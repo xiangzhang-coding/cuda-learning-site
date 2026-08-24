@@ -4,7 +4,7 @@
 
 CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU programming. Chinese pages live at the root and English counterparts under `/en/`.
 
-The current public baseline contains Home, O01, O02, O03, paired Exercises and reviewed solutions, two Practice Bank entries, the Glossary, the Sources and Version Record, and About. Navigation exposes no unfinished learning material.
+The current public baseline contains Home, O01, O02, O03, paired Exercises and reviewed solutions, two Practice Bank entries, the Glossary, the Sources and Version Record, and About. Silicon Light, Profiler Dark, and Blueprint style this same content without changing its structure or meaning. Navigation exposes no unfinished learning material.
 
 Contributions use [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) and [Pull Requests](https://github.com/xiangzhang-coding/cuda-learning-site/pulls). Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
 
@@ -19,7 +19,7 @@ npm run build:release
 npm run test
 ```
 
-The build is fully static. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
+The build is fully static. Theme selection is the only learner preference retained across browser sessions. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
 
 ## Licensing
 

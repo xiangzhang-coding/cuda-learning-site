@@ -23,6 +23,11 @@ export default defineConfig({
       pagefind: true,
       disable404Route: true,
       customCss: ['./src/styles/site.css'],
+      components: {
+        Banner: './src/components/ThemeFallbackBanner.astro',
+        ThemeProvider: './src/components/ThemeProvider.astro',
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
       sidebar: [
         {
           label: '从这里开始',

@@ -32,19 +32,21 @@ head:
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站（Learning Site）使用了哪些精确发布接口，以及 O02/O03 的 CUDA 版本事实来自哪里。工具版本、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站（Learning Site）使用了哪些精确发布与主题接口，以及 O02/O03 的 CUDA 版本事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-本页覆盖 Home、O01、O02、O03、配套练习与解答、练习题库（Practice Bank）、术语表（Glossary）和静态发布外壳。所有链接在 **2026-08-24** 重新打开复核；网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+本页覆盖 Home、O01、O02、O03、配套练习与解答、练习题库（Practice Bank）、术语表（Glossary）、三套视觉主题和静态发布外壳。所有链接在 **2026-08-24** 重新打开复核；网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 已核对的发布接口
 
 | 接口 | 精确版本 | 核对内容 | Context7 | 上游资料 |
 | --- | --- | --- | --- | --- |
-| Astro | 7.2.4 | `output: 'static'`、`site`、`outDir`、`trailingSlash`、`prerenderConflictBehavior`、集成配置 | `/withastro/docs` | [npm 清单](https://registry.npmjs.org/astro/7.2.4)、[配置参考](https://docs.astro.build/en/reference/configuration-reference/) |
-| Starlight | 0.41.7 | 根语言、本地化标题、对应页切换、显式侧边栏、预渲染、Pagefind | `/withastro/starlight` | [npm 清单](https://registry.npmjs.org/%40astrojs%2Fstarlight/0.41.7)、[国际化](https://starlight.astro.build/guides/i18n/#use-a-root-locale)、[侧边栏](https://starlight.astro.build/guides/sidebar/)、[站内搜索](https://starlight.astro.build/guides/site-search/) |
+| Astro | 7.2.4 | 静态输出配置；经处理的 TypeScript 客户端脚本；首屏前 `is:inline` 脚本 | `/withastro/docs` | [npm 清单](https://registry.npmjs.org/astro/7.2.4)、[配置参考](https://docs.astro.build/en/reference/configuration-reference/)、[客户端脚本](https://docs.astro.build/en/guides/client-side-scripts/) |
+| Starlight | 0.41.7 | 根语言、本地化标题、显式侧边栏、`Banner`/`ThemeProvider`/`ThemeSelect` 组件覆写、自定义 CSS 与级联层 | `/withastro/starlight` | [npm 清单](https://registry.npmjs.org/%40astrojs%2Fstarlight/0.41.7)、[组件覆写](https://starlight.astro.build/guides/overriding-components/)、[CSS 与样式](https://starlight.astro.build/guides/css-and-tailwind/)、[国际化](https://starlight.astro.build/guides/i18n/#use-a-root-locale) |
 | Pagefind | 1.5.2 | 根据 `<html lang>` 生成语言分区索引，以及扩展版中文分词 | `/websites/pagefind_app` | [npm 清单](https://registry.npmjs.org/pagefind/1.5.2)、[多语言搜索](https://pagefind.app/docs/multilingual/) |
+| Playwright 与 axe | 1.62.1；`@axe-core/playwright` 4.13.0 | Chromium/Firefox/WebKit 项目、Mobile Safari 设备模拟、媒体与强制色模拟、键盘、打印、截图和自动化无障碍检查边界 | `/microsoft/playwright`（精确索引截至 1.61.0） | [Playwright 清单](https://registry.npmjs.org/%40playwright%2Ftest/1.62.1)、[浏览器修订](https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/browsers.json)、[模拟](https://playwright.dev/docs/emulation)、[无障碍测试](https://playwright.dev/docs/accessibility-testing)、[axe 清单](https://registry.npmjs.org/%40axe-core%2Fplaywright/4.13.0) |
+| 浏览器接口与 CSS 媒体 | Web Storage、Custom Elements、`prefers-reduced-motion`、`prefers-contrast`、`forced-colors`、print | 单一主题偏好、无脚本回退、减弱动态、增强对比、系统强制色与打印覆盖 | Playwright Context7 用于测试接口交叉核对；WHATWG/W3C 规范与 MDN 用于浏览器语义 | [HTML Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html)、[HTML Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html)、[Media Queries 5](https://drafts.csswg.org/mediaqueries-5/)、[CSS Color Adjustment](https://drafts.csswg.org/css-color-adjust-1/)、[CSS Paged Media](https://www.w3.org/TR/css-page-3/)、[MDN localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)、[MDN media queries](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media) |
 
 精确 npm 清单负责版本、引擎、依赖和许可信息；当前上游文档负责配置语义。Context7 用于发现和交叉核对接口，不覆盖目标版本清单。
 
@@ -67,11 +69,11 @@ CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、cuBLAS 等 c
 
 ## 内容与素材来源
 
-- Home、O01、O02、O03、练习、解答、Practice Bank 条目、术语定义和 CSS 硅片布线纹理由项目原创，采用 **CC BY 4.0**（文字）或 **Apache-2.0**（样式与工具代码）。
+- Home、O01、O02、O03、练习、解答、Practice Bank 条目、术语定义，以及三套 CSS 网格、轨迹纹理和主题选择标记均由项目原创，采用 **CC BY 4.0**（文字）或 **Apache-2.0**（样式与工具代码）。
 - 本次发布没有改编图表、复制示例代码、外部字体或第三方图片。
-- 语言、主题、搜索等界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；其上游包声明 MIT 许可。
+- 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 所有技术链接只用于核对发布接口；公开文字为摘要和改写，不镜像上游正文。
 
 ## 复核记录
 
-**复核日期：2026-08-24。** Astro 7.2.4、Starlight 0.41.7 与 Pagefind 1.5.2 的精确依赖组合由 npm 11.17.0 解析。CUDA 11.8.0、12.9.2、13.3.1 的 owner sources 与容器标签已复核，但本次没有执行 CUDA、没有编译 Lane、没有记录性能结果，也没有声明 Reference Environment。C++23 文档差异保留给后续精确 probe。
+**复核日期：2026-08-24。** Astro 7.2.4、Starlight 0.41.7、Pagefind 1.5.2、Playwright 1.62.1 与 axe-playwright 4.13.0 的精确依赖组合由 npm 11.17.0 解析。主题组件、Web Storage、媒体查询、设备模拟和自动化无障碍测试边界已按上表复核；自动化结果不构成 WCAG 一致性声明。CUDA 11.8.0、12.9.2、13.3.1 的 owner sources 与容器标签已复核，但本次没有执行 CUDA、没有编译 Lane、没有记录性能结果，也没有声明 Reference Environment。C++23 文档差异保留给后续精确 probe。

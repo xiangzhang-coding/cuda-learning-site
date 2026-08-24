@@ -1,0 +1,43 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import Default from '@astrojs/starlight/components/Banner.astro';
+
+import { THEME_COPY } from '../theme-contract';
+
+const locale = Astro.locals.starlightRoute.lang === 'zh-CN' ? 'zh-CN' : 'en';
+---
+
+<Default />
+<p id="static-theme-fallback" class="static-theme-notice" data-pagefind-ignore data-static-theme-fallback>
+  {THEME_COPY[locale].staticFallback}
+</p>
+
+<style>
+  .static-theme-notice {
+    max-width: var(--sl-content-width);
+    margin: 1rem auto 0;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--sl-color-gray-5);
+    background: var(--sl-color-bg);
+    color: var(--sl-color-text);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-sm);
+    line-height: 1.5;
+  }
+
+  :global(:root[data-learning-theme]:not([data-theme-storage-unavailable])) .static-theme-notice {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    .static-theme-notice {
+      border-color: CanvasText;
+    }
+  }
+
+  @media print {
+    .static-theme-notice {
+      display: none;
+    }
+  }
+</style>

@@ -10,6 +10,7 @@ structure:
   - outcome
   - resource-types
   - published-route
+  - themes
   - workflow
   - boundaries
   - check
@@ -29,7 +30,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'outcome,resource-types,published-route,workflow,boundaries,check'
+      content: 'outcome,resource-types,published-route,themes,workflow,boundaries,check'
 ---
 
 <a class="locale-pair" data-locale-counterpart href="/start/using-the-learning-site/" lang="zh-CN">阅读中文对应页</a>
@@ -40,6 +41,7 @@ CUDA Learning Site is not a blog ordered by publication time. It places concepts
 
 - Explain the distinct job of each of the seven learning resource types.
 - Follow the complete prerequisite route that is published now without treating navigation as a roadmap.
+- Select a visual theme without changing content meaning and explain the no-script fallback.
 - Decide when to read, when to practise, and what belongs in the browser versus an external CUDA environment.
 
 ## Seven resource types, seven jobs
@@ -70,6 +72,18 @@ As of **2026-08-24**, the complete prerequisite shape is:
 
 O02 and O03 each have Exercises and separate reviewed solutions. The [Practice Bank](/en/practice/) currently contains two complete entries linked back to O02 and O03. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
 
+## Three visual themes, one body of content
+
+The visual-theme control in the header and mobile menu offers three ways to read:
+
+- **Silicon Light** is the default. Bright surfaces and a quiet silicon-dot field support long-form reading.
+- **Profiler Dark** uses dark surfaces, timeline ticks, and high-contrast code regions for code and performance-trace reading.
+- **Blueprint** uses an engineering-blue field, major and minor grids, and a data-path signal color to emphasize spatial relationships and data flow.
+
+All three themes share one page structure, text, semantic-color meanings, keyboard order, and focus behavior. A theme never hides content or turns a decorative browser graphic into a CUDA observation. Theme selection is the site's only learner preference retained across browser sessions. It writes one value to this origin's `localStorage` and needs no account, tracking profile, application API, database, or server-rendered state.
+
+If scripts are disabled or browser policy blocks persistence, the page remains readable in the static Silicon Light default and exposes a textual fallback. Reduced-motion, increased-contrast and forced-color, narrow-screen reflow, and print rules cover every theme. Automated checks can detect only some accessibility problems and do not prove WCAG conformance; keyboard, screen-reader, and real zoom review remain manual responsibilities.
+
 ## A useful study rhythm
 
 1. Read the Learning Unit objectives and prerequisites, then confirm the question it answers.
@@ -88,11 +102,12 @@ O02 and O03 each have Exercises and separate reviewed solutions. The [Practice B
 
 ## Check before leaving
 
-You are ready to move on when you can answer these four questions:
+You are ready to move on when you can answer these five questions:
 
 1. How does a Runnable Example differ from a Lab?
 2. Why does a Practice Bank entry link back to prerequisite Learning Units?
 3. Why is material absent from navigation not considered published?
-4. Why does publishing a page not grant CUDA evidence?
+4. How does the theme control fall back when scripts or persistence are unavailable?
+5. Why does publishing a page not grant CUDA evidence?
 
 **Fact-check date: 2026-08-24.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.

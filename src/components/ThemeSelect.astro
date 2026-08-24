@@ -1,0 +1,108 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import { DEFAULT_THEME, THEME_COPY, THEME_IDS } from '../theme-contract';
+
+const locale = Astro.locals.starlightRoute.lang === 'zh-CN' ? 'zh-CN' : 'en';
+const copy = THEME_COPY[locale];
+---
+
+<learning-theme-select>
+  <label class="theme-control">
+    <span class="sr-only">{copy.controlLabel}</span>
+    <span class="theme-mark" aria-hidden="true"></span>
+    <select aria-describedby="static-theme-fallback" autocomplete="off" data-theme-picker>
+      {
+        THEME_IDS.map((theme) => (
+          <option value={theme} selected={theme === DEFAULT_THEME}>{copy.options[theme]}</option>
+        ))
+      }
+    </select>
+  </label>
+</learning-theme-select>
+
+<script is:inline>
+  window.CudaLearningTheme.updatePickers();
+</script>
+
+<script>
+  type ThemeController = {
+    apply(value: string, persist?: boolean): string;
+    updatePickers(theme?: string): void;
+  };
+
+  const controller = () =>
+    (window as Window & typeof globalThis & { CudaLearningTheme?: ThemeController }).CudaLearningTheme;
+
+  class LearningThemeSelect extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      this.dataset.ready = 'true';
+      const select = this.querySelector('select');
+      if (!(select instanceof HTMLSelectElement)) return;
+
+      controller()?.updatePickers();
+      select.addEventListener('change', () => controller()?.apply(select.value, true));
+    }
+  }
+
+  if (!customElements.get('learning-theme-select')) {
+    customElements.define('learning-theme-select', LearningThemeSelect);
+  }
+</script>
+
+<style>
+  learning-theme-select {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    color: var(--sl-color-gray-2);
+    font-family: var(--sl-font-mono);
+  }
+
+  .theme-control {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .theme-mark {
+    position: absolute;
+    z-index: 1;
+    inset-inline-start: 0.45rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border: 1px solid currentColor;
+    background:
+      linear-gradient(90deg, transparent 45%, currentColor 45% 55%, transparent 55%),
+      linear-gradient(transparent 45%, currentColor 45% 55%, transparent 55%);
+    pointer-events: none;
+  }
+
+  select {
+    width: 11.75rem;
+    max-width: 100%;
+    min-width: 9rem;
+    padding: 0.45rem 1.55rem 0.45rem 1.65rem;
+    overflow: hidden;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.2rem;
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-gray-1);
+    font: inherit;
+    font-size: var(--sl-text-xs);
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  :global(:root:not([data-learning-theme])) .theme-control {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    select,
+    .theme-mark {
+      border-color: ButtonText;
+    }
+  }
+</style>

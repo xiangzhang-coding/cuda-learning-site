@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 import { expect, test } from '@playwright/test';
 
+import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
+
 const routes = [
   '/',
   '/en/',
@@ -120,25 +122,32 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
 });
 
 test('print keeps content dark on a white page', async ({ page }) => {
-  for (const colorScheme of ['light', 'dark'] as const) {
-    await page.emulateMedia({ media: 'print', colorScheme });
+  for (const theme of THEME_IDS) {
     await page.goto('/en/');
+    await page.evaluate(
+      ([storageKey, value]) => localStorage.setItem(storageKey, value),
+      [THEME_STORAGE_KEY, theme] as const,
+    );
+    await page.reload();
+    await page.emulateMedia({ media: 'print' });
 
     await expect(page.locator('.locale-pair')).toBeHidden();
+    await expect(page.locator('learning-theme-select').first()).toBeHidden();
     expect(await page.locator('body').evaluate((body) => getComputedStyle(body).backgroundColor)).toBe(
       'rgb(255, 255, 255)',
     );
     expect(
       await page.locator('.signal-hero > p').last().evaluate((paragraph) => getComputedStyle(paragraph).color),
-    ).toBe('rgb(17, 17, 17)');
+    ).toBe('rgb(34, 34, 34)');
     expect(await page.locator('.signal-kicker').evaluate((label) => getComputedStyle(label).color)).toBe(
-      'rgb(13, 61, 69)',
+      'rgb(7, 81, 89)',
     );
     expect(
       await page.locator('.signal-action').evaluate((action) => getComputedStyle(action).backgroundColor),
-    ).toBe('rgb(13, 61, 69)');
+    ).toBe('rgb(7, 81, 89)');
     expect(await page.locator('.route-card span').first().evaluate((label) => getComputedStyle(label).color)).toBe(
-      'rgb(138, 58, 34)',
+      'rgb(122, 47, 28)',
     );
+    await page.emulateMedia({ media: 'screen' });
   }
 });

@@ -32,19 +32,21 @@ head:
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing interfaces behind CUDA Learning Site and the owner sources for O02/O03 CUDA facts. Tool versions, hardware capability, project support policy, and observed behavior remain separate.
+This record names the exact publishing and theme interfaces behind CUDA Learning Site and the owner sources for O02/O03 CUDA facts. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers Home, O01, O02, O03, their Exercises and solutions, the Practice Bank, Glossary, and static publishing shell. Every link below was reopened on **2026-08-24**. Website builds use Node.js 24.19.0 and npm 11.17.0.
+This page covers Home, O01, O02, O03, their Exercises and solutions, the Practice Bank, Glossary, three visual themes, and the static publishing shell. Every link below was reopened on **2026-08-24**. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Verified publishing interfaces
 
 | Interface | Exact version | What was checked | Context7 | Owner sources |
 | --- | --- | --- | --- | --- |
-| Astro | 7.2.4 | `output: 'static'`, `site`, `outDir`, `trailingSlash`, `prerenderConflictBehavior`, and integrations | `/withastro/docs` | [npm manifest](https://registry.npmjs.org/astro/7.2.4), [configuration reference](https://docs.astro.build/en/reference/configuration-reference/) |
-| Starlight | 0.41.7 | Root locale, localized title, direct counterpart switching, explicit sidebar, prerendering, and Pagefind | `/withastro/starlight` | [npm manifest](https://registry.npmjs.org/%40astrojs%2Fstarlight/0.41.7), [internationalization](https://starlight.astro.build/guides/i18n/#use-a-root-locale), [sidebar](https://starlight.astro.build/guides/sidebar/), [site search](https://starlight.astro.build/guides/site-search/) |
+| Astro | 7.2.4 | Static-output configuration, processed TypeScript client scripts, and pre-paint `is:inline` scripts | `/withastro/docs` | [npm manifest](https://registry.npmjs.org/astro/7.2.4), [configuration reference](https://docs.astro.build/en/reference/configuration-reference/), [client-side scripts](https://docs.astro.build/en/guides/client-side-scripts/) |
+| Starlight | 0.41.7 | Root locale, localized title, explicit sidebar, `Banner`/`ThemeProvider`/`ThemeSelect` component overrides, custom CSS, and cascade layers | `/withastro/starlight` | [npm manifest](https://registry.npmjs.org/%40astrojs%2Fstarlight/0.41.7), [component overrides](https://starlight.astro.build/guides/overriding-components/), [CSS and styling](https://starlight.astro.build/guides/css-and-tailwind/), [internationalization](https://starlight.astro.build/guides/i18n/#use-a-root-locale) |
 | Pagefind | 1.5.2 | Language-partitioned indexes selected from `<html lang>` and extended Chinese segmentation | `/websites/pagefind_app` | [npm manifest](https://registry.npmjs.org/pagefind/1.5.2), [multilingual search](https://pagefind.app/docs/multilingual/) |
+| Playwright and axe | 1.62.1; `@axe-core/playwright` 4.13.0 | Chromium/Firefox/WebKit projects, Mobile Safari device emulation, media and forced-color emulation, keyboard use, print, screenshots, and automated-accessibility limits | `/microsoft/playwright` (exact index currently through 1.61.0) | [Playwright manifest](https://registry.npmjs.org/%40playwright%2Ftest/1.62.1), [browser revisions](https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/browsers.json), [emulation](https://playwright.dev/docs/emulation), [accessibility testing](https://playwright.dev/docs/accessibility-testing), [axe manifest](https://registry.npmjs.org/%40axe-core%2Fplaywright/4.13.0) |
+| Browser APIs and CSS media | Web Storage, Custom Elements, `prefers-reduced-motion`, `prefers-contrast`, `forced-colors`, and print | One theme preference, no-script fallback, reduced motion, increased contrast, system forced colors, and print coverage | Playwright Context7 cross-checks test interfaces; WHATWG/W3C specifications and MDN cover browser semantics | [HTML Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html), [HTML Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html), [Media Queries 5](https://drafts.csswg.org/mediaqueries-5/), [CSS Color Adjustment](https://drafts.csswg.org/css-color-adjust-1/), [CSS Paged Media](https://www.w3.org/TR/css-page-3/), [MDN localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [MDN media queries](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media) |
 
 Exact npm manifests govern package versions, engines, dependencies, and package licenses. Current owner documentation governs configuration semantics. Context7 supports interface discovery and cross-checking but does not override the target-version manifests.
 
@@ -67,11 +69,11 @@ Native Linux as the only Supported Environment, the two GPU Capability Tier gate
 
 ## Content and asset sources
 
-- Home, O01, O02, O03, Exercises, solutions, Practice Bank entries, term definitions, and the CSS silicon-routing texture are original project work under **CC BY 4.0** for prose and **Apache-2.0** for styles and tooling.
+- Home, O01, O02, O03, Exercises, solutions, Practice Bank entries, term definitions, and all three CSS grid/trace textures and theme-control marks are original project work under **CC BY 4.0** for prose and **Apache-2.0** for styles and tooling.
 - This release contains no adapted diagram, copied sample code, external font, or third-party image.
-- Language, theme, and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source. The upstream package declares the MIT license.
+- Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface verification. Public prose summarizes and paraphrases; it does not mirror owner documentation.
 
 ## Review record
 
-**Reviewed: 2026-08-24.** npm 11.17.0 resolved the exact Astro 7.2.4, Starlight 0.41.7, and Pagefind 1.5.2 dependency set. Owner sources and container tags for CUDA 11.8.0, 12.9.2, and 13.3.1 were reviewed, but this release ran no CUDA, compiled no Lane, recorded no performance result, and declared no Reference Environment. The C++23 documentation discrepancy remains for a later exact-Lane probe.
+**Reviewed: 2026-08-24.** npm 11.17.0 resolved the exact Astro 7.2.4, Starlight 0.41.7, Pagefind 1.5.2, Playwright 1.62.1, and axe-playwright 4.13.0 dependency set. Theme components, Web Storage, media queries, device emulation, and automated-accessibility limits were reviewed against the sources above; automated results are not a WCAG conformance claim. Owner sources and container tags for CUDA 11.8.0, 12.9.2, and 13.3.1 were reviewed, but this release ran no CUDA, compiled no Lane, recorded no performance result, and declared no Reference Environment. The C++23 documentation discrepancy remains for a later exact-Lane probe.
