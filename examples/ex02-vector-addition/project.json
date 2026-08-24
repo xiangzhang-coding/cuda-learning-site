@@ -4,7 +4,7 @@
   "id": "EX02",
   "title": "Vector addition",
   "root": "examples/ex02-vector-addition",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex02-vector-addition",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/1cdca8b411135c6023d1241a25b2ff8aea820d65/examples/ex02-vector-addition",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
@@ -115,7 +115,29 @@
     }
   },
   "evidence": {
-    "compilation": [],
+    "compilation": [
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-11-8-cxx17.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-12-9-cxx17.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-12-9-cxx20.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-13-3-cxx17.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-13-3-cxx20.json"
+      }
+    ],
+    "dialectProbe": "evidence/cuda-13-3-cxx23-probe.json",
     "runtime": "Pending Hardware Verification",
     "expectedObservations": [
       "A qualifying GPU run should report that the CUDA result matches the CPU reference within both tolerances.",

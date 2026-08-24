@@ -25,7 +25,7 @@ EX02 host-side verification is available without CUDA:
 make -C examples/ex02-vector-addition host-test
 ```
 
-The independent `CUDA Compile Evidence` workflow preprocesses, compiles, links, and inspects EX02 in three digest-pinned NVIDIA development environments on x86-64 CPU runners. It never executes the CUDA binary and therefore grants no runtime evidence.
+The independent `CUDA Compile Evidence` workflow preprocesses, compiles, links, and inspects EX02 in three digest-pinned NVIDIA development environments on x86-64 CPU runners. The declared C++17 matrix and the applicable C++20 checks are Compile-Checked. The workflow never executes the CUDA binary, so runtime remains Pending Hardware Verification.
 
 The build is fully static. Theme selection is the only learner preference retained across browser sessions. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
 

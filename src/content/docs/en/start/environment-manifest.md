@@ -174,7 +174,7 @@ Tiers combine compute capability, memory, GPU count, features, and permissions. 
 
 ## Three Toolkit Lanes
 
-These Lanes are future compile-evidence targets, not observed results. None is currently Compile-Checked.
+EX02 completed preprocessing, compilation, linking, and inspection in all three Lanes in [CUDA Compile Evidence run 32717957107](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107): C++17 on 11.8.0 and both C++17/C++20 on 12.9.2 and 13.3.1 are Compile-Checked. That status belongs only to the exact EX02 source, dialect, target, and recorded environment. It upgrades no other subject and provides no GPU runtime evidence.
 
 | Toolkit Lane | Selected OS | Curriculum dialects | Owner version coordinates, not local observations |
 | --- | --- | --- | --- |
@@ -182,7 +182,7 @@ These Lanes are future compile-evidence targets, not observed results. None is c
 | CUDA 12.9.2 | Ubuntu 24.04 x86-64 | C++17, C++20 | NVCC 12.9.86; paired Linux driver 575.57.08; 12.x floor 525.60.13 |
 | CUDA 13.3.1 | Ubuntu 24.04 x86-64 | C++17, C++20; separate C++23 probe | NVCC 13.3.73; paired Linux driver 610.43.02; 13.x floor R580/`>=580` |
 
-The CUDA 13.3.1 Linux installation guide lists C++23, while the same-version NVCC `--std` option reference still lists only through C++20. This site does not turn a documentation discrepancy into a pass. C++23 requires a separate probe in the exact Lane with retained artifacts. The existence of a container tag is registry metadata, not compilation evidence.
+The CUDA 13.3.1 Linux installation guide lists C++23, while the same-version NVCC `--std` option reference still lists only through C++20. The separate exact-image probe recorded GCC 13.3 and NVCC 13.3.73 and observed that `-std=c++23` is unsupported with the configured host compiler. Its result is `unsupported`, not EX02 C++23 Compile-Checked. A container tag by itself remains registry metadata.
 
 ## Reference Environment declaration boundary
 

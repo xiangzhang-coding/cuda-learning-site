@@ -29,7 +29,8 @@ canonicalRanges:
   - cpu-reference
 hardwareGate: 'Build: x86-64 CPU runner; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer'
 evidence:
-  compilation: []
+  compilation:
+    - Compile-Checked
   runtime:
     - Pending Hardware Verification
   expectedObservations:
@@ -140,7 +141,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:evidence-compilation'
-      content: none
+      content: Compile-Checked
   - tag: meta
     attrs:
       name: 'cuda:evidence-runtime'
@@ -178,7 +179,7 @@ The project defines correctness before any measurement. No qualifying GPU run ex
 
 ## Get the canonical project
 
-[View or download the complete EX02 project on GitHub](https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex02-vector-addition). `project.json` is the machine-readable contract, `README.md` gives standalone build instructions, and `src/`, `include/`, and `tests/` are the only implementation sources. Both locale pages read only the declared marker ranges shown below.
+[View or download the compile-checked EX02 project on GitHub](https://github.com/xiangzhang-coding/cuda-learning-site/tree/1cdca8b411135c6023d1241a25b2ff8aea820d65/examples/ex02-vector-addition). `project.json` is the machine-readable contract, `README.md` gives standalone build instructions, and `src/`, `include/`, and `tests/` are the only implementation sources. Both locale pages read only the declared marker ranges shown below.
 
 The bounds check allows a problem size that is not an exact multiple of the block size:
 
@@ -226,7 +227,7 @@ CPU-only CI **never executes** `build/ex02-vector-addition`. A later learner run
 | Baseline GPU Capability Tier | Compute capability 7.5 or newer; problem sizes fit within 8 GB |
 | Compiler target | `sm_75` cubin + `compute_75` PTX |
 | Shared implementation | Explicit C++17; 12.9.2/13.3.1 also check the same source as C++20 |
-| C++23 | Separate 13.3.1 dialect probe only; it grants no C++23 compile claim to EX02 |
+| C++23 | GCC 13.3 in the 13.3.1 image does not support the NVCC C++23 configuration; the separate probe records `unsupported` and grants no C++23 compile claim to EX02 |
 
 The build never uses `--allow-unsupported-compiler`. An image tag and digest are inputs, not observed environments. Every result must record the actual OS, host compiler, NVCC, and pulled image identity.
 

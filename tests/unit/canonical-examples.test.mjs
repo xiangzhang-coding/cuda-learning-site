@@ -272,13 +272,7 @@ describe('canonical Runnable Example resolver', () => {
     const fixtureExampleRoot = path.join(fixtureRoot, 'examples/ex02-vector-addition');
     await mkdir(path.dirname(fixtureExampleRoot), { recursive: true });
     await cp(sourceRoot, fixtureExampleRoot, { recursive: true });
-    const record = await passingEx02Record(fixtureRoot);
-    await writeFile(
-      path.join(fixtureExampleRoot, 'evidence/cuda-11-8-cxx17.json'),
-      JSON.stringify(record),
-    );
-
-    await expect(loadCompileEvidence(fixtureRoot, 'EX02')).resolves.toHaveLength(1);
+    await expect(loadCompileEvidence(fixtureRoot, 'EX02')).resolves.toHaveLength(6);
     await writeFile(
       path.join(fixtureExampleRoot, 'include/vector_add_reference.hpp'),
       '// SPDX-License-Identifier: Apache-2.0\nchanged\n',

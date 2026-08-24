@@ -1,0 +1,73 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "result": "pass",
+  "claim": "Compile-Checked",
+  "subject": "EX02",
+  "check": "cuda-11-8-cxx17",
+  "sourceCommit": "1cdca8b411135c6023d1241a25b2ff8aea820d65",
+  "buildContractSha256": "5a076671c1f34d3fc68b1021c8119db1c8d59236091efdea921611bbea40f4d1",
+  "verificationDate": "2026-08-24",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107",
+  "runner": {
+    "operatingSystem": "Linux",
+    "architecture": "X64",
+    "imageOS": "ubuntu24",
+    "imageVersion": "20260816.277.1",
+    "dockerEngine": "28.0.4",
+    "dockerBuildx": "github.com/docker/buildx v0.36.1 1d8dde89b8aba914e05e45366770736fea1fd690"
+  },
+  "container": {
+    "declaredReference": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+    "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+    "expectedAmd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+    "actualAmd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+    "actualImageId": "sha256:6f9cc9f1ba9ed67d195088555737124e4a2eb54bebaaa7596f44e235428a461c",
+    "actualRepoDigests": [
+      "nvidia/cuda@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f"
+    ],
+    "operatingSystem": {
+      "id": "ubuntu",
+      "versionId": "22.04",
+      "prettyName": "Ubuntu 22.04.3 LTS"
+    }
+  },
+  "toolchain": {
+    "toolkit": "11.8.0",
+    "hostCompiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0",
+    "nvcc": "Cuda compilation tools, release 11.8, V11.8.89",
+    "cuobjdump": "cuobjdump: NVIDIA (R) fat binary listing tool; Cuda compilation tools, release 11.8, V11.8.86",
+    "dialect": "c++17",
+    "target": [
+      "sm_75",
+      "compute_75"
+    ]
+  },
+  "commands": [
+    "make preprocess DIALECT=c++17 BUILD_DIR=build",
+    "make compile DIALECT=c++17 BUILD_DIR=build",
+    "make link DIALECT=c++17 BUILD_DIR=build",
+    "make inspect DIALECT=c++17 BUILD_DIR=build",
+    "make host-test DIALECT=c++17 BUILD_DIR=build"
+  ],
+  "artifacts": [
+    {
+      "path": "build/vector_add.ii",
+      "bytes": 2374185,
+      "sha256": "d235ccb8a5d65b87d4bf4440d5c515b57575cf4df12928e6020eaa4f7cf7cda3"
+    },
+    {
+      "path": "build/vector_add.o",
+      "bytes": 50400,
+      "sha256": "5ef92fcb98955f99c386f070c42304d094daae01035da716600f3f0e1c02cea0"
+    },
+    {
+      "path": "build/ex02-vector-addition",
+      "bytes": 850664,
+      "sha256": "9c59a1a038743f3ae6932328abf1eb39f57c2575cca764253981bd6acf3322e0"
+    }
+  ],
+  "hostReferenceExecuted": true,
+  "gpuExecutableExecuted": false,
+  "runtimeEvidence": "Pending Hardware Verification"
+}

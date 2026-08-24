@@ -121,6 +121,7 @@ const publicationPairs: readonly PublicationPair[] = [
     exampleIds: 'EX02',
     canonicalExample: 'EX02',
     canonicalRanges: 'kernel,error-checking,cpu-reference',
+    evidenceCompilation: 'Compile-Checked',
     evidenceRuntime: 'Pending Hardware Verification',
     expectedObservations: '2 declared expectations',
     sourceCount: '11',

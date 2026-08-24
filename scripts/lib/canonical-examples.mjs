@@ -247,5 +247,15 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
     if (errors.length > 0) throw new Error(`${file}: ${errors.join('; ')}`);
     records.push(record);
   }
+  if (records.length > 0) {
+    const sourceCommits = new Set(records.map((record) => record.sourceCommit));
+    const checks = new Set(records.map((record) => record.check));
+    if (sourceCommits.size !== 1) throw new Error(`${exampleId} evidence records reference different source commits`);
+    if (checks.size !== records.length) throw new Error(`${exampleId} evidence records duplicate a check`);
+    const [sourceCommit] = sourceCommits;
+    if (!example.sourceUrl.includes(sourceCommit)) {
+      throw new Error(`${exampleId} source URL does not resolve to its evidence commit`);
+    }
+  }
   return records;
 }

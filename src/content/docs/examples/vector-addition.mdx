@@ -29,7 +29,8 @@ canonicalRanges:
   - cpu-reference
 hardwareGate: 'Build: x86-64 CPU runner; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer'
 evidence:
-  compilation: []
+  compilation:
+    - Compile-Checked
   runtime:
     - Pending Hardware Verification
   expectedObservations:
@@ -140,7 +141,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:evidence-compilation'
-      content: none
+      content: Compile-Checked
   - tag: meta
     attrs:
       name: 'cuda:evidence-runtime'
@@ -178,7 +179,7 @@ EX02 是一个独立、原创的向量加法可运行示例（Runnable Example�
 
 ## 获取 canonical project
 
-[在 GitHub 查看或下载完整 EX02 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex02-vector-addition)。`project.json` 是机器可读契约；`README.md` 给出独立构建步骤；`src/`、`include/` 和 `tests/` 是唯一实现来源。两个语言页面都只从下面声明的 marker range 读取代码。
+[在 GitHub 查看或下载通过编译检查的完整 EX02 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/1cdca8b411135c6023d1241a25b2ff8aea820d65/examples/ex02-vector-addition)。`project.json` 是机器可读契约；`README.md` 给出独立构建步骤；`src/`、`include/` 和 `tests/` 是唯一实现来源。两个语言页面都只从下面声明的 marker range 读取代码。
 
 边界判断使问题规模不必是 block 大小的整数倍：
 
@@ -226,7 +227,7 @@ CPU-only CI **绝不运行** `build/ex02-vector-addition`。学习者之后在�
 | 基础 GPU 能力层级（Baseline GPU Capability Tier） | compute capability 7.5 或更新；问题规模适配 8 GB |
 | 编译目标 | `sm_75` cubin + `compute_75` PTX |
 | 共享实现 | 显式 C++17；12.9.2/13.3.1 也检查同一源码的 C++20 编译 |
-| C++23 | 只在 13.3.1 做独立 dialect probe，不给 EX02 授予 C++23 编译声明 |
+| C++23 | 13.3.1 image 中的 GCC 13.3 不支持 NVCC C++23 配置；独立 probe 记录 `unsupported`，不给 EX02 授予 C++23 编译声明 |
 
 没有使用 `--allow-unsupported-compiler`。镜像 tag 和 digest 只是输入；实际 OS、host compiler、NVCC 和 pulled image identity 必须由每次结果记录。
 

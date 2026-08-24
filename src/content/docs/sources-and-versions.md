@@ -64,7 +64,7 @@ Context7 的 `/websites/nvidia_cuda` 当前索引用于发现和交叉核对；�
 | compute capability | CUDA Programming Guide 13.3.1；CUDA-capable GPUs | 功能与技术限制按 compute capability 组织；GPU 型号映射单独查询 | [Compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[CUDA GPUs](https://developer.nvidia.com/cuda-gpus) |
 | 容器身份 | `11.8.0-devel-ubuntu22.04`、`12.9.2-devel-ubuntu24.04`、`13.3.1-devel-ubuntu24.04`；amd64/arm64 | 标签、manifest digest 和当前 amd64 child digest；它们是 EX02 Lane 输入，单独不能构成 Compile-Checked | [11.8.0 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)、[12.9.2 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)、[13.3.1 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04) |
 
-CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、cuBLAS 等 component、paired driver 和 compatibility floor 都不能合并成一个“CUDA 版本”。`archive/12.9.2` 下的 Runtime API 页面自身标记为 v12.9.1；本站保留这个文档标签差异，并用精确 12.9.2 image 的编译检查验证 EX02 接口，不从中外推未执行的运行行为。CUDA 13.3.1 Linux 指南列出 C++23，而同版本 NVCC `--std` 参考仍只列到 C++20；该差异保留为精确环境中的独立 probe，不在 probe 通过前宣称结果。
+CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、cuBLAS 等 component、paired driver 和 compatibility floor 都不能合并成一个“CUDA 版本”。`archive/12.9.2` 下的 Runtime API 页面自身标记为 v12.9.1；本站保留这个文档标签差异，并用精确 12.9.2 image 的编译检查验证 EX02 接口，不从中外推未执行的运行行为。CUDA 13.3.1 Linux 指南列出 C++23，而同版本 NVCC `--std` 参考仍只列到 C++20；精确 image probe 记录 GCC 13.3/NVCC 13.3.73 并观察到该配置不支持 `-std=c++23`，因此结果是 `unsupported`，不是 EX02 的 C++23 Compile-Checked。
 
 原生 Linux 作为唯一 Supported Environment、两个 GPU Capability Tier 的门槛以及 Reference Environment 声明条件，是本站公开支持政策。NVIDIA 资料支撑底层版本和 compute-capability 事实，但不替本站作出支持承诺。
 
@@ -77,4 +77,4 @@ CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、cuBLAS 等 c
 
 ## 复核记录
 
-**复核日期：2026-08-24。** Astro 7.2.4、Starlight 0.41.7、Pagefind 1.5.2、Playwright 1.62.1 与 axe-playwright 4.13.0 的精确依赖组合由 npm 11.17.0 解析。主题组件、Web Storage、媒体查询、设备模拟和自动化无障碍测试边界已按上表复核；自动化结果不构成 WCAG 一致性声明。CUDA 11.8.0、12.9.2、13.3.1 的 owner sources 与容器标签已复核，但本次没有执行 CUDA、没有编译 Lane、没有记录性能结果，也没有声明 Reference Environment。C++23 文档差异保留给后续精确 probe。
+**复核日期：2026-08-24。** Astro 7.2.4、Starlight 0.41.7、Pagefind 1.5.2、Playwright 1.62.1 与 axe-playwright 4.13.0 的精确依赖组合由 npm 11.17.0 解析。主题组件、Web Storage、媒体查询、设备模拟和自动化无障碍测试边界已按上表复核；自动化结果不构成 WCAG 一致性声明。[run 32717957107](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107) 在 x86-64 `ubuntu-24.04` runner 上通过五个 EX02 检查，并记录 Docker 28.0.4、Buildx 0.36.1、实际 image/OS/compiler 和构建产物；独立 C++23 probe 记录为 `unsupported`。没有执行 CUDA binary、没有记录性能结果，也没有声明 Reference Environment，所以 runtime 仍为 Pending Hardware Verification。
