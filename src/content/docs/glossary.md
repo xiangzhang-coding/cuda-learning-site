@@ -71,14 +71,14 @@ head:
 
 - **定义：** 展示一个聚焦概念的独立源代码项目，是学习单元引用的规范可执行来源。
 - **避免使用：** 代码片段、伪代码、实验。
-- **相关单元：** O01。
+- **相关单元：** O01、F01。
 - **版本说明：** 具体项目必须另行声明适用版本。
 
 ### Lab · 实验
 
 - **定义：** 学习者在外部 CUDA 环境中执行的引导式活动，包含预期观察和验收条件。
 - **避免使用：** 演示、浏览器游乐场。
-- **相关单元：** O01。
+- **相关单元：** O01、LAB02。
 - **版本说明：** 具体实验必须另行声明环境要求。
 
 ### Exercise · 练习
@@ -214,6 +214,69 @@ head:
 - **相关单元：** O03。
 - **版本说明：** 型号映射和功能表必须按当前 NVIDIA 文档复核。
 
+### kernel · 核函数
+
+- **定义：** 由 host 发起、在 CUDA device 上由许多 thread 执行的函数；CUDA C++ 中 `__global__` kernel 使用 execution configuration launch。
+- **避免使用：** 普通 CPU 函数、浏览器动画。
+- **相关单元：** F01、LAB02。
+- **版本说明：** F01 使用 CUDA Programming Guide v13.3 的基础执行模型。
+
+### execution configuration · 执行配置
+
+- **定义：** Kernel launch 中声明 grid 与 thread block 形状的配置；一维场景常写成 block 数和每 block thread 数。
+- **避免使用：** 数据范围、GPU 配置。
+- **相关单元：** F01、VIS02。
+- **版本说明：** 配置创建执行 thread，不自动定义逻辑数据 extent。
+
+### grid · 网格
+
+- **定义：** 一次 kernel launch 创建的全部 thread block 集合，可具有一维、二维或三维形状。
+- **避免使用：** 数据数组、固定调度顺序。
+- **相关单元：** F01、VIS01、VIS02。
+- **版本说明：** Block 的分派和完成顺序不由 grid 坐标保证。
+
+### thread block · 线程块
+
+- **定义：** Grid 中一组共同调度到一个 SM 的 thread；`blockIdx` 标识 block，`blockDim` 描述其形状。
+- **避免使用：** CPU thread pool、warp。
+- **相关单元：** F01、VIS01、VIS02。
+- **版本说明：** F01 只使用一维 block；多维关系由 VIS02 说明。
+
+### thread · 线程
+
+- **定义：** Kernel 的一个逻辑执行实例；它通过 `threadIdx` 与 block/grid 坐标推导自己负责的数据位置。
+- **避免使用：** 元素、warp、操作系统线程。
+- **相关单元：** F01、VIS02。
+- **版本说明：** Launch thread 可以落在逻辑数据范围外，因此仍需 bounds check。
+
+### host and device · 主机与设备
+
+- **定义：** Host 代码在 CPU 侧管理分配、复制、launch 和同步；device 代码由 CUDA GPU 执行，二者的内存和完成边界必须显式处理。
+- **避免使用：** 把 host test 当作 GPU run、把 device memory 当作 host memory。
+- **相关单元：** F01、LAB02。
+- **版本说明：** LAB02 使用 CUDA Runtime API 11.8.0、12.9.2 或 13.3.1 的声明 Lane。
+
+### bounds check · 边界判断
+
+- **定义：** Thread 在访问数组前比较推导索引与逻辑 extent，使最后一个 partial block 的越界 thread 跳过访问。
+- **避免使用：** 阻止 thread launch、缩小 grid。
+- **相关单元：** F01、VIS02、LAB02。
+- **版本说明：** EX02 的一维条件是 `index < element_count`。
+
+### CPU reference · CPU 参考实现
+
+- **定义：** 与 CUDA kernel 独立、在 CPU 上计算预期结果的实现，用于逐元素正确性比较。
+- **避免使用：** GPU runtime evidence、性能基线（除非另有测量合同）。
+- **相关单元：** F01、LAB02。
+- **版本说明：** EX02 的 host-only test 不运行 GPU，也不授予 Runtime-Verified。
+
+### tolerance · 容差
+
+- **定义：** 浮点比较的预先声明接受规则；EX02 在绝对 `1e-5` 或相对 `1e-5` 任一标准满足时接受元素。
+- **避免使用：** 要求两个标准同时满足、看到小数就视为正确。
+- **相关单元：** F01、LAB02。
+- **版本说明：** 容差值属于 EX02 correctness contract，改变时需要新证据范围。
+
 ## 维护规则
 
-这些词条与 O01、O02、O03 的事实核查日期同为 **2026-08-24**。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。
+这些词条与 O01、O02、O03、F01 和 LAB02 的事实核查日期同为 **2026-08-24**。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。

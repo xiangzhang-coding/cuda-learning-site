@@ -1,0 +1,264 @@
+---
+title: 'LAB02：运行并验证向量加法'
+description: 在原生 Linux CUDA 环境中构建 canonical EX02，记录完整 manifest，并用 CPU reference 与容差验证结果。
+pairId: lab02
+counterpart: /en/labs/vector-addition/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - prepare
+  - predict
+  - build
+  - run
+  - verify
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB02
+prerequisites:
+  - O03
+  - F01
+relatedUnits:
+  - O02
+  - EX02
+  - VIS01
+  - VIS02
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - error-checking
+  - kernel
+  - cpu-reference
+hardwareGate: 'Native Linux; one CUDA GPU with compute capability 7.5 or newer; workload below 8 GB'
+estimatedMinutes: 45
+difficulty: introductory
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 1610612736
+gpuCount: 1
+permissions:
+  - 'Access the selected CUDA device'
+  - 'Execute NVCC, the host compiler, make, and the built binary'
+  - 'Create and remove files in the EX02 build directory'
+evidence:
+  compilation:
+    - Compile-Checked
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A qualifying run should be accepted by the independent CPU reference under the absolute-or-relative tolerance rule.
+    - Running 1003 elements should exercise a final partial block whose out-of-bounds threads skip array access.
+  recordedObservations: []
+sources:
+  - title: 'CUDA 11.8 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 12.9.2 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 13.3 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Compute Capabilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,prepare,predict,build,run,verify,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'O03,F01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O02,EX02,VIS01,VIS02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'error-checking,kernel,cpu-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux; one CUDA GPU with compute capability 7.5 or newer; workload below 8 GB' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '45' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: introductory }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '1610612736' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'CUDA device; compiler and binary execution; EX02 build-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: Compile-Checked }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '2 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/vector-addition/" lang="en">Read the English counterpart</a>
+
+LAB02 是一个实验（Lab）：你在网站之外的 CUDA-capable environment 中执行步骤，网站只提供合同、预期观察和验收条件。没有可用硬件时，可以完成准备与预测，但不能填写运行观察。
+
+## 实验合同
+
+| 坐标 | 要求 |
+| --- | --- |
+| 预计时间 | 45 分钟 |
+| 难度 | 入门（introductory） |
+| 先修 | O03、F01 |
+| 受支持环境（Supported Environment） | 仅原生 Linux；WSL、Windows 和托管 notebook 不在本站支持边界内 |
+| Toolkit Lane | 选择 CUDA 11.8.0/Ubuntu 22.04、12.9.2/Ubuntu 24.04 或 13.3.1/Ubuntu 24.04 的 C++17 Lane；其他环境不得冒用 Lane 名称 |
+| GPU Capability Tier | 基础 GPU 能力层级（Baseline GPU Capability Tier）；compute capability 7.5 或更新 |
+| GPU 数量 | 恰好使用 1 个可见 GPU |
+| 工作负载 | 默认 1,048,576 个 `float`；可选 `1..134,217,728`；最大三个 device vector 为 1,610,612,736 bytes（1.5 GiB），低于 8 GB |
+| 权限 | 能访问所选 CUDA device；执行 NVCC、host compiler、`make` 和 binary；在 EX02 `build/` 中创建和删除文件；不要求性能计数器权限 |
+| 正确性 | 所有 CUDA 边界通过；独立 CPU reference 接受每个元素；进程零退出 |
+| 编译证据 | canonical EX02 在声明的 C++17 Lane 中为 Compile-Checked |
+| 运行证据 | Pending Hardware Verification；本页没有 Reference Environment 运行记录 |
+
+## 先修检查
+
+1. 能解释 [O03](/start/environment-manifest/) 的 Environment Manifest 字段，并准备记录真实值。
+2. 能回答 [F01](/foundations/first-cuda-kernel/) 的五道 retrieval questions，尤其是 partial block 和容差规则。
+3. 选定上表的一条 C++17 Toolkit Lane。若你的原生 Linux 环境不匹配任何 Lane，可以把它记录为自己的环境，但不能继承已提交的 Lane 编译证据。
+4. 确认将只使用一个 GPU，且它的 compute capability 为 7.5 或更新。
+
+## 准备 canonical project 与 manifest
+
+[查看或下载固定提交中的完整 EX02 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition)。一种可复核的获取方式是：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout d69f7131acff7f8b1dfcd780b494426b5948735b
+cd examples/ex02-vector-addition
+```
+
+在执行构建前创建自己的 manifest，至少填写：GPU identity、compute capability 与查询方法、GPU count、driver、Toolkit、NVCC、host compiler、OS/architecture、项目 commit、元素数、device memory 上限、permissions、精确命令、正确性方法与标准、观察日期。不要把下面命令的示例形式当成你的真实值：
+
+```sh
+nvidia-smi
+nvcc --version
+c++ --version
+```
+
+## 先预测
+
+对默认规模和 `1003` 两个规模分别写下：block size `256`、向上取整后的 block count、launch thread 总数、最后合法 index 和越界 thread 数。需要重新检查坐标时使用共享的 [VIS02 索引讲解](/visuals/indexing/)；需要定位 launch 到完成的边界时使用 [VIS01 kernel 路径](/visuals/kernel-journey/)。它们是浏览器模型，不是本次 Lab 的运行证据。完成 LAB 后只比较这些结构性预测，不补写你没有测量的时间。
+
+## 构建与 host-only 检查
+
+错误检查 helper 来自 canonical source：
+
+<CanonicalCode exampleId="EX02" range="error-checking" />
+
+在项目目录运行 C++17 合同：
+
+```sh
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+```
+
+保留完整 stdout/stderr 和每个命令的退出状态。`make host-test` 只检查 CPU reference 与比较函数；它不会执行 CUDA binary。若任一步失败，记录 blocker 并停止，不把失败或跳过写成 Compile-Checked。
+
+## 运行 GPU binary
+
+Kernel 和 bounds check 仍只从 EX02 marker range 显示：
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+运行默认规模，再运行用于检查 partial block 的规模：
+
+```sh
+./build/ex02-vector-addition
+./build/ex02-vector-addition 1003
+```
+
+保留命令、退出状态和未经改写的日志。不要在本页或共享记录中填入“预期 PASS”；只记录程序实际返回的内容。任一非零退出或 CUDA error 都使本次正确性验收失败。
+
+## 验证正确性
+
+CPU reference 和接受规则来自同一 canonical project：
+
+<CanonicalCode exampleId="EX02" range="cpu-reference" />
+
+本次 Lab 只有在下列条件全部成立时完成：
+
+1. 三次 `cudaMalloc`、两次 host-to-device copy、`cudaGetLastError`、`cudaDeviceSynchronize`、device-to-host copy 和三次 `cudaFree` 均未触发错误路径。
+2. 默认规模和 `1003` 两次运行都以状态 0 退出。
+3. 每个 GPU 元素由独立 CPU reference 比较；绝对差 `<= 1e-5` **或**相对差 `<= 1e-5 * max(abs(expected), abs(actual))` 即接受，两者都不接受才失败。
+4. Manifest、精确命令、日期、原始日志和 criteria result 一起保存；没有这些坐标，单独一行 `PASS` 不够。
+5. 不根据这两次正确性运行声明 latency、bandwidth、speedup、occupancy 或 profiler 结论。
+
+## 预期观察，不是记录结果
+
+- 一个合格运行**应当**被独立 CPU reference 按绝对或相对容差接受。
+- `1003` 个元素**应当**产生最后一个 partial block；global index `1003..1023` 的 thread 应跳过数组访问。
+
+这些句子是执行前标准。本站没有观察到你的环境、输出或 GPU 行为；请把自己的实际观察放入单独记录，不修改预期来迎合结果。
+
+## 分开维护证据轴
+
+| 轴 | 当前本站状态 | 你的记录如何处理 |
+| --- | --- | --- |
+| Compilation | Compile-Checked，仅绑定 canonical EX02、精确提交、Lane、方言、target 和已提交 workflow record | 保留自己的构建日志；不要把它改写成其他源码或环境的本站状态 |
+| Runtime | Pending Hardware Verification | 完整社区记录可按 O02 评估为 Community-Observed，但在维护者 Reference Environment 复现前仍不是 Runtime-Verified |
+| Recorded observations | 空 | 只有真实执行后才填写 manifest、日志、日期与 criteria result |
+
+网页构建、VIS01/VIS02、host-only test 和现有 Compile-Checked 都不会升级运行轴。
+
+## 清理与提交产物
+
+```sh
+make clean BUILD_DIR=build
+```
+
+提交或保存你自己的 manifest、命令日志、退出状态、正确性判断和 blocker。不要提交 binary、build directory、私密设备标识、credential 或未经检查的大型 artifact。
+
+## 来源与复核
+
+当前 Context7 `/websites/nvidia_cuda` 用于交叉核对 Runtime allocation/copy/free、launch error 和 synchronization 语义；精确接口以 CUDA 11.8.0、12.9.2 与 13.3.1 Runtime API owner 文档为准。Compute-capability 门槛按 CUDA Programming Guide v13.3 复核。版本和平台坐标见[来源与版本记录](/sources-and-versions/)。
+
+**事实核查日期：2026-08-24。** LAB02 没有内置或虚构运行输出、profiler 数据、speedup 或性能数字；运行仍为 Pending Hardware Verification。

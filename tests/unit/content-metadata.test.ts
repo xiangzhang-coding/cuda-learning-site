@@ -67,3 +67,24 @@ describe('Visual Explainer metadata', () => {
     expect(resourceKindSchema.safeParse('visual-demo').success).toBe(false);
   });
 });
+
+describe('Foundation and Lab metadata', () => {
+  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'LAB02'])(
+    'accepts the controlled curriculum identifier %s',
+    (identifier) => {
+      expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
+    },
+  );
+
+  it.each(['F1', 'F001', 'f01', 'LAB2', 'LAB02-EXERCISES'])(
+    'rejects the malformed curriculum identifier %s',
+    (identifier) => {
+      expect(curriculumIdSchema.safeParse(identifier).success).toBe(false);
+    },
+  );
+
+  it('accepts Lab as a publication resource kind', () => {
+    expect(resourceKindSchema.safeParse('lab').success).toBe(true);
+    expect(resourceKindSchema.safeParse('demo').success).toBe(false);
+  });
+});

@@ -39,9 +39,19 @@ export default defineConfig({
           ],
         },
         {
+          label: '基础课程',
+          translations: { en: 'Foundations' },
+          items: [{ slug: 'foundations/first-cuda-kernel' }],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [{ slug: 'examples/vector-addition' }],
+        },
+        {
+          label: '实验',
+          translations: { en: 'Labs' },
+          items: [{ slug: 'labs/vector-addition' }],
         },
         {
           label: '可视化讲解',

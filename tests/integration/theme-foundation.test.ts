@@ -17,7 +17,7 @@ async function builtHtmlFiles() {
 describe('built theme foundation', () => {
   it('renders the complete localized theme control and static fallback on every page', async () => {
     const htmlFiles = await builtHtmlFiles();
-    expect(htmlFiles).toHaveLength(30);
+    expect(htmlFiles).toHaveLength(38);
 
     for (const file of htmlFiles) {
       const document = parseHTML(await readFile(path.join(projectRoot, 'dist', file), 'utf8')).document;

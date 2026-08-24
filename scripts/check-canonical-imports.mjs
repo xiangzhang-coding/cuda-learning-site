@@ -20,6 +20,10 @@ function readFrontmatterList(content, key) {
   return match ? [...match[1].matchAll(/^  - ([^\n]+)$/gm)].map((entry) => entry[1].trim()) : [];
 }
 
+function readFrontmatterScalar(content, key) {
+  return new RegExp(`^${key}:\\s*['"]?([^'"\\n]+)['"]?$`, 'm').exec(content)?.[1]?.trim();
+}
+
 for (const file of contentFiles) {
   const content = await readFile(file, 'utf8');
   const match = /^canonicalExample:\s*['"]?([^'"\n]+)['"]?$/m.exec(content);
@@ -29,22 +33,42 @@ for (const file of contentFiles) {
   const ranges = readFrontmatterList(content, 'canonicalRanges');
   const imports = [...content.matchAll(/<CanonicalCode\s+exampleId="([^"]+)"\s+range="([^"]+)"\s*\/>/g)]
     .map((entry) => ({ example: entry[1], range: entry[2] }));
-  declarations.push({ file, content, example, ranges, imports });
+  declarations.push({
+    file,
+    content,
+    example,
+    ranges,
+    imports,
+    pairId: readFrontmatterScalar(content, 'pairId'),
+    resourceKind: readFrontmatterScalar(content, 'resourceKind'),
+  });
 }
 
 for (const exampleId of new Set(declarations.map(({ example }) => example))) {
   errors.push(...(await validateCanonicalExample(projectRoot, exampleId)));
   const example = await loadCanonicalExample(projectRoot, exampleId);
   const pages = declarations.filter(({ example: declared }) => declared === exampleId);
-  if (pages.length !== 2) errors.push(`${exampleId} must be published by exactly one Chinese/English pair`);
+  const publisherPages = pages.filter(({ resourceKind }) => resourceKind === 'runnable-example');
+  if (pages.length < 2) errors.push(`${exampleId} must have at least one Chinese/English consumer pair`);
+  if (publisherPages.length !== 2 || new Set(publisherPages.map(({ pairId }) => pairId)).size !== 1) {
+    errors.push(`${exampleId} must have exactly one canonical Runnable Example Publication Pair`);
+  }
 
   for (const page of pages) {
     const relativePath = path.relative(docsRoot, page.file).split(path.sep).join('/');
     const counterpartPath = relativePath.startsWith('en/')
       ? relativePath.slice(3)
       : `en/${relativePath}`;
-    if (!pages.some(({ file }) => path.relative(docsRoot, file).split(path.sep).join('/') === counterpartPath)) {
+    const counterpart = pages.find(
+      ({ file }) => path.relative(docsRoot, file).split(path.sep).join('/') === counterpartPath,
+    );
+    if (!counterpart) {
       errors.push(`${relativePath} has no canonical counterpart at ${counterpartPath}`);
+    } else {
+      if (page.pairId !== counterpart.pairId) errors.push(`${relativePath} and ${counterpartPath} use different pairId values`);
+      if (JSON.stringify(page.ranges) !== JSON.stringify(counterpart.ranges)) {
+        errors.push(`${page.pairId ?? relativePath} Publication Pair declares different canonical ranges`);
+      }
     }
     if (page.ranges.length === 0) errors.push(`${relativePath} must declare canonicalRanges`);
     if (new Set(page.ranges).size !== page.ranges.length) errors.push(`${relativePath} duplicates a canonical range`);
@@ -72,9 +96,6 @@ for (const exampleId of new Set(declarations.map(({ example }) => example))) {
     }
   }
 
-  if (pages.length === 2 && JSON.stringify(pages[0].ranges) !== JSON.stringify(pages[1].ranges)) {
-    errors.push(`${exampleId} Publication Pair declares different canonical ranges`);
-  }
 }
 
 if (errors.length > 0) {

@@ -4,9 +4,10 @@ import { z } from 'astro/zod';
 export const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 export const curriculumIdSchema = z
   .string()
-  .regex(/^(?:O\d{2}(?:-[A-Z]+)?|EX\d{2}|VIS\d{2}|PB-R0(?:-\d{3})?)$/);
+  .regex(/^(?:O\d{2}(?:-[A-Z]+)?|F\d{2}(?:-[A-Z]+)?|LAB\d{2}|EX\d{2}|VIS\d{2}|PB-R0(?:-\d{3})?)$/);
 export const resourceKindSchema = z.enum([
   'learning-unit',
+  'lab',
   'exercise-set',
   'solution-set',
   'practice-bank',

@@ -69,8 +69,9 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
 3. 完成 O01 后，可以分别进入 [O02：诚实记录证据状态](/start/evidence-status/)和 [O03：读懂环境清单](/start/environment-manifest/)，学习证据状态（Evidence Status）和环境清单（Environment Manifest）。
+4. 完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)，再在原生 Linux CUDA 环境中完成 [LAB02](/labs/vector-addition/)。
 
-O02 和 O03 各有练习与独立参考解答；[EX02 向量加法可运行示例](/examples/vector-addition/)公开 canonical source、构建契约和独立编译/运行证据边界；[VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)提供确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)当前包含两道分别链接回 O02 和 O03 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
+O02、O03 和 F01 各有练习与独立参考解答；[EX02 向量加法可运行示例](/examples/vector-addition/)是 F01/LAB02 唯一 canonical source，并公开构建契约和独立编译/运行证据边界；[VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)提供确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)当前包含五道链接回 O02、O03 和 F01 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
 
 ## 三种视觉主题，一套内容
 

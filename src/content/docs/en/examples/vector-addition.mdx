@@ -20,6 +20,8 @@ unitId: EX02
 relatedUnits:
   - O02
   - O03
+  - F01
+  - LAB02
 exampleIds:
   - EX02
 canonicalExample: EX02
@@ -121,7 +123,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:related-units'
-      content: 'O02,O03'
+      content: 'O02,O03,F01,LAB02'
   - tag: meta
     attrs:
       name: 'cuda:example-ids'
@@ -170,6 +172,8 @@ import ExampleEvidence from '../../../../components/ExampleEvidence.astro';
 <a class="locale-pair" data-locale-counterpart href="/examples/vector-addition/" lang="zh-CN">阅读中文版本</a>
 
 EX02 is a standalone, original vector-addition Runnable Example. It keeps grid indexing, bounds handling, the explicit memory lifecycle, CUDA error checks, and a CPU correctness reference in one small project. It is not a Lab, and the website never executes CUDA.
+
+It is the sole canonical source displayed by [F01](/en/foundations/first-cuda-kernel/) and downloaded for [LAB02](/en/labs/vector-addition/). Neither resource maintains a second complete implementation.
 
 ## What this project is for
 

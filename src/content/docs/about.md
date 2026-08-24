@@ -40,7 +40,7 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 本站维护按先修关系组织的稳定课程（Stable Curriculum），并搭配可运行示例（Runnable Example）、实验（Lab）、练习（Exercise）、可视化讲解（Visual Explainer）和术语表（Glossary）。只有完整材料会进入导航。本网站保持静态，不提供账号、进度跟踪、服务端应用、API 或浏览器内 CUDA 执行。
 
-当前公开内容包括 Orientation 路线：[O01](/start/using-the-learning-site/)、[O02](/start/evidence-status/)、[O03](/start/environment-manifest/)、配套练习与解答、[EX02 向量加法可运行示例](/examples/vector-addition/)、[VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)，以及[练习题库（Practice Bank）](/practice/)、[术语表](/glossary/)和[来源与版本记录](/sources-and-versions/)。EX02 有独立编译证据，但网站没有执行 CUDA binary，也没有声明基准环境（Reference Environment）；两个浏览器模型也不会授予 CUDA 证据状态。
+当前公开内容包括 Orientation 路线 [O01](/start/using-the-learning-site/)、[O02](/start/evidence-status/)和 [O03](/start/environment-manifest/)，基础学习单元（Learning Unit）[F01](/foundations/first-cuda-kernel/)及其练习与解答，[EX02 向量加法可运行示例](/examples/vector-addition/)、[LAB02 向量加法实验](/labs/vector-addition/)、[VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)，以及包含五道题的[练习题库（Practice Bank）](/practice/)、[术语表](/glossary/)和[来源与版本记录](/sources-and-versions/)。EX02 有独立编译证据，但 LAB02 运行仍为 Pending Hardware Verification；网站没有执行 CUDA binary，也没有声明基准环境（Reference Environment）。
 
 ## 作者
 

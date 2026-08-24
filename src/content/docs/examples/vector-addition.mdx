@@ -20,6 +20,8 @@ unitId: EX02
 relatedUnits:
   - O02
   - O03
+  - F01
+  - LAB02
 exampleIds:
   - EX02
 canonicalExample: EX02
@@ -121,7 +123,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:related-units'
-      content: 'O02,O03'
+      content: 'O02,O03,F01,LAB02'
   - tag: meta
     attrs:
       name: 'cuda:example-ids'
@@ -170,6 +172,8 @@ import ExampleEvidence from '../../../components/ExampleEvidence.astro';
 <a class="locale-pair" data-locale-counterpart href="/en/examples/vector-addition/" lang="en">Read the English counterpart</a>
 
 EX02 是一个独立、原创的向量加法可运行示例（Runnable Example）。它把网格索引、边界判断、显式内存生命周期、CUDA 错误检查和 CPU 正确性参考放在一个小项目里。它不是实验（Lab），也不在网页中执行 CUDA。
+
+它是 [F01](/foundations/first-cuda-kernel/) 显示代码和 [LAB02](/labs/vector-addition/) 下载运行的唯一 canonical source；两个资源都不会维护第二份完整实现。
 
 ## 这个项目解决什么
 

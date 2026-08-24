@@ -24,6 +24,8 @@ prerequisites:
   - O01
 relatedUnits:
   - O02
+  - F01
+  - LAB02
 exampleIds:
   - O03-MANIFEST-TEMPLATE
   - O03-INCOMPLETE-A
@@ -90,7 +92,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: O01 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: O02 }
+    attrs: { name: 'cuda:related-units', content: 'O02,F01,LAB02' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: 'O03-MANIFEST-TEMPLATE,O03-INCOMPLETE-A' }
   - tag: meta
@@ -202,6 +204,7 @@ Ubuntu 24.04 x86-64 with CUDA 13.3.1 is only a candidate software coordinate. It
 
 - Complete the [O03 Exercises](/en/start/environment-manifest/exercises/), then inspect the separate [reviewed solutions](/en/start/environment-manifest/solutions/).
 - Solve PB-R0-002 in the [Practice Bank](/en/practice/) to repair an incomplete manifest and support-boundary claim.
+- Continue to [F01](/en/foundations/first-cuda-kernel/) and prepare these fields as a real record template before entering [LAB02](/en/labs/vector-addition/).
 
 ## Sources and review
 

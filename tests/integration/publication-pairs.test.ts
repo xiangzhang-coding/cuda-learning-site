@@ -28,6 +28,13 @@ type PublicationPair = {
   evidenceRuntime?: string;
   expectedObservations?: string;
   recordedObservations?: string;
+  estimatedMinutes?: string;
+  difficulty?: string;
+  toolkitLanes?: string;
+  minimumComputeCapability?: string;
+  maximumProblemMemoryBytes?: string;
+  gpuCount?: string;
+  permissions?: string;
   sourceCount?: string;
   sourceVersions?: string;
   zh: string;
@@ -86,7 +93,7 @@ const publicationPairs: readonly PublicationPair[] = [
     resourceKind: 'learning-unit',
     unitId: 'O03',
     prerequisites: 'O01',
-    relatedUnits: 'O02',
+    relatedUnits: 'O02,F01,LAB02',
     exampleIds: 'O03-MANIFEST-TEMPLATE,O03-INCOMPLETE-A',
     sourceCount: '8',
     sourceVersions: '11.8.0,12.9.2,13.3.1',
@@ -114,11 +121,50 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/start/environment-manifest/solutions/',
   },
   {
+    pairId: 'f01',
+    structure: 'outcome,prerequisites,motivation,prediction,implementation,correctness,measurement,optimization-boundaries,explanation,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'F01',
+    prerequisites: 'O03',
+    relatedUnits: 'O02,VIS01,VIS02,LAB02',
+    exampleIds: 'EX02',
+    canonicalExample: 'EX02',
+    canonicalRanges: 'kernel,error-checking,cpu-reference',
+    hardwareGate: 'None for this Learning Unit; LAB02 requires native Linux and one qualifying CUDA GPU',
+    sourceCount: '4',
+    sourceVersions: '13.3,13.3.1',
+    zh: '/foundations/first-cuda-kernel/',
+    en: '/en/foundations/first-cuda-kernel/',
+  },
+  {
+    pairId: 'f01-exercises',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'F01-EXERCISES',
+    prerequisites: 'F01',
+    relatedUnits: 'F01,LAB02',
+    exampleIds: 'EX02',
+    hardwareGate: 'None; implementation may be prepared without executing CUDA',
+    zh: '/foundations/first-cuda-kernel/exercises/',
+    en: '/en/foundations/first-cuda-kernel/exercises/',
+  },
+  {
+    pairId: 'f01-solutions',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'F01-SOLUTIONS',
+    prerequisites: 'F01-EXERCISES',
+    relatedUnits: 'F01,LAB02',
+    exampleIds: 'EX02',
+    zh: '/foundations/first-cuda-kernel/solutions/',
+    en: '/en/foundations/first-cuda-kernel/solutions/',
+  },
+  {
     pairId: 'ex02',
     structure: 'purpose,project,correctness,build,compatibility,evidence,expected-observations,sources',
     resourceKind: 'runnable-example',
     unitId: 'EX02',
-    relatedUnits: 'O02,O03',
+    relatedUnits: 'O02,O03,F01,LAB02',
     exampleIds: 'EX02',
     canonicalExample: 'EX02',
     canonicalRanges: 'kernel,error-checking,cpu-reference',
@@ -131,11 +177,37 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/examples/vector-addition/',
   },
   {
+    pairId: 'lab02',
+    structure: 'contract,prerequisites,prepare,predict,build,run,verify,observations,evidence,cleanup,sources',
+    resourceKind: 'lab',
+    unitId: 'LAB02',
+    prerequisites: 'O03,F01',
+    relatedUnits: 'O02,EX02,VIS01,VIS02',
+    exampleIds: 'EX02',
+    canonicalExample: 'EX02',
+    canonicalRanges: 'error-checking,kernel,cpu-reference',
+    hardwareGate: 'Native Linux; one CUDA GPU with compute capability 7.5 or newer; workload below 8 GB',
+    evidenceCompilation: 'Compile-Checked',
+    evidenceRuntime: 'Pending Hardware Verification',
+    expectedObservations: '2 declared expectations',
+    estimatedMinutes: '45',
+    difficulty: 'introductory',
+    toolkitLanes: 'cuda-11.8,cuda-12.9,cuda-13.3',
+    minimumComputeCapability: '7.5',
+    maximumProblemMemoryBytes: '1610612736',
+    gpuCount: '1',
+    permissions: 'CUDA device; compiler and binary execution; EX02 build-directory write/delete',
+    sourceCount: '4',
+    sourceVersions: '11.8.0,12.9.2,13.3.1',
+    zh: '/labs/vector-addition/',
+    en: '/en/labs/vector-addition/',
+  },
+  {
     pairId: 'vis01',
     structure: 'purpose,model,controls,scheduling-boundary,static-sequence,evidence-boundary,sources',
     resourceKind: 'visual-explainer',
     unitId: 'VIS01',
-    relatedUnits: 'O01,O02',
+    relatedUnits: 'O01,O02,F01',
     hardwareGate: 'None: deterministic browser model; no CUDA-capable system required',
     sourceCount: '9',
     sourceVersions: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12',
@@ -147,7 +219,7 @@ const publicationPairs: readonly PublicationPair[] = [
     structure: 'purpose,model,dimensions,equations,bounds,static-examples,evidence-boundary,sources',
     resourceKind: 'visual-explainer',
     unitId: 'VIS02',
-    relatedUnits: 'O01,O02',
+    relatedUnits: 'O01,O02,F01',
     hardwareGate: 'None: deterministic browser model; no CUDA-capable system required',
     sourceCount: '7',
     sourceVersions: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12',
@@ -156,11 +228,11 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'practice-bank',
-    structure: 'use,entry-pb-r0-001,entry-pb-r0-002,review',
+    structure: 'use,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03',
-    relatedUnits: 'O02,O03',
+    prerequisites: 'O02,O03,F01',
+    relatedUnits: 'O02,O03,F01',
     zh: '/practice/',
     en: '/en/practice/',
   },
@@ -194,7 +266,7 @@ describe('Publication Pairs', () => {
       { route: zh, lang: 'zh-CN', counterpart: en, pairId, structure, ...contract },
       { route: en, lang: 'en', counterpart: zh, pairId, structure, ...contract },
     ]),
-  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, hardwareGate, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', sourceCount, sourceVersions }) => {
+  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, hardwareGate, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', estimatedMinutes, difficulty, toolkitLanes, minimumComputeCapability, maximumProblemMemoryBytes, gpuCount, permissions, sourceCount, sourceVersions }) => {
     const document = await readRoute(route);
 
     expect(document.documentElement.lang).toBe(lang);
@@ -211,6 +283,13 @@ describe('Publication Pairs', () => {
     if (canonicalExample) expect(metadata(document, 'cuda:canonical-example')).toBe(canonicalExample);
     if (canonicalRanges) expect(metadata(document, 'cuda:canonical-ranges')).toBe(canonicalRanges);
     if (hardwareGate) expect(metadata(document, 'cuda:hardware-gate')).toBe(hardwareGate);
+    if (estimatedMinutes) expect(metadata(document, 'cuda:estimated-minutes')).toBe(estimatedMinutes);
+    if (difficulty) expect(metadata(document, 'cuda:difficulty')).toBe(difficulty);
+    if (toolkitLanes) expect(metadata(document, 'cuda:toolkit-lanes')).toBe(toolkitLanes);
+    if (minimumComputeCapability) expect(metadata(document, 'cuda:minimum-compute-capability')).toBe(minimumComputeCapability);
+    if (maximumProblemMemoryBytes) expect(metadata(document, 'cuda:maximum-problem-memory-bytes')).toBe(maximumProblemMemoryBytes);
+    if (gpuCount) expect(metadata(document, 'cuda:gpu-count')).toBe(gpuCount);
+    if (permissions) expect(metadata(document, 'cuda:permissions')).toBe(permissions);
     if (sourceCount) expect(metadata(document, 'cuda:source-count')).toBe(sourceCount);
     if (sourceVersions) expect(metadata(document, 'cuda:source-versions')).toBe(sourceVersions);
     if (resourceKind) {
@@ -267,20 +346,17 @@ describe('published navigation', () => {
   it.each([
     {
       route: '/start/using-the-learning-site/',
-      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/examples/vector-addition/', '/visuals/kernel-journey/', '/visuals/indexing/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
+      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/foundations/first-cuda-kernel/', '/examples/vector-addition/', '/labs/vector-addition/', '/visuals/kernel-journey/', '/visuals/indexing/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
     },
     {
       route: '/en/start/using-the-learning-site/',
-      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/visuals/kernel-journey/', '/en/visuals/indexing/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
+      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/foundations/first-cuda-kernel/', '/en/examples/vector-addition/', '/en/labs/vector-addition/', '/en/visuals/kernel-journey/', '/en/visuals/indexing/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
     },
   ])('exposes only complete destinations from $route', async ({ route, expected }) => {
     const document = await readRoute(route);
     const hrefs = [...document.querySelectorAll('nav a[href]')].map((link) => link.getAttribute('href'));
 
     for (const href of expected) expect(hrefs).toContain(href);
-    for (const prefix of ['/foundations/', '/labs/']) {
-      expect(hrefs.some((href) => href?.startsWith(prefix) || href?.startsWith(`/en${prefix}`))).toBe(false);
-    }
   });
 
   it('contains no broken internal page links', async () => {

@@ -1,0 +1,209 @@
+---
+title: 'F01：从预测到第一个 CUDA kernel'
+description: 先预测 thread 索引，再从 EX02 的规范源码理解实现、正确性、测量边界和解释方法。
+pairId: f01
+counterpart: /en/foundations/first-cuda-kernel/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - motivation
+  - prediction
+  - implementation
+  - correctness
+  - measurement
+  - optimization-boundaries
+  - explanation
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F01
+prerequisites:
+  - O03
+relatedUnits:
+  - O02
+  - VIS01
+  - VIS02
+  - LAB02
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - kernel
+  - error-checking
+  - cpu-reference
+hardwareGate: 'None for this Learning Unit; LAB02 requires native Linux and one qualifying CUDA GPU'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Introduction to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA host and device execution'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Runtime API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,motivation,prediction,implementation,correctness,measurement,optimization-boundaries,explanation,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O03 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O02,VIS01,VIS02,LAB02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'kernel,error-checking,cpu-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None for this Learning Unit; LAB02 requires native Linux and one qualifying CUDA GPU' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+import IndexingExplorer from '../../../components/IndexingExplorer.astro';
+import KernelJourney from '../../../components/KernelJourney.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/first-cuda-kernel/" lang="en">Read the English counterpart</a>
+
+向量加法很小，却足以暴露第一个 CUDA 程序的完整问题：谁拥有一个元素、越界 thread 做什么、host 何时能相信结果，以及“程序输出了东西”为什么还不是正确性证据。本学习单元（Learning Unit）只建立回答这些问题所需的最小 C++ 和 GPU 架构背景。
+
+## 学完本单元，你应该能
+
+- 在看到实现前，根据 execution configuration 预测一维 thread 的全局索引和 bounds 状态。
+- 从 EX02 的规范源码解释 `__global__` kernel、host/device 内存生命周期和 launch 后的错误边界。
+- 用独立 CPU reference 与“绝对容差或相对容差”规则定义正确性。
+- 区分正确性、测量和优化，不从编译记录或浏览器模型推断 GPU 性能。
+
+## 先修关系
+
+先完成 [O03：读懂环境清单（Environment Manifest）](/start/environment-manifest/)。你需要知道 GPU、compute capability、Toolkit Lane、工作负载和正确性标准为什么必须分开记录。遇到状态判断时回到 [O02](/start/evidence-status/)；本页本身不获得 CUDA Evidence Status。
+
+## 动机：把循环的所有权分给 thread
+
+CPU 参考实现按顺序处理 `0..N-1`。CUDA kernel 仍做同一个逐元素加法，但 launch 会创建一个 grid，grid 包含 thread block，block 包含 thread。每个 thread 必须先算出自己负责的元素索引，再决定这个索引是否属于逻辑数据范围。
+
+这里的最低 C++ 背景只有三点：指针指向数组起点，`element_count` 给出合法元素数量，`output[index] = left[index] + right[index]` 写入一个结果。`__global__` 表明函数由 host launch、在 device 上执行；它不表示网页或普通 C++ 编译器能运行该函数。
+
+## 预测：先算再看代码
+
+对一维配置，thread 使用：
+
+```text
+index = blockIdx.x * blockDim.x + threadIdx.x
+```
+
+假设 `element_count = 1000`、每个 block 有 `256` 个 thread，则需要 `ceil(1000 / 256) = 4` 个 block，共 launch 1024 个 thread。请先写下这三个预测：
+
+1. `blockIdx.x = 2`、`threadIdx.x = 17` 时，`index` 是多少？
+2. 最后一个合法元素由哪个全局索引拥有？
+3. 全局索引 `1000..1023` 应该执行写入还是跳过？
+
+VIS02 使用同一组索引事实。改变配置并选择 thread，检查你的预测；它是浏览器模型，不是 CUDA 执行。
+
+<IndexingExplorer locale="zh-CN" />
+
+## 实现：只读 canonical EX02
+
+[查看或下载固定提交中的完整 EX02 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition)。`src/vector_add.cu`、`include/vector_add_reference.hpp`、`project.json` 和构建文件是唯一规范来源；不要从页面片段拼成第二份程序。
+
+Kernel 的全部教学要点都在这个声明的 marker range 中：
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+第 37 行把 block 坐标和 block 内坐标合成全局索引。第 38 行是 bounds check：launch 范围可以向上取整，但只有 `index < element_count` 的 thread 才能访问数组。这个判断保护最后一个 partial block，而不是减少已 launch 的 thread 数量。
+
+Host 还负责分配三块 device memory、复制两个输入、计算 block 数、launch、等待、复制输出和释放资源。Execution configuration 使用 block 数和每 block thread 数；它决定创建多少 thread，不替 kernel 定义逻辑数据范围。
+
+## 正确性：错误路径、CPU reference、容差
+
+所有需要检查的 CUDA Runtime 调用通过同一个 fail-fast 边界：
+
+<CanonicalCode exampleId="EX02" range="error-checking" />
+
+一次合格运行必须检查三次 `cudaMalloc`、两次 host-to-device copy、`cudaGetLastError`、`cudaDeviceSynchronize`、device-to-host copy 和三次 `cudaFree`。Launch 通常对 host 异步返回；`cudaGetLastError` 检查 launch 边界，`cudaDeviceSynchronize` 等待完成并暴露执行错误。只检查其中一个不能覆盖完整边界。
+
+正确输出由独立 CPU reference 定义：
+
+<CanonicalCode exampleId="EX02" range="cpu-reference" />
+
+EX02 对每个元素使用绝对容差 `1e-5` 和相对容差 `1e-5`。**任一标准接受就通过；两者都不接受才失败。** `make host-test` 可以检查 CPU reference 和比较函数，但它没有运行 GPU kernel，不能建立 GPU 正确性。
+
+## 测量：先保留空结果
+
+正确性通过之前不要解释时间。即使未来要测量，也要先记录完整 Environment Manifest、精确命令、工作负载、同步点、计时工具与版本、warm-up、样本方法和基线。本页没有执行 CUDA，不提供输出、延迟、带宽、speedup 或 profiler 数据。
+
+EX02 的精确源码已经在三条 Toolkit Lane 中获得 Compile-Checked；这只说明声明的构建阶段通过。运行仍是 Pending Hardware Verification。你将在 [LAB02](/labs/vector-addition/) 中按照这个独立证据合同运行自己的副本。
+
+## 优化边界：第一遍不要追速度
+
+第一遍只追求索引正确、bounds 安全、错误可见、结果可比较。不要因为访问看起来连续就声称带宽已优化，也不要在没有基线和测量方法时改变 block size 并宣布更快。Memory coalescing、occupancy、shared memory 和 profiler 解释都超出 F01 的验收范围。
+
+[VIS01](/visuals/kernel-journey/) 可以帮助你定位 launch、block、warp、memory transaction 和完成边界，但它的固定步序与计时只是教学界面。真实 block 调度顺序不固定，浏览器阶段也不是性能轨迹。
+
+## 解释：从 launch 走到可比较结果
+
+使用下面的共享 VIS01，把口头解释固定在七个因果边界上：host 提交 launch；grid 包含 block；block 由 SM 调度；thread 组成 warp；指令产生内存访问；同步使完成可观察；复制回 host 后才能与 CPU reference 比较。
+
+<KernelJourney locale="zh-CN" />
+
+一个合格解释必须同时说出“不保证什么”：block 的分派顺序不保证，浏览器动画时长不代表 GPU 时间，Compile-Checked 不代表 kernel 已执行，正确性也不自动产生性能结论。
+
+## 离开前检查
+
+1. 为什么 `ceil(N / blockDim.x)` 会创建越界 thread，而这仍是合法设计？
+2. `blockIdx.x * blockDim.x + threadIdx.x` 中每一项分别来自哪一层？
+3. 为什么需要同时检查 `cudaGetLastError` 和 `cudaDeviceSynchronize`？
+4. 一个元素在什么条件下通过 EX02 的绝对/相对容差规则？
+5. 为什么 Compile-Checked、CPU host test 和 VIS01 都不能证明 GPU 运行正确或更快？
+
+## 继续练习
+
+- 完成 [F01 练习（Exercise）](/foundations/first-cuda-kernel/exercises/)，再查看独立的[参考解答](/foundations/first-cuda-kernel/solutions/)。
+- 在[练习题库（Practice Bank）](/practice/)完成 PB-R0-003、PB-R0-004 和 PB-R0-005。
+- 准备好原生 Linux CUDA 环境后进入 [LAB02：运行并验证向量加法](/labs/vector-addition/)。
+
+## 来源与复核
+
+当前 Context7 `/websites/nvidia_cuda` 用于发现并交叉核对 `__global__`、execution configuration、一维索引、异步 launch、`cudaGetLastError` 和 `cudaDeviceSynchronize`。精确教学结论以 NVIDIA CUDA Programming Guide v13.3 和 CUDA Runtime API 13.3.1 owner 文档为准；完整来源坐标记录在[来源与版本记录](/sources-and-versions/)。
+
+**事实核查日期：2026-08-24。** 页面文字和教学编排均为原创；没有复制 NVIDIA sample listing、图表、私有资料、运行输出或性能数字。
