@@ -77,4 +77,4 @@ CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、cuBLAS 等 c
 
 ## 复核记录
 
-**复核日期：2026-08-24。** Astro 7.2.4、Starlight 0.41.7、Pagefind 1.5.2、Playwright 1.62.1 与 axe-playwright 4.13.0 的精确依赖组合由 npm 11.17.0 解析。主题组件、Web Storage、媒体查询、设备模拟和自动化无障碍测试边界已按上表复核；自动化结果不构成 WCAG 一致性声明。[run 32717957107](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107) 在 x86-64 `ubuntu-24.04` runner 上通过五个 EX02 检查，并记录 Docker 28.0.4、Buildx 0.36.1、实际 image/OS/compiler 和构建产物；独立 C++23 probe 记录为 `unsupported`。没有执行 CUDA binary、没有记录性能结果，也没有声明 Reference Environment，所以 runtime 仍为 Pending Hardware Verification。
+**复核日期：2026-08-24。** Astro 7.2.4、Starlight 0.41.7、Pagefind 1.5.2、Playwright 1.62.1 与 axe-playwright 4.13.0 的精确依赖组合由 npm 11.17.0 解析。主题组件、Web Storage、媒体查询、设备模拟和自动化无障碍测试边界已按上表复核；自动化结果不构成 WCAG 一致性声明。[run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) 在 x86-64 `ubuntu-24.04` runner 上通过五个 EX02 检查，并记录 Docker 28.0.4、Buildx 0.36.1、实际 image/OS/compiler 和构建产物；独立 C++23 probe 记录为 `unsupported`。没有执行 CUDA binary、没有记录性能结果，也没有声明 Reference Environment，所以 runtime 仍为 Pending Hardware Verification。

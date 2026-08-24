@@ -174,7 +174,7 @@ Tiers combine compute capability, memory, GPU count, features, and permissions. 
 
 ## Three Toolkit Lanes
 
-EX02 completed preprocessing, compilation, linking, and inspection in all three Lanes in [CUDA Compile Evidence run 32717957107](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107): C++17 on 11.8.0 and both C++17/C++20 on 12.9.2 and 13.3.1 are Compile-Checked. That status belongs only to the exact EX02 source, dialect, target, and recorded environment. It upgrades no other subject and provides no GPU runtime evidence.
+EX02 completed preprocessing, compilation, linking, and inspection in all three Lanes in [CUDA Compile Evidence run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527): C++17 on 11.8.0 and both C++17/C++20 on 12.9.2 and 13.3.1 are Compile-Checked. That status belongs only to the exact EX02 source, dialect, target, and recorded environment. It upgrades no other subject and provides no GPU runtime evidence.
 
 | Toolkit Lane | Selected OS | Curriculum dialects | Owner version coordinates, not local observations |
 | --- | --- | --- | --- |

@@ -31,7 +31,7 @@ These are the source coordinates and declared evidence targets for EX02. Context
 | Compute capability | Programming Guide 13.3.1 feature and limit tables; current GPU-to-capability mapping | [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) |
 | NVCC phases | Compiler Driver 13.3.1 compile, PTX/CUBIN, link, and run phase boundary | [supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases) |
 
-CUDA Compile Evidence [run 32717957107](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107) passed EX02 with C++17 in all three Lanes and with C++20 in the 12.9.2 and 13.3.1 Lanes. The exact 13.3.1 probe resolved the C++23 documentation conflict for this image: GCC 13.3/NVCC 13.3.73 reports `-std=c++23` unsupported with the configured host compiler. That probe grants no EX02 C++23 status. No CUDA binary ran, no Reference Environment is declared, and no runtime or performance evidence was produced.
+CUDA Compile Evidence [run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) passed EX02 with C++17 in all three Lanes and with C++20 in the 12.9.2 and 13.3.1 Lanes. The exact 13.3.1 probe resolved the C++23 documentation conflict for this image: GCC 13.3/NVCC 13.3.73 reports `-std=c++23` unsupported with the configured host compiler. That probe grants no EX02 C++23 status. No CUDA binary ran, no Reference Environment is declared, and no runtime or performance evidence was produced.
 
 ## Immutable action coordinates
 

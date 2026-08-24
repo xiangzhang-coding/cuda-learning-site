@@ -5,10 +5,10 @@
   "claim": "Compile-Checked",
   "subject": "EX02",
   "check": "cuda-12-9-cxx20",
-  "sourceCommit": "1cdca8b411135c6023d1241a25b2ff8aea820d65",
+  "sourceCommit": "d69f7131acff7f8b1dfcd780b494426b5948735b",
   "buildContractSha256": "5a076671c1f34d3fc68b1021c8119db1c8d59236091efdea921611bbea40f4d1",
   "verificationDate": "2026-08-24",
-  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527",
   "runner": {
     "operatingSystem": "Linux",
     "architecture": "X64",

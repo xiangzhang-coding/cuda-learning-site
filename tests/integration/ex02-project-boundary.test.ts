@@ -32,7 +32,7 @@ describe('EX02 standalone project boundary', () => {
     expect(example.evidence.runtime).toBe('Pending Hardware Verification');
     expect(example.evidence.compilation).toHaveLength(5);
     expect(example.evidence.recordedObservations).toEqual([]);
-    expect(example.sourceUrl).toContain('1cdca8b411135c6023d1241a25b2ff8aea820d65');
+    expect(example.sourceUrl).toContain('d69f7131acff7f8b1dfcd780b494426b5948735b');
   });
 
   it('accepts five exact Compile-Checked records and one separate unsupported C++23 probe', async () => {
@@ -42,7 +42,7 @@ describe('EX02 standalone project boundary', () => {
 
     expect(compileChecked).toHaveLength(5);
     expect(new Set(compileChecked.map((record) => record.sourceCommit))).toEqual(
-      new Set(['1cdca8b411135c6023d1241a25b2ff8aea820d65']),
+      new Set(['d69f7131acff7f8b1dfcd780b494426b5948735b']),
     );
     expect(compileChecked.every((record) =>
       record.result === 'pass' &&

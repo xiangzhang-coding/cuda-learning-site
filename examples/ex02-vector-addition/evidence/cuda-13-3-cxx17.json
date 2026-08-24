@@ -5,10 +5,10 @@
   "claim": "Compile-Checked",
   "subject": "EX02",
   "check": "cuda-13-3-cxx17",
-  "sourceCommit": "1cdca8b411135c6023d1241a25b2ff8aea820d65",
+  "sourceCommit": "d69f7131acff7f8b1dfcd780b494426b5948735b",
   "buildContractSha256": "5a076671c1f34d3fc68b1021c8119db1c8d59236091efdea921611bbea40f4d1",
   "verificationDate": "2026-08-24",
-  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527",
   "runner": {
     "operatingSystem": "Linux",
     "architecture": "X64",
@@ -59,12 +59,12 @@
     {
       "path": "build/vector_add.o",
       "bytes": 45008,
-      "sha256": "1a463d5014b9466d273d9ef94b333edbb3df20db510197f871c20dea80ce18aa"
+      "sha256": "f3f00daa648cea8809d0154837f6ea6405d2f4ec3565e93246b4068fff380885"
     },
     {
       "path": "build/ex02-vector-addition",
       "bytes": 1103800,
-      "sha256": "89d8956358cc421be50b93667c60dab4760785d379f186a701fa2d8d69792fe0"
+      "sha256": "7ed416e9285724ded8a8cb6c9209292f4ba39ccb27c1747969b907d988a85019"
     }
   ],
   "hostReferenceExecuted": true,

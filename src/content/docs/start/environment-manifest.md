@@ -174,7 +174,7 @@ O03-INCOMPLETE-A 只有“RTX 4090、CUDA 13.3.1、跑了矩阵乘”。它缺�
 
 ## 三条 Toolkit Lane
 
-EX02 已在 [CUDA Compile Evidence run 32717957107](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32717957107) 中完成三条 Lane 的 preprocess、compile、link 和 inspect：11.8.0 的 C++17、12.9.2/13.3.1 的 C++17 与 C++20 均为 Compile-Checked。这个状态只属于 EX02 的精确源码、方言、target 和已记录环境，不升级其他对象，也不构成 GPU 运行证据。
+EX02 已在 [CUDA Compile Evidence run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) 中完成三条 Lane 的 preprocess、compile、link 和 inspect：11.8.0 的 C++17、12.9.2/13.3.1 的 C++17 与 C++20 均为 Compile-Checked。这个状态只属于 EX02 的精确源码、方言、target 和已记录环境，不升级其他对象，也不构成 GPU 运行证据。
 
 | Toolkit Lane | 选择的 OS | 课程编译方言 | 上游版本坐标（不是本机观察） |
 | --- | --- | --- | --- |
