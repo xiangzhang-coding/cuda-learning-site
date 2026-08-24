@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: The initial canonical bilingual vocabulary for CUDA Learning Site.
+description: Published canonical bilingual vocabulary and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-08-24'
@@ -37,7 +37,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 “Avoid” identifies wording that would blur a teaching contract or resource type. It is not a ban on ordinary language. Each entry also names related Learning Units and any version boundary.
 
-## Initial entries
+## Published entries
 
 ### Learning Site · 学习站
 
@@ -109,6 +109,111 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O01.
 - **Version note:** Entries are reviewed with the curriculum but do not imply interface compatibility.
 
+### Evidence Status · 证据状态
+
+- **Definition:** A controlled label describing the reviewable evidence available for a Lab or Runnable Example. Compilation and runtime are independent axes.
+- **Avoid:** Unqualified “verified” or “supported.”
+- **Related unit:** O02.
+- **Version note:** A status is scoped to a subject, environment, criteria, and date; publishing a web page grants none.
+
+### Compile-Checked · 编译已检查
+
+- **Definition:** The required source actually built in a declared Toolkit Lane with dialect, target, command, and build environment recorded. It neither requires nor implies GPU execution.
+- **Avoid:** Runtime-Verified, tested on GPU.
+- **Related units:** O02, O03.
+- **Version note:** Every claim binds to an exact Toolkit Lane.
+
+### Community-Observed · 社区已观察
+
+- **Definition:** A contributor reported a runtime observation with a complete Environment Manifest, logs or artifacts, criteria, and date. It is not maintainer reproduction.
+- **Avoid:** Runtime-Verified, anecdotal support.
+- **Related units:** O02, O03.
+- **Version note:** May coexist with Pending Hardware Verification.
+
+### Runtime-Verified · 运行已验证
+
+- **Definition:** The subject executed in a declared, maintainer-controlled Reference Environment and met its stated correctness and observation criteria.
+- **Avoid:** Compile-Checked, expected to work.
+- **Related units:** O02, O03.
+- **Version note:** The conclusion covers only recorded GPU, driver, Toolkit, components, workload, and method coordinates.
+
+### Pending Hardware Verification · 待硬件验证
+
+- **Definition:** Acceptance requires GPU behavior, but the required qualifying runtime evidence does not yet exist.
+- **Avoid:** Runtime-Verified, should run.
+- **Related unit:** O02.
+- **Version note:** A successful build or community observation does not remove it automatically.
+
+### Runtime-Not-Applicable · 无需运行验证
+
+- **Definition:** A runtime-axis status for acceptance criteria that require compilation or artifact inspection and no GPU behavior.
+- **Avoid:** Compile-only, skipped runtime.
+- **Related unit:** O02.
+- **Version note:** It must not hide runtime correctness or performance requirements.
+
+### Environment Manifest · 环境清单
+
+- **Definition:** Separate GPU, compute-capability, count, driver, Toolkit, component, compiler, operating-system, workload, and method coordinates needed to interpret a build, run, or measurement.
+- **Avoid:** Version string, machine description.
+- **Related unit:** O03.
+- **Version note:** New evidence records new coordinates and an observation date.
+
+### Supported Environment · 受支持环境
+
+- **Definition:** An environment family for which the site accepts setup guidance, troubleshooting boundaries, and validation responsibility. Native Linux is the only one.
+- **Avoid:** Any platform that may happen to work.
+- **Related unit:** O03.
+- **Version note:** Upstream product support does not expand site responsibility automatically.
+
+### Reference Environment · 基准环境
+
+- **Definition:** A declared, maintainer-controlled configuration inside the Supported Environment with a complete manifest and successful controlled baseline run.
+- **Avoid:** Recommended environment, community setup.
+- **Related unit:** O03.
+- **Version note:** No Reference Environment is currently declared.
+
+### Toolkit Lane · 工具包通道
+
+- **Definition:** A pinned Toolkit and host environment with declared C++ dialects, used as a compile-evidence target.
+- **Avoid:** Site version, documentation version.
+- **Related unit:** O03.
+- **Version note:** A Lane is not a curriculum copy or Reference Environment; only a successful build can add Compile-Checked.
+
+### GPU Capability Tier · GPU 能力层级
+
+- **Definition:** A curriculum support tier defined by compute capability, memory, GPU count, features, and permissions.
+- **Avoid:** GPU class, memory tier.
+- **Related unit:** O03.
+- **Version note:** Product names and extra memory cannot select a tier alone.
+
+### Baseline GPU Capability Tier · 基础 GPU 能力层级
+
+- **Definition:** The tier for Stable Curriculum fundamentals, requiring compute capability 7.5 or newer and problem sizes that fit within 8 GB.
+- **Avoid:** 8 GB GPU tier, Turing tier.
+- **Related unit:** O03.
+- **Version note:** 8 GB is a workload boundary, not a separate hardware class.
+
+### Modern Single-GPU Capability Tier · 现代单 GPU 能力层级
+
+- **Definition:** The tier for the complete single-GPU route, requiring compute capability 8.0 or newer and at least 8 GB. Additional activities state extra gates.
+- **Avoid:** Complete tier, Ampere tier.
+- **Related unit:** O03.
+- **Version note:** It does not automatically cover multi-GPU or architecture-specific activities.
+
+### CUDA Toolkit · CUDA 工具包
+
+- **Definition:** NVIDIA's bundle of compilers, libraries, tools, and runtime development components, recorded separately from the installed driver and individual component versions.
+- **Avoid:** CUDA driver version, the whole CUDA environment.
+- **Related unit:** O03.
+- **Version note:** Toolkit Lanes use exact `X.Y.Z` coordinates.
+
+### compute capability · 计算能力
+
+- **Definition:** A major.minor capability coordinate describing a set of GPU architectural features and technical limits.
+- **Avoid:** GPU generation, Toolkit version.
+- **Related unit:** O03.
+- **Version note:** Model mappings and feature tables require current NVIDIA documentation.
+
 ## Maintenance rule
 
-These entries share O01's fact-check date of **2026-08-24**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.
+These entries share the O01, O02, and O03 fact-check date of **2026-08-24**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.

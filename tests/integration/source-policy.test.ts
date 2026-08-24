@@ -24,7 +24,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(10);
+    expect(contentFiles).toHaveLength(24);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');
       expect(content, file).toMatch(/^license: CC-BY-4\.0$/m);
