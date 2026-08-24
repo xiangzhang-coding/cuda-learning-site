@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: Apache-2.0
+import starlight from '@astrojs/starlight';
+import { defineConfig } from 'astro/config';
+
+export default defineConfig({
+  site: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
+  output: 'static',
+  outDir: './dist',
+  trailingSlash: 'always',
+  prerenderConflictBehavior: 'error',
+  integrations: [
+    starlight({
+      title: {
+        'zh-CN': 'CUDA 学习站',
+        en: 'CUDA Learning Site',
+      },
+      defaultLocale: 'root',
+      locales: {
+        root: { label: '简体中文', lang: 'zh-CN' },
+        en: { label: 'English', lang: 'en' },
+      },
+      prerender: true,
+      pagefind: true,
+      customCss: ['./src/styles/site.css'],
+      sidebar: [
+        {
+          label: '从这里开始',
+          translations: { en: 'Start Here' },
+          items: [{ slug: 'start/using-the-learning-site' }],
+        },
+        { slug: 'glossary' },
+        { slug: 'sources-and-versions' },
+        { slug: 'about' },
+      ],
+    }),
+  ],
+});

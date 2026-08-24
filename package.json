@@ -1,0 +1,36 @@
+{
+  "name": "cuda-learning-site",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": "24.19.0",
+    "npm": "11.17.0"
+  },
+  "packageManager": "npm@11.17.0",
+  "scripts": {
+    "build": "astro build",
+    "check": "astro check",
+    "dev": "astro dev",
+    "preview": "astro preview",
+    "test": "npm run test:integration && npm run test:e2e",
+    "test:e2e": "playwright test",
+    "test:integration": "vitest run tests/integration"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.2.4",
+    "@astrojs/mdx": "7.0.7",
+    "@astrojs/starlight": "0.41.7",
+    "astro": "7.2.4",
+    "pagefind": "1.5.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "linkedom": "0.18.13",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}
