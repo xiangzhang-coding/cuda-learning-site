@@ -256,6 +256,9 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
     if (!example.sourceUrl.includes(sourceCommit)) {
       throw new Error(`${exampleId} source URL does not resolve to its evidence commit`);
     }
+    if (!example.downloadUrl?.includes(sourceCommit)) {
+      throw new Error(`${exampleId} download URL does not resolve to its evidence commit`);
+    }
   }
   return records;
 }

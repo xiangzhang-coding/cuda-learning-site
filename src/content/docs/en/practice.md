@@ -82,6 +82,8 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - Invent no manifest, build log, observation date, or maintainer reproduction.
 - Keep expected observations separate from recorded observations.
 
+**Expected evidence:** A sentence-by-sentence status repair naming the evidence available for each claim, the missing material, and the status that remains.
+
 **Acceptance criteria:**
 
 - A blocked build has no Compile-Checked.
@@ -115,6 +117,8 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - Do not guess GPU model, compute capability, driver, Toolkit patch, or measurement method.
 - Cover correctness and performance fields, but leave result unobserved.
 - Apply only O03's Supported Environment and GPU Capability Tier definitions.
+
+**Expected evidence:** A missing-field checklist, two repaired support and tier conclusions, and a note that isolates the method-free performance text as unreviewed raw input.
 
 **Acceptance criteria:**
 

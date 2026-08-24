@@ -16,6 +16,7 @@ const allowedRootEntries = new Set([
   'CONTENT_LICENSES.md',
   'CONTRIBUTING.md',
   'DEPENDENCY_REVIEW.md',
+  'DEPLOYMENT.md',
   'examples',
   'LICENSE',
   'LICENSE-CONTENT',
@@ -28,12 +29,14 @@ const allowedRootEntries = new Set([
   'package-lock.json',
   'package.json',
   'playwright.config.ts',
+  'playwright.release.config.ts',
   'public',
   'scripts',
   'src',
   'tests',
   'tsconfig.json',
   'vitest.config.ts',
+  'wrangler.jsonc',
 ]);
 const allowedGithubFiles = new Set([
   '.github/ISSUE_TEMPLATE/config.yml',

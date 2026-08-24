@@ -2,6 +2,7 @@
 import { expect, test } from '@playwright/test';
 
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
+import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 
 const routes = [
   '/',
@@ -45,11 +46,7 @@ const routes = [
 ];
 
 test('all published routes load without browser errors', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
-  });
-  page.on('pageerror', (error) => errors.push(error.message));
+  const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -87,32 +84,18 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
   for (const scenario of [
-    { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/' },
-    { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/' },
-    { route: '/', button: /搜索/, query: '内存事务', localePrefix: '/' },
-    { route: '/', button: /搜索/, query: '第一个 CUDA kernel', localePrefix: '/' },
-    { route: '/', button: /搜索/, query: '运行并验证向量加法', localePrefix: '/' },
-    { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/' },
-    { route: '/en/', button: /Search/, query: 'Evidence Status', localePrefix: '/en/' },
-    { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/' },
-    { route: '/en/', button: /Search/, query: 'first CUDA kernel', localePrefix: '/en/' },
-    { route: '/en/', button: /Search/, query: 'Run and Verify Vector Addition', localePrefix: '/en/' },
+    { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/'] },
+    { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/', expectedHrefs: ['/start/environment-manifest/'] },
+    { route: '/', button: /搜索/, query: '内存事务', localePrefix: '/', expectedHrefs: ['/visuals/kernel-journey/'] },
+    { route: '/', button: /搜索/, query: '第一个 CUDA kernel', localePrefix: '/', expectedHrefs: ['/foundations/first-cuda-kernel/'] },
+    { route: '/', button: /搜索/, query: '运行并验证向量加法', localePrefix: '/', expectedHrefs: ['/labs/vector-addition/'] },
+    { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
+    { route: '/en/', button: /Search/, query: 'Evidence Status', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/', '/en/start/evidence-status/exercises/', '/en/practice/'] },
+    { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/', expectedHrefs: ['/en/visuals/indexing/'] },
+    { route: '/en/', button: /Search/, query: 'first CUDA kernel', localePrefix: '/en/', expectedHrefs: ['/en/foundations/first-cuda-kernel/'] },
+    { route: '/en/', button: /Search/, query: 'Run and Verify Vector Addition', localePrefix: '/en/', expectedHrefs: ['/en/labs/vector-addition/'] },
   ]) {
-    await page.goto(scenario.route);
-    await page.getByRole('button', { name: scenario.button }).first().click();
-    const dialog = page.getByRole('dialog', { name: scenario.button });
-    const input = dialog.getByRole('textbox', { name: scenario.button });
-    await input.fill(scenario.query);
-    const resultLinks = dialog.locator('a[href]');
-    await expect(resultLinks.first()).toBeVisible();
-    const hrefs = await resultLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
-    expect(hrefs.length).toBeGreaterThan(0);
-    expect(
-      hrefs.every((href) =>
-        scenario.localePrefix === '/en/' ? href.startsWith('/en/') : !href.startsWith('/en/'),
-      ),
-    ).toBe(true);
-    await page.keyboard.press('Escape');
+    await expectRankedSearchResult(page, scenario);
   }
 });
 

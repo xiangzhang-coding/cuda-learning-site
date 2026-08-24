@@ -29,6 +29,10 @@ The independent `CUDA Compile Evidence` workflow preprocesses, compiles, links, 
 
 The build is fully static. VIS01 and VIS02 are deterministic browser models with complete textual and static fallbacks; their state and timing grant no CUDA Evidence Status. Theme selection is the only learner preference retained across browser sessions. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
 
+## Deployment
+
+Cloudflare Workers Builds deploys the reviewed static output from `main` to <https://cuda-learning-site.hmzhangxiang.workers.dev>. The pinned Wrangler configuration contains only a Static Assets directory and no Worker application or runtime binding. Non-production builds upload versions for noncanonical Preview URLs; production and preview acceptance use the separate remote Playwright smoke gate. See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings, evidence boundaries, and rollback.
+
 ## Licensing
 
 Software and tooling files use Apache-2.0. Original learning content and visuals use CC BY 4.0. See [CONTENT_LICENSES.md](CONTENT_LICENSES.md), [LICENSE](LICENSE), [LICENSE-CONTENT](LICENSE-CONTENT), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for exact scope and upstream notices.

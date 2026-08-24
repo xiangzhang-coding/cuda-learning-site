@@ -57,6 +57,7 @@ describe('GitHub Actions quality contract', () => {
       'npm run test:unit',
       'npm run check',
       'npm run build',
+      'npm run quality:deployment',
       'npm run test:integration',
       'npm run quality:dist',
       'npm run test:e2e:chromium',
@@ -72,6 +73,18 @@ describe('GitHub Actions quality contract', () => {
     expect(workflow).toContain('ImageVersion');
     expect(workflow).toContain('RUNNER_ARCH');
     expect(workflow).toContain('Web quality does not grant CUDA evidence status');
+  });
+
+  it('fails CI on flaky browser behavior and retains reviewed cross-browser evidence', async () => {
+    const [config, workflow] = await Promise.all([
+      readProjectFile('playwright.config.ts'),
+      readProjectFile('.github/workflows/web-quality.yml'),
+    ]);
+
+    expect(config).toContain('failOnFlakyTests: Boolean(process.env.CI)');
+    expect(workflow).toMatch(
+      /name: Upload reviewed cross-browser evidence\s+if: \$\{\{ always\(\) && steps\.scan-cross-browser\.outcome == 'success' \}\}/,
+    );
   });
 });
 

@@ -202,9 +202,38 @@ describe('Exercises and Practice Bank contract', () => {
   it.each(['/practice/', '/en/practice/'])('publishes five complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
-    expect(text).toContain('PB-R0-001');
-    expect(text).toContain('PB-R0-002');
-    for (const entry of ['PB-R0-003', 'PB-R0-004', 'PB-R0-005']) expect(text).toContain(entry);
+    const entryIds = ['PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005'];
+    const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
+      entryIds.some((entryId) => heading.textContent?.includes(entryId)),
+    );
+
+    expect(entryHeadings).toHaveLength(entryIds.length);
+    for (const [index, entryId] of entryIds.entries()) {
+      const heading = entryHeadings[index];
+      expect(heading.textContent, route).toContain(entryId);
+
+      const sectionElements: Element[] = [];
+      for (
+        let element = heading.parentElement?.nextElementSibling ?? null;
+        element && !element.querySelector('h2');
+        element = element.nextElementSibling
+      ) {
+        sectionElements.push(element);
+      }
+      const sectionText = sectionElements.map((element) => element.textContent ?? '').join(' ').replace(/\s+/g, ' ');
+      const sectionLinks = sectionElements.flatMap((element) => [...element.querySelectorAll('a[href]')]);
+
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Prerequisite|先修条件/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Hardware gate|硬件门槛/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Constraints|约束/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Expected evidence|预期证据/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Acceptance criteria|验收条件/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Hint 1|提示 1/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Solution|解答/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Source basis|来源依据/);
+      expect(sectionLinks.some((link) => /\/(?:en\/)?(?:start|foundations)\//.test(link.getAttribute('href') ?? ''))).toBe(true);
+    }
+
     expect(text).not.toMatch(/EX01|LAB01/);
     expect(text).toMatch(/O02/);
     expect(text).toMatch(/O03/);

@@ -51,6 +51,10 @@ const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'o01',
     structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
+    resourceKind: 'learning-unit',
+    unitId: 'O01',
+    prerequisites: 'none',
+    relatedUnits: 'O02,O03',
     zh: '/start/using-the-learning-site/',
     en: '/en/start/using-the-learning-site/',
   },
@@ -164,6 +168,7 @@ const publicationPairs: readonly PublicationPair[] = [
     structure: 'purpose,project,correctness,build,compatibility,evidence,expected-observations,sources',
     resourceKind: 'runnable-example',
     unitId: 'EX02',
+    prerequisites: 'none',
     relatedUnits: 'O02,O03,F01,LAB02',
     exampleIds: 'EX02',
     canonicalExample: 'EX02',
@@ -207,6 +212,7 @@ const publicationPairs: readonly PublicationPair[] = [
     structure: 'purpose,model,controls,scheduling-boundary,static-sequence,evidence-boundary,sources',
     resourceKind: 'visual-explainer',
     unitId: 'VIS01',
+    prerequisites: 'none',
     relatedUnits: 'O01,O02,F01',
     hardwareGate: 'None: deterministic browser model; no CUDA-capable system required',
     sourceCount: '9',
@@ -219,6 +225,7 @@ const publicationPairs: readonly PublicationPair[] = [
     structure: 'purpose,model,dimensions,equations,bounds,static-examples,evidence-boundary,sources',
     resourceKind: 'visual-explainer',
     unitId: 'VIS02',
+    prerequisites: 'none',
     relatedUnits: 'O01,O02,F01',
     hardwareGate: 'None: deterministic browser model; no CUDA-capable system required',
     sourceCount: '7',
@@ -339,6 +346,45 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
+  });
+
+  it('publishes a closed, acyclic R0 prerequisite graph', async () => {
+    const expectedPrerequisites = new Map<string, readonly string[]>([
+      ['O01', []],
+      ['O02', ['O01']],
+      ['O03', ['O01']],
+      ['F01', ['O03']],
+      ['LAB02', ['O03', 'F01']],
+      ['EX02', []],
+      ['VIS01', []],
+      ['VIS02', []],
+    ]);
+    const publishedIds = new Set(publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : [])));
+    const graph = new Map<string, string[]>();
+
+    for (const pair of publicationPairs.filter(({ unitId }) => expectedPrerequisites.has(unitId ?? ''))) {
+      const document = await readRoute(pair.zh);
+      const rawPrerequisites = metadata(document, 'cuda:prerequisites');
+      const prerequisites = !rawPrerequisites || rawPrerequisites === 'none' ? [] : rawPrerequisites.split(',');
+
+      expect(prerequisites, pair.unitId).toEqual(expectedPrerequisites.get(pair.unitId ?? ''));
+      for (const prerequisite of prerequisites) expect(publishedIds, prerequisite).toContain(prerequisite);
+      graph.set(pair.unitId ?? '', prerequisites);
+    }
+
+    const visited = new Set<string>();
+    const active = new Set<string>();
+    const visit = (unitId: string) => {
+      expect(active, `cycle reaches ${unitId}`).not.toContain(unitId);
+      if (visited.has(unitId)) return;
+      active.add(unitId);
+      for (const prerequisite of graph.get(unitId) ?? []) visit(prerequisite);
+      active.delete(unitId);
+      visited.add(unitId);
+    };
+
+    for (const unitId of graph.keys()) visit(unitId);
+    expect(visited).toEqual(new Set(expectedPrerequisites.keys()));
   });
 });
 
