@@ -158,14 +158,22 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
         'nvcc --help',
         'nvcc --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o',
       ];
-  const expectedArtifacts = isExample ? example.build.artifacts : ['build/cxx23_probe.o'];
+  const expectedArtifacts = isExample
+    ? example.build.artifacts
+    : record?.result === 'pass' ? ['build/cxx23_probe.o'] : [];
 
   if (record?.['SPDX-License-Identifier'] !== 'Apache-2.0' || record?.schemaVersion !== 1) {
     errors.push('record schema and SPDX declaration are invalid');
   }
-  if (record?.result !== 'pass' || (!isExample && !isProbe)) errors.push('record subject or result is invalid');
+  const validResult = isExample
+    ? record?.result === 'pass'
+    : isProbe && ['pass', 'unsupported'].includes(record?.result);
+  if (!validResult) errors.push('record subject or result is invalid');
   if (isExample && record?.claim !== 'Compile-Checked') errors.push('EX02 record has an invalid claim');
   if (isProbe && record?.claim !== 'C++23-Dialect-Probe') errors.push('C++23 probe record has an invalid claim');
+  if (isProbe && record?.result === 'unsupported' && !record?.probeDiagnostic) {
+    errors.push('unsupported C++23 probe requires a diagnostic');
+  }
   if (!/^[0-9a-f]{40}$/.test(record?.sourceCommit ?? '')) errors.push('source commit is not a full Git SHA');
   if (record?.buildContractSha256 !== await hashCanonicalBuildContract(projectRoot, exampleId)) {
     errors.push('build contract hash does not match the canonical project');

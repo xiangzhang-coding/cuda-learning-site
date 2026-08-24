@@ -10,7 +10,7 @@ interface Props {
 }
 
 type EvidenceRecord = {
-  result: 'pass';
+  result: 'pass' | 'unsupported';
   claim: 'Compile-Checked' | 'C++23-Dialect-Probe';
   subject: 'EX02' | 'CUDA-13.3-CXX23-PROBE';
   sourceCommit: string;
@@ -61,6 +61,7 @@ const labels = locale === 'zh-CN'
       probe: '独立 C++23 probe',
       pending: '未授予 Compile-Checked',
       probePending: 'probe 尚未通过',
+      probeUnsupported: 'probe 已记录：当前环境不支持',
       noRecord: '尚无通过记录',
       record: '工作流记录',
     }
@@ -75,6 +76,7 @@ const labels = locale === 'zh-CN'
       probe: 'Separate C++23 probe',
       pending: 'Compile-Checked not granted',
       probePending: 'Probe has not passed',
+      probeUnsupported: 'Probe recorded: unsupported in this environment',
       noRecord: 'No passing record yet',
       record: 'Workflow record',
     };
@@ -99,12 +101,19 @@ const labels = locale === 'zh-CN'
         (kind === 'ex02' ? candidate.subject === exampleId : candidate.claim === 'C++23-Dialect-Probe'),
       );
       const passed = Boolean(record);
+      const status = kind === 'ex02'
+        ? (passed ? 'Compile-Checked' : labels.pending)
+        : record?.result === 'pass'
+          ? 'Probe passed'
+          : record?.result === 'unsupported'
+            ? labels.probeUnsupported
+            : labels.probePending;
       return (
-        <tr data-lane={lane.id} data-dialect={dialect} data-result={passed ? 'pass' : 'pending'}>
+        <tr data-lane={lane.id} data-dialect={dialect} data-result={record?.result ?? 'pending'}>
           <th scope="row">CUDA {lane.toolkit}<br /><small>{lane.operatingSystem}</small></th>
           <td><code>{dialect}</code></td>
           <td>{kind === 'ex02' ? labels.example : labels.probe}</td>
-          <td>{passed ? (kind === 'ex02' ? 'Compile-Checked' : 'Probe passed') : (kind === 'ex02' ? labels.pending : labels.probePending)}</td>
+          <td>{status}</td>
           <td>
             {record ? (
               <small>

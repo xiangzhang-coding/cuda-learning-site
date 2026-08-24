@@ -186,6 +186,46 @@ describe('canonical Runnable Example resolver', () => {
     const record = await passingEx02Record();
     await expect(validateCompileEvidenceRecord(projectRoot, 'EX02', record)).resolves.toEqual([]);
 
+    const example = await loadCanonicalExample(projectRoot, 'EX02');
+    const probeLane = example.compatibility.lanes[2];
+    const unsupportedProbe = {
+      ...record,
+      result: 'unsupported',
+      claim: 'C++23-Dialect-Probe',
+      subject: 'CUDA-13.3-CXX23-PROBE',
+      check: 'cuda-13-3-cxx23-probe',
+      container: {
+        ...record.container,
+        declaredReference: probeLane.image,
+        manifestDigest: probeLane.manifestDigest,
+        expectedAmd64Digest: probeLane.amd64Digest,
+        actualAmd64Digest: probeLane.amd64Digest,
+        actualRepoDigests: [`nvidia/cuda@${probeLane.manifestDigest}`],
+        operatingSystem: { id: 'ubuntu', versionId: '24.04', prettyName: 'Ubuntu 24.04.4 LTS' },
+      },
+      toolchain: {
+        ...record.toolchain,
+        toolkit: probeLane.toolkit,
+        hostCompiler: 'g++ (Ubuntu 13.3.0) 13.3.0',
+        nvcc: 'Cuda compilation tools, release 13.3, V13.3.73',
+        cuobjdump: 'cuobjdump 13.3.73',
+        dialect: 'c++23',
+      },
+      commands: [
+        'nvcc --help',
+        'nvcc --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o',
+      ],
+      artifacts: [],
+      hostReferenceExecuted: false,
+      runtimeEvidence: 'Runtime-Not-Applicable',
+      probeDiagnostic: "nvcc fatal   : Value 'c++23' is not defined for option 'std'",
+    };
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX02', unsupportedProbe)).resolves.toEqual([]);
+    const { probeDiagnostic: _, ...missingDiagnostic } = unsupportedProbe;
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX02', missingDiagnostic)).resolves.toContain(
+      'unsupported C++23 probe requires a diagnostic',
+    );
+
     const invalid = {
       ...record,
       'SPDX-License-Identifier': 'MIT',

@@ -110,25 +110,33 @@ const dockerEngine = run('docker', ['version', '--format', '{{.Server.Version}}'
 const dockerBuildx = run('docker', ['buildx', 'version']);
 
 const uid = typeof process.getuid === 'function' ? `${process.getuid()}:${process.getgid()}` : '1000:1000';
-run('docker', [
-  ...baseDockerArgs,
-  '--user',
-  uid,
-  '--env',
-  'HOME=/tmp',
-  '--volume',
-  `${projectRoot}:/workspace`,
-  '--workdir',
-  `/workspace/${example.root}`,
-  lane.image,
-  'bash',
-  'scripts/compile-check.sh',
-  args.dialect,
-  args.kind,
-  `/workspace/artifacts/cuda/${args.check}`,
-]);
+let compileResult = 'pass';
+try {
+  run('docker', [
+    ...baseDockerArgs,
+    '--user',
+    uid,
+    '--env',
+    'HOME=/tmp',
+    '--volume',
+    `${projectRoot}:/workspace`,
+    '--workdir',
+    `/workspace/${example.root}`,
+    lane.image,
+    'bash',
+    'scripts/compile-check.sh',
+    args.dialect,
+    args.kind,
+    `/workspace/artifacts/cuda/${args.check}`,
+  ]);
+} catch (error) {
+  if (args.kind !== 'cxx23-probe') throw error;
+  compileResult = 'unsupported';
+}
 
-const artifactPaths = args.kind === 'ex02' ? example.build.artifacts : ['build/cxx23_probe.o'];
+const artifactPaths = args.kind === 'ex02'
+  ? example.build.artifacts
+  : compileResult === 'pass' ? ['build/cxx23_probe.o'] : [];
 const sourceCommit = process.env.GITHUB_SHA || run('git', ['rev-parse', 'HEAD']);
 const workflowRun = process.env.GITHUB_RUN_ID && process.env.GITHUB_REPOSITORY
   ? `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
@@ -139,11 +147,16 @@ const commandValues = args.kind === 'ex02'
       'nvcc --help',
       'nvcc --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o',
     ];
+const probeDiagnostic = compileResult === 'unsupported'
+  ? (await readFile(path.join(resultRoot, 'compile.log'), 'utf8'))
+      .split(/\r?\n/)
+      .find((line) => /(?:fatal|error|unsupported)/i.test(line)) ?? 'C++23 compilation returned a nonzero status.'
+  : null;
 
 const record = {
   'SPDX-License-Identifier': 'Apache-2.0',
   schemaVersion: 1,
-  result: 'pass',
+  result: compileResult,
   claim: args.kind === 'ex02' ? 'Compile-Checked' : 'C++23-Dialect-Probe',
   subject: args.kind === 'ex02' ? 'EX02' : 'CUDA-13.3-CXX23-PROBE',
   check: args.check,
@@ -181,6 +194,7 @@ const record = {
   hostReferenceExecuted: args.kind === 'ex02',
   gpuExecutableExecuted: false,
   runtimeEvidence: args.kind === 'ex02' ? 'Pending Hardware Verification' : 'Runtime-Not-Applicable',
+  ...(probeDiagnostic ? { probeDiagnostic } : {}),
 };
 
 const recordErrors = await validateCompileEvidenceRecord(projectRoot, 'EX02', record);
