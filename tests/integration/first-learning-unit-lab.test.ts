@@ -70,6 +70,7 @@ describe('F01 first-kernel Learning Unit', () => {
 
     expect(figures.map((figure) => figure.getAttribute('data-canonical-range'))).toEqual(declared);
     expect(document.querySelector('a[href="https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition"]')).not.toBeNull();
+    expect(document.querySelector('a[href="https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip"]')).not.toBeNull();
 
     for (const figure of figures) {
       const range = figure.getAttribute('data-canonical-range') ?? '';

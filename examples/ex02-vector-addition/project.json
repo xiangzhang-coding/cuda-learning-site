@@ -5,6 +5,7 @@
   "title": "Vector addition",
   "root": "examples/ex02-vector-addition",
   "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

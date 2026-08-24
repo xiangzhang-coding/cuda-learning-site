@@ -30,12 +30,23 @@ async function fileFor(requestPath) {
 
 const server = createServer(async (request, response) => {
   const target = await fileFor(request.url ?? '/');
-  const file = target ?? path.join(root, '404.html');
+
+  if (!target) {
+    try {
+      const body = await readFile(path.join(root, '404.html'));
+      response.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+      response.end(body);
+    } catch {
+      response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      response.end('Static build output has no matching asset.');
+    }
+    return;
+  }
 
   try {
-    const body = await readFile(file);
-    response.writeHead(target ? 200 : 404, {
-      'Content-Type': contentTypes.get(path.extname(file)) ?? 'application/octet-stream',
+    const body = await readFile(target);
+    response.writeHead(200, {
+      'Content-Type': contentTypes.get(path.extname(target)) ?? 'application/octet-stream',
     });
     response.end(body);
   } catch {

@@ -74,6 +74,7 @@ for (const exampleId of new Set(declarations.map(({ example }) => example))) {
     if (new Set(page.ranges).size !== page.ranges.length) errors.push(`${relativePath} duplicates a canonical range`);
     if (!page.content.includes('import CanonicalCode')) errors.push(`${relativePath} does not import CanonicalCode`);
     if (!page.content.includes(example.sourceUrl)) errors.push(`${relativePath} does not link to the canonical project tree`);
+    if (!page.content.includes(example.downloadUrl)) errors.push(`${relativePath} does not link to the canonical project download`);
     if (/```(?:cuda|cpp|c\+\+)/i.test(page.content)) {
       errors.push(`${relativePath} contains a manually maintained CUDA/C++ code fence`);
     }

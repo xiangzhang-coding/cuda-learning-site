@@ -82,6 +82,8 @@ head:
 - 不能虚构 manifest、构建日志、观察日期或维护者复现。
 - 必须把预期观察和已记录观察分开。
 
+**预期证据：** 一条逐句修订的状态记录，明确每项声明已有的证据、仍缺的材料和保留的状态。
+
 **验收条件：**
 
 - blocked build 没有 Compile-Checked。
@@ -115,6 +117,8 @@ head:
 - 不猜 GPU 型号、compute capability、driver、Toolkit patch 或测量方法。
 - 正确性和性能字段都要覆盖，但 result 保持未观察。
 - 只按 O03 的 Supported Environment 和 GPU Capability Tier 定义判断。
+
+**预期证据：** 一份待补字段清单、两条修订后的支持/层级结论，以及把无方法性能文字隔离为未审核原始记录的说明。
 
 **验收条件：**
 

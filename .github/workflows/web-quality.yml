@@ -70,6 +70,9 @@ jobs:
       - name: Build static site and Pagefind indexes
         run: npm run build
 
+      - name: Validate the assets-only Cloudflare deployment configuration
+        run: npm run quality:deployment
+
       - name: Run Publication Pair, metadata, navigation, link, and integration checks
         run: npm run test:integration
 
@@ -189,7 +192,7 @@ jobs:
           done
 
       - name: Upload reviewed cross-browser evidence
-        if: ${{ failure() && steps.scan-cross-browser.outcome == 'success' }}
+        if: ${{ always() && steps.scan-cross-browser.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: cross-browser-evidence

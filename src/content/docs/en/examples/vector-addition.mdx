@@ -17,6 +17,7 @@ structure:
   - sources
 resourceKind: runnable-example
 unitId: EX02
+prerequisites: []
 relatedUnits:
   - O02
   - O03
@@ -122,6 +123,10 @@ head:
       content: EX02
   - tag: meta
     attrs:
+      name: 'cuda:prerequisites'
+      content: none
+  - tag: meta
+    attrs:
       name: 'cuda:related-units'
       content: 'O02,O03,F01,LAB02'
   - tag: meta
@@ -183,7 +188,7 @@ The project defines correctness before any measurement. No qualifying GPU run ex
 
 ## Get the canonical project
 
-[View or download the compile-checked EX02 project on GitHub](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition). `project.json` is the machine-readable contract, `README.md` gives standalone build instructions, and `src/`, `include/`, and `tests/` are the only implementation sources. Both locale pages read only the declared marker ranges shown below.
+[View the compile-checked EX02 project on GitHub](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition), or [download the source archive for that same compile-evidence commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip). After extraction, enter `examples/ex02-vector-addition/`. `project.json` is the machine-readable contract, `README.md` gives standalone build instructions, and `src/`, `include/`, and `tests/` are the only implementation sources. Both locale pages read only the declared marker ranges shown below.
 
 The bounds check allows a problem size that is not an exact multiple of the block size:
 

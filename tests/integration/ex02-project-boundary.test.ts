@@ -33,6 +33,11 @@ describe('EX02 standalone project boundary', () => {
     expect(example.evidence.compilation).toHaveLength(5);
     expect(example.evidence.recordedObservations).toEqual([]);
     expect(example.sourceUrl).toContain('d69f7131acff7f8b1dfcd780b494426b5948735b');
+    expect(example.downloadUrl).toBe(
+      'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip',
+    );
+    const sourceCommit = /\/tree\/([0-9a-f]{40})\//.exec(example.sourceUrl)?.[1];
+    expect(example.downloadUrl).toContain(`/archive/${sourceCommit}.zip`);
   });
 
   it('accepts five exact Compile-Checked records and one separate unsupported C++23 probe', async () => {

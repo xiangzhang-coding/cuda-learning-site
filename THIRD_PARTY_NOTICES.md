@@ -19,5 +19,6 @@ This project installs third-party packages to build and test the Learning Site. 
 | `@playwright/test` | 1.62.1 | Apache-2.0 | <https://github.com/microsoft/playwright> | Browser tests |
 | `@axe-core/playwright` | 4.13.0 | MPL-2.0 | <https://github.com/dequelabs/axe-core-npm> | Automated accessibility checks |
 | `@types/node` | 24.13.3 | MIT | <https://github.com/DefinitelyTyped/DefinitelyTyped> | Node.js type declarations |
+| `wrangler` | 4.125.0 | MIT OR Apache-2.0 | <https://github.com/cloudflare/workers-sdk/tree/wrangler%404.125.0/packages/wrangler> | Assets-only deployment validation and upload |
 
-No upstream source file, documentation passage, diagram, or sample code is copied or adapted into project-owned content in this release. Exact transitive versions, sources, integrity values, declared licenses, install scripts, and bundled flags are reviewed from the committed npm lockfile by the repository quality checks.
+The production output carries this notice plus the complete project license texts and the exact Astro, Starlight, and Pagefind license notices for interfaces bundled into the static site. No upstream source file, documentation passage, diagram, or sample code is copied or adapted into project-owned content in this release. Exact transitive versions, sources, integrity values, declared licenses, install scripts, and bundled flags are reviewed from the committed npm lockfile by the repository quality checks.

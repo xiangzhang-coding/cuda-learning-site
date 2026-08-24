@@ -14,6 +14,17 @@ structure:
   - workflow
   - boundaries
   - check
+resourceKind: learning-unit
+unitId: O01
+prerequisites: []
+relatedUnits:
+  - O02
+  - O03
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
 head:
   - tag: meta
     attrs:
@@ -31,6 +42,22 @@ head:
     attrs:
       name: 'cuda:structure'
       content: 'outcome,resource-types,published-route,themes,workflow,boundaries,check'
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O02,O03' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
 ---
 
 <a class="locale-pair" data-locale-counterpart href="/start/using-the-learning-site/" lang="zh-CN">阅读中文对应页</a>

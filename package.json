@@ -10,13 +10,14 @@
   },
   "packageManager": "npm@11.17.0",
   "scripts": {
-    "build": "astro build",
-    "build:release": "npm run quality:source && npm run quality:dependencies && npm run quality:licenses && npm run quality:canonical-imports && npm run check && npm run test:unit && npm run build && npm run test:integration && npm run quality:dist",
+    "build": "astro build && node scripts/prepare-release-output.mjs",
+    "build:release": "npm run quality:source && npm run quality:dependencies && npm run quality:licenses && npm run quality:canonical-imports && npm run check && npm run test:unit && npm run build && npm run quality:deployment && npm run test:integration && npm run quality:dist",
     "check": "astro check",
     "dev": "astro dev",
     "preview": "astro preview",
     "quality:artifacts": "node scripts/check-artifacts.mjs",
     "quality:canonical-imports": "node scripts/check-canonical-imports.mjs",
+    "quality:deployment": "wrangler deploy --dry-run --outdir .quality/wrangler-dry-run",
     "quality:dependencies": "node scripts/check-lockfile.mjs",
     "quality:dist": "node scripts/check-artifacts.mjs dist",
     "quality:licenses": "node scripts/check-file-licenses.mjs",
@@ -28,7 +29,10 @@
     "test:e2e:cross-browser": "playwright test --project=firefox --project=webkit --project=mobile-safari --grep-invert \"@accessibility|@visual\"",
     "test:e2e:visual": "playwright test --project=chromium --grep @visual",
     "test:integration": "vitest run tests/integration",
-    "test:unit": "vitest run tests/unit --coverage"
+    "test:release-smoke": "playwright test --config=playwright.release.config.ts",
+    "test:unit": "vitest run tests/unit --coverage",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler versions upload"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.2.4",
@@ -45,6 +49,7 @@
     "@vitest/coverage-v8": "4.1.11",
     "linkedom": "0.18.13",
     "typescript": "6.0.3",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "wrangler": "4.125.0"
   }
 }

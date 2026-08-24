@@ -72,6 +72,7 @@ const allowedLicenses = new Set([
   'ISC',
   'LGPL-3.0-or-later',
   'MIT',
+  'MIT OR Apache-2.0',
   'MPL-2.0',
   'Python-2.0',
 ]);
@@ -80,6 +81,9 @@ const allowedInstallScripts = new Set([
   'esbuild@0.28.2',
   'fsevents@2.3.2',
   'vite/node_modules/fsevents@2.3.3',
+  'workerd@1.20260820.1',
+  'wrangler/node_modules/esbuild@0.28.1',
+  'wrangler/node_modules/fsevents@2.3.3',
 ]);
 
 function normalized(relativePath) {
