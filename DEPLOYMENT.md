@@ -38,6 +38,15 @@ RELEASE_KIND="production" \
 npm run test:release-smoke
 ```
 
+If the maintainer network cannot reach `workers.dev`, dispatch the same gate on an independent GitHub-hosted runner. This workflow is smoke-only and has no Cloudflare credential or deploy command:
+
+```sh
+gh workflow run release-smoke.yml --ref main \
+  -f base_url="https://cuda-learning-site.hmzhangxiang.workers.dev" \
+  -f release_kind="production" \
+  -f source_commit="<40-character-main-commit>"
+```
+
 For a Preview URL, use that public version or branch URL as `RELEASE_BASE_URL` and set `RELEASE_KIND="preview"`. The gate checks source identity, both locales, navigation, direct locale switching, relevant bilingual search, all themes and persistence, keyboard flow, reduced motion, mobile reflow, print and no-script Visual Explainer fallbacks, the immutable EX02 download, legal notices, 404 behavior, canonical metadata, and browser/network errors.
 
 After smoke passes, record the Git commit, GitHub check runs, Cloudflare build UUID, version ID, deployment ID, production URL, Preview URL, and smoke result in the release issue. Scan retained smoke reports before publishing them.

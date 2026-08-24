@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Release Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Exact production or Cloudflare Preview URL origin
+        required: true
+        type: string
+      release_kind:
+        description: Remote release surface
+        required: true
+        type: choice
+        options:
+          - preview
+          - production
+      source_commit:
+        description: Exact 40-character commit recorded by the deployed release
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-smoke-${{ inputs.release_kind }}-${{ inputs.source_commit }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  NODE_VERSION: 24.19.0
+  RELEASE_BASE_URL: ${{ inputs.base_url }}
+  RELEASE_KIND: ${{ inputs.release_kind }}
+  RELEASE_SOURCE_COMMIT: ${{ inputs.source_commit }}
+  PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/release-smoke-results.json
+
+jobs:
+  release-smoke:
+    name: release-smoke-${{ inputs.release_kind }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the trusted main smoke harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install reviewed dependency tree without lifecycle scripts
+        run: npm ci --ignore-scripts
+
+      - name: Install pinned Chromium and host dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run strict remote release smoke
+        run: npm run test:release-smoke -- --reporter=list,json
+
+      - name: Scan release reports before retention
+        id: scan-release
+        if: ${{ !cancelled() }}
+        run: |
+          for target in test-results playwright-report; do
+            if [ -d "$target" ]; then node scripts/check-artifacts.mjs "$target"; fi
+          done
+
+      - name: Upload reviewed release evidence
+        if: ${{ always() && steps.scan-release.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-smoke-${{ inputs.release_kind }}-${{ inputs.source_commit }}
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 30

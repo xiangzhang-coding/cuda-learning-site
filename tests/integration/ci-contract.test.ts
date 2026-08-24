@@ -9,6 +9,12 @@ async function readProjectFile(relativePath: string) {
   return readFile(path.join(projectRoot, relativePath), 'utf8');
 }
 
+function expectExactActionPins(workflow: string, pins: readonly string[]) {
+  const actionPins = [...workflow.matchAll(/uses:\s+actions\/[^@\s]+@([0-9a-f]{40})/g)].map((match) => match[1]);
+  expect(new Set(actionPins)).toEqual(new Set(pins));
+  expect(workflow).not.toMatch(/uses:\s+[^\s]+@(?![0-9a-f]{40}(?:\s|$))/);
+}
+
 describe('GitHub Actions quality contract', () => {
   it('uses safe triggers, least privilege, exact action SHAs, and the pinned runner', async () => {
     const workflow = await readProjectFile('.github/workflows/web-quality.yml');
@@ -21,16 +27,12 @@ describe('GitHub Actions quality contract', () => {
     expect(workflow).toMatch(/permissions:\s*\n\s+contents: read/);
     expect(workflow).toContain('runs-on: ubuntu-24.04');
 
-    const actionPins = [...workflow.matchAll(/uses:\s+actions\/[^@\s]+@([0-9a-f]{40})/g)].map((match) => match[1]);
-    expect(new Set(actionPins)).toEqual(
-      new Set([
-        '3d3c42e5aac5ba805825da76410c181273ba90b1',
-        '820762786026740c76f36085b0efc47a31fe5020',
-        '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a',
-        '3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
-      ]),
-    );
-    expect(workflow).not.toMatch(/uses:\s+[^\s]+@(?![0-9a-f]{40}(?:\s|$))/);
+    expectExactActionPins(workflow, [
+      '3d3c42e5aac5ba805825da76410c181273ba90b1',
+      '820762786026740c76f36085b0efc47a31fe5020',
+      '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a',
+      '3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
+    ]);
     expect(workflow.match(/persist-credentials: false/g)).toHaveLength(5);
   });
 
@@ -85,6 +87,30 @@ describe('GitHub Actions quality contract', () => {
     expect(workflow).toMatch(
       /name: Upload reviewed cross-browser evidence\s+if: \$\{\{ always\(\) && steps\.scan-cross-browser\.outcome == 'success' \}\}/,
     );
+  });
+
+  it('provides an owner-dispatched remote release smoke gate without becoming a deploy authority', async () => {
+    const workflow = await readProjectFile('.github/workflows/release-smoke.yml');
+
+    expect(workflow).toContain('name: Release Smoke');
+    expect(workflow).toContain('workflow_dispatch:');
+    for (const input of ['base_url:', 'release_kind:', 'source_commit:']) expect(workflow).toContain(input);
+    expect(workflow).toMatch(/permissions:\s*\n\s+contents: read/);
+    expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
+    expect(workflow).toContain('persist-credentials: false');
+    expect(workflow).not.toContain('ref: ${{ inputs.source_commit }}');
+    expect(workflow).toContain('npm ci --ignore-scripts');
+    expect(workflow).toContain('npx playwright install --with-deps chromium');
+    expect(workflow).toContain('npm run test:release-smoke');
+    expect(workflow).toContain('node scripts/check-artifacts.mjs');
+    expect(workflow).toMatch(/if: \$\{\{ always\(\) && steps\.scan-release\.outcome == 'success' \}\}/);
+    expect(workflow).not.toMatch(/wrangler (?:deploy|versions upload)|CLOUDFLARE_API_TOKEN|pull_request_target/);
+
+    expectExactActionPins(workflow, [
+      '3d3c42e5aac5ba805825da76410c181273ba90b1',
+      '820762786026740c76f36085b0efc47a31fe5020',
+      '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a',
+    ]);
   });
 });
 
