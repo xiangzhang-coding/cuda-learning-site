@@ -21,6 +21,8 @@ const criticalRoutes = [
   '/en/start/environment-manifest/exercises/',
   '/start/environment-manifest/solutions/',
   '/en/start/environment-manifest/solutions/',
+  '/examples/vector-addition/',
+  '/en/examples/vector-addition/',
   '/practice/',
   '/en/practice/',
   '/glossary/',

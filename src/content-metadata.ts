@@ -2,7 +2,7 @@
 import { z } from 'astro/zod';
 
 export const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-export const curriculumIdSchema = z.string().regex(/^(?:O\d{2}(?:-[A-Z]+)?|PB-R0(?:-\d{3})?)$/);
+export const curriculumIdSchema = z.string().regex(/^(?:O\d{2}(?:-[A-Z]+)?|EX\d{2}|PB-R0(?:-\d{3})?)$/);
 
 export const compilationEvidenceStatusSchema = z.enum(['Compile-Checked']);
 export const runtimeEvidenceStatusSchema = z.enum([

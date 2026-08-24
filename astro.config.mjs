@@ -38,6 +38,11 @@ export default defineConfig({
             { slug: 'start/environment-manifest' },
           ],
         },
+        {
+          label: '可运行示例',
+          translations: { en: 'Runnable Examples' },
+          items: [{ slug: 'examples/vector-addition' }],
+        },
         { slug: 'practice' },
         { slug: 'glossary' },
         { slug: 'sources-and-versions' },

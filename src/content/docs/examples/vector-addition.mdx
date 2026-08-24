@@ -1,0 +1,261 @@
+---
+title: 'EX02：向量加法可运行示例'
+description: 获取一个共享 C++17 实现，理解其正确性边界，并查看三条 Toolkit Lane 的独立编译证据。
+pairId: ex02
+counterpart: /en/examples/vector-addition/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - correctness
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX02
+relatedUnits:
+  - O02
+  - O03
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - kernel
+  - error-checking
+  - cpu-reference
+hardwareGate: 'Build: x86-64 CPU runner; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A qualifying GPU run should match the CPU reference within the declared tolerances.
+    - Changing the element count should change grid size while the bounds check protects the final partial block.
+  recordedObservations: []
+sources:
+  - title: 'CUDA 11.8 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 13.3 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 11.8 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 12.9.2 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA 13.3 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Binary Utilities - cuobjdump'
+    url: 'https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+  - title: 'NVIDIA CUDA 11.8.0 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-24'
+  - title: 'NVIDIA CUDA 12.9.2 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-24'
+  - title: 'NVIDIA CUDA 13.3.1 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-24'
+  - title: 'GitHub Actions workflow syntax'
+    url: 'https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax'
+    version: 'Current on 2026-08-24'
+    platform: 'GitHub-hosted ubuntu-24.04 runner'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex02
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-24'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,correctness,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX02
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O02,O03'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX02
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX02
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'kernel,error-checking,cpu-reference'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU runner; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '2 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '11'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+import ExampleEvidence from '../../../components/ExampleEvidence.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/vector-addition/" lang="en">Read the English counterpart</a>
+
+EX02 是一个独立、原创的向量加法可运行示例（Runnable Example）。它把网格索引、边界判断、显式内存生命周期、CUDA 错误检查和 CPU 正确性参考放在一个小项目里。它不是实验（Lab），也不在网页中执行 CUDA。
+
+## 这个项目解决什么
+
+学习者只需要面对一份 canonical C++17 实现。CUDA 11.8.0、12.9.2 和 13.3.1 的工具包通道（Toolkit Lane）检查都指向同一个源码树；12.9.2 和 13.3.1 还用 C++20 重新编译同一份源码，而不是维护另一份实现。
+
+项目先规定正确性，再谈任何测量。当前没有合格 GPU 运行，因此没有记录运行输出或性能数字。
+
+## 获取 canonical project
+
+[在 GitHub 查看或下载完整 EX02 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex02-vector-addition)。`project.json` 是机器可读契约；`README.md` 给出独立构建步骤；`src/`、`include/` 和 `tests/` 是唯一实现来源。两个语言页面都只从下面声明的 marker range 读取代码。
+
+边界判断使问题规模不必是 block 大小的整数倍：
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+所有 CUDA Runtime 调用、kernel launch 和同步边界都进入同一错误检查路径：
+
+<CanonicalCode exampleId="EX02" range="error-checking" />
+
+## 正确性边界
+
+CPU 参考和容差没有 CUDA 依赖，可以在普通 C++ 编译器下单独测试：
+
+<CanonicalCode exampleId="EX02" range="cpu-reference" />
+
+- 绝对容差：`1e-5`。
+- 相对容差：`1e-5`。
+- 默认规模：`1,048,576` 个 `float` 元素。
+- 可选规模：`1..134,217,728`；三份 device vector 在最大规模约占 1.5 GiB，低于 8 GB 课程边界。
+- `make host-test` 只运行 CPU reference 和 tolerance 验收；它不能证明 GPU kernel 正确。
+
+真正的 GPU 运行还必须经过 `cudaMalloc`、两次 host-to-device copy、launch error、`cudaDeviceSynchronize`、device-to-host copy、CPU 比较和三次 `cudaFree`。任何失败都会返回非零状态。
+
+## 构建契约
+
+在支持的原生 Linux 环境中，从项目目录执行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+前四步依次产生 `build/vector_add.ii`、`build/vector_add.o` 和 `build/ex02-vector-addition`，然后用 `cuobjdump` 确认 native `sm_75` cubin 和来自 `compute_75` 的 forward-compatible PTX。项目没有 relocatable device code，所以不增加虚假的独立 device-link 阶段。
+
+CPU-only CI **绝不运行** `build/ex02-vector-addition`。学习者之后在满足条件的外部环境中运行它，也必须先记录完整环境清单（Environment Manifest）；构建通过不能替代 GPU 正确性。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | compute capability 7.5 或更新；问题规模适配 8 GB |
+| 编译目标 | `sm_75` cubin + `compute_75` PTX |
+| 共享实现 | 显式 C++17；12.9.2/13.3.1 也检查同一源码的 C++20 编译 |
+| C++23 | 只在 13.3.1 做独立 dialect probe，不给 EX02 授予 C++23 编译声明 |
+
+没有使用 `--allow-unsupported-compiler`。镜像 tag 和 digest 只是输入；实际 OS、host compiler、NVCC 和 pulled image identity 必须由每次结果记录。
+
+## 编译与运行证据
+
+下表由 canonical manifest 和已提交的 sanitized workflow record 构建。只有完整通过 preprocess、compile、link、inspect 和 host-only test 的 EX02 行才能显示编译已检查（Compile-Checked）。C++23 probe 不是 EX02 的 Compile-Checked。所有 GPU 运行仍是待硬件验证（Pending Hardware Verification）。
+
+<ExampleEvidence exampleId="EX02" locale="zh-CN" />
+
+网页构建、host-only test、镜像存在、跳过或失败的 workflow 都不会授予 CUDA Evidence Status。若 registry、runner 或 workflow 阻塞，issue 记录 blocker，但对应行保持未通过。
+
+## 预期观察，不是运行记录
+
+以下内容是未来合格运行需要核对的**预期**，不是本页观察到的输出：
+
+1. CUDA 结果应在绝对与相对容差内匹配独立 CPU reference。
+2. 改变元素数量时，grid 大小应随之变化；最后一个不完整 block 仍由 `index < element_count` 保护。
+
+当前已记录运行观察为空，没有 Reference Environment，也没有性能结论。
+
+## 来源与复核
+
+当前 Context7 `/websites/nvidia_cuda` 用于发现和交叉核对 Runtime error boundary、NVCC phases、target 以及 `cuobjdump`；GitHub Actions 使用 `/websites/github_en_actions`。精确结论仍以 CUDA 11.8.0、12.9.2 的归档文档、13.3.1 当前 owner 文档和三个 NVIDIA Docker Hub tag API 为准。
+
+- [CUDA 11.8.0 NVCC supported phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 NVCC](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3 NVCC](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
+- [CUDA Binary Utilities](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html)
+- [GitHub Actions workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
+
+**事实核查日期：2026-08-24。** 项目源码与文字均为原创，没有复制 NVIDIA sample listing、私有资料、运行输出或性能结果。

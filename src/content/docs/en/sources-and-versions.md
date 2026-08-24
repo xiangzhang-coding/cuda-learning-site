@@ -1,6 +1,6 @@
 ---
 title: Sources and Version Record
-description: Publishing interfaces, CUDA version facts, content sources, and review dates for the current Orientation route.
+description: Publishing interfaces, CUDA version facts, content sources, and review dates for the current public routes and EX02.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
 factCheckDate: '2026-08-24'
@@ -32,11 +32,11 @@ head:
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing and theme interfaces behind CUDA Learning Site and the owner sources for O02/O03 CUDA facts. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
+This record names the exact publishing and theme interfaces behind CUDA Learning Site and the owner sources for O02/O03/EX02 CUDA facts. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers Home, O01, O02, O03, their Exercises and solutions, the Practice Bank, Glossary, three visual themes, and the static publishing shell. Every link below was reopened on **2026-08-24**. Website builds use Node.js 24.19.0 and npm 11.17.0.
+This page covers Home, O01, O02, O03, their Exercises and solutions, EX02, the Practice Bank, Glossary, three visual themes, and the static publishing shell. Every link below was reopened on **2026-08-24**. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Verified publishing interfaces
 
@@ -61,15 +61,15 @@ The current `/websites/nvidia_cuda` Context7 index supported discovery and cross
 | CUDA 13.3 Lane sources | Toolkit 13.3.1; Ubuntu 24.04 x86-64 | Latest production identity; NVCC 13.3.73; paired Linux driver 610.43.02; 13.x floor R580/`>=580`; C++17/C++20 plus a separate C++23 probe | [Toolkit archive](https://developer.nvidia.com/cuda-toolkit-archive), [13.3 release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html), [13.3 Linux guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#supported-c-dialects), [13.3 NVCC `--std`](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std) |
 | Compilation and running phases | NVCC 13.3.1; Linux/Windows | `--compile`, PTX/CUBIN generation, and `--run` are separate phases; a build does not prove GPU execution | [NVCC supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases) |
 | compute capability | CUDA Programming Guide 13.3.1; CUDA-capable GPUs | Feature and technical-limit tables are organized by compute capability; model mapping is queried separately | [Compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) |
-| Container identities | `11.8.0-devel-ubuntu22.04`, `12.9.2-devel-ubuntu24.04`, `13.3.1-devel-ubuntu24.04`; amd64/arm64 | Tag existence and manifest digest; future Lane input only, never Compile-Checked | [11.8.0 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04), [12.9.2 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04), [13.3.1 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04) |
+| Container identities | `11.8.0-devel-ubuntu22.04`, `12.9.2-devel-ubuntu24.04`, `13.3.1-devel-ubuntu24.04`; amd64/arm64 | Tags, manifest digests, and current amd64 child digests; they are EX02 Lane inputs and grant no Compile-Checked status by themselves | [11.8.0 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04), [12.9.2 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04), [13.3.1 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04) |
 
-Toolkit components have been independently versioned since CUDA 11, so Toolkit, NVCC, a component such as cuBLAS, paired driver, and compatibility floor cannot collapse into one “CUDA version.” The CUDA 13.3.1 Linux guide lists C++23 while the same-version NVCC `--std` reference still stops at C++20. The discrepancy remains a separate exact-environment probe and is not presented as passing evidence.
+Toolkit components have been independently versioned since CUDA 11, so Toolkit, NVCC, a component such as cuBLAS, paired driver, and compatibility floor cannot collapse into one “CUDA version.” The Runtime API page under `archive/12.9.2` labels itself v12.9.1. The site preserves that documentation-label discrepancy and uses compilation in the exact 12.9.2 image to check EX02 interfaces without inferring unexecuted runtime behavior. The CUDA 13.3.1 Linux guide lists C++23 while the same-version NVCC `--std` reference still stops at C++20. The discrepancy remains a separate exact-environment probe and is not presented as passing before that probe succeeds.
 
 Native Linux as the only Supported Environment, the two GPU Capability Tier gates, and the Reference Environment declaration criteria are public project policy. NVIDIA sources support underlying version and compute-capability facts but do not make the site's support commitment.
 
 ## Content and asset sources
 
-- Home, O01, O02, O03, Exercises, solutions, Practice Bank entries, term definitions, and all three CSS grid/trace textures and theme-control marks are original project work under **CC BY 4.0** for prose and **Apache-2.0** for styles and tooling.
+- Home, O01, O02, O03, the EX02 page, Exercises, solutions, Practice Bank entries, term definitions, and all three CSS grid/trace textures and theme-control marks are original project work under **CC BY 4.0** for prose and **Apache-2.0** for code, styles, and tooling.
 - This release contains no adapted diagram, copied sample code, external font, or third-party image.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface verification. Public prose summarizes and paraphrases; it does not mirror owner documentation.

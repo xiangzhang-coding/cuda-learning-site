@@ -1,0 +1,107 @@
+# SPDX-License-Identifier: Apache-2.0
+name: CUDA Compile Evidence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cuda-compile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24.19.0
+
+jobs:
+  cuda-compile:
+    name: ${{ matrix.lane }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: cuda-11-8-cxx17
+            toolkit_lane: cuda-11.8
+            dialect: c++17
+            kind: ex02
+            image: nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f
+          - lane: cuda-12-9-cxx17
+            toolkit_lane: cuda-12.9
+            dialect: c++17
+            kind: ex02
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: cuda-12-9-cxx20
+            toolkit_lane: cuda-12.9
+            dialect: c++20
+            kind: ex02
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: cuda-13-3-cxx17
+            toolkit_lane: cuda-13.3
+            dialect: c++17
+            kind: ex02
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+          - lane: cuda-13-3-cxx20
+            toolkit_lane: cuda-13.3
+            dialect: c++20
+            kind: ex02
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+          - lane: cuda-13-3-cxx23-probe
+            toolkit_lane: cuda-13.3
+            dialect: c++23
+            kind: cxx23-probe
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+    steps:
+      - name: Check out canonical public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up exact Node.js for the evidence recorder
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Record UTC verification date
+        run: echo "VERIFICATION_DATE=$(date -u +%F)" >> "$GITHUB_ENV"
+
+      - name: Preprocess, compile, link, inspect, and test the host boundary
+        run: >-
+          node scripts/run-cuda-compile.mjs
+          --check "${{ matrix.lane }}"
+          --toolkit-lane "${{ matrix.toolkit_lane }}"
+          --dialect "${{ matrix.dialect }}"
+          --kind "${{ matrix.kind }}"
+          --image "${{ matrix.image }}"
+
+      - name: Scan the sanitized compile record and logs
+        run: node scripts/check-artifacts.mjs ".quality/cuda/${{ matrix.lane }}"
+
+      - name: Upload sanitized compile evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuda-compile-${{ matrix.lane }}
+          path: .quality/cuda/${{ matrix.lane }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+
+  cuda-compile-gate:
+    name: cuda-compile-gate
+    if: ${{ always() }}
+    needs: cuda-compile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every declared CUDA compile boundary
+        env:
+          CUDA_RESULT: ${{ needs.cuda-compile.result }}
+        run: |
+          if [ "$CUDA_RESULT" != "success" ]; then exit 1; fi
+          echo "Compile evidence does not grant CUDA runtime evidence."

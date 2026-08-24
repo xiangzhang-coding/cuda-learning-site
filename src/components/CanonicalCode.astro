@@ -1,0 +1,32 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import path from 'node:path';
+
+import { loadCanonicalExample, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
+
+interface Props {
+  exampleId: string;
+  range: string;
+}
+
+const { exampleId, range } = Astro.props;
+const projectRoot = path.resolve(process.cwd());
+const [example, excerpt] = await Promise.all([
+  loadCanonicalExample(projectRoot, exampleId),
+  readCanonicalRange(projectRoot, exampleId, range),
+]);
+const sourceUrl = `${example.sourceUrl.replace('/tree/', '/blob/')}/${excerpt.file}#L${excerpt.startLine}-L${excerpt.endLine}`;
+---
+
+<figure
+  class="canonical-code"
+  data-canonical-example={exampleId}
+  data-canonical-range={range}
+  data-canonical-file={excerpt.file}
+  data-canonical-lines={`${excerpt.startLine}-${excerpt.endLine}`}
+>
+  <figcaption>
+    <a href={sourceUrl}><code>{exampleId} · {excerpt.file}:{excerpt.startLine}-{excerpt.endLine}</code></a>
+  </figcaption>
+  <pre tabindex="0"><code class={`language-${excerpt.language}`}>{excerpt.code}</code></pre>
+</figure>

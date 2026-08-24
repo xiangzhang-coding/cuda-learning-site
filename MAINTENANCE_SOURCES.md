@@ -3,7 +3,7 @@
 # Maintenance Source Record
 
 - Review date: 2026-08-24
-- Scope: public repository baseline, three-theme visual foundation, web quality CI, and O02/O03 evidence/environment contract
+- Scope: public repository baseline, three-theme visual foundation, web quality CI, O02/O03 evidence/environment contract, and canonical EX02 compile evidence
 
 Context7 was used for current interface discovery. Exact package manifests, tagged owner source, action tags/commits, and versioned owner documentation govern the selected versions when a current Context7 index lags the selected patch.
 
@@ -19,7 +19,7 @@ Context7 was used for current interface discovery. Exact package manifests, tagg
 
 ## CUDA teaching coordinates
 
-These are source coordinates and planned evidence targets, not build or runtime observations. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane.
+These are the source coordinates and declared evidence targets for EX02. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane. A tag or reviewed source does not grant Compile-Checked without a passing workflow record.
 
 | Interface | Exact coordinate | Owner sources reviewed |
 | --- | --- | --- |

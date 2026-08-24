@@ -377,6 +377,11 @@ body {
   background: var(--sl-color-bg-inline-code);
 }
 
+.sl-markdown-content .expressive-code pre {
+  border-color: var(--ec-brdCol);
+  background: var(--ec-codeBg);
+}
+
 :root[data-learning-theme='profiler-dark'] .sl-markdown-content :where(pre, code),
 :root[data-learning-theme='profiler-dark'] .signal-kicker,
 :root[data-learning-theme='profiler-dark'] .route-card span {
