@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
+const siteOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -64,6 +65,47 @@ describe('Publication Pairs', () => {
     expect(metadata(document, 'cuda:fact-check-date')).toBe('2026-08-24');
     expect(metadata(document, 'cuda:license')).toBe('CC-BY-4.0');
     expect(metadata(document, 'cuda:structure')).toBe(structure);
+    expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(`${siteOrigin}${route}`);
+
+    const alternateLinks = new Map(
+      [...document.querySelectorAll('link[rel="alternate"][hreflang]')].map((link) => [
+        link.getAttribute('hreflang'),
+        link.getAttribute('href'),
+      ]),
+    );
+    const pair = publicationPairs.find((candidate) => candidate.pairId === pairId);
+    expect(alternateLinks.get('zh-CN')).toBe(`${siteOrigin}${pair?.zh}`);
+    expect(alternateLinks.get('en')).toBe(`${siteOrigin}${pair?.en}`);
+    expect(alternateLinks.get('x-default')).toBe(`${siteOrigin}${pair?.zh}`);
+  });
+
+  it('discovers every source and built page as a complete pair', async () => {
+    const sourceFiles = (await readdir(path.join(projectRoot, 'src/content/docs'), { recursive: true }))
+      .map((file) => file.split(path.sep).join('/'))
+      .filter((file) => /\.(?:md|mdx)$/.test(file));
+    const rootFiles = sourceFiles.filter((file) => !file.startsWith('en/'));
+    const englishFiles = sourceFiles.filter((file) => file.startsWith('en/')).map((file) => file.slice(3));
+
+    expect(new Set(englishFiles)).toEqual(new Set(rootFiles));
+
+    const sourceRoutes = new Set(
+      sourceFiles.map((file) => {
+        const stem = file.replace(/\.(?:md|mdx)$/, '').replace(/(?:^|\/)index$/, '');
+        return stem ? `/${stem}/` : '/';
+      }),
+    );
+    const builtRoutes = new Set(
+      (await readdir(path.join(projectRoot, 'dist'), { recursive: true }))
+        .map((file) => file.split(path.sep).join('/'))
+        .filter((file) => file.endsWith('.html'))
+        .map((file) => {
+          const stem = file.replace(/(?:^|\/)index\.html$/, '').replace(/\.html$/, '');
+          return stem ? `/${stem}/` : '/';
+        }),
+    );
+
+    expect(builtRoutes).toEqual(sourceRoutes);
+    expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
   });
 });
 
@@ -98,6 +140,38 @@ describe('published navigation', () => {
         .map((href) => href.split('#')[0]);
 
       for (const href of links) expect(publishedRoutes, `${route} links to ${href}`).toContain(href);
+    }
+  });
+
+  it('uses valid HTTPS URLs for every external content link', async () => {
+    for (const route of publicationPairs.flatMap(({ zh, en }) => [zh, en])) {
+      const document = await readRoute(route);
+      const externalLinks = [...document.querySelectorAll('a[href]')]
+        .map((link) => link.getAttribute('href'))
+        .filter((href): href is string => Boolean(href && !href.startsWith('/') && !href.startsWith('#')));
+
+      for (const href of externalLinks) {
+        const url = new URL(href);
+        expect(url.protocol, href).toBe('https:');
+        expect(url.hostname, href).not.toMatch(/^(?:localhost|127\.0\.0\.1)$/);
+      }
+    }
+  });
+
+  it('resolves every built page asset and metadata link', async () => {
+    for (const route of publicationPairs.flatMap(({ zh, en }) => [zh, en])) {
+      const document = await readRoute(route);
+      const assetLinks = [
+        ...document.querySelectorAll('script[src], link[href]'),
+      ]
+        .map((element) => element.getAttribute('src') ?? element.getAttribute('href'))
+        .filter((href): href is string => Boolean(href?.startsWith('/')))
+        .map((href) => href.split(/[?#]/)[0]);
+
+      for (const href of assetLinks) {
+        const target = path.join(projectRoot, 'dist', href.slice(1));
+        await expect(readFile(target), `${route} references ${href}`).resolves.toBeInstanceOf(Buffer);
+      }
     }
   });
 });

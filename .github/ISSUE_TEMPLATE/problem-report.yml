@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Public site problem
+description: Report a reproducible content, bilingual, accessibility, link, or source problem.
+title: "[Problem]: "
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, private paths, sensitive logs, or exploit details. Use GitHub Security Advisories for vulnerabilities.
+  - type: input
+    id: route
+    attributes:
+      label: Public route or source path
+      placeholder: /en/start/using-the-learning-site/
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What did you observe?
+      description: Include the locale, browser or tool, and exact reproducible behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Relevant public environment details
+      description: For website issues, include browser, viewport, and assistive technology when applicable. Do not paste a home path or credentials.

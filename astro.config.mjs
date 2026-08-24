@@ -21,6 +21,7 @@ export default defineConfig({
       },
       prerender: true,
       pagefind: true,
+      disable404Route: true,
       customCss: ['./src/styles/site.css'],
       sidebar: [
         {
