@@ -24,17 +24,24 @@ function parseArguments(argv) {
 }
 
 function run(command, args, options = {}) {
+  const { quiet = false, ...spawnOptions } = options;
   const result = spawnSync(command, args, {
     cwd: projectRoot,
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
-    ...options,
+    ...spawnOptions,
   });
-  if (result.stdout) process.stdout.write(result.stdout);
+  if (!quiet && result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`${command} exited with status ${result.status}`);
   return result.stdout.trim();
+}
+
+function selectVersion(output, pattern, label) {
+  const line = output.split(/\r?\n/).find((candidate) => pattern.test(candidate));
+  if (!line) throw new Error(`Could not read ${label} from the declared container.`);
+  return line;
 }
 
 function parseOsRelease(content) {
@@ -93,8 +100,8 @@ await rm(resultRoot, { recursive: true, force: true });
 await mkdir(resultRoot, { recursive: true });
 
 run('docker', ['pull', '--platform', 'linux/amd64', lane.image]);
-const imageInspection = JSON.parse(run('docker', ['image', 'inspect', lane.image]))[0];
-const imageIndex = JSON.parse(run('docker', ['buildx', 'imagetools', 'inspect', '--raw', lane.image]));
+const imageInspection = JSON.parse(run('docker', ['image', 'inspect', lane.image], { quiet: true }))[0];
+const imageIndex = JSON.parse(run('docker', ['buildx', 'imagetools', 'inspect', '--raw', lane.image], { quiet: true }));
 const actualAmd64Digest = imageIndex.manifests?.find(
   (manifest) => manifest.platform?.os === 'linux' && manifest.platform?.architecture === 'amd64',
 )?.digest;
@@ -102,12 +109,18 @@ if (actualAmd64Digest !== lane.amd64Digest) {
   throw new Error(`Resolved amd64 digest ${actualAmd64Digest ?? 'missing'} does not match ${lane.amd64Digest}.`);
 }
 const baseDockerArgs = ['run', '--platform', 'linux/amd64', '--rm', '--network', 'none'];
-const osRelease = run('docker', [...baseDockerArgs, lane.image, 'cat', '/etc/os-release']);
-const hostCompiler = run('docker', [...baseDockerArgs, lane.image, 'g++', '--version']);
-const nvcc = run('docker', [...baseDockerArgs, lane.image, 'nvcc', '--version']);
-const cuobjdump = run('docker', [...baseDockerArgs, lane.image, 'cuobjdump', '--version']);
-const dockerEngine = run('docker', ['version', '--format', '{{.Server.Version}}']);
-const dockerBuildx = run('docker', ['buildx', 'version']);
+const osRelease = run('docker', [...baseDockerArgs, lane.image, 'cat', '/etc/os-release'], { quiet: true });
+const hostCompilerOutput = run('docker', [...baseDockerArgs, lane.image, 'g++', '--version'], { quiet: true });
+const nvccOutput = run('docker', [...baseDockerArgs, lane.image, 'nvcc', '--version'], { quiet: true });
+const cuobjdumpOutput = run('docker', [...baseDockerArgs, lane.image, 'cuobjdump', '--version'], { quiet: true });
+const hostCompiler = selectVersion(hostCompilerOutput, /^g\+\+ /, 'host compiler version');
+const nvcc = selectVersion(nvccOutput, /^Cuda compilation tools,/, 'NVCC version');
+const cuobjdump = [
+  selectVersion(cuobjdumpOutput, /^cuobjdump:/, 'cuobjdump identity'),
+  selectVersion(cuobjdumpOutput, /^Cuda compilation tools,/, 'cuobjdump version'),
+].join('; ');
+const dockerEngine = run('docker', ['version', '--format', '{{.Server.Version}}'], { quiet: true });
+const dockerBuildx = run('docker', ['buildx', 'version'], { quiet: true });
 
 const uid = typeof process.getuid === 'function' ? `${process.getuid()}:${process.getgid()}` : '1000:1000';
 let compileResult = 'pass';
@@ -137,7 +150,7 @@ try {
 const artifactPaths = args.kind === 'ex02'
   ? example.build.artifacts
   : compileResult === 'pass' ? ['build/cxx23_probe.o'] : [];
-const sourceCommit = process.env.GITHUB_SHA || run('git', ['rev-parse', 'HEAD']);
+const sourceCommit = run('git', ['rev-parse', 'HEAD'], { quiet: true });
 const workflowRun = process.env.GITHUB_RUN_ID && process.env.GITHUB_REPOSITORY
   ? `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : null;
@@ -150,7 +163,7 @@ const commandValues = args.kind === 'ex02'
 const probeDiagnostic = compileResult === 'unsupported'
   ? (await readFile(path.join(resultRoot, 'compile.log'), 'utf8'))
       .split(/\r?\n/)
-      .find((line) => /(?:fatal|error|unsupported)/i.test(line)) ?? 'C++23 compilation returned a nonzero status.'
+      .find((line) => /(?:not supported|fatal|error|unsupported)/i.test(line)) ?? 'C++23 compilation returned a nonzero status.'
   : null;
 
 const record = {

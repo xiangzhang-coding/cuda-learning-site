@@ -217,6 +217,10 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
   if (!record?.toolchain?.hostCompiler || !record?.toolchain?.nvcc || !record?.toolchain?.cuobjdump) {
     errors.push('toolchain coordinates are incomplete');
   }
+  if ([record?.toolchain?.hostCompiler, record?.toolchain?.nvcc, record?.toolchain?.cuobjdump]
+      .some((coordinate) => coordinate?.includes('\n'))) {
+    errors.push('toolchain coordinates must be sanitized version lines');
+  }
   if (!sameValues(record?.toolchain?.target, example.compatibility.target)) errors.push('compiler target is invalid');
   if (!sameValues(record?.commands, expectedCommands)) errors.push('compile commands do not match the build contract');
   if (!sameValues(record?.artifacts?.map(({ path: artifactPath }) => artifactPath), expectedArtifacts) ||

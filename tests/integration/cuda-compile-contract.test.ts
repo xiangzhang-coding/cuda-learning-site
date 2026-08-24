@@ -20,6 +20,7 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toMatch(/permissions:\s*\n\s+contents: read/);
     expect(workflow).not.toContain('pull_request_target');
     expect(workflow).toContain('persist-credentials: false');
+    expect(workflow).toContain('ref: ${{ github.event.pull_request.head.sha || github.sha }}');
 
     const actionPins = [...workflow.matchAll(/uses:\s+actions\/[^@\s]+@([0-9a-f]{40})/g)].map((match) => match[1]);
     expect(new Set(actionPins)).toEqual(new Set([
