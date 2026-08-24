@@ -96,9 +96,7 @@ test('reduced motion, increased contrast, and forced colors override every theme
     expect(await page.evaluate(() => matchMedia('(prefers-contrast: more)').matches)).toBe(true);
     expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
     expect(await page.locator('body').evaluate((element) => getComputedStyle(element).backgroundImage)).toBe('none');
-    expect(await picker.evaluate((element) => Number.parseFloat(getComputedStyle(element).outlineWidth))).toBeGreaterThanOrEqual(
-      4,
-    );
+    await expect(picker).toHaveCSS('outline-width', '4px');
     expect(
       await page
         .locator('.route-card')
