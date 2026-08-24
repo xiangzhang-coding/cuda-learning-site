@@ -77,22 +77,29 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(legalFiles.get('pagefind-vscode-ripgrep-MIT.txt')).toContain('Copyright (c) Microsoft Corporation');
   });
 
-  it('publishes the selected Workers Builds, preview, smoke, and rollback procedure', async () => {
-    const [deployment, maintenanceSources, chineseSources, englishSources] = await Promise.all([
+  it('publishes the selected Wrangler authority plus reviewed Workers Builds, preview, smoke, and rollback boundaries', async () => {
+    const [deployment, readme, maintenanceSources, chineseSources, englishSources] = await Promise.all([
       readFile(path.join(projectRoot, 'DEPLOYMENT.md'), 'utf8'),
+      readFile(path.join(projectRoot, 'README.md'), 'utf8'),
       readFile(path.join(projectRoot, 'MAINTENANCE_SOURCES.md'), 'utf8'),
       readFile(path.join(projectRoot, 'src/content/docs/sources-and-versions.md'), 'utf8'),
       readFile(path.join(projectRoot, 'src/content/docs/en/sources-and-versions.md'), 'utf8'),
     ]);
 
     expect(deployment).toContain('Cloudflare Workers Builds');
-    expect(deployment).toContain('Production branch: `main`');
+    expect(deployment).toContain('only deployment authority');
+    expect(deployment).toContain('Workers Builds: reviewed, disabled for R0');
+    expect(deployment).toContain('Source branch: clean, protected `main`');
     expect(deployment).toContain('Build command: `npm run build:release`');
     expect(deployment).toContain('Production deploy command: `npm run deploy`');
     expect(deployment).toContain('Preview deploy command: `npm run deploy:preview`');
     expect(deployment).toContain('npm run test:release-smoke');
     expect(deployment).toContain('wrangler rollback');
     expect(deployment).toContain('No Worker application code or runtime binding');
+    expect(readme).toContain('repository-pinned Wrangler deploys reviewed static output from a clean `main` checkout');
+    expect(readme).toContain('Workers Builds behavior is reviewed but its account automation is disabled for R0');
+    expect(chineseSources).toContain('R0 未启用其账户自动化');
+    expect(englishSources).toContain('account automation disabled for R0');
 
     for (const sourceRecord of [maintenanceSources, chineseSources, englishSources]) {
       expect(sourceRecord).toContain('4.125.0');
