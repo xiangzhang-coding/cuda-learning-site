@@ -44,6 +44,7 @@ const allowedGithubFiles = new Set([
   '.github/PULL_REQUEST_TEMPLATE.md',
   '.github/workflows/web-quality.yml',
   '.github/workflows/cuda-compile.yml',
+  '.github/workflows/release-smoke.yml',
 ]);
 
 const { stdout } = await execFileAsync('git', ['ls-files', '-z'], { cwd: projectRoot, encoding: 'utf8' });
