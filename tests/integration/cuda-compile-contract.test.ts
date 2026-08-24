@@ -49,6 +49,12 @@ describe('CUDA compile evidence workflow', () => {
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
     expect(workflow).toContain('node scripts/check-artifacts.mjs');
+    expect(workflow).toContain('ImageVersion');
+    expect(workflow).toContain('RUNNER_ARCH');
+    expect(workflow).toContain("docker version --format '{{.Server.Version}}'");
+    expect(workflow).toContain('docker buildx version');
+    expect(workflow).toContain('path: artifacts/cuda/${{ matrix.lane }}');
+    expect(workflow).not.toContain('path: .quality/');
     expect(workflow).toContain('retention-days: 7');
     expect(workflow).toContain('include-hidden-files: false');
     expect(workflow).toMatch(/^  cuda-compile-gate:/m);

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+import { createHash } from 'node:crypto';
 import { access, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -116,4 +117,123 @@ export async function validateCanonicalExample(projectRoot, exampleId) {
   }
 
   return errors;
+}
+
+export async function hashCanonicalBuildContract(projectRoot, exampleId) {
+  const example = await loadCanonicalExample(projectRoot, exampleId);
+  const exampleRoot = path.join(projectRoot, example.root);
+  const files = [...new Set([
+    ...example.build.inputs,
+    ...example.build.hostTestInputs,
+    ...example.build.contractFiles,
+    'probes/cxx23.cu',
+  ])].sort();
+  const hash = createHash('sha256');
+  for (const relativePath of files) {
+    hash.update(relativePath);
+    hash.update('\0');
+    hash.update(await readFile(resolveInside(exampleRoot, relativePath)));
+    hash.update('\0');
+  }
+  return hash.digest('hex');
+}
+
+function sameValues(actual, expected) {
+  return JSON.stringify(actual) === JSON.stringify(expected);
+}
+
+export async function validateCompileEvidenceRecord(projectRoot, exampleId, record) {
+  const example = await loadCanonicalExample(projectRoot, exampleId);
+  const errors = [];
+  const lane = example.compatibility.lanes.find(
+    (candidate) => candidate.toolkit === record?.toolchain?.toolkit,
+  );
+  const isExample = record?.subject === exampleId;
+  const isProbe = record?.subject === 'CUDA-13.3-CXX23-PROBE';
+  const expectedCommands = isExample && lane
+    ? Object.values(example.build.commands).map((command) =>
+        command.replace('{dialect}', record.toolchain.dialect),
+      )
+    : [
+        'nvcc --help',
+        'nvcc --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o',
+      ];
+  const expectedArtifacts = isExample ? example.build.artifacts : ['build/cxx23_probe.o'];
+
+  if (record?.['SPDX-License-Identifier'] !== 'Apache-2.0' || record?.schemaVersion !== 1) {
+    errors.push('record schema and SPDX declaration are invalid');
+  }
+  if (record?.result !== 'pass' || (!isExample && !isProbe)) errors.push('record subject or result is invalid');
+  if (isExample && record?.claim !== 'Compile-Checked') errors.push('EX02 record has an invalid claim');
+  if (isProbe && record?.claim !== 'C++23-Dialect-Probe') errors.push('C++23 probe record has an invalid claim');
+  if (!/^[0-9a-f]{40}$/.test(record?.sourceCommit ?? '')) errors.push('source commit is not a full Git SHA');
+  if (record?.buildContractSha256 !== await hashCanonicalBuildContract(projectRoot, exampleId)) {
+    errors.push('build contract hash does not match the canonical project');
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(record?.verificationDate ?? '')) errors.push('verification date is invalid');
+  if (!/^https:\/\/github\.com\/xiangzhang-coding\/cuda-learning-site\/actions\/runs\/\d+$/.test(record?.workflowRun ?? '')) {
+    errors.push('workflow run URL is invalid');
+  }
+  if (record?.runner?.architecture !== 'X64' || !record?.runner?.imageOS || !record?.runner?.imageVersion) {
+    errors.push('runner coordinates are incomplete');
+  }
+  if (!record?.runner?.dockerEngine || !record?.runner?.dockerBuildx) {
+    errors.push('Docker and Buildx versions are incomplete');
+  }
+  if (!lane) {
+    errors.push('Toolkit Lane is not declared');
+  } else {
+    const expectedOsVersion = /Ubuntu ([0-9.]+)/.exec(lane.operatingSystem)?.[1];
+    if (record?.container?.declaredReference !== lane.image ||
+        record?.container?.manifestDigest !== lane.manifestDigest ||
+        record?.container?.expectedAmd64Digest !== lane.amd64Digest ||
+        record?.container?.actualAmd64Digest !== lane.amd64Digest) {
+      errors.push('container coordinates do not match the declared Toolkit Lane');
+    }
+    if (!/^sha256:[0-9a-f]{64}$/.test(record?.container?.actualImageId ?? '') ||
+        !Array.isArray(record?.container?.actualRepoDigests) ||
+        record.container.actualRepoDigests.length === 0) {
+      errors.push('actual container identity is incomplete');
+    }
+    if (record?.container?.operatingSystem?.id !== 'ubuntu' ||
+        record?.container?.operatingSystem?.versionId !== expectedOsVersion) {
+      errors.push('actual container operating system does not match the Lane');
+    }
+    if (isExample && !lane.dialects.includes(record?.toolchain?.dialect)) {
+      errors.push('EX02 dialect is not declared for the Lane');
+    }
+    if (isProbe && !(lane.cxx23Probe && record?.toolchain?.dialect === 'c++23')) {
+      errors.push('C++23 probe is not declared for the Lane');
+    }
+  }
+  if (!record?.toolchain?.hostCompiler || !record?.toolchain?.nvcc || !record?.toolchain?.cuobjdump) {
+    errors.push('toolchain coordinates are incomplete');
+  }
+  if (!sameValues(record?.toolchain?.target, example.compatibility.target)) errors.push('compiler target is invalid');
+  if (!sameValues(record?.commands, expectedCommands)) errors.push('compile commands do not match the build contract');
+  if (!sameValues(record?.artifacts?.map(({ path: artifactPath }) => artifactPath), expectedArtifacts) ||
+      record?.artifacts?.some(({ bytes, sha256 }) =>
+        !Number.isSafeInteger(bytes) || bytes <= 0 || !/^[0-9a-f]{64}$/.test(sha256))) {
+    errors.push('artifact records are incomplete or unexpected');
+  }
+  if (record?.gpuExecutableExecuted !== false || record?.hostReferenceExecuted !== isExample) {
+    errors.push('execution boundary is invalid');
+  }
+  const expectedRuntime = isExample ? 'Pending Hardware Verification' : 'Runtime-Not-Applicable';
+  if (record?.runtimeEvidence !== expectedRuntime) errors.push('runtime evidence boundary is invalid');
+  return errors;
+}
+
+export async function loadCompileEvidence(projectRoot, exampleId) {
+  const example = await loadCanonicalExample(projectRoot, exampleId);
+  const evidenceRoot = path.join(projectRoot, example.root, 'evidence');
+  const files = (await readdir(evidenceRoot)).filter((file) => file.endsWith('.json')).sort();
+  const records = [];
+  for (const file of files) {
+    const record = JSON.parse(await readFile(path.join(evidenceRoot, file), 'utf8'));
+    const errors = await validateCompileEvidenceRecord(projectRoot, exampleId, record);
+    if (errors.length > 0) throw new Error(`${file}: ${errors.join('; ')}`);
+    records.push(record);
+  }
+  return records;
 }

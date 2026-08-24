@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 import path from 'node:path';
 import os from 'node:os';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  hashCanonicalBuildContract,
+  loadCompileEvidence,
   loadCanonicalExample,
   readCanonicalRange,
   validateCanonicalExample,
+  validateCompileEvidenceRecord,
 } from '../../scripts/lib/canonical-examples.mjs';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
@@ -27,6 +30,62 @@ async function createFixture(manifest, source) {
 afterEach(async () => {
   await Promise.all(temporaryRoots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
+
+async function passingEx02Record(root = projectRoot) {
+  const example = await loadCanonicalExample(root, 'EX02');
+  const lane = example.compatibility.lanes[0];
+  const dialect = 'c++17';
+  return {
+    'SPDX-License-Identifier': 'Apache-2.0',
+    schemaVersion: 1,
+    result: 'pass',
+    claim: 'Compile-Checked',
+    subject: 'EX02',
+    check: 'cuda-11-8-cxx17',
+    sourceCommit: 'a'.repeat(40),
+    buildContractSha256: await hashCanonicalBuildContract(root, 'EX02'),
+    verificationDate: '2026-08-24',
+    workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/12345',
+    runner: {
+      operatingSystem: 'Linux',
+      architecture: 'X64',
+      imageOS: 'ubuntu24',
+      imageVersion: '20260816.277.1',
+      dockerEngine: '29.0.0',
+      dockerBuildx: 'github.com/docker/buildx v0.30.0',
+    },
+    container: {
+      declaredReference: lane.image,
+      manifestDigest: lane.manifestDigest,
+      expectedAmd64Digest: lane.amd64Digest,
+      actualAmd64Digest: lane.amd64Digest,
+      actualImageId: `sha256:${'b'.repeat(64)}`,
+      actualRepoDigests: [`nvidia/cuda@${lane.manifestDigest}`],
+      operatingSystem: {
+        id: 'ubuntu',
+        versionId: '22.04',
+        prettyName: 'Ubuntu 22.04 LTS',
+      },
+    },
+    toolchain: {
+      toolkit: lane.toolkit,
+      hostCompiler: 'g++ (Ubuntu 11.4.0) 11.4.0',
+      nvcc: 'Cuda compilation tools, release 11.8, V11.8.89',
+      cuobjdump: 'cuobjdump 11.8.86',
+      dialect,
+      target: example.compatibility.target,
+    },
+    commands: Object.values(example.build.commands).map((command) => command.replace('{dialect}', dialect)),
+    artifacts: example.build.artifacts.map((artifactPath) => ({
+      path: artifactPath,
+      bytes: 1,
+      sha256: 'c'.repeat(64),
+    })),
+    hostReferenceExecuted: true,
+    gpuExecutableExecuted: false,
+    runtimeEvidence: 'Pending Hardware Verification',
+  };
+}
 
 describe('canonical Runnable Example resolver', () => {
   it('loads EX02 as one C++17 project shared by every Toolkit Lane', async () => {
@@ -121,5 +180,71 @@ describe('canonical Runnable Example resolver', () => {
     };
     await writeFile(manifestPath, JSON.stringify(wrongRoot));
     await expect(loadCanonicalExample(fixtureRoot, 'EX99')).rejects.toThrow('declares root');
+  });
+
+  it('accepts only complete evidence for the current canonical build contract', async () => {
+    const record = await passingEx02Record();
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX02', record)).resolves.toEqual([]);
+
+    const invalid = {
+      ...record,
+      'SPDX-License-Identifier': 'MIT',
+      schemaVersion: 2,
+      result: 'failed',
+      claim: 'Built',
+      sourceCommit: 'short',
+      buildContractSha256: 'd'.repeat(64),
+      verificationDate: '2026/08/24',
+      workflowRun: 'https://example.com/run/1',
+      runner: { ...record.runner, architecture: 'ARM64', imageOS: '', dockerEngine: '' },
+      container: {
+        ...record.container,
+        declaredReference: 'nvidia/cuda:latest',
+        actualAmd64Digest: 'sha256:wrong',
+        actualImageId: 'missing',
+        actualRepoDigests: [],
+        operatingSystem: { id: 'debian', versionId: '12' },
+      },
+      toolchain: {
+        ...record.toolchain,
+        hostCompiler: '',
+        dialect: 'c++23',
+        target: ['sm_90'],
+      },
+      commands: [],
+      artifacts: [{ path: 'unexpected', bytes: 0, sha256: 'bad' }],
+      hostReferenceExecuted: false,
+      gpuExecutableExecuted: true,
+      runtimeEvidence: 'Runtime-Verified',
+    };
+    const errors = await validateCompileEvidenceRecord(projectRoot, 'EX02', invalid);
+    expect(errors).toContain('record schema and SPDX declaration are invalid');
+    expect(errors).toContain('build contract hash does not match the canonical project');
+    expect(errors).toContain('container coordinates do not match the declared Toolkit Lane');
+    expect(errors).toContain('compile commands do not match the build contract');
+    expect(errors).toContain('execution boundary is invalid');
+  });
+
+  it('loads committed records and rejects one after its build contract drifts', async () => {
+    const fixtureRoot = await mkdtemp(path.join(os.tmpdir(), 'canonical-evidence-'));
+    temporaryRoots.push(fixtureRoot);
+    const sourceRoot = path.join(projectRoot, 'examples/ex02-vector-addition');
+    const fixtureExampleRoot = path.join(fixtureRoot, 'examples/ex02-vector-addition');
+    await mkdir(path.dirname(fixtureExampleRoot), { recursive: true });
+    await cp(sourceRoot, fixtureExampleRoot, { recursive: true });
+    const record = await passingEx02Record(fixtureRoot);
+    await writeFile(
+      path.join(fixtureExampleRoot, 'evidence/cuda-11-8-cxx17.json'),
+      JSON.stringify(record),
+    );
+
+    await expect(loadCompileEvidence(fixtureRoot, 'EX02')).resolves.toHaveLength(1);
+    await writeFile(
+      path.join(fixtureExampleRoot, 'include/vector_add_reference.hpp'),
+      '// SPDX-License-Identifier: Apache-2.0\nchanged\n',
+    );
+    await expect(loadCompileEvidence(fixtureRoot, 'EX02')).rejects.toThrow(
+      'build contract hash does not match',
+    );
   });
 });

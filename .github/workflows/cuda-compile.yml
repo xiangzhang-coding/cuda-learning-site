@@ -71,6 +71,12 @@ jobs:
       - name: Record UTC verification date
         run: echo "VERIFICATION_DATE=$(date -u +%F)" >> "$GITHUB_ENV"
 
+      - name: Record runner and container-tool coordinates
+        run: |
+          node -e "console.log(JSON.stringify({ImageOS:process.env.ImageOS,ImageVersion:process.env.ImageVersion,RUNNER_ARCH:process.env.RUNNER_ARCH},null,2))"
+          docker version --format '{{.Server.Version}}'
+          docker buildx version
+
       - name: Preprocess, compile, link, inspect, and test the host boundary
         run: >-
           node scripts/run-cuda-compile.mjs
@@ -81,13 +87,13 @@ jobs:
           --image "${{ matrix.image }}"
 
       - name: Scan the sanitized compile record and logs
-        run: node scripts/check-artifacts.mjs ".quality/cuda/${{ matrix.lane }}"
+        run: node scripts/check-artifacts.mjs "artifacts/cuda/${{ matrix.lane }}"
 
       - name: Upload sanitized compile evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: cuda-compile-${{ matrix.lane }}
-          path: .quality/cuda/${{ matrix.lane }}
+          path: artifacts/cuda/${{ matrix.lane }}
           if-no-files-found: error
           include-hidden-files: false
           retention-days: 7

@@ -1,9 +1,8 @@
 ---
 // SPDX-License-Identifier: Apache-2.0
-import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import { loadCanonicalExample } from '../../scripts/lib/canonical-examples.mjs';
+import { loadCanonicalExample, loadCompileEvidence } from '../../scripts/lib/canonical-examples.mjs';
 
 interface Props {
   exampleId: string;
@@ -11,9 +10,9 @@ interface Props {
 }
 
 type EvidenceRecord = {
-  result: string;
-  claim: string;
-  subject: string;
+  result: 'pass';
+  claim: 'Compile-Checked' | 'C++23-Dialect-Probe';
+  subject: 'EX02' | 'CUDA-13.3-CXX23-PROBE';
   sourceCommit: string;
   verificationDate: string;
   workflowRun: string | null;
@@ -27,7 +26,7 @@ type EvidenceRecord = {
     nvcc: string;
     dialect: string;
   };
-  gpuExecutableExecuted: boolean;
+  gpuExecutableExecuted: false;
 };
 
 type CanonicalLane = {
@@ -39,23 +38,13 @@ type CanonicalLane = {
 };
 
 type CanonicalExample = {
-  root: string;
   compatibility: { lanes: CanonicalLane[] };
 };
 
 const { exampleId, locale } = Astro.props;
 const projectRoot = path.resolve(process.cwd());
 const example = await loadCanonicalExample(projectRoot, exampleId) as CanonicalExample;
-const evidenceRoot = path.join(projectRoot, example.root, 'evidence');
-let evidenceFiles: string[] = [];
-try {
-  evidenceFiles = (await readdir(evidenceRoot)).filter((file) => file.endsWith('.json')).sort();
-} catch (error) {
-  if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-}
-const records = await Promise.all(
-  evidenceFiles.map(async (file) => JSON.parse(await readFile(path.join(evidenceRoot, file), 'utf8')) as EvidenceRecord),
-);
+const records = await loadCompileEvidence(projectRoot, exampleId) as EvidenceRecord[];
 const rows = example.compatibility.lanes.flatMap((lane) => [
   ...lane.dialects.map((dialect) => ({ lane, dialect, kind: 'ex02' as const })),
   ...(lane.cxx23Probe ? [{ lane, dialect: 'c++23', kind: 'probe' as const }] : []),
@@ -109,7 +98,7 @@ const labels = locale === 'zh-CN'
         candidate.toolchain.dialect === dialect &&
         (kind === 'ex02' ? candidate.subject === exampleId : candidate.claim === 'C++23-Dialect-Probe'),
       );
-      const passed = record?.result === 'pass' && record.gpuExecutableExecuted === false;
+      const passed = Boolean(record);
       return (
         <tr data-lane={lane.id} data-dialect={dialect} data-result={passed ? 'pass' : 'pending'}>
           <th scope="row">CUDA {lane.toolkit}<br /><small>{lane.operatingSystem}</small></th>

@@ -4,7 +4,11 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { loadCanonicalExample } from './lib/canonical-examples.mjs';
+import {
+  hashCanonicalBuildContract,
+  loadCanonicalExample,
+  validateCompileEvidenceRecord,
+} from './lib/canonical-examples.mjs';
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 
@@ -51,19 +55,6 @@ async function hashFile(file) {
   return createHash('sha256').update(await readFile(file)).digest('hex');
 }
 
-async function hashBuildContract(exampleRoot, relativePaths) {
-  const files = [...new Set(relativePaths)].sort();
-  const hash = createHash('sha256');
-  for (const relativePath of files) {
-    const file = path.join(exampleRoot, relativePath);
-    hash.update(relativePath);
-    hash.update('\0');
-    hash.update(await readFile(file));
-    hash.update('\0');
-  }
-  return hash.digest('hex');
-}
-
 async function describeArtifacts(exampleRoot, paths) {
   return Promise.all(
     paths.map(async (relativePath) => {
@@ -96,7 +87,7 @@ if (args.kind === 'cxx23-probe' && !(lane.cxx23Probe && args.dialect === 'c++23'
 }
 if (!['ex02', 'cxx23-probe'].includes(args.kind)) throw new Error(`Unknown check kind: ${args.kind}`);
 
-const resultRoot = path.join(projectRoot, '.quality/cuda', args.check);
+const resultRoot = path.join(projectRoot, 'artifacts/cuda', args.check);
 const exampleRoot = path.join(projectRoot, example.root);
 await rm(resultRoot, { recursive: true, force: true });
 await mkdir(resultRoot, { recursive: true });
@@ -115,6 +106,8 @@ const osRelease = run('docker', [...baseDockerArgs, lane.image, 'cat', '/etc/os-
 const hostCompiler = run('docker', [...baseDockerArgs, lane.image, 'g++', '--version']);
 const nvcc = run('docker', [...baseDockerArgs, lane.image, 'nvcc', '--version']);
 const cuobjdump = run('docker', [...baseDockerArgs, lane.image, 'cuobjdump', '--version']);
+const dockerEngine = run('docker', ['version', '--format', '{{.Server.Version}}']);
+const dockerBuildx = run('docker', ['buildx', 'version']);
 
 const uid = typeof process.getuid === 'function' ? `${process.getuid()}:${process.getgid()}` : '1000:1000';
 run('docker', [
@@ -132,7 +125,7 @@ run('docker', [
   'scripts/compile-check.sh',
   args.dialect,
   args.kind,
-  `/workspace/.quality/cuda/${args.check}`,
+  `/workspace/artifacts/cuda/${args.check}`,
 ]);
 
 const artifactPaths = args.kind === 'ex02' ? example.build.artifacts : ['build/cxx23_probe.o'];
@@ -155,12 +148,7 @@ const record = {
   subject: args.kind === 'ex02' ? 'EX02' : 'CUDA-13.3-CXX23-PROBE',
   check: args.check,
   sourceCommit,
-  sourceTreeSha256: await hashBuildContract(exampleRoot, [
-    ...example.build.inputs,
-    ...example.build.hostTestInputs,
-    ...example.build.contractFiles,
-    'probes/cxx23.cu',
-  ]),
+  buildContractSha256: await hashCanonicalBuildContract(projectRoot, 'EX02'),
   verificationDate: process.env.VERIFICATION_DATE || new Date().toISOString().slice(0, 10),
   workflowRun,
   runner: {
@@ -168,6 +156,8 @@ const record = {
     architecture: process.env.RUNNER_ARCH || process.arch,
     imageOS: process.env.ImageOS || null,
     imageVersion: process.env.ImageVersion || null,
+    dockerEngine,
+    dockerBuildx,
   },
   container: {
     declaredReference: lane.image,
@@ -193,5 +183,7 @@ const record = {
   runtimeEvidence: args.kind === 'ex02' ? 'Pending Hardware Verification' : 'Runtime-Not-Applicable',
 };
 
+const recordErrors = await validateCompileEvidenceRecord(projectRoot, 'EX02', record);
+if (recordErrors.length > 0) throw new Error(`Generated evidence is invalid: ${recordErrors.join('; ')}`);
 await writeFile(path.join(resultRoot, 'record.json'), `${JSON.stringify(record, null, 2)}\n`);
-console.log(`CUDA compile evidence written to .quality/cuda/${args.check}/record.json`);
+console.log(`CUDA compile evidence written to artifacts/cuda/${args.check}/record.json`);
