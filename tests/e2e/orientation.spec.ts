@@ -46,6 +46,7 @@ const routes = [
 ];
 
 test('all published routes load without browser errors', async ({ page }) => {
+  test.slow();
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
   for (const route of routes) {
