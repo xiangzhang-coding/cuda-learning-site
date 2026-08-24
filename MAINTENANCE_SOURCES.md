@@ -3,7 +3,7 @@
 # Maintenance Source Record
 
 - Review date: 2026-08-24
-- Scope: public repository baseline, three-theme visual foundation, web quality CI, and O02/O03 evidence/environment contract
+- Scope: public repository baseline, three-theme visual foundation, web quality CI, O02/O03 evidence/environment contract, and canonical EX02 compile evidence
 
 Context7 was used for current interface discovery. Exact package manifests, tagged owner source, action tags/commits, and versioned owner documentation govern the selected versions when a current Context7 index lags the selected patch.
 
@@ -16,10 +16,11 @@ Context7 was used for current interface discovery. Exact package manifests, tagg
 | axe-playwright | 4.13.0; axe-core `~4.13.0` | Playwright accessibility guidance above | [package manifest](https://registry.npmjs.org/%40axe-core%2Fplaywright/4.13.0), [Playwright accessibility testing and its automation disclaimer](https://playwright.dev/docs/accessibility-testing) |
 | Browser theme APIs | `localStorage`, Custom Elements, `prefers-reduced-motion`, `prefers-contrast`, `forced-colors`, print | Playwright Context7 cross-checks emulation; WHATWG/W3C specifications govern browser semantics | [HTML Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html), [HTML Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html), [Media Queries 5](https://drafts.csswg.org/mediaqueries-5/), [CSS Color Adjustment](https://drafts.csswg.org/css-color-adjust-1/), [CSS Paged Media](https://www.w3.org/TR/css-page-3/), [MDN web platform references](https://developer.mozilla.org/en-US/docs/Web) |
 | GitHub Actions | `ubuntu-24.04`; current reviewed image `20260816.277.1`; least-privilege workflow token; full-SHA action pins | `/websites/github_en_actions`, `/actions/runner-images` | [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax), [Ubuntu 24.04 image release](https://github.com/actions/runner-images/releases/tag/ubuntu24/20260816.277), action tags and commits listed below |
+| Docker Engine and Buildx | GitHub runner-provided versions, recorded by every CUDA compile result | Owner references govern this CLI boundary; no Docker behavior is inferred from a Toolkit label | [`docker image pull`](https://docs.docker.com/reference/cli/docker/image/pull/), [`docker image inspect`](https://docs.docker.com/reference/cli/docker/image/inspect/), [`docker buildx imagetools inspect`](https://docs.docker.com/reference/cli/docker/buildx/imagetools/inspect/) |
 
 ## CUDA teaching coordinates
 
-These are source coordinates and planned evidence targets, not build or runtime observations. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane.
+These are the source coordinates and declared evidence targets for EX02. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane. A tag or reviewed source does not grant Compile-Checked without a passing workflow record.
 
 | Interface | Exact coordinate | Owner sources reviewed |
 | --- | --- | --- |
@@ -30,7 +31,7 @@ These are source coordinates and planned evidence targets, not build or runtime 
 | Compute capability | Programming Guide 13.3.1 feature and limit tables; current GPU-to-capability mapping | [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) |
 | NVCC phases | Compiler Driver 13.3.1 compile, PTX/CUBIN, link, and run phase boundary | [supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases) |
 
-The CUDA 13.3.1 Linux guide lists C++23 while its NVCC `--std` reference lists through C++20. Preserve this as an unresolved exact-Lane probe. No Lane is Compile-Checked, no Reference Environment is declared, and no runtime or performance evidence was produced by this source review.
+CUDA Compile Evidence [run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) passed EX02 with C++17 in all three Lanes and with C++20 in the 12.9.2 and 13.3.1 Lanes. The exact 13.3.1 probe resolved the C++23 documentation conflict for this image: GCC 13.3/NVCC 13.3.73 reports `-std=c++23` unsupported with the configured host compiler. That probe grants no EX02 C++23 status. No CUDA binary ran, no Reference Environment is declared, and no runtime or performance evidence was produced.
 
 ## Immutable action coordinates
 

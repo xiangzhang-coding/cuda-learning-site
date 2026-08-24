@@ -20,6 +20,8 @@ const routes = [
   '/en/start/environment-manifest/exercises/',
   '/start/environment-manifest/solutions/',
   '/en/start/environment-manifest/solutions/',
+  '/examples/vector-addition/',
+  '/en/examples/vector-addition/',
   '/practice/',
   '/en/practice/',
   '/glossary/',
@@ -51,6 +53,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
     { zh: '/start/environment-manifest/', en: '/en/start/environment-manifest/' },
+    { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/practice/', en: '/en/practice/' },
   ]) {
     await page.goto(zh);
@@ -105,7 +108,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  for (const route of ['/en/', '/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/practice/', '/en/sources-and-versions/']) {
+  for (const route of ['/en/', '/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/practice/', '/en/sources-and-versions/']) {
     await page.goto(route);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }

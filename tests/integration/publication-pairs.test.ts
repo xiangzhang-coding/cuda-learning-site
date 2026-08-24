@@ -21,6 +21,12 @@ type PublicationPair = {
   prerequisites?: string;
   relatedUnits?: string;
   exampleIds?: string;
+  canonicalExample?: string;
+  canonicalRanges?: string;
+  evidenceCompilation?: string;
+  evidenceRuntime?: string;
+  expectedObservations?: string;
+  recordedObservations?: string;
   sourceCount?: string;
   sourceVersions?: string;
   zh: string;
@@ -107,6 +113,23 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/start/environment-manifest/solutions/',
   },
   {
+    pairId: 'ex02',
+    structure: 'purpose,project,correctness,build,compatibility,evidence,expected-observations,sources',
+    resourceKind: 'runnable-example',
+    unitId: 'EX02',
+    relatedUnits: 'O02,O03',
+    exampleIds: 'EX02',
+    canonicalExample: 'EX02',
+    canonicalRanges: 'kernel,error-checking,cpu-reference',
+    evidenceCompilation: 'Compile-Checked',
+    evidenceRuntime: 'Pending Hardware Verification',
+    expectedObservations: '2 declared expectations',
+    sourceCount: '11',
+    sourceVersions: '11.8.0,12.9.2,13.3.1',
+    zh: '/examples/vector-addition/',
+    en: '/en/examples/vector-addition/',
+  },
+  {
     pairId: 'practice-bank',
     structure: 'use,entry-pb-r0-001,entry-pb-r0-002,review',
     resourceKind: 'practice-bank',
@@ -146,7 +169,7 @@ describe('Publication Pairs', () => {
       { route: zh, lang: 'zh-CN', counterpart: en, pairId, structure, ...contract },
       { route: en, lang: 'en', counterpart: zh, pairId, structure, ...contract },
     ]),
-  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, sourceCount, sourceVersions }) => {
+  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', sourceCount, sourceVersions }) => {
     const document = await readRoute(route);
 
     expect(document.documentElement.lang).toBe(lang);
@@ -160,12 +183,15 @@ describe('Publication Pairs', () => {
     if (prerequisites) expect(metadata(document, 'cuda:prerequisites')).toBe(prerequisites);
     if (relatedUnits) expect(metadata(document, 'cuda:related-units')).toBe(relatedUnits);
     if (exampleIds) expect(metadata(document, 'cuda:example-ids')).toBe(exampleIds);
+    if (canonicalExample) expect(metadata(document, 'cuda:canonical-example')).toBe(canonicalExample);
+    if (canonicalRanges) expect(metadata(document, 'cuda:canonical-ranges')).toBe(canonicalRanges);
     if (sourceCount) expect(metadata(document, 'cuda:source-count')).toBe(sourceCount);
     if (sourceVersions) expect(metadata(document, 'cuda:source-versions')).toBe(sourceVersions);
     if (resourceKind) {
-      expect(metadata(document, 'cuda:evidence-compilation')).toBe('none');
-      expect(metadata(document, 'cuda:evidence-runtime')).toBe('none');
-      expect(metadata(document, 'cuda:recorded-observations')).toBe('none');
+      expect(metadata(document, 'cuda:evidence-compilation')).toBe(evidenceCompilation);
+      expect(metadata(document, 'cuda:evidence-runtime')).toBe(evidenceRuntime);
+      if (expectedObservations) expect(metadata(document, 'cuda:expected-observations')).toBe(expectedObservations);
+      expect(metadata(document, 'cuda:recorded-observations')).toBe(recordedObservations);
     }
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(`${siteOrigin}${route}`);
 
@@ -215,18 +241,18 @@ describe('published navigation', () => {
   it.each([
     {
       route: '/start/using-the-learning-site/',
-      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
+      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/examples/vector-addition/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
     },
     {
       route: '/en/start/using-the-learning-site/',
-      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
+      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
     },
   ])('exposes only complete destinations from $route', async ({ route, expected }) => {
     const document = await readRoute(route);
     const hrefs = [...document.querySelectorAll('nav a[href]')].map((link) => link.getAttribute('href'));
 
     for (const href of expected) expect(hrefs).toContain(href);
-    for (const prefix of ['/foundations/', '/examples/', '/labs/', '/visuals/']) {
+    for (const prefix of ['/foundations/', '/labs/', '/visuals/']) {
       expect(hrefs.some((href) => href?.startsWith(prefix) || href?.startsWith(`/en${prefix}`))).toBe(false);
     }
   });

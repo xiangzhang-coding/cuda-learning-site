@@ -59,7 +59,11 @@ for (const relativePath of trackedFiles) {
   }
 
   if (formatExemptions.has(relativePath)) continue;
-  if (!content.includes(softwareSpdx)) errors.push(`${relativePath}: missing Apache-2.0 SPDX declaration`);
+  const jsonSpdx = relativePath.endsWith('.json') &&
+    /"SPDX-License-Identifier"\s*:\s*"Apache-2\.0"/.test(content);
+  if (!content.includes(softwareSpdx) && !jsonSpdx) {
+    errors.push(`${relativePath}: missing Apache-2.0 SPDX declaration`);
+  }
 }
 
 if (errors.length > 0) {

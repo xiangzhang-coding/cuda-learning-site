@@ -16,6 +16,7 @@ const allowedRootEntries = new Set([
   'CONTENT_LICENSES.md',
   'CONTRIBUTING.md',
   'DEPENDENCY_REVIEW.md',
+  'examples',
   'LICENSE',
   'LICENSE-CONTENT',
   'MAINTENANCE_SOURCES.md',
@@ -39,6 +40,7 @@ const allowedGithubFiles = new Set([
   '.github/ISSUE_TEMPLATE/problem-report.yml',
   '.github/PULL_REQUEST_TEMPLATE.md',
   '.github/workflows/web-quality.yml',
+  '.github/workflows/cuda-compile.yml',
 ]);
 
 const { stdout } = await execFileAsync('git', ['ls-files', '-z'], { cwd: projectRoot, encoding: 'utf8' });

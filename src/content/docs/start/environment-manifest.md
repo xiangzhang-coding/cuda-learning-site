@@ -174,7 +174,7 @@ O03-INCOMPLETE-A 只有“RTX 4090、CUDA 13.3.1、跑了矩阵乘”。它缺�
 
 ## 三条 Toolkit Lane
 
-这些 Lane 是将来的编译证据目标，不是已经通过的结果。三条 Lane 当前都没有 Compile-Checked。
+EX02 已在 [CUDA Compile Evidence run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) 中完成三条 Lane 的 preprocess、compile、link 和 inspect：11.8.0 的 C++17、12.9.2/13.3.1 的 C++17 与 C++20 均为 Compile-Checked。这个状态只属于 EX02 的精确源码、方言、target 和已记录环境，不升级其他对象，也不构成 GPU 运行证据。
 
 | Toolkit Lane | 选择的 OS | 课程编译方言 | 上游版本坐标（不是本机观察） |
 | --- | --- | --- | --- |
@@ -182,7 +182,7 @@ O03-INCOMPLETE-A 只有“RTX 4090、CUDA 13.3.1、跑了矩阵乘”。它缺�
 | CUDA 12.9.2 | Ubuntu 24.04 x86-64 | C++17、C++20 | NVCC 12.9.86；paired Linux driver 575.57.08；12.x floor 525.60.13 |
 | CUDA 13.3.1 | Ubuntu 24.04 x86-64 | C++17、C++20；C++23 单独 probe | NVCC 13.3.73；paired Linux driver 610.43.02；13.x floor 为 R580/`>=580` |
 
-CUDA 13.3.1 的 Linux 安装指南把 C++23 列为受支持方言，但同版本 NVCC `--std` 选项参考仍只列到 C++20。本站不会把文档不一致写成通过；C++23 必须在精确 Lane 中单独探测并保存产物。容器标签存在也只证明 registry metadata，不是编译证据。
+CUDA 13.3.1 的 Linux 安装指南把 C++23 列为受支持方言，但同版本 NVCC `--std` 选项参考仍只列到 C++20。精确 image 中的独立 probe 记录了 GCC 13.3 和 NVCC 13.3.73，并观察到 `-std=c++23` 不受当前 host compiler 配置支持；结果为 `unsupported`，不是 EX02 的 C++23 Compile-Checked。容器标签本身仍只证明 registry metadata。
 
 ## Reference Environment 声明边界
 

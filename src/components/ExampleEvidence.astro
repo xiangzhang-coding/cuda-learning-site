@@ -1,0 +1,135 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import path from 'node:path';
+
+import { loadCanonicalExample, loadCompileEvidence } from '../../scripts/lib/canonical-examples.mjs';
+
+interface Props {
+  exampleId: string;
+  locale: 'zh-CN' | 'en';
+}
+
+type EvidenceRecord = {
+  result: 'pass' | 'unsupported';
+  claim: 'Compile-Checked' | 'C++23-Dialect-Probe';
+  subject: 'EX02' | 'CUDA-13.3-CXX23-PROBE';
+  sourceCommit: string;
+  verificationDate: string;
+  workflowRun: string | null;
+  container: {
+    actualImageId: string;
+    operatingSystem: { prettyName?: string };
+  };
+  toolchain: {
+    toolkit: string;
+    hostCompiler: string;
+    nvcc: string;
+    dialect: string;
+  };
+  gpuExecutableExecuted: false;
+};
+
+type CanonicalLane = {
+  id: string;
+  toolkit: string;
+  operatingSystem: string;
+  dialects: string[];
+  cxx23Probe?: boolean;
+};
+
+type CanonicalExample = {
+  compatibility: { lanes: CanonicalLane[] };
+};
+
+const { exampleId, locale } = Astro.props;
+const projectRoot = path.resolve(process.cwd());
+const example = await loadCanonicalExample(projectRoot, exampleId) as CanonicalExample;
+const records = await loadCompileEvidence(projectRoot, exampleId) as EvidenceRecord[];
+const rows = example.compatibility.lanes.flatMap((lane) => [
+  ...lane.dialects.map((dialect) => ({ lane, dialect, kind: 'ex02' as const })),
+  ...(lane.cxx23Probe ? [{ lane, dialect: 'c++23', kind: 'probe' as const }] : []),
+]);
+const labels = locale === 'zh-CN'
+  ? {
+      lane: 'Toolkit Lane',
+      dialect: '方言',
+      scope: '检查对象',
+      status: '结果',
+      environment: '实际环境',
+      evidence: '证据',
+      example: 'EX02 构建',
+      probe: '独立 C++23 probe',
+      pending: '未授予 Compile-Checked',
+      probePending: 'probe 尚未通过',
+      probeUnsupported: 'probe 已记录：当前环境不支持',
+      noRecord: '尚无通过记录',
+      record: '工作流记录',
+    }
+  : {
+      lane: 'Toolkit Lane',
+      dialect: 'Dialect',
+      scope: 'Checked subject',
+      status: 'Result',
+      environment: 'Actual environment',
+      evidence: 'Evidence',
+      example: 'EX02 build',
+      probe: 'Separate C++23 probe',
+      pending: 'Compile-Checked not granted',
+      probePending: 'Probe has not passed',
+      probeUnsupported: 'Probe recorded: unsupported in this environment',
+      noRecord: 'No passing record yet',
+      record: 'Workflow record',
+    };
+---
+
+<table class="example-evidence" data-example-evidence={exampleId}>
+  <thead>
+    <tr>
+      <th scope="col">{labels.lane}</th>
+      <th scope="col">{labels.dialect}</th>
+      <th scope="col">{labels.scope}</th>
+      <th scope="col">{labels.status}</th>
+      <th scope="col">{labels.environment}</th>
+      <th scope="col">{labels.evidence}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map(({ lane, dialect, kind }) => {
+      const record = records.find((candidate) =>
+        candidate.toolchain.toolkit === lane.toolkit &&
+        candidate.toolchain.dialect === dialect &&
+        (kind === 'ex02' ? candidate.subject === exampleId : candidate.claim === 'C++23-Dialect-Probe'),
+      );
+      const passed = Boolean(record);
+      const status = kind === 'ex02'
+        ? (passed ? 'Compile-Checked' : labels.pending)
+        : record?.result === 'pass'
+          ? 'Probe passed'
+          : record?.result === 'unsupported'
+            ? labels.probeUnsupported
+            : labels.probePending;
+      return (
+        <tr data-lane={lane.id} data-dialect={dialect} data-result={record?.result ?? 'pending'}>
+          <th scope="row">CUDA {lane.toolkit}<br /><small>{lane.operatingSystem}</small></th>
+          <td><code>{dialect}</code></td>
+          <td>{kind === 'ex02' ? labels.example : labels.probe}</td>
+          <td>{status}</td>
+          <td>
+            {record ? (
+              <small>
+                {record.container.operatingSystem.prettyName}<br />
+                {record.toolchain.hostCompiler.split('\n')[0]}<br />
+                {record.toolchain.nvcc.split('\n').at(-1)}<br />
+                <code>{record.container.actualImageId}</code>
+              </small>
+            ) : labels.noRecord}
+          </td>
+          <td>
+            {record?.workflowRun ? <a href={record.workflowRun}>{labels.record}</a> : labels.noRecord}
+            {record && <><br /><small><code>{record.sourceCommit}</code> · {record.verificationDate}</small></>}
+          </td>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>

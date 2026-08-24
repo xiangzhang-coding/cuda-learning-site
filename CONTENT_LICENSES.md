@@ -12,7 +12,7 @@ This scope includes:
 - `scripts/` and `tests/`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
-- original Runnable Example code when examples are added
+- original Runnable Example code under `examples/`
 
 Source files in these areas carry `SPDX-License-Identifier: Apache-2.0` where their format supports comments.
 
@@ -24,7 +24,7 @@ Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page o
 
 ## Adaptations
 
-No adapted content or assets are included in this Orientation release. It contains no copied diagram, sample listing, external font, or third-party image. The three CSS textures and theme-control mark are original software styling under Apache-2.0. Package-provided interface assets remain under their upstream terms and are recorded in `THIRD_PARTY_NOTICES.md`.
+No adapted content or assets are included in this release. It contains no copied diagram, sample listing, external font, or third-party image. EX02 is original code rather than a reconstruction of an NVIDIA sample. The three CSS textures and theme-control mark are original software styling under Apache-2.0. Package-provided interface assets remain under their upstream terms and are recorded in `THIRD_PARTY_NOTICES.md`.
 
 Original, upstream, or adapted files under `src/assets/`, `public/assets/`, `third_party/`, and the root favicon require an adjacent `<filename>.license.json` sidecar:
 

@@ -70,7 +70,7 @@ As of **2026-08-24**, the complete prerequisite shape is:
 2. **O01: Using the Learning Site** (this page)
 3. After O01, enter [O02: Recording Evidence Honestly](/en/start/evidence-status/) and [O03: Reading an Environment Manifest](/en/start/environment-manifest/) as separate branches.
 
-O02 and O03 each have Exercises and separate reviewed solutions. The [Practice Bank](/en/practice/) currently contains two complete entries linked back to O02 and O03. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
+O02 and O03 each have Exercises and separate reviewed solutions. The [EX02 vector-addition Runnable Example](/en/examples/vector-addition/) publishes its canonical source, build contract, and independent compilation/runtime evidence boundary. The [Practice Bank](/en/practice/) currently contains two complete entries linked back to O02 and O03. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
 
 ## Three visual themes, one body of content
 
