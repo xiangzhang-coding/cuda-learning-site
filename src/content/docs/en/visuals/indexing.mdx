@@ -1,0 +1,196 @@
+---
+title: 'VIS02: Grid, Block, and Thread Indexing'
+description: Change 1D, 2D, and 3D configurations, select a thread, and independently verify global coordinates, local linear IDs, row-major data indices, and bounds.
+pairId: vis02
+counterpart: /visuals/indexing/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - model
+  - dimensions
+  - equations
+  - bounds
+  - static-examples
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS02
+relatedUnits:
+  - O01
+  - O02
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT programming model'
+    accessDate: '2026-08-24'
+  - title: 'Astro client-side scripts'
+    url: 'https://docs.astro.build/en/guides/client-side-scripts/'
+    version: 'Astro 7.2.4 selected; current owner documentation reviewed'
+    platform: 'Static browser output'
+    accessDate: '2026-08-24'
+  - title: 'Starlight sidebar configuration'
+    url: 'https://starlight.astro.build/guides/sidebar/'
+    version: 'Starlight 0.41.7 selected; current owner documentation reviewed'
+    platform: 'Astro static documentation routes'
+    accessDate: '2026-08-24'
+  - title: 'WHATWG HTML - Custom elements'
+    url: 'https://html.spec.whatwg.org/multipage/custom-elements.html'
+    version: 'Living Standard; last updated 2026-08-21'
+    platform: 'Current browser engines'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique ARIA22 - role=status'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'Assistive-technology status messages'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique C39 - prefers-reduced-motion'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/css/C39'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'CSS media queries'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: vis02
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-24'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,model,dimensions,equations,bounds,static-examples,evidence-boundary,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: visual-explainer
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: VIS02
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O01,O02'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'None: deterministic browser model; no CUDA-capable system required'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12'
+---
+
+import IndexingExplorer from '../../../../components/IndexingExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/indexing/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS02 is a Visual Explainer. It separates the execution configuration’s `gridDim` and `blockDim` from each thread’s `blockIdx` and `threadIdx`, then adds logical data `extent` values so you can predict whether a launched thread owns a valid data position.
+
+<IndexingExplorer locale="en" />
+
+## Model and input boundary
+
+Selecting 1D, 2D, or 3D normalizes inactive axes to size `1` and coordinate `0`. Grid, block, data, and selected-coordinate controls accept base-10 whole numbers. Invalid, out-of-range, fractional, or unsafe-product input never replaces the last valid model.
+
+Per-axis interface caps and the limit of 32 visible thread buttons prevent runaway browser state. They are not CUDA device properties and do not define a GPU Capability Tier.
+
+## One-, two-, and three-dimensional coordinates
+
+Every active axis uses the same equation independently:
+
+```text
+global.x = blockIdx.x * blockDim.x + threadIdx.x
+global.y = blockIdx.y * blockDim.y + threadIdx.y
+global.z = blockIdx.z * blockDim.z + threadIdx.z
+```
+
+Changing dimensionality does not change the x-fastest convention. It only decides whether y and z participate in coordinates and bounds.
+
+## Three different linear IDs
+
+The block-local thread ID determines warp and lane membership:
+
+```text
+localThread = threadIdx.x
+            + blockDim.x * (threadIdx.y + blockDim.y * threadIdx.z)
+warp = floor(localThread / 32)
+lane = localThread % 32
+```
+
+The grid-linear block ID also uses x-fastest ordering:
+
+```text
+linearBlock = blockIdx.x
+            + gridDim.x * (blockIdx.y + gridDim.y * blockIdx.z)
+```
+
+Only after declaring an x-fastest row-major data layout do we obtain:
+
+```text
+dataIndex = global.x + extent.x * (global.y + extent.y * global.z)
+```
+
+In a multidimensional launch, `linearBlock * threadsPerBlock + localThread` is generally **not equal** to that spatial row-major `dataIndex`. VIS02 displays these values separately so execution-hierarchy ordering is not mistaken for a data layout.
+
+## Bounds states
+
+A launched thread is **IN BOUNDS** only when every active axis satisfies `global.axis < extent.axis`. A final partial block still contains legally launched threads, but some are **OUT OF BOUNDS** for the logical data and the kernel must make those threads skip the corresponding access.
+
+The state uses text, an `OK`/`!` marker, and a border instead of color alone. A table retains each axis coordinate, extent, and Boolean predicate.
+
+## Static examples
+
+The 1D, 2D, and 3D cards at the end of the component are the purpose-built static fallback, generated by the same pure TypeScript model as the interactive workbench. Configuration, selected coordinates, global coordinates, local IDs, warp/lane, data indices, and bounds remain available with JavaScript disabled and in print.
+
+## Evidence boundary
+
+The browser only evaluates indexing equations. It compiles no CUDA and launches no GPU threads. Therefore selections, bounds labels, and static examples grant no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status. See [O02](/en/start/evidence-status/) for evidence classification.
+
+## Sources
+
+Grid, block, 1D/2D/3D built-ins, and x-fastest linearization follow NVIDIA’s [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html) and [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html). Both pages identify CUDA Programming Guide v13.3, updated 2026-05-27; this site rechecked them on 2026-08-24.
+
+Interaction and test interfaces were checked against current Astro, Starlight, and Playwright records in Context7 plus the WHATWG custom-elements and W3C `role=status` and reduced-motion owner documentation. All 1D/2D/3D values, layouts, and annotations are original; no NVIDIA diagram, table, or sample listing is mirrored.

@@ -8,6 +8,7 @@ import {
   curriculumIdSchema,
   dateSchema,
   evidenceMetadataSchema,
+  resourceKindSchema,
   sourceReferenceSchema,
 } from './content-metadata';
 
@@ -18,9 +19,7 @@ const publicationMetadata = z.object({
   license: z.literal('CC-BY-4.0'),
   provenance: z.literal('original'),
   structure: z.array(z.string()),
-  resourceKind: z
-    .enum(['learning-unit', 'exercise-set', 'solution-set', 'practice-bank', 'runnable-example'])
-    .optional(),
+  resourceKind: resourceKindSchema.optional(),
   unitId: curriculumIdSchema.optional(),
   prerequisites: z.array(curriculumIdSchema).optional(),
   relatedUnits: z.array(curriculumIdSchema).optional(),

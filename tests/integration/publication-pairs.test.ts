@@ -23,6 +23,7 @@ type PublicationPair = {
   exampleIds?: string;
   canonicalExample?: string;
   canonicalRanges?: string;
+  hardwareGate?: string;
   evidenceCompilation?: string;
   evidenceRuntime?: string;
   expectedObservations?: string;
@@ -130,6 +131,30 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/examples/vector-addition/',
   },
   {
+    pairId: 'vis01',
+    structure: 'purpose,model,controls,scheduling-boundary,static-sequence,evidence-boundary,sources',
+    resourceKind: 'visual-explainer',
+    unitId: 'VIS01',
+    relatedUnits: 'O01,O02',
+    hardwareGate: 'None: deterministic browser model; no CUDA-capable system required',
+    sourceCount: '9',
+    sourceVersions: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12',
+    zh: '/visuals/kernel-journey/',
+    en: '/en/visuals/kernel-journey/',
+  },
+  {
+    pairId: 'vis02',
+    structure: 'purpose,model,dimensions,equations,bounds,static-examples,evidence-boundary,sources',
+    resourceKind: 'visual-explainer',
+    unitId: 'VIS02',
+    relatedUnits: 'O01,O02',
+    hardwareGate: 'None: deterministic browser model; no CUDA-capable system required',
+    sourceCount: '7',
+    sourceVersions: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12',
+    zh: '/visuals/indexing/',
+    en: '/en/visuals/indexing/',
+  },
+  {
     pairId: 'practice-bank',
     structure: 'use,entry-pb-r0-001,entry-pb-r0-002,review',
     resourceKind: 'practice-bank',
@@ -169,7 +194,7 @@ describe('Publication Pairs', () => {
       { route: zh, lang: 'zh-CN', counterpart: en, pairId, structure, ...contract },
       { route: en, lang: 'en', counterpart: zh, pairId, structure, ...contract },
     ]),
-  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', sourceCount, sourceVersions }) => {
+  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, hardwareGate, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', sourceCount, sourceVersions }) => {
     const document = await readRoute(route);
 
     expect(document.documentElement.lang).toBe(lang);
@@ -185,6 +210,7 @@ describe('Publication Pairs', () => {
     if (exampleIds) expect(metadata(document, 'cuda:example-ids')).toBe(exampleIds);
     if (canonicalExample) expect(metadata(document, 'cuda:canonical-example')).toBe(canonicalExample);
     if (canonicalRanges) expect(metadata(document, 'cuda:canonical-ranges')).toBe(canonicalRanges);
+    if (hardwareGate) expect(metadata(document, 'cuda:hardware-gate')).toBe(hardwareGate);
     if (sourceCount) expect(metadata(document, 'cuda:source-count')).toBe(sourceCount);
     if (sourceVersions) expect(metadata(document, 'cuda:source-versions')).toBe(sourceVersions);
     if (resourceKind) {
@@ -241,18 +267,18 @@ describe('published navigation', () => {
   it.each([
     {
       route: '/start/using-the-learning-site/',
-      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/examples/vector-addition/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
+      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/examples/vector-addition/', '/visuals/kernel-journey/', '/visuals/indexing/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
     },
     {
       route: '/en/start/using-the-learning-site/',
-      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
+      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/visuals/kernel-journey/', '/en/visuals/indexing/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
     },
   ])('exposes only complete destinations from $route', async ({ route, expected }) => {
     const document = await readRoute(route);
     const hrefs = [...document.querySelectorAll('nav a[href]')].map((link) => link.getAttribute('href'));
 
     for (const href of expected) expect(hrefs).toContain(href);
-    for (const prefix of ['/foundations/', '/labs/', '/visuals/']) {
+    for (const prefix of ['/foundations/', '/labs/']) {
       expect(hrefs.some((href) => href?.startsWith(prefix) || href?.startsWith(`/en${prefix}`))).toBe(false);
     }
   });

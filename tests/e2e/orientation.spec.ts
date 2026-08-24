@@ -22,6 +22,10 @@ const routes = [
   '/en/start/environment-manifest/solutions/',
   '/examples/vector-addition/',
   '/en/examples/vector-addition/',
+  '/visuals/kernel-journey/',
+  '/en/visuals/kernel-journey/',
+  '/visuals/indexing/',
+  '/en/visuals/indexing/',
   '/practice/',
   '/en/practice/',
   '/glossary/',
@@ -54,6 +58,8 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
     { zh: '/start/environment-manifest/', en: '/en/start/environment-manifest/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
+    { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
+    { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
     { zh: '/practice/', en: '/en/practice/' },
   ]) {
     await page.goto(zh);
@@ -73,8 +79,10 @@ test('Chinese and English searches stay in their language index', async ({ page 
   for (const scenario of [
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/' },
     { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/' },
+    { route: '/', button: /搜索/, query: '内存事务', localePrefix: '/' },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/' },
     { route: '/en/', button: /Search/, query: 'Evidence Status', localePrefix: '/en/' },
+    { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/' },
   ]) {
     await page.goto(scenario.route);
     await page.getByRole('button', { name: scenario.button }).first().click();
@@ -108,7 +116,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  for (const route of ['/en/', '/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/practice/', '/en/sources-and-versions/']) {
+  for (const route of ['/en/', '/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/examples/vector-addition/', '/en/visuals/kernel-journey/', '/en/visuals/indexing/', '/en/practice/', '/en/sources-and-versions/']) {
     await page.goto(route);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }

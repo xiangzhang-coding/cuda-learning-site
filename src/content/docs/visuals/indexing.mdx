@@ -1,0 +1,196 @@
+---
+title: 'VIS02：Grid、block 与 thread 索引'
+description: 改变 1D、2D 和 3D 配置，选择 thread，并分别验证全局坐标、局部线性编号、row-major 数据索引与 bounds。
+pairId: vis02
+counterpart: /en/visuals/indexing/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - model
+  - dimensions
+  - equations
+  - bounds
+  - static-examples
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS02
+relatedUnits:
+  - O01
+  - O02
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT programming model'
+    accessDate: '2026-08-24'
+  - title: 'Astro client-side scripts'
+    url: 'https://docs.astro.build/en/guides/client-side-scripts/'
+    version: 'Astro 7.2.4 selected; current owner documentation reviewed'
+    platform: 'Static browser output'
+    accessDate: '2026-08-24'
+  - title: 'Starlight sidebar configuration'
+    url: 'https://starlight.astro.build/guides/sidebar/'
+    version: 'Starlight 0.41.7 selected; current owner documentation reviewed'
+    platform: 'Astro static documentation routes'
+    accessDate: '2026-08-24'
+  - title: 'WHATWG HTML - Custom elements'
+    url: 'https://html.spec.whatwg.org/multipage/custom-elements.html'
+    version: 'Living Standard; last updated 2026-08-21'
+    platform: 'Current browser engines'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique ARIA22 - role=status'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'Assistive-technology status messages'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique C39 - prefers-reduced-motion'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/css/C39'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'CSS media queries'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: vis02
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-24'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,model,dimensions,equations,bounds,static-examples,evidence-boundary,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: visual-explainer
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: VIS02
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O01,O02'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'None: deterministic browser model; no CUDA-capable system required'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12'
+---
+
+import IndexingExplorer from '../../../components/IndexingExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/indexing/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS02 是一份可视化讲解（Visual Explainer）。它把执行配置中的 `gridDim`、`blockDim` 与每个 thread 可见的 `blockIdx`、`threadIdx` 分开，再引入逻辑数据范围 `extent`，让你预测一个已 launch thread 是否拥有合法数据位置。
+
+<IndexingExplorer locale="zh-CN" />
+
+## 模型与输入边界
+
+选择 1D、2D 或 3D 后，无效轴会规范化为尺寸 `1`、坐标 `0`。Grid、block、数据范围和选择坐标都接受十进制整数。非法、越界、fractional 或会造成不安全整数乘积的输入不会替换上一份合法模型。
+
+界面每轴上限与最多显示 32 个 thread 按钮只为阻止浏览器创建失控状态。它们不是 CUDA device property，也不构成 GPU Capability Tier。
+
+## 一维、二维与三维坐标
+
+每个有效轴独立使用同一个方程：
+
+```text
+global.x = blockIdx.x * blockDim.x + threadIdx.x
+global.y = blockIdx.y * blockDim.y + threadIdx.y
+global.z = blockIdx.z * blockDim.z + threadIdx.z
+```
+
+改变维数不会改变 x 最快（x-fastest）的约定。它只决定 y、z 是否参与坐标和 bounds 判断。
+
+## 三种不同的线性编号
+
+Block 内局部 thread ID 决定 warp 与 lane：
+
+```text
+localThread = threadIdx.x
+            + blockDim.x * (threadIdx.y + blockDim.y * threadIdx.z)
+warp = floor(localThread / 32)
+lane = localThread % 32
+```
+
+Grid 内线性 block ID 也按 x 最快展开：
+
+```text
+linearBlock = blockIdx.x
+            + gridDim.x * (blockIdx.y + gridDim.y * blockIdx.z)
+```
+
+只有先声明数据采用 x 最快的 row-major 布局，才得到：
+
+```text
+dataIndex = global.x + extent.x * (global.y + extent.y * global.z)
+```
+
+多维 launch 中，`linearBlock * threadsPerBlock + localThread` 通常**不等于**这个空间 row-major `dataIndex`。VIS02 分开显示这些值，避免把执行层次的线性顺序误当作数据布局。
+
+## Bounds 状态
+
+一个已 launch thread 只有在每个有效轴都满足 `global.axis < extent.axis` 时才是 **IN BOUNDS**。最后一个 partial block 中仍会存在合法的 launch thread，但其中一部分对逻辑数据是 **OUT OF BOUNDS**，kernel 必须让这些 thread 跳过相应访问。
+
+状态同时使用文字、`OK`/`!` 标记和边框，不只依赖颜色。每个轴的坐标、extent 和布尔判断都保留在 table 中。
+
+## 静态示例
+
+组件末尾的 1D、2D、3D 卡片是 purpose-built static fallback，全部由交互区使用的同一纯 TypeScript 模型生成。禁用 JavaScript或打印时，配置、选择坐标、全局坐标、局部 ID、warp/lane、数据索引与 bounds 结论仍然存在。
+
+## 证据边界
+
+浏览器只求值索引方程。它没有编译 CUDA，也没有在 GPU 上 launch thread。因此当前选择、bounds 标签和静态示例都不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**。证据分类见 [O02](/start/evidence-status/)。
+
+## 来源
+
+Grid、block、1D/2D/3D 内建量和 x-fastest linearization 依据 NVIDIA [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html) 与 [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)。两页均标为 CUDA Programming Guide v13.3，2026-05-27 更新，本站于 2026-08-24 复核。
+
+交互与验证接口按 Context7 中当前 Astro、Starlight、Playwright 资料以及 WHATWG custom elements、W3C `role=status` 和 reduced-motion owner 文档复核。页面的 1D/2D/3D 数值、布局和注释均为本站原创，没有镜像 NVIDIA diagram、table 或 sample listing。

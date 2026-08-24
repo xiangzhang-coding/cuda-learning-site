@@ -1,0 +1,176 @@
+---
+title: 'VIS01：Kernel 从 launch 到完成的路径'
+description: 用可播放、可单步和可拖动的确定性模型理解 grid、block、warp、内存事务与可观察完成，同时保留真实调度边界。
+pairId: vis01
+counterpart: /en/visuals/kernel-journey/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - model
+  - controls
+  - scheduling-boundary
+  - static-sequence
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS01
+relatedUnits:
+  - O01
+  - O02
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA host and device execution'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT hardware model'
+    accessDate: '2026-08-24'
+  - title: 'Astro client-side scripts'
+    url: 'https://docs.astro.build/en/guides/client-side-scripts/'
+    version: 'Astro 7.2.4 selected; current owner documentation reviewed'
+    platform: 'Static browser output'
+    accessDate: '2026-08-24'
+  - title: 'Starlight sidebar configuration'
+    url: 'https://starlight.astro.build/guides/sidebar/'
+    version: 'Starlight 0.41.7 selected; current owner documentation reviewed'
+    platform: 'Astro static documentation routes'
+    accessDate: '2026-08-24'
+  - title: 'WHATWG HTML - Custom elements'
+    url: 'https://html.spec.whatwg.org/multipage/custom-elements.html'
+    version: 'Living Standard; last updated 2026-08-21'
+    platform: 'Current browser engines'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique ARIA22 - role=status'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'Assistive-technology status messages'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique C39 - prefers-reduced-motion'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/css/C39'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'CSS media queries'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: vis01
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-24'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,model,controls,scheduling-boundary,static-sequence,evidence-boundary,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: visual-explainer
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: VIS01
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O01,O02'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'None: deterministic browser model; no CUDA-capable system required'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '9'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12'
+---
+
+import KernelJourney from '../../../components/KernelJourney.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/kernel-journey/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS01 是一份可视化讲解（Visual Explainer）。它用一条**确定性的教学轨迹**把 kernel launch、grid 中的 thread block、SM 上的 warp、global-memory transaction 和同步边界连起来。确定性只服务于重复操作和预测，不代表真实 GPU 采用固定调度顺序。
+
+<KernelJourney locale="zh-CN" />
+
+## 模型如何读取
+
+轨迹从 host 把 launch 放入 stream 开始，到声明的同步或依赖边界可以观察全部 grid 工作完成为止。每一步只增加一个概念事实；向后拖动会重建对应状态，不保留后续步骤的高亮。
+
+浏览器不自动开始播放。页面初次打开、刷新和重置都会回到第一个步骤，也不会把可视化状态写入 `localStorage`、cookie 或远端服务。
+
+## 控件与无动态访问
+
+- **播放**按固定顺序推进，完成后停止；间隔只是界面节奏。
+- **暂停**保留当前步骤；**单步**推进一次并保持暂停。
+- 范围输入可用方向键逐步定位；**重置**清除播放状态并回到 launch。
+- `prefers-reduced-motion` 下没有位移动画。所有事实仍可通过单步、拖动和完整静态序列获取。
+
+## 真实调度边界
+
+一个 thread block 的全部 thread 在一个 SM 上执行，但不同 block 没有保证的分派或完成顺序；它们可以并行，也可以串行。Block 内 thread 以 x 最快的局部线性 ID 划分为 32-thread warp。图中只跟踪一个示意 block 和一个 ready warp，不声称其他合法调度不存在。
+
+内存阶段使用一个严格限定的例子：一个 warp 的 32 个 lane 读取对齐、连续的 4-byte word，总共覆盖 128 B，因此由四个 32 B global-memory transaction 满足。宽度、对齐、地址分布、cache 行为或架构条件变化时，事务数量也可能变化。
+
+## 静态阶段序列
+
+组件中的编号列表就是 purpose-built static fallback。禁用 JavaScript 时控件不会出现，但八个阶段、每个阶段的边界说明和证据声明仍在初始 HTML 中；打印时也只保留这份完整序列，而不是打印一个失去状态的动画截图。
+
+## 证据边界
+
+这个页面没有编译 CUDA，也没有在 GPU 上运行 kernel。浏览器的当前状态、播放间隔、完成标签和截图都不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**。真实运行证据必须遵守 [O02 的证据状态合同](/start/evidence-status/)。
+
+## 来源
+
+CUDA 事实依据 NVIDIA 的 [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html)、[Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)、[Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html) 和 [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)，页面均标为 CUDA Programming Guide v13.3，2026-05-27 更新，本站于 2026-08-24 复核。
+
+交互使用 Astro 7.2.4 处理的 TypeScript client script、light-DOM custom element 和原生 HTML 控件。状态消息采用预先存在的 `role="status"` 容器；减少动态效果遵循 `prefers-reduced-motion`。这些接口同时按 Context7 的 Astro、Starlight 和 Playwright 当前资料以及上方列出的 WHATWG/W3C owner 文档复核。
+
+全部流程图形、阶段布局和文字注释均为本站原创；未复制、描摹或改编 NVIDIA 的 figure、table 或 sample listing。

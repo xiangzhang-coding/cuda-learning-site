@@ -8,7 +8,7 @@ Website source, configuration, styles, test tooling, and scripts are licensed un
 
 This scope includes:
 
-- `astro.config.mjs`, `src/content.config.ts`, `src/components/`, `src/styles/`, and `src/theme-contract.ts`
+- `astro.config.mjs`, `src/content.config.ts`, `src/components/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
 - `scripts/` and `tests/`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
@@ -24,7 +24,7 @@ Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page o
 
 ## Adaptations
 
-No adapted content or assets are included in this release. It contains no copied diagram, sample listing, external font, or third-party image. EX02 is original code rather than a reconstruction of an NVIDIA sample. The three CSS textures and theme-control mark are original software styling under Apache-2.0. Package-provided interface assets remain under their upstream terms and are recorded in `THIRD_PARTY_NOTICES.md`.
+No adapted content or assets are included in this release. It contains no copied diagram, sample listing, external font, or third-party image. EX02 is original code rather than a reconstruction of an NVIDIA sample. VIS01 and VIS02 use original HTML/CSS visual compositions, model code, worked values, and annotations; no owner figure or table is mirrored or traced. The three CSS textures, theme-control mark, Visual Explainer components, models, and styling are original software under Apache-2.0, while their instructional prose and rendered teaching composition are covered by the page-level CC BY 4.0 declaration. Package-provided interface assets remain under their upstream terms and are recorded in `THIRD_PARTY_NOTICES.md`.
 
 Original, upstream, or adapted files under `src/assets/`, `public/assets/`, `third_party/`, and the root favicon require an adjacent `<filename>.license.json` sidecar:
 

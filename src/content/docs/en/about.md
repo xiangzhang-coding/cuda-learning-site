@@ -38,9 +38,9 @@ CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU
 
 ## Current scope
 
-The site maintains a prerequisite-bearing Stable Curriculum alongside runnable code, external Labs, Exercises, and a terminology index. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
+The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable Examples, external Labs, Exercises, Visual Explainers, and a Glossary. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
 
-The public surface now contains the Orientation route: [O01](/en/start/using-the-learning-site/), [O02](/en/start/evidence-status/), [O03](/en/start/environment-manifest/), their Exercises and solutions, the [EX02 vector-addition Runnable Example](/en/examples/vector-addition/), plus the [Practice Bank](/en/practice/), [Glossary](/en/glossary/), and [Sources and Version Record](/en/sources-and-versions/). EX02 has independent compilation evidence, but the website ran no CUDA binary and declares no Reference Environment.
+The public surface now contains the Orientation route: [O01](/en/start/using-the-learning-site/), [O02](/en/start/evidence-status/), [O03](/en/start/environment-manifest/), their Exercises and solutions, the [EX02 vector-addition Runnable Example](/en/examples/vector-addition/), [VIS01 Kernel Journey](/en/visuals/kernel-journey/), and [VIS02 Indexing](/en/visuals/indexing/), plus the [Practice Bank](/en/practice/), [Glossary](/en/glossary/), and [Sources and Version Record](/en/sources-and-versions/). EX02 has independent compilation evidence, but the website ran no CUDA binary and declares no Reference Environment; the two browser models also grant no CUDA Evidence Status.
 
 ## Author
 
