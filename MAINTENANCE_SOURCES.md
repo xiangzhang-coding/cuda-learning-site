@@ -3,7 +3,7 @@
 # Maintenance Source Record
 
 - Review date: 2026-08-24
-- Scope: public repository baseline, three-theme visual foundation, VIS01/VIS02 deterministic Visual Explainers, web quality CI, O02/O03 evidence/environment contract, and canonical EX02 compile evidence
+- Scope: public repository baseline, three-theme visual foundation, VIS01/VIS02 deterministic Visual Explainers, web quality CI, O02/O03 evidence/environment contract, F01/LAB02 first-kernel route, and canonical EX02 compile evidence
 
 Context7 was used for current interface discovery. Exact package manifests, tagged owner source, action tags/commits, and versioned owner documentation govern the selected versions when a current Context7 index lags the selected patch.
 
@@ -20,7 +20,7 @@ Context7 was used for current interface discovery. Exact package manifests, tagg
 
 ## CUDA teaching coordinates
 
-These are the source coordinates and declared evidence targets for EX02 plus the CUDA facts modeled by VIS01/VIS02. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane, while the current v13.3 Programming Guide governs the conceptual visual facts. A tag, reviewed source, or browser model does not grant Compile-Checked without a passing workflow record.
+These are the source coordinates and declared evidence targets for EX02/LAB02 plus the CUDA facts taught by F01 and modeled by VIS01/VIS02. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane, while the current v13.3 Programming Guide governs foundational and visual facts. A tag, reviewed source, Learning Unit, Lab instruction, or browser model does not grant Compile-Checked without a passing workflow record.
 
 | Interface | Exact coordinate | Owner sources reviewed |
 | --- | --- | --- |
@@ -32,8 +32,10 @@ These are the source coordinates and declared evidence targets for EX02 plus the
 | NVCC phases | Compiler Driver 13.3.1 compile, PTX/CUBIN, link, and run phase boundary | [supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases) |
 | VIS01 execution model | CUDA Programming Guide v13.3; updated 2026-05-27 | [programming model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html), [SIMT kernels and 32 B transactions](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html), [asynchronous launch and synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html), [warp scheduling and Independent Thread Scheduling](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) |
 | VIS02 indexing model | CUDA Programming Guide v13.3; updated 2026-05-27 | [1D/2D/3D grids and blocks](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html), [built-ins and x-fastest linearization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) |
+| F01 first-kernel model | CUDA Programming Guide v13.3; Runtime API 13.3.1 | [introductory CUDA C++ and vector indexing](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html), [asynchronous execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html), [Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html) |
+| LAB02 runtime boundary | Runtime API 11.8.0, 12.9.2/archive label 12.9.1, and 13.3.1; native Linux x86-64; one GPU; compute capability >=7.5 | [11.8 API](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html), [12.9.2 archive API](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html), [13.3 API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html), [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html) |
 
-CUDA Compile Evidence [run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) passed EX02 with C++17 in all three Lanes and with C++20 in the 12.9.2 and 13.3.1 Lanes. The exact 13.3.1 probe resolved the C++23 documentation conflict for this image: GCC 13.3/NVCC 13.3.73 reports `-std=c++23` unsupported with the configured host compiler. That probe grants no EX02 C++23 status. No CUDA binary ran, no Reference Environment is declared, and no runtime or performance evidence was produced.
+CUDA Compile Evidence [run 32720214527](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/32720214527) passed EX02 with C++17 in all three Lanes and with C++20 in the 12.9.2 and 13.3.1 Lanes. F01 and LAB02 import that exact source and do not broaden its evidence scope. The exact 13.3.1 probe resolved the C++23 documentation conflict for this image: GCC 13.3/NVCC 13.3.73 reports `-std=c++23` unsupported with the configured host compiler. That probe grants no EX02 C++23 status. No CUDA binary ran, no Reference Environment is declared, and LAB02 runtime remains Pending Hardware Verification.
 
 VIS01 and VIS02 use original deterministic TypeScript models and original HTML/CSS compositions. Their controls, timer cadence, equations, bounds labels, screenshots, and browser test results are conceptual only and grant no Compile-Checked, Community-Observed, or Runtime-Verified status. No NVIDIA figure, table, sample listing, or private material was copied, traced, or adapted.
 

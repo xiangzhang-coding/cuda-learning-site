@@ -21,8 +21,16 @@ const criticalRoutes = [
   '/en/start/environment-manifest/exercises/',
   '/start/environment-manifest/solutions/',
   '/en/start/environment-manifest/solutions/',
+  '/foundations/first-cuda-kernel/',
+  '/en/foundations/first-cuda-kernel/',
+  '/foundations/first-cuda-kernel/exercises/',
+  '/en/foundations/first-cuda-kernel/exercises/',
+  '/foundations/first-cuda-kernel/solutions/',
+  '/en/foundations/first-cuda-kernel/solutions/',
   '/examples/vector-addition/',
   '/en/examples/vector-addition/',
+  '/labs/vector-addition/',
+  '/en/labs/vector-addition/',
   '/visuals/kernel-journey/',
   '/en/visuals/kernel-journey/',
   '/visuals/indexing/',
@@ -39,7 +47,7 @@ const criticalRoutes = [
 
 test('@accessibility axe detects no tagged violations across themes; this is not a conformance claim', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
 
   for (const theme of THEME_IDS) {
     await page.goto('/');

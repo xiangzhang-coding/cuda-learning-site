@@ -173,6 +173,8 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/evidence-status/exercises/',
     '/start/environment-manifest/exercises/',
     '/en/start/environment-manifest/exercises/',
+    '/foundations/first-cuda-kernel/exercises/',
+    '/en/foundations/first-cuda-kernel/exercises/',
   ])('provides goals, constraints, acceptance criteria, and layered hints in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/Goal|目标/);
@@ -189,24 +191,29 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/evidence-status/solutions/',
     '/start/environment-manifest/solutions/',
     '/en/start/environment-manifest/solutions/',
+    '/foundations/first-cuda-kernel/solutions/',
+    '/en/foundations/first-cuda-kernel/solutions/',
   ])('keeps reviewed solutions on a separate route in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/参考解答|Reviewed solution/);
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes only the two Issue #5 Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes five complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     expect(text).toContain('PB-R0-001');
     expect(text).toContain('PB-R0-002');
-    expect(text).not.toMatch(/PB-R0-00[3-5]|EX01|LAB01/);
+    for (const entry of ['PB-R0-003', 'PB-R0-004', 'PB-R0-005']) expect(text).toContain(entry);
+    expect(text).not.toMatch(/EX01|LAB01/);
     expect(text).toMatch(/O02/);
     expect(text).toMatch(/O03/);
+    expect(text).toMatch(/F01/);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
     expect(document.querySelector('a[href*="evidence-status"]')).not.toBeNull();
     expect(document.querySelector('a[href*="environment-manifest"]')).not.toBeNull();
+    expect(document.querySelector('a[href*="first-cuda-kernel"]')).not.toBeNull();
   });
 });

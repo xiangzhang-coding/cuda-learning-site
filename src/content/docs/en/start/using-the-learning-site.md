@@ -69,8 +69,9 @@ As of **2026-08-24**, the complete prerequisite shape is:
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
 3. After O01, enter [O02: Recording Evidence Honestly](/en/start/evidence-status/) and [O03: Reading an Environment Manifest](/en/start/environment-manifest/) as separate branches.
+4. After O03, complete [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/), then run [LAB02](/en/labs/vector-addition/) in a native Linux CUDA environment.
 
-O02 and O03 each have Exercises and separate reviewed solutions. The [EX02 vector-addition Runnable Example](/en/examples/vector-addition/) publishes its canonical source, build contract, and independent compilation/runtime evidence boundary. [VIS01 Kernel Journey](/en/visuals/kernel-journey/) and [VIS02 Indexing](/en/visuals/indexing/) provide deterministic browser models, textual explanations, and static fallbacks. The [Practice Bank](/en/practice/) currently contains two complete entries linked back to O02 and O03. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
+O02, O03, and F01 each have Exercises and separate reviewed solutions. The [EX02 vector-addition Runnable Example](/en/examples/vector-addition/) is the sole canonical source shared by F01/LAB02 and publishes its build contract and independent compilation/runtime evidence boundary. [VIS01 Kernel Journey](/en/visuals/kernel-journey/) and [VIS02 Indexing](/en/visuals/indexing/) provide deterministic browser models, textual explanations, and static fallbacks. The [Practice Bank](/en/practice/) now contains five complete entries linked back to O02, O03, and F01. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
 
 ## Three visual themes, one body of content
 

@@ -1,0 +1,209 @@
+---
+title: 'F01: From Prediction to a First CUDA Kernel'
+description: Predict thread indices first, then use canonical EX02 source to understand implementation, correctness, measurement boundaries, and explanation.
+pairId: f01
+counterpart: /foundations/first-cuda-kernel/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - motivation
+  - prediction
+  - implementation
+  - correctness
+  - measurement
+  - optimization-boundaries
+  - explanation
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F01
+prerequisites:
+  - O03
+relatedUnits:
+  - O02
+  - VIS01
+  - VIS02
+  - LAB02
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - kernel
+  - error-checking
+  - cpu-reference
+hardwareGate: 'None for this Learning Unit; LAB02 requires native Linux and one qualifying CUDA GPU'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Introduction to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA host and device execution'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Runtime API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,motivation,prediction,implementation,correctness,measurement,optimization-boundaries,explanation,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O03 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O02,VIS01,VIS02,LAB02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'kernel,error-checking,cpu-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None for this Learning Unit; LAB02 requires native Linux and one qualifying CUDA GPU' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+import IndexingExplorer from '../../../../components/IndexingExplorer.astro';
+import KernelJourney from '../../../../components/KernelJourney.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/first-cuda-kernel/" lang="zh-CN">阅读中文对应页</a>
+
+Vector addition is small enough to expose the complete first-kernel problem: who owns an element, what an out-of-bounds thread does, when the host may trust a result, and why “the program printed something” is not correctness evidence. This Learning Unit introduces only the C++ and GPU architecture context needed to answer those questions.
+
+## What you should be able to do
+
+- Predict a one-dimensional thread's global index and bounds state from an execution configuration before reading the implementation.
+- Explain the `__global__` kernel, host/device memory lifecycle, and post-launch error boundaries in canonical EX02 source.
+- Define correctness with an independent CPU reference and an absolute-or-relative tolerance rule.
+- Keep correctness, measurement, and optimization separate without inferring GPU performance from compile records or browser models.
+
+## Prerequisite
+
+Complete [O03: Reading an Environment Manifest](/en/start/environment-manifest/) first. You need to know why GPU, compute capability, Toolkit Lane, workload, and correctness criteria remain separate. Return to [O02](/en/start/evidence-status/) for status decisions. This page itself receives no CUDA Evidence Status.
+
+## Motivation: assign loop ownership to threads
+
+The CPU reference handles `0..N-1` in sequence. A CUDA kernel performs the same element-wise addition, but a launch creates a grid of thread blocks, each containing threads. Every thread must first calculate the element it owns and then decide whether that index belongs to the logical data range.
+
+Only three C++ facts are needed here: pointers identify array starts, `element_count` gives the legal element count, and `output[index] = left[index] + right[index]` writes one result. `__global__` marks a function launched by the host and executed on the device. It does not make that function executable by a web page or ordinary C++ compiler.
+
+## Prediction: calculate before reading code
+
+For a one-dimensional configuration, each thread uses:
+
+```text
+index = blockIdx.x * blockDim.x + threadIdx.x
+```
+
+Suppose `element_count = 1000` and each block has `256` threads. The launch needs `ceil(1000 / 256) = 4` blocks, or 1024 launched threads. Write down three predictions first:
+
+1. What is `index` for `blockIdx.x = 2` and `threadIdx.x = 17`?
+2. Which global index owns the final valid element?
+3. Should global indices `1000..1023` write or skip?
+
+VIS02 uses these same indexing facts. Change the configuration, select a thread, and check your prediction. It is a browser model, not CUDA execution.
+
+<IndexingExplorer locale="en" />
+
+## Implementation: read only canonical EX02
+
+[View or download the complete EX02 project at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition). `src/vector_add.cu`, `include/vector_add_reference.hpp`, `project.json`, and the build files are the only canonical sources. Do not reconstruct a second program from page excerpts.
+
+The kernel's teaching surface fits in this declared marker range:
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+Line 37 combines the block coordinate and coordinate within the block into a global index. Line 38 is the bounds check: the launch extent may round up, but only a thread with `index < element_count` may access the arrays. This protects the final partial block; it does not reduce the number of launched threads.
+
+The host also owns three device allocations, two input copies, block-count calculation, launch, waiting, output copy, and cleanup. The execution configuration chooses blocks and threads per block. It creates threads but does not define the logical data extent for the kernel.
+
+## Correctness: error path, CPU reference, tolerances
+
+Every CUDA Runtime operation that needs checking uses one fail-fast boundary:
+
+<CanonicalCode exampleId="EX02" range="error-checking" />
+
+A qualifying run must check all three `cudaMalloc` calls, both host-to-device copies, `cudaGetLastError`, `cudaDeviceSynchronize`, the device-to-host copy, and all three `cudaFree` calls. A launch normally returns to the host asynchronously. `cudaGetLastError` checks the launch boundary; `cudaDeviceSynchronize` waits and exposes execution errors. Checking only one leaves the boundary incomplete.
+
+An independent CPU reference defines the expected output:
+
+<CanonicalCode exampleId="EX02" range="cpu-reference" />
+
+EX02 uses absolute tolerance `1e-5` and relative tolerance `1e-5` for every element. **An element passes when either criterion accepts it; it fails only when neither accepts it.** `make host-test` can verify the CPU reference and comparison function, but it runs no GPU kernel and cannot establish GPU correctness.
+
+## Measurement: leave the result empty first
+
+Do not interpret time before correctness passes. A future measurement also needs a complete Environment Manifest, exact command, workload, synchronization point, timer and version, warm-up, sample method, and baseline. This page executes no CUDA and reports no output, latency, bandwidth, speedup, or profiler data.
+
+The exact EX02 source is Compile-Checked in three Toolkit Lanes. That says only that its declared build stages passed; runtime remains Pending Hardware Verification. You will run your own copy under that independent evidence contract in [LAB02](/en/labs/vector-addition/).
+
+## Optimization boundaries: do not chase speed on the first pass
+
+The first pass requires correct indexing, safe bounds, visible errors, and comparable results. Do not claim bandwidth optimization because accesses look contiguous. Do not change block size and announce a speedup without a baseline and measurement method. Memory coalescing, occupancy, shared memory, and profiler interpretation are beyond F01 acceptance.
+
+[VIS01](/en/visuals/kernel-journey/) can locate launch, block, warp, memory transaction, and completion boundaries. Its fixed step order and timing are instructional UI only. Real block scheduling order is not fixed, and browser stages are not a performance trace.
+
+## Explanation: move from launch to a comparable result
+
+Use the shared VIS01 below to anchor an explanation in seven causal boundaries: the host submits a launch; a grid contains blocks; an SM schedules a block; threads form warps; instructions cause memory accesses; synchronization makes completion observable; and only a host copy permits comparison with the CPU reference.
+
+<KernelJourney locale="en" />
+
+A qualifying explanation also says what is not guaranteed: block dispatch order, correspondence between animation duration and GPU time, execution from Compile-Checked, or a performance conclusion from correctness.
+
+## Retrieval check
+
+1. Why can `ceil(N / blockDim.x)` create out-of-bounds threads and still be a legal design?
+2. Which hierarchy level supplies each term in `blockIdx.x * blockDim.x + threadIdx.x`?
+3. Why are both `cudaGetLastError` and `cudaDeviceSynchronize` required?
+4. Under which condition does an element pass EX02's absolute/relative tolerance rule?
+5. Why can none of Compile-Checked, the CPU host test, or VIS01 prove a correct or faster GPU run?
+
+## Continue with practice
+
+- Complete the [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/), then inspect the separate [reviewed solutions](/en/foundations/first-cuda-kernel/solutions/).
+- Solve PB-R0-003, PB-R0-004, and PB-R0-005 in the [Practice Bank](/en/practice/).
+- Enter [LAB02: Run and Verify Vector Addition](/en/labs/vector-addition/) when a native Linux CUDA environment is ready.
+
+## Sources and review
+
+The current Context7 `/websites/nvidia_cuda` index supported discovery and cross-checking for `__global__`, execution configuration, one-dimensional indexing, asynchronous launch, `cudaGetLastError`, and `cudaDeviceSynchronize`. Exact teaching claims are governed by the NVIDIA CUDA Programming Guide v13.3 and CUDA Runtime API 13.3.1 owner documentation. Complete coordinates appear in the [Sources and Version Record](/en/sources-and-versions/).
+
+**Fact checked: 2026-08-24.** The prose and instructional composition are original. They copy no NVIDIA sample listing, figure, private material, runtime output, or performance number.

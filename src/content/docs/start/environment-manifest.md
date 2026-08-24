@@ -24,6 +24,8 @@ prerequisites:
   - O01
 relatedUnits:
   - O02
+  - F01
+  - LAB02
 exampleIds:
   - O03-MANIFEST-TEMPLATE
   - O03-INCOMPLETE-A
@@ -90,7 +92,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: O01 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: O02 }
+    attrs: { name: 'cuda:related-units', content: 'O02,F01,LAB02' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: 'O03-MANIFEST-TEMPLATE,O03-INCOMPLETE-A' }
   - tag: meta
@@ -202,6 +204,7 @@ Ubuntu 24.04 x86-64 加 CUDA 13.3.1 目前只是候选软件坐标；它没有 G
 
 - 完成 [O03 练习（Exercise）](/start/environment-manifest/exercises/)，再查看独立的[参考解答](/start/environment-manifest/solutions/)。
 - 在[练习题库（Practice Bank）](/practice/)完成 PB-R0-002，修复一份不完整 manifest 和错误支持边界。
+- 继续到 [F01](/foundations/first-cuda-kernel/)，并在进入 [LAB02](/labs/vector-addition/)前把本页字段准备成真实记录模板。
 
 ## 来源与复核
 

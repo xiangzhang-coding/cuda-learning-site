@@ -71,14 +71,14 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** A standalone source project demonstrating one focused idea and serving as the canonical executable source for Learning Units.
 - **Avoid:** Snippet, pseudocode, Lab.
-- **Related unit:** O01.
+- **Related units:** O01 and F01.
 - **Version note:** Each project declares its own compatibility.
 
 ### Lab · 实验
 
 - **Definition:** A guided activity that learners run in an external CUDA-capable environment, with expected observations and acceptance criteria.
 - **Avoid:** Demo, browser playground.
-- **Related unit:** O01.
+- **Related units:** O01 and LAB02.
 - **Version note:** Each Lab declares its environment requirements.
 
 ### Exercise · 练习
@@ -214,6 +214,69 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O03.
 - **Version note:** Model mappings and feature tables require current NVIDIA documentation.
 
+### kernel · 核函数
+
+- **Definition:** A function launched by the host and executed by many threads on a CUDA device. In CUDA C++, a `__global__` kernel is launched with an execution configuration.
+- **Avoid:** Ordinary CPU function, browser animation.
+- **Related units:** F01 and LAB02.
+- **Version note:** F01 uses the foundational execution model in CUDA Programming Guide v13.3.
+
+### execution configuration · 执行配置
+
+- **Definition:** The kernel-launch configuration that declares grid and thread-block shapes; a one-dimensional case commonly supplies block count and threads per block.
+- **Avoid:** Data extent, GPU configuration.
+- **Related resources:** F01 and VIS02.
+- **Version note:** The configuration creates execution threads but does not define logical data extent automatically.
+
+### grid · 网格
+
+- **Definition:** The complete collection of thread blocks created by one kernel launch, with one-, two-, or three-dimensional shape.
+- **Avoid:** Data array, fixed scheduling order.
+- **Related resources:** F01, VIS01, and VIS02.
+- **Version note:** Grid coordinates do not guarantee block dispatch or completion order.
+
+### thread block · 线程块
+
+- **Definition:** A group of threads in a grid scheduled together on one SM. `blockIdx` identifies a block, while `blockDim` describes its shape.
+- **Avoid:** CPU thread pool, warp.
+- **Related resources:** F01, VIS01, and VIS02.
+- **Version note:** F01 uses only one-dimensional blocks; VIS02 covers multidimensional relationships.
+
+### thread · 线程
+
+- **Definition:** One logical execution instance of a kernel. It derives an owned data position from `threadIdx` and block/grid coordinates.
+- **Avoid:** Element, warp, operating-system thread.
+- **Related resources:** F01 and VIS02.
+- **Version note:** A launched thread may lie beyond logical data extent, so a bounds check remains necessary.
+
+### host and device · 主机与设备
+
+- **Definition:** Host code runs on the CPU side and manages allocation, copies, launch, and synchronization. Device code executes on a CUDA GPU, with explicit memory and completion boundaries between them.
+- **Avoid:** Treating a host test as a GPU run, treating device memory as host memory.
+- **Related units:** F01 and LAB02.
+- **Version note:** LAB02 uses the declared CUDA Runtime API 11.8.0, 12.9.2, or 13.3.1 Lane.
+
+### bounds check · 边界判断
+
+- **Definition:** A comparison between a thread's derived index and logical extent before array access, causing out-of-bounds threads in the final partial block to skip access.
+- **Avoid:** Preventing thread launch, shrinking the grid.
+- **Related resources:** F01, VIS02, and LAB02.
+- **Version note:** EX02's one-dimensional condition is `index < element_count`.
+
+### CPU reference · CPU 参考实现
+
+- **Definition:** An implementation independent of the CUDA kernel that calculates expected results on the CPU for element-wise correctness comparison.
+- **Avoid:** GPU runtime evidence, performance baseline unless separately defined by a measurement contract.
+- **Related units:** F01 and LAB02.
+- **Version note:** EX02's host-only test runs no GPU and grants no Runtime-Verified status.
+
+### tolerance · 容差
+
+- **Definition:** A predefined floating-point acceptance rule. EX02 accepts an element when either absolute `1e-5` or relative `1e-5` succeeds.
+- **Avoid:** Requiring both criteria, treating any decimal output as correct.
+- **Related units:** F01 and LAB02.
+- **Version note:** The values belong to the EX02 correctness contract; changing them creates a new evidence scope.
+
 ## Maintenance rule
 
-These entries share the O01, O02, and O03 fact-check date of **2026-08-24**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.
+These entries share the O01, O02, O03, F01, and LAB02 fact-check date of **2026-08-24**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.

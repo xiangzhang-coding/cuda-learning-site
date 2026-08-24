@@ -10,15 +10,20 @@ structure:
   - use
   - entry-pb-r0-001
   - entry-pb-r0-002
+  - entry-pb-r0-003
+  - entry-pb-r0-004
+  - entry-pb-r0-005
   - review
 resourceKind: practice-bank
 unitId: PB-R0
 prerequisites:
   - O02
   - O03
+  - F01
 relatedUnits:
   - O02
   - O03
+  - F01
 hardwareGate: none
 evidence:
   compilation: []
@@ -33,15 +38,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,entry-pb-r0-001,entry-pb-r0-002,review' }
+    attrs: { name: 'cuda:structure', content: 'use,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -58,7 +63,7 @@ head:
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面两个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面五个完整条目，不用空白题目预告未来内容。
 
 ## PB-R0-001：修复证据状态（Evidence Status）记录
 
@@ -127,6 +132,93 @@ head:
 
 **来源依据（Source basis）：** 本站 [O03](/start/environment-manifest/) 的原创 manifest 和支持合同，以及 NVIDIA [CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)与 [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)。
 
+## PB-R0-003：在运行前审查索引预测
+
+- **ID 与双语发布对：** PB-R0-003；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 概念与实现；基础。
+- **先修条件：** [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态推理。
+- **相关学习单元：** F01。
+- **最后复核（Last reviewed）：** 2026-08-24。
+
+**题目：** 对 `N = 65`、`blockDim.x = 32` 的一维向量加法，给出 block 数、总 launch thread 数、最后一个合法 index，并判断最后一个 block 中 `threadIdx.x = 0` 和 `1` 的 bounds 状态。解释为什么 bounds check 仍然必需。
+
+**约束：** 先写公式；不运行程序；零起始索引；不能把 launch 范围当作逻辑数据范围。
+
+**预期证据：** 一张坐标表和一段不超过五句的所有权解释。
+
+**验收条件：** 得到 3 个 block、96 个 launch thread、最后合法 index 64；识别最后 block 的局部 thread 0 合法、1 越界；说明 31 个越界 thread 必须跳过访问。
+
+<details><summary>提示 1</summary>Block 数使用 `ceil(65 / 32)`。</details>
+
+<details><summary>提示 2</summary>最后一个 block 的 `blockIdx.x = 2`，所以其全局 index 从 64 开始。</details>
+
+**解答：** `ceil(65 / 32) = 3`，总共 launch 96 个 thread。最后一个合法元素是 index 64。最后 block 中局部 thread 0 的 global index 是 64，IN BOUNDS；局部 thread 1 的 global index 是 65，OUT OF BOUNDS。其余局部 thread 也越界，因此 kernel 必须用 `index < N` 保护访问。
+
+**有效替代方案：** 可以用数轴或 VIS02 的静态坐标表表达，只要公式和 bounds 理由仍可复核。
+
+**常见错误：** 向下取整成两个 block；把 index 65 当成最后元素；认为多出的 thread 没有被 launch。
+
+**来源依据（Source basis）：** 本站 [F01](/foundations/first-cuda-kernel/) 与 [VIS02](/visuals/indexing/) 的原创索引模型，以及 NVIDIA [Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html)。
+
+## PB-R0-004：修复不完整的错误与正确性边界
+
+- **ID 与双语发布对：** PB-R0-004；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 调试与正确性；基础。
+- **先修条件：** [F01](/foundations/first-cuda-kernel/)。
+- **硬件门槛（Hardware gate）：** 无；审查假设流程。
+- **相关学习单元：** F01、O02。
+- **最后复核（Last reviewed）：** 2026-08-24。
+
+**题目：** 一个程序只检查 `cudaMalloc` 和最终输出文字，然后声称“无报错且 GPU 正确”。写出缺失边界，并定义一个元素的接受规则。
+
+**约束：** 使用 EX02 已声明的 Runtime 流程和容差；不得虚构输出；必须区分 API 成功与数值正确。
+
+**预期证据：** 按执行顺序排列的检查清单，以及一条可计算的数值接受条件。
+
+**验收条件：** 包含三次 allocation、两次 H2D copy、launch error、synchronization、D2H copy、CPU comparison 和三次 free；绝对 `1e-5` 或相对 `1e-5` 满足其一即接受；指出一行输出不能替代这些检查。
+
+<details><summary>提示 1</summary>Launch 返回与 kernel 完成是两个边界。</details>
+
+<details><summary>提示 2</summary>失败条件是绝对和相对标准都不接受，而不是任一不接受。</details>
+
+**解答：** 在三次 `cudaMalloc` 后检查两次 H2D copy；launch 后先查 `cudaGetLastError`，再用 `cudaDeviceSynchronize` 等待并检查执行；检查 D2H copy；逐元素与独立 CPU reference 比较；最后检查三次 `cudaFree`。若 `abs(expected-actual) <= 1e-5` **或**该差值 `<= 1e-5 * max(abs(expected), abs(actual))`，元素通过。API 全部成功和数值全部通过缺一不可。
+
+**有效替代方案：** 可以用状态机或时序图代替清单，但必须保留相同顺序和两个独立验收层。
+
+**常见错误：** 只同步不检查 launch；把两个容差写成 AND；把 host test 当作 GPU 结果。
+
+**来源依据（Source basis）：** 本站 [F01](/foundations/first-cuda-kernel/) 与 [EX02](/examples/vector-addition/) 的 canonical error/correctness contract，以及 NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)。
+
+## PB-R0-005：审查一份 LAB02 证据申请
+
+- **ID 与双语发布对：** PB-R0-005；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 证据审查与实验准备；基础。
+- **先修条件：** [F01](/foundations/first-cuda-kernel/)；结合 [O02](/start/evidence-status/)和 [O03](/start/environment-manifest/)。
+- **硬件门槛（Hardware gate）：** 无；审查文本记录，不运行 CUDA。
+- **相关学习单元：** F01、O02、O03。
+- **最后复核（Last reviewed）：** 2026-08-24。
+
+**题目：** 一份 LAB02 申请只有“CUDA 13、vector add PASS、0.01 ms”，要求标记 Runtime-Verified。判断目前能授予什么状态，并列出补全路径。
+
+**约束：** 不猜环境 patch、GPU 或日志；不把性能数字当作正确性；Compile-Checked 只能引用 canonical EX02 的既有 Lane 记录。
+
+**预期证据：** 状态判断、缺口清单和一份执行前记录模板。
+
+**验收条件：** Runtime 保持 Pending Hardware Verification；不授予 Community-Observed 或 Runtime-Verified；要求完整 manifest、精确命令、原始日志、日期和 criteria result；把未经方法支持的 `0.01 ms` 标为不可解释原始文字。
+
+<details><summary>提示 1</summary>一句 `PASS` 缺少主体、标准、环境、日志和日期。</details>
+
+<details><summary>提示 2</summary>Runtime-Verified 还要求维护者在已声明 Reference Environment 中复现。</details>
+
+**解答：** 现有申请不能授予 Community-Observed 或 Runtime-Verified；运行轴保持 Pending Hardware Verification。补全时记录 GPU identity、compute capability、count、driver、Toolkit patch、NVCC、host compiler、原生 Linux、workload、memory、permissions、精确命令、CPU/tolerance 标准、日期、退出状态和原始日志。`0.01 ms` 在没有同步、工具版本、样本和基线时移入“不可解释原始文字”。只有维护者在声明的 Reference Environment 中按预定标准复现后，才评估 Runtime-Verified。
+
+**有效替代方案：** 社区先提交完整记录并满足标准时，可评估 Community-Observed，同时保留 Pending Hardware Verification；这仍不是维护者复现。
+
+**常见错误：** 因为 EX02 Compile-Checked 就升级 runtime；把未知 CUDA 13 环境当作 13.3.1 Lane；保留一个没有方法的性能数字作为观察。
+
+**来源依据（Source basis）：** [LAB02](/labs/vector-addition/)、[O02](/start/evidence-status/)和 [O03](/start/environment-manifest/)的原创证据合同。
+
 ## 复核记录
 
-两个条目及其英文对应内容在 **2026-08-24** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
+五个条目及其英文对应内容在 **2026-08-24** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
