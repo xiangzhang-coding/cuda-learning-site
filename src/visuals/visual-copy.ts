@@ -211,7 +211,7 @@ type IndexingCopy = {
 export const INDEXING_COPY = {
   'zh-CN': {
     eyebrow: 'VIS02 · 索引预测台',
-    title: '从六个 CUDA 内建量推导数据位置',
+    title: '从四个 CUDA 内建量与逻辑范围推导数据位置',
     summary: '改变 1D、2D、3D 配置并选择 thread，分别计算坐标、局部线性编号和 row-major 数据索引。',
     conceptualNotice:
       '这里只计算 CUDA 索引方程和逻辑 bounds。输入上限用于保护浏览器渲染，不是 CUDA hardware limit；页面不会 launch kernel。',
@@ -249,7 +249,7 @@ export const INDEXING_COPY = {
   },
   en: {
     eyebrow: 'VIS02 · INDEX PREDICTION DESK',
-    title: 'Derive data positions from six CUDA built-ins',
+    title: 'Derive data positions from four CUDA built-ins and logical extents',
     summary: 'Change a 1D, 2D, or 3D configuration and select a thread to compute coordinates, local linear IDs, and row-major data indices separately.',
     conceptualNotice:
       'This model evaluates CUDA indexing equations and logical bounds only. Input caps protect browser rendering; they are not CUDA hardware limits. The page launches no kernel.',

@@ -104,7 +104,7 @@ const staticExamples = INDEXING_STATIC_CONFIGURATIONS.map(({ id, config: example
       <p class="index-limit-note">{copy.browserLimit}</p>
     </div>
 
-    <div class="index-workbench" data-pagefind-ignore>
+    <div class="index-workbench" data-interactive-workbench data-pagefind-ignore hidden>
       <section class="thread-selector" aria-label={copy.selectedThread}>
         <h3>{copy.threadStrip}</h3>
         <p data-selected-thread>
@@ -269,12 +269,14 @@ const staticExamples = INDEXING_STATIC_CONFIGURATIONS.map(({ id, config: example
     connectedCallback() {
       if (this.dataset.ready === 'true') return;
       const controls = this.querySelector<HTMLElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
       const dimensionPicker = this.querySelector<HTMLSelectElement>('[data-dimension-picker]');
       const reset = this.querySelector<HTMLButtonElement>('[data-action="reset-indexing"]');
-      if (!controls || !dimensionPicker || !reset) return;
+      if (!controls || !workbench || !dimensionPicker || !reset) return;
 
       this.dataset.ready = 'true';
       controls.hidden = false;
+      workbench.hidden = false;
       dimensionPicker.addEventListener('change', () => {
         const dimensions = Number(dimensionPicker.value);
         if (dimensions !== 1 && dimensions !== 2 && dimensions !== 3) return;
@@ -354,7 +356,7 @@ const staticExamples = INDEXING_STATIC_CONFIGURATIONS.map(({ id, config: example
       this.dataset.validation = 'valid';
     }
 
-    private render() {
+    private render(focusThreadX?: number) {
       const copy = INDEXING_COPY[this.locale()];
       const result = calculateIndexing(this.config);
       this.dataset.dimensions = String(this.config.dimensions);
@@ -421,10 +423,10 @@ const staticExamples = INDEXING_STATIC_CONFIGURATIONS.map(({ id, config: example
       if (bounds) bounds.dataset.boundsState = result.inBounds ? 'in-bounds' : 'out-of-bounds';
       this.setText('[data-bounds-mark]', result.inBounds ? 'OK' : '!');
       this.setText('[data-bounds-copy]', result.inBounds ? copy.inBounds : copy.outOfBounds);
-      this.renderThreadButtons();
+      this.renderThreadButtons(focusThreadX);
     }
 
-    private renderThreadButtons() {
+    private renderThreadButtons(focusThreadX?: number) {
       const strip = this.querySelector<HTMLElement>('[data-thread-strip]');
       if (!strip) return;
       const count = Math.min(this.config.blockDim.x, INDEXING_LIMITS.renderedThreadButtons);
@@ -447,11 +449,14 @@ const staticExamples = INDEXING_STATIC_CONFIGURATIONS.map(({ id, config: example
         button.addEventListener('click', () => {
           this.config = { ...this.config, threadIdx: { ...this.config.threadIdx, x } };
           this.clearValidation();
-          this.render();
+          this.render(x);
         });
         return button;
       });
       strip.replaceChildren(...buttons);
+      if (focusThreadX !== undefined) {
+        buttons.find((button) => button.dataset.threadX === String(focusThreadX))?.focus();
+      }
     }
 
     private setText(selector: string, value: string) {

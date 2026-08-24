@@ -124,9 +124,18 @@ const stages = KERNEL_JOURNEY_STAGES.map(({ id }) => ({ id, ...copy.stages[id] }
 
       this.dataset.ready = 'true';
       controls.hidden = false;
-      play.addEventListener('click', () => this.apply({ type: 'play' }));
-      pause.addEventListener('click', () => this.apply({ type: 'pause' }));
-      step.addEventListener('click', () => this.apply({ type: 'step' }));
+      play.addEventListener('click', () => {
+        this.apply({ type: 'play' });
+        pause.focus();
+      });
+      pause.addEventListener('click', () => {
+        this.apply({ type: 'pause' });
+        play.focus();
+      });
+      step.addEventListener('click', () => {
+        this.apply({ type: 'step' });
+        if (step.disabled) reset.focus();
+      });
       reset.addEventListener('click', () => this.apply({ type: 'reset' }));
       scrub.addEventListener('input', () => this.apply({ type: 'scrub', stageIndex: Number(scrub.value) }));
       this.render();
@@ -181,6 +190,8 @@ const stages = KERNEL_JOURNEY_STAGES.map(({ id }) => ({ id, ...copy.stages[id] }
       const play = this.querySelector<HTMLButtonElement>('[data-action="play"]');
       const pause = this.querySelector<HTMLButtonElement>('[data-action="pause"]');
       const step = this.querySelector<HTMLButtonElement>('[data-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-action="reset"]');
+      const focusedControl = this.ownerDocument.activeElement;
 
       if (title) title.textContent = stageCopy.title;
       if (description) description.textContent = stageCopy.description;
@@ -197,6 +208,11 @@ const stages = KERNEL_JOURNEY_STAGES.map(({ id }) => ({ id, ...copy.stages[id] }
       if (play) play.disabled = this.state.isPlaying || this.state.stageIndex === finalStageIndex;
       if (pause) pause.disabled = !this.state.isPlaying;
       if (step) step.disabled = this.state.stageIndex === finalStageIndex;
+      if (play && focusedControl === play && play.disabled) pause?.focus();
+      else if (pause && focusedControl === pause && pause.disabled) {
+        if (this.state.stageIndex === finalStageIndex) reset?.focus();
+        else play?.focus();
+      } else if (step && focusedControl === step && step.disabled) reset?.focus();
     }
   }
 

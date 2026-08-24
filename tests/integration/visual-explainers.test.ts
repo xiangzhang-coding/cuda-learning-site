@@ -34,6 +34,7 @@ describe('built Visual Explainers', () => {
       expect(visual?.querySelector('form')).toBeNull();
       expect(visual?.querySelector('img, iframe, object, embed')).toBeNull();
       expect(visual?.querySelectorAll('[id]').length).toBe(0);
+      if (id === 'VIS02') expect(visual?.querySelector('[data-interactive-workbench][hidden]')).not.toBeNull();
     },
   );
 
@@ -100,6 +101,7 @@ describe('built Visual Explainers', () => {
       expect(visual?.querySelectorAll('[data-axis-bound]')).toHaveLength(3);
       expect(visual?.textContent).toContain('IN BOUNDS');
       expect(visual?.textContent).toContain('OUT OF BOUNDS');
+      expect(visual?.textContent).not.toMatch(/six CUDA built-ins|六个 CUDA 内建量/);
     }
   });
 

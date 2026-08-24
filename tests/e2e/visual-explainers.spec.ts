@@ -19,6 +19,7 @@ test('VIS01 controls produce a deterministic trace and cancel stale playback', a
 
   await visual.getByRole('button', { name: 'Reset', exact: true }).click();
   await visual.getByRole('button', { name: 'Play', exact: true }).click();
+  await expect(visual.getByRole('button', { name: 'Pause', exact: true })).toBeFocused();
   await expect(visual).toHaveAttribute('data-current-stage', 'grid-ready', { timeout: 2_500 });
   await visual.getByRole('button', { name: 'Pause', exact: true }).click();
   const pausedStage = await visual.getAttribute('data-current-stage');
@@ -29,6 +30,7 @@ test('VIS01 controls produce a deterministic trace and cancel stale playback', a
   await visual.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(visual).toHaveAttribute('data-current-stage', 'synchronization-complete', { timeout: 2_500 });
   await expect(visual).toHaveAttribute('data-playing', 'false');
+  await expect(visual.getByRole('button', { name: 'Reset', exact: true })).toBeFocused();
 
   await visual.getByRole('button', { name: 'Reset', exact: true }).click();
   await visual.getByRole('button', { name: 'Play', exact: true }).click();
@@ -102,6 +104,7 @@ test('Visual Explainer controls support keyboard operation and visible focus', a
   await thread.focus();
   await thread.press('Space');
   await expect(thread).toHaveAttribute('aria-pressed', 'true');
+  await expect(indexing.locator('[data-thread-x="3"]')).toBeFocused();
   await expect(indexing.locator('[data-global-coordinate]')).toHaveText('(x=11)');
 });
 
@@ -166,6 +169,7 @@ test('no-script and narrow layouts retain complete static Visual Explainers', as
     ]) {
       await page.goto(`http://127.0.0.1:4321${route}`);
       await expect(page.locator('[data-visual-controls]')).toBeHidden();
+      await expect(page.locator('[data-interactive-workbench]')).toBeHidden();
       await expect(page.locator('[data-static-fallback]')).toBeVisible();
       await expect(page.locator('[data-no-evidence]')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${route} at ${width}px`).toBe(
