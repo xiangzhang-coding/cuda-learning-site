@@ -46,15 +46,16 @@ const routes = [
 ];
 
 test('all published routes load without browser errors', async ({ page }) => {
+  test.slow();
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
   for (const route of routes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
     await page.waitForLoadState('networkidle');
+    await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
+    expect(errors, route).toEqual([]);
   }
-
-  expect(errors).toEqual([]);
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
