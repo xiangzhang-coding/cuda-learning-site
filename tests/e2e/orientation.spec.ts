@@ -53,9 +53,9 @@ test('all published routes load without browser errors', async ({ page }) => {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
     await page.waitForLoadState('networkidle');
+    await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
+    expect(errors, route).toEqual([]);
   }
-
-  expect(errors).toEqual([]);
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
