@@ -40,7 +40,7 @@ CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU
 
 The site maintains a prerequisite-bearing Stable Curriculum alongside runnable code, external Labs, Exercises, and a terminology index. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
 
-The public surface currently contains the Orientation shell: [O01](/en/start/using-the-learning-site/), the [Glossary](/en/glossary/), and the [Sources and Version Record](/en/sources-and-versions/).
+The public surface now contains the Orientation route: [O01](/en/start/using-the-learning-site/), [O02](/en/start/evidence-status/), [O03](/en/start/environment-manifest/), their Exercises and solutions, plus the [Practice Bank](/en/practice/), [Glossary](/en/glossary/), and [Sources and Version Record](/en/sources-and-versions/). These pages define evidence contracts but run no CUDA and declare no Reference Environment.
 
 ## Author
 

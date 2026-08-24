@@ -13,7 +13,21 @@ async function readRoute(route: string) {
   return parseHTML(html).document;
 }
 
-const publicationPairs = [
+type PublicationPair = {
+  pairId: string;
+  structure: string;
+  resourceKind?: string;
+  unitId?: string;
+  prerequisites?: string;
+  relatedUnits?: string;
+  exampleIds?: string;
+  sourceCount?: string;
+  sourceVersions?: string;
+  zh: string;
+  en: string;
+};
+
+const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'home',
     structure: 'purpose,current-route,boundaries,destinations',
@@ -25,6 +39,82 @@ const publicationPairs = [
     structure: 'outcome,resource-types,published-route,workflow,boundaries,check',
     zh: '/start/using-the-learning-site/',
     en: '/en/start/using-the-learning-site/',
+  },
+  {
+    pairId: 'o02',
+    structure: 'outcome,prerequisites,model,statuses,decision,examples,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'O02',
+    prerequisites: 'O01',
+    relatedUnits: 'O01',
+    exampleIds: 'O02-CASE-A,O02-CASE-B,O02-CASE-C,O02-CASE-D,O02-CASE-E,O02-CASE-F',
+    sourceCount: '1',
+    sourceVersions: '13.3.1',
+    zh: '/start/evidence-status/',
+    en: '/en/start/evidence-status/',
+  },
+  {
+    pairId: 'o02-exercises',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'O02-EXERCISES',
+    prerequisites: 'O02',
+    relatedUnits: 'O02',
+    zh: '/start/evidence-status/exercises/',
+    en: '/en/start/evidence-status/exercises/',
+  },
+  {
+    pairId: 'o02-solutions',
+    structure: 'review,solution-1,solution-2,solution-3,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'O02-SOLUTIONS',
+    prerequisites: 'O02-EXERCISES',
+    relatedUnits: 'O02',
+    zh: '/start/evidence-status/solutions/',
+    en: '/en/start/evidence-status/solutions/',
+  },
+  {
+    pairId: 'o03',
+    structure: 'outcome,prerequisites,manifest,relationships,support,tiers,lanes,reference-boundary,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'O03',
+    prerequisites: 'O01',
+    relatedUnits: 'O02',
+    exampleIds: 'O03-MANIFEST-TEMPLATE,O03-INCOMPLETE-A',
+    sourceCount: '8',
+    sourceVersions: '11.8.0,12.9.2,13.3.1',
+    zh: '/start/environment-manifest/',
+    en: '/en/start/environment-manifest/',
+  },
+  {
+    pairId: 'o03-exercises',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'O03-EXERCISES',
+    prerequisites: 'O03',
+    relatedUnits: 'O03',
+    zh: '/start/environment-manifest/exercises/',
+    en: '/en/start/environment-manifest/exercises/',
+  },
+  {
+    pairId: 'o03-solutions',
+    structure: 'review,solution-1,solution-2,solution-3,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'O03-SOLUTIONS',
+    prerequisites: 'O03-EXERCISES',
+    relatedUnits: 'O03',
+    zh: '/start/environment-manifest/solutions/',
+    en: '/en/start/environment-manifest/solutions/',
+  },
+  {
+    pairId: 'practice-bank',
+    structure: 'use,entry-pb-r0-001,entry-pb-r0-002,review',
+    resourceKind: 'practice-bank',
+    unitId: 'PB-R0',
+    prerequisites: 'O02,O03',
+    relatedUnits: 'O02,O03',
+    zh: '/practice/',
+    en: '/en/practice/',
   },
   {
     pairId: 'glossary',
@@ -44,7 +134,7 @@ const publicationPairs = [
     zh: '/about/',
     en: '/en/about/',
   },
-] as const;
+];
 
 function metadata(document: Document, name: string) {
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content');
@@ -52,11 +142,11 @@ function metadata(document: Document, name: string) {
 
 describe('Publication Pairs', () => {
   it.each(
-    publicationPairs.flatMap(({ pairId, structure, zh, en }) => [
-      { route: zh, lang: 'zh-CN', counterpart: en, pairId, structure },
-      { route: en, lang: 'en', counterpart: zh, pairId, structure },
+    publicationPairs.flatMap(({ pairId, structure, zh, en, ...contract }) => [
+      { route: zh, lang: 'zh-CN', counterpart: en, pairId, structure, ...contract },
+      { route: en, lang: 'en', counterpart: zh, pairId, structure, ...contract },
     ]),
-  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure }) => {
+  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, sourceCount, sourceVersions }) => {
     const document = await readRoute(route);
 
     expect(document.documentElement.lang).toBe(lang);
@@ -65,6 +155,18 @@ describe('Publication Pairs', () => {
     expect(metadata(document, 'cuda:fact-check-date')).toBe('2026-08-24');
     expect(metadata(document, 'cuda:license')).toBe('CC-BY-4.0');
     expect(metadata(document, 'cuda:structure')).toBe(structure);
+    if (resourceKind) expect(metadata(document, 'cuda:resource-kind')).toBe(resourceKind);
+    if (unitId) expect(metadata(document, 'cuda:unit-id')).toBe(unitId);
+    if (prerequisites) expect(metadata(document, 'cuda:prerequisites')).toBe(prerequisites);
+    if (relatedUnits) expect(metadata(document, 'cuda:related-units')).toBe(relatedUnits);
+    if (exampleIds) expect(metadata(document, 'cuda:example-ids')).toBe(exampleIds);
+    if (sourceCount) expect(metadata(document, 'cuda:source-count')).toBe(sourceCount);
+    if (sourceVersions) expect(metadata(document, 'cuda:source-versions')).toBe(sourceVersions);
+    if (resourceKind) {
+      expect(metadata(document, 'cuda:evidence-compilation')).toBe('none');
+      expect(metadata(document, 'cuda:evidence-runtime')).toBe('none');
+      expect(metadata(document, 'cuda:recorded-observations')).toBe('none');
+    }
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(`${siteOrigin}${route}`);
 
     const alternateLinks = new Map(
@@ -113,18 +215,18 @@ describe('published navigation', () => {
   it.each([
     {
       route: '/start/using-the-learning-site/',
-      expected: ['/start/using-the-learning-site/', '/glossary/', '/sources-and-versions/', '/about/'],
+      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
     },
     {
       route: '/en/start/using-the-learning-site/',
-      expected: ['/en/start/using-the-learning-site/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
+      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
     },
   ])('exposes only complete destinations from $route', async ({ route, expected }) => {
     const document = await readRoute(route);
     const hrefs = [...document.querySelectorAll('nav a[href]')].map((link) => link.getAttribute('href'));
 
     for (const href of expected) expect(hrefs).toContain(href);
-    for (const prefix of ['/foundations/', '/examples/', '/labs/', '/practice/', '/visuals/']) {
+    for (const prefix of ['/foundations/', '/examples/', '/labs/', '/visuals/']) {
       expect(hrefs.some((href) => href?.startsWith(prefix) || href?.startsWith(`/en${prefix}`))).toBe(false);
     }
   });
@@ -186,12 +288,13 @@ describe('O01 content boundary', () => {
       route: '/en/start/using-the-learning-site/',
       terms: ['Learning Unit', 'Runnable Example', 'Lab', 'Exercise', 'Practice Bank', 'Visual Explainer', 'Glossary'],
     },
-  ])('distinguishes resource types without presenting evidence from $route', async ({ route, terms }) => {
+  ])('distinguishes resource types and points to the controlled evidence contract from $route', async ({ route, terms }) => {
     const document = await readRoute(route);
     const text = document.querySelector('main')?.textContent ?? '';
 
     for (const term of terms) expect(text).toContain(term);
-    expect(text).not.toMatch(/Evidence Status|Compile-Checked|Runtime-Verified|Pending Hardware Verification|证据状态|编译已检查|运行已验证|待硬件验证/);
+    expect(text).toMatch(/O02/);
+    expect(text).toMatch(/does not grant CUDA evidence|不会授予 CUDA 证据状态/);
   });
 });
 

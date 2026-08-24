@@ -3,7 +3,7 @@
 # Maintenance Source Record
 
 - Review date: 2026-08-24
-- Scope: public repository baseline and web quality CI
+- Scope: public repository baseline, web quality CI, and O02/O03 evidence/environment contract
 
 Context7 was used for current interface discovery. Exact package manifests, tagged owner source, action tags/commits, and versioned owner documentation govern the selected versions when a current Context7 index lags the selected patch.
 
@@ -15,6 +15,21 @@ Context7 was used for current interface discovery. Exact package manifests, tagg
 | Playwright | Playwright Test 1.62.1 | `/microsoft/playwright` (current exact index available through 1.61.0) | [package manifest](https://registry.npmjs.org/%40playwright%2Ftest/1.62.1), [browser revisions](https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/browsers.json), [CI guide](https://playwright.dev/docs/ci), [test configuration](https://playwright.dev/docs/test-configuration) |
 | axe-playwright | 4.13.0; axe-core `~4.13.0` | Playwright accessibility guidance above | [package manifest](https://registry.npmjs.org/%40axe-core%2Fplaywright/4.13.0), [Playwright accessibility testing](https://playwright.dev/docs/accessibility-testing) |
 | GitHub Actions | `ubuntu-24.04`; current reviewed image `20260816.277.1`; least-privilege workflow token; full-SHA action pins | `/websites/github_en_actions`, `/actions/runner-images` | [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax), [Ubuntu 24.04 image release](https://github.com/actions/runner-images/releases/tag/ubuntu24/20260816.277), action tags and commits listed below |
+
+## CUDA teaching coordinates
+
+These are source coordinates and planned evidence targets, not build or runtime observations. Context7 `/websites/nvidia_cuda` was queried on 2026-08-24; exact-version owner documentation governs each Lane.
+
+| Interface | Exact coordinate | Owner sources reviewed |
+| --- | --- | --- |
+| CUDA 11.8 Lane | Toolkit 11.8.0; Ubuntu 22.04 x86-64; curriculum C++17; NVCC 11.8.89; paired Linux driver 520.61.05; 11.x floor 450.80.02 | [archive](https://developer.nvidia.com/cuda-toolkit-archive), [release notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html), [Linux guide](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-installation-guide-linux/index.html), [container tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04) |
+| CUDA 12.9 Lane | Toolkit 12.9.2; Ubuntu 24.04 x86-64; C++17/C++20; NVCC 12.9.86; paired Linux driver 575.57.08; 12.x floor 525.60.13 | [release notes](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html), [Linux guide](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#supported-c-dialects), [NVCC](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std), [container tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04) |
+| CUDA 13.3 Lane | Toolkit 13.3.1; Ubuntu 24.04 x86-64; C++17/C++20 plus separate C++23 probe; NVCC 13.3.73; paired Linux driver 610.43.02; 13.x floor R580 | [archive/latest identity](https://developer.nvidia.com/cuda-toolkit-archive), [release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html), [Linux guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#supported-c-dialects), [NVCC](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std), [container tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04) |
+| Driver compatibility | 11.x floor 450.80.02; 12.x floor 525.60.13; 13.x R580 family; paired-driver values remain separate | [minor version compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html) |
+| Compute capability | Programming Guide 13.3.1 feature and limit tables; current GPU-to-capability mapping | [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) |
+| NVCC phases | Compiler Driver 13.3.1 compile, PTX/CUBIN, link, and run phase boundary | [supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases) |
+
+The CUDA 13.3.1 Linux guide lists C++23 while its NVCC `--std` reference lists through C++20. Preserve this as an unresolved exact-Lane probe. No Lane is Compile-Checked, no Reference Environment is declared, and no runtime or performance evidence was produced by this source review.
 
 ## Immutable action coordinates
 

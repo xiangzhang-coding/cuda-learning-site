@@ -1,6 +1,6 @@
 ---
 title: Sources and Version Record
-description: Framework interfaces, content sources, and review dates for the Orientation release.
+description: Publishing interfaces, CUDA version facts, content sources, and review dates for the current Orientation route.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
 factCheckDate: '2026-08-24'
@@ -32,11 +32,11 @@ head:
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing interfaces behind the current CUDA Learning Site shell and the owner sources used to verify their configuration. Tool versions here are not CUDA teaching facts.
+This record names the exact publishing interfaces behind CUDA Learning Site and the owner sources for O02/O03 CUDA facts. Tool versions, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers the Home, O01, initial Glossary, and static publishing shell only. Every link below was reopened on **2026-08-24**. Builds use Node.js 24.19.0 and npm 11.17.0.
+This page covers Home, O01, O02, O03, their Exercises and solutions, the Practice Bank, Glossary, and static publishing shell. Every link below was reopened on **2026-08-24**. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Verified publishing interfaces
 
@@ -48,13 +48,30 @@ This page covers the Home, O01, initial Glossary, and static publishing shell on
 
 Exact npm manifests govern package versions, engines, dependencies, and package licenses. Current owner documentation governs configuration semantics. Context7 supports interface discovery and cross-checking but does not override the target-version manifests.
 
+### Verified CUDA version facts
+
+The current `/websites/nvidia_cuda` Context7 index supported discovery and cross-checking. Exact-version release notes, installation guides, and registry metadata govern. Every row below was accessed on **2026-08-24**.
+
+| Coordinate | Exact version and platform | What was checked | Owner sources |
+| --- | --- | --- | --- |
+| CUDA 11.8 Lane sources | Toolkit 11.8.0; Ubuntu 22.04 x86-64 | NVIDIA archive identity; NVCC 11.8.89; paired Linux driver 520.61.05; 11.x minor-compatibility floor 450.80.02; project-selected C++17 | [Toolkit archive](https://developer.nvidia.com/cuda-toolkit-archive), [11.8.0 release notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html), [11.8.0 Linux guide](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-installation-guide-linux/index.html), [compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html) |
+| CUDA 12.9 Lane sources | Toolkit 12.9.2; Ubuntu 24.04 x86-64 | Update 2 identity; NVCC 12.9.86; paired Linux driver 575.57.08; 12.x floor 525.60.13; C++17/C++20 | [12.9.2 release notes](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html), [12.9.2 Linux guide](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#supported-c-dialects), [12.9.2 NVCC](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std) |
+| CUDA 13.3 Lane sources | Toolkit 13.3.1; Ubuntu 24.04 x86-64 | Latest production identity; NVCC 13.3.73; paired Linux driver 610.43.02; 13.x floor R580/`>=580`; C++17/C++20 plus a separate C++23 probe | [Toolkit archive](https://developer.nvidia.com/cuda-toolkit-archive), [13.3 release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html), [13.3 Linux guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#supported-c-dialects), [13.3 NVCC `--std`](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std) |
+| Compilation and running phases | NVCC 13.3.1; Linux/Windows | `--compile`, PTX/CUBIN generation, and `--run` are separate phases; a build does not prove GPU execution | [NVCC supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases) |
+| compute capability | CUDA Programming Guide 13.3.1; CUDA-capable GPUs | Feature and technical-limit tables are organized by compute capability; model mapping is queried separately | [Compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) |
+| Container identities | `11.8.0-devel-ubuntu22.04`, `12.9.2-devel-ubuntu24.04`, `13.3.1-devel-ubuntu24.04`; amd64/arm64 | Tag existence and manifest digest; future Lane input only, never Compile-Checked | [11.8.0 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04), [12.9.2 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04), [13.3.1 tag](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04) |
+
+Toolkit components have been independently versioned since CUDA 11, so Toolkit, NVCC, a component such as cuBLAS, paired driver, and compatibility floor cannot collapse into one “CUDA version.” The CUDA 13.3.1 Linux guide lists C++23 while the same-version NVCC `--std` reference still stops at C++20. The discrepancy remains a separate exact-environment probe and is not presented as passing evidence.
+
+Native Linux as the only Supported Environment, the two GPU Capability Tier gates, and the Reference Environment declaration criteria are public project policy. NVIDIA sources support underlying version and compute-capability facts but do not make the site's support commitment.
+
 ## Content and asset sources
 
-- The Home, O01, term definitions, and CSS silicon-routing texture are original project work under **CC BY 4.0** for prose and **Apache-2.0** for styles and tooling.
+- Home, O01, O02, O03, Exercises, solutions, Practice Bank entries, term definitions, and the CSS silicon-routing texture are original project work under **CC BY 4.0** for prose and **Apache-2.0** for styles and tooling.
 - This release contains no adapted diagram, copied sample code, external font, or third-party image.
 - Language, theme, and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source. The upstream package declares the MIT license.
 - Technical links support publishing-interface verification. Public prose summarizes and paraphrases; it does not mirror owner documentation.
 
 ## Review record
 
-**Reviewed: 2026-08-24.** npm 11.17.0 resolved the exact Astro 7.2.4, Starlight 0.41.7, and Pagefind 1.5.2 dependency set without a peer-dependency conflict. The exact-version static build and bilingual indexes completed successfully. No interface conflict remains unresolved.
+**Reviewed: 2026-08-24.** npm 11.17.0 resolved the exact Astro 7.2.4, Starlight 0.41.7, and Pagefind 1.5.2 dependency set. Owner sources and container tags for CUDA 11.8.0, 12.9.2, and 13.3.1 were reviewed, but this release ran no CUDA, compiled no Lane, recorded no performance result, and declared no Reference Environment. The C++23 documentation discrepancy remains for a later exact-Lane probe.

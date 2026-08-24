@@ -27,8 +27,13 @@ export default defineConfig({
         {
           label: '从这里开始',
           translations: { en: 'Start Here' },
-          items: [{ slug: 'start/using-the-learning-site' }],
+          items: [
+            { slug: 'start/using-the-learning-site' },
+            { slug: 'start/evidence-status' },
+            { slug: 'start/environment-manifest' },
+          ],
         },
+        { slug: 'practice' },
         { slug: 'glossary' },
         { slug: 'sources-and-versions' },
         { slug: 'about' },

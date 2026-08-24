@@ -6,6 +6,20 @@ const routes = [
   '/en/',
   '/start/using-the-learning-site/',
   '/en/start/using-the-learning-site/',
+  '/start/evidence-status/',
+  '/en/start/evidence-status/',
+  '/start/evidence-status/exercises/',
+  '/en/start/evidence-status/exercises/',
+  '/start/evidence-status/solutions/',
+  '/en/start/evidence-status/solutions/',
+  '/start/environment-manifest/',
+  '/en/start/environment-manifest/',
+  '/start/environment-manifest/exercises/',
+  '/en/start/environment-manifest/exercises/',
+  '/start/environment-manifest/solutions/',
+  '/en/start/environment-manifest/solutions/',
+  '/practice/',
+  '/en/practice/',
   '/glossary/',
   '/en/glossary/',
   '/sources-and-versions/',
@@ -31,31 +45,31 @@ test('all published routes load without browser errors', async ({ page }) => {
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
-  await page.goto('/start/using-the-learning-site/');
-  await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute(
-    'href',
-    '/en/start/using-the-learning-site/',
-  );
+  for (const { zh, en } of [
+    { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
+    { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
+    { zh: '/start/environment-manifest/', en: '/en/start/environment-manifest/' },
+    { zh: '/practice/', en: '/en/practice/' },
+  ]) {
+    await page.goto(zh);
+    await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', en);
 
-  if (testInfo.project.name === 'mobile-safari') {
-    await page.locator('[data-locale-counterpart]').click();
-  } else {
-    await page
-      .getByRole('banner')
-      .locator('starlight-lang-select select')
-      .selectOption('/en/start/using-the-learning-site/');
+    if (testInfo.project.name === 'mobile-safari') {
+      await page.locator('[data-locale-counterpart]').click();
+    } else {
+      await page.getByRole('banner').locator('starlight-lang-select select').selectOption(en);
+    }
+    await expect(page).toHaveURL(new RegExp(`${en}$`));
+    await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', zh);
   }
-  await expect(page).toHaveURL(/\/en\/start\/using-the-learning-site\/$/);
-  await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute(
-    'href',
-    '/start/using-the-learning-site/',
-  );
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
   for (const scenario of [
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/' },
+    { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/' },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/' },
+    { route: '/en/', button: /Search/, query: 'Evidence Status', localePrefix: '/en/' },
   ]) {
     await page.goto(scenario.route);
     await page.getByRole('button', { name: scenario.button }).first().click();
@@ -89,12 +103,12 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  for (const route of ['/en/', '/en/start/using-the-learning-site/', '/en/sources-and-versions/']) {
+  for (const route of ['/en/', '/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/practice/', '/en/sources-and-versions/']) {
     await page.goto(route);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }
 
-  await page.goto('/en/start/using-the-learning-site/');
+  await page.goto('/en/start/environment-manifest/');
 
   if (testInfo.project.name === 'mobile-safari') {
     await page.getByRole('button', { name: 'Menu' }).click();

@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: Apache-2.0
+import { describe, expect, it } from 'vitest';
+
+import { evidenceMetadataSchema, sourceReferenceSchema } from '../../src/content-metadata';
+
+const noEvidence = {
+  compilation: [],
+  runtime: [],
+  expectedObservations: [],
+  recordedObservations: [],
+};
+
+describe('content evidence metadata', () => {
+  it.each([
+    noEvidence,
+    { ...noEvidence, compilation: ['Compile-Checked'], runtime: ['Pending Hardware Verification'] },
+    { ...noEvidence, compilation: ['Compile-Checked'], runtime: ['Runtime-Verified'], recordedObservations: ['criteria met'] },
+    { ...noEvidence, compilation: ['Compile-Checked'], runtime: ['Runtime-Not-Applicable'] },
+    { ...noEvidence, runtime: ['Community-Observed', 'Pending Hardware Verification'], recordedObservations: ['community log'] },
+  ])('accepts independent legal evidence axes', (metadata) => {
+    expect(evidenceMetadataSchema.safeParse(metadata).success).toBe(true);
+  });
+
+  it.each([
+    { ...noEvidence, compilation: ['Built'] },
+    { ...noEvidence, runtime: ['Verified'] },
+    { ...noEvidence, runtime: ['Runtime-Not-Applicable', 'Community-Observed'] },
+    { ...noEvidence, runtime: ['Runtime-Verified', 'Pending Hardware Verification'] },
+    { ...noEvidence, runtime: ['Runtime-Verified'] },
+    { ...noEvidence, runtime: ['Community-Observed', 'Pending Hardware Verification'] },
+    { ...noEvidence, recordedObservations: ['unqualified result'] },
+  ])('rejects uncontrolled or contradictory evidence claims', (metadata) => {
+    expect(evidenceMetadataSchema.safeParse(metadata).success).toBe(false);
+  });
+
+  it('requires exact source coordinates', () => {
+    const source = {
+      title: 'CUDA Toolkit release notes',
+      url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/',
+      version: '13.3.1',
+      platform: 'Linux x86_64',
+      accessDate: '2026-08-24',
+    };
+
+    expect(sourceReferenceSchema.safeParse(source).success).toBe(true);
+    expect(sourceReferenceSchema.safeParse({ ...source, url: 'not-a-url' }).success).toBe(false);
+    expect(sourceReferenceSchema.safeParse({ ...source, accessDate: '2026/08/24' }).success).toBe(false);
+  });
+});

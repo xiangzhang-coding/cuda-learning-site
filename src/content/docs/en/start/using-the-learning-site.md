@@ -62,12 +62,13 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 ## The published route
 
-As of **2026-08-24**, the complete prerequisite route contains only:
+As of **2026-08-24**, the complete prerequisite shape is:
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
+3. After O01, enter [O02: Recording Evidence Honestly](/en/start/evidence-status/) and [O03: Reading an Environment Manifest](/en/start/environment-manifest/) as separate branches.
 
-You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
+O02 and O03 each have Exercises and separate reviewed solutions. The [Practice Bank](/en/practice/) currently contains two complete entries linked back to O02 and O03. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
 
 ## A useful study rhythm
 
@@ -83,13 +84,15 @@ You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/e
 - It does not hide the execution environment behind server rendering, an application API, or in-browser CUDA.
 - It does not use blank pages, placeholder navigation, or coming-soon links as a substitute for learnable material.
 - It does not treat a browser model as a hardware execution result.
+- It does not grant CUDA evidence because a page, web CI job, or browser interaction exists; the controlled contract begins at [O02](/en/start/evidence-status/).
 
 ## Check before leaving
 
-You are ready to move on when you can answer these questions:
+You are ready to move on when you can answer these four questions:
 
 1. How does a Runnable Example differ from a Lab?
 2. Why does a Practice Bank entry link back to prerequisite Learning Units?
 3. Why is material absent from navigation not considered published?
+4. Why does publishing a page not grant CUDA evidence?
 
-**Fact-check date: 2026-08-24.** This page is not tied to a CUDA Toolkit version. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for the publishing interfaces reviewed for this release.
+**Fact-check date: 2026-08-24.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.
