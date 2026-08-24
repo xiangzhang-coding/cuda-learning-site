@@ -31,7 +31,7 @@ The build is fully static. VIS01 and VIS02 are deterministic browser models with
 
 ## Deployment
 
-Cloudflare Workers Builds deploys the reviewed static output from `main` to <https://cuda-learning-site.hmzhangxiang.workers.dev>. The pinned Wrangler configuration contains only a Static Assets directory and no Worker application or runtime binding. Non-production builds upload versions for noncanonical Preview URLs; production and preview acceptance use the separate remote Playwright smoke gate. See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings, evidence boundaries, and rollback.
+The repository-pinned Wrangler deploys reviewed static output from a clean `main` checkout to <https://cuda-learning-site.hmzhangxiang.workers.dev>. The configuration contains only a Static Assets directory and no Worker application or runtime binding. Separate version uploads provide noncanonical Preview URLs; production and preview acceptance use the remote Playwright smoke gate. Workers Builds behavior is reviewed but its account automation is disabled for R0 to avoid a second deployment authority. See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings, evidence boundaries, and rollback.
 
 ## Licensing
 

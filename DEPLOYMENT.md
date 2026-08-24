@@ -2,28 +2,28 @@
 
 # Cloudflare Deployment
 
-The production Learning Site is <https://cuda-learning-site.hmzhangxiang.workers.dev>. Cloudflare Workers Builds is the only deployment authority. GitHub Actions produces the independent web-quality and CUDA compilation evidence; it does not deploy a second copy of the site.
+The production Learning Site is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R0 uses the repository-pinned Wrangler from a clean `main` checkout as its only deployment authority. Cloudflare Workers Builds behavior was reviewed but account automation is disabled for R0; enabling it later must replace this flow rather than create a second deploy authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
 
 ## Static Architecture
 
 `astro.config.mjs` emits static files into `dist/`. `wrangler.jsonc` names that directory as Cloudflare Static Assets and intentionally has no `main`, asset binding, route, service, KV, D1, R2, Durable Object, secret, variable, or runtime handler. No Worker application code or runtime binding is part of this deployment. The site has no API, authentication, database, server rendering, hosted GPU backend, or browser CUDA execution.
 
-`npm run quality:deployment` runs Wrangler's dry-run parser against the built output. It must report no bindings. `dist/release.json` records `WORKERS_CI_COMMIT_SHA` in Workers Builds and falls back to the checked-out Git commit elsewhere. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
+`npm run quality:deployment` runs Wrangler's dry-run parser against the built output. It must report no bindings. `dist/release.json` records the checked-out Git commit; it also accepts `WORKERS_CI_COMMIT_SHA` if Workers Builds replaces the manual authority in a future release. Production carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
 
-## Workers Builds Settings
+## Release Settings
 
-- Production branch: `main`
-- Root directory: `/`
+- Source branch: clean, protected `main`
+- Working directory: repository root
 - Build command: `npm run build:release`
 - Production deploy command: `npm run deploy`
 - Preview deploy command: `npm run deploy:preview`
-- Non-production branch builds: enabled for explicit release-preview branches
+- Workers Builds: reviewed, disabled for R0
 - Node.js: `24.19.0` from `.node-version`
 - npm: `11.17.0` from `packageManager` and the package engine contract
 
 The build command checks source/privacy boundaries, the exact lockfile and licenses, canonical imports, diagnostics, unit tests, static output, Wrangler's assets-only schema, built-output integration tests, and generated artifacts. The pinned Wrangler `4.125.0` is resolved from this repository rather than a mutable global or `latest` tag.
 
-Workers Builds production deploys use `wrangler deploy`. Non-production builds use `wrangler versions upload`, which uploads a version without promoting it and exposes a public Preview URL because `preview_urls` is explicitly enabled. Internal links stay on the preview host, while canonical, hreflang, sitemap, and release metadata continue to identify the production `workers.dev` origin.
+`npm run deploy` invokes `wrangler deploy` for production. `npm run deploy:preview` invokes `wrangler versions upload`, which uploads a version without promoting it and exposes a public Preview URL because `preview_urls` is explicitly enabled. Internal links stay on the preview host, while canonical, hreflang, sitemap, and release metadata continue to identify the production `workers.dev` origin.
 
 ## Acceptance
 
@@ -49,7 +49,7 @@ gh workflow run release-smoke.yml --ref main \
 
 For a Preview URL, use that public version or branch URL as `RELEASE_BASE_URL` and set `RELEASE_KIND="preview"`. The gate checks source identity, both locales, navigation, direct locale switching, relevant bilingual search, all themes and persistence, keyboard flow, reduced motion, mobile reflow, print and no-script Visual Explainer fallbacks, the immutable EX02 download, legal notices, 404 behavior, canonical metadata, and browser/network errors.
 
-After smoke passes, record the Git commit, GitHub check runs, Cloudflare build UUID, version ID, deployment ID, production URL, Preview URL, and smoke result in the release issue. Scan retained smoke reports before publishing them.
+After smoke passes, record the Git commit, GitHub check runs, Cloudflare version and deployment IDs, production URL, Preview URL, and smoke result in the release issue. Scan retained smoke reports before publishing them.
 
 ## Rollback
 
