@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 import { describe, expect, it } from 'vitest';
 
-import { evidenceMetadataSchema, sourceReferenceSchema } from '../../src/content-metadata';
+import {
+  curriculumIdSchema,
+  evidenceMetadataSchema,
+  resourceKindSchema,
+  sourceReferenceSchema,
+} from '../../src/content-metadata';
 
 const noEvidence = {
   compilation: [],
@@ -45,5 +50,20 @@ describe('content evidence metadata', () => {
     expect(sourceReferenceSchema.safeParse(source).success).toBe(true);
     expect(sourceReferenceSchema.safeParse({ ...source, url: 'not-a-url' }).success).toBe(false);
     expect(sourceReferenceSchema.safeParse({ ...source, accessDate: '2026/08/24' }).success).toBe(false);
+  });
+});
+
+describe('Visual Explainer metadata', () => {
+  it.each(['VIS01', 'VIS02'])('accepts the controlled visual identifier %s', (identifier) => {
+    expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
+  });
+
+  it.each(['VIS1', 'VIS001', 'vis01', 'VIS01-EXERCISES'])('rejects malformed visual identifier %s', (identifier) => {
+    expect(curriculumIdSchema.safeParse(identifier).success).toBe(false);
+  });
+
+  it('accepts Visual Explainer as a publication resource kind', () => {
+    expect(resourceKindSchema.safeParse('visual-explainer').success).toBe(true);
+    expect(resourceKindSchema.safeParse('visual-demo').success).toBe(false);
   });
 });

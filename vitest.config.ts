@@ -10,7 +10,7 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['scripts/lib/**/*.mjs'],
+      include: ['scripts/lib/**/*.mjs', 'src/visuals/*-model.ts'],
       reporter: ['text', 'json-summary'],
       reportsDirectory: 'coverage',
       thresholds: {

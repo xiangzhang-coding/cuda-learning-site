@@ -1,0 +1,176 @@
+---
+title: 'VIS01: A Kernel Journey from Launch to Completion'
+description: Use a deterministic model with play, step, and scrub controls to connect grids, blocks, warps, memory transactions, and observable completion without erasing real scheduling boundaries.
+pairId: vis01
+counterpart: /visuals/kernel-journey/
+factCheckDate: '2026-08-24'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - model
+  - controls
+  - scheduling-boundary
+  - static-sequence
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS01
+relatedUnits:
+  - O01
+  - O02
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT programming model'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA host and device execution'
+    accessDate: '2026-08-24'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT hardware model'
+    accessDate: '2026-08-24'
+  - title: 'Astro client-side scripts'
+    url: 'https://docs.astro.build/en/guides/client-side-scripts/'
+    version: 'Astro 7.2.4 selected; current owner documentation reviewed'
+    platform: 'Static browser output'
+    accessDate: '2026-08-24'
+  - title: 'Starlight sidebar configuration'
+    url: 'https://starlight.astro.build/guides/sidebar/'
+    version: 'Starlight 0.41.7 selected; current owner documentation reviewed'
+    platform: 'Astro static documentation routes'
+    accessDate: '2026-08-24'
+  - title: 'WHATWG HTML - Custom elements'
+    url: 'https://html.spec.whatwg.org/multipage/custom-elements.html'
+    version: 'Living Standard; last updated 2026-08-21'
+    platform: 'Current browser engines'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique ARIA22 - role=status'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'Assistive-technology status messages'
+    accessDate: '2026-08-24'
+  - title: 'W3C WAI Technique C39 - prefers-reduced-motion'
+    url: 'https://www.w3.org/WAI/WCAG22/Techniques/css/C39'
+    version: 'WCAG 2.2 Technique; updated 2026-01-12'
+    platform: 'CSS media queries'
+    accessDate: '2026-08-24'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: vis01
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-24'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,model,controls,scheduling-boundary,static-sequence,evidence-boundary,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: visual-explainer
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: VIS01
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O01,O02'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'None: deterministic browser model; no CUDA-capable system required'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '9'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '13.3,7.2.4,0.41.7,2026-08-21,2026-01-12'
+---
+
+import KernelJourney from '../../../../components/KernelJourney.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/kernel-journey/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS01 is a Visual Explainer. It uses a **deterministic teaching trace** to connect a kernel launch, thread blocks in a grid, warps on an SM, global-memory transactions, and a synchronization boundary. Determinism makes controls repeatable and predictions checkable; it does not mean a real GPU follows a fixed schedule.
+
+<KernelJourney locale="en" />
+
+## How to read the model
+
+The trace begins when the host enqueues a launch in a stream and ends when a declared synchronization or dependency boundary can observe all grid work as complete. Each step adds one conceptual fact. Scrubbing backward reconstructs that state instead of retaining highlights from later steps.
+
+Playback never starts automatically. Opening, reloading, and resetting the page all return to the first step. Visual state is not written to `localStorage`, cookies, or a remote service.
+
+## Controls and no-motion access
+
+- **Play** advances in one fixed order and stops at completion; its interval is only interface pacing.
+- **Pause** preserves the current step; **Step** advances once and remains paused.
+- The range input supports arrow-key stepping; **Reset** clears playback state and returns to launch.
+- Under `prefers-reduced-motion`, there is no positional animation. Step, scrub, and the complete static sequence retain every fact.
+
+## Real scheduling boundaries
+
+Every thread in one thread block executes on one SM, but independent blocks have no guaranteed dispatch or completion order; they may run in parallel or in series. Threads in a block are partitioned into 32-thread warps using x-fastest local linear IDs. The visual follows one illustrative block and one ready warp without excluding other legal schedules.
+
+The memory stage is deliberately narrow: 32 lanes read aligned consecutive 4-byte words spanning 128 B, so four 32 B global-memory transactions satisfy the requests. Change the width, alignment, address distribution, cache behavior, or architecture conditions and the transaction count may change.
+
+## Static stage sequence
+
+The numbered list inside the component is the purpose-built static fallback. With JavaScript disabled, controls do not appear, but all eight stages, every boundary note, and the evidence statement remain in the initial HTML. Print shows that complete sequence rather than a state-less screenshot of an animation.
+
+## Evidence boundary
+
+This page neither compiles CUDA nor runs a kernel on a GPU. Browser state, playback intervals, completion labels, and screenshots grant no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status. Runtime evidence must follow the [O02 Evidence Status contract](/en/start/evidence-status/).
+
+## Sources
+
+CUDA facts come from NVIDIA’s [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html), [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html), [Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html), and [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html). Each page identifies CUDA Programming Guide v13.3, updated 2026-05-27; this site rechecked them on 2026-08-24.
+
+Interaction uses an Astro 7.2.4 processed TypeScript client script, a light-DOM custom element, and native HTML controls. Status text uses a pre-existing `role="status"` container, and motion reduction follows `prefers-reduced-motion`. These interfaces were checked against current Astro, Starlight, and Playwright records in Context7 plus the WHATWG/W3C owner sources listed above.
+
+All flow shapes, stage layouts, and annotations are original to this site. No NVIDIA figure, table, or sample listing was copied, traced, or adapted.

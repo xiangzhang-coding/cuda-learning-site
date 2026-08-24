@@ -23,6 +23,10 @@ const criticalRoutes = [
   '/en/start/environment-manifest/solutions/',
   '/examples/vector-addition/',
   '/en/examples/vector-addition/',
+  '/visuals/kernel-journey/',
+  '/en/visuals/kernel-journey/',
+  '/visuals/indexing/',
+  '/en/visuals/indexing/',
   '/practice/',
   '/en/practice/',
   '/glossary/',
@@ -35,7 +39,7 @@ const criticalRoutes = [
 
 test('@accessibility axe detects no tagged violations across themes; this is not a conformance claim', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
 
   for (const theme of THEME_IDS) {
     await page.goto('/');
@@ -56,5 +60,20 @@ test('@accessibility axe detects no tagged violations across themes; this is not
         `${theme}: ${route}`,
       ).toEqual([]);
     }
+
+    await page.goto('/en/visuals/kernel-journey/');
+    await page.locator('[data-action="scrub"]').fill('5');
+    let results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(results.violations, `${theme}: VIS01 memory state`).toEqual([]);
+
+    await page.goto('/en/visuals/indexing/');
+    await page.locator('[data-dimension-picker]').selectOption('3');
+    await page.locator('[data-index-field="extent.x"]').fill('9');
+    results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(results.violations, `${theme}: VIS02 out-of-bounds state`).toEqual([]);
   }
 });

@@ -1,0 +1,206 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import { KERNEL_JOURNEY_STAGES } from '../visuals/kernel-journey-model';
+import { KERNEL_JOURNEY_COPY, type VisualLocale } from '../visuals/visual-copy';
+
+interface Props {
+  locale: VisualLocale;
+}
+
+const { locale } = Astro.props;
+const copy = KERNEL_JOURNEY_COPY[locale];
+const stages = KERNEL_JOURNEY_STAGES.map(({ id }) => ({ id, ...copy.stages[id] }));
+---
+
+<cuda-kernel-journey
+  class="visual-explainer not-content"
+  data-visual-id="VIS01"
+  data-locale={locale}
+  data-current-stage="launch"
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <div class="visual-controls" data-visual-controls hidden role="group" aria-label={copy.controlsLabel}>
+      <button type="button" data-action="play">{copy.play}</button>
+      <button type="button" data-action="pause" disabled>{copy.pause}</button>
+      <button type="button" data-action="step">{copy.step}</button>
+      <button type="button" data-action="reset">{copy.reset}</button>
+      <label class="visual-scrubber">
+        <span>{copy.scrub}</span>
+        <input
+          type="range"
+          min="0"
+          max={stages.length - 1}
+          value="0"
+          step="1"
+          data-action="scrub"
+          aria-valuetext={stages[0].title}
+        />
+      </label>
+    </div>
+
+    <ol class="journey-corridor" aria-hidden="true">
+      {
+        stages.map((stage, index) => (
+          <li
+            class="journey-node"
+            data-journey-node={stage.id}
+            data-active={index === 0 ? 'true' : 'false'}
+            data-passed="false"
+          >
+            <span class="visual-step-number">{String(index + 1).padStart(2, '0')}</span>
+            <span class="visual-signal">{stage.signal}</span>
+            <strong>{stage.title}</strong>
+          </li>
+        ))
+      }
+    </ol>
+
+    <section class="visual-current" data-pagefind-ignore aria-label={copy.currentState}>
+      <div class="visual-current-title">
+        <span class="visual-result-label">{copy.currentState}</span>
+        <strong data-current-title>{stages[0].title}</strong>
+        <span data-stage-counter>{copy.stepCounter.replace('{current}', '1').replace('{total}', String(stages.length))}</span>
+      </div>
+      <div class="visual-current-description" role="status" aria-atomic="true" data-current-status>
+        <p data-current-description>{stages[0].description}</p>
+        <p class="visual-boundary" data-current-boundary>{stages[0].boundary}</p>
+      </div>
+    </section>
+
+    <section class="visual-section" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <ol class="journey-static-list">
+        {
+          stages.map((stage, index) => (
+            <li data-stage-id={stage.id} aria-current={index === 0 ? 'step' : undefined}>
+              <strong>{stage.title}</strong>
+              <span class="journey-current-tag">{locale === 'zh-CN' ? '当前' : 'current'}</span>
+              <p>{stage.description}</p>
+              <p class="visual-boundary">{stage.boundary}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.evidenceNotice}</p>
+  </div>
+</cuda-kernel-journey>
+
+<script>
+  import {
+    KERNEL_JOURNEY_STAGES,
+    createKernelJourneyState,
+    reduceKernelJourney,
+    type KernelJourneyAction,
+    type KernelJourneyState,
+  } from '../visuals/kernel-journey-model';
+  import { KERNEL_JOURNEY_COPY } from '../visuals/visual-copy';
+
+  class CudaKernelJourney extends HTMLElement {
+    private state: KernelJourneyState = createKernelJourneyState();
+    private timer: number | undefined;
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+
+      const controls = this.querySelector<HTMLElement>('[data-visual-controls]');
+      const play = this.querySelector<HTMLButtonElement>('[data-action="play"]');
+      const pause = this.querySelector<HTMLButtonElement>('[data-action="pause"]');
+      const step = this.querySelector<HTMLButtonElement>('[data-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-action="reset"]');
+      const scrub = this.querySelector<HTMLInputElement>('[data-action="scrub"]');
+      if (!controls || !play || !pause || !step || !reset || !scrub) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      play.addEventListener('click', () => this.apply({ type: 'play' }));
+      pause.addEventListener('click', () => this.apply({ type: 'pause' }));
+      step.addEventListener('click', () => this.apply({ type: 'step' }));
+      reset.addEventListener('click', () => this.apply({ type: 'reset' }));
+      scrub.addEventListener('input', () => this.apply({ type: 'scrub', stageIndex: Number(scrub.value) }));
+      this.render();
+    }
+
+    disconnectedCallback() {
+      this.stopTimer();
+    }
+
+    private apply(action: KernelJourneyAction) {
+      this.state = reduceKernelJourney(this.state, action);
+      this.render();
+      if (this.state.isPlaying) this.startTimer();
+      else this.stopTimer();
+    }
+
+    private startTimer() {
+      if (this.timer !== undefined) return;
+      this.timer = window.setInterval(() => this.apply({ type: 'tick' }), 1_200);
+    }
+
+    private stopTimer() {
+      if (this.timer === undefined) return;
+      window.clearInterval(this.timer);
+      this.timer = undefined;
+    }
+
+    private render() {
+      const locale = this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+      const copy = KERNEL_JOURNEY_COPY[locale];
+      const stage = KERNEL_JOURNEY_STAGES[this.state.stageIndex];
+      if (!stage) return;
+      const stageCopy = copy.stages[stage.id];
+      const finalStageIndex = KERNEL_JOURNEY_STAGES.length - 1;
+
+      this.dataset.currentStage = stage.id;
+      this.dataset.playing = String(this.state.isPlaying);
+      this.querySelectorAll<HTMLElement>('[data-journey-node]').forEach((node, index) => {
+        node.dataset.active = String(index === this.state.stageIndex);
+        node.dataset.passed = String(index < this.state.stageIndex);
+      });
+      this.querySelectorAll<HTMLElement>('[data-stage-id]').forEach((item, index) => {
+        if (index === this.state.stageIndex) item.setAttribute('aria-current', 'step');
+        else item.removeAttribute('aria-current');
+      });
+
+      const title = this.querySelector<HTMLElement>('[data-current-title]');
+      const description = this.querySelector<HTMLElement>('[data-current-description]');
+      const boundary = this.querySelector<HTMLElement>('[data-current-boundary]');
+      const counter = this.querySelector<HTMLElement>('[data-stage-counter]');
+      const scrub = this.querySelector<HTMLInputElement>('[data-action="scrub"]');
+      const play = this.querySelector<HTMLButtonElement>('[data-action="play"]');
+      const pause = this.querySelector<HTMLButtonElement>('[data-action="pause"]');
+      const step = this.querySelector<HTMLButtonElement>('[data-action="step"]');
+
+      if (title) title.textContent = stageCopy.title;
+      if (description) description.textContent = stageCopy.description;
+      if (boundary) boundary.textContent = stageCopy.boundary;
+      if (counter) {
+        counter.textContent = copy.stepCounter
+          .replace('{current}', String(this.state.stageIndex + 1))
+          .replace('{total}', String(KERNEL_JOURNEY_STAGES.length));
+      }
+      if (scrub) {
+        scrub.value = String(this.state.stageIndex);
+        scrub.setAttribute('aria-valuetext', stageCopy.title);
+      }
+      if (play) play.disabled = this.state.isPlaying || this.state.stageIndex === finalStageIndex;
+      if (pause) pause.disabled = !this.state.isPlaying;
+      if (step) step.disabled = this.state.stageIndex === finalStageIndex;
+    }
+  }
+
+  if (!customElements.get('cuda-kernel-journey')) {
+    customElements.define('cuda-kernel-journey', CudaKernelJourney);
+  }
+</script>

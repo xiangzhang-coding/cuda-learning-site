@@ -43,6 +43,11 @@ export default defineConfig({
           translations: { en: 'Runnable Examples' },
           items: [{ slug: 'examples/vector-addition' }],
         },
+        {
+          label: '可视化讲解',
+          translations: { en: 'Visual Explainers' },
+          items: [{ slug: 'visuals/kernel-journey' }, { slug: 'visuals/indexing' }],
+        },
         { slug: 'practice' },
         { slug: 'glossary' },
         { slug: 'sources-and-versions' },

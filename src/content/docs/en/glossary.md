@@ -99,7 +99,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** An interactive or animated representation that exposes spatial, temporal, or architectural behavior. It may model CUDA concepts in the browser but never executes CUDA.
 - **Avoid:** Decoration, CUDA demo.
-- **Related unit:** O01.
+- **Related resources:** O01, [VIS01](/en/visuals/kernel-journey/), and [VIS02](/en/visuals/indexing/).
 - **Version note:** Conceptual models must be separated from hardware-specific behavior.
 
 ### Glossary · 术语表

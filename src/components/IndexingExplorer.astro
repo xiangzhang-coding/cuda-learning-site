@@ -1,0 +1,474 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import {
+  INDEXING_LIMITS,
+  INDEXING_STATIC_CONFIGURATIONS,
+  calculateIndexing,
+  createIndexingConfiguration,
+  type Axis,
+} from '../visuals/indexing-model';
+import { INDEXING_COPY, type VisualLocale } from '../visuals/visual-copy';
+
+interface Props {
+  locale: VisualLocale;
+}
+
+const { locale } = Astro.props;
+const copy = INDEXING_COPY[locale];
+const axes: readonly Axis[] = ['x', 'y', 'z'];
+const config = createIndexingConfiguration(1);
+const result = calculateIndexing(config);
+const activeCoordinates = (value: { x: number; y: number; z: number }, dimensions: number) =>
+  `(${axes.slice(0, dimensions).map((axis) => `${axis}=${value[axis]}`).join(', ')})`;
+const groups = [
+  { key: 'gridDim', label: copy.gridDim, minimum: 1, maximum: INDEXING_LIMITS.gridAxis },
+  { key: 'blockDim', label: copy.blockDim, minimum: 1, maximum: INDEXING_LIMITS.blockAxis },
+  { key: 'extent', label: copy.extent, minimum: 1, maximum: INDEXING_LIMITS.extentAxis },
+  { key: 'blockIdx', label: copy.blockIdx, minimum: 0, maximum: 0 },
+  { key: 'threadIdx', label: copy.threadIdx, minimum: 0, maximum: 0 },
+] as const;
+const maximumFor = (key: (typeof groups)[number]['key'], axis: Axis) => {
+  if (key === 'blockIdx') return config.gridDim[axis] - 1;
+  if (key === 'threadIdx') return config.blockDim[axis] - 1;
+  return groups.find((group) => group.key === key)?.maximum ?? 0;
+};
+const staticExamples = INDEXING_STATIC_CONFIGURATIONS.map(({ id, config: exampleConfig }) => ({
+  id,
+  config: exampleConfig,
+  result: calculateIndexing(exampleConfig),
+}));
+---
+
+<cuda-indexing-explorer
+  class="visual-explainer not-content"
+  data-visual-id="VIS02"
+  data-locale={locale}
+  data-dimensions="1"
+  data-bounds-state={result.inBounds ? 'in-bounds' : 'out-of-bounds'}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <div class="visual-controls index-controls" data-visual-controls hidden role="group" aria-label={copy.controlsLabel}>
+      <label class="index-dimension-picker">
+        <span>{copy.dimensions}</span>
+        <select data-dimension-picker autocomplete="off">
+          {
+            ([1, 2, 3] as const).map((dimensions) => (
+              <option value={dimensions} selected={dimensions === 1}>
+                {copy.dimensionOptions[String(dimensions) as '1' | '2' | '3']}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+      <button type="button" data-action="reset-indexing">{copy.reset}</button>
+
+      <div class="index-control-grid">
+        {
+          groups.map((group) => (
+            <fieldset data-index-group={group.key}>
+              <legend>{group.label}</legend>
+              <div class="index-axis-controls">
+                {axes.map((axis, axisIndex) => (
+                  <label class="index-axis-control" data-axis={axis} hidden={axisIndex >= config.dimensions}>
+                    <span>{axis}</span>
+                    <input
+                      type="number"
+                      inputmode="numeric"
+                      autocomplete="off"
+                      step="1"
+                      min={group.minimum}
+                      max={maximumFor(group.key, axis)}
+                      value={config[group.key][axis]}
+                      aria-invalid="false"
+                      aria-label={`${group.label}, ${axis}`}
+                      data-index-field={`${group.key}.${axis}`}
+                    />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))
+        }
+      </div>
+
+      <p class="index-validation" data-index-validation role="status" aria-atomic="true" hidden></p>
+      <p class="index-limit-note">{copy.browserLimit}</p>
+    </div>
+
+    <div class="index-workbench" data-pagefind-ignore>
+      <section class="thread-selector" aria-label={copy.selectedThread}>
+        <h3>{copy.threadStrip}</h3>
+        <p data-selected-thread>
+          {copy.selectedThread}: threadIdx {activeCoordinates(config.threadIdx, config.dimensions)}
+        </p>
+        <div class="thread-strip" data-thread-strip role="group" aria-label={copy.threadStrip}>
+          {
+            Array.from({ length: config.blockDim.x }, (_, x) => (
+              <button
+                type="button"
+                class="visual-thread-button"
+                data-thread-x={x}
+                aria-pressed={x === config.threadIdx.x ? 'true' : 'false'}
+                aria-label={`threadIdx.x ${x}`}
+              >
+                {x}
+              </button>
+            ))
+          }
+        </div>
+        <p class="thread-strip-note">{copy.threadStripNote}</p>
+      </section>
+
+      <section class="index-result-panel" aria-label={copy.results}>
+        <h3>{copy.results}</h3>
+        <dl class="index-result-summary">
+          <div>
+            <dt class="visual-result-label">{copy.globalCoordinate}</dt>
+            <dd><code data-global-coordinate>{activeCoordinates(result.global, config.dimensions)}</code></dd>
+          </div>
+          <div>
+            <dt class="visual-result-label">{copy.localThread}</dt>
+            <dd><code data-local-thread>{result.localThread}</code></dd>
+          </div>
+          <div>
+            <dt class="visual-result-label">{copy.warpLane}</dt>
+            <dd><code data-warp-lane>warp {result.warp}, lane {result.lane}</code></dd>
+          </div>
+          <div>
+            <dt class="visual-result-label">{copy.linearBlock}</dt>
+            <dd><code data-linear-block>{result.linearBlock}</code></dd>
+          </div>
+          <div>
+            <dt class="visual-result-label">{copy.dataLinear}</dt>
+            <dd><code data-data-linear>{result.dataLinear}</code></dd>
+          </div>
+        </dl>
+
+        <div
+          class="index-bounds-status"
+          data-bounds-status
+          data-bounds-state={result.inBounds ? 'in-bounds' : 'out-of-bounds'}
+          role="status"
+          aria-atomic="true"
+        >
+          <span class="visual-status-mark" data-bounds-mark>{result.inBounds ? 'OK' : '!'}</span>
+          <span data-bounds-copy>{result.inBounds ? copy.inBounds : copy.outOfBounds}</span>
+        </div>
+
+        <div class="index-equations" role="group" aria-label={locale === 'zh-CN' ? '求值方程' : 'Evaluated equations'}>
+          <p><code data-equation="global-x">global.x = 2 * 4 + 1 = 9</code></p>
+          <p data-axis="y" hidden><code data-equation="global-y">global.y = 0 * 1 + 0 = 0</code></p>
+          <p data-axis="z" hidden><code data-equation="global-z">global.z = 0 * 1 + 0 = 0</code></p>
+          <p><code data-equation="local-thread">localThread = 1 + 4 * (0 + 1 * 0) = 1</code></p>
+          <p><code data-equation="linear-block">linearBlock = 2 + 3 * (0 + 1 * 0) = 2</code></p>
+          <p><code data-equation="data-linear">dataIndex = 9 + 10 * (0 + 1 * 0) = 9</code></p>
+        </div>
+
+        <table class="index-bounds-table">
+          <caption>{copy.axisBounds}</caption>
+          <thead>
+            <tr><th scope="col">{copy.axis}</th><th scope="col">{copy.coordinate}</th><th scope="col">{copy.predicate}</th></tr>
+          </thead>
+          <tbody>
+            {
+              axes.map((axis, axisIndex) => (
+                <tr data-axis={axis} data-axis-bound={axis} hidden={axisIndex >= config.dimensions}>
+                  <th scope="row" class="visual-axis">{axis}</th>
+                  <td data-axis-values={`${axis}`}>{result.global[axis]} / {config.extent[axis]}</td>
+                  <td data-axis-predicate={`${axis}`}>{result.axisBounds[axis] ? '< true' : '< false'}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="visual-section" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="visual-static-grid">
+        {
+          staticExamples.map((example) => (
+            <article class="visual-static-card" data-static-example={example.id}>
+              <h4>{copy.staticLabels[example.id]}</h4>
+              <dl>
+                <div>
+                  <dt>gridDim / blockDim / extent</dt>
+                  <dd>
+                    <code>
+                      {activeCoordinates(example.config.gridDim, example.config.dimensions)} /{' '}
+                      {activeCoordinates(example.config.blockDim, example.config.dimensions)} /{' '}
+                      {activeCoordinates(example.config.extent, example.config.dimensions)}
+                    </code>
+                  </dd>
+                </div>
+                <div>
+                  <dt>blockIdx / threadIdx</dt>
+                  <dd>
+                    <code>
+                      {activeCoordinates(example.config.blockIdx, example.config.dimensions)} /{' '}
+                      {activeCoordinates(example.config.threadIdx, example.config.dimensions)}
+                    </code>
+                  </dd>
+                </div>
+                <div>
+                  <dt>global / localThread</dt>
+                  <dd>
+                    <code>{activeCoordinates(example.result.global, example.config.dimensions)} / {example.result.localThread}</code>
+                  </dd>
+                </div>
+                <div>
+                  <dt>warp / lane / dataIndex</dt>
+                  <dd><code>{example.result.warp} / {example.result.lane} / {example.result.dataLinear}</code></dd>
+                </div>
+                <div>
+                  <dt>bounds</dt>
+                  <dd><strong>{example.result.inBounds ? 'IN BOUNDS' : 'OUT OF BOUNDS'}</strong></dd>
+                </div>
+              </dl>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.evidenceNotice}</p>
+  </div>
+</cuda-indexing-explorer>
+
+<script>
+  import {
+    INDEXING_LIMITS,
+    calculateIndexing,
+    createIndexingConfiguration,
+    normalizeIndexingDimensions,
+    parseIndexingInteger,
+    resetIndexingConfiguration,
+    validateIndexingConfiguration,
+    type Axis,
+    type IndexingConfiguration,
+  } from '../visuals/indexing-model';
+  import { INDEXING_COPY } from '../visuals/visual-copy';
+
+  const axes: readonly Axis[] = ['x', 'y', 'z'];
+  type VectorKey = 'gridDim' | 'blockDim' | 'extent' | 'blockIdx' | 'threadIdx';
+
+  class CudaIndexingExplorer extends HTMLElement {
+    private config: IndexingConfiguration = createIndexingConfiguration(1);
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-visual-controls]');
+      const dimensionPicker = this.querySelector<HTMLSelectElement>('[data-dimension-picker]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-action="reset-indexing"]');
+      if (!controls || !dimensionPicker || !reset) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      dimensionPicker.addEventListener('change', () => {
+        const dimensions = Number(dimensionPicker.value);
+        if (dimensions !== 1 && dimensions !== 2 && dimensions !== 3) return;
+        this.config = normalizeIndexingDimensions(this.config, dimensions);
+        this.clearValidation();
+        this.render();
+      });
+      reset.addEventListener('click', () => {
+        this.config = resetIndexingConfiguration();
+        this.clearValidation();
+        this.render();
+      });
+      this.querySelectorAll<HTMLInputElement>('[data-index-field]').forEach((input) => {
+        input.addEventListener('input', () => this.updateField(input));
+      });
+      this.render();
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private updateField(input: HTMLInputElement) {
+      const [rawKey, rawAxis] = (input.dataset.indexField ?? '').split('.');
+      if (!this.isVectorKey(rawKey) || !this.isAxis(rawAxis)) return;
+
+      const minimum = rawKey === 'blockIdx' || rawKey === 'threadIdx' ? 0 : 1;
+      const maximum = this.maximumFor(rawKey, rawAxis);
+      const value = parseIndexingInteger(input.value, minimum, maximum);
+      if (value === null) {
+        this.showValidation(input);
+        return;
+      }
+
+      const candidate = {
+        ...this.config,
+        [rawKey]: { ...this.config[rawKey], [rawAxis]: value },
+      } as IndexingConfiguration;
+      if (!validateIndexingConfiguration(candidate).valid) {
+        this.showValidation(input);
+        return;
+      }
+
+      this.config = candidate;
+      this.clearValidation();
+      this.render();
+    }
+
+    private maximumFor(key: VectorKey, axis: Axis) {
+      if (key === 'blockIdx') return this.config.gridDim[axis] - 1;
+      if (key === 'threadIdx') return this.config.blockDim[axis] - 1;
+      if (key === 'gridDim') return INDEXING_LIMITS.gridAxis;
+      if (key === 'blockDim') return INDEXING_LIMITS.blockAxis;
+      return INDEXING_LIMITS.extentAxis;
+    }
+
+    private showValidation(input: HTMLInputElement) {
+      const copy = INDEXING_COPY[this.locale()];
+      input.setAttribute('aria-invalid', 'true');
+      const validation = this.querySelector<HTMLElement>('[data-index-validation]');
+      if (validation) {
+        validation.hidden = false;
+        validation.textContent = copy.invalidUpdate;
+      }
+      this.dataset.validation = 'invalid';
+    }
+
+    private clearValidation() {
+      this.querySelectorAll<HTMLInputElement>('[data-index-field]').forEach((input) =>
+        input.setAttribute('aria-invalid', 'false'),
+      );
+      const validation = this.querySelector<HTMLElement>('[data-index-validation]');
+      if (validation) {
+        validation.hidden = true;
+        validation.textContent = '';
+      }
+      this.dataset.validation = 'valid';
+    }
+
+    private render() {
+      const copy = INDEXING_COPY[this.locale()];
+      const result = calculateIndexing(this.config);
+      this.dataset.dimensions = String(this.config.dimensions);
+      this.dataset.boundsState = result.inBounds ? 'in-bounds' : 'out-of-bounds';
+      this.dataset.globalX = String(result.global.x);
+      this.dataset.globalY = String(result.global.y);
+      this.dataset.globalZ = String(result.global.z);
+
+      const picker = this.querySelector<HTMLSelectElement>('[data-dimension-picker]');
+      if (picker) picker.value = String(this.config.dimensions);
+      this.querySelectorAll<HTMLElement>('[data-axis]').forEach((element) => {
+        const axis = element.dataset.axis;
+        element.hidden = axis === 'y' ? this.config.dimensions < 2 : axis === 'z' ? this.config.dimensions < 3 : false;
+      });
+      this.querySelectorAll<HTMLInputElement>('[data-index-field]').forEach((input) => {
+        const [rawKey, rawAxis] = (input.dataset.indexField ?? '').split('.');
+        if (!this.isVectorKey(rawKey) || !this.isAxis(rawAxis)) return;
+        input.value = String(this.config[rawKey][rawAxis]);
+        input.max = String(this.maximumFor(rawKey, rawAxis));
+      });
+
+      const coordinates = (value: { x: number; y: number; z: number }) =>
+        `(${axes.slice(0, this.config.dimensions).map((axis) => `${axis}=${value[axis]}`).join(', ')})`;
+      this.setText('[data-selected-thread]', `${copy.selectedThread}: threadIdx ${coordinates(this.config.threadIdx)}`);
+      this.setText('[data-global-coordinate]', coordinates(result.global));
+      this.setText('[data-local-thread]', String(result.localThread));
+      this.setText('[data-warp-lane]', `warp ${result.warp}, lane ${result.lane}`);
+      this.setText('[data-linear-block]', String(result.linearBlock));
+      this.setText('[data-data-linear]', String(result.dataLinear));
+      this.setText(
+        '[data-equation="global-x"]',
+        `global.x = ${this.config.blockIdx.x} * ${this.config.blockDim.x} + ${this.config.threadIdx.x} = ${result.global.x}`,
+      );
+      this.setText(
+        '[data-equation="global-y"]',
+        `global.y = ${this.config.blockIdx.y} * ${this.config.blockDim.y} + ${this.config.threadIdx.y} = ${result.global.y}`,
+      );
+      this.setText(
+        '[data-equation="global-z"]',
+        `global.z = ${this.config.blockIdx.z} * ${this.config.blockDim.z} + ${this.config.threadIdx.z} = ${result.global.z}`,
+      );
+      this.setText(
+        '[data-equation="local-thread"]',
+        `localThread = ${this.config.threadIdx.x} + ${this.config.blockDim.x} * (${this.config.threadIdx.y} + ${this.config.blockDim.y} * ${this.config.threadIdx.z}) = ${result.localThread}`,
+      );
+      this.setText(
+        '[data-equation="linear-block"]',
+        `linearBlock = ${this.config.blockIdx.x} + ${this.config.gridDim.x} * (${this.config.blockIdx.y} + ${this.config.gridDim.y} * ${this.config.blockIdx.z}) = ${result.linearBlock}`,
+      );
+      this.setText(
+        '[data-equation="data-linear"]',
+        `dataIndex = ${result.global.x} + ${this.config.extent.x} * (${result.global.y} + ${this.config.extent.y} * ${result.global.z}) = ${result.dataLinear}`,
+      );
+
+      for (const axis of axes) {
+        this.setText(`[data-axis-values="${axis}"]`, `${result.global[axis]} / ${this.config.extent[axis]}`);
+        this.setText(
+          `[data-axis-predicate="${axis}"]`,
+          `${result.global[axis]} < ${this.config.extent[axis]}: ${result.axisBounds[axis]}`,
+        );
+      }
+
+      const bounds = this.querySelector<HTMLElement>('[data-bounds-status]');
+      if (bounds) bounds.dataset.boundsState = result.inBounds ? 'in-bounds' : 'out-of-bounds';
+      this.setText('[data-bounds-mark]', result.inBounds ? 'OK' : '!');
+      this.setText('[data-bounds-copy]', result.inBounds ? copy.inBounds : copy.outOfBounds);
+      this.renderThreadButtons();
+    }
+
+    private renderThreadButtons() {
+      const strip = this.querySelector<HTMLElement>('[data-thread-strip]');
+      if (!strip) return;
+      const count = Math.min(this.config.blockDim.x, INDEXING_LIMITS.renderedThreadButtons);
+      const start = Math.min(
+        Math.max(0, this.config.threadIdx.x - Math.floor(count / 2)),
+        this.config.blockDim.x - count,
+      );
+      const buttons = Array.from({ length: count }, (_, offset) => {
+        const x = start + offset;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'visual-thread-button';
+        button.dataset.threadX = String(x);
+        button.textContent = String(x);
+        button.setAttribute('aria-pressed', String(x === this.config.threadIdx.x));
+        button.setAttribute(
+          'aria-label',
+          `threadIdx.x ${x}, threadIdx.y ${this.config.threadIdx.y}, threadIdx.z ${this.config.threadIdx.z}`,
+        );
+        button.addEventListener('click', () => {
+          this.config = { ...this.config, threadIdx: { ...this.config.threadIdx, x } };
+          this.clearValidation();
+          this.render();
+        });
+        return button;
+      });
+      strip.replaceChildren(...buttons);
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+
+    private isVectorKey(value: string): value is VectorKey {
+      return value === 'gridDim' || value === 'blockDim' || value === 'extent' || value === 'blockIdx' || value === 'threadIdx';
+    }
+
+    private isAxis(value: string): value is Axis {
+      return value === 'x' || value === 'y' || value === 'z';
+    }
+  }
+
+  if (!customElements.get('cuda-indexing-explorer')) {
+    customElements.define('cuda-indexing-explorer', CudaIndexingExplorer);
+  }
+</script>
