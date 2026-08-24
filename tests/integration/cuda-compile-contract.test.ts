@@ -70,6 +70,9 @@ describe('CUDA compile evidence workflow', () => {
     ]);
 
     expect(orchestrator).not.toMatch(/exec(?:File)?Sync\([^\n]*ex02-vector-addition/);
+    expect(orchestrator).toContain('Fatbin ptx code:');
+    expect(orchestrator).toContain('\\.target\\s+sm_75');
+    expect(orchestrator).toContain('-std=c\\+\\+23 flag is not supported with the configured host compiler');
     expect(laneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex02-vector-addition(?:\s|$)/m);
     expect(laneScript).toContain('make host-test');
   });

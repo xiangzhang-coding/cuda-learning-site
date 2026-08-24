@@ -140,7 +140,7 @@
     "dialectProbe": "evidence/cuda-13-3-cxx23-probe.json",
     "runtime": "Pending Hardware Verification",
     "expectedObservations": [
-      "A qualifying GPU run should report that the CUDA result matches the CPU reference within both tolerances.",
+      "A qualifying GPU run should report that the CUDA result is accepted by the declared absolute-or-relative tolerance rule.",
       "Changing the element count should change the grid size while the bounds check protects the final partial block."
     ],
     "recordedObservations": []

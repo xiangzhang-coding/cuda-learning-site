@@ -34,7 +34,7 @@ evidence:
   runtime:
     - Pending Hardware Verification
   expectedObservations:
-    - A qualifying GPU run should match the CPU reference within the declared tolerances.
+    - A qualifying GPU run should be accepted by the declared absolute-or-relative tolerance rule.
     - Changing the element count should change grid size while the bounds check protects the final partial block.
   recordedObservations: []
 sources:
@@ -197,6 +197,7 @@ CPU 参考和容差没有 CUDA 依赖，可以在普通 C++ 编译器下单独�
 
 - 绝对容差：`1e-5`。
 - 相对容差：`1e-5`。
+- 每个元素只要满足绝对容差或相对容差之一就通过；两者都不满足才失败。
 - 默认规模：`1,048,576` 个 `float` 元素。
 - 可选规模：`1..134,217,728`；三份 device vector 在最大规模约占 1.5 GiB，低于 8 GB 课程边界。
 - `make host-test` 只运行 CPU reference 和 tolerance 验收；它不能证明 GPU kernel 正确。
@@ -243,7 +244,7 @@ CPU-only CI **绝不运行** `build/ex02-vector-addition`。学习者之后在�
 
 以下内容是未来合格运行需要核对的**预期**，不是本页观察到的输出：
 
-1. CUDA 结果应在绝对与相对容差内匹配独立 CPU reference。
+1. CUDA 结果应按“绝对容差或相对容差满足其一”的规则匹配独立 CPU reference。
 2. 改变元素数量时，grid 大小应随之变化；最后一个不完整 block 仍由 `index < element_count` 保护。
 
 当前已记录运行观察为空，没有 Reference Environment，也没有性能结论。

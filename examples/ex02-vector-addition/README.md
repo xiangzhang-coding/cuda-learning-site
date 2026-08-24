@@ -34,6 +34,6 @@ On a native Linux CUDA environment, build the project and run:
 ./build/ex02-vector-addition 16777216
 ```
 
-The optional element count is bounded to `1..134217728`. The default is `1048576`. The program computes an independent CPU reference, checks every CUDA call and launch boundary, synchronizes before comparison, and reports failure when either tolerance is exceeded.
+The optional element count is bounded to `1..134217728`. The default is `1048576`. The program computes an independent CPU reference, checks every CUDA call and launch boundary, synchronizes before comparison, and reports failure when neither the absolute nor the relative tolerance accepts an element.
 
 No Reference Environment or qualifying GPU execution is currently declared by this project. Runtime evidence remains Pending Hardware Verification until a complete Environment Manifest and acceptance record exist.

@@ -34,7 +34,7 @@ evidence:
   runtime:
     - Pending Hardware Verification
   expectedObservations:
-    - A qualifying GPU run should match the CPU reference within the declared tolerances.
+    - A qualifying GPU run should be accepted by the declared absolute-or-relative tolerance rule.
     - Changing the element count should change grid size while the bounds check protects the final partial block.
   recordedObservations: []
 sources:
@@ -197,6 +197,7 @@ The CPU reference and tolerances have no CUDA dependency and can be tested with 
 
 - Absolute tolerance: `1e-5`.
 - Relative tolerance: `1e-5`.
+- An element passes when either the absolute or relative tolerance accepts it; it fails only when neither does.
 - Default size: `1,048,576` `float` elements.
 - Optional size: `1..134,217,728`; the three device vectors use about 1.5 GiB at the maximum, below the curriculum's 8 GB boundary.
 - `make host-test` runs only the CPU reference and tolerance acceptance checks. It cannot establish GPU-kernel correctness.
@@ -243,7 +244,7 @@ A website build, host-only test, existing image, skipped workflow, or failed wor
 
 These are **expectations** for a future qualifying run, not output observed by this page:
 
-1. The CUDA result should match the independent CPU reference within both declared tolerances.
+1. The CUDA result should match the independent CPU reference under the absolute-or-relative acceptance rule.
 2. Changing the element count should change grid size while `index < element_count` protects the final partial block.
 
 Recorded runtime observations are empty. No Reference Environment or performance conclusion exists.

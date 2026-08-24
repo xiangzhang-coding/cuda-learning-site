@@ -76,6 +76,17 @@ async function describeArtifacts(exampleRoot, paths) {
   );
 }
 
+async function assertEmbeddedCudaImages(resultRoot) {
+  const [cubinList, ptxDump] = await Promise.all([
+    readFile(path.join(resultRoot, 'cubin-list.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'ptx-dump.txt'), 'utf8'),
+  ]);
+  if (!/sm_75/.test(cubinList)) throw new Error('Linked EX02 executable has no embedded sm_75 cubin.');
+  if (!/Fatbin ptx code:/.test(ptxDump) || !/\.target\s+sm_75/.test(ptxDump)) {
+    throw new Error('Linked EX02 executable has no embedded compute_75 PTX image.');
+  }
+}
+
 const args = parseArguments(process.argv.slice(2));
 for (const required of ['check', 'toolkit-lane', 'dialect', 'kind', 'image']) {
   if (!args[required]) throw new Error(`Missing --${required}`);
@@ -124,6 +135,7 @@ const dockerBuildx = run('docker', ['buildx', 'version'], { quiet: true });
 
 const uid = typeof process.getuid === 'function' ? `${process.getuid()}:${process.getgid()}` : '1000:1000';
 let compileResult = 'pass';
+let probeFailure = null;
 try {
   run('docker', [
     ...baseDockerArgs,
@@ -144,8 +156,26 @@ try {
   ]);
 } catch (error) {
   if (args.kind !== 'cxx23-probe') throw error;
-  compileResult = 'unsupported';
+  probeFailure = error;
 }
+
+let probeDiagnostic = null;
+if (probeFailure) {
+  let compileLog;
+  try {
+    compileLog = await readFile(path.join(resultRoot, 'compile.log'), 'utf8');
+  } catch {
+    throw probeFailure;
+  }
+  const unsupportedLine = compileLog
+    .split(/\r?\n/)
+    .find((line) => /-std=c\+\+23 flag is not supported with the configured host compiler/.test(line));
+  const expectedGuard = /The CUDA 13\.3 C\+\+23 probe requires a post-C\+\+20 language mode/.test(compileLog);
+  if (!unsupportedLine || !expectedGuard) throw probeFailure;
+  compileResult = 'unsupported';
+  probeDiagnostic = unsupportedLine;
+}
+if (args.kind === 'ex02') await assertEmbeddedCudaImages(resultRoot);
 
 const artifactPaths = args.kind === 'ex02'
   ? example.build.artifacts
@@ -160,12 +190,6 @@ const commandValues = args.kind === 'ex02'
       'nvcc --help',
       'nvcc --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o',
     ];
-const probeDiagnostic = compileResult === 'unsupported'
-  ? (await readFile(path.join(resultRoot, 'compile.log'), 'utf8'))
-      .split(/\r?\n/)
-      .find((line) => /(?:not supported|fatal|error|unsupported)/i.test(line)) ?? 'C++23 compilation returned a nonzero status.'
-  : null;
-
 const record = {
   'SPDX-License-Identifier': 'Apache-2.0',
   schemaVersion: 1,
