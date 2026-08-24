@@ -36,7 +36,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'o01',
-    structure: 'outcome,resource-types,published-route,workflow,boundaries,check',
+    structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
     zh: '/start/using-the-learning-site/',
     en: '/en/start/using-the-learning-site/',
   },

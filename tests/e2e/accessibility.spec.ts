@@ -2,6 +2,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
+import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
+
 const criticalRoutes = [
   '/',
   '/en/',
@@ -29,16 +31,28 @@ const criticalRoutes = [
   '/en/about/',
 ];
 
-test('@accessibility critical bilingual routes have no automated WCAG A/AA violations', async ({ page }) => {
-  for (const route of criticalRoutes) {
-    await page.goto(route);
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-      .analyze();
+test('@accessibility axe detects no tagged violations across themes; this is not a conformance claim', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
+  test.setTimeout(90_000);
 
-    expect(
-      results.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((node) => node.target) })),
-      route,
-    ).toEqual([]);
+  for (const theme of THEME_IDS) {
+    await page.goto('/');
+    await page.evaluate(
+      ([storageKey, value]) => localStorage.setItem(storageKey, value),
+      [THEME_STORAGE_KEY, theme] as const,
+    );
+
+    for (const route of criticalRoutes) {
+      await page.goto(route);
+      await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .analyze();
+
+      expect(
+        results.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((node) => node.target) })),
+        `${theme}: ${route}`,
+      ).toEqual([]);
+    }
   }
 });

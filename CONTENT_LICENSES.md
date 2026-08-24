@@ -8,7 +8,7 @@ Website source, configuration, styles, test tooling, and scripts are licensed un
 
 This scope includes:
 
-- `astro.config.mjs`, `src/content.config.ts`, and `src/styles/`
+- `astro.config.mjs`, `src/content.config.ts`, `src/components/`, `src/styles/`, and `src/theme-contract.ts`
 - `scripts/` and `tests/`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
@@ -24,7 +24,7 @@ Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page o
 
 ## Adaptations
 
-No adapted content or assets are included in this Orientation release. It contains no copied diagram, sample listing, external font, or third-party image. Package-provided interface assets remain under their upstream terms and are recorded in `THIRD_PARTY_NOTICES.md`.
+No adapted content or assets are included in this Orientation release. It contains no copied diagram, sample listing, external font, or third-party image. The three CSS textures and theme-control mark are original software styling under Apache-2.0. Package-provided interface assets remain under their upstream terms and are recorded in `THIRD_PARTY_NOTICES.md`.
 
 Original, upstream, or adapted files under `src/assets/`, `public/assets/`, `third_party/`, and the root favicon require an adjacent `<filename>.license.json` sidecar:
 

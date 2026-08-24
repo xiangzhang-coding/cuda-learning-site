@@ -1,0 +1,115 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import {
+  DEFAULT_THEME,
+  LEGACY_THEME_ALIASES,
+  STARLIGHT_THEME_BY_LEARNING_THEME,
+  THEME_IDS,
+  THEME_STORAGE_KEY,
+} from '../theme-contract';
+---
+
+{/* This unprocessed script restores the theme before first paint. */}
+<script
+  is:inline
+  define:vars={{
+    defaultTheme: DEFAULT_THEME,
+    legacyThemeAliases: LEGACY_THEME_ALIASES,
+    starlightThemes: STARLIGHT_THEME_BY_LEARNING_THEME,
+    storageKey: THEME_STORAGE_KEY,
+    themes: THEME_IDS,
+  }}
+>
+  (() => {
+    const parseTheme = (value) => {
+      if (typeof value === 'string' && Object.hasOwn(legacyThemeAliases, value)) return legacyThemeAliases[value];
+      return themes.includes(value) ? value : defaultTheme;
+    };
+
+    const storageAvailable = (() => {
+      const probeKey = `${storageKey}-probe`;
+      try {
+        localStorage.setItem(probeKey, '1');
+        localStorage.removeItem(probeKey);
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+
+    const loadTheme = () => {
+      if (!storageAvailable) return defaultTheme;
+      try {
+        return parseTheme(localStorage.getItem(storageKey));
+      } catch {
+        return defaultTheme;
+      }
+    };
+
+    const storeTheme = (theme) => {
+      try {
+        localStorage.setItem(storageKey, theme);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const reflectTheme = (theme) => {
+      document.documentElement.dataset.learningTheme = theme;
+      document.documentElement.removeAttribute('data-theme-storage-unavailable');
+      document.documentElement.dataset.theme = starlightThemes[theme];
+      document.documentElement.style.colorScheme = starlightThemes[theme];
+    };
+
+    const reflectStaticFallback = () => {
+      document.documentElement.removeAttribute('data-learning-theme');
+      document.documentElement.dataset.themeStorageUnavailable = '';
+      document.documentElement.dataset.theme = starlightThemes[defaultTheme];
+      document.documentElement.style.colorScheme = starlightThemes[defaultTheme];
+    };
+
+    const reflectStorageFailure = () => {
+      reflectTheme(defaultTheme);
+      document.documentElement.dataset.themeStorageUnavailable = '';
+    };
+
+    const updatePickers = (theme) => {
+      document.querySelectorAll('learning-theme-select select').forEach((picker) => {
+        picker.value = theme;
+      });
+    };
+
+    const applyTheme = (value, persist = false) => {
+      const theme = parseTheme(value);
+      if (!storageAvailable) {
+        reflectStaticFallback();
+        updatePickers(defaultTheme);
+        return defaultTheme;
+      }
+      if (persist && !storeTheme(theme)) {
+        reflectStorageFailure();
+        updatePickers(defaultTheme);
+        return defaultTheme;
+      }
+      reflectTheme(theme);
+      updatePickers(theme);
+      return theme;
+    };
+
+    const initialTheme = loadTheme();
+    if (storageAvailable) reflectTheme(initialTheme);
+    else reflectStaticFallback();
+
+    window.CudaLearningTheme = {
+      apply: applyTheme,
+      updatePickers: (theme = parseTheme(document.documentElement.dataset.learningTheme)) =>
+        updatePickers(parseTheme(theme)),
+    };
+
+    // Preserve Starlight's public picker hook for components that expect it.
+    window.StarlightThemeProvider = {
+      updatePickers: (theme) => window.CudaLearningTheme.updatePickers(theme),
+    };
+  })();
+</script>

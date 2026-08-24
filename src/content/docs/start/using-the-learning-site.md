@@ -10,6 +10,7 @@ structure:
   - outcome
   - resource-types
   - published-route
+  - themes
   - workflow
   - boundaries
   - check
@@ -29,7 +30,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'outcome,resource-types,published-route,workflow,boundaries,check'
+      content: 'outcome,resource-types,published-route,themes,workflow,boundaries,check'
 ---
 
 <a class="locale-pair" data-locale-counterpart href="/en/start/using-the-learning-site/" lang="en">Read the English counterpart</a>
@@ -40,6 +41,7 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 - 说清本站七类学习资源分别承担什么任务。
 - 找到当前已经完整发布的先修路线，而不是把导航当作未来目录。
+- 在不改变内容含义的前提下选择视觉主题，并说清无脚本回退行为。
 - 判断何时阅读、何时动手，以及浏览器和外部 CUDA 环境各自负责什么。
 
 ## 七类资源，各做一件事
@@ -70,6 +72,18 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 O02 和 O03 各有练习与独立参考解答；[练习题库](/practice/)当前包含两道分别链接回 O02 和 O03 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
 
+## 三种视觉主题，一套内容
+
+页头和移动菜单中的视觉主题选择器提供三种阅读方式：
+
+- **硅光浅色（Silicon Light）** 是默认模式，使用明亮表面和低干扰的硅片点阵，适合长文阅读。
+- **分析器深色（Profiler Dark）** 使用深色表面、时间刻度和高对比代码区域，适合阅读代码与性能轨迹。
+- **蓝图（Blueprint）** 使用工程蓝底、主次网格和数据路径色，突出空间关系与数据流。
+
+三种主题共享同一份页面结构、文字、语义色、键盘顺序和焦点行为；主题不会隐藏内容，也不会把装饰图形当作 CUDA 观察。主题选择是本站唯一跨浏览器会话保留的学习者偏好，只写入当前站点的 `localStorage`，不需要账号、跟踪档案、应用 API、数据库或服务端状态。
+
+如果脚本被关闭，或浏览器策略不允许持久化，页面会保持可读的 Silicon Light 静态默认并显示文字回退。减弱动态、高对比与强制色、窄屏重排和打印规则覆盖全部主题。自动化检查只能发现部分无障碍问题，不能证明 WCAG 一致性；键盘、屏幕阅读器和实际缩放仍需要人工复核。
+
 ## 建议的使用节奏
 
 1. 先读学习单元的目标和先修条件，确认它回答的问题。
@@ -88,11 +102,12 @@ O02 和 O03 各有练习与独立参考解答；[练习题库](/practice/)当前
 
 ## 离开前检查
 
-如果你能回答下面四个问题，就可以把 O01 当作已经掌握：
+如果你能回答下面五个问题，就可以把 O01 当作已经掌握：
 
 1. 可运行示例和实验的差别是什么？
 2. 为什么练习题库中的条目要链接回先修学习单元？
 3. 为什么导航中没有出现的学习材料不能视为已经发布？
-4. 为什么公开一个页面不会授予 CUDA 证据状态？
+4. 脚本或持久化不可用时，主题选择器如何回退？
+5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
 **事实核查日期：2026-08-24。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

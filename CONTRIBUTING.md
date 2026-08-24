@@ -34,6 +34,8 @@ Native Linux is the only Supported Environment. Other environments may be discus
 
 Keep semantic structure, logical keyboard order, visible focus, reduced-motion behavior, forced-colors support, 200% zoom/reflow, mobile layout, and print output usable in both locales. Visual Explainers require keyboard controls, a textual explanation, and a static fallback. Automated axe scans are a regression tool, not a WCAG conformance claim.
 
+Silicon Light, Profiler Dark, and Blueprint must preserve the same content, hierarchy, semantic-color meanings, and focus behavior. Learner-facing theme labels, explanations, and fallbacks change as a complete Publication Pair. Theme choice is the only cross-session learner preference; do not persist progress, scores, profiles, or other application state.
+
 Run the applicable Chromium, Firefox, WebKit, and Mobile Safari emulation checks. Record any real-device or assistive-technology boundary precisely rather than generalizing from emulation.
 
 ## Sources, licenses, and attribution
