@@ -10,7 +10,7 @@ const releaseKind = process.env.RELEASE_KIND as 'local' | 'preview' | 'productio
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
 const ex01DownloadUrl =
-  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/5fa2284a3493fc1a51c6ccc5ba709be096e862b8.zip';
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
