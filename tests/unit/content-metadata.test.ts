@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   curriculumIdSchema,
+  dateSchema,
   evidenceMetadataSchema,
   resourceKindSchema,
   sourceReferenceSchema,
@@ -34,6 +35,9 @@ describe('content evidence metadata', () => {
     { ...noEvidence, runtime: ['Runtime-Verified'] },
     { ...noEvidence, runtime: ['Community-Observed', 'Pending Hardware Verification'] },
     { ...noEvidence, recordedObservations: ['unqualified result'] },
+    { ...noEvidence, compilation: ['Compile-Checked', 'Compile-Checked'] },
+    { ...noEvidence, runtime: ['Pending Hardware Verification', 'Pending Hardware Verification'] },
+    { ...noEvidence, expectedObservations: [''] },
   ])('rejects uncontrolled or contradictory evidence claims', (metadata) => {
     expect(evidenceMetadataSchema.safeParse(metadata).success).toBe(false);
   });
@@ -49,7 +53,18 @@ describe('content evidence metadata', () => {
 
     expect(sourceReferenceSchema.safeParse(source).success).toBe(true);
     expect(sourceReferenceSchema.safeParse({ ...source, url: 'not-a-url' }).success).toBe(false);
+    expect(sourceReferenceSchema.safeParse({ ...source, url: 'http://docs.nvidia.com/example' }).success).toBe(false);
+    expect(sourceReferenceSchema.safeParse({ ...source, title: '' }).success).toBe(false);
     expect(sourceReferenceSchema.safeParse({ ...source, accessDate: '2026/08/24' }).success).toBe(false);
+    expect(sourceReferenceSchema.safeParse({ ...source, accessDate: '2026-02-30' }).success).toBe(false);
+  });
+
+  it.each(['2024-02-29', '2026-08-25'])('accepts real ISO calendar date %s', (date) => {
+    expect(dateSchema.safeParse(date).success).toBe(true);
+  });
+
+  it.each(['2023-02-29', '2026-13-01', '2026-00-10', '2026-04-31'])('rejects impossible date %s', (date) => {
+    expect(dateSchema.safeParse(date).success).toBe(false);
   });
 });
 
@@ -69,7 +84,7 @@ describe('Visual Explainer metadata', () => {
 });
 
 describe('Foundation and Lab metadata', () => {
-  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'LAB02'])(
+  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
     'accepts the controlled curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);

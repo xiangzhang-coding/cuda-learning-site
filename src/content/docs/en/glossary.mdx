@@ -3,11 +3,12 @@ title: Glossary
 description: Published canonical bilingual vocabulary and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-25'
 license: CC-BY-4.0
 provenance: original
 structure:
   - use
+  - lookup-index
   - entries
   - maintenance
 head:
@@ -18,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-24'
+      content: '2026-08-25'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -26,8 +27,10 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,entries,maintenance'
+      content: 'use,lookup-index,entries,maintenance'
 ---
+
+import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/glossary/" lang="zh-CN">阅读中文对应页</a>
 
@@ -37,7 +40,15 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 “Avoid” identifies wording that would blur a teaching contract or resource type. It is not a ban on ordinary language. Each entry also names related Learning Units and any version boundary.
 
+## Published term index
+
+<ResourceIndex group="glossary" locale="en" />
+
+`TERM-*` is a stable planning ID, not a rule that generates a permanent URL. Card links point to the current term locations. Filtering does not hide the static definitions below or retain learner progress.
+
 ## Published entries
+
+<span id="term-001" class="resource-target" aria-hidden="true"></span>
 
 ### Learning Site · 学习站
 
@@ -46,12 +57,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O01.
 - **Version note:** Not tied to a Toolkit version.
 
+<span id="term-002" class="resource-target" aria-hidden="true"></span>
+
 ### Stable Curriculum · 稳定课程
 
 - **Definition:** The prerequisite-bearing curriculum built on non-preview interfaces and durable concepts. Stability describes the teaching dependency contract, not a hardware-observation claim for every hands-on activity.
 - **Avoid:** Main curriculum, latest-feature catalog.
 - **Related unit:** O01.
 - **Version note:** Maintained continuously rather than copied per Toolkit.
+
+<span id="term-003" class="resource-target" aria-hidden="true"></span>
 
 ### Learning Unit · 学习单元
 
@@ -60,12 +75,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O01.
 - **Version note:** The resource type is version-independent.
 
+<span id="term-004" class="resource-target" aria-hidden="true"></span>
+
 ### Publication Pair · 双语发布对
 
 - **Definition:** The Chinese and English counterparts of one public page, sharing facts, structure, code, visuals, metadata, and source dates.
 - **Avoid:** Translation fallback, optional translation.
 - **Related unit:** O01.
 - **Version note:** Applies to every release.
+
+<span id="term-005" class="resource-target" aria-hidden="true"></span>
 
 ### Runnable Example · 可运行示例
 
@@ -74,12 +93,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related units:** O01 and F01.
 - **Version note:** Each project declares its own compatibility.
 
+<span id="term-006" class="resource-target" aria-hidden="true"></span>
+
 ### Lab · 实验
 
 - **Definition:** A guided activity that learners run in an external CUDA-capable environment, with expected observations and acceptance criteria.
 - **Avoid:** Demo, browser playground.
 - **Related units:** O01 and LAB02.
 - **Version note:** Each Lab declares its environment requirements.
+
+<span id="term-007" class="resource-target" aria-hidden="true"></span>
 
 ### Exercise · 练习
 
@@ -88,12 +111,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O01.
 - **Version note:** The resource type is version-independent.
 
+<span id="term-008" class="resource-target" aria-hidden="true"></span>
+
 ### Practice Bank · 练习题库
 
 - **Definition:** A curated collection of original problems across the curriculum, with every entry linked to the Learning Units that teach its prerequisites.
 - **Avoid:** FAQ, copied question dump.
 - **Related unit:** O01.
 - **Version note:** Individual entries declare version boundaries when needed.
+
+<span id="term-009" class="resource-target" aria-hidden="true"></span>
 
 ### Visual Explainer · 可视化讲解
 
@@ -102,12 +129,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** O01, [VIS01](/en/visuals/kernel-journey/), and [VIS02](/en/visuals/indexing/).
 - **Version note:** Conceptual models must be separated from hardware-specific behavior.
 
+<span id="term-010" class="resource-target" aria-hidden="true"></span>
+
 ### Glossary · 术语表
 
 - **Definition:** A learner-facing bilingual index of canonical terms used throughout the curriculum.
 - **Avoid:** Dictionary, keyword list.
 - **Related unit:** O01.
 - **Version note:** Entries are reviewed with the curriculum but do not imply interface compatibility.
+
+<span id="term-011" class="resource-target" aria-hidden="true"></span>
 
 ### Evidence Status · 证据状态
 
@@ -116,12 +147,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O02.
 - **Version note:** A status is scoped to a subject, environment, criteria, and date; publishing a web page grants none.
 
+<span id="term-012" class="resource-target" aria-hidden="true"></span>
+
 ### Compile-Checked · 编译已检查
 
 - **Definition:** The required source actually built in a declared Toolkit Lane with dialect, target, command, and build environment recorded. It neither requires nor implies GPU execution.
 - **Avoid:** Runtime-Verified, tested on GPU.
 - **Related units:** O02, O03.
 - **Version note:** Every claim binds to an exact Toolkit Lane.
+
+<span id="term-013" class="resource-target" aria-hidden="true"></span>
 
 ### Community-Observed · 社区已观察
 
@@ -130,12 +165,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related units:** O02, O03.
 - **Version note:** May coexist with Pending Hardware Verification.
 
+<span id="term-014" class="resource-target" aria-hidden="true"></span>
+
 ### Runtime-Verified · 运行已验证
 
 - **Definition:** The subject executed in a declared, maintainer-controlled Reference Environment and met its stated correctness and observation criteria.
 - **Avoid:** Compile-Checked, expected to work.
 - **Related units:** O02, O03.
 - **Version note:** The conclusion covers only recorded GPU, driver, Toolkit, components, workload, and method coordinates.
+
+<span id="term-015" class="resource-target" aria-hidden="true"></span>
 
 ### Pending Hardware Verification · 待硬件验证
 
@@ -144,12 +183,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O02.
 - **Version note:** A successful build or community observation does not remove it automatically.
 
+<span id="term-016" class="resource-target" aria-hidden="true"></span>
+
 ### Runtime-Not-Applicable · 无需运行验证
 
 - **Definition:** A runtime-axis status for acceptance criteria that require compilation or artifact inspection and no GPU behavior.
 - **Avoid:** Compile-only, skipped runtime.
 - **Related unit:** O02.
 - **Version note:** It must not hide runtime correctness or performance requirements.
+
+<span id="term-017" class="resource-target" aria-hidden="true"></span>
 
 ### Environment Manifest · 环境清单
 
@@ -158,12 +201,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O03.
 - **Version note:** New evidence records new coordinates and an observation date.
 
+<span id="term-018" class="resource-target" aria-hidden="true"></span>
+
 ### Supported Environment · 受支持环境
 
 - **Definition:** An environment family for which the site accepts setup guidance, troubleshooting boundaries, and validation responsibility. Native Linux is the only one.
 - **Avoid:** Any platform that may happen to work.
 - **Related unit:** O03.
 - **Version note:** Upstream product support does not expand site responsibility automatically.
+
+<span id="term-019" class="resource-target" aria-hidden="true"></span>
 
 ### Reference Environment · 基准环境
 
@@ -172,12 +219,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O03.
 - **Version note:** No Reference Environment is currently declared.
 
+<span id="term-020" class="resource-target" aria-hidden="true"></span>
+
 ### Toolkit Lane · 工具包通道
 
 - **Definition:** A pinned Toolkit and host environment with declared C++ dialects, used as a compile-evidence target.
 - **Avoid:** Site version, documentation version.
 - **Related unit:** O03.
 - **Version note:** A Lane is not a curriculum copy or Reference Environment; only a successful build can add Compile-Checked.
+
+<span id="term-021" class="resource-target" aria-hidden="true"></span>
 
 ### GPU Capability Tier · GPU 能力层级
 
@@ -186,12 +237,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O03.
 - **Version note:** Product names and extra memory cannot select a tier alone.
 
+<span id="term-022" class="resource-target" aria-hidden="true"></span>
+
 ### Baseline GPU Capability Tier · 基础 GPU 能力层级
 
 - **Definition:** The tier for Stable Curriculum fundamentals, requiring compute capability 7.5 or newer and problem sizes that fit within 8 GB.
 - **Avoid:** 8 GB GPU tier, Turing tier.
 - **Related unit:** O03.
 - **Version note:** 8 GB is a workload boundary, not a separate hardware class.
+
+<span id="term-023" class="resource-target" aria-hidden="true"></span>
 
 ### Modern Single-GPU Capability Tier · 现代单 GPU 能力层级
 
@@ -200,12 +255,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O03.
 - **Version note:** It does not automatically cover multi-GPU or architecture-specific activities.
 
+<span id="term-024" class="resource-target" aria-hidden="true"></span>
+
 ### CUDA Toolkit · CUDA 工具包
 
 - **Definition:** NVIDIA's bundle of compilers, libraries, tools, and runtime development components, recorded separately from the installed driver and individual component versions.
 - **Avoid:** CUDA driver version, the whole CUDA environment.
 - **Related unit:** O03.
 - **Version note:** Toolkit Lanes use exact `X.Y.Z` coordinates.
+
+<span id="term-025" class="resource-target" aria-hidden="true"></span>
 
 ### compute capability · 计算能力
 
@@ -214,12 +273,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related unit:** O03.
 - **Version note:** Model mappings and feature tables require current NVIDIA documentation.
 
+<span id="term-026" class="resource-target" aria-hidden="true"></span>
+
 ### kernel · 核函数
 
 - **Definition:** A function launched by the host and executed by many threads on a CUDA device. In CUDA C++, a `__global__` kernel is launched with an execution configuration.
 - **Avoid:** Ordinary CPU function, browser animation.
 - **Related units:** F01 and LAB02.
 - **Version note:** F01 uses the foundational execution model in CUDA Programming Guide v13.3.
+
+<span id="term-027" class="resource-target" aria-hidden="true"></span>
 
 ### execution configuration · 执行配置
 
@@ -228,12 +291,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** F01 and VIS02.
 - **Version note:** The configuration creates execution threads but does not define logical data extent automatically.
 
+<span id="term-028" class="resource-target" aria-hidden="true"></span>
+
 ### grid · 网格
 
 - **Definition:** The complete collection of thread blocks created by one kernel launch, with one-, two-, or three-dimensional shape.
 - **Avoid:** Data array, fixed scheduling order.
 - **Related resources:** F01, VIS01, and VIS02.
 - **Version note:** Grid coordinates do not guarantee block dispatch or completion order.
+
+<span id="term-029" class="resource-target" aria-hidden="true"></span>
 
 ### thread block · 线程块
 
@@ -242,12 +309,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** F01, VIS01, and VIS02.
 - **Version note:** F01 uses only one-dimensional blocks; VIS02 covers multidimensional relationships.
 
+<span id="term-030" class="resource-target" aria-hidden="true"></span>
+
 ### thread · 线程
 
 - **Definition:** One logical execution instance of a kernel. It derives an owned data position from `threadIdx` and block/grid coordinates.
 - **Avoid:** Element, warp, operating-system thread.
 - **Related resources:** F01 and VIS02.
 - **Version note:** A launched thread may lie beyond logical data extent, so a bounds check remains necessary.
+
+<span id="term-031" class="resource-target" aria-hidden="true"></span>
 
 ### host and device · 主机与设备
 
@@ -256,6 +327,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related units:** F01 and LAB02.
 - **Version note:** LAB02 uses the declared CUDA Runtime API 11.8.0, 12.9.2, or 13.3.1 Lane.
 
+<span id="term-032" class="resource-target" aria-hidden="true"></span>
+
 ### bounds check · 边界判断
 
 - **Definition:** A comparison between a thread's derived index and logical extent before array access, causing out-of-bounds threads in the final partial block to skip access.
@@ -263,12 +336,16 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** F01, VIS02, and LAB02.
 - **Version note:** EX02's one-dimensional condition is `index < element_count`.
 
+<span id="term-033" class="resource-target" aria-hidden="true"></span>
+
 ### CPU reference · CPU 参考实现
 
 - **Definition:** An implementation independent of the CUDA kernel that calculates expected results on the CPU for element-wise correctness comparison.
 - **Avoid:** GPU runtime evidence, performance baseline unless separately defined by a measurement contract.
 - **Related units:** F01 and LAB02.
 - **Version note:** EX02's host-only test runs no GPU and grants no Runtime-Verified status.
+
+<span id="term-034" class="resource-target" aria-hidden="true"></span>
 
 ### tolerance · 容差
 
@@ -279,4 +356,4 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 ## Maintenance rule
 
-These entries share the O01, O02, O03, F01, and LAB02 fact-check date of **2026-08-24**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.
+These entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-25**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.

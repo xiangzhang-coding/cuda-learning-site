@@ -82,8 +82,8 @@ describe('Cloudflare assets-only deployment contract', () => {
       readFile(path.join(projectRoot, 'DEPLOYMENT.md'), 'utf8'),
       readFile(path.join(projectRoot, 'README.md'), 'utf8'),
       readFile(path.join(projectRoot, 'MAINTENANCE_SOURCES.md'), 'utf8'),
-      readFile(path.join(projectRoot, 'src/content/docs/sources-and-versions.md'), 'utf8'),
-      readFile(path.join(projectRoot, 'src/content/docs/en/sources-and-versions.md'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/content/docs/sources-and-versions.mdx'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/content/docs/en/sources-and-versions.mdx'), 'utf8'),
     ]);
 
     expect(deployment).toContain('Cloudflare Workers Builds');

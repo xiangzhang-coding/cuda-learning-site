@@ -3,11 +3,12 @@ title: 练习题库
 description: 当前已发布的跨单元原创练习，包含先修链接、分层提示和解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-25'
 license: CC-BY-4.0
 provenance: original
 structure:
   - use
+  - lookup-index
   - entry-pb-r0-001
   - entry-pb-r0-002
   - entry-pb-r0-003
@@ -34,11 +35,11 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-25' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
@@ -57,6 +58,8 @@ head:
     attrs: { name: 'cuda:recorded-observations', content: none }
 ---
 
+import ResourceIndex from '../../components/ResourceIndex.astro';
+
 <a class="locale-pair" data-locale-counterpart href="/en/practice/" lang="en">Read the English counterpart</a>
 
 练习题库（Practice Bank）收录跨课程反复出现的原创问题。每个条目都说明先修学习单元（Learning Unit）、硬件门槛（Hardware gate）、验收条件、提示、解答和来源依据；它不是复制来的问答清单。
@@ -65,6 +68,14 @@ head:
 
 先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面五个完整条目，不用空白题目预告未来内容。
 
+## 已发布条目索引
+
+<ResourceIndex group="practice" locale="zh-CN" />
+
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方五道完整题目、先修链接和解答始终保留在静态页面中。
+
+<span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-001：修复证据状态（Evidence Status）记录
 
 - **ID 与双语发布对（Publication Pair）：** PB-R0-001；位于 `practice-bank` Publication Pair。
@@ -72,7 +83,7 @@ head:
 - **先修条件：** [O02：诚实记录证据状态](/start/evidence-status/)。
 - **硬件门槛（Hardware gate）：** 无；只分析文本记录。
 - **相关学习单元：** O02。
-- **最后复核（Last reviewed）：** 2026-08-24。
+- **最后复核（Last reviewed）：** 2026-08-25。
 
 **题目：** 一份发布说明写道：“Linux 构建因容器仓库超时而跳过。贡献者在自己的 GPU 上贴出 `PASS`，所以项目已经 Compile-Checked 和 Runtime-Verified。网页测试也证明浏览器演示可以算 CUDA 运行。”请重写成一条诚实记录。
 
@@ -101,6 +112,8 @@ head:
 
 **来源依据（Source basis）：** 本站 [O02](/start/evidence-status/) 的原创证据合同，以及 NVIDIA `nvcc` 13.3.1 [supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases)对编译和运行阶段的区分。
 
+<span id="pb-r0-002" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-002：补全 manifest 并修复支持边界
 
 - **ID 与双语发布对：** PB-R0-002；位于 `practice-bank` Publication Pair。
@@ -108,7 +121,7 @@ head:
 - **先修条件：** [O03：读懂环境清单（Environment Manifest）](/start/environment-manifest/)。
 - **硬件门槛（Hardware gate）：** 无；使用假设记录，不运行 CUDA。
 - **相关学习单元：** O03。
-- **最后复核（Last reviewed）：** 2026-08-24。
+- **最后复核（Last reviewed）：** 2026-08-25。
 
 **题目：** 一份记录只有“8 GB GPU、CUDA 12、WSL、kernel 0.2 ms”，并声称“属于完整层级，且本站支持这个环境”。列出必须补充的 manifest 字段，并修复两条结论。
 
@@ -136,6 +149,8 @@ head:
 
 **来源依据（Source basis）：** 本站 [O03](/start/environment-manifest/) 的原创 manifest 和支持合同，以及 NVIDIA [CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)与 [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)。
 
+<span id="pb-r0-003" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-003：在运行前审查索引预测
 
 - **ID 与双语发布对：** PB-R0-003；位于 `practice-bank` Publication Pair。
@@ -143,7 +158,7 @@ head:
 - **先修条件：** [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。
 - **硬件门槛（Hardware gate）：** 无；只做静态推理。
 - **相关学习单元：** F01。
-- **最后复核（Last reviewed）：** 2026-08-24。
+- **最后复核（Last reviewed）：** 2026-08-25。
 
 **题目：** 对 `N = 65`、`blockDim.x = 32` 的一维向量加法，给出 block 数、总 launch thread 数、最后一个合法 index，并判断最后一个 block 中 `threadIdx.x = 0` 和 `1` 的 bounds 状态。解释为什么 bounds check 仍然必需。
 
@@ -165,6 +180,8 @@ head:
 
 **来源依据（Source basis）：** 本站 [F01](/foundations/first-cuda-kernel/) 与 [VIS02](/visuals/indexing/) 的原创索引模型，以及 NVIDIA [Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html)。
 
+<span id="pb-r0-004" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-004：修复不完整的错误与正确性边界
 
 - **ID 与双语发布对：** PB-R0-004；位于 `practice-bank` Publication Pair。
@@ -172,7 +189,7 @@ head:
 - **先修条件：** [F01](/foundations/first-cuda-kernel/)。
 - **硬件门槛（Hardware gate）：** 无；审查假设流程。
 - **相关学习单元：** F01、O02。
-- **最后复核（Last reviewed）：** 2026-08-24。
+- **最后复核（Last reviewed）：** 2026-08-25。
 
 **题目：** 一个程序只检查 `cudaMalloc` 和最终输出文字，然后声称“无报错且 GPU 正确”。写出缺失边界，并定义一个元素的接受规则。
 
@@ -194,6 +211,8 @@ head:
 
 **来源依据（Source basis）：** 本站 [F01](/foundations/first-cuda-kernel/) 与 [EX02](/examples/vector-addition/) 的 canonical error/correctness contract，以及 NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)。
 
+<span id="pb-r0-005" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-005：审查一份 LAB02 证据申请
 
 - **ID 与双语发布对：** PB-R0-005；位于 `practice-bank` Publication Pair。
@@ -201,7 +220,7 @@ head:
 - **先修条件：** [F01](/foundations/first-cuda-kernel/)；结合 [O02](/start/evidence-status/)和 [O03](/start/environment-manifest/)。
 - **硬件门槛（Hardware gate）：** 无；审查文本记录，不运行 CUDA。
 - **相关学习单元：** F01、O02、O03。
-- **最后复核（Last reviewed）：** 2026-08-24。
+- **最后复核（Last reviewed）：** 2026-08-25。
 
 **题目：** 一份 LAB02 申请只有“CUDA 13、vector add PASS、0.01 ms”，要求标记 Runtime-Verified。判断目前能授予什么状态，并列出补全路径。
 
@@ -225,4 +244,4 @@ head:
 
 ## 复核记录
 
-五个条目及其英文对应内容在 **2026-08-24** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
+五个条目及其英文对应内容在 **2026-08-25** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。

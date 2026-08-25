@@ -4,7 +4,7 @@
 
 CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU programming. Chinese pages live at the root and English counterparts under `/en/`.
 
-The current public baseline contains Home; O01, O02, and O03; F01 with paired Exercises and reviewed solutions; the canonical EX02 vector-addition Runnable Example; LAB02; VIS01 Kernel Journey; VIS02 Indexing; five Practice Bank entries; the Glossary; the Sources and Version Record; and About. Silicon Light, Profiler Dark, and Blueprint style this same content without changing its structure or meaning. Navigation exposes no unfinished learning material.
+The current public baseline contains Home; O01, O02, and O03; F01 with paired Exercises and reviewed solutions; the canonical EX02 vector-addition Runnable Example; LAB02; VIS01 Kernel Journey; VIS02 Indexing; five Practice Bank entries; the Glossary; the Sources and Version Record; and About. Complete bilingual indexes provide direct lookup for Labs, Practice Bank entries, Visual Explainers, Glossary terms, and source/version records while preserving prerequisite links. Silicon Light, Profiler Dark, and Blueprint style this same content without changing its structure or meaning. Navigation exposes no unfinished learning material.
 
 Contributions use [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) and [Pull Requests](https://github.com/xiangzhang-coding/cuda-learning-site/pulls). Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
 

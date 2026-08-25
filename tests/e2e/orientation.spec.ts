@@ -3,56 +3,15 @@ import { expect, test } from '@playwright/test';
 
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
-
-const routes = [
-  '/',
-  '/en/',
-  '/start/using-the-learning-site/',
-  '/en/start/using-the-learning-site/',
-  '/start/evidence-status/',
-  '/en/start/evidence-status/',
-  '/start/evidence-status/exercises/',
-  '/en/start/evidence-status/exercises/',
-  '/start/evidence-status/solutions/',
-  '/en/start/evidence-status/solutions/',
-  '/start/environment-manifest/',
-  '/en/start/environment-manifest/',
-  '/start/environment-manifest/exercises/',
-  '/en/start/environment-manifest/exercises/',
-  '/start/environment-manifest/solutions/',
-  '/en/start/environment-manifest/solutions/',
-  '/foundations/first-cuda-kernel/',
-  '/en/foundations/first-cuda-kernel/',
-  '/foundations/first-cuda-kernel/exercises/',
-  '/en/foundations/first-cuda-kernel/exercises/',
-  '/foundations/first-cuda-kernel/solutions/',
-  '/en/foundations/first-cuda-kernel/solutions/',
-  '/examples/vector-addition/',
-  '/en/examples/vector-addition/',
-  '/labs/vector-addition/',
-  '/en/labs/vector-addition/',
-  '/visuals/kernel-journey/',
-  '/en/visuals/kernel-journey/',
-  '/visuals/indexing/',
-  '/en/visuals/indexing/',
-  '/practice/',
-  '/en/practice/',
-  '/glossary/',
-  '/en/glossary/',
-  '/sources-and-versions/',
-  '/en/sources-and-versions/',
-  '/about/',
-  '/en/about/',
-];
+import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 test('all published routes load without browser errors', async ({ page }) => {
-  test.slow();
+  test.setTimeout(180_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
-  for (const route of routes) {
+  for (const route of await discoverPublishedRoutes()) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
-    await page.waitForLoadState('networkidle');
     await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
     expect(errors, route).toEqual([]);
   }
@@ -65,10 +24,14 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/start/environment-manifest/', en: '/en/start/environment-manifest/' },
     { zh: '/foundations/first-cuda-kernel/', en: '/en/foundations/first-cuda-kernel/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
+    { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
+    { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
     { zh: '/practice/', en: '/en/practice/' },
+    { zh: '/glossary/', en: '/en/glossary/' },
+    { zh: '/sources-and-versions/', en: '/en/sources-and-versions/' },
   ]) {
     await page.goto(zh);
     await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', en);
@@ -90,11 +53,13 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: '内存事务', localePrefix: '/', expectedHrefs: ['/visuals/kernel-journey/'] },
     { route: '/', button: /搜索/, query: '第一个 CUDA kernel', localePrefix: '/', expectedHrefs: ['/foundations/first-cuda-kernel/'] },
     { route: '/', button: /搜索/, query: '运行并验证向量加法', localePrefix: '/', expectedHrefs: ['/labs/vector-addition/'] },
+    { route: '/', button: /搜索/, query: 'TERM-034 容差', localePrefix: '/', expectedHrefs: ['/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Evidence Status', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/', '/en/start/evidence-status/exercises/', '/en/practice/'] },
     { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/', expectedHrefs: ['/en/visuals/indexing/'] },
     { route: '/en/', button: /Search/, query: 'first CUDA kernel', localePrefix: '/en/', expectedHrefs: ['/en/foundations/first-cuda-kernel/'] },
     { route: '/en/', button: /Search/, query: 'Run and Verify Vector Addition', localePrefix: '/en/', expectedHrefs: ['/en/labs/vector-addition/'] },
+    { route: '/en/', button: /Search/, query: 'SRC-WEB-003 Pagefind 1.5.2', localePrefix: '/en/', expectedHrefs: ['/en/sources-and-versions/'] },
   ]) {
     await expectRankedSearchResult(page, scenario);
   }
@@ -114,7 +79,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  for (const route of ['/', '/en/', '/start/using-the-learning-site/', '/en/start/using-the-learning-site/', '/start/evidence-status/', '/en/start/evidence-status/', '/start/environment-manifest/', '/en/start/environment-manifest/', '/foundations/first-cuda-kernel/', '/en/foundations/first-cuda-kernel/', '/foundations/first-cuda-kernel/exercises/', '/en/foundations/first-cuda-kernel/exercises/', '/foundations/first-cuda-kernel/solutions/', '/en/foundations/first-cuda-kernel/solutions/', '/examples/vector-addition/', '/en/examples/vector-addition/', '/labs/vector-addition/', '/en/labs/vector-addition/', '/visuals/kernel-journey/', '/en/visuals/kernel-journey/', '/visuals/indexing/', '/en/visuals/indexing/', '/practice/', '/en/practice/', '/sources-and-versions/', '/en/sources-and-versions/']) {
+  for (const route of ['/', '/en/', '/start/using-the-learning-site/', '/en/start/using-the-learning-site/', '/start/evidence-status/', '/en/start/evidence-status/', '/start/environment-manifest/', '/en/start/environment-manifest/', '/foundations/first-cuda-kernel/', '/en/foundations/first-cuda-kernel/', '/foundations/first-cuda-kernel/exercises/', '/en/foundations/first-cuda-kernel/exercises/', '/foundations/first-cuda-kernel/solutions/', '/en/foundations/first-cuda-kernel/solutions/', '/examples/vector-addition/', '/en/examples/vector-addition/', '/labs/', '/en/labs/', '/labs/vector-addition/', '/en/labs/vector-addition/', '/visuals/', '/en/visuals/', '/visuals/kernel-journey/', '/en/visuals/kernel-journey/', '/visuals/indexing/', '/en/visuals/indexing/', '/practice/', '/en/practice/', '/glossary/', '/en/glossary/', '/sources-and-versions/', '/en/sources-and-versions/']) {
     await page.goto(route);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }

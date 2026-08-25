@@ -47,6 +47,7 @@ test('@visual selected home layouts produce reviewable screenshots', async ({ pa
 
 test('@visual selected Visual Explainer states produce reviewable screenshots', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Selected visual evidence is owned by pinned Chromium.');
+  test.setTimeout(90_000);
 
   for (const visual of [
     {

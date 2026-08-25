@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-25'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -33,7 +33,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-24'
+      content: '2026-08-25'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -91,14 +91,14 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 ## The published route
 
-As of **2026-08-24**, the complete prerequisite shape is:
+As of **2026-08-25**, the complete prerequisite shape is:
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
 3. After O01, enter [O02: Recording Evidence Honestly](/en/start/evidence-status/) and [O03: Reading an Environment Manifest](/en/start/environment-manifest/) as separate branches.
 4. After O03, complete [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/), then run [LAB02](/en/labs/vector-addition/) in a native Linux CUDA environment.
 
-O02, O03, and F01 each have Exercises and separate reviewed solutions. The [EX02 vector-addition Runnable Example](/en/examples/vector-addition/) is the sole canonical source shared by F01/LAB02 and publishes its build contract and independent compilation/runtime evidence boundary. [VIS01 Kernel Journey](/en/visuals/kernel-journey/) and [VIS02 Indexing](/en/visuals/indexing/) provide deterministic browser models, textual explanations, and static fallbacks. The [Practice Bank](/en/practice/) now contains five complete entries linked back to O02, O03, and F01. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
+O02, O03, and F01 each have Exercises and separate reviewed solutions. The [EX02 vector-addition Runnable Example](/en/examples/vector-addition/) is the sole canonical source shared by F01/LAB02 and publishes its build contract and independent compilation/runtime evidence boundary. The [Lab Index](/en/labs/) preserves the prerequisite sequence while adding direct lookup. The [Visual Explainer Index](/en/visuals/) collects the deterministic browser models, text, and static fallbacks for VIS01 Kernel Journey and VIS02 Indexing. The [Practice Bank](/en/practice/) contains five complete entries linked back to O02, O03, and F01. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
 
 ## Three visual themes, one body of content
 
@@ -138,4 +138,4 @@ You are ready to move on when you can answer these five questions:
 4. How does the theme control fall back when scripts or persistence are unavailable?
 5. Why does publishing a page not grant CUDA evidence?
 
-**Fact-check date: 2026-08-24.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.
+**Fact-check date: 2026-08-25.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.
