@@ -1,0 +1,287 @@
+---
+title: 'O05: Reproducible Linux Command-Line Work'
+description: Make paths, build stages, process snapshots, log boundaries, and reproduction records explicit on native Linux without mistaking visible output for success.
+pairId: o05
+counterpart: /start/linux-command-line/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - paths
+  - builds
+  - processes
+  - logs
+  - reproducibility
+  - visual
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O05
+prerequisites:
+  - O01
+relatedUnits:
+  - O03
+  - O08
+  - LAB01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: GNU Bash Reference Manual - Builtins, Redirections, Pipelines, and The Set Builtin
+    url: 'https://www.gnu.org/software/bash/manual/bash.html'
+    version: '5.3'
+    platform: 'GNU/Linux with GNU Bash'
+    accessDate: '2026-08-26'
+  - title: GNU Coreutils Manual - realpath, tee, env, uname, and SHA-2 utilities
+    url: 'https://www.gnu.org/software/coreutils/manual/coreutils.html'
+    version: '9.11'
+    platform: 'GNU/Linux user space'
+    accessDate: '2026-08-26'
+  - title: GNU Make Manual - Recipe Execution and One Shell
+    url: 'https://www.gnu.org/software/make/manual/make.html'
+    version: '4.4.1'
+    platform: 'GNU/Linux build recipes'
+    accessDate: '2026-08-26'
+  - title: procps-ng tagged ps(1) manual
+    url: 'https://gitlab.com/procps-ng/procps/-/raw/v4.0.6/man/ps.1'
+    version: '4.0.6'
+    platform: 'Linux procfs process reporting'
+    accessDate: '2026-08-26'
+  - title: Linux kernel documentation - The /proc Filesystem
+    url: 'https://www.kernel.org/doc/html/v6.8/filesystems/proc.html'
+    version: '6.8'
+    platform: 'Linux procfs'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,paths,builds,processes,logs,reproducibility,visual,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O03,O08,LAB01' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '5.3,9.11,4.4.1,4.0.6,6.8' }
+---
+
+import OrientationVisual from '../../../../components/OrientationVisual.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/start/linux-command-line/" lang="zh-CN">阅读中文对应页</a>
+
+This Learning Unit follows one native Linux command lifecycle: establish where a command runs, perform a controlled build, observe the processes present at that time, preserve output and exit status, and seal a reviewable record. It is not a general Linux command catalog and requires no GPU.
+
+## What you should be able to do
+
+- Describe both the logical and physical current working directory and identify ambiguity introduced by symbolic links.
+- Divide a build into named stages and record each stage's working directory, command, timestamps, and exit status.
+- Explain GNU Make recipe shell boundaries and why `cd` on one recipe line does not affect the next line by default.
+- Distinguish a literal command, xtrace, standard output, and standard error while reasoning correctly about redirections and pipeline status.
+- Assemble a minimal reproduction record from an allowlisted environment, process snapshots, UTC timestamps, and SHA-2 hashes.
+
+## Prerequisite
+
+O05 has exactly one direct prerequisite: [O01: Using the Learning Site](/en/start/using-the-learning-site/). [O03](/en/start/environment-manifest/) places this unit's records into an Environment Manifest. O08 and LAB01 reuse its build and logging discipline, but neither is required before O05.
+
+This page executes no CUDA, requires no hardware, and grants no compilation or runtime Evidence Status.
+
+## Paths: record logical and physical location
+
+A shell can describe its location in two valid but different ways. `pwd -L` uses the logical path and can preserve symbolic-link names followed while entering the directory. `pwd -P` uses the physical path and removes symbolic-link components. `$PWD` is shell-maintained logical state, not sufficient file identity by itself.
+
+For an existing target, GNU Coreutils `realpath -e` requires every path component to exist and emits an absolute name with `.`, `..`, and symbolic links resolved:
+
+```bash
+pwd -L >"$record_dir/cwd.logical"
+logical_status=$?
+pwd -P >"$record_dir/cwd.physical"
+physical_status=$?
+realpath -e -- "$build_dir" >"$record_dir/build-dir.physical"
+realpath_status=$?
+printf '%s\n' "$logical_status" >"$record_dir/cwd.logical.exit"
+printf '%s\n' "$physical_status" >"$record_dir/cwd.physical.exit"
+printf '%s\n' "$realpath_status" >"$record_dir/build-dir.physical.exit"
+```
+
+The logical path explains how the operator reached a directory. The physical path explains where that name resolved at collection time. Preserve both. A symbolic link can be retargeted and a directory can be renamed, so collect these values immediately before each important stage rather than attaching an old path record to a new build.
+
+## Builds: fix the working directory, stages, and status
+
+Do not let a build depend on where its caller happened to stand. `make -C` changes directory before reading makefiles, putting the working directory in the command itself. Capture stdout, stderr, and exit status separately:
+
+```bash
+make -C "$build_dir" "$target" \
+  >"$record_dir/build.stdout" \
+  2>"$record_dir/build.stderr"
+build_status=$?
+printf '%s\n' "$build_status" >"$record_dir/build.exit"
+```
+
+A record lists the build stages that really exist, such as `configure`, `build`, and `inspect`. Each entry needs a stage name, literal command and arguments, logical and physical working directory, UTC start and finish, exit status, stdout file, and stderr file. Do not compress several commands into a sentence saying that the build passed.
+
+`set -e` is not a complete status model. Bash has `errexit` exceptions in conditions, lists, pipelines, and other grammatical contexts. It may be part of a script policy, but it does not replace copying `$?` immediately at a stage boundary and deciding explicitly whether execution continues.
+
+GNU Make uses `/bin/sh` by default and starts a new sub-shell for each recipe line. The `cd` below does not persist into the next line:
+
+```make
+artifact:
+	cd build
+	$(MAKE) artifact
+```
+
+Keep the directory and command on one line, or pass the directory to the sub-Make:
+
+```make
+artifact:
+	$(MAKE) -C build artifact
+```
+
+`.ONESHELL` sends all recipe lines to one shell, but it also changes failure propagation. If you use it, declare the shell, flags, and critical command statuses. Do not assume that an earlier failing line necessarily fails the complete recipe.
+
+## Processes: a snapshot is not history
+
+procps-ng defines `ps` as a snapshot of active processes. Explicit columns, ordering, and locale reduce drift caused by terminal width, environment variables, and defaults:
+
+```bash
+LC_ALL=C ps -eo pid=,ppid=,lstart=,stat=,comm= --sort=pid \
+  >"$record_dir/processes.before"
+process_status=$?
+printf '%s\n' "$process_status" >"$record_dir/processes.before.exit"
+```
+
+Taking one snapshot before and one after a stage helps comparison, but still does not create atomic history. Processes can start, exit, or change state while collection runs. `args` and environment fields can also expose credentials, so record `comm` by default. Expand to full command lines only under a stated safety policy and handle sensitive content before publication.
+
+procfs, the `/proc` filesystem, exposes process views such as `/proc/PID/status`, `cmdline`, and `cwd`. A process discovered before a read can exit before its files are opened, so the path disappears. The numeric PID may later identify a different process. Linux 6.8 also specifies that an already-open descriptor for the old `/proc/PID` does not begin acting on a new process that reuses the PID, but reopening by path performs a new lookup.
+
+Permissions, PID namespaces, the `hidepid` mount option, and ptrace checks can hide or deny fields. A failed read means that this collection could not access the value, not that the process or field did not exist. Record collection time, PID, an available start-time identity, and the original error instead of filling gaps by inference.
+
+## Logs: preserve command, descriptor, and pipeline boundaries
+
+A literal command is the script bytes and argument boundaries saved before execution. Keep a fixed script as part of the record and use NUL-separated arguments to avoid ambiguity from spaces:
+
+```bash
+printf '%s\0' "$0" "$@" >"$record_dir/argv.nul"
+```
+
+xtrace is a different artifact. `set -x` prints commands after expansion, normally to stderr. Values have already expanded, and original quoting cannot be reconstructed reliably. The trace helps diagnose the branch actually taken; it is not a copy of literal input and can disclose tokens. When needed, point `BASH_XTRACEFD` at a separate descriptor, enable tracing only around non-secret work, and retain the original script and arguments.
+
+File descriptor 1 is stdout and 2 is stderr. Bash processes redirections from left to right, so the next three commands are alternatives, not a sequence:
+
+```bash
+make -C "$build_dir" "$target" \
+  >"$record_dir/build.stdout" \
+  2>"$record_dir/build.stderr"
+make -C "$build_dir" "$target" \
+  >"$record_dir/build.combined" \
+  2>&1
+make -C "$build_dir" "$target" \
+  2>&1 \
+  >"$record_dir/build.stdout"
+```
+
+The second command first sends stdout to the file, then duplicates that current destination for stderr, so both streams enter the file. The third duplicates the original stdout for stderr before moving stdout, so stderr does not enter the file. `2>&1` copies the destination at that moment; it does not create a permanent binding.
+
+`tee` can display and save one merged stream, but it adds another pipeline stage:
+
+```bash
+set -o pipefail
+make -C "$build_dir" "$target" 2>&1 | tee "$record_dir/build.combined"
+pipeline_status=("${PIPESTATUS[@]}")
+printf '%s\n' "${pipeline_status[0]}" >"$record_dir/make.exit"
+printf '%s\n' "${pipeline_status[1]}" >"$record_dir/tee.exit"
+```
+
+Without `pipefail`, pipeline status is normally only the final command's status, so a successful `tee` can hide a failed `make`. With `pipefail`, the aggregate is the rightmost nonzero status, but it still does not identify every failed stage. Copy `PIPESTATUS` before running any other simple command. `tee` can itself fail while writing the log or a downstream pipe. After `2>&1`, stream identity cannot be recovered, and buffering can affect visible ordering. Treat a combined log as a convenience view. Use separate stdout, stderr, and status files when channel review matters.
+
+## Reproducibility: constrain the environment, then seal facts
+
+Inheriting an interactive environment brings in `PATH`, locale, tool configuration, and possibly credentials. GNU `env -i` starts with an empty environment. Add only variables the build needs and that the record may safely preserve:
+
+```bash
+env -i PATH="$tool_path" LC_ALL=C TZ=UTC env \
+  >"$record_dir/environment.allowlist"
+
+env -i PATH="$tool_path" LC_ALL=C TZ=UTC \
+  make -C "$build_dir" "$target" \
+  >"$record_dir/build.stdout" \
+  2>"$record_dir/build.stderr"
+build_status=$?
+printf '%s\n' "$build_status" >"$record_dir/build.exit"
+```
+
+If a tool really needs `HOME`, a cache directory, or a license variable, add it individually and state why. Do not dump the full inherited environment merely for completeness. Record the actual kernel name, release, and machine separately with `uname -srm`; that command does not replace distribution, container, or tool-version fields.
+
+Bash 5.3 `printf` can produce the actual collection time. Fix the timezone to UTC and invoke it before and after each stage:
+
+```bash
+timestamp_utc() (
+  export TZ=UTC
+  printf '%(%Y-%m-%dT%H:%M:%SZ)T\n' -1
+)
+
+timestamp_utc >"$record_dir/started-at.txt"
+```
+
+After every log is closed, calculate SHA-256 over a fixed file list:
+
+```bash
+(
+  cd -- "$record_dir" || exit
+  sha256sum -- command.sh argv.nul paths.txt environment.allowlist \
+    system.uname stages.tsv build.stdout build.stderr build.exit \
+    processes.before processes.after >SHA256SUMS
+)
+```
+
+A timestamp states when collection occurred. A hash states whether later bytes match. Neither proves that a command was correct, a source was trustworthy, or a result generalizes. Keep the record directory outside any build directory that cleanup removes, and do not include `SHA256SUMS` in its own input list.
+
+## Visual: from command to record
+
+<OrientationVisual kind="command-lifecycle" locale="en" />
+
+This static teaching visual fixes the lifecycle order: resolve logical and physical paths, establish the allowlisted environment, enter an explicit stage, connect file descriptors, observe processes, collect every status, then write timestamps and hashes. It executes no shell, Make, or CUDA and produces no Evidence Status.
+
+## Retrieval check
+
+1. Why should one record preserve `pwd -L`, `pwd -P`, and `realpath -e` for the build directory?
+2. Why do `cmd >log 2>&1` and `cmd 2>&1 >log` behave differently?
+3. Why can xtrace not replace a literal script and argument record?
+4. Which races, PID-reuse cases, and permission boundaries limit a `ps` or `/proc/PID` snapshot?
+
+## Continue with practice
+
+- Complete the [O05 Exercises](/en/start/linux-command-line/exercises/), then inspect the separate [reviewed solutions](/en/start/linux-command-line/solutions/).
+- Repair a command record that can hide build failure in [Practice Bank PB-R1-002](/en/practice/#pb-r1-002).
+- Carry the completed fields back to [O03](/en/start/environment-manifest/) and retain the same stage and log boundaries before O08 or LAB01.
+
+## Sources and review
+
+Shell builtins, redirections, pipelines, `pipefail`, `PIPESTATUS`, xtrace, and the `printf` time format were checked against the [GNU Bash 5.3 Reference Manual](https://www.gnu.org/software/bash/manual/bash.html). `realpath`, `tee`, `env`, `uname`, and SHA-2 utilities were checked against [GNU Coreutils 9.11](https://www.gnu.org/software/coreutils/manual/coreutils.html). Recipe execution and `.ONESHELL` were checked against [GNU Make 4.4.1](https://www.gnu.org/software/make/manual/make.html). Process fields and snapshot semantics were checked against the [procps-ng 4.0.6 tagged `ps(1)` manual](https://gitlab.com/procps-ng/procps/-/raw/v4.0.6/man/ps.1). Process directories, races, and permission boundaries came from the [Linux kernel 6.8 `/proc` documentation](https://www.kernel.org/doc/html/v6.8/filesystems/proc.html). These owner sources were reopened on **2026-08-26**.
+
+**Fact-check date: 2026-08-26.** This page executed none of its example commands, invented no command output, and recorded no hardware or CUDA evidence.

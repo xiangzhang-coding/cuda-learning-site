@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-24'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -40,7 +40,11 @@ CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU
 
 The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable Examples, external Labs, Exercises, Visual Explainers, and a Glossary. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
 
-The public surface now contains the Orientation route [O01](/en/start/using-the-learning-site/), [O02](/en/start/evidence-status/), and [O03](/en/start/environment-manifest/); foundational Learning Unit [F01](/en/foundations/first-cuda-kernel/) with Exercises and solutions; the [EX02 vector-addition Runnable Example](/en/examples/vector-addition/); [LAB02 Vector Addition](/en/labs/vector-addition/); [VIS01 Kernel Journey](/en/visuals/kernel-journey/); [VIS02 Indexing](/en/visuals/indexing/); a five-entry [Practice Bank](/en/practice/); the [Glossary](/en/glossary/); and the [Sources and Version Record](/en/sources-and-versions/). EX02 has independent compilation evidence, but LAB02 runtime remains Pending Hardware Verification. The website ran no CUDA binary and declares no Reference Environment.
+The O01-O08 orientation of the Stable Curriculum is completely published in both languages: [O01](/en/start/using-the-learning-site/), [O02](/en/start/evidence-status/), [O03](/en/start/environment-manifest/), [O04](/en/start/cpp17-for-cuda/), [O05](/en/start/linux-command-line/), [O06](/en/start/architecture-refresher/), [O07](/en/start/programmable-gpus/), and [O08](/en/start/reference-environment-candidate/). O02-O08 each have Exercises and separate reviewed solutions.
+
+The remaining public surface contains foundational Learning Unit [F01](/en/foundations/first-cuda-kernel/) with Exercises and solutions; the [EX01 environment-report](/en/examples/environment-report/) and [EX02 vector-addition](/en/examples/vector-addition/) Runnable Examples; [LAB01 Record and Interpret a CUDA Environment](/en/labs/record-cuda-environment/) and [LAB02 Vector Addition](/en/labs/vector-addition/); [VIS01 Kernel Journey](/en/visuals/kernel-journey/); [VIS02 Indexing](/en/visuals/indexing/); a ten-entry [Practice Bank](/en/practice/); the [Glossary](/en/glossary/); and the [Sources and Version Record](/en/sources-and-versions/).
+
+EX01 has no Compile-Checked claim, and its runtime axis is Pending Hardware Verification. LAB01 likewise has no compilation claim, and its runtime axis is Pending Hardware Verification. EX02 and LAB02 retain their existing Compile-Checked compilation status, while both runtime axes remain Pending Hardware Verification. The website ran no CUDA binary and declares no Reference Environment.
 
 ## Author
 
@@ -48,4 +52,4 @@ The public surface now contains the Orientation route [O01](/en/start/using-the-
 
 ## Feedback
 
-For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). Page facts were reviewed on **2026-08-24**.
+For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). Page facts were reviewed on **2026-08-26**.

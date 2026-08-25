@@ -1,0 +1,217 @@
+---
+title: 'O06: Architecture Refresher: Rate, Delay, and Data Movement'
+description: Distinguish latency, throughput, bandwidth, concurrency, and intensity with explicit paths, units, and boundaries.
+pairId: o06
+counterpart: /start/architecture-refresher/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - latency-throughput
+  - memory
+  - bandwidth
+  - concurrency
+  - intensity
+  - comparison
+  - visual
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O06
+prerequisites:
+  - O01
+relatedUnits:
+  - O07
+  - F01
+  - VIS01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Introduction'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable heterogeneous systems'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA kernel hardware model'
+    accessDate: '2026-08-26'
+  - title: 'CUDA C++ Best Practices Guide - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA memory performance metrics'
+    accessDate: '2026-08-26'
+  - title: 'CUDA C++ Best Practices Guide - Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA execution configuration'
+    accessDate: '2026-08-26'
+  - title: 'Roofline: An Insightful Visual Performance Model for Floating-Point Programs and Multicore Architectures'
+    url: 'https://www.osti.gov/biblio/1407078'
+    version: '2009 technical report; OSTI ID 1407078; DOI 10.2172/1407078'
+    platform: 'Architecture-independent performance model'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'NVIDIA Nsight Compute UI and CLI'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,latency-throughput,memory,bandwidth,concurrency,intensity,comparison,visual,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O07,F01,VIS01' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2009,2026.2.1' }
+---
+
+import OrientationVisual from '../../../../components/OrientationVisual.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/start/architecture-refresher/" lang="zh-CN">阅读中文对应页</a>
+
+This Learning Unit builds architecture intuition around three coordinates: how long one event waits, how much work completes during an interval, and which path data follows. Latency, throughput, and bandwidth are related, but they are not substitutes. This page uses static reasoning only, requires no GPU, and records no CUDA runtime or performance evidence.
+
+## What you should be able to do
+
+- Define latency with an object, start and finish boundaries, and units, then define throughput with work, an interval, and units.
+- Distinguish caches from shared memory and explain how a ready warp hides waiting without lowering the latency of the waiting operation.
+- State an explicit data path, direction, byte convention, and time boundary for theoretical, effective, and actual bandwidth.
+- Keep resident work, occupancy, concurrent kernels, streams, copy/compute overlap, and CPU/GPU overlap separate.
+- Calculate intensity only after declaring operation-count and memory boundaries, then limit a Roofline conclusion to a model bound.
+
+## Prerequisite
+
+The sole prerequisite is [O01: Using the Learning Site](/en/start/using-the-learning-site/). O07, [F01](/en/foundations/first-cuda-kernel/), and [VIS01](/en/visuals/kernel-journey/) are related, not additional O06 prerequisites. O06 has no hardware gate and grants no Evidence Status.
+
+## Latency and throughput
+
+**Latency is elapsed time from the start to the finish of one named event.** A load instruction may be timed from issue until its result becomes available. A kernel may instead be timed between recorded start and finish events. Those boundaries answer different questions, so neither result should be labeled only "latency." Common units include ns, us, and ms, and the unit must accompany the value.
+
+**Throughput is completed work per time interval.** Its numerator might be requests, items, instructions, operations, or bytes, so units might be items/s, operations/s, or bytes/s. A system can raise aggregate throughput by advancing more independent work while the latency of one operation remains unchanged. Conversely, reducing one operation's latency does not ensure higher system throughput when queues, dependencies, or another resource impose the limit.
+
+GPUs often preserve aggregate progress through latency hiding. When one warp waits for a memory result, a warp scheduler can issue the next instruction from a ready warp whose inputs and execution resource are available. This hides the wait's effect on aggregate issue rate. It does not shorten the waiting memory operation's latency. With no ready warp, unresolved dependencies, or a busy target pipeline, the scheduler may still have nothing to issue.
+
+## Memory hierarchy
+
+A memory hierarchy is not completely described by a single "nearer is faster" ladder. A CUDA program may involve host memory, a host/device interconnect, global memory in device DRAM, the GPU-wide L2 cache, per-SM L1 caches, registers, and shared memory. Whether an access hits a cache, who shares the data, whether it is reused, and which levels it actually crosses all change the interpretation.
+
+A cache is managed by hardware from accesses and locality. A global-memory load may be satisfied by a cache or continue toward another level. Shared memory is block-scoped storage that software explicitly allocates, addresses, and coordinates, commonly to exchange or reuse data among threads. It is not a "manually controlled L1 cache." On many architectures, L1 and shared memory draw from the same physical unified data cache, but their programming semantics, visibility, and resource allocation remain distinct.
+
+Registers commonly hold thread-private state. The name local memory is another trap: local memory is private to one thread in the programming model, but it commonly resides on the device-memory path and passes through caches. It is not an on-chip register. Before discussing "memory speed," name the address space, hit level, access direction, and sharing scope.
+
+## Bandwidth needs a path and units
+
+Bandwidth is a data-transfer rate. A complete claim states source and destination endpoints, direction, byte-count convention, time interval, and units. `host memory -> interconnect -> device memory` and `device DRAM <-> SM` are different paths. Reads, writes, and a bidirectional total also use different numerators.
+
+- **Theoretical bandwidth** is a peak ceiling derived from specifications such as a declared interface clock, transfer multiplier, and bus width. It times no workload and is not an application result.
+- **Effective bandwidth** divides useful bytes requested by the workload by explicit elapsed time. If one activity requests `B_r` bytes read and `B_w` bytes written, a definition may use `(B_r + B_w) / t`. The record must state what counts as useful and which path those bytes describe.
+- **Actual bandwidth** divides bytes attributed by a profiler to transfers at a named hardware interface by its collection interval. Transaction granularity, extra segments, writebacks, and other traffic can make it differ from requested or effective bandwidth. The metric name and collection domain determine which level it observes.
+
+`GB/s` normally uses decimal `10^9 bytes/s`, while `GiB/s` uses binary `2^30 bytes/s`. Bits and bytes must also stay separate. Comparing theoretical, effective, and actual bandwidth is meaningful only when path, direction, time, and unit conventions align. Cache reuse can also let a logical effective rate exceed the ceiling of a different physical path without contradiction.
+
+## Concurrency is not one thing
+
+The following terms answer different questions and should not collapse into one statement that work "ran in parallel":
+
+- **Resident work** consists of blocks or warps whose execution state and resources such as registers and shared memory have been allocated on an SM. Residency does not mean every warp issues in the same cycle.
+- **Occupancy** is commonly the ratio of active warps per SM to the hardware maximum active warps. Registers, shared memory, block size, and architectural limits constrain it together. Higher occupancy can expose more schedulable warps, but it does not guarantee greater throughput or a shorter runtime.
+- **Concurrent kernels** means work from multiple kernel launches overlaps in time. Several resident blocks may all belong to one kernel. Several submitted kernels may serialize because of dependencies or resource pressure.
+- A **stream** defines an ordered sequence of operations. Operations in one stream establish order, while different streams can make independent work eligible to overlap. Stream count alone does not prove concurrent execution.
+- **Copy/compute overlap** additionally needs an asynchronous copy, a valid stream and dependency arrangement, suitable host-memory properties, an available copy engine, and device capability. An API name containing `Async` supplies particular asynchronous semantics, not an observation of overlap.
+- **CPU/GPU overlap** means host and device work advance during the same interval. A host preparing the next input batch while the GPU executes the current kernel is CPU/GPU overlap even when only one GPU kernel is active.
+
+A timeline can demonstrate that overlap occurred in one execution. Source structure usually shows only that overlap could occur. This page has no timeline and claims no observed overlap.
+
+## Arithmetic and operational intensity
+
+Arithmetic intensity is a declared count of arithmetic operations divided by bytes transferred across a declared memory boundary, in operations/byte:
+
+```text
+work = counted operations
+traffic = bytes crossing the declared memory boundary
+I = work / traffic
+```
+
+Operational intensity is the broader term used by the original 2009 Roofline work, commonly relating executed operations to DRAM traffic after cache filtering. Nsight Compute uses the term Arithmetic Intensity for its Roofline chart. The terms can be compared directly only when operation-count convention, memory level, read/write convention, and workload scope match.
+
+Let `P` be the modeled operation rate, `P_compute` the compute ceiling, and `B_path` the bandwidth ceiling of the declared path. A simplified Roofline model can be written as:
+
+```text
+P <= min(P_compute, I * B_path)
+```
+
+When `I * B_path` lies below the compute ceiling, the model places the work in a **memory-bound region with respect to that path and those ceilings**. This does not diagnose every wait as DRAM traffic, and it is not an achieved-performance prediction. Insufficient parallelism, memory latency, instruction issue, dependencies, imbalance, cache behavior, operation mix, launches, synchronization, host/device transfers, and end-to-end software overhead can all keep achieved performance below the roof. Changing the memory boundary or counting rule changes `I` and may change the conclusion.
+
+## CPU and GPU design emphases
+
+CPUs and GPUs both have parallel execution, caches, memory hierarchies, and their respective vector or SIMT mechanisms. They are not simply a "serial processor" and a "parallel processor." Common CPU designs emphasize latency for a small number of threads, complex control flow, and large caches. Common GPU designs emphasize aggregate throughput across many lightweight threads, SIMT execution, and hiding waits with ready work.
+
+These are design emphases, not an equivalence and not a universal claim that a GPU is faster. Workload parallelism, branch behavior, data locality, problem size, precision, library implementation, data movement, and comparison boundary jointly determine outcomes. A heterogeneous application often assigns control and latency-sensitive work to a CPU and suitable data-parallel work to a GPU, but the exact partition requires measurement rather than inference from labels.
+
+## Visual model
+
+The static map below connects request latency, aggregate throughput, memory paths, resident warps, and overlap boundaries. Read each card by naming its object, path, time interval, and unsupported inference. It executes no CUDA, copies no owner figure, and is not a profiler timeline.
+
+<OrientationVisual kind='architecture' locale='en' />
+
+Open [VIS01](/en/visuals/kernel-journey/) when you need to place blocks, warps, SMs, memory transactions, and completion boundaries on an execution path. Neither VIS01 nor this visual produces runtime or performance evidence.
+
+## Retrieval check
+
+1. How can system throughput rise while the latency of one request stays unchanged?
+2. How do caches and shared memory differ in management, and why does a ready warp not lower memory latency?
+3. Which path, direction, byte, time, and unit coordinates make bandwidth claims comparable?
+4. What separate questions do resident work, occupancy, concurrent kernels, streams, copy/compute overlap, and CPU/GPU overlap answer?
+5. When does arithmetic or operational intensity support a memory-bound upper bound, and which limits does Roofline omit?
+
+## Continue with practice
+
+- Complete the [O06 Exercises](/en/start/architecture-refresher/exercises/), then inspect the separate [reviewed solutions](/en/start/architecture-refresher/solutions/).
+- Review a mixed latency, bandwidth, and concurrency claim in [Practice Bank PB-R1-003](/en/practice/#pb-r1-003).
+- Continue using [F01](/en/foundations/first-cuda-kernel/) and [VIS01](/en/visuals/kernel-journey/) to apply these boundaries to a concrete kernel path. O07 will reuse the O06 terminology contract.
+
+## Sources and review
+
+- CUDA Programming Guide v13.3 [Introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html) supports the CPU/GPU design-emphasis boundary.
+- Its [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html) supports the host/device, SM, cache, global-memory, and shared-memory boundaries.
+- Its [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) supports resident-warps, ready-warp scheduling, and latency hiding.
+- CUDA C++ Best Practices Guide v13.3 [Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) and [Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy) support the three bandwidth categories and occupancy limits.
+- The 2009 [primary Roofline technical report](https://www.osti.gov/biblio/1407078) by Williams, Waterman, and Patterson, OSTI ID 1407078 and DOI `10.2172/1407078`, supports the operational-intensity bound and its scope.
+- [NVIDIA Nsight Compute Profiling Guide 2026.2.1](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) supports metric-domain, occupancy, scheduler-state, and Roofline-chart terminology.
+
+**Fact checked: 2026-08-26.** The prose, equation arrangement, and visual explanation are original and copy no external table, figure, or performance value. This page requires no hardware, carries no compilation or runtime Evidence Status, and records no observation.

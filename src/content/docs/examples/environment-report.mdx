@@ -1,0 +1,246 @@
+---
+title: 'EX01：环境报告可运行示例'
+description: 构建一个不启动 kernel 的 C++17 CUDA Runtime 工具，读取结构化环境观察，并理解它与完整环境清单之间的边界。
+pairId: ex01
+counterpart: /en/examples/environment-report/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - report-contract
+  - build
+  - hardware
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX01
+prerequisites: []
+relatedUnits:
+  - O02
+  - O03
+  - O08
+  - LAB01
+exampleIds:
+  - EX01
+canonicalExample: EX01
+canonicalRanges:
+  - observation-model
+  - version-query
+  - device-inventory
+hardwareGate: 'Build: host C++17 compiler for host-test and a CUDA Toolkit for the CUDA executable; runtime inventory: native Linux with CUDA Runtime access, where zero visible devices remains a valid observation'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A successful report should contain UTC, build, environment-variable, version, count, and per-visible-device observations in one JSON document.
+    - A successful zero device count should produce an empty device inventory; any required unavailable or error observation should preserve valid JSON and select exit code 3.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 11.8.0 - Version Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - Version Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Version Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide 13.3 - Obtain the GPU Compute Capability'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability'
+    version: 'CUDA Programming Guide 13.3'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex01
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-26'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,report-contract,build,hardware,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX01
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O02,O03,O08,LAB01'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX01
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX01
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'observation-model,version-query,device-inventory'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: host C++17 compiler for host-test and a CUDA Toolkit for the CUDA executable; runtime inventory: native Linux with CUDA Runtime access, where zero visible devices remains a valid observation'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '2 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '5'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/environment-report/" lang="en">Read the English counterpart</a>
+
+EX01 是一个独立、原创的环境报告可运行示例（Runnable Example）。它通过 CUDA Runtime API 读取环境观察，不启动 kernel，不分配 device memory，也不在网页内执行 CUDA。
+
+它输出的是环境事实，不是结论。报告不会给出兼容性（compatibility）判断，不会选择 GPU 能力层级（GPU Capability Tier），不会声明基准环境（Reference Environment），也不会授予证据状态（Evidence Status）。
+
+## 用途
+
+当构建工具链、活动 Runtime 和可见设备来自不同层次时，只保存一个版本字符串很容易把它们混在一起。EX01 分开采集 UTC 时间、编译期编译器坐标、CUDART 链接选择、两个 CUDA 环境变量、driver 支持的 CUDA API 版本、Runtime 版本，以及每台设备的标识和容量。
+
+这份输出只是完整环境清单（Environment Manifest）的一个输入。它没有 OS、已安装 driver package、精确 Toolkit package/path、workload、运行命令、正确性标准、记录保管和维护者控制等全部字段。
+
+## 获取项目
+
+[在 GitHub 查看固定 commit 的 EX01 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5fa2284a3493fc1a51c6ccc5ba709be096e862b8/examples/ex01-environment-report)，或[下载同一 commit 的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5fa2284a3493fc1a51c6ccc5ba709be096e862b8.zip)。解压后进入 `examples/ex01-environment-report/`。
+
+`project.json` 是机器可读契约，`README.md` 给出独立使用边界。两个语言页面只显示 manifest 声明的三个 marker range。第一个 range 定义可复用的纯 C++17 observation model、version decoding 和 environment capture。同一 header 还提供由 host-only test 覆盖的 JSON escaping 与 UUID byte encoding：
+
+<CanonicalCode exampleId="EX01" range="observation-model" />
+
+## 报告契约
+
+报告模式只有一个命令：
+
+```sh
+./build/ex01-environment-report --format=json
+```
+
+`--help` 打印用法并返回 `0`。其他 CLI 形式只向 `stderr` 写诊断并返回 `2`。报告模式只向 `stdout` 写一个 JSON 文档；查询错误保留在文档内，不会被伪装成示例值。
+
+| JSON 坐标 | 结构保证 |
+| --- | --- |
+| `generatedAtUtc` | UTC 时间 observation |
+| `build` | C++17、编译期 NVCC/host compiler 坐标和 `shared` 或 `static` CUDART 选择 |
+| `environment` | `CUDA_VISIBLE_DEVICES` 与 `CUDA_DEVICE_ORDER` 的 `present`/`absent` 状态；变量存在但值为空时不会变成 absent |
+| version queries | `available`、`unavailable` 或 `error`；失败时保留 API source、CUDA error name、整数 code 和 message |
+| device inventory | 成功的 count 和每个可见 ordinal 的观察；count 为 `0` 时 `devices` 是空数组 |
+
+`cudaDriverGetVersion` 与 `cudaRuntimeGetVersion` 都保存原始 encoded integer，并按 `1000 * major + 10 * minor` 解码：
+
+<CanonicalCode exampleId="EX01" range="version-query" />
+
+逐设备路径用 `cudaGetDeviceProperties` 读取设备名称、16 个原始 UUID 字节（raw UUID bytes）和全局内存。UUID 保持字节顺序，每个字节写成两个小写十六进制字符，不加分隔符。PCI bus ID 来自 `cudaDeviceGetPCIBusId`；compute capability 的 major/minor 分别直接来自 `cudaDeviceGetAttribute`：
+
+<CanonicalCode exampleId="EX01" range="device-inventory" />
+
+所有必需查询都为 available 时返回 `0`。成功观察到 count `0` 也返回 `0`。只要有必需查询为 unavailable 或 error，程序仍先写出有效 JSON，再返回 `3`。
+
+## 构建
+
+三条工具包通道（Toolkit Lane）都使用同一份 C++17 source：CUDA 11.8.0/Ubuntu 22.04、CUDA 12.9.2/Ubuntu 24.04、CUDA 13.3.1/Ubuntu 24.04。项目没有 device code，因此没有 `sm_*` 或 `compute_*` architecture target。
+
+```sh
+make preprocess DIALECT=c++17 CUDART=shared
+make compile DIALECT=c++17 CUDART=shared
+make link DIALECT=c++17 CUDART=shared
+make host-test DIALECT=c++17
+```
+
+`make build` 指向 link stage。`CUDART=static` 选择 static linkage；`NVCC`、`HOST_CXX` 和 `BUILD_DIR` 都可以显式覆盖。`scripts/compile-check.sh` 依次组织 preprocess、compile、link 和 host-only test，但绝不执行 `build/ex01-environment-report`。
+
+## 硬件门槛
+
+构建与 runtime inventory 是两道不同门槛：
+
+- `make host-test` 只需要 host C++17 compiler，不需要 CUDA header、driver 或 GPU。
+- preprocess、compile 和 link 需要对应 CUDA Toolkit，但不需要执行 GPU 工作。
+- 采集 runtime inventory 需要在课程的受支持环境（Supported Environment），即原生 Linux 中执行已构建程序，并允许 CUDA Runtime 访问该环境。可见设备 count 成功返回 `0` 是有效的空 inventory，不会被改写成硬件失败。
+
+EX01 没有 kernel 和 device allocation，因此这里不声明 minimum compute capability、memory floor 或 GPU count requirement。
+
+## 兼容性边界
+
+`cudaDriverGetVersion` 返回 driver 支持的最高 CUDA API 版本，不是已安装 driver package 版本。`cudaRuntimeGetVersion` 返回 Runtime version encoding；该 encoding 只有 major/minor，不能确定 Toolkit patch。编译期 NVCC macros 与 Makefile 选择的 CUDART linkage 是另外两组坐标，也不能互相替代。
+
+程序直接调用 CUDA Runtime。它不启动 subprocess，不访问 network 或 profiler，也不抓取 `nvidia-smi`。观察到的 name、compute capability、memory 和 version 不会被 EX01 合成为 compatibility、tier 或 Reference Environment 判断；这类判断还需要 O03 和 O08 规定的完整输入与门槛。
+
+## 证据
+
+`project.json` 的 compilation evidence 数组为空，runtime 为待硬件验证（Pending Hardware Verification），recorded observations 也为空。host-only test 只验证 pure helper contract；源码存在、网站构建或本地编译都不会自动改变这些字段。
+
+## 预期观察，不是运行记录
+
+以下两项是未来复核 report structure 时使用的预期，不是本页生成或保存的 output：
+
+1. 成功报告应在一个 JSON document 中包含 UTC、build、environment-variable、version、count 和每个 visible device 的 observation。
+2. 成功返回 device count `0` 时 inventory 应为空；任何 required unavailable/error observation 都应保持 JSON 有效，并选择 exit code `3`。
+
+当前没有 recorded runtime observation，也没有示例 JSON 或推测出的 machine value。
+
+## 来源与复核
+
+版本语义以三份精确 Runtime Version Management 页面为准。12.9.2 archive path 当前页面标签显示 12.9.1，因此 metadata 同时保存 path 和 page label。Compute capability 的 direct Runtime query 来自 CUDA Programming Guide v13.3；device count、properties、attribute 和 PCI query 来自 Runtime Device Management。
+
+- [CUDA Runtime API 11.8.0 Version Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART____VERSION.html)
+- [CUDA Runtime API 12.9.2 archive Version Management](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART____VERSION.html)
+- [CUDA Runtime API 13.3.1 Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html)
+- [CUDA Programming Guide v13.3: obtain compute capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability)
+- [CUDA Runtime API 13.3.1 Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+
+**事实核查与访问日期：2026-08-26。** 页面与项目源码均为原创，没有复制 NVIDIA sample listing、私有资料或运行输出。

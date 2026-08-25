@@ -3,7 +3,7 @@ title: 术语表
 description: CUDA 学习站已发布的规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-25'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -354,6 +354,132 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关单元：** F01、LAB02。
 - **版本说明：** 容差值属于 EX02 correctness contract，改变时需要新证据范围。
 
+<span id="term-035" class="resource-target" aria-hidden="true"></span>
+
+### RAII · 资源获取即初始化
+
+- **定义：** 把资源所有权绑定到 C++ 对象生命周期的管理方法，在初始化时获取资源，并由 owner 的析构函数负责释放。O04 把裸指针用作非拥有型视图，这是一项指导，不是 C++ 语言规则。
+- **避免使用：** 垃圾回收、把每个裸指针都当作所有者。
+- **相关单元：** O04。
+- **版本说明：** O04 采用 C++17 基线；接口仍可明确记录所有权转移。
+
+<span id="term-036" class="resource-target" aria-hidden="true"></span>
+
+### undefined behavior · 未定义行为
+
+- **定义：** C++ 规范不要求产生任何特定行为的操作。
+- **避免使用：** 必然崩溃、未指定行为、实现定义行为。
+- **相关单元：** O04。
+- **版本说明：** O04 采用 C++17 语言基线；compiler diagnostic 和 sanitizer 结果不会重新定义未定义行为，也不能证明它不存在。
+
+<span id="term-037" class="resource-target" aria-hidden="true"></span>
+
+### translation unit · 翻译单元
+
+- **定义：** 一个源文件经过预处理并展开 include 与 macro 后形成、由编译器作为一个单元翻译的源码材料。
+- **避免使用：** 未预处理的源文件、整个程序、已链接的可执行文件。
+- **相关单元：** O04。
+- **版本说明：** O04 以 C++17 和 NVCC 13.3 说明边界；Toolkit 内部步骤可以变化，但 translation unit 位于预处理之后。
+
+<span id="term-038" class="resource-target" aria-hidden="true"></span>
+
+### reproducible command record · 可复现命令记录
+
+- **定义：** 对一个命令阶段的可复核记录，包含字面命令与参数边界、工作目录与允许列表环境等执行上下文、独立 stdout 和 stderr、退出状态、采集日期与 UTC 起止时间，以及保留输入和产物的哈希。
+- **避免使用：** 改写后的命令、只有截图的日志、没有退出状态的合并输出。
+- **相关单元：** O05。
+- **版本说明：** 工具与操作系统版本属于执行上下文；命令、上下文或被哈希字节改变后，就是另一份记录。
+
+<span id="term-039" class="resource-target" aria-hidden="true"></span>
+
+### latency · 延迟
+
+- **定义：** 一个指定事件从已声明起点到已声明终点经过的时间，必须同时报告单位。它衡量单个事件，不是单位时间内完成的工作量。
+- **避免使用：** 吞吐量、速率、没有事件和边界的计时值。
+- **相关单元：** O06。
+- **版本说明：** 比较 latency 时必须对齐事件、同步边界、timer 及其版本、workload 和单位。
+
+<span id="term-040" class="resource-target" aria-hidden="true"></span>
+
+### throughput · 吞吐量
+
+- **定义：** 在已声明时间窗口内完成的指定工作量，以 items/s、operations/s 等单位表示。它是速率，不是一个事件的经过时间。
+- **避免使用：** 单次操作的 latency、没有工作量和时间窗口的速率、未说明条件的 peak 值。
+- **相关单元：** O06、O07。
+- **版本说明：** 并发或批处理可以在单项 latency 不变时提高 throughput；比较时必须对齐 workload、时间窗口和单位。
+
+<span id="term-041" class="resource-target" aria-hidden="true"></span>
+
+### bandwidth · 带宽
+
+- **定义：** 沿一条已命名路径和方向的数据传输速率，必须声明 byte 计数口径、时间区间以及 GB/s 或 GiB/s 等单位。
+- **避免使用：** 没有路径的 throughput 声明、省略单位、混用 GB/s 与 GiB/s。
+- **相关单元：** O06。
+- **版本说明：** 只有路径、方向、时间和单位口径一致时，theoretical、effective 与 actual bandwidth 才能比较。
+
+<span id="term-042" class="resource-target" aria-hidden="true"></span>
+
+### concurrency · 并发
+
+- **定义：** 两个或更多指定操作在已声明作用域内的时间区间发生重叠；它本身不表示这些操作在同一时刻由不同硬件单元执行。
+- **避免使用：** 把 stream 数量、异步提交、residency 或 occupancy 当作已观察 overlap 的证明。
+- **相关单元：** O06。
+- **版本说明：** 源码与 API 最多说明 overlap 可能发生；声称实际并发需要精确执行下的 timeline 或等价观察，并注明 kernel、copy/compute 或 CPU/GPU 等作用域。
+
+<span id="term-043" class="resource-target" aria-hidden="true"></span>
+
+### arithmetic intensity · 算术强度
+
+- **定义：** 对一个指定 workload，把已声明的算术工作计数除以穿过已声明内存边界的数据流量，单位为 operations/byte。
+- **避免使用：** 只有 operation count、FLOP/s、没有流量边界的比值。
+- **相关单元：** O06。
+- **版本说明：** Operation 计数规则、read/write 流量口径、memory level 或 workload scope 改变时，intensity 也会改变。
+
+<span id="term-044" class="resource-target" aria-hidden="true"></span>
+
+### occupancy · 占用率
+
+- **定义：** 通常指每个 SM 的 active warp 数与硬件允许的最大 active warp 数之比，不是 GPU utilization，也不保证性能。
+- **避免使用：** GPU utilization、并发执行证明、性能分数或性能保证。
+- **相关单元：** O06。
+- **版本说明：** Occupancy 受架构、block size、register 和 shared-memory 限制共同影响；更高 occupancy 不保证更高 throughput 或更短 runtime。
+
+<span id="term-045" class="resource-target" aria-hidden="true"></span>
+
+### programmable shader stage · 可编程着色器阶段
+
+- **定义：** 图形流水线中允许应用提供指令的指定阶段，其调用、输入、输出、资源限制和周围阶段仍遵循图形语义。
+- **避免使用：** 通用 kernel、不受限制的处理器接口、CUDA kernel。
+- **相关单元：** O07。
+- **版本说明：** 可用阶段、profile 和能力随图形 API 与时期变化；这个术语始终受图形流水线边界约束。
+
+<span id="term-046" class="resource-target" aria-hidden="true"></span>
+
+### GPGPU · 通用 GPU 计算
+
+- **定义：** 使用 GPU 完成非图形计算的广义实践，历史上常把数据与工作映射到 texture、shader stage 和 render target，后来也使用通用计算接口。它是一个历史类别，不是 CUDA 的同义词。
+- **避免使用：** CUDA 的同义词、可编程着色器阶段、所有 GPU 工作的统称。
+- **相关单元：** O07。
+- **版本说明：** GPGPU 跨越多个时期、API 和硬件；CUDA 是其中一种通用计算平台与模型，两者并不等价。
+
+<span id="term-047" class="resource-target" aria-hidden="true"></span>
+
+### compatibility assessment · 兼容性评估
+
+- **定义：** 把精确环境坐标与选定的当前 owner documentation 进行带来源日期的比较，只能得到 `documented-path`、`not-documented` 或 `indeterminate` 三种初筛结果之一，任何结果都不授予编译或运行证据。
+- **避免使用：** “受支持”结论、Evidence Status、runtime validation 或 Reference Environment 声明。
+- **相关单元：** O08。
+- **版本说明：** 结果只适用于已记录坐标、来源和日期，三种结果都不授予编译或运行证据；`documented-path` 只允许继续验证。
+
+<span id="term-048" class="resource-target" aria-hidden="true"></span>
+
+### Reference Environment candidate · 基准环境候选配置
+
+- **定义：** 正在按 manifest、tier、compatibility、maintainer control 和独立 baseline 门槛接受审查的一套精确原生 Linux GPU 与软件配置。候选身份不构成 Reference Environment 声明。
+- **避免使用：** 已声明的 Reference Environment、推荐配置、已验证机器。
+- **相关单元：** O08、LAB01。
+- **版本说明：** 候选身份不是声明；只有全部门槛满足后的独立维护者声明，才能建立 Reference Environment。
+
 ## 维护规则
 
-这些词条及其索引元数据在 **2026-08-25** 与英文对应内容同步复核。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。
+这些词条及其索引元数据在 **2026-08-26** 与英文对应内容同步复核。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。

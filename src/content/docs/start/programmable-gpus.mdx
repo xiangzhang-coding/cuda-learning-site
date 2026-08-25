@@ -1,0 +1,203 @@
+---
+title: 'O07：GPU 为什么变得可编程'
+description: 从固定图形状态承受的抽象压力出发，经过可编程阶段与借道图形抽象的 GPGPU，理解 CUDA 为何把 kernel、thread block、局部性和可扩展的 block independence 放到中心。
+pairId: o07
+counterpart: /en/start/programmable-gpus/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - motivation
+  - programmable-stages
+  - gpgpu
+  - cuda-shift
+  - timeline
+  - boundaries
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O07
+prerequisites:
+  - O06
+relatedUnits:
+  - F01
+  - O06
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - Introduction'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html'
+    version: 'v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-26'
+  - title: OpenGL ARB_vertex_program Specification
+    url: 'https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_program.txt'
+    version: 'ARB Extension #26; approved 2002-06-18; revision 46 dated 2007-07-25'
+    platform: 'OpenGL 1.3 vertex processing'
+    accessDate: '2026-08-26'
+  - title: OpenGL ARB_fragment_program Specification
+    url: 'https://registry.khronos.org/OpenGL/extensions/ARB/ARB_fragment_program.txt'
+    version: 'ARB Extension #27; approved 2002-09-18; revision 28 dated 2013-10-08'
+    platform: 'OpenGL 1.3 fragment processing'
+    accessDate: '2026-08-26'
+  - title: A User-Programmable Vertex Engine
+    url: 'https://research.nvidia.com/publication/2001-08_user-programmable-vertex-engine'
+    version: 'SIGGRAPH 2001; published 2001-08-01; DOI 10.1145/383259.383274'
+    platform: 'Programmable vertex processing within a graphics pipeline'
+    accessDate: '2026-08-26'
+  - title: 'Cg: A System for Programming Graphics Hardware in a C-like Language'
+    url: 'https://doi.org/10.1145/882262.882362'
+    version: 'ACM Transactions on Graphics 22(3), 2003; DOI 10.1145/882262.882362'
+    platform: 'Vertex and fragment graphics programs'
+    accessDate: '2026-08-26'
+  - title: 'Brook for GPUs: Stream Computing on Graphics Hardware'
+    url: 'https://graphics.stanford.edu/projects/brookgpu/'
+    version: 'BrookGPU project; ACM Transactions on Graphics 23(3), 2004; DOI 10.1145/1015706.1015800'
+    platform: 'GPU stream computing through graphics abstractions'
+    accessDate: '2026-08-26'
+  - title: Scalable Parallel Programming with CUDA
+    url: 'https://doi.org/10.1145/1365490.1365500'
+    version: 'Queue 6(2), 2008; DOI 10.1145/1365490.1365500'
+    platform: 'CUDA heterogeneous parallel programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,motivation,programmable-stages,gpgpu,cuda-shift,timeline,boundaries,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O06 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F01,O06' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2001,2002,2003,2004,2008' }
+---
+
+import OrientationVisual from '../../../components/OrientationVisual.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/start/programmable-gpus/" lang="en">Read the English counterpart</a>
+
+图形处理器（graphics processing unit，GPU）的可编程性（programmability）不适合用“产品一代比一代新”来解释。更关键的线索是抽象压力（abstraction pressure）：每一层接口解决了一个表达问题，也暴露出下一层尚未摆脱的限制。本学习单元（Learning Unit）沿着这条因果线，从图形工作、有限的可编程阶段，走到借道图形接口的通用计算，最后来到以核函数（kernel）和并行工作为中心的模型。
+
+## 学完本单元，你应该能
+
+- 解释大量相互独立的图形工作为什么有利于汇总吞吐量（aggregate throughput），同时不把它误解为每个操作都有低延迟。
+- 根据程序员能表达什么、系统仍保留什么限制，区分固定功能接口（fixed-function interface）、可编程图形阶段接口（programmed graphics-stage interface）和通用 GPU 接口（general-purpose GPU interface）。
+- 把顶点/片段程序（vertex/fragment program）、Cg、Brook 和 CUDA 看成对不同抽象压力的回应，而不是一份产品年表。
+- 解释 CUDA 为什么把 kernel、线程块（thread block）、局部性（locality）和块独立性（block independence）放在可扩展异构编程的中心。
+
+## 先修关系
+
+先完成 [O06：架构回顾：速率、延迟与数据移动](/start/architecture-refresher/)。O06 是唯一先修单元，因为本页需要用到 latency、throughput、bandwidth、cache、concurrency 和 arithmetic intensity，才能说明吞吐量导向的处理器为什么有用，又不把 CPU 与 GPU 说成可以互换的设备。[F01](/foundations/first-cuda-kernel/)是相关实践，不是 O07 的先修单元。
+
+## 动机：吞吐量让固定状态承受压力
+
+实时图形会对大量顶点（vertex）和片段（fragment）执行相似的变换与着色操作。其中许多工作可以相互独立地推进，因此处理器可以让许多项目同时处于执行途中，追求单位时间内完成更多工作。这就是汇总吞吐量。它不等于缩短一个串行任务的延迟，也不表示所有图形操作都彼此独立或成本相同。
+
+早期图形接口用一条专用图形流水线（graphics pipeline）匹配这种工作负载。应用选择 matrix、lighting mode、texture combination、fog 等预定义状态。固定功能状态（fixed-function state）在目标效果恰好落入菜单时很高效，但每当效果超出菜单，同一个问题就会出现：应用只能配置已有操作，不能定义新的操作序列。继续增加状态和扩展只会放大菜单，并没有消除僵化。
+
+因此，关键因果关系不是“更新的硬件获得了更多功能”。独立工作有利于吞吐量，而固定状态越来越难表达应用想要的计算。接口需要在保留周围并行图形流水线的同时，提供一个受控位置，让应用提交自己的指令。
+
+## 可编程阶段：开放指令，保留流水线
+
+2001 年的[可编程 vertex engine 论文](https://research.nvidia.com/publication/2001-08_user-programmable-vertex-engine)描述了让程序处理一串相互独立的 vertex，同时继续嵌在更大的固定图形流水线中。程序员控制的是一个选定阶段，不是一台不受约束的机器。
+
+Khronos 的 [ARB_vertex_program](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_program.txt) 与 [ARB_fragment_program](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_fragment_program.txt) 规范把这个区别写得更明确。传统状态隐含了一串逐 vertex 或逐 fragment 操作；顶点程序（vertex program）和片段程序（fragment program）则为相应阶段提供明确指令序列。调用方式、可用输入、结果寄存器、资源上限、primitive assembly、rasterization 和后续流水线操作仍遵守图形语义。
+
+Cg 把源码语言提高了一层。它用类似 C 的语法、编译器（compiler）、profile 和主要图形 API 支持，让程序员不必直接书写每一种目标指令，就能描述 vertex 与 fragment 计算。[Cg 论文](https://doi.org/10.1145/882262.882362)讨论的仍是面向图形流处理器（stream processor）的系统。高级语言改善了表达方式和跨图形目标的可移植性，却没有把所有阶段变成通用 kernel 接口。
+
+<OrientationVisual kind="programmability" locale="zh-CN" />
+
+## GPGPU：让非图形工作借道图形抽象
+
+当 fragment 阶段可以执行算术并采样 texture 后，程序员开始重新解释图形资源：数组放进 texture，fragment program 执行非图形计算，drawing operation 产生调用，render target 收集结果。图形处理器通用计算（general-purpose computing on graphics processing units，GPGPU）描述的是目标，但到达这个目标的路径仍受图形形状的输入、输出和 pass 约束。
+
+这种映射证明了非图形工作也能利用 GPU 吞吐量，同时暴露了下一层抽象压力。一个数值程序必须改写成 texture access、fragment invocation、render target、受限写入，有时还要拆成多个 rendering pass。图形 API 既是入口，也是限制。
+
+[BrookGPU](https://graphics.stanford.edu/projects/brookgpu/) 又提高了一层。Brook 用流（stream）和 kernel 扩展 C，由 compiler 和运行时（runtime）抽象并虚拟化图形硬件细节。它与 Cg 的区别在于，编程表面面向通用 stream computation；它与 CUDA 的区别在于，实现仍要把这层表面映射到图形时代的机制。语言和 runtime 可以隐藏许多限制，却不能让底层接口合同消失。
+
+## CUDA 转变：让通用并行工作成为主语
+
+CUDA 把首要问题从“怎样把计算编码成图形”改成“主机（host）与设备（device）怎样分担并行计算”。在这种异构编程（heterogeneous programming）模型里，host code 启动 kernel。一个网格（grid）包含多个线程块（thread block），每个 block 包含多个线程（thread）；内存层级让数据移动与局部性（locality）成为显式问题，不再要求把数组伪装成图形资源。
+
+Thread block 既是工作分区，也是局部性边界。同一 block 内的 thread 可以通过共享内存（shared memory）与 block 范围同步合作。基本模型要求不同 block 彼此独立，因为调度器（scheduler）可以让它们以任意顺序执行，也可以并发或分时执行。2008 年的 [CUDA 论文](https://doi.org/10.1145/1365490.1365500)把 block independence 与跨不同处理核心数量的透明可扩展性联系起来。
+
+所以，block independence 既是限制，也是可扩展机制。除非使用另一个受支持的协调边界，kernel 不能假设别的 block 已经产出某个值。作为交换，runtime 可以按可用资源安排相互独立的 block。这个模型不保证所有程序都会加速；可用并行度、数据移动、局部性、控制流、问题规模和 CPU 工作仍共同决定 GPU 是否合适。
+
+## 一条按概念组织的时间线
+
+下面的原创时间线按压力、回应和保留边界组织。日期只用于定位来源，不用于给产品排名，也不构造“一直更快”的叙事。
+
+| 抽象压力 | 接口回应 | 仍然保留的边界 | 来源锚点 |
+| --- | --- | --- | --- |
+| 大量独立图形项目有利于汇总吞吐量，而固定状态只能选择预定义操作 | 保留专用并行流水线，同时寻找受控的应用自定义工作位置 | 图形数据和阶段顺序仍定义任务 | 2001 年 programmable vertex engine 论文 |
+| 逐 vertex 和逐 fragment 状态组合越来越僵化 | 开放明确的 vertex 与 fragment 指令程序 | 调用、输入、输出和周围阶段仍属于图形系统 | 2002 年 ARB vertex/fragment 规范 |
+| stage assembly 和目标差异增加了编写与迁移成本 | 通过 stage profile 和图形 API 编译类似 C 的语言 | 程序仍以 vertex 或 fragment processor 为目标 | 2003 年 Cg 论文 |
+| 非图形算法需要更自然的数据并行表面 | 用 compiler/runtime 提供 stream 和 kernel | 实现仍把工作映射到图形机制 | 2004 年 BrookGPU 项目与论文 |
+| 图形编码本身妨碍更广泛的并行计算 | 让异构 kernel、grid、thread block、内存局部性和调度成为主要模型 | 可扩展执行要求 block 独立，并显式声明协调边界 | CUDA 于 2006 年推出；2008 年论文描述其模型 |
+
+这条线的重点是因果关系：每种接口解决一个表达问题，也让下一项剩余限制更容易被看见。
+
+## 防止错误类比的边界
+
+| 接口类别 | 程序员提交什么 | 谁仍然控制执行 |
+| --- | --- | --- |
+| 固定功能接口 | 预定义操作的参数与选项 | 系统拥有操作序列 |
+| 可编程图形阶段接口 | 某个 vertex 或 fragment 阶段的指令或高级代码 | 图形调用、阶段输入输出和周围流水线 |
+| 通用 GPU 接口 | 非 drawing 模型中的 kernel、工作划分、数据和协调方式 | runtime、硬件限制、内存层级和已声明同步规则 |
+
+“可编程”本身不能决定属于哪一行。Cg 看起来像 C，却以图形阶段为目标；fragment program 可以执行非图形计算，却仍在使用图形阶段接口；Brook 在图形机制之上提供通用 stream 编程表面；CUDA 让通用异构模型成为主语，但没有消除内存、调度或同步限制。
+
+这套解释也排除了三种错误捷径。有限的可编程阶段不是不受约束的处理器。通用接口不表示所有工作负载都适合 GPU。更晚的日期本身不能解释抽象为什么改变。
+
+## 离开前检查
+
+1. 为什么独立图形工作有利于 aggregate throughput，却不代表单个项目具有低 latency？
+2. 要区分 fixed-function、programmed-stage 和 general-purpose interface，应该分别追问操作、调用、输入与输出的哪些控制权？
+3. Cg 和 Brook 各自怎样提高编程层次，又分别保留了什么限制？
+4. Block independence 为什么有利于 CUDA 扩展，它同时禁止 kernel 作出什么协调假设？
+
+## 继续练习
+
+- 完成 [O07 练习（Exercise）](/start/programmable-gpus/exercises/)，再查看独立的[参考解答](/start/programmable-gpus/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-004](/practice/#pb-r1-004)中，用压力、回应、保留边界和来源归属重写另一条历史解释。
+- 继续到 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)，把通用 kernel 模型落实到具体 thread ownership。
+
+## 来源与复核
+
+下面的来源顺序与发布 metadata 一致。
+
+- [CUDA Programming Guide v13.3 Introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html)：用于核对 fixed-function 到 programmable graphics 的概述、2006 年 CUDA 转变，以及以吞吐量区分 CPU/GPU 设计目标的边界。
+- [Khronos ARB_vertex_program 规范](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_program.txt)：用于核对隐含固定状态、明确 vertex 指令、阶段输入结果，以及 vertex program 没有覆盖的操作。
+- [Khronos ARB_fragment_program 规范](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_fragment_program.txt)：用于核对逐 fragment 指令、texture operation、结果限制与保留的 rasterization 语义。
+- [NVIDIA Research, A User-Programmable Vertex Engine](https://research.nvidia.com/publication/2001-08_user-programmable-vertex-engine)：用于核对独立 vertex stream、有限可编程阶段，以及它在更大固定流水线中的位置。
+- [Cg 论文，DOI 10.1145/882262.882362](https://doi.org/10.1145/882262.882362)：用于核对类似 C 的语言、compiler system、profile 和图形 API 目标。
+- [Stanford BrookGPU 项目](https://graphics.stanford.edu/projects/brookgpu/)与 [Brook for GPUs 论文，DOI 10.1145/1015706.1015800](https://doi.org/10.1145/1015706.1015800)：用于核对 stream、kernel，以及建立在图形硬件之上的 compiler/runtime 抽象。
+- [Nickolls 等，Scalable Parallel Programming with CUDA，DOI 10.1145/1365490.1365500](https://doi.org/10.1145/1365490.1365500)：用于核对异构 kernel、thread block、共享局部性、block independence 和自动可扩展性。
+
+**事实核查日期：2026-08-26。** 页面文字、接口分类、因果时间线和可视化构图均为原创，没有复制来源图表、产品代际图、性能结果或私有资料。

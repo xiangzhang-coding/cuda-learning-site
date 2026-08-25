@@ -1,0 +1,213 @@
+---
+title: 'O04: C++17 Refresher for CUDA Learners'
+description: Review the C++17 lifetime, ownership, template, error, build, and checking boundaries that CUDA source makes easy to cross.
+pairId: o04
+counterpart: /start/cpp17-for-cuda/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - pointers
+  - ownership
+  - templates
+  - errors
+  - build-boundaries
+  - undefined-behavior
+  - visual
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O04
+prerequisites:
+  - O01
+relatedUnits:
+  - F01
+  - EX02
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'N4659: Working Draft, Standard for Programming Language C++'
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf'
+    version: 'N4659; 2017-03-21'
+    platform: 'ISO C++17 core language and standard library'
+    accessDate: '2026-08-26'
+  - title: "N4661 Editors' Report -- Programming Languages -- C++"
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4661.html'
+    version: 'N4661; 2017-03-20'
+    platform: 'C++17 working-draft provenance'
+    accessDate: '2026-08-26'
+  - title: C++ Core Guidelines
+    url: 'https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines'
+    version: 'Living document; page dated 2026-06-14'
+    platform: 'C++17 host resource and ownership guidance'
+    accessDate: '2026-08-26'
+  - title: 'Using the GNU Compiler Collection (GCC) 13.3.0 - Program Instrumentation Options'
+    url: 'https://gcc.gnu.org/onlinedocs/gcc-13.3.0/gcc/Instrumentation-Options.html#Instrumentation-Options'
+    version: 'GCC 13.3.0'
+    platform: 'GNU/Linux host C++ instrumentation'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - C++ Language Support'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-support.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ host and device language support'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime API error codes'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver - The CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'CUDA C++ host and device compilation'
+    accessDate: '2026-08-26'
+  - title: 'Compute Sanitizer 2026.2.1'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html'
+    version: 'v2026.2.1'
+    platform: 'CUDA application runtime checking'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,pointers,ownership,templates,errors,build-boundaries,undefined-behavior,visual,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F01,EX02' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'N4659,N4661,GCC 13.3.0,CUDA 13.3,CUDA 13.3.1,Compute Sanitizer 2026.2.1' }
+---
+
+import OrientationVisual from '../../../../components/OrientationVisual.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/start/cpp17-for-cuda/" lang="zh-CN">阅读中文对应页</a>
+
+This is not a general C++ survey. It refreshes only the C++17 contracts that become especially visible when one source file contains host control code, device code, explicit CUDA resources, and more than one compilation path.
+
+## What you should be able to do
+
+- Separate a pointer value from the lifetime of the object or allocation it names, and identify a dangling pointer without assuming its bits changed.
+- Distinguish an RAII owner from a non-owning raw pointer and keep the owner alive through every permitted use.
+- Place template definitions where required instantiations can see them.
+- Keep host exceptions, explicit CUDA error codes, and the device exception restriction in separate error policies.
+- Trace preprocessing, compilation, device linking when used, host linking, and execution without treating one boundary as proof of another.
+- Explain why host sanitizers and Compute Sanitizer check selected executed paths rather than prove the absence of undefined behavior.
+
+## Prerequisite
+
+Complete [O01: Using the Learning Site](/en/start/using-the-learning-site/) first. O01 is O04's only direct prerequisite. [F01](/en/foundations/first-cuda-kernel/) and canonical [EX02](/en/examples/vector-addition/) are related places to apply this refresher, not additional prerequisite edges.
+
+## Pointer value is not pointee lifetime
+
+A pointer object stores a value that can designate an object, function, or allocation location. The pointer object and the pointee have independent lifetimes. Copying a pointer copies its value; it does not copy the pointee, transfer ownership, or extend the pointee's lifetime.
+
+When an owner destroys an object or releases an allocation, a retained pointer can become dangling. The pointer's stored bits need not become `nullptr` or otherwise change. Dereferencing it or using it to access storage outside its valid lifetime is undefined behavior. Assigning `nullptr` to one copy does not repair other copies.
+
+CUDA makes this distinction operational. A raw pointer passed to an asynchronous CUDA operation remains a view, not a lifetime token. The allocation and every object used through that view must remain valid until the operation that may access them has completed under an explicit synchronization or dependency contract. A pointer also does not carry an extent, ownership policy, or proof that host code may dereference the address.
+
+## RAII owns; raw pointers observe
+
+Resource Acquisition Is Initialization, or RAII, binds resource release to a C++ object's lifetime. On the host, `std::vector`, `std::unique_ptr`, and a purpose-built CUDA allocation wrapper can make ownership explicit. Ordinary scope exit and host exception unwinding then release resources through the owner's destructor.
+
+Use a raw `T*` as a non-owning view unless an interface explicitly documents a legacy ownership transfer. Pair it with the required extent and address-space meaning. The caller must keep the owner alive for the complete use interval. The callee must not free, retain, or outlive the view unless its contract says so.
+
+CUDA cleanup calls return error codes, while cleanup destructors should remain non-throwing. A robust host wrapper therefore keeps destruction non-throwing and gives callers an explicit operation when cleanup failure must be observed. RAII controls lifetime; it does not erase the CUDA error channel.
+
+## Templates need an instantiation-visible definition
+
+A template declaration describes a family. Code for a specialization appears only when that specialization is instantiated. At an implicit instantiation point, the compiler needs the template definition, not merely a declaration.
+
+Two arrangements are reliable:
+
+1. Put the complete template definition in a header and include it in every translation unit that instantiates it.
+2. Keep the definition in one implementation translation unit, explicitly instantiate every supported specialization there, and expose matching declarations to users.
+
+Putting a generic definition only in a `.cpp` file while another `.cpp` or `.cu` file implicitly instantiates it can leave the required specialization unavailable. The failure may surface during compilation, device linking, or host linking, depending on which entity is missing and how separate compilation is configured.
+
+CUDA annotations add another visibility boundary. A `__device__` or `__host__ __device__` template needed by device code must be visible to the CUDA device compilation path. A `__host__ __device__` body is compiled for both targets, so every operation in that body must be valid on both paths or be separated deliberately.
+
+## Host exceptions and CUDA error codes are different channels
+
+Host C++ may use exceptions. A `throw` transfers control to a matching host handler, and RAII destroys completed automatic objects while the host stack unwinds. That policy does not replace inspection of CUDA results.
+
+CUDA Runtime operations return explicit values of type `cudaError_t`. Compare each required result with `cudaSuccess`, preserve the failing call site, and use `cudaGetErrorName` or `cudaGetErrorString` when reporting it. An application may translate a failed `cudaError_t` into a host exception at one documented adapter boundary, but the adapter must first receive and retain the CUDA failure information.
+
+Exception handling is not supported in device code, and exception specifications are not supported for `__global__` functions. Do not put `throw`, `try`, or `catch` on a device execution path or design an exception to cross the host/device boundary. Device work communicates status through CUDA-supported data and execution mechanisms; host code observes failures through explicit Runtime API boundaries.
+
+## Translation units and host/device build boundaries
+
+After preprocessing expands includes and macros for one source file, the result is a translation unit. Compilation turns each translation unit into an object or another requested artifact. Linking combines compatible objects and libraries and resolves required definitions. A declaration can pass preprocessing and compilation while its missing definition fails only at a link boundary.
+
+For a `.cu` source, `nvcc` has distinct host and device paths. Its documented trajectory preprocesses for device compilation, produces device code for a fatbinary, preprocesses and synthesizes host C++, and asks a supported host compiler to create a host object containing that fatbinary. Relocatable device code adds a device-link step before the final host link. Internal substeps may change between Toolkit releases; the documented phases are the stable interface.
+
+The main annotations answer different questions:
+
+| Annotation | Call boundary | Execution boundary |
+| --- | --- | --- |
+| unannotated or `__host__` | host code calls it | host |
+| `__device__` | device code calls it | device |
+| `__global__` | host code launches it | device |
+| `__host__ __device__` | host or device code calls the corresponding version | separately compiled host and device versions |
+
+Preprocessing success is not compilation success. Compilation success is not link success. A linked executable is not evidence that a GPU path ran or produced a correct result.
+
+## Undefined behavior checks are path-bounded
+
+Undefined behavior means the C++ specification imposes no required behavior for that operation. Dangling dereferences, out-of-bounds accesses, and selected invalid arithmetic are examples relevant to CUDA host code. A warning-free build does not establish that none occur.
+
+GCC host instrumentation can check selected host behavior at runtime. AddressSanitizer instruments such classes as out-of-bounds and use-after-free accesses; UndefinedBehaviorSanitizer instruments a documented subset of undefined operations. Those checks cover instrumented host code reached by the supplied workload.
+
+Compute Sanitizer checks different CUDA concerns. Its tools include `memcheck`, `racecheck`, `initcheck`, and `synccheck`, each with a defined detection scope. A clean report means that the selected tool reported no covered defect on the executed paths under that exact build, input, device, and tool version. It says nothing about unexecuted branches, other inputs, other schedules, or defects outside the selected tool's scope.
+
+Use static review, compiler diagnostics, host sanitizers, CUDA error checks, Compute Sanitizer, and independent correctness criteria as complementary evidence. None is a proof that the whole program is free of undefined behavior.
+
+## Read the annotation map
+
+Use the shared map to trace where a function is called, where it executes, and which compilation path must accept its body. The visual models source annotations only. It does not compile or execute CUDA and grants no Evidence Status.
+
+<OrientationVisual kind="annotations" locale="en" />
+
+## Retrieval check
+
+1. Why can copying a pointer preserve its value without extending the pointee's lifetime?
+2. Which two template arrangements make required specializations available across translation units?
+3. Why can a host exception adapter not remove explicit `cudaError_t` checks, and why can the same exception path not run on the device?
+4. What does a clean host-sanitizer or Compute Sanitizer run establish, and what remains outside that claim?
+
+## Continue with practice
+
+- Complete the [O04 Exercises](/en/start/cpp17-for-cuda/exercises/), then inspect the separate [reviewed solutions](/en/start/cpp17-for-cuda/solutions/).
+- Solve [Practice Bank PB-R1-001](/en/practice/#pb-r1-001) to review a combined lifetime, build, and error-boundary defect.
+- Apply the distinctions while reading [F01](/en/foundations/first-cuda-kernel/) and canonical [EX02](/en/examples/vector-addition/).
+
+## Sources and review
+
+N4659 supplies the C++17 language baseline, and N4661 records its working-draft provenance. The C++ Core Guidelines support the ownership and RAII guidance. GCC 13.3 documents host runtime instrumentation. CUDA Programming Guide v13.3 governs CUDA C++ support and device restrictions; CUDA Runtime API v13.3.1 governs explicit errors; NVCC v13.3 governs the host/device compilation trajectory; Compute Sanitizer 2026.2.1 governs its runtime checking scope. All eight owner URLs were reopened on **2026-08-26**.
+
+**Fact checked: 2026-08-26.** The prose, tables, questions, and instructional composition are original. This Learning Unit records no compilation, GPU execution, sanitizer result, or performance observation.

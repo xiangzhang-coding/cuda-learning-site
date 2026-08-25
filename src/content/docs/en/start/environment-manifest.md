@@ -3,7 +3,7 @@ title: 'O03: Reading an Environment Manifest'
 description: Separate hardware, software, workload, and measurement coordinates so a CUDA claim has an honest scope.
 pairId: o03
 counterpart: /start/environment-manifest/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -24,6 +24,9 @@ prerequisites:
   - O01
 relatedUnits:
   - O02
+  - EX01
+  - O08
+  - LAB01
   - F01
   - LAB02
 exampleIds:
@@ -40,47 +43,47 @@ sources:
     url: 'https://developer.nvidia.com/cuda-toolkit-archive'
     version: '11.8.0, 12.9.2, and 13.3.1 release identities'
     platform: 'All published platforms'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Toolkit 11.8.0 Release Notes
     url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
     version: '11.8.0'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Toolkit 12.9 Update 2 Release Notes
     url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html'
     version: '12.9.2'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Toolkit 13.3 Update 1 Release Notes
     url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
     version: '13.3.1'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Installation Guide for Linux 12.9
     url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#supported-c-dialects'
     version: '12.9.2'
     platform: 'Ubuntu 24.04 x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Installation Guide for Linux 13.3
     url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#supported-c-dialects'
     version: '13.3.1'
     platform: 'Ubuntu 24.04 x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Minor Version Compatibility
     url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
-    version: 'Current on 2026-08-24'
+    version: 'Current on 2026-08-26'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Programming Guide - Compute Capabilities
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
     version: '13.3.1'
     platform: 'CUDA-capable GPUs'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
 head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: o03 }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -92,7 +95,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: O01 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,F01,LAB02' }
+    attrs: { name: 'cuda:related-units', content: 'O02,EX01,O08,LAB01,F01,LAB02' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: 'O03-MANIFEST-TEMPLATE,O03-INCOMPLETE-A' }
   - tag: meta
@@ -204,10 +207,12 @@ Ubuntu 24.04 x86-64 with CUDA 13.3.1 is only a candidate software coordinate. It
 
 - Complete the [O03 Exercises](/en/start/environment-manifest/exercises/), then inspect the separate [reviewed solutions](/en/start/environment-manifest/solutions/).
 - Solve PB-R0-002 in the [Practice Bank](/en/practice/) to repair an incomplete manifest and support-boundary claim.
-- Continue to [F01](/en/foundations/first-cuda-kernel/) and prepare these fields as a real record template before entering [LAB02](/en/labs/vector-addition/).
+- Open the [EX01 Environment Report Runnable Example](/en/examples/environment-report/) to see which structured observations it can collect and which manifest fields it cannot replace.
+- Complete O02, O03, and O05 before entering [O08](/en/start/reference-environment-candidate/). After both O03 and O08, use [LAB01](/en/labs/record-cuda-environment/) to capture and interpret the candidate configuration.
+- The kernel route can still continue to [F01](/en/foundations/first-cuda-kernel/). Prepare these fields as a real record template before entering [LAB02](/en/labs/vector-addition/).
 
 ## Sources and review
 
-Exact Toolkit, component, paired-driver, Linux qualification, and dialect facts come from NVIDIA versioned release notes and installation guides. Driver floors come from CUDA Compatibility, and compute capability comes from the CUDA Programming Guide. Every URL, version, platform, and access date is recorded in the [Sources and Version Record](/en/sources-and-versions/) and was reopened on **2026-08-24**.
+Exact Toolkit, component, paired-driver, Linux qualification, and dialect facts come from NVIDIA versioned release notes and installation guides. Driver floors come from CUDA Compatibility, and compute capability comes from the CUDA Programming Guide. Every URL, version, platform, and access date is recorded in the [Sources and Version Record](/en/sources-and-versions/) and was reopened on **2026-08-26**.
 
-**Fact-check date: 2026-08-24.** The manifest is a template and hypothetical counterexample. This page records no real machine, runtime output, or performance result.
+**Fact-check date: 2026-08-26.** The manifest is a template and hypothetical counterexample. This page records no real machine, runtime output, or performance result.

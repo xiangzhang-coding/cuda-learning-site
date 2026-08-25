@@ -13,7 +13,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-08-25T12:00:00Z');
+const asOf = new Date('2026-08-26T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -57,7 +57,7 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 1, practice: 5, visuals: 2, glossary: 34, sources: 17 });
+    expect(counts).toEqual({ labs: 2, practice: 10, visuals: 2, glossary: 48, sources: 27 });
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexedText = (
@@ -122,8 +122,8 @@ describe('published resource indexes', () => {
   });
 
   it.each([
-    { group: 'practice', route: '/practice/', selector: '.resource-target[id^="pb-r0-"]' },
-    { group: 'practice', route: '/en/practice/', selector: '.resource-target[id^="pb-r0-"]' },
+    { group: 'practice', route: '/practice/', selector: '.resource-target[id^="pb-r"]' },
+    { group: 'practice', route: '/en/practice/', selector: '.resource-target[id^="pb-r"]' },
     { group: 'glossary', route: '/glossary/', selector: '.resource-target[id^="term-"]' },
     { group: 'glossary', route: '/en/glossary/', selector: '.resource-target[id^="term-"]' },
     { group: 'sources', route: '/sources-and-versions/', selector: '.resource-target[id^="src-"]' },

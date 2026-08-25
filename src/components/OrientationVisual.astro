@@ -1,0 +1,161 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/orientation-visuals.css';
+
+type OrientationVisualKind = 'annotations' | 'command-lifecycle' | 'architecture' | 'programmability';
+type OrientationVisualLocale = 'zh-CN' | 'en';
+
+interface Props {
+  kind: OrientationVisualKind;
+  locale: OrientationVisualLocale;
+}
+
+const { kind, locale } = Astro.props;
+
+const visualCopy = {
+  en: {
+    annotations: {
+      eyebrow: 'O04 / compilation map',
+      title: 'One source file, distinct execution domains',
+      summary: 'Annotations select compilation and call boundaries. They do not move objects or make a pointer valid in another memory space.',
+      ordered: false,
+      items: [
+        { signal: 'ordinary / __host__', title: 'Host path', body: 'The host compiler emits CPU code. Host lifetime and host error-handling rules apply.' },
+        { signal: '__device__', title: 'Device path', body: 'NVCC emits device code. The device language and callable interfaces are narrower than the host environment.' },
+        { signal: '__host__ __device__', title: 'Two compilation passes', body: 'Each pass checks the same function against its own available interfaces. Success in one pass does not guarantee the other.' },
+        { signal: '__global__', title: 'Kernel boundary', body: 'Host code launches the function; device threads execute it. Launch status and completion errors remain separate checks.' },
+      ],
+      boundary: 'A callable annotation describes where code is compiled and executed. Pointer ownership, pointee lifetime, and memory accessibility require their own proof.',
+    },
+    'command-lifecycle': {
+      eyebrow: 'O05 / command record',
+      title: 'A command becomes reproducible through its full lifecycle',
+      summary: 'Preserve the literal instruction and the context that gives it meaning. A terminal screenshot or a final PASS line loses too much information.',
+      ordered: true,
+      items: [
+        { signal: 'PATH', title: 'Resolve context', body: 'Record the physical working directory, selected tools, allowlisted environment variables, and input identities.' },
+        { signal: 'CMD', title: 'Freeze the instruction', body: 'Keep the literal command or script before expansion. Shell xtrace is diagnostic output, not the original source.' },
+        { signal: 'RUN', title: 'Capture execution', body: 'Retain stdout, stderr, and the immediate exit status. Pipeline status needs an explicit pipefail policy.' },
+        { signal: 'SEAL', title: 'Bind artifacts', body: 'Add a UTC timestamp and hashes for logs and outputs. A hash checks identity, not correctness or authenticity.' },
+      ],
+      boundary: 'The record must still show which process failed. tee, redirection order, parallel output, and process races can otherwise hide the responsible boundary.',
+    },
+    architecture: {
+      eyebrow: 'O06 / bottleneck questions',
+      title: 'Ask about delay, rate, and movement separately',
+      summary: 'CPU and GPU designs make different trade-offs, but both use parallel execution, caches, control logic, and memory systems.',
+      ordered: false,
+      items: [
+        { signal: 'LATENCY', title: 'How long does one dependency wait?', body: 'Latency belongs to a named operation and path. More resident work can cover waiting time without reducing the underlying latency.' },
+        { signal: 'THROUGHPUT', title: 'How much work completes per unit time?', body: 'Throughput needs a workload, operation definition, and time boundary. Peak issue rate is not achieved application throughput.' },
+        { signal: 'BANDWIDTH', title: 'How many bytes cross which boundary?', body: 'State the path and units. Theoretical, effective, requested, and actual transfer rates answer different questions.' },
+        { signal: 'INTENSITY', title: 'How much work accompanies each transferred byte?', body: 'The result depends on the operation count and memory-traffic boundary. It is not a permanent property of an algorithm name.' },
+      ],
+      boundary: 'Occupancy is resident warps divided by the architectural maximum. It is neither utilization nor a promise that a higher value runs faster.',
+    },
+    programmability: {
+      eyebrow: 'O07 / abstraction shift',
+      title: 'Programming interfaces moved away from fixed graphics state',
+      summary: 'The useful history is a sequence of abstraction problems. Product generations are not the organizing principle.',
+      ordered: true,
+      items: [
+        { signal: 'FIXED STATE', title: 'Select predefined operations', body: 'Graphics workloads supplied abundant independent work, but applications could only combine operations exposed by fixed pipeline state.' },
+        { signal: 'STAGE PROGRAMS', title: 'Program selected graphics stages', body: 'Vertex and fragment programs replaced parts of fixed state with application-defined instruction sequences while retaining graphics inputs and outputs.' },
+        { signal: 'GPGPU', title: 'Map nongraphics work into graphics abstractions', body: 'Researchers used streams, textures, fragments, and compiler systems to run general calculations, exposing both useful throughput and an awkward interface mismatch.' },
+        { signal: 'CUDA', title: 'Make general-purpose kernels the primary model', body: 'CUDA exposed host and device execution, kernels, thread blocks, locality, and synchronization without requiring a graphics pipeline mapping.' },
+      ],
+      boundary: 'This sequence explains a change in programming model. It does not claim that every stage was first, that one system replaced all others, or that GPUs are universally faster.',
+    },
+  },
+  'zh-CN': {
+    annotations: {
+      eyebrow: 'O04 / 编译映射',
+      title: '同一份源文件，不同的执行域',
+      summary: '标注决定编译路径和调用边界。它不会搬移对象，也不会让指针自动在另一种内存空间中有效。',
+      ordered: false,
+      items: [
+        { signal: 'ordinary / __host__', title: 'Host 路径', body: 'Host 编译器生成 CPU 代码。这里遵守 host 端的对象生存期和错误处理规则。' },
+        { signal: '__device__', title: 'Device 路径', body: 'NVCC 生成 device 代码。可用的 device 语言特性和可调用接口比 host 环境更窄。' },
+        { signal: '__host__ __device__', title: '两次编译检查', body: '两个编译过程分别按各自可用接口检查同一个函数。一侧成功不代表另一侧也成功。' },
+        { signal: '__global__', title: 'Kernel 边界', body: 'Host 代码发起调用，device thread 执行函数。Launch 状态与执行完成错误仍是两次检查。' },
+      ],
+      boundary: '可调用标注说明代码在哪里编译和执行。指针所有权、pointee 生存期和内存可访问性都需要单独证明。',
+    },
+    'command-lifecycle': {
+      eyebrow: 'O05 / 命令记录',
+      title: '可复现命令需要完整生命周期',
+      summary: '保存字面命令，也要保存赋予它含义的上下文。终端截图或最后一行 PASS 会丢掉太多信息。',
+      ordered: true,
+      items: [
+        { signal: 'PATH', title: '解析上下文', body: '记录物理工作目录、选中的工具、允许公开的环境变量和输入身份。' },
+        { signal: 'CMD', title: '冻结命令', body: '在 shell 展开前保存字面命令或脚本。Xtrace 是诊断输出，不是原始命令。' },
+        { signal: 'RUN', title: '捕获执行', body: '保留 stdout、stderr 和紧随命令得到的退出状态。Pipeline 状态需要明确的 pipefail 策略。' },
+        { signal: 'SEAL', title: '绑定产物', body: '为日志和输出添加 UTC 时间与 hash。Hash 只能检查身份，不能证明正确性或真实性。' },
+      ],
+      boundary: '记录还要指出失败的是哪个进程。tee、重定向顺序、并行输出和 process race 都可能遮住真正的失败边界。',
+    },
+    architecture: {
+      eyebrow: 'O06 / 瓶颈问题',
+      title: '分别追问等待、速率和数据移动',
+      summary: 'CPU 与 GPU 的设计取舍不同，但两者都有并行执行、cache、控制逻辑和内存系统。',
+      ordered: false,
+      items: [
+        { signal: 'LATENCY', title: '一次依赖要等多久？', body: 'Latency 必须绑定具体操作和路径。更多 resident work 可以覆盖等待时间，但不会降低原本的 latency。' },
+        { signal: 'THROUGHPUT', title: '单位时间完成多少工作？', body: 'Throughput 需要工作负载、操作定义和计时边界。峰值发射率不等于应用实际 throughput。' },
+        { signal: 'BANDWIDTH', title: '多少字节跨过哪条边界？', body: '必须说明路径和单位。理论、有效、请求与实际 transfer rate 回答的是不同问题。' },
+        { signal: 'INTENSITY', title: '每个传输字节伴随多少工作？', body: '结果取决于操作计数和内存流量边界，不能把它当作算法名称的永久属性。' },
+      ],
+      boundary: 'Occupancy 是 resident warp 数与架构上限的比值。它不是 utilization，也不保证数值越高速度越快。',
+    },
+    programmability: {
+      eyebrow: 'O07 / 抽象变化',
+      title: '编程接口逐步摆脱固定图形状态',
+      summary: '这段历史要解释抽象层遇到的问题，而不是罗列产品代际。',
+      ordered: true,
+      items: [
+        { signal: 'FIXED STATE', title: '选择预定义操作', body: '图形工作负载提供了大量相互独立的工作，但应用只能组合固定 pipeline state 暴露的操作。' },
+        { signal: 'STAGE PROGRAMS', title: '编写选定图形阶段', body: 'Vertex program 和 fragment program 用应用定义的指令序列替代部分固定状态，同时保留图形输入与输出约束。' },
+        { signal: 'GPGPU', title: '把非图形工作映射到图形抽象', body: '研究者借助 stream、texture、fragment 和编译系统运行通用计算，既利用了吞吐能力，也暴露出接口错配。' },
+        { signal: 'CUDA', title: '让通用 kernel 成为主要模型', body: 'CUDA 直接提供 host/device 执行、kernel、thread block、局部性和同步，不再要求先映射到图形 pipeline。' },
+      ],
+      boundary: '这个顺序解释编程模型怎样变化。它不声称每一步都是最早方案，也不声称某个系统取代全部方案或 GPU 总是更快。',
+    },
+  },
+} as const;
+
+const visual = visualCopy[locale][kind];
+---
+
+<figure class="orientation-visual not-content" data-orientation-kind={kind}>
+  <figcaption>
+    <span>{visual.eyebrow}</span>
+    <strong>{visual.title}</strong>
+    <p>{visual.summary}</p>
+  </figcaption>
+
+  {
+    visual.ordered ? (
+      <ol class="orientation-track" data-ordered="true">
+        {visual.items.map((item) => (
+          <li>
+            <code>{item.signal}</code>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <div class="orientation-track" data-ordered="false" role="list">
+        {visual.items.map((item) => (
+          <article role="listitem">
+            <code>{item.signal}</code>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </div>
+    )
+  }
+
+  <p class="orientation-boundary"><strong>{locale === 'zh-CN' ? '边界' : 'Boundary'}:</strong> {visual.boundary}</p>
+</figure>

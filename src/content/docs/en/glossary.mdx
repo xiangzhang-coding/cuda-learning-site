@@ -3,7 +3,7 @@ title: Glossary
 description: Published canonical bilingual vocabulary and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-25'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -354,6 +354,132 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related units:** F01 and LAB02.
 - **Version note:** The values belong to the EX02 correctness contract; changing them creates a new evidence scope.
 
+<span id="term-035" class="resource-target" aria-hidden="true"></span>
+
+### RAII · 资源获取即初始化
+
+- **Definition:** A C++ lifetime-management technique that binds resource ownership to an object's lifetime, acquires the resource during initialization, and releases it through the owner's destructor. O04 treats raw pointers as non-owning views as guidance, not as a rule of the C++ language.
+- **Avoid:** Garbage collection, treating every raw pointer as an owner.
+- **Related unit:** O04.
+- **Version note:** O04 uses the C++17 baseline; an interface may still document ownership transfer explicitly.
+
+<span id="term-036" class="resource-target" aria-hidden="true"></span>
+
+### undefined behavior · 未定义行为
+
+- **Definition:** An operation for which the C++ specification imposes no required behavior.
+- **Avoid:** Guaranteed crash, unspecified behavior, implementation-defined behavior.
+- **Related unit:** O04.
+- **Version note:** O04 uses the C++17 language baseline; compiler diagnostics and sanitizer results neither redefine undefined behavior nor prove its absence.
+
+<span id="term-037" class="resource-target" aria-hidden="true"></span>
+
+### translation unit · 翻译单元
+
+- **Definition:** The source material produced after preprocessing one source file, including expanded includes and macros, that a compiler translates as one unit.
+- **Avoid:** The unpreprocessed source file, the whole program, a linked executable.
+- **Related unit:** O04.
+- **Version note:** O04 describes the boundary with C++17 and NVCC 13.3; Toolkit-internal steps may change, but a translation unit exists after preprocessing.
+
+<span id="term-038" class="resource-target" aria-hidden="true"></span>
+
+### reproducible command record · 可复现命令记录
+
+- **Definition:** A reviewable capture of one command stage containing the literal command and argument boundaries; working directory, allowlisted environment, and tool context; separate stdout and stderr streams; exit status; collection date and UTC start and finish times; and hashes of retained inputs and artifacts.
+- **Avoid:** Paraphrased command, screenshot-only log, merged output without exit status.
+- **Related unit:** O05.
+- **Version note:** Tool and operating-system versions belong to the execution context; changing the command, context, or hashed bytes creates a different record.
+
+<span id="term-039" class="resource-target" aria-hidden="true"></span>
+
+### latency · 延迟
+
+- **Definition:** Elapsed time from a declared start boundary to a declared finish boundary for one named event, reported with units. It measures one event, not completed work per interval.
+- **Avoid:** Throughput, rate, a timing value without an event and boundaries.
+- **Related unit:** O06.
+- **Version note:** Comparable latency measurements align the event, synchronization boundary, timer and version, workload, and units.
+
+<span id="term-040" class="resource-target" aria-hidden="true"></span>
+
+### throughput · 吞吐量
+
+- **Definition:** The amount of named work completed per declared time interval, reported with units such as items/s or operations/s. It is a rate, not one event's elapsed time.
+- **Avoid:** One operation's latency, a rate without work and time boundaries, an unconditional peak value.
+- **Related units:** O06 and O07.
+- **Version note:** Concurrency or batching can raise throughput while per-item latency stays unchanged; comparisons must align workload, interval, and units.
+
+<span id="term-041" class="resource-target" aria-hidden="true"></span>
+
+### bandwidth · 带宽
+
+- **Definition:** A data-transfer rate over a named path and direction, with a byte-count convention, time interval, and units such as GB/s or GiB/s.
+- **Avoid:** Pathless throughput claim, omitted units, treating GB/s and GiB/s as interchangeable.
+- **Related unit:** O06.
+- **Version note:** Theoretical, effective, and actual bandwidth are comparable only when path, direction, time, and unit conventions align.
+
+<span id="term-042" class="resource-target" aria-hidden="true"></span>
+
+### concurrency · 并发
+
+- **Definition:** Two or more named operations overlap in time within a declared scope; this alone does not mean different hardware units execute them at the same instant.
+- **Avoid:** Treating stream count, asynchronous submission, residency, or occupancy as proof of observed overlap.
+- **Related unit:** O06.
+- **Version note:** Source and APIs can show only that overlap is possible; actual concurrency needs a timeline or equivalent observation from the exact execution and a scope such as kernels, copy/compute, or CPU/GPU work.
+
+<span id="term-043" class="resource-target" aria-hidden="true"></span>
+
+### arithmetic intensity · 算术强度
+
+- **Definition:** For a named workload, a declared count of arithmetic work divided by data traffic across a declared memory boundary, in operations/byte.
+- **Avoid:** Operation count alone, FLOP/s, a ratio without a traffic boundary.
+- **Related unit:** O06.
+- **Version note:** Changing the operation-count rule, read/write traffic convention, memory level, or workload scope changes the intensity.
+
+<span id="term-044" class="resource-target" aria-hidden="true"></span>
+
+### occupancy · 占用率
+
+- **Definition:** Commonly, the ratio of active warps per SM to the hardware maximum active warps, not GPU utilization or a performance guarantee.
+- **Avoid:** GPU utilization, proof of concurrent execution, performance score or guarantee.
+- **Related unit:** O06.
+- **Version note:** Architecture, block size, registers, and shared-memory limits jointly constrain occupancy; higher occupancy guarantees neither higher throughput nor shorter runtime.
+
+<span id="term-045" class="resource-target" aria-hidden="true"></span>
+
+### programmable shader stage · 可编程着色器阶段
+
+- **Definition:** A selected stage in a graphics pipeline where an application supplies instructions while invocation, inputs, outputs, resource limits, and surrounding stages retain graphics semantics.
+- **Avoid:** General-purpose kernel, unrestricted processor interface, CUDA kernel.
+- **Related unit:** O07.
+- **Version note:** Available stages, profiles, and capabilities vary by graphics API and period; the term remains bound to a graphics pipeline.
+
+<span id="term-046" class="resource-target" aria-hidden="true"></span>
+
+### GPGPU · 通用 GPU 计算
+
+- **Definition:** The broad practice of using GPUs for nongraphics computation, historically often by mapping data and work through textures, shader stages, and render targets, and later also through general-purpose compute interfaces. It is a historical category, not a synonym for CUDA.
+- **Avoid:** A synonym for CUDA, programmable shader stage, a label for all GPU work.
+- **Related unit:** O07.
+- **Version note:** GPGPU spans periods, APIs, and hardware; CUDA is one general-purpose platform and model within that history, not an equivalent term.
+
+<span id="term-047" class="resource-target" aria-hidden="true"></span>
+
+### compatibility assessment · 兼容性评估
+
+- **Definition:** A source-dated comparison of exact environment coordinates with selected current owner documentation that yields only one of three triage outcomes: `documented-path`, `not-documented`, or `indeterminate`. No outcome grants compilation or runtime evidence.
+- **Avoid:** Supported verdict, Evidence Status, runtime validation, Reference Environment declaration.
+- **Related unit:** O08.
+- **Version note:** An outcome is scoped to the recorded coordinates, sources, and date, and none grants compilation or runtime evidence; `documented-path` only permits validation to continue.
+
+<span id="term-048" class="resource-target" aria-hidden="true"></span>
+
+### Reference Environment candidate · 基准环境候选配置
+
+- **Definition:** One exact native-Linux GPU and software configuration being reviewed against manifest, tier, compatibility, maintainer control, and a separately designated baseline. Candidate status does not declare a Reference Environment.
+- **Avoid:** Declared Reference Environment, recommended setup, validated machine.
+- **Related units:** O08 and LAB01.
+- **Version note:** Candidate status is not a declaration; only a separate maintainer declaration after every gate passes can establish a Reference Environment.
+
 ## Maintenance rule
 
-These entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-25**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.
+These entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-26**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.

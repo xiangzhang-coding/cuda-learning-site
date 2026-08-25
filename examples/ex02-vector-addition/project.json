@@ -22,6 +22,9 @@
       "Makefile",
       "scripts/compile-check.sh"
     ],
+    "additionalContractInputs": [
+      "probes/cxx23.cu"
+    ],
     "stages": [
       "preprocess",
       "compile",

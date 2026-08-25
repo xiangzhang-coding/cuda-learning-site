@@ -1,0 +1,418 @@
+---
+title: 'LAB01: Record and Interpret a CUDA Environment'
+description: Capture a reviewable CUDA environment record on native Linux, reconcile CUDA and NVIDIA-SMI device identities, and decide whether it can continue as a Reference Environment candidate.
+pairId: lab01
+counterpart: /labs/record-cuda-environment/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - prepare
+  - capture
+  - build
+  - inventory
+  - reconcile
+  - tier
+  - compatibility
+  - candidate-decision
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB01
+prerequisites:
+  - O03
+  - O08
+relatedUnits:
+  - O02
+  - O05
+  - EX01
+exampleIds:
+  - EX01
+canonicalExample: EX01
+canonicalRanges:
+  - observation-model
+  - version-query
+  - device-inventory
+hardwareGate: 'Native Linux; one selected CUDA-capable NVIDIA GPU with compute capability 7.5 or newer for a Reference Environment candidate; preparation and build may be completed without a GPU'
+estimatedMinutes: 60
+difficulty: introductory
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 0
+gpuCount: 1
+permissions:
+  - 'Read operating-system and NVIDIA driver metadata'
+  - 'Execute shell tools, nvidia-smi, NVCC, the host compiler, make, and EX01'
+  - 'Create and remove local capture records'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A successful EX01 report should contain UTC, build, environment-variable, version, count, and per-visible-device observations in one JSON document.
+    - The one selected CUDA-visible device should reconcile with NVIDIA-SMI by UUID or PCI identity after visibility controls and any MIG boundary are accounted for.
+  recordedObservations: []
+sources:
+  - title: NVIDIA CUDA Toolkit Archive
+    url: 'https://developer.nvidia.com/cuda-toolkit-archive'
+    version: '11.8.0, 12.9.2, and 13.3.1 release identities'
+    platform: 'All published platforms'
+    accessDate: '2026-08-26'
+  - title: CUDA Toolkit 13.3 Update 1 Release Notes
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: '13.3.1; selected 11.x, 12.x, and 13.x Linux driver compatibility rows'
+    platform: 'Linux x86_64'
+    accessDate: '2026-08-26'
+  - title: Why CUDA Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'CUDA application deployment'
+    accessDate: '2026-08-26'
+  - title: CUDA Minor Version Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'Linux x86_64'
+    accessDate: '2026-08-26'
+  - title: CUDA Forward Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'Eligible NVIDIA Linux systems'
+    accessDate: '2026-08-26'
+  - title: CUDA Programming Guide - Obtain the GPU Compute Capability
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability'
+    version: '13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-26'
+  - title: CUDA Programming Guide - CUDA Environment Variables
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/environment-variables.html'
+    version: '13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-26'
+  - title: CUDA Runtime API - Device Management
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: '13.3.1; last updated 2026-06-29'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-26'
+  - title: CUDA Runtime API - Version Management
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: '13.3.1; last updated 2026-06-29'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-26'
+  - title: NVIDIA System Management Interface
+    url: 'https://docs.nvidia.com/deploy/nvidia-smi/index.html'
+    version: 'Current on 2026-08-26'
+    platform: 'NVIDIA driver-supported Linux'
+    accessDate: '2026-08-26'
+  - title: NVIDIA CUDA Compiler Driver - Supported Phases
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux and Windows'
+    accessDate: '2026-08-26'
+  - title: systemd os-release
+    url: 'https://github.com/systemd/systemd/blob/v261.2/man/os-release.xml'
+    version: 'systemd 261.2'
+    platform: 'Linux'
+    accessDate: '2026-08-26'
+  - title: GNU Bash Reference Manual - Shell Functions, Redirections, and Exit Status
+    url: 'https://www.gnu.org/software/bash/manual/bash.html'
+    version: '5.3'
+    platform: 'GNU/Linux with GNU Bash'
+    accessDate: '2026-08-26'
+  - title: GNU Coreutils Manual - date, uname, realpath, and SHA-2 utilities
+    url: 'https://www.gnu.org/software/coreutils/manual/coreutils.html'
+    version: '9.11'
+    platform: 'GNU/Linux user space'
+    accessDate: '2026-08-26'
+  - title: GNU Make Manual - Targets and Recipe Execution
+    url: 'https://www.gnu.org/software/make/manual/make.html'
+    version: '4.4.1'
+    platform: 'GNU/Linux build recipes'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,prepare,capture,build,inventory,reconcile,tier,compatibility,candidate-decision,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'O03,O08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O02,O05,EX01' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX01 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX01 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'observation-model,version-query,device-inventory' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux; one selected CUDA-capable NVIDIA GPU with compute capability 7.5 or newer for a Reference Environment candidate; preparation and build may be completed without a GPU' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '60' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: introductory }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '0' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'OS and NVIDIA driver metadata read; shell tools, nvidia-smi, NVCC, host compiler, make, and EX01 execution; local capture-record write/delete; no performance counters' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '2 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '15' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3,261.2,5.3,9.11,4.4.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/labs/record-cuda-environment/" lang="zh-CN">阅读中文对应页</a>
+
+LAB01 is a Lab. You will capture an Environment Manifest outside the website, build and run Runnable Example EX01, and interpret the collected facts as a Reference Environment candidate. The site executes none of these commands and has observed none of your machine. **No Reference Environment is currently declared.**
+
+## Lab contract
+
+| Coordinate | Requirement |
+| --- | --- |
+| Estimated time | 60 minutes |
+| Difficulty | Introductory |
+| Direct prerequisites | Complete O03 and O08; O08 already lists O03 among its own direct prerequisites |
+| Supported Environment | Native Linux only; another platform cannot form a Reference Environment candidate for this site |
+| Hardware gate | A candidate requires one selected CUDA-capable NVIDIA GPU with compute capability 7.5 or newer; preparation and build may be completed without a GPU |
+| Toolkit Lane | Select `cuda-11.8`, `cuda-12.9`, or `cuda-13.3`; record the actual Toolkit, components, and host compiler without borrowing evidence from another Lane |
+| Problem data | EX01 allocates no problem data, so `maximumProblemMemoryBytes` is `0`; internal Runtime or driver initialization is not problem data |
+| Permissions | Read OS and NVIDIA driver metadata; execute shell tools, `nvidia-smi`, NVCC, host compiler, `make`, and EX01; create and remove local records; no performance-counter access required |
+| Compilation evidence | Empty; a local successful build and host-only test do not automatically become Compile-Checked |
+| Runtime evidence | Pending Hardware Verification; this page has no run record |
+| Final decision | Write only `candidate-ready`, `candidate-incomplete`, or `candidate-rejected` |
+
+Build, hardware eligibility, compatibility, expected observations, recorded observations, and Evidence Status are six independent decisions. Success in any one cannot stand in for another or declare a Reference Environment.
+
+## Prerequisite check
+
+1. Complete [O03: Reading an Environment Manifest](/en/start/environment-manifest/) and keep GPU, compute capability, driver, Toolkit, components, compilers, OS, commands, and dates in separate fields.
+2. Complete [O08: Preparing a Reference Environment Candidate](/en/start/reference-environment-candidate/) and distinguish tier, compatibility, maintainer control, and the baseline declaration gate.
+3. Revisit the independent evidence axes in related [O02](/en/start/evidence-status/) and the literal-command, stdout, stderr, exit-status, UTC-timestamp, and hash discipline in [O05](/en/start/linux-command-line/).
+4. Select one Toolkit Lane and a dedicated record directory. It must be outside EX01 `build/` and created with private-by-default permissions.
+
+Without a GPU, you may still finish preparation, software capture, the build, and the host-only test. You must then stop at `candidate-incomplete` and must not fill CUDA-visible inventory or recorded observations.
+
+## Prepare the project and freeze the record
+
+[View the complete EX01 project at its pinned source commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5fa2284a3493fc1a51c6ccc5ba709be096e862b8/examples/ex01-environment-report), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5fa2284a3493fc1a51c6ccc5ba709be096e862b8.zip). This immutable acquisition coordinate binds the displayed ranges and build inputs to one source tree. Record the full commit SHA before entering the project directory:
+
+```sh
+git clone \
+  https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git rev-parse HEAD
+cd examples/ex01-environment-report
+```
+
+First create `manifest.md` with field names present and every observed-value cell empty. Reserve fields for source commit, Toolkit Lane, CUDART linkage, OS source path and fields, `uname` fields, loaded KMD, driver-supported CUDA API, Toolkit and components, NVCC, host compiler, build stages, visibility controls, NVIDIA-SMI inventory, EX01 inventory, identity reconciliation, tier, compatibility, candidate decision, UTC date, raw-log paths, and hashes. Empty means the schema is frozen without expected values filled in.
+
+Create `criteria.md` separately and declare before execution that:
+
+1. Every required command retains literal argv, separate stdout/stderr, exit status, and UTC start/finish; a nonzero status or missing field remains a blocker.
+2. The OS record follows `/etc/os-release` precedence and never merges the two `os-release` files.
+3. The specified EX01 build and host-only targets must complete and exit zero before the GPU run may continue, but this still grants no Compile-Checked status.
+4. The hardware stage must make exactly one selected device visible to EX01, every required CUDA query must succeed, and visibility plus any MIG boundary must be retained.
+5. The CUDA-visible identity must match the same capture's NVIDIA-SMI identity by UUID or PCI identity, never by ordinal or product name alone.
+6. Tier and compatibility are judged by their own rules, followed by exactly one of the three candidate decisions.
+
+Freeze the empty manifest and criteria, then make a working manifest that may receive observations:
+
+```sh
+umask 077
+: "${LAB01_RECORD_DIR:?set LAB01_RECORD_DIR}"
+record_dir="$LAB01_RECORD_DIR"
+mkdir -p -- \
+  "$record_dir/capture"
+cp -- \
+  "$record_dir/manifest.md" \
+  "$record_dir/manifest.pre-run.md"
+sha256sum -- \
+  "$record_dir/manifest.pre-run.md" \
+  "$record_dir/criteria.md" \
+  >"$record_dir/pre-run.sha256"
+```
+
+Put collection commands in a fixed script and preserve argument boundaries as NUL-separated argv. Each stage should call `date -u +%Y-%m-%dT%H:%M:%SZ` before and after execution, write stdout and stderr to separate files, and write `$?` immediately after the command. Shell history and xtrace are not literal commands, and a complete inherited environment is not a safe manifest. If command arguments, environment variables, or logs could contain credentials, change the collection design instead of relying on later deletion. Keep the raw record private and hash any publishable redacted copy separately.
+
+Canonical EX01 defines the boundary between observation and interpretation here:
+
+<CanonicalCode exampleId="EX01" range="observation-model" />
+
+## Capture host and software coordinates
+
+The systemd `os-release` contract gives `/etc/os-release` precedence. Use `/usr/lib/os-release` only when the former does not exist, and never merge the two. Save that selection logic as a literal script, execute it as a capture stage, and retain the selected path, resolved path, original file bytes, and exit status. Record the actual presence of at least `ID`, `ID_LIKE`, `VERSION_ID`, `VARIANT_ID`, and `PRETTY_NAME`; an absent optional field must remain absent.
+
+Then capture these separately, never using one to fill another:
+
+```sh
+uname -s -r -m
+cat /proc/driver/nvidia/version
+query_fields="name,uuid,pci.bus_id,driver_version"
+query_fields+=",memory.total,memory.free,compute_cap,mig.mode.current"
+nvidia-smi \
+  --query-gpu="$query_fields" \
+  --format=csv,noheader,nounits
+nvidia-smi --version
+nvcc --version
+c++ --version
+make --version
+cuobjdump --version
+```
+
+The kernel name, release, and machine from `uname` are separate fields and do not replace the distribution record. `/proc/driver/nvidia/version` and the selective NVIDIA-SMI query record the loaded driver, while a package name records only installed state. If the current driver does not support a selective field, retain the original command, stderr, and nonzero or unavailable result, then mark the gap under the predeclared rule instead of silently dropping the field.
+
+Also retain the resolved path of the active `nvcc`, the exact path selected by `HOST_CXX`, and Toolkit package/component records relevant to this assessment. NVIDIA-SMI's CUDA UMD value or legacy `CUDA Version` banner describes the API level supported by the driver, not the installed Toolkit. EX01 separately queries the driver-supported API and CUDA Runtime version. Keep NVCC, Runtime, libraries, and tools as component-specific versions rather than compressing them into one "CUDA version."
+
+This section captures host and software metadata only. It proves no build, CUDA-visible hardware, compatibility path, or Evidence Status.
+
+## Build EX01 and run the host-only test
+
+In the selected Lane's C++17 environment, preselect and record the CUDART linkage. The commands below use the canonical shared linkage and execute the two targets as separate capture stages:
+
+```sh
+make build DIALECT=c++17 CUDART=shared BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+```
+
+Retain each target's working directory, literal argv, UTC start/finish, stdout, stderr, exit status, and SHA-256 for generated artifacts. Preparation and both targets require no GPU. `host-test` checks only EX01's observation model and formatting/invariants; it cannot provide CUDA-visible inventory.
+
+If either target fails, retain the blocker and stop before the GPU run. Even when both succeed, this page and EX01 still have an empty compilation Evidence Status because no reviewed compile-evidence record currently binds the exact source, Lane, dialect, target, command, and build environment. A successful build also proves no hardware, compatibility, or runtime claim.
+
+## Capture CUDA-visible hardware inventory
+
+EX01 queries the driver-supported CUDA API and Runtime version separately:
+
+<CanonicalCode exampleId="EX01" range="version-query" />
+
+It then uses the CUDA Runtime to enumerate devices actually visible to the current process:
+
+<CanonicalCode exampleId="EX01" range="device-inventory" />
+
+Choose one device identifier from the NVIDIA-SMI capture. Prefer a full UUID. If you use a PCI bus ID or MIG identifier, retain the exact value in the private raw record. Set and record visibility explicitly, then run the binary as a capture stage:
+
+```sh
+env \
+  CUDA_DEVICE_ORDER=PCI_BUS_ID \
+  CUDA_VISIBLE_DEVICES="$selected_cuda_id" \
+  ./build/ex01-environment-report \
+  --format=json
+```
+
+Acceptance requires EX01 to emit one schema-version-`1` JSON document, exit zero, complete every required CUDA API call, report a visible count of `1`, and include the selected device's Runtime ordinal, name, UUID, PCI bus ID, compute capability, and total device memory. When a required observation is unavailable or reports an error, EX01 preserves valid JSON and exits with status `3`; that diagnostic remains a blocker, not success. Retain separate driver/runtime version fields and complete stderr. The existence of stdout is not success.
+
+EX01 launches no workload kernel and allocates no problem data, so this Lab's `maximumProblemMemoryBytes` is `0`. CUDA initialization may consume internal resources, which does not change the problem-memory contract. Infer no performance conclusion from execution time, free-memory changes, or command duration.
+
+## Reconcile CUDA and NVIDIA-SMI identities
+
+Keep the EX01 run and a time-adjacent selective query in one record, then reconcile them field by field:
+
+1. A CUDA Runtime ordinal is filtered and reordered by `CUDA_VISIBLE_DEVICES`; it is not automatically the NVIDIA-SMI index.
+2. Prefer UUID. EX01 encodes the 16 raw bytes as lowercase hexadecimal with two characters per byte and no separators. Normalize the NVIDIA-SMI UUID under that declared encoding before comparing bytes. When both sides expose PCI bus IDs, normalize domain, bus, device, and function format and use that as a second identity check.
+3. With MIG disabled, UUID and PCI identity should point to the same physical function. Product-name matching alone is insufficient.
+4. With MIG enabled, additionally retain `nvidia-smi -L` and the needed MIG inventory. A MIG instance UUID identifies the selected compute instance. Several instances can share their parent GPU's PCI bus ID, so PCI establishes only the parent relationship and cannot distinguish sibling instances.
+5. Container or device-node filtering, permission boundaries, and visibility settings can make EX01's set smaller than NVIDIA-SMI's set. Record that boundary instead of inventing missing devices.
+
+If UUID/PCI normalization still cannot produce one unique match, or the configuration changed between captures, mark reconciliation unresolved and choose `candidate-incomplete`. Never force a match from product name, memory size, or ordinal. Successful reconciliation establishes identity only; it proves no tier, compatibility, or correctness baseline.
+
+## Assign a GPU Capability Tier
+
+Use only the direct compute-capability query, selected visible-device memory, GPU count, required features, and permissions. Record the highest tier whose complete contract is met:
+
+- **Baseline GPU Capability Tier:** compute capability 7.5 or newer, exactly one usable selected GPU, and Stable Curriculum fundamental workloads constrained below 8 GB. EX01 itself needs 0 bytes of problem data, which says only that EX01 fits.
+- **Modern Single-GPU Capability Tier:** compute capability 8.0 or newer, at least 8 GB total memory on the selected CUDA-visible device, and the features and permissions required by the single-GPU route. For a selected MIG instance, assess its visible resources rather than borrowing the parent GPU's total memory.
+- **No tier:** compute capability below 7.5, a missing required fact, selected count other than one, or an unmet feature or permission gate. Never infer a missing value from the product name.
+
+When Modern applies, note that it also clears the Baseline capability floor, but write only the highest applicable tier in the final field. A tier is curriculum-route eligibility, not a runtime observation or Evidence Status.
+
+## Interpret compatibility separately
+
+Open the [O08 Compatibility Explorer](/en/start/reference-environment-candidate/#interpret-toolkit-and-driver-compatibility) separately from EX01. Enter the loaded KMD, driver-supported CUDA API, selected Toolkit Lane, installed Toolkit/component facts, target or PTX dependency, and forward-package eligibility and installation facts. Retain the inputs, source access date, and explorer outcome without merging them into EX01 stdout.
+
+The explorer's `documented-path` means only that owner documentation describes a path whose restrictions remain active. `not-documented` means the current coordinates have no documented path. `indeterminate` means a required input is missing. None executes a workload or proves a build, hardware inventory, runtime correctness, or Evidence Status.
+
+Do not copy an NVIDIA compatibility matrix or treat a driver floor as a paired driver or guaranteed runtime. Locate the applicable rule in the current NVIDIA owner page and retain its link, date, and restrictions. If the configuration changes, recapture affected fields, hashes, and the explorer result instead of carrying forward the old conclusion.
+
+## Make the candidate decision
+
+Choose exactly one final token:
+
+| Token | Use it when | Next action |
+| --- | --- | --- |
+| `candidate-ready` | Native Linux, complete manifest, successful build/host-test, one selected device that clears the hardware gate, successful EX01 capture, unique identity reconciliation, applicable tier, and `documented-path` all hold | Send the packet into the separate maintainer-control and baseline process; do not declare a Reference Environment |
+| `candidate-incomplete` | A required field, command, log, hash, GPU run, reconciliation, or tier is missing; build/run is blocked; or the explorer says `indeterminate` | Retain the blocker, collect the missing facts, and repeat from the affected stage |
+| `candidate-rejected` | The system is not native Linux, the selected GPU is below compute capability 7.5, or the exact configuration receives `not-documented` | Change the configuration and create a new candidate record; do not relabel the old packet as ready |
+
+`candidate-ready` means only that the LAB01 capture contract is complete. It is neither a Reference Environment declaration nor an Evidence Status. **No Reference Environment is currently declared.** Declaration additionally requires maintainer control and a baseline designated separately from the EX01 environment report. Before that baseline runs, record its source revision, commands, inputs, required API checks, correctness method, and explicit pass/fail criteria. Only a completely retained successful baseline run may enter later declaration review.
+
+## Keep observations and Evidence Status separate
+
+### Expected observations
+
+- A successful EX01 report should contain UTC, build, environment-variable, version, count, and per-visible-device observations in one JSON document.
+- The one selected CUDA-visible device should reconcile with NVIDIA-SMI by UUID or PCI identity after visibility controls and any MIG boundary are accounted for.
+
+These are pre-run structural expectations with no device values or sample output. Never rewrite them to fit an actual result.
+
+### Recorded observations
+
+This page's recorded observations are empty. Put your raw commands, stdout, stderr, exit statuses, UTC date, manifest, reconciliation, and decision in the external record instead of copying expected text into an observed-result field. Completing the Lab does not automatically add an observation to public-page metadata.
+
+### Evidence Status
+
+| Axis | Current site status | What cannot be inferred |
+| --- | --- | --- |
+| Compilation | Empty; no Compile-Checked status | A local successful build or host-test cannot upgrade the site's compilation status |
+| Runtime | Pending Hardware Verification | EX01's expected structure, a compatibility outcome, or a candidate token is not Runtime-Verified |
+| Recorded observations | Empty | Without a reviewed raw record, neither Community-Observed nor Runtime-Verified may be claimed |
+
+A complete learner or community record may be reviewed separately under O02, but it does not automatically change the site's status. Runtime-Verified can be considered only for a named subject that meets predeclared criteria in an already declared, maintainer-controlled Reference Environment. LAB01's environment inventory cannot replace the separately designated baseline.
+
+## Clean up and retain the record
+
+Clean build artifacts without deleting the record outside `build/`:
+
+```sh
+make clean BUILD_DIR=build
+```
+
+After every log is closed, generate final SHA-256 hashes over a fixed allowlist. Include at least `manifest.pre-run.md`, the filled `manifest.md`, `criteria.md`, capture scripts, every stage's argv/stdout/stderr/exit/timestamps, source commit, reconciliation, and candidate decision. Do not include `SHA256SUMS` in itself. Verify with `sha256sum -c` and retain that command's exit status.
+
+The raw packet can contain sensitive device identity needed for reconciliation and belongs in controlled storage. For publication, create a redacted copy that removes credentials, network identity, real UUIDs, and unnecessary paths, then hash the redacted bytes separately. Never edit the raw files while continuing to cite their old hashes. Do not submit binaries, build directories, complete environment dumps, performance figures, or unreviewed large artifacts.
+
+## Sources and review
+
+OS precedence follows the versioned systemd 261.2 [`os-release`](https://github.com/systemd/systemd/blob/v261.2/man/os-release.xml) owner source. Command capture, UTC date, `uname`, path, and SHA-2 behavior were checked against [GNU Bash 5.3](https://www.gnu.org/software/bash/manual/bash.html), [GNU Coreutils 9.11](https://www.gnu.org/software/coreutils/manual/coreutils.html), and [GNU Make 4.4.1](https://www.gnu.org/software/make/manual/make.html).
+
+CUDA-visible enumeration and `CUDA_VISIBLE_DEVICES` follow the CUDA Programming Guide v13.3 [CUDA Environment Variables](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/environment-variables.html). Direct compute capability, Runtime device/version queries, and selective inventory follow [Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability), CUDA Runtime API 13.3.1 [Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html) and [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html), and the current [NVIDIA-SMI owner documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html). The build/run phase boundary follows [NVCC supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases).
+
+Toolkit release identities and compatibility interpretation follow the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive), [CUDA 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html), [Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html), [Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html), and [Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html). This page copies no owner table.
+
+**Fact-check date: 2026-08-26.** The Lab workflow, criteria, and decision language are original under CC BY 4.0. This page contains no sample command output, performance figure, owner table, real machine identity, or recorded observation. Runtime remains Pending Hardware Verification, and no Reference Environment is currently declared.

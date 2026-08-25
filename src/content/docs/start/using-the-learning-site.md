@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,6 +20,11 @@ prerequisites: []
 relatedUnits:
   - O02
   - O03
+  - O04
+  - O05
+  - O06
+  - O07
+  - O08
 evidence:
   compilation: []
   runtime: []
@@ -33,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-25'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -49,7 +54,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: none }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:evidence-compilation', content: none }
   - tag: meta
@@ -91,14 +96,21 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-截至 **2026-08-25**，完整的先修关系是：
+截至 **2026-08-26**，完整发布的严格先修关系是：
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
-3. 完成 O01 后，可以分别进入 [O02：诚实记录证据状态](/start/evidence-status/)和 [O03：读懂环境清单](/start/environment-manifest/)，学习证据状态（Evidence Status）和环境清单（Environment Manifest）。
-4. 完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)，再在原生 Linux CUDA 环境中完成 [LAB02](/labs/vector-addition/)。
+3. [O02：诚实记录证据状态](/start/evidence-status/)、[O03：读懂环境清单](/start/environment-manifest/)、[O04：面向 CUDA 学习者的 C++17 复习](/start/cpp17-for-cuda/)、[O05：可复现的 Linux 命令行工作](/start/linux-command-line/)和 [O06：架构回顾](/start/architecture-refresher/)都直接依赖 O01。
+4. [O07：GPU 为什么变得可编程](/start/programmable-gpus/)只依赖 O06。
+5. [O08：准备基准环境候选配置](/start/reference-environment-candidate/)同时依赖 O02、O03 和 O05。
+6. [EX01 环境报告可运行示例](/examples/environment-report/)没有严格学习单元先修条件；[LAB01：记录并解读 CUDA 环境](/labs/record-cuda-environment/)同时依赖 O03 和 O08，并使用 EX01。
+7. 现有 kernel 路线仍在完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)，再进入 [LAB02](/labs/vector-addition/)；这条路线使用 canonical [EX02](/examples/vector-addition/)。
 
-O02、O03 和 F01 各有练习与独立参考解答；[EX02 向量加法可运行示例](/examples/vector-addition/)是 F01/LAB02 唯一 canonical source，并公开构建契约和独立编译/运行证据边界。[实验索引](/labs/)保留先修顺序并提供直接查找；[可视化讲解索引](/visuals/)收录 VIS01 kernel 路径与 VIS02 索引的确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)当前包含五道链接回 O02、O03 和 F01 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
+下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01/EX02 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于 F01。这些建议不增加上面没有列出的先修边。
+
+O04-O08 都有直接练习和独立参考解答：[O04 练习](/start/cpp17-for-cuda/exercises/)与[解答](/start/cpp17-for-cuda/solutions/)、[O05 练习](/start/linux-command-line/exercises/)与[解答](/start/linux-command-line/solutions/)、[O06 练习](/start/architecture-refresher/exercises/)与[解答](/start/architecture-refresher/solutions/)、[O07 练习](/start/programmable-gpus/exercises/)与[解答](/start/programmable-gpus/solutions/)、[O08 练习](/start/reference-environment-candidate/exercises/)与[解答](/start/reference-environment-candidate/solutions/)。O02、O03 和 F01 也保留各自的练习与独立解答。
+
+[实验索引](/labs/)按先修顺序列出 LAB01 和 LAB02；[可视化讲解索引](/visuals/)收录 VIS01 kernel 路径与 VIS02 索引的确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)收录十道链接回 O02-O08 和 F01 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
 
 ## 三种视觉主题，一套内容
 
@@ -138,4 +150,4 @@ O02、O03 和 F01 各有练习与独立参考解答；[EX02 向量加法可运�
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**事实核查日期：2026-08-25。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**事实核查日期：2026-08-26。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

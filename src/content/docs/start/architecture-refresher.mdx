@@ -1,0 +1,217 @@
+---
+title: 'O06：架构回顾：速率、延迟与数据移动'
+description: 用明确的路径、单位和边界区分延迟、吞吐量、带宽、并发与运算强度。
+pairId: o06
+counterpart: /en/start/architecture-refresher/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - latency-throughput
+  - memory
+  - bandwidth
+  - concurrency
+  - intensity
+  - comparison
+  - visual
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O06
+prerequisites:
+  - O01
+relatedUnits:
+  - O07
+  - F01
+  - VIS01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Introduction'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable heterogeneous systems'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA kernel hardware model'
+    accessDate: '2026-08-26'
+  - title: 'CUDA C++ Best Practices Guide - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA memory performance metrics'
+    accessDate: '2026-08-26'
+  - title: 'CUDA C++ Best Practices Guide - Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA execution configuration'
+    accessDate: '2026-08-26'
+  - title: 'Roofline: An Insightful Visual Performance Model for Floating-Point Programs and Multicore Architectures'
+    url: 'https://www.osti.gov/biblio/1407078'
+    version: '2009 technical report; OSTI ID 1407078; DOI 10.2172/1407078'
+    platform: 'Architecture-independent performance model'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'NVIDIA Nsight Compute UI and CLI'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,latency-throughput,memory,bandwidth,concurrency,intensity,comparison,visual,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O07,F01,VIS01' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2009,2026.2.1' }
+---
+
+import OrientationVisual from '../../../components/OrientationVisual.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/start/architecture-refresher/" lang="en">Read the English counterpart</a>
+
+这个学习单元（Learning Unit）用三个坐标建立架构直觉：一个事件要等多久，一段时间能完成多少工作，以及数据沿哪条路径移动。延迟（latency）、吞吐量（throughput）、带宽（bandwidth）、并发（concurrency）和算术强度（arithmetic intensity）相互关联，但不能互相替代。页面只做静态推理，不需要 GPU，也不记录 CUDA 运行或性能证据。
+
+## 学完本单元，你应该能
+
+- 用对象、起止边界和单位定义 latency，用工作量、时间窗口和单位定义 throughput。
+- 区分 cache 与 shared memory，并解释 ready warp 怎样隐藏等待而不降低被等待操作的 latency。
+- 为 theoretical、effective 和 actual bandwidth 写出明确的数据路径、方向、字节口径和时间边界。
+- 分开 resident work、occupancy、concurrent kernels、stream 以及 copy/compute 和 CPU/GPU overlap。
+- 在声明操作计数与内存边界后计算 intensity，并把 Roofline 结论限制为模型上界。
+
+## 先修关系
+
+唯一先修是 [O01：如何使用学习站](/start/using-the-learning-site/)。O07、[F01](/foundations/first-cuda-kernel/)和 [VIS01](/visuals/kernel-journey/)是相关内容，不是 O06 的额外先修。O06 没有硬件门槛（hardware gate），也不授予证据状态（Evidence Status）。
+
+## 延迟与吞吐量
+
+**Latency 描述一个指定事件从起点到终点经过的时间。** 例如，可以测一条 load 指令从发出到其结果可用，也可以测一次 kernel 从记录的开始事件到记录的结束事件。两者边界不同，不能只写“延迟”。常见单位是 ns、us 或 ms，单位必须跟着数字。
+
+**Throughput 描述一个时间窗口内完成工作的速率。** 分子可以是 request、item、instruction、operation 或 byte，分母是时间，因此单位可以是 items/s、operations/s 或 bytes/s。一个系统可以通过让更多独立工作同时推进来提高 aggregate throughput，而单个操作的 latency 保持不变。反过来，缩短一个操作的 latency 也不保证整个系统的 throughput 提高，因为队列、依赖关系或其他资源可能成为限制。
+
+GPU 常用延迟隐藏（latency hiding）维持 aggregate progress。一个 warp 等待内存结果时，warp scheduler 可以选择输入已就绪且执行资源可用的就绪 warp（ready warp）发出下一条指令。这里被隐藏的是等待对整体发出速率的影响，不是那条内存操作本身的 latency。没有 ready warp、依赖尚未解决或目标 pipeline 忙时，调度器仍可能无法发出指令。
+
+## 内存层级
+
+内存层级（memory hierarchy）不是一句“越近越快”就能完整描述的单线阶梯。CUDA 程序可能涉及主机内存（host memory）、host/device interconnect、设备 DRAM 中的全局内存（global memory）、全 GPU 共享的 L2 cache、每个 SM 的 L1 cache、寄存器（register）和共享内存（shared memory）。一次访问是否命中 cache、由谁共享数据、数据是否复用以及实际跨过哪一层，都会改变解释。
+
+高速缓存（cache）由硬件根据访问和局部性管理。程序发出 global-memory load 时，cache 可能满足请求，也可能把请求继续送往下一层。Shared memory 则是程序显式分配、寻址并协调的 block 级存储，常用于 thread 之间交换或复用数据。它不是“手动控制的 L1 cache”。在许多架构上，L1 与 shared memory 使用同一个 unified data cache 的物理资源，但二者的编程语义、可见范围和资源分配仍然不同。
+
+寄存器通常保存 thread 私有状态。名称中的 local memory 也是常见陷阱：它在语义上属于单个 thread，却通常位于 device memory 路径并经过 cache，不等于片上 register。讨论任何“内存速度”之前，先命名 address space、命中层级、访问方向和 sharing scope。
+
+## 带宽必须有路径和单位
+
+Bandwidth 是数据传输速率，至少需要写成“源端点到目标端点、方向、字节数口径、时间区间、单位”。`host memory -> interconnect -> device memory` 与 `device DRAM <-> SM` 是不同路径；read、write 和双向合计也不是同一个分子。
+
+- **理论带宽（theoretical bandwidth）** 是根据声明接口的时钟、传输倍率和总线宽度等规格推导出的 peak ceiling。它没有计时某个 workload，也不能直接当作应用结果。
+- **有效带宽（effective bandwidth）** 用 workload 请求的有用字节除以明确的 elapsed time。若一次活动请求读取 `B_r` byte、写入 `B_w` byte，则定义可以写成 `(B_r + B_w) / t`。必须说明哪些访问计入“有用”，以及这些 byte 针对哪条路径。
+- **实际带宽（actual bandwidth）** 用 profiler 在某个命名硬件接口上归属的实际传输 byte 除以采集区间。Transaction granularity、额外 segment、writeback 和其他 traffic 可能使它不同于 requested/effective bandwidth。Metric 名称和采集 domain 决定它到底观察哪一层。
+
+`GB/s` 通常使用十进制 `10^9 bytes/s`，`GiB/s` 使用二进制 `2^30 bytes/s`。还要分清 bit 与 byte。只有路径、方向、时间和单位口径一致时，theoretical、effective 与 actual bandwidth 的比较才有意义；cache reuse 也可能让某个逻辑 effective rate 超过另一条物理路径的 ceiling，而不构成矛盾。
+
+## 并发不是一个概念
+
+下面这些词回答不同问题，不能用一个“并行了”代替：
+
+- **驻留工作（resident work）** 指 block 或 warp 的执行状态与 register、shared-memory 等资源已分配到 SM。驻留不表示每个 warp 在同一 cycle 发出指令。
+- **占用率（occupancy）** 通常是每个 SM 的 active warp 数与硬件允许的最大 active warp 数之比。Register、shared memory、block size 和架构上限共同限制它。更高 occupancy 可以增加可供调度的 warp，但不是更高 throughput 或更短 runtime 的保证。
+- **并发 kernel（concurrent kernels）** 指来自多个 kernel launch 的工作在时间上重叠。多个 resident block 可能都来自同一个 kernel；多个 kernel 已提交也可能因依赖或资源竞争而串行。
+- **流（stream）** 定义一条有序操作序列。同一 stream 内的操作按顺序建立依赖；不同 stream 可以让独立工作具备重叠资格，但 stream 数量本身不证明实际 concurrent execution。
+- **复制与计算重叠（copy/compute overlap）** 还需要异步 copy、正确的 stream 与 dependency 布局、合适的 host-memory 属性、可用 copy engine 和设备能力。一个名字带 `Async` 的 API 只说明特定异步语义，不是 overlap 观察。
+- **CPU/GPU 重叠（CPU/GPU overlap）** 指 host 与 device 在同一时间区间各自推进工作。Host 在 GPU kernel 执行时准备下一批输入就是这个类别，即使 GPU 上只有一个 kernel。
+
+因此，一张 timeline 可以证明某次执行发生了重叠；源码结构通常只能说明重叠有可能发生。本页没有 timeline，也不声称发生过 overlap。
+
+## 算术强度与操作强度
+
+算术强度（arithmetic intensity）是已声明 arithmetic-operation count 与某个已声明内存边界所传输 byte 的比值，单位是 operations/byte：
+
+```text
+work = counted operations
+traffic = bytes crossing the declared memory boundary
+I = work / traffic
+```
+
+操作强度（operational intensity）是 2009 Roofline 原始工作使用的更广术语，通常把执行的 operation 与经过 cache 过滤后到 DRAM 的 traffic 联系起来。Nsight Compute 的 Roofline chart 使用 Arithmetic Intensity 一词。只有 operation 计数规则、memory level、read/write 口径和 workload 范围一致时，两种说法才能直接比较。
+
+令 `P` 表示模型化运算速率（modeled operation rate），`P_compute` 表示计算上限（compute ceiling），`B_path` 表示已声明路径的带宽上限（bandwidth ceiling）。一个简化 Roofline 模型可以写成：
+
+```text
+P <= min(P_compute, I * B_path)
+```
+
+当 `I * B_path` 低于 compute ceiling 时，模型把工作放在**相对于这条 path 与这些 ceiling 的内存受限（memory-bound）区域**。这不是“所有等待都来自 DRAM”的诊断，也不是实际性能预测。低并行度、memory latency、instruction issue、dependency、imbalance、cache 行为、operation mix、launch、同步、host/device transfer 和端到端软件开销都可能让 achieved performance 低于 roof。换一条 memory boundary 或计数规则，`I` 和结论也会变化。
+
+## CPU 与 GPU 的设计侧重
+
+CPU 和 GPU 都有 parallel execution、cache、memory hierarchy 以及各自的 vector 或 SIMT 机制，所以不能把它们写成“串行处理器”和“并行处理器”的简单对立。常见 CPU 设计更侧重少量 thread 的 latency、复杂 control flow 和大容量 cache；常见 GPU 设计更侧重大量轻量 thread 的 aggregate throughput、SIMT execution 和用 ready work 隐藏等待。
+
+这是一组设计侧重，不是等价关系，也不是“GPU 总是更快”的结论。Workload 的 parallelism、branch behavior、data locality、problem size、precision、library implementation、data movement 和比较边界共同决定结果。异构程序常让 CPU 负责 control 与 latency-sensitive work，让 GPU 负责合适的 data-parallel work，但具体划分必须测量而不能从标签推断。
+
+## 可视化模型
+
+下面的静态图连接 request latency、aggregate throughput、memory path、resident warp 和 overlap 边界。阅读每张卡片时，分别指出对象、路径、时间窗口和不保证的结论。本图不执行 CUDA，不复制 owner figure，也不是 profiler timeline。
+
+<OrientationVisual kind='architecture' locale='zh-CN' />
+
+需要把 block、warp、SM、memory transaction 和 completion boundary 放进一条执行路径时，再打开 [VIS01](/visuals/kernel-journey/)。VIS01 与本图都不能产生运行或性能证据。
+
+## 离开前检查
+
+1. 为什么一个系统的 throughput 可以提高，而单个 request 的 latency 不变？
+2. Cache 与 shared memory 的管理方式有什么不同，ready warp 又为什么没有降低 memory latency？
+3. 一条可比较的 bandwidth 声明必须给出哪些路径、方向、byte、时间与单位坐标？
+4. Resident work、occupancy、concurrent kernels、streams、copy/compute overlap 和 CPU/GPU overlap 分别回答什么问题？
+5. Arithmetic 或 operational intensity 在什么条件下支持 memory-bound 上界，Roofline 又忽略了哪些限制？
+
+## 继续练习
+
+- 完成 [O06 练习（Exercise）](/start/architecture-refresher/exercises/)，再查看独立的[参考解答](/start/architecture-refresher/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-003](/practice/#pb-r1-003)中复核一份混合 latency、bandwidth 与 concurrency 的性能声明。
+- 继续使用 [F01](/foundations/first-cuda-kernel/)和 [VIS01](/visuals/kernel-journey/)把这些边界应用到具体 kernel 路径；O07 将沿用 O06 的术语合同。
+
+## 来源与复核
+
+- CUDA Programming Guide v13.3 的 [Introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html)用于核对 CPU/GPU design emphasis。
+- 同版本 [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html)用于核对 host/device、SM、cache、global memory 和 shared memory 边界。
+- 同版本 [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)用于核对 resident warp、ready-warp scheduling 与 latency hiding。
+- CUDA C++ Best Practices Guide v13.3 的 [Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)与 [Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy)用于核对三类 bandwidth 和 occupancy 限制。
+- Williams、Waterman 与 Patterson 的 2009 [Roofline primary technical report](https://www.osti.gov/biblio/1407078)，OSTI ID 1407078、DOI `10.2172/1407078`，用于 operational-intensity 上界与限制。
+- [NVIDIA Nsight Compute Profiling Guide 2026.2.1](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)用于核对 metric domain、occupancy、scheduler state 与 Roofline chart 术语。
+
+**事实核查日期：2026-08-26。** 页面文字、公式编排和可视化说明均为原创；没有复制外部 table、figure 或 performance value。本页不需要硬件，没有编译或运行 Evidence Status，也没有 recorded observation。

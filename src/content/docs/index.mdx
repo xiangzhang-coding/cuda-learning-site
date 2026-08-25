@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-25'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,9 @@ head:
 
 ## 当前发布路线
 
-当前稳定入口是 **首页 → O01 → O03 → F01：从预测到第一个 CUDA kernel → LAB02：运行并验证向量加法**。O02 提供贯穿路线的证据状态（Evidence Status）合同，EX02 是 F01/LAB02 共享的 canonical 可运行示例（Runnable Example），VIS01/VIS02 提供 kernel 路径与索引可视化讲解（Visual Explainer）。学习单元（Learning Unit）配有练习（Exercise）和独立解答；实验、练习题库（Practice Bank）、可视化讲解、术语和来源都提供直接索引。路线不会用空页面代替尚未完成的材料。
+稳定课程（Stable Curriculum）的 O01-O08 导学部分已经完整发布。严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。LAB01 同时依赖 O03 和 O08，并使用 EX01 环境报告可运行示例（Runnable Example）。EX01 没有编译已检查（Compile-Checked）声明，EX01 和 LAB01 的运行轴均为待硬件验证（Pending Hardware Verification）。原有 kernel 路线仍由 O03 进入 F01，再到 LAB02；EX02 仍是 F01/LAB02 共享的 canonical source。
+
+O04-O08 都提供完整练习（Exercise）和独立参考解答：[O04 练习](/start/cpp17-for-cuda/exercises/)与[解答](/start/cpp17-for-cuda/solutions/)、[O05 练习](/start/linux-command-line/exercises/)与[解答](/start/linux-command-line/solutions/)、[O06 练习](/start/architecture-refresher/exercises/)与[解答](/start/architecture-refresher/solutions/)、[O07 练习](/start/programmable-gpus/exercises/)与[解答](/start/programmable-gpus/solutions/)、[O08 练习](/start/reference-environment-candidate/exercises/)与[解答](/start/reference-environment-candidate/solutions/)。实验（Lab）、练习题库（Practice Bank）、可视化讲解（Visual Explainer）、术语和来源也提供直接索引。路线不会用空页面代替尚未完成的材料。
 
 ## 边界先说清
 
@@ -70,15 +72,50 @@ head:
     <strong>读懂环境清单</strong>
     <small>分开硬件、软件、工作负载和测量坐标。</small>
   </a>
+  <a className="route-card" href="/start/cpp17-for-cuda/">
+    <span>O04 · C++17</span>
+    <strong>面向 CUDA 学习者的 C++17 复习</strong>
+    <small>补齐生命周期、所有权、模板、错误与构建边界。</small>
+  </a>
+  <a className="route-card" href="/start/linux-command-line/">
+    <span>O05 · NATIVE LINUX</span>
+    <strong>可复现的 Linux 命令行工作</strong>
+    <small>明确路径、阶段、进程快照、日志和复现记录。</small>
+  </a>
+  <a className="route-card" href="/start/architecture-refresher/">
+    <span>O06 · ARCHITECTURE</span>
+    <strong>架构回顾：速率、延迟与数据移动</strong>
+    <small>分清 latency、throughput、bandwidth、concurrency 与 intensity。</small>
+  </a>
+  <a className="route-card" href="/start/programmable-gpus/">
+    <span>O07 · PROGRAMMABILITY</span>
+    <strong>GPU 为什么变得可编程</strong>
+    <small>从固定图形阶段走到通用 kernel 模型，同时保留真实边界。</small>
+  </a>
+  <a className="route-card" href="/start/reference-environment-candidate/">
+    <span>O08 · CANDIDATE</span>
+    <strong>准备基准环境候选配置</strong>
+    <small>核对 manifest、tier、compatibility、控制与 baseline 门槛。</small>
+  </a>
   <a className="route-card" href="/foundations/first-cuda-kernel/">
     <span>F01 · FIRST KERNEL</span>
     <strong>从预测到第一个 CUDA kernel</strong>
     <small>先算 thread 索引，再理解实现、正确性和测量边界。</small>
   </a>
+  <a className="route-card" href="/examples/environment-report/">
+    <span>EX01 · ENVIRONMENT REPORT</span>
+    <strong>环境报告可运行示例</strong>
+    <small>读取结构化观察，但不把报告当作基准环境声明。</small>
+  </a>
   <a className="route-card" href="/examples/vector-addition/">
     <span>EX02 · CANONICAL SOURCE</span>
     <strong>向量加法可运行示例</strong>
     <small>获取唯一规范源码、构建合同和独立证据。</small>
+  </a>
+  <a className="route-card" href="/labs/record-cuda-environment/">
+    <span>LAB01 · CAPTURE</span>
+    <strong>记录并解读 CUDA 环境</strong>
+    <small>在原生 Linux 上采集并核对候选记录，运行仍待硬件验证。</small>
   </a>
   <a className="route-card" href="/labs/vector-addition/">
     <span>LAB02 · VERIFY</span>
@@ -108,7 +145,7 @@ head:
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用五道原创题迁移证据、环境和第一个 kernel 的判断方法。</small>
+    <small>用十道原创题迁移证据、环境、C++、Linux、架构和 kernel 判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>

@@ -26,6 +26,10 @@ export const RESOURCE_TYPES = [
   'kernel-vocabulary',
   'publishing-interface',
   'cuda-version-record',
+  'cpp-language-record',
+  'linux-tool-record',
+  'architecture-record',
+  'historical-record',
 ] as const;
 export type ResourceType = (typeof RESOURCE_TYPES)[number];
 
@@ -84,15 +88,51 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'O03：读懂环境清单', en: 'O03: Reading an Environment Manifest' },
     prerequisites: ['O01'],
   },
+  O04: {
+    href: { 'zh-CN': '/start/cpp17-for-cuda/', en: '/en/start/cpp17-for-cuda/' },
+    title: { 'zh-CN': 'O04：面向 CUDA 学习者的 C++17 复习', en: 'O04: C++17 Refresher for CUDA Learners' },
+    prerequisites: ['O01'],
+  },
+  O05: {
+    href: { 'zh-CN': '/start/linux-command-line/', en: '/en/start/linux-command-line/' },
+    title: { 'zh-CN': 'O05：可复现的 Linux 命令行工作', en: 'O05: Reproducible Linux Command-Line Work' },
+    prerequisites: ['O01'],
+  },
+  O06: {
+    href: { 'zh-CN': '/start/architecture-refresher/', en: '/en/start/architecture-refresher/' },
+    title: { 'zh-CN': 'O06：架构回顾：速率、延迟与数据移动', en: 'O06: Architecture Refresher: Rate, Delay, and Data Movement' },
+    prerequisites: ['O01'],
+  },
+  O07: {
+    href: { 'zh-CN': '/start/programmable-gpus/', en: '/en/start/programmable-gpus/' },
+    title: { 'zh-CN': 'O07：GPU 为什么变得可编程', en: 'O07: Why GPUs Became Programmable' },
+    prerequisites: ['O06'],
+  },
+  O08: {
+    href: { 'zh-CN': '/start/reference-environment-candidate/', en: '/en/start/reference-environment-candidate/' },
+    title: { 'zh-CN': 'O08：准备基准环境候选配置', en: 'O08: Preparing a Reference Environment Candidate' },
+    prerequisites: ['O02', 'O03', 'O05'],
+  },
   F01: {
     href: { 'zh-CN': '/foundations/first-cuda-kernel/', en: '/en/foundations/first-cuda-kernel/' },
     title: { 'zh-CN': 'F01：从预测到第一个 CUDA kernel', en: 'F01: From Prediction to a First CUDA Kernel' },
     prerequisites: ['O03'],
   },
+  EX01: {
+    href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
+    title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
+    prerequisites: [],
+  },
   EX02: {
     href: { 'zh-CN': '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     title: { 'zh-CN': 'EX02：向量加法可运行示例', en: 'EX02: Vector Addition Runnable Example' },
     prerequisites: [],
+  },
+  LAB01: {
+    href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
+    title: { 'zh-CN': 'LAB01：记录并解读 CUDA 环境', en: 'LAB01: Record and Interpret a CUDA Environment' },
+    prerequisites: ['O03', 'O08'],
+    indexGroup: 'labs',
   },
   LAB02: {
     href: { 'zh-CN': '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
@@ -115,14 +155,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
 };
 
 export const MAX_REVIEW_AGE_DAYS = 180;
+export const REVIEW_DATE_TIME_ZONE = 'Asia/Shanghai';
 
 const MILLISECONDS_PER_DAY = 86_400_000;
+const reviewDateFormatter = new Intl.DateTimeFormat('en', {
+  timeZone: REVIEW_DATE_TIME_ZONE,
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+});
 const planningIdPatterns: Readonly<Record<IndexGroup, RegExp>> = {
   labs: /^LAB\d{2}$/,
   practice: /^PB-R\d+-\d{3}$/,
   visuals: /^VIS\d{2}$/,
   glossary: /^TERM-\d{3}$/,
-  sources: /^SRC-(?:WEB|CUDA)-\d{3}$/,
+  sources: /^SRC-(?:WEB|CUDA|CPP|LINUX|ARCH|HIST)-\d{3}$/,
 };
 const compilationStatuses = new Set<string>(COMPILATION_EVIDENCE_STATUSES);
 const runtimeStatuses = new Set<string>(RUNTIME_EVIDENCE_STATUSES);
@@ -145,7 +192,13 @@ function dateIssues(label: string, value: string, asOf: Date, maximumAgeDays: nu
   const issues: string[] = [];
   const date = parseIsoDate(value);
   if (!date) return [`${label} must be a real ISO date.`];
-  const age = Math.floor((Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth(), asOf.getUTCDate()) - date.valueOf()) / MILLISECONDS_PER_DAY);
+  const parts = Object.fromEntries(
+    reviewDateFormatter.formatToParts(asOf)
+      .filter(({ type }) => type === 'year' || type === 'month' || type === 'day')
+      .map(({ type, value: part }) => [type, Number(part)]),
+  );
+  const reviewDate = Date.UTC(parts.year, parts.month - 1, parts.day);
+  const age = Math.floor((reviewDate - date.valueOf()) / MILLISECONDS_PER_DAY);
   if (age < 0) issues.push(`${label} must not be in the future.`);
   if (age > maximumAgeDays) issues.push(`${label} is stale (${age} days old; maximum ${maximumAgeDays}).`);
   return issues;

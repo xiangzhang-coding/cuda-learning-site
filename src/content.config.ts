@@ -32,7 +32,7 @@ export const publicationMetadata = z
     difficulty: z.enum(['introductory', 'intermediate', 'advanced']).optional(),
     toolkitLanes: z.array(z.string().regex(/^cuda-\d+\.\d+$/)).optional(),
     minimumComputeCapability: z.string().regex(/^\d+\.\d+$/).optional(),
-    maximumProblemMemoryBytes: z.number().int().positive().optional(),
+    maximumProblemMemoryBytes: z.number().int().nonnegative().optional(),
     gpuCount: z.number().int().positive().optional(),
     permissions: z.array(z.string().min(1)).optional(),
     evidence: evidenceMetadataSchema.optional(),

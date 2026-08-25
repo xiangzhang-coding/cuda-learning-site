@@ -88,6 +88,42 @@ async function passingEx02Record(root = projectRoot) {
 }
 
 describe('canonical Runnable Example resolver', () => {
+  it('loads EX01 as one C++17 query project with no borrowed evidence', async () => {
+    const example = await loadCanonicalExample(projectRoot, 'EX01');
+
+    expect(example).toMatchObject({
+      id: 'EX01',
+      root: 'examples/ex01-environment-report',
+      build: {
+        standard: 'c++17',
+        stages: ['preprocess', 'compile', 'link'],
+      },
+      compatibility: { target: [] },
+      evidence: {
+        compilation: [],
+        runtime: 'Pending Hardware Verification',
+        recordedObservations: [],
+      },
+    });
+    expect(example.compatibility.lanes.map((lane) => lane.toolkit)).toEqual(['11.8.0', '12.9.2', '13.3.1']);
+    await expect(validateCanonicalExample(projectRoot, 'EX01')).resolves.toEqual([]);
+    await expect(loadCompileEvidence(projectRoot, 'EX01')).resolves.toEqual([]);
+    await expect(hashCanonicalBuildContract(projectRoot, 'EX01')).resolves.toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('returns EX01 observation ranges without exposing a kernel implementation', async () => {
+    const model = await readCanonicalRange(projectRoot, 'EX01', 'observation-model');
+    const versions = await readCanonicalRange(projectRoot, 'EX01', 'version-query');
+    const inventory = await readCanonicalRange(projectRoot, 'EX01', 'device-inventory');
+
+    expect(model.code).toContain('struct Observation');
+    expect(versions.code).toContain('cudaDriverGetVersion');
+    expect(versions.code).toContain('cudaRuntimeGetVersion');
+    expect(inventory.code).toContain('cudaGetDeviceCount');
+    expect(inventory.code).toContain('cudaDevAttrComputeCapabilityMajor');
+    expect([model.code, versions.code, inventory.code].join('\n')).not.toMatch(/__global__|<<</);
+  });
+
   it('loads EX02 as one C++17 project shared by every Toolkit Lane', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX02');
 
