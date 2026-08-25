@@ -3,7 +3,7 @@ title: 'O03：读懂环境清单'
 description: 分开记录硬件、软件、工作负载和测量坐标，判断一条 CUDA 证据能说明什么。
 pairId: o03
 counterpart: /en/start/environment-manifest/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -24,6 +24,9 @@ prerequisites:
   - O01
 relatedUnits:
   - O02
+  - EX01
+  - O08
+  - LAB01
   - F01
   - LAB02
 exampleIds:
@@ -40,47 +43,47 @@ sources:
     url: 'https://developer.nvidia.com/cuda-toolkit-archive'
     version: '11.8.0, 12.9.2, and 13.3.1 release identities'
     platform: 'All published platforms'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Toolkit 11.8.0 Release Notes
     url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
     version: '11.8.0'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Toolkit 12.9 Update 2 Release Notes
     url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html'
     version: '12.9.2'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Toolkit 13.3 Update 1 Release Notes
     url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
     version: '13.3.1'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Installation Guide for Linux 12.9
     url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#supported-c-dialects'
     version: '12.9.2'
     platform: 'Ubuntu 24.04 x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Installation Guide for Linux 13.3
     url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#supported-c-dialects'
     version: '13.3.1'
     platform: 'Ubuntu 24.04 x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Minor Version Compatibility
     url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
-    version: 'Current on 2026-08-24'
+    version: 'Current on 2026-08-26'
     platform: 'Linux x86_64'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
   - title: CUDA Programming Guide - Compute Capabilities
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
     version: '13.3.1'
     platform: 'CUDA-capable GPUs'
-    accessDate: '2026-08-24'
+    accessDate: '2026-08-26'
 head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: o03 }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -92,7 +95,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: O01 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,F01,LAB02' }
+    attrs: { name: 'cuda:related-units', content: 'O02,EX01,O08,LAB01,F01,LAB02' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: 'O03-MANIFEST-TEMPLATE,O03-INCOMPLETE-A' }
   - tag: meta
@@ -204,10 +207,12 @@ Ubuntu 24.04 x86-64 加 CUDA 13.3.1 目前只是候选软件坐标；它没有 G
 
 - 完成 [O03 练习（Exercise）](/start/environment-manifest/exercises/)，再查看独立的[参考解答](/start/environment-manifest/solutions/)。
 - 在[练习题库（Practice Bank）](/practice/)完成 PB-R0-002，修复一份不完整 manifest 和错误支持边界。
-- 继续到 [F01](/foundations/first-cuda-kernel/)，并在进入 [LAB02](/labs/vector-addition/)前把本页字段准备成真实记录模板。
+- 打开 [EX01 环境报告可运行示例](/examples/environment-report/)，理解它能采集哪些结构化观察，以及它不能替代哪些 manifest 字段。
+- 完成 O02、O03 和 O05 后进入 [O08](/start/reference-environment-candidate/)；同时具备 O03 和 O08 后，再用 [LAB01](/labs/record-cuda-environment/)采集并解释候选配置。
+- kernel 路线仍可继续到 [F01](/foundations/first-cuda-kernel/)，并在进入 [LAB02](/labs/vector-addition/)前把本页字段准备成真实记录模板。
 
 ## 来源与复核
 
-Toolkit、组件、paired driver、Linux 资格和方言来自 NVIDIA 的精确版本发布说明与安装指南；驱动 floor 来自 CUDA Compatibility，compute capability 来自 CUDA Programming Guide。所有链接、版本和平台坐标记录在[来源与版本记录](/sources-and-versions/)，并于 **2026-08-24** 重新打开。
+Toolkit、组件、paired driver、Linux 资格和方言来自 NVIDIA 的精确版本发布说明与安装指南；驱动 floor 来自 CUDA Compatibility，compute capability 来自 CUDA Programming Guide。所有链接、版本和平台坐标记录在[来源与版本记录](/sources-and-versions/)，并于 **2026-08-26** 重新打开。
 
-**事实核查日期：2026-08-24。** 本页的 manifest 只是模板和假设反例，没有记录真实机器、运行输出或性能结果。
+**事实核查日期：2026-08-26。** 本页的 manifest 只是模板和假设反例，没有记录真实机器、运行输出或性能结果。

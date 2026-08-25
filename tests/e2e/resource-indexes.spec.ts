@@ -20,14 +20,14 @@ test('both locales combine text, type, and related-resource filters without pers
   await practice.locator('[data-resource-filter="relation"]').selectOption('O03');
   await expect(practice.locator('[data-resource-card]:visible')).toHaveCount(1);
   await expect(practice.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'PB-R0-002');
-  await expect(practice.locator('[data-resource-count]')).toHaveText('Showing 1 of 5 published entries');
+  await expect(practice.locator('[data-resource-count]')).toHaveText('Showing 1 of 10 published entries');
 
   await practice.locator('[data-resource-query]').fill('no eligible record has this phrase');
   await expect(practice.locator('[data-resource-card]:visible')).toHaveCount(0);
   await expect(practice.locator('[data-resource-empty]')).toBeVisible();
   await practice.getByRole('button', { name: 'Reset filters' }).click();
   await expect(practice.locator('[data-resource-query]')).toBeFocused();
-  await expect(practice.locator('[data-resource-card]:visible')).toHaveCount(5);
+  await expect(practice.locator('[data-resource-card]:visible')).toHaveCount(10);
 
   await page.goto('/glossary/');
   const glossary = page.locator('cuda-resource-index');
@@ -59,7 +59,7 @@ test('filter controls and direct resource links support keyboard operation', asy
   await expect(reset).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(query).toBeFocused();
-  await expect(index.locator('[data-resource-card]:visible')).toHaveCount(34);
+  await expect(index.locator('[data-resource-card]:visible')).toHaveCount(48);
 
   await page.goto('/en/labs/');
   const labCard = page.locator('[data-resource-id="LAB02"]');
@@ -133,7 +133,7 @@ test('theme changes preserve ephemeral filters while reloads reset them', async 
 
   await page.reload();
   await expect(page.locator('[data-resource-query]')).toHaveValue('');
-  await expect(page.locator('[data-resource-card]:visible')).toHaveCount(5);
+  await expect(page.locator('[data-resource-card]:visible')).toHaveCount(10);
 });
 
 test('mobile reflow keeps every index within the viewport', async ({ page }) => {
@@ -168,7 +168,7 @@ test('print restores the complete index after a screen filter', async ({ page },
     await index.locator('[data-resource-card]').evaluateAll((cards) =>
       cards.filter((card) => getComputedStyle(card).display !== 'none').length,
     ),
-  ).toBe(34);
+  ).toBe(48);
 });
 
 test('no-script output keeps every eligible card and direct link available', async ({ browser }, testInfo) => {

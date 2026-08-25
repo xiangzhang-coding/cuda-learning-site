@@ -48,17 +48,21 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
   for (const scenario of [
-    { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/'] },
-    { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/', expectedHrefs: ['/start/environment-manifest/'] },
+    { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
+    { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/', expectedHrefs: ['/start/environment-manifest/', '/labs/record-cuda-environment/', '/practice/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '内存事务', localePrefix: '/', expectedHrefs: ['/visuals/kernel-journey/'] },
     { route: '/', button: /搜索/, query: '第一个 CUDA kernel', localePrefix: '/', expectedHrefs: ['/foundations/first-cuda-kernel/'] },
     { route: '/', button: /搜索/, query: '运行并验证向量加法', localePrefix: '/', expectedHrefs: ['/labs/vector-addition/'] },
+    { route: '/', button: /搜索/, query: '可复现命令记录', localePrefix: '/', expectedHrefs: ['/start/linux-command-line/', '/glossary/'] },
+    { route: '/', button: /搜索/, query: '基准环境候选配置', localePrefix: '/', expectedHrefs: ['/start/reference-environment-candidate/', '/labs/record-cuda-environment/'] },
     { route: '/', button: /搜索/, query: 'TERM-034 容差', localePrefix: '/', expectedHrefs: ['/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Evidence Status', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/', '/en/start/evidence-status/exercises/', '/en/practice/'] },
     { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/', expectedHrefs: ['/en/visuals/indexing/'] },
     { route: '/en/', button: /Search/, query: 'first CUDA kernel', localePrefix: '/en/', expectedHrefs: ['/en/foundations/first-cuda-kernel/'] },
     { route: '/en/', button: /Search/, query: 'Run and Verify Vector Addition', localePrefix: '/en/', expectedHrefs: ['/en/labs/vector-addition/'] },
+    { route: '/en/', button: /Search/, query: 'arithmetic intensity occupancy', localePrefix: '/en/', expectedHrefs: ['/en/start/architecture-refresher/', '/en/start/architecture-refresher/exercises/', '/en/start/architecture-refresher/solutions/'] },
+    { route: '/en/', button: /Search/, query: 'Environment Report Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/environment-report/'] },
     { route: '/en/', button: /Search/, query: 'SRC-WEB-003 Pagefind 1.5.2', localePrefix: '/en/', expectedHrefs: ['/en/sources-and-versions/'] },
   ]) {
     await expectRankedSearchResult(page, scenario);

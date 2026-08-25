@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,6 +20,11 @@ prerequisites: []
 relatedUnits:
   - O02
   - O03
+  - O04
+  - O05
+  - O06
+  - O07
+  - O08
 evidence:
   compilation: []
   runtime: []
@@ -33,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-25'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -49,7 +54,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: none }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:evidence-compilation', content: none }
   - tag: meta
@@ -91,14 +96,21 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 ## The published route
 
-As of **2026-08-25**, the complete prerequisite shape is:
+As of **2026-08-26**, the completely published strict prerequisite graph is:
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
-3. After O01, enter [O02: Recording Evidence Honestly](/en/start/evidence-status/) and [O03: Reading an Environment Manifest](/en/start/environment-manifest/) as separate branches.
-4. After O03, complete [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/), then run [LAB02](/en/labs/vector-addition/) in a native Linux CUDA environment.
+3. [O02: Recording Evidence Honestly](/en/start/evidence-status/), [O03: Reading an Environment Manifest](/en/start/environment-manifest/), [O04: C++17 Refresher for CUDA Learners](/en/start/cpp17-for-cuda/), [O05: Reproducible Linux Command-Line Work](/en/start/linux-command-line/), and [O06: Architecture Refresher](/en/start/architecture-refresher/) all depend directly on O01.
+4. [O07: Why GPUs Became Programmable](/en/start/programmable-gpus/) depends only on O06.
+5. [O08: Preparing a Reference Environment Candidate](/en/start/reference-environment-candidate/) requires O02, O03, and O05 together.
+6. The [EX01 Environment Report Runnable Example](/en/examples/environment-report/) has no strict Learning Unit prerequisite. [LAB01: Record and Interpret a CUDA Environment](/en/labs/record-cuda-environment/) requires both O03 and O08 and uses EX01.
+7. The existing kernel route still enters [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/) after O03 and then [LAB02](/en/labs/vector-addition/), using canonical [EX02](/en/examples/vector-addition/).
 
-O02, O03, and F01 each have Exercises and separate reviewed solutions. The [EX02 vector-addition Runnable Example](/en/examples/vector-addition/) is the sole canonical source shared by F01/LAB02 and publishes its build contract and independent compilation/runtime evidence boundary. The [Lab Index](/en/labs/) preserves the prerequisite sequence while adding direct lookup. The [Visual Explainer Index](/en/visuals/) collects the deterministic browser models, text, and static fallbacks for VIS01 Kernel Journey and VIS02 Indexing. The [Practice Bank](/en/practice/) contains five complete entries linked back to O02, O03, and F01. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
+Choose the next step by the gap you need to close. Apply the O04 C++17 refresher while reading F01/EX02, but do not add it as a prerequisite to either. The Linux-record route must combine O02, O03, and O05 before O08. EX01 remains directly available, while LAB01 requires both O03 and O08. The architecture route follows O06 with O07 before carrying those models into F01. These recommendations add no prerequisite edge beyond the graph above.
+
+O04-O08 all have direct Exercises and separate reviewed solutions: [O04 Exercises](/en/start/cpp17-for-cuda/exercises/) and [solutions](/en/start/cpp17-for-cuda/solutions/), [O05 Exercises](/en/start/linux-command-line/exercises/) and [solutions](/en/start/linux-command-line/solutions/), [O06 Exercises](/en/start/architecture-refresher/exercises/) and [solutions](/en/start/architecture-refresher/solutions/), [O07 Exercises](/en/start/programmable-gpus/exercises/) and [solutions](/en/start/programmable-gpus/solutions/), and [O08 Exercises](/en/start/reference-environment-candidate/exercises/) and [solutions](/en/start/reference-environment-candidate/solutions/). O02, O03, and F01 retain their own Exercises and separate solutions.
+
+The [Lab Index](/en/labs/) lists LAB01 and LAB02 in prerequisite order. The [Visual Explainer Index](/en/visuals/) collects the deterministic browser models, text, and static fallbacks for VIS01 Kernel Journey and VIS02 Indexing. The [Practice Bank](/en/practice/) contains ten complete entries linked back to O02-O08 and F01. You can also open the [Glossary](/en/glossary/), [Sources and Version Record](/en/sources-and-versions/), and [About](/en/about/) directly. If learning material is absent from navigation, it is not public; an identifier or mention does not imply that a page exists.
 
 ## Three visual themes, one body of content
 
@@ -138,4 +150,4 @@ You are ready to move on when you can answer these five questions:
 4. How does the theme control fall back when scripts or persistence are unavailable?
 5. Why does publishing a page not grant CUDA evidence?
 
-**Fact-check date: 2026-08-25.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.
+**Fact-check date: 2026-08-26.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.

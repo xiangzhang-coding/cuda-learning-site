@@ -5,13 +5,14 @@ import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-inde
 import {
   INDEX_GROUPS,
   PUBLISHED_DESTINATIONS,
+  REVIEW_DATE_TIME_ZONE,
   projectResourceIndex,
   validateResourceCatalog,
   type PublishedDestination,
   type ResourceIndexRecord,
 } from '../../src/resource-indexes/resource-index-model';
 
-const asOf = new Date('2026-08-25T12:00:00Z');
+const asOf = new Date('2026-08-26T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -22,18 +23,36 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(59);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(89);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 1, practice: 5, visuals: 2, glossary: 34, sources: 17 });
+    ).toEqual({ labs: 2, practice: 10, visuals: 2, glossary: 48, sources: 27 });
+  });
+
+  it('interprets date-only review records in the declared maintainer review timezone', () => {
+    expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
+    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
+      asOf: new Date('2026-08-25T18:00:00Z'),
+    })).not.toThrow();
   });
 
   it('projects current destinations, relationships, and evidence without deriving URLs from IDs', () => {
-    const [lab] = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'labs', 'en', { asOf });
+    const labs = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'labs', 'en', { asOf });
+    const lab01 = labs.find(({ planningId }) => planningId === 'LAB01');
+    const lab = labs.find(({ planningId }) => planningId === 'LAB02');
 
+    expect(lab01).toMatchObject({
+      planningId: 'LAB01',
+      href: '/en/labs/record-cuda-environment/',
+      counterpart: '/labs/record-cuda-environment/',
+      evidence: {
+        compilation: [],
+        runtime: ['Pending Hardware Verification'],
+      },
+    });
     expect(lab).toMatchObject({
       planningId: 'LAB02',
       href: '/en/labs/vector-addition/',
@@ -44,11 +63,11 @@ describe('resource index catalog', () => {
         runtime: ['Pending Hardware Verification'],
       },
     });
-    expect(lab.prerequisites.map(({ id, href }) => [id, href])).toEqual([
+    expect(lab?.prerequisites.map(({ id, href }) => [id, href])).toEqual([
       ['O03', '/en/start/environment-manifest/'],
       ['F01', '/en/foundations/first-cuda-kernel/'],
     ]);
-    expect(lab.searchText).toContain('CUDA Toolkit Lane 11.8.0');
+    expect(lab?.searchText).toContain('CUDA Toolkit Lane 11.8.0');
   });
 
   it('sorts a growing fixture set by stable planning ID instead of input order', () => {
@@ -70,7 +89,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(59);
+    expect(projected).toHaveLength(73);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
     );
@@ -80,7 +99,7 @@ describe('resource index catalog', () => {
     {
       name: 'duplicate planning IDs',
       records: () => [...RESOURCE_INDEX_RECORDS, RESOURCE_INDEX_RECORDS[0]],
-      message: /LAB02 is duplicated/,
+      message: /LAB01 is duplicated/,
     },
     {
       name: 'empty localized metadata',

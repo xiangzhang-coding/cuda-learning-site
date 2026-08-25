@@ -1,0 +1,268 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/orientation-visuals.css';
+import { COMPATIBILITY_LANES, assessCompatibility } from '../visuals/compatibility-model';
+
+interface Props {
+  locale: 'zh-CN' | 'en';
+}
+
+const { locale } = Astro.props;
+const copy = locale === 'zh-CN'
+  ? {
+      eyebrow: 'O08 / 兼容性探索器',
+      title: '先确认文档路径，再做实际运行验证',
+      summary: '输入应用的构建 Toolkit Lane 和已加载 Linux driver 版本。结果只解释已复核的 NVIDIA 路径，不会宣布环境兼容。',
+      lane: '应用构建使用的 Toolkit Lane',
+      driver: '已加载的 Linux driver 版本',
+      driverHint: '例如 580.82.09。按点分整数比较，不按 SemVer 或小数比较。',
+      forward: 'Forward compatibility package',
+      forwardOptions: {
+        unknown: '未知',
+        'not-used': '未使用',
+        'verified-loaded': '已核对 package 与实际加载的 user-mode library',
+      },
+      reset: '重置',
+      result: '评估结果',
+      mechanisms: '文档路径',
+      reasons: '判断依据',
+      missing: '仍需补全',
+      none: '无',
+      state: {
+        'documented-path': 'documented-path：主文档描述了可能路径',
+        'not-documented': 'not-documented：所选主文档没有给出这条路径',
+        indeterminate: 'indeterminate：现有输入不足',
+      },
+      runtime: '任何结果都需要对精确应用、driver、GPU 与组件做实际运行验证。',
+      evidence: '这个浏览器模型不会更改 Compile-Checked 或 runtime Evidence Status。',
+      staticTitle: '选定 Toolkit Lane 的来源坐标',
+      staticIntro: '这是本站从 NVIDIA 主文档提取的三个 Lane 坐标，不是完整兼容性表。',
+      toolkit: 'Toolkit',
+      floor: '同 major family 的 Linux driver floor',
+      paired: '该 Toolkit release 配对的 Linux driver',
+      source: '来源',
+    }
+  : {
+      eyebrow: 'O08 / compatibility explorer',
+      title: 'Find a documented path, then validate it by running the exact application',
+      summary: 'Enter the application build Toolkit Lane and loaded Linux driver release. The result interprets reviewed NVIDIA paths; it never declares the environment compatible.',
+      lane: 'Application build Toolkit Lane',
+      driver: 'Loaded Linux driver release',
+      driverHint: 'For example, 580.82.09. Releases are dotted integer tuples, not SemVer or decimal numbers.',
+      forward: 'Forward compatibility package',
+      forwardOptions: {
+        unknown: 'Unknown',
+        'not-used': 'Not used',
+        'verified-loaded': 'Package and loaded user-mode library source checked',
+      },
+      reset: 'Reset',
+      result: 'Assessment',
+      mechanisms: 'Documented mechanism',
+      reasons: 'Reasons',
+      missing: 'Facts still required',
+      none: 'None',
+      state: {
+        'documented-path': 'documented-path: owner documentation describes a possible path',
+        'not-documented': 'not-documented: the selected owner rules describe no path',
+        indeterminate: 'indeterminate: the current inputs are insufficient',
+      },
+      runtime: 'Every outcome still requires a run of the exact application, driver, GPU, and components.',
+      evidence: 'This browser model changes neither Compile-Checked nor runtime Evidence Status.',
+      staticTitle: 'Selected Toolkit Lane source coordinates',
+      staticIntro: 'These are three project-selected coordinates extracted from NVIDIA owner documentation, not a reproduction of the complete compatibility tables.',
+      toolkit: 'Toolkit',
+      floor: 'Linux driver floor within the same major family',
+      paired: 'Linux driver paired with the Toolkit release',
+      source: 'Source',
+    };
+const initial = assessCompatibility({ laneId: 'cuda-13.3', driverRelease: '', forwardPackage: 'unknown' });
+---
+
+<cuda-compatibility-explorer class="compatibility-explorer not-content" data-locale={locale} data-assessment={initial.state}>
+  <header>
+    <span>{copy.eyebrow}</span>
+    <h2>{copy.title}</h2>
+    <p>{copy.summary}</p>
+  </header>
+
+  <div class="compatibility-controls" data-compatibility-controls hidden role="group" aria-label={copy.title}>
+    <label>
+      <span>{copy.lane}</span>
+      <select data-compatibility-lane autocomplete="off">
+        {COMPATIBILITY_LANES.map((lane) => <option value={lane.id} selected={lane.id === 'cuda-13.3'}>{lane.id} / {lane.toolkit}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>{copy.driver}</span>
+      <input data-driver-release type="text" inputmode="decimal" autocomplete="off" placeholder="580.82.09" aria-describedby={`driver-hint-${locale}`} />
+      <small id={`driver-hint-${locale}`}>{copy.driverHint}</small>
+    </label>
+    <label>
+      <span>{copy.forward}</span>
+      <select data-forward-package autocomplete="off">
+        <option value="unknown" selected>{copy.forwardOptions.unknown}</option>
+        <option value="not-used">{copy.forwardOptions['not-used']}</option>
+        <option value="verified-loaded">{copy.forwardOptions['verified-loaded']}</option>
+      </select>
+    </label>
+    <button type="button" data-reset-compatibility>{copy.reset}</button>
+  </div>
+
+  <section class="compatibility-result" data-compatibility-result data-assessment={initial.state} role="status" aria-live="polite" aria-atomic="true">
+    <h3>{copy.result}</h3>
+    <strong data-assessment-state>{copy.state[initial.state]}</strong>
+    <dl>
+      <div><dt>{copy.mechanisms}</dt><dd data-assessment-mechanisms>{copy.none}</dd></div>
+      <div><dt>{copy.reasons}</dt><dd><ul data-assessment-reasons><li>{locale === 'zh-CN' ? '请填写 driver 版本。' : 'Enter the driver release.'}</li></ul></dd></div>
+      <div><dt>{copy.missing}</dt><dd><ul data-assessment-missing><li>{locale === 'zh-CN' ? '实际运行观察' : 'Runtime observation'}</li></ul></dd></div>
+    </dl>
+    <p>{copy.runtime}</p>
+    <p class="compatibility-no-evidence">{copy.evidence}</p>
+  </section>
+
+  <section class="compatibility-static" data-static-fallback>
+    <h3>{copy.staticTitle}</h3>
+    <p>{copy.staticIntro}</p>
+    <div class="compatibility-table-wrap">
+      <table>
+        <thead><tr><th scope="col">Lane</th><th scope="col">{copy.toolkit}</th><th scope="col">{copy.floor}</th><th scope="col">{copy.paired}</th><th scope="col">{copy.source}</th></tr></thead>
+        <tbody>
+          {COMPATIBILITY_LANES.map((lane) => (
+            <tr>
+              <th scope="row">{lane.id}</th>
+              <td>{lane.toolkit}</td>
+              <td>{lane.floorLabel}</td>
+              <td>{lane.pairedLinuxDriver}</td>
+              <td><a href="https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html">NVIDIA CUDA Compatibility</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</cuda-compatibility-explorer>
+
+<script>
+  import {
+    assessCompatibility,
+    type CompatibilityLaneId,
+    type CompatibilityMissingFact,
+    type CompatibilityReason,
+    type CompatibilityState,
+    type ForwardPackageState,
+  } from '../visuals/compatibility-model';
+
+  const messages = {
+    en: {
+      state: {
+        'documented-path': 'documented-path: owner documentation describes a possible path',
+        'not-documented': 'not-documented: the selected owner rules describe no path',
+        indeterminate: 'indeterminate: the current inputs are insufficient',
+      },
+      reasons: {
+        'missing-driver': 'The loaded Linux driver release is missing.',
+        'invalid-driver': 'Use one to four dot-separated integer fields for the driver release.',
+        'meets-paired-driver': 'The driver is at least the release paired with this Toolkit, so the backward-compatibility path is documented.',
+        'meets-major-floor': 'The driver is below the paired release but meets the reviewed floor for this Toolkit major family.',
+        'below-major-floor': 'The driver is below the reviewed floor for this Toolkit major family.',
+        'forward-package-needs-review': 'A forward-compatibility package needs eligible hardware and proof of the user-mode library actually loaded.',
+        'forward-package-unknown': 'Forward-package presence, eligibility, and loaded library source are unknown.',
+      },
+      missing: {
+        'application-components': 'Exact application Runtime and component versions',
+        'binary-targets': 'SASS and PTX targets in the built application',
+        'feature-dependencies': 'Driver-dependent features used by the application',
+        'forward-eligible-device': 'Forward-compatibility GPU eligibility',
+        'loaded-user-mode-driver': 'Actual loaded user-mode driver library source',
+        'runtime-observation': 'Run result for the exact application and environment',
+      },
+      mechanism: { backward: 'backward', minor: 'minor-version', 'forward-package': 'forward-package' },
+      none: 'None',
+    },
+    'zh-CN': {
+      state: {
+        'documented-path': 'documented-path：主文档描述了可能路径',
+        'not-documented': 'not-documented：所选主文档没有给出这条路径',
+        indeterminate: 'indeterminate：现有输入不足',
+      },
+      reasons: {
+        'missing-driver': '缺少已加载的 Linux driver 版本。',
+        'invalid-driver': 'Driver 版本应包含一到四段点分整数。',
+        'meets-paired-driver': 'Driver 不低于该 Toolkit 配对版本，因此主文档描述了 backward compatibility 路径。',
+        'meets-major-floor': 'Driver 低于配对版本，但达到该 Toolkit major family 的复核 floor。',
+        'below-major-floor': 'Driver 低于该 Toolkit major family 的复核 floor。',
+        'forward-package-needs-review': 'Forward compatibility package 还需要合格 GPU，并证明实际加载的 user-mode library 来源。',
+        'forward-package-unknown': 'Forward package、硬件资格和已加载 library 来源都未知。',
+      },
+      missing: {
+        'application-components': '应用的精确 Runtime 与 component 版本',
+        'binary-targets': '应用内的 SASS 与 PTX target',
+        'feature-dependencies': '应用使用的 driver-dependent feature',
+        'forward-eligible-device': 'Forward compatibility GPU 资格',
+        'loaded-user-mode-driver': '实际加载的 user-mode driver library 来源',
+        'runtime-observation': '精确应用与环境的实际运行结果',
+      },
+      mechanism: { backward: 'backward', minor: 'minor-version', 'forward-package': 'forward-package' },
+      none: '无',
+    },
+  } as const;
+
+  class CudaCompatibilityExplorer extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-compatibility-controls]');
+      const lane = this.querySelector<HTMLSelectElement>('[data-compatibility-lane]');
+      const driver = this.querySelector<HTMLInputElement>('[data-driver-release]');
+      const forward = this.querySelector<HTMLSelectElement>('[data-forward-package]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reset-compatibility]');
+      if (!controls || !lane || !driver || !forward || !reset) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      const render = () => this.render(lane.value as CompatibilityLaneId, driver.value, forward.value as ForwardPackageState);
+      lane.addEventListener('change', render);
+      driver.addEventListener('input', render);
+      forward.addEventListener('change', render);
+      reset.addEventListener('click', () => {
+        lane.value = 'cuda-13.3';
+        driver.value = '';
+        forward.value = 'unknown';
+        render();
+        driver.focus();
+      });
+      render();
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private render(laneId: CompatibilityLaneId, driverRelease: string, forwardPackage: ForwardPackageState) {
+      const assessment = assessCompatibility({ laneId, driverRelease, forwardPackage });
+      const copy = messages[this.locale()];
+      this.dataset.assessment = assessment.state;
+      const result = this.querySelector<HTMLElement>('[data-compatibility-result]');
+      if (result) result.dataset.assessment = assessment.state;
+      const state = this.querySelector<HTMLElement>('[data-assessment-state]');
+      if (state) state.textContent = copy.state[assessment.state as CompatibilityState];
+      const mechanisms = this.querySelector<HTMLElement>('[data-assessment-mechanisms]');
+      if (mechanisms) mechanisms.textContent = assessment.mechanisms.map((mechanism) => copy.mechanism[mechanism]).join(', ') || copy.none;
+      this.renderList('[data-assessment-reasons]', assessment.reasons.map((reason) => copy.reasons[reason as CompatibilityReason]));
+      this.renderList('[data-assessment-missing]', assessment.missingFacts.map((fact) => copy.missing[fact as CompatibilityMissingFact]));
+    }
+
+    private renderList(selector: string, values: readonly string[]) {
+      const list = this.querySelector<HTMLElement>(selector);
+      if (!list) return;
+      list.replaceChildren(...values.map((value) => {
+        const item = document.createElement('li');
+        item.textContent = value;
+        return item;
+      }));
+    }
+  }
+
+  if (!customElements.get('cuda-compatibility-explorer')) {
+    customElements.define('cuda-compatibility-explorer', CudaCompatibilityExplorer);
+  }
+</script>

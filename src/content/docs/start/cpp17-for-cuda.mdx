@@ -1,0 +1,213 @@
+---
+title: 'O04：面向 CUDA 学习者的 C++17 复习'
+description: 复习 CUDA 源码中容易跨越的 C++17 生命周期、所有权、模板、错误、构建和检查边界。
+pairId: o04
+counterpart: /en/start/cpp17-for-cuda/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - pointers
+  - ownership
+  - templates
+  - errors
+  - build-boundaries
+  - undefined-behavior
+  - visual
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O04
+prerequisites:
+  - O01
+relatedUnits:
+  - F01
+  - EX02
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'N4659: Working Draft, Standard for Programming Language C++'
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf'
+    version: 'N4659; 2017-03-21'
+    platform: 'ISO C++17 core language and standard library'
+    accessDate: '2026-08-26'
+  - title: "N4661 Editors' Report -- Programming Languages -- C++"
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4661.html'
+    version: 'N4661; 2017-03-20'
+    platform: 'C++17 working-draft provenance'
+    accessDate: '2026-08-26'
+  - title: C++ Core Guidelines
+    url: 'https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines'
+    version: 'Living document; page dated 2026-06-14'
+    platform: 'C++17 host resource and ownership guidance'
+    accessDate: '2026-08-26'
+  - title: 'Using the GNU Compiler Collection (GCC) 13.3.0 - Program Instrumentation Options'
+    url: 'https://gcc.gnu.org/onlinedocs/gcc-13.3.0/gcc/Instrumentation-Options.html#Instrumentation-Options'
+    version: 'GCC 13.3.0'
+    platform: 'GNU/Linux host C++ instrumentation'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - C++ Language Support'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-support.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ host and device language support'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime API error codes'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver - The CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'CUDA C++ host and device compilation'
+    accessDate: '2026-08-26'
+  - title: 'Compute Sanitizer 2026.2.1'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html'
+    version: 'v2026.2.1'
+    platform: 'CUDA application runtime checking'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,pointers,ownership,templates,errors,build-boundaries,undefined-behavior,visual,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: O01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F01,EX02' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'N4659,N4661,GCC 13.3.0,CUDA 13.3,CUDA 13.3.1,Compute Sanitizer 2026.2.1' }
+---
+
+import OrientationVisual from '../../../components/OrientationVisual.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/start/cpp17-for-cuda/" lang="en">Read the English counterpart</a>
+
+这不是一门通用 C++ 速成课。本学习单元（Learning Unit）只复习 CUDA 源码中格外明显的 C++17 合同：同一个源文件可能同时包含主机（host）控制代码、设备（device）代码、显式 CUDA 资源和多条编译路径。
+
+## 学完本单元，你应该能
+
+- 分开指针值（pointer value）与被指对象生命周期（pointee lifetime），并且不靠“指针位是否变化”判断悬空。
+- 区分资源获取即初始化（Resource Acquisition Is Initialization, RAII）所有者（owner）与非拥有型裸指针（non-owning raw pointer），让所有者覆盖每一次合法使用。
+- 把模板（template）定义放在所需实例化（instantiation）能够看到的位置。
+- 分开主机异常（host exception）、显式 CUDA 错误码（explicit CUDA error code）和设备异常限制。
+- 追踪预处理（preprocessing）、编译（compilation）、按需执行的设备链接（device linking）、主机链接（host linking）和执行，不把一个边界当成另一个边界的证据。
+- 说明主机检查工具（host sanitizer）和 Compute Sanitizer 为什么只能检查选定的已执行路径，不能证明不存在未定义行为（undefined behavior）。
+
+## 先修关系
+
+先完成 [O01：如何使用学习站](/start/using-the-learning-site/)。O01 是 O04 唯一的直接先修学习单元。[F01](/foundations/first-cuda-kernel/)和规范 [EX02](/examples/vector-addition/)用于应用本页复习内容，不增加新的先修边。
+
+## 指针值不等于被指对象生命周期
+
+一个指针对象保存一个值，这个值可以指示某个对象、函数或分配位置。指针对象和被指对象的生命周期彼此独立。复制指针只复制它的值，不会复制被指对象、转移所有权或延长被指对象的生命周期。
+
+所有者销毁对象或释放分配后，仍被保存的指针可能成为悬空指针（dangling pointer）。指针中保存的位不必变成 `nullptr`，甚至不必发生任何变化。解引用悬空指针，或用它访问已超出有效生命周期的存储，属于未定义行为。把其中一个副本设为 `nullptr` 也不会修复其他副本。
+
+CUDA 会让这个区别直接影响程序。传给异步 CUDA 操作的裸指针仍只是视图，不是生命周期令牌。分配以及通过该视图使用的对象必须保持有效，直到可能访问它们的操作按照明确的同步或依赖合同完成。指针本身也不携带范围（extent）、所有权政策，或“host 可以解引用这个地址”的证明。
+
+## RAII 负责拥有，裸指针负责观察
+
+资源获取即初始化（Resource Acquisition Is Initialization, RAII）把资源释放绑定到 C++ 对象生命周期。在 host 侧，`std::vector`、`std::unique_ptr` 或专用 CUDA 分配封装都可以明确表达所有权。普通作用域退出和 host exception 展开栈时，资源由 owner 的析构函数释放。
+
+除非接口明确记录了遗留式所有权转移，否则把裸 `T*` 当作非拥有型视图（non-owning view），并同时传递所需 extent 和地址空间（address space）含义。调用者负责让 owner 覆盖完整使用区间；被调用者不能擅自释放、保留或活得比 view 更久。
+
+CUDA 资源清理调用返回 error code，而负责清理的析构函数应保持不抛异常。稳健的 host 封装应保持析构不抛异常，并在清理失败必须可观察时提供显式操作。RAII 管理生命周期，但不会抹去 CUDA 错误通道。
+
+## 模板需要实例化可见的定义
+
+模板声明描述一族代码；某个特化（specialization）的代码只在实例化时产生。在隐式实例化点，编译器需要看到模板定义，只有声明并不够。
+
+两种安排是可靠的：
+
+1. 把完整模板定义放进 header，让每个需要实例化它的翻译单元（translation unit）都包含该 header。
+2. 把定义保留在一个实现翻译单元中，在那里显式实例化全部受支持特化，并向使用方暴露匹配的声明。
+
+如果通用定义只放在一个 `.cpp` 文件里，而另一个 `.cpp` 或 `.cu` 文件需要隐式实例化它，所需特化可能不可用。根据缺失的实体和分离编译（separate compilation）配置，失败可能出现在 compilation、device linking 或 host linking。
+
+CUDA 标注还会增加一层可见性边界。设备代码需要的 `__device__` 或 `__host__ __device__` 模板，必须对 CUDA 设备编译路径可见。`__host__ __device__` 函数体会分别为两个目标（target）编译，因此其中每个操作都必须在两条路径上合法，或者被有意分开。
+
+## 主机异常与 CUDA 错误码是不同通道
+
+主机 C++ 可以使用异常（exception）。`throw` 会把控制转交给匹配的 host handler；host stack 展开时，RAII 会销毁已经完成构造的自动对象。这个政策不能替代 CUDA 结果检查。
+
+CUDA Runtime 操作返回 `cudaError_t` 类型的显式值。每个需要检查的结果都要与 `cudaSuccess` 比较，保留失败调用位置，并在报告时使用 `cudaGetErrorName` 或 `cudaGetErrorString`。应用可以在一个有文档的 host adapter 边界把失败的 `cudaError_t` 转成 host exception，但 adapter 必须先接收并保留 CUDA 失败信息。
+
+设备代码不支持异常处理，`__global__` 函数也不支持 exception specification。不要把 `throw`、`try` 或 `catch` 放进设备执行路径，也不要设计跨 host/device 边界的 exception。设备工作通过 CUDA 支持的数据与执行机制传递状态；host 通过显式 Runtime API 边界观察失败。
+
+## 翻译单元与主机/设备构建边界
+
+一个源文件经过 preprocessing，展开 include 和 macro 后，结果就是一个 translation unit。Compilation 把每个 translation unit 变成 object 或其他指定产物；linking 组合兼容的 object 与 library，并解析所需定义。一个 declaration 可以通过 preprocessing 和 compilation，缺失的 definition 却到 link boundary 才失败。
+
+对 `.cu` 源码，`nvcc` 有相互分开的 host 与 device path。其公开编译轨迹（compilation trajectory）先为 device compilation 做预处理并生成放进 fatbinary 的 device code，再次预处理并合成 host C++，然后让受支持的 host compiler 生成包含该 fatbinary 的 host object。Relocatable device code 会在最终 host link 前增加 device-link step。Toolkit 内部子步骤可能变化，公开 phase 才是稳定接口。
+
+主要标注（annotation）回答不同问题：
+
+| 标注 | 调用边界 | 执行边界 |
+| --- | --- | --- |
+| 无标注或 `__host__` | host code 调用 | host |
+| `__device__` | device code 调用 | device |
+| `__global__` | host code launch | device |
+| `__host__ __device__` | host 或 device code 调用对应版本 | 分别编译的 host 与 device 版本 |
+
+Preprocessing 成功不等于 compilation 成功，compilation 成功不等于 linking 成功。得到可链接 executable 也不证明 GPU path 已运行或结果正确。
+
+## 未定义行为检查受执行路径限制
+
+未定义行为表示 C++ 规范不要求该操作产生任何特定行为。悬空解引用、越界访问和部分非法算术，是 CUDA host code 相关的例子。构建没有 warning，不能证明它们都不存在。
+
+GCC host instrumentation 可以在运行时检查一部分 host 行为。AddressSanitizer 会插桩检查越界、use-after-free 等类别；UndefinedBehaviorSanitizer 会插桩检查文档列出的部分 undefined operation。这些检查只覆盖当前 workload 到达的、已经插桩的 host code。
+
+Compute Sanitizer 检查另一组 CUDA 问题。它包含 `memcheck`、`racecheck`、`initcheck` 和 `synccheck`，每个工具都有明确 detection scope。Clean report 只表示所选工具在精确 build、input、device 和 tool version 下，没有在已执行路径上报告它能覆盖的缺陷；它不能说明未执行分支、其他 input、其他 schedule 或工具范围外的缺陷。
+
+Static review、compiler diagnostic、host sanitizer、CUDA error check、Compute Sanitizer 和独立 correctness criteria 应作为互补证据。任何一项都不能证明整个程序没有 undefined behavior。
+
+## 读取标注图
+
+用共享图追踪函数从哪里被调用、在哪里执行，以及哪条 compilation path 必须接受函数体。这个可视化讲解（Visual Explainer）只建模源码 annotation，不编译或执行 CUDA，也不授予任何证据状态（Evidence Status）。
+
+<OrientationVisual kind="annotations" locale="zh-CN" />
+
+## 离开前检查
+
+1. 为什么复制指针可以保留同一个值，却不能延长 pointee lifetime？
+2. 哪两种 template 安排能让 translation unit 获得所需 specialization？
+3. 为什么 host exception adapter 不能省略显式 `cudaError_t` 检查，而且同一条 exception path 不能在 device 上运行？
+4. 一次 clean host-sanitizer 或 Compute Sanitizer 运行能建立什么结论，哪些内容仍在结论之外？
+
+## 继续练习
+
+- 完成 [O04 练习（Exercise）](/start/cpp17-for-cuda/exercises/)，再查看独立的[参考解答](/start/cpp17-for-cuda/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-001](/practice/#pb-r1-001)中审查一组生命周期、构建和错误边界缺陷。
+- 阅读 [F01](/foundations/first-cuda-kernel/)和规范 [EX02](/examples/vector-addition/)时应用这些区别。
+
+## 来源与复核
+
+N4659 提供 C++17 语言基线，N4661 记录该 working draft 的来源。C++ Core Guidelines 支撑所有权与 RAII 指导，GCC 13.3 说明 host runtime instrumentation。CUDA Programming Guide v13.3 约束 CUDA C++ support 与 device restriction；CUDA Runtime API v13.3.1 约束 explicit error；NVCC v13.3 约束 host/device compilation trajectory；Compute Sanitizer 2026.2.1 约束其 runtime checking scope。八个 owner URL 均于 **2026-08-26** 重新打开。
+
+**事实核查日期：2026-08-26。** 页面文字、表格、问题和教学编排均为原创。本学习单元没有记录编译、GPU 执行、sanitizer 结果或性能观察。

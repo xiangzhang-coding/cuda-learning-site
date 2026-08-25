@@ -36,6 +36,11 @@ export default defineConfig({
             { slug: 'start/using-the-learning-site' },
             { slug: 'start/evidence-status' },
             { slug: 'start/environment-manifest' },
+            { slug: 'start/cpp17-for-cuda' },
+            { slug: 'start/linux-command-line' },
+            { slug: 'start/architecture-refresher' },
+            { slug: 'start/programmable-gpus' },
+            { slug: 'start/reference-environment-candidate' },
           ],
         },
         {
@@ -46,12 +51,12 @@ export default defineConfig({
         {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
-          items: [{ slug: 'examples/vector-addition' }],
+          items: [{ slug: 'examples/environment-report' }, { slug: 'examples/vector-addition' }],
         },
         {
           label: '实验',
           translations: { en: 'Labs' },
-          items: [{ slug: 'labs' }, { slug: 'labs/vector-addition' }],
+          items: [{ slug: 'labs' }, { slug: 'labs/record-cuda-environment' }, { slug: 'labs/vector-addition' }],
         },
         {
           label: '可视化讲解',

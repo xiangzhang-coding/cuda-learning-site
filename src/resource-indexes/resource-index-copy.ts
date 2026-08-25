@@ -15,6 +15,10 @@ export const RESOURCE_TYPE_LABELS: Readonly<Record<ResourceType, LocalizedText>>
   'kernel-vocabulary': { 'zh-CN': 'Kernel 基础词汇', en: 'Kernel foundations vocabulary' },
   'publishing-interface': { 'zh-CN': '发布接口', en: 'Publishing interface' },
   'cuda-version-record': { 'zh-CN': 'CUDA 版本记录', en: 'CUDA version record' },
+  'cpp-language-record': { 'zh-CN': 'C++ 语言与工具记录', en: 'C++ language and tool record' },
+  'linux-tool-record': { 'zh-CN': 'Linux 工具记录', en: 'Linux tool record' },
+  'architecture-record': { 'zh-CN': '架构来源记录', en: 'Architecture source record' },
+  'historical-record': { 'zh-CN': '历史主来源记录', en: 'Historical primary-source record' },
 };
 
 export const DIFFICULTY_LABELS = {

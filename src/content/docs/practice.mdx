@@ -3,7 +3,7 @@ title: 练习题库
 description: 当前已发布的跨单元原创练习，包含先修链接、分层提示和解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -14,6 +14,11 @@ structure:
   - entry-pb-r0-003
   - entry-pb-r0-004
   - entry-pb-r0-005
+  - entry-pb-r1-001
+  - entry-pb-r1-002
+  - entry-pb-r1-003
+  - entry-pb-r1-004
+  - entry-pb-r1-005
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -21,10 +26,20 @@ prerequisites:
   - O02
   - O03
   - F01
+  - O04
+  - O05
+  - O06
+  - O07
+  - O08
 relatedUnits:
   - O02
   - O03
   - F01
+  - O04
+  - O05
+  - O06
+  - O07
+  - O08
 hardwareGate: none
 evidence:
   compilation: []
@@ -35,19 +50,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-25' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -66,13 +81,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面五个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面十个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方五道完整题目、先修链接和解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方十道完整题目、先修链接和解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -83,7 +98,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **先修条件：** [O02：诚实记录证据状态](/start/evidence-status/)。
 - **硬件门槛（Hardware gate）：** 无；只分析文本记录。
 - **相关学习单元：** O02。
-- **最后复核（Last reviewed）：** 2026-08-25。
+- **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一份发布说明写道：“Linux 构建因容器仓库超时而跳过。贡献者在自己的 GPU 上贴出 `PASS`，所以项目已经 Compile-Checked 和 Runtime-Verified。网页测试也证明浏览器演示可以算 CUDA 运行。”请重写成一条诚实记录。
 
@@ -121,7 +136,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **先修条件：** [O03：读懂环境清单（Environment Manifest）](/start/environment-manifest/)。
 - **硬件门槛（Hardware gate）：** 无；使用假设记录，不运行 CUDA。
 - **相关学习单元：** O03。
-- **最后复核（Last reviewed）：** 2026-08-25。
+- **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一份记录只有“8 GB GPU、CUDA 12、WSL、kernel 0.2 ms”，并声称“属于完整层级，且本站支持这个环境”。列出必须补充的 manifest 字段，并修复两条结论。
 
@@ -158,7 +173,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **先修条件：** [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。
 - **硬件门槛（Hardware gate）：** 无；只做静态推理。
 - **相关学习单元：** F01。
-- **最后复核（Last reviewed）：** 2026-08-25。
+- **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 对 `N = 65`、`blockDim.x = 32` 的一维向量加法，给出 block 数、总 launch thread 数、最后一个合法 index，并判断最后一个 block 中 `threadIdx.x = 0` 和 `1` 的 bounds 状态。解释为什么 bounds check 仍然必需。
 
@@ -189,7 +204,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **先修条件：** [F01](/foundations/first-cuda-kernel/)。
 - **硬件门槛（Hardware gate）：** 无；审查假设流程。
 - **相关学习单元：** F01、O02。
-- **最后复核（Last reviewed）：** 2026-08-25。
+- **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一个程序只检查 `cudaMalloc` 和最终输出文字，然后声称“无报错且 GPU 正确”。写出缺失边界，并定义一个元素的接受规则。
 
@@ -220,7 +235,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **先修条件：** [F01](/foundations/first-cuda-kernel/)；结合 [O02](/start/evidence-status/)和 [O03](/start/environment-manifest/)。
 - **硬件门槛（Hardware gate）：** 无；审查文本记录，不运行 CUDA。
 - **相关学习单元：** F01、O02、O03。
-- **最后复核（Last reviewed）：** 2026-08-25。
+- **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一份 LAB02 申请只有“CUDA 13、vector add PASS、0.01 ms”，要求标记 Runtime-Verified。判断目前能授予什么状态，并列出补全路径。
 
@@ -242,6 +257,209 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 **来源依据（Source basis）：** [LAB02](/labs/vector-addition/)、[O02](/start/evidence-status/)和 [O03](/start/environment-manifest/)的原创证据合同。
 
+<span id="pb-r1-001" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-001：修复生命周期、构建与错误边界
+
+- **ID 与双语发布对：** PB-R1-001；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 调试与正确性；中级。
+- **直接先修条件：** [O04：面向 CUDA 学习者的 C++17 复习](/start/cpp17-for-cuda/)。
+- **硬件门槛（Hardware gate）：** 无；只做源码与构建设计审查，不需要 GPU。
+- **相关学习单元：** O04。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一份 `.cu` 补丁把局部 `std::vector<float>` 的 `data()` 保存到异步复制任务中，函数在任务完成前返回；一个管理 CUDA 分配（allocation）的资源获取即初始化（Resource Acquisition Is Initialization, RAII）所有者（owner）在析构函数里因 `cudaFree` 失败而 `throw`；一个 `__host__ __device__` helper 调用只允许主机（host）执行且会抛异常的函数。CI 只用 host compiler 编译调用方，就宣称 host 与设备（device）路径都已构建；运行路径用 `try/catch` 包住 kernel launch，却忽略 `cudaError_t`、launch check 和 completion check。写出最小修复方案。
+
+**约束：**
+
+- 不执行构建、sanitizer 或 CUDA，也不虚构诊断与输出。
+- 把被指对象生命周期（pointee lifetime）、所有权（ownership）、构建边界（build boundary）和错误边界（error boundary）分开处理。
+- 裸指针只能作为非拥有型视图（non-owning view）；修复必须说明 owner 何时才可销毁。
+
+**预期证据：** 一条覆盖异步完成点的所有权时间线、一张 host/device 构建阶段表，以及按执行顺序排列的错误检查清单。
+
+**验收条件：**
+
+- 指出局部 `vector` 先销毁会让保存的 view 悬空，并让 owner 覆盖异步操作完成点，或在作用域退出前建立明确 completion boundary。
+- CUDA owner 的析构函数保持不抛异常；若 cleanup failure 必须可观察，则提供显式 `close` 或 `reset` 路径。
+- 把 host-only throwing code 与 device-safe helper 分开，让 device 所需定义对 `nvcc` 路径可见，并分别记录 compilation、按需 device linking 和 host linking；host object 成功不证明 device path 或执行。
+- 检查每个相关 `cudaError_t`，把 launch error 与 completion error 分开；host exception adapter 只能在保存 CUDA 失败信息后转换错误。
+
+<details><summary>提示 1</summary>复制 raw pointer 只复制地址值，不会延长 `vector` 或 allocation 的生命周期。</details>
+
+<details><summary>提示 2</summary>`try/catch` 观察 host exception；CUDA Runtime failure 先通过返回值、launch boundary 和 completion boundary 暴露。</details>
+
+**解答：** 把 staging buffer 和 CUDA allocation 放进一个 operation owner，使它们至少活到 stream event 或显式 synchronization 确认任务完成；另一种最小修复是在局部 owner 销毁前同步。所有 raw pointer 都标成 view，并携带 extent 与 address-space 含义。析构函数只做不抛异常的 best-effort cleanup，要求报告 cleanup failure 时调用显式 `close`。把 throwing host adapter 与 device helper 分开，确保 `.cu` 和 device 所需定义由 `nvcc` 编译，并单独记录可能的 device link 与最终 host link。逐项检查 allocation、copy 和其他 Runtime API 返回值，launch 后检查 launch error，再在同步或 event 边界检查 completion；只有 host adapter 在保留 error name、message 和调用位置后才可以抛异常。任何构建产物都不证明 GPU 路径已执行。
+
+**有效替代方案：** 可以选择拥有异步状态的 operation object，也可以把复制改成在当前作用域内完成的同步操作；两种方案都必须让 owner 覆盖最后一次合法访问，并保留同样的构建与错误边界。
+
+**常见错误：** 只把一个 pointer 副本设成 `nullptr`；让 non-owning view 负责 `free`；从析构函数抛异常；让 host-only `throw` 进入 device path；把 host compilation、linking 或零 warning 当作 CUDA 执行证据。
+
+**来源依据（Source basis）：** 本站 [O04](/start/cpp17-for-cuda/) 的原创生命周期、构建与错误合同，以及 [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)、NVIDIA [CUDA Runtime API Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)和 [`nvcc` compilation trajectory](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory)。
+
+<span id="pb-r1-002" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-002：修复隐藏生产者失败的构建记录
+
+- **ID 与双语发布对：** PB-R1-002；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 调试与可复现性；中级。
+- **直接先修条件：** [O05：可复现的 Linux 命令行工作](/start/linux-command-line/)。
+- **硬件门槛（Hardware gate）：** 无；只设计记录流程，不需要 GPU。
+- **相关学习单元：** O05。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一个脚本通过管道（pipeline）执行 `make -C "$build_dir" all 2>&1 | tee "$record_dir/build.log"`，随后把 `$?` 写进 `build.exit`，并因其中为零而报告 build success。它还保存完整 `env` 和 xtrace，却没有字面命令（literal command）、独立标准输出（stdout）与标准错误（stderr）、实际开始/结束时间或封存哈希。修复失败判断，并设计一份可公开的最小记录。
+
+**约束：**
+
+- 不运行命令，不填写实际退出状态、时间戳、日志内容或哈希，也不虚构任何输出。
+- 不记录秘密（secret）、令牌（token）、凭据（credential）或未经允许的完整环境；xtrace 不能替代字面输入。
+- 规范记录必须保留 command、stdout、stderr、退出状态（exit status）、UTC 时间戳（timestamp）和 SHA-256 哈希（hash）的边界。
+
+**预期证据：** 一段失败传播解释，以及按采集顺序列出的产物清单（artifact manifest），说明每个文件何时写入、何时关闭、何时参与哈希。
+
+**验收条件：**
+
+- 说明原脚本中的 `$?` 默认属于 `tee`，成功的消费者（consumer）会隐藏失败的生产者（producer）；`2>&1` 还会丢失通道身份。
+- 执行前保存固定 `command.sh` 与 NUL 分隔的 argv，记录逻辑/物理工作目录和允许列表环境（allowlisted environment），不保存 secret。
+- 在阶段前后采集 UTC 时间；把 stdout 与 stderr 写入独立文件，并在任何其他简单命令前复制 producer status。
+- 日志关闭后，对固定 artifact 清单计算 SHA-256；`SHA256SUMS` 不把自己列为输入，hash 不证明命令正确。
+- 若保留 pipeline，则启用 `pipefail` 并立即复制 `PIPESTATUS`，分别保存 producer 与 `tee` 状态；combined log 只能是便利视图。
+
+<details><summary>提示 1</summary>管道的默认状态来自最后一段，不是你最关心的 `make`。</details>
+
+<details><summary>提示 2</summary>先把 `$?` 或 `PIPESTATUS` 复制到 shell variable，再执行 `printf`、timestamp 或 hash 命令。</details>
+
+**解答：** 规范路径可以直接移除 `tee`：先保存不可变 `command.sh`、`argv.nul`、路径与 allowlisted environment，写入 `started-at.txt`，再把 `make` 的 stdout 和 stderr 分别重定向到两个文件。命令返回后立即执行 `build_status=$?`，之后才把该值写入 `build.exit`，并采集 `ended-at.txt`。所有 stream 关闭后，对明确列出的 command、argv、路径、环境、时间、stdout、stderr 和 exit 文件生成 `SHA256SUMS`，且不包含该清单自身。记录模板只定义文件和顺序，不填任何未观察值。完整 `env` 与可能展开 credential 的 xtrace 从公开记录中移除。
+
+**有效替代方案：** 若交互显示必须使用 `tee`，可用 `pipefail` 并在下一条简单命令前复制 `PIPESTATUS`，分别记录 `make` 与 `tee`；但合并流不能恢复 stdout/stderr 身份，所以仍需独立的规范通道产物或明确降低记录范围。
+
+**常见错误：** 在 `printf` 之后才读取 `$?`；只记录 pipeline 的整体状态；把 combined log 当作两个通道；hash 尚未关闭的文件；把完整 environment 或 xtrace 当作“更可复现”而泄露 secret；为模板填入猜测的 `0` 或时间。
+
+**来源依据（Source basis）：** 本站 [O05](/start/linux-command-line/) 的原创命令记录合同，以及 [GNU Bash 5.3 Reference Manual](https://www.gnu.org/software/bash/manual/bash.html)和 [GNU Coreutils 9.11](https://www.gnu.org/software/coreutils/manual/coreutils.html)。
+
+<span id="pb-r1-003" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-003：分类架构声明并计算有边界的算术强度
+
+- **ID 与双语发布对：** PB-R1-003；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 架构推理与定量分析；中级。
+- **直接先修条件：** [O06：架构回顾：速率、延迟与数据移动](/start/architecture-refresher/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态分类与算术。
+- **相关学习单元：** O06。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 把以下五条待审核草稿分别归入延迟（latency）、吞吐量（throughput）、带宽（bandwidth）、并发（concurrency）或占用率（occupancy），并修复越界结论：A.“kernel latency 是 40 us”；B.“一个批次完成 2,000,000 items/s”；C.“64 MB requested bytes 在 4 ms 内经过 device DRAM 到 SM，所以这是 actual bandwidth”；D.“两个 kernel 位于不同 stream，所以已经并发执行”；E.“occupancy 为 75%，所以达到 peak throughput 的 75%”。然后计算一个独立静态模型：`N = 4096`，每个元素明确计数一次 multiply 和一次 add；在声明的 device-DRAM boundary 上，每个元素恰有一次 4-byte read 与一次 4-byte write，模型不计其他 traffic。
+
+**约束：**
+
+- 这些草稿不是 recorded observation；不补写 timer、profiler、timeline、device 或 workload 事实。
+- 算术强度（arithmetic intensity）必须同时声明 operation-count rule、memory boundary、read/write byte 口径和 workload 范围。
+- 不从计算结果推出实际性能、内存受限（memory-bound）、加速比（speedup）、重叠（overlap）或利用率（utilization）。
+
+**预期证据：** 一张五行声明分类表（claim-classification table）、一条完整的 intensity 等式，以及一段明确不保证哪些结论的边界说明。
+
+**验收条件：**
+
+- A 只有在命名起止事件和单位后才是 latency；B 是需要工作量与时间窗口的 throughput。
+- C 的形式属于带路径与方向的 requested/effective bandwidth，不是 profiler 归属的 actual bandwidth；还要固定 MB 口径和 elapsed boundary。
+- D 只说明不同 stream 中的独立工作可能具备 overlap 资格；观察 concurrency 需要 timeline。E 是 active warp 与最大 active warp 的比率，不等于 throughput 百分比。
+- 得到 `8192 operations / 32768 bytes = 0.25 operations/byte`，并把结论严格限制在给定计数与 device-DRAM boundary。
+- 不作 bottleneck、runtime、bandwidth ceiling 或性能排名声明。
+
+<details><summary>提示 1</summary>先为每条声明写清“一个事件”“时间窗口”“数据路径”“时间重叠”或“resident warp ratio”中的哪一个。</details>
+
+<details><summary>提示 2</summary>每个元素有 2 个 counted operations 和 8 个 boundary bytes。</details>
+
+**解答：** A 是缺少起止边界的 latency 草稿；B 是缺少明确窗口与 workload scope 的 throughput 草稿；C 使用 requested bytes，只能在路径、方向、时间和 MB 定义完整时形成 effective-bandwidth 算式，不能称为 actual bandwidth；D 是 overlap eligibility，不是 observed concurrency；E 是 occupancy 数值，不能换算成 achieved throughput。静态模型中，operation count 为 `4096 * 2 = 8192`，声明边界上的 byte count 为 `4096 * (4 + 4) = 32768`，所以 `I = 8192 / 32768 = 0.25 operations/byte`。这个比值没有测量 traffic 或时间，也没有给出 compute 或 bandwidth ceiling，因此不支持任何性能结论。
+
+**有效替代方案：** 可以用“对象、边界、单位、可证明内容、不可证明内容”五列 claim map 代替分类表，只要五个术语和 intensity 口径仍彼此分开。
+
+**常见错误：** 把 throughput 当作单次 latency；省略 bandwidth path；从不同 stream 推断实际 overlap；把 occupancy 当作 utilization；用 cache traffic 替换题目声明的 DRAM boundary；从 intensity 单独宣布 memory-bound。
+
+**来源依据（Source basis）：** 本站 [O06](/start/architecture-refresher/) 的原创术语与模型边界，CUDA C++ Best Practices Guide v13.3 的 [Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)和 [Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy)，以及 Williams、Waterman 与 Patterson 的 [Roofline primary technical report](https://www.osti.gov/biblio/1407078)。
+
+<span id="pb-r1-004" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-004：把产品年表改写成抽象演进
+
+- **ID 与双语发布对：** PB-R1-004；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 历史与架构解释；中级。
+- **直接先修条件：** [O07：GPU 为什么变得可编程](/start/programmable-gpus/)。
+- **硬件门槛（Hardware gate）：** 无；只做概念改写与来源归属。
+- **相关学习单元：** O07。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 把这句话改写成由抽象压力驱动的解释：“每一代新 GPU 都让上一代过时；shader 让图形芯片变成通用处理器，Brook 和 CUDA 只是继续让 GPU 在所有任务上比 CPU 更快。”改写必须按固定功能状态（fixed-function state）、可编程图形阶段（programmable graphics stage）、图形处理器通用计算（general-purpose computing on graphics processing units，GPGPU）和 CUDA 的顺序展开，并为具体历史事实建立原始来源归属（primary-source attribution）。
+
+**约束：**
+
+- 每一步都写出上一层的表达压力、接口回应和仍保留的边界。
+- 不写产品排名、普遍加速、完全替代 CPU、无来源的“首次”或仅由日期驱动的因果关系。
+- 声明到来源映射（claim-to-source map）只能使用 O07 已引用的权威来源（owner source），并让每项具体事实可回查。
+
+**预期证据：** 一个四阶段因果段落，后接一张 claim-to-source map；两者都要把接口能力与性能结论分开。
+
+**验收条件：**
+
+- Fixed-function state 只能配置预定义操作；表达新效果的压力促成有限 programmable stage，而图形 invocation、输入输出和周围 pipeline 仍保留。
+- GPGPU 把 array、computation 和 result 映射到 texture、fragment invocation 与 render target；Brook 提供 stream/kernel 表面，但底层仍经过图形机制。
+- CUDA 让 heterogeneous kernel、grid、thread block、memory locality 和 scheduling 成为主要模型，并把 block independence 与可扩展调度联系起来。
+- 不声称 CUDA 或 GPU 对所有 workload 更快；具体事实分别归属 Khronos 规范、Brook 项目或论文、CUDA Programming Guide 与 2008 CUDA 论文。
+
+<details><summary>提示 1</summary>不要先问“哪一年有什么产品”，先问“程序员还不能自然表达什么”。</details>
+
+<details><summary>提示 2</summary>“可编程”不等于“通用”：检查谁控制 invocation、input、output 和周围 stage。</details>
+
+**解答：** 固定功能图形接口擅长让大量图形项目通过预定义状态进入专用 pipeline，但新效果只能从既有菜单中选择，表达压力因此集中在允许应用提交受控指令。Vertex 与 fragment program 开放了选定 stage，Cg 又改善了源码表达，但 invocation、资源限制和周围图形语义仍由 pipeline 决定。GPGPU 随后把非图形问题编码成 texture、fragment 和 render target；Brook 用 stream 与 kernel 隐藏部分映射，却仍建立在图形机制上。CUDA 把问题改写为 host/device 分工以及 kernel、grid、thread block 和显式 memory locality，block independence 允许 runtime 在不同资源规模上安排工作。这个抽象转变扩大了可表达范围，不证明任何 workload 的普遍 speedup。来源归属为：programmable stage 对照 Khronos ARB 规范与 programmable vertex engine 论文，Brook 层对照 Stanford BrookGPU 与 Brook 论文，CUDA 模型对照 CUDA Programming Guide Introduction 和 Nickolls 等 2008 年论文。
+
+**有效替代方案：** 可以使用“压力、回应、保留边界、来源”四列表格代替连续段落，但不能退化成产品与日期列表。
+
+**常见错误：** 把 shader 写成不受约束的 general-purpose interface；混淆 Cg 与 Brook 的目标表面；把 graphics-mediated GPGPU 直接称为 CUDA；用发布日期代替因果关系；附加“GPU 总是更快”的无证据结论。
+
+**来源依据（Source basis）：** 本站 [O07](/start/programmable-gpus/) 的原创抽象压力框架，以及 [Khronos ARB_vertex_program](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_program.txt)与 [ARB_fragment_program](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_fragment_program.txt)规范、[Stanford BrookGPU 项目](https://graphics.stanford.edu/projects/brookgpu/)、[CUDA Programming Guide v13.3 Introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html)和 [Nickolls 等 2008 年 CUDA 论文](https://doi.org/10.1145/1365490.1365500)。
+
+<span id="pb-r1-005" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-005：审查不完整的基准环境候选配置
+
+- **ID 与双语发布对：** PB-R1-005；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 环境审查与证据边界；中级。
+- **直接先修条件：** [O08：准备基准环境候选配置](/start/reference-environment-candidate/)。
+- **硬件门槛（Hardware gate）：** 无；只审查候选材料，不运行 CUDA。
+- **相关学习单元：** O08。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一份基准环境（Reference Environment）候选材料只有“Ubuntu 24.04、12 GB GPU”、一张写有 `CUDA Version: 13.0` 的 banner 截图、一句 `vector add PASS` 和一个临时托管 notebook shell。材料没有记录原生系统与容器边界（native/container boundary）、设备 identity/count、直接 compute-capability query、驱动内核模式组件（Driver KMD）、已安装 Toolkit 与组件（installed Toolkit/component）、所选工具包通道与目标（selected Toolkit Lane/target）、精确命令、日志、预声明标准（predeclared criteria）、维护者控制或独立基线（baseline），却要求宣布现代单 GPU 能力层级（Modern Single-GPU Capability Tier）、Reference Environment 和 Runtime-Verified。逐门槛审查这份申请。
+
+**约束：**
+
+- 不从产品名、memory 或 banner 推断缺失坐标，不猜 compatibility path，也不补写观察。
+- 按 O08 的范围（scope）、环境清单（manifest）、层级（tier）、兼容性（compatibility）、控制（control）、baseline 和声明门槛（declaration gate）顺序判断。
+- 不作 Reference Environment 声明，不升级任何 Evidence Status，也不执行 CUDA。
+
+**预期证据：** 一张包含“已知事实、缺失事实、当前判断、下一步”的门槛表（gate table），以及一条明确的声明与状态结论。
+
+**验收条件：**
+
+- Supported scope 因 native/container boundary 未知而未建立；manifest 因硬件、软件、workload、execution、correctness 与 custody 坐标缺失而不完整。
+- Tier 保持 indeterminate，因为 12 GB 不能替代 direct compute capability、count、feature 和 permission；不授予 Modern Single-GPU Capability Tier。
+- Compatibility 保持 indeterminate；`CUDA Version` banner 不能填写 installed Toolkit，且缺少 KMD、Toolkit/component、Lane、target/PTX dependency 与 path restriction。
+- 临时 shell 不建立 maintainer control；一句 `PASS` 不是执行前指定并保存完整日志的独立 baseline。
+- 候选配置保持 incomplete and undeclared；不授予 Community-Observed、Runtime-Verified 或其他状态升级。
+
+<details><summary>提示 1</summary>把“能打开 shell”与“能固定配置、安排独占验证、重启并保管证据”分开。</details>
+
+<details><summary>提示 2</summary>Banner、Toolkit、KMD 和 driver-supported CUDA API 是不同坐标；成功 baseline 也必须在执行前写好 criteria。</details>
+
+**解答：** 当前首先无法确认候选配置位于本站的 native Linux Supported Environment，完整 manifest 也不存在。12 GB 只提供一个 capacity 片段，不能确定 tier。Banner 不能识别 installed Toolkit，缺少 KMD、精确 Toolkit/component、selected Lane、target 与 path-specific restriction 时，compatibility outcome 只能是 `indeterminate`。临时 notebook 不证明维护者可以固定软件栈、控制权限、重启或保存机器与产物，因此 control gate 未通过。`vector add PASS` 没有独立 subject、revision、command、input、correctness method、预声明 criteria、exit status、日期和原始日志，所以 baseline gate 也未通过。应先确认 scope，补全 manifest 与 direct query，再选择 tier、依据当前 owner documentation 审查 compatibility、建立 maintainer control，并在所有前置门槛完成后预先定义 baseline；在此之前保持未声明候选配置且不升级任何状态。
+
+**有效替代方案：** 可以用 stop/go checklist 或 decision tree 表达同一审查，只要未知项不会被默认成通过，并且 baseline 与 declaration 仍是独立门槛。
+
+**常见错误：** 用 memory 猜 compute capability；把 `nvidia-smi` banner 当 Toolkit；把 temporary login 当 maintainer control；运行后才补 criteria；用一次 `PASS` 同时越过 baseline、declaration 与 Runtime-Verified 边界。
+
+**来源依据（Source basis）：** 本站 [O08](/start/reference-environment-candidate/) 的原创候选与声明门槛，以及 NVIDIA [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive)、[Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)、CUDA Programming Guide [Obtain the GPU Compute Capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability)、CUDA Runtime API [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html)和 [NVIDIA-SMI documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html)。
+
 ## 复核记录
 
-五个条目及其英文对应内容在 **2026-08-25** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
+十个原创条目及其英文对应内容在 **2026-08-26** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。

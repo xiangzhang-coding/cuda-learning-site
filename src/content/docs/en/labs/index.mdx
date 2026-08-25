@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-25' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. Incomplete planned work does not appear, and there are no coming-soon destinations.
+This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-08-26, it contains two published Labs: LAB01 and LAB02. Incomplete planned work does not appear, and there are no coming-soon destinations.
 
 ## Published Labs
 
@@ -34,8 +34,8 @@ This index lists only Labs that form complete Publication Pairs and already prov
 
 ## Sequence and direct lookup
 
-A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link, and complete the linked prerequisite Learning Units in sequence before entering a Lab.
+The current sequence lists [LAB01: Record and Interpret a CUDA Environment](/en/labs/record-cuda-environment/) before [LAB02: Run and Verify Vector Addition](/en/labs/vector-addition/). LAB01 requires both O03 and O08 and uses EX01. LAB02 requires both O03 and F01 and uses EX02. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
 
 ## Evidence boundary
 
-Compilation and runtime labels are copied directly from the linked Lab's controlled evidence fields. A site build, filter action, or browser test cannot upgrade CUDA evidence. LAB02 therefore remains Pending Hardware Verification on its runtime axis.
+Compilation and runtime labels are copied directly from the linked Lab's controlled evidence fields. A site build, filter action, or browser test cannot upgrade CUDA evidence. LAB01 has an empty compilation axis with no Compile-Checked claim, and its runtime axis is Pending Hardware Verification. LAB02 retains Compile-Checked compilation while its runtime axis remains Pending Hardware Verification.

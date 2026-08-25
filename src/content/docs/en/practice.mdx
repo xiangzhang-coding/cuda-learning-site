@@ -3,7 +3,7 @@ title: Practice Bank
 description: Published original cross-unit practice with prerequisite links, layered hints, and solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -14,6 +14,11 @@ structure:
   - entry-pb-r0-003
   - entry-pb-r0-004
   - entry-pb-r0-005
+  - entry-pb-r1-001
+  - entry-pb-r1-002
+  - entry-pb-r1-003
+  - entry-pb-r1-004
+  - entry-pb-r1-005
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -21,10 +26,20 @@ prerequisites:
   - O02
   - O03
   - F01
+  - O04
+  - O05
+  - O06
+  - O07
+  - O08
 relatedUnits:
   - O02
   - O03
   - F01
+  - O04
+  - O05
+  - O06
+  - O07
+  - O08
 hardwareGate: none
 evidence:
   compilation: []
@@ -35,19 +50,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-25' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -66,13 +81,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the five complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the ten complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The five complete prompts, prerequisite links, and solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The ten complete prompts, prerequisite links, and solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -83,7 +98,7 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 - **Prerequisite:** [O02: Recording Evidence Honestly](/en/start/evidence-status/).
 - **Hardware gate:** None; analyse a text record only.
 - **Related Learning Unit:** O02.
-- **Last reviewed:** 2026-08-25.
+- **Last reviewed:** 2026-08-26.
 
 **Prompt:** A release note says: “The Linux build was skipped after the container registry timed out. A contributor pasted `PASS` from a personal GPU, so the project is Compile-Checked and Runtime-Verified. Web tests also prove that the browser explainer counts as a CUDA run.” Rewrite it as an honest record.
 
@@ -121,7 +136,7 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 - **Prerequisite:** [O03: Reading an Environment Manifest](/en/start/environment-manifest/).
 - **Hardware gate:** None; use a hypothetical record and run no CUDA.
 - **Related Learning Unit:** O03.
-- **Last reviewed:** 2026-08-25.
+- **Last reviewed:** 2026-08-26.
 
 **Prompt:** A record contains only “8 GB GPU, CUDA 12, WSL, kernel 0.2 ms” and claims “complete tier; this site supports the environment.” List the missing manifest fields and repair both conclusions.
 
@@ -158,7 +173,7 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 - **Prerequisite:** [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/).
 - **Hardware gate:** None; use static reasoning only.
 - **Related Learning Unit:** F01.
-- **Last reviewed:** 2026-08-25.
+- **Last reviewed:** 2026-08-26.
 
 **Prompt:** For one-dimensional vector addition with `N = 65` and `blockDim.x = 32`, give the block count, total launched thread count, final valid index, and bounds state of `threadIdx.x = 0` and `1` in the final block. Explain why a bounds check remains necessary.
 
@@ -189,7 +204,7 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 - **Prerequisite:** [F01](/en/foundations/first-cuda-kernel/).
 - **Hardware gate:** None; review a hypothetical flow.
 - **Related Learning Units:** F01 and O02.
-- **Last reviewed:** 2026-08-25.
+- **Last reviewed:** 2026-08-26.
 
 **Prompt:** A program checks only `cudaMalloc` and final output text, then claims “no error and GPU-correct.” Write the missing boundaries and define the acceptance rule for one element.
 
@@ -220,7 +235,7 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 - **Prerequisite:** [F01](/en/foundations/first-cuda-kernel/), with [O02](/en/start/evidence-status/) and [O03](/en/start/environment-manifest/).
 - **Hardware gate:** None; review a text record and run no CUDA.
 - **Related Learning Units:** F01, O02, and O03.
-- **Last reviewed:** 2026-08-25.
+- **Last reviewed:** 2026-08-26.
 
 **Prompt:** A LAB02 request contains only “CUDA 13, vector add PASS, 0.01 ms” and asks for Runtime-Verified. Decide which status can be assigned now and list the completion path.
 
@@ -242,6 +257,209 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 
 **Source basis:** The original evidence contracts in [LAB02](/en/labs/vector-addition/), [O02](/en/start/evidence-status/), and [O03](/en/start/environment-manifest/).
 
+<span id="pb-r1-001" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-001: Repair lifetime, build, and error boundaries
+
+- **ID and Publication Pair:** PB-R1-001 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Debugging and correctness; intermediate.
+- **Direct prerequisite:** [O04: C++17 Refresher for CUDA Learners](/en/start/cpp17-for-cuda/).
+- **Hardware gate:** None; review source and build design only. No GPU is required.
+- **Related Learning Unit:** O04.
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A `.cu` patch saves `data()` from a local `std::vector<float>` in an asynchronous copy task, then returns before the task completes. An RAII owner for a CUDA allocation throws from its destructor when `cudaFree` fails. A `__host__ __device__` helper calls a throwing host-only function. CI compiles only the caller with a host compiler and declares that both host and device paths built. The runtime path wraps a kernel launch in `try/catch` but ignores `cudaError_t`, the launch check, and the completion check. Write the smallest complete repair.
+
+**Constraints:**
+
+- Run no build, sanitizer, or CUDA command, and invent no diagnostic or output.
+- Treat pointee lifetime, ownership, build boundaries, and error boundaries independently.
+- A raw pointer is a non-owning view. The repair must say when its owner may be destroyed.
+
+**Expected evidence:** An ownership timeline through asynchronous completion, a host/device build-stage table, and an execution-ordered error checklist.
+
+**Acceptance criteria:**
+
+- Identify that destroying the local vector first leaves the saved view dangling. Keep the owner alive through asynchronous completion or establish an explicit completion boundary before scope exit.
+- Keep the CUDA owner's destructor non-throwing. Supply an explicit `close` or `reset` path when cleanup failure must remain observable.
+- Separate host-only throwing code from the device-safe helper, expose device definitions to the `nvcc` path, and record compilation, optional device linking, and host linking separately. A successful host object proves neither the device path nor execution.
+- Check every relevant `cudaError_t` and separate launch error from completion error. A host exception adapter may convert an error only after preserving the CUDA failure details.
+
+<details><summary>Hint 1</summary>Copying a raw pointer copies an address value. It does not extend the vector or allocation lifetime.</details>
+
+<details><summary>Hint 2</summary>`try/catch` observes host exceptions. CUDA Runtime failures first cross return-value, launch, and completion boundaries.</details>
+
+**Solution:** Put the staging buffer and CUDA allocation in an operation owner that lives until a stream event or explicit synchronization confirms completion. The other minimal repair is to synchronize before the local owner is destroyed. Mark every raw pointer as a view and carry its extent and address-space meaning. Make the destructor perform non-throwing best-effort cleanup and expose explicit `close` when cleanup failure must be reported. Split the throwing host adapter from the device helper, compile the `.cu` file and device-visible definitions with `nvcc`, and record any device link separately from the final host link. Check allocation, copy, and other Runtime API results, inspect launch error after launch, and inspect completion at a synchronization or event boundary. Only a host adapter may throw, after retaining the error name, message, and call site. No build artifact proves that a GPU path ran.
+
+**Valid alternative:** Use an operation object that owns asynchronous state, or make the copy complete synchronously within the current scope. Either choice must keep the owner alive through the final legal access and preserve the same build and error boundaries.
+
+**Common errors:** Nulling only one pointer copy; making a non-owning view call `free`; throwing from a destructor; letting host-only `throw` enter the device path; treating host compilation, linking, or zero warnings as CUDA execution evidence.
+
+**Source basis:** The site's original [O04 contract](/en/start/cpp17-for-cuda/), the [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines), NVIDIA [CUDA Runtime API Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html), and the [`nvcc` compilation trajectory](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory).
+
+<span id="pb-r1-002" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-002: Repair a build record that hides producer failure
+
+- **ID and Publication Pair:** PB-R1-002 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Debugging and reproducibility; intermediate.
+- **Direct prerequisite:** [O05: Reproducible Linux Command-Line Work](/en/start/linux-command-line/).
+- **Hardware gate:** None; design the record only. No GPU is required.
+- **Related Learning Unit:** O05.
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A script runs `make -C "$build_dir" all 2>&1 | tee "$record_dir/build.log"`, writes the following `$?` to `build.exit`, and reports build success because that value is zero. It also saves the complete `env` and xtrace, but has no literal command, separate stdout and stderr, actual start and end times, or sealing hash. Repair the failure decision and design a minimal public record.
+
+**Constraints:**
+
+- Run no command and fill in no exit status, timestamp, log content, hash, or other invented output.
+- Record no secret, token, credential, or unapproved full environment. Xtrace cannot replace literal input.
+- The canonical record must preserve command, stdout, stderr, exit status, UTC timestamps, and SHA-256 hash boundaries.
+
+**Expected evidence:** A failure-propagation explanation and an ordered artifact manifest stating when each file is written, closed, and included in hashing.
+
+**Acceptance criteria:**
+
+- Explain that the original `$?` belongs to `tee` by default, so a successful consumer can hide a failed producer. `2>&1` also discards channel identity.
+- Before execution, preserve a fixed `command.sh`, NUL-delimited argv, logical and physical working directories, and an allowlisted environment with no secrets.
+- Capture UTC time before and after the stage, write stdout and stderr separately, and copy producer status before any other simple command.
+- After logs close, hash a fixed artifact list with SHA-256. Do not include `SHA256SUMS` in itself, and do not claim that a hash proves command correctness.
+- If the pipeline remains, enable `pipefail`, immediately copy `PIPESTATUS`, and preserve producer and `tee` status separately. A combined log is only a convenience view.
+
+<details><summary>Hint 1</summary>A pipeline's default status comes from its final stage, not from the `make` command you care about.</details>
+
+<details><summary>Hint 2</summary>Copy `$?` or `PIPESTATUS` into a shell variable before running `printf`, timestamp, or hash commands.</details>
+
+**Solution:** The canonical path may remove `tee`. First preserve immutable `command.sh`, `argv.nul`, paths, and the allowlisted environment, then write `started-at.txt`. Run `make` with stdout and stderr redirected to separate files. Immediately execute `build_status=$?`; only then write that value to `build.exit` and capture `ended-at.txt`. After every stream closes, generate `SHA256SUMS` over an explicit list containing command, argv, paths, environment, times, stdout, stderr, and exit files, excluding the checksum file itself. The template defines names and ordering without supplying any unobserved value. Remove complete `env` and any xtrace that could expand credentials from the public record.
+
+**Valid alternative:** If interactive display requires `tee`, use `pipefail` and copy `PIPESTATUS` before the next simple command, recording `make` and `tee` independently. A merged stream cannot recover stdout/stderr identity, so retain separate canonical channel artifacts or explicitly narrow the record's scope.
+
+**Common errors:** Reading `$?` after `printf`; retaining only the aggregate pipeline status; treating a combined log as two channels; hashing files before they close; leaking secrets because a full environment or xtrace seems “more reproducible”; filling a template with a guessed `0` or time.
+
+**Source basis:** The site's original [O05 contract](/en/start/linux-command-line/), the [GNU Bash 5.3 Reference Manual](https://www.gnu.org/software/bash/manual/bash.html), and [GNU Coreutils 9.11](https://www.gnu.org/software/coreutils/manual/coreutils.html).
+
+<span id="pb-r1-003" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-003: Classify architecture claims and calculate bounded arithmetic intensity
+
+- **ID and Publication Pair:** PB-R1-003 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Architecture reasoning and quantitative analysis; intermediate.
+- **Direct prerequisite:** [O06: Architecture Refresher: Rate, Delay, and Data Movement](/en/start/architecture-refresher/).
+- **Hardware gate:** None; use static classification and arithmetic only.
+- **Related Learning Unit:** O06.
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** Classify each review draft as latency, throughput, bandwidth, concurrency, or occupancy, then repair its overreach: A. “Kernel latency is 40 us.” B. “One batch completes 2,000,000 items/s.” C. “64 MB of requested bytes crossed from device DRAM to an SM in 4 ms, so this is actual bandwidth.” D. “Two kernels use different streams, so they executed concurrently.” E. “Occupancy is 75%, so the kernel reached 75% of peak throughput.” Then calculate a separate static model: `N = 4096`; each element counts exactly one multiply and one add; at the declared device-DRAM boundary, each element has exactly one 4-byte read and one 4-byte write, with no other traffic counted by the model.
+
+**Constraints:**
+
+- The drafts are not recorded observations. Add no timer, profiler, timeline, device, or workload facts.
+- Arithmetic intensity must declare its operation-count rule, memory boundary, read/write byte convention, and workload scope.
+- Infer no achieved performance, memory-bound diagnosis, speedup, overlap, or utilization from the calculation.
+
+**Expected evidence:** A five-row claim-classification table, one complete intensity equation, and a scope statement naming what neither artifact guarantees.
+
+**Acceptance criteria:**
+
+- A becomes latency only after naming start and end events and units. B is throughput and needs a work amount and time window.
+- C has the shape of requested or effective bandwidth with a path and direction, not profiler-attributed actual bandwidth. It also needs a fixed MB convention and elapsed boundary.
+- D says only that independent work in different streams may be eligible to overlap; concurrency requires a timeline. E is an active-warp to maximum-active-warp ratio, not a throughput percentage.
+- Derive `8192 operations / 32768 bytes = 0.25 operations/byte` and restrict it to the supplied counting rule and device-DRAM boundary.
+- Make no bottleneck, runtime, bandwidth-ceiling, or performance-ranking claim.
+
+<details><summary>Hint 1</summary>For each draft, ask whether its subject is one event, a time window, a data path, temporal overlap, or a resident-warp ratio.</details>
+
+<details><summary>Hint 2</summary>Each element contributes 2 counted operations and 8 boundary bytes.</details>
+
+**Solution:** A is a latency draft missing start and end boundaries. B is a throughput draft missing a precise window and workload scope. C uses requested bytes, so it can form an effective-bandwidth calculation only after path, direction, time, and MB meaning are complete; it is not actual bandwidth. D establishes overlap eligibility, not observed concurrency. E is an occupancy value and cannot be converted into achieved throughput. In the static model, the operation count is `4096 * 2 = 8192` and the byte count at the declared boundary is `4096 * (4 + 4) = 32768`, so `I = 8192 / 32768 = 0.25 operations/byte`. The ratio measures neither traffic nor time and supplies no compute or bandwidth ceiling, so it supports no performance conclusion.
+
+**Valid alternative:** Replace the classification table with a claim map containing subject, boundary, unit, established conclusion, and excluded conclusion, provided the five terms and intensity convention stay distinct.
+
+**Common errors:** Treating throughput as single-request latency; omitting the bandwidth path; inferring overlap from different streams; treating occupancy as utilization; replacing the declared DRAM boundary with cache traffic; declaring memory-bound behavior from intensity alone.
+
+**Source basis:** The site's original [O06 terminology and model boundaries](/en/start/architecture-refresher/), CUDA C++ Best Practices Guide v13.3 [Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) and [Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy), and the [primary Roofline technical report](https://www.osti.gov/biblio/1407078) by Williams, Waterman, and Patterson.
+
+<span id="pb-r1-004" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-004: Replace a product chronology with abstraction history
+
+- **ID and Publication Pair:** PB-R1-004 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** History and architecture explanation; intermediate.
+- **Direct prerequisite:** [O07: Why GPUs Became Programmable](/en/start/programmable-gpus/).
+- **Hardware gate:** None; rewrite concepts and attribute sources only.
+- **Related Learning Unit:** O07.
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** Rewrite this statement as an abstraction-pressure explanation: “Every new GPU generation made the last obsolete. Shaders turned graphics chips into general processors, and Brook and CUDA merely kept making GPUs faster than CPUs for every task.” Proceed through fixed-function state, programmable graphics stages, general-purpose computing on graphics processing units, or GPGPU, and CUDA in that order. Attribute concrete historical facts to primary sources.
+
+**Constraints:**
+
+- For every transition, state the previous abstraction's expressive pressure, the interface response, and the boundary that remained.
+- Make no product ranking, universal-speed claim, complete-CPU-replacement claim, unsourced “first,” or date-only causal argument.
+- The claim-to-source map may use only owner sources already cited by O07, with each concrete fact traceable.
+
+**Expected evidence:** A four-stage causal paragraph followed by a claim-to-source map. Both must keep interface capability separate from performance conclusions.
+
+**Acceptance criteria:**
+
+- Fixed-function state configures predefined operations. Pressure to express new effects leads to limited programmable stages while graphics invocation, inputs, outputs, and the surrounding pipeline remain.
+- GPGPU maps arrays, computation, and results onto textures, fragment invocation, and render targets. Brook supplies a stream and kernel surface while its implementation still passes through graphics mechanisms.
+- CUDA makes heterogeneous kernels, grids, thread blocks, memory locality, and scheduling the primary model, connecting block independence with scalable scheduling.
+- Claim no universal GPU or CUDA speed advantage. Attribute specific facts to the Khronos specifications, Brook project or paper, CUDA Programming Guide, and the 2008 CUDA paper.
+
+<details><summary>Hint 1</summary>Do not begin with “which product appeared in which year.” Begin with “what could programmers not yet express naturally?”</details>
+
+<details><summary>Hint 2</summary>“Programmable” is not identical to “general purpose.” Check who controls invocation, input, output, and surrounding stages.</details>
+
+**Solution:** Fixed-function graphics interfaces efficiently sent many graphics items through a specialized pipeline, but new effects had to be selected from a predefined menu, creating pressure for an application-controlled instruction surface. Vertex and fragment programs opened selected stages, and Cg improved source-level expression, while invocation, resource limits, and surrounding graphics semantics remained pipeline-controlled. GPGPU then encoded nongraphics problems as textures, fragment work, and render targets. Brook hid part of that mapping behind streams and kernels but still relied on graphics mechanisms. CUDA reframed the problem around host/device division, kernels, grids, thread blocks, and explicit memory locality. Block independence lets the runtime schedule work across different resource counts. This abstraction shift expands what can be expressed; it proves no universal workload speedup. Attribute programmable-stage claims to the Khronos ARB specifications and programmable vertex-engine paper, Brook claims to Stanford BrookGPU and its paper, and CUDA claims to the CUDA Programming Guide Introduction and Nickolls et al. 2008 paper.
+
+**Valid alternative:** Use a four-column pressure, response, retained-boundary, and source table instead of continuous prose, but do not reduce it to products and dates.
+
+**Common errors:** Treating a shader as an unconstrained general-purpose interface; conflating the target surfaces of Cg and Brook; calling graphics-mediated GPGPU CUDA; substituting release date for causation; appending an unsupported “GPUs are always faster” conclusion.
+
+**Source basis:** The site's original [O07 abstraction-pressure framework](/en/start/programmable-gpus/), the Khronos [ARB_vertex_program](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_program.txt) and [ARB_fragment_program](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_fragment_program.txt) specifications, the [Stanford BrookGPU project](https://graphics.stanford.edu/projects/brookgpu/), [CUDA Programming Guide v13.3 Introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/introduction.html), and the [2008 CUDA paper by Nickolls et al.](https://doi.org/10.1145/1365490.1365500).
+
+<span id="pb-r1-005" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-005: Triage an incomplete Reference Environment candidate
+
+- **ID and Publication Pair:** PB-R1-005 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Environment review and evidence boundaries; intermediate.
+- **Direct prerequisite:** [O08: Preparing a Reference Environment Candidate](/en/start/reference-environment-candidate/).
+- **Hardware gate:** None; review candidate material and run no CUDA.
+- **Related Learning Unit:** O08.
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A Reference Environment candidate packet contains only “Ubuntu 24.04, 12 GB GPU,” a screenshot with a `CUDA Version: 13.0` banner, one `vector add PASS` line, and a temporary hosted-notebook shell. It records no native or container boundary, device identity or count, direct compute-capability query, Driver KMD, installed Toolkit or components, selected Toolkit Lane or target, exact command, logs, predeclared criteria, maintainer control, or separate baseline. It requests the Modern Single-GPU Capability Tier, a Reference Environment declaration, and Runtime-Verified. Review every gate.
+
+**Constraints:**
+
+- Infer no missing coordinate from a product name, memory capacity, or banner. Guess no compatibility path and add no observation.
+- Apply O08's scope, manifest, tier, compatibility, control, baseline, and declaration gates in order.
+- Make no Reference Environment declaration, Evidence Status upgrade, or CUDA execution.
+
+**Expected evidence:** A gate table with known facts, missing facts, current decision, and next action, followed by an explicit declaration and status conclusion.
+
+**Acceptance criteria:**
+
+- Supported scope is not established because the native or container boundary is unknown. The manifest lacks hardware, software, workload, execution, correctness, and custody coordinates.
+- Tier remains indeterminate because 12 GB does not replace direct compute capability, count, features, and permissions. Do not assign the Modern Single-GPU Capability Tier.
+- Compatibility remains indeterminate. The `CUDA Version` banner cannot fill the installed Toolkit field, and KMD, Toolkit or components, Lane, target or PTX dependency, and path restrictions are absent.
+- A temporary shell does not establish maintainer control. A `PASS` line is not a separately specified baseline with predeclared criteria and retained logs.
+- Keep the candidate incomplete and undeclared. Grant no Community-Observed, Runtime-Verified, or other status upgrade.
+
+<details><summary>Hint 1</summary>Separate “can open a shell” from “can pin the configuration, schedule exclusive validation, reboot, and retain evidence.”</details>
+
+<details><summary>Hint 2</summary>The banner, Toolkit, KMD, and driver-supported CUDA API are distinct coordinates. A successful baseline also needs criteria written before execution.</details>
+
+**Solution:** The packet does not first establish that the candidate lies inside the site's native Linux Supported Environment, and no complete manifest exists. Twelve GB supplies only one capacity fragment and cannot select a tier. The banner does not identify the installed Toolkit. Without KMD, exact Toolkit or components, selected Lane, target, and path-specific restrictions, the compatibility outcome is `indeterminate`. A temporary notebook does not show that maintainers can pin the stack, control permissions, reboot, or retain the machine and artifacts, so the control gate fails. `vector add PASS` has no separate subject, revision, command, input, correctness method, predeclared criteria, exit status, date, or raw logs, so there is no baseline. Confirm scope first, complete the manifest and direct query, then select a tier, review compatibility against current owner documentation, establish maintainer control, and predeclare a baseline only after all earlier gates are complete. Until then, preserve an undeclared candidate and upgrade no status.
+
+**Valid alternative:** A stop/go checklist or decision tree is acceptable when unknown values never default to pass and baseline remains separate from declaration.
+
+**Common errors:** Guessing compute capability from memory; treating an `nvidia-smi` banner as the Toolkit; treating temporary login as maintainer control; adding criteria after execution; using one `PASS` line to cross baseline, declaration, and Runtime-Verified boundaries at once.
+
+**Source basis:** The site's original [O08 candidate and declaration gates](/en/start/reference-environment-candidate/), NVIDIA [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive), [Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html), CUDA Programming Guide [Obtain the GPU Compute Capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability), CUDA Runtime API [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html), and the [NVIDIA-SMI documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html).
+
 ## Review record
 
-All five entries and their Chinese counterparts were reviewed together on **2026-08-25**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.
+All ten original entries and their Chinese counterparts were reviewed together on **2026-08-26**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.

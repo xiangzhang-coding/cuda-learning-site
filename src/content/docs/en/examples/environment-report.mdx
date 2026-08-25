@@ -1,0 +1,246 @@
+---
+title: 'EX01: Environment Report Runnable Example'
+description: Build a C++17 CUDA Runtime utility that launches no kernel, read its structured observations, and understand the boundary around a complete Environment Manifest.
+pairId: ex01
+counterpart: /examples/environment-report/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - report-contract
+  - build
+  - hardware
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX01
+prerequisites: []
+relatedUnits:
+  - O02
+  - O03
+  - O08
+  - LAB01
+exampleIds:
+  - EX01
+canonicalExample: EX01
+canonicalRanges:
+  - observation-model
+  - version-query
+  - device-inventory
+hardwareGate: 'Build: host C++17 compiler for host-test and a CUDA Toolkit for the CUDA executable; runtime inventory: native Linux with CUDA Runtime access, where zero visible devices remains a valid observation'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A successful report should contain UTC, build, environment-variable, version, count, and per-visible-device observations in one JSON document.
+    - A successful zero device count should produce an empty device inventory; any required unavailable or error observation should preserve valid JSON and select exit code 3.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 11.8.0 - Version Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - Version Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Version Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide 13.3 - Obtain the GPU Compute Capability'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability'
+    version: 'CUDA Programming Guide 13.3'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex01
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-26'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,report-contract,build,hardware,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX01
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'O02,O03,O08,LAB01'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX01
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX01
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'observation-model,version-query,device-inventory'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: host C++17 compiler for host-test and a CUDA Toolkit for the CUDA executable; runtime inventory: native Linux with CUDA Runtime access, where zero visible devices remains a valid observation'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '2 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '5'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/environment-report/" lang="zh-CN">阅读中文版本</a>
+
+EX01 is a standalone, original environment-report Runnable Example. It reads environment observations through the CUDA Runtime API, launches no kernel, allocates no device memory, and never executes CUDA inside the website.
+
+It reports facts rather than conclusions. The report does not decide compatibility, select a GPU Capability Tier, declare a Reference Environment, or grant an Evidence Status.
+
+## Purpose
+
+A single version string can merge distinct layers when the build toolchain, active Runtime, and visible devices come from different places. EX01 separately captures UTC time, compile-time compiler coordinates, the CUDART linkage selection, two CUDA environment variables, the driver-supported CUDA API version, the Runtime version, and per-device identity and capacity.
+
+This output is only one input to a complete Environment Manifest. It does not contain every required field for the OS, installed driver package, exact Toolkit package and path, workload, execution command, correctness criteria, record custody, and maintainer control.
+
+## Project
+
+[View the temporary EX01 project on the main branch](https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex01-environment-report), or [download the temporary main-branch source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/refs/heads/main.zip). After extraction, enter `examples/ex01-environment-report/`.
+
+`project.json` is the machine-readable contract, and `README.md` gives the standalone usage boundary. Both locale pages display only the three marker ranges declared by the manifest. The first range defines the reusable pure C++17 observation model, version decoding, and environment capture. The same header also provides JSON escaping and UUID byte encoding covered by the host-only test:
+
+<CanonicalCode exampleId="EX01" range="observation-model" />
+
+## Report contract
+
+Report mode has one command:
+
+```sh
+./build/ex01-environment-report --format=json
+```
+
+`--help` prints usage and returns `0`. Every other CLI shape writes its diagnostic only to `stderr` and returns `2`. Report mode writes one JSON document and nothing else to `stdout`. Query failures remain observations in that document rather than becoming fabricated example values.
+
+| JSON coordinate | Structural guarantee |
+| --- | --- |
+| `generatedAtUtc` | UTC time observation |
+| `build` | C++17, compile-time NVCC and host-compiler coordinates, and the selected `shared` or `static` CUDART linkage |
+| `environment` | `present` or `absent` states for `CUDA_VISIBLE_DEVICES` and `CUDA_DEVICE_ORDER`; a present empty string remains distinct from absence |
+| Version queries | `available`, `unavailable`, or `error`; a failure preserves the API source, CUDA error name, integer code, and message |
+| Device inventory | A successful count and observations for each visible ordinal; `devices` is an empty array when the count is `0` |
+
+Both `cudaDriverGetVersion` and `cudaRuntimeGetVersion` preserve the encoded integer and decode it as `1000 * major + 10 * minor`:
+
+<CanonicalCode exampleId="EX01" range="version-query" />
+
+The per-device path uses `cudaGetDeviceProperties` for the name, 16 raw UUID bytes, and global memory. It preserves UUID byte order and writes exactly two lowercase hexadecimal characters per byte with no separator. The PCI bus ID comes from `cudaDeviceGetPCIBusId`. Compute-capability major and minor are each queried directly with `cudaDeviceGetAttribute`:
+
+<CanonicalCode exampleId="EX01" range="device-inventory" />
+
+The process returns `0` when every required query is available. A successfully observed count of `0` also returns `0`. If any required query is unavailable or reports an error, the process first writes valid JSON and then returns `3`.
+
+## Build
+
+All three Toolkit Lanes use the same C++17 source: CUDA 11.8.0 on Ubuntu 22.04, CUDA 12.9.2 on Ubuntu 24.04, and CUDA 13.3.1 on Ubuntu 24.04. The project has no device code, so it declares no `sm_*` or `compute_*` architecture target.
+
+```sh
+make preprocess DIALECT=c++17 CUDART=shared
+make compile DIALECT=c++17 CUDART=shared
+make link DIALECT=c++17 CUDART=shared
+make host-test DIALECT=c++17
+```
+
+`make build` names the link-stage dependency. `CUDART=static` selects static linkage. `NVCC`, `HOST_CXX`, and `BUILD_DIR` are explicit overrides. `scripts/compile-check.sh` orchestrates preprocessing, compilation, linking, and the host-only test in sequence, but it never executes `build/ex01-environment-report`.
+
+## Hardware
+
+Build and runtime inventory have separate gates:
+
+- `make host-test` needs only a host C++17 compiler. It needs no CUDA header, driver, or GPU.
+- Preprocessing, compilation, and linking need the corresponding CUDA Toolkit but execute no GPU work.
+- Runtime inventory requires executing the built utility in the Learning Site's Supported Environment, native Linux, with CUDA Runtime access to that environment. A successful visible-device count of `0` is a valid empty inventory rather than a hardware failure.
+
+EX01 has no kernel or device allocation, so this page declares no minimum compute capability, memory floor, or required GPU count.
+
+## Compatibility
+
+`cudaDriverGetVersion` returns the latest CUDA API version supported by the driver, not the installed driver-package version. `cudaRuntimeGetVersion` returns a Runtime version encoding. That encoding contains only major and minor coordinates and cannot identify a Toolkit patch. Compile-time NVCC macros and the Makefile-selected CUDART linkage are separate coordinates and cannot substitute for either result.
+
+The program calls the CUDA Runtime directly. It starts no subprocess, reaches no network or profiler, and never scrapes `nvidia-smi`. EX01 does not combine the observed name, compute capability, memory, and versions into a compatibility, tier, or Reference Environment decision. Those decisions require the complete inputs and gates taught by O03 and O08.
+
+## Evidence
+
+The `project.json` compilation-evidence array is empty, runtime is Pending Hardware Verification, and recorded observations are empty. The host-only test checks only the pure-helper contract. Source availability, a website build, or a local compilation does not change those fields automatically.
+
+## Expected observations, not runtime records
+
+These are expectations for future review of report structure, not output generated or stored by this page:
+
+1. A successful report should contain UTC, build, environment-variable, version, count, and per-visible-device observations in one JSON document.
+2. A successful zero device count should produce an empty device inventory; any required unavailable or error observation should preserve valid JSON and select exit code `3`.
+
+There is no recorded runtime observation, example JSON, or inferred machine value.
+
+## Sources
+
+The three exact Runtime Version Management pages govern version semantics. The archive path for 12.9.2 currently labels its page as 12.9.1, so the metadata preserves both the path and the displayed label. The direct Runtime compute-capability query comes from CUDA Programming Guide v13.3. Device count, properties, attributes, and PCI queries come from Runtime Device Management.
+
+- [CUDA Runtime API 11.8.0 Version Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART____VERSION.html)
+- [CUDA Runtime API 12.9.2 archive Version Management](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART____VERSION.html)
+- [CUDA Runtime API 13.3.1 Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html)
+- [CUDA Programming Guide v13.3: obtain compute capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability)
+- [CUDA Runtime API 13.3.1 Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+
+**Fact-check and access date: 2026-08-26.** The page and project source are original. They copy no NVIDIA sample listing, private material, or runtime output.

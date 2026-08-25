@@ -1,0 +1,270 @@
+---
+title: 'O08: Preparing a Reference Environment Candidate'
+description: Qualify a native-Linux candidate through complete coordinates, documented compatibility, maintainer control, and a predeclared successful baseline without declaring evidence early.
+pairId: o08
+counterpart: /start/reference-environment-candidate/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - candidate
+  - manifest
+  - tier
+  - compatibility
+  - control
+  - baseline
+  - decision
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O08
+prerequisites:
+  - O02
+  - O03
+  - O05
+relatedUnits:
+  - EX01
+  - LAB01
+exampleIds:
+  - EX01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: NVIDIA CUDA Toolkit Archive
+    url: 'https://developer.nvidia.com/cuda-toolkit-archive'
+    version: '11.8.0, 12.9.2, and 13.3.1 release identities'
+    platform: 'All published platforms'
+    accessDate: '2026-08-26'
+  - title: CUDA Toolkit 13.3 Update 1 Release Notes
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: '13.3.1; selected 11.x, 12.x, and 13.x Linux driver compatibility rows'
+    platform: 'Linux x86_64'
+    accessDate: '2026-08-26'
+  - title: Why CUDA Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'CUDA application deployment'
+    accessDate: '2026-08-26'
+  - title: CUDA Minor Version Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'Linux x86_64'
+    accessDate: '2026-08-26'
+  - title: CUDA Forward Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'Eligible NVIDIA Linux systems'
+    accessDate: '2026-08-26'
+  - title: CUDA Programming Guide - Obtain the GPU Compute Capability
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability'
+    version: '13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-26'
+  - title: CUDA Runtime API - Version Management
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: '13.3.1; last updated 2026-06-29'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-26'
+  - title: NVIDIA System Management Interface
+    url: 'https://docs.nvidia.com/deploy/nvidia-smi/index.html'
+    version: 'Current on 2026-08-26'
+    platform: 'NVIDIA driver-supported Linux'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,candidate,manifest,tier,compatibility,control,baseline,decision,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,O05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX01,LAB01' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX01 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3' }
+---
+
+import CompatibilityExplorer from '../../../../components/CompatibilityExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/start/reference-environment-candidate/" lang="zh-CN">阅读中文对应页</a>
+
+This Learning Unit turns a native-Linux machine into a reviewable Reference Environment candidate. A candidate is not a declaration. **No Reference Environment is currently declared.** EX01 output, a Compatibility Explorer result, a successful build, `nvidia-smi`, or a community report is insufficient to declare one.
+
+## What you should be able to do
+
+- Assemble the complete Environment Manifest needed to assess one candidate without merging independent coordinates.
+- Query compute capability directly, select the applicable GPU Capability Tier, and keep hardware eligibility separate from observed behavior.
+- Distinguish the installed kernel-mode driver, the CUDA API level supported by the driver, and the installed Toolkit and component versions.
+- Interpret backward, minor-version, and forward-package compatibility as documented paths that still require runtime validation.
+- Apply maintainer-control and successful-baseline gates before any Reference Environment declaration.
+
+This unit performs static assessment only. It requires no GPU, runs no CUDA, and grants no CUDA Evidence Status.
+
+## Prerequisites
+
+Complete these Learning Units in this exact order:
+
+1. [O02: Recording Evidence Honestly](/en/start/evidence-status/), for independent compilation and runtime evidence axes.
+2. [O03: Reading an Environment Manifest](/en/start/environment-manifest/), for complete and interpretable environment coordinates.
+3. [O05: Reproducible Linux Command-Line Work](/en/start/linux-command-line/), for reproducible queries, commands, and captured logs.
+
+## What makes a candidate
+
+A Reference Environment candidate is one concrete configuration being prepared for review. It must stay inside the site's only Supported Environment, native Linux, and it must identify one exact GPU and software stack rather than a product family or a floating “latest” setup.
+
+Preparation has five independent parts: a complete manifest, an applicable GPU Capability Tier, a documented compatibility assessment, maintainer control, and a separately designated baseline whose correctness criteria were written before execution. Missing any part leaves the configuration a candidate with a named gap.
+
+**No Reference Environment is currently declared.** An EX01 report can help collect fields, but EX01 output, a compatibility result, a build, `nvidia-smi`, or a community report cannot cross the declaration boundary.
+
+## Complete the Environment Manifest
+
+Record observed values and the exact collection command. Do not replace a missing value with a product-page lookup or an inference from another field.
+
+| Coordinate group | Required record |
+| --- | --- |
+| GPU identity | Product name, UUID or stable device identifier, visible and used GPU count |
+| Direct capability query | Compute capability as `major.minor`, raw query output, query command, and selected device |
+| Capacity and features | Total and available device memory, required features, topology when relevant, and activity permissions |
+| Driver stack | Exact installed kernel-mode driver, driver-supported CUDA API level, and the method used for each |
+| Toolkit and components | Exact Toolkit `X.Y.Z`, active installation path, NVCC, CUDA Runtime, relevant libraries and tools, and package records |
+| Host software | Native-Linux distribution, release, architecture, kernel, host compiler, and relevant container boundary if any |
+| Workload | Subject ID and revision, input source, data type, shape, iterations, GPU count, and memory requirement |
+| Execution | Unabridged build and run commands, environment variables, selected C++ dialect, compiler target, working directory, and permissions |
+| Correctness | Independent reference, tolerance or invariant, plus explicit pass and fail criteria written before execution |
+| Record custody | Observer, observation date, raw logs, exit status, generated artifacts, and durable storage location |
+
+Query compute capability from the device instead of inferring it from the GPU name. CUDA Programming Guide v13.3 documents this direct `nvidia-smi` form:
+
+```bash
+nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader
+```
+
+The Runtime and Driver APIs provide direct alternatives through `cudaDeviceGetAttribute()` and `cuDeviceGetAttribute()`. Whichever method is used, preserve the exact command or source, raw result, device identity, and date. A direct query fills one manifest coordinate. It does not validate the candidate.
+
+### Keep three software coordinates separate
+
+| Coordinate | What it means | Suitable collection basis |
+| --- | --- | --- |
+| Driver KMD | The installed NVIDIA kernel-mode driver version used against a documented driver floor | Preserve the `KMD Version` from current `nvidia-smi -q` output or an equivalent driver package record |
+| Driver-supported CUDA API | The latest CUDA API level exposed by the driver stack, not the installed Toolkit | Preserve `CUDA UMD Version` or query `cudaDriverGetVersion()` |
+| Installed Toolkit and components | The compiler, runtime, libraries, and tools actually selected for the workload | Record `nvcc --version`, installation and package paths, `cudaRuntimeGetVersion()`, and relevant component-specific versions |
+
+Current NVIDIA-SMI documentation says its CUDA UMD value is usually, but not always, the installed Toolkit version. Therefore the `CUDA Version` banner cannot fill the Toolkit field. CUDA Runtime API 13.3.1 also states that `cudaDriverGetVersion()` reports the latest CUDA version supported by the driver, while `cudaRuntimeGetVersion()` reports the current Runtime version and, since CUDA 12.0, returns a compile-time Toolkit constant without initializing CUDA.
+
+## Select the applicable GPU Capability Tier
+
+Use the directly queried compute capability together with memory, GPU count, required features, and permissions:
+
+- The **Baseline GPU Capability Tier** requires compute capability **7.5 or newer**. Stable Curriculum fundamentals use problem sizes that fit within **8 GB**.
+- The **Modern Single-GPU Capability Tier** requires compute capability **8.0 or newer** and at least **8 GB** for the complete single-GPU route.
+- Multi-GPU and architecture-specific work adds its own count, topology, feature, and permission gates.
+
+Write the highest tier whose complete contract the candidate actually meets, and record why. Memory alone, a product name, or a compatibility result cannot select a tier. Meeting a tier allows a route to be attempted; it is not a runtime observation and grants no evidence.
+
+## Interpret Toolkit and driver compatibility
+
+The selected Toolkit Lanes use only these Linux driver floors for this assessment. They are not the drivers bundled or paired with each Toolkit, and they are not proof that a workload will run.
+
+| Selected Toolkit Lane | Linux driver floor | Exact interpretation |
+| --- | --- | --- |
+| CUDA 11.8.0 | `450.80.02` | Floor for the documented CUDA 11.x minor-version path, subject to all minor-version restrictions |
+| CUDA 12.9.2 | `525.60.13` | Floor for the documented CUDA 12.x minor-version path, subject to all minor-version restrictions |
+| CUDA 13.3.1 | `R580`, numerically `>= 580` | Floor for the documented CUDA 13.x minor-version path, subject to all minor-version restrictions |
+
+Interpret the candidate through one documented path:
+
+- **Backward compatibility:** a newer NVIDIA driver stack can run applications built with an older Toolkit. The application still needs suitable GPU code and the correct dynamically linked libraries. No compatibility output proves those runtime conditions.
+- **Minor-version compatibility:** an older driver in the same major CUDA family may be used only at or above that family's floor. The feature set can be limited, applications relying on PTX do not work on the older driver, NVCC needs an explicit target architecture, and library interdependencies still apply.
+- **Forward compatibility package:** crossing to an older driver from another major family is not ordinary minor compatibility. NVIDIA limits this path to Data Center GPUs, select NGC Server Ready RTX SKUs, and Jetson boards. It requires an applicable `cuda-compat-<major>-<minor>` package, correct user-mode library selection, and attention to feature exceptions. The package supplies user-mode driver libraries, does not configure the system to find them, and does not replace the installed KMD. It is not a universal route for every GPU.
+
+Do not copy or compress a full NVIDIA matrix into a verdict. Record the candidate coordinates, identify the applicable row and restrictions in current owner documentation, and retain the source date.
+
+<CompatibilityExplorer locale="en" />
+
+The explorer has exactly three triage outcomes:
+
+| Outcome | Meaning | Required next action |
+| --- | --- | --- |
+| `documented-path` | The entered coordinates match a path described by the selected NVIDIA sources, with its restrictions still visible | Perform runtime validation against predeclared criteria; the result itself grants no evidence |
+| `not-documented` | The selected sources document no path for those coordinates | Change the configuration to a documented path, assess it again, and runtime-validate the changed candidate; this outcome grants no evidence |
+| `indeterminate` | A required version, eligibility fact, package fact, target, or component coordinate is missing or ambiguous | Collect the missing facts, assess again, and then perform runtime validation; this outcome grants no evidence |
+
+All three outcomes leave runtime behavior unobserved. A `documented-path` is permission to continue checking, not Compile-Checked, Community-Observed, Runtime-Verified, or a Reference Environment declaration.
+
+## Establish maintainer control
+
+Maintainer control means the maintainer can identify and preserve the configuration, schedule exclusive validation when required, install or pin the KMD, Toolkit, components, and host compiler, control permissions and environment variables, reboot or reset the system when the protocol requires it, run the exact revision and commands, and retain raw logs and artifacts.
+
+Control is a reproducibility and custody condition, not merely access to a shell. A borrowed account, hosted notebook, opaque image, or community-owned machine does not become maintainer-controlled because it produced plausible output. A complete community report may be evaluated under O02, but it cannot satisfy this declaration gate.
+
+## Run a separately designated baseline
+
+Before execution, designate one baseline subject separately from EX01's environment report. Record its exact source revision, build and run commands, input and shape, compiler target, required GPU Capability Tier, expected API checks, correctness method, and explicit pass and fail criteria. Leave all observed-result fields empty.
+
+Run that baseline only after the manifest, compatibility path, and maintainer-control record are complete. A successful baseline requires reviewable logs showing the process and required CUDA calls completed as specified and every predeclared correctness criterion passed. Producing output, exiting zero without the required checks, or passing criteria written after the run is not a successful baseline.
+
+The baseline is a prerequisite for an environment declaration, not a retroactive Runtime-Verified label. At baseline time no Reference Environment has yet been declared. Any later Evidence Status must be evaluated for a named subject under O02 after the environment declaration exists.
+
+## Make the declaration decision
+
+| Gate | Must be true before declaration | If false or unknown |
+| --- | --- | --- |
+| Supported scope | The exact system is native Linux | Keep the configuration outside the Reference Environment process |
+| Manifest | Every required coordinate has an observed value, method, date, and retained record | Keep it as an incomplete candidate |
+| Tier | A direct compute-capability query plus memory, count, features, and permissions establishes the applicable tier | Record the missing gate and do not infer a tier |
+| Compatibility | Current owner documentation identifies a path and all path-specific restrictions are addressed | Change or complete the configuration before runtime validation |
+| Control | Maintainers control configuration, execution, and evidence custody | A community or third-party record remains insufficient |
+| Baseline | A separately designated baseline met criteria declared before execution and retained complete logs | Do not declare the environment |
+| Declaration record | Maintainers publish the exact manifest, tier, compatibility interpretation, baseline record, scope, and declaration date | The candidate remains undeclared |
+
+Passing every gate makes a configuration eligible for a separate maintainer declaration. This page does not make that declaration. **No Reference Environment is currently declared.** EX01 output, a compatibility result, a build, `nvidia-smi`, or a community report remains insufficient, alone or in combination without every gate above.
+
+## Retrieval check
+
+1. Why must the driver KMD, driver-supported CUDA API level, and installed Toolkit and component versions be recorded separately?
+2. What additional restrictions apply when a candidate uses a minor-version compatibility floor?
+3. How do `documented-path`, `not-documented`, and `indeterminate` differ, and what do they all fail to prove?
+4. What maintainer-control facts cannot be supplied by a complete community report?
+5. Why must the successful baseline be separately designated with correctness criteria written before execution?
+
+## Continue with practice
+
+- Complete the [O08 Exercises](/en/start/reference-environment-candidate/exercises/), then compare your reasoning with the separate [reviewed solutions](/en/start/reference-environment-candidate/solutions/).
+- Solve [Practice Bank PB-R1-005](/en/practice/#pb-r1-005) to review a candidate declaration packet across all gates.
+- Use related EX01 to collect an environment report and LAB01 to guide candidate capture and interpretation. Neither resource can declare a Reference Environment by itself.
+
+## Sources and review
+
+Selected Lane identities come from the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive). The three floors and component separation were checked against the current [CUDA Toolkit 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html). Compatibility meanings and restrictions come from NVIDIA's [Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html), [Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html), and [Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html) pages.
+
+The direct query comes from CUDA Programming Guide v13.3 [Obtain the GPU Compute Capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability). Driver and Runtime version semantics come from CUDA Runtime API 13.3.1 [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html). KMD, CUDA UMD, query, and output-boundary language was checked against the current [NVIDIA-SMI documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html).
+
+**Fact-check date: 2026-08-26.** All prose, decision rules, scenarios, and the explorer teaching model are original under CC BY 4.0. No NVIDIA table, sample output, private material, machine observation, or performance result is copied or claimed. No Reference Environment is currently declared, and this Learning Unit grants no CUDA evidence.

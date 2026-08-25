@@ -24,7 +24,18 @@ test('serves the exact static release with production canonical metadata and no 
   expect(legalResponse.ok()).toBe(true);
   expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
 
-  for (const route of ['/', '/en/', '/start/using-the-learning-site/', '/en/start/using-the-learning-site/']) {
+  for (const route of [
+    '/',
+    '/en/',
+    '/start/using-the-learning-site/',
+    '/en/start/using-the-learning-site/',
+    '/start/reference-environment-candidate/',
+    '/en/start/reference-environment-candidate/',
+    '/examples/environment-report/',
+    '/en/examples/environment-report/',
+    '/labs/record-cuda-environment/',
+    '/en/labs/record-cuda-environment/',
+  ]) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
     await page.waitForLoadState('networkidle');
@@ -68,10 +79,23 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     query: 'SRC-WEB-003 Pagefind 1.5.2',
     expectedHrefs: ['/en/sources-and-versions/'],
   });
+  await expectRankedSearchResult(page, {
+    route: '/en/',
+    button: /Search/,
+    query: 'Reference Environment candidate',
+    expectedHrefs: [
+      '/en/start/reference-environment-candidate/',
+      '/en/start/reference-environment-candidate/exercises/',
+      '/en/start/reference-environment-candidate/solutions/',
+      '/en/labs/record-cuda-environment/',
+    ],
+  });
 
   await page.goto('/en/practice/');
   const index = page.locator('cuda-resource-index');
   await index.locator('[data-resource-query]').fill('manifest');
+  await index.locator('[data-resource-filter="type"]').selectOption('correctness-debugging');
+  await index.locator('[data-resource-filter="relation"]').selectOption('O03');
   await expect(index.locator('[data-resource-card]:visible')).toHaveCount(1);
   await expect(index.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'PB-R0-002');
   expect(failures).toEqual([]);
@@ -105,7 +129,14 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
 test('keeps mobile pages and no-script Visual Explainers complete', async ({ browser, page }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const route of ['/labs/vector-addition/', '/en/labs/vector-addition/']) {
+  for (const route of [
+    '/labs/record-cuda-environment/',
+    '/en/labs/record-cuda-environment/',
+    '/labs/vector-addition/',
+    '/en/labs/vector-addition/',
+    '/start/reference-environment-candidate/',
+    '/en/start/reference-environment-candidate/',
+  ]) {
     await page.goto(route);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }
@@ -117,13 +148,23 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
     viewport: { width: 390, height: 844 },
   });
   const staticPage = await staticContext.newPage();
-  for (const route of ['/visuals/kernel-journey/', '/en/visuals/indexing/', '/practice/', '/en/glossary/']) {
+  for (const route of [
+    '/visuals/kernel-journey/',
+    '/en/visuals/indexing/',
+    '/start/reference-environment-candidate/',
+    '/en/start/reference-environment-candidate/',
+    '/practice/',
+    '/en/glossary/',
+  ]) {
     const response = await staticPage.goto(route);
     expect(response?.ok(), route).toBe(true);
     if (route.includes('/visuals/')) {
       await expect(staticPage.locator('[data-visual-controls]')).toBeHidden();
       await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
       await expect(staticPage.locator('[data-no-evidence]')).toBeVisible();
+    } else if (route.includes('reference-environment-candidate')) {
+      await expect(staticPage.locator('[data-compatibility-controls]')).toBeHidden();
+      await expect(staticPage.locator('[data-static-fallback] tbody tr')).toHaveCount(3);
     } else {
       await expect(staticPage.locator('[data-resource-controls]')).toBeHidden();
       await expect(staticPage.locator('[data-resource-card]').first()).toBeVisible();

@@ -175,6 +175,16 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/environment-manifest/exercises/',
     '/foundations/first-cuda-kernel/exercises/',
     '/en/foundations/first-cuda-kernel/exercises/',
+    '/start/cpp17-for-cuda/exercises/',
+    '/en/start/cpp17-for-cuda/exercises/',
+    '/start/linux-command-line/exercises/',
+    '/en/start/linux-command-line/exercises/',
+    '/start/architecture-refresher/exercises/',
+    '/en/start/architecture-refresher/exercises/',
+    '/start/programmable-gpus/exercises/',
+    '/en/start/programmable-gpus/exercises/',
+    '/start/reference-environment-candidate/exercises/',
+    '/en/start/reference-environment-candidate/exercises/',
   ])('provides goals, constraints, acceptance criteria, and layered hints in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/Goal|目标/);
@@ -193,16 +203,29 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/environment-manifest/solutions/',
     '/foundations/first-cuda-kernel/solutions/',
     '/en/foundations/first-cuda-kernel/solutions/',
+    '/start/cpp17-for-cuda/solutions/',
+    '/en/start/cpp17-for-cuda/solutions/',
+    '/start/linux-command-line/solutions/',
+    '/en/start/linux-command-line/solutions/',
+    '/start/architecture-refresher/solutions/',
+    '/en/start/architecture-refresher/solutions/',
+    '/start/programmable-gpus/solutions/',
+    '/en/start/programmable-gpus/solutions/',
+    '/start/reference-environment-candidate/solutions/',
+    '/en/start/reference-environment-candidate/solutions/',
   ])('keeps reviewed solutions on a separate route in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/参考解答|Reviewed solution/);
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes five complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes ten complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
-    const entryIds = ['PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005'];
+    const entryIds = [
+      'PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005',
+      'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
+    ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
     );
@@ -223,7 +246,7 @@ describe('Exercises and Practice Bank contract', () => {
       const sectionText = sectionElements.map((element) => element.textContent ?? '').join(' ').replace(/\s+/g, ' ');
       const sectionLinks = sectionElements.flatMap((element) => [...element.querySelectorAll('a[href]')]);
 
-      expect(sectionText, `${route} ${entryId}`).toMatch(/Prerequisite|先修条件/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/prerequisite|先修/i);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Hardware gate|硬件门槛/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Constraints|约束/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Expected evidence|预期证据/);
@@ -234,15 +257,20 @@ describe('Exercises and Practice Bank contract', () => {
       expect(sectionLinks.some((link) => /\/(?:en\/)?(?:start|foundations)\//.test(link.getAttribute('href') ?? ''))).toBe(true);
     }
 
-    expect(text).not.toMatch(/EX01|LAB01/);
+    expect(text).toMatch(/EX01/);
+    expect(text).toMatch(/LAB01/);
     expect(text).toMatch(/O02/);
     expect(text).toMatch(/O03/);
     expect(text).toMatch(/F01/);
+    for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
     expect(document.querySelector('a[href*="evidence-status"]')).not.toBeNull();
     expect(document.querySelector('a[href*="environment-manifest"]')).not.toBeNull();
     expect(document.querySelector('a[href*="first-cuda-kernel"]')).not.toBeNull();
+    for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {
+      expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
+    }
   });
 });

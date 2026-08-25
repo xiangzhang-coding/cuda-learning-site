@@ -1,0 +1,270 @@
+---
+title: 'O08：准备基准环境候选配置'
+description: 用完整坐标、文档化兼容路径、维护者控制和预先声明标准的成功基线审查原生 Linux 候选配置，不提前声明证据。
+pairId: o08
+counterpart: /en/start/reference-environment-candidate/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - candidate
+  - manifest
+  - tier
+  - compatibility
+  - control
+  - baseline
+  - decision
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: O08
+prerequisites:
+  - O02
+  - O03
+  - O05
+relatedUnits:
+  - EX01
+  - LAB01
+exampleIds:
+  - EX01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: NVIDIA CUDA Toolkit Archive
+    url: 'https://developer.nvidia.com/cuda-toolkit-archive'
+    version: '11.8.0, 12.9.2, and 13.3.1 release identities'
+    platform: 'All published platforms'
+    accessDate: '2026-08-26'
+  - title: CUDA Toolkit 13.3 Update 1 Release Notes
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: '13.3.1; selected 11.x, 12.x, and 13.x Linux driver compatibility rows'
+    platform: 'Linux x86_64'
+    accessDate: '2026-08-26'
+  - title: Why CUDA Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'CUDA application deployment'
+    accessDate: '2026-08-26'
+  - title: CUDA Minor Version Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'Linux x86_64'
+    accessDate: '2026-08-26'
+  - title: CUDA Forward Compatibility
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html'
+    version: 'Current on 2026-08-26'
+    platform: 'Eligible NVIDIA Linux systems'
+    accessDate: '2026-08-26'
+  - title: CUDA Programming Guide - Obtain the GPU Compute Capability
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability'
+    version: '13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-26'
+  - title: CUDA Runtime API - Version Management
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html'
+    version: '13.3.1; last updated 2026-06-29'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-26'
+  - title: NVIDIA System Management Interface
+    url: 'https://docs.nvidia.com/deploy/nvidia-smi/index.html'
+    version: 'Current on 2026-08-26'
+    platform: 'NVIDIA driver-supported Linux'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: o08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,candidate,manifest,tier,compatibility,control,baseline,decision,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: O08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,O05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX01,LAB01' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX01 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3' }
+---
+
+import CompatibilityExplorer from '../../../components/CompatibilityExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/start/reference-environment-candidate/" lang="en">Read the English counterpart</a>
+
+本学习单元（Learning Unit）把一台原生 Linux 机器整理成可复核的基准环境（Reference Environment）候选配置。候选配置不等于声明。**目前没有声明任何基准环境。** 可运行示例（Runnable Example）EX01 的输出、Compatibility Explorer 结果、一次成功构建、`nvidia-smi` 输出或社区报告，都不足以声明 Reference Environment。
+
+## 学完本单元，你应该能
+
+- 填写审查候选配置所需的完整环境清单（Environment Manifest），不合并彼此独立的坐标。
+- 直接查询计算能力（compute capability），选择适用的 GPU 能力层级（GPU Capability Tier），并把硬件资格与已观察行为分开。
+- 区分已安装的内核模式驱动、驱动支持的 CUDA API 级别，以及已安装 Toolkit 和组件版本。
+- 按文档解释 backward compatibility、minor-version compatibility 和 forward compatibility package，并说明每条路径仍要经过运行验证。
+- 在声明任何 Reference Environment 之前，分别检查维护者控制（maintainer control）和成功 baseline。
+
+本单元只做静态审查，不需要 GPU，不运行 CUDA，也不授予任何 CUDA 证据状态（Evidence Status）。
+
+## 先修关系
+
+严格按以下顺序完成学习单元：
+
+1. [O02：诚实记录证据状态](/start/evidence-status/)，掌握相互独立的编译证据轴与运行证据轴。
+2. [O03：读懂环境清单](/start/environment-manifest/)，掌握完整且可解释的环境坐标。
+3. [O05：可复现的 Linux 命令行工作](/start/linux-command-line/)，掌握可复现查询、命令和日志保存。
+
+## 什么才是候选配置
+
+Reference Environment 候选配置是正在接受审查的一套具体配置。它必须位于本站唯一的受支持环境（Supported Environment），也就是原生 Linux，并且要指向一块明确 GPU 和一套精确软件栈，不能只写产品家族或会漂移的“最新版”。
+
+准备候选配置要分别完成五件事：补全 manifest，确定适用的 GPU Capability Tier，给出有文档依据的兼容性判断，建立维护者控制，并单独指定一项在执行前写好正确性标准的 baseline。只要有一项缺失，就只能保留候选身份并记录缺口。
+
+**目前没有声明任何基准环境。** EX01 报告可以帮助采集字段，但 EX01 输出、compatibility 结果、一次构建、`nvidia-smi` 或社区报告都不能越过声明边界。
+
+## 补全 Environment Manifest
+
+记录实际观察值和精确采集命令。缺失值不能用产品网页或其他字段的推断代替。
+
+| 坐标组 | 必须记录的内容 |
+| --- | --- |
+| GPU identity | 产品名、UUID 或稳定设备标识、可见 GPU 数与实际使用数 |
+| direct capability query | `major.minor` 形式的 compute capability、原始查询输出、查询命令和所选设备 |
+| capacity and features | 总量与可用 device memory、所需 feature、必要 topology 和活动权限 |
+| driver stack | 精确已安装 kernel-mode driver、driver-supported CUDA API level，以及各自查询方法 |
+| Toolkit and components | 精确 Toolkit `X.Y.Z`、活动安装路径、NVCC、CUDA Runtime、相关 library/tool 和 package record |
+| host software | 原生 Linux 发行版、版本、架构、kernel、host compiler，以及必要的 container boundary |
+| workload | 对象 ID 与 revision、输入来源、数据类型、shape、迭代、GPU count 和 memory requirement |
+| execution | 未省略的 build/run command、环境变量、所选 C++ 方言、compiler target、工作目录和权限 |
+| correctness | 独立 reference、tolerance 或 invariant，以及执行前写明的 pass/fail criteria |
+| record custody | observer、observation date、原始日志、exit status、生成产物和持久保存位置 |
+
+必须从设备直接查询 compute capability，不能根据 GPU 名称推断。CUDA Programming Guide v13.3 给出下面的 `nvidia-smi` 直接查询形式：
+
+```bash
+nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader
+```
+
+Runtime API 的 `cudaDeviceGetAttribute()` 和 Driver API 的 `cuDeviceGetAttribute()` 也是直接查询方法。无论选择哪一种，都要保留精确命令或源码、原始结果、设备 identity 和日期。直接查询只补全一个 manifest 坐标，不会验证候选配置。
+
+### 分开三种软件坐标
+
+| 坐标 | 含义 | 合适的采集依据 |
+| --- | --- | --- |
+| Driver KMD | 已安装 NVIDIA 内核模式驱动版本，用它比较文档中的 driver floor | 保存当前 `nvidia-smi -q` 的 `KMD Version` 或等价 driver package record |
+| driver-supported CUDA API | driver stack 暴露的最高 CUDA API 级别，不是已安装 Toolkit | 保存 `CUDA UMD Version` 或查询 `cudaDriverGetVersion()` |
+| installed Toolkit and components | workload 实际选择的 compiler、runtime、library 和 tool | 记录 `nvcc --version`、安装与 package path、`cudaRuntimeGetVersion()` 和相关 component-specific version |
+
+当前 NVIDIA-SMI 文档说明，CUDA UMD 值通常但不总是等于系统安装的 Toolkit 版本。因此 `CUDA Version` banner 不能填写 Toolkit 字段。CUDA Runtime API 13.3.1 还说明，`cudaDriverGetVersion()` 返回 driver 支持的最高 CUDA 版本；`cudaRuntimeGetVersion()` 返回当前 Runtime 版本，并且从 CUDA 12.0 起只返回编译期 Toolkit 常量，不会初始化 CUDA。
+
+## 选择适用的 GPU Capability Tier
+
+把直接查询到的 compute capability 与 memory、GPU count、required features 和 permissions 一起判断：
+
+- **基础 GPU 能力层级（Baseline GPU Capability Tier）**要求 compute capability **7.5 或更新**。稳定课程（Stable Curriculum）基础部分使用能放进 **8 GB** 的问题规模。
+- **现代单 GPU 能力层级（Modern Single-GPU Capability Tier）**要求 compute capability **8.0 或更新**并且至少 **8 GB**，覆盖完整单 GPU 路线。
+- 多 GPU 和架构专用工作还要增加 count、topology、feature 和 permission 门槛。
+
+只写候选配置完整满足的最高层级，并记录理由。Memory、产品名或 compatibility 结果都不能单独决定 tier。满足 tier 只允许尝试一条路线，不是运行观察，也不授予证据。
+
+## 解释 Toolkit 与 driver compatibility
+
+本次审查只使用下面三条工具包通道（Toolkit Lane）的 Linux driver floor。它们不是各 Toolkit bundled 或 paired driver，也不能证明 workload 会运行。
+
+| 所选 Toolkit Lane | Linux driver floor | 精确解释 |
+| --- | --- | --- |
+| CUDA 11.8.0 | `450.80.02` | 文档中的 CUDA 11.x minor-version 路径 floor，且必须满足全部 minor-version 限制 |
+| CUDA 12.9.2 | `525.60.13` | 文档中的 CUDA 12.x minor-version 路径 floor，且必须满足全部 minor-version 限制 |
+| CUDA 13.3.1 | `R580`，数值条件为 `>= 580` | 文档中的 CUDA 13.x minor-version 路径 floor，且必须满足全部 minor-version 限制 |
+
+候选配置只能按一条文档路径解释：
+
+- **Backward compatibility：** 较新的 NVIDIA driver stack 可以运行由较旧 Toolkit 构建的应用。应用仍需合适的 GPU code 和正确的动态链接 library；任何 compatibility 输出都不能证明这些运行条件。
+- **Minor-version compatibility：** 只有同一 CUDA major family 内的较旧 driver 达到该 family floor 时才可能使用。Feature set 可能受限；依赖 PTX 的应用不能在较旧 driver 上工作；NVCC 需要显式 target architecture；library interdependency 仍然有效。
+- **Forward compatibility package：** 跨 major family 使用更旧 driver 不是普通 minor compatibility。NVIDIA 把这条路径限制在 Data Center GPU、部分 NGC Server Ready RTX SKU 和 Jetson board。它要求适用的 `cuda-compat-<major>-<minor>` package、正确的 user-mode library selection，并处理 feature exception。该 package 提供 user-mode driver library，但不会替系统配置 library 查找路径，也不替换已安装 KMD。它不是适用于每块 GPU 的通用路径。
+
+不要把 NVIDIA 完整矩阵复制或压缩成一句 verdict。应记录候选坐标，在当前 owner documentation 中定位适用行与限制，并保留来源日期。
+
+<CompatibilityExplorer locale="zh-CN" />
+
+Explorer 只给出三种初筛结果：
+
+| Outcome | 含义 | 必须继续做什么 |
+| --- | --- | --- |
+| `documented-path` | 输入坐标与所选 NVIDIA 来源描述的一条路径一致，且限制仍清楚可见 | 按预先声明标准做 runtime validation；结果本身不授予证据 |
+| `not-documented` | 所选来源没有为这些坐标记录路径 | 把配置改到 documented path，重新审查，再对改后的候选配置做 runtime validation；此结果不授予证据 |
+| `indeterminate` | 必需的 version、eligibility、package、target 或 component 坐标缺失或含糊 | 补采事实，重新审查，再做 runtime validation；此结果不授予证据 |
+
+三种结果都没有观察到运行行为。`documented-path` 只允许继续检查，不等于编译已检查（Compile-Checked）、社区已观察（Community-Observed）、运行已验证（Runtime-Verified）或 Reference Environment 声明。
+
+## 建立维护者控制
+
+维护者控制意味着维护者可以识别并保存配置，在需要时安排独占验证，安装或固定 KMD、Toolkit、component 和 host compiler，控制权限与环境变量，按 protocol 重启或 reset 系统，运行精确 revision 与命令，并保存原始日志和产物。
+
+控制是一项可复现与保管条件，不等于“能登录 shell”。借用账号、托管 notebook、不透明 image 或社区机器不会因为产生了看似合理的输出就变成 maintainer-controlled。完整社区报告可以按 O02 审查，但不能满足这道声明门槛。
+
+## 运行单独指定的 baseline
+
+执行前先指定一项与 EX01 environment report 分开的 baseline subject。记录其精确 source revision、build/run command、输入与 shape、compiler target、所需 GPU Capability Tier、预期 API check、correctness method，以及明确 pass/fail criteria。所有 observed-result field 保持为空。
+
+只有 manifest、compatibility path 和维护者控制记录完整后才运行 baseline。成功 baseline 必须留下可复核日志，表明进程与要求的 CUDA call 按 protocol 完成，并且所有预先声明的 correctness criterion 都通过。只产生输出、在缺少必要检查时零退出，或运行后补写标准，都不是成功 baseline。
+
+Baseline 是环境声明的先决条件，不是回填 Runtime-Verified 的理由。运行 baseline 时 Reference Environment 还没有声明。环境声明存在后，任何后续 Evidence Status 都要按 O02 针对一个明确对象重新判断。
+
+## 作出声明判断
+
+| 门槛 | 声明前必须成立 | 不满足或未知时 |
+| --- | --- | --- |
+| Supported scope | 精确系统是原生 Linux | 不让该配置进入 Reference Environment 流程 |
+| Manifest | 每个必需坐标都有观察值、方法、日期和保存记录 | 保留不完整候选配置 |
+| Tier | direct compute-capability query 加 memory、count、feature 和 permission 能确定适用 tier | 记录缺口，不推断 tier |
+| Compatibility | 当前 owner documentation 给出路径，且 path-specific restriction 全部处理 | runtime validation 前先修改或补全配置 |
+| Control | 维护者控制配置、执行和证据保管 | 社区或第三方记录仍然不足 |
+| Baseline | 单独指定的 baseline 满足执行前声明的标准并保存完整日志 | 不声明环境 |
+| Declaration record | 维护者发布精确 manifest、tier、compatibility interpretation、baseline record、scope 和 declaration date | 候选配置保持 undeclared |
+
+所有门槛都通过，只表示该配置有资格接受单独的维护者声明；本页不作这项声明。**目前没有声明任何基准环境。** EX01 输出、compatibility 结果、一次构建、`nvidia-smi` 或社区报告，无论单独出现还是在其他门槛缺失时组合出现，都仍然不足。
+
+## 离开前检查
+
+1. 为什么必须分开记录 driver KMD、driver-supported CUDA API level 与 installed Toolkit/component version？
+2. 使用 minor-version compatibility floor 时还必须满足哪些限制？
+3. `documented-path`、`not-documented` 和 `indeterminate` 有何区别，它们都不能证明什么？
+4. 完整社区报告仍不能提供哪些 maintainer-control 事实？
+5. 为什么成功 baseline 必须单独指定，并在执行前写好 correctness criteria？
+
+## 继续练习
+
+- 完成 [O08 练习（Exercise）](/start/reference-environment-candidate/exercises/)，再对照独立的[参考解答](/start/reference-environment-candidate/solutions/)复核推理。
+- 到[练习题库（Practice Bank）PB-R1-005](/practice/#pb-r1-005)跨全部门槛审查一份候选声明材料。
+- 使用相关 EX01 采集 environment report，再由实验（Lab）LAB01 引导候选配置的采集与解释。两种资源都不能单独声明 Reference Environment。
+
+## 来源与复核
+
+所选 Lane identity 来自 [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive)。三个 floor 和 component separation 按当前 [CUDA Toolkit 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)复核。Compatibility 含义与限制来自 NVIDIA 的 [Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html)、[Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)和 [Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html)。
+
+直接查询依据 CUDA Programming Guide v13.3 的 [Obtain the GPU Compute Capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability)。Driver 与 Runtime version 语义来自 CUDA Runtime API 13.3.1 的 [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html)。KMD、CUDA UMD、query 和输出边界按当前 [NVIDIA-SMI 文档](https://docs.nvidia.com/deploy/nvidia-smi/index.html)复核。
+
+**事实核查日期：2026-08-26。** 全部正文、判断规则、情景和 explorer 教学模型均为 CC BY 4.0 原创内容。没有复制 NVIDIA table、sample output、私有材料、机器观察或性能结果。目前没有声明任何 Reference Environment，本 Learning Unit 也不授予 CUDA 证据。

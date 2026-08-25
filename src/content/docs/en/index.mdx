@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-25'
+      content: '2026-08-26'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,9 @@ head:
 
 ## The route published today
 
-The stable route is **Home → O01 → O03 → F01: From Prediction to a First CUDA Kernel → LAB02: Run and Verify Vector Addition**. O02 supplies the Evidence Status contract across that route, EX02 is the canonical Runnable Example shared by F01/LAB02, and VIS01/VIS02 explain the kernel journey and indexing. Learning Units have Exercises and separate solutions. Labs, Practice Bank entries, Visual Explainers, terms, and source records also have direct indexes. The route never substitutes empty pages for unfinished material.
+The O01-O08 orientation of the Stable Curriculum is completely published. The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. LAB01 requires both O03 and O08 and uses the EX01 environment-report Runnable Example. EX01 has no Compile-Checked claim, and the runtime axes for EX01 and LAB01 are both Pending Hardware Verification. The existing kernel route still runs from O03 to F01 and then LAB02, with EX02 remaining the canonical source shared by F01/LAB02.
+
+O04-O08 each publish complete Exercises and separate reviewed solutions: [O04 Exercises](/en/start/cpp17-for-cuda/exercises/) and [solutions](/en/start/cpp17-for-cuda/solutions/), [O05 Exercises](/en/start/linux-command-line/exercises/) and [solutions](/en/start/linux-command-line/solutions/), [O06 Exercises](/en/start/architecture-refresher/exercises/) and [solutions](/en/start/architecture-refresher/solutions/), [O07 Exercises](/en/start/programmable-gpus/exercises/) and [solutions](/en/start/programmable-gpus/solutions/), and [O08 Exercises](/en/start/reference-environment-candidate/exercises/) and [solutions](/en/start/reference-environment-candidate/solutions/). Labs, Practice Bank entries, Visual Explainers, terms, and source records also have direct indexes. The route never substitutes empty pages for unfinished material.
 
 ## Boundaries first
 
@@ -70,15 +72,50 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Reading an Environment Manifest</strong>
     <small>Separate hardware, software, workload, and measurement coordinates.</small>
   </a>
+  <a className="route-card" href="/en/start/cpp17-for-cuda/">
+    <span>O04 · C++17</span>
+    <strong>C++17 Refresher for CUDA Learners</strong>
+    <small>Close lifetime, ownership, template, error, and build-boundary gaps.</small>
+  </a>
+  <a className="route-card" href="/en/start/linux-command-line/">
+    <span>O05 · NATIVE LINUX</span>
+    <strong>Reproducible Linux Command-Line Work</strong>
+    <small>Make paths, stages, process snapshots, logs, and reproduction records explicit.</small>
+  </a>
+  <a className="route-card" href="/en/start/architecture-refresher/">
+    <span>O06 · ARCHITECTURE</span>
+    <strong>Architecture Refresher: Rate, Delay, and Data Movement</strong>
+    <small>Separate latency, throughput, bandwidth, concurrency, and intensity.</small>
+  </a>
+  <a className="route-card" href="/en/start/programmable-gpus/">
+    <span>O07 · PROGRAMMABILITY</span>
+    <strong>Why GPUs Became Programmable</strong>
+    <small>Move from fixed graphics stages to general kernels without erasing real constraints.</small>
+  </a>
+  <a className="route-card" href="/en/start/reference-environment-candidate/">
+    <span>O08 · CANDIDATE</span>
+    <strong>Preparing a Reference Environment Candidate</strong>
+    <small>Check manifest, tier, compatibility, control, and baseline gates.</small>
+  </a>
   <a className="route-card" href="/en/foundations/first-cuda-kernel/">
     <span>F01 · FIRST KERNEL</span>
     <strong>From Prediction to a First CUDA Kernel</strong>
     <small>Calculate thread indices before learning implementation, correctness, and measurement boundaries.</small>
   </a>
+  <a className="route-card" href="/en/examples/environment-report/">
+    <span>EX01 · ENVIRONMENT REPORT</span>
+    <strong>Environment Report Runnable Example</strong>
+    <small>Read structured observations without treating a report as an environment declaration.</small>
+  </a>
   <a className="route-card" href="/en/examples/vector-addition/">
     <span>EX02 · CANONICAL SOURCE</span>
     <strong>Vector Addition Runnable Example</strong>
     <small>Obtain the sole canonical source, build contract, and independent evidence.</small>
+  </a>
+  <a className="route-card" href="/en/labs/record-cuda-environment/">
+    <span>LAB01 · CAPTURE</span>
+    <strong>Record and Interpret a CUDA Environment</strong>
+    <small>Capture and reconcile a native-Linux candidate while runtime remains pending.</small>
   </a>
   <a className="route-card" href="/en/labs/vector-addition/">
     <span>LAB02 · VERIFY</span>
@@ -108,7 +145,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, and first-kernel models through five original problems.</small>
+    <small>Transfer evidence, environment, C++, Linux, architecture, and kernel models through ten original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>

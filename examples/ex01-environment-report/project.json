@@ -1,0 +1,120 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX01",
+  "title": "Environment report",
+  "root": "examples/ex01-environment-report",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex01-environment-report",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/refs/heads/main.zip",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/environment_report.hpp",
+      "src/environment_report.cu"
+    ],
+    "hostTestInputs": [
+      "include/environment_report.hpp",
+      "tests/report_contract_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} CUDART={cudart} BUILD_DIR=build",
+      "compile": "make compile DIALECT={dialect} CUDART={cudart} BUILD_DIR=build",
+      "link": "make link DIALECT={dialect} CUDART={cudart} BUILD_DIR=build",
+      "build": "make build DIALECT={dialect} CUDART={cudart} BUILD_DIR=build",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/environment_report.ii",
+      "build/environment_report.o",
+      "build/ex01-environment-report"
+    ]
+  },
+  "correctness": {
+    "contract": "structural",
+    "hostTest": "tests/report_contract_test.cpp",
+    "reportSchemaVersion": 1,
+    "reportMode": "--format=json",
+    "successExitCode": 0,
+    "invalidCliExitCode": 2,
+    "incompleteObservationExitCode": 3,
+    "zeroDeviceCount": "observed-empty-inventory"
+  },
+  "compatibility": {
+    "target": [],
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "observation-model": {
+      "file": "include/environment_report.hpp",
+      "startMarker": "// [ex01-observation-model-start]",
+      "endMarker": "// [ex01-observation-model-end]",
+      "language": "cpp"
+    },
+    "version-query": {
+      "file": "src/environment_report.cu",
+      "startMarker": "// [ex01-version-query-start]",
+      "endMarker": "// [ex01-version-query-end]",
+      "language": "cpp"
+    },
+    "device-inventory": {
+      "file": "src/environment_report.cu",
+      "startMarker": "// [ex01-device-inventory-start]",
+      "endMarker": "// [ex01-device-inventory-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "A successful report should contain UTC, build, environment-variable, version, count, and per-visible-device observations in one JSON document.",
+      "A successful zero device count should produce an empty device inventory; any required unavailable or error observation should preserve valid JSON and select exit code 3."
+    ],
+    "recordedObservations": []
+  }
+}

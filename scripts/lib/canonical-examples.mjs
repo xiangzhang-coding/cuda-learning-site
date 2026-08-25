@@ -126,7 +126,7 @@ export async function hashCanonicalBuildContract(projectRoot, exampleId) {
     ...example.build.inputs,
     ...example.build.hostTestInputs,
     ...example.build.contractFiles,
-    'probes/cxx23.cu',
+    ...(example.build.additionalContractInputs ?? []),
   ])].sort();
   const hash = createHash('sha256');
   for (const relativePath of files) {
