@@ -51,12 +51,12 @@ export default defineConfig({
         {
           label: '实验',
           translations: { en: 'Labs' },
-          items: [{ slug: 'labs/vector-addition' }],
+          items: [{ slug: 'labs' }, { slug: 'labs/vector-addition' }],
         },
         {
           label: '可视化讲解',
           translations: { en: 'Visual Explainers' },
-          items: [{ slug: 'visuals/kernel-journey' }, { slug: 'visuals/indexing' }],
+          items: [{ slug: 'visuals' }, { slug: 'visuals/kernel-journey' }, { slug: 'visuals/indexing' }],
         },
         { slug: 'practice' },
         { slug: 'glossary' },

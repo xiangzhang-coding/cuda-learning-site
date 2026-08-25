@@ -10,6 +10,12 @@ Every learner-facing page ships as a complete Chinese and English Publication Pa
 
 Do not expose unfinished Learning Units or empty future sections in navigation. A development fallback does not satisfy pair completeness.
 
+## Resource indexes
+
+Every eligible Lab, Practice Bank entry, Visual Explainer, Glossary term, and source/version record must appear in the validated catalog under `src/resource-indexes/` with both locale titles and destinations, current prerequisite/related-unit edges, gates, and a last-review date. Do not add planned placeholders. Planning IDs are stable labels, not URL generators or URL-stability promises.
+
+Catalog review and source-access dates become stale after 180 days and must be rechecked rather than mechanically bumped. Index Evidence Status must be copied from the linked subject and must never be inferred from web CI, search, filtering, or browser behavior.
+
 ## Canonical Runnable Examples
 
 A Runnable Example is a standalone source project and the only canonical executable form of its lesson code. Both locales must import the same declared ranges from that project. Do not maintain a complete copy in Markdown or MDX, and do not reconstruct an upstream sample under a project license.

@@ -3,11 +3,12 @@ title: Practice Bank
 description: Published original cross-unit practice with prerequisite links, layered hints, and solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-25'
 license: CC-BY-4.0
 provenance: original
 structure:
   - use
+  - lookup-index
   - entry-pb-r0-001
   - entry-pb-r0-002
   - entry-pb-r0-003
@@ -34,11 +35,11 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-24' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-25' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
@@ -57,6 +58,8 @@ head:
     attrs: { name: 'cuda:recorded-observations', content: none }
 ---
 
+import ResourceIndex from '../../../components/ResourceIndex.astro';
+
 <a class="locale-pair" data-locale-counterpart href="/practice/" lang="zh-CN">阅读中文对应页</a>
 
 The Practice Bank collects original problems that recur across the curriculum. Each entry names prerequisite Learning Units, a Hardware gate, acceptance criteria, hints, a solution, and its Source basis. It is not a copied question dump.
@@ -65,6 +68,14 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the five complete entries below and uses no empty preview entries.
 
+## Published entry index
+
+<ResourceIndex group="practice" locale="en" />
+
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The five complete prompts, prerequisite links, and solutions below remain in the static page.
+
+<span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-001: Repair an Evidence Status record
 
 - **ID and Publication Pair:** PB-R0-001 in the `practice-bank` Publication Pair.
@@ -72,7 +83,7 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - **Prerequisite:** [O02: Recording Evidence Honestly](/en/start/evidence-status/).
 - **Hardware gate:** None; analyse a text record only.
 - **Related Learning Unit:** O02.
-- **Last reviewed:** 2026-08-24.
+- **Last reviewed:** 2026-08-25.
 
 **Prompt:** A release note says: “The Linux build was skipped after the container registry timed out. A contributor pasted `PASS` from a personal GPU, so the project is Compile-Checked and Runtime-Verified. Web tests also prove that the browser explainer counts as a CUDA run.” Rewrite it as an honest record.
 
@@ -101,6 +112,8 @@ Review the linked prerequisite, then produce your own artifact before reading th
 
 **Source basis:** The site's original [O02 contract](/en/start/evidence-status/) and the separation of compile and run phases in NVIDIA `nvcc` 13.3.1 [supported phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases).
 
+<span id="pb-r0-002" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-002: Complete a manifest and repair a support claim
 
 - **ID and Publication Pair:** PB-R0-002 in the `practice-bank` Publication Pair.
@@ -108,7 +121,7 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - **Prerequisite:** [O03: Reading an Environment Manifest](/en/start/environment-manifest/).
 - **Hardware gate:** None; use a hypothetical record and run no CUDA.
 - **Related Learning Unit:** O03.
-- **Last reviewed:** 2026-08-24.
+- **Last reviewed:** 2026-08-25.
 
 **Prompt:** A record contains only “8 GB GPU, CUDA 12, WSL, kernel 0.2 ms” and claims “complete tier; this site supports the environment.” List the missing manifest fields and repair both conclusions.
 
@@ -136,6 +149,8 @@ Review the linked prerequisite, then produce your own artifact before reading th
 
 **Source basis:** The site's original [O03 contract](/en/start/environment-manifest/), NVIDIA [CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html), and the CUDA Programming Guide [compute capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html).
 
+<span id="pb-r0-003" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-003: Review an indexing prediction before execution
 
 - **ID and Publication Pair:** PB-R0-003 in the `practice-bank` Publication Pair.
@@ -143,7 +158,7 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - **Prerequisite:** [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/).
 - **Hardware gate:** None; use static reasoning only.
 - **Related Learning Unit:** F01.
-- **Last reviewed:** 2026-08-24.
+- **Last reviewed:** 2026-08-25.
 
 **Prompt:** For one-dimensional vector addition with `N = 65` and `blockDim.x = 32`, give the block count, total launched thread count, final valid index, and bounds state of `threadIdx.x = 0` and `1` in the final block. Explain why a bounds check remains necessary.
 
@@ -165,6 +180,8 @@ Review the linked prerequisite, then produce your own artifact before reading th
 
 **Source basis:** The original indexing model in [F01](/en/foundations/first-cuda-kernel/) and [VIS02](/en/visuals/indexing/), plus NVIDIA [Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html).
 
+<span id="pb-r0-004" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-004: Repair incomplete error and correctness boundaries
 
 - **ID and Publication Pair:** PB-R0-004 in the `practice-bank` Publication Pair.
@@ -172,7 +189,7 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - **Prerequisite:** [F01](/en/foundations/first-cuda-kernel/).
 - **Hardware gate:** None; review a hypothetical flow.
 - **Related Learning Units:** F01 and O02.
-- **Last reviewed:** 2026-08-24.
+- **Last reviewed:** 2026-08-25.
 
 **Prompt:** A program checks only `cudaMalloc` and final output text, then claims “no error and GPU-correct.” Write the missing boundaries and define the acceptance rule for one element.
 
@@ -194,6 +211,8 @@ Review the linked prerequisite, then produce your own artifact before reading th
 
 **Source basis:** The canonical error/correctness contract in [F01](/en/foundations/first-cuda-kernel/) and [EX02](/en/examples/vector-addition/), plus NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html).
 
+<span id="pb-r0-005" class="resource-target" aria-hidden="true"></span>
+
 ## PB-R0-005: Review a LAB02 evidence request
 
 - **ID and Publication Pair:** PB-R0-005 in the `practice-bank` Publication Pair.
@@ -201,7 +220,7 @@ Review the linked prerequisite, then produce your own artifact before reading th
 - **Prerequisite:** [F01](/en/foundations/first-cuda-kernel/), with [O02](/en/start/evidence-status/) and [O03](/en/start/environment-manifest/).
 - **Hardware gate:** None; review a text record and run no CUDA.
 - **Related Learning Units:** F01, O02, and O03.
-- **Last reviewed:** 2026-08-24.
+- **Last reviewed:** 2026-08-25.
 
 **Prompt:** A LAB02 request contains only “CUDA 13, vector add PASS, 0.01 ms” and asks for Runtime-Verified. Decide which status can be assigned now and list the completion path.
 
@@ -225,4 +244,4 @@ Review the linked prerequisite, then produce your own artifact before reading th
 
 ## Review record
 
-All five entries and their Chinese counterparts were reviewed together on **2026-08-24**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.
+All five entries and their Chinese counterparts were reviewed together on **2026-08-25**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.

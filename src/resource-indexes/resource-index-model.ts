@@ -1,0 +1,391 @@
+// SPDX-License-Identifier: Apache-2.0
+import {
+  COMPILATION_EVIDENCE_STATUSES,
+  RUNTIME_EVIDENCE_STATUSES,
+  evidenceStatusIssues,
+  parseIsoDate,
+} from '../content-contract';
+
+export const INDEX_GROUPS = ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const;
+export type IndexGroup = (typeof INDEX_GROUPS)[number];
+
+export const INDEX_LOCALES = ['zh-CN', 'en'] as const;
+export type IndexLocale = (typeof INDEX_LOCALES)[number];
+
+export const RESOURCE_TYPES = [
+  'guided-lab',
+  'mental-model',
+  'correctness-debugging',
+  'concepts-implementation',
+  'evidence-review',
+  'execution-model',
+  'indexing-model',
+  'resource-vocabulary',
+  'evidence-vocabulary',
+  'environment-vocabulary',
+  'kernel-vocabulary',
+  'publishing-interface',
+  'cuda-version-record',
+] as const;
+export type ResourceType = (typeof RESOURCE_TYPES)[number];
+
+export const INDEX_ROUTES: Readonly<Record<IndexGroup, Readonly<Record<IndexLocale, string>>>> = {
+  labs: { 'zh-CN': '/labs/', en: '/en/labs/' },
+  practice: { 'zh-CN': '/practice/', en: '/en/practice/' },
+  visuals: { 'zh-CN': '/visuals/', en: '/en/visuals/' },
+  glossary: { 'zh-CN': '/glossary/', en: '/en/glossary/' },
+  sources: { 'zh-CN': '/sources-and-versions/', en: '/en/sources-and-versions/' },
+};
+
+export type LocalizedText = Readonly<Record<IndexLocale, string>>;
+
+export type EvidenceProjection = Readonly<{
+  compilation: readonly string[];
+  runtime: readonly string[];
+}>;
+
+export type ResourceIndexRecord = Readonly<{
+  planningId: string;
+  group: IndexGroup;
+  title: LocalizedText;
+  href: LocalizedText;
+  resourceType: ResourceType;
+  prerequisites: readonly string[];
+  relatedUnits: readonly string[];
+  hardwareGate: LocalizedText;
+  versionGate: LocalizedText;
+  reviewedOn: string;
+  difficulty?: 'foundational' | 'introductory' | 'intermediate' | 'advanced';
+  evidence?: EvidenceProjection;
+  sourceAccessDate?: string;
+  keywords?: LocalizedText;
+}>;
+
+export type PublishedDestination = Readonly<{
+  href: LocalizedText;
+  title: LocalizedText;
+  prerequisites: readonly string[];
+  indexGroup?: 'labs' | 'visuals';
+}>;
+
+export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  O01: {
+    href: { 'zh-CN': '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
+    title: { 'zh-CN': 'O01：如何使用学习站', en: 'O01: Using the Learning Site' },
+    prerequisites: [],
+  },
+  O02: {
+    href: { 'zh-CN': '/start/evidence-status/', en: '/en/start/evidence-status/' },
+    title: { 'zh-CN': 'O02：诚实记录证据状态', en: 'O02: Recording Evidence Honestly' },
+    prerequisites: ['O01'],
+  },
+  O03: {
+    href: { 'zh-CN': '/start/environment-manifest/', en: '/en/start/environment-manifest/' },
+    title: { 'zh-CN': 'O03：读懂环境清单', en: 'O03: Reading an Environment Manifest' },
+    prerequisites: ['O01'],
+  },
+  F01: {
+    href: { 'zh-CN': '/foundations/first-cuda-kernel/', en: '/en/foundations/first-cuda-kernel/' },
+    title: { 'zh-CN': 'F01：从预测到第一个 CUDA kernel', en: 'F01: From Prediction to a First CUDA Kernel' },
+    prerequisites: ['O03'],
+  },
+  EX02: {
+    href: { 'zh-CN': '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
+    title: { 'zh-CN': 'EX02：向量加法可运行示例', en: 'EX02: Vector Addition Runnable Example' },
+    prerequisites: [],
+  },
+  LAB02: {
+    href: { 'zh-CN': '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
+    title: { 'zh-CN': 'LAB02：运行并验证向量加法', en: 'LAB02: Run and Verify Vector Addition' },
+    prerequisites: ['O03', 'F01'],
+    indexGroup: 'labs',
+  },
+  VIS01: {
+    href: { 'zh-CN': '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
+    title: { 'zh-CN': 'VIS01：Kernel 从 launch 到完成的路径', en: 'VIS01: A Kernel Journey from Launch to Completion' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS02: {
+    href: { 'zh-CN': '/visuals/indexing/', en: '/en/visuals/indexing/' },
+    title: { 'zh-CN': 'VIS02：Grid、block 与 thread 索引', en: 'VIS02: Grid, Block, and Thread Indexing' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
+};
+
+export const MAX_REVIEW_AGE_DAYS = 180;
+
+const MILLISECONDS_PER_DAY = 86_400_000;
+const planningIdPatterns: Readonly<Record<IndexGroup, RegExp>> = {
+  labs: /^LAB\d{2}$/,
+  practice: /^PB-R\d+-\d{3}$/,
+  visuals: /^VIS\d{2}$/,
+  glossary: /^TERM-\d{3}$/,
+  sources: /^SRC-(?:WEB|CUDA)-\d{3}$/,
+};
+const compilationStatuses = new Set<string>(COMPILATION_EVIDENCE_STATUSES);
+const runtimeStatuses = new Set<string>(RUNTIME_EVIDENCE_STATUSES);
+
+function internalCounterpart(href: string) {
+  const url = new URL(href, 'https://resource-index.invalid');
+  const path = url.pathname === '/' ? '/en/' : `/en${url.pathname}`;
+  return `${path}${url.search}${url.hash}`;
+}
+
+function nonEmpty(value: string) {
+  return value.trim().length > 0;
+}
+
+function duplicateValues(values: readonly string[]) {
+  return values.filter((value, index) => values.indexOf(value) !== index);
+}
+
+function dateIssues(label: string, value: string, asOf: Date, maximumAgeDays: number) {
+  const issues: string[] = [];
+  const date = parseIsoDate(value);
+  if (!date) return [`${label} must be a real ISO date.`];
+  const age = Math.floor((Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth(), asOf.getUTCDate()) - date.valueOf()) / MILLISECONDS_PER_DAY);
+  if (age < 0) issues.push(`${label} must not be in the future.`);
+  if (age > maximumAgeDays) issues.push(`${label} is stale (${age} days old; maximum ${maximumAgeDays}).`);
+  return issues;
+}
+
+export type ResourceCatalogValidationOptions = Readonly<{
+  asOf?: Date;
+  maximumAgeDays?: number;
+  destinations?: Readonly<Record<string, PublishedDestination>>;
+  requiredGroups?: readonly IndexGroup[];
+}>;
+
+export function validateResourceCatalog(
+  records: readonly ResourceIndexRecord[],
+  {
+    asOf = new Date(),
+    maximumAgeDays = MAX_REVIEW_AGE_DAYS,
+    destinations = PUBLISHED_DESTINATIONS,
+    requiredGroups = INDEX_GROUPS,
+  }: ResourceCatalogValidationOptions = {},
+) {
+  const issues: string[] = [];
+  const seenIds = new Set<string>();
+  const seenHrefs = new Set<string>();
+
+  if (Number.isNaN(asOf.valueOf())) issues.push('The catalog validation date is invalid.');
+  if (!Number.isInteger(maximumAgeDays) || maximumAgeDays < 0) {
+    issues.push('The maximum review age must be a non-negative integer.');
+  }
+
+  for (const [unitId, destination] of Object.entries(destinations)) {
+    for (const locale of INDEX_LOCALES) {
+      if (!nonEmpty(destination.title[locale])) issues.push(`${unitId} has an empty ${locale} destination title.`);
+      if (!destination.href[locale].startsWith('/')) issues.push(`${unitId} has a non-internal ${locale} destination.`);
+    }
+    if (internalCounterpart(destination.href['zh-CN']) !== destination.href.en) {
+      issues.push(`${unitId} destination counterparts do not align.`);
+    }
+    for (const prerequisite of destination.prerequisites) {
+      if (!destinations[prerequisite]) issues.push(`${unitId} has unknown prerequisite ${prerequisite}.`);
+      if (prerequisite === unitId) issues.push(`${unitId} cannot require itself.`);
+    }
+    for (const duplicate of duplicateValues(destination.prerequisites)) {
+      issues.push(`${unitId} repeats prerequisite ${duplicate}.`);
+    }
+  }
+
+  const visited = new Set<string>();
+  const active = new Set<string>();
+  const visit = (unitId: string) => {
+    if (active.has(unitId)) {
+      issues.push(`The prerequisite graph contains a cycle through ${unitId}.`);
+      return;
+    }
+    if (visited.has(unitId)) return;
+    active.add(unitId);
+    for (const prerequisite of destinations[unitId]?.prerequisites ?? []) visit(prerequisite);
+    active.delete(unitId);
+    visited.add(unitId);
+  };
+  for (const unitId of Object.keys(destinations)) visit(unitId);
+
+  for (const record of records) {
+    const prefix = record.planningId || '(missing planning ID)';
+    if (!planningIdPatterns[record.group]?.test(record.planningId)) {
+      issues.push(`${prefix} is not a valid planning ID for ${record.group}.`);
+    }
+    if (seenIds.has(record.planningId)) issues.push(`${prefix} is duplicated.`);
+    seenIds.add(record.planningId);
+
+    if (!RESOURCE_TYPES.includes(record.resourceType)) issues.push(`${prefix} has unknown resource type ${record.resourceType}.`);
+    for (const locale of INDEX_LOCALES) {
+      if (!nonEmpty(record.title[locale])) issues.push(`${prefix} has an empty ${locale} title.`);
+      if (!nonEmpty(record.hardwareGate[locale])) issues.push(`${prefix} has an empty ${locale} hardware gate.`);
+      if (!nonEmpty(record.versionGate[locale])) issues.push(`${prefix} has an empty ${locale} version gate.`);
+      if (!record.href[locale].startsWith('/') || record.href[locale] === '/' || record.href[locale] === '#') {
+        issues.push(`${prefix} has an empty or non-internal ${locale} destination.`);
+      }
+      const hrefKey = `${locale}:${record.href[locale]}`;
+      if (seenHrefs.has(hrefKey)) issues.push(`${prefix} reuses destination ${record.href[locale]}.`);
+      seenHrefs.add(hrefKey);
+    }
+    if (internalCounterpart(record.href['zh-CN']) !== record.href.en) {
+      issues.push(`${prefix} is missing an aligned Publication Pair destination.`);
+    }
+
+    const destination = destinations[record.planningId];
+    if (record.group === 'labs' || record.group === 'visuals') {
+      if (!destination || destination.indexGroup !== record.group) {
+        issues.push(`${prefix} has no published ${record.group} subject.`);
+      } else if (INDEX_LOCALES.some((locale) => destination.href[locale] !== record.href[locale])) {
+        issues.push(`${prefix} does not link to its published subject.`);
+      }
+      if (destination && record.prerequisites.join(',') !== destination.prerequisites.join(',')) {
+        issues.push(`${prefix} prerequisites do not match its published subject.`);
+      }
+    } else {
+      for (const locale of INDEX_LOCALES) {
+        const url = new URL(record.href[locale], 'https://resource-index.invalid');
+        if (url.pathname !== INDEX_ROUTES[record.group][locale] || !url.hash.slice(1)) {
+          issues.push(`${prefix} must link to a non-empty destination within its ${record.group} index.`);
+        }
+      }
+    }
+
+    for (const relation of [...record.prerequisites, ...record.relatedUnits]) {
+      if (!destinations[relation]) issues.push(`${prefix} links to unknown curriculum ID ${relation}.`);
+      if (relation === record.planningId) issues.push(`${prefix} cannot relate to itself.`);
+    }
+    for (const duplicate of duplicateValues(record.prerequisites)) issues.push(`${prefix} repeats prerequisite ${duplicate}.`);
+    for (const duplicate of duplicateValues(record.relatedUnits)) issues.push(`${prefix} repeats related unit ${duplicate}.`);
+    for (const [index, prerequisite] of record.prerequisites.entries()) {
+      const requiredEarlier = new Set<string>();
+      const collect = (unitId: string) => {
+        for (const required of destinations[unitId]?.prerequisites ?? []) {
+          if (requiredEarlier.has(required)) continue;
+          requiredEarlier.add(required);
+          collect(required);
+        }
+      };
+      collect(prerequisite);
+      for (const required of requiredEarlier) {
+        const requiredIndex = record.prerequisites.indexOf(required);
+        if (requiredIndex > index) issues.push(`${prefix} lists ${prerequisite} before its prerequisite ${required}.`);
+      }
+    }
+
+    if (record.group === 'labs' && !record.evidence) issues.push(`${prefix} must project its Evidence Status.`);
+    if (record.group === 'visuals' && record.evidence) issues.push(`${prefix} must not receive CUDA Evidence Status.`);
+    if (record.evidence) {
+      for (const status of record.evidence.compilation) {
+        if (!compilationStatuses.has(status)) issues.push(`${prefix} has unknown compilation status ${status}.`);
+      }
+      for (const status of record.evidence.runtime) {
+        if (!runtimeStatuses.has(status)) issues.push(`${prefix} has unknown runtime status ${status}.`);
+      }
+      for (const message of evidenceStatusIssues(record.evidence.compilation, record.evidence.runtime)) {
+        issues.push(`${prefix}: ${message}`);
+      }
+    }
+
+    issues.push(...dateIssues(`${prefix} reviewedOn`, record.reviewedOn, asOf, maximumAgeDays));
+    if (record.group === 'sources' && !record.sourceAccessDate) {
+      issues.push(`${prefix} is missing a source access date.`);
+    }
+    if (record.sourceAccessDate) {
+      issues.push(...dateIssues(`${prefix} sourceAccessDate`, record.sourceAccessDate, asOf, maximumAgeDays));
+      const reviewed = parseIsoDate(record.reviewedOn);
+      const accessed = parseIsoDate(record.sourceAccessDate);
+      if (reviewed && accessed && accessed > reviewed) issues.push(`${prefix} was reviewed before its source was accessed.`);
+    }
+  }
+
+  for (const group of requiredGroups) {
+    if (!records.some((record) => record.group === group)) issues.push(`${group} has no eligible published entries.`);
+  }
+  for (const [unitId, destination] of Object.entries(destinations)) {
+    if (!destination.indexGroup) continue;
+    const matches = records.filter((record) => record.planningId === unitId && record.group === destination.indexGroup);
+    if (matches.length !== 1) issues.push(`${unitId} is orphaned from the ${destination.indexGroup} index.`);
+  }
+
+  if (issues.length > 0) {
+    throw new Error(`Resource index catalog validation failed:\n${issues.map((issue) => `- ${issue}`).join('\n')}`);
+  }
+}
+
+export type ResourceIndexRelation = Readonly<{
+  id: string;
+  href: string;
+  title: string;
+}>;
+
+export type ResourceIndexViewItem = Readonly<{
+  planningId: string;
+  title: string;
+  href: string;
+  counterpart: string;
+  resourceType: ResourceType;
+  prerequisites: readonly ResourceIndexRelation[];
+  relatedUnits: readonly ResourceIndexRelation[];
+  hardwareGate: string;
+  versionGate: string;
+  reviewedOn: string;
+  difficulty?: ResourceIndexRecord['difficulty'];
+  evidence?: EvidenceProjection;
+  sourceAccessDate?: string;
+  searchText: string;
+}>;
+
+export function projectResourceIndex(
+  records: readonly ResourceIndexRecord[],
+  group: IndexGroup,
+  locale: IndexLocale,
+  options: ResourceCatalogValidationOptions = {},
+) {
+  const destinations = options.destinations ?? PUBLISHED_DESTINATIONS;
+  validateResourceCatalog(records, options);
+  const otherLocale: IndexLocale = locale === 'zh-CN' ? 'en' : 'zh-CN';
+  const relationFor = (unitId: string): ResourceIndexRelation => ({
+    id: unitId,
+    href: destinations[unitId]?.href[locale] ?? '',
+    title: destinations[unitId]?.title[locale] ?? unitId,
+  });
+
+  return records
+    .filter((record) => record.group === group)
+    .map<ResourceIndexViewItem>((record) => {
+      const prerequisites = record.prerequisites.map(relationFor);
+      const relatedUnits = record.relatedUnits.map(relationFor);
+      const searchText = [
+        record.planningId,
+        record.title[locale],
+        record.resourceType,
+        record.difficulty ?? '',
+        record.hardwareGate[locale],
+        record.versionGate[locale],
+        record.keywords?.[locale] ?? '',
+        ...prerequisites.flatMap(({ id, title }) => [id, title]),
+        ...relatedUnits.flatMap(({ id, title }) => [id, title]),
+        ...(record.evidence?.compilation ?? []),
+        ...(record.evidence?.runtime ?? []),
+      ].join(' ');
+
+      return {
+        planningId: record.planningId,
+        title: record.title[locale],
+        href: record.href[locale],
+        counterpart: record.href[otherLocale],
+        resourceType: record.resourceType,
+        prerequisites,
+        relatedUnits,
+        hardwareGate: record.hardwareGate[locale],
+        versionGate: record.versionGate[locale],
+        reviewedOn: record.reviewedOn,
+        difficulty: record.difficulty,
+        evidence: record.evidence,
+        sourceAccessDate: record.sourceAccessDate,
+        searchText,
+      };
+    })
+    .sort((left, right) => left.planningId.localeCompare(right.planningId, 'en', { numeric: true }));
+}

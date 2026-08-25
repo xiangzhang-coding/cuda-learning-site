@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-25'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -33,7 +33,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-24'
+      content: '2026-08-25'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -91,14 +91,14 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-截至 **2026-08-24**，完整的先修关系是：
+截至 **2026-08-25**，完整的先修关系是：
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
 3. 完成 O01 后，可以分别进入 [O02：诚实记录证据状态](/start/evidence-status/)和 [O03：读懂环境清单](/start/environment-manifest/)，学习证据状态（Evidence Status）和环境清单（Environment Manifest）。
 4. 完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)，再在原生 Linux CUDA 环境中完成 [LAB02](/labs/vector-addition/)。
 
-O02、O03 和 F01 各有练习与独立参考解答；[EX02 向量加法可运行示例](/examples/vector-addition/)是 F01/LAB02 唯一 canonical source，并公开构建契约和独立编译/运行证据边界；[VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)提供确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)当前包含五道链接回 O02、O03 和 F01 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
+O02、O03 和 F01 各有练习与独立参考解答；[EX02 向量加法可运行示例](/examples/vector-addition/)是 F01/LAB02 唯一 canonical source，并公开构建契约和独立编译/运行证据边界。[实验索引](/labs/)保留先修顺序并提供直接查找；[可视化讲解索引](/visuals/)收录 VIS01 kernel 路径与 VIS02 索引的确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)当前包含五道链接回 O02、O03 和 F01 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
 
 ## 三种视觉主题，一套内容
 
@@ -138,4 +138,4 @@ O02、O03 和 F01 各有练习与独立参考解答；[EX02 向量加法可运�
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**事实核查日期：2026-08-24。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**事实核查日期：2026-08-25。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

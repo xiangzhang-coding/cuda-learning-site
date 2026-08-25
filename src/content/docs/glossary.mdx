@@ -3,11 +3,12 @@ title: 术语表
 description: CUDA 学习站已发布的规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-24'
+factCheckDate: '2026-08-25'
 license: CC-BY-4.0
 provenance: original
 structure:
   - use
+  - lookup-index
   - entries
   - maintenance
 head:
@@ -18,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-24'
+      content: '2026-08-25'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -26,8 +27,10 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,entries,maintenance'
+      content: 'use,lookup-index,entries,maintenance'
 ---
+
+import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/glossary/" lang="en">Read the English counterpart</a>
 
@@ -37,7 +40,15 @@ head:
 
 “避免使用”不是在禁止日常表达，而是在指出会改变本站教学合同或资源类型的称呼。每个词条都给出相关学习单元（Learning Unit）和版本边界。
 
+## 已发布词条索引
+
+<ResourceIndex group="glossary" locale="zh-CN" />
+
+`TERM-*` 是稳定的规划 ID，不是从 ID 生成永久 URL 的规则。卡片链接指向当前词条位置；筛选不隐藏下方静态定义，也不会保存学习进度。
+
 ## 已发布词条
+
+<span id="term-001" class="resource-target" aria-hidden="true"></span>
 
 ### Learning Site · 学习站
 
@@ -46,12 +57,16 @@ head:
 - **相关单元：** O01。
 - **版本说明：** 不受特定 Toolkit 版本约束。
 
+<span id="term-002" class="resource-target" aria-hidden="true"></span>
+
 ### Stable Curriculum · 稳定课程
 
 - **定义：** 建立在非预览接口和耐久概念上的先修课程；“稳定”描述教学依赖合同，不表示每个动手活动都已有硬件观察。
 - **避免使用：** 主课程、最新特性目录。
 - **相关单元：** O01。
 - **版本说明：** 课程持续维护，不按 Toolkit 复制多套版本。
+
+<span id="term-003" class="resource-target" aria-hidden="true"></span>
 
 ### Learning Unit · 学习单元
 
@@ -60,12 +75,16 @@ head:
 - **相关单元：** O01。
 - **版本说明：** 资源类型本身不受版本约束。
 
+<span id="term-004" class="resource-target" aria-hidden="true"></span>
+
 ### Publication Pair · 双语发布对
 
 - **定义：** 同一公开页面的中英文对应版本，共享事实、结构、代码、可视化、元数据和来源日期。
 - **避免使用：** 翻译回退、可选翻译。
 - **相关单元：** O01。
 - **版本说明：** 适用于每次发布。
+
+<span id="term-005" class="resource-target" aria-hidden="true"></span>
 
 ### Runnable Example · 可运行示例
 
@@ -74,12 +93,16 @@ head:
 - **相关单元：** O01、F01。
 - **版本说明：** 具体项目必须另行声明适用版本。
 
+<span id="term-006" class="resource-target" aria-hidden="true"></span>
+
 ### Lab · 实验
 
 - **定义：** 学习者在外部 CUDA 环境中执行的引导式活动，包含预期观察和验收条件。
 - **避免使用：** 演示、浏览器游乐场。
 - **相关单元：** O01、LAB02。
 - **版本说明：** 具体实验必须另行声明环境要求。
+
+<span id="term-007" class="resource-target" aria-hidden="true"></span>
 
 ### Exercise · 练习
 
@@ -88,12 +111,16 @@ head:
 - **相关单元：** O01。
 - **版本说明：** 资源类型本身不受版本约束。
 
+<span id="term-008" class="resource-target" aria-hidden="true"></span>
+
 ### Practice Bank · 练习题库
 
 - **定义：** 跨课程整理的原创问题集合，每个条目都会链接到教授其先修知识的学习单元。
 - **避免使用：** 常见问题、复制的题目堆。
 - **相关单元：** O01。
 - **版本说明：** 具体条目在需要时声明版本边界。
+
+<span id="term-009" class="resource-target" aria-hidden="true"></span>
 
 ### Visual Explainer · 可视化讲解
 
@@ -102,12 +129,16 @@ head:
 - **相关资源：** O01、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)。
 - **版本说明：** 概念模型和特定硬件行为必须分开说明。
 
+<span id="term-010" class="resource-target" aria-hidden="true"></span>
+
 ### Glossary · 术语表
 
 - **定义：** 面向学习者的双语规范术语索引。
 - **避免使用：** 字典、关键词清单。
 - **相关单元：** O01。
 - **版本说明：** 词条会随课程复核，但不会暗示接口兼容性。
+
+<span id="term-011" class="resource-target" aria-hidden="true"></span>
 
 ### Evidence Status · 证据状态
 
@@ -116,12 +147,16 @@ head:
 - **相关单元：** O02。
 - **版本说明：** 状态必须绑定对象、环境、标准和日期；网页发布本身不授予状态。
 
+<span id="term-012" class="resource-target" aria-hidden="true"></span>
+
 ### Compile-Checked · 编译已检查
 
 - **定义：** 要求的源代码在声明的 Toolkit Lane 中实际构建成功，并记录方言、目标、命令和构建环境；不要求也不暗示 GPU 执行。
 - **避免使用：** 运行已验证、已在 GPU 测试。
 - **相关单元：** O02、O03。
 - **版本说明：** 每次声明都绑定精确 Toolkit Lane。
+
+<span id="term-013" class="resource-target" aria-hidden="true"></span>
 
 ### Community-Observed · 社区已观察
 
@@ -130,12 +165,16 @@ head:
 - **相关单元：** O02、O03。
 - **版本说明：** 可与 Pending Hardware Verification 并存。
 
+<span id="term-014" class="resource-target" aria-hidden="true"></span>
+
 ### Runtime-Verified · 运行已验证
 
 - **定义：** 对象在已声明、由维护者控制的 Reference Environment 中执行，并满足预先声明的正确性和观察标准。
 - **避免使用：** Compile-Checked、预期可运行。
 - **相关单元：** O02、O03。
 - **版本说明：** 结论只覆盖记录的 GPU、驱动、Toolkit、组件、工作负载和方法。
+
+<span id="term-015" class="resource-target" aria-hidden="true"></span>
 
 ### Pending Hardware Verification · 待硬件验证
 
@@ -144,12 +183,16 @@ head:
 - **相关单元：** O02。
 - **版本说明：** 编译成功或社区观察不会自动移除此状态。
 
+<span id="term-016" class="resource-target" aria-hidden="true"></span>
+
 ### Runtime-Not-Applicable · 无需运行验证
 
 - **定义：** 验收只要求编译或检查产物，不要求任何 GPU 行为时使用的运行轴状态。
 - **避免使用：** 编译专用、跳过运行。
 - **相关单元：** O02。
 - **版本说明：** 不能用来隐藏运行正确性或性能要求。
+
+<span id="term-017" class="resource-target" aria-hidden="true"></span>
 
 ### Environment Manifest · 环境清单
 
@@ -158,12 +201,16 @@ head:
 - **相关单元：** O03。
 - **版本说明：** 证据发生变化时必须记录新的观察日期和坐标。
 
+<span id="term-018" class="resource-target" aria-hidden="true"></span>
+
 ### Supported Environment · 受支持环境
 
 - **定义：** 本站承担安装说明、故障边界和验证声明责任的环境家族；只有原生 Linux 属于此范围。
 - **避免使用：** 任何可能碰巧运行的平台。
 - **相关单元：** O03。
 - **版本说明：** 上游产品支持不会自动扩大本站责任。
+
+<span id="term-019" class="resource-target" aria-hidden="true"></span>
 
 ### Reference Environment · 基准环境
 
@@ -172,12 +219,16 @@ head:
 - **相关单元：** O03。
 - **版本说明：** 当前尚未声明任何 Reference Environment。
 
+<span id="term-020" class="resource-target" aria-hidden="true"></span>
+
 ### Toolkit Lane · 工具包通道
 
 - **定义：** 固定 Toolkit 和主机环境、并声明所测 C++ 方言的编译证据目标。
 - **避免使用：** 站点版本、文档版本。
 - **相关单元：** O03。
 - **版本说明：** Lane 不是课程副本或 Reference Environment；构建成功后才能获得 Compile-Checked。
+
+<span id="term-021" class="resource-target" aria-hidden="true"></span>
 
 ### GPU Capability Tier · GPU 能力层级
 
@@ -186,12 +237,16 @@ head:
 - **相关单元：** O03。
 - **版本说明：** 产品名和更大显存不能单独决定层级。
 
+<span id="term-022" class="resource-target" aria-hidden="true"></span>
+
 ### Baseline GPU Capability Tier · 基础 GPU 能力层级
 
 - **定义：** 稳定课程基础内容的层级，要求 compute capability 7.5 或更新，并采用能放入 8 GB 的问题规模。
 - **避免使用：** 8 GB GPU tier、Turing tier。
 - **相关单元：** O03。
 - **版本说明：** 8 GB 描述工作负载边界，不是单独的硬件档位。
+
+<span id="term-023" class="resource-target" aria-hidden="true"></span>
 
 ### Modern Single-GPU Capability Tier · 现代单 GPU 能力层级
 
@@ -200,12 +255,16 @@ head:
 - **相关单元：** O03。
 - **版本说明：** 多 GPU 和架构专用活动不由此层级自动覆盖。
 
+<span id="term-024" class="resource-target" aria-hidden="true"></span>
+
 ### CUDA Toolkit · CUDA 工具包
 
 - **定义：** NVIDIA 提供的编译器、库、工具和运行时开发组件集合；它和已安装驱动、单个组件版本分别记录。
 - **避免使用：** CUDA 驱动版本、整台 CUDA 环境。
 - **相关单元：** O03。
 - **版本说明：** 本站 Toolkit Lane 使用精确 `X.Y.Z` 坐标。
+
+<span id="term-025" class="resource-target" aria-hidden="true"></span>
 
 ### compute capability · 计算能力
 
@@ -214,12 +273,16 @@ head:
 - **相关单元：** O03。
 - **版本说明：** 型号映射和功能表必须按当前 NVIDIA 文档复核。
 
+<span id="term-026" class="resource-target" aria-hidden="true"></span>
+
 ### kernel · 核函数
 
 - **定义：** 由 host 发起、在 CUDA device 上由许多 thread 执行的函数；CUDA C++ 中 `__global__` kernel 使用 execution configuration launch。
 - **避免使用：** 普通 CPU 函数、浏览器动画。
 - **相关单元：** F01、LAB02。
 - **版本说明：** F01 使用 CUDA Programming Guide v13.3 的基础执行模型。
+
+<span id="term-027" class="resource-target" aria-hidden="true"></span>
 
 ### execution configuration · 执行配置
 
@@ -228,12 +291,16 @@ head:
 - **相关单元：** F01、VIS02。
 - **版本说明：** 配置创建执行 thread，不自动定义逻辑数据 extent。
 
+<span id="term-028" class="resource-target" aria-hidden="true"></span>
+
 ### grid · 网格
 
 - **定义：** 一次 kernel launch 创建的全部 thread block 集合，可具有一维、二维或三维形状。
 - **避免使用：** 数据数组、固定调度顺序。
 - **相关单元：** F01、VIS01、VIS02。
 - **版本说明：** Block 的分派和完成顺序不由 grid 坐标保证。
+
+<span id="term-029" class="resource-target" aria-hidden="true"></span>
 
 ### thread block · 线程块
 
@@ -242,12 +309,16 @@ head:
 - **相关单元：** F01、VIS01、VIS02。
 - **版本说明：** F01 只使用一维 block；多维关系由 VIS02 说明。
 
+<span id="term-030" class="resource-target" aria-hidden="true"></span>
+
 ### thread · 线程
 
 - **定义：** Kernel 的一个逻辑执行实例；它通过 `threadIdx` 与 block/grid 坐标推导自己负责的数据位置。
 - **避免使用：** 元素、warp、操作系统线程。
 - **相关单元：** F01、VIS02。
 - **版本说明：** Launch thread 可以落在逻辑数据范围外，因此仍需 bounds check。
+
+<span id="term-031" class="resource-target" aria-hidden="true"></span>
 
 ### host and device · 主机与设备
 
@@ -256,6 +327,8 @@ head:
 - **相关单元：** F01、LAB02。
 - **版本说明：** LAB02 使用 CUDA Runtime API 11.8.0、12.9.2 或 13.3.1 的声明 Lane。
 
+<span id="term-032" class="resource-target" aria-hidden="true"></span>
+
 ### bounds check · 边界判断
 
 - **定义：** Thread 在访问数组前比较推导索引与逻辑 extent，使最后一个 partial block 的越界 thread 跳过访问。
@@ -263,12 +336,16 @@ head:
 - **相关单元：** F01、VIS02、LAB02。
 - **版本说明：** EX02 的一维条件是 `index < element_count`。
 
+<span id="term-033" class="resource-target" aria-hidden="true"></span>
+
 ### CPU reference · CPU 参考实现
 
 - **定义：** 与 CUDA kernel 独立、在 CPU 上计算预期结果的实现，用于逐元素正确性比较。
 - **避免使用：** GPU runtime evidence、性能基线（除非另有测量合同）。
 - **相关单元：** F01、LAB02。
 - **版本说明：** EX02 的 host-only test 不运行 GPU，也不授予 Runtime-Verified。
+
+<span id="term-034" class="resource-target" aria-hidden="true"></span>
 
 ### tolerance · 容差
 
@@ -279,4 +356,4 @@ head:
 
 ## 维护规则
 
-这些词条与 O01、O02、O03、F01 和 LAB02 的事实核查日期同为 **2026-08-24**。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。
+这些词条及其索引元数据在 **2026-08-25** 与英文对应内容同步复核。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。

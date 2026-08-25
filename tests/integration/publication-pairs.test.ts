@@ -15,6 +15,7 @@ async function readRoute(route: string) {
 
 type PublicationPair = {
   pairId: string;
+  factCheckDate?: string;
   structure: string;
   resourceKind?: string;
   unitId?: string;
@@ -44,12 +45,14 @@ type PublicationPair = {
 const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'home',
+    factCheckDate: '2026-08-25',
     structure: 'purpose,current-route,boundaries,destinations',
     zh: '/',
     en: '/en/',
   },
   {
     pairId: 'o01',
+    factCheckDate: '2026-08-25',
     structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
     resourceKind: 'learning-unit',
     unitId: 'O01',
@@ -182,6 +185,13 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/examples/vector-addition/',
   },
   {
+    pairId: 'labs-index',
+    factCheckDate: '2026-08-25',
+    structure: 'scope,published-index,sequence,evidence-boundary',
+    zh: '/labs/',
+    en: '/en/labs/',
+  },
+  {
     pairId: 'lab02',
     structure: 'contract,prerequisites,prepare,predict,build,run,verify,observations,evidence,cleanup,sources',
     resourceKind: 'lab',
@@ -206,6 +216,13 @@ const publicationPairs: readonly PublicationPair[] = [
     sourceVersions: '11.8.0,12.9.2,13.3.1',
     zh: '/labs/vector-addition/',
     en: '/en/labs/vector-addition/',
+  },
+  {
+    pairId: 'visuals-index',
+    factCheckDate: '2026-08-25',
+    structure: 'scope,published-index,sequence,evidence-boundary',
+    zh: '/visuals/',
+    en: '/en/visuals/',
   },
   {
     pairId: 'vis01',
@@ -235,7 +252,8 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'practice-bank',
-    structure: 'use,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review',
+    factCheckDate: '2026-08-25',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
     prerequisites: 'O02,O03,F01',
@@ -245,13 +263,15 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'glossary',
-    structure: 'use,entries,maintenance',
+    factCheckDate: '2026-08-25',
+    structure: 'use,lookup-index,entries,maintenance',
     zh: '/glossary/',
     en: '/en/glossary/',
   },
   {
     pairId: 'sources-and-versions',
-    structure: 'scope,verified-interfaces,content-sources,review-record',
+    factCheckDate: '2026-08-25',
+    structure: 'scope,lookup-index,verified-interfaces,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',
   },
@@ -269,17 +289,17 @@ function metadata(document: Document, name: string) {
 
 describe('Publication Pairs', () => {
   it.each(
-    publicationPairs.flatMap(({ pairId, structure, zh, en, ...contract }) => [
-      { route: zh, lang: 'zh-CN', counterpart: en, pairId, structure, ...contract },
-      { route: en, lang: 'en', counterpart: zh, pairId, structure, ...contract },
+    publicationPairs.flatMap(({ pairId, factCheckDate = '2026-08-24', structure, zh, en, ...contract }) => [
+      { route: zh, lang: 'zh-CN', counterpart: en, pairId, factCheckDate, structure, ...contract },
+      { route: en, lang: 'en', counterpart: zh, pairId, factCheckDate, structure, ...contract },
     ]),
-  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, hardwareGate, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', estimatedMinutes, difficulty, toolkitLanes, minimumComputeCapability, maximumProblemMemoryBytes, gpuCount, permissions, sourceCount, sourceVersions }) => {
+  )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, factCheckDate, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, hardwareGate, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', estimatedMinutes, difficulty, toolkitLanes, minimumComputeCapability, maximumProblemMemoryBytes, gpuCount, permissions, sourceCount, sourceVersions }) => {
     const document = await readRoute(route);
 
     expect(document.documentElement.lang).toBe(lang);
     expect(document.querySelector(`[data-locale-counterpart][href="${counterpart}"]`)).not.toBeNull();
     expect(metadata(document, 'cuda:pair-id')).toBe(pairId);
-    expect(metadata(document, 'cuda:fact-check-date')).toBe('2026-08-24');
+    expect(metadata(document, 'cuda:fact-check-date')).toBe(factCheckDate);
     expect(metadata(document, 'cuda:license')).toBe('CC-BY-4.0');
     expect(metadata(document, 'cuda:structure')).toBe(structure);
     if (resourceKind) expect(metadata(document, 'cuda:resource-kind')).toBe(resourceKind);
@@ -392,11 +412,11 @@ describe('published navigation', () => {
   it.each([
     {
       route: '/start/using-the-learning-site/',
-      expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/foundations/first-cuda-kernel/', '/examples/vector-addition/', '/labs/vector-addition/', '/visuals/kernel-journey/', '/visuals/indexing/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
+       expected: ['/start/using-the-learning-site/', '/start/evidence-status/', '/start/environment-manifest/', '/foundations/first-cuda-kernel/', '/examples/vector-addition/', '/labs/', '/labs/vector-addition/', '/visuals/', '/visuals/kernel-journey/', '/visuals/indexing/', '/practice/', '/glossary/', '/sources-and-versions/', '/about/'],
     },
     {
       route: '/en/start/using-the-learning-site/',
-      expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/foundations/first-cuda-kernel/', '/en/examples/vector-addition/', '/en/labs/vector-addition/', '/en/visuals/kernel-journey/', '/en/visuals/indexing/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
+       expected: ['/en/start/using-the-learning-site/', '/en/start/evidence-status/', '/en/start/environment-manifest/', '/en/foundations/first-cuda-kernel/', '/en/examples/vector-addition/', '/en/labs/', '/en/labs/vector-addition/', '/en/visuals/', '/en/visuals/kernel-journey/', '/en/visuals/indexing/', '/en/practice/', '/en/glossary/', '/en/sources-and-versions/', '/en/about/'],
     },
   ])('exposes only complete destinations from $route', async ({ route, expected }) => {
     const document = await readRoute(route);
@@ -405,17 +425,34 @@ describe('published navigation', () => {
     for (const href of expected) expect(hrefs).toContain(href);
   });
 
-  it('contains no broken internal page links', async () => {
+  it('contains no empty destinations or broken internal page and fragment links', async () => {
     const publishedRoutes = new Set(publicationPairs.flatMap(({ zh, en }) => [zh, en]));
+    const documents = new Map<string, Document>();
+    const destinationDocument = async (route: string) => {
+      const cached = documents.get(route);
+      if (cached) return cached;
+      const document = await readRoute(route);
+      documents.set(route, document);
+      return document;
+    };
 
     for (const route of publishedRoutes) {
-      const document = await readRoute(route);
-      const links = [...document.querySelectorAll('a[href]')]
-        .map((link) => link.getAttribute('href'))
-        .filter((href): href is string => Boolean(href?.startsWith('/')))
-        .map((href) => href.split('#')[0]);
+      const document = await destinationDocument(route);
+      const links = [...document.querySelectorAll('a[href]')].map((link) => link.getAttribute('href') ?? '');
 
-      for (const href of links) expect(publishedRoutes, `${route} links to ${href}`).toContain(href);
+      for (const href of links) {
+        expect(href.trim(), `${route} contains an empty link`).not.toBe('');
+        expect(href, `${route} contains a placeholder link`).not.toBe('#');
+        if (!href.startsWith('/') && !href.startsWith('#')) continue;
+
+        const destination = new URL(href, `${siteOrigin}${route}`);
+        expect(publishedRoutes, `${route} links to ${destination.pathname}`).toContain(destination.pathname);
+        if (!destination.hash) continue;
+
+        const fragment = decodeURIComponent(destination.hash.slice(1));
+        const target = await destinationDocument(destination.pathname);
+        expect(target.getElementById(fragment), `${route} links to missing #${fragment} in ${destination.pathname}`).not.toBeNull();
+      }
     }
   });
 
@@ -480,7 +517,7 @@ describe('search readiness', () => {
 
     expect(entry.version).toBe('1.5.2');
     expect(Object.keys(entry.languages).sort()).toEqual(['en', 'zh-cn']);
-    expect(entry.languages.en.page_count).toBeGreaterThanOrEqual(5);
-    expect(entry.languages['zh-cn'].page_count).toBeGreaterThanOrEqual(5);
+    expect(entry.languages.en.page_count).toBe(publicationPairs.length);
+    expect(entry.languages['zh-cn'].page_count).toBe(publicationPairs.length);
   });
 });

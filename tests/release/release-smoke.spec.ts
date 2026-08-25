@@ -62,6 +62,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     query: 'row-major data index',
     expectedHrefs: ['/en/visuals/indexing/'],
   });
+  await expectRankedSearchResult(page, {
+    route: '/en/',
+    button: /Search/,
+    query: 'SRC-WEB-003 Pagefind 1.5.2',
+    expectedHrefs: ['/en/sources-and-versions/'],
+  });
+
+  await page.goto('/en/practice/');
+  const index = page.locator('cuda-resource-index');
+  await index.locator('[data-resource-query]').fill('manifest');
+  await expect(index.locator('[data-resource-card]:visible')).toHaveCount(1);
+  await expect(index.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'PB-R0-002');
   expect(failures).toEqual([]);
 });
 
@@ -105,12 +117,17 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
     viewport: { width: 390, height: 844 },
   });
   const staticPage = await staticContext.newPage();
-  for (const route of ['/visuals/kernel-journey/', '/en/visuals/indexing/']) {
+  for (const route of ['/visuals/kernel-journey/', '/en/visuals/indexing/', '/practice/', '/en/glossary/']) {
     const response = await staticPage.goto(route);
     expect(response?.ok(), route).toBe(true);
-    await expect(staticPage.locator('[data-visual-controls]')).toBeHidden();
-    await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
-    await expect(staticPage.locator('[data-no-evidence]')).toBeVisible();
+    if (route.includes('/visuals/')) {
+      await expect(staticPage.locator('[data-visual-controls]')).toBeHidden();
+      await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
+      await expect(staticPage.locator('[data-no-evidence]')).toBeVisible();
+    } else {
+      await expect(staticPage.locator('[data-resource-controls]')).toBeHidden();
+      await expect(staticPage.locator('[data-resource-card]').first()).toBeVisible();
+    }
     expect(await staticPage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }
   await staticContext.close();
