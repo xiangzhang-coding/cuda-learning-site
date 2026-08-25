@@ -63,7 +63,7 @@ head:
 
 ## 复核前
 
-这是 [O08 练习（Exercise）](/start/reference-environment-candidate/exercises/)的**参考解答**。解答只复核推理和必需记录，不会把两份假设材料变成观察。目前没有声明任何基准环境（Reference Environment）。
+这是 [O08 练习（Exercise）](/start/reference-environment-candidate/exercises/)的**参考解答**。解答只复核基准环境候选配置（Reference Environment candidate）的推理和必需记录，不会把两份假设材料变成观察。目前没有声明任何基准环境（Reference Environment）。
 
 ## 解答 1：分诊不完整候选配置
 

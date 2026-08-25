@@ -207,7 +207,7 @@ Ubuntu 24.04 x86-64 加 CUDA 13.3.1 目前只是候选软件坐标；它没有 G
 
 - 完成 [O03 练习（Exercise）](/start/environment-manifest/exercises/)，再查看独立的[参考解答](/start/environment-manifest/solutions/)。
 - 在[练习题库（Practice Bank）](/practice/)完成 PB-R0-002，修复一份不完整 manifest 和错误支持边界。
-- 打开 [EX01 环境报告可运行示例](/examples/environment-report/)，理解它能采集哪些结构化观察，以及它不能替代哪些 manifest 字段。
+- 打开 [EX01 环境报告可运行示例（Runnable Example）](/examples/environment-report/)，理解它能采集哪些结构化观察，以及它不能替代哪些 manifest 字段。
 - 完成 O02、O03 和 O05 后进入 [O08](/start/reference-environment-candidate/)；同时具备 O03 和 O08 后，再用 [LAB01](/labs/record-cuda-environment/)采集并解释候选配置。
 - kernel 路线仍可继续到 [F01](/foundations/first-cuda-kernel/)，并在进入 [LAB02](/labs/vector-addition/)前把本页字段准备成真实记录模板。
 

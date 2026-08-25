@@ -22,7 +22,7 @@ Context7 was used only for current interface discovery and cross-checking. This 
 
 ## Resource index contract
 
-The catalog under `src/resource-indexes/` is the public, build-time source for Lab, Practice Bank, Visual Explainer, Glossary, and source/version index cards. The publication review now covers LAB01/LAB02, ten complete Practice Bank entries, VIS01/VIS02, 34 Glossary terms, five new original embedded visual views, and 27 anchored records in the Sources and Version Publication Pair. Catalog counts remain derived from code rather than duplicated here. Unpublished work is not stored as an empty destination.
+The catalog under `src/resource-indexes/` is the public, build-time source for Lab, Practice Bank, Visual Explainer, Glossary, and source/version index cards. The publication review now covers LAB01/LAB02, the complete Practice Bank, VIS01/VIS02, the published Glossary, five new original embedded visual views, and the anchored records in the Sources and Version Publication Pair. Catalog counts remain derived from code rather than duplicated here. Unpublished work is not stored as an empty destination.
 
 Catalog validation fails the build for missing locale fields, counterpart drift, duplicate or malformed planning IDs, unknown or cyclic prerequisite edges, orphaned Labs or Visual Explainers, empty destinations, invalid or older-than-180-day review/source dates, and uncontrolled Evidence Status. Planning IDs remain stable discussion labels; routes and fragments are explicit fields and are not generated as a public URL promise. Built-output tests separately require every current destination and fragment to exist.
 

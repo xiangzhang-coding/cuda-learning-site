@@ -9,6 +9,8 @@ const expectedSourceCommit = process.env.RELEASE_SOURCE_COMMIT as string;
 const releaseKind = process.env.RELEASE_KIND as 'local' | 'preview' | 'production';
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
+const ex01DownloadUrl =
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/5fa2284a3493fc1a51c6ccc5ba709be096e862b8.zip';
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
@@ -174,7 +176,7 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
   await staticContext.close();
 });
 
-test('serves the immutable EX02 download and returns a real 404 for unknown application paths', async ({ page, request }) => {
+test('serves immutable canonical downloads and returns a real 404 for unknown application paths', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/examples/vector-addition/');
   await expect(page.locator(`a[href="${downloadUrl}"]`)).toBeVisible();
@@ -183,6 +185,13 @@ test('serves the immutable EX02 download and returns a real 404 for unknown appl
   expect(download.ok()).toBe(true);
   expect(download.headers()['content-type']).toMatch(/zip|octet-stream/);
   expect((await download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+
+  await page.goto('/en/examples/environment-report/');
+  await expect(page.locator(`a[href="${ex01DownloadUrl}"]`)).toBeVisible();
+  const ex01Download = await request.get(ex01DownloadUrl);
+  expect(ex01Download.ok()).toBe(true);
+  expect(ex01Download.headers()['content-type']).toMatch(/zip|octet-stream/);
+  expect((await ex01Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
 
   const missing = await request.get('/api/r0-smoke-must-not-exist');
   expect(missing.status()).toBe(404);

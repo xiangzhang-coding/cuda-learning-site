@@ -191,7 +191,7 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/labs/record-cuda-environment/" lang="en">Read the English counterpart</a>
 
-LAB01 是一项实验（Lab）。你要在网站之外采集一份环境清单（Environment Manifest），构建并运行可运行示例（Runnable Example）EX01，再把采集事实解释为基准环境（Reference Environment）候选配置。本站不会执行这些命令，也没有观察到你的机器。**目前没有声明任何 Reference Environment。**
+LAB01 是一项实验（Lab）。你要在网站之外采集一份环境清单（Environment Manifest），构建并运行可运行示例（Runnable Example）EX01，再把采集事实解释为基准环境候选配置（Reference Environment candidate）。本站不会执行这些命令，也没有观察到你的机器。**目前没有声明任何基准环境（Reference Environment）。**
 
 ## 实验合同
 
@@ -199,7 +199,7 @@ LAB01 是一项实验（Lab）。你要在网站之外采集一份环境清单�
 | --- | --- |
 | 预计时间 | 60 分钟 |
 | 难度 | 入门（introductory） |
-| 直接先修 | 严格按 O03、O08 的顺序完成 |
+| 直接先修 | 完成 O03 与 O08；O08 本身已经把 O03 列为直接先修 |
 | 受支持环境（Supported Environment） | 仅原生 Linux；其他平台不能形成本站的 Reference Environment 候选配置 |
 | 硬件门槛 | 要形成候选配置，需要选择 1 块 compute capability 7.5 或更新的 CUDA-capable NVIDIA GPU；准备与构建可以在没有 GPU 时完成 |
 | 工具包通道（Toolkit Lane） | 选择 `cuda-11.8`、`cuda-12.9` 或 `cuda-13.3`；记录实际 Toolkit、组件和 host compiler，不借用其他 Lane 的证据 |
@@ -222,7 +222,7 @@ LAB01 是一项实验（Lab）。你要在网站之外采集一份环境清单�
 
 ## 准备项目并冻结记录
 
-[查看临时 `main` 分支中的完整 EX01 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex01-environment-report)，或[下载临时 `main` 源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/refs/heads/main.zip)。这些链接会在 reviewed evidence commit 存在后固定；当前 `main` 不是不可变证据坐标。无论怎样取得源码，都先记录完整 commit SHA，再进入项目目录：
+[查看固定 source commit 中的完整 EX01 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5fa2284a3493fc1a51c6ccc5ba709be096e862b8/examples/ex01-environment-report)，或[下载同一 commit 的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5fa2284a3493fc1a51c6ccc5ba709be096e862b8.zip)。这组不可变 acquisition coordinate 把页面显示 range 和 build input 绑定到同一 source tree。进入项目目录前，先记录完整 commit SHA：
 
 ```sh
 git clone \
@@ -346,7 +346,7 @@ EX01 不启动 workload kernel，也不分配 problem data，所以本 Lab 的 `
 
 只使用 direct compute-capability query、selected visible device 的 memory、GPU count、required feature 和 permission。记录满足完整合同的最高 tier：
 
-- **基础 GPU 能力层级（Baseline GPU Capability Tier）：** compute capability 7.5 或更新，恰好选择 1 块可用 GPU，并且稳定课程基础 workload 能满足低于 8 GB 的问题规模合同。EX01 的 problem-data requirement 为 0 bytes，但这只说明 EX01 自身能放下。
+- **基础 GPU 能力层级（Baseline GPU Capability Tier）：** compute capability 7.5 或更新，恰好选择 1 块可用 GPU，并且稳定课程（Stable Curriculum）基础 workload 能满足低于 8 GB 的问题规模合同。EX01 的 problem-data requirement 为 0 bytes，但这只说明 EX01 自身能放下。
 - **现代单 GPU 能力层级（Modern Single-GPU Capability Tier）：** compute capability 8.0 或更新，selected CUDA-visible device 至少有 8 GB total memory，并满足 single-GPU route 所需 feature 与 permission。若选择 MIG instance，按 instance 可见资源判断，不能借用 parent GPU 总内存。
 - **No tier：** compute capability 低于 7.5，required fact 缺失，selected count 不是 1，或 feature/permission gate 未满足。缺失值不能按 product name 推断。
 

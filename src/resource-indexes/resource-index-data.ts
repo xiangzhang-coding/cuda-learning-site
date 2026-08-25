@@ -74,7 +74,7 @@ const labs: readonly ResourceIndexRecord[] = [
     prerequisites: lab01Destination.prerequisites,
     relatedUnits: ['O02', 'O05', 'EX01'],
     hardwareGate: localized(
-      '原生 Linux；候选项需要 1 个 compute capability 7.5 或更新的 CUDA-capable NVIDIA GPU；准备和构建不需要 GPU。',
+      '原生 Linux；候选配置需要 1 个 compute capability 7.5 或更新的 CUDA-capable NVIDIA GPU；准备和构建不需要 GPU。',
       'Native Linux; a candidate needs one CUDA-capable NVIDIA GPU with compute capability 7.5 or newer; preparation and build need no GPU.',
     ),
     versionGate: localized(
@@ -86,7 +86,7 @@ const labs: readonly ResourceIndexRecord[] = [
       runtime: ['Pending Hardware Verification'],
     },
     reviewedOn: '2026-08-26',
-    keywords: localized('环境清单 EX01 兼容性 GPU 能力层级 候选项', 'Environment Manifest EX01 compatibility GPU Capability Tier candidate'),
+    keywords: localized('环境清单 EX01 兼容性 GPU 能力层级 候选配置', 'Environment Manifest EX01 compatibility GPU Capability Tier candidate'),
   },
   {
     planningId: 'LAB02',
@@ -235,7 +235,7 @@ const practice: readonly ResourceIndexRecord[] = [
   {
     planningId: 'PB-R1-005',
     group: 'practice',
-    title: localized('审查不完整的基准环境候选项', 'Triage an incomplete Reference Environment candidate'),
+    title: localized('审查不完整的基准环境候选配置', 'Triage an incomplete Reference Environment candidate'),
     href: localized('/practice/#pb-r1-005', '/en/practice/#pb-r1-005'),
     resourceType: 'evidence-review',
     difficulty: 'intermediate',
@@ -316,7 +316,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-037', 'translation unit · 翻译单元', 'kernel-vocabulary', ['O04'], 'O04 使用 ISO C++17 与 NVCC v13.3 compilation trajectory。', 'O04 uses ISO C++17 and the NVCC v13.3 compilation trajectory.'),
   glossaryRecord('TERM-038', 'reproducible command record · 可复现命令记录', 'environment-vocabulary', ['O05', 'LAB01'], 'GNU Bash 5.3、Coreutils 9.11 与 GNU Make 4.4.1。', 'GNU Bash 5.3, Coreutils 9.11, and GNU Make 4.4.1.'),
   glossaryRecord('TERM-039', 'latency · 延迟', 'kernel-vocabulary', ['O06'], '必须绑定具体操作、路径与计时边界。', 'Must bind to a named operation, path, and timing boundary.'),
-  glossaryRecord('TERM-040', 'throughput · 吞吐率', 'kernel-vocabulary', ['O06', 'O07'], '峰值 issue rate 不等于应用实际吞吐率。', 'Peak issue rate is not achieved application throughput.'),
+  glossaryRecord('TERM-040', 'throughput · 吞吐量', 'kernel-vocabulary', ['O06', 'O07'], '峰值 issue rate 不等于应用实际吞吐量。', 'Peak issue rate is not achieved application throughput.'),
   glossaryRecord('TERM-041', 'bandwidth · 带宽', 'kernel-vocabulary', ['O06'], '必须记录 memory path、单位与 theoretical/effective/actual 口径。', 'Requires a memory path, units, and theoretical/effective/actual convention.'),
   glossaryRecord('TERM-042', 'concurrency · 并发', 'kernel-vocabulary', ['O06'], '必须说明 resident work、kernel、stream、copy/compute 或 host/device scope。', 'Must name resident-work, kernel, stream, copy/compute, or host/device scope.'),
   glossaryRecord('TERM-043', 'arithmetic intensity · 算术强度', 'kernel-vocabulary', ['O06'], '工作计数与 memory-traffic boundary 决定数值。', 'The work count and memory-traffic boundary determine the value.'),
@@ -324,7 +324,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-045', 'programmable shader stage · 可编程着色器阶段', 'kernel-vocabulary', ['O07'], '历史接口仍受 graphics pipeline input/output 约束。', 'Historical interfaces remain constrained by graphics-pipeline inputs and outputs.'),
   glossaryRecord('TERM-046', 'GPGPU · 通用 GPU 计算', 'kernel-vocabulary', ['O07'], '历史 GPGPU mapping 不等同于 CUDA programming model。', 'Historical GPGPU mappings are not the CUDA programming model.'),
   glossaryRecord('TERM-047', 'compatibility assessment · 兼容性评估', 'environment-vocabulary', ['O08'], '只输出 documented-path、not-documented 或 indeterminate，不授予证据状态。', 'Produces only documented-path, not-documented, or indeterminate and grants no Evidence Status.'),
-  glossaryRecord('TERM-048', 'Reference Environment candidate · 基准环境候选项', 'environment-vocabulary', ['O08', 'LAB01'], '候选项不是声明；仍需 maintainer control 与成功 baseline run。', 'A candidate is not a declaration; maintainer control and a successful baseline run remain required.'),
+  glossaryRecord('TERM-048', 'Reference Environment candidate · 基准环境候选配置', 'environment-vocabulary', ['O08', 'LAB01'], '候选配置不是声明；仍需 maintainer control 与成功 baseline run。', 'A candidate is not a declaration; maintainer control and a successful baseline run remain required.'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [

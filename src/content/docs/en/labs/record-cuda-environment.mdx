@@ -199,7 +199,7 @@ LAB01 is a Lab. You will capture an Environment Manifest outside the website, bu
 | --- | --- |
 | Estimated time | 60 minutes |
 | Difficulty | Introductory |
-| Direct prerequisites | Complete O03 and then O08 in that exact order |
+| Direct prerequisites | Complete O03 and O08; O08 already lists O03 among its own direct prerequisites |
 | Supported Environment | Native Linux only; another platform cannot form a Reference Environment candidate for this site |
 | Hardware gate | A candidate requires one selected CUDA-capable NVIDIA GPU with compute capability 7.5 or newer; preparation and build may be completed without a GPU |
 | Toolkit Lane | Select `cuda-11.8`, `cuda-12.9`, or `cuda-13.3`; record the actual Toolkit, components, and host compiler without borrowing evidence from another Lane |
@@ -222,7 +222,7 @@ Without a GPU, you may still finish preparation, software capture, the build, an
 
 ## Prepare the project and freeze the record
 
-[View the complete EX01 project on the temporary `main` branch](https://github.com/xiangzhang-coding/cuda-learning-site/tree/main/examples/ex01-environment-report), or [download the temporary `main` source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/refs/heads/main.zip). These links will be pinned when a reviewed evidence commit exists; current `main` is not an immutable evidence coordinate. Whichever acquisition path you use, record the full commit SHA before entering the project directory:
+[View the complete EX01 project at its pinned source commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5fa2284a3493fc1a51c6ccc5ba709be096e862b8/examples/ex01-environment-report), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5fa2284a3493fc1a51c6ccc5ba709be096e862b8.zip). This immutable acquisition coordinate binds the displayed ranges and build inputs to one source tree. Record the full commit SHA before entering the project directory:
 
 ```sh
 git clone \

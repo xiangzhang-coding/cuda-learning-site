@@ -395,13 +395,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 ### latency · 延迟
 
 - **定义：** 一个指定事件从已声明起点到已声明终点经过的时间，必须同时报告单位。它衡量单个事件，不是单位时间内完成的工作量。
-- **避免使用：** 吞吐率、速率、没有事件和边界的计时值。
+- **避免使用：** 吞吐量、速率、没有事件和边界的计时值。
 - **相关单元：** O06。
 - **版本说明：** 比较 latency 时必须对齐事件、同步边界、timer 及其版本、workload 和单位。
 
 <span id="term-040" class="resource-target" aria-hidden="true"></span>
 
-### throughput · 吞吐率
+### throughput · 吞吐量
 
 - **定义：** 在已声明时间窗口内完成的指定工作量，以 items/s、operations/s 等单位表示。它是速率，不是一个事件的经过时间。
 - **避免使用：** 单次操作的 latency、没有工作量和时间窗口的速率、未说明条件的 peak 值。
@@ -473,7 +473,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <span id="term-048" class="resource-target" aria-hidden="true"></span>
 
-### Reference Environment candidate · 基准环境候选项
+### Reference Environment candidate · 基准环境候选配置
 
 - **定义：** 正在按 manifest、tier、compatibility、maintainer control 和独立 baseline 门槛接受审查的一套精确原生 Linux GPU 与软件配置。候选身份不构成 Reference Environment 声明。
 - **避免使用：** 已声明的 Reference Environment、推荐配置、已验证机器。

@@ -63,7 +63,7 @@ head:
 
 ## 先修条件
 
-先完成 [O08：准备基准环境候选配置](/start/reference-environment-candidate/)，掌握基准环境（Reference Environment）候选配置的审查门槛。这些练习（Exercise）只使用假设材料，不需要 GPU，也不记录机器观察或 CUDA 证据。
+先完成 [O08：准备基准环境候选配置](/start/reference-environment-candidate/)，掌握基准环境候选配置（Reference Environment candidate）的审查门槛。这些练习（Exercise）只使用假设材料，不需要 GPU，也不记录机器观察或 CUDA 证据。
 
 ## 作答方法
 

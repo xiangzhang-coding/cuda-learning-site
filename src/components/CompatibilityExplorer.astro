@@ -1,6 +1,7 @@
 ---
 // SPDX-License-Identifier: Apache-2.0
 import '../styles/orientation-visuals.css';
+import { COMPATIBILITY_STATE_COPY } from '../visuals/compatibility-copy';
 import { COMPATIBILITY_LANES, assessCompatibility } from '../visuals/compatibility-model';
 
 interface Props {
@@ -20,7 +21,7 @@ const copy = locale === 'zh-CN'
       forwardOptions: {
         unknown: '未知',
         'not-used': '未使用',
-        'verified-loaded': '已核对 package 与实际加载的 user-mode library',
+        'package-observed': '已记录 package；GPU 资格与实际加载 library 仍待核对',
       },
       reset: '重置',
       result: '评估结果',
@@ -28,11 +29,7 @@ const copy = locale === 'zh-CN'
       reasons: '判断依据',
       missing: '仍需补全',
       none: '无',
-      state: {
-        'documented-path': 'documented-path：主文档描述了可能路径',
-        'not-documented': 'not-documented：所选主文档没有给出这条路径',
-        indeterminate: 'indeterminate：现有输入不足',
-      },
+      state: COMPATIBILITY_STATE_COPY['zh-CN'],
       runtime: '任何结果都需要对精确应用、driver、GPU 与组件做实际运行验证。',
       evidence: '这个浏览器模型不会更改 Compile-Checked 或 runtime Evidence Status。',
       staticTitle: '选定 Toolkit Lane 的来源坐标',
@@ -53,7 +50,7 @@ const copy = locale === 'zh-CN'
       forwardOptions: {
         unknown: 'Unknown',
         'not-used': 'Not used',
-        'verified-loaded': 'Package and loaded user-mode library source checked',
+        'package-observed': 'Package record observed; GPU eligibility and loaded library remain unverified',
       },
       reset: 'Reset',
       result: 'Assessment',
@@ -61,11 +58,7 @@ const copy = locale === 'zh-CN'
       reasons: 'Reasons',
       missing: 'Facts still required',
       none: 'None',
-      state: {
-        'documented-path': 'documented-path: owner documentation describes a possible path',
-        'not-documented': 'not-documented: the selected owner rules describe no path',
-        indeterminate: 'indeterminate: the current inputs are insufficient',
-      },
+      state: COMPATIBILITY_STATE_COPY.en,
       runtime: 'Every outcome still requires a run of the exact application, driver, GPU, and components.',
       evidence: 'This browser model changes neither Compile-Checked nor runtime Evidence Status.',
       staticTitle: 'Selected Toolkit Lane source coordinates',
@@ -102,7 +95,7 @@ const initial = assessCompatibility({ laneId: 'cuda-13.3', driverRelease: '', fo
       <select data-forward-package autocomplete="off">
         <option value="unknown" selected>{copy.forwardOptions.unknown}</option>
         <option value="not-used">{copy.forwardOptions['not-used']}</option>
-        <option value="verified-loaded">{copy.forwardOptions['verified-loaded']}</option>
+        <option value="package-observed">{copy.forwardOptions['package-observed']}</option>
       </select>
     </label>
     <button type="button" data-reset-compatibility>{copy.reset}</button>
@@ -151,14 +144,11 @@ const initial = assessCompatibility({ laneId: 'cuda-13.3', driverRelease: '', fo
     type CompatibilityState,
     type ForwardPackageState,
   } from '../visuals/compatibility-model';
+  import { COMPATIBILITY_STATE_COPY } from '../visuals/compatibility-copy';
 
   const messages = {
     en: {
-      state: {
-        'documented-path': 'documented-path: owner documentation describes a possible path',
-        'not-documented': 'not-documented: the selected owner rules describe no path',
-        indeterminate: 'indeterminate: the current inputs are insufficient',
-      },
+      state: COMPATIBILITY_STATE_COPY.en,
       reasons: {
         'missing-driver': 'The loaded Linux driver release is missing.',
         'invalid-driver': 'Use one to four dot-separated integer fields for the driver release.',
@@ -180,11 +170,7 @@ const initial = assessCompatibility({ laneId: 'cuda-13.3', driverRelease: '', fo
       none: 'None',
     },
     'zh-CN': {
-      state: {
-        'documented-path': 'documented-path：主文档描述了可能路径',
-        'not-documented': 'not-documented：所选主文档没有给出这条路径',
-        indeterminate: 'indeterminate：现有输入不足',
-      },
+      state: COMPATIBILITY_STATE_COPY['zh-CN'],
       reasons: {
         'missing-driver': '缺少已加载的 Linux driver 版本。',
         'invalid-driver': 'Driver 版本应包含一到四段点分整数。',

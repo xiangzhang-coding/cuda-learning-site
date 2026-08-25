@@ -86,7 +86,7 @@ describe('O08 compatibility explorer model', () => {
     expect(assessCompatibility({
       laneId: 'cuda-13.3',
       driverRelease: '575.57.08',
-      forwardPackage: 'verified-loaded',
+      forwardPackage: 'package-observed',
     })).toMatchObject({
       state: 'indeterminate',
       mechanisms: ['forward-package'],

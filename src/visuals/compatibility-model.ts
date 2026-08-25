@@ -28,7 +28,7 @@ export const COMPATIBILITY_LANES = [
 ] as const;
 
 export type CompatibilityLaneId = (typeof COMPATIBILITY_LANES)[number]['id'];
-export type ForwardPackageState = 'not-used' | 'verified-loaded' | 'unknown';
+export type ForwardPackageState = 'not-used' | 'package-observed' | 'unknown';
 export type CompatibilityState = 'documented-path' | 'not-documented' | 'indeterminate';
 export type CompatibilityMechanism = 'backward' | 'minor' | 'forward-package';
 export type CompatibilityReason =
@@ -63,6 +63,23 @@ export type CompatibilityInput = Readonly<{
   forwardPackage: ForwardPackageState;
 }>;
 
+function createAssessment(
+  state: CompatibilityState,
+  mechanisms: readonly CompatibilityMechanism[],
+  reasons: readonly CompatibilityReason[],
+  missingFacts: readonly CompatibilityMissingFact[],
+): CompatibilityAssessment {
+  return {
+    state,
+    mechanisms,
+    reasons,
+    missingFacts,
+    sourceFactIds: ['SRC-CUDA-012'],
+    requiresRuntimeRun: true,
+    evidenceStatusEffect: 'none',
+  };
+}
+
 export function parseDriverRelease(value: string) {
   const normalized = value.trim();
   if (!/^\d+(?:\.\d+){0,3}$/.test(normalized)) return null;
@@ -87,86 +104,50 @@ export function assessCompatibility({ laneId, driverRelease, forwardPackage }: C
   if (!lane) throw new Error(`Unknown Toolkit Lane: ${laneId}`);
 
   if (driverRelease.trim().length === 0) {
-    return {
-      state: 'indeterminate',
-      mechanisms: [],
-      reasons: ['missing-driver'],
-      missingFacts: ['runtime-observation'],
-      sourceFactIds: ['SRC-CUDA-012'],
-      requiresRuntimeRun: true,
-      evidenceStatusEffect: 'none',
-    };
+    return createAssessment('indeterminate', [], ['missing-driver'], ['runtime-observation']);
   }
 
   const floorComparison = compareDriverReleases(driverRelease, lane.minimumLinuxDriver);
   const pairedComparison = compareDriverReleases(driverRelease, lane.pairedLinuxDriver);
   if (floorComparison === null || pairedComparison === null) {
-    return {
-      state: 'indeterminate',
-      mechanisms: [],
-      reasons: ['invalid-driver'],
-      missingFacts: ['runtime-observation'],
-      sourceFactIds: ['SRC-CUDA-012'],
-      requiresRuntimeRun: true,
-      evidenceStatusEffect: 'none',
-    };
+    return createAssessment('indeterminate', [], ['invalid-driver'], ['runtime-observation']);
   }
 
   if (pairedComparison >= 0) {
-    return {
-      state: 'documented-path',
-      mechanisms: ['backward'],
-      reasons: ['meets-paired-driver'],
-      missingFacts: ['application-components', 'binary-targets', 'feature-dependencies', 'runtime-observation'],
-      sourceFactIds: ['SRC-CUDA-012'],
-      requiresRuntimeRun: true,
-      evidenceStatusEffect: 'none',
-    };
+    return createAssessment(
+      'documented-path',
+      ['backward'],
+      ['meets-paired-driver'],
+      ['application-components', 'binary-targets', 'feature-dependencies', 'runtime-observation'],
+    );
   }
 
   if (floorComparison >= 0) {
-    return {
-      state: 'documented-path',
-      mechanisms: ['minor'],
-      reasons: ['meets-major-floor'],
-      missingFacts: ['application-components', 'binary-targets', 'feature-dependencies', 'runtime-observation'],
-      sourceFactIds: ['SRC-CUDA-012'],
-      requiresRuntimeRun: true,
-      evidenceStatusEffect: 'none',
-    };
+    return createAssessment(
+      'documented-path',
+      ['minor'],
+      ['meets-major-floor'],
+      ['application-components', 'binary-targets', 'feature-dependencies', 'runtime-observation'],
+    );
   }
 
-  if (forwardPackage === 'verified-loaded') {
-    return {
-      state: 'indeterminate',
-      mechanisms: ['forward-package'],
-      reasons: ['below-major-floor', 'forward-package-needs-review'],
-      missingFacts: ['application-components', 'binary-targets', 'feature-dependencies', 'forward-eligible-device', 'loaded-user-mode-driver', 'runtime-observation'],
-      sourceFactIds: ['SRC-CUDA-012'],
-      requiresRuntimeRun: true,
-      evidenceStatusEffect: 'none',
-    };
+  if (forwardPackage === 'package-observed') {
+    return createAssessment(
+      'indeterminate',
+      ['forward-package'],
+      ['below-major-floor', 'forward-package-needs-review'],
+      ['application-components', 'binary-targets', 'feature-dependencies', 'forward-eligible-device', 'loaded-user-mode-driver', 'runtime-observation'],
+    );
   }
 
   if (forwardPackage === 'unknown') {
-    return {
-      state: 'indeterminate',
-      mechanisms: [],
-      reasons: ['below-major-floor', 'forward-package-unknown'],
-      missingFacts: ['forward-eligible-device', 'loaded-user-mode-driver', 'runtime-observation'],
-      sourceFactIds: ['SRC-CUDA-012'],
-      requiresRuntimeRun: true,
-      evidenceStatusEffect: 'none',
-    };
+    return createAssessment(
+      'indeterminate',
+      [],
+      ['below-major-floor', 'forward-package-unknown'],
+      ['forward-eligible-device', 'loaded-user-mode-driver', 'runtime-observation'],
+    );
   }
 
-  return {
-    state: 'not-documented',
-    mechanisms: [],
-    reasons: ['below-major-floor'],
-    missingFacts: ['runtime-observation'],
-    sourceFactIds: ['SRC-CUDA-012'],
-    requiresRuntimeRun: true,
-    evidenceStatusEffect: 'none',
-  };
+  return createAssessment('not-documented', [], ['below-major-floor'], ['runtime-observation']);
 }
