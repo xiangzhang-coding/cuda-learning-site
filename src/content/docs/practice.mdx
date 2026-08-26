@@ -19,6 +19,9 @@ structure:
   - entry-pb-r1-003
   - entry-pb-r1-004
   - entry-pb-r1-005
+  - entry-pb-r1-006
+  - entry-pb-r1-007
+  - entry-pb-r1-008
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -26,6 +29,9 @@ prerequisites:
   - O02
   - O03
   - F01
+  - F02
+  - F03
+  - F04
   - O04
   - O05
   - O06
@@ -35,6 +41,9 @@ relatedUnits:
   - O02
   - O03
   - F01
+  - F02
+  - F03
+  - F04
   - O04
   - O05
   - O06
@@ -54,15 +63,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -81,13 +90,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面十个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面十三个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方十道完整题目、先修链接和解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方十三道完整题目、先修链接和解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -460,6 +469,149 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 **来源依据（Source basis）：** 本站 [O08](/start/reference-environment-candidate/) 的原创候选与声明门槛，以及 NVIDIA [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive)、[Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)、CUDA Programming Guide [Obtain the GPU Compute Capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability)、CUDA Runtime API [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html)和 [NVIDIA-SMI documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html)。
 
+<span id="pb-r1-006" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-006：预测二维 partial launch 的 thread 所有权与层次身份
+
+- **ID 与双语发布对：** PB-R1-006；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 执行层次推理与正确性；中级。
+- **直接先修条件：** [F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态计算，不运行 CUDA。
+- **相关学习单元与资源：** [F02](/foundations/execution-hierarchy/)、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)和 [EX03](/examples/multidimensional-indexing/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一个 x 最快、行主序的逻辑数组宽 `19`、高 `9`，使用 `blockDim = (8, 5)`，`gridDim` 由每轴向上取整得到。对边界 block `blockIdx = (2, 1)` 中的 `threadIdx = (2, 3)`、`(3, 3)`、`(2, 4)`和 `(7, 4)`，分别计算 global 坐标、x 最快的线性 block ID、block 内局部线性 thread ID、`warpInBlock`、lane 和数据所有权；只为拥有数据的 thread 计算 row-major `dataIndex`。最后说明这些身份为什么既不是调度顺序，也不自动授予数据所有权。
+
+**约束：**
+
+- 先写逐轴 ceiling division、global 坐标、线性 block、局部 thread、warp 与 lane 公式。
+- 必须分别检查 x 与 y，再决定是否计算可访问的 `dataIndex`；不能 clamp 坐标或把 launch 范围当作逻辑范围。
+- 不执行 CUDA，不虚构输出或性能，也不从 block、warp 或 lane 数值推断开始或完成顺序。
+
+**预期证据：** 一张四行表，包含 block/global/local/warp/lane 身份、逐轴 bounds、所有权和可选 `dataIndex`，再附一段身份与调度边界说明。
+
+**验收条件：**
+
+- 得到 `gridDim = (3, 2)`、每个 block 40 个 thread，以及边界 block 的 `linearBlock = 2 + 3 * 1 = 5`。
+- `(2, 3)` 映射到 global `(18, 8)`、local `26`、warp `0`、lane `26`，拥有最后一个逻辑元素，`dataIndex = 170`。
+- `(3, 3)` 映射到 `(19, 8)`、local `27`、warp `0`、lane `27`，仅 x 越界；`(2, 4)` 映射到 `(18, 9)`、local `34`、warp `1`、lane `2`，仅 y 越界；`(7, 4)` 映射到 `(23, 9)`、local `39`、warp `1`、lane `7`，x 与 y 都越界。三者都不产生可访问的 `dataIndex`。
+- 指出该边界 block 只有 `3 * 4 = 12` 个 thread 拥有数据，其余 28 个仍被 launch 但必须跳过访问；任何身份编号都不承诺调度顺序。
+
+<details><summary>提示 1</summary>这个 block 的 global 起点是 `(2 * 8, 1 * 5) = (16, 5)`；合法局部 x 只有 `0..2`，合法局部 y 只有 `0..3`。</details>
+
+<details><summary>提示 2</summary>使用 `localThread = threadIdx.x + 8 * threadIdx.y`，再分别计算 `floor(localThread / 32)` 与 `localThread % 32`。</details>
+
+**解答：** 逐轴向上取整得到 `gridDim = (ceil(19 / 8), ceil(9 / 5)) = (3, 2)`。二维 x-fastest block 展开给出 `linearBlock = blockIdx.x + gridDim.x * blockIdx.y = 5`，四个 thread 都属于这个 block，但局部身份分别是 26、27、34 和 39，对应 `(warp, lane)` 为 `(0, 26)`、`(0, 27)`、`(1, 2)`和 `(1, 7)`。Global 坐标依次是 `(18, 8)`、`(19, 8)`、`(18, 9)`和 `(23, 9)`。只有 `(18, 8)` 同时满足 `gx < 19` 与 `gy < 9`，所以只有它拥有数据，且 `dataIndex = 18 + 19 * 8 = 170`；其余三项在展平和访问前停止。边界 block 的有效局部区域是 3 列乘 4 行，因此 12 个 thread 拥有数据、28 个不拥有数据。Block、local thread、warp 与 lane 编号描述层次身份，不描述 block 调度、warp 完成顺序或数据合法性。
+
+**有效替代方案：** 可以用标注坐标的 `8 x 5` block 图或 identity ledger 代替表格，只要四个 thread 的公式、逐轴 bounds、warp/lane 和唯一合法 `dataIndex` 都可复核。
+
+**常见错误：** 把 `gridDim` 向下取整；把二维 `threadIdx` 直接相加；让 local ID 34 变成 data index 34；认为 warp 1 的 thread 自动越界；从 block ID 5 或 warp ID 0 推断执行先后；为无效坐标展平并访问数组。
+
+**来源依据（Source basis）：** 本站 [F02](/foundations/execution-hierarchy/) 的原创层次与所有权合同、[VIS01](/visuals/kernel-journey/)的调度边界、[VIS02](/visuals/indexing/)的坐标模型和 [EX03](/examples/multidimensional-indexing/)的应用布局边界，以及 NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)。
+
+<span id="pb-r1-007" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-007：修复过早展平的三维 bounds 缺陷
+
+- **ID 与双语发布对：** PB-R1-007；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 调试与多维正确性；中级。
+- **直接先修条件：** [F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)。
+- **硬件门槛（Hardware gate）：** 无；只审查和修复源码，不运行 CUDA。
+- **相关学习单元与资源：** [F03](/foundations/multidimensional-indexing/)、[VIS02](/visuals/indexing/)和 [EX03](/examples/multidimensional-indexing/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一个三维 kernel 先计算 `gx`、`gy`、`gz`，但只检查 x，随后就在 y 与 z 尚未通过 bounds 前展平并访问：
+
+```cpp
+if (gx >= width) {
+  return;
+}
+
+const std::size_t index = ((gz * height) + gy) * width + gx;
+output[index] = input[index];
+```
+
+在保持 x 最快行主序布局的前提下修复顺序。再对 `width = 13`、`height = 6`、`depth = 5`、`blockDim = (5, 4, 2)` 的 launch 计算 `gridDim`，并分类边界 block `blockIdx = (2, 1, 2)` 中的 `threadIdx = (2, 1, 0)`、`(3, 1, 0)`、`(2, 2, 0)`和 `(2, 1, 1)`。只为合法坐标给出线性索引。
+
+**约束：**
+
+- 保留逐轴 global 坐标、逻辑 extent 和 `((gz * height) + gy) * width + gx` 映射；不能 clamp、修改 extent 或缩小 launch 来隐藏 fringe。
+- 任一活动轴越界都必须在展平和任何数组访问之前停止；索引类型必须足以容纳完整元素计数。
+- 不执行 CUDA，不填写输出或性能，也不把静态补丁、host-only 检查或浏览器模型写成 CUDA Evidence Status。
+
+**预期证据：** 一份最小源码补丁、一张四行逐轴 bounds 表，以及一句说明这份静态审查没有产生编译或运行证据的话。
+
+**验收条件：**
+
+- 修复使用 `gx >= width || gy >= height || gz >= depth` 的 early return，或只在三个 `<` 谓词同时成立时包围展平和访问。
+- 得到 `gridDim = (3, 2, 3)`；四个局部坐标分别映射到 global `(12, 5, 4)`、`(13, 5, 4)`、`(12, 6, 4)`和 `(12, 5, 5)`。
+- 只有 `(12, 5, 4)` 合法，且 `dataIndex = ((4 * 6) + 5) * 13 + 12 = 389`；其余三项分别仅因 x、y、z 越界，并在展平前停止。
+- 不把得到整数的 flattening 表达式当作合法访问证明，也不从修复本身声明 Compile-Checked 或 Runtime-Verified。
+
+<details><summary>提示 1</summary>Early return 连接的是三个“无效”谓词，所以任一为真就必须返回。</details>
+
+<details><summary>提示 2</summary>边界 block 的 global 起点是 `(10, 4, 4)`；最后一个合法元素的三维坐标是 `(12, 5, 4)`。</details>
+
+**解答：** 最小修复是把完整保护放在展平之前：
+
+```cpp
+if (gx >= width || gy >= height || gz >= depth) {
+  return;
+}
+
+const std::size_t index = ((gz * height) + gy) * width + gx;
+output[index] = input[index];
+```
+
+逐轴向上取整得到 `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 2)) = (3, 2, 3)`。所选 block 从 `(10, 4, 4)` 开始，四个 global 坐标依次是 `(12, 5, 4)`、`(13, 5, 4)`、`(12, 6, 4)`和 `(12, 5, 5)`。第一项通过全部三轴检查并映射到 390 个元素中的最后一个 index 389；后三项分别在 x、y、z 上失败，不能计算可访问索引或触及数组。代码审查和手算只建立修复理由，没有编译或执行 CUDA，也没有产生 Evidence Status。
+
+**有效替代方案：** 可以用正向条件 `gx < width && gy < height && gz < depth` 包围展平和全部访问；只要条件外没有 flatten 或数组操作，合同与 early return 等价。
+
+**常见错误：** 用 `&&` 连接三个越界谓词；保留只检查 x 的 guard；先 flatten 再检查 y/z；对越界坐标求模或 clamp；把 CUDA geometry 当作 row-major 布局来源；把 host-only 或 VIS02 结果当作 device 执行。
+
+**来源依据（Source basis）：** 本站 [F03](/foundations/multidimensional-indexing/) 的原创逐轴 bounds 与应用布局合同、[VIS02](/visuals/indexing/)的静态索引模型和 [EX03](/examples/multidimensional-indexing/)的 canonical indexing 与证据边界，以及 NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)。
+
+<span id="pb-r1-008" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-008：重建 host-device 生命周期并修复证据声明
+
+- **ID 与双语发布对：** PB-R1-008；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 生命周期调试与证据审查；中级。
+- **直接先修条件：** [F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)。
+- **硬件门槛（Hardware gate）：** 无；只审查顺序、所有权与公开证据，不运行 CUDA。
+- **相关学习单元与资源：** [F04](/foundations/host-device-lifecycle/)、[O02](/start/evidence-status/)、[O04](/start/cpp17-for-cuda/)和 [EX03](/examples/multidimensional-indexing/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一份单 kernel review packet 把动作打乱为：`cudaFree(d_output)`、D2H copy-back、初始化 `h_input`/`h_expected` 与 `h_output` storage、kernel launch、host comparison 后立即返回、H2D transfer、`cudaDeviceSynchronize`、分配 `d_input`/`d_output`、`cudaGetLastError`、`cudaFree(d_input)`。重建 canonical 成功路径，并为 host containers、host 上的 device pointer handles 和两块 device allocations 标出 owner、取得状态、最后使用、release 责任与返回边界。Packet 还声称：“源码、网站构建和 host-only 检查足以让 EX03 成为 Compile-Checked；静态 lifecycle ledger 足以让它成为 Runtime-Verified。”修复两条声明。
+
+**约束：**
+
+- 不执行 build、host test 或 CUDA，不虚构日志、输出、时间或性能。
+- Pointer value 与它指向的 allocation 必须分开；kernel 和 `cudaMemcpy` 都不取得 allocation ownership。
+- 只能在最后使用后 release 每项已成功取得的 allocation，且恰好一次；comparison verdict 必须先保存，cleanup 后才能返回。
+- Evidence Status 结论必须使用 [O02](/start/evidence-status/)和 [EX03](/examples/multidimensional-indexing/)当前公开记录，不把静态审查升级成观察。
+
+**预期证据：** 一张按顺序排列的 lifecycle ledger，至少包含 action、owner、state before、state after、last use 和 release/return obligation，再附一张 Compile-Checked 与 runtime 声明修订表。
+
+**验收条件：**
+
+- 顺序为 host 初始化、检查两项 device allocation、H2D、launch、`cudaGetLastError`、`cudaDeviceSynchronize`、D2H、host comparison 并保存 verdict、释放两项已取得的 allocation、返回 verdict。
+- Host C++ scope 拥有 `h_input`、`h_output` 与 `h_expected`；host pointer 变量只是 handles。Host 控制流承担每次成功 `cudaMalloc` 产生的 release 责任，kernel 使用 buffer 但不接管 ownership。
+- 在题目给定路径中，`h_input` 的最后使用在成功的 H2D，`d_input` 的最后使用在成功的 completion boundary，`d_output` 的最后使用在成功的 D2H，`h_output` 与 `h_expected` 的本次最后使用在 comparison；device allocations 显式 release，host containers 在各自 C++ owner 离开作用域时 release。任何失败路径只释放已经取得的 allocation，不读取尚未建立的结果。
+- EX03 的 compilation evidence 数组为空，因此不是 Compile-Checked；源码存在、网站构建或 host-only 检查都不能填充该轴。EX03 runtime 保持 Pending Hardware Verification，recorded observations 为空，没有声明 Reference Environment 或合格 GPU execution，因此不能授予 Runtime-Verified。
+
+<details><summary>提示 1</summary>`cudaMalloc` 成功同时产生可用 allocation 与 release obligation；host pointer handle 离开作用域不会替代 `cudaFree`。</details>
+
+<details><summary>提示 2</summary>Launch check 只检查提交边界；completion check 成功后 device input 才越过最后使用，D2H 成功后 device output 才越过最后使用。</details>
+
+**解答：** 先在 host 建立输入、独立 expected data 和 output storage；再分别取得并检查 `d_input` 与 `d_output`。H2D 成功后，`h_input` 在这条给定路径中的最后使用结束；接着提交 kernel，立即检查 `cudaGetLastError`，再检查 `cudaDeviceSynchronize`。只有 completion 成功才执行 D2H，只有 D2H 成功才比较 `h_output` 与 `h_expected` 并保存 verdict。随后对两项已取得的 device allocation 各调用一次并检查 `cudaFree`，最后返回保存的 verdict；host containers 在各自 C++ owner 离开作用域时 release。失败安全变体在失败点停止创建依赖，只清理 ledger 中已经 acquired 的项目。Host 上的 `d_input`/`d_output` 变量只是 handles，device allocation 的 release 责任属于 host 控制流而不是 kernel。证据声明改为：“EX03 没有合格 Lane compile record，compilation axis 为空，所以不是 Compile-Checked。静态 ledger、源码、网站构建和 host-only 检查都没有执行 GPU kernel；EX03 runtime 仍是 Pending Hardware Verification，不能声明 Runtime-Verified。”
+
+**有效替代方案：** 可以用单一 cleanup block 或 [O04](/start/cpp17-for-cuda/)所述的显式不抛异常 RAII owner 管理失败路径；两者都必须保留相同的取得状态、last-use 边界、一次 release、保存 verdict 后 cleanup 再返回，以及独立证据判断。
+
+**常见错误：** 认为复制 pointer 会复制或转移 allocation ownership；在 synchronization 前释放 input；在 D2H 前释放 output；comparison mismatch 直接返回并跳过 cleanup；double free 未取得或已释放的资源；把网站 build、host-only test 或静态表当成 EX03 compilation/runtime 观察。
+
+**来源依据（Source basis）：** 本站 [F04](/foundations/host-device-lifecycle/) 的原创显式 lifecycle、[O04](/start/cpp17-for-cuda/)的 lifetime/ownership 边界、[O02](/start/evidence-status/)的证据合同和 [EX03](/examples/multidimensional-indexing/)的 canonical lifecycle 与当前证据记录，以及 NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)。
+
 ## 复核记录
 
-十个原创条目及其英文对应内容在 **2026-08-26** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
+十三个原创条目及其英文对应内容在 **2026-08-26** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。

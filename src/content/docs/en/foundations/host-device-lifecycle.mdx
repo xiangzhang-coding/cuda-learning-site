@@ -1,0 +1,237 @@
+---
+title: 'F04: The Explicit Host-Device Resource Lifecycle'
+description: Read the explicit CUDA resource lifecycle from host initialization through device release using ownership and last-use boundaries.
+pairId: f04
+counterpart: /foundations/host-device-lifecycle/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - ownership
+  - initialization
+  - allocation
+  - transfer-in
+  - launch
+  - synchronization
+  - transfer-out
+  - verification
+  - release
+  - lifecycle-map
+  - canonical-example
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F04
+prerequisites:
+  - F01
+relatedUnits:
+  - O04
+  - EX03
+exampleIds:
+  - EX03
+canonicalExample: EX03
+canonicalRanges:
+  - lifecycle
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 13.3.1 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'CUDA Runtime API'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'CUDA Runtime memory management'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'CUDA Runtime device management'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Introduction to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,ownership,initialization,allocation,transfer-in,launch,synchronization,transfer-out,verification,release,lifecycle-map,canonical-example,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O04,EX03' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: lifecycle }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/host-device-lifecycle/" lang="zh-CN">阅读中文对应页</a>
+
+An explicit CUDA program manages distinct resources on the host and device. This Learning Unit fixes that resource lifecycle into a reviewable path: initialization, allocation, transfer, kernel launch, synchronization, copy-back, and release. The goal is not to memorize an API list, but to answer “who owns this resource?” and “where is its last use?” at every step.
+
+## What you should be able to do
+
+- Explain host data, device buffers, kernel work, and host verification in the required order.
+- Distinguish a host container, a device pointer value stored on the host, and the device allocation named by that value.
+- Mark acquisition, usable state, last-use boundary, and release responsibility for every resource.
+- Place `cudaGetLastError` and `cudaDeviceSynchronize` at their different boundaries in this minimal lifecycle without expanding them into a complete asynchronous-error model.
+- Separate host-only tests, compilation facts, and actual GPU execution evidence.
+
+## Prerequisite
+
+Complete [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/) first. F01 establishes the minimum kernel, launch, error-checking, and host-comparison model. F04 expands its memory and resource responsibilities into a complete order.
+
+[O04: A C++17 Refresher for CUDA Learners](/en/start/cpp17-for-cuda/) can refresh pointers, scope, and RAII, but it is related rather than a new F04 prerequisite. Reading this page requires no CUDA-capable system, and the Learning Unit itself receives no CUDA Evidence Status.
+
+## Ownership: a pointer is not an allocation
+
+Host code creates and owns the host inputs, host output, and independent reference data. After `cudaMalloc` succeeds, the CUDA Runtime provides a device allocation and writes a value representing its address into a host variable. That host variable is only a handle to the device allocation. Copying or overwriting the pointer value does not copy, initialize, or release the storage it names.
+
+Track two lifecycles separately: host containers are destroyed according to C++ scope, while every successful device allocation must be released exactly once by host control flow after its last use. `cudaMemcpy` changes destination storage contents; it does not transfer release responsibility. A kernel consumes device buffers but does not take ownership of them.
+
+Last-use boundaries are more precise than “free everything at the end.” Device inputs are last used when the kernel completes; the device output is last used when D2H copy-back completes; the host output is last used by host comparison. Grouping release after comparison gives the canonical path one clear cleanup stage, but the underlying safety rule is that release never precedes the corresponding last use.
+
+## Initialization: establish host facts first
+
+First create host input, output, and expected/reference storage, then populate deterministic inputs. Host initialization must precede H2D transfer; otherwise the transfer faithfully copies undefined or incorrect input content.
+
+Initializing host data does not initialize device storage. `cudaMalloc` only acquires an allocation. Do not assume zeroes or any other value until the program explicitly writes that storage. Host comparison occurs later, but its independent expected data must come from a declared rule rather than being inferred from GPU output.
+
+## Allocation: acquire separate device buffers
+
+Second, call and check `cudaMalloc` with the required byte count for every input and output. Each successful call adds a release obligation to the host resource ledger. A failed call produced no usable buffer, so later control flow must not treat it as acquired.
+
+A reusable failure-safe control flow releases only allocations that succeeded before a partial allocation failure, exactly once each. The EX03 excerpt presents a fail-fast success path rather than structured partial-failure cleanup. Its success path must not copy or launch until every required buffer is available.
+
+## Transfer in: establish kernel inputs with H2D copies
+
+Third, use explicit `cudaMemcpyHostToDevice` directions to transfer initialized host inputs into matching device buffers. Check the status, source, destination, and byte count for every H2D transfer. Matching pointer types do not make a direction or length correct.
+
+Only after successful transfer do the device inputs satisfy the precondition for this kernel launch. The host still owns its inputs, and an independent comparison may read them again later.
+
+## Launch: submit work, then check the launch boundary
+
+Fourth, submit the kernel launch with device pointers and the logical extent. Immediately after the launch expression returns, call and check `cudaGetLastError` so launch configuration and submission are inside the fail-fast path.
+
+That check does not say the kernel has completed, and it does not make host output readable. F04 keeps only this necessary distinction; a fuller taxonomy of asynchronous errors is outside this unit.
+
+## Synchronization: establish a completion and error boundary
+
+Fifth, call and check `cudaDeviceSynchronize`. In this unit's canonical diagnostic contract, it explicitly waits for preceding device work and records a kernel completion/error boundary separately from the later D2H copy-back.
+
+A synchronous `cudaMemcpyDeviceToHost` also waits for relevant device work and may return errors from earlier asynchronous work. Explicit `cudaDeviceSynchronize` is therefore not the only mechanism that makes a blocking D2H result readable. This project retains it to establish a separate, reviewable kernel completion and error boundary before copy-back.
+
+Host control flow enters the normal copy-back path only after that boundary succeeds. A reusable design moves to cleanup if this call fails instead of comparing a host output that has not been established as a valid result; EX03's fail-fast macro terminates the process instead.
+
+## Transfer out: establish the host result with D2H copy-back
+
+Sixth, use `cudaMemcpyDeviceToHost` to copy device output into host output. A successful D2H copy-back is the device output's last-use boundary. After the call returns successfully, host comparison has a readable candidate GPU result.
+
+Copy-back is not verification. It changes the address space containing the result; it neither proves the kernel correct nor compares expected and actual data.
+
+## Verification: produce a verdict on the host
+
+Seventh, compare actual output with expected output under an independent host rule and preserve the pass/fail verdict. The comparison must cover the declared logical extent and report enough context to locate the first mismatch.
+
+A host-only test can verify a reference, comparator, or indexing helper, but it executes no GPU kernel. Likewise, Compile-Checked proves only that declared build stages succeeded. Neither substitutes for a GPU run that satisfies its environment, command, and acceptance criteria.
+
+## Release: after last use, before return
+
+Eighth, release every successfully acquired device allocation. The canonical success path places release after host comparison and returns the saved verdict only after cleanup, so a mismatch cannot skip `cudaFree` through an early return.
+
+A stronger failure-safe variant follows the same ledger: release only acquired resources, never consume a result that was not established as valid, and never double free. The explicit `cudaFree` calls in the EX03 excerpt belong to its success path; the complete project's fail-fast macro terminates API-failure paths. Host containers are released when their C++ owner leaves scope.
+
+## Static lifecycle map
+
+The original semantic table below is read in a fixed top-to-bottom order. It executes no CUDA, measures no time, and creates no runtime evidence. It is not a new Visual Explainer ID.
+
+<table>
+  <caption>F04 explicit host-device lifecycle: actions, states, and last-use boundaries</caption>
+  <thead>
+    <tr>
+      <th scope="col">Order</th>
+      <th scope="col">Host action</th>
+      <th scope="col">Resource state</th>
+      <th scope="col">Last-use boundary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row">1</th><td>Initialize host data</td><td>Inputs and reference are defined; device buffers do not exist</td><td>Host inputs may still be needed by comparison</td></tr>
+    <tr><th scope="row">2</th><td>Allocate device buffers</td><td>Each successful <code>cudaMalloc</code> adds a release obligation; contents are uninitialized</td><td>Do not release: copies and the kernel still need them</td></tr>
+    <tr><th scope="row">3</th><td>Perform H2D transfers</td><td>Device inputs contain the data required by this launch</td><td>Device-input last use remains at kernel completion</td></tr>
+    <tr><th scope="row">4</th><td>Submit the kernel launch</td><td>Work is submitted; completion is not established</td><td>All device buffers remain live</td></tr>
+    <tr><th scope="row">5</th><td>Check <code>cudaGetLastError</code></td><td>The launch boundary is checked; execution completion is not implied</td><td>All device buffers remain live</td></tr>
+    <tr><th scope="row">6</th><td>Check <code>cudaDeviceSynchronize</code></td><td>Success establishes the device completion/error boundary</td><td>Device inputs are no longer used by the kernel afterward</td></tr>
+    <tr><th scope="row">7</th><td>Perform D2H copy-back</td><td>Host output contains the candidate GPU result</td><td>Device-output last use ends when the copy succeeds</td></tr>
+    <tr><th scope="row">8</th><td>Perform host comparison</td><td>A pass/fail verdict is saved</td><td>This use of host output and reference ends</td></tr>
+    <tr><th scope="row">9</th><td>Release device allocations</td><td>Release every acquired resource exactly once, then return</td><td>Release must not precede the corresponding last use</td></tr>
+  </tbody>
+</table>
+
+The full textual reading is: establish deterministic data on the host; acquire uninitialized device storage; copy inputs H2D; submit the kernel; immediately check `cudaGetLastError`; use `cudaDeviceSynchronize` as the completion and error boundary; copy output D2H; run the independent host comparison and save its verdict; finally release every acquired device allocation before returning that verdict. This is the complete success-path order. A reusable failure-safe variant also stops creating new dependencies at its failure point and cleans up only resources already acquired.
+
+## Canonical example: the EX03 lifecycle range
+
+[View the complete EX03 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/a69a52b0b0c271f931ebe813b3ec320baeb18f04.zip). After extraction, enter `examples/ex03-multidimensional-indexing/`. The complete project is the sole canonical source. This page renders only its declared lifecycle excerpt and maintains no second implementation.
+
+<CanonicalCode exampleId="EX03" range="lifecycle" />
+
+Read this success-path excerpt in the nine-step order above and mark acquired, last use, and released beside every device pointer. The complete project's `CUDA_CHECK` terminates the process on an API failure, so this code does not demonstrate reusable partial-failure cleanup; that design is left to the Exercises. EX03's host-only tests and any Compile-Checked records cannot prove that its GPU kernel executed. **Pending Hardware Verification is EX03's runtime Evidence Status, not a status of this Learning Unit; F04 keeps both compilation and runtime axes empty.**
+
+## Retrieval check
+
+1. Why does a successful `cudaMalloc` create both a usable resource and a release obligation without initializing its contents?
+2. After a kernel launch, why does the canonical diagnostic sequence choose to check `cudaGetLastError`, then `cudaDeviceSynchronize`, before entering D2H copy-back? What waiting boundary does synchronous D2H itself provide?
+3. Where are the last-use boundaries for device input, device output, and host output?
+4. Why is successful D2H copy-back insufficient to produce a correctness verdict?
+5. Why can neither a host-only test nor Compile-Checked change EX03's runtime status to Runtime-Verified?
+
+## Continue with practice
+
+- Complete the [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/), then inspect the separate [reviewed solutions](/en/foundations/host-device-lifecycle/solutions/).
+- Review a lifecycle record containing ownership, last-use, and evidence defects in [Practice Bank PB-R1-008](/en/practice/#pb-r1-008).
+
+## Sources and review
+
+- [CUDA Runtime API 13.3.1 index](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
+- [CUDA Runtime API 13.3.1 Memory Management group](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)
+- [CUDA Runtime API 13.3.1 Device Management group](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+- [CUDA Programming Guide v13.3: Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html)
+
+All four owner sources were accessed on **2026-08-26**. The prose, lifecycle table, and instructional composition are original. The static table expresses only a deterministic program order and claims no compilation or runtime evidence.

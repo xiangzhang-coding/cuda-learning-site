@@ -1,0 +1,222 @@
+---
+title: 'F03: Make Multidimensional Indexing and Bounds a Correctness Contract'
+description: Extend coordinates from one to three dimensions, check every logical extent, and flatten safely under an application-declared data layout.
+pairId: f03
+counterpart: /foundations/multidimensional-indexing/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - coordinate-contract
+  - one-dimension
+  - two-dimensions
+  - three-dimensions
+  - bounds
+  - flattening
+  - canonical-example
+  - visual
+  - correctness
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F03
+prerequisites:
+  - F02
+relatedUnits:
+  - VIS02
+  - EX03
+  - F04
+exampleIds:
+  - EX03
+canonicalExample: EX03
+canonicalRanges:
+  - indexing-kernel
+  - host-reference
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ execution and indexing'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Introduction to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,coordinate-contract,one-dimension,two-dimensions,three-dimensions,bounds,flattening,canonical-example,visual,correctness,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F02 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'VIS02,EX03,F04' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'indexing-kernel,host-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+import IndexingExplorer from '../../../../components/IndexingExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/multidimensional-indexing/" lang="zh-CN">阅读中文对应页</a>
+
+Multidimensional indexing is not a mechanical copy of a one-dimensional equation. A kernel first derives coordinates from launch geometry, then tests those coordinates against the logical extent of every active axis, and only then calculates a linear memory position under the application-declared data layout. These three contracts are different, and their order matters.
+
+## What you should be able to do
+
+- Calculate `gx`, `gy`, and `gz` for one-, two-, and three-dimensional launches.
+- Explain how unspecified launch dimensions receive defaults and why those defaults do not create active data axes.
+- Check every active axis before flattening and repair missing x, y, or z checks, incorrect Boolean combinations, and checks that occur too late.
+- Distinguish CUDA execution geometry from the application's row-major data mapping.
+- Use EX03's independent host reference boundary on non-divisible extents without reporting a host-only result as CUDA runtime evidence.
+
+## Prerequisite
+
+Complete [F02: Understanding the CUDA Execution Hierarchy](/en/foundations/execution-hierarchy/) first. You should already distinguish grids, blocks, threads, warps, and lanes, and know which hierarchy level supplies `blockIdx`, `blockDim`, and `threadIdx`. This unit composes those levels into a data-ownership contract. F04 will continue with the explicit host-device lifecycle.
+
+## Coordinate contract: geometry comes before data layout
+
+Every active axis independently uses the same coordinate rule:
+
+```text
+gx = blockIdx.x * blockDim.x + threadIdx.x
+gy = blockIdx.y * blockDim.y + threadIdx.y
+gz = blockIdx.z * blockDim.z + threadIdx.z
+```
+
+CUDA's three-component launch configuration type, `dim3`, stores x, y, and z extents in one value. As documented by the current Programming Guide, constructing a `dim3` with fewer arguments initializes unspecified components to `1`. A one-dimensional configuration therefore has y and z extents of 1, so their coordinates can only be 0; the same applies to z in a two-dimensional configuration. These defaults describe execution geometry. They do not invent an application `height`, `depth`, or data layout.
+
+## One dimension: only x is an active data axis
+
+A one-dimensional array needs only:
+
+```text
+gx = blockIdx.x * blockDim.x + threadIdx.x
+```
+
+The application declares legal coordinates as `0 <= gx < width`. Even though `gridDim.y = gridDim.z = blockDim.y = blockDim.z = 1`, y and z need not become data axes. They are only size-one launch components.
+
+## Two dimensions: derive x and y separately
+
+A two-dimensional image or matrix uses:
+
+```text
+gx = blockIdx.x * blockDim.x + threadIdx.x
+gy = blockIdx.y * blockDim.y + threadIdx.y
+```
+
+A legal coordinate must satisfy both `gx < width` and `gy < height`. Ceiling division on each axis can leave non-owning threads in the rightmost block column, the bottom block row, or the bottom-right block. These threads belong to a legal launch but may not access the application array.
+
+## Three dimensions: z is an independent coordinate
+
+A three-dimensional volume adds:
+
+```text
+gz = blockIdx.z * blockDim.z + threadIdx.z
+```
+
+For `width = 10`, `height = 7`, `depth = 5`, and block shape `(4, 3, 2)`, ceiling division on each axis gives grid shape `(3, 3, 3)`. The final groups of blocks contain partial regions on x, y, and z. A valid x coordinate does not imply that the same thread's y and z coordinates are valid.
+
+## Bounds: every active axis is a correctness precondition
+
+The bounds check must cover every active axis and occur before any flattening or array access:
+
+```text
+1D: gx < width
+2D: gx < width AND gy < height
+3D: gx < width AND gy < height AND gz < depth
+```
+
+The equivalent early-return form returns when `gx >= width OR gy >= height OR gz >= depth`. The `OR` is essential: one invalid axis means there is no legal element. Joining the three invalid predicates with `AND` rejects only threads that exceed all three extents at once. Checking only x lets the y and z fringes cross the contract.
+
+## Flattening: the application declares layout
+
+This Learning Site and EX03 explicitly declare an x-fastest row-major layout. The mapping from a three-dimensional coordinate to a linear index is:
+
+```text
+index = ((gz * height) + gy) * width + gx
+```
+
+This is equivalent to `gx + width * (gy + height * gz)`. Adjacent x coordinates differ by 1, a complete row spans `width` elements, and a complete layer spans `width * height` elements. **CUDA grid/block geometry does not declare data layout.** Column-major storage, pitched rows, tiled formats, or other application contracts can use the same CUDA coordinates and require different mappings. Index multiplication must also use an integer type wide enough for the complete element count.
+
+## Canonical example: inspect the implementation first
+
+[View the complete EX03 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/a69a52b0b0c271f931ebe813b3ec320baeb18f04.zip). After extraction, enter `examples/ex03-multidimensional-indexing/`. This page renders only declared canonical ranges and maintains no second program.
+
+<CanonicalCode exampleId="EX03" range="indexing-kernel" />
+
+Review the implementation in a fixed order: derive all three global coordinates; return when any active axis is invalid; only then flatten under the declared row-major formula and access an element. The execution configuration creates threads but does not define `width`, `height`, or `depth` for this implementation.
+
+## Visual: reuse VIS02 only
+
+The [VIS02 Indexing Explainer](/en/visuals/indexing/) uses the same coordinate, per-axis bounds, and application-layout contracts as this page. The single `IndexingExplorer` below reuses that model instead of creating a duplicate. It is a deterministic browser model; the component's static cards and this page's text equations provide non-interactive equivalents.
+
+<IndexingExplorer locale="en" />
+
+The browser model compiles no CUDA, launches no GPU threads, and reads no EX03 runtime result. Its interactive state, static fallback, and hand calculations provide no CUDA compilation or runtime evidence.
+
+## Correctness: an independent host reference and non-divisible extents
+
+EX03's CPU reference defines expected elements on the host and remains an independent correctness boundary from the kernel implementation:
+
+<CanonicalCode exampleId="EX03" range="host-reference" />
+
+EX03's host test covers the `10 x 9 x 5` extent, which is not divisible by the project's block shape, verifies reference values, legal coordinates, and the row-major mapping, and reaches the x, y, and z fringes through independent cases. It launches no GPU kernel. Passing it therefore establishes only the host reference contract, not device execution or agreement with device results.
+
+This page records no compilation or runtime observations and reports no latency, bandwidth, throughput, speedup, or profiler conclusion. Correct indexing is a precondition for future measurement, not a performance claim.
+
+## Retrieval check
+
+1. Which values do unspecified `dim3` components receive, and why can coordinates on those axes only be 0?
+2. Why is `gx < width` alone not a correctness contract for a two-dimensional launch?
+3. Why does an early return join invalid 3D predicates with `OR`, while the positive valid-thread predicate uses `AND`?
+4. Why must every axis be checked before calculating `((gz * height) + gy) * width + gx`?
+5. Why can neither CUDA geometry nor a CPU reference declare the application's data layout or prove GPU performance?
+
+## Continue with practice
+
+- Complete the [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/), then inspect the separate [reviewed solutions](/en/foundations/multidimensional-indexing/solutions/).
+- Repair another set of multidimensional bounds and flattening defects in [Practice Bank PB-R1-007](/en/practice/#pb-r1-007).
+- In [F04: The Explicit Host-Device Resource Lifecycle](/en/foundations/host-device-lifecycle/), preserve this coordinate and layout contract while placing allocation, transfer, launch, synchronization, copy-back, and release around it.
+
+## Sources and review
+
+One-, two-, and three-dimensional grid/block organization, built-in index variables, `dim3` defaults, and kernel launch semantics follow NVIDIA's [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) and [Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html). Both owner pages identify **CUDA Programming Guide v13.3**, **updated 2026-05-27**; this site accessed them on **2026-08-26**.
+
+The row-major mapping, non-divisible case, exercises, and instructional composition are explicit, original site contracts. They are not attributed to CUDA geometry. No NVIDIA sample listing, diagram, table, runtime output, or performance number is copied.
+
+**Fact checked: 2026-08-26.**

@@ -1,0 +1,215 @@
+---
+title: 'F02: Understanding the CUDA Execution Hierarchy'
+description: Separate functions, launch work, cooperation units, execution groups, and positions, then predict one- and two-dimensional thread ownership.
+pairId: f02
+counterpart: /foundations/execution-hierarchy/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - hierarchy
+  - kernel
+  - grid
+  - block
+  - warp-lane
+  - scheduling
+  - prediction
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F02
+prerequisites:
+  - F01
+relatedUnits:
+  - VIS01
+  - VIS02
+  - F03
+exampleIds:
+  - EX03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,hierarchy,kernel,grid,block,warp-lane,scheduling,prediction,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'VIS01,VIS02,F03' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/execution-hierarchy/" lang="zh-CN">阅读中文对应页</a>
+
+This Learning Unit separates names that are easy to conflate. A kernel is a function in source code. One launch with an execution configuration creates a grid work instance. A grid contains thread blocks. Threads in a block form warps from their local IDs, and every thread occupies a lane position. A streaming multiprocessor (SM) is a hardware execution resource that schedules this work, not another launch-coordinate level.
+
+## What you should be able to do
+
+- Distinguish a kernel function, one grid launch, a thread block, a 32-thread warp, a lane position, and an SM without treating a source declaration as a dynamic work instance.
+- Predict a thread's global coordinates, block-local linear ID, warp, and lane from a one- or two-dimensional execution configuration.
+- Decide whether a thread owns logical data by testing every active axis instead of assuming every launched thread is valid.
+- Explain that a block supports cooperation and is assigned to an SM as a scheduling unit without assuming block dispatch or completion order.
+
+## Prerequisite
+
+Complete [F01: From Prediction to a First CUDA Kernel](/en/foundations/first-cuda-kernel/) first. F01 established one-dimensional global indexing, partial blocks, and bounds checks. F02 places those facts in the complete execution hierarchy. This page executes no CUDA, has no hardware gate, and receives no CUDA Evidence Status.
+
+## Hierarchy: identify what each thing is
+
+| Concept | Precise meaning in this unit | Do not confuse it with |
+| --- | --- | --- |
+| Kernel function | A `__global__` device function definition that may be launched repeatedly | One grid currently executing |
+| Grid | All blocks created by one kernel launch; one dynamic work instance | The reusable function definition or a fixed schedule |
+| Thread block | Threads that can cooperate through shared memory and block-scoped synchronization and are assigned to one SM as a unit | A 32-thread warp |
+| Warp | A 32-thread execution group formed from consecutive block-local linear thread IDs | An independent launch or a cooperation scope equivalent to a block |
+| Lane | A thread's `0..31` position in its warp | A new thread, global data index, or time order |
+| SM | Hardware that receives blocks and schedules their warps | A `blockIdx`, `threadIdx`, or execution-configuration dimension |
+
+The same kernel function may be launched repeatedly. Every launch creates new grid, block, and thread instances while the function remains one definition. “Which function is called?” and “How much work did this launch create?” therefore require separate answers.
+
+## Kernel: a function definition is not one work instance
+
+The host starts a launch with `kernel_name<<<grid_dimensions, block_dimensions>>>(arguments)`. The execution configuration inside angle brackets gives the number of blocks on each grid axis and the number of threads on each block axis. It does not directly select warps, lanes, or SMs, and it promises no block order.
+
+Every launched thread executes the same kernel function body but can read its own `blockIdx`, `blockDim`, `threadIdx`, and `gridDim`. These built-ins let one function definition calculate different ownership for different coordinates. The logical data extent still comes from arguments or data structures; the launch extent may be larger.
+
+## Grid: the complete work instance from one launch
+
+A grid is all thread blocks created by one launch. `gridDim` gives the block count on each axis, while `blockIdx` identifies the current block's coordinates. In a two-dimensional grid, `(0, 1)` and `(1, 0)` identify different blocks, but those coordinates do not say which block is dispatched or completed first.
+
+Launching the same kernel function twice with the same execution configuration still produces two distinct grid instances. Threads, block state, and completion order from the first launch do not become identities for the second.
+
+## Thread block: cooperation and scheduling boundary
+
+`blockDim` gives a block's thread count on each axis, and `threadIdx` gives a thread's coordinates within that block. Threads in one block can cooperate using block-scoped shared memory and synchronization. Different blocks cannot use ordinary block synchronization or an implicit execution order to coordinate.
+
+Threads are linearized within a block with **x fastest**:
+
+```text
+localThread = threadIdx.x
+            + blockDim.x * (threadIdx.y + blockDim.y * threadIdx.z)
+
+threadsPerBlock = blockDim.x * blockDim.y * blockDim.z
+```
+
+The x coordinate changes first, followed by y and then z. This ID is local to one block; a new block starts again at local ID 0.
+
+## Warp and lane: execution group and position
+
+A CUDA warp is a 32-thread execution group with 32 lane positions. Consecutive local linear thread IDs in one block are partitioned as follows:
+
+```text
+warpInBlock = floor(localThread / 32)
+lane = localThread % 32
+```
+
+For example, local ID 37 belongs to warp 1, lane 5 within its block. `lane = 5` states only a position in the group. It neither assigns data element 5 nor says that this thread executes before lane 6. If a block's thread count is not a multiple of 32, the final warp has no block thread for its remaining lane positions; the bounds rule does not change.
+
+## Scheduling: logical coordinates promise no time order
+
+All threads of one block execute on the same SM, and the block is assigned as a unit. The SM then schedules that block's warps. Independent blocks in a grid have no promised dispatch or completion order. `blockIdx.x = 0` may begin first, begin later, or overlap other blocks; kernel correctness cannot depend on one of those cases.
+
+Warp and lane IDs are not a timetable either. `warpInBlock = 0` does not guarantee completion before warp 1, and lane IDs do not imply lane-by-lane execution. Use [VIS01: A Kernel Journey from Launch to Completion](/en/visuals/kernel-journey/) to revisit launch, grid, block, warp, SM, and completion boundaries. Its existing deterministic steps are instructional, not a scheduling record. This page creates no duplicate visual.
+
+## Ownership prediction: one and two dimensions
+
+### Worked 1D prediction
+
+The logical data contains `N = 150` elements, and each block has `blockDim.x = 64` threads. The execution configuration needs:
+
+```text
+gridDim.x = ceil(150 / 64) = 3
+globalX = blockIdx.x * blockDim.x + threadIdx.x
+```
+
+The three blocks cover launched indices `0..191`, but the logical range is only `0..149`. In the final block (`blockIdx.x = 2`):
+
+- `threadIdx.x = 21` gives `globalX = 2 * 64 + 21 = 149`. Because `149 < 150`, it owns the final element.
+- `threadIdx.x = 22` gives `globalX = 150`. Because `150 < 150` is false, it must skip data access.
+- `threadIdx.x = 63` gives `globalX = 191` and is also out of bounds. Its local ID is 63, so it belongs to warp 1, lane 31; warp/lane identity does not make an invalid access legal.
+
+### Worked 2D prediction
+
+Logical data has width `70` and height `35` in a declared x-fastest row-major layout. Choose `blockDim = (16, 8)`, giving:
+
+```text
+gridDim = (ceil(70 / 16), ceil(35 / 8)) = (5, 5)
+globalX = blockIdx.x * 16 + threadIdx.x
+globalY = blockIdx.y * 8  + threadIdx.y
+localThread = threadIdx.x + 16 * threadIdx.y
+```
+
+In boundary block `blockIdx = (4, 4)`, select `threadIdx = (5, 2)`:
+
+```text
+global = (4 * 16 + 5, 4 * 8 + 2) = (69, 34)
+localThread = 5 + 16 * 2 = 37
+warpInBlock = 1
+lane = 5
+dataIndex = 69 + 70 * 34 = 2449
+```
+
+Because `69 < 70` and `34 < 35`, this thread owns the final logical element. Changing x to `threadIdx.x = 6` gives `(70, 34)`, out of bounds on x. Changing y to `threadIdx.y = 3` gives `(69, 35)`, out of bounds on y. Two-dimensional ownership requires **both axes to be valid**. An out-of-bounds coordinate must not access data merely because linearization produces an integer.
+
+[VIS02: Grid, Block, and Thread Indexing](/en/visuals/indexing/) applies the same equations to 1D, 2D, and 3D coordinates, local IDs, warp/lane positions, and bounds. It is the existing Visual Explainer, not CUDA execution or browser evidence. This page embeds no copy and infers no performance from a selection.
+
+## Retrieval check
+
+1. When the same `__global__` function is launched twice, how many kernel functions and grid instances are there?
+2. Why is a thread block both a cooperation boundary and a scheduling unit while a warp is not the same kind of boundary?
+3. For `blockDim = (16, 8)` and `threadIdx = (5, 2)`, why is the local linear ID 37 rather than 21?
+4. Which identity facts follow from `warpInBlock = 1, lane = 5`, and which data or timing facts do not?
+5. Why can the numeric order of `blockIdx` not serve as block dispatch, completion, or cross-block cooperation order?
+
+## Continue with practice
+
+- Complete the [F02 Exercises](/en/foundations/execution-hierarchy/exercises/), then inspect the separate [reviewed solutions](/en/foundations/execution-hierarchy/solutions/).
+- Complete PB-R1-006 in the [Practice Bank](/en/practice/#pb-r1-006) to keep predicting 2D thread ownership and warp/lane identity.
+- Return to [VIS01](/en/visuals/kernel-journey/) to explain scheduling boundaries, then change launch shapes in [VIS02](/en/visuals/indexing/) and predict coordinates before checking them.
+- Continue to [F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/) to compose hierarchy identities into per-axis data-ownership rules.
+
+## Sources and review
+
+Hierarchy, execution configuration, built-in coordinates, x-fastest thread linearization, 32-thread warps, and scheduling boundaries follow NVIDIA CUDA Programming Guide v13.3: [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html) and [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html). Both owner pages report an update date of 2026-05-27 and were accessed and reviewed here on 2026-08-26. Complete coordinates also appear in the [Sources and Version Record](/en/sources-and-versions/).
+
+**Fact checked: 2026-08-26.** The prose, table, and worked predictions are original. This page executes no CUDA and presents no runtime output, scheduling observation, or performance conclusion.

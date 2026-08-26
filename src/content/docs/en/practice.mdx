@@ -19,6 +19,9 @@ structure:
   - entry-pb-r1-003
   - entry-pb-r1-004
   - entry-pb-r1-005
+  - entry-pb-r1-006
+  - entry-pb-r1-007
+  - entry-pb-r1-008
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -26,6 +29,9 @@ prerequisites:
   - O02
   - O03
   - F01
+  - F02
+  - F03
+  - F04
   - O04
   - O05
   - O06
@@ -35,6 +41,9 @@ relatedUnits:
   - O02
   - O03
   - F01
+  - F02
+  - F03
+  - F04
   - O04
   - O05
   - O06
@@ -54,15 +63,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -81,13 +90,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the ten complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the thirteen complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The ten complete prompts, prerequisite links, and solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The thirteen complete prompts, prerequisite links, and solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -460,6 +469,149 @@ A planning ID is a stable label for cross-curriculum discussion, not a URL-stabi
 
 **Source basis:** The site's original [O08 candidate and declaration gates](/en/start/reference-environment-candidate/), NVIDIA [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive), [Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html), CUDA Programming Guide [Obtain the GPU Compute Capability](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#obtain-the-gpu-compute-capability), CUDA Runtime API [Version Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html), and the [NVIDIA-SMI documentation](https://docs.nvidia.com/deploy/nvidia-smi/index.html).
 
+<span id="pb-r1-006" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-006: Predict thread ownership and hierarchy identities in a partial 2D launch
+
+- **ID and Publication Pair:** PB-R1-006 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Execution-hierarchy reasoning and correctness; intermediate.
+- **Direct prerequisite:** [F02: Understanding the CUDA Execution Hierarchy](/en/foundations/execution-hierarchy/).
+- **Hardware gate:** None; use static calculations only and run no CUDA.
+- **Related Learning Unit and resources:** [F02](/en/foundations/execution-hierarchy/), [VIS01](/en/visuals/kernel-journey/), [VIS02](/en/visuals/indexing/), and [EX03](/en/examples/multidimensional-indexing/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** An x-fastest, row-major logical array has width `19` and height `9`. It uses `blockDim = (8, 5)`, with `gridDim` obtained by ceiling division on each axis. For `threadIdx = (2, 3)`, `(3, 3)`, `(2, 4)`, and `(7, 4)` in boundary block `blockIdx = (2, 1)`, calculate the global coordinate, x-fastest linear block ID, block-local linear thread ID, `warpInBlock`, lane, and data ownership. Calculate a row-major `dataIndex` only for a thread that owns data. Finish by explaining why these identities are neither a schedule nor automatic data ownership.
+
+**Constraints:**
+
+- Write the per-axis ceiling-division, global-coordinate, linear-block, local-thread, warp, and lane equations first.
+- Check x and y independently before deciding whether to calculate an accessible `dataIndex`. Do not clamp coordinates or equate launch extent with logical extent.
+- Execute no CUDA, invent no output or performance, and infer no start or completion order from block, warp, or lane values.
+
+**Expected evidence:** A four-row table containing block, global, local, warp, and lane identities; per-axis bounds; ownership; and optional `dataIndex`, followed by a paragraph separating identity from scheduling.
+
+**Acceptance criteria:**
+
+- Derive `gridDim = (3, 2)`, 40 threads per block, and `linearBlock = 2 + 3 * 1 = 5` for the boundary block.
+- Map `(2, 3)` to global `(18, 8)`, local `26`, warp `0`, and lane `26`. It owns the final logical element at `dataIndex = 170`.
+- Map `(3, 3)` to `(19, 8)`, local `27`, warp `0`, lane `27`, out of bounds only on x; map `(2, 4)` to `(18, 9)`, local `34`, warp `1`, lane `2`, out of bounds only on y; map `(7, 4)` to `(23, 9)`, local `39`, warp `1`, lane `7`, out of bounds on both x and y. None receives an accessible `dataIndex`.
+- State that only `3 * 4 = 12` threads in this boundary block own data, while the other 28 are still launched and must skip access. No identity number promises scheduling order.
+
+<details><summary>Hint 1</summary>This block's global origin is `(2 * 8, 1 * 5) = (16, 5)`. Its valid local x values are only `0..2`, and its valid local y values are only `0..3`.</details>
+
+<details><summary>Hint 2</summary>Use `localThread = threadIdx.x + 8 * threadIdx.y`, then calculate `floor(localThread / 32)` and `localThread % 32` separately.</details>
+
+**Solution:** Per-axis ceiling division gives `gridDim = (ceil(19 / 8), ceil(9 / 5)) = (3, 2)`. X-fastest 2D block linearization gives `linearBlock = blockIdx.x + gridDim.x * blockIdx.y = 5`. All four threads belong to that block, but their local identities are 26, 27, 34, and 39, with `(warp, lane)` values `(0, 26)`, `(0, 27)`, `(1, 2)`, and `(1, 7)`. Their global coordinates are `(18, 8)`, `(19, 8)`, `(18, 9)`, and `(23, 9)`. Only `(18, 8)` satisfies both `gx < 19` and `gy < 9`, so only it owns data, at `dataIndex = 18 + 19 * 8 = 170`; the other three stop before flattening or access. The boundary block's valid local region is 3 columns by 4 rows, so 12 threads own data and 28 do not. Block, local-thread, warp, and lane numbers describe hierarchy identity, not block scheduling, warp completion order, or data validity.
+
+**Valid alternative:** An annotated `8 x 5` block diagram or identity ledger may replace the table when the equations, per-axis bounds, warp and lane values, and sole valid `dataIndex` remain reviewable for all four threads.
+
+**Common errors:** Rounding `gridDim` down; directly adding 2D `threadIdx` components; turning local ID 34 into data index 34; assuming every thread in warp 1 is out of bounds; inferring execution order from block ID 5 or warp ID 0; flattening and accessing an invalid coordinate.
+
+**Source basis:** The site's original hierarchy and ownership contract in [F02](/en/foundations/execution-hierarchy/), scheduling boundary in [VIS01](/en/visuals/kernel-journey/), coordinate model in [VIS02](/en/visuals/indexing/), and application-layout boundary in [EX03](/en/examples/multidimensional-indexing/), plus NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
+
+<span id="pb-r1-007" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-007: Repair a 3D bounds defect that flattens too early
+
+- **ID and Publication Pair:** PB-R1-007 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Debugging and multidimensional correctness; intermediate.
+- **Direct prerequisite:** [F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/).
+- **Hardware gate:** None; review and repair source only. Run no CUDA.
+- **Related Learning Unit and resources:** [F03](/en/foundations/multidimensional-indexing/), [VIS02](/en/visuals/indexing/), and [EX03](/en/examples/multidimensional-indexing/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A 3D kernel calculates `gx`, `gy`, and `gz`, but checks only x, then flattens and accesses before y and z have passed their bounds:
+
+```cpp
+if (gx >= width) {
+  return;
+}
+
+const std::size_t index = ((gz * height) + gy) * width + gx;
+output[index] = input[index];
+```
+
+Repair the order while preserving an x-fastest row-major layout. Then, for `width = 13`, `height = 6`, `depth = 5`, and `blockDim = (5, 4, 2)`, calculate `gridDim` and classify `threadIdx = (2, 1, 0)`, `(3, 1, 0)`, `(2, 2, 0)`, and `(2, 1, 1)` in boundary block `blockIdx = (2, 1, 2)`. Give a linear index only for a legal coordinate.
+
+**Constraints:**
+
+- Preserve the per-axis global coordinates, logical extents, and `((gz * height) + gy) * width + gx` mapping. Do not clamp, change an extent, or shrink the launch to hide the fringe.
+- Any invalid active axis must stop the thread before flattening or any array access. The index type must hold the complete element count.
+- Execute no CUDA, supply no output or performance, and do not convert a static patch, host-only check, or browser model into CUDA Evidence Status.
+
+**Expected evidence:** A minimal source patch, a four-row per-axis bounds table, and one sentence stating that the static review produced no compilation or runtime evidence.
+
+**Acceptance criteria:**
+
+- Repair the guard with an early return on `gx >= width || gy >= height || gz >= depth`, or surround flattening and access with all three positive `<` predicates.
+- Derive `gridDim = (3, 2, 3)`. The four local coordinates map to global `(12, 5, 4)`, `(13, 5, 4)`, `(12, 6, 4)`, and `(12, 5, 5)`.
+- Only `(12, 5, 4)` is legal, with `dataIndex = ((4 * 6) + 5) * 13 + 12 = 389`. The remaining coordinates fail only x, y, and z respectively and stop before flattening.
+- Do not treat an integer produced by a flattening expression as proof of legal access, and claim neither Compile-Checked nor Runtime-Verified from the repair itself.
+
+<details><summary>Hint 1</summary>An early return joins the three invalid predicates, so one true predicate must return.</details>
+
+<details><summary>Hint 2</summary>The boundary block's global origin is `(10, 4, 4)`. The final legal element has coordinate `(12, 5, 4)`.</details>
+
+**Solution:** The minimal repair moves the complete guard before flattening:
+
+```cpp
+if (gx >= width || gy >= height || gz >= depth) {
+  return;
+}
+
+const std::size_t index = ((gz * height) + gy) * width + gx;
+output[index] = input[index];
+```
+
+Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 2)) = (3, 2, 3)`. The selected block starts at `(10, 4, 4)`, so the global coordinates are `(12, 5, 4)`, `(13, 5, 4)`, `(12, 6, 4)`, and `(12, 5, 5)`. The first passes all three bounds and maps to index 389, the final element among 390. The other three fail x, y, and z respectively and may neither calculate an accessible index nor touch the arrays. Source review and hand calculation establish only the repair rationale. They compile or execute no CUDA and create no Evidence Status.
+
+**Valid alternative:** Surround flattening and every access with `gx < width && gy < height && gz < depth`. This is equivalent to the early return when no flattening or array operation remains outside the condition.
+
+**Common errors:** Joining invalid predicates with `&&`; retaining an x-only guard; flattening before checking y and z; applying modulo or clamping to invalid coordinates; treating CUDA geometry as the source of row-major layout; treating host-only or VIS02 results as device execution.
+
+**Source basis:** The site's original per-axis bounds and application-layout contract in [F03](/en/foundations/multidimensional-indexing/), static indexing model in [VIS02](/en/visuals/indexing/), and canonical indexing and evidence boundaries in [EX03](/en/examples/multidimensional-indexing/), plus NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
+
+<span id="pb-r1-008" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-008: Rebuild a host-device lifecycle and repair its evidence claims
+
+- **ID and Publication Pair:** PB-R1-008 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Lifecycle debugging and evidence review; intermediate.
+- **Direct prerequisite:** [F04: The Explicit Host-Device Resource Lifecycle](/en/foundations/host-device-lifecycle/).
+- **Hardware gate:** None; review ordering, ownership, and public evidence only. Run no CUDA.
+- **Related Learning Units and resource:** [F04](/en/foundations/host-device-lifecycle/), [O02](/en/start/evidence-status/), [O04](/en/start/cpp17-for-cuda/), and [EX03](/en/examples/multidimensional-indexing/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A single-kernel review packet shuffles its actions into this order: `cudaFree(d_output)`, D2H copy-back, initialize `h_input` and `h_expected` plus `h_output` storage, kernel launch, host comparison followed by immediate return, H2D transfer, `cudaDeviceSynchronize`, allocate `d_input` and `d_output`, `cudaGetLastError`, and `cudaFree(d_input)`. Rebuild the canonical success path. For the host containers, device-pointer handles stored on the host, and two device allocations, mark owner, acquisition state, last use, release responsibility, and return boundary. The packet also claims: “Source, a website build, and host-only checks are enough to make EX03 Compile-Checked; a static lifecycle ledger is enough to make it Runtime-Verified.” Repair both claims.
+
+**Constraints:**
+
+- Run no build, host test, or CUDA command, and invent no log, output, timing, or performance.
+- Keep a pointer value separate from the allocation it names. Neither the kernel nor `cudaMemcpy` acquires allocation ownership.
+- Release each successfully acquired allocation exactly once and only after last use. Save the comparison verdict first and return only after cleanup.
+- Base Evidence Status conclusions on the current public records in [O02](/en/start/evidence-status/) and [EX03](/en/examples/multidimensional-indexing/). Do not upgrade a static review into an observation.
+
+**Expected evidence:** An ordered lifecycle ledger with at least action, owner, state before, state after, last use, and release or return obligation columns, followed by a Compile-Checked and runtime claim-repair table.
+
+**Acceptance criteria:**
+
+- Order host initialization, both checked device allocations, H2D, launch, `cudaGetLastError`, `cudaDeviceSynchronize`, D2H, host comparison with a saved verdict, release of both acquired allocations, and return of the verdict.
+- The host C++ scope owns `h_input`, `h_output`, and `h_expected`; host pointer variables are only handles. Host control flow owns each release obligation created by successful `cudaMalloc`, while the kernel uses buffers without taking ownership.
+- In the stated flow, successful H2D ends `h_input`'s last use, the successful completion boundary ends `d_input`'s last use, successful D2H ends `d_output`'s last use, and comparison ends this use of `h_output` and `h_expected`. Device allocations are released explicitly; host containers are released when their C++ owners leave scope. A failure path releases only acquired allocations and never reads a result that was not established.
+- EX03's compilation-evidence array is empty, so it is not Compile-Checked. Source availability, a website build, and host-only checks do not populate that axis. EX03 runtime remains Pending Hardware Verification with empty recorded observations and no declared Reference Environment or qualifying GPU execution, so it is not Runtime-Verified.
+
+<details><summary>Hint 1</summary>A successful `cudaMalloc` creates both a usable allocation and a release obligation. Letting the host pointer handle leave scope does not replace `cudaFree`.</details>
+
+<details><summary>Hint 2</summary>The launch check covers submission only. Device-input last use ends after the successful completion check, while device-output last use ends after successful D2H.</details>
+
+**Solution:** First establish host input, independent expected data, and output storage. Then acquire and check `d_input` and `d_output` separately. Successful H2D ends `h_input`'s last use in this stated flow. Next submit the kernel, immediately check `cudaGetLastError`, and then check `cudaDeviceSynchronize`. Perform D2H only after successful completion, and compare `h_output` with `h_expected` only after successful D2H, saving the verdict. Call and check `cudaFree` once for each acquired device allocation, then return the saved verdict; the host containers are released when their C++ owners leave scope. A failure-safe variant stops creating dependencies at the failure point and cleans up only items marked acquired in the ledger. Host variables `d_input` and `d_output` are only handles, and host control flow, not the kernel, carries each device-allocation release obligation. Repair the evidence statement to: “EX03 has no qualifying Lane compile record and its compilation axis is empty, so it is not Compile-Checked. A static ledger, source, website build, and host-only checks execute no GPU kernel. EX03 runtime remains Pending Hardware Verification and cannot be declared Runtime-Verified.”
+
+**Valid alternative:** Use one cleanup block or an explicit non-throwing RAII owner as reviewed in [O04](/en/start/cpp17-for-cuda/). Either form must preserve acquisition state, last-use boundaries, exactly-once release, saved-verdict then cleanup then return, and the independent evidence decision.
+
+**Common errors:** Believing pointer copying duplicates or transfers allocation ownership; releasing input before synchronization; releasing output before D2H; returning immediately on comparison mismatch and skipping cleanup; double-freeing an unacquired or released resource; treating a website build, host-only test, or static table as an EX03 compilation or runtime observation.
+
+**Source basis:** The site's original explicit lifecycle in [F04](/en/foundations/host-device-lifecycle/), lifetime and ownership boundaries in [O04](/en/start/cpp17-for-cuda/), evidence contract in [O02](/en/start/evidence-status/), and canonical lifecycle and current evidence record in [EX03](/en/examples/multidimensional-indexing/), plus NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html).
+
 ## Review record
 
-All ten original entries and their Chinese counterparts were reviewed together on **2026-08-26**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.
+All thirteen original entries and their Chinese counterparts were reviewed together on **2026-08-26**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.

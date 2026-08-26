@@ -118,6 +118,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'F01：从预测到第一个 CUDA kernel', en: 'F01: From Prediction to a First CUDA Kernel' },
     prerequisites: ['O03'],
   },
+  F02: {
+    href: { 'zh-CN': '/foundations/execution-hierarchy/', en: '/en/foundations/execution-hierarchy/' },
+    title: { 'zh-CN': 'F02：理解 CUDA 执行层次', en: 'F02: Understanding the CUDA Execution Hierarchy' },
+    prerequisites: ['F01'],
+  },
+  F03: {
+    href: { 'zh-CN': '/foundations/multidimensional-indexing/', en: '/en/foundations/multidimensional-indexing/' },
+    title: { 'zh-CN': 'F03：把多维索引与边界写成正确性合同', en: 'F03: Make Multidimensional Indexing and Bounds a Correctness Contract' },
+    prerequisites: ['F02'],
+  },
+  F04: {
+    href: { 'zh-CN': '/foundations/host-device-lifecycle/', en: '/en/foundations/host-device-lifecycle/' },
+    title: { 'zh-CN': 'F04：显式 host-device 资源生命周期', en: 'F04: The Explicit Host-Device Resource Lifecycle' },
+    prerequisites: ['F01'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -127,6 +142,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     title: { 'zh-CN': 'EX02：向量加法可运行示例', en: 'EX02: Vector Addition Runnable Example' },
     prerequisites: [],
+  },
+  EX03: {
+    href: { 'zh-CN': '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
+    title: { 'zh-CN': 'EX03：多维索引可运行示例', en: 'EX03: Multidimensional Indexing Runnable Example' },
+    prerequisites: ['F03'],
   },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },

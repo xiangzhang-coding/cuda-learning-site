@@ -40,11 +40,11 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 本站维护按先修关系组织的稳定课程（Stable Curriculum），并搭配可运行示例（Runnable Example）、实验（Lab）、练习（Exercise）、可视化讲解（Visual Explainer）和术语表（Glossary）。只有完整材料会进入导航。本网站保持静态，不提供账号、进度跟踪、服务端应用、API 或浏览器内 CUDA 执行。
 
-稳定课程的 O01-O08 导学部分已经完整双语发布：[O01](/start/using-the-learning-site/)、[O02](/start/evidence-status/)、[O03](/start/environment-manifest/)、[O04](/start/cpp17-for-cuda/)、[O05](/start/linux-command-line/)、[O06](/start/architecture-refresher/)、[O07](/start/programmable-gpus/)和 [O08](/start/reference-environment-candidate/)。O02-O08 都有练习与独立参考解答。
+稳定课程的 O01-O08 导学部分已经完整双语发布：[O01](/start/using-the-learning-site/)、[O02](/start/evidence-status/)、[O03](/start/environment-manifest/)、[O04](/start/cpp17-for-cuda/)、[O05](/start/linux-command-line/)、[O06](/start/architecture-refresher/)、[O07](/start/programmable-gpus/)和 [O08](/start/reference-environment-candidate/)。稳定课程还包括 [F01 第一个 CUDA kernel](/foundations/first-cuda-kernel/)、[F02 CUDA 执行层次](/foundations/execution-hierarchy/)、[F03 多维索引](/foundations/multidimensional-indexing/)与 [F04 host-device 生命周期](/foundations/host-device-lifecycle/)。O02-O08 与 F01-F04 都有练习和独立参考解答。
 
-其余公开内容包括基础学习单元（Learning Unit）[F01](/foundations/first-cuda-kernel/)及其练习与解答，[EX01 环境报告](/examples/environment-report/)和 [EX02 向量加法](/examples/vector-addition/)可运行示例，[LAB01 记录并解读 CUDA 环境](/labs/record-cuda-environment/)和 [LAB02 向量加法](/labs/vector-addition/)实验，[VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)，以及包含十道题的[练习题库（Practice Bank）](/practice/)、[术语表](/glossary/)和[来源与版本记录](/sources-and-versions/)。
+其余公开内容包括 [EX01 环境报告](/examples/environment-report/)、[EX02 向量加法](/examples/vector-addition/)和 [EX03 多维索引](/examples/multidimensional-indexing/)可运行示例（Runnable Example）；仍只有 [LAB01 记录并解读 CUDA 环境](/labs/record-cuda-environment/)和 [LAB02 向量加法](/labs/vector-addition/)两个实验；复用 [VIS01 kernel 路径](/visuals/kernel-journey/)和 [VIS02 索引](/visuals/indexing/)；以及包含十三道题的[练习题库（Practice Bank）](/practice/)、已扩展的[术语表](/glossary/)和[来源与版本记录](/sources-and-versions/)。导航不显示 LAB03 或未完成学习单元。
 
-EX01 没有编译已检查（Compile-Checked）声明，运行轴为待硬件验证（Pending Hardware Verification）；LAB01 同样没有编译声明，运行轴为待硬件验证。EX02 和 LAB02 保留现有编译已检查状态，运行轴均为待硬件验证。网站没有执行任何 CUDA binary，也没有声明基准环境（Reference Environment）。
+EX01 没有编译已检查（Compile-Checked）声明，运行轴为待硬件验证（Pending Hardware Verification）；LAB01 同样没有编译声明，运行轴为待硬件验证。EX02 和 LAB02 保留现有编译已检查状态，运行轴均为待硬件验证。EX03 在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit Lane）使用同一份原创 C++17 source，并提供 host-only checks；它的 compilation evidence 为空，因此不是 Compile-Checked，运行仍为 Pending Hardware Verification。网站没有执行 EX03 CUDA binary，也不发布 EX03 运行输出或性能数字。F02-F04 复用 VIS01/VIS02；F04 的原创静态生命周期表不是新的 Visual Explainer，也不是证据来源。
 
 ## 作者
 

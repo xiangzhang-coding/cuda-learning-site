@@ -279,7 +279,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 由 host 发起、在 CUDA device 上由许多 thread 执行的函数；CUDA C++ 中 `__global__` kernel 使用 execution configuration launch。
 - **避免使用：** 普通 CPU 函数、浏览器动画。
-- **相关单元：** F01、LAB02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F02](/foundations/execution-hierarchy/)、[F03](/foundations/multidimensional-indexing/)、[F04](/foundations/host-device-lifecycle/)、[EX03](/examples/multidimensional-indexing/)、[LAB02](/labs/vector-addition/)。
 - **版本说明：** F01 使用 CUDA Programming Guide v13.3 的基础执行模型。
 
 <span id="term-027" class="resource-target" aria-hidden="true"></span>
@@ -288,7 +288,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** Kernel launch 中声明 grid 与 thread block 形状的配置；一维场景常写成 block 数和每 block thread 数。
 - **避免使用：** 数据范围、GPU 配置。
-- **相关单元：** F01、VIS02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F02](/foundations/execution-hierarchy/)、[F03](/foundations/multidimensional-indexing/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)。
 - **版本说明：** 配置创建执行 thread，不自动定义逻辑数据 extent。
 
 <span id="term-028" class="resource-target" aria-hidden="true"></span>
@@ -297,7 +297,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 一次 kernel launch 创建的全部 thread block 集合，可具有一维、二维或三维形状。
 - **避免使用：** 数据数组、固定调度顺序。
-- **相关单元：** F01、VIS01、VIS02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F02](/foundations/execution-hierarchy/)、[F03](/foundations/multidimensional-indexing/)、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)。
 - **版本说明：** Block 的分派和完成顺序不由 grid 坐标保证。
 
 <span id="term-029" class="resource-target" aria-hidden="true"></span>
@@ -306,7 +306,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** Grid 中一组共同调度到一个 SM 的 thread；`blockIdx` 标识 block，`blockDim` 描述其形状。
 - **避免使用：** CPU thread pool、warp。
-- **相关单元：** F01、VIS01、VIS02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F02](/foundations/execution-hierarchy/)、[F03](/foundations/multidimensional-indexing/)、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)。
 - **版本说明：** F01 只使用一维 block；多维关系由 VIS02 说明。
 
 <span id="term-030" class="resource-target" aria-hidden="true"></span>
@@ -315,7 +315,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** Kernel 的一个逻辑执行实例；它通过 `threadIdx` 与 block/grid 坐标推导自己负责的数据位置。
 - **避免使用：** 元素、warp、操作系统线程。
-- **相关单元：** F01、VIS02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F02](/foundations/execution-hierarchy/)、[F03](/foundations/multidimensional-indexing/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)。
 - **版本说明：** Launch thread 可以落在逻辑数据范围外，因此仍需 bounds check。
 
 <span id="term-031" class="resource-target" aria-hidden="true"></span>
@@ -324,7 +324,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** Host 代码在 CPU 侧管理分配、复制、launch 和同步；device 代码由 CUDA GPU 执行，二者的内存和完成边界必须显式处理。
 - **避免使用：** 把 host test 当作 GPU run、把 device memory 当作 host memory。
-- **相关单元：** F01、LAB02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F04](/foundations/host-device-lifecycle/)、[EX03](/examples/multidimensional-indexing/)、[LAB02](/labs/vector-addition/)。
 - **版本说明：** LAB02 使用 CUDA Runtime API 11.8.0、12.9.2 或 13.3.1 的声明 Lane。
 
 <span id="term-032" class="resource-target" aria-hidden="true"></span>
@@ -333,7 +333,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** Thread 在访问数组前比较推导索引与逻辑 extent，使最后一个 partial block 的越界 thread 跳过访问。
 - **避免使用：** 阻止 thread launch、缩小 grid。
-- **相关单元：** F01、VIS02、LAB02。
+- **相关资源：** [F01](/foundations/first-cuda-kernel/)、[F03](/foundations/multidimensional-indexing/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)、[LAB02](/labs/vector-addition/)。
 - **版本说明：** EX02 的一维条件是 `index < element_count`。
 
 <span id="term-033" class="resource-target" aria-hidden="true"></span>
@@ -479,6 +479,69 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **避免使用：** 已声明的 Reference Environment、推荐配置、已验证机器。
 - **相关单元：** O08、LAB01。
 - **版本说明：** 候选身份不是声明；只有全部门槛满足后的独立维护者声明，才能建立 Reference Environment。
+
+<span id="term-049" class="resource-target" aria-hidden="true"></span>
+
+### streaming multiprocessor (SM) · 流式多处理器
+
+- **定义：** CUDA GPU 中接收 thread block 并调度其 warp 的硬件执行资源；一个 SM 可驻留的 block 和 warp 数受寄存器、shared memory 等架构资源限制。
+- **避免使用：** 整张 GPU、CUDA core、thread block。
+- **相关资源：** [F02](/foundations/execution-hierarchy/)、[VIS01](/visuals/kernel-journey/)。
+- **版本说明：** 执行层次与调度表述按 CUDA Programming Guide v13.3；SM 数量和每 SM 限制属于架构特定信息，不能从 launch geometry 推断。
+
+<span id="term-050" class="resource-target" aria-hidden="true"></span>
+
+### warp · 线程束
+
+- **定义：** 同一 thread block 中按局部线性编号连续分组、由 SM 在 SIMT 模型下调度的 32 个 thread；每个 thread 占据一个 lane。
+- **避免使用：** thread block、CPU SIMD vector、完成顺序保证。
+- **相关资源：** [F02](/foundations/execution-hierarchy/)、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)。
+- **版本说明：** 32-thread 分组与执行模型按 CUDA Programming Guide v13.3；具体调度时序仍不能由 warp 编号推断。
+
+<span id="term-051" class="resource-target" aria-hidden="true"></span>
+
+### lane · 通道
+
+- **定义：** 一个 block thread 在所属 warp 中的 `0..31` 位置；对 block 内局部线性编号 `t`，lane 为 `t % 32`，它不表示数据索引或执行先后。
+- **避免使用：** CUDA core、global data index、`threadIdx.x` 的同义词。
+- **相关资源：** [F02](/foundations/execution-hierarchy/)、[VIS02](/visuals/indexing/)。
+- **版本说明：** 位置与取模规则按 CUDA Programming Guide v13.3 的 32-thread warp 模型。
+
+<span id="term-052" class="resource-target" aria-hidden="true"></span>
+
+### dim3 · 三分量 launch 配置类型
+
+- **定义：** 用 `x`、`y`、`z` 三个分量表示 grid 或 thread block 尺寸的 CUDA C++ 类型；构造时未显式给出的分量默认为 `1`。
+- **避免使用：** 逻辑范围、数据布局、完整 kernel launch。
+- **相关资源：** [F03](/foundations/multidimensional-indexing/)、[EX03](/examples/multidimensional-indexing/)。
+- **版本说明：** 类型与默认分量按 CUDA Programming Guide v13.3 和 CUDA Runtime API 13.3.1；EX03 选择 CUDA 11.8.0、12.9.2 和 13.3.1 Toolkit Lane，选择本身不是 Compile-Checked。
+
+<span id="term-053" class="resource-target" aria-hidden="true"></span>
+
+### logical extent · 逻辑范围
+
+- **定义：** 应用为问题或数据在每个有效轴上声明的合法坐标范围；thread 必须在访问前逐轴检查它，而 launch thread 数可以更大。
+- **避免使用：** `gridDim`、allocation byte count、launch geometry。
+- **相关资源：** [F03](/foundations/multidimensional-indexing/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)。
+- **版本说明：** 坐标与 launch 模型按 CUDA Programming Guide v13.3；EX03 在所选 CUDA 11.8.0、12.9.2 和 13.3.1 Toolkit Lane 中共享同一 extent 合同。
+
+<span id="term-054" class="resource-target" aria-hidden="true"></span>
+
+### row-major layout · 行主序布局
+
+- **定义：** 由应用声明、把一行中的连续列映射到连续线性位置的数据布局；F03 和 EX03 使用 x-fastest 公式 `((z * height) + y) * width + x`。CUDA launch geometry 只产生坐标，不声明该布局。
+- **避免使用：** CUDA 默认布局、grid/block shape、column-major layout 的同义词。
+- **相关资源：** [F03](/foundations/multidimensional-indexing/)、[VIS02](/visuals/indexing/)、[EX03](/examples/multidimensional-indexing/)。
+- **版本说明：** CUDA 坐标模型按 CUDA Programming Guide v13.3；布局公式是跨 EX03 所选 CUDA 11.8.0、12.9.2 和 13.3.1 Toolkit Lane 保持不变的应用合同。
+
+<span id="term-055" class="resource-target" aria-hidden="true"></span>
+
+### resource lifecycle · 资源生命周期
+
+- **定义：** 按所有权和最后使用边界组织资源的取得、初始化、使用、同步或传输以及释放；显式 CUDA 程序必须分别跟踪 host storage 与 device allocation。
+- **避免使用：** 仅指 kernel 执行、RAII 的同义词、没有所有权与释放责任的 API 清单。
+- **相关资源：** [F04](/foundations/host-device-lifecycle/)、[O04](/start/cpp17-for-cuda/)、[EX03](/examples/multidimensional-indexing/)。
+- **版本说明：** F04 的 CUDA 调用边界按 CUDA Runtime API 13.3.1；EX03 在所选 CUDA 11.8.0、12.9.2 和 13.3.1 Toolkit Lane 中声明同一显式生命周期，Lane 选择不授予编译或运行证据。
 
 ## 维护规则
 

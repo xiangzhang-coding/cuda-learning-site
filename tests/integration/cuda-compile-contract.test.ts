@@ -40,6 +40,9 @@ describe('CUDA compile evidence workflow', () => {
       'lane: cuda-13-3-cxx17',
       'lane: cuda-13-3-cxx20',
       'lane: cuda-13-3-cxx23-probe',
+      'lane: ex03-cuda-11-8-cxx17',
+      'lane: ex03-cuda-12-9-cxx17',
+      'lane: ex03-cuda-13-3-cxx17',
     ]) {
       expect(workflow).toContain(coordinate);
     }
@@ -60,13 +63,17 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('include-hidden-files: false');
     expect(workflow).toMatch(/^  cuda-compile-gate:/m);
     expect(workflow).toContain('if: ${{ always() }}');
-    expect(workflow).toContain('CUDA_RESULT: ${{ needs.cuda-compile.result }}');
+    expect(workflow).toContain('CUDA_EVIDENCE_RESULT: ${{ needs.cuda-compile.result }}');
+    expect(workflow).toContain('EX03_BUILD_RESULT: ${{ needs.ex03-build.result }}');
+    expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
+    expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
   });
 
   it('never executes the generated CUDA binary in the compile boundary', async () => {
-    const [orchestrator, laneScript] = await Promise.all([
+    const [orchestrator, laneScript, ex03LaneScript] = await Promise.all([
       readProjectFile('scripts/run-cuda-compile.mjs'),
       readProjectFile('examples/ex02-vector-addition/scripts/compile-check.sh'),
+      readProjectFile('examples/ex03-multidimensional-indexing/scripts/compile-check.sh'),
     ]);
 
     expect(orchestrator).not.toMatch(/exec(?:File)?Sync\([^\n]*ex02-vector-addition/);
@@ -75,5 +82,7 @@ describe('CUDA compile evidence workflow', () => {
     expect(orchestrator).toContain('-std=c\\+\\+23 flag is not supported with the configured host compiler');
     expect(laneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex02-vector-addition(?:\s|$)/m);
     expect(laneScript).toContain('make host-test');
+    expect(ex03LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex03-multidimensional-indexing(?:\s|$)/m);
+    expect(ex03LaneScript).toContain('make host-test');
   });
 });

@@ -23,13 +23,13 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(89);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(101);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 2, practice: 10, visuals: 2, glossary: 48, sources: 27 });
+    ).toEqual({ labs: 2, practice: 13, visuals: 2, glossary: 55, sources: 29 });
   });
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
@@ -89,7 +89,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(73);
+    expect(projected).toHaveLength(80);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
     );

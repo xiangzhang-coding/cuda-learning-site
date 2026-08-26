@@ -53,11 +53,11 @@ describe('published resource indexes', () => {
     },
   );
 
-  it('publishes no planned placeholder and keeps exact initial eligible populations', async () => {
+  it('publishes no planned placeholder and keeps exact eligible populations', async () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 2, practice: 10, visuals: 2, glossary: 48, sources: 27 });
+    expect(counts).toEqual({ labs: 2, practice: 13, visuals: 2, glossary: 55, sources: 29 });
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexedText = (

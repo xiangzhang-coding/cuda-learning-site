@@ -46,12 +46,21 @@ export default defineConfig({
         {
           label: '基础课程',
           translations: { en: 'Foundations' },
-          items: [{ slug: 'foundations/first-cuda-kernel' }],
+          items: [
+            { slug: 'foundations/first-cuda-kernel' },
+            { slug: 'foundations/execution-hierarchy' },
+            { slug: 'foundations/multidimensional-indexing' },
+            { slug: 'foundations/host-device-lifecycle' },
+          ],
         },
         {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
-          items: [{ slug: 'examples/environment-report' }, { slug: 'examples/vector-addition' }],
+          items: [
+            { slug: 'examples/environment-report' },
+            { slug: 'examples/vector-addition' },
+            { slug: 'examples/multidimensional-indexing' },
+          ],
         },
         {
           label: '实验',
