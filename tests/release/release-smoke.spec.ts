@@ -12,7 +12,7 @@ const downloadUrl =
 const ex01DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
 const ex03DownloadUrl =
-  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/a69a52b0b0c271f931ebe813b3ec320baeb18f04.zip';
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6.zip';
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);

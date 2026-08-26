@@ -67,7 +67,7 @@ head:
 
 ## 作答方法
 
-先提交每题要求的可复核产物，再依次打开提示。实现复核从[固定提交中的 EX03 canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing)开始，不从学习页面拼接第二份程序。完成后使用独立的[参考解答](/foundations/multidimensional-indexing/solutions/)复核推理。
+先提交每题要求的可复核产物，再依次打开提示。实现复核从[固定提交中的 EX03 canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6/examples/ex03-multidimensional-indexing)开始，不从学习页面拼接第二份程序。完成后使用独立的[参考解答](/foundations/multidimensional-indexing/solutions/)复核推理。
 
 ## 练习 1：分类三维 partial fringe
 
