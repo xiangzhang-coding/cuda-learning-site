@@ -104,13 +104,16 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 4. [O07：GPU 为什么变得可编程](/start/programmable-gpus/)只依赖 O06。
 5. [O08：准备基准环境候选配置](/start/reference-environment-candidate/)同时依赖 O02、O03 和 O05。
 6. [EX01 环境报告可运行示例](/examples/environment-report/)没有严格学习单元先修条件；[LAB01：记录并解读 CUDA 环境](/labs/record-cuda-environment/)同时依赖 O03 和 O08，并使用 EX01。
-7. 现有 kernel 路线仍在完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)，再进入 [LAB02](/labs/vector-addition/)；这条路线使用 canonical [EX02](/examples/vector-addition/)。
+7. Kernel 路线在完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。[F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)依赖 F02；[F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)也依赖 F01。
+8. [EX03 多维索引可运行示例](/examples/multidimensional-indexing/)依赖 F03，并为 F03/F04 提供 canonical source。[LAB02](/labs/vector-addition/)仍同时依赖 O03 和 F01，并使用 canonical [EX02](/examples/vector-addition/)。
 
-下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01/EX02 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于 F01。这些建议不增加上面没有列出的先修边。
+下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01-F04 和 EX02/EX03 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于 F01-F04。F02-F03 构成连续索引路线，F04 则从 F01 分支；这些建议不增加上面没有列出的先修边。
 
-O04-O08 都有直接练习和独立参考解答：[O04 练习](/start/cpp17-for-cuda/exercises/)与[解答](/start/cpp17-for-cuda/solutions/)、[O05 练习](/start/linux-command-line/exercises/)与[解答](/start/linux-command-line/solutions/)、[O06 练习](/start/architecture-refresher/exercises/)与[解答](/start/architecture-refresher/solutions/)、[O07 练习](/start/programmable-gpus/exercises/)与[解答](/start/programmable-gpus/solutions/)、[O08 练习](/start/reference-environment-candidate/exercises/)与[解答](/start/reference-environment-candidate/solutions/)。O02、O03 和 F01 也保留各自的练习与独立解答。
+O02-O08 和 F01-F04 都有直接练习和独立参考解答。基础路线可直接进入 [F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)。
 
-[实验索引](/labs/)按先修顺序列出 LAB01 和 LAB02；[可视化讲解索引](/visuals/)收录 VIS01 kernel 路径与 VIS02 索引的确定性浏览器模型、文字解释与静态回退；[练习题库](/practice/)收录十道链接回 O02-O08 和 F01 的完整题目。你还可以直接查阅[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
+[实验索引](/labs/)仍只按先修顺序列出 LAB01 和 LAB02；导航没有 LAB03 或未完成学习单元。[可视化讲解索引](/visuals/)继续复用 VIS01 kernel 路径与 VIS02 索引的确定性浏览器模型、文字解释与静态回退；F04 的原创静态生命周期表不是新的 Visual Explainer，也不产生证据。[练习题库](/practice/)现收录十三道链接回 O02-O08 与 F01-F04 的完整题目。你还可以直接查阅已经扩展的[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
+
+EX03 在 11.8.0、12.9.2 与 13.3.1 三条工具包通道（Toolkit Lane）使用同一份原创 C++17 source。Host-only checks 不编译或运行 CUDA；EX03 的 compilation evidence 为空，因此不是 Compile-Checked，runtime 为 Pending Hardware Verification。本站没有运行 EX03 CUDA binary，也没有记录 output、timing 或 performance number。
 
 ## 三种视觉主题，一套内容
 

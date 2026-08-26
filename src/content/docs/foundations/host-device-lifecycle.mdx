@@ -1,0 +1,237 @@
+---
+title: 'F04：显式 host-device 资源生命周期'
+description: 按所有权和最后使用边界，读懂从 host 初始化到 device 释放的显式 CUDA 资源生命周期。
+pairId: f04
+counterpart: /en/foundations/host-device-lifecycle/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - ownership
+  - initialization
+  - allocation
+  - transfer-in
+  - launch
+  - synchronization
+  - transfer-out
+  - verification
+  - release
+  - lifecycle-map
+  - canonical-example
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F04
+prerequisites:
+  - F01
+relatedUnits:
+  - O04
+  - EX03
+exampleIds:
+  - EX03
+canonicalExample: EX03
+canonicalRanges:
+  - lifecycle
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 13.3.1 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'CUDA Runtime API'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'CUDA Runtime memory management'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'CUDA Runtime device management'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Introduction to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,ownership,initialization,allocation,transfer-in,launch,synchronization,transfer-out,verification,release,lifecycle-map,canonical-example,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'O04,EX03' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: lifecycle }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/host-device-lifecycle/" lang="en">Read the English counterpart</a>
+
+一个显式 CUDA 程序同时管理主机（host）与设备（device）上的不同资源。本学习单元（Learning Unit）把这段资源生命周期（resource lifecycle）固定为一条可复核路径：初始化（initialization）、分配（allocation）、传输（transfer）、kernel 启动（kernel launch）、同步（synchronization）、回传（copy-back）和释放（release）。重点不是背 API 名单，而是随时回答“谁拥有这块资源”和“它最后一次在哪里被使用”。
+
+## 学完本单元，你应该能
+
+- 按正确顺序解释 host 数据、device buffer、kernel 工作和 host 验证之间的关系。
+- 区分 host 容器、host 上保存的 device pointer，以及 pointer 指向的 device allocation。
+- 为每个资源标出 acquisition、可用状态、最后使用边界和 release 责任。
+- 说明 `cudaGetLastError` 与 `cudaDeviceSynchronize` 在这条最小生命周期中的不同位置，但不把它们扩展成完整异步错误模型。
+- 区分 host-only test、编译事实和真实 GPU 执行证据。
+
+## 先修关系
+
+先完成 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。F01 已经建立 kernel、launch、错误检查和 host comparison 的最小模型；F04 把其中的内存与资源责任展开成完整顺序。
+
+[O04：面向 CUDA 学习者的 C++17 复习](/start/cpp17-for-cuda/)可以帮助你复习指针、作用域和 RAII，但它是相关单元，不是 F04 的新增先修。阅读本页不需要 CUDA-capable system，本学习单元本身也没有 CUDA Evidence Status。
+
+## 所有权：pointer 不是 allocation
+
+Host 代码创建并拥有 host 输入、host 输出和独立参考数据。`cudaMalloc` 成功后，CUDA Runtime 提供一块 device allocation，并把表示其地址的值写入 host 变量。这个 host 变量只是访问 device allocation 的 handle；复制或覆盖 pointer 值不会复制、初始化或释放它指向的 storage。
+
+因此要分别记录两层生命周期：host 容器按 C++ 作用域销毁；每个成功取得的 device allocation 则必须由 host 控制流在最后使用之后恰好释放一次。`cudaMemcpy` 改变目标 storage 的内容，不转移释放责任。Kernel 使用 device buffer，但不会接管它们的 ownership。
+
+最后使用边界比“函数末尾统一 free”更精确：device 输入的最后使用是 kernel 完成；device 输出的最后使用是 D2H copy-back 完成；host 输出的最后使用是 host comparison。把释放统一放在 comparison 之后是一条清楚的 canonical 顺序，但安全性的根本条件是不能早于对应资源的最后使用。
+
+## 初始化：先建立 host 事实
+
+第一步在 host 上创建输入、输出和 expected/reference storage，并填充确定的输入。Host 初始化必须先于任何 H2D transfer，否则 transfer 只会忠实复制未定义或错误的输入内容。
+
+初始化 host 数据不等于初始化 device storage。`cudaMalloc` 只取得 allocation；除非程序随后明确写入，否则不要假设其中是零或任何其他值。Host comparison 可以在最后才执行，但它所需的独立 expected data 必须来自明确规则，而不是从 GPU 输出反推。
+
+## 分配：取得独立的 device buffer
+
+第二步按所需 byte count 为每个输入和输出调用并检查 `cudaMalloc`。成功调用把一项 release 责任加入 host 的资源账本；失败调用没有产生可用 buffer，后续路径不得把它当作已取得资源。
+
+可复用的失败安全控制流在部分分配失败时，只释放此前已经成功取得的 allocation，并且每项只释放一次。EX03 excerpt 展示的是 fail-fast success path，不是结构化 partial-failure cleanup；成功路径在全部需要的 buffer 都可用之前，不得开始 copy 或 launch。
+
+## 输入传输：从 H2D 建立 kernel 输入
+
+第三步使用方向明确的 `cudaMemcpyHostToDevice` 把已初始化的 host 输入传到匹配的 device buffer。检查每次 H2D transfer 的返回状态、source、destination 和 byte count；pointer 类型相同并不代表方向或长度正确。
+
+传输成功后，device 输入才满足本次 kernel launch 的前置条件。Host 输入仍归 host 所有，也可能在最后的独立 comparison 中再次被读取。
+
+## 启动：提交工作，再检查 launch 边界
+
+第四步用 device pointer 和逻辑 extent 提交 kernel launch。Launch expression 返回后，立即调用并检查 `cudaGetLastError`，把 launch configuration 与提交边界纳入 fail-fast 路径。
+
+这个检查不表示 kernel 已完成，也不使 host output 自动可读。F04 只保留这条必要区分；更完整的异步错误分类不属于本单元。
+
+## 同步：建立完成与错误边界
+
+第五步调用并检查 `cudaDeviceSynchronize`。在本单元的 canonical 诊断合同中，它显式等待此前 device 工作完成，并把 kernel completion/error boundary 与后续 D2H copy-back 分开记录。
+
+同步的 `cudaMemcpyDeviceToHost` 本身也会等待相关 device 工作，并可能返回此前异步工作的错误；因此，显式 `cudaDeviceSynchronize` 并不是“让 blocking D2H 结果可读”的唯一机制。本项目保留它，是为了在 copy-back 之前建立独立、可复核的 kernel 完成与错误边界。
+
+只有成功越过这个边界，host 控制流才进入正常的 copy-back 路径。可复用设计若在这里失败，应转入 cleanup，而不是比较一个尚未建立为有效结果的 host output；EX03 的 fail-fast macro 则直接终止进程。
+
+## 输出回传：从 D2H 建立 host 结果
+
+第六步使用 `cudaMemcpyDeviceToHost` 把 device 输出复制到 host 输出。成功的 D2H copy-back 是 device 输出的最后使用边界；从这一步返回并通过错误检查之后，host comparison 才有一份可读的 GPU 结果候选。
+
+Copy-back 不是验证。它只改变结果所在的 address space；它没有证明 kernel 算对了，也没有把 expected data 与 actual data 比较。
+
+## 验证：在 host 上产生 verdict
+
+第七步用独立 host 规则比较 actual output 与 expected output，并保存 pass/fail verdict。比较必须覆盖声明的 logical extent，并报告足以定位首个 mismatch 的上下文。
+
+Host-only test 可以验证 reference、comparison 或索引辅助逻辑；它没有执行 GPU kernel。类似地，Compile-Checked 只证明声明的构建阶段成功。两者都不能替代一次满足环境、命令和验收条件的 GPU 运行。
+
+## 释放：最后使用之后，返回之前
+
+第八步释放每个成功取得的 device allocation。Canonical 成功路径把 release 放在 host comparison 之后，并在 cleanup 完成后才根据保存的 verdict 返回。这样 mismatch 不会通过早退跳过 `cudaFree`。
+
+更强的失败安全变体同样遵循资源账本：只 release 已取得的资源，不访问未建立为有效的结果，不 double free。EX03 excerpt 的显式 `cudaFree` 属于 success path；它的 API 失败路径由完整 project 中的 fail-fast macro 终止。Host 容器则在其 C++ owner 离开作用域时释放。
+
+## 静态生命周期图
+
+下面是本页原创的语义化静态顺序表。它按从上到下的固定顺序阅读，不执行 CUDA、不测量时间，也不产生任何运行证据；它不是新的 Visual Explainer ID。
+
+<table>
+  <caption>F04 显式 host-device 生命周期：动作、状态与最后使用边界</caption>
+  <thead>
+    <tr>
+      <th scope="col">顺序</th>
+      <th scope="col">Host 动作</th>
+      <th scope="col">资源状态</th>
+      <th scope="col">最后使用边界</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row">1</th><td>初始化 host 数据</td><td>输入与 reference 已定义；device buffer 尚不存在</td><td>Host 输入仍可能供 comparison 使用</td></tr>
+    <tr><th scope="row">2</th><td>分配 device buffer</td><td>每次成功的 <code>cudaMalloc</code> 增加一项 release 责任；内容未初始化</td><td>尚不可释放：copy 与 kernel 仍需使用</td></tr>
+    <tr><th scope="row">3</th><td>执行 H2D transfer</td><td>Device 输入取得本次 launch 所需内容</td><td>Device 输入的最后使用仍在 kernel 完成边界</td></tr>
+    <tr><th scope="row">4</th><td>提交 kernel launch</td><td>工作已提交；完成尚未建立</td><td>所有 device buffer 仍为 live</td></tr>
+    <tr><th scope="row">5</th><td>检查 <code>cudaGetLastError</code></td><td>Launch 边界已检查；不代表执行完成</td><td>所有 device buffer 仍为 live</td></tr>
+    <tr><th scope="row">6</th><td>检查 <code>cudaDeviceSynchronize</code></td><td>成功时建立 device completion/error boundary</td><td>Device 输入在此后不再被 kernel 使用</td></tr>
+    <tr><th scope="row">7</th><td>执行 D2H copy-back</td><td>Host 输出取得 GPU 结果候选</td><td>Device 输出的最后使用在 copy 成功时结束</td></tr>
+    <tr><th scope="row">8</th><td>执行 host comparison</td><td>保存 pass/fail verdict</td><td>Host 输出与 reference 的本次最后使用结束</td></tr>
+    <tr><th scope="row">9</th><td>释放 device allocation</td><td>每项已取得资源恰好 release 一次，然后返回</td><td>Release 不得早于对应 last use</td></tr>
+  </tbody>
+</table>
+
+这张表的完整文字读法是：先在 host 建立确定输入；再取得未初始化的 device storage；随后把输入 H2D 复制过去；提交 kernel；马上检查 `cudaGetLastError`；用 `cudaDeviceSynchronize` 建立完成与错误边界；把输出 D2H 回传；在 host 做独立 comparison 并保存 verdict；最后 release 所有已经取得的 device allocation，再返回 verdict。这是 success path 的完整顺序；可复用的失败安全变体还要从失败位置停止创建新依赖，并只清理已经取得的资源。
+
+## Canonical 示例：EX03 lifecycle range
+
+[查看固定提交中的完整 EX03 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/b5d0dab070946eedc41e2bfe0106b67d8c01706b.zip)。解压后进入 `examples/ex03-multidimensional-indexing/`。完整 project 是唯一 canonical source；本页只渲染声明的 lifecycle excerpt，不维护第二份实现。
+
+<CanonicalCode exampleId="EX03" range="lifecycle" />
+
+按上面的九步顺序阅读这段 success-path excerpt，并在每个 device pointer 旁标出 acquired、last use 和 released。完整 project 的 `CUDA_CHECK` 在 API 失败时终止进程，所以这段代码不展示 reusable partial-failure cleanup；对应设计留给练习。EX03 的 host-only tests 或 Compile-Checked 记录都不能证明 GPU kernel 已执行。**Pending Hardware Verification 是 EX03 的 runtime Evidence Status，不是本学习单元的状态；F04 的 compilation 与 runtime 轴都保持为空。**
+
+## 离开前检查
+
+1. 为什么成功的 `cudaMalloc` 同时创建了可用 resource 和一项必须履行的 release 责任，却没有初始化其中的数据？
+2. Kernel launch 之后，为什么 canonical 诊断顺序选择先检查 `cudaGetLastError`，再检查 `cudaDeviceSynchronize`，然后进入 D2H copy-back？同步 D2H 自身还提供什么等待边界？
+3. Device 输入、device 输出和 host 输出各自的最后使用边界在哪里？
+4. 为什么 D2H copy-back 成功仍不足以产生 correctness verdict？
+5. 为什么 host-only test 与 Compile-Checked 都不能把 EX03 的 runtime 状态改成 Runtime-Verified？
+
+## 继续练习
+
+- 完成 [F04 练习（Exercise）](/foundations/host-device-lifecycle/exercises/)，再查看独立的[参考解答](/foundations/host-device-lifecycle/solutions/)。
+- 到[练习题库（Practice Bank）PB-R1-008](/practice/#pb-r1-008)复核一条包含 ownership、last use 与 evidence 错误的生命周期记录。
+
+## 来源与复核
+
+- [CUDA Runtime API 13.3.1 index](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
+- [CUDA Runtime API 13.3.1 Memory Management group](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)
+- [CUDA Runtime API 13.3.1 Device Management group](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+- [CUDA Programming Guide v13.3: Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html)
+
+四项 owner source 均访问于 **2026-08-26**。页面文字、生命周期表和教学编排均为原创；静态表只表达确定的程序顺序，不声称编译或运行证据。

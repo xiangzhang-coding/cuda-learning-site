@@ -175,6 +175,12 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/environment-manifest/exercises/',
     '/foundations/first-cuda-kernel/exercises/',
     '/en/foundations/first-cuda-kernel/exercises/',
+    '/foundations/execution-hierarchy/exercises/',
+    '/en/foundations/execution-hierarchy/exercises/',
+    '/foundations/multidimensional-indexing/exercises/',
+    '/en/foundations/multidimensional-indexing/exercises/',
+    '/foundations/host-device-lifecycle/exercises/',
+    '/en/foundations/host-device-lifecycle/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -203,6 +209,12 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/environment-manifest/solutions/',
     '/foundations/first-cuda-kernel/solutions/',
     '/en/foundations/first-cuda-kernel/solutions/',
+    '/foundations/execution-hierarchy/solutions/',
+    '/en/foundations/execution-hierarchy/solutions/',
+    '/foundations/multidimensional-indexing/solutions/',
+    '/en/foundations/multidimensional-indexing/solutions/',
+    '/foundations/host-device-lifecycle/solutions/',
+    '/en/foundations/host-device-lifecycle/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -219,12 +231,13 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes ten complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes thirteen complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     const entryIds = [
       'PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005',
       'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
+      'PB-R1-006', 'PB-R1-007', 'PB-R1-008',
     ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
@@ -262,6 +275,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/O02/);
     expect(text).toMatch(/O03/);
     expect(text).toMatch(/F01/);
+    for (const unitId of ['F02', 'F03', 'F04']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
@@ -269,6 +283,9 @@ describe('Exercises and Practice Bank contract', () => {
     expect(document.querySelector('a[href*="evidence-status"]')).not.toBeNull();
     expect(document.querySelector('a[href*="environment-manifest"]')).not.toBeNull();
     expect(document.querySelector('a[href*="first-cuda-kernel"]')).not.toBeNull();
+    for (const slug of ['execution-hierarchy', 'multidimensional-indexing', 'host-device-lifecycle']) {
+      expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
+    }
     for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }

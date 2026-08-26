@@ -1,0 +1,286 @@
+---
+title: 'EX03: Multidimensional Indexing Runnable Example'
+description: Obtain one shared original C++17 multidimensional-indexing implementation and review its per-axis bounds, row-major flattening, explicit lifecycle, and still-empty compilation evidence.
+pairId: ex03
+counterpart: /examples/multidimensional-indexing/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - indexing-contract
+  - lifecycle
+  - correctness
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX03
+prerequisites:
+  - F03
+relatedUnits:
+  - F02
+  - F03
+  - F04
+  - VIS02
+exampleIds:
+  - EX03
+canonicalExample: EX03
+canonicalRanges:
+  - indexing-kernel
+  - lifecycle
+  - host-reference
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with the declared problem using under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A 1D, 2D, or 3D launch should produce the same row-major result as the pure host reference for the declared logical extent.
+    - For an extent that is not divisible by the block dimensions, independent x, y, and z bounds should prevent out-of-range writes from the partial edge blocks.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ execution and indexing'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 Runtime API archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex03
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-26'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,indexing-contract,lifecycle,correctness,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX03
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: F03
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'F02,F03,F04,VIS02'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX03
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX03
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'indexing-kernel,lifecycle,host-reference'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with the declared problem using under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '2 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '10'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/multidimensional-indexing/" lang="zh-CN">阅读中文版本</a>
+
+EX03 is a standalone, original multidimensional-indexing Runnable Example. One C++17 implementation handles one-, two-, and three-dimensional logical extents while keeping per-axis bounds, application-declared row-major flattening, an explicit host-device lifecycle, and an independent host reference in one project. The website never executes CUDA.
+
+## Purpose
+
+Complete [F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/) first. EX03 turns that Learning Unit's coordinate rules into the sole executable implementation. [F02](/en/foundations/execution-hierarchy/) supplies the execution hierarchy, [F04](/en/foundations/host-device-lifecycle/) explains the resource lifecycle, and [VIS02](/en/visuals/indexing/) presents the same indexing mental model only in the browser.
+
+The same code path accepts one to three positive extents. With only x, y and z remain 1. With x and y, z remains 1. Supplying all three creates a full three-dimensional extent. These degenerate dimensions let 1D, 2D, and 3D share one implementation rather than maintaining three programs.
+
+## Canonical project
+
+[View the complete EX03 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/b5d0dab070946eedc41e2bfe0106b67d8c01706b.zip). After extraction, enter `examples/ex03-multidimensional-indexing/`.
+
+`project.json` is the machine-readable contract, and `README.md` states the standalone build and external-runtime boundaries. `src/`, `include/`, and `tests/` are the only implementation sources. Both locale pages render each of the three manifest-declared canonical ranges exactly once and in the same order. The project and page prose are original; project source uses Apache-2.0.
+
+## Indexing contract
+
+The kernel independently derives x, y, and z global coordinates, checks all three extents independently, and only then flattens under the application's declared x-fastest row-major layout:
+
+<CanonicalCode exampleId="EX03" range="indexing-kernel" />
+
+The linear position is `((z * extent_y) + y) * extent_x + x`. Adjacent x coordinates name adjacent elements, one row spans `extent_x` elements, and one layer spans `extent_x * extent_y` elements. CUDA grid/block geometry creates coordinates; it does not declare the application's memory layout.
+
+The three early returns are independent. Any invalid coordinate must return before flattening or array access. Checking only x, or requiring all three invalid predicates at once, would let y or z fringes in partial edge blocks cross the contract. A degenerate axis has extent 1, so only coordinate 0 is valid on that axis; the same per-axis checks reject its remaining threads.
+
+## Lifecycle
+
+The same project orders host initialization, the independent reference, device allocation, transfer, launch, synchronization, copy-back, comparison, and release along one explicit success path:
+
+<CanonicalCode exampleId="EX03" range="lifecycle" />
+
+The order is: create three host-storage vectors; initialize input and compute the host expected result; allocate input and output device buffers; copy H2D; construct a ceiling-divided grid on each axis; launch the kernel; check `cudaGetLastError`, then establish completion with `cudaDeviceSynchronize`; copy D2H; save the element-by-element comparison result; and finally release both device allocations.
+
+This range presents a fail-fast success path, not reusable partial-failure cleanup. The complete project's `CUDA_CHECK` terminates the process after a CUDA API failure, so it does not follow a structured cleanup path for allocations acquired earlier. On the success path, it saves the comparison verdict before both `cudaFree` calls. This page does not rewrite that implementation limit as a stronger resource-safety claim.
+
+## Correctness boundary
+
+The pure host C++17 reference defines extents, coordinates, per-axis validity, row-major mapping, and the expected integer value for each element without a CUDA header or device annotation:
+
+<CanonicalCode exampleId="EX03" range="host-reference" />
+
+`make host-test` checks known positions in the 1D `7 x 1 x 1`, 2D `5 x 4 x 1`, and 3D `4 x 3 x 2` extents. It also covers the `10 x 9 x 5` extent, which is not divisible by the project block shape, and submits separate out-of-range x, y, and z coordinates. The test uses exact `std::uint32_t` element comparisons and introduces no floating-point tolerance.
+
+This host-only test can catch dimension swaps, incorrect flattening, and an incomplete host bounds contract, but it neither compiles nor executes the CUDA kernel. Passing it cannot establish agreement with the device implementation and grants no CUDA Evidence Status.
+
+## Build contract
+
+From the project directory on native Linux, run the stages in this fixed order:
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+Preprocessing, compilation, linking, and inspection require the selected CUDA Toolkit. The host test requires only a host C++17 compiler on the x86-64 CPU. The first three CUDA stages create `build/multidimensional_indexing.ii`, `build/multidimensional_indexing.o`, and `build/ex03-multidimensional-indexing`. Inspection uses `cuobjdump` to check a native `sm_75` cubin and forward-compatible PTX generated from `compute_75`; host-test executes only the separate host executable.
+
+These five steps define the complete acceptance path for a future compilation record. The build flow does not execute `build/ex03-multidimensional-indexing`, so even a successful build creates no GPU runtime observation.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Build gate | x86-64 CPU; host C++17 compiler for host-test and the selected Toolkit for CUDA stages |
+| Runtime gate | Native Linux; one CUDA GPU with compute capability 7.5 or newer |
+| Baseline GPU Capability Tier | At most `262,144` `std::uint32_t` elements; two device buffers total 2 MiB, keeping declared problem memory far below the 8 GB boundary |
+| Compiler target | Native `sm_75` cubin plus PTX generated from `compute_75` |
+| Language contract | The same original C++17 source in all three Lanes |
+
+| Toolkit Lane | OS / architecture | Declared development image tag |
+| --- | --- | --- |
+| CUDA 11.8.0 | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04` |
+| CUDA 12.9.2 | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04` |
+| CUDA 13.3.1 | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04` |
+
+These are selected evidence targets and container-identity inputs, not successful records. Tag API metadata, a manifest digest, or image availability cannot by itself show that EX03 compiled or ran.
+
+## Compilation and runtime evidence
+
+EX03's compilation-evidence array is empty. The repository commits no qualifying EX03 Lane compile record, so **EX03 is not Compile-Checked**. Source availability, runnable commands, a passing host-only test, an existing container tag, or a successful website build does not populate that empty axis.
+
+The runtime Evidence Status is **Pending Hardware Verification**, and recorded observations are empty. The project declares no Reference Environment and has no qualifying GPU execution. This page therefore stores or infers no runtime output, timing, latency, bandwidth, throughput, speedup, or other performance claim.
+
+The [VIS02 browser explainer](/en/visuals/indexing/) compiles no CUDA, launches no GPU thread, and reads no EX03 result. VIS02 and the host-only tests grant no CUDA Evidence Status and cannot upgrade runtime to Runtime-Verified.
+
+## Expected observations, not runtime records
+
+These manifest-declared acceptance directions are not observed output:
+
+1. A 1D, 2D, or 3D launch should produce the same row-major result as the pure host reference for the declared logical extent.
+2. For an extent that is not divisible by the block dimensions, independent x, y, and z bounds should prevent out-of-range writes from the partial edge blocks.
+
+Both remain to be checked by a GPU record that satisfies the hardware gate, a complete Environment Manifest, and the acceptance criteria. The observation list remains empty, with no timing or performance expectation.
+
+## Sources and review
+
+CUDA coordinates, per-axis bounds, and launch semantics follow Writing CUDA SIMT Kernels in Programming Guide v13.3. The three exact NVCC paths govern build phases, and the three Runtime API paths govern the explicit lifecycle. The Runtime API page under `archive/12.9.2` labels itself **12.9.1**, so metadata preserves both the archive path and page label. The three NVIDIA Docker Hub tag APIs provide image metadata only, not compilation or runtime evidence.
+
+- [CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 11.8.0 Runtime API](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html)
+- [CUDA 12.9.2 Runtime API archive; page label 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html)
+- [CUDA 13.3.1 Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**Fact-check and all-source access date: 2026-08-26.** The page copies no NVIDIA sample listing, private material, runtime output, or performance result.

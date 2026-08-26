@@ -1,0 +1,222 @@
+---
+title: 'F03：把多维索引与边界写成正确性合同'
+description: 从一维扩展到三维坐标，逐轴检查逻辑范围，再按应用声明的数据布局安全地展平索引。
+pairId: f03
+counterpart: /en/foundations/multidimensional-indexing/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - coordinate-contract
+  - one-dimension
+  - two-dimensions
+  - three-dimensions
+  - bounds
+  - flattening
+  - canonical-example
+  - visual
+  - correctness
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F03
+prerequisites:
+  - F02
+relatedUnits:
+  - VIS02
+  - EX03
+  - F04
+exampleIds:
+  - EX03
+canonicalExample: EX03
+canonicalRanges:
+  - indexing-kernel
+  - host-reference
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ execution and indexing'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Introduction to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,coordinate-contract,one-dimension,two-dimensions,three-dimensions,bounds,flattening,canonical-example,visual,correctness,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F02 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'VIS02,EX03,F04' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'indexing-kernel,host-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+import IndexingExplorer from '../../../components/IndexingExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/multidimensional-indexing/" lang="en">Read the English counterpart</a>
+
+多维索引（multidimensional indexing）不是把一维公式机械地复制三次。Kernel 必须先从 launch geometry 得到坐标，再按每个有效轴的逻辑范围（logical extent）判断该坐标是否拥有数据，最后才按应用声明的数据布局计算内存中的线性位置。三个步骤的合同不同，顺序也不能互换。
+
+## 学完本单元，你应该能
+
+- 分别计算一维、二维和三维 launch 中的 `gx`、`gy`、`gz`。
+- 解释未显式指定的 launch 维度如何取默认值，以及为什么它们不增加有效数据轴。
+- 在展平前检查每个有效轴，修复只检查 x、错误组合 x/y/z 或检查过晚的缺陷。
+- 区分 CUDA execution geometry 与应用选择的数据布局。
+- 用 EX03 的独立 host 参考边界检查非整除范围，同时不把 host-only 结果写成 CUDA 运行证据。
+
+## 先修关系
+
+先完成 [F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)。你应当已经能区分 grid、block、thread、warp 和 lane，并知道 `blockIdx`、`blockDim`、`threadIdx` 分别来自哪一层。本单元只把这些层次组合成数据所有权合同；F04 将继续处理显式的 host-device 生命周期。
+
+## 坐标合同：geometry 先于数据布局
+
+每个有效轴独立使用同一条坐标规则：
+
+```text
+gx = blockIdx.x * blockDim.x + threadIdx.x
+gy = blockIdx.y * blockDim.y + threadIdx.y
+gz = blockIdx.z * blockDim.z + threadIdx.z
+```
+
+CUDA 的三分量 launch 配置类型（`dim3`）把 x、y、z 尺寸放在一个值中。按当前 Programming Guide 的说明，用较少参数构造 `dim3` 时，未指定的分量初始化为 `1`。因此一维配置的 y、z 尺寸为 1，相应坐标只能为 0；二维配置的 z 也如此。默认值描述 execution geometry，不会替应用发明 `height`、`depth` 或数据布局。
+
+## 一维：只有 x 是有效数据轴
+
+一维数组只需要：
+
+```text
+gx = blockIdx.x * blockDim.x + threadIdx.x
+```
+
+应用声明合法坐标为 `0 <= gx < width`。即使 `gridDim.y = gridDim.z = blockDim.y = blockDim.z = 1`，也不需要把 y、z 当作数据轴。它们只是尺寸为 1 的 launch 分量。
+
+## 二维：分别求 x 与 y
+
+二维图像或矩阵使用：
+
+```text
+gx = blockIdx.x * blockDim.x + threadIdx.x
+gy = blockIdx.y * blockDim.y + threadIdx.y
+```
+
+合法坐标必须同时满足 `gx < width` 与 `gy < height`。为每轴分别向上取整 block 数，可能让最右一列 block、最下一行 block 或右下角 block 含有不拥有数据的 thread。这些 thread 仍属于合法 launch，只是不能访问应用数组。
+
+## 三维：z 也是独立坐标
+
+三维 volume 再加入：
+
+```text
+gz = blockIdx.z * blockDim.z + threadIdx.z
+```
+
+例如 `width = 10`、`height = 7`、`depth = 5`，block shape 为 `(4, 3, 2)` 时，逐轴向上取整得到 grid shape `(3, 3, 3)`。最后一组 block 在 x、y、z 上都含 partial 区域。不能因为一个 thread 的 x 合法，就推断其 y 和 z 也合法。
+
+## 边界：每个有效轴都是正确性前提
+
+边界检查（bounds check）必须覆盖所有有效轴，并发生在任何展平和数组访问之前：
+
+```text
+1D: gx < width
+2D: gx < width AND gy < height
+3D: gx < width AND gy < height AND gz < depth
+```
+
+等价的 early-return 形式是在 `gx >= width OR gy >= height OR gz >= depth` 时立即返回。这里的 `OR` 很关键：任一轴越界就没有合法元素。把三个无效条件用 `AND` 连接，只会拒绝三轴同时越界的 thread；只检查 x 则会让 y 或 z fringe 穿过合同。
+
+## 展平：布局由应用声明
+
+CUDA 学习站（Learning Site）和 EX03 明确声明 x-fastest 的行主序布局（row-major layout）。三维坐标到线性索引的映射是：
+
+```text
+index = ((gz * height) + gy) * width + gx
+```
+
+它等价于 `gx + width * (gy + height * gz)`。相邻 x 坐标相差 1，一整行跨过 `width` 个元素，一整层跨过 `width * height` 个元素。**CUDA grid/block geometry 不声明数据布局。** 列主序、带 pitch 的行、分块格式或其他应用合同都可以使用同一组 CUDA 坐标，却需要不同映射。索引乘法还必须使用足以容纳完整元素计数的整数类型。
+
+## 规范示例：先看实现
+
+[查看固定提交中的完整 EX03 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/b5d0dab070946eedc41e2bfe0106b67d8c01706b.zip)。解压后进入 `examples/ex03-multidimensional-indexing/`。页面只呈现已声明的 canonical range，不维护第二份程序。
+
+<CanonicalCode exampleId="EX03" range="indexing-kernel" />
+
+阅读时按固定顺序复核：先求三个 global 坐标；再让任一无效轴提前返回；最后才按已声明的 row-major 公式展平并访问元素。Execution configuration 只创建 thread，不替这段实现定义 `width`、`height` 或 `depth`。
+
+## 可视化：只复用 VIS02
+
+[VIS02 索引讲解](/visuals/indexing/)与本页使用同一组坐标、逐轴 bounds 和应用布局合同。下面只复用这一份 `IndexingExplorer`，不创建重复模型。它是确定性浏览器模型；组件内的静态卡片和本页文字公式提供不依赖交互的等价说明。
+
+<IndexingExplorer locale="zh-CN" />
+
+浏览器模型不编译 CUDA、不 launch GPU thread，也不读取 EX03 的运行结果。交互状态、静态回退和手算结果都不构成 CUDA 编译或运行证据。
+
+## 正确性：独立 host 参考与非整除范围
+
+EX03 的 CPU 参考实现（CPU reference）在 host 上定义预期元素，并与 kernel 实现保持独立的正确性边界：
+
+<CanonicalCode exampleId="EX03" range="host-reference" />
+
+EX03 的 host test 覆盖 `10 x 9 x 5` 这个不能被项目 block shape 整除的范围，验证参考值、合法坐标和 row-major 映射，并用独立案例触及 x、y、z 三个 fringe。它没有 launch GPU kernel，因此即使通过也只能说明 host 参考合同通过，不能证明 device 实现已运行或结果一致。
+
+本页不记录编译或运行观察，也不提供 latency、bandwidth、throughput、speedup 或任何 profiler 结论。正确索引是未来测量的前提，不是性能声明。
+
+## 离开前检查
+
+1. 用较少参数构造 `dim3` 时，未指定分量是什么值？对应坐标为什么只能为 0？
+2. 对二维 launch，为什么 `gx < width` 不能单独构成正确性合同？
+3. 三维 early-return 为什么连接无效条件时使用 `OR`，而保留有效 thread 的正向条件使用 `AND`？
+4. 为什么必须先逐轴检查，再计算 `((gz * height) + gy) * width + gx`？
+5. 为什么 CUDA geometry 与 CPU reference 都不能替应用声明数据布局或证明 GPU 性能？
+
+## 继续练习
+
+- 完成 [F03 练习（Exercise）](/foundations/multidimensional-indexing/exercises/)，再查看独立的[参考解答](/foundations/multidimensional-indexing/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-007](/practice/#pb-r1-007)修复另一组多维 bounds 与 flattening 缺陷。
+- 继续到 [F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)时，保留这里的坐标与布局合同，再把 allocation、transfer、launch、synchronization、copy-back 和 release 接到它外面。
+
+## 来源与复核
+
+一维、二维、三维 grid/block 组织、内建索引量、`dim3` 默认分量与 kernel launch 语义依据 NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)和 [Introduction to CUDA C++](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html)。两份 owner 页面均标为 **CUDA Programming Guide v13.3**、**2026-05-27 更新**；本站访问日期为 **2026-08-26**。
+
+Row-major 映射、非整除案例、练习和教学编排由本站明确声明并原创，不归因于 CUDA geometry，也没有复制 NVIDIA sample listing、diagram、table、运行输出或性能数字。
+
+**事实核查日期：2026-08-26。**

@@ -46,9 +46,9 @@ head:
 
 ## The route published today
 
-The O01-O08 orientation of the Stable Curriculum is completely published. The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. LAB01 requires both O03 and O08 and uses the EX01 environment-report Runnable Example. EX01 has no Compile-Checked claim, and the runtime axes for EX01 and LAB01 are both Pending Hardware Verification. The existing kernel route still runs from O03 to F01 and then LAB02, with EX02 remaining the canonical source shared by F01/LAB02.
+The Stable Curriculum now completely publishes the O01-O08 orientation and foundational Learning Units F01-F04. The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. LAB01 requires both O03 and O08 and uses the EX01 environment-report Runnable Example. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04. LAB02 still requires O03 and F01 and uses EX02.
 
-O04-O08 each publish complete Exercises and separate reviewed solutions: [O04 Exercises](/en/start/cpp17-for-cuda/exercises/) and [solutions](/en/start/cpp17-for-cuda/solutions/), [O05 Exercises](/en/start/linux-command-line/exercises/) and [solutions](/en/start/linux-command-line/solutions/), [O06 Exercises](/en/start/architecture-refresher/exercises/) and [solutions](/en/start/architecture-refresher/solutions/), [O07 Exercises](/en/start/programmable-gpus/exercises/) and [solutions](/en/start/programmable-gpus/solutions/), and [O08 Exercises](/en/start/reference-environment-candidate/exercises/) and [solutions](/en/start/reference-environment-candidate/solutions/). Labs, Practice Bank entries, Visual Explainers, terms, and source records also have direct indexes. The route never substitutes empty pages for unfinished material.
+F01-F04 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), and [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/). O02-O08 retain their own Exercises and separate solutions. EX03 shares one original C++17 source across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1 and provides host-only checks, but its compilation evidence is empty, so it is not Compile-Checked; runtime is Pending Hardware Verification. The site ran no EX03 CUDA binary and publishes no EX03 performance number. This expansion reuses VIS01/VIS02. F04's original static lifecycle table is neither a new Visual Explainer nor an evidence source. Navigation still publishes only LAB01/LAB02, with no LAB03 or unfinished Learning Unit; the Practice Bank now contains thirteen complete entries, and the Glossary and source records are expanded.
 
 ## Boundaries first
 
@@ -102,6 +102,21 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>From Prediction to a First CUDA Kernel</strong>
     <small>Calculate thread indices before learning implementation, correctness, and measurement boundaries.</small>
   </a>
+  <a className="route-card" href="/en/foundations/execution-hierarchy/">
+    <span>F02 · EXECUTION HIERARCHY</span>
+    <strong>Understanding the CUDA Execution Hierarchy</strong>
+    <small>Separate kernels, grids, blocks, warps, lanes, and SMs.</small>
+  </a>
+  <a className="route-card" href="/en/foundations/multidimensional-indexing/">
+    <span>F03 · INDEXING CONTRACT</span>
+    <strong>Make Multidimensional Indexing and Bounds a Correctness Contract</strong>
+    <small>Derive and check each axis before flattening under the declared data layout.</small>
+  </a>
+  <a className="route-card" href="/en/foundations/host-device-lifecycle/">
+    <span>F04 · RESOURCE LIFECYCLE</span>
+    <strong>The Explicit Host-Device Resource Lifecycle</strong>
+    <small>Read the complete order through ownership, last use, and release.</small>
+  </a>
   <a className="route-card" href="/en/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>Environment Report Runnable Example</strong>
@@ -111,6 +126,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <span>EX02 · CANONICAL SOURCE</span>
     <strong>Vector Addition Runnable Example</strong>
     <small>Obtain the sole canonical source, build contract, and independent evidence.</small>
+  </a>
+  <a className="route-card" href="/en/examples/multidimensional-indexing/">
+    <span>EX03 · SHARED C++17 SOURCE</span>
+    <strong>Multidimensional Indexing Runnable Example</strong>
+    <small>Get the shared implementation and host-only checks while CUDA evidence remains pending.</small>
   </a>
   <a className="route-card" href="/en/labs/record-cuda-environment/">
     <span>LAB01 · CAPTURE</span>
@@ -145,7 +165,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, C++, Linux, architecture, and kernel models through ten original problems.</small>
+    <small>Transfer evidence, environment, C++, Linux, architecture, and kernel models through thirteen original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>

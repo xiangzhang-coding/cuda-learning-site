@@ -1,0 +1,215 @@
+---
+title: 'F02：理解 CUDA 执行层次'
+description: 区分函数、launch 工作、协作单元、执行分组与位置，并预测一维和二维 thread 所有权。
+pairId: f02
+counterpart: /en/foundations/execution-hierarchy/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - hierarchy
+  - kernel
+  - grid
+  - block
+  - warp-lane
+  - scheduling
+  - prediction
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F02
+prerequisites:
+  - F01
+relatedUnits:
+  - VIS01
+  - VIS02
+  - F03
+exampleIds:
+  - EX03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA programming model'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA SIMT programming model'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,hierarchy,kernel,grid,block,warp-lane,scheduling,prediction,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F01 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'VIS01,VIS02,F03' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX03 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/execution-hierarchy/" lang="en">Read the English counterpart</a>
+
+本学习单元（Learning Unit）把容易混用的名字拆成不同层次：核函数（kernel）是源码中的函数；一次带执行配置（execution configuration）的 launch 创建一个网格（grid）工作实例；网格包含线程块（thread block）；线程块内的 thread 按局部编号组成线程束（warp），每个 thread 在其中占一个通道（lane）位置；流式多处理器（streaming multiprocessor，SM）是调度这些工作的硬件执行资源，而不是 launch 坐标的一层。
+
+## 学完本单元，你应该能
+
+- 区分 kernel 函数、一次 grid launch、thread block、32-thread warp、lane 位置和 SM，不把源码声明当成动态工作实例。
+- 从一维或二维 execution configuration 预测 thread 的全局坐标、block 内局部线性编号、warp 与 lane。
+- 用每个有效轴的 bounds 条件判断 thread 是否拥有逻辑数据，而不是从 launch 总量推断所有 thread 都合法。
+- 解释 block 可以协作且作为调度单元分派到 SM，同时不假设 block 的分派或完成顺序。
+
+## 先修关系
+
+先完成 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。F01 已经建立一维全局索引、partial block 和 bounds check；F02 把这些事实放进完整执行层次。这里不执行 CUDA，没有硬件门槛，也不获得 CUDA Evidence Status。
+
+## 层次：先分清“是什么”
+
+| 概念 | 本单元中的准确含义 | 不应混同为 |
+| --- | --- | --- |
+| kernel 函数 | 带 `__global__` 的 device 函数定义，可被重复 launch | 某一次正在执行的 grid |
+| grid | 一次 kernel launch 创建的全部 block，是一个动态工作实例 | 可复用的函数定义或固定调度顺序 |
+| thread block | 可通过 shared memory 和 block 范围同步进行协作，并作为一个单元分派到一个 SM 的 thread 集合 | 32 个 thread 的 warp |
+| warp | 同一 block 中连续局部线性 thread ID 形成的 32-thread 执行分组 | 独立 launch 或协作范围等同于 block 的单元 |
+| lane | thread 在所属 warp 中的 `0..31` 位置 | 新 thread、全局数据索引或先后顺序 |
+| SM | 接收 block 并调度其 warp 的硬件资源 | `blockIdx`、`threadIdx` 或 execution configuration 的一个维度 |
+
+同一个 kernel 函数可以被 launch 多次。每次 launch 都创建新的 grid、block 和 thread 实例；函数仍只有同一份定义。因而“调用哪个函数”和“这次创建了多少工作”必须分开回答。
+
+## Kernel：函数定义不等于一次工作
+
+Host 用 `kernel_name<<<grid_dimensions, block_dimensions>>>(arguments)` 发起 launch。尖括号中的 execution configuration 指定 grid 各轴的 block 数和每个 block 各轴的 thread 数。它不直接指定 warp、lane、SM，也不承诺任何 block 顺序。
+
+每个已 launch thread 执行同一个 kernel 函数体，但能读取自己的 `blockIdx`、`blockDim`、`threadIdx` 和 `gridDim`。这些内建量让同一份函数定义为不同坐标计算不同所有权。逻辑数据范围仍由参数或数据结构给出；launch 范围可以大于它。
+
+## Grid：一次 launch 的完整工作实例
+
+Grid 是一次 launch 创建的所有 thread block。`gridDim` 给出每个轴上的 block 数，`blockIdx` 给出当前 block 的坐标。二维 grid 中的 `(0, 1)` 与 `(1, 0)` 是两个不同 block，但坐标只标识工作，不规定谁先分派或先完成。
+
+相同 kernel 函数与相同 execution configuration 连续 launch 两次，仍会得到两个不同 grid 实例。不能把第一次 launch 的 thread、block 状态或完成顺序当成第二次 launch 的身份。
+
+## Thread block：协作与调度边界
+
+`blockDim` 给出一个 block 在各轴上的 thread 数，`threadIdx` 给出 thread 在 block 内的坐标。一个 block 的 thread 可以使用 block 范围的 shared memory 与同步来协作；不同 block 不能依赖普通 block 内同步或某个隐含执行顺序来协调。
+
+Block 内 thread 按 **x 最快（x-fastest）**展开为局部线性编号：
+
+```text
+localThread = threadIdx.x
+            + blockDim.x * (threadIdx.y + blockDim.y * threadIdx.z)
+
+threadsPerBlock = blockDim.x * blockDim.y * blockDim.z
+```
+
+因此 x 坐标先变化，随后是 y，再随后是 z。这个编号只在线程所属 block 内有效；新 block 从局部编号 0 重新开始。
+
+## Warp 与 lane：执行分组和组内位置
+
+CUDA 的 warp 是一个 32-thread 执行分组，包含 32 个 lane 位置。同一 block 中连续的局部线性 thread ID 按下式划分：
+
+```text
+warpInBlock = floor(localThread / 32)
+lane = localThread % 32
+```
+
+例如局部编号 37 属于 block 内 warp 1、lane 5。`lane = 5` 只说明组内位置，不表示它拥有数据元素 5，也不表示它在 lane 6 之前执行。若 block 的 thread 总数不是 32 的整数倍，最后一个 warp 的剩余 lane 没有对应的 block thread；这不会改变 bounds 规则。
+
+## 调度：逻辑坐标不承诺时间顺序
+
+一个 block 的 thread 在同一个 SM 上执行，block 作为一个单元被分派；SM 再调度该 block 的 warp。Grid 中独立 block 的分派顺序和完成顺序都没有承诺。`blockIdx.x = 0` 可能先开始、后开始或与其他 block 重叠，kernel 正确性都不能依赖其中一种情况。
+
+Warp 和 lane 编号也不是时间表。不能由 `warpInBlock = 0` 推断它一定在 warp 1 前完成，也不能由 lane 编号推断逐 lane 执行。使用 [VIS01：Kernel 从 launch 到完成的路径](/visuals/kernel-journey/)复查 launch、grid、block、warp、SM 与完成边界；它现有的确定性步骤只用于教学，不是调度记录。本页不复制第二份 visual。
+
+## 所有权预测：一维与二维
+
+### 一维 worked prediction
+
+逻辑数据有 `N = 150` 个元素，每个 block 有 `blockDim.x = 64` 个 thread。Execution configuration 需要：
+
+```text
+gridDim.x = ceil(150 / 64) = 3
+globalX = blockIdx.x * blockDim.x + threadIdx.x
+```
+
+前三个 block 覆盖 launch 索引 `0..191`，但逻辑范围只有 `0..149`。在最后一个 block（`blockIdx.x = 2`）中：
+
+- `threadIdx.x = 21` 得到 `globalX = 2 * 64 + 21 = 149`，满足 `149 < 150`，拥有最后一个元素。
+- `threadIdx.x = 22` 得到 `globalX = 150`，不满足 `150 < 150`，必须跳过数据访问。
+- `threadIdx.x = 63` 得到 `globalX = 191`，同样越界。它的局部编号为 63，所以属于 warp 1、lane 31；warp/lane 身份不会让越界访问变合法。
+
+### 二维 worked prediction
+
+逻辑数据宽 `70`、高 `35`，声明 x 最快的 row-major 布局。选择 `blockDim = (16, 8)`，则：
+
+```text
+gridDim = (ceil(70 / 16), ceil(35 / 8)) = (5, 5)
+globalX = blockIdx.x * 16 + threadIdx.x
+globalY = blockIdx.y * 8  + threadIdx.y
+localThread = threadIdx.x + 16 * threadIdx.y
+```
+
+在边界 block `blockIdx = (4, 4)` 中选择 `threadIdx = (5, 2)`：
+
+```text
+global = (4 * 16 + 5, 4 * 8 + 2) = (69, 34)
+localThread = 5 + 16 * 2 = 37
+warpInBlock = 1
+lane = 5
+dataIndex = 69 + 70 * 34 = 2449
+```
+
+因为 `69 < 70` 且 `34 < 35`，该 thread 拥有最后一个逻辑元素。把 x 改为 `threadIdx.x = 6` 会得到 `(70, 34)`，在 x 轴越界；把 y 改为 `threadIdx.y = 3` 会得到 `(69, 35)`，在 y 轴越界。二维所有权要求**两个轴都合法**，越界坐标不能因为线性化后得到一个整数就访问数据。
+
+[VIS02：Grid、block 与 thread 索引](/visuals/indexing/)可以用同一组公式检查 1D、2D 和 3D 坐标、局部编号、warp/lane 与 bounds。它是已存在的可视化讲解（Visual Explainer），不是 CUDA 运行或浏览器证据；本页不嵌入副本，也不从选择结果推断性能。
+
+## 离开前检查
+
+1. 同一个 `__global__` 函数连续 launch 两次时，kernel 函数和 grid 实例各有几个？
+2. 为什么 thread block 既是协作边界又是调度单元，而 warp 不是同一种边界？
+3. 对 `blockDim = (16, 8)` 和 `threadIdx = (5, 2)`，为什么局部线性编号是 37，而不是 21？
+4. `warpInBlock = 1, lane = 5` 能告诉你哪些身份事实，又不能告诉你哪些数据或时间事实？
+5. 为什么 `blockIdx` 的数值顺序不能作为 block 的分派、完成或跨 block 协作顺序？
+
+## 继续练习
+
+- 完成 [F02 练习（Exercise）](/foundations/execution-hierarchy/exercises/)，再查看独立的[参考解答](/foundations/execution-hierarchy/solutions/)。
+- 在[练习题库（Practice Bank）](/practice/#pb-r1-006)完成 PB-R1-006，继续预测二维 thread 所有权与 warp/lane 身份。
+- 回到 [VIS01](/visuals/kernel-journey/)练习解释调度边界，并在 [VIS02](/visuals/indexing/)中改变 launch 形状后先预测、再检查坐标。
+- 继续到 [F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)，把层次身份组合成逐轴数据所有权规则。
+
+## 来源与复核
+
+层次、execution configuration、内建坐标、x-fastest thread 线性化、32-thread warp 与调度边界依据 NVIDIA CUDA Programming Guide v13.3 的 [Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html)和 [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)。两份 owner 页面均标为 2026-05-27 更新，本站于 2026-08-26 访问并复核；完整坐标也记录在[来源与版本记录](/sources-and-versions/)。
+
+**事实核查日期：2026-08-26。** 页面文字、表格和 worked predictions 均为原创。本页没有执行 CUDA，不包含运行输出、调度观察或性能结论。

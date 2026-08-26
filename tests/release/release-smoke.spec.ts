@@ -11,6 +11,8 @@ const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
 const ex01DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
+const ex03DownloadUrl =
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/b5d0dab070946eedc41e2bfe0106b67d8c01706b.zip';
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
@@ -33,8 +35,16 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/start/using-the-learning-site/',
     '/start/reference-environment-candidate/',
     '/en/start/reference-environment-candidate/',
+    '/foundations/execution-hierarchy/',
+    '/en/foundations/execution-hierarchy/',
+    '/foundations/multidimensional-indexing/',
+    '/en/foundations/multidimensional-indexing/',
+    '/foundations/host-device-lifecycle/',
+    '/en/foundations/host-device-lifecycle/',
     '/examples/environment-report/',
     '/en/examples/environment-report/',
+    '/examples/multidimensional-indexing/',
+    '/en/examples/multidimensional-indexing/',
     '/labs/record-cuda-environment/',
     '/en/labs/record-cuda-environment/',
   ]) {
@@ -73,7 +83,19 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     route: '/en/',
     button: /Search/,
     query: 'row-major data index',
-    expectedHrefs: ['/en/visuals/indexing/'],
+    expectedHrefs: ['/en/visuals/indexing/', '/en/foundations/multidimensional-indexing/'],
+  });
+  await expectRankedSearchResult(page, {
+    route: '/',
+    button: /搜索/,
+    query: '显式 host-device 资源生命周期',
+    expectedHrefs: ['/foundations/host-device-lifecycle/'],
+  });
+  await expectRankedSearchResult(page, {
+    route: '/en/',
+    button: /Search/,
+    query: 'warp lane execution hierarchy',
+    expectedHrefs: ['/en/foundations/execution-hierarchy/'],
   });
   await expectRankedSearchResult(page, {
     route: '/en/',
@@ -138,6 +160,14 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
     '/en/labs/vector-addition/',
     '/start/reference-environment-candidate/',
     '/en/start/reference-environment-candidate/',
+    '/foundations/execution-hierarchy/',
+    '/en/foundations/execution-hierarchy/',
+    '/foundations/multidimensional-indexing/',
+    '/en/foundations/multidimensional-indexing/',
+    '/foundations/host-device-lifecycle/',
+    '/en/foundations/host-device-lifecycle/',
+    '/examples/multidimensional-indexing/',
+    '/en/examples/multidimensional-indexing/',
   ]) {
     await page.goto(route);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
@@ -153,6 +183,8 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
   for (const route of [
     '/visuals/kernel-journey/',
     '/en/visuals/indexing/',
+    '/foundations/multidimensional-indexing/',
+    '/en/foundations/multidimensional-indexing/',
     '/start/reference-environment-candidate/',
     '/en/start/reference-environment-candidate/',
     '/practice/',
@@ -160,7 +192,7 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
   ]) {
     const response = await staticPage.goto(route);
     expect(response?.ok(), route).toBe(true);
-    if (route.includes('/visuals/')) {
+    if (route.includes('/visuals/') || route.includes('/foundations/multidimensional-indexing/')) {
       await expect(staticPage.locator('[data-visual-controls]')).toBeHidden();
       await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
       await expect(staticPage.locator('[data-no-evidence]')).toBeVisible();
@@ -192,6 +224,13 @@ test('serves immutable canonical downloads and returns a real 404 for unknown ap
   expect(ex01Download.ok()).toBe(true);
   expect(ex01Download.headers()['content-type']).toMatch(/zip|octet-stream/);
   expect((await ex01Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+
+  await page.goto('/en/examples/multidimensional-indexing/');
+  await expect(page.locator(`a[href="${ex03DownloadUrl}"]`)).toBeVisible();
+  const ex03Download = await request.get(ex03DownloadUrl);
+  expect(ex03Download.ok()).toBe(true);
+  expect(ex03Download.headers()['content-type']).toMatch(/zip|octet-stream/);
+  expect((await ex03Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
 
   const missing = await request.get('/api/r0-smoke-must-not-exist');
   expect(missing.status()).toBe(404);

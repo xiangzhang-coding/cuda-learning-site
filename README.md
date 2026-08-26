@@ -4,7 +4,7 @@
 
 CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU programming. Chinese pages live at the root and English counterparts under `/en/`.
 
-The complete O01-O08 Stable Curriculum orientation is published in both languages. The current published source baseline also contains Home; paired Exercises and reviewed solutions for O02-O08; F01 with paired Exercises and reviewed solutions; the canonical EX01 environment-report and EX02 vector-addition Runnable Examples; LAB01 and LAB02; VIS01 Kernel Journey; VIS02 Indexing; ten Practice Bank entries; the Glossary; the Sources and Version Record; and About. Complete bilingual indexes provide direct lookup for Labs, Practice Bank entries, Visual Explainers, Glossary terms, and source/version records while preserving prerequisite links. Silicon Light, Profiler Dark, and Blueprint style this same content without changing its structure or meaning. Navigation exposes no unfinished learning material.
+The published Stable Curriculum contains the complete O01-O08 orientation and F01-F04, with paired Exercises and reviewed solutions for O02-O08 and every F01-F04 unit. The current bilingual source baseline also contains Home; the canonical EX01 environment-report, EX02 vector-addition, and EX03 multidimensional-indexing Runnable Examples; LAB01 and LAB02 only; the reused VIS01 Kernel Journey and VIS02 Indexing Visual Explainers; thirteen Practice Bank entries; the expanded Glossary and source/version records; and About. Complete bilingual indexes provide direct lookup while preserving prerequisite links. Silicon Light, Profiler Dark, and Blueprint style this same content without changing its structure or meaning. Navigation exposes no LAB03 or unfinished Learning Unit.
 
 Contributions use [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) and [Pull Requests](https://github.com/xiangzhang-coding/cuda-learning-site/pulls). Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
 
@@ -19,16 +19,19 @@ npm run build:release
 npm run test
 ```
 
-EX01 and EX02 host-only tests are available without CUDA:
+EX01, EX02, and EX03 host-only tests are available without CUDA:
 
 ```sh
 make -C examples/ex01-environment-report host-test
 make -C examples/ex02-vector-addition host-test
+make -C examples/ex03-multidimensional-indexing host-test
 ```
 
-EX01 has no Compile-Checked claim, and its runtime remains Pending Hardware Verification. LAB01 likewise has no compilation claim and remains Pending Hardware Verification at runtime. A host-only test or local build does not upgrade either status. The independent `CUDA Compile Evidence` workflow preprocesses, compiles, links, and inspects EX02 in three digest-pinned NVIDIA development environments on x86-64 CPU runners. The declared C++17 matrix and the applicable C++20 checks remain Compile-Checked for EX02, while LAB02 retains its existing Compile-Checked compilation status. The workflow never executes either CUDA binary, so EX02 and LAB02 runtime remain Pending Hardware Verification.
+EX01 and EX03 have no Compile-Checked claim, and their runtime remains Pending Hardware Verification. LAB01 likewise has no compilation claim and remains Pending Hardware Verification at runtime. A host-only test or local build does not upgrade any status. EX03 uses one original shared C++17 source for the 11.8.0, 12.9.2, and 13.3.1 Toolkit Lanes, but its compilation-evidence array is empty. No EX03 CUDA binary has run, and the site publishes no EX03 output, timing, or performance number.
 
-The build is fully static. VIS01 and VIS02 are deterministic browser models with complete textual and static fallbacks; their state and timing grant no CUDA Evidence Status. Theme selection is the only learner preference retained across browser sessions. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
+The independent `CUDA Compile Evidence` workflow preprocesses, compiles, links, and inspects EX02 in three digest-pinned NVIDIA development environments on x86-64 CPU runners. The declared C++17 matrix and the applicable C++20 checks remain Compile-Checked for EX02, while LAB02 retains its existing Compile-Checked compilation status. The workflow never executes either CUDA binary, so EX02 and LAB02 runtime remain Pending Hardware Verification.
+
+The build is fully static. F02-F04 reuse VIS01 and VIS02 rather than introducing a new Visual Explainer. Both are deterministic browser models with complete textual and static fallbacks; their state and timing grant no CUDA Evidence Status. F04's original static lifecycle table is not a Visual Explainer or an evidence source. Theme selection is the only learner preference retained across browser sessions. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
 
 ## Deployment
 
