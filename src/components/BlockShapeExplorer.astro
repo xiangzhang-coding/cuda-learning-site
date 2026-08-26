@@ -66,7 +66,7 @@ const copy = locale === 'zh-CN'
       staticInvalid: 'x 与 y 分别不超上限，但 1024 * 2 = 2048 超过 maxThreadsPerBlock 1024；不生成 grid 或 fringe。',
       formula: '对正整数使用 grid.x = 1 + floor((width - 1) / block.x)，y 轴同理；先检查每个乘积，再计算 launch 与 fringe。',
       staticResource: '这些 device ceilings 只通过第一层 resource gate。真实 kernel 仍需要 function attributes、register 与 shared-memory demand。',
-      noEvidence: '无证据：此组件不编译 CUDA、不 launch GPU、不读取 profiler，也不改变任何 Evidence Status。',
+      noEvidence: '此组件不编译 CUDA、不 launch GPU，也不读取 profiler。它不授予 Compile-Checked、Community-Observed 或 Runtime-Verified 这三种 Evidence Status。',
       issueLabels: {
         'capability-record-invalid': 'Capability record 不完整或包含无效 limit。',
         'logical-width-invalid': 'Logical width 必须是正十进制安全整数。',
@@ -137,7 +137,7 @@ const copy = locale === 'zh-CN'
       staticInvalid: 'x and y each fit their axis limit, but 1024 * 2 = 2048 exceeds maxThreadsPerBlock 1024, so no grid or fringe is produced.',
       formula: 'For positive integers, use grid.x = 1 + floor((width - 1) / block.x), and likewise for y. Check every product before calculating launch and fringe values.',
       staticResource: 'These device ceilings pass only the first resource gate. A real kernel still needs its function attributes, register demand, and shared-memory demand checked.',
-      noEvidence: 'No evidence: this component compiles no CUDA, launches no GPU, reads no profiler, and changes no Evidence Status.',
+      noEvidence: 'This component compiles no CUDA, launches no GPU, and reads no profiler. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
       issueLabels: {
         'capability-record-invalid': 'The capability record is incomplete or contains an invalid limit.',
         'logical-width-invalid': 'Logical width must be a positive decimal safe integer.',
@@ -177,18 +177,19 @@ const logicalBlock = `${(initial.logical.height / initial.coverage.height) * 100
 
 <cuda-block-shape-explorer
   class="block-shape-explorer not-content"
+  data-visual-id="VIS22"
   data-locale={locale}
   data-state="valid"
 >
   <header class="block-shape-header">
     <p>{copy.eyebrow}</p>
     <h3>{copy.title}</h3>
-    <p>{copy.summary}</p>
+    <p data-conceptual-only>{copy.summary}</p>
   </header>
 
   <p class="block-shape-notice">{copy.modelNotice}</p>
 
-  <fieldset class="block-shape-controls" data-block-shape-controls data-pagefind-ignore hidden>
+  <fieldset class="block-shape-controls" data-block-shape-controls data-visual-controls data-pagefind-ignore hidden>
     <legend>{copy.controls}</legend>
     <div class="block-shape-control-grid">
       <label>
@@ -300,7 +301,7 @@ const logicalBlock = `${(initial.logical.height / initial.coverage.height) * 100
     <p class="block-shape-static-resource">{copy.staticResource}</p>
   </section>
 
-  <p class="block-shape-no-evidence">{copy.noEvidence}</p>
+  <p class="block-shape-no-evidence" data-no-evidence>{copy.noEvidence}</p>
 </cuda-block-shape-explorer>
 
 <script>

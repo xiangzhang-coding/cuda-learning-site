@@ -27,6 +27,7 @@ prerequisites:
   - F05
 relatedUnits:
   - EX04
+  - VIS21
 exampleIds:
   - EX04
 hardwareGate: none
@@ -102,7 +103,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'F04,F05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: EX04 }
+    attrs: { name: 'cuda:related-units', content: 'EX04,VIS21' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta
@@ -215,8 +216,9 @@ More explicit Driver handles can make responsibility visible, but they do not sy
 
 ## Boundary model: compare responsibility stage by stage
 
-The embedded layer/ownership comparison below is an original site composition. Its buttons select lifecycle stages in one deterministic model; arrow keys, Home, and End move among tabs. A complete static diagram, six-row table, and textual reading always remain available. It has no VIS ID, executes no CUDA, and grants no Evidence Status.
+The embedded Visual Explainer **VIS21: Runtime/Driver API boundary** below is an original layer/ownership comparison. Its buttons select lifecycle stages in one deterministic model; arrow keys, Home, and End move among tabs. A complete static diagram, six-row table, and textual reading always remain available. It executes no CUDA and grants no Evidence Status.
 
+<span id="vis21" class="resource-target" aria-hidden="true"></span>
 <ApiBoundary locale="en" />
 
 ## Decisions: begin with ownership requirements

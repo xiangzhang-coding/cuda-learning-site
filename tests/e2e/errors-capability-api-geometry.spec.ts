@@ -5,7 +5,8 @@ import { collectBrowserFailures } from '../helpers/browser-contract';
 
 const embeddedModels = [
   {
-    id: 'F05 error timeline',
+    id: 'VIS19 error timeline',
+    visualId: 'VIS19',
     routes: {
       zh: '/foundations/asynchronous-errors/',
       en: '/en/foundations/asynchronous-errors/',
@@ -19,7 +20,8 @@ const embeddedModels = [
     printHidden: '[data-live-status]',
   },
   {
-    id: 'F06 capability filter',
+    id: 'VIS20 capability filter',
+    visualId: 'VIS20',
     routes: {
       zh: '/foundations/compute-capability/',
       en: '/en/foundations/compute-capability/',
@@ -29,11 +31,12 @@ const embeddedModels = [
     controls: '[data-capability-controls]',
     fallbackItems: '[data-static-fallback] tbody tr',
     fallbackCount: 5,
-    evidence: '.capability-filter__evidence',
+    evidence: '[data-no-evidence]',
     printHidden: '[data-capability-result]',
   },
   {
-    id: 'F07 API boundary',
+    id: 'VIS21 API boundary',
+    visualId: 'VIS21',
     routes: {
       zh: '/foundations/runtime-driver-api/',
       en: '/en/foundations/runtime-driver-api/',
@@ -47,7 +50,8 @@ const embeddedModels = [
     printHidden: '[data-api-boundary-panel]',
   },
   {
-    id: 'F08 block-shape explorer',
+    id: 'VIS22 block-shape explorer',
+    visualId: 'VIS22',
     routes: {
       zh: '/foundations/launch-geometry/',
       en: '/en/foundations/launch-geometry/',
@@ -57,25 +61,30 @@ const embeddedModels = [
     controls: '[data-block-shape-controls]',
     fallbackItems: '[data-static-fallback] article',
     fallbackCount: 3,
-    evidence: '.block-shape-no-evidence',
+    evidence: '[data-no-evidence]',
     printHidden: '[data-live-result]',
   },
 ] as const;
 
-test('all four embedded models keep complete static text and reveal controls after enhancement', async ({ page }) => {
+test('VIS19-VIS22 keep complete static text and reveal controls after enhancement', async ({ page }) => {
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
   for (const model of embeddedModels) {
     for (const route of [model.routes.zh, model.routes.en]) {
       const response = await page.goto(route);
       expect(response?.ok(), route).toBe(true);
-      const component = page.locator(model.component);
+      const component = page.locator(`${model.component}[data-visual-id="${model.visualId}"]`);
       await expect(component, `${model.id}: ${route}`).toHaveAttribute(model.readyAttribute, 'true');
+      await expect(page.locator(`#${model.visualId.toLowerCase()}`)).toHaveCount(1);
       await expect(component.locator(model.controls)).toBeVisible();
+      await expect(component.locator('[data-visual-controls]')).toBeVisible();
       await expect(component.locator('[data-static-fallback]')).toBeVisible();
       await expect(component.locator(model.fallbackItems)).toHaveCount(model.fallbackCount);
       await expect(component.locator(model.evidence)).toBeVisible();
       await expect(component.locator(model.evidence)).toContainText(/(?:no|none|不|无).*Evidence Status/i);
+      for (const status of ['Compile-Checked', 'Community-Observed', 'Runtime-Verified']) {
+        await expect(component.locator(model.evidence), `${model.id}: ${status}`).toContainText(status);
+      }
     }
   }
 
@@ -237,8 +246,9 @@ test('embedded models reflow on mobile without horizontal page overflow', async 
 
   for (const model of embeddedModels) {
     await page.goto(model.routes.en);
-    await expect(page.locator(model.component).locator(model.controls)).toBeVisible();
-    await expect(page.locator(model.component).locator('[data-static-fallback]')).toBeVisible();
+    const component = page.locator(`${model.component}[data-visual-id="${model.visualId}"]`);
+    await expect(component.locator(model.controls)).toBeVisible();
+    await expect(component.locator('[data-static-fallback]')).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
       model.id,
@@ -305,8 +315,9 @@ test('no-script and print output retain every complete static fallback', async (
     for (const route of [model.routes.zh, model.routes.en]) {
       const response = await staticPage.goto(route);
       expect(response?.ok(), route).toBe(true);
-      const component = staticPage.locator(model.component);
+      const component = staticPage.locator(`${model.component}[data-visual-id="${model.visualId}"]`);
       await expect(component.locator(model.controls)).toBeHidden();
+      await expect(component.locator('[data-visual-controls]')).toBeHidden();
       await expect(component.locator('[data-static-fallback]')).toBeVisible();
       await expect(component.locator(model.fallbackItems)).toHaveCount(model.fallbackCount);
       await expect(component.locator(model.evidence)).toBeVisible();
@@ -319,7 +330,7 @@ test('no-script and print output retain every complete static fallback', async (
   await page.emulateMedia({ media: 'print' });
   for (const model of embeddedModels) {
     await page.goto(model.routes.en);
-    const component = page.locator(model.component);
+    const component = page.locator(`${model.component}[data-visual-id="${model.visualId}"]`);
     await expect(component.locator(model.controls)).toBeHidden();
     await expect(component.locator(model.printHidden)).toBeHidden();
     await expect(component.locator('[data-static-fallback]')).toBeVisible();

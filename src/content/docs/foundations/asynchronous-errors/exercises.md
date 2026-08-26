@@ -23,6 +23,7 @@ relatedUnits:
   - EX04
   - LAB03
   - F07
+  - VIS19
 exampleIds:
   - EX04
 hardwareGate: none
@@ -47,7 +48,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F05 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F05,F03,EX04,LAB03,F07' }
+    attrs: { name: 'cuda:related-units', content: 'F05,F03,EX04,LAB03,F07,VIS19' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta
@@ -102,13 +103,13 @@ Review packet 给出两条不带具体错误码的 trace。Trace A：preflight l
 
 <details><summary>提示 2</summary>一个可审查区间的两端分别是“已有状态已处理”和“目标工作的同步返回已检查”；区间中不要混入另一个未标记 launch。</details>
 
-## 练习 3：设计 LAB03 可用的观察与证据合同
+## 练习 3：设计 LAB03 的观察与证据合同
 
-你要为未来 LAB03 设计一张记录表，用同一份 EX04 project 分别观察 launch-configuration 情景与 deferred-execution 情景。当前你没有 Reference Environment 日志，也不能假设两条 Toolkit Lane 返回相同错误码或相同文字。
+你要为 [LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)设计一张记录表，用同一份 EX04 project 分别观察 launch-configuration 情景与 deferred-execution 情景。当前你没有 Reference Environment 日志，也不能假设两条 Toolkit Lane 返回相同错误码或相同文字。
 
 **目标：** 写出一份运行前预测、运行时记录和运行后判定合同，使另一位学习者能判断错误 origin、host observation、cleanup 与 correctness 是否符合预期，同时不会越界授予 Evidence Status。
 
-**约束：** Environment Manifest 至少预留 GPU、compute capability、driver、Toolkit、compiler、OS、命令和 source commit；分别记录 preflight、immediate check、synchronization direct return、是否执行 D2H/comparison 与 process result；不要求固定错误码；不虚构输出、日期、硬件或性能；浏览器 ErrorTimeline 不得列为 CUDA evidence。
+**约束：** Environment Manifest 至少预留 GPU、compute capability、driver、Toolkit、compiler、OS、命令和 source commit；分别记录 preflight、immediate check、synchronization direct return、是否执行 D2H/comparison 与 process result；不要求固定错误码；不虚构输出、日期、硬件或性能；浏览器 [VIS19 ErrorTimeline](/foundations/asynchronous-errors/#vis19)不得列为 CUDA evidence。
 
 **预期证据：** 一份两情景 observation matrix、一份 acceptance checklist，以及“未运行”“Community-Observed”“Runtime-Verified”三种报告模板；每种模板都指明 subject 是 EX04、LAB03 还是 F05。
 

@@ -23,6 +23,7 @@ relatedUnits:
   - EX04
   - LAB03
   - F07
+  - VIS19
 exampleIds:
   - EX04
 hardwareGate: none
@@ -47,7 +48,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F05 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F05,F03,EX04,LAB03,F07' }
+    attrs: { name: 'cuda:related-units', content: 'F05,F03,EX04,LAB03,F07,VIS19' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta
@@ -104,11 +105,11 @@ A review-only flow begins with one unconsumed last error and then performs: `cud
 
 ## Exercise 3: Design an observation and evidence contract for LAB03
 
-Design a record for future LAB03 use that observes the launch-configuration and deferred-execution scenarios from the same EX04 project. You currently have no Reference Environment log and cannot assume two Toolkit Lanes return the same error code or text.
+Design a record for [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/) that observes the launch-configuration and deferred-execution scenarios from the same EX04 project. You currently have no Reference Environment log and cannot assume two Toolkit Lanes return the same error code or text.
 
 **Goal:** Write a pre-run prediction, runtime record, and post-run decision contract that lets another learner judge error origin, host observation, cleanup, and correctness without over-granting Evidence Status.
 
-**Constraints:** Reserve Environment Manifest fields for at least GPU, compute capability, driver, Toolkit, compiler, OS, command, and source commit. Record preflight, immediate check, synchronization direct return, whether D2H/comparison ran, and process result separately. Require no fixed error code. Invent no output, date, hardware, or performance. Do not list the browser ErrorTimeline as CUDA evidence.
+**Constraints:** Reserve Environment Manifest fields for at least GPU, compute capability, driver, Toolkit, compiler, OS, command, and source commit. Record preflight, immediate check, synchronization direct return, whether D2H/comparison ran, and process result separately. Require no fixed error code. Invent no output, date, hardware, or performance. Do not list the browser [VIS19 ErrorTimeline](/en/foundations/asynchronous-errors/#vis19) as CUDA evidence.
 
 **Expected evidence:** A two-scenario observation matrix, an acceptance checklist, and report templates for “not run,” “Community-Observed,” and “Runtime-Verified.” Every template identifies whether its subject is EX04, LAB03, or F05.
 

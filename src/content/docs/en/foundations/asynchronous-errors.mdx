@@ -28,6 +28,7 @@ relatedUnits:
   - EX04
   - LAB03
   - F07
+  - VIS19
 exampleIds:
   - EX04
 canonicalExample: EX04
@@ -101,7 +102,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F04 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F03,EX04,LAB03,F07' }
+    attrs: { name: 'cuda:related-units', content: 'F03,EX04,LAB03,F07,VIS19' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta
@@ -141,7 +142,7 @@ A CUDA kernel launch is normally asynchronous with respect to the host, so an as
 
 Complete [F04: The Explicit Host-Device Resource Lifecycle](/en/foundations/host-device-lifecycle/) first. You should already trace allocation, H2D, launch, synchronization, D2H, comparison, and release, and know that the immediate check after a launch does not mean the kernel completed. F05 expands the asynchronous-error model that F04 deliberately kept narrow.
 
-[F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/) supplies device-access context that can lead to execution problems, but it is related rather than a new prerequisite. EX04 is this page's canonical executable counterpart; LAB03 owns a future guided observation in a real environment; and F07 will reuse these boundary arguments. This Learning Unit executes no CUDA and has no CUDA Evidence Status.
+[F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/) supplies device-access context that can lead to execution problems, but it is related rather than a new prerequisite. EX04 is this page's canonical executable counterpart; [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/) owns the guided observation in a real environment; and F07 will reuse these boundary arguments. This Learning Unit executes no CUDA and has no CUDA Evidence Status.
 
 ## Error state: separate direct returns from last-error state
 
@@ -193,8 +194,9 @@ Read the excerpt through five boundaries: launch submission, immediate check, de
 
 ## Timeline: compare the two surfacing points
 
-The original embedded teaching surface below preserves two complete static timelines. Once scripting enhances it, native controls can select a scenario, play, pause, step, reset, or scrub with a range input; every control is keyboard-operable. It has no Visual Explainer ID and executes no CUDA.
+The original embedded Visual Explainer **VIS19: Error-surfacing timeline** below preserves two complete static timelines. Once scripting enhances it, native controls can select a scenario, play, pause, step, reset, or scrub with a range input; every control is keyboard-operable. It executes no CUDA.
 
+<span id="vis19" class="resource-target" aria-hidden="true"></span>
 <ErrorTimeline locale="en" />
 
 The static text and interactive highlight express a causal model, not measured duration. Spacing between cards is not latency, playback speed is not a device/host ratio, and no state grants Compile-Checked, Community-Observed, or Runtime-Verified.
@@ -217,7 +219,7 @@ EX04 is a Runnable Example, while F05 is the Learning Unit that explains its mod
 
 - Complete the [F05 Exercises](/en/foundations/asynchronous-errors/exercises/), then inspect the separate [reviewed solutions](/en/foundations/asynchronous-errors/solutions/).
 - Review a record that confuses stale last-error state, the immediate check, and the synchronization boundary in [Practice Bank PB-R1-009](/en/practice/#pb-r1-009).
-- When LAB03 is available and you have a Supported Environment, carry these predictions into its guided run. Keep observations empty when no real run occurred.
+- In a Supported Environment, open [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/) and carry these predictions into its guided run. Keep observations empty when no real run occurred.
 
 ## Sources and review
 

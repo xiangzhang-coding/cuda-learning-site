@@ -25,6 +25,7 @@ prerequisites:
   - O03
 relatedUnits:
   - F08
+  - VIS20
 hardwareGate: none
 evidence:
   compilation: []
@@ -73,7 +74,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'F02,O03' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: F08 }
+    attrs: { name: 'cuda:related-units', content: 'F08,VIS20' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -188,8 +189,9 @@ An accepted target pair is still only a compile-plan fact. Driver support, code 
 
 ## Filter: inspect the reviewed subset
 
-The embedded `CapabilityFilter` below has no Visual Explainer ID. It reuses the same original five-row dataset as the tables above, reveals native controls only after enhancement, and fails closed for malformed or unreviewed values. Its permanent static table is the non-interactive equivalent.
+The embedded Visual Explainer **VIS20: Compute-capability contract filter** (`CapabilityFilter`) reuses the same original five-row dataset as the tables above, reveals native controls only after enhancement, and fails closed for malformed or unreviewed values. Its permanent static table is the non-interactive equivalent.
 
+<span id="vis20" class="resource-target" aria-hidden="true"></span>
 <CapabilityFilter locale="en" />
 
 The filter is a lookup aid, not a hardware probe. Selecting `12.0` does not say that the reader owns such a GPU, that NVCC 13.3.1 is installed, that a driver can load an artifact, or that any kernel ran.

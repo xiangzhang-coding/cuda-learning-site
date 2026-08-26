@@ -9,6 +9,7 @@ import {
 const localized = (zh: string, en: string): LocalizedText => ({ 'zh-CN': zh, en });
 const same = (value: string): LocalizedText => localized(value, value);
 const noHardware = localized('无；仅浏览静态记录。', 'None; static record lookup only.');
+const noCudaHardware = localized('无；浏览器教学模型不需要 CUDA-capable 系统。', 'None; the browser teaching model requires no CUDA-capable system.');
 
 function glossaryRecord(
   planningId: string,
@@ -63,6 +64,10 @@ const lab02Destination = PUBLISHED_DESTINATIONS.LAB02;
 const lab03Destination = PUBLISHED_DESTINATIONS.LAB03;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
+const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
+const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
+const vis21Destination = PUBLISHED_DESTINATIONS.VIS21;
+const vis22Destination = PUBLISHED_DESTINATIONS.VIS22;
 
 const labs: readonly ResourceIndexRecord[] = [
   {
@@ -317,7 +322,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'correctness-debugging',
     difficulty: 'intermediate',
     prerequisites: ['F05'],
-    relatedUnits: ['F05', 'EX04', 'LAB03'],
+    relatedUnits: ['F05', 'VIS19', 'EX04', 'LAB03'],
     hardwareGate: localized('无；只审查静态 error-lifecycle 记录。', 'None; review a static error-lifecycle record only.'),
     versionGate: localized('Runtime API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Runtime API 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
     reviewedOn: '2026-08-26',
@@ -330,7 +335,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'concepts-implementation',
     difficulty: 'intermediate',
     prerequisites: ['F06'],
-    relatedUnits: ['F06', 'O03', 'F08'],
+    relatedUnits: ['F06', 'VIS20', 'O03', 'F08'],
     hardwareGate: localized('无；只审查 capability、limit 与 target 记录。', 'None; review capability, limit, and target records only.'),
     versionGate: localized('CUDA Programming Guide v13.3；NVCC 11.8.0、12.9.2 与 13.3.1。', 'CUDA Programming Guide v13.3; NVCC 11.8.0, 12.9.2, and 13.3.1.'),
     reviewedOn: '2026-08-26',
@@ -343,7 +348,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'correctness-debugging',
     difficulty: 'intermediate',
     prerequisites: ['F07'],
-    relatedUnits: ['F04', 'F05', 'F07', 'EX04'],
+    relatedUnits: ['F04', 'F05', 'F07', 'VIS21', 'EX04'],
     hardwareGate: localized('无；只审查混合 API 设计，不运行 CUDA。', 'None; review a mixed-API design and run no CUDA.'),
     versionGate: localized('Runtime/Driver API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Runtime/Driver APIs 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
     reviewedOn: '2026-08-26',
@@ -356,7 +361,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'concepts-implementation',
     difficulty: 'intermediate',
     prerequisites: ['F08'],
-    relatedUnits: ['F03', 'F06', 'F08', 'LAB03'],
+    relatedUnits: ['F03', 'F06', 'F08', 'VIS22', 'LAB03'],
     hardwareGate: localized('无；只做静态 geometry 与 resource 检查。', 'None; perform static geometry and resource checks only.'),
     versionGate: localized('CUDA Programming Guide v13.3；Runtime API 13.3.1 device/function properties。', 'CUDA Programming Guide v13.3; Runtime API 13.3.1 device/function properties.'),
     reviewedOn: '2026-08-26',
@@ -390,6 +395,70 @@ const visuals: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-08-24',
     keywords: localized('gridDim blockDim blockIdx threadIdx bounds row-major', 'gridDim blockDim blockIdx threadIdx bounds row-major'),
   },
+  {
+    planningId: 'VIS19',
+    group: 'visuals',
+    title: vis19Destination.title,
+    href: vis19Destination.href,
+    resourceType: 'execution-model',
+    prerequisites: vis19Destination.prerequisites,
+    relatedUnits: ['F05', 'EX04', 'LAB03', 'F07'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Runtime API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。',
+      'CUDA Runtime API 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.',
+    ),
+    reviewedOn: '2026-08-26',
+    keywords: localized('异步错误 last-error launch completion 时间线', 'asynchronous error last-error launch completion timeline'),
+  },
+  {
+    planningId: 'VIS20',
+    group: 'visuals',
+    title: vis20Destination.title,
+    href: vis20Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis20Destination.prerequisites,
+    relatedUnits: ['F06', 'F08'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Programming Guide v13.3；NVCC 11.8.0、12.9.2 archive 与 selected Toolkit 13.3.1（页面标签 NVCC 13.3）。',
+      'CUDA Programming Guide v13.3; NVCC 11.8.0, the 12.9.2 archive, and selected Toolkit 13.3.1 (page label NVCC 13.3).',
+    ),
+    reviewedOn: '2026-08-26',
+    keywords: localized('compute capability feature set compiler target filter', 'compute capability feature set compiler target filter'),
+  },
+  {
+    planningId: 'VIS21',
+    group: 'visuals',
+    title: vis21Destination.title,
+    href: vis21Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis21Destination.prerequisites,
+    relatedUnits: ['F07', 'EX04'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Runtime/Driver API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。',
+      'CUDA Runtime and Driver APIs 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.',
+    ),
+    reviewedOn: '2026-08-26',
+    keywords: localized('Runtime Driver context module function ownership boundary', 'Runtime Driver context module function ownership boundary'),
+  },
+  {
+    planningId: 'VIS22',
+    group: 'visuals',
+    title: vis22Destination.title,
+    href: vis22Destination.href,
+    resourceType: 'indexing-model',
+    prerequisites: vis22Destination.prerequisites,
+    relatedUnits: ['F08', 'LAB03'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Programming Guide v13.3；Runtime API 13.3.1 device/function properties。',
+      'CUDA Programming Guide v13.3; Runtime API 13.3.1 device and function properties.',
+    ),
+    reviewedOn: '2026-08-26',
+    keywords: localized('block shape launch geometry limits grid fringe', 'block shape launch geometry limits grid fringe'),
+  },
 ];
 
 const glossary: readonly ResourceIndexRecord[] = [
@@ -401,7 +470,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-006', 'Lab · 实验', 'resource-vocabulary', ['O01', 'LAB02'], '每个 Lab 单独声明环境要求。', 'Each Lab declares its environment requirements.'),
   glossaryRecord('TERM-007', 'Exercise · 练习', 'resource-vocabulary', ['O01'], '资源类型本身不受版本约束。', 'The resource type is version-independent.'),
   glossaryRecord('TERM-008', 'Practice Bank · 练习题库', 'resource-vocabulary', ['O01'], '具体条目按需声明版本边界。', 'Individual entries declare version boundaries as needed.'),
-  glossaryRecord('TERM-009', 'Visual Explainer · 可视化讲解', 'resource-vocabulary', ['O01', 'VIS01', 'VIS02'], '概念模型与硬件行为必须分开。', 'Conceptual models remain separate from hardware behavior.'),
+  glossaryRecord('TERM-009', 'Visual Explainer · 可视化讲解', 'resource-vocabulary', ['O01', 'VIS01', 'VIS02', 'VIS19', 'VIS20', 'VIS21', 'VIS22'], '概念模型与硬件行为必须分开。', 'Conceptual models remain separate from hardware behavior.'),
   glossaryRecord('TERM-010', 'Glossary · 术语表', 'resource-vocabulary', ['O01'], '随课程复核，不暗示接口兼容性。', 'Reviewed with the curriculum without implying interface compatibility.'),
   glossaryRecord('TERM-011', 'Evidence Status · 证据状态', 'evidence-vocabulary', ['O02'], '状态绑定对象、环境、标准和日期。', 'Status is scoped to a subject, environment, criteria, and date.'),
   glossaryRecord('TERM-012', 'Compile-Checked · 编译已检查', 'evidence-vocabulary', ['O02', 'O03'], '每项声明绑定精确 Toolkit Lane。', 'Every claim binds to an exact Toolkit Lane.'),
@@ -482,7 +551,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02'],
+    ['O01', 'VIS01', 'VIS02', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
@@ -674,7 +743,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-015',
     localized('F05/F07/EX04/LAB03 错误与 Runtime/Driver API', 'F05/F07/EX04/LAB03 errors and Runtime/Driver APIs'),
     'cuda-version-record',
-    ['F05', 'F07', 'EX04', 'LAB03'],
+    ['F05', 'F07', 'VIS19', 'VIS21', 'EX04', 'LAB03'],
     localized('Programming Guide v13.3；Runtime/Driver API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Programming Guide v13.3; Runtime/Driver APIs 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
     '2026-08-26',
     '2026-08-26',
@@ -683,7 +752,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-016',
     localized('F06/F08 capability、compiler target 与 launch limit', 'F06/F08 capability, compiler targets, and launch limits'),
     'cuda-version-record',
-    ['F06', 'F08'],
+    ['F06', 'F08', 'VIS20', 'VIS22'],
     localized('Programming Guide v13.3；NVCC 11.8.0、12.9.2、selected Toolkit 13.3.1；Runtime API 13.3.1。', 'Programming Guide v13.3; NVCC 11.8.0, 12.9.2, and selected Toolkit 13.3.1; Runtime API 13.3.1.'),
     '2026-08-26',
     '2026-08-26',

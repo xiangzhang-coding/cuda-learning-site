@@ -23,6 +23,7 @@ relatedUnits:
   - EX04
   - LAB03
   - F07
+  - VIS19
 exampleIds:
   - EX04
 hardwareGate: none
@@ -47,7 +48,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F05-EXERCISES }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F05,F03,EX04,LAB03,F07' }
+    attrs: { name: 'cuda:related-units', content: 'F05,F03,EX04,LAB03,F07,VIS19' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta

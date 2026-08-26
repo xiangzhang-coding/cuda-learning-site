@@ -27,6 +27,7 @@ prerequisites:
   - F06
 relatedUnits:
   - LAB03
+  - VIS22
 hardwareGate: none
 evidence:
   compilation: []
@@ -65,7 +66,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'F02,F03,F06' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: LAB03 }
+    attrs: { name: 'cuda:related-units', content: 'LAB03,VIS22' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -167,8 +168,9 @@ Device-level block 检查通过后，还要查看加载到该 device 上的具�
 
 ## Explorer：先显示 constraint ledger
 
-下面的 `BlockShapeExplorer` 是本页内嵌组件，不分配新的 VIS ID。它只接受二维 logical width/height 与 block.x/block.y 的正十进制安全整数，从明确选择的 CC 7.5 或 CC 8.0 capability record 检查逐轴、aggregate 和 grid limits。任一输入、乘积或 limit 无效时，它返回问题列表，并且不暴露 grid、launch 或 fringe 值。
+下面的 `BlockShapeExplorer` 是本页嵌入式可视化讲解（Visual Explainer）**VIS22：Block-shape constraint explorer**。它只接受二维 logical width/height 与 block.x/block.y 的正十进制安全整数，从明确选择的 CC 7.5 或 CC 8.0 capability record 检查逐轴、aggregate 和 grid limits。任一输入、乘积或 limit 无效时，它返回问题列表，并且不暴露 grid、launch 或 fringe 值。
 
+<span id="vis22" class="resource-target" aria-hidden="true"></span>
 <BlockShapeExplorer locale="zh-CN" />
 
 静态卡片、打印输出和交互状态都使用同一个纯模型。Capability record 只提供已复核的 device ceilings；组件始终把 kernel-specific max threads、register 与 shared memory 标为仍需核对。它不读取本机 device properties，也不执行 CUDA。

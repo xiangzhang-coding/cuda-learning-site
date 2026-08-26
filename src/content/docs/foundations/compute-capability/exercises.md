@@ -20,6 +20,7 @@ prerequisites:
 relatedUnits:
   - F06
   - F08
+  - VIS20
 hardwareGate: none
 evidence:
   compilation: []
@@ -42,7 +43,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F06 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F06,F08' }
+    attrs: { name: 'cuda:related-units', content: 'F06,F08,VIS20' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -57,7 +58,7 @@ head:
 
 ## 先修条件
 
-先完成 [F06：Compute capability 是功能合同](/foundations/compute-capability/)。这些练习（Exercise）只需要静态复核。查表结果、浏览器筛选结果或 target plan 都不是 GPU observation。
+先完成 [F06：Compute capability 是功能合同](/foundations/compute-capability/)。这些练习（Exercise）只需要静态复核。查表结果、[VIS20 浏览器筛选结果](/foundations/compute-capability/#vis20)或 target plan 都不是 GPU observation。
 
 ## 作答方法
 

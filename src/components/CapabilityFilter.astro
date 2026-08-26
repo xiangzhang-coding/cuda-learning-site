@@ -67,7 +67,7 @@ const copy = locale === 'zh-CN'
       baselineTargets: 'Baseline targets',
       qualifiedTargets: '带后缀 targets',
       none: '无',
-      evidence: '此浏览器筛选器不查询硬件、不编译或运行 CUDA，也不会改变任何 Evidence Status。',
+      evidence: '此浏览器筛选器不查询硬件，也不编译或运行 CUDA。它不授予 Compile-Checked、Community-Observed 或 Runtime-Verified 这三种 Evidence Status。',
     }
   : {
       eyebrow: 'F06 / embedded filter',
@@ -121,7 +121,7 @@ const copy = locale === 'zh-CN'
       baselineTargets: 'Baseline targets',
       qualifiedTargets: 'Suffixed targets',
       none: 'None',
-      evidence: 'This browser filter queries no hardware, compiles or runs no CUDA, and changes no Evidence Status.',
+      evidence: 'This browser filter queries no hardware and compiles or runs no CUDA. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
     };
 
 const initial = resolveCapabilityContract('7.5');
@@ -146,14 +146,14 @@ const hintId = `capability-filter-hint-${locale}`;
 const optionsId = `capability-filter-options-${locale}`;
 ---
 
-<cuda-capability-filter class="capability-filter not-content" data-locale={locale} data-state="known">
+<cuda-capability-filter class="capability-filter not-content" data-visual-id="VIS20" data-locale={locale} data-state="known">
   <header class="capability-filter__header">
     <p class="capability-filter__eyebrow">{copy.eyebrow}</p>
     <h3>{copy.title}</h3>
-    <p>{copy.summary}</p>
+    <p data-conceptual-only>{copy.summary}</p>
   </header>
 
-  <div class="capability-filter__controls" data-capability-controls hidden role="group" aria-label={copy.title}>
+  <div class="capability-filter__controls" data-capability-controls data-visual-controls hidden role="group" aria-label={copy.title}>
     <label for={inputId}>{copy.input}</label>
     <div class="capability-filter__input-row">
       <input
@@ -278,7 +278,7 @@ const optionsId = `capability-filter-options-${locale}`;
     </div>
   </section>
 
-  <p class="capability-filter__evidence">{copy.evidence}</p>
+  <p class="capability-filter__evidence" data-no-evidence>{copy.evidence}</p>
 </cuda-capability-filter>
 
 <script>

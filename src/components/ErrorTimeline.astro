@@ -52,7 +52,7 @@ const COPY: Readonly<Record<ErrorTimelineLocale, TimelineCopy>> = {
     caveat:
       '“在哪次 API 调用看到错误”不必然等于“错误从哪行代码产生”。CUDA Runtime API 还明确提示：调用可能返回此前异步 launch 的错误。',
     evidenceNotice:
-      '这是确定性的浏览器教学模型。它不编译或执行 CUDA，不读取 EX04 日志，也不获得任何 CUDA Evidence Status。',
+      '这是确定性的浏览器教学模型。它不编译或执行 CUDA，也不读取 EX04 日志。它不授予 Compile-Checked、Community-Observed 或 Runtime-Verified 这三种 Evidence Status。',
     staticHeading: '两条完整静态时间线',
     staticIntro:
       '即使脚本不可用，下面两条时间线仍按相同的五阶段顺序完整呈现。增强后的控件只改变当前高亮，不删除静态文字。',
@@ -134,7 +134,7 @@ const COPY: Readonly<Record<ErrorTimelineLocale, TimelineCopy>> = {
     caveat:
       'The API call that reports an error is not necessarily the source line that caused it. The CUDA Runtime API also warns that a call may return an error from an earlier asynchronous launch.',
     evidenceNotice:
-      'This is a deterministic browser teaching model. It compiles and executes no CUDA, reads no EX04 log, and receives no CUDA Evidence Status.',
+      'This is a deterministic browser teaching model. It compiles and executes no CUDA and reads no EX04 log. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
     staticHeading: 'Two complete static timelines',
     staticIntro:
       'Both timelines remain complete and follow the same five-stage order when scripts are unavailable. Enhanced controls change only the current highlight; they do not remove the static text.',
@@ -227,6 +227,7 @@ const initialEventCopy = initialScenarioCopy.events[initialEvent.stageId];
 
 <cuda-error-timeline
   class="error-timeline not-content"
+  data-visual-id="VIS19"
   data-locale={locale}
   data-scenario="launch-configuration"
   data-stage="launch-submission"
@@ -235,7 +236,7 @@ const initialEventCopy = initialScenarioCopy.events[initialEvent.stageId];
     <header class="timeline-header">
       <p class="timeline-eyebrow">{copy.eyebrow}</p>
       <h3>{copy.title}</h3>
-      <p class="timeline-summary">{copy.summary}</p>
+      <p class="timeline-summary" data-conceptual-only>{copy.summary}</p>
     </header>
 
     <p class="timeline-caveat">{copy.caveat}</p>
@@ -292,7 +293,7 @@ const initialEventCopy = initialScenarioCopy.events[initialEvent.stageId];
       </div>
     </section>
 
-    <div class="timeline-controls" data-timeline-controls hidden role="group" aria-label={copy.controlsLabel}>
+    <div class="timeline-controls" data-timeline-controls data-visual-controls hidden role="group" aria-label={copy.controlsLabel}>
       <label class="scenario-picker">
         <span>{copy.scenarioLabel}</span>
         <select data-action="select-scenario" autocomplete="off">

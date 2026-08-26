@@ -632,7 +632,7 @@ Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 
 - **Type and difficulty:** Error-lifecycle debugging; intermediate.
 - **Direct prerequisite:** [F05: CUDA Errors Are Often Asynchronous](/en/foundations/asynchronous-errors/).
 - **Hardware gate:** None; review a static error-lifecycle record and run no CUDA.
-- **Related Learning Units and resources:** [F05](/en/foundations/asynchronous-errors/), [EX04](/en/examples/error-handling-lifecycle/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Related Learning Units and resources:** [F05](/en/foundations/asynchronous-errors/), [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [EX04](/en/examples/error-handling-lifecycle/), and [LAB03](/en/labs/break-and-repair-indexing/).
 - **Last reviewed:** 2026-08-26.
 
 **Prompt:** One host thread first records a failed Runtime operation but does not consume its last-error state. A pre-launch `cudaPeekAtLastError` observes that unspecified old failure and is ignored. The thread then submits a prevalidated legal no-op launch; the adjacent `cudaGetLastError` returns the same non-success state, and the reviewer blames the new launch. Because the getter resets the state, a second interval begins cleanly: a launch with a deliberate device-access defect is accepted, its adjacent `cudaGetLastError` returns success, and `cudaDeviceSynchronize` later returns failure. The reviewer now says synchronization caused the defect. Rebuild both intervals with correct origin, observation, state-transition, and control-flow labels.
@@ -672,7 +672,7 @@ Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 
 - **Type and difficulty:** Capability and compiler-target review; intermediate.
 - **Direct prerequisite:** [F06: Compute Capability Is a Feature Contract](/en/foundations/compute-capability/).
 - **Hardware gate:** None; review capability, limit, and compiler records without probing a GPU.
-- **Related Learning Units:** [F06](/en/foundations/compute-capability/), [O03](/en/start/environment-manifest/), and [F08](/en/foundations/launch-geometry/).
+- **Related Learning Units and resources:** [F06](/en/foundations/compute-capability/), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [O03](/en/start/environment-manifest/), and [F08](/en/foundations/launch-geometry/).
 - **Last reviewed:** 2026-08-26.
 
 **Prompt:** A packet directly identifies one selected GPU and records compute capability 9.0. Its kernel requires an architecture-specific 9.0 feature. The capability table records 1024 as the device maximum threads per block, and the proposed block is `(32, 32, 1)`. The packet chooses baseline `compute_90` plus `sm_90`, says the same pair must work in NVCC 11.8.0, the 12.9.2 archive, and the selected Toolkit 13.3.1, and declares the block “recommended and faster” because its product equals the maximum. Repair the feature, limit, target, and unresolved-environment decisions.
@@ -712,7 +712,7 @@ Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 
 - **Type and difficulty:** Mixed-API lifecycle debugging; intermediate.
 - **Direct prerequisite:** [F07: Distinguish CUDA Runtime API and Driver API Roles](/en/foundations/runtime-driver-api/).
 - **Hardware gate:** None; review a mixed-API design and run no CUDA.
-- **Related Learning Units and resource:** [F04](/en/foundations/host-device-lifecycle/), [F05](/en/foundations/asynchronous-errors/), [F07](/en/foundations/runtime-driver-api/), and [EX04](/en/examples/error-handling-lifecycle/).
+- **Related Learning Units and resources:** [F04](/en/foundations/host-device-lifecycle/), [F05](/en/foundations/asynchronous-errors/), [F07](/en/foundations/runtime-driver-api/), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [EX04](/en/examples/error-handling-lifecycle/).
 - **Last reviewed:** 2026-08-26.
 
 **Prompt:** A mixed design calls `cudaSetDevice` and `cudaMalloc`, then `cuInit(0)`, obtains the current context with `cuCtxGetCurrent`, loads a `CUmodule`, resolves a `CUfunction`, and calls `cuLaunchKernel`. The helper labels the obtained context “owned,” ignores every `CUresult` because a later `cudaGetLastError` is supposed to cover them, unloads the module, calls `cuCtxDestroy` on the obtained context, then calls `cudaDeviceSynchronize` and `cudaFree`. Repair initialization, current-context ownership, module/function lifetime, direct status checks, asynchronous completion, and teardown authority.
@@ -752,7 +752,7 @@ Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 
 - **Type and difficulty:** Launch-geometry correctness and resource review; intermediate.
 - **Direct prerequisite:** [F08: Launch Geometry Is a Correctness and Resource Decision Before Speed](/en/foundations/launch-geometry/).
 - **Hardware gate:** None; perform static geometry and resource checks only.
-- **Related Learning Units and resource:** [F03](/en/foundations/multidimensional-indexing/), [F06](/en/foundations/compute-capability/), [F08](/en/foundations/launch-geometry/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Related Learning Units and resources:** [F03](/en/foundations/multidimensional-indexing/), [F06](/en/foundations/compute-capability/), [F08](/en/foundations/launch-geometry/), [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22), and [LAB03](/en/labs/break-and-repair-indexing/).
 - **Last reviewed:** 2026-08-26.
 
 **Prompt:** A fixed logical extent is `width = 1000`, `height = 513`. The selected device record gives `maxThreadsDim = (1024, 1024, 64)`, `maxThreadsPerBlock = 1024`, and grid limits larger than every grid below. The selected kernel reports `maxThreadsPerBlock = 768`; its declared register and shared-memory needs fit for candidates at or below that function limit. Classify A `(32, 32)`, B `(48, 16)`, C `(64, 8)`, and D `(1025, 1)`. For every legal candidate, derive an overflow-safe grid, coverage, and fringe count while preserving the same two-axis bounds check. The packet calls B fastest because it has slightly less fringe than C. Decide which candidates may proceed to correctness verification and what remains before measurement.

@@ -20,6 +20,7 @@ prerequisites:
 relatedUnits:
   - F08
   - LAB03
+  - VIS22
 hardwareGate: none
 evidence:
   compilation: []
@@ -42,7 +43,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F08-EXERCISES }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F08,LAB03' }
+    attrs: { name: 'cuda:related-units', content: 'F08,LAB03,VIS22' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta

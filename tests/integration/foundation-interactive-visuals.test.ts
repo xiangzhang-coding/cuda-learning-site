@@ -39,6 +39,7 @@ function metadata(document: Document, name: string) {
 const components = [
   {
     unitId: 'F05',
+    visualId: 'VIS19',
     slug: 'asynchronous-errors',
     tag: 'cuda-error-timeline',
     file: 'ErrorTimeline.astro',
@@ -48,6 +49,7 @@ const components = [
   },
   {
     unitId: 'F06',
+    visualId: 'VIS20',
     slug: 'compute-capability',
     tag: 'cuda-capability-filter',
     file: 'CapabilityFilter.astro',
@@ -57,6 +59,7 @@ const components = [
   },
   {
     unitId: 'F07',
+    visualId: 'VIS21',
     slug: 'runtime-driver-api',
     tag: 'cuda-api-boundary',
     file: 'ApiBoundary.astro',
@@ -66,6 +69,7 @@ const components = [
   },
   {
     unitId: 'F08',
+    visualId: 'VIS22',
     slug: 'launch-geometry',
     tag: 'cuda-block-shape-explorer',
     file: 'BlockShapeExplorer.astro',
@@ -164,7 +168,9 @@ describe('foundation embedded interactive models', () => {
         expect(root?.querySelector(component.controls)?.hasAttribute('hidden'), route).toBe(true);
         expect(root?.querySelectorAll(component.staticSelector), route).toHaveLength(component.staticCount);
         expect(root?.textContent, route).toMatch(/no.*Evidence Status|无.*Evidence Status|不.*Evidence Status/i);
-        expect(document.querySelector('[data-visual-id]'), route).toBeNull();
+        expect(document.querySelectorAll('[data-visual-id]'), route).toHaveLength(1);
+        expect(root?.getAttribute('data-visual-id'), route).toBe(component.visualId);
+        expect(document.getElementById(component.visualId.toLowerCase()), route).not.toBeNull();
         expect(metadata(document, 'cuda:unit-id'), route).toBe(component.unitId);
         expect(metadata(document, 'cuda:resource-kind'), route).toBe('learning-unit');
         expect(metadata(document, 'cuda:evidence-compilation'), route).toBe('none');
@@ -211,7 +217,7 @@ describe('foundation embedded interactive models', () => {
   });
 
   it('ships explicit mobile, reduced-motion, forced-color, and print fallbacks for every component', async () => {
-    for (const { file } of components) {
+    for (const { file, visualId } of components) {
       const source = await readFile(path.join(projectRoot, 'src/components', file), 'utf8');
 
       expect(source, `${file} model import`).toMatch(/from ['"]\.\.\/visuals\/[a-z-]+-model['"]/);
@@ -221,7 +227,7 @@ describe('foundation embedded interactive models', () => {
       expect(source, `${file} print`).toMatch(/@media print/);
       expect(source, `${file} hidden controls`).toMatch(/controls\.hidden = false/);
       expect(source, `${file} static fallback`).toContain('data-static-fallback');
-      expect(source, `${file} no VIS assignment`).not.toContain('data-visual-id');
+      expect(source, `${file} formal embedded VIS assignment`).toContain(`data-visual-id="${visualId}"`);
     }
   });
 });

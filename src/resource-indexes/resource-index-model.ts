@@ -203,6 +203,30 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     prerequisites: [],
     indexGroup: 'visuals',
   },
+  VIS19: {
+    href: { 'zh-CN': '/foundations/asynchronous-errors/#vis19', en: '/en/foundations/asynchronous-errors/#vis19' },
+    title: { 'zh-CN': 'VIS19：错误暴露时间线', en: 'VIS19: Error-Surfacing Timeline' },
+    prerequisites: ['F04'],
+    indexGroup: 'visuals',
+  },
+  VIS20: {
+    href: { 'zh-CN': '/foundations/compute-capability/#vis20', en: '/en/foundations/compute-capability/#vis20' },
+    title: { 'zh-CN': 'VIS20：计算能力合同筛选器', en: 'VIS20: Compute-Capability Contract Filter' },
+    prerequisites: ['F02', 'O03'],
+    indexGroup: 'visuals',
+  },
+  VIS21: {
+    href: { 'zh-CN': '/foundations/runtime-driver-api/#vis21', en: '/en/foundations/runtime-driver-api/#vis21' },
+    title: { 'zh-CN': 'VIS21：Runtime/Driver API 边界', en: 'VIS21: Runtime/Driver API Boundary' },
+    prerequisites: ['F04', 'F05'],
+    indexGroup: 'visuals',
+  },
+  VIS22: {
+    href: { 'zh-CN': '/foundations/launch-geometry/#vis22', en: '/en/foundations/launch-geometry/#vis22' },
+    title: { 'zh-CN': 'VIS22：线程块形状约束探索器', en: 'VIS22: Block-Shape Constraint Explorer' },
+    prerequisites: ['F02', 'F03', 'F06'],
+    indexGroup: 'visuals',
+  },
 };
 
 export const MAX_REVIEW_AGE_DAYS = 180;
@@ -361,19 +385,22 @@ export function validateResourceCatalog(
     }
     for (const duplicate of duplicateValues(record.prerequisites)) issues.push(`${prefix} repeats prerequisite ${duplicate}.`);
     for (const duplicate of duplicateValues(record.relatedUnits)) issues.push(`${prefix} repeats related unit ${duplicate}.`);
-    for (const [index, prerequisite] of record.prerequisites.entries()) {
-      const requiredEarlier = new Set<string>();
-      const collect = (unitId: string) => {
-        for (const required of destinations[unitId]?.prerequisites ?? []) {
-          if (requiredEarlier.has(required)) continue;
-          requiredEarlier.add(required);
-          collect(required);
+    const prerequisiteOrderComesFromDestination = record.group === 'labs' || record.group === 'visuals';
+    if (!prerequisiteOrderComesFromDestination) {
+      for (const [index, prerequisite] of record.prerequisites.entries()) {
+        const requiredEarlier = new Set<string>();
+        const collect = (unitId: string) => {
+          for (const required of destinations[unitId]?.prerequisites ?? []) {
+            if (requiredEarlier.has(required)) continue;
+            requiredEarlier.add(required);
+            collect(required);
+          }
+        };
+        collect(prerequisite);
+        for (const required of requiredEarlier) {
+          const requiredIndex = record.prerequisites.indexOf(required);
+          if (requiredIndex > index) issues.push(`${prefix} lists ${prerequisite} before its prerequisite ${required}.`);
         }
-      };
-      collect(prerequisite);
-      for (const required of requiredEarlier) {
-        const requiredIndex = record.prerequisites.indexOf(required);
-        if (requiredIndex > index) issues.push(`${prefix} lists ${prerequisite} before its prerequisite ${required}.`);
       }
     }
 

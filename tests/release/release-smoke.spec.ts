@@ -13,8 +13,11 @@ const ex01DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
 const ex03DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6.zip';
+const ex04SourceCommit = '1bfe7b2d309db6d733471260c888262e59258660';
+const ex04SourceUrl =
+  `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
 const ex04DownloadUrl =
-  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/349f2f65c195ca940eb85bc89941507aed326496.zip';
+  `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${ex04SourceCommit}.zip`;
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
@@ -247,22 +250,26 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     viewport: { width: 390, height: 844 },
   });
   const staticPage = await staticContext.newPage();
-  const embeddedFallbacks: Record<string, { controls: string; evidence: string }> = {
+  const embeddedFallbacks: Record<string, { controls: string; evidence: string; visualId: string }> = {
     '/en/foundations/asynchronous-errors/': {
       controls: '[data-timeline-controls]',
       evidence: '[data-no-evidence]',
+      visualId: 'VIS19',
     },
     '/en/foundations/compute-capability/': {
       controls: '[data-capability-controls]',
-      evidence: '.capability-filter__evidence',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS20',
     },
     '/en/foundations/runtime-driver-api/': {
       controls: '[data-api-boundary-controls]',
       evidence: '[data-no-evidence]',
+      visualId: 'VIS21',
     },
     '/en/foundations/launch-geometry/': {
       controls: '[data-block-shape-controls]',
-      evidence: '.block-shape-no-evidence',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS22',
     },
   };
   for (const route of [
@@ -283,9 +290,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
       await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
       await expect(staticPage.locator('[data-no-evidence]')).toBeVisible();
     } else if (embeddedFallbacks[route]) {
-      await expect(staticPage.locator(embeddedFallbacks[route].controls)).toBeHidden();
-      await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
-      await expect(staticPage.locator(embeddedFallbacks[route].evidence)).toBeVisible();
+      const embedded = embeddedFallbacks[route];
+      const visual = staticPage.locator(`[data-visual-id="${embedded.visualId}"]`);
+      await expect(visual.locator(embedded.controls)).toBeHidden();
+      await expect(visual.locator('[data-visual-controls]')).toBeHidden();
+      await expect(visual.locator('[data-static-fallback]')).toBeVisible();
+      await expect(visual.locator(embedded.evidence)).toBeVisible();
     } else if (route.includes('reference-environment-candidate')) {
       await expect(staticPage.locator('[data-compatibility-controls]')).toBeHidden();
       await expect(staticPage.locator('[data-static-fallback] tbody tr')).toHaveCount(3);
@@ -323,11 +333,16 @@ test('serves immutable canonical downloads and returns a real 404 for unknown ap
   expect((await ex03Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
 
   await page.goto('/en/examples/error-handling-lifecycle/');
+  await expect(page.locator(`a[href="${ex04SourceUrl}"]`)).toBeVisible();
   await expect(page.locator(`a[href="${ex04DownloadUrl}"]`)).toBeVisible();
   const ex04Download = await request.get(ex04DownloadUrl);
   expect(ex04Download.ok()).toBe(true);
   expect(ex04Download.headers()['content-type']).toMatch(/zip|octet-stream/);
-  expect((await ex04Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+  const ex04Archive = await ex04Download.body();
+  expect(ex04Archive.subarray(0, 2).toString('ascii')).toBe('PK');
+  expect(
+    ex04Archive.includes(Buffer.from('/examples/ex04-error-handling-lifecycle/src/error_handling_lifecycle.cu')),
+  ).toBe(true);
 
   const missing = await request.get('/api/r0-smoke-must-not-exist');
   expect(missing.status()).toBe(404);

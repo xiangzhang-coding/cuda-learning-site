@@ -23,6 +23,7 @@ const issue14GlossaryIds = [
   'TERM-065',
 ] as const;
 const issue14SourceIds = ['SRC-CUDA-015', 'SRC-CUDA-016'] as const;
+const embeddedVisualIds = ['VIS19', 'VIS20', 'VIS21', 'VIS22'] as const;
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
@@ -89,24 +90,25 @@ test('filter controls and direct resource links support keyboard operation', asy
   await expect(page).toHaveURL(/\/en\/labs\/vector-addition\/$/);
 });
 
-test('LAB03 and issue-14 practice, glossary, and source records keep exact cards, anchors, and counts', async ({ page }) => {
+test('LAB03, embedded visuals, and issue-14 records keep exact cards, anchors, and counts', async ({ page }) => {
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(3);
   expect(counts.practice).toBe(17);
-  expect(counts.visuals).toBe(2);
+  expect(counts.visuals).toBe(6);
   expect(counts.glossary).toBe(65);
   expect(counts.sources).toBe(31);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(122);
 
-  const expectedIds = ['LAB03', ...issue14PracticeIds, ...issue14GlossaryIds, ...issue14SourceIds];
+  const expectedIds = ['LAB03', ...embeddedVisualIds, ...issue14PracticeIds, ...issue14GlossaryIds, ...issue14SourceIds];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
     expect(record, planningId).toBeDefined();
     return record!;
   });
 
-  for (const group of ['labs', 'practice', 'glossary', 'sources'] as const) {
+  for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {
     const groupRecords = records.filter((record) => record.group === group);
     await page.goto(INDEX_ROUTES[group].en);
     const index = page.locator('cuda-resource-index');
@@ -127,6 +129,9 @@ test('LAB03 and issue-14 practice, glossary, and source records keep exact cards
         await expect(page.locator('main h1')).toContainText(record.planningId);
       } else {
         await expect(page.locator(`#${record.planningId.toLowerCase()}`), record.planningId).toHaveCount(1);
+        if (group === 'visuals') {
+          await expect(page.locator(`[data-visual-id="${record.planningId}"]`), record.planningId).toHaveCount(1);
+        }
       }
     }
   }

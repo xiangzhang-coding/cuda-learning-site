@@ -25,6 +25,7 @@ prerequisites:
   - O03
 relatedUnits:
   - F08
+  - VIS20
 hardwareGate: none
 evidence:
   compilation: []
@@ -73,7 +74,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'F02,O03' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: F08 }
+    attrs: { name: 'cuda:related-units', content: 'F08,VIS20' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -188,8 +189,9 @@ Compiler acceptance 是 versioned fact。下面的 matrix 只是本单元使用�
 
 ## 筛选器：查看已复核子集
 
-下面内嵌的 `CapabilityFilter` 没有 Visual Explainer ID。它复用与上表相同的五行原创数据集，只在 enhancement 成功后显示 native controls，并对格式错误或未复核值 fail closed。永久静态表提供等价的非交互说明。
+下面内嵌的可视化讲解（Visual Explainer）**VIS20：Compute-capability contract filter**（`CapabilityFilter`）复用与上表相同的五行原创数据集，只在 enhancement 成功后显示 native controls，并对格式错误或未复核值 fail closed。永久静态表提供等价的非交互说明。
 
+<span id="vis20" class="resource-target" aria-hidden="true"></span>
 <CapabilityFilter locale="zh-CN" />
 
 筛选器是 lookup aid，不是 hardware probe。选择 `12.0` 不表示读者拥有这种 GPU、不表示已安装 NVCC 13.3.1、不表示 driver 能加载 artifact，也不表示任何 kernel 已运行。

@@ -20,6 +20,7 @@ prerequisites:
 relatedUnits:
   - F06
   - F08
+  - VIS20
 hardwareGate: none
 evidence:
   compilation: []
@@ -42,7 +43,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F06 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F06,F08' }
+    attrs: { name: 'cuda:related-units', content: 'F06,F08,VIS20' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -57,7 +58,7 @@ head:
 
 ## Prerequisite
 
-Complete [F06: Compute Capability Is a Feature Contract](/en/foundations/compute-capability/) first. These Exercises require static review only. A table lookup, browser-filter result, or target plan is not a GPU observation.
+Complete [F06: Compute Capability Is a Feature Contract](/en/foundations/compute-capability/) first. These Exercises require static review only. A table lookup, [VIS20 browser-filter result](/en/foundations/compute-capability/#vis20), or target plan is not a GPU observation.
 
 ## How to answer
 

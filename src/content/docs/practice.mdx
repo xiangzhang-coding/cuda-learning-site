@@ -632,7 +632,7 @@ output[index] = input[index];
 - **类型与难度：** Error-lifecycle 调试；中级。
 - **直接先修条件：** [F05：CUDA 错误为何常常延后暴露](/foundations/asynchronous-errors/)。
 - **硬件门槛（Hardware gate）：** 无；只审查静态 error-lifecycle 记录，不运行 CUDA。
-- **相关学习单元与资源：** [F05](/foundations/asynchronous-errors/)、[EX04](/examples/error-handling-lifecycle/)和 [LAB03](/labs/break-and-repair-indexing/)。
+- **相关学习单元与资源：** [F05](/foundations/asynchronous-errors/)、[VIS19 错误暴露时间线](/foundations/asynchronous-errors/#vis19)、[EX04](/examples/error-handling-lifecycle/)和 [LAB03](/labs/break-and-repair-indexing/)。
 - **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一个 host thread 先记录到某项 Runtime 操作失败，却没有消费它的 last-error state。Launch 前的 `cudaPeekAtLastError` 观察到这项未指定的旧失败，但记录忽略了它。随后该 thread 提交一个已预先确认 configuration 合法的 no-op launch；紧邻的 `cudaGetLastError` 返回相同的 non-success state，reviewer 却归咎于新 launch。因为 getter 随后 reset 了 state，第二个区间从 clean state 开始：一个包含故意 device access 缺陷的 launch 被接受，紧邻的 `cudaGetLastError` 返回 success，之后 `cudaDeviceSynchronize` 返回 failure。Reviewer 又声称缺陷由 synchronization 引起。用正确的 origin、observation、state transition 与 control-flow 标签重建两个区间。
@@ -672,7 +672,7 @@ output[index] = input[index];
 - **类型与难度：** Capability 与 compiler-target 审查；中级。
 - **直接先修条件：** [F06：Compute capability 是功能合同](/foundations/compute-capability/)。
 - **硬件门槛（Hardware gate）：** 无；不探测 GPU，只审查 capability、limit 与 compiler record。
-- **相关学习单元：** [F06](/foundations/compute-capability/)、[O03](/start/environment-manifest/)和 [F08](/foundations/launch-geometry/)。
+- **相关学习单元与资源：** [F06](/foundations/compute-capability/)、[VIS20 计算能力合同筛选器](/foundations/compute-capability/#vis20)、[O03](/start/environment-manifest/)和 [F08](/foundations/launch-geometry/)。
 - **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一份 packet 直接识别了一个 selected GPU，并记录 compute capability 9.0。Kernel 需要一项 architecture-specific 9.0 feature；capability table 记录 device maximum threads per block 为 1024，候选 block 是 `(32, 32, 1)`。Packet 选择 baseline `compute_90` 加 `sm_90`，声称同一 pair 必然可用于 NVCC 11.8.0、12.9.2 archive 和 selected Toolkit 13.3.1，还因为 block product 等于 maximum 就宣布它“recommended and faster”。修复 feature、limit、target 与未解决 environment 决策。
@@ -712,7 +712,7 @@ output[index] = input[index];
 - **类型与难度：** Mixed-API lifecycle 调试；中级。
 - **直接先修条件：** [F07：区分 CUDA Runtime API 与 Driver API 的角色](/foundations/runtime-driver-api/)。
 - **硬件门槛（Hardware gate）：** 无；只审查 mixed-API design，不运行 CUDA。
-- **相关学习单元与资源：** [F04](/foundations/host-device-lifecycle/)、[F05](/foundations/asynchronous-errors/)、[F07](/foundations/runtime-driver-api/)和 [EX04](/examples/error-handling-lifecycle/)。
+- **相关学习单元与资源：** [F04](/foundations/host-device-lifecycle/)、[F05](/foundations/asynchronous-errors/)、[F07](/foundations/runtime-driver-api/)、[VIS21 Runtime/Driver API 边界](/foundations/runtime-driver-api/#vis21)和 [EX04](/examples/error-handling-lifecycle/)。
 - **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 一份 mixed design 先调用 `cudaSetDevice` 与 `cudaMalloc`，再调用 `cuInit(0)`，通过 `cuCtxGetCurrent` 取得 current context，加载 `CUmodule`、解析 `CUfunction` 并调用 `cuLaunchKernel`。Helper 把取得的 context 标为“owned”，忽略每个 `CUresult`，理由是后续 `cudaGetLastError` 会统一覆盖；随后它 unload module，对取得的 context 调用 `cuCtxDestroy`，最后才调用 `cudaDeviceSynchronize` 与 `cudaFree`。修复 initialization、current-context ownership、module/function lifetime、direct status checks、asynchronous completion 与 teardown authority。
@@ -752,7 +752,7 @@ output[index] = input[index];
 - **类型与难度：** Launch-geometry 正确性与 resource 审查；中级。
 - **直接先修条件：** [F08：Launch geometry 是先于速度的正确性与资源决策](/foundations/launch-geometry/)。
 - **硬件门槛（Hardware gate）：** 无；只做静态 geometry 与 resource 检查。
-- **相关学习单元与资源：** [F03](/foundations/multidimensional-indexing/)、[F06](/foundations/compute-capability/)、[F08](/foundations/launch-geometry/)和 [LAB03](/labs/break-and-repair-indexing/)。
+- **相关学习单元与资源：** [F03](/foundations/multidimensional-indexing/)、[F06](/foundations/compute-capability/)、[F08](/foundations/launch-geometry/)、[VIS22 线程块形状约束探索器](/foundations/launch-geometry/#vis22)和 [LAB03](/labs/break-and-repair-indexing/)。
 - **最后复核（Last reviewed）：** 2026-08-26。
 
 **题目：** 固定 logical extent 是 `width = 1000`、`height = 513`。Selected device record 给出 `maxThreadsDim = (1024, 1024, 64)`、`maxThreadsPerBlock = 1024`，grid limits 大于下列全部 grid。Selected kernel 报告 `maxThreadsPerBlock = 768`；在不超过该 function limit 的候选中，其声明的 register 与 shared-memory needs 都能放入限制。分类 A `(32, 32)`、B `(48, 16)`、C `(64, 8)`与 D `(1025, 1)`。为每个合法候选推导 overflow-safe grid、coverage 与 fringe count，同时保留相同双轴 bounds check。Packet 因为 B 的 fringe 略少于 C 就声称 B 最快。判断哪些候选可以进入 correctness verification，以及 measurement 前还缺什么。

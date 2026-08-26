@@ -40,7 +40,7 @@ const copies = {
     driverResponsibility: 'Driver 责任',
     invariant: '不变边界',
     reading: '文字读法：Runtime 路径通常隐式建立 primary context 并管理 module；Driver 路径先显式初始化，再取得 device、context、module 与 function handle。两条路径都要求程序管理 buffer、参数、完成边界和错误检查。它们可以按文档规定的 context 规则互操作，但选择任一 API 都不会把异步 launch 变成同步完成。',
-    evidence: '无 CUDA Evidence Status：该浏览器构图没有加载 CUDA、没有提交 kernel、没有观察 GPU，也不会改变 EX04 或任何 Lab 的证据状态。',
+    evidence: '该浏览器构图没有加载 CUDA、没有提交 kernel、没有观察 GPU，也不会改变 EX04 或任何 Lab 的证据状态。它不授予 Compile-Checked、Community-Observed 或 Runtime-Verified 这三种 Evidence Status。',
     managementLabels: {
       'implicit-primary-context': '隐式 primary-context 管理',
       'implicit-module': '隐式 module 管理',
@@ -115,7 +115,7 @@ const copies = {
     driverResponsibility: 'Driver responsibility',
     invariant: 'Invariant boundary',
     reading: 'Textual reading: the Runtime path commonly establishes a primary context and manages modules implicitly; the Driver path explicitly initializes and obtains device, context, module, and function handles. Both paths leave buffer, parameter, completion-boundary, and error-checking responsibilities in the program. They may interoperate under documented context rules, but choosing either API does not turn an asynchronous launch into synchronous completion.',
-    evidence: 'No CUDA Evidence Status: this browser composition loads no CUDA, submits no kernel, observes no GPU, and changes no evidence status for EX04 or any Lab.',
+    evidence: 'This browser composition loads no CUDA, submits no kernel, observes no GPU, and changes no evidence status for EX04 or any Lab. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
     managementLabels: {
       'implicit-primary-context': 'Implicit primary-context management',
       'implicit-module': 'Implicit module management',
@@ -173,16 +173,16 @@ const tabId = (stageId: ApiBoundaryStageId) => `api-boundary-tab-${locale}-${sta
 const codeList = (values: readonly string[]) => values.join(' · ');
 ---
 
-<cuda-api-boundary class="api-boundary not-content" data-locale={locale} data-current-stage={initialStage.id}>
+<cuda-api-boundary class="api-boundary not-content" data-visual-id="VIS21" data-locale={locale} data-current-stage={initialStage.id}>
   <header class="api-boundary-header">
     <p>{copy.eyebrow}</p>
-    <h2>{copy.title}</h2>
-    <p>{copy.summary}</p>
+    <h3>{copy.title}</h3>
+    <p data-conceptual-only>{copy.summary}</p>
   </header>
 
   <p class="api-boundary-notice">{copy.notice}</p>
 
-  <div class="api-boundary-tabs" data-api-boundary-controls hidden role="tablist" aria-label={copy.controls}>
+  <div class="api-boundary-tabs" data-api-boundary-controls data-visual-controls hidden role="tablist" aria-label={copy.controls}>
     {API_BOUNDARY_STAGES.map((stage, index) => (
       <button
         id={tabId(stage.id)}
@@ -215,7 +215,7 @@ const codeList = (values: readonly string[]) => values.join(' · ');
     <div class="api-boundary-compare">
       <article data-api-family="runtime">
         <p class="api-family-label">{copy.runtime}</p>
-        <h3 data-stage-title>{initialCopy.label}</h3>
+        <h4 data-stage-title>{initialCopy.label}</h4>
         <p data-runtime-responsibility>{initialCopy.runtime}</p>
         <dl>
           <div><dt>{copy.management}</dt><dd data-runtime-management>{copy.managementLabels[initialStage.runtime.management]}</dd></div>
@@ -225,7 +225,7 @@ const codeList = (values: readonly string[]) => values.join(' · ');
       </article>
       <article data-api-family="driver">
         <p class="api-family-label">{copy.driver}</p>
-        <h3 data-stage-title>{initialCopy.label}</h3>
+        <h4 data-stage-title>{initialCopy.label}</h4>
         <p data-driver-responsibility>{initialCopy.driver}</p>
         <dl>
           <div><dt>{copy.management}</dt><dd data-driver-management>{copy.managementLabels[initialStage.driver.management]}</dd></div>
@@ -242,7 +242,7 @@ const codeList = (values: readonly string[]) => values.join(' · ');
   </section>
 
   <section class="api-boundary-static" data-static-fallback aria-label={copy.staticTitle}>
-    <h3>{copy.staticTitle}</h3>
+    <h4>{copy.staticTitle}</h4>
     <p>{copy.staticIntro}</p>
     <div class="api-layer-diagram" role="img" aria-label={`${copy.application}: ${copy.runtimeLayer} or ${copy.driverLayer}; ${copy.driverStack}; ${copy.device}.`}>
       <div class="api-layer-host">{copy.application}</div>
@@ -479,16 +479,16 @@ const codeList = (values: readonly string[]) => values.join(' · ');
     text-transform: uppercase;
   }
 
-  .api-boundary-header h2,
+  .api-boundary-header h3,
   .api-boundary-header p,
-  .api-boundary-current h3,
+  .api-boundary-current h4,
   .api-boundary-current p,
-  .api-boundary-static h3,
+  .api-boundary-static h4,
   .api-boundary-static p {
     margin: 0;
   }
 
-  .api-boundary-header h2 {
+  .api-boundary-header h3 {
     font-size: clamp(1.25rem, 3vw, 1.75rem);
     line-height: 1.15;
   }

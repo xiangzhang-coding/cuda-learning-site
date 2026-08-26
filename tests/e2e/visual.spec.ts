@@ -105,7 +105,7 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
   }
 });
 
-test('@visual issue-14 models expose visible selected and fail-closed states in every theme', async ({ page }, testInfo) => {
+test('@visual VIS19-VIS22 expose visible selected and fail-closed states in every theme', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Semantic visual coverage is owned by pinned Chromium.');
   await page.setViewportSize({ width: 1280, height: 800 });
 
@@ -117,7 +117,7 @@ test('@visual issue-14 models expose visible selected and fail-closed states in 
     );
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
-    const timeline = page.locator('cuda-error-timeline');
+    const timeline = page.locator('cuda-error-timeline[data-visual-id="VIS19"]');
     await timeline.locator('[data-action="select-scenario"]').selectOption('deferred-execution');
     await timeline.locator('[data-action="scrub"]').fill('3');
     const activeEvent = timeline.locator('[data-scenario="deferred-execution"] [aria-current="step"]');
@@ -125,7 +125,7 @@ test('@visual issue-14 models expose visible selected and fail-closed states in 
     expect(await activeEvent.evaluate((element) => Number.parseFloat(getComputedStyle(element).outlineWidth))).toBeGreaterThan(0);
 
     await page.goto('/en/foundations/compute-capability/');
-    const filter = page.locator('cuda-capability-filter');
+    const filter = page.locator('cuda-capability-filter[data-visual-id="VIS20"]');
     await filter.locator('[data-capability-input]').fill('8.6');
     await expect(filter.locator('[data-capability-status]')).toBeVisible();
     await expect(filter.locator('[data-capability-details]')).toBeHidden();
@@ -134,7 +134,7 @@ test('@visual issue-14 models expose visible selected and fail-closed states in 
     ).toBeGreaterThan(0);
 
     await page.goto('/en/foundations/runtime-driver-api/');
-    const boundary = page.locator('cuda-api-boundary');
+    const boundary = page.locator('cuda-api-boundary[data-visual-id="VIS21"]');
     const selectedTab = boundary.locator('[data-stage-tab="completion-errors"]');
     await selectedTab.click();
     await expect(selectedTab).toHaveAttribute('aria-selected', 'true');
@@ -142,7 +142,7 @@ test('@visual issue-14 models expose visible selected and fail-closed states in 
     expect(await selectedTab.evaluate((element) => Number.parseFloat(getComputedStyle(element).borderWidth))).toBeGreaterThanOrEqual(2);
 
     await page.goto('/en/foundations/launch-geometry/');
-    const explorer = page.locator('cuda-block-shape-explorer');
+    const explorer = page.locator('cuda-block-shape-explorer[data-visual-id="VIS22"]');
     await explorer.locator('[data-block-shape-field="blockX"]').fill('1024');
     await explorer.locator('[data-block-shape-field="blockY"]').fill('2');
     await expect(explorer.locator('[data-issue-panel]')).toBeVisible();

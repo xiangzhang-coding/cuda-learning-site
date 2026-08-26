@@ -27,6 +27,7 @@ prerequisites:
   - F06
 relatedUnits:
   - LAB03
+  - VIS22
 hardwareGate: none
 evidence:
   compilation: []
@@ -65,7 +66,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'F02,F03,F06' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: LAB03 }
+    attrs: { name: 'cuda:related-units', content: 'LAB03,VIS22' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -167,8 +168,9 @@ Ask first whether the logical extent remains unchanged, per-axis bounds still pr
 
 ## Explorer: show the constraint ledger first
 
-The embedded `BlockShapeExplorer` below receives no new VIS ID. It accepts only positive decimal safe integers for logical 2D width/height and block.x/block.y, then checks per-axis, aggregate, and grid limits against an explicitly selected CC 7.5 or CC 8.0 capability record. If any input, product, or limit fails, it returns an issue list and exposes no grid, launch, or fringe value.
+The `BlockShapeExplorer` below is the embedded Visual Explainer **VIS22: Block-shape constraint explorer**. It accepts only positive decimal safe integers for logical 2D width/height and block.x/block.y, then checks per-axis, aggregate, and grid limits against an explicitly selected CC 7.5 or CC 8.0 capability record. If any input, product, or limit fails, it returns an issue list and exposes no grid, launch, or fringe value.
 
+<span id="vis22" class="resource-target" aria-hidden="true"></span>
 <BlockShapeExplorer locale="en" />
 
 The static cards, print output, and interactive state use the same pure model. A capability record supplies only reviewed device ceilings; the component always leaves kernel-specific maximum threads, registers, and shared memory as required checks. It neither reads local device properties nor executes CUDA.

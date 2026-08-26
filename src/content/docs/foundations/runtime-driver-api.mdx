@@ -27,6 +27,7 @@ prerequisites:
   - F05
 relatedUnits:
   - EX04
+  - VIS21
 exampleIds:
   - EX04
 hardwareGate: none
@@ -102,7 +103,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'F04,F05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: EX04 }
+    attrs: { name: 'cuda:related-units', content: 'EX04,VIS21' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta
@@ -215,8 +216,9 @@ Driver 的更多显式 handle 可以改善责任可见性，但它不会自动�
 
 ## 边界模型：按阶段比较谁负责什么
 
-下面是本站原创的嵌入式 layer/ownership comparison。按钮按 lifecycle stage 切换同一份确定性模型；方向键、Home 和 End 可在 tabs 间移动。完整静态图、六行表格与文字读法始终保留。它没有 VIS ID，不是 CUDA 执行，也不授予 Evidence Status。
+下面是本站原创的嵌入式可视化讲解（Visual Explainer）**VIS21：Runtime/Driver API boundary**，用于比较 layer/ownership。按钮按 lifecycle stage 切换同一份确定性模型；方向键、Home 和 End 可在 tabs 间移动。完整静态图、六行表格与文字读法始终保留。它不是 CUDA 执行，也不授予 Evidence Status。
 
+<span id="vis21" class="resource-target" aria-hidden="true"></span>
 <ApiBoundary locale="zh-CN" />
 
 ## 决策：先从 ownership 需求出发

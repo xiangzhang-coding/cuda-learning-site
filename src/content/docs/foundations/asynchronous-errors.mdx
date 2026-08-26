@@ -28,6 +28,7 @@ relatedUnits:
   - EX04
   - LAB03
   - F07
+  - VIS19
 exampleIds:
   - EX04
 canonicalExample: EX04
@@ -101,7 +102,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: F04 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'F03,EX04,LAB03,F07' }
+    attrs: { name: 'cuda:related-units', content: 'F03,EX04,LAB03,F07,VIS19' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX04 }
   - tag: meta
@@ -141,7 +142,7 @@ CUDA kernel launch 相对 host 通常是异步的，因此异步错误（asynchr
 
 先完成 [F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)。你应当已经能按 allocation、H2D、launch、同步、D2H、comparison 和 release 追踪资源，并知道 launch 后的即时检查不代表 kernel 已完成。F05 把 F04 暂时收窄的异步错误模型完整展开。
 
-[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)提供一种可能导致执行问题的 device 访问背景，但它是相关单元而不是新增先修。EX04 是本页的 canonical executable counterpart；LAB03 负责未来的引导式真实环境观察；F07 会继续使用这里的边界推理。本学习单元自身不执行 CUDA，也没有 CUDA Evidence Status。
+[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)提供一种可能导致执行问题的 device 访问背景，但它是相关单元而不是新增先修。EX04 是本页的 canonical executable counterpart；[LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)负责引导式真实环境观察；F07 会继续使用这里的边界推理。本学习单元自身不执行 CUDA，也没有 CUDA Evidence Status。
 
 ## 错误状态：先分清直接返回与 last-error state
 
@@ -193,8 +194,9 @@ Canonical 诊断顺序先处理旧 last-error state，再发出一个 launch，�
 
 ## 时间线：比较两个暴露位置
 
-下面的原创嵌入式教学界面同时保留两条完整静态时间线。脚本增强后可以选择情景、播放、暂停、逐步前进、重置或用 range input 定位阶段；全部控件都是原生 keyboard-operable 控件。它没有 Visual Explainer ID，也不会执行 CUDA。
+下面的原创嵌入式可视化讲解（Visual Explainer）**VIS19：错误暴露时间线**同时保留两条完整静态时间线。脚本增强后可以选择情景、播放、暂停、逐步前进、重置或用 range input 定位阶段；全部控件都是原生 keyboard-operable 控件。它不会执行 CUDA。
 
+<span id="vis19" class="resource-target" aria-hidden="true"></span>
 <ErrorTimeline locale="zh-CN" />
 
 静态文字和交互高亮表达的是因果模型，不是测量到的时长。相邻卡片的间距不表示 latency，播放速度不表示 device/host 比例，任一状态也不授予 Compile-Checked、Community-Observed 或 Runtime-Verified。
@@ -217,7 +219,7 @@ EX04 是 Runnable Example，F05 是解释其模型的 Learning Unit，两者是�
 
 - 完成 [F05 练习（Exercise）](/foundations/asynchronous-errors/exercises/)，再查看独立的[参考解答](/foundations/asynchronous-errors/solutions/)。
 - 到[练习题库（Practice Bank）PB-R1-009](/practice/#pb-r1-009)审查一份混淆 stale last-error state、即时检查和同步边界的记录。
-- 在 LAB03 可用并且你有受支持环境时，把这里的预测带入引导式 Lab；没有真实运行就保持 observation 为空。
+- 在有受支持环境时，进入[LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)，把这里的预测带入引导式 Lab；没有真实运行就保持 observation 为空。
 
 ## 来源与复核
 
