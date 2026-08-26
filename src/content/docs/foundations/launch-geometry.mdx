@@ -99,7 +99,7 @@ Launch geometry 决定创建多少 block、每个 block 有多少 thread，以�
 
 先完成 [F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)、[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)和 [F06：把 compute capability 当作 feature 与 limit 合同](/foundations/compute-capability/)。F02 提供 grid/block/thread 层次，F03 提供逐轴坐标与 bounds，F06 要求从明确的 capability/device record 读取限制，而不是从 GPU 名称或记忆猜值。
 
-本学习单元（Learning Unit）不需要 CUDA-capable system，也不授予任何 Evidence Status。相关的 LAB03 会把索引缺陷放入实际 Lab 合同；本页本身既不是 Lab，也没有 canonical Runnable Example。
+本学习单元（Learning Unit）不需要 CUDA-capable system，也不授予任何 Evidence Status。相关的 LAB03 已把索引缺陷放入实际 Lab 合同；本页本身既不是 Lab，也没有 canonical Runnable Example。
 
 ## 不变量：block shape 不得改写问题
 
