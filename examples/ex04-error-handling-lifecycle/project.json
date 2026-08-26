@@ -4,8 +4,8 @@
   "id": "EX04",
   "title": "Error handling lifecycle",
   "root": "examples/ex04-error-handling-lifecycle",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/349f2f65c195ca940eb85bc89941507aed326496/examples/ex04-error-handling-lifecycle",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/349f2f65c195ca940eb85bc89941507aed326496.zip",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/1bfe7b2d309db6d733471260c888262e59258660/examples/ex04-error-handling-lifecycle",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/1bfe7b2d309db6d733471260c888262e59258660.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
