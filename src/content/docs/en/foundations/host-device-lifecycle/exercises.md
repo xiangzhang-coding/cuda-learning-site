@@ -66,7 +66,7 @@ Complete [F04: The Explicit Host-Device Resource Lifecycle](/en/foundations/host
 
 ## How to answer
 
-Produce your resource ledger, repair plan, or evidence matrix before opening hints in order. When implementation review is needed, start from the [canonical EX03 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing). Do not reconstruct a second complete program from the Learning Unit. Answers live on the separate [reviewed-solutions page](/en/foundations/host-device-lifecycle/solutions/).
+Produce your resource ledger, repair plan, or evidence matrix before opening hints in order. When implementation review is needed, start from the [canonical EX03 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing). Do not reconstruct a second complete program from the Learning Unit. Answers live on the separate [reviewed-solutions page](/en/foundations/host-device-lifecycle/solutions/).
 
 ## Exercise 1: Reconstruct order and last-use boundaries
 

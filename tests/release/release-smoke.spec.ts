@@ -12,7 +12,7 @@ const downloadUrl =
 const ex01DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
 const ex03DownloadUrl =
-  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/b5d0dab070946eedc41e2bfe0106b67d8c01706b.zip';
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/a69a52b0b0c271f931ebe813b3ec320baeb18f04.zip';
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
@@ -94,7 +94,7 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
   await expectRankedSearchResult(page, {
     route: '/en/',
     button: /Search/,
-    query: 'warp lane execution hierarchy',
+    query: 'Understanding the CUDA Execution Hierarchy',
     expectedHrefs: ['/en/foundations/execution-hierarchy/'],
   });
   await expectRankedSearchResult(page, {

@@ -40,9 +40,11 @@ test('new unit, Exercise, solution, and EX03 pages reflow and switch locale dire
 
   for (const [chinese, english] of pairs) {
     await page.goto(chinese);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', english);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), chinese).toBe(true);
     await page.goto(english);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', chinese);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), english).toBe(true);
   }

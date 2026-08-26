@@ -4,8 +4,8 @@
   "id": "EX03",
   "title": "Multidimensional indexing",
   "root": "examples/ex03-multidimensional-indexing",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/b5d0dab070946eedc41e2bfe0106b67d8c01706b.zip",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/a69a52b0b0c271f931ebe813b3ec320baeb18f04.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

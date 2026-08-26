@@ -34,6 +34,7 @@ describe('GitHub Actions quality contract', () => {
       '3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
     ]);
     expect(workflow.match(/persist-credentials: false/g)).toHaveLength(5);
+    expect(workflow.match(/fetch-depth: 0/g)).toHaveLength(1);
   });
 
   it('runs every applicable quality surface and gates retained artifacts', async () => {

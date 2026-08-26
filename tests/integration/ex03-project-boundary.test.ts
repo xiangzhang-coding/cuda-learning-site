@@ -69,6 +69,11 @@ describe('EX03 standalone project boundary', () => {
     );
     expect(sourceMatch).not.toBeNull();
     expect(downloadMatch?.[1]).toBe(sourceMatch?.[1]);
+    await expect(execFileAsync('git', [
+      'cat-file',
+      '-e',
+      `${sourceMatch?.[1]}:examples/ex03-multidimensional-indexing/project.json`,
+    ], { cwd: projectRoot })).resolves.toBeDefined();
   });
 
   it('declares exactly three C++17 Toolkit Lanes at the Baseline GPU Capability Tier', async () => {

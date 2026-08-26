@@ -66,7 +66,7 @@ head:
 
 ## 作答方法
 
-先提交自己的资源账本、修复方案或证据矩阵，再按顺序打开提示。需要核对实现时，从[固定提交中的 EX03 canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing)开始；不要从 Learning Unit 拼接第二份完整程序。答案在独立的[参考解答页](/foundations/host-device-lifecycle/solutions/)。
+先提交自己的资源账本、修复方案或证据矩阵，再按顺序打开提示。需要核对实现时，从[固定提交中的 EX03 canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing)开始；不要从 Learning Unit 拼接第二份完整程序。答案在独立的[参考解答页](/foundations/host-device-lifecycle/solutions/)。
 
 ## 练习 1：重建顺序与最后使用边界
 

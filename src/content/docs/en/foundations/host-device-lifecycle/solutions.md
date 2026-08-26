@@ -115,7 +115,7 @@ The packet has no actual GPU observation, so EX03 runtime remains **Pending Hard
 
 - Assuming `cudaMalloc` zeroes device memory, or that copying a device pointer copies its allocation.
 - Failing to initialize host input before H2D, or reversing H2D and D2H directions.
-- Calling only `cudaGetLastError` after launch and starting D2H without the required completion/error boundary.
+- Calling only `cudaGetLastError` and starting blocking D2H without saying where completion/errors surface. The canonical flow keeps an explicit synchronization as a separate diagnostic boundary, while synchronous D2H also waits for relevant work.
 - Comparing host output before D2H, or treating successful copy-back as a correctness verdict.
 - Releasing device input before kernel completion, or device output before D2H completion.
 - Returning immediately on a comparison mismatch and leaking successfully acquired allocations.

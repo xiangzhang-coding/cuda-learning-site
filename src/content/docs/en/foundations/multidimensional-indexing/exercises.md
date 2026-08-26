@@ -67,7 +67,7 @@ Complete [F03: Make Multidimensional Indexing and Bounds a Correctness Contract]
 
 ## How to answer
 
-Produce the required reviewable artifact before opening hints in order. Implementation review starts from the [canonical EX03 project at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b5d0dab070946eedc41e2bfe0106b67d8c01706b/examples/ex03-multidimensional-indexing); do not reconstruct a second program from the Learning Unit. Use the separate [reviewed solutions](/en/foundations/multidimensional-indexing/solutions/) after completing your work.
+Produce the required reviewable artifact before opening hints in order. Implementation review starts from the [canonical EX03 project at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a69a52b0b0c271f931ebe813b3ec320baeb18f04/examples/ex03-multidimensional-indexing); do not reconstruct a second program from the Learning Unit. Use the separate [reviewed solutions](/en/foundations/multidimensional-indexing/solutions/) after completing your work.
 
 ## Exercise 1: Classify a three-dimensional partial fringe
 

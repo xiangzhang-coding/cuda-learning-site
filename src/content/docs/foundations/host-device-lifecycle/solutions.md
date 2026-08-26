@@ -115,7 +115,7 @@ Packet 没有实际 GPU observation，因此 EX03 的 runtime 仍是 **Pending H
 
 - 认为 `cudaMalloc` 会把 device memory 清零，或认为复制 device pointer 就复制了 allocation。
 - 在 H2D 之前没有初始化 host input，或把 H2D/D2H 方向写反。
-- 在 launch 后只调用 `cudaGetLastError` 就开始 D2H，漏掉所需 completion/error boundary。
+- 在 launch 后只调用 `cudaGetLastError` 就开始 blocking D2H，却没有说明 completion/error 在哪里暴露；canonical flow 用显式同步保留独立诊断边界，而同步 D2H 本身也会等待相关工作。
 - 在 D2H 之前比较 host output，或把 copy-back 成功当成 correctness verdict。
 - 在 kernel 完成前 release device input，或在 D2H 完成前 release device output。
 - Comparison mismatch 直接 return，造成成功取得的 allocation 泄漏。
