@@ -9,6 +9,21 @@ import { collectBrowserFailures } from '../helpers/browser-contract';
 const expectedCount = (group: (typeof INDEX_GROUPS)[number]) =>
   RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length;
 
+const issue14PracticeIds = ['PB-R1-009', 'PB-R1-010', 'PB-R1-011', 'PB-R1-012'] as const;
+const issue14GlossaryIds = [
+  'TERM-056',
+  'TERM-057',
+  'TERM-058',
+  'TERM-059',
+  'TERM-060',
+  'TERM-061',
+  'TERM-062',
+  'TERM-063',
+  'TERM-064',
+  'TERM-065',
+] as const;
+const issue14SourceIds = ['SRC-CUDA-015', 'SRC-CUDA-016'] as const;
+
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
@@ -72,6 +87,49 @@ test('filter controls and direct resource links support keyboard operation', asy
   await page.locator('[data-resource-id="LAB02"] h3 a').focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/en\/labs\/vector-addition\/$/);
+});
+
+test('LAB03 and issue-14 practice, glossary, and source records keep exact cards, anchors, and counts', async ({ page }) => {
+  const counts = Object.fromEntries(
+    INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
+  ) as Record<(typeof INDEX_GROUPS)[number], number>;
+  expect(counts.labs).toBe(3);
+  expect(counts.practice).toBe(17);
+  expect(counts.visuals).toBe(2);
+  expect(counts.glossary).toBe(65);
+  expect(counts.sources).toBe(31);
+
+  const expectedIds = ['LAB03', ...issue14PracticeIds, ...issue14GlossaryIds, ...issue14SourceIds];
+  const records = expectedIds.map((planningId) => {
+    const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
+    expect(record, planningId).toBeDefined();
+    return record!;
+  });
+
+  for (const group of ['labs', 'practice', 'glossary', 'sources'] as const) {
+    const groupRecords = records.filter((record) => record.group === group);
+    await page.goto(INDEX_ROUTES[group].en);
+    const index = page.locator('cuda-resource-index');
+    await expect(index.locator('[data-resource-card]')).toHaveCount(counts[group]);
+    await expect(index.locator('[data-resource-count]')).toHaveText(
+      `Showing ${counts[group]} of ${counts[group]} published entries`,
+    );
+
+    for (const record of groupRecords) {
+      const card = index.locator(`[data-resource-id="${record.planningId}"]`);
+      await expect(card, record.planningId).toHaveCount(1);
+      await expect(card.locator('h3 a')).toHaveAttribute('href', record.href.en);
+    }
+
+    for (const record of groupRecords) {
+      await page.goto(record.href.en);
+      if (group === 'labs') {
+        await expect(page.locator('main h1')).toContainText(record.planningId);
+      } else {
+        await expect(page.locator(`#${record.planningId.toLowerCase()}`), record.planningId).toHaveCount(1);
+      }
+    }
+  }
 });
 
 test('filtering remains deterministic with a growing synthetic card fixture', async ({ page }) => {

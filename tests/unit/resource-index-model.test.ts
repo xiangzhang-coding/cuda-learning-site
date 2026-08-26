@@ -23,13 +23,13 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(101);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(118);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 2, practice: 13, visuals: 2, glossary: 55, sources: 29 });
+    ).toEqual({ labs: 3, practice: 17, visuals: 2, glossary: 65, sources: 31 });
   });
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
@@ -43,6 +43,7 @@ describe('resource index catalog', () => {
     const labs = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'labs', 'en', { asOf });
     const lab01 = labs.find(({ planningId }) => planningId === 'LAB01');
     const lab = labs.find(({ planningId }) => planningId === 'LAB02');
+    const lab03 = labs.find(({ planningId }) => planningId === 'LAB03');
 
     expect(lab01).toMatchObject({
       planningId: 'LAB01',
@@ -68,6 +69,21 @@ describe('resource index catalog', () => {
       ['F01', '/en/foundations/first-cuda-kernel/'],
     ]);
     expect(lab?.searchText).toContain('CUDA Toolkit Lane 11.8.0');
+    expect(lab03).toMatchObject({
+      planningId: 'LAB03',
+      href: '/en/labs/break-and-repair-indexing/',
+      counterpart: '/labs/break-and-repair-indexing/',
+      difficulty: 'intermediate',
+      evidence: {
+        compilation: [],
+        runtime: ['Pending Hardware Verification'],
+      },
+    });
+    expect(lab03?.prerequisites.map(({ id, href }) => [id, href])).toEqual([
+      ['F03', '/en/foundations/multidimensional-indexing/'],
+      ['F05', '/en/foundations/asynchronous-errors/'],
+    ]);
+    expect(lab03?.searchText).toContain('EX04');
   });
 
   it('sorts a growing fixture set by stable planning ID instead of input order', () => {
@@ -89,7 +105,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(80);
+    expect(projected).toHaveLength(90);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
     );

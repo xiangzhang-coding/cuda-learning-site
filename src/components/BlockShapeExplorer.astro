@@ -1,0 +1,989 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import {
+  BLOCK_SHAPE_CAPABILITIES,
+  BLOCK_SHAPE_STATIC_CASES,
+  DEFAULT_BLOCK_SHAPE_CAPABILITY_ID,
+  assessBlockShape,
+  createDefaultBlockShapeInput,
+  findBlockShapeCapability,
+  type BlockShapeIssueCode,
+} from '../visuals/block-shape-model';
+
+interface Props {
+  locale: 'zh-CN' | 'en';
+}
+
+const { locale } = Astro.props;
+const copy = locale === 'zh-CN'
+  ? {
+      eyebrow: 'F08 / Launch feasibility',
+      title: '先取得 launch 许可，再讨论测量',
+      summary: '选择明确的 GPU capability record，输入二维逻辑范围与 block shape。模型先检查正整数、安全算术和 device limit；只有全部通过才生成 grid、launch 与 fringe。',
+      modelNotice: '这是确定性的浏览器算术模型，不查询当前 GPU，也不执行 CUDA。',
+      controls: 'Block shape 输入',
+      capability: '选定 capability record',
+      logicalWidth: '逻辑 width',
+      logicalHeight: '逻辑 height',
+      blockX: 'block.x',
+      blockY: 'block.y',
+      reset: '重置为确定值',
+      controlHelp: '只接受不带符号、空格、指数或小数点的正十进制安全整数。',
+      result: 'Launch feasibility 记录',
+      valid: 'DEVICE LIMITS PASS',
+      invalid: 'STOP',
+      validStatus: '输入与 device launch limit 已通过。Kernel-specific resource check 仍待完成。',
+      invalidStatus: '未生成 geometry：先修复列出的输入、算术或 device limit。',
+      issues: '必须先修复',
+      logical: '逻辑范围',
+      block: 'Block shape',
+      grid: 'Grid shape',
+      coverage: 'Launch 覆盖',
+      launched: 'Launch thread 数',
+      fringe: 'Fringe thread 数',
+      mapLabel: 'Launch coverage 外框与 logical extent 内框。两者之间的区域是需要 bounds check 拒绝的 fringe。',
+      mapCoverage: 'launch coverage',
+      mapLogical: 'logical extent',
+      gate1: '1 / 正确性与算术',
+      gate1Body: '所有尺寸必须为正安全整数；乘法和向上取整不得溢出；kernel 仍须对 gx < width 且 gy < height 做边界保护。',
+      gate2: '2 / Device launch limit',
+      gate2Body: '分别检查 block.x、block.y、block.x * block.y，再检查计算出的 grid.x 与 grid.y。',
+      gate3: '3 / Kernel resource',
+      gate3Body: 'Device 记录还不能替代函数自己的 maxThreadsPerBlock、compiled register demand，以及 static + dynamic shared memory 检查。',
+      gate4: '4 / 测量边界',
+      gate4Body: '只有在 launch 可行、bounds 正确且结果已验证后，才可以在受控环境中测量候选 shape。本模型不计算 occupancy，也不判断最快 shape。',
+      capabilityFacts: '选定记录的 device ceilings',
+      blockLimit: 'block axis / aggregate',
+      gridLimit: 'grid axis',
+      resourceLimit: 'register / shared memory per block',
+      staticTitle: '无脚本与打印回退',
+      staticIntro: '下面三张卡完整保留同一合同：整除、带 fringe，以及逐轴合法但 aggregate 非法。',
+      staticLabels: {
+        exact: '整除范围',
+        fringe: '需要 bounds 的 fringe',
+        'aggregate-invalid': 'Aggregate limit 拒绝',
+      },
+      staticInvalid: 'x 与 y 分别不超上限，但 1024 * 2 = 2048 超过 maxThreadsPerBlock 1024；不生成 grid 或 fringe。',
+      formula: '对正整数使用 grid.x = 1 + floor((width - 1) / block.x)，y 轴同理；先检查每个乘积，再计算 launch 与 fringe。',
+      staticResource: '这些 device ceilings 只通过第一层 resource gate。真实 kernel 仍需要 function attributes、register 与 shared-memory demand。',
+      noEvidence: '无证据：此组件不编译 CUDA、不 launch GPU、不读取 profiler，也不改变任何 Evidence Status。',
+      issueLabels: {
+        'capability-record-invalid': 'Capability record 不完整或包含无效 limit。',
+        'logical-width-invalid': 'Logical width 必须是正十进制安全整数。',
+        'logical-height-invalid': 'Logical height 必须是正十进制安全整数。',
+        'block-x-invalid': 'block.x 必须是正十进制安全整数。',
+        'block-y-invalid': 'block.y 必须是正十进制安全整数。',
+        'block-x-exceeds-capability': 'block.x 超过选定记录的逐轴上限。',
+        'block-y-exceeds-capability': 'block.y 超过选定记录的逐轴上限。',
+        'block-product-overflow': 'block.x * block.y 不能安全表示。',
+        'threads-per-block-exceeds-capability': 'block.x * block.y 超过 maxThreadsPerBlock。',
+        'logical-elements-overflow': 'width * height 不能安全表示。',
+        'grid-x-exceeds-capability': '计算出的 grid.x 超过选定记录的上限。',
+        'grid-y-exceeds-capability': '计算出的 grid.y 超过选定记录的上限。',
+        'grid-product-overflow': 'grid.x * grid.y 不能安全表示。',
+        'coverage-width-overflow': 'grid.x * block.x 不能安全表示。',
+        'coverage-height-overflow': 'grid.y * block.y 不能安全表示。',
+        'launched-threads-overflow': '总 launch thread 数不能安全表示。',
+        'fringe-calculation-invalid': '无法安全计算 coverage 或 fringe。',
+      } satisfies Record<BlockShapeIssueCode, string>,
+    }
+  : {
+      eyebrow: 'F08 / launch feasibility',
+      title: 'Earn a launch permit before discussing measurement',
+      summary: 'Select an explicit GPU capability record, then enter a logical 2D extent and block shape. The model checks positive integers, safe arithmetic, and device limits before it produces any grid, launch, or fringe value.',
+      modelNotice: 'This is a deterministic browser arithmetic model. It neither queries the current GPU nor executes CUDA.',
+      controls: 'Block-shape inputs',
+      capability: 'Selected capability record',
+      logicalWidth: 'Logical width',
+      logicalHeight: 'Logical height',
+      blockX: 'block.x',
+      blockY: 'block.y',
+      reset: 'Reset to deterministic values',
+      controlHelp: 'Use positive decimal safe integers with no sign, spaces, exponent, or decimal point.',
+      result: 'Launch-feasibility record',
+      valid: 'DEVICE LIMITS PASS',
+      invalid: 'STOP',
+      validStatus: 'Inputs and device launch limits pass. Kernel-specific resource checks remain required.',
+      invalidStatus: 'No geometry was produced. Repair the listed input, arithmetic, or device-limit issue first.',
+      issues: 'Repair before continuing',
+      logical: 'Logical extent',
+      block: 'Block shape',
+      grid: 'Grid shape',
+      coverage: 'Launch coverage',
+      launched: 'Launched threads',
+      fringe: 'Fringe threads',
+      mapLabel: 'Launch coverage outer frame and logical-extent inner frame. The area between them is fringe that the bounds check must reject.',
+      mapCoverage: 'launch coverage',
+      mapLogical: 'logical extent',
+      gate1: '1 / Correctness and arithmetic',
+      gate1Body: 'Every dimension must be a positive safe integer; products and ceiling division must not overflow; the kernel still needs gx < width and gy < height bounds protection.',
+      gate2: '2 / Device launch limits',
+      gate2Body: 'Check block.x and block.y independently, then block.x * block.y, followed by the calculated grid.x and grid.y.',
+      gate3: '3 / Kernel resources',
+      gate3Body: 'The device record cannot replace the function-specific maxThreadsPerBlock, compiled register demand, or static plus dynamic shared-memory checks.',
+      gate4: '4 / Measurement boundary',
+      gate4Body: 'Only after launch feasibility, correct bounds, and verified results may candidate shapes be measured in a controlled environment. This model calculates no occupancy and identifies no fastest shape.',
+      capabilityFacts: 'Device ceilings in the selected record',
+      blockLimit: 'block axis / aggregate',
+      gridLimit: 'grid axis',
+      resourceLimit: 'register / shared memory per block',
+      staticTitle: 'No-script and print fallback',
+      staticIntro: 'These three cards preserve the complete contract: exact division, a fringe, and axes that pass while the aggregate fails.',
+      staticLabels: {
+        exact: 'Exactly divisible extent',
+        fringe: 'Fringe requiring bounds',
+        'aggregate-invalid': 'Aggregate limit rejection',
+      },
+      staticInvalid: 'x and y each fit their axis limit, but 1024 * 2 = 2048 exceeds maxThreadsPerBlock 1024, so no grid or fringe is produced.',
+      formula: 'For positive integers, use grid.x = 1 + floor((width - 1) / block.x), and likewise for y. Check every product before calculating launch and fringe values.',
+      staticResource: 'These device ceilings pass only the first resource gate. A real kernel still needs its function attributes, register demand, and shared-memory demand checked.',
+      noEvidence: 'No evidence: this component compiles no CUDA, launches no GPU, reads no profiler, and changes no Evidence Status.',
+      issueLabels: {
+        'capability-record-invalid': 'The capability record is incomplete or contains an invalid limit.',
+        'logical-width-invalid': 'Logical width must be a positive decimal safe integer.',
+        'logical-height-invalid': 'Logical height must be a positive decimal safe integer.',
+        'block-x-invalid': 'block.x must be a positive decimal safe integer.',
+        'block-y-invalid': 'block.y must be a positive decimal safe integer.',
+        'block-x-exceeds-capability': 'block.x exceeds the selected record\'s per-axis limit.',
+        'block-y-exceeds-capability': 'block.y exceeds the selected record\'s per-axis limit.',
+        'block-product-overflow': 'block.x * block.y cannot be represented safely.',
+        'threads-per-block-exceeds-capability': 'block.x * block.y exceeds maxThreadsPerBlock.',
+        'logical-elements-overflow': 'width * height cannot be represented safely.',
+        'grid-x-exceeds-capability': 'The calculated grid.x exceeds the selected record\'s limit.',
+        'grid-y-exceeds-capability': 'The calculated grid.y exceeds the selected record\'s limit.',
+        'grid-product-overflow': 'grid.x * grid.y cannot be represented safely.',
+        'coverage-width-overflow': 'grid.x * block.x cannot be represented safely.',
+        'coverage-height-overflow': 'grid.y * block.y cannot be represented safely.',
+        'launched-threads-overflow': 'The total launched-thread count cannot be represented safely.',
+        'fringe-calculation-invalid': 'Coverage or fringe cannot be calculated safely.',
+      } satisfies Record<BlockShapeIssueCode, string>,
+    };
+
+const defaultInput = createDefaultBlockShapeInput();
+const defaultCapability = findBlockShapeCapability(DEFAULT_BLOCK_SHAPE_CAPABILITY_ID);
+if (!defaultCapability) throw new Error('Missing default block-shape capability record.');
+const initialAssessment = assessBlockShape(defaultInput, defaultCapability);
+if (!initialAssessment.valid) throw new Error('Default block-shape input must be valid.');
+const initial = initialAssessment.geometry;
+const format = new Intl.NumberFormat(locale);
+const staticCases = BLOCK_SHAPE_STATIC_CASES.map(({ id, input }) => ({
+  id,
+  input,
+  assessment: assessBlockShape(input, defaultCapability),
+}));
+const logicalInline = `${(initial.logical.width / initial.coverage.width) * 100}%`;
+const logicalBlock = `${(initial.logical.height / initial.coverage.height) * 100}%`;
+---
+
+<cuda-block-shape-explorer
+  class="block-shape-explorer not-content"
+  data-locale={locale}
+  data-state="valid"
+>
+  <header class="block-shape-header">
+    <p>{copy.eyebrow}</p>
+    <h3>{copy.title}</h3>
+    <p>{copy.summary}</p>
+  </header>
+
+  <p class="block-shape-notice">{copy.modelNotice}</p>
+
+  <fieldset class="block-shape-controls" data-block-shape-controls data-pagefind-ignore hidden>
+    <legend>{copy.controls}</legend>
+    <div class="block-shape-control-grid">
+      <label>
+        <span>{copy.capability}</span>
+        <select data-capability autocomplete="off">
+          {BLOCK_SHAPE_CAPABILITIES.map((capability) => (
+            <option value={capability.id} selected={capability.id === DEFAULT_BLOCK_SHAPE_CAPABILITY_ID}>
+              CC {capability.computeCapability}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.logicalWidth}</span>
+        <input data-block-shape-field="logicalWidth" type="number" inputmode="numeric" min="1" step="1" value={defaultInput.logicalWidth} autocomplete="off" aria-invalid="false" />
+      </label>
+      <label>
+        <span>{copy.logicalHeight}</span>
+        <input data-block-shape-field="logicalHeight" type="number" inputmode="numeric" min="1" step="1" value={defaultInput.logicalHeight} autocomplete="off" aria-invalid="false" />
+      </label>
+      <label>
+        <span>{copy.blockX}</span>
+        <input data-block-shape-field="blockX" type="number" inputmode="numeric" min="1" step="1" value={defaultInput.blockX} autocomplete="off" aria-invalid="false" />
+      </label>
+      <label>
+        <span>{copy.blockY}</span>
+        <input data-block-shape-field="blockY" type="number" inputmode="numeric" min="1" step="1" value={defaultInput.blockY} autocomplete="off" aria-invalid="false" />
+      </label>
+      <button type="button" data-reset-block-shape>{copy.reset}</button>
+    </div>
+    <small>{copy.controlHelp}</small>
+  </fieldset>
+
+  <section class="block-shape-live-result" data-live-result data-state="valid" data-pagefind-ignore aria-label={copy.result}>
+    <div class="block-shape-verdict">
+      <span data-verdict>{copy.valid}</span>
+      <h4>{copy.result}</h4>
+    </div>
+    <p class="block-shape-live-status" data-live-status role="status" aria-live="polite" aria-atomic="true">
+      {copy.validStatus} grid {initial.grid.x} x {initial.grid.y}; {copy.launched} {format.format(initial.coverage.launchedThreads)}; {copy.fringe} {format.format(initial.coverage.fringeThreads)}.
+    </p>
+    <div class="block-shape-issues" data-issue-panel hidden>
+      <strong>{copy.issues}</strong>
+      <ul data-issues></ul>
+    </div>
+
+    <div class="block-shape-geometry" data-geometry>
+      <dl class="block-shape-metrics">
+        <div><dt>{copy.logical}</dt><dd><code data-logical>{format.format(initial.logical.width)} x {format.format(initial.logical.height)}</code></dd></div>
+        <div><dt>{copy.block}</dt><dd><code data-block>{format.format(initial.block.x)} x {format.format(initial.block.y)} = {format.format(initial.block.threads)}</code></dd></div>
+        <div><dt>{copy.grid}</dt><dd><code data-grid>{format.format(initial.grid.x)} x {format.format(initial.grid.y)} = {format.format(initial.grid.blocks)}</code></dd></div>
+        <div><dt>{copy.coverage}</dt><dd><code data-coverage>{format.format(initial.coverage.width)} x {format.format(initial.coverage.height)}</code></dd></div>
+        <div><dt>{copy.launched}</dt><dd><code data-launched>{format.format(initial.coverage.launchedThreads)}</code></dd></div>
+        <div><dt>{copy.fringe}</dt><dd><code data-fringe>{format.format(initial.coverage.fringeThreads)}</code></dd></div>
+      </dl>
+
+      <div
+        class="block-shape-map"
+        data-shape-map
+        role="img"
+        aria-label={copy.mapLabel}
+        style={`--logical-inline: ${logicalInline}; --logical-block: ${logicalBlock};`}
+      >
+        <span class="block-shape-map-coverage">{copy.mapCoverage}</span>
+        <div class="block-shape-logical"><span>{copy.mapLogical}</span></div>
+      </div>
+    </div>
+
+    <ol class="block-shape-gates">
+      <li><strong>{copy.gate1}</strong><span>{copy.gate1Body}</span></li>
+      <li><strong>{copy.gate2}</strong><span>{copy.gate2Body}</span></li>
+      <li data-pending="true"><strong>{copy.gate3}</strong><span>{copy.gate3Body}</span></li>
+      <li><strong>{copy.gate4}</strong><span>{copy.gate4Body}</span></li>
+    </ol>
+
+    <section class="block-shape-capability" aria-label={copy.capabilityFacts}>
+      <h4>{copy.capabilityFacts}: <span data-capability-name>CC {defaultCapability.computeCapability}</span></h4>
+      <dl>
+        <div><dt>{copy.blockLimit}</dt><dd><code data-capability-block>{defaultCapability.maxBlockDim.x} x {defaultCapability.maxBlockDim.y} / {defaultCapability.maxThreadsPerBlock}</code></dd></div>
+        <div><dt>{copy.gridLimit}</dt><dd><code data-capability-grid>{format.format(defaultCapability.maxGridDim.x)} x {format.format(defaultCapability.maxGridDim.y)}</code></dd></div>
+        <div><dt>{copy.resourceLimit}</dt><dd><code data-capability-resource>{format.format(defaultCapability.registersPerBlock)} / {defaultCapability.sharedMemoryPerBlockBytes / 1_024} KiB</code></dd></div>
+      </dl>
+    </section>
+  </section>
+
+  <section class="block-shape-static" data-static-fallback aria-label={copy.staticTitle}>
+    <h3>{copy.staticTitle}</h3>
+    <p>{copy.staticIntro}</p>
+    <p><strong>{copy.capabilityFacts}: CC {defaultCapability.computeCapability}.</strong> <code>block {defaultCapability.maxBlockDim.x} x {defaultCapability.maxBlockDim.y} / {defaultCapability.maxThreadsPerBlock}; grid {defaultCapability.maxGridDim.x} x {defaultCapability.maxGridDim.y}; {defaultCapability.registersPerBlock} registers / {defaultCapability.sharedMemoryPerBlockBytes / 1_024} KiB shared memory per block.</code></p>
+    <p><code>{copy.formula}</code></p>
+    <div class="block-shape-static-grid">
+      {staticCases.map(({ id, input, assessment }) => (
+        <article>
+          <h4>{copy.staticLabels[id]}</h4>
+          <p><code>logical {input.logicalWidth} x {input.logicalHeight}; block {input.blockX} x {input.blockY}</code></p>
+          {assessment.valid ? (
+            <dl>
+              <div><dt>{copy.grid}</dt><dd><code>{assessment.geometry.grid.x} x {assessment.geometry.grid.y}</code></dd></div>
+              <div><dt>{copy.coverage}</dt><dd><code>{assessment.geometry.coverage.width} x {assessment.geometry.coverage.height}</code></dd></div>
+              <div><dt>{copy.launched}</dt><dd><code>{format.format(assessment.geometry.coverage.launchedThreads)}</code></dd></div>
+              <div><dt>{copy.fringe}</dt><dd><code>{format.format(assessment.geometry.coverage.fringeThreads)}</code></dd></div>
+            </dl>
+          ) : (
+            <p class="block-shape-static-stop"><strong>{copy.invalid}:</strong> {copy.staticInvalid}</p>
+          )}
+        </article>
+      ))}
+    </div>
+    <p class="block-shape-static-resource">{copy.staticResource}</p>
+  </section>
+
+  <p class="block-shape-no-evidence">{copy.noEvidence}</p>
+</cuda-block-shape-explorer>
+
+<script>
+  import {
+    DEFAULT_BLOCK_SHAPE_CAPABILITY_ID,
+    assessBlockShape,
+    createDefaultBlockShapeInput,
+    findBlockShapeCapability,
+    type BlockShapeInput,
+    type BlockShapeIssueCode,
+  } from '../visuals/block-shape-model';
+
+  const messages = {
+    en: {
+      valid: 'DEVICE LIMITS PASS',
+      invalid: 'STOP',
+      validStatus: 'Inputs and device launch limits pass. Kernel-specific resource checks remain required.',
+      invalidStatus: 'No geometry was produced. Repair the listed input, arithmetic, or device-limit issue first.',
+      mapLabel: 'Launch coverage outer frame and logical-extent inner frame. The area between them is fringe that the bounds check must reject.',
+      issues: {
+        'capability-record-invalid': 'The capability record is incomplete or contains an invalid limit.',
+        'logical-width-invalid': 'Logical width must be a positive decimal safe integer.',
+        'logical-height-invalid': 'Logical height must be a positive decimal safe integer.',
+        'block-x-invalid': 'block.x must be a positive decimal safe integer.',
+        'block-y-invalid': 'block.y must be a positive decimal safe integer.',
+        'block-x-exceeds-capability': 'block.x exceeds the selected record\'s per-axis limit.',
+        'block-y-exceeds-capability': 'block.y exceeds the selected record\'s per-axis limit.',
+        'block-product-overflow': 'block.x * block.y cannot be represented safely.',
+        'threads-per-block-exceeds-capability': 'block.x * block.y exceeds maxThreadsPerBlock.',
+        'logical-elements-overflow': 'width * height cannot be represented safely.',
+        'grid-x-exceeds-capability': 'The calculated grid.x exceeds the selected record\'s limit.',
+        'grid-y-exceeds-capability': 'The calculated grid.y exceeds the selected record\'s limit.',
+        'grid-product-overflow': 'grid.x * grid.y cannot be represented safely.',
+        'coverage-width-overflow': 'grid.x * block.x cannot be represented safely.',
+        'coverage-height-overflow': 'grid.y * block.y cannot be represented safely.',
+        'launched-threads-overflow': 'The total launched-thread count cannot be represented safely.',
+        'fringe-calculation-invalid': 'Coverage or fringe cannot be calculated safely.',
+      },
+    },
+    'zh-CN': {
+      valid: 'DEVICE LIMITS PASS',
+      invalid: 'STOP',
+      validStatus: '输入与 device launch limit 已通过。Kernel-specific resource check 仍待完成。',
+      invalidStatus: '未生成 geometry：先修复列出的输入、算术或 device limit。',
+      mapLabel: 'Launch coverage 外框与 logical extent 内框。两者之间的区域是需要 bounds check 拒绝的 fringe。',
+      issues: {
+        'capability-record-invalid': 'Capability record 不完整或包含无效 limit。',
+        'logical-width-invalid': 'Logical width 必须是正十进制安全整数。',
+        'logical-height-invalid': 'Logical height 必须是正十进制安全整数。',
+        'block-x-invalid': 'block.x 必须是正十进制安全整数。',
+        'block-y-invalid': 'block.y 必须是正十进制安全整数。',
+        'block-x-exceeds-capability': 'block.x 超过选定记录的逐轴上限。',
+        'block-y-exceeds-capability': 'block.y 超过选定记录的逐轴上限。',
+        'block-product-overflow': 'block.x * block.y 不能安全表示。',
+        'threads-per-block-exceeds-capability': 'block.x * block.y 超过 maxThreadsPerBlock。',
+        'logical-elements-overflow': 'width * height 不能安全表示。',
+        'grid-x-exceeds-capability': '计算出的 grid.x 超过选定记录的上限。',
+        'grid-y-exceeds-capability': '计算出的 grid.y 超过选定记录的上限。',
+        'grid-product-overflow': 'grid.x * grid.y 不能安全表示。',
+        'coverage-width-overflow': 'grid.x * block.x 不能安全表示。',
+        'coverage-height-overflow': 'grid.y * block.y 不能安全表示。',
+        'launched-threads-overflow': '总 launch thread 数不能安全表示。',
+        'fringe-calculation-invalid': '无法安全计算 coverage 或 fringe。',
+      },
+    },
+  } as const;
+
+  const issueFields: Partial<Record<BlockShapeIssueCode, readonly (keyof BlockShapeInput)[]>> = {
+    'logical-width-invalid': ['logicalWidth'],
+    'logical-height-invalid': ['logicalHeight'],
+    'block-x-invalid': ['blockX'],
+    'block-y-invalid': ['blockY'],
+    'block-x-exceeds-capability': ['blockX'],
+    'block-y-exceeds-capability': ['blockY'],
+    'block-product-overflow': ['blockX', 'blockY'],
+    'threads-per-block-exceeds-capability': ['blockX', 'blockY'],
+    'logical-elements-overflow': ['logicalWidth', 'logicalHeight'],
+    'grid-x-exceeds-capability': ['logicalWidth', 'blockX'],
+    'grid-y-exceeds-capability': ['logicalHeight', 'blockY'],
+    'grid-product-overflow': ['logicalWidth', 'logicalHeight', 'blockX', 'blockY'],
+    'coverage-width-overflow': ['logicalWidth', 'blockX'],
+    'coverage-height-overflow': ['logicalHeight', 'blockY'],
+    'launched-threads-overflow': ['logicalWidth', 'logicalHeight', 'blockX', 'blockY'],
+    'fringe-calculation-invalid': ['logicalWidth', 'logicalHeight', 'blockX', 'blockY'],
+  };
+
+  class CudaBlockShapeExplorer extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-block-shape-controls]');
+      const capability = this.querySelector<HTMLSelectElement>('[data-capability]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reset-block-shape]');
+      const inputs = this.inputs();
+      if (!controls || !capability || !reset || inputs.size !== 4) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      capability.addEventListener('change', () => this.render());
+      inputs.forEach((input) => input.addEventListener('input', () => this.render()));
+      reset.addEventListener('click', () => {
+        const defaults = createDefaultBlockShapeInput();
+        capability.value = DEFAULT_BLOCK_SHAPE_CAPABILITY_ID;
+        inputs.forEach((input, field) => {
+          input.value = defaults[field];
+        });
+        this.render();
+        inputs.get('logicalWidth')?.focus();
+      });
+      this.render();
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private inputs() {
+      const inputs = new Map<keyof BlockShapeInput, HTMLInputElement>();
+      this.querySelectorAll<HTMLInputElement>('[data-block-shape-field]').forEach((input) => {
+        const field = input.dataset.blockShapeField;
+        if (field === 'logicalWidth' || field === 'logicalHeight' || field === 'blockX' || field === 'blockY') {
+          inputs.set(field, input);
+        }
+      });
+      return inputs;
+    }
+
+    private render() {
+      const capabilityPicker = this.querySelector<HTMLSelectElement>('[data-capability]');
+      const capability = findBlockShapeCapability(capabilityPicker?.value ?? '');
+      if (!capability) {
+        const copy = messages[this.locale()];
+        this.dataset.state = 'invalid';
+        const result = this.querySelector<HTMLElement>('[data-live-result]');
+        if (result) result.dataset.state = 'invalid';
+        this.setText('[data-verdict]', copy.invalid);
+        this.setText('[data-live-status]', copy.invalidStatus);
+        const geometry = this.querySelector<HTMLElement>('[data-geometry]');
+        if (geometry) geometry.hidden = true;
+        const issuePanel = this.querySelector<HTMLElement>('[data-issue-panel]');
+        if (issuePanel) issuePanel.hidden = false;
+        const issueList = this.querySelector<HTMLUListElement>('[data-issues]');
+        if (issueList) {
+          const item = document.createElement('li');
+          item.textContent = copy.issues['capability-record-invalid'];
+          issueList.replaceChildren(item);
+        }
+        return;
+      }
+      const inputs = this.inputs();
+      const value = Object.fromEntries(
+        [...inputs].map(([field, input]) => [field, input.value]),
+      ) as BlockShapeInput;
+      const assessment = assessBlockShape(value, capability);
+      const copy = messages[this.locale()];
+      const format = new Intl.NumberFormat(this.locale());
+      const result = this.querySelector<HTMLElement>('[data-live-result]');
+      const geometry = this.querySelector<HTMLElement>('[data-geometry]');
+      const issuePanel = this.querySelector<HTMLElement>('[data-issue-panel]');
+      const issueList = this.querySelector<HTMLUListElement>('[data-issues]');
+
+      this.dataset.state = assessment.valid ? 'valid' : 'invalid';
+      if (result) result.dataset.state = assessment.valid ? 'valid' : 'invalid';
+      this.setText('[data-verdict]', assessment.valid ? copy.valid : copy.invalid);
+      if (!assessment.valid) this.setText('[data-live-status]', copy.invalidStatus);
+      inputs.forEach((input) => input.setAttribute('aria-invalid', 'false'));
+      for (const issue of assessment.issues) {
+        for (const field of issueFields[issue] ?? []) inputs.get(field)?.setAttribute('aria-invalid', 'true');
+      }
+
+      if (issueList) {
+        issueList.replaceChildren(...assessment.issues.map((issue) => {
+          const item = document.createElement('li');
+          item.textContent = copy.issues[issue];
+          return item;
+        }));
+      }
+      if (issuePanel) issuePanel.hidden = assessment.valid;
+      if (geometry) geometry.hidden = !assessment.valid;
+
+      this.setText('[data-capability-name]', `CC ${capability.computeCapability}`);
+      this.setText(
+        '[data-capability-block]',
+        `${capability.maxBlockDim.x} x ${capability.maxBlockDim.y} / ${capability.maxThreadsPerBlock}`,
+      );
+      this.setText(
+        '[data-capability-grid]',
+        `${format.format(capability.maxGridDim.x)} x ${format.format(capability.maxGridDim.y)}`,
+      );
+      this.setText(
+        '[data-capability-resource]',
+        `${format.format(capability.registersPerBlock)} / ${capability.sharedMemoryPerBlockBytes / 1_024} KiB`,
+      );
+
+      if (!assessment.valid) return;
+      const measured = assessment.geometry;
+      this.setText('[data-logical]', `${format.format(measured.logical.width)} x ${format.format(measured.logical.height)}`);
+      this.setText(
+        '[data-block]',
+        `${format.format(measured.block.x)} x ${format.format(measured.block.y)} = ${format.format(measured.block.threads)}`,
+      );
+      this.setText(
+        '[data-grid]',
+        `${format.format(measured.grid.x)} x ${format.format(measured.grid.y)} = ${format.format(measured.grid.blocks)}`,
+      );
+      this.setText(
+        '[data-coverage]',
+        `${format.format(measured.coverage.width)} x ${format.format(measured.coverage.height)}`,
+      );
+      this.setText('[data-launched]', format.format(measured.coverage.launchedThreads));
+      this.setText('[data-fringe]', format.format(measured.coverage.fringeThreads));
+      this.setText(
+        '[data-live-status]',
+        `${copy.validStatus} grid ${measured.grid.x} x ${measured.grid.y}; ${this.locale() === 'zh-CN' ? 'launch threads' : 'launched threads'} ${format.format(measured.coverage.launchedThreads)}; fringe ${format.format(measured.coverage.fringeThreads)}.`,
+      );
+      const map = this.querySelector<HTMLElement>('[data-shape-map]');
+      if (map) {
+        map.style.setProperty('--logical-inline', `${(measured.logical.width / measured.coverage.width) * 100}%`);
+        map.style.setProperty('--logical-block', `${(measured.logical.height / measured.coverage.height) * 100}%`);
+        map.setAttribute('aria-label', copy.mapLabel);
+      }
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-block-shape-explorer')) {
+    customElements.define('cuda-block-shape-explorer', CudaBlockShapeExplorer);
+  }
+</script>
+
+<style>
+  .block-shape-explorer {
+    --block-shape-line: color-mix(in srgb, var(--theme-accent) 38%, var(--sl-color-gray-5));
+    --block-shape-panel: color-mix(in srgb, var(--theme-canvas) 90%, var(--theme-accent) 10%);
+    display: grid;
+    min-width: 0;
+    gap: 1rem;
+    margin-block: 1.5rem 2rem;
+    padding: clamp(0.9rem, 3vw, 1.5rem);
+    overflow: hidden;
+    border: 1px solid var(--block-shape-line);
+    border-radius: 0.3rem;
+    background:
+      linear-gradient(90deg, var(--theme-grid) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
+      linear-gradient(var(--theme-grid) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
+      var(--theme-canvas);
+    color: var(--theme-ink);
+  }
+
+  .block-shape-explorer [hidden] {
+    display: none !important;
+  }
+
+  .block-shape-header {
+    display: grid;
+    gap: 0.35rem;
+    padding-block-end: 0.85rem;
+    border-block-end: 1px solid var(--block-shape-line);
+  }
+
+  .block-shape-header p,
+  .block-shape-header h3,
+  .block-shape-static > p,
+  .block-shape-static h3,
+  .block-shape-no-evidence {
+    margin: 0;
+  }
+
+  .block-shape-header > p:first-child {
+    color: var(--theme-signal);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .block-shape-header h3 {
+    font-size: clamp(1.2rem, 3vw, 1.7rem);
+    line-height: 1.15;
+  }
+
+  .block-shape-header > p:last-child,
+  .block-shape-static > p {
+    max-width: 75ch;
+    color: var(--sl-color-gray-2);
+  }
+
+  .block-shape-notice,
+  .block-shape-no-evidence,
+  .block-shape-static-resource {
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border-inline-start: 0.28rem solid var(--theme-signal);
+    background: color-mix(in srgb, var(--theme-signal) 9%, var(--theme-canvas));
+    font-size: var(--sl-text-sm);
+  }
+
+  .block-shape-controls {
+    min-width: 0;
+    margin: 0;
+    padding: 0.8rem;
+    border: 1px solid var(--sl-color-gray-5);
+    background: var(--sl-color-bg-nav);
+  }
+
+  .block-shape-controls legend {
+    padding-inline: 0.35rem;
+    color: var(--theme-accent-strong);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    font-weight: 800;
+  }
+
+  .block-shape-control-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+    gap: 0.65rem;
+    align-items: end;
+  }
+
+  .block-shape-controls label {
+    display: grid;
+    min-width: 0;
+    gap: 0.28rem;
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-xs);
+  }
+
+  .block-shape-controls input,
+  .block-shape-controls select,
+  .block-shape-controls button {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.55rem;
+    padding-inline: 0.55rem;
+    border: 1px solid var(--sl-color-gray-4);
+    border-radius: 0.16rem;
+    background: var(--sl-color-bg);
+    color: var(--sl-color-text);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .block-shape-controls button {
+    width: auto;
+    cursor: pointer;
+  }
+
+  .block-shape-controls input[aria-invalid='true'] {
+    border: 2px solid var(--sl-color-red-high);
+  }
+
+  .block-shape-controls :focus-visible {
+    outline: 3px solid var(--theme-signal);
+    outline-offset: 2px;
+  }
+
+  .block-shape-controls > small {
+    display: block;
+    margin-block-start: 0.55rem;
+    color: var(--sl-color-gray-3);
+  }
+
+  .block-shape-live-result {
+    display: grid;
+    min-width: 0;
+    gap: 0.8rem;
+    padding: 1rem;
+    border: 2px solid var(--theme-accent-strong);
+    background: color-mix(in srgb, var(--theme-accent) 7%, var(--sl-color-bg));
+  }
+
+  .block-shape-live-result[data-state='invalid'] {
+    border-color: var(--sl-color-red-high);
+  }
+
+  .block-shape-verdict {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: baseline;
+  }
+
+  .block-shape-verdict span {
+    padding: 0.22rem 0.42rem;
+    border: 1px solid currentColor;
+    color: var(--theme-accent-strong);
+    font-family: var(--sl-font-mono);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+  }
+
+  [data-state='invalid'] .block-shape-verdict span {
+    color: var(--sl-color-red-high);
+  }
+
+  .block-shape-verdict h4,
+  .block-shape-capability h4,
+  .block-shape-static h4,
+  .block-shape-live-status {
+    margin: 0;
+  }
+
+  .block-shape-live-status {
+    color: var(--sl-color-gray-2);
+  }
+
+  .block-shape-issues {
+    padding: 0.75rem;
+    border: 1px solid var(--sl-color-red-high);
+    background: color-mix(in srgb, var(--sl-color-red-high) 8%, var(--sl-color-bg));
+  }
+
+  .block-shape-issues ul {
+    margin-block: 0.4rem 0;
+    padding-inline-start: 1.2rem;
+  }
+
+  .block-shape-geometry {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(12rem, 0.75fr);
+    gap: 0.8rem;
+  }
+
+  .block-shape-metrics,
+  .block-shape-capability dl,
+  .block-shape-static dl {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .block-shape-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .block-shape-metrics > div,
+  .block-shape-capability dl > div,
+  .block-shape-static article {
+    min-width: 0;
+    padding: 0.65rem;
+    border: 1px solid var(--sl-color-gray-5);
+    background: var(--block-shape-panel);
+  }
+
+  .block-shape-metrics dt,
+  .block-shape-capability dt,
+  .block-shape-static dt {
+    color: var(--sl-color-gray-2);
+    font-family: var(--sl-font-mono);
+    font-size: 0.7rem;
+    font-weight: 750;
+    text-transform: uppercase;
+  }
+
+  .block-shape-metrics dd,
+  .block-shape-capability dd,
+  .block-shape-static dd {
+    margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  .block-shape-map {
+    position: relative;
+    min-height: 13rem;
+    overflow: hidden;
+    border: 2px solid var(--theme-signal);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 0.6rem, color-mix(in srgb, var(--theme-signal) 12%, transparent) 0.6rem 1.2rem),
+      var(--sl-color-bg);
+  }
+
+  .block-shape-logical {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: var(--logical-inline);
+    block-size: var(--logical-block);
+    min-inline-size: 1.5rem;
+    min-block-size: 1.5rem;
+    border-inline-end: 2px solid var(--theme-accent-strong);
+    border-block-end: 2px solid var(--theme-accent-strong);
+    background: color-mix(in srgb, var(--theme-accent) 24%, var(--sl-color-bg));
+  }
+
+  .block-shape-map-coverage,
+  .block-shape-logical span {
+    position: absolute;
+    padding: 0.18rem 0.32rem;
+    background: var(--sl-color-bg);
+    font-family: var(--sl-font-mono);
+    font-size: 0.66rem;
+    font-weight: 800;
+  }
+
+  .block-shape-map-coverage {
+    inset-block-end: 0.35rem;
+    inset-inline-end: 0.35rem;
+    color: var(--theme-signal);
+  }
+
+  .block-shape-logical span {
+    inset-block-start: 0.35rem;
+    inset-inline-start: 0.35rem;
+    color: var(--theme-accent-strong);
+  }
+
+  .block-shape-gates {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+
+  .block-shape-gates li {
+    display: grid;
+    min-width: 0;
+    gap: 0.35rem;
+    padding: 0.7rem;
+    border-block-start: 0.25rem solid var(--theme-accent-strong);
+    background: var(--block-shape-panel);
+    font-size: var(--sl-text-sm);
+  }
+
+  .block-shape-gates li[data-pending='true'] {
+    border-color: var(--theme-signal);
+  }
+
+  .block-shape-gates strong {
+    color: var(--theme-accent-strong);
+    font-family: var(--sl-font-mono);
+    font-size: 0.72rem;
+  }
+
+  .block-shape-gates span {
+    color: var(--sl-color-gray-2);
+  }
+
+  .block-shape-capability {
+    display: grid;
+    gap: 0.55rem;
+    padding-block-start: 0.7rem;
+    border-block-start: 1px dashed var(--sl-color-gray-4);
+  }
+
+  .block-shape-capability dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .block-shape-static {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .block-shape-static-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .block-shape-static article {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+  }
+
+  .block-shape-static article > p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .block-shape-static-stop {
+    color: var(--sl-color-red-high);
+  }
+
+  .block-shape-no-evidence {
+    border-block-start: 1px dashed var(--sl-color-gray-4);
+    border-inline-start: 0;
+    font-weight: 700;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .block-shape-controls button,
+    .block-shape-controls input,
+    .block-shape-controls select {
+      transition: border-color 140ms ease, background-color 140ms ease;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .block-shape-controls button,
+    .block-shape-controls input,
+    .block-shape-controls select {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 58rem) {
+    .block-shape-control-grid,
+    .block-shape-gates {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .block-shape-geometry {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .block-shape-control-grid,
+    .block-shape-metrics,
+    .block-shape-gates,
+    .block-shape-capability dl,
+    .block-shape-static-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .block-shape-controls button {
+      width: 100%;
+    }
+
+    .block-shape-map {
+      min-height: 10rem;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .block-shape-explorer,
+    .block-shape-notice,
+    .block-shape-live-result,
+    .block-shape-issues,
+    .block-shape-metrics > div,
+    .block-shape-capability dl > div,
+    .block-shape-static article,
+    .block-shape-gates li,
+    .block-shape-map,
+    .block-shape-logical,
+    .block-shape-no-evidence {
+      border-color: CanvasText;
+      background: Canvas;
+      color: CanvasText;
+      forced-color-adjust: auto;
+    }
+
+    .block-shape-logical {
+      border: 3px double Highlight;
+    }
+  }
+
+  @media print {
+    .block-shape-explorer {
+      break-inside: auto;
+      border: 1px solid #555;
+      background: #fff;
+      color: #222;
+      box-shadow: none;
+    }
+
+    .block-shape-controls,
+    .block-shape-live-result {
+      display: none !important;
+    }
+
+    .block-shape-static-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .block-shape-static article,
+    .block-shape-notice,
+    .block-shape-static-resource,
+    .block-shape-no-evidence {
+      break-inside: avoid;
+      border-color: #777;
+      background: #fff;
+      color: #222;
+    }
+  }
+</style>

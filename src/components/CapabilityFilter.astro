@@ -1,0 +1,724 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import {
+  CAPABILITY_RECORDS,
+  resolveCapabilityContract,
+  type CapabilityFeatureId,
+  type CapabilityRecord,
+  type CompilerTargetScope,
+  type CompilerTargetSet,
+} from '../visuals/capability-filter-model';
+
+interface Props {
+  locale: 'zh-CN' | 'en';
+}
+
+const { locale } = Astro.props;
+const copy = locale === 'zh-CN'
+  ? {
+      eyebrow: 'F06 / 内嵌筛选器',
+      title: '从直接查询值展开功能合同',
+      summary: '只接受这份小型复核数据集中的 compute capability。功能、数值限制和编译目标保持为三个独立结果。',
+      input: '直接查询到的 compute capability',
+      hint: '已复核值：7.5、8.0、9.0、10.0、12.0。其他值保持未知，不取整、不猜测。',
+      reset: '重置为 7.5',
+      known: '已显示 compute capability',
+      unknown: '未知或格式错误：不显示功能、限制或目标。请保留原始值并核对当前 owner 文档。',
+      featuresHeading: '功能可用性',
+      feature: '功能合同条目',
+      availability: '可用性',
+      available: '可用',
+      unavailable: '不可用',
+      features: {
+        'hardware-memcpy-async': '硬件加速 memcpy_async',
+        'thread-block-clusters': '线程块集群（Thread Block Cluster）',
+        'architecture-specific-feature-set': '架构专用（architecture-specific）功能集',
+        'family-specific-feature-set': '家族专用（family-specific）功能集',
+      },
+      limitsHeading: '数值限制',
+      warpSize: 'Warp 大小',
+      threadsPerBlock: '每 block 最大 thread 数',
+      sharedPerSm: '每 SM 最大 shared memory',
+      sharedPerBlock: '每 block 最大 shared memory',
+      kib: 'KiB（owner 表中的 KB 按 1024 bytes）',
+      targetsHeading: '编译目标',
+      targetSet: '功能集',
+      virtual: 'Virtual target',
+      real: 'Real target',
+      lanes: '复核过的 NVCC 文档',
+      scope: '代码范围',
+      sets: {
+        baseline: 'Baseline',
+        'architecture-specific': 'Architecture-specific',
+        'family-specific': 'Family-specific',
+      },
+      scopes: {
+        'baseline-features': '只启用 baseline 功能假设',
+        'exact-capability': '只限完全相同的 compute capability',
+        'same-family': '只限 owner 表声明的同一家族成员',
+      },
+      boundary: '筛选边界',
+      boundaryText: '结果不反推 GPU 型号，不评估 Toolkit/driver/OS 环境兼容性，不预测性能，也不构成编译或运行证据。',
+      staticHeading: '静态复核表',
+      staticIntro: 'JavaScript 不可用时，下面的原创小表仍提供相同数据范围。它不是完整架构目录。',
+      capability: 'Compute capability',
+      selectedFeatures: '所选功能',
+      numericLimits: '数值限制',
+      baselineTargets: 'Baseline targets',
+      qualifiedTargets: '带后缀 targets',
+      none: '无',
+      evidence: '此浏览器筛选器不查询硬件、不编译或运行 CUDA，也不会改变任何 Evidence Status。',
+    }
+  : {
+      eyebrow: 'F06 / embedded filter',
+      title: 'Expand a feature contract from a directly queried value',
+      summary: 'Only compute capabilities in this small reviewed dataset are accepted. Features, numeric limits, and compiler targets remain three separate results.',
+      input: 'Directly queried compute capability',
+      hint: 'Reviewed values: 7.5, 8.0, 9.0, 10.0, and 12.0. Other values remain unknown; they are never rounded or guessed.',
+      reset: 'Reset to 7.5',
+      known: 'Showing compute capability',
+      unknown: 'Unknown or malformed: no features, limits, or targets are shown. Preserve the raw value and check current owner documentation.',
+      featuresHeading: 'Feature availability',
+      feature: 'Feature-contract entry',
+      availability: 'Availability',
+      available: 'Available',
+      unavailable: 'Unavailable',
+      features: {
+        'hardware-memcpy-async': 'Hardware-accelerated memcpy_async',
+        'thread-block-clusters': 'Thread Block Cluster',
+        'architecture-specific-feature-set': 'Architecture-specific feature set',
+        'family-specific-feature-set': 'Family-specific feature set',
+      },
+      limitsHeading: 'Numeric limits',
+      warpSize: 'Warp size',
+      threadsPerBlock: 'Maximum threads per block',
+      sharedPerSm: 'Maximum shared memory per SM',
+      sharedPerBlock: 'Maximum shared memory per block',
+      kib: 'KiB (the owner table defines KB as 1024 bytes)',
+      targetsHeading: 'Compiler targets',
+      targetSet: 'Feature set',
+      virtual: 'Virtual target',
+      real: 'Real target',
+      lanes: 'Reviewed NVCC documentation',
+      scope: 'Code scope',
+      sets: {
+        baseline: 'Baseline',
+        'architecture-specific': 'Architecture-specific',
+        'family-specific': 'Family-specific',
+      },
+      scopes: {
+        'baseline-features': 'Enables baseline feature assumptions only',
+        'exact-capability': 'Restricted to the exact compute capability',
+        'same-family': 'Restricted to members in the owner family table',
+      },
+      boundary: 'Filter boundary',
+      boundaryText: 'The result does not infer a GPU model, assess Toolkit/driver/OS environment compatibility, predict performance, or provide compilation or runtime evidence.',
+      staticHeading: 'Static review table',
+      staticIntro: 'When JavaScript is unavailable, this original small table preserves the same data scope. It is not a complete architecture catalog.',
+      capability: 'Compute capability',
+      selectedFeatures: 'Selected features',
+      numericLimits: 'Numeric limits',
+      baselineTargets: 'Baseline targets',
+      qualifiedTargets: 'Suffixed targets',
+      none: 'None',
+      evidence: 'This browser filter queries no hardware, compiles or runs no CUDA, and changes no Evidence Status.',
+    };
+
+const initial = resolveCapabilityContract('7.5');
+if (initial.state !== 'known') throw new Error('The initial capability contract must be reviewed.');
+
+const featureLabel = (id: CapabilityFeatureId) => copy.features[id];
+const targetSetLabel = (set: CompilerTargetSet) => copy.sets[set];
+const targetScopeLabel = (scope: CompilerTargetScope) => copy.scopes[scope];
+const featureSummary = (record: CapabilityRecord) => record.featureAvailability
+  .map((feature) => `${featureLabel(feature.id)}: ${feature.available ? copy.available : copy.unavailable}`)
+  .join('; ');
+const baselineTarget = (record: CapabilityRecord) => record.compilerTargets
+  .filter((target) => target.set === 'baseline')
+  .map((target) => `${target.virtual} / ${target.real}`)
+  .join(', ');
+const qualifiedTargets = (record: CapabilityRecord) => record.compilerTargets
+  .filter((target) => target.set !== 'baseline')
+  .map((target) => `${target.virtual} / ${target.real}`)
+  .join(', ') || copy.none;
+const inputId = `capability-filter-input-${locale}`;
+const hintId = `capability-filter-hint-${locale}`;
+const optionsId = `capability-filter-options-${locale}`;
+---
+
+<cuda-capability-filter class="capability-filter not-content" data-locale={locale} data-state="known">
+  <header class="capability-filter__header">
+    <p class="capability-filter__eyebrow">{copy.eyebrow}</p>
+    <h3>{copy.title}</h3>
+    <p>{copy.summary}</p>
+  </header>
+
+  <div class="capability-filter__controls" data-capability-controls hidden role="group" aria-label={copy.title}>
+    <label for={inputId}>{copy.input}</label>
+    <div class="capability-filter__input-row">
+      <input
+        id={inputId}
+        data-capability-input
+        type="text"
+        inputmode="decimal"
+        autocomplete="off"
+        value="7.5"
+        list={optionsId}
+        pattern="[0-9]+\.[0-9]+"
+        aria-describedby={hintId}
+        aria-invalid="false"
+      />
+      <datalist id={optionsId}>
+        {CAPABILITY_RECORDS.map((record) => <option value={record.id}></option>)}
+      </datalist>
+      <button type="button" data-capability-reset>{copy.reset}</button>
+    </div>
+    <small id={hintId}>{copy.hint}</small>
+  </div>
+
+  <section class="capability-filter__interactive" data-capability-result hidden aria-label={copy.title}>
+    <p class="capability-filter__status" data-capability-status role="status" aria-live="polite" aria-atomic="true">
+      {copy.known} {initial.capability}.
+    </p>
+
+    <div data-capability-details>
+      <div class="capability-filter__contract-grid">
+        <section class="capability-filter__panel" aria-labelledby={`capability-features-${locale}`}>
+          <h4 id={`capability-features-${locale}`}>{copy.featuresHeading}</h4>
+          <div class="capability-filter__table-wrap" tabindex="0" aria-label={copy.featuresHeading}>
+            <table>
+              <thead><tr><th scope="col">{copy.feature}</th><th scope="col">{copy.availability}</th></tr></thead>
+              <tbody data-capability-features>
+                {initial.featureAvailability.map((feature) => (
+                  <tr>
+                    <th scope="row">{featureLabel(feature.id)}</th>
+                    <td>{feature.available ? copy.available : copy.unavailable}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="capability-filter__panel" aria-labelledby={`capability-limits-${locale}`}>
+          <h4 id={`capability-limits-${locale}`}>{copy.limitsHeading}</h4>
+          <dl class="capability-filter__limits">
+            <div><dt>{copy.warpSize}</dt><dd data-limit-warp>{initial.numericLimits.warpSize}</dd></div>
+            <div><dt>{copy.threadsPerBlock}</dt><dd data-limit-threads>{initial.numericLimits.maximumThreadsPerBlock}</dd></div>
+            <div><dt>{copy.sharedPerSm}</dt><dd><span data-limit-shared-sm>{initial.numericLimits.maximumSharedMemoryPerSmKiB}</span> {copy.kib}</dd></div>
+            <div><dt>{copy.sharedPerBlock}</dt><dd><span data-limit-shared-block>{initial.numericLimits.maximumSharedMemoryPerBlockKiB}</span> {copy.kib}</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <section class="capability-filter__panel capability-filter__targets" aria-labelledby={`capability-targets-${locale}`}>
+        <h4 id={`capability-targets-${locale}`}>{copy.targetsHeading}</h4>
+        <div class="capability-filter__table-wrap" tabindex="0" aria-label={copy.targetsHeading}>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">{copy.targetSet}</th>
+                <th scope="col">{copy.virtual}</th>
+                <th scope="col">{copy.real}</th>
+                <th scope="col">{copy.lanes}</th>
+                <th scope="col">{copy.scope}</th>
+              </tr>
+            </thead>
+            <tbody data-capability-targets>
+              {initial.compilerTargets.map((target) => (
+                <tr>
+                  <th scope="row">{targetSetLabel(target.set)}</th>
+                  <td><code>{target.virtual}</code></td>
+                  <td><code>{target.real}</code></td>
+                  <td>{target.toolkitLanes.join(', ')}</td>
+                  <td>{targetScopeLabel(target.scope)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <aside class="capability-filter__boundary" aria-label={copy.boundary}>
+      <strong>{copy.boundary}</strong>
+      <p>{copy.boundaryText}</p>
+    </aside>
+  </section>
+
+  <section class="capability-filter__static" data-static-fallback aria-labelledby={`capability-static-${locale}`}>
+    <h4 id={`capability-static-${locale}`}>{copy.staticHeading}</h4>
+    <p>{copy.staticIntro}</p>
+    <div class="capability-filter__table-wrap" tabindex="0" aria-label={copy.staticHeading}>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{copy.capability}</th>
+            <th scope="col">{copy.selectedFeatures}</th>
+            <th scope="col">{copy.numericLimits}</th>
+            <th scope="col">{copy.baselineTargets}</th>
+            <th scope="col">{copy.qualifiedTargets}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {CAPABILITY_RECORDS.map((record) => (
+            <tr>
+              <th scope="row">{record.id}</th>
+              <td>{featureSummary(record)}</td>
+              <td>
+                {copy.warpSize}: {record.numericLimits.warpSize}; {copy.threadsPerBlock}: {record.numericLimits.maximumThreadsPerBlock};{' '}
+                {copy.sharedPerSm}: {record.numericLimits.maximumSharedMemoryPerSmKiB} KiB; {copy.sharedPerBlock}: {record.numericLimits.maximumSharedMemoryPerBlockKiB} KiB
+              </td>
+              <td><code>{baselineTarget(record)}</code></td>
+              <td>{qualifiedTargets(record)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="capability-filter__evidence">{copy.evidence}</p>
+</cuda-capability-filter>
+
+<script>
+  import {
+    resolveCapabilityContract,
+    type CapabilityCompilerTarget,
+    type CapabilityFeature,
+  } from '../visuals/capability-filter-model';
+
+  const messages = {
+    en: {
+      known: 'Showing compute capability',
+      unknown: 'Unknown or malformed: no features, limits, or targets are shown. Preserve the raw value and check current owner documentation.',
+      available: 'Available',
+      unavailable: 'Unavailable',
+      features: {
+        'hardware-memcpy-async': 'Hardware-accelerated memcpy_async',
+        'thread-block-clusters': 'Thread Block Cluster',
+        'architecture-specific-feature-set': 'Architecture-specific feature set',
+        'family-specific-feature-set': 'Family-specific feature set',
+      },
+      sets: {
+        baseline: 'Baseline',
+        'architecture-specific': 'Architecture-specific',
+        'family-specific': 'Family-specific',
+      },
+      scopes: {
+        'baseline-features': 'Enables baseline feature assumptions only',
+        'exact-capability': 'Restricted to the exact compute capability',
+        'same-family': 'Restricted to members in the owner family table',
+      },
+    },
+    'zh-CN': {
+      known: '已显示 compute capability',
+      unknown: '未知或格式错误：不显示功能、限制或目标。请保留原始值并核对当前 owner 文档。',
+      available: '可用',
+      unavailable: '不可用',
+      features: {
+        'hardware-memcpy-async': '硬件加速 memcpy_async',
+        'thread-block-clusters': '线程块集群（Thread Block Cluster）',
+        'architecture-specific-feature-set': '架构专用（architecture-specific）功能集',
+        'family-specific-feature-set': '家族专用（family-specific）功能集',
+      },
+      sets: {
+        baseline: 'Baseline',
+        'architecture-specific': 'Architecture-specific',
+        'family-specific': 'Family-specific',
+      },
+      scopes: {
+        'baseline-features': '只启用 baseline 功能假设',
+        'exact-capability': '只限完全相同的 compute capability',
+        'same-family': '只限 owner 表声明的同一家族成员',
+      },
+    },
+  } as const;
+
+  class CudaCapabilityFilter extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-capability-controls]');
+      const result = this.querySelector<HTMLElement>('[data-capability-result]');
+      const input = this.querySelector<HTMLInputElement>('[data-capability-input]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-capability-reset]');
+      if (!controls || !result || !input || !reset) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      result.hidden = false;
+      input.addEventListener('input', () => this.render(input));
+      reset.addEventListener('click', () => {
+        input.value = '7.5';
+        this.render(input);
+        input.focus();
+      });
+      this.render(input);
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private render(input: HTMLInputElement) {
+      const contract = resolveCapabilityContract(input.value);
+      const copy = messages[this.locale()];
+      const details = this.querySelector<HTMLElement>('[data-capability-details]');
+      this.dataset.state = contract.state;
+      input.setAttribute('aria-invalid', String(contract.state === 'unknown'));
+
+      if (contract.state === 'unknown') {
+        if (details) details.hidden = true;
+        this.setText('[data-capability-status]', copy.unknown);
+        return;
+      }
+
+      if (details) details.hidden = false;
+      this.setText('[data-capability-status]', `${copy.known} ${contract.capability}.`);
+      this.renderFeatures(contract.featureAvailability);
+      this.setText('[data-limit-warp]', String(contract.numericLimits.warpSize));
+      this.setText('[data-limit-threads]', String(contract.numericLimits.maximumThreadsPerBlock));
+      this.setText('[data-limit-shared-sm]', String(contract.numericLimits.maximumSharedMemoryPerSmKiB));
+      this.setText('[data-limit-shared-block]', String(contract.numericLimits.maximumSharedMemoryPerBlockKiB));
+      this.renderTargets(contract.compilerTargets);
+    }
+
+    private renderFeatures(features: readonly CapabilityFeature[]) {
+      const body = this.querySelector<HTMLTableSectionElement>('[data-capability-features]');
+      if (!body) return;
+      const copy = messages[this.locale()];
+      body.replaceChildren(...features.map((feature) => {
+        const row = document.createElement('tr');
+        const name = document.createElement('th');
+        const availability = document.createElement('td');
+        name.scope = 'row';
+        name.textContent = copy.features[feature.id];
+        availability.textContent = feature.available ? copy.available : copy.unavailable;
+        row.append(name, availability);
+        return row;
+      }));
+    }
+
+    private renderTargets(targets: readonly CapabilityCompilerTarget[]) {
+      const body = this.querySelector<HTMLTableSectionElement>('[data-capability-targets]');
+      if (!body) return;
+      const copy = messages[this.locale()];
+      body.replaceChildren(...targets.map((target) => {
+        const row = document.createElement('tr');
+        const set = document.createElement('th');
+        const virtual = document.createElement('td');
+        const real = document.createElement('td');
+        const lanes = document.createElement('td');
+        const scope = document.createElement('td');
+        set.scope = 'row';
+        set.textContent = copy.sets[target.set];
+        virtual.append(this.code(target.virtual));
+        real.append(this.code(target.real));
+        lanes.textContent = target.toolkitLanes.join(', ');
+        scope.textContent = copy.scopes[target.scope];
+        row.append(set, virtual, real, lanes, scope);
+        return row;
+      }));
+    }
+
+    private code(value: string) {
+      const code = document.createElement('code');
+      code.textContent = value;
+      return code;
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-capability-filter')) {
+    customElements.define('cuda-capability-filter', CudaCapabilityFilter);
+  }
+</script>
+
+<style is:global>
+  .capability-filter {
+    --cap-border: var(--sl-color-gray-5, #59677a);
+    --cap-panel: color-mix(in srgb, var(--sl-color-bg, #10151d) 92%, var(--sl-color-accent, #72e6be));
+    --cap-accent: var(--sl-color-accent-high, #8af0cf);
+    display: block;
+    margin-block: 1.5rem;
+    border: 1px solid var(--cap-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--sl-color-bg, #10151d);
+  }
+
+  .capability-filter [hidden] {
+    display: none !important;
+  }
+
+  .capability-filter__header,
+  .capability-filter__controls,
+  .capability-filter__interactive,
+  .capability-filter__static,
+  .capability-filter__evidence {
+    padding-inline: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  .capability-filter__header {
+    padding-block: 1.35rem 1rem;
+    border-bottom: 1px solid var(--cap-border);
+    background: linear-gradient(135deg, var(--cap-panel), var(--sl-color-bg, #10151d));
+  }
+
+  .capability-filter__header h3,
+  .capability-filter__panel h4,
+  .capability-filter__static h4 {
+    margin-block: 0.25rem 0.5rem;
+  }
+
+  .capability-filter__header p,
+  .capability-filter__boundary p,
+  .capability-filter__static p {
+    margin-block: 0.4rem 0;
+  }
+
+  .capability-filter__eyebrow {
+    color: var(--cap-accent);
+    font-family: var(--__sl-font-mono, ui-monospace, monospace);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .capability-filter__controls {
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--cap-border);
+  }
+
+  .capability-filter__controls > label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-weight: 700;
+  }
+
+  .capability-filter__input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .capability-filter__input-row input,
+  .capability-filter__input-row button {
+    min-height: 2.75rem;
+    border: 1px solid var(--cap-border);
+    border-radius: 0.4rem;
+    background: var(--sl-color-bg, #10151d);
+    color: var(--sl-color-text, #edf2f7);
+    font: inherit;
+  }
+
+  .capability-filter__input-row input {
+    width: min(100%, 13rem);
+    padding-inline: 0.75rem;
+  }
+
+  .capability-filter__input-row input[aria-invalid='true'] {
+    border-color: var(--sl-color-red-high, #ff8d8d);
+    outline-color: var(--sl-color-red-high, #ff8d8d);
+  }
+
+  .capability-filter__input-row button {
+    padding-inline: 0.9rem;
+    cursor: pointer;
+  }
+
+  .capability-filter__input-row button:hover,
+  .capability-filter__input-row button:focus-visible {
+    border-color: var(--cap-accent);
+  }
+
+  .capability-filter__controls small {
+    display: block;
+    margin-top: 0.55rem;
+  }
+
+  .capability-filter__interactive,
+  .capability-filter__static {
+    padding-block: 1rem 1.25rem;
+  }
+
+  .capability-filter__status {
+    margin-block: 0 1rem;
+    border-inline-start: 0.3rem solid var(--cap-accent);
+    padding: 0.7rem 0.85rem;
+    background: var(--cap-panel);
+    font-weight: 700;
+  }
+
+  .capability-filter[data-state='unknown'] .capability-filter__status {
+    border-inline-start-color: var(--sl-color-red-high, #ff8d8d);
+  }
+
+  .capability-filter__contract-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(15rem, 0.8fr);
+    gap: 1rem;
+  }
+
+  .capability-filter__panel,
+  .capability-filter__boundary {
+    border: 1px solid var(--cap-border);
+    border-radius: 0.55rem;
+    padding: 0.85rem;
+    background: var(--cap-panel);
+  }
+
+  .capability-filter__targets,
+  .capability-filter__boundary {
+    margin-top: 1rem;
+  }
+
+  .capability-filter__table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .capability-filter table {
+    width: 100%;
+    min-width: 34rem;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .capability-filter th,
+  .capability-filter td {
+    border: 1px solid var(--cap-border);
+    padding: 0.55rem 0.65rem;
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .capability-filter thead th {
+    color: var(--sl-color-text);
+    background: var(--sl-color-bg-nav);
+  }
+
+  .capability-filter__limits {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+  }
+
+  .capability-filter__limits div {
+    display: grid;
+    grid-template-columns: minmax(9rem, 1fr) minmax(0, 1fr);
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--cap-border);
+    padding-block: 0.4rem;
+  }
+
+  .capability-filter__limits dt {
+    font-weight: 700;
+  }
+
+  .capability-filter__limits dd {
+    margin: 0;
+  }
+
+  .capability-filter__boundary strong {
+    color: var(--cap-accent);
+  }
+
+  .capability-filter__static {
+    border-top: 1px solid var(--cap-border);
+  }
+
+  .capability-filter__static table {
+    min-width: 58rem;
+  }
+
+  .capability-filter__evidence {
+    margin: 0;
+    border-top: 1px solid var(--cap-border);
+    padding-block: 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 46rem) {
+    .capability-filter__contract-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .capability-filter__input-row input,
+    .capability-filter__input-row button {
+      width: 100%;
+    }
+
+    .capability-filter__limits div {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .capability-filter,
+    .capability-filter * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .capability-filter,
+    .capability-filter__header,
+    .capability-filter__panel,
+    .capability-filter__boundary,
+    .capability-filter__status,
+    .capability-filter th,
+    .capability-filter td,
+    .capability-filter__input-row input,
+    .capability-filter__input-row button {
+      border-color: CanvasText;
+      background: Canvas;
+      color: CanvasText;
+      forced-color-adjust: auto;
+    }
+  }
+
+  @media print {
+    .capability-filter {
+      border-color: #000;
+      color: #000;
+      background: #fff;
+      break-inside: avoid;
+    }
+
+    .capability-filter__controls,
+    .capability-filter__interactive {
+      display: none !important;
+    }
+
+    .capability-filter__header,
+    .capability-filter__static,
+    .capability-filter__evidence,
+    .capability-filter th,
+    .capability-filter td {
+      border-color: #000;
+      color: #000;
+      background: #fff;
+    }
+
+    .capability-filter__table-wrap {
+      overflow: visible;
+    }
+
+    .capability-filter table,
+    .capability-filter__static table {
+      min-width: 0;
+      font-size: 8pt;
+    }
+  }
+</style>

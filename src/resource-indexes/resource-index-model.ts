@@ -133,6 +133,26 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'F04：显式 host-device 资源生命周期', en: 'F04: The Explicit Host-Device Resource Lifecycle' },
     prerequisites: ['F01'],
   },
+  F05: {
+    href: { 'zh-CN': '/foundations/asynchronous-errors/', en: '/en/foundations/asynchronous-errors/' },
+    title: { 'zh-CN': 'F05：CUDA 错误为何常常延后暴露', en: 'F05: CUDA Errors Are Often Asynchronous' },
+    prerequisites: ['F04'],
+  },
+  F06: {
+    href: { 'zh-CN': '/foundations/compute-capability/', en: '/en/foundations/compute-capability/' },
+    title: { 'zh-CN': 'F06：Compute capability 是功能合同', en: 'F06: Compute Capability Is a Feature Contract' },
+    prerequisites: ['F02', 'O03'],
+  },
+  F07: {
+    href: { 'zh-CN': '/foundations/runtime-driver-api/', en: '/en/foundations/runtime-driver-api/' },
+    title: { 'zh-CN': 'F07：区分 CUDA Runtime API 与 Driver API 的角色', en: 'F07: Distinguish CUDA Runtime API and Driver API Roles' },
+    prerequisites: ['F04', 'F05'],
+  },
+  F08: {
+    href: { 'zh-CN': '/foundations/launch-geometry/', en: '/en/foundations/launch-geometry/' },
+    title: { 'zh-CN': 'F08：Launch geometry 是先于速度的正确性与资源决策', en: 'F08: Launch Geometry Is a Correctness and Resource Decision Before Speed' },
+    prerequisites: ['F02', 'F03', 'F06'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -148,6 +168,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'EX03：多维索引可运行示例', en: 'EX03: Multidimensional Indexing Runnable Example' },
     prerequisites: ['F03'],
   },
+  EX04: {
+    href: { 'zh-CN': '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
+    title: { 'zh-CN': 'EX04：错误处理生命周期可运行示例', en: 'EX04: Error Handling Lifecycle Runnable Example' },
+    prerequisites: ['F05'],
+  },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
     title: { 'zh-CN': 'LAB01：记录并解读 CUDA 环境', en: 'LAB01: Record and Interpret a CUDA Environment' },
@@ -158,6 +183,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
     title: { 'zh-CN': 'LAB02：运行并验证向量加法', en: 'LAB02: Run and Verify Vector Addition' },
     prerequisites: ['O03', 'F01'],
+    indexGroup: 'labs',
+  },
+  LAB03: {
+    href: { 'zh-CN': '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
+    title: { 'zh-CN': 'LAB03：破坏并修复索引', en: 'LAB03: Break and Repair Indexing' },
+    prerequisites: ['F03', 'F05'],
     indexGroup: 'labs',
   },
   VIS01: {

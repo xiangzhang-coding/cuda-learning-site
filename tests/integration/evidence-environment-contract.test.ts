@@ -181,6 +181,14 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/foundations/multidimensional-indexing/exercises/',
     '/foundations/host-device-lifecycle/exercises/',
     '/en/foundations/host-device-lifecycle/exercises/',
+    '/foundations/asynchronous-errors/exercises/',
+    '/en/foundations/asynchronous-errors/exercises/',
+    '/foundations/compute-capability/exercises/',
+    '/en/foundations/compute-capability/exercises/',
+    '/foundations/runtime-driver-api/exercises/',
+    '/en/foundations/runtime-driver-api/exercises/',
+    '/foundations/launch-geometry/exercises/',
+    '/en/foundations/launch-geometry/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -215,6 +223,14 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/foundations/multidimensional-indexing/solutions/',
     '/foundations/host-device-lifecycle/solutions/',
     '/en/foundations/host-device-lifecycle/solutions/',
+    '/foundations/asynchronous-errors/solutions/',
+    '/en/foundations/asynchronous-errors/solutions/',
+    '/foundations/compute-capability/solutions/',
+    '/en/foundations/compute-capability/solutions/',
+    '/foundations/runtime-driver-api/solutions/',
+    '/en/foundations/runtime-driver-api/solutions/',
+    '/foundations/launch-geometry/solutions/',
+    '/en/foundations/launch-geometry/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -227,21 +243,28 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/reference-environment-candidate/solutions/',
   ])('keeps reviewed solutions on a separate route in $route', async (route) => {
     const text = mainText(await readRoute(route));
-    expect(text).toMatch(/参考解答|Reviewed solution/);
+    expect(text).toMatch(/参考解答|Reviewed solutions?/i);
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes thirteen complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes seventeen complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     const entryIds = [
       'PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005',
       'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
       'PB-R1-006', 'PB-R1-007', 'PB-R1-008',
+      'PB-R1-009', 'PB-R1-010', 'PB-R1-011', 'PB-R1-012',
     ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
     );
+    const focusedPrerequisiteSlugs: Readonly<Record<string, string>> = {
+      'PB-R1-009': 'asynchronous-errors',
+      'PB-R1-010': 'compute-capability',
+      'PB-R1-011': 'runtime-driver-api',
+      'PB-R1-012': 'launch-geometry',
+    };
 
     expect(entryHeadings).toHaveLength(entryIds.length);
     for (const [index, entryId] of entryIds.entries()) {
@@ -268,6 +291,13 @@ describe('Exercises and Practice Bank contract', () => {
       expect(sectionText, `${route} ${entryId}`).toMatch(/Solution|解答/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Source basis|来源依据/);
       expect(sectionLinks.some((link) => /\/(?:en\/)?(?:start|foundations)\//.test(link.getAttribute('href') ?? ''))).toBe(true);
+      const prerequisiteSlug = focusedPrerequisiteSlugs[entryId];
+      if (prerequisiteSlug) {
+        expect(
+          sectionLinks.some((link) => link.getAttribute('href')?.includes(`/foundations/${prerequisiteSlug}/`)),
+          `${route} ${entryId} prerequisite`,
+        ).toBe(true);
+      }
     }
 
     expect(text).toMatch(/EX01/);
@@ -275,7 +305,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/O02/);
     expect(text).toMatch(/O03/);
     expect(text).toMatch(/F01/);
-    for (const unitId of ['F02', 'F03', 'F04']) expect(text).toContain(unitId);
+    for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
@@ -283,7 +313,15 @@ describe('Exercises and Practice Bank contract', () => {
     expect(document.querySelector('a[href*="evidence-status"]')).not.toBeNull();
     expect(document.querySelector('a[href*="environment-manifest"]')).not.toBeNull();
     expect(document.querySelector('a[href*="first-cuda-kernel"]')).not.toBeNull();
-    for (const slug of ['execution-hierarchy', 'multidimensional-indexing', 'host-device-lifecycle']) {
+    for (const slug of [
+      'execution-hierarchy',
+      'multidimensional-indexing',
+      'host-device-lifecycle',
+      'asynchronous-errors',
+      'compute-capability',
+      'runtime-driver-api',
+      'launch-geometry',
+    ]) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
     for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {

@@ -1,0 +1,204 @@
+---
+title: 'F08：Launch geometry 是先于速度的正确性与资源决策'
+description: 先用逻辑范围、逐轴与总 thread 上限、安全算术和 kernel resource 合同证明二维 launch 可行，再保留正确性后进入测量。
+pairId: f08
+counterpart: /en/foundations/launch-geometry/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - invariants
+  - legality
+  - coverage
+  - resources
+  - block-shape
+  - explorer
+  - measurement-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F08
+prerequisites:
+  - F02
+  - F03
+  - F06
+relatedUnits:
+  - LAB03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Compute Capabilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPU feature and technical limits'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - cudaDeviceProp'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime device properties'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - cudaFuncAttributes'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime kernel function attributes'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,invariants,legality,coverage,resources,block-shape,explorer,measurement-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,F03,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: LAB03 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1' }
+---
+
+import BlockShapeExplorer from '../../../components/BlockShapeExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/launch-geometry/" lang="en">Read the English counterpart</a>
+
+Launch geometry 决定创建多少 block、每个 block 有多少 thread，以及逻辑数据范围之外会出现多少 fringe thread。它首先是一份**正确性与 launch feasibility 合同**：逻辑范围不能随 block shape 改变；每个维度与乘积必须可表示；配置必须满足选定 device 与具体 kernel 的限制；额外 thread 必须被 bounds check 拒绝。只有这些条件和结果验证都成立，候选 shape 才进入测量。
+
+## 学完本单元，你应该能
+
+- 固定二维 logical width/height，并从正的 block.x/block.y 安全计算 grid shape。
+- 分别检查 `maxThreadsDim` 的逐轴限制与 `maxThreadsPerBlock` 的总 thread 限制，而不把其中一个替代另一个。
+- 在乘法前检查溢出，并使用不会先计算 `n + d - 1` 的向上取整除法。
+- 说明 device properties 通过后，为什么函数自己的 thread、register 与 shared-memory 需求仍可能阻止 launch。
+- 在任何 occupancy 或“最快 shape”判断之前，先保住 bounds、结果验证和测量边界。
+
+## 先修关系
+
+先完成 [F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)、[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)和 [F06：把 compute capability 当作 feature 与 limit 合同](/foundations/compute-capability/)。F02 提供 grid/block/thread 层次，F03 提供逐轴坐标与 bounds，F06 要求从明确的 capability/device record 读取限制，而不是从 GPU 名称或记忆猜值。
+
+本学习单元（Learning Unit）不需要 CUDA-capable system，也不授予任何 Evidence Status。相关的 LAB03 会把索引缺陷放入实际 Lab 合同；本页本身既不是 Lab，也没有 canonical Runnable Example。
+
+## 不变量：block shape 不得改写问题
+
+设应用声明二维逻辑范围为 `width x height`。无论 block shape 怎样变化，合法坐标始终是：
+
+```text
+0 <= gx < width
+0 <= gy < height
+```
+
+Thread 坐标仍由 `gx = blockIdx.x * blockDim.x + threadIdx.x` 与 y 轴的同构公式产生。Kernel 必须在任何 flattening 或 memory access 前同时检查 `gx < width AND gy < height`。改变 block.x/block.y 不能把 `width`、`height` 向上改成 launch coverage，也不能把 fringe 当作新增数据。
+
+第二个不变量是可表示性。Logical element count、threads per block、grid block count、launch thread count 和 coverage product 都必须在选定整数类型中可表示。若任一必要值无效或溢出，正确结果是停止并报告约束失败，不是返回一组截断或部分 geometry。
+
+## 合法性：逐轴、总量与 grid 是不同检查
+
+二维配置先要求 `width > 0`、`height > 0`、`block.x > 0`、`block.y > 0`。然后按选定 device record 依次检查：
+
+```text
+block.x <= device.maxThreadsDim[0]
+block.y <= device.maxThreadsDim[1]
+checked_product(block.x, block.y) <= device.maxThreadsPerBlock
+```
+
+逐轴通过不代表总量通过。例如在本页选定的 CC 7.5 record 中，`block = (1024, 2)` 的 x 和 y 都分别不超过 1024，但 2048 threads 超过 `maxThreadsPerBlock = 1024`。反过来，总量较小也不能豁免某个轴超限。
+
+计算 grid 后还要分别检查 `grid.x <= maxGridSize[0]` 和 `grid.y <= maxGridSize[1]`。`cudaDeviceProp` 把这些限制公开为 `maxThreadsDim`、`maxThreadsPerBlock` 与 `maxGridSize`；应记录实际选择的 device/capability facts，而不是把本站某张表当作所有环境的运行观察。
+
+## 覆盖：安全向上取整并保留 logical extent
+
+对已经验证为正整数的 `n` 与 `d`，本站使用：
+
+```text
+ceil_div(n, d) = 1 + floor((n - 1) / d)
+grid.x = ceil_div(width, block.x)
+grid.y = ceil_div(height, block.y)
+```
+
+这个形式避免先求可能溢出的 `n + d - 1`。乘积也必须先做 `a > MAX / b` 一类检查，再求 `a * b`。JavaScript 浏览器模型以 `Number.MAX_SAFE_INTEGER` 为界；CUDA host code 则必须对自己选择的无符号类型使用对应上限，不能照抄 JavaScript 的界限。
+
+合法 grid 满足 `grid.x * block.x >= width` 与 `grid.y * block.y >= height`。Launch thread 数和 fringe 为：
+
+```text
+blockThreads   = checked_product(block.x, block.y)
+gridBlocks     = checked_product(grid.x, grid.y)
+launched       = checked_product(gridBlocks, blockThreads)
+logical        = checked_product(width, height)
+fringe         = launched - logical
+```
+
+例如 `1000 x 750` 配 `block = (32, 8)` 时，grid 是 `(32, 94)`，coverage 是 `1024 x 752`，launch 770,048 threads，其中 20,048 个属于 fringe。这个 fringe 是必须由 bounds check 正确拒绝的 thread 数，不是浪费百分比、occupancy 或速度结论。
+
+## 资源：device ceiling 不是 kernel feasibility 的全部
+
+Device-level block 检查通过后，还要查看加载到该 device 上的具体函数。`cudaFuncAttributes.maxThreadsPerBlock` 是该函数在当前 device 上允许的最大 block thread 数；它可能比 device 的 `maxThreadsPerBlock` 更严格。`numRegs` 描述函数每个 thread 使用的 register 数，`sharedSizeBytes` 描述静态 shared memory，launch 的第三个配置参数还会请求 dynamic shared memory。
+
+因此，完整 feasibility review 至少要把函数属性与 device 的 `regsPerBlock`、`sharedMemPerBlock` 或适用的 opt-in shared-memory limit 一起核对。Register allocation granularity、编译 target 和动态 shared-memory opt-in 使“只把一个表格数字相乘”不足以证明真实 launch 可行；launch/error checking 仍是实际程序边界。
+
+这些资源事实回答“这个配置能否用于这个 kernel/device 组合”。本单元不从它们计算 occupancy，不把较高 occupancy 当作目标，也不从静态资源数字宣布某个 shape 更快。
+
+## Block shape：相同 thread 数仍是不同映射
+
+`(32, 8)` 与 `(16, 16)` 都有 256 threads，但它们产生不同 grid、coverage 与 fringe，也让 x/y 坐标以不同矩形分组。对 `1000 x 750`，前者产生 20,048 个 fringe thread，后者产生 8,016 个。较少 fringe 只是一项几何事实，不能单独推出较短运行时间。
+
+选择 shape 时先问：logical extent 是否保持不变；逐轴 bounds 是否仍在访问前；所有 device 与 kernel resource gate 是否通过；结果是否在同一输入上正确。Memory-access behavior、scheduler state、instruction mix 和其他性能问题属于后续受控测量，不能由矩形外观或 thread 总数替代。
+
+## Explorer：先显示 constraint ledger
+
+下面的 `BlockShapeExplorer` 是本页内嵌组件，不分配新的 VIS ID。它只接受二维 logical width/height 与 block.x/block.y 的正十进制安全整数，从明确选择的 CC 7.5 或 CC 8.0 capability record 检查逐轴、aggregate 和 grid limits。任一输入、乘积或 limit 无效时，它返回问题列表，并且不暴露 grid、launch 或 fringe 值。
+
+<BlockShapeExplorer locale="zh-CN" />
+
+静态卡片、打印输出和交互状态都使用同一个纯模型。Capability record 只提供已复核的 device ceilings；组件始终把 kernel-specific max threads、register 与 shared memory 标为仍需核对。它不读取本机 device properties，也不执行 CUDA。
+
+## 测量边界：正确之后才允许比较
+
+一次有意义的候选比较至少需要相同 logical extents、相同 kernel semantics、同一输入与验证规则、明确的 Environment Manifest，以及成功的 launch/completion checks。先证明每个候选都覆盖全部合法元素、拒绝 fringe access 并产生正确结果，再规定 warm-up、计时区间、同步位置和重复策略。
+
+本页没有执行这些步骤，因此没有 latency、throughput、speedup、occupancy 或 fastest-shape verdict。浏览器模型和手算只能审查 geometry 合同；它们既不是 Compile-Checked，也不是 Runtime-Verified 或 Community-Observed evidence。
+
+## 离开前检查
+
+1. 为什么 `block.x <= maxThreadsDim[0]` 与 `block.y <= maxThreadsDim[1]` 都通过，仍不能省略 `block.x * block.y <= maxThreadsPerBlock`？
+2. 为什么正整数 ceiling division 使用 `1 + floor((n - 1) / d)`，乘法又必须在执行前检查上限？
+3. Grid coverage 超过 logical extent 时，为什么不能把 rounded coverage 写回 `width` 或 `height`？
+4. Device properties 通过之后，还缺少哪些 kernel-specific register、shared-memory 与 function-limit 事实？
+5. 为什么 fringe 更少、thread 数相同或 device limit 通过，都不能单独产生 occupancy 或 fastest-shape verdict？
+
+## 继续练习
+
+- 完成 [F08 练习（Exercise）](/foundations/launch-geometry/exercises/)，再查看独立的[参考解答](/foundations/launch-geometry/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-012](/practice/#pb-r1-012)审查另一份把 geometry 合法性误写成速度结论的 launch 记录。
+- [LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)是相关单元：进入实际 Lab 时继续保留 F03 的逐轴 bounds 和本页的 feasibility ledger，不把本页静态模型当作 Lab 运行证据。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)提供当前 compute capability 技术限制表；页面更新于 **2026-05-27**。
+- [CUDA Runtime API v13.3.1：cudaDeviceProp](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html)定义 `maxThreadsDim`、`maxThreadsPerBlock`、`maxGridSize`、`regsPerBlock` 与 shared-memory properties。
+- [CUDA Runtime API v13.3.1：cudaFuncAttributes](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html)定义函数自己的 `maxThreadsPerBlock`、`numRegs`、`sharedSizeBytes` 与 `maxDynamicSharedSizeBytes`。两份 Runtime API 页面标记 **2026-06-29** 更新。
+
+三项 owner source 均访问于 **2026-08-26**。安全算术合同、示例数字、constraint ledger、Explorer 构图、练习与教学编排均为本站原创；没有复制 NVIDIA table、diagram、sample output 或性能数字。
+
+**事实核查日期：2026-08-26。**

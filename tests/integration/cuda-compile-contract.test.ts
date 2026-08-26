@@ -43,6 +43,9 @@ describe('CUDA compile evidence workflow', () => {
       'lane: ex03-cuda-11-8-cxx17',
       'lane: ex03-cuda-12-9-cxx17',
       'lane: ex03-cuda-13-3-cxx17',
+      'lane: ex04-cuda-11-8-cxx17',
+      'lane: ex04-cuda-12-9-cxx17',
+      'lane: ex04-cuda-13-3-cxx17',
     ]) {
       expect(workflow).toContain(coordinate);
     }
@@ -50,6 +53,7 @@ describe('CUDA compile evidence workflow', () => {
 
   it('records manifests, scans retained evidence, and gates all matrix jobs', async () => {
     const workflow = await readProjectFile('.github/workflows/cuda-compile.yml');
+    const ex04Build = workflow.match(/^  ex04-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
     expect(workflow).toContain('node scripts/check-artifacts.mjs');
@@ -65,15 +69,39 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('if: ${{ always() }}');
     expect(workflow).toContain('CUDA_EVIDENCE_RESULT: ${{ needs.cuda-compile.result }}');
     expect(workflow).toContain('EX03_BUILD_RESULT: ${{ needs.ex03-build.result }}');
+    expect(workflow).toContain('EX04_BUILD_RESULT: ${{ needs.ex04-build.result }}');
+    expect(workflow).toContain('needs: [cuda-compile, ex03-build, ex04-build]');
+    expect(workflow).toContain('if [ "$EX04_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
+
+    expect(ex04Build).not.toBe('');
+    expect(ex04Build.match(/^\s+- lane: ex04-cuda-\d+-\d+-cxx17$/gm)).toHaveLength(3);
+    for (const [lane, image] of [
+      ['ex04-cuda-11-8-cxx17', 'nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f'],
+      ['ex04-cuda-12-9-cxx17', 'nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5'],
+      ['ex04-cuda-13-3-cxx17', 'nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87'],
+    ]) {
+      expect(ex04Build).toContain(`- lane: ${lane}\n            image: ${image}`);
+    }
+    expect(ex04Build).toContain('docker pull --platform linux/amd64');
+    expect(ex04Build).toContain('docker run --platform linux/amd64 --rm --network none');
+    expect(ex04Build).toContain('--user "$(id -u):$(id -g)"');
+    expect(ex04Build).toContain('bash scripts/compile-check.sh c++17 ex04');
+    expect(ex04Build).toContain('path: artifacts/cuda-ex04/${{ matrix.lane }}');
+    expect(ex04Build).toContain('retention-days: 7');
+    const scanOffset = ex04Build.indexOf('node scripts/check-artifacts.mjs');
+    const uploadOffset = ex04Build.indexOf('uses: actions/upload-artifact@');
+    expect(scanOffset).toBeGreaterThan(-1);
+    expect(uploadOffset).toBeGreaterThan(scanOffset);
   });
 
   it('never executes the generated CUDA binary in the compile boundary', async () => {
-    const [orchestrator, laneScript, ex03LaneScript] = await Promise.all([
+    const [orchestrator, laneScript, ex03LaneScript, ex04LaneScript] = await Promise.all([
       readProjectFile('scripts/run-cuda-compile.mjs'),
       readProjectFile('examples/ex02-vector-addition/scripts/compile-check.sh'),
       readProjectFile('examples/ex03-multidimensional-indexing/scripts/compile-check.sh'),
+      readProjectFile('examples/ex04-error-handling-lifecycle/scripts/compile-check.sh'),
     ]);
 
     expect(orchestrator).not.toMatch(/exec(?:File)?Sync\([^\n]*ex02-vector-addition/);
@@ -84,5 +112,28 @@ describe('CUDA compile evidence workflow', () => {
     expect(laneScript).toContain('make host-test');
     expect(ex03LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex03-multidimensional-indexing(?:\s|$)/m);
     expect(ex03LaneScript).toContain('make host-test');
+    expect(ex04LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex04-error-handling-lifecycle(?:\s|$)/m);
+    for (const target of ['preprocess', 'compile', 'link', 'inspect', 'host-test']) {
+      expect(ex04LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+    }
+  });
+
+  it('keeps ephemeral EX04 build logs from granting public compilation evidence', async () => {
+    const [workflow, manifestSource, evidenceReadme, englishPage, chinesePage] = await Promise.all([
+      readProjectFile('.github/workflows/cuda-compile.yml'),
+      readProjectFile('examples/ex04-error-handling-lifecycle/project.json'),
+      readProjectFile('examples/ex04-error-handling-lifecycle/evidence/README.md'),
+      readProjectFile('src/content/docs/en/examples/error-handling-lifecycle.mdx'),
+      readProjectFile('src/content/docs/examples/error-handling-lifecycle.mdx'),
+    ]);
+    const manifest = JSON.parse(manifestSource) as { evidence: { compilation: unknown[] } };
+
+    expect(workflow).toContain('Compile EX04 without granting Evidence Status');
+    expect(workflow).not.toContain('examples/ex04-error-handling-lifecycle/evidence/');
+    expect(manifest.evidence.compilation).toEqual([]);
+    expect(evidenceReadme).toContain('no qualifying EX04 compilation record exists');
+    for (const page of [englishPage, chinesePage]) {
+      expect(page).toMatch(/evidence:\s*\n\s+compilation:\s*\[\]/);
+    }
   });
 });

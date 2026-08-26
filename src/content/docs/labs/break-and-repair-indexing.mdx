@@ -1,0 +1,384 @@
+---
+title: 'LAB03：破坏并修复索引'
+description: 在原生 Linux CUDA 环境中运行 EX04 的确定性错误 stride 与修复路径，用独立 host 比较和分开的 launch/completion 边界验收结果。
+pairId: lab03
+counterpart: /en/labs/break-and-repair-indexing/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - prepare
+  - predict
+  - build
+  - fail
+  - repair
+  - verify
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB03
+prerequisites:
+  - F03
+  - F05
+relatedUnits:
+  - EX04
+  - F08
+exampleIds:
+  - EX04
+canonicalExample: EX04
+canonicalRanges:
+  - indexing-kernels
+  - host-verification
+hardwareGate: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; fixed 7 x 5 indexing extent; one 35-element uint32_t output allocation of 140 bytes; workload below 8 GB'
+estimatedMinutes: 60
+difficulty: intermediate
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 140
+gpuCount: 1
+permissions:
+  - 'Access the selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, and the built binary'
+  - 'Create and remove files in the EX04 build directory and a learner-owned evidence directory'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The launch-config scenario should surface a launch-configuration defect at the immediate-after-submission check; cudaPeekAtLastError should observe without clearing, and cudaGetLastError should retrieve and clear that same launch state before explicit synchronization.
+    - The deferred-access scenario should show no launch error at the immediate check and should surface the deliberately invalid device access only when cudaDeviceSynchronize establishes the completion boundary.
+    - The indexing-defect scenario should complete without an illegal memory access but fail deterministic host verification because its in-bounds column-major permutation disagrees with the declared row-major reference.
+    - The repaired-indexing scenario should complete explicit synchronization and match the overflow-checked row-major host reference.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ asynchronous execution and error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ execution and indexing'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Toolkit 11.8.0; last updated 2022-10-03'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 archive Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Toolkit 13.3.1; last updated 2026-06-29'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1; last updated 2026-06-29'
+    platform: 'Linux x86-64 synchronization contract'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Compute Capabilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'CUDA-capable GPUs'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,prepare,predict,build,fail,repair,verify,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F03,F05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX04,F08' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'indexing-kernels,host-verification' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; fixed 7 x 5 indexing extent; one 35-element uint32_t output allocation of 140 bytes; workload below 8 GB' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '60' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: intermediate }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '140' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'CUDA device; compiler, make, and binary execution; EX04 build/evidence-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '4 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/break-and-repair-indexing/" lang="en">Read the English counterpart</a>
+
+LAB03 是一个实验（Lab）：你在网站之外用四个独立进程运行 EX04，先定位 immediate launch、deferred execution 与 host verification 三种边界，再让确定性的错误 stride 被独立 host 比较（independent host comparison）拒绝，并验收修复路径。网站不执行 CUDA，也没有预先填入任何实际输出、错误码或退出码。
+
+## 实验合同
+
+| 坐标 | 要求 |
+| --- | --- |
+| 预计时间 | 60 分钟 |
+| 难度 | 中级（intermediate） |
+| 先修 | F03、F05 |
+| 受支持环境（Supported Environment） | 仅原生 Linux；WSL、Windows 和托管 notebook 不在本站支持边界内 |
+| Toolkit Lane | 选择 CUDA 11.8.0/Ubuntu 22.04、12.9.2/Ubuntu 24.04 或 13.3.1/Ubuntu 24.04 的 C++17 Lane；其他环境不得借用 Lane 名称 |
+| GPU Capability Tier | 基础 GPU 能力层级（Baseline GPU Capability Tier）；compute capability 7.5 或更新 |
+| GPU 数量 | 恰好使用 1 个可见 GPU |
+| 工作负载 | 两个 error scenario 不分配 problem data；两个 indexing scenario 固定为 `7 x 5`，只分配一个包含 35 个 `uint32_t` 的 device output，共 140 bytes，低于 8 GB |
+| 权限 | 访问所选 CUDA device；执行 NVCC、host C++ compiler、`make` 和 binary；在 EX04 `build/` 与学习者自己的 evidence directory 中创建和删除文件；不要求性能计数器权限 |
+| Error-boundary 验收 | `launch-config` 在 immediate-after-submission 暴露预期 launch state；`deferred-access` 的 immediate check 保持 clear，并在 synchronization 暴露预期执行 failure；每个 scenario 自成一个进程且满足合同时状态为 0 |
+| 索引缺陷验收 | `indexing-defect` 的 allocation、launch、synchronization、D2H 与 free 成功，host verification 报告 mismatch；该预期 mismatch 被程序正确识别时，scenario 以状态 0 结束 |
+| 修复路径验收 | `repaired-indexing` 在相同 `7 x 5` extent 与 CUDA 边界下通过 35 个元素的精确比较，并以状态 0 结束 |
+| 编译证据 | 空；源码、网站构建、host-only test 或学习者本机构建都不会自动把 EX04 标成 Compile-Checked |
+| 运行证据 | Pending Hardware Verification；本页没有 Reference Environment 运行记录 |
+
+## 先修检查
+
+1. 完成 [F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)，能写出二维 row-major 位置 `y * width + x`，并说明为什么 x/y bounds 必须先于展平。
+2. 完成 [F05：CUDA 错误为何常常延后暴露](/foundations/asynchronous-errors/)，能区分 launch 后的即时 launch 检查（immediate launch check）与 synchronization 处的延迟执行检查（deferred execution check）。
+3. 选择一条 C++17 Toolkit Lane，确认原生 Linux 上只有一个参与本 Lab 的可见 GPU，且 compute capability 至少为 7.5。
+4. 确认你可以保留原始 stdout、stderr 和每条命令的退出状态。只保留终端截图或一行手写结论不满足本 Lab。
+
+## 准备 canonical project 与 manifest
+
+[EX04 可运行示例页](/examples/error-handling-lifecycle/)解释四个 scenario 的完整项目合同。[查看固定提交中的完整 EX04 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/349f2f65c195ca940eb85bc89941507aed326496/examples/ex04-error-handling-lifecycle)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/349f2f65c195ca940eb85bc89941507aed326496.zip)。一种可复核的 Git 获取方式是：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout 349f2f65c195ca940eb85bc89941507aed326496
+cd examples/ex04-error-handling-lifecycle
+```
+
+运行前创建环境清单（Environment Manifest）。尖括号内容必须由你的环境和记录替换，不能把模板或查询命令当作观察值：
+
+```text
+subject: EX04 / LAB03
+source_commit: 349f2f65c195ca940eb85bc89941507aed326496
+observation_date_utc: <YYYY-MM-DD and time>
+gpu_identity:
+  <model and stable local identifier after privacy review>
+compute_capability: <value>
+compute_capability_query: <exact command or API>
+gpu_count_used: 1
+driver: <value>
+toolkit_lane: <cuda-11.8 | cuda-12.9 | cuda-13.3>
+nvcc: <value>
+host_compiler: <value>
+operating_system_and_architecture:
+  <native Linux distribution, version, architecture>
+cxx_dialect: c++17
+scenarios:
+  - launch-config
+  - deferred-access
+  - indexing-defect
+  - repaired-indexing
+process_isolation: one scenario per process
+extent: 7 x 5 for indexing-defect and repaired-indexing
+planned_output_bytes: 7 * 5 * 4 = 140
+maximum_problem_memory_bytes: 140
+permissions:
+  - <device access>
+  - <executable access>
+  - <build/evidence-directory access>
+exact_commands:
+  <ordered argv for every stage>
+correctness_oracle:
+  EX04 independent element-by-element host comparison
+raw_logs: <stdout/stderr paths>
+exit_statuses: <one path per command>
+criteria_result: <fill only after execution>
+```
+
+用于采集坐标的命令可以包括 `nvidia-smi`、`nvcc --version` 和 `c++ --version`，但 manifest 必须保存实际值、查询方法和日期。不要发布 credential、完整继承环境或不必要的设备唯一标识。
+
+## 先预测
+
+EX04 把错误与修复 kernel 放在同一个 canonical range 中：
+
+<CanonicalCode exampleId="EX04" range="indexing-kernels" />
+
+运行前完成一张四行预测表：
+
+1. `launch-config`：launch expression 返回后，`cudaPeekAtLastError` 应在哪个 stage 观察状态；为什么 peek 不清除状态、后续 `cudaGetLastError` 才读取并清除；清除后才进入显式 synchronization。
+2. `deferred-access`：合法 launch configuration 为什么应让 immediate check 保持 clear；故意的 invalid device access 为什么只应在 `cudaDeviceSynchronize` 建立 completion boundary 时暴露。该进程在预期 deferred failure 后不做 cleanup 或 recovery call。
+3. `indexing-defect`：对 `7 x 5` 写出 row-major `y * width + x` 与 defective column-major permutation `x * height + y`，总元素数 35、allocation 140 bytes，并预测最早发生 host mismatch 的线性位置。两种映射都保持在 allocation 内，不能把逻辑 defect 预测成 illegal access。
+4. `repaired-indexing`：写出与独立 host reference 相同的 row-major 映射，并预测 35 个元素都被精确接受。
+
+四项都只是执行前标准。不要把预期 stage、status class 或 mismatch 写成已观察输出，也不要预填具体 CUDA error name 或数值错误码。
+
+## 构建并保留原始记录
+
+在项目目录创建学习者自己的记录目录，再按 C++17 合同逐项执行：
+
+```sh
+mkdir -p lab03-evidence
+
+make preprocess DIALECT=c++17 BUILD_DIR=build \
+  >lab03-evidence/01-preprocess.stdout.log \
+  2>lab03-evidence/01-preprocess.stderr.log
+status=$?
+printf '%s\n' "$status" >lab03-evidence/01-preprocess.status
+
+make compile DIALECT=c++17 BUILD_DIR=build \
+  >lab03-evidence/02-compile.stdout.log \
+  2>lab03-evidence/02-compile.stderr.log
+status=$?
+printf '%s\n' "$status" >lab03-evidence/02-compile.status
+
+make link DIALECT=c++17 BUILD_DIR=build \
+  >lab03-evidence/03-link.stdout.log \
+  2>lab03-evidence/03-link.stderr.log
+status=$?
+printf '%s\n' "$status" >lab03-evidence/03-link.status
+
+make inspect DIALECT=c++17 BUILD_DIR=build \
+  >lab03-evidence/04-inspect.stdout.log \
+  2>lab03-evidence/04-inspect.stderr.log
+status=$?
+printf '%s\n' "$status" >lab03-evidence/04-inspect.status
+
+make host-test DIALECT=c++17 BUILD_DIR=build \
+  >lab03-evidence/05-host-test.stdout.log \
+  2>lab03-evidence/05-host-test.stderr.log
+status=$?
+printf '%s\n' "$status" >lab03-evidence/05-host-test.status
+```
+
+每条命令后立即检查保存的状态；非零时记录 blocker 并停止后续依赖阶段。不要用会丢失 producer 状态的 pipeline 改写这些命令。`make host-test` 不执行 CUDA binary；即使它通过，也只验证 host-side 合同，不产生 CUDA 编译证据、运行证据或性能证据。本页的 compilation 数组仍为空。
+
+## 让三个缺陷在正确边界被识别
+
+EX04 CLI 每个进程只接受一个 scenario。依次运行三个故意失败的逻辑案例，并分别保留记录：
+
+```sh
+./build/ex04-error-handling-lifecycle launch-config \
+  >lab03-evidence/06-launch-config.stdout.log \
+  2>lab03-evidence/06-launch-config.stderr.log
+launch_config_status=$?
+printf '%s\n' "$launch_config_status" \
+  >lab03-evidence/06-launch-config.status
+
+./build/ex04-error-handling-lifecycle deferred-access \
+  >lab03-evidence/07-deferred-access.stdout.log \
+  2>lab03-evidence/07-deferred-access.stderr.log
+deferred_access_status=$?
+printf '%s\n' "$deferred_access_status" \
+  >lab03-evidence/07-deferred-access.status
+
+./build/ex04-error-handling-lifecycle indexing-defect \
+  >lab03-evidence/08-indexing-defect.stdout.log \
+  2>lab03-evidence/08-indexing-defect.stderr.log
+indexing_defect_status=$?
+printf '%s\n' "$indexing_defect_status" \
+  >lab03-evidence/08-indexing-defect.status
+```
+
+保留每个进程的原始日志，不要合并后丢失 scenario 边界。`launch-config` 只有在预期 launch state 于 immediate stage 被 peek、由 get 读取并清除、清除后的状态通过检查且显式 synchronization 完成时才被接受。不要预设具体 error name。`deferred-access` 只有在 immediate check 没有 launch error、故意 invalid access 于 synchronization 暴露且进程随后不对可能不可用的 context 发出 cleanup/recovery call 时才被接受。
+
+`indexing-defect` 必须通过 allocation、immediate check、synchronization、D2H 与 free，再由 host verification 报告 deterministic mismatch。这里的“失败”是 row-major correctness verdict，不是 CUDA API failure。EX04 把“成功发现预期 defect”当作 scenario acceptance，所以合格记录中该进程状态应为 0；非零意味着 scenario 自身没有满足合同，不能被当作预期 mismatch。把实际首个 mismatch 与预测比较，但只记录程序真实提供的信息，不预填输出或数值错误码。
+
+## 运行修复路径
+
+不改变 Toolkit Lane、device selection、固定 `7 x 5` extent 或记录方法，运行第四个独立 scenario：
+
+```sh
+./build/ex04-error-handling-lifecycle repaired-indexing \
+  >lab03-evidence/09-repaired-indexing.stdout.log \
+  2>lab03-evidence/09-repaired-indexing.stderr.log
+repaired_indexing_status=$?
+printf '%s\n' "$repaired_indexing_status" \
+  >lab03-evidence/09-repaired-indexing.status
+```
+
+从 canonical range 中指出 `indexing-defect` 与 `repaired-indexing` 之间把 column-major permutation 修复为 row-major stride 的最小源码差异。修复不是删掉 bounds、跳过错误检查、放宽 comparison 或只改打印文本。若 repaired path 遇到 CUDA error、comparison mismatch 或非零状态，本次 repair 尚未通过；保留原始记录并调查，不要把预期结果填进 recorded observations。
+
+## 验证正确性与边界
+
+独立参考、逐元素比较和 host-visible verdict 来自第二个 canonical range：
+
+<CanonicalCode exampleId="EX04" range="host-verification" />
+
+本 Lab 只有在下列条件全部成立时完成：
+
+1. 四个 scenario 都使用同一 commit、Lane、C++17 binary 与单一 GPU，并且每个 scenario 在独立进程中运行。两个 indexing scenario 使用源码固定的 `7 x 5` extent。
+2. `launch-config` 的记录显示预期 launch state 首先位于 immediate-after-submission stage；peek 不清除，get 读取并清除同一状态；随后检查 cleared state、到达显式 synchronization，并以状态 0 结束。不要用具体 error name 替代 stage 合同。
+3. `deferred-access` 的 immediate check 没有 launch error，故意 invalid access 在 `cudaDeviceSynchronize` 的 deferred-at-synchronization stage 暴露；该进程随后不发出 cleanup/recovery call，并以状态 0 结束。
+4. `indexing-defect` 的单个 140-byte allocation、immediate check、synchronization、D2H 与 free 均成功；独立 host comparison 精确比较两份 35 元素数组并报告第一个 mismatch；程序接受“检测到预期 defect”，进程状态为 0。
+5. `repaired-indexing` 在相同 CUDA 边界成功后，由独立 host comparison 对全部 35 个元素精确接受，进程状态为 0。
+6. Manifest、精确命令、四组原始 stdout/stderr、每条命令的退出状态、日期、预测与逐项 criteria result 一起保存。单独的 `PASS`、`FAIL`、截图或转述不够。
+7. 不从这些 correctness/error-boundary run 声明 latency、bandwidth、throughput、speedup、occupancy、coalescing 或 profiler 结论。[F08：Launch geometry 是先于速度的正确性与资源决策](/foundations/launch-geometry/)可以继续讨论 geometry 约束，但本 Lab 不测量性能。
+
+## 预期观察，不是记录结果
+
+- `launch-config` **应当**在 immediate-after-submission check 暴露 launch-configuration defect；`cudaPeekAtLastError` 观察但不清除，`cudaGetLastError` 读取并清除同一 launch state，随后才显式 synchronization。
+- `deferred-access` 的 immediate check **应当**没有 launch error，故意 invalid device access **应当**只在 `cudaDeviceSynchronize` 建立 completion boundary 时暴露。
+- `indexing-defect` **应当**不触发 illegal memory access，而在 host verification 中因 allocation 内的 column-major permutation 与 row-major reference 不一致而得到 deterministic mismatch；程序正确识别该预期 mismatch 时，scenario 本身被接受。
+- `repaired-indexing` **应当**完成显式 synchronization，并与经过 overflow check 的 row-major host reference 精确匹配。
+
+这些是运行前的预期观察（expected observations）。本站没有看到你的 GPU、日志或退出状态，frontmatter 的记录观察（recorded observations）仍为空。实际环境若偏离预期，保留偏离和 blocker，不要修改预期来迎合结果，也不要从源代码推演伪造运行记录。
+
+## 分开维护证据轴
+
+| 轴 | 当前本站状态 | 本次记录的边界 |
+| --- | --- | --- |
+| Compilation | 空 | 本机构建日志可以进入你的 record，但没有绑定 Lane、commit、target 和审核流程的已提交合格记录时，不能把本站状态改成 Compile-Checked |
+| Runtime | Pending Hardware Verification | 完整的外部记录最多按证据规则评估；维护者尚未在 Reference Environment 复现，因此本页不能写 Runtime-Verified |
+| Recorded observations | 空 | 只有真实 GPU 执行后才能附 manifest、原始日志、退出状态、日期和逐项 criteria result |
+
+源码阅读、CanonicalCode 渲染、网站构建、host-only test、成功编译和预期表都不会执行这两条 GPU 路径，也不会升级 runtime Evidence Status。反过来，一次 GPU run 也不会自动补上为空的 compilation axis。任何这些 artifact 都不能证明性能。
+
+## 清理并保留可审核产物
+
+先把 manifest、原始日志、状态文件和 criteria result 保存到你控制的位置，再清理 build artifact：
+
+```sh
+make clean BUILD_DIR=build
+```
+
+保留 `lab03-evidence/` 时记录它对应的 source commit，不要把 binary、`build/`、credential、私密设备标识或未经检查的大型 artifact 当作 Lab 结果提交。若要删除 evidence directory，必须先确认你不再需要提交或复核这次观察。
+
+## 来源与复核
+
+当前 Context7 `/websites/nvidia_cuda` 与 `/websites/nvidia_cuda_cuda-programming-guide` 索引用于交叉核对二维 kernel indexing、异步 launch、`cudaPeekAtLastError`、`cudaGetLastError` 和 `cudaDeviceSynchronize` 的边界。Context7 是检索辅助，不是版本坐标的替代品。精确 error-state 接口以 NVIDIA CUDA 11.8.0 Error Handling（2022-10-03 更新）、CUDA 12.9.2 archive Error Handling（页面标签为 Runtime API 12.9.1）和 CUDA 13.3.1 Error Handling（2026-06-29 更新）owner 页面为准；显式同步还按 CUDA 13.3.1 Device Management（2026-06-29 更新）复核。二维 indexing、asynchronous execution 与 compute-capability 门槛按 CUDA Programming Guide v13.3 复核，其中前两份 Guide 页面标为 2026-05-27 更新。
+
+**事实核查日期：2026-08-26。** LAB03 没有内置或虚构运行输出、错误码、数值退出码、profiler 数据、speedup 或性能数字。Compilation 仍为空，runtime 仍为 Pending Hardware Verification。

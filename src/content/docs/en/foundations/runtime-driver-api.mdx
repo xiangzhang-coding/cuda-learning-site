@@ -1,0 +1,254 @@
+---
+title: 'F07: Distinguish CUDA Runtime API and Driver API Roles'
+description: Compare higher-level implicit Runtime API management with explicit Driver API handle ownership along one resource and error lifecycle.
+pairId: f07
+counterpart: /foundations/runtime-driver-api/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - shared-stack
+  - runtime-role
+  - driver-role
+  - ownership
+  - interoperability
+  - error-model
+  - boundary
+  - decisions
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F07
+prerequisites:
+  - F04
+  - F05
+relatedUnits:
+  - EX04
+exampleIds:
+  - EX04
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Driver API 13.3.1 - Difference between the driver and runtime APIs'
+    url: 'https://docs.nvidia.com/cuda/cuda-driver-api/driver-vs-runtime-api.html'
+    version: 'CUDA Driver API v13.3.1; last updated 2026-06-29'
+    platform: 'Current Runtime/Driver role comparison'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Interactions with the CUDA Driver API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DRIVER.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current context and handle interoperability rules'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - API synchronization behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Runtime synchronization boundaries'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API 13.3.1 - API synchronization behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html'
+    version: 'CUDA Driver API v13.3.1; last updated 2026-06-29'
+    platform: 'Driver synchronization boundaries'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 11.8.0 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Selected CUDA 11.8.0 documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API 11.8.0 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-driver-api/index.html'
+    version: 'CUDA Driver API v11.8.0; last updated 2022-10-03'
+    platform: 'Selected CUDA 11.8.0 documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive path 12.9.2 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html'
+    version: 'Archive path 12.9.2; owner page label CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Selected CUDA 12.9.2 archive documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API archive path 12.9.2 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-driver-api/index.html'
+    version: 'Archive path 12.9.2; owner page label CUDA Driver API v12.9.1; last updated 2025-06-04'
+    platform: 'Selected CUDA 12.9.2 archive documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Selected current CUDA 13.3.1 documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API 13.3.1 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/cuda-driver-api/index.html'
+    version: 'CUDA Driver API v13.3.1; last updated 2026-06-29'
+    platform: 'Selected current CUDA 13.3.1 documentation coordinate'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,shared-stack,runtime-role,driver-role,ownership,interoperability,error-model,boundary,decisions,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,F05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3.1' }
+---
+
+import ApiBoundary from '../../../../components/ApiBoundary.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/runtime-driver-api/" lang="zh-CN">阅读中文对应页</a>
+
+The CUDA Runtime API and CUDA Driver API are two host-side interface paths. Runtime API functions use the `cuda` prefix and provide higher-level device-code, primary-context, and module management. Driver API functions use the `cu` prefix and expose initialization, device, context, module, and function handles to application control. This Learning Unit compares **roles and ownership boundaries**. It is neither a function-by-function replacement table nor a request that beginners rewrite an existing Runtime program with the Driver API.
+
+## What you should be able to do
+
+- Draw the shared layers from a host application through either Runtime API or Driver API to the CUDA driver stack and device, without inventing two different GPU execution systems.
+- Explain why the Runtime is the introductory path while preserving application responsibility for allocation, transfer, launch arguments, synchronization, and error checking.
+- Order Driver-path ownership of `cuInit`, `CUdevice`, `CUcontext`, `CUmodule`, `CUfunction`, and `cuLaunchKernel`.
+- Write current-context, resource-owner, reset, and error-boundary clauses for a design that mixes both APIs.
+- Reject both “every Runtime call is a thin wrapper around one Driver call” and “choosing the Driver removes asynchronous errors.”
+
+## Prerequisites
+
+Complete [F04: The Explicit Host-Device Resource Lifecycle](/en/foundations/host-device-lifecycle/) and [F05: CUDA Errors Are Often Asynchronous](/en/foundations/asynchronous-errors/) first. F04 supplies ownership order for allocation, transfer, launch, completion, copy-back, and release. F05 separates launch-submission checks from observation points for deferred execution errors. F07 changes only the axis of “which layer manages this, and which handles are visible to the application”; it does not reteach the complete lifecycle.
+
+Reading this page requires no CUDA-capable system. Neither the page nor the browser composition below executes CUDA, so F07 has empty compilation and runtime evidence axes.
+
+## Shared stack: both host API paths reach the driver
+
+Start with this layer sketch for the bounded lifecycle in this unit:
+
+```text
+host application
+  ├─ CUDA Runtime API: cuda* + higher-level CUDA C++ launch surface
+  └─ CUDA Driver API:  cu* + explicit CUDA handles
+                    ↓
+              CUDA driver stack
+                    ↓
+                CUDA device
+```
+
+Both paths ultimately depend on the CUDA driver stack to interact with the device. That shared destination does not imply one-to-one calls. The Runtime can compose primary-context initialization, module management, and CUDA C++ kernel registration behind higher-level interfaces. The Driver makes more of those steps explicit. “Both reach the driver” therefore answers a **layering** question; it does not prove that one `cuda*` call forwards only to one corresponding `cu*` call.
+
+This page compares only minimum lifecycle roles related to EX04. The complete Runtime and Driver surfaces in CUDA 13.3.1 are much larger and evolve across Toolkit releases. No table here claims to cover every function, handle, or interoperability exception.
+
+## Runtime API role: higher-level management, not ownership-free code
+
+The Runtime path is this site's introductory route. It lets CUDA C++ programs use `cuda*` calls such as `cudaMalloc`, `cudaMemcpy`, `cudaDeviceSynchronize`, and `cudaFree`, and submit kernels through the angle-bracket launch syntax or corresponding Runtime launch interfaces. The current owner comparison describes its central simplifications as implicit primary-context initialization/management and implicit module management.
+
+“Implicit” means that an application usually need not acquire `CUcontext`, `CUmodule`, and `CUfunction` before a launch. It does not remove responsibility for selecting the right device, calculating byte counts, keeping pointers valid, supplying correct arguments, checking statuses, establishing completion boundaries, and releasing allocations after last use. The F04 ownership and F05 error contracts remain fully applicable.
+
+Runtime device and primary-context identities are closely associated on the common path. Read exact behavior by version: 11.8.0 and the 12.9.2 archive pages labeled 12.9.1 describe the implicit primary-context path; current 13.3.1 also adds an explicit execution-context surface. Do not project a 13.3.1 handle or exception backward into an older Lane.
+
+## Driver API role: explicit initialization, handles, and module control
+
+The Driver path transfers more object and state control to the application. A bounded role sequence is:
+
+1. Call and check `cuInit(0)`, then resolve a device ordinal to `CUdevice`.
+2. Explicitly choose primary-context management or create/set a `CUcontext`, recording which context is current on each host thread.
+3. Load a device-code module to obtain `CUmodule`, resolve a `CUfunction` by name, and define the unload boundary.
+4. Manage allocation and transfer through `CUdeviceptr`, then call `cuLaunchKernel` only while module, function, and context are valid.
+5. Check every `CUresult`, observe asynchronous work at an appropriate context, stream, or event completion boundary, then release resources according to ownership.
+
+This list is a comparison framework, not a complete program. It does not replace exact-version parameter, thread-safety, context, or error contracts for each function. F07 maintains no second EX04 implementation.
+
+## Ownership: the management layer changes, the resource ledger remains
+
+| Lifecycle responsibility | Runtime path | Driver path | Shared contract |
+| --- | --- | --- | --- |
+| Initialization and device | Runtime establishes higher-level state as needed; the application commonly uses a device ordinal | The application explicitly calls `cuInit` and obtains `CUdevice` | Device selection is neither launch nor completion evidence |
+| Context | Commonly uses the primary context implicitly unless an exact-version documented path selects another context | The application retains a primary context or obtains `CUcontext` and manages current-context state | Context bounds the validity of related objects and state |
+| Module/function | Runtime commonly manages registered device code and modules implicitly | The application obtains and releases `CUmodule`, then obtains `CUfunction` | Different code-ownership roles do not create a call-by-call mapping |
+| Memory | The application owns device pointers, byte counts, direction, last use, and `cudaFree` | The application owns `CUdeviceptr`, copies, last use, and `cuMemFree` | A higher-level API does not erase allocation ownership |
+| Launch | A kernel symbol, execution configuration, and arguments enter the Runtime launch surface | `CUfunction`, grid/block configuration, and a parameter array enter `cuLaunchKernel` | Submission and completion are separate |
+| Error/completion | Check `cudaError_t` and establish a Runtime synchronization boundary | Check `CUresult` and establish a Driver context/stream/event boundary | Both paths retain deferred-error observation points |
+
+The calls are representative coordinates only. The table does not claim that every memory, launch, or synchronization function has identical parameters or behavior, and it draws no performance conclusion from API choice.
+
+## Interoperability: write a current-context contract first
+
+The Runtime and Driver can interoperate, subject to the selected version's documented context rules. The selected 11.8.0, 12.9.2 archive path (whose owner page is labeled 12.9.1), and current 13.3.1 documentation all explain that many Runtime calls use an applicable Driver context already current on the calling thread. Without one, the Runtime uses or initializes a device primary context under its documented rules. Listed exceptions and newer execution-context interfaces are not identical across versions.
+
+A mixed design must therefore record at least:
+
+- Which layer creates or retains the context, which host thread makes it current, and when it is released or removed.
+- Which context owns allocations, modules, functions, streams/events, and which layer may destroy them.
+- Who has authority to call `cudaDeviceReset` or tear down a context. A primary context is shared state, not private cleanup for one local helper.
+- Whether each concrete Runtime/Driver data type is interchangeable, requires a cast, or has restrictions in the selected version. One documented interchangeable type does not generalize to every handle.
+
+“May interoperate” does not mean “may mix arbitrarily.” Do not cross the API boundary until current context, object ownership, and teardown authority are explicit.
+
+## Error model: changing prefixes does not remove asynchronous boundaries
+
+Runtime calls commonly return `cudaError_t`; Driver calls return `CUresult`. Error types and query functions differ, but the host-asynchronous nature of a kernel launch does not disappear with API choice. Both paths distinguish:
+
+1. **Submission boundary:** the launch call or an immediate launch-status check can expose some argument, configuration, or submission errors.
+2. **Completion boundary:** later context, device, stream, or event synchronization establishes the corresponding completion observation point and may expose deferred execution errors.
+3. **Attribution boundary:** some exact API references state that a call may also return an error from an earlier asynchronous launch, so the call returning an error is not necessarily the call that caused it.
+
+More explicit Driver handles can make responsibility visible, but they do not synchronize automatically or establish correct attribution automatically. Higher-level Runtime management does not check completion for the application. F05's asynchronous error model remains in force on both paths.
+
+## Boundary model: compare responsibility stage by stage
+
+The embedded layer/ownership comparison below is an original site composition. Its buttons select lifecycle stages in one deterministic model; arrow keys, Home, and End move among tabs. A complete static diagram, six-row table, and textual reading always remain available. It has no VIS ID, executes no CUDA, and grants no Evidence Status.
+
+<ApiBoundary locale="en" />
+
+## Decisions: begin with ownership requirements
+
+| Need | Starting point in this curriculum | Question to review next |
+| --- | --- | --- |
+| Learn CUDA C++ kernels, memory lifecycle, and error boundaries | Begin with Runtime API | Which resources still require explicit acquire/check/release? |
+| Explicit module load/unload or function lookup by name | Compare Driver API | Who owns the exact code artifact, context, and unload boundary? |
+| Plug-ins, frameworks, or libraries share CUDA in one process | Write a context/teardown contract before choosing one or both APIs | Who owns the primary context, current-context transitions, and reset? |
+| Use the Driver API “for more performance” | The API name alone cannot justify that conclusion | What workload, implementation, version, and measurement contract apply? |
+| Rewrite all of [EX04](/en/examples/error-handling-lifecycle/) with the Driver API to learn | F07 does not require this | Compare responsibilities first; another complete implementation would create an unnecessary canonical duplicate |
+
+Defaulting to the Runtime is an instructional dependency decision, not a sweeping claim that the Driver is unimportant or the Runtime fits every system. The Driver comparison becomes design input when module, context, language-boundary, or integration ownership requires more direct control. Exact-version owner documentation and the system contract still govern the final choice.
+
+## Retrieval check
+
+1. Why does “both APIs reach the CUDA driver stack” not imply that every `cuda*` call has a one-to-one `cu*` wrapper?
+2. When the Runtime manages a primary context and modules implicitly, which memory and completion responsibilities remain explicit in the application?
+3. Why must acquisition order and ownership of `CUdevice`, `CUcontext`, `CUmodule`, and `CUfunction` remain visible on the Driver path?
+4. Before calling the Runtime on a Driver-created context, which minimum current-context and teardown clauses must be written?
+5. Why does changing `cudaError_t` to `CUresult` not remove the boundary between launch submission and deferred execution errors?
+
+## Continue with practice
+
+- Complete the [F07 Exercises](/en/foundations/runtime-driver-api/exercises/), then inspect the separate [reviewed solutions](/en/foundations/runtime-driver-api/solutions/).
+- Review ownership and error contracts across a Runtime/Driver boundary in [Practice Bank PB-R1-011](/en/practice/#pb-r1-011).
+- Treat the related Runnable Example [EX04](/en/examples/error-handling-lifecycle/) as Runtime-lifecycle input and annotate only the additional handles and owners that a Driver-managed stage would require. Do not copy or maintain a second complete program.
+
+## Sources and review
+
+- Current role boundaries follow NVIDIA [CUDA Driver API 13.3.1: Difference between the driver and runtime APIs](https://docs.nvidia.com/cuda/cuda-driver-api/driver-vs-runtime-api.html).
+- Current context/handle interoperation follows [CUDA Runtime API 13.3.1: Interactions with the CUDA Driver API](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DRIVER.html). Synchronization and asynchronous boundaries were cross-checked against [Runtime API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html) and [Driver API synchronization behavior](https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html).
+- Paired selected-version coordinates are [11.8.0 Runtime](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html) / [11.8.0 Driver](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-driver-api/index.html), [12.9.2 archive Runtime](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html) / [12.9.2 archive Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-driver-api/index.html) (both owner pages label themselves v12.9.1), and current [13.3.1 Runtime](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html) / [13.3.1 Driver](https://docs.nvidia.com/cuda/cuda-driver-api/index.html). The complete bundle is recorded as `SRC-CUDA-015`.
+
+All owner sources were accessed on **2026-08-26**. The prose, tables, and API-boundary composition are original and copy or adapt no NVIDIA diagram, table, or sample. This page compiles and executes no CUDA, observes no GPU, and makes no performance claim.

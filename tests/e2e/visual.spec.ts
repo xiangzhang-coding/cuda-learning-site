@@ -104,3 +104,52 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
     }
   }
 });
+
+test('@visual issue-14 models expose visible selected and fail-closed states in every theme', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Semantic visual coverage is owned by pinned Chromium.');
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  for (const theme of THEME_IDS) {
+    await page.goto('/en/foundations/asynchronous-errors/');
+    await page.evaluate(
+      ([storageKey, value]) => localStorage.setItem(storageKey, value),
+      [THEME_STORAGE_KEY, theme] as const,
+    );
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+    const timeline = page.locator('cuda-error-timeline');
+    await timeline.locator('[data-action="select-scenario"]').selectOption('deferred-execution');
+    await timeline.locator('[data-action="scrub"]').fill('3');
+    const activeEvent = timeline.locator('[data-scenario="deferred-execution"] [aria-current="step"]');
+    await expect(activeEvent).toBeVisible();
+    expect(await activeEvent.evaluate((element) => Number.parseFloat(getComputedStyle(element).outlineWidth))).toBeGreaterThan(0);
+
+    await page.goto('/en/foundations/compute-capability/');
+    const filter = page.locator('cuda-capability-filter');
+    await filter.locator('[data-capability-input]').fill('8.6');
+    await expect(filter.locator('[data-capability-status]')).toBeVisible();
+    await expect(filter.locator('[data-capability-details]')).toBeHidden();
+    expect(
+      await filter.locator('[data-capability-input]').evaluate((element) => Number.parseFloat(getComputedStyle(element).borderWidth)),
+    ).toBeGreaterThan(0);
+
+    await page.goto('/en/foundations/runtime-driver-api/');
+    const boundary = page.locator('cuda-api-boundary');
+    const selectedTab = boundary.locator('[data-stage-tab="completion-errors"]');
+    await selectedTab.click();
+    await expect(selectedTab).toHaveAttribute('aria-selected', 'true');
+    await expect(boundary.locator('[data-api-boundary-panel]')).toBeVisible();
+    expect(await selectedTab.evaluate((element) => Number.parseFloat(getComputedStyle(element).borderWidth))).toBeGreaterThanOrEqual(2);
+
+    await page.goto('/en/foundations/launch-geometry/');
+    const explorer = page.locator('cuda-block-shape-explorer');
+    await explorer.locator('[data-block-shape-field="blockX"]').fill('1024');
+    await explorer.locator('[data-block-shape-field="blockY"]').fill('2');
+    await expect(explorer.locator('[data-issue-panel]')).toBeVisible();
+    await expect(explorer.locator('[data-geometry]')).toBeHidden();
+    await expect(explorer.locator('[data-verdict]')).toBeVisible();
+    expect(
+      await explorer.locator('[data-live-result]').evaluate((element) => Number.parseFloat(getComputedStyle(element).borderWidth)),
+    ).toBeGreaterThanOrEqual(2);
+  }
+});

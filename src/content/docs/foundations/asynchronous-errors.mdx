@@ -1,0 +1,236 @@
+---
+title: 'F05：CUDA 错误为何常常延后暴露'
+description: 区分 launch configuration 的即时错误、device execution 的延后错误、last-error state 与显式同步边界。
+pairId: f05
+counterpart: /en/foundations/asynchronous-errors/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - error-state
+  - immediate
+  - deferred
+  - synchronization
+  - canonical-example
+  - timeline
+  - correctness
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F05
+prerequisites:
+  - F04
+relatedUnits:
+  - F03
+  - EX04
+  - LAB03
+  - F07
+exampleIds:
+  - EX04
+canonicalExample: EX04
+canonicalRanges:
+  - error-lifecycle
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 11.8.0 - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Runtime API 11.8.0'
+    platform: 'CUDA Runtime error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 11.8.0 - API Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/api-sync-behavior.html'
+    version: 'CUDA Runtime API 11.8.0'
+    platform: 'CUDA Runtime synchronization behavior'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 11.8.0 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API 11.8.0'
+    platform: 'cudaDeviceSynchronize reference'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'CUDA Runtime error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - API Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/api-sync-behavior.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'CUDA Runtime synchronization behavior'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - Reference Manual PDF'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/pdf/CUDA_Runtime_API.pdf'
+    version: 'Archive path 12.9.2; document labels CUDA Runtime API 12.9.1'
+    platform: 'cudaDeviceSynchronize reference'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Runtime API 13.3.1'
+    platform: 'CUDA Runtime error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - API Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html'
+    version: 'CUDA Runtime API 13.3.1'
+    platform: 'CUDA Runtime synchronization behavior'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API 13.3.1'
+    platform: 'cudaDeviceSynchronize reference'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,error-state,immediate,deferred,synchronization,canonical-example,timeline,correctness,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F04 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F03,EX04,LAB03,F07' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: error-lifecycle }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+import ErrorTimeline from '../../../components/ErrorTimeline.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/asynchronous-errors/" lang="en">Read the English counterpart</a>
+
+CUDA kernel launch 相对 host 通常是异步的，因此异步错误（asynchronous error）可能在导致它的 device 工作之后才对 host 可见。与此同时，launch configuration 的一部分问题可以在提交路径立即暴露。正确的错误生命周期必须把“错误何时产生”“host 在哪里观察到它”和“哪个状态被读取或清除”分开，不能把所有 CUDA 调用统称为异步，也不能把某个 API 返回错误的位置直接当成唯一根因。
+
+## 学完本单元，你应该能
+
+- 区分 CUDA Runtime 的末次错误状态（last-error state）与每个 API 调用的直接返回值。
+- 准确说明 `cudaPeekAtLastError` 读取但不重置状态，而 `cudaGetLastError` 读取后把状态重置为 `cudaSuccess`。
+- 把 launch configuration 的即时错误（immediate error）与 device execution 的延后执行错误（deferred execution error）放到不同时间线上。
+- 使用显式同步边界（explicit synchronization boundary）等待此前 device 工作并检查其返回状态。
+- 在错误检查、结果正确性与 CUDA Evidence Status 之间保持独立边界。
+
+## 先修关系
+
+先完成 [F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)。你应当已经能按 allocation、H2D、launch、同步、D2H、comparison 和 release 追踪资源，并知道 launch 后的即时检查不代表 kernel 已完成。F05 把 F04 暂时收窄的异步错误模型完整展开。
+
+[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)提供一种可能导致执行问题的 device 访问背景，但它是相关单元而不是新增先修。EX04 是本页的 canonical executable counterpart；LAB03 负责未来的引导式真实环境观察；F07 会继续使用这里的边界推理。本学习单元自身不执行 CUDA，也没有 CUDA Evidence Status。
+
+## 错误状态：先分清直接返回与 last-error state
+
+返回 `cudaError_t` 的 Runtime API 调用有自己的直接返回值，调用方应当在原位置检查它。Kernel launch syntax 本身没有一个可供普通赋值检查的 `cudaError_t` 返回值，因此 host 通常紧邻 launch 查询 last-error state。两条通道相关，但不能互相替代：例如 `cudaDeviceSynchronize` 的直接返回值必须直接检查，不能只在更晚的位置猜测发生了什么。
+
+在本页使用的单 Runtime 实例程序中，last-error state 属于 host thread。CUDA 11.8.0 文档称其为同一 host thread 中任意 Runtime call 产生的末次错误；12.9.2 archive 和 13.3.1 文档进一步写明它属于该 host thread 中同一 CUDA Runtime library instance。这个状态不是每个 kernel、stream 或 device 各有一份的错误队列。
+
+| 操作 | 读取什么 | 读取后是否重置 last-error state | 是否建立 device completion |
+| --- | --- | --- | --- |
+| `cudaPeekAtLastError()` | 当前 host thread / Runtime instance 的 last error | 否 | 否 |
+| `cudaGetLastError()` | 同一 last error | 是，重置为 `cudaSuccess` | 否 |
+| `cudaDeviceSynchronize()` | 它自己的同步调用结果 | 不应把它当作上述两个 getter 的替代品 | 是，等待此前请求的 device tasks |
+
+`cudaPeekAtLastError` 适合不消费状态的观察；如果期间没有新错误改变状态，重复 peek 仍会看到同一项。`cudaGetLastError` 适合取得并消费当前状态，从而为下一段诊断建立明确起点。若 preflight `cudaGetLastError` 取到旧错误，正确做法是报告或处理它，而不是为了得到一张“干净”时间线而静默丢弃。
+
+三组指定版本的 Error Handling 页面都带有重要 caveat：`cudaPeekAtLastError` 和 `cudaGetLastError` 也可能返回此前异步 launch 的错误。许多其他 Runtime API 条目也有同类注记。因此“某次调用返回了错误”只确定了 host 的观察点；在没有隔离边界时，它不保证错误起源就是这次调用。
+
+## 即时错误：launch configuration 在提交路径失败
+
+Kernel launch 相对 host 是异步的，但这不表示与 launch 有关的所有失败都必须等 device execution 后才出现。Runtime 在提交路径处理 execution configuration；若配置不能形成可接受的 launch，失败可以在 kernel body 开始前进入 last-error state。紧邻 launch 的 `cudaGetLastError` 或 `cudaPeekAtLastError` 因而可以观察这类即时 launch 边界问题。
+
+Canonical 诊断顺序先处理旧 last-error state，再发出一个 launch，并立即查询 launch 边界。若即时检查失败，依赖该 kernel 输出的同步后处理、D2H 和 comparison 都没有满足前置条件，控制流应进入 cleanup。同步不会修复被拒绝的 launch，也不应成为这种情景的首次预期发现点。
+
+不要把教学分类绑定到某一个固定错误码。不同 configuration defect、Toolkit、device 或上下文可能返回不同状态；验收依据是**失败在 device body 执行前被即时检查观察到**，而不是背诵一项枚举值。
+
+## 延后错误：device execution 之后才可见
+
+另一条时间线中，Runtime 接受 launch，紧邻 launch 的检查没有观察到新的 configuration 失败，host 随后继续。这个结果只说明当时的 launch 边界，没有等待 kernel body，也没有证明 execution 成功。
+
+若问题在已提交工作实际执行时发生，错误产生在 device execution 阶段。Host 需要到一个会等待相关工作的边界，才可能取得这个延后结果。EX04 使用显式 `cudaDeviceSynchronize` 把“launch 已接受”和“此前 device work 已完成或失败”分成两个可审查返回点。
+
+即时 getter 不是 execution probe。把 `cudaGetLastError` 放在 launch 后非常近，仍不会因为距离近就等待 device；同样，把它放得更晚也不能自动提供清晰归因，因为它可能读取之前没有消费的状态。诊断质量来自受控状态和有意设置的同步边界，而不是 API 行号之间的距离。
+
+## 同步：让 host 在明确边界等待
+
+`cudaDeviceSynchronize` 的三个指定版本参考都把它定义为等待 device 完成此前请求的 tasks，并在此前 task 失败时返回错误。这使它成为 EX04 用来暴露 deferred execution error 的显式 completion/error boundary。调用方必须检查这个调用自己的返回值，并在失败时停止把输出当作有效结果。
+
+显式 device-wide 同步不是 CUDA 程序唯一可能等待的地方。同步 D2H transfer 等调用也可能形成等待边界；而 API synchronization behavior 文档还明确警告，同步/异步命名不能被简化成“所有无 Async 后缀调用都阻塞”或“所有 Async 调用都立刻返回”，并且 Runtime 调用可能因内部资源原因发生未承诺的阻塞。正确性只能依赖文档化语义，不能依赖一次观察到的时序。
+
+一个窄而清晰的调试区间是：处理已有 last-error state；提交目标 launch；立即检查 launch 边界；在不混入无关工作时等待目标工作；直接检查同步返回。这个区间能改善归因，却仍不应被描述成普遍的“报错 API 就是根因”，尤其在多 stream、多 host thread 或更复杂 library 组合中。
+
+## Canonical 示例：EX04 error-lifecycle range
+
+[查看固定提交中的完整 EX04 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/349f2f65c195ca940eb85bc89941507aed326496/examples/ex04-error-handling-lifecycle)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/349f2f65c195ca940eb85bc89941507aed326496.zip)。解压后进入 `examples/ex04-error-handling-lifecycle/`。完整 project 是唯一 canonical source；本页只渲染声明的 `error-lifecycle` range，不维护第二份实现。
+
+<CanonicalCode exampleId="EX04" range="error-lifecycle" />
+
+按五个边界阅读 excerpt：launch submission、immediate check、device execution、explicit synchronization、host-visible result。对 launch-configuration 情景，device execution 标记为未到达；对 deferred-execution 情景，即时检查不宣称 execution 成功，失败由后续同步返回暴露。示例检查实际返回状态，但本页不承诺所有环境产生完全相同的错误码或诊断文字。
+
+## 时间线：比较两个暴露位置
+
+下面的原创嵌入式教学界面同时保留两条完整静态时间线。脚本增强后可以选择情景、播放、暂停、逐步前进、重置或用 range input 定位阶段；全部控件都是原生 keyboard-operable 控件。它没有 Visual Explainer ID，也不会执行 CUDA。
+
+<ErrorTimeline locale="zh-CN" />
+
+静态文字和交互高亮表达的是因果模型，不是测量到的时长。相邻卡片的间距不表示 latency，播放速度不表示 device/host 比例，任一状态也不授予 Compile-Checked、Community-Observed 或 Runtime-Verified。
+
+## 正确性：发现错误不等于证明结果正确
+
+即时检查与同步都成功，只能说明这些被检查的 API 边界没有返回失败；它们不会证明索引、算法、数值容差或 output 内容正确。结果仍必须在成功 D2H 后按独立 host reference 或其他明确 oracle 验证。反过来，收到一个 error 也不能仅凭枚举名定位唯一 source line；需要结合受控输入、边界、日志和必要的调试工具。
+
+EX04 是 Runnable Example，F05 是解释其模型的 Learning Unit，两者是不同 evidence subject。本页的 compilation 与 runtime axes 都为空。浏览器时间线、静态阅读、host-only model test 和 source inspection 都不能给 EX04 或 F05 添加 GPU runtime observation；只有满足声明环境与验收条件的真实 GPU 执行记录才可能改变相应 executable subject 的 runtime Evidence Status。
+
+## 离开前检查
+
+1. `cudaPeekAtLastError` 与 `cudaGetLastError` 读取同一类状态时，最关键的副作用差异是什么？两者是否等待 kernel 完成？
+2. 为什么 launch 后的即时检查可以发现一部分 configuration 问题，却不能证明 device execution 成功？
+3. Deferred execution error 的 origin boundary 与 host observation boundary 分别在哪里？
+4. 为什么某个 Runtime API 返回错误时，不能仅凭该调用位置断言它制造了错误？
+5. 即时检查和同步都成功后，还需要什么独立步骤才能产生 correctness verdict？
+
+## 继续练习
+
+- 完成 [F05 练习（Exercise）](/foundations/asynchronous-errors/exercises/)，再查看独立的[参考解答](/foundations/asynchronous-errors/solutions/)。
+- 到[练习题库（Practice Bank）PB-R1-009](/practice/#pb-r1-009)审查一份混淆 stale last-error state、即时检查和同步边界的记录。
+- 在 LAB03 可用并且你有受支持环境时，把这里的预测带入引导式 Lab；没有真实运行就保持 observation 为空。
+
+## 来源与复核
+
+- [CUDA Runtime API 11.8.0 Error Handling](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA Runtime API 11.8.0 API synchronization behavior](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/api-sync-behavior.html)
+- [CUDA Runtime API 11.8.0 Device Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html)
+- [CUDA Runtime API archive 12.9.2 Error Handling；页面标签 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA Runtime API archive 12.9.2 API synchronization behavior；页面标签 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/api-sync-behavior.html)
+- [CUDA Runtime API archive 12.9.2 Reference Manual PDF；文档标签 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/pdf/CUDA_Runtime_API.pdf)
+- [CUDA Runtime API 13.3.1 Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA Runtime API 13.3.1 API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html)
+- [CUDA Runtime API 13.3.1 Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+
+三组 owner documentation 均访问于 **2026-08-26**。11.8.0、12.9.2 archive 和 13.3.1 对 `cudaGetLastError` 的重置语义、`cudaPeekAtLastError` 的非重置语义、此前异步 launch caveat、kernel launch 相对 host 的异步性以及显式 device synchronization 的核心行为一致。`archive/12.9.2` 页面与 PDF 自身标为 **CUDA Runtime API 12.9.1**，因此 metadata 同时保留 archive path 与显示版本。页面文字、练习与时间线编排均为原创，不复制 NVIDIA sample、diagram、table、运行输出或性能数字。
+
+**事实核查日期：2026-08-26。**

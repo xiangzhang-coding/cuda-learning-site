@@ -57,7 +57,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 2, practice: 13, visuals: 2, glossary: 55, sources: 29 });
+    expect(counts).toEqual({ labs: 3, practice: 17, visuals: 2, glossary: 65, sources: 31 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(118);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexedText = (

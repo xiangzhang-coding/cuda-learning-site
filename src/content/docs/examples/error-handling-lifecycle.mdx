@@ -1,0 +1,318 @@
+---
+title: 'EX04：错误处理生命周期可运行示例'
+description: 获取一个共享的原创 C++17 错误处理实现，区分提交后的立即检查、同步时的延迟失败、host 逻辑验证与修复后的索引。
+pairId: ex04
+counterpart: /en/examples/error-handling-lifecycle/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - scenario-contract
+  - error-lifecycle
+  - indexing-kernels
+  - host-verification
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX04
+prerequisites:
+  - F05
+relatedUnits:
+  - F03
+  - F04
+  - F05
+  - LAB03
+exampleIds:
+  - EX04
+canonicalExample: EX04
+canonicalRanges:
+  - error-lifecycle
+  - indexing-kernels
+  - host-verification
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 140 bytes of declared problem allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The launch-config scenario should surface a launch-configuration defect at the immediate-after-submission check; cudaPeekAtLastError should observe without clearing, and cudaGetLastError should retrieve and clear that same launch state before explicit synchronization.
+    - The deferred-access scenario should show no launch error at the immediate check and should surface the deliberately invalid device access only when cudaDeviceSynchronize establishes the completion boundary.
+    - The indexing-defect scenario should complete without an illegal memory access but fail deterministic host verification because its in-bounds column-major permutation disagrees with the declared row-major reference.
+    - The repaired-indexing scenario should complete explicit synchronization and match the overflow-checked row-major host reference.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ asynchronous execution and error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ execution and indexing'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Toolkit 11.8.0; last updated 2022-10-03'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 archive Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Toolkit 13.3.1; last updated 2026-06-29'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1; last updated 2026-06-29'
+    platform: 'Linux x86-64 synchronization contract'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex04
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-26'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,scenario-contract,error-lifecycle,indexing-kernels,host-verification,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX04
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: F05
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'F03,F04,F05,LAB03'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX04
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX04
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'error-lifecycle,indexing-kernels,host-verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 140 bytes of declared problem allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '4 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '12'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/error-handling-lifecycle/" lang="en">Read the English counterpart</a>
+
+EX04 是一个独立、原创的错误处理生命周期可运行示例（Runnable Example）。同一份 C++17 项目把提交后的立即检查（immediate-after-submission）、同步时的延迟检查（deferred-at-synchronization）、纯 host 逻辑验证（host verification）和修复后的索引放在四个单场景进程中。网站不会执行 CUDA。
+
+## 用途
+
+先完成 [F05：分开立即 launch error 与延迟 execution error](/foundations/asynchronous-errors/)。EX04 把 F05 的异步错误时间线变成唯一可执行实现；[F03](/foundations/multidimensional-indexing/)提供二维 row-major 索引合同，[F04](/foundations/host-device-lifecycle/)提供 allocation、submission、synchronization 与 cleanup 的顺序，[LAB03](/labs/break-and-repair-indexing/)再引导学习者运行故障与修复场景。
+
+本项目刻意不把所有故障塞进一个长生命周期。每次调用只运行一个场景，这样前一次异步错误不会污染下一次 `cudaPeekAtLastError`，而且报告潜在 fatal device fault 后不再尝试复用 CUDA context。
+
+## 获取 canonical project
+
+[在 GitHub 查看固定提交中的完整 EX04 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/349f2f65c195ca940eb85bc89941507aed326496/examples/ex04-error-handling-lifecycle)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/349f2f65c195ca940eb85bc89941507aed326496.zip)。解压后进入 `examples/ex04-error-handling-lifecycle/`。
+
+`project.json` 是机器可读合同，`README.md` 可脱离网站说明构建、运行与证据边界。`src/`、`include/` 和 `tests/` 是唯一实现来源。两个语言页面都按 manifest 顺序各显示一次 `error-lifecycle`、`indexing-kernels` 和 `host-verification`。项目和页面均为原创；项目源码使用 Apache-2.0。
+
+## 场景合同
+
+| CLI 场景 | 刻意设置 | 首个预期分类 | 安全边界 |
+| --- | --- | --- | --- |
+| `launch-config` | 使用超过 block thread 上限的 launch configuration | `immediate-after-submission` | launch 被拒绝后读取、清除 last-error state，再显式同步 |
+| `deferred-access` | 合法 launch 内故意解引用无效 device address | `deferred-at-synchronization` | 不分配 device buffer；同步报告故障后立即结束进程 |
+| `indexing-defect` | 把 `x,y` 以 column-major permutation 写入同一 allocation | `host-verification` | 所有位置都在 35 个元素内；不借助非法访问制造 mismatch |
+| `repaired-indexing` | 使用声明的 `y * width + x` row-major map | `none` | 同步成功后与纯 host reference 精确比较 |
+
+表中的分类是验收方向，不是本站观察到的 runtime output。程序检查成功或失败状态，而不把某个具体 `cudaError_t` 数值写成跨环境保证。
+
+## 错误生命周期
+
+以下范围保存四个场景的 host-side observation boundary 和 cleanup 决策：
+
+<CanonicalCode exampleId="EX04" range="error-lifecycle" />
+
+`launch-config` 在 triple-chevron submission 后立即调用 `cudaPeekAtLastError`。该 API 读取调用线程可见的 last-error state，但不清除它；随后 `cudaGetLastError` 取回并清除同一 state，再次 peek 应看到已清除状态。最后的 `cudaDeviceSynchronize` 仍然明确存在，因此“立即检查”和“完成边界”没有被混为一谈。
+
+`deferred-access` 的 launch geometry 本身合法。代码先执行不清除 state 的 immediate peek，然后调用 `cudaDeviceSynchronize` 等待此前提交的工作；故意的 device access 以该 synchronization call 为预期报告点。由于这类执行故障可能让当前 CUDA context 不再适合继续工作，函数在记录返回的 status 后直接结束，不调用 `cudaFree`、reset 或下一次 kernel。
+
+两个索引场景只在 `cudaMalloc`、launch immediate check、显式同步和 D2H copy 全部成功后执行 host verification。它们也只在成功同步、成功回传之后调用 `cudaFree`；任何 CUDA failure 都让进程退出并把 allocation 留给进程终止回收，而不是冒险沿潜在损坏的 context 执行 cleanup。
+
+## 索引 kernels
+
+同一 device source 包含 launch-configuration probe、延迟无效访问，以及成对的错误/修复索引 kernel：
+
+<CanonicalCode exampleId="EX04" range="indexing-kernels" />
+
+`indexing_defect` 不是越界 kernel。对 `width=7,height=5` 的每个有效 `(x,y)`，`x * height + y` 都落在 `[0,35)`，并且构成完整 permutation；问题在于它违反应用声明的 x-fastest row-major layout。这样，场景只测试“逻辑 mapping 与 reference 不一致”，不会让一次 illegal memory access 同时污染 CUDA error state。
+
+`repaired_indexing` 在同样的 coordinates、bounds、grid、block 和 allocation 上只替换为 `y * width + x`。控制变量使 host mismatch 能归因于 mapping repair，而不是问题大小或 launch geometry 变化。
+
+## Host 验证边界
+
+纯 host C++17 header 定义 scenario parser、稳定的 stage label、首个 failure stage 分类、overflow-safe element count、两种 2D mapping、确定性 reference value 和 exact verifier：
+
+<CanonicalCode exampleId="EX04" range="host-verification" />
+
+`try_element_count` 在乘法前检查零 extent 与 `std::size_t` overflow。两种 index function 先验证 extent product，再验证每个 coordinate，失败时不改写 caller 提供的 index。host test 遍历 `7 x 5` 范围，模拟 in-bounds defect 与 repair，并确认 mismatch 第一次出现在确定位置。
+
+`make host-test` 不包含 CUDA header、`__host__`、`__device__` 或 GPU dependency。它能验证 parsing、arithmetic、reference 和 classification 合同，但不能证明 CUDA source 已编译，也不能证明 device 执行按预期阶段报告错误。
+
+## 构建合同
+
+在原生 Linux 的项目目录中按固定顺序执行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+前四步需要所选 CUDA Toolkit，host-test 只需要 x86-64 CPU 上的 host C++17 compiler。CUDA stages 产生 `build/error_handling_lifecycle.ii`、`build/error_handling_lifecycle.o` 和 `build/ex04-error-handling-lifecycle`。Inspect 使用 `cuobjdump` 确认 native `sm_75` cubin 与从 `compute_75` 生成的 forward-compatible PTX。
+
+`scripts/compile-check.sh c++17 ex04 <result-dir>` 依次运行 clean、preprocess、compile、link、inspect 和 host-test，并保存日志与 inspection artifacts。它绝不运行 `build/ex04-error-handling-lifecycle`；因此成功的构建流程也不会产生 immediate、deferred 或 host-verification runtime observation。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 构建门槛 | x86-64 CPU；host-test 使用 host C++17 compiler，CUDA stages 使用所选 Toolkit |
+| 运行门槛 | 原生 Linux；一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 索引场景固定 35 个 `std::uint32_t`，唯一显式 device allocation 是 140 bytes，远低于 8 GB 边界 |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Lane 共用同一份原创 C++17 source |
+
+| Toolkit Lane | OS / architecture | 声明的 development image tag |
+| --- | --- | --- |
+| CUDA 11.8.0 | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04` |
+| CUDA 12.9.2 | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04` |
+| CUDA 13.3.1 | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04` |
+
+Manifest 固定了与 EX03 完全相同的 tag、manifest digest 和 linux/amd64 digest。这些只是 future evidence target 与 container identity 输入；tag metadata、digest 或本地 host-test 不能证明任一 Lane 已编译或运行 EX04。
+
+## 编译与运行证据
+
+EX04 的 compilation evidence 数组为空，仓库没有合格的 Lane compile record，因此 **EX04 不是 Compile-Checked**。源码存在、命令可执行、host-only test 通过或 container image 可取得，都不会填充这条空轴。
+
+Runtime Evidence Status 是 **Pending Hardware Verification**，recorded observations 为空。没有声明的 Reference Environment，也没有合格 GPU execution；本页不保存或推断 error code、console transcript、timing、latency、throughput、speedup 或其他性能结论。不存在可渲染的 compilation record。
+
+LAB03 或人工外部运行只有在提交完整环境清单（Environment Manifest）、每个场景独立进程日志和验收判定后，才可能形成候选 runtime record。学习者本地看到的结果不会自动升级本站 Evidence Status。
+
+## 预期观察，不是运行记录
+
+以下四项来自 manifest 的预先声明，不是已观察 output：
+
+1. `launch-config` 应在提交后的立即检查暴露 launch-configuration defect；`cudaPeekAtLastError` 应只观察，`cudaGetLastError` 应取回并清除同一 launch state，然后代码仍显式同步。
+2. `deferred-access` 的 immediate check 应没有 launch error，故意的 invalid device access 应只在 `cudaDeviceSynchronize` 建立 completion boundary 时暴露。
+3. `indexing-defect` 应在没有 illegal memory access 的情况下完成 device work，但因为 in-bounds column-major permutation 与 row-major reference 不一致而无法通过 deterministic host verification。
+4. `repaired-indexing` 应完成显式同步，并匹配经过 overflow 检查的 row-major host reference。
+
+四项都仍需符合 hardware gate、Environment Manifest 和 acceptance criteria 的 GPU 记录验证。当前 observation 列表为空，也没有预设具体错误枚举、输出文本或性能数字。
+
+## 来源与复核
+
+Programming Guide v13.3 的 Asynchronous Execution 说明 submission、synchronization、`cudaPeekAtLastError` 与 `cudaGetLastError` 的角色；Writing CUDA SIMT Kernels 支撑 coordinate、bounds 和 flattening。三条 Runtime Error Handling 页面覆盖 11.8.0、12.9.2 archive path 与 current 13.3.1；当前 Device Management 页面补充 `cudaDeviceSynchronize` 合同。三条 NVCC 页面对应 manifest 中的精确 Toolkit Lanes，三个 Docker Hub tag API 只用于 image metadata。
+
+`archive/12.9.2` 下的 Runtime 页面自身标记为 **12.9.1**，所以 source metadata 同时保留 archive path 和 page label。不同版本对 runtime instance 的措辞有演进，本页只依赖三条文档共同保证的核心行为：peek 不清除，get 取回并清除，显式 synchronization 建立 completion boundary。
+
+- [CUDA Programming Guide v13.3 - Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)
+- [CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)
+- [CUDA 11.8.0 Runtime API - Error Handling](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA 12.9.2 archive Runtime API - Error Handling; page label 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA 13.3.1 Runtime API - Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA 13.3.1 Runtime API - Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-26。** 页面没有复制 NVIDIA sample listing、运行输出或性能结果。

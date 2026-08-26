@@ -60,6 +60,7 @@ function sourceRecord(
 
 const lab01Destination = PUBLISHED_DESTINATIONS.LAB01;
 const lab02Destination = PUBLISHED_DESTINATIONS.LAB02;
+const lab03Destination = PUBLISHED_DESTINATIONS.LAB03;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
 
@@ -111,6 +112,30 @@ const labs: readonly ResourceIndexRecord[] = [
     },
     reviewedOn: '2026-08-24',
     keywords: localized('向量加法 manifest CPU reference 容差', 'vector addition manifest CPU reference tolerance'),
+  },
+  {
+    planningId: 'LAB03',
+    group: 'labs',
+    title: lab03Destination.title,
+    href: lab03Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'intermediate',
+    prerequisites: lab03Destination.prerequisites,
+    relatedUnits: ['EX04', 'F08'],
+    hardwareGate: localized(
+      '原生 Linux；1 个 compute capability 7.5 或更新的 CUDA GPU；固定 7 x 5、35 个 uint32_t 的问题，共 140 bytes，低于 8 GB。',
+      'Native Linux; one CUDA GPU with compute capability 7.5 or newer; fixed 7 x 5 problem of 35 uint32_t values (140 bytes), below 8 GB.',
+    ),
+    versionGate: localized(
+      'CUDA Toolkit Lane 11.8.0、12.9.2 或 13.3.1；C++17。',
+      'CUDA Toolkit Lane 11.8.0, 12.9.2, or 13.3.1; C++17.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-08-26',
+    keywords: localized('错误生命周期 索引修复 host comparison EX04', 'error lifecycle indexing repair host comparison EX04'),
   },
 ];
 
@@ -284,6 +309,58 @@ const practice: readonly ResourceIndexRecord[] = [
     versionGate: localized('CUDA Runtime API 13.3.1；EX03 runtime 待硬件验证。', 'CUDA Runtime API 13.3.1; EX03 runtime remains Pending Hardware Verification.'),
     reviewedOn: '2026-08-26',
   },
+  {
+    planningId: 'PB-R1-009',
+    group: 'practice',
+    title: localized('修复 stale、immediate 与 deferred error 归因', 'Repair stale, immediate, and deferred error attribution'),
+    href: localized('/practice/#pb-r1-009', '/en/practice/#pb-r1-009'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['F05'],
+    relatedUnits: ['F05', 'EX04', 'LAB03'],
+    hardwareGate: localized('无；只审查静态 error-lifecycle 记录。', 'None; review a static error-lifecycle record only.'),
+    versionGate: localized('Runtime API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Runtime API 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
+    reviewedOn: '2026-08-26',
+  },
+  {
+    planningId: 'PB-R1-010',
+    group: 'practice',
+    title: localized('重建 capability 到 compiler target 的决策', 'Rebuild a capability-to-compiler-target decision'),
+    href: localized('/practice/#pb-r1-010', '/en/practice/#pb-r1-010'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'intermediate',
+    prerequisites: ['F06'],
+    relatedUnits: ['F06', 'O03', 'F08'],
+    hardwareGate: localized('无；只审查 capability、limit 与 target 记录。', 'None; review capability, limit, and target records only.'),
+    versionGate: localized('CUDA Programming Guide v13.3；NVCC 11.8.0、12.9.2 与 13.3.1。', 'CUDA Programming Guide v13.3; NVCC 11.8.0, 12.9.2, and 13.3.1.'),
+    reviewedOn: '2026-08-26',
+  },
+  {
+    planningId: 'PB-R1-011',
+    group: 'practice',
+    title: localized('修复 Runtime/Driver 所有权与错误边界', 'Repair Runtime/Driver ownership and error boundaries'),
+    href: localized('/practice/#pb-r1-011', '/en/practice/#pb-r1-011'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['F07'],
+    relatedUnits: ['F04', 'F05', 'F07', 'EX04'],
+    hardwareGate: localized('无；只审查混合 API 设计，不运行 CUDA。', 'None; review a mixed-API design and run no CUDA.'),
+    versionGate: localized('Runtime/Driver API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Runtime/Driver APIs 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
+    reviewedOn: '2026-08-26',
+  },
+  {
+    planningId: 'PB-R1-012',
+    group: 'practice',
+    title: localized('在测量前选择合法 block shape', 'Select legal block shapes before measurement'),
+    href: localized('/practice/#pb-r1-012', '/en/practice/#pb-r1-012'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'intermediate',
+    prerequisites: ['F08'],
+    relatedUnits: ['F03', 'F06', 'F08', 'LAB03'],
+    hardwareGate: localized('无；只做静态 geometry 与 resource 检查。', 'None; perform static geometry and resource checks only.'),
+    versionGate: localized('CUDA Programming Guide v13.3；Runtime API 13.3.1 device/function properties。', 'CUDA Programming Guide v13.3; Runtime API 13.3.1 device/function properties.'),
+    reviewedOn: '2026-08-26',
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -340,7 +417,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-022', 'Baseline GPU Capability Tier · 基础 GPU 能力层级', 'environment-vocabulary', ['O03'], 'Compute capability 7.5+；问题规模可放入 8 GB。', 'Compute capability 7.5+ with problem sizes that fit within 8 GB.'),
   glossaryRecord('TERM-023', 'Modern Single-GPU Capability Tier · 现代单 GPU 能力层级', 'environment-vocabulary', ['O03'], 'Compute capability 8.0+ 且至少 8 GB。', 'Compute capability 8.0+ and at least 8 GB.'),
   glossaryRecord('TERM-024', 'CUDA Toolkit · CUDA 工具包', 'environment-vocabulary', ['O03'], 'Toolkit Lane 使用精确 X.Y.Z 坐标。', 'Toolkit Lanes use exact X.Y.Z coordinates.'),
-  glossaryRecord('TERM-025', 'compute capability · 计算能力', 'environment-vocabulary', ['O03'], '型号映射和特性表按当前 NVIDIA 文档复核。', 'Model mappings and feature tables require current NVIDIA documentation.'),
+  glossaryRecord('TERM-025', 'compute capability · 计算能力', 'environment-vocabulary', ['O03', 'F06'], '型号映射、功能、限制与编译目标按当前 NVIDIA 文档复核。', 'Model mappings, features, limits, and compiler targets require current NVIDIA documentation.'),
   glossaryRecord('TERM-026', 'kernel · 核函数', 'kernel-vocabulary', ['F01', 'F02', 'F04', 'LAB02', 'EX03'], 'F01-F04 使用 CUDA Programming Guide v13.3。', 'F01-F04 use CUDA Programming Guide v13.3.'),
   glossaryRecord('TERM-027', 'execution configuration · 执行配置', 'kernel-vocabulary', ['F01', 'F02', 'F03', 'VIS02', 'EX03'], '执行配置不自动定义逻辑数据范围。', 'Execution configuration does not define logical data extent automatically.'),
   glossaryRecord('TERM-028', 'grid · 网格', 'kernel-vocabulary', ['F01', 'F02', 'F03', 'VIS01', 'VIS02', 'EX03'], 'Grid 坐标不保证 block 调度顺序。', 'Grid coordinates do not guarantee block scheduling order.'),
@@ -371,6 +448,16 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-053', 'logical extent · 逻辑范围', 'kernel-vocabulary', ['F03', 'VIS02', 'EX03'], 'Extent 由应用声明，不由 execution geometry 自动推断。', 'The application declares its extent; execution geometry does not infer it.'),
   glossaryRecord('TERM-054', 'row-major layout · 行主序布局', 'kernel-vocabulary', ['F03', 'VIS02', 'EX03'], 'EX03 显式声明 x-fastest layout；CUDA launch geometry 不声明数据布局。', 'EX03 explicitly declares an x-fastest layout; CUDA launch geometry declares no data layout.'),
   glossaryRecord('TERM-055', 'resource lifecycle · 资源生命周期', 'kernel-vocabulary', ['F04', 'O04', 'EX03'], 'CUDA Runtime API 13.3.1；ownership、last use 与 release 必须分开记录。', 'CUDA Runtime API 13.3.1; ownership, last use, and release remain distinct.'),
+  glossaryRecord('TERM-056', 'asynchronous error · 异步错误', 'kernel-vocabulary', ['F05', 'F07', 'EX04', 'LAB03'], 'Runtime API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Runtime API 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
+  glossaryRecord('TERM-057', 'last-error state · 末次错误状态', 'kernel-vocabulary', ['F05', 'EX04', 'LAB03'], '三个 selected Runtime API 版本共享 getter reset/peek non-reset 合同。', 'All three selected Runtime API versions share getter-reset and peek-non-reset semantics.'),
+  glossaryRecord('TERM-058', 'CUDA Runtime API · CUDA 运行时 API', 'kernel-vocabulary', ['F04', 'F05', 'F07', 'EX04', 'LAB03'], '11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1 的角色按版本核对。', 'Roles are reviewed by version at 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
+  glossaryRecord('TERM-059', 'CUDA Driver API · CUDA 驱动 API', 'kernel-vocabulary', ['F07'], '11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1 的 handle/interop 合同按版本核对。', 'Handle and interoperability contracts are reviewed by version at 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
+  glossaryRecord('TERM-060', 'virtual architecture target · 虚拟架构目标', 'environment-vocabulary', ['F06'], 'NVCC 11.8.0、12.9.2 与 selected Toolkit 13.3.1 的 accepted targets。', 'Accepted targets are versioned across NVCC 11.8.0, 12.9.2, and selected Toolkit 13.3.1.'),
+  glossaryRecord('TERM-061', 'real architecture target · 实际架构目标', 'environment-vocabulary', ['F06'], '每个 real target 必须实现 paired virtual target 的 feature assumptions。', 'Each real target must implement the paired virtual target feature assumptions.'),
+  glossaryRecord('TERM-062', 'architecture-specific feature set · 架构特定功能集', 'environment-vocabulary', ['F06'], 'CUDA Programming Guide v13.3；从 compute capability 9.0 开始。', 'CUDA Programming Guide v13.3; available beginning with compute capability 9.0.'),
+  glossaryRecord('TERM-063', 'family-specific feature set · 系列特定功能集', 'environment-vocabulary', ['F06'], 'CUDA Programming Guide v13.3；从 compute capability 10.0 开始。', 'CUDA Programming Guide v13.3; available beginning with compute capability 10.0.'),
+  glossaryRecord('TERM-064', 'launch geometry · 启动几何', 'kernel-vocabulary', ['F02', 'F03', 'F08', 'LAB03'], 'Programming Guide v13.3 与 Runtime API 13.3.1 device/function limits。', 'Programming Guide v13.3 and Runtime API 13.3.1 device/function limits.'),
+  glossaryRecord('TERM-065', 'block shape · 线程块形状', 'kernel-vocabulary', ['F08', 'LAB03'], '轴向、总 thread 与 kernel-specific limit 必须分开核对。', 'Per-axis, aggregate-thread, and kernel-specific limits require separate checks.'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -580,6 +667,24 @@ const sources: readonly ResourceIndexRecord[] = [
     'cuda-version-record',
     ['F04', 'EX03'],
     localized('Runtime/NVCC 11.8.0、12.9.2/页面标签 12.9.1、13.3.1；C++17。', 'Runtime/NVCC 11.8.0, 12.9.2/page label 12.9.1, and 13.3.1; C++17.'),
+    '2026-08-26',
+    '2026-08-26',
+  ),
+  sourceRecord(
+    'SRC-CUDA-015',
+    localized('F05/F07/EX04/LAB03 错误与 Runtime/Driver API', 'F05/F07/EX04/LAB03 errors and Runtime/Driver APIs'),
+    'cuda-version-record',
+    ['F05', 'F07', 'EX04', 'LAB03'],
+    localized('Programming Guide v13.3；Runtime/Driver API 11.8.0、12.9.2 archive/页面标签 12.9.1 与 13.3.1。', 'Programming Guide v13.3; Runtime/Driver APIs 11.8.0, 12.9.2 archive/page label 12.9.1, and 13.3.1.'),
+    '2026-08-26',
+    '2026-08-26',
+  ),
+  sourceRecord(
+    'SRC-CUDA-016',
+    localized('F06/F08 capability、compiler target 与 launch limit', 'F06/F08 capability, compiler targets, and launch limits'),
+    'cuda-version-record',
+    ['F06', 'F08'],
+    localized('Programming Guide v13.3；NVCC 11.8.0、12.9.2、selected Toolkit 13.3.1；Runtime API 13.3.1。', 'Programming Guide v13.3; NVCC 11.8.0, 12.9.2, and selected Toolkit 13.3.1; Runtime API 13.3.1.'),
     '2026-08-26',
     '2026-08-26',
   ),

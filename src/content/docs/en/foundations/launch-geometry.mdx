@@ -1,0 +1,204 @@
+---
+title: 'F08: Launch Geometry Is a Correctness and Resource Decision Before Speed'
+description: Prove a 2D launch feasible through logical extents, per-axis and aggregate thread limits, safe arithmetic, and kernel resources before preserving correctness into measurement.
+pairId: f08
+counterpart: /foundations/launch-geometry/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - invariants
+  - legality
+  - coverage
+  - resources
+  - block-shape
+  - explorer
+  - measurement-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F08
+prerequisites:
+  - F02
+  - F03
+  - F06
+relatedUnits:
+  - LAB03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Compute Capabilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable GPU feature and technical limits'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - cudaDeviceProp'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime device properties'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - cudaFuncAttributes'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime kernel function attributes'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,invariants,legality,coverage,resources,block-shape,explorer,measurement-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,F03,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: LAB03 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1' }
+---
+
+import BlockShapeExplorer from '../../../../components/BlockShapeExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/launch-geometry/" lang="zh-CN">阅读中文对应页</a>
+
+Launch geometry determines how many blocks are created, how many threads each block contains, and how many fringe threads lie beyond the logical data extent. It is first a **correctness and launch-feasibility contract**: the logical extent must not change with block shape; every dimension and product must be representable; the configuration must satisfy the selected device and specific kernel limits; and bounds must reject extra threads. Candidate shapes reach measurement only after these conditions and result verification hold.
+
+## What you should be able to do
+
+- Keep a 2D logical width and height fixed while safely deriving a grid from positive block.x and block.y values.
+- Check the per-axis `maxThreadsDim` limits separately from the aggregate `maxThreadsPerBlock` limit without substituting one for the other.
+- Check before multiplying and use ceiling division that does not first evaluate `n + d - 1`.
+- Explain why function-specific thread, register, and shared-memory demands can still prevent a launch after device properties pass.
+- Preserve bounds, result verification, and the measurement boundary before making any occupancy or “fastest shape” judgment.
+
+## Prerequisites
+
+Complete [F02: Understanding the CUDA Execution Hierarchy](/en/foundations/execution-hierarchy/), [F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/), and [F06: Treat Compute Capability as a Feature and Limit Contract](/en/foundations/compute-capability/) first. F02 supplies the grid/block/thread hierarchy, F03 supplies per-axis coordinates and bounds, and F06 requires limits to come from an explicit capability/device record rather than a GPU name or memory.
+
+This Learning Unit requires no CUDA-capable system and receives no Evidence Status. The related LAB03 will place indexing defects inside an actual Lab contract. This page is neither a Lab nor backed by a canonical Runnable Example.
+
+## Invariants: block shape must not rewrite the problem
+
+Let the application declare a 2D logical extent of `width x height`. Legal coordinates remain the same for every block shape:
+
+```text
+0 <= gx < width
+0 <= gy < height
+```
+
+Thread coordinates still come from `gx = blockIdx.x * blockDim.x + threadIdx.x` and the corresponding y-axis equation. Before any flattening or memory access, the kernel must test both `gx < width AND gy < height`. Changing block.x or block.y must not round `width` or `height` up to launch coverage or turn fringe into new data.
+
+Representability is the second invariant. The logical element count, threads per block, grid block count, launched-thread count, and coverage products must all fit the selected integer type. If any required value is malformed or overflows, the correct result is to stop and report a constraint failure, not return truncated or partial geometry.
+
+## Legality: axis, aggregate, and grid checks are distinct
+
+A 2D configuration first requires `width > 0`, `height > 0`, `block.x > 0`, and `block.y > 0`. Then apply the selected device record in order:
+
+```text
+block.x <= device.maxThreadsDim[0]
+block.y <= device.maxThreadsDim[1]
+checked_product(block.x, block.y) <= device.maxThreadsPerBlock
+```
+
+Passing each axis does not imply that the aggregate passes. In this page's selected CC 7.5 record, for example, `block = (1024, 2)` keeps x and y individually at or below 1024, but its 2048 threads exceed `maxThreadsPerBlock = 1024`. Conversely, a small aggregate does not excuse an axis that exceeds its own limit.
+
+After deriving the grid, separately check `grid.x <= maxGridSize[0]` and `grid.y <= maxGridSize[1]`. `cudaDeviceProp` exposes these limits as `maxThreadsDim`, `maxThreadsPerBlock`, and `maxGridSize`. Record the device/capability facts actually selected; do not turn a table on this site into a runtime observation for every environment.
+
+## Coverage: safe ceiling division preserves logical extents
+
+For already validated positive integers `n` and `d`, this site uses:
+
+```text
+ceil_div(n, d) = 1 + floor((n - 1) / d)
+grid.x = ceil_div(width, block.x)
+grid.y = ceil_div(height, block.y)
+```
+
+This form avoids first calculating the possibly overflowing `n + d - 1`. Products likewise require an `a > MAX / b`-style check before evaluating `a * b`. The browser model uses `Number.MAX_SAFE_INTEGER`; CUDA host code must use the limit of its own chosen unsigned type rather than copying the JavaScript boundary.
+
+A legal grid satisfies `grid.x * block.x >= width` and `grid.y * block.y >= height`. Launched and fringe thread counts are:
+
+```text
+blockThreads   = checked_product(block.x, block.y)
+gridBlocks     = checked_product(grid.x, grid.y)
+launched       = checked_product(gridBlocks, blockThreads)
+logical        = checked_product(width, height)
+fringe         = launched - logical
+```
+
+For `1000 x 750` with `block = (32, 8)`, the grid is `(32, 94)`, coverage is `1024 x 752`, and the launch contains 770,048 threads, of which 20,048 are fringe. That fringe is the number of threads that correct bounds must reject. It is not a waste percentage, occupancy value, or speed conclusion.
+
+## Resources: device ceilings are not complete kernel feasibility
+
+After device-level block checks pass, inspect the specific function loaded on that device. `cudaFuncAttributes.maxThreadsPerBlock` is the maximum block thread count for that function on the current device, and it can be stricter than the device's `maxThreadsPerBlock`. `numRegs` describes the function's registers per thread, `sharedSizeBytes` describes statically allocated shared memory, and the launch configuration's third argument requests dynamic shared memory.
+
+A complete feasibility review therefore compares function attributes with device `regsPerBlock`, `sharedMemPerBlock`, or an applicable opt-in shared-memory limit. Register allocation granularity, compilation target, and dynamic shared-memory opt-in mean that multiplying one pair of table values is insufficient to prove a real launch feasible. Launch and error checks remain the actual program boundary.
+
+These resource facts answer whether a configuration can be used for one kernel/device combination. This unit calculates no occupancy, does not make higher occupancy a goal, and does not use static resource values to declare one shape faster.
+
+## Block shape: equal thread counts still map differently
+
+`(32, 8)` and `(16, 16)` each contain 256 threads, but they produce different grids, coverage, and fringe and group x/y coordinates into different rectangles. For `1000 x 750`, the first produces 20,048 fringe threads and the second 8,016. Fewer fringe threads are a geometric fact, not a standalone argument for shorter runtime.
+
+Ask first whether the logical extent remains unchanged, per-axis bounds still precede access, every device and kernel resource gate passes, and results are correct on the same input. Memory-access behavior, scheduler state, instruction mix, and other performance questions belong to later controlled measurement. Neither rectangle appearance nor thread count answers them.
+
+## Explorer: show the constraint ledger first
+
+The embedded `BlockShapeExplorer` below receives no new VIS ID. It accepts only positive decimal safe integers for logical 2D width/height and block.x/block.y, then checks per-axis, aggregate, and grid limits against an explicitly selected CC 7.5 or CC 8.0 capability record. If any input, product, or limit fails, it returns an issue list and exposes no grid, launch, or fringe value.
+
+<BlockShapeExplorer locale="en" />
+
+The static cards, print output, and interactive state use the same pure model. A capability record supplies only reviewed device ceilings; the component always leaves kernel-specific maximum threads, registers, and shared memory as required checks. It neither reads local device properties nor executes CUDA.
+
+## Measurement boundary: comparison is allowed only after correctness
+
+A meaningful candidate comparison needs identical logical extents, identical kernel semantics, the same inputs and verification rule, an explicit Environment Manifest, and successful launch/completion checks. First prove that every candidate covers all legal elements, rejects fringe access, and produces correct results. Only then define warm-up, timing interval, synchronization placement, and repetition policy.
+
+This page performs none of those steps, so it reports no latency, throughput, speedup, occupancy, or fastest-shape verdict. Browser arithmetic and hand calculations can review the geometry contract; they are neither Compile-Checked, Runtime-Verified, nor Community-Observed evidence.
+
+## Retrieval check
+
+1. Why can `block.x <= maxThreadsDim[0]` and `block.y <= maxThreadsDim[1]` both pass while `block.x * block.y <= maxThreadsPerBlock` is still required?
+2. Why does positive-integer ceiling division use `1 + floor((n - 1) / d)`, and why must multiplication be checked before it occurs?
+3. When grid coverage exceeds the logical extent, why must rounded coverage not be written back into `width` or `height`?
+4. Which kernel-specific function, register, and shared-memory facts remain missing after device properties pass?
+5. Why can fewer fringe threads, an equal thread count, or passing device limits not independently produce an occupancy or fastest-shape verdict?
+
+## Continue with practice
+
+- Complete the [F08 Exercises](/en/foundations/launch-geometry/exercises/), then inspect the separate [reviewed solutions](/en/foundations/launch-geometry/solutions/).
+- Review another launch record that mistakes geometry legality for a speed conclusion in [Practice Bank PB-R1-012](/en/practice/#pb-r1-012).
+- [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/) is a related unit. In the actual Lab, preserve F03's per-axis bounds and this page's feasibility ledger without treating this static model as Lab runtime evidence.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html) supplies the current compute-capability technical-limit tables; the page was updated **2026-05-27**.
+- [CUDA Runtime API v13.3.1: cudaDeviceProp](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html) defines `maxThreadsDim`, `maxThreadsPerBlock`, `maxGridSize`, `regsPerBlock`, and shared-memory properties.
+- [CUDA Runtime API v13.3.1: cudaFuncAttributes](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html) defines function-specific `maxThreadsPerBlock`, `numRegs`, `sharedSizeBytes`, and `maxDynamicSharedSizeBytes`. Both Runtime API pages identify an update date of **2026-06-29**.
+
+All three owner sources were accessed on **2026-08-26**. The safe-arithmetic contract, example numbers, constraint ledger, Explorer composition, Exercises, and instructional arrangement are original to this site. No NVIDIA table, diagram, sample output, or performance number is copied.
+
+**Fact checked: 2026-08-26.**

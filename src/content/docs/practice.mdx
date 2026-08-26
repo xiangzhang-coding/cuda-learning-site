@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的跨单元原创练习，包含先修链接、分层提示和解答。
+description: 当前已发布的 17 个跨单元原创练习，包含先修链接、分层提示和解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-08-26'
@@ -22,6 +22,10 @@ structure:
   - entry-pb-r1-006
   - entry-pb-r1-007
   - entry-pb-r1-008
+  - entry-pb-r1-009
+  - entry-pb-r1-010
+  - entry-pb-r1-011
+  - entry-pb-r1-012
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -32,6 +36,10 @@ prerequisites:
   - F02
   - F03
   - F04
+  - F05
+  - F06
+  - F07
+  - F08
   - O04
   - O05
   - O06
@@ -44,6 +52,10 @@ relatedUnits:
   - F02
   - F03
   - F04
+  - F05
+  - F06
+  - F07
+  - F08
   - O04
   - O05
   - O06
@@ -63,15 +75,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -90,13 +102,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面十三个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面十七个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方十三道完整题目、先修链接和解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方十七道完整题目、先修链接和解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -612,6 +624,166 @@ output[index] = input[index];
 
 **来源依据（Source basis）：** 本站 [F04](/foundations/host-device-lifecycle/) 的原创显式 lifecycle、[O04](/start/cpp17-for-cuda/)的 lifetime/ownership 边界、[O02](/start/evidence-status/)的证据合同和 [EX03](/examples/multidimensional-indexing/)的 canonical lifecycle 与当前证据记录，以及 NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)。
 
+<span id="pb-r1-009" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-009：修复 stale、immediate 与 deferred error 归因
+
+- **ID 与双语发布对：** PB-R1-009；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Error-lifecycle 调试；中级。
+- **直接先修条件：** [F05：CUDA 错误为何常常延后暴露](/foundations/asynchronous-errors/)。
+- **硬件门槛（Hardware gate）：** 无；只审查静态 error-lifecycle 记录，不运行 CUDA。
+- **相关学习单元与资源：** [F05](/foundations/asynchronous-errors/)、[EX04](/examples/error-handling-lifecycle/)和 [LAB03](/labs/break-and-repair-indexing/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一个 host thread 先记录到某项 Runtime 操作失败，却没有消费它的 last-error state。Launch 前的 `cudaPeekAtLastError` 观察到这项未指定的旧失败，但记录忽略了它。随后该 thread 提交一个已预先确认 configuration 合法的 no-op launch；紧邻的 `cudaGetLastError` 返回相同的 non-success state，reviewer 却归咎于新 launch。因为 getter 随后 reset 了 state，第二个区间从 clean state 开始：一个包含故意 device access 缺陷的 launch 被接受，紧邻的 `cudaGetLastError` 返回 success，之后 `cudaDeviceSynchronize` 返回 failure。Reviewer 又声称缺陷由 synchronization 引起。用正确的 origin、observation、state transition 与 control-flow 标签重建两个区间。
+
+**约束：**
+
+- 把直接 `cudaError_t` return 与 last-error state 分开，并说明每项操作是否读取、reset 或等待。
+- 不为任何假设失败指定固定 enum value 或 diagnostic string。
+- Launch 或 completion boundary 失败后停止依赖它的 D2H 与 verification；不得虚构 runtime output 或 Evidence Status。
+
+**预期证据：** 一张双区间 ledger，包含 prior state、operation、direct return 或 queried state、reset effect、completion effect、attributed origin 和 permitted next step，再附两条修复后的 reviewer 结论。
+
+**验收条件：**
+
+- 第一项邻接 getter 读取的是 stale state，因为同一失败在合法目标 launch 前已经可见；不能把它归因给该 launch。
+- 说明 `cudaPeekAtLastError` 观察但不 reset，`cudaGetLastError` 观察并 reset 为 `cudaSuccess`；两者都不建立 device completion。
+- 第二项 immediate success 只描述 launch boundary；故意 access defect 的 origin 在 device execution，host observation 位于 synchronization return。
+- 把 `cudaDeviceSynchronize` 视为 reporting/completion boundary，而不是自动视为 origin；不能从静态修复声明 compilation 或 runtime evidence。
+
+<details><summary>提示 1</summary>如果 non-success value 在目标 launch 前已经可见，launch 后的源码距离就不能建立新的归因。</details>
+
+<details><summary>提示 2</summary>为 launch submission、邻接 getter、device execution 与 synchronization 分别画一行；只有其中一行等待此前 device work。</details>
+
+**解答：** 在第一个区间，旧 Runtime 操作产生 state；launch 前的 peek 证明 state 早于目标 launch，并保持它不变。合法 no-op launch 没有建立新失败，邻接 getter 读取仍然 stale 的项目并 reset state。正确结论是：“较早失败尚未消费，这份 trace 不能归咎于目标 launch。”第二个区间中，clean starting state 与邻接 getter 的 success 只说明没有观察到 immediate launch failure。接受的 kernel 随后在 device execution 期间触发故意 invalid access；`cudaDeviceSynchronize` 等待此前工作并返回这项 deferred failure，因此不得继续 D2H 或 host verification。正确结论是：“execution defect 起源于 device，并在 completion boundary 对 host 可见。”两个区间都没有提供实际 run record。
+
+**有效替代方案：** 按 EX04/LAB03 要求把每个诊断场景放进独立 process，同时仍记录 preflight state 与直接 synchronization return。Process isolation 能收窄归因，但不能把 immediate getter 变成 completion check。
+
+**常见错误：** 静默丢弃 preflight error；把 last-error state 当成每个 kernel 一条 queue；声称 `cudaGetLastError` 会同步；把 immediate success 当作 execution success；把 device defect 归咎于 synchronization call；completion 失败后仍 copy 或 verify output。
+
+**来源依据（Source basis）：** 本站原创的 [F05 error-state 与 observation 合同](/foundations/asynchronous-errors/)、[EX04 scenario contract](/examples/error-handling-lifecycle/)和 [SRC-CUDA-015 记录](/sources-and-versions/#src-cuda-015)，以及 NVIDIA Runtime API [Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)与 [API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html)。
+
+<span id="pb-r1-010" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-010：重建 capability 到 compiler target 的决策
+
+- **ID 与双语发布对：** PB-R1-010；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Capability 与 compiler-target 审查；中级。
+- **直接先修条件：** [F06：Compute capability 是功能合同](/foundations/compute-capability/)。
+- **硬件门槛（Hardware gate）：** 无；不探测 GPU，只审查 capability、limit 与 compiler record。
+- **相关学习单元：** [F06](/foundations/compute-capability/)、[O03](/start/environment-manifest/)和 [F08](/foundations/launch-geometry/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一份 packet 直接识别了一个 selected GPU，并记录 compute capability 9.0。Kernel 需要一项 architecture-specific 9.0 feature；capability table 记录 device maximum threads per block 为 1024，候选 block 是 `(32, 32, 1)`。Packet 选择 baseline `compute_90` 加 `sm_90`，声称同一 pair 必然可用于 NVCC 11.8.0、12.9.2 archive 和 selected Toolkit 13.3.1，还因为 block product 等于 maximum 就宣布它“recommended and faster”。修复 feature、limit、target 与未解决 environment 决策。
+
+**约束：**
+
+- 把 GPU identity、compute capability、required feature set、numeric limits、Toolkit、NVCC、virtual target、real target、driver、artifact 与 runtime result 保持为独立字段。
+- 只使用 F06 复核的 selected target rows；不能从 GPU 或数值大小推断 compiler support。
+- 不能从 maximum 或 documentation lookup 产生 performance、compatibility、compilation 或 runtime 声明。
+
+**预期证据：** 一张覆盖三个 NVCC 坐标的 decision ledger、一条 block-limit clause，以及进入 build、launch、correctness 或 measurement 前仍需补充的事实清单。
+
+**验收条件：**
+
+- 因为 source requirement 使用 architecture-specific 9.0 set，把 baseline pair 改为 `compute_90a` / `sm_90a`，并把这份 code 限定到 exact capability 9.0。
+- 记录 selected NVCC 11.8.0 subset 没有 qualified target pair，而 12.9.2 archive 与 selected Toolkit 13.3.1 坐标列出 `compute_90a` / `sm_90a`；拒绝一份不变的 three-Lane plan。
+- 把 1024 分类为 device validity maximum；`(32, 32, 1)` 达到该总量，只有在每轴、function-specific limit、register/shared-memory requirement 与 launch boundary 都通过时才合法，且它不是 recommendation。
+- Driver loading、embedded artifact code、host compiler、OS、permissions、build result、correctness 与 performance 保持 unresolved。
+
+<details><summary>提示 1</summary>`compute_90` 表示 baseline virtual contract；suffix 属于 feature scope，不是装饰拼写。</details>
+
+<details><summary>提示 2</summary>先按 compiler row 阅读 target matrix，再读取 device limit；compiler accepted targets 与 GPU thread maximum 回答不同问题。</details>
+
+**解答：** Direct query 只为 selected GPU 建立 capability 9.0，并选择适用的 feature/limit row，不会识别 compiler。因为 kernel 要求 architecture-specific set，baseline `compute_90` / `sm_90` 在语义上不足；可复核计划是 exact 9.0 的 `compute_90a` / `sm_90a`。F06 selected matrix 没有为 NVCC 11.8.0 列 qualified pair，却为 12.9.2 archive 和 selected Toolkit 13.3.1 列出该 pair，所以这份 source 不能在三条 Lane 中保持同一个 target plan。1024-thread device maximum 只让 `(32, 32, 1)` 的 product 暂时通过 device gate；function attributes 与其他 resources 仍可能让它非法，等于 ceiling 也不能预测速度。每个可行 compiler plan 仍需要 build record、artifact/driver 审查、实际 launch/completion checks、result verification 与独立 measurement contract。
+
+**有效替代方案：** 移除或替换 architecture-specific source dependency，再分别在每个 exact compiler 中审查 baseline `compute_90` / `sm_90` plan。这通过改变程序需求扩大 scope，并不是原程序去掉 suffix 后的等价拼写。
+
+**常见错误：** 从 product name 猜 capability；把 feature row 当成 compiler target list；把 `compute_90a` 与 baseline `sm_90` 配对；认为更大的 capability number 自动接受 exact-9.0 feature；把 `maxThreadsPerBlock` 变成 preferred block size；因为读过文档就声称所有 Toolkit Lane 已构建。
+
+**来源依据（Source basis）：** 本站原创的 [F06 decision chain](/foundations/compute-capability/)与 [SRC-CUDA-016 记录](/sources-and-versions/#src-cuda-016)，NVIDIA [Compute Capabilities and Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets)，以及精确 [NVCC 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html)、[12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)和 [current NVCC](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html) owner pages。
+
+<span id="pb-r1-011" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-011：修复 Runtime/Driver 所有权与错误边界
+
+- **ID 与双语发布对：** PB-R1-011；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Mixed-API lifecycle 调试；中级。
+- **直接先修条件：** [F07：区分 CUDA Runtime API 与 Driver API 的角色](/foundations/runtime-driver-api/)。
+- **硬件门槛（Hardware gate）：** 无；只审查 mixed-API design，不运行 CUDA。
+- **相关学习单元与资源：** [F04](/foundations/host-device-lifecycle/)、[F05](/foundations/asynchronous-errors/)、[F07](/foundations/runtime-driver-api/)和 [EX04](/examples/error-handling-lifecycle/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 一份 mixed design 先调用 `cudaSetDevice` 与 `cudaMalloc`，再调用 `cuInit(0)`，通过 `cuCtxGetCurrent` 取得 current context，加载 `CUmodule`、解析 `CUfunction` 并调用 `cuLaunchKernel`。Helper 把取得的 context 标为“owned”，忽略每个 `CUresult`，理由是后续 `cudaGetLastError` 会统一覆盖；随后它 unload module，对取得的 context 调用 `cuCtxDestroy`，最后才调用 `cudaDeviceSynchronize` 与 `cudaFree`。修复 initialization、current-context ownership、module/function lifetime、direct status checks、asynchronous completion 与 teardown authority。
+
+**约束：**
+
+- 把 Runtime `cudaError_t`、Driver `CUresult` 与 Runtime last-error state 作为不同 observation channels。
+- 不能因为查询到 handle 就授予 context destruction authority；每项 release 必须匹配显式 acquisition/ownership rule。
+- Allocation、module、function 与 context 必须在 launch completion boundary 前保持有效；不得虚构 output 或 performance result。
+
+**预期证据：** 一张 context、allocation、module 与 function 的 owner/lifetime ledger；一条修复后的有序 flow；以及独立的 submission、completion 与 attribution clauses。
+
+**验收条件：**
+
+- 检查 `cuInit(0)` 与每个 Driver call 自己的 `CUresult`，检查每个 Runtime call 自己的 `cudaError_t`；不能用 `cudaGetLastError` 替代 `cuLaunchKernel` direct return。
+- 把 `cuCtxGetCurrent` 返回的 context 当成 current handle；packet 没有证明 teardown authority。保持其 current/valid，除非有匹配的 context-creation ownership path，否则不能调用 `cuCtxDestroy`。
+- Application-owned `CUmodule` 与其 `CUfunction` 在 completion 前保持有效；通过同一 context 中一个有文档依据的 boundary 同步并直接检查 return，随后才 unload module，并在最后使用后 free Runtime-owned allocation。
+- 说明 Driver submission 之后仍可能在 context、stream 或 event completion 观察到 deferred execution error；API 选择不会移除 F05 attribution boundary。
+
+<details><summary>提示 1</summary>查询 current handle 回答“哪个 context 适用”，不回答“哪个 helper 可以销毁共享状态”。</details>
+
+<details><summary>提示 2</summary>在 `cuLaunchKernel` 旁放一个 status cell，在所选 synchronization call 旁再放一个；两者覆盖不同阶段。</details>
+
+**解答：** 先建立 Runtime-selected device 并调用、检查 `cudaMalloc`，再调用、检查 `cuInit(0)`。查询并记录这个 host thread 当前的 context，但不声称 packet 从未取得的 ownership。在该 context 下 load module、resolve function，并检查每个 `CUresult`。调用 `cuLaunchKernel` 时 allocation、context、module 与 function 都必须有效，其 direct return 是 submission result，Runtime last-error getter 不能替代它。保持同一 context current，使用 `cuCtxSynchronize` 等有文档依据的 completion operation 并检查自己的 `CUresult`；这里的 failure 可能报告更早的 asynchronous device work，而不是起源于 synchronization。只有 successful completion 以及需要的 result transfer/verification 结束后，application 才能 unload 自己的 module，并通过记录的 Runtime owner free allocation；不能销毁 borrowed current context。这份静态 design review 不产生 CUDA evidence。
+
+**有效替代方案：** 显式 retain primary context 或创建 Driver-managed context，再把 acquisition 与精确文档中的 release path 配对，并写清全部 Runtime interoperability clauses。只用 Runtime 或只用 Driver 的实现也有效，只要保留同样的 ownership、completion 与 correctness boundaries。
+
+**常见错误：** 把两个 API 当成不同 device stack；认为每个 Runtime call 都一对一映射到 Driver call；销毁由其他 owner 管理的 primary/current context；work 完成前 unload module；用 `cudaGetLastError` 检查 `CUresult`；把 successful launch return 当成 successful execution。
+
+**来源依据（Source basis）：** 本站原创的 [F07 role/ownership contract](/foundations/runtime-driver-api/)、[F05 asynchronous-error contract](/foundations/asynchronous-errors/)与 [SRC-CUDA-015 记录](/sources-and-versions/#src-cuda-015)，以及 NVIDIA [Driver versus Runtime API](https://docs.nvidia.com/cuda/cuda-driver-api/driver-vs-runtime-api.html)、[Runtime/Driver interactions](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DRIVER.html)和 [Driver synchronization behavior](https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html)。
+
+<span id="pb-r1-012" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-012：在测量前选择合法 block shape
+
+- **ID 与双语发布对：** PB-R1-012；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Launch-geometry 正确性与 resource 审查；中级。
+- **直接先修条件：** [F08：Launch geometry 是先于速度的正确性与资源决策](/foundations/launch-geometry/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态 geometry 与 resource 检查。
+- **相关学习单元与资源：** [F03](/foundations/multidimensional-indexing/)、[F06](/foundations/compute-capability/)、[F08](/foundations/launch-geometry/)和 [LAB03](/labs/break-and-repair-indexing/)。
+- **最后复核（Last reviewed）：** 2026-08-26。
+
+**题目：** 固定 logical extent 是 `width = 1000`、`height = 513`。Selected device record 给出 `maxThreadsDim = (1024, 1024, 64)`、`maxThreadsPerBlock = 1024`，grid limits 大于下列全部 grid。Selected kernel 报告 `maxThreadsPerBlock = 768`；在不超过该 function limit 的候选中，其声明的 register 与 shared-memory needs 都能放入限制。分类 A `(32, 32)`、B `(48, 16)`、C `(64, 8)`与 D `(1025, 1)`。为每个合法候选推导 overflow-safe grid、coverage 与 fringe count，同时保留相同双轴 bounds check。Packet 因为 B 的 fringe 略少于 C 就声称 B 最快。判断哪些候选可以进入 correctness verification，以及 measurement 前还缺什么。
+
+**约束：**
+
+- 不能 round/pad logical extent、删除任一 axis bound，也不能计算未经检查的 product。
+- 把 positive input、per-axis device limit、aggregate device limit、function-specific limit 与 grid limit 作为独立 gates。
+- 不产生 latency、occupancy、throughput 或 fastest-shape 声明；本题不运行 kernel。
+
+**预期证据：** 一张四行 legality ledger、B/C 的精确 grid/coverage/fringe 算术、保留后的 kernel guard，以及 pre-measurement checklist。
+
+**验收条件：**
+
+- A 的 1024 threads 虽通过 device aggregate limit，却超过 function-specific limit 768，必须拒绝；D 的 x 超过 axis limit，aggregate 也超过 device limit，必须拒绝。
+- B 暂时合法，grid 为 `(21, 33)`，coverage 为 `1008 x 528`，launched threads 为 532,224，fringe threads 为 19,224。
+- C 暂时合法，grid 为 `(16, 65)`，coverage 为 `1024 x 520`，launched threads 为 532,480，fringe threads 为 19,480。
+- 在 flatten/access 前保留 `gx < 1000 && gy < 513`；每个候选都要通过 launch/completion 与相同 result verification；在实际执行 controlled measurement contract 前拒绝“B fastest”。
+
+<details><summary>提示 1</summary>Device legality 不是最后一个 block gate；逐轴检查后，还要把每个 product 与 768 比较。</details>
+
+<details><summary>提示 2</summary>对正整数 `n` 与 `d` 使用 `1 + floor((n - 1) / d)`；coverage 不是替代 logical extent。</details>
+
+**解答：** A 有 `32 * 32 = 1024` 个 thread，所以 axis 与 device aggregate 都通过，但 function limit 失败。D 违反 `block.x <= 1024` 且含 1025 个 thread，因此在推导 grid 前失败。B 有 768 个 thread，得到 `grid = (1 + floor(999 / 48), 1 + floor(512 / 16)) = (21, 33)`；coverage 是 `1008 x 528`，checked products 得到 532,224 launched 减 513,000 logical，等于 19,224 fringe。C 有 512 个 thread，grid 为 `(16, 65)`，coverage 为 `1024 x 520`，launched 为 532,480，fringe 为 19,480。两者仍只是 provisional，因为 actual launch/completion checks 仍然必要；kernel 必须保持 logical extent 不变，并在 flatten 前用两个谓词拒绝 fringe。B 少 256 个 fringe thread 是 geometry fact，不是 runtime verdict。只有相同 inputs、成功边界、独立 result comparison，以及已声明 warm-up/timing/synchronization/repetition 方法后，B/C 才能测量。
+
+**有效替代方案：** 可以按同一 gates 与 logical extent 把合法的 `(16, 16)` 候选加入 ledger；合法仍不代表 preferred 或 faster。
+
+**常见错误：** 只检查 `maxThreadsPerBlock`；检查 overflow 前先相乘；忽略 `cudaFuncAttributes.maxThreadsPerBlock`；把 width/height 改成 coverage；使用 x-only bounds；把更少 fringe 称为更快；把浏览器或手算当成 GPU execution。
+
+**来源依据（Source basis）：** 本站原创的 [F08 feasibility/measurement contract](/foundations/launch-geometry/)、[F03 bounds contract](/foundations/multidimensional-indexing/)与 [SRC-CUDA-016 记录](/sources-and-versions/#src-cuda-016)，以及 NVIDIA [Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[`cudaDeviceProp`](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html)和 [`cudaFuncAttributes`](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html)。
+
 ## 复核记录
 
-十三个原创条目及其英文对应内容在 **2026-08-26** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
+十七个原创条目及其英文对应内容在 **2026-08-26** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
