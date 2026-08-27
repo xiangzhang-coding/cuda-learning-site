@@ -13,7 +13,7 @@ const ex01DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
 const ex03DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6.zip';
-const ex04SourceCommit = '1bfe7b2d309db6d733471260c888262e59258660';
+const ex04SourceCommit = 'aeecf72d81d8777d027e6aa84c8614b51e9b0da2';
 const ex04SourceUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
 const ex04DownloadUrl =

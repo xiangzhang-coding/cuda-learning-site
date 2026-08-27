@@ -69,7 +69,7 @@ Complete [F05: CUDA Errors Are Often Asynchronous](/en/foundations/asynchronous-
 
 ## How to answer
 
-Submit your timeline, state ledger, or observation contract before opening the two hint layers in order. When implementation boundaries need review, start from the [canonical EX04 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/1bfe7b2d309db6d733471260c888262e59258660/examples/ex04-error-handling-lifecycle). Do not reconstruct a second program from this page. Complete answers live on the separate [reviewed-solutions page](/en/foundations/asynchronous-errors/solutions/).
+Submit your timeline, state ledger, or observation contract before opening the two hint layers in order. When implementation boundaries need review, start from the [canonical EX04 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/aeecf72d81d8777d027e6aa84c8614b51e9b0da2/examples/ex04-error-handling-lifecycle). Do not reconstruct a second program from this page. Complete answers live on the separate [reviewed-solutions page](/en/foundations/asynchronous-errors/solutions/).
 
 ## Exercise 1: Infer two error timelines from observation points
 

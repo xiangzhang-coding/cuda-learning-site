@@ -246,6 +246,7 @@ test('embedded models reflow on mobile without horizontal page overflow', async 
 
   for (const model of embeddedModels) {
     await page.goto(model.routes.en);
+    await page.waitForLoadState('networkidle');
     const component = page.locator(`${model.component}[data-visual-id="${model.visualId}"]`);
     await expect(component.locator(model.controls)).toBeVisible();
     await expect(component.locator('[data-static-fallback]')).toBeVisible();
