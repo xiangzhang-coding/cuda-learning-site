@@ -132,7 +132,7 @@ address(i) = B + offsetBytes + i * strideWords * 4
 segment(i) = floor(address(i) / 32)
 ```
 
-If a word crosses a segment boundary, both segments count. The frozen fixtures below use naturally aligned 4-byte words, so each word lies within one segment.
+This model accepts naturally aligned 1-, 2-, 4-, and 8-byte words from a 32-byte-aligned fixture base. Every accepted width divides 32, so each accepted word lies within one segment. A byte offset that is not divisible by the selected word width is outside this single-instruction contract rather than a boundary-crossing case to count.
 
 ## Aligned contiguous: four segments
 
@@ -161,7 +161,7 @@ The stride-two payload remains 128 requested bytes while segment coverage is 256
 
 ## Active lanes, word width, and instruction boundaries
 
-A tail warp may have only some lanes pass F03 bounds. An inactive lane requests no word and must not be added merely to make 32 lanes. For example, lanes 0..4 reading 4-byte words from an aligned base touch only the first segment. A wider word can cover more bytes and can cross a segment boundary.
+A tail warp may have only some lanes pass F03 bounds. An inactive lane requests no word and must not be added merely to make 32 lanes. For example, lanes 0..4 reading 4-byte words from an aligned base touch only the first segment. A wider accepted word covers more bytes, but natural alignment keeps each selected 1-, 2-, 4-, or 8-byte word inside one 32-byte segment; analyze other widths or alignment contracts separately.
 
 Two source-level accesses may also compile to separate instructions. Apply the model per instruction with that instruction's active mask and request width; do not combine every address from a whole kernel into one segment set.
 

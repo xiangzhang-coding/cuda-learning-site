@@ -132,7 +132,7 @@ address(i) = B + offsetBytes + i * strideWords * 4
 segment(i) = floor(address(i) / 32)
 ```
 
-若 word 跨 segment boundary，两个 segment 都要计入。下面的 frozen fixtures 都使用自然对齐 4-byte words，因此每个 word 落在单个 segment 中。
+本模型只接受从 32-byte-aligned fixture base 出发、自然对齐的 1、2、4、8-byte word。每个允许宽度都能整除 32，因此每个 accepted word 都落在一个 segment 内。若 byte offset 不能被 selected word width 整除，它就超出这份 single-instruction contract，而不是一个应继续计数的 boundary-crossing case。
 
 ## Aligned contiguous：四个 segment
 
@@ -161,7 +161,7 @@ Stride 2 的 requested payload 仍是 128 bytes，但 segment coverage 是 256 b
 
 ## Active lanes、word width 与 instruction boundary
 
-Tail warp 可能只有一部分 lane 通过 F03 bounds。Inactive lane 不请求 word，因此不能为了凑满 32 lanes 把它加入集合。例如 aligned base 上只有 lane 0..4 active 且每 lane 请求 4 bytes，只触及第一个 segment。反过来，更宽 word 可能让一个 lane 覆盖更多 bytes，甚至跨越 segment boundary。
+Tail warp 可能只有一部分 lane 通过 F03 bounds。Inactive lane 不请求 word，因此不能为了凑满 32 lanes 把它加入集合。例如 aligned base 上只有 lane 0..4 active 且每 lane 请求 4 bytes，只触及第一个 segment。更宽的 accepted word 会覆盖更多 bytes，但 natural alignment 会让每个 selected 1、2、4、8-byte word 保持在一个 32-byte segment 内；其他 width 或 alignment contract 必须单独分析。
 
 两条 source-level access 也可能编译成不同 instructions。Model 必须逐 instruction 使用其 active mask 和 request width，不能把整段 kernel 的所有 address 混在一个 segment set 中。
 

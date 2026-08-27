@@ -97,7 +97,7 @@ A profiler metric need not equal the teaching count because it may represent a d
 ## Valid alternatives
 
 - List absolute boundaries `[B + 32k, B + 32k + 31]` or relative segment indices, provided the alignment origin is explicit.
-- Use interval union or enumerate each word's byte range; a boundary-crossing word adds both segments.
+- Use interval union or enumerate each word's byte range. Under the frozen natural-alignment contract, each accepted word belongs to one segment; reject a non-naturally-aligned word as outside this single-instruction model.
 - Represent the active mask as a 32-bit bitset, lane list, or predicate table; inactive lanes generate zero requests.
 - Add profiler metrics to the observation schema, but give each its own definition rather than one vague “transactions” field.
 

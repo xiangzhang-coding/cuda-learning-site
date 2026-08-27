@@ -170,7 +170,7 @@ A `cudaMalloc` buffer cannot be freed while a kernel may still use it. A host ca
 
 - Complete the [M01 Exercises](/en/memory/address-spaces/exercises/), then inspect the separate [reviewed solutions](/en/memory/address-spaces/solutions/).
 - Review an object inventory that mixes address spaces, caches, and release responsibilities in [Practice Bank PB-R1-013](/en/practice/#pb-r1-013).
-- Related VIS06 should reproduce the owner/scope/lifetime filters. It is not a CUDA runtime observation.
+- Related VIS06 should reproduce scope and operation-path filters while preserving every owner/lifetime/release fact. It is not a CUDA runtime observation.
 
 ## Sources and review
 

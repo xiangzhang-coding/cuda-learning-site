@@ -13,7 +13,7 @@ export type MemoryOperationFilter =
 export type MemoryHierarchyRecord = Readonly<{
   id: MemoryHierarchyRecordId;
   scope: Exclude<MemoryScopeFilter, 'all'>;
-  operationPath: Exclude<MemoryOperationFilter, 'all'>;
+  operationPaths: readonly Exclude<MemoryOperationFilter, 'all'>[];
   physicalLayer: 'host-system' | 'device-memory' | 'streaming-multiprocessor';
   ownerAcquisition: string;
   accessibleScope: string;
@@ -46,18 +46,18 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'host',
     scope: 'host',
-    operationPath: 'host-language',
+    operationPaths: ['host-language', 'runtime-api'],
     physicalLayer: 'host-system',
-    ownerAcquisition: 'The host application acquires a bounded host allocation or object through the host language.',
+    ownerAcquisition: 'The host application acquires storage through the host language or a CUDA Runtime host-allocation API.',
     accessibleScope: 'Host code; device access requires a separately declared mapped or managed mechanism.',
     lifetime: 'The allocation or host object lifetime, independent of any single kernel launch.',
-    releaseEnd: 'The matching host-language deallocation or object destruction, or process termination.',
+    releaseEnd: 'The matching host-language release, object destruction, cudaFreeHost call, or process termination.',
     physicalAddressSpaceCaveat: 'Host memory is not one of the kernel device address spaces; mapping does not erase host ownership.',
   },
   {
     id: 'global',
     scope: 'grid',
-    operationPath: 'runtime-api',
+    operationPaths: ['runtime-api'],
     physicalLayer: 'device-memory',
     ownerAcquisition: 'The host acquires device allocation storage through a CUDA Runtime allocation API.',
     accessibleScope: 'Threads with a valid pointer across grids; host code manages or copies it through CUDA APIs.',
@@ -68,7 +68,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'constant',
     scope: 'grid',
-    operationPath: 'symbol-api',
+    operationPaths: ['symbol-api'],
     physicalLayer: 'device-memory',
     ownerAcquisition: 'A module/context owns a __constant__ symbol; host code initializes it through symbol APIs.',
     accessibleScope: 'Read-only to kernel threads in a grid; host-side Runtime APIs can address the symbol.',
@@ -79,7 +79,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'shared',
     scope: 'block',
-    operationPath: 'kernel-declaration',
+    operationPaths: ['kernel-declaration'],
     physicalLayer: 'streaming-multiprocessor',
     ownerAcquisition: 'Each thread block receives static declarations and/or dynamic launch-sized shared storage.',
     accessibleScope: 'Threads of the owning block, subject to the program\'s synchronization and ordering.',
@@ -90,7 +90,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'local',
     scope: 'thread',
-    operationPath: 'compiler-placement',
+    operationPaths: ['compiler-placement'],
     physicalLayer: 'device-memory',
     ownerAcquisition: 'The compiler gives each thread private local storage for selected automatic objects and spills.',
     accessibleScope: 'Only the owning thread through its private logical addresses.',
@@ -101,7 +101,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'register',
     scope: 'thread',
-    operationPath: 'compiler-placement',
+    operationPaths: ['compiler-placement'],
     physicalLayer: 'streaming-multiprocessor',
     ownerAcquisition: 'The compiler assigns per-thread values to registers when resources and code generation permit.',
     accessibleScope: 'Only the owning thread; registers are not a block-shared address space.',
@@ -164,7 +164,10 @@ export function filterMemoryHierarchy(filter: MemoryHierarchyFilter): MemoryHier
     filter,
     records: MEMORY_HIERARCHY_RECORDS.filter((record) =>
       (filter.scope === 'all' || record.scope === filter.scope)
-      && (filter.operation === 'all' || record.operationPath === filter.operation)),
+      && (
+        filter.operation === 'all'
+        || (record.operationPaths as readonly MemoryOperationFilter[]).includes(filter.operation)
+      )),
     contract: MEMORY_HIERARCHY_MODEL_CONTRACT,
   };
 }

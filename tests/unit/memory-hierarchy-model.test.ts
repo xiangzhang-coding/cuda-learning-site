@@ -30,13 +30,13 @@ describe('VIS06 memory hierarchy, scope, and operation model', () => {
       'kernel-declaration',
       'compiler-placement',
     ]);
-    expect(MEMORY_HIERARCHY_RECORDS.map(({ id, operationPath }) => [id, operationPath])).toEqual([
-      ['host', 'host-language'],
-      ['global', 'runtime-api'],
-      ['constant', 'symbol-api'],
-      ['shared', 'kernel-declaration'],
-      ['local', 'compiler-placement'],
-      ['register', 'compiler-placement'],
+    expect(MEMORY_HIERARCHY_RECORDS.map(({ id, operationPaths }) => [id, operationPaths])).toEqual([
+      ['host', ['host-language', 'runtime-api']],
+      ['global', ['runtime-api']],
+      ['constant', ['symbol-api']],
+      ['shared', ['kernel-declaration']],
+      ['local', ['compiler-placement']],
+      ['register', ['compiler-placement']],
     ]);
     for (const record of MEMORY_HIERARCHY_RECORDS) {
       expect(record.ownerAcquisition.length).toBeGreaterThan(30);
@@ -68,11 +68,11 @@ describe('VIS06 memory hierarchy, scope, and operation model', () => {
     [{ scope: 'grid', operation: 'all' }, ['global', 'constant']],
     [{ scope: 'thread', operation: 'all' }, ['local', 'register']],
     [{ scope: 'all', operation: 'host-language' }, ['host']],
-    [{ scope: 'all', operation: 'runtime-api' }, ['global']],
+    [{ scope: 'all', operation: 'runtime-api' }, ['host', 'global']],
     [{ scope: 'all', operation: 'symbol-api' }, ['constant']],
     [{ scope: 'block', operation: 'kernel-declaration' }, ['shared']],
     [{ scope: 'thread', operation: 'compiler-placement' }, ['local', 'register']],
-    [{ scope: 'host', operation: 'runtime-api' }, []],
+    [{ scope: 'host', operation: 'runtime-api' }, ['host']],
   ] as const)('filters %j without changing catalog order', (filter, expected) => {
     const result = filterMemoryHierarchy(filter);
     expect(result.valid).toBe(true);

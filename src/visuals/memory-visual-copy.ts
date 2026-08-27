@@ -264,10 +264,10 @@ export const MEMORY_HIERARCHY_COPY = {
     records: {
       host: {
         title: 'Host memory',
-        ownerAcquisition: 'Host application 通过 host-language allocator 或 object declaration 取得 host storage。',
+        ownerAcquisition: 'Host application 通过 host-language allocator/object declaration 或 CUDA Runtime host-allocation API（如 cudaMallocHost）取得 storage。',
         accessibleScope: 'Host code；device 访问必须另行声明 mapped 或 managed 机制。',
         lifetime: 'Allocation 或 host object 的 lifetime，不依附于单次 kernel launch。',
-        releaseEnd: '匹配的 host-language deallocation、object destruction，或 process 结束。',
+        releaseEnd: '匹配的 host-language release、object destruction、cudaFreeHost，或 process 结束。',
         physicalAddressSpaceCaveat: 'Host memory 不是 kernel device address space；映射不会抹去 host ownership。',
       },
       global: {
@@ -353,10 +353,10 @@ export const MEMORY_HIERARCHY_COPY = {
     records: {
       host: {
         title: 'Host memory',
-        ownerAcquisition: 'The host application acquires host storage through a host-language allocator or object declaration.',
+        ownerAcquisition: 'The host application acquires storage through a host-language allocator/object declaration or a CUDA Runtime host-allocation API such as cudaMallocHost.',
         accessibleScope: 'Host code; device access requires a separately declared mapped or managed mechanism.',
         lifetime: 'The allocation or host object lifetime, independent of any single kernel launch.',
-        releaseEnd: 'The matching host-language deallocation or object destruction, or process termination.',
+        releaseEnd: 'The matching host-language release, object destruction, cudaFreeHost call, or process termination.',
         physicalAddressSpaceCaveat: 'Host memory is not a kernel device address space; mapping does not erase host ownership.',
       },
       global: {

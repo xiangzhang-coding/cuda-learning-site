@@ -97,7 +97,7 @@ Profiler metric 不必与 teaching count 一一相等；它可能位于不同层
 ## 有效替代方案
 
 - Segment set 可以列 absolute boundaries `[B + 32k, B + 32k + 31]`，也可以列 relative indices，只要 alignment origin 明确。
-- 可以用 interval union 或枚举每个 word byte range；跨 boundary 的 word 必须把两个 segment 都加入。
+- 可以用 interval union 或枚举每个 word byte range；在 frozen natural-alignment contract 下，每个 accepted word 只属于一个 segment，未自然对齐的 word 应判为超出 single-instruction model。
 - Active mask 可用 32-bit bitset、lane list 或 predicate 表示；inactive lane 必须生成零 requests。
 - Observation schema 可以增加多个 profiler metrics，但每个都要有自己的定义，不能共享一个模糊的 “transactions”。
 

@@ -109,6 +109,12 @@ test('VIS06 intersects scope and operation filters and restores the six-record c
   await expect(scope).toBeFocused();
   await expect(visual.locator('[data-static-memory-record]')).toHaveCount(6);
 
+  await operation.selectOption('runtime-api');
+  await expect(visual.locator('[data-hierarchy-records] tr')).toHaveCount(2);
+  await expect(visual.locator('[data-hierarchy-records]')).toContainText('Host memory');
+  await expect(visual.locator('[data-hierarchy-records]')).toContainText('Global memory');
+  await visual.getByRole('button', { name: 'Reset to all six records' }).click();
+
   await scope.selectOption('grid');
   await expect(visual.locator('[data-hierarchy-records] tr')).toHaveCount(2);
   await expect(visual.locator('[data-hierarchy-records]')).toContainText('Global memory');

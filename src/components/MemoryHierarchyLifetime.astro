@@ -110,7 +110,7 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
               {MEMORY_HIERARCHY_RECORDS.filter((record) => record.physicalLayer === layer).map((record) => (
                 <li data-layer-memory={record.id}>
                   <strong>{copy.records[record.id].title}</strong>
-                  <span>{copy.scopes[record.scope]} · {copy.operations[record.operationPath]}</span>
+                  <span>{copy.scopes[record.scope]} · {record.operationPaths.map((operation) => copy.operations[operation]).join(' / ')}</span>
                 </li>
               ))}
             </ul>
