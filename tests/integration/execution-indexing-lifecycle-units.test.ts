@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
-
-import { PUBLISHED_DESTINATIONS } from '../../src/resource-indexes/resource-index-model';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 
@@ -168,7 +166,7 @@ describe('F02-F04 execution, indexing, and lifecycle publication', () => {
     }
   });
 
-  it('keeps source facts aligned across locales and leaves LAB03 unpublished', async () => {
+  it('keeps F02-F04 source facts aligned across locales', async () => {
     const ownerSources = new Map([
       ['execution-hierarchy', [
         'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html',
@@ -193,13 +191,5 @@ describe('F02-F04 execution, indexing, and lifecycle publication', () => {
       }
     }
 
-    expect(PUBLISHED_DESTINATIONS.LAB03).toBeUndefined();
-    const builtFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true }))
-      .map((file) => file.split(path.sep).join('/'));
-    expect(builtFiles.some((file) => /(?:^|\/)labs\/.*lab03/i.test(file))).toBe(false);
-    for (const route of ['/start/using-the-learning-site/', '/en/start/using-the-learning-site/']) {
-      const document = await readRoute(route);
-      expect(document.querySelector('nav a[href*="lab03"]')).toBeNull();
-    }
   });
 });

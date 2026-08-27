@@ -1,0 +1,256 @@
+---
+title: 'F07：区分 CUDA Runtime API 与 Driver API 的角色'
+description: 沿同一条资源与错误生命周期比较 Runtime API 的较高层隐式管理和 Driver API 的显式 handle 所有权。
+pairId: f07
+counterpart: /en/foundations/runtime-driver-api/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - shared-stack
+  - runtime-role
+  - driver-role
+  - ownership
+  - interoperability
+  - error-model
+  - boundary
+  - decisions
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F07
+prerequisites:
+  - F04
+  - F05
+relatedUnits:
+  - EX04
+  - VIS21
+exampleIds:
+  - EX04
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Driver API 13.3.1 - Difference between the driver and runtime APIs'
+    url: 'https://docs.nvidia.com/cuda/cuda-driver-api/driver-vs-runtime-api.html'
+    version: 'CUDA Driver API v13.3.1; last updated 2026-06-29'
+    platform: 'Current Runtime/Driver role comparison'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Interactions with the CUDA Driver API'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DRIVER.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current context and handle interoperability rules'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - API synchronization behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Runtime synchronization boundaries'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API 13.3.1 - API synchronization behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html'
+    version: 'CUDA Driver API v13.3.1; last updated 2026-06-29'
+    platform: 'Driver synchronization boundaries'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 11.8.0 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Selected CUDA 11.8.0 documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API 11.8.0 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-driver-api/index.html'
+    version: 'CUDA Driver API v11.8.0; last updated 2022-10-03'
+    platform: 'Selected CUDA 11.8.0 documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive path 12.9.2 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html'
+    version: 'Archive path 12.9.2; owner page label CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Selected CUDA 12.9.2 archive documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API archive path 12.9.2 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-driver-api/index.html'
+    version: 'Archive path 12.9.2; owner page label CUDA Driver API v12.9.1; last updated 2025-06-04'
+    platform: 'Selected CUDA 12.9.2 archive documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/index.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Selected current CUDA 13.3.1 documentation coordinate'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Driver API 13.3.1 - API Reference Manual'
+    url: 'https://docs.nvidia.com/cuda/cuda-driver-api/index.html'
+    version: 'CUDA Driver API v13.3.1; last updated 2026-06-29'
+    platform: 'Selected current CUDA 13.3.1 documentation coordinate'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,shared-stack,runtime-role,driver-role,ownership,interoperability,error-model,boundary,decisions,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,F05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX04,VIS21' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3.1' }
+---
+
+import ApiBoundary from '../../../components/ApiBoundary.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/runtime-driver-api/" lang="en">Read the English counterpart</a>
+
+CUDA Runtime API 与 CUDA Driver API 是两条 host 侧接口路径。Runtime API 使用以 `cuda` 开头的函数，提供更高层的 device-code、primary-context 与 module 管理；Driver API 使用以 `cu` 开头的函数，把初始化、device、context、module 和 function 等 handle 暴露给应用控制。本学习单元（Learning Unit）比较的是**角色与 ownership 边界**，不是逐函数替换表，也不是要求初学者把已有 Runtime 程序改写成 Driver 程序。
+
+## 学完本单元，你应该能
+
+- 画出 host 应用、Runtime API 或 Driver API、CUDA driver 栈与 device 的共同层次，不把两个 host API 误画成两个不同 GPU 执行系统。
+- 说明 Runtime 为什么适合作为稳定课程的入门路径，同时指出 allocation、transfer、launch 参数、同步与错误检查仍由程序负责。
+- 按顺序列出 Driver 路径中的 `cuInit`、`CUdevice`、`CUcontext`、`CUmodule`、`CUfunction` 与 `cuLaunchKernel` ownership。
+- 为混合使用两套 API 的设计写出 current-context、resource owner、reset 与 error boundary 合同。
+- 拒绝“每个 Runtime 调用都是某个 Driver 调用的一层薄 wrapper”以及“选择 Driver 就消除了异步错误”的推断。
+
+## 先修关系
+
+先完成 [F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)和 [F05：CUDA 错误为何常常延后暴露](/foundations/asynchronous-errors/)。F04 提供 allocation、transfer、launch、completion、copy-back 与 release 的 ownership 顺序；F05 把 launch 提交检查与延后执行错误的观察点分开。F07 只替换“由哪层管理、应用看见哪些 handle”这一条轴，不重教完整生命周期。
+
+阅读本页不需要 CUDA-capable system。页面和下面的浏览器构图都不执行 CUDA，因此 F07 的 compilation 与 runtime evidence 轴为空。
+
+## 共同栈：两条 host API 路径都到达 driver
+
+对本单元的受限生命周期，可以先使用这张层次草图：
+
+```text
+host application
+  ├─ CUDA Runtime API: cuda* + higher-level CUDA C++ launch surface
+  └─ CUDA Driver API:  cu* + explicit CUDA handles
+                    ↓
+              CUDA driver stack
+                    ↓
+                CUDA device
+```
+
+两条路径最终都依赖 CUDA driver 栈来和设备交互。这一共同终点不等于一一对应：Runtime 可以把 primary-context 初始化、module 管理和 CUDA C++ kernel 注册组合在更高层接口中；Driver 则让应用显式安排更多步骤。因而“结果都到 driver”只回答**层次**，不能推出某个 `cuda*` 调用必然只转发给某个单独 `cu*` 调用。
+
+本页只比较 EX04 相关的最小 lifecycle 角色。CUDA 13.3.1 的完整 Runtime 与 Driver surface 都远大于下表，且会随 Toolkit 版本演进；这里不声称覆盖全部函数、handle 或互操作例外。
+
+## Runtime API 角色：较高层管理，不是无 ownership
+
+Runtime 路径是本站的入门路径。它让 CUDA C++ 程序直接使用 `cudaMalloc`、`cudaMemcpy`、`cudaDeviceSynchronize`、`cudaFree` 等 `cuda*` 调用，并可通过尖括号 launch 语法或相应 Runtime launch 接口提交 kernel。当前 owner 对比页把它的关键简化描述为 implicit primary-context initialization/management 与 implicit module management。
+
+“隐式”只说明应用通常不必先取得 `CUcontext`、`CUmodule` 和 `CUfunction` 才能 launch；它没有取消以下责任：选择正确 device、计算 byte count、保持 pointer 有效、传入正确参数、检查返回状态、建立完成边界并在 last use 之后释放 allocation。F04 与 F05 的 ownership/error 合同继续完整适用。
+
+Runtime 的 device 与 primary context 在常见路径中紧密关联。精确行为必须按版本阅读：11.8.0 与标为 12.9.1 的 12.9.2 archive 页面描述 implicit primary-context 路径；当前 13.3.1 还增加了 explicit execution-context surface。不能把 13.3.1 的新增 handle 或例外倒推成旧 Lane 的接口。
+
+## Driver API 角色：显式初始化、handle 与 module 控制
+
+Driver 路径把更多对象和状态转移给应用控制。一个受限的角色序列是：
+
+1. 调用并检查 `cuInit(0)`，再通过 device ordinal 取得 `CUdevice`。
+2. 明确选择 primary-context 管理或创建/设置 `CUcontext`，并记录哪个 host thread 上哪个 context current。
+3. 加载 device-code module 得到 `CUmodule`，按名称取得 `CUfunction`，并规定 unload 边界。
+4. 使用 `CUdeviceptr` 管理 allocation 与 transfer，在 module、function 与 context 都有效后调用 `cuLaunchKernel`。
+5. 检查每个 `CUresult`，并用适当的 context、stream 或 event 完成边界观察异步工作，然后按 ownership 释放资源。
+
+这份列表是比较框架，不是完整程序，也不替代每个函数在精确版本 Driver API 中的参数、线程安全、context 与错误合同。F07 不维护第二份 EX04 实现。
+
+## Ownership：管理层变化，资源账本仍然存在
+
+| 生命周期责任 | Runtime 路径 | Driver 路径 | 共同合同 |
+| --- | --- | --- | --- |
+| 初始化与 device | Runtime 按需建立较高层运行状态；应用通常使用 device ordinal | 应用显式调用 `cuInit` 并取得 `CUdevice` | Device 选择不是 launch 或完成证据 |
+| Context | 通常隐式使用 primary context，除非精确版本支持/采用另一 documented context 路径 | 应用 retain primary context 或取得 `CUcontext`，并管理 current-context 状态 | Context 决定相关对象与状态的有效边界 |
+| Module/function | Runtime 通常隐式管理已注册的 device code 和 module | 应用取得并释放 `CUmodule`，再取得 `CUfunction` | Code ownership 角色不同，不形成逐调用映射 |
+| Memory | 应用管理 device pointer、byte count、direction、last use 与 `cudaFree` | 应用管理 `CUdeviceptr`、copy、last use 与 `cuMemFree` | Higher-level API 不取消 allocation ownership |
+| Launch | Kernel symbol、execution configuration 与参数进入 Runtime launch surface | `CUfunction`、grid/block 配置与参数数组进入 `cuLaunchKernel` | Submission 与 completion 分开 |
+| Error/completion | 检查 `cudaError_t`，并建立 Runtime synchronization boundary | 检查 `CUresult`，并建立 Driver context/stream/event boundary | 两条路径都有延后错误观察点 |
+
+表中的调用只是代表性坐标。它不声称所有 memory、launch 或 synchronization 函数都具有相同参数或行为，也不把性能作为 API 选择结论。
+
+## 互操作：先写 current-context 合同
+
+Runtime 与 Driver 可以互操作，但必须遵循所选版本的 documented context rules。选定的 11.8.0、12.9.2 archive path（owner 页面标为 12.9.1）和当前 13.3.1 文档都说明：调用线程上若已有适用的 Driver context current，许多 Runtime 调用会使用它；若没有，Runtime 会按文档规则使用/初始化 device 的 primary context。各版本列出的例外和新增 execution-context 接口并不完全相同。
+
+因此，混合设计至少要记录：
+
+- 哪一层创建或 retain context，哪个 host thread 负责把它设为 current，以及何时撤销或释放。
+- Allocation、module、function、stream/event 等对象属于哪个 context，哪一层可以销毁它们。
+- 谁拥有 `cudaDeviceReset` 或 context teardown 权限。Primary context 是共享资源，不能把 reset 当成某个局部 helper 的私有清理。
+- 所用具体 Runtime/Driver data type 是否按该版本文档允许互换、需要 cast，或存在限制；不能从一个可互换类型推广到所有 handle。
+
+“可互操作”不是“任意混用”。如果合同没有写出 current context、对象 owner 与 teardown 权限，先不要跨 API 边界。
+
+## 错误模型：前缀变化不会消除异步边界
+
+Runtime 调用通常返回 `cudaError_t`，Driver 调用返回 `CUresult`。错误类型和查询函数不同，但 kernel launch 对 host 的异步性质不因 API 选择而消失。两条路径都要区分：
+
+1. **提交边界：** launch 调用或紧随其后的 launch-status 检查可以发现参数、configuration 或提交阶段的一部分错误。
+2. **完成边界：** 后续 context、device、stream 或 event synchronization 才建立相应工作的 completion observation point，并可能暴露延后执行错误。
+3. **归因边界：** 精确 API reference 中一些调用注明也可能返回此前 asynchronous launch 的错误，因此“哪个调用返回错误”不必等于“错误由哪个调用产生”。
+
+Driver 的更多显式 handle 可以改善责任可见性，但它不会自动同步，也不会自动建立正确归因。Runtime 的更高层管理也不会替应用检查完成边界。F05 的异步错误模型在两条路径上都保留。
+
+## 边界模型：按阶段比较谁负责什么
+
+下面是本站原创的嵌入式可视化讲解（Visual Explainer）**VIS21：Runtime/Driver API boundary**，用于比较 layer/ownership。按钮按 lifecycle stage 切换同一份确定性模型；方向键、Home 和 End 可在 tabs 间移动。完整静态图、六行表格与文字读法始终保留。它不是 CUDA 执行，也不授予 Evidence Status。
+
+<span id="vis21" class="resource-target" aria-hidden="true"></span>
+<ApiBoundary locale="zh-CN" />
+
+## 决策：先从 ownership 需求出发
+
+| 需求 | 本课程中的起点 | 继续复核的问题 |
+| --- | --- | --- |
+| 学习 CUDA C++ kernel、memory lifecycle 与 error boundary | 先用 Runtime API | 哪些资源仍需显式 acquire/check/release？ |
+| 需要显式 module load/unload 或按名称解析 function | 比较 Driver API | 精确 code artifact、context 与 unload owner 是谁？ |
+| Plugin、框架或 library 在同一进程共享 CUDA | 先写 context/teardown 合同，再决定单用或混用 | 谁拥有 primary context、current-context 切换与 reset？ |
+| 想用 Driver API“获得更高性能” | 不能仅凭 API 名称下结论 | 工作负载、实现、版本与 measurement contract 是什么？ |
+| 想把 [EX04](/examples/error-handling-lifecycle/) 全部改写成 Driver 版本来学习 | F07 不要求 | 先用责任矩阵比较；另一个完整实现会制造不必要的 canonical duplicate |
+
+默认选择 Runtime 是教学依赖决策，不是“Driver 不重要”或“Runtime 总是适合所有系统”的 sweeping claim。只有当 module、context、language boundary 或集成 ownership 需要更直接控制时，Driver 比较才成为设计输入；最终仍以精确版本 owner documentation 和系统合同为准。
+
+## 离开前检查
+
+1. 为什么“两条 API 都到达 CUDA driver 栈”不能推出每个 `cuda*` 调用都有一个一一对应的 `cu*` wrapper？
+2. Runtime 隐式管理 primary context 与 module 时，应用仍然必须显式承担哪些 memory 和 completion 责任？
+3. Driver 路径中 `CUdevice`、`CUcontext`、`CUmodule` 与 `CUfunction` 的取得顺序和 owner 为什么必须可见？
+4. 在 Driver-created context 上调用 Runtime 前，最少要写出哪些 current-context 与 teardown 条款？
+5. 为什么从 `cudaError_t` 换成 `CUresult` 不会消除 launch submission 与 deferred execution error 之间的边界？
+
+## 继续练习
+
+- 完成 [F07 练习（Exercise）](/foundations/runtime-driver-api/exercises/)，再查看独立的[参考解答](/foundations/runtime-driver-api/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-011](/practice/#pb-r1-011)审查一份跨 Runtime/Driver 边界的 ownership 与 error contract。
+- 把 related Runnable Example [EX04](/examples/error-handling-lifecycle/) 当作 Runtime lifecycle 输入，只标注每个阶段若改由 Driver 管理会新增哪些 handle 与 owner；不要复制或维护第二份完整程序。
+
+## 来源与复核
+
+- 当前角色边界依据 NVIDIA [CUDA Driver API 13.3.1：Difference between the driver and runtime APIs](https://docs.nvidia.com/cuda/cuda-driver-api/driver-vs-runtime-api.html)。
+- 当前 context/handle 互操作依据 [CUDA Runtime API 13.3.1：Interactions with the CUDA Driver API](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DRIVER.html)。同步和异步边界分别与 [Runtime API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html)及 [Driver API synchronization behavior](https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html)交叉复核。
+- 选定版本坐标成对复核了 [11.8.0 Runtime](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/index.html) / [11.8.0 Driver](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-driver-api/index.html)、[12.9.2 archive Runtime](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/index.html) / [12.9.2 archive Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-driver-api/index.html)（两页 owner label 均为 v12.9.1），以及当前 [13.3.1 Runtime](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html) / [13.3.1 Driver](https://docs.nvidia.com/cuda/cuda-driver-api/index.html)。完整 bundle 记录为 `SRC-CUDA-015`。
+
+全部 owner source 访问于 **2026-08-26**。页面文字、表格和 API-boundary 构图均为原创，没有复制或改编 NVIDIA diagram、table 或 sample。页面没有编译或执行 CUDA，没有观察 GPU，也不提出性能结论。

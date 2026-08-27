@@ -1,0 +1,318 @@
+---
+title: 'EX04: Error Handling Lifecycle Runnable Example'
+description: Obtain one shared original C++17 error-handling implementation that separates post-submission checks, synchronization-time failures, host logical verification, and repaired indexing.
+pairId: ex04
+counterpart: /examples/error-handling-lifecycle/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - scenario-contract
+  - error-lifecycle
+  - indexing-kernels
+  - host-verification
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX04
+prerequisites:
+  - F05
+relatedUnits:
+  - F03
+  - F04
+  - F05
+  - LAB03
+exampleIds:
+  - EX04
+canonicalExample: EX04
+canonicalRanges:
+  - error-lifecycle
+  - indexing-kernels
+  - host-verification
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 140 bytes of declared problem allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The launch-config scenario should surface a launch-configuration defect at the immediate-after-submission check; cudaPeekAtLastError should observe without clearing, and cudaGetLastError should retrieve and clear that same launch state before explicit synchronization.
+    - The deferred-access scenario should show no launch error at the immediate check and should surface the deliberately invalid device access only when cudaDeviceSynchronize establishes the completion boundary.
+    - The indexing-defect scenario should complete without an illegal memory access but fail deterministic host verification because its in-bounds column-major permutation disagrees with the declared row-major reference.
+    - The repaired-indexing scenario should complete explicit synchronization and match the overflow-checked row-major host reference.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ asynchronous execution and error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ execution and indexing'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Toolkit 11.8.0; last updated 2022-10-03'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 archive Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Toolkit 13.3.1; last updated 2026-06-29'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Runtime API - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Toolkit 13.3.1; last updated 2026-06-29'
+    platform: 'Linux x86-64 synchronization contract'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex04
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-26'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,scenario-contract,error-lifecycle,indexing-kernels,host-verification,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX04
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: F05
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'F03,F04,F05,LAB03'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX04
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX04
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'error-lifecycle,indexing-kernels,host-verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 140 bytes of declared problem allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '4 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '12'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/error-handling-lifecycle/" lang="zh-CN">阅读中文版本</a>
+
+EX04 is a standalone, original error-handling-lifecycle Runnable Example. One C++17 project separates the immediate-after-submission check, the deferred-at-synchronization check, pure host logical verification, and repaired indexing into four single-scenario processes. The website never executes CUDA.
+
+## Purpose
+
+Complete [F05: Separate Immediate Launch Errors from Deferred Execution Errors](/en/foundations/asynchronous-errors/) first. EX04 turns F05's asynchronous-error timeline into the sole executable implementation. [F03](/en/foundations/multidimensional-indexing/) supplies the two-dimensional row-major indexing contract, [F04](/en/foundations/host-device-lifecycle/) supplies the allocation, submission, synchronization, and cleanup order, and [LAB03](/en/labs/break-and-repair-indexing/) then guides learners through the defective and repaired scenarios.
+
+The project deliberately does not place every fault in one long-lived process. Each invocation runs one scenario, preventing an earlier asynchronous error from contaminating the next `cudaPeekAtLastError` and avoiding attempted CUDA-context reuse after a potentially fatal device fault.
+
+## Canonical project
+
+[View the complete EX04 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/1bfe7b2d309db6d733471260c888262e59258660/examples/ex04-error-handling-lifecycle), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/1bfe7b2d309db6d733471260c888262e59258660.zip). After extraction, enter `examples/ex04-error-handling-lifecycle/`.
+
+`project.json` is the machine-readable contract, and `README.md` states standalone build, runtime, and evidence boundaries. `src/`, `include/`, and `tests/` are the only implementation sources. Both locale pages render `error-lifecycle`, `indexing-kernels`, and `host-verification` exactly once in manifest order. The project and page prose are original; project source uses Apache-2.0.
+
+## Scenario contract
+
+| CLI scenario | Deliberate condition | First expected classification | Safety boundary |
+| --- | --- | --- | --- |
+| `launch-config` | A launch configuration exceeding the block thread limit | `immediate-after-submission` | Read and clear last-error state after rejection, then synchronize explicitly |
+| `deferred-access` | A valid launch that deliberately dereferences an invalid device address | `deferred-at-synchronization` | Allocate no device buffer; terminate the process immediately after synchronization reports the fault |
+| `indexing-defect` | Store `(x,y)` through a column-major permutation of the same allocation | `host-verification` | Keep every position inside 35 elements; do not manufacture the mismatch with illegal access |
+| `repaired-indexing` | Use the declared `y * width + x` row-major map | `none` | Compare exactly with the pure host reference after successful synchronization |
+
+These classifications are acceptance directions, not runtime output observed by this site. The executable checks success versus failure at each boundary without treating one specific `cudaError_t` value as a cross-environment guarantee.
+
+## Error lifecycle
+
+This range holds the host-side observation boundaries and cleanup decisions for all four scenarios:
+
+<CanonicalCode exampleId="EX04" range="error-lifecycle" />
+
+`launch-config` calls `cudaPeekAtLastError` immediately after triple-chevron submission. That API reads the last-error state visible to the calling thread without clearing it. `cudaGetLastError` then retrieves and clears the same state, and another peek checks the cleared state. A final `cudaDeviceSynchronize` remains explicit, so the immediate check is not confused with a completion boundary.
+
+`deferred-access` has valid launch geometry. The code first performs the non-clearing immediate peek, then calls `cudaDeviceSynchronize` to wait for preceding work; synchronization is the intended reporting point for the deliberate device access. Because an execution fault may leave the current CUDA context unsuitable for further work, the function terminates after recording the returned status and performs no `cudaFree`, reset, or subsequent kernel launch.
+
+The two indexing paths reach host verification only after `cudaMalloc`, the launch check, explicit synchronization, and D2H copy all succeed. They call `cudaFree` only after successful synchronization and copy-back. Any CUDA failure exits the process and leaves allocation reclamation to process termination rather than attempting cleanup through a potentially damaged context.
+
+## Indexing kernels
+
+The same device source contains the launch-configuration probe, deferred invalid access, and paired defective/repaired indexing kernels:
+
+<CanonicalCode exampleId="EX04" range="indexing-kernels" />
+
+`indexing_defect` is not an out-of-bounds kernel. For every valid `(x,y)` in `width=7,height=5`, `x * height + y` lies in `[0,35)` and forms a complete permutation. The defect is that this map violates the application's declared x-fastest row-major layout. Host verification can therefore isolate a logical mapping disagreement without simultaneously contaminating CUDA error state with an illegal memory access.
+
+`repaired_indexing` changes only the map to `y * width + x`; coordinates, bounds, grid, block, and allocation remain the same. That controlled change lets a host mismatch be attributed to the mapping repair rather than a changed problem size or launch geometry.
+
+## Host verification boundary
+
+The pure host C++17 header defines scenario parsing, stable stage labels, first-failure classification, overflow-safe element counting, both 2D maps, deterministic reference values, and exact verification:
+
+<CanonicalCode exampleId="EX04" range="host-verification" />
+
+`try_element_count` rejects zero extents and checks `std::size_t` overflow before multiplication. Each indexing function validates the extent product and each coordinate before computing an index, leaving the caller's destination unchanged on failure. The host test traverses the `7 x 5` extent, simulates the in-bounds defect and repair, and confirms that the mismatch begins at a deterministic position.
+
+`make host-test` includes no CUDA header, `__host__`, `__device__`, or GPU dependency. It can verify parsing, arithmetic, reference, and classification contracts, but it cannot establish that the CUDA source compiled or that device execution reports a fault at the expected stage.
+
+## Build contract
+
+From the project directory on native Linux, run these stages in fixed order:
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+The first four stages require the selected CUDA Toolkit. Host-test needs only a host C++17 compiler on the x86-64 CPU. CUDA stages create `build/error_handling_lifecycle.ii`, `build/error_handling_lifecycle.o`, and `build/ex04-error-handling-lifecycle`. Inspection uses `cuobjdump` to confirm a native `sm_75` cubin and forward-compatible PTX generated from `compute_75`.
+
+`scripts/compile-check.sh c++17 ex04 <result-dir>` runs clean, preprocess, compile, link, inspect, and host-test in order, preserving logs and inspection artifacts. It never runs `build/ex04-error-handling-lifecycle`; even a successful build flow creates no immediate, deferred, or host-verification runtime observation.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Build gate | x86-64 CPU; host C++17 compiler for host-test and the selected Toolkit for CUDA stages |
+| Runtime gate | Native Linux; one CUDA GPU with compute capability 7.5 or newer |
+| Baseline GPU Capability Tier | The indexing scenarios fix 35 `std::uint32_t` elements; the sole explicit device allocation is 140 bytes, far below the 8 GB boundary |
+| Compiler target | Native `sm_75` cubin plus PTX generated from `compute_75` |
+| Language contract | The same original C++17 source in all three Lanes |
+
+| Toolkit Lane | OS / architecture | Declared development image tag |
+| --- | --- | --- |
+| CUDA 11.8.0 | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04` |
+| CUDA 12.9.2 | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04` |
+| CUDA 13.3.1 | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04` |
+
+The manifest pins the exact tag, manifest digest, and linux/amd64 digest used by EX03. These are future evidence targets and container-identity inputs only. Tag metadata, a digest, or a local host test cannot show that EX04 compiled or ran in any Lane.
+
+## Compilation and runtime evidence
+
+EX04's compilation-evidence array is empty. The repository commits no qualifying Lane compile record, so **EX04 is not Compile-Checked**. Source availability, executable commands, a passing host-only test, or an available container image does not populate that empty axis.
+
+The runtime Evidence Status is **Pending Hardware Verification**, and recorded observations are empty. There is no declared Reference Environment and no qualifying GPU execution. This page stores or infers no error code, console transcript, timing, latency, throughput, speedup, or other performance conclusion. No compilation record exists to render.
+
+A LAB03 or manual external run becomes a candidate runtime record only after supplying a complete Environment Manifest, separate-process logs for every scenario, and acceptance decisions. Results seen by one learner do not automatically upgrade the site's Evidence Status.
+
+## Expected observations, not runtime records
+
+These four manifest-declared statements are not observed output:
+
+1. `launch-config` should expose the launch-configuration defect at the immediate-after-submission check; `cudaPeekAtLastError` should observe without clearing, `cudaGetLastError` should retrieve and clear the same launch state, and the code should still synchronize explicitly.
+2. `deferred-access` should have no launch error at the immediate check, and the deliberate invalid device access should surface only when `cudaDeviceSynchronize` establishes the completion boundary.
+3. `indexing-defect` should complete device work without illegal memory access but fail deterministic host verification because its in-bounds column-major permutation disagrees with the row-major reference.
+4. `repaired-indexing` should complete explicit synchronization and match the overflow-checked row-major host reference.
+
+All four remain to be checked by a GPU record satisfying the hardware gate, Environment Manifest, and acceptance criteria. The observation list is empty, with no predetermined error enum, output text, or performance number.
+
+## Sources and review
+
+Asynchronous Execution in Programming Guide v13.3 supplies the roles of submission, synchronization, `cudaPeekAtLastError`, and `cudaGetLastError`; Writing CUDA SIMT Kernels supplies coordinates, bounds, and flattening. The three Runtime Error Handling pages cover 11.8.0, the 12.9.2 archive path, and current 13.3.1. Current Device Management supplies the `cudaDeviceSynchronize` contract. Three NVCC pages correspond to the exact manifest Lanes, while the Docker Hub tag APIs supply image metadata only.
+
+The Runtime page under `archive/12.9.2` labels itself **12.9.1**, so source metadata preserves both archive path and page label. Runtime-instance wording evolves across versions; this page relies only on the shared core behavior: peek does not clear, get retrieves and clears, and explicit synchronization establishes a completion boundary.
+
+- [CUDA Programming Guide v13.3 - Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)
+- [CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)
+- [CUDA 11.8.0 Runtime API - Error Handling](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA 12.9.2 archive Runtime API - Error Handling; page label 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA 13.3.1 Runtime API - Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA 13.3.1 Runtime API - Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**Fact-check and all-source access date: 2026-08-26.** The page copies no NVIDIA sample listing, runtime output, or performance result.

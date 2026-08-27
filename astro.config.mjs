@@ -51,6 +51,10 @@ export default defineConfig({
             { slug: 'foundations/execution-hierarchy' },
             { slug: 'foundations/multidimensional-indexing' },
             { slug: 'foundations/host-device-lifecycle' },
+            { slug: 'foundations/asynchronous-errors' },
+            { slug: 'foundations/compute-capability' },
+            { slug: 'foundations/runtime-driver-api' },
+            { slug: 'foundations/launch-geometry' },
           ],
         },
         {
@@ -60,12 +64,18 @@ export default defineConfig({
             { slug: 'examples/environment-report' },
             { slug: 'examples/vector-addition' },
             { slug: 'examples/multidimensional-indexing' },
+            { slug: 'examples/error-handling-lifecycle' },
           ],
         },
         {
           label: '实验',
           translations: { en: 'Labs' },
-          items: [{ slug: 'labs' }, { slug: 'labs/record-cuda-environment' }, { slug: 'labs/vector-addition' }],
+          items: [
+            { slug: 'labs' },
+            { slug: 'labs/record-cuda-environment' },
+            { slug: 'labs/vector-addition' },
+            { slug: 'labs/break-and-repair-indexing' },
+          ],
         },
         {
           label: '可视化讲解',

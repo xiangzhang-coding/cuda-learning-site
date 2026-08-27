@@ -13,6 +13,11 @@ const ex01DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
 const ex03DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6.zip';
+const ex04SourceCommit = '1bfe7b2d309db6d733471260c888262e59258660';
+const ex04SourceUrl =
+  `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
+const ex04DownloadUrl =
+  `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${ex04SourceCommit}.zip`;
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
@@ -41,12 +46,24 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/foundations/multidimensional-indexing/',
     '/foundations/host-device-lifecycle/',
     '/en/foundations/host-device-lifecycle/',
+    '/foundations/asynchronous-errors/',
+    '/en/foundations/asynchronous-errors/',
+    '/foundations/compute-capability/',
+    '/en/foundations/compute-capability/',
+    '/foundations/runtime-driver-api/',
+    '/en/foundations/runtime-driver-api/',
+    '/foundations/launch-geometry/',
+    '/en/foundations/launch-geometry/',
     '/examples/environment-report/',
     '/en/examples/environment-report/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
+    '/examples/error-handling-lifecycle/',
+    '/en/examples/error-handling-lifecycle/',
     '/labs/record-cuda-environment/',
     '/en/labs/record-cuda-environment/',
+    '/labs/break-and-repair-indexing/',
+    '/en/labs/break-and-repair-indexing/',
   ]) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -114,6 +131,38 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       '/en/labs/record-cuda-environment/',
     ],
   });
+  await expectRankedSearchResult(page, {
+    route: '/',
+    button: /搜索/,
+    query: 'CUDA 错误为何常常延后暴露',
+    expectedHrefs: [
+      '/foundations/asynchronous-errors/',
+      '/foundations/asynchronous-errors/exercises/',
+      '/foundations/asynchronous-errors/solutions/',
+    ],
+  });
+  await expectRankedSearchResult(page, {
+    route: '/en/',
+    button: /Search/,
+    query: 'Compute Capability Is a Feature Contract',
+    expectedHrefs: [
+      '/en/foundations/compute-capability/',
+      '/en/foundations/compute-capability/exercises/',
+      '/en/foundations/compute-capability/solutions/',
+    ],
+  });
+  await expectRankedSearchResult(page, {
+    route: '/',
+    button: /搜索/,
+    query: '破坏并修复索引',
+    expectedHrefs: ['/labs/break-and-repair-indexing/'],
+  });
+  await expectRankedSearchResult(page, {
+    route: '/en/',
+    button: /Search/,
+    query: 'Error Handling Lifecycle Runnable Example',
+    expectedHrefs: ['/en/examples/error-handling-lifecycle/'],
+  });
 
   await page.goto('/en/practice/');
   const index = page.locator('cuda-resource-index');
@@ -147,10 +196,18 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' });
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
+  for (const { route, controls } of [
+    { route: '/en/foundations/asynchronous-errors/', controls: '[data-timeline-controls]' },
+    { route: '/en/foundations/launch-geometry/', controls: '[data-block-shape-controls]' },
+  ]) {
+    await page.goto(route);
+    await expect(page.locator(controls)).toBeHidden();
+    await expect(page.locator('[data-static-fallback]')).toBeVisible();
+  }
   expect(failures).toEqual([]);
 });
 
-test('keeps mobile pages and no-script Visual Explainers complete', async ({ browser, page }) => {
+test('keeps mobile pages and no-script teaching fallbacks complete', async ({ browser, page }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of [
@@ -166,10 +223,23 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
     '/en/foundations/multidimensional-indexing/',
     '/foundations/host-device-lifecycle/',
     '/en/foundations/host-device-lifecycle/',
+    '/foundations/asynchronous-errors/',
+    '/en/foundations/asynchronous-errors/',
+    '/foundations/compute-capability/',
+    '/en/foundations/compute-capability/',
+    '/foundations/runtime-driver-api/',
+    '/en/foundations/runtime-driver-api/',
+    '/foundations/launch-geometry/',
+    '/en/foundations/launch-geometry/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
+    '/examples/error-handling-lifecycle/',
+    '/en/examples/error-handling-lifecycle/',
+    '/labs/break-and-repair-indexing/',
+    '/en/labs/break-and-repair-indexing/',
   ]) {
     await page.goto(route);
+    await page.waitForLoadState('networkidle');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }
   expect(failures).toEqual([]);
@@ -180,11 +250,34 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
     viewport: { width: 390, height: 844 },
   });
   const staticPage = await staticContext.newPage();
+  const embeddedFallbacks: Record<string, { controls: string; evidence: string; visualId: string }> = {
+    '/en/foundations/asynchronous-errors/': {
+      controls: '[data-timeline-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS19',
+    },
+    '/en/foundations/compute-capability/': {
+      controls: '[data-capability-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS20',
+    },
+    '/en/foundations/runtime-driver-api/': {
+      controls: '[data-api-boundary-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS21',
+    },
+    '/en/foundations/launch-geometry/': {
+      controls: '[data-block-shape-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS22',
+    },
+  };
   for (const route of [
     '/visuals/kernel-journey/',
     '/en/visuals/indexing/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
+    ...Object.keys(embeddedFallbacks),
     '/start/reference-environment-candidate/',
     '/en/start/reference-environment-candidate/',
     '/practice/',
@@ -196,6 +289,13 @@ test('keeps mobile pages and no-script Visual Explainers complete', async ({ bro
       await expect(staticPage.locator('[data-visual-controls]')).toBeHidden();
       await expect(staticPage.locator('[data-static-fallback]')).toBeVisible();
       await expect(staticPage.locator('[data-no-evidence]')).toBeVisible();
+    } else if (embeddedFallbacks[route]) {
+      const embedded = embeddedFallbacks[route];
+      const visual = staticPage.locator(`[data-visual-id="${embedded.visualId}"]`);
+      await expect(visual.locator(embedded.controls)).toBeHidden();
+      await expect(visual.locator('[data-visual-controls]')).toBeHidden();
+      await expect(visual.locator('[data-static-fallback]')).toBeVisible();
+      await expect(visual.locator(embedded.evidence)).toBeVisible();
     } else if (route.includes('reference-environment-candidate')) {
       await expect(staticPage.locator('[data-compatibility-controls]')).toBeHidden();
       await expect(staticPage.locator('[data-static-fallback] tbody tr')).toHaveCount(3);
@@ -231,6 +331,18 @@ test('serves immutable canonical downloads and returns a real 404 for unknown ap
   expect(ex03Download.ok()).toBe(true);
   expect(ex03Download.headers()['content-type']).toMatch(/zip|octet-stream/);
   expect((await ex03Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+
+  await page.goto('/en/examples/error-handling-lifecycle/');
+  await expect(page.locator(`a[href="${ex04SourceUrl}"]`)).toBeVisible();
+  await expect(page.locator(`a[href="${ex04DownloadUrl}"]`)).toBeVisible();
+  const ex04Download = await request.get(ex04DownloadUrl);
+  expect(ex04Download.ok()).toBe(true);
+  expect(ex04Download.headers()['content-type']).toMatch(/zip|octet-stream/);
+  const ex04Archive = await ex04Download.body();
+  expect(ex04Archive.subarray(0, 2).toString('ascii')).toBe('PK');
+  expect(
+    ex04Archive.includes(Buffer.from('/examples/ex04-error-handling-lifecycle/src/error_handling_lifecycle.cu')),
+  ).toBe(true);
 
   const missing = await request.get('/api/r0-smoke-must-not-exist');
   expect(missing.status()).toBe(404);

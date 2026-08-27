@@ -23,13 +23,13 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(101);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(122);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 2, practice: 13, visuals: 2, glossary: 55, sources: 29 });
+    ).toEqual({ labs: 3, practice: 17, visuals: 6, glossary: 65, sources: 31 });
   });
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
@@ -43,6 +43,7 @@ describe('resource index catalog', () => {
     const labs = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'labs', 'en', { asOf });
     const lab01 = labs.find(({ planningId }) => planningId === 'LAB01');
     const lab = labs.find(({ planningId }) => planningId === 'LAB02');
+    const lab03 = labs.find(({ planningId }) => planningId === 'LAB03');
 
     expect(lab01).toMatchObject({
       planningId: 'LAB01',
@@ -68,6 +69,75 @@ describe('resource index catalog', () => {
       ['F01', '/en/foundations/first-cuda-kernel/'],
     ]);
     expect(lab?.searchText).toContain('CUDA Toolkit Lane 11.8.0');
+    expect(lab03).toMatchObject({
+      planningId: 'LAB03',
+      href: '/en/labs/break-and-repair-indexing/',
+      counterpart: '/labs/break-and-repair-indexing/',
+      difficulty: 'intermediate',
+      evidence: {
+        compilation: [],
+        runtime: ['Pending Hardware Verification'],
+      },
+    });
+    expect(lab03?.prerequisites.map(({ id, href }) => [id, href])).toEqual([
+      ['F03', '/en/foundations/multidimensional-indexing/'],
+      ['F05', '/en/foundations/asynchronous-errors/'],
+    ]);
+    expect(lab03?.searchText).toContain('EX04');
+
+    const visuals = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'visuals', 'en', { asOf });
+    expect(visuals.map(({ planningId }) => planningId)).toEqual([
+      'VIS01',
+      'VIS02',
+      'VIS19',
+      'VIS20',
+      'VIS21',
+      'VIS22',
+    ]);
+    for (const expected of [
+      {
+        planningId: 'VIS19',
+        href: '/en/foundations/asynchronous-errors/#vis19',
+        counterpart: '/foundations/asynchronous-errors/#vis19',
+        prerequisites: [['F04', '/en/foundations/host-device-lifecycle/']],
+      },
+      {
+        planningId: 'VIS20',
+        href: '/en/foundations/compute-capability/#vis20',
+        counterpart: '/foundations/compute-capability/#vis20',
+        prerequisites: [
+          ['F02', '/en/foundations/execution-hierarchy/'],
+          ['O03', '/en/start/environment-manifest/'],
+        ],
+      },
+      {
+        planningId: 'VIS21',
+        href: '/en/foundations/runtime-driver-api/#vis21',
+        counterpart: '/foundations/runtime-driver-api/#vis21',
+        prerequisites: [
+          ['F04', '/en/foundations/host-device-lifecycle/'],
+          ['F05', '/en/foundations/asynchronous-errors/'],
+        ],
+      },
+      {
+        planningId: 'VIS22',
+        href: '/en/foundations/launch-geometry/#vis22',
+        counterpart: '/foundations/launch-geometry/#vis22',
+        prerequisites: [
+          ['F02', '/en/foundations/execution-hierarchy/'],
+          ['F03', '/en/foundations/multidimensional-indexing/'],
+          ['F06', '/en/foundations/compute-capability/'],
+        ],
+      },
+    ] as const) {
+      const visual = visuals.find(({ planningId }) => planningId === expected.planningId);
+      expect(visual).toMatchObject({
+        planningId: expected.planningId,
+        href: expected.href,
+        counterpart: expected.counterpart,
+      });
+      expect(visual?.prerequisites.map(({ id, href }) => [id, href])).toEqual(expected.prerequisites);
+    }
   });
 
   it('sorts a growing fixture set by stable planning ID instead of input order', () => {
@@ -89,7 +159,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(80);
+    expect(projected).toHaveLength(90);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
     );
@@ -220,9 +290,9 @@ describe('resource index catalog', () => {
 
   it('rejects orphaned indexed subjects and cycles across the full prerequisite graph', () => {
     expect(() => validateResourceCatalog(
-      RESOURCE_INDEX_RECORDS.filter(({ planningId }) => planningId !== 'VIS02'),
+      RESOURCE_INDEX_RECORDS.filter(({ planningId }) => planningId !== 'VIS22'),
       { asOf },
-    )).toThrow(/VIS02 is orphaned from the visuals index/);
+    )).toThrow(/VIS22 is orphaned from the visuals index/);
 
     const destinations: Record<string, PublishedDestination> = {
       ...PUBLISHED_DESTINATIONS,

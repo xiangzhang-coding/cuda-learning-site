@@ -3,6 +3,59 @@ import { expect, test } from '@playwright/test';
 
 import { collectBrowserFailures } from '../helpers/browser-contract';
 
+const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
+
+const issue14Publications = [
+  {
+    unitId: 'F05',
+    pairId: 'f05',
+    resourceKind: 'learning-unit',
+    zh: '/foundations/asynchronous-errors/',
+    en: '/en/foundations/asynchronous-errors/',
+    runtimeEvidence: 'none',
+  },
+  {
+    unitId: 'F06',
+    pairId: 'f06',
+    resourceKind: 'learning-unit',
+    zh: '/foundations/compute-capability/',
+    en: '/en/foundations/compute-capability/',
+    runtimeEvidence: 'none',
+  },
+  {
+    unitId: 'F07',
+    pairId: 'f07',
+    resourceKind: 'learning-unit',
+    zh: '/foundations/runtime-driver-api/',
+    en: '/en/foundations/runtime-driver-api/',
+    runtimeEvidence: 'none',
+  },
+  {
+    unitId: 'F08',
+    pairId: 'f08',
+    resourceKind: 'learning-unit',
+    zh: '/foundations/launch-geometry/',
+    en: '/en/foundations/launch-geometry/',
+    runtimeEvidence: 'none',
+  },
+  {
+    unitId: 'EX04',
+    pairId: 'ex04',
+    resourceKind: 'runnable-example',
+    zh: '/examples/error-handling-lifecycle/',
+    en: '/en/examples/error-handling-lifecycle/',
+    runtimeEvidence: 'Pending Hardware Verification',
+  },
+  {
+    unitId: 'LAB03',
+    pairId: 'lab03',
+    resourceKind: 'lab',
+    zh: '/labs/break-and-repair-indexing/',
+    en: '/en/labs/break-and-repair-indexing/',
+    runtimeEvidence: 'Pending Hardware Verification',
+  },
+] as const;
+
 test('F03 reuses the deterministic VIS02 interaction and keeps its evidence boundary', async ({ page }) => {
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   await page.goto('/en/foundations/multidimensional-indexing/');
@@ -35,7 +88,13 @@ test('new unit, Exercise, solution, and EX03 pages reflow and switch locale dire
     ['/foundations/execution-hierarchy/solutions/', '/en/foundations/execution-hierarchy/solutions/'],
     ['/foundations/multidimensional-indexing/', '/en/foundations/multidimensional-indexing/'],
     ['/foundations/host-device-lifecycle/', '/en/foundations/host-device-lifecycle/'],
+    ['/foundations/asynchronous-errors/', '/en/foundations/asynchronous-errors/'],
+    ['/foundations/compute-capability/', '/en/foundations/compute-capability/'],
+    ['/foundations/runtime-driver-api/', '/en/foundations/runtime-driver-api/'],
+    ['/foundations/launch-geometry/', '/en/foundations/launch-geometry/'],
     ['/examples/multidimensional-indexing/', '/en/examples/multidimensional-indexing/'],
+    ['/examples/error-handling-lifecycle/', '/en/examples/error-handling-lifecycle/'],
+    ['/labs/break-and-repair-indexing/', '/en/labs/break-and-repair-indexing/'],
   ] as const;
 
   for (const [chinese, english] of pairs) {
@@ -83,8 +142,36 @@ test('F03 no-script and print output retain static indexing and canonical teachi
   await expect(page.locator('.canonical-code')).toHaveCount(3);
 });
 
-test('LAB03 remains absent from the published navigation', async ({ page }) => {
+test('F05-F08, EX04, and LAB03 publish paired routes with canonical metadata and honest evidence', async ({ page }) => {
+  const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
+
+  for (const publication of issue14Publications) {
+    for (const { route, counterpart, lang } of [
+      { route: publication.zh, counterpart: publication.en, lang: 'zh-CN' },
+      { route: publication.en, counterpart: publication.zh, lang: 'en' },
+    ] as const) {
+      const response = await page.goto(route);
+      expect(response?.ok(), route).toBe(true);
+      await expect(page.locator('html')).toHaveAttribute('lang', lang);
+      await expect(page.locator('main h1')).toContainText(publication.unitId);
+      await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', counterpart);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${canonicalOrigin}${route}`);
+      await expect(page.locator('meta[name="cuda:pair-id"]')).toHaveAttribute('content', publication.pairId);
+      await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', publication.unitId);
+      await expect(page.locator('meta[name="cuda:resource-kind"]')).toHaveAttribute('content', publication.resourceKind);
+      await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
+        'content',
+        publication.runtimeEvidence,
+      );
+      await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+    }
+  }
+
   await page.goto('/en/start/using-the-learning-site/');
-  await expect(page.locator('nav a[href*="lab03"]')).toHaveCount(0);
-  await expect(page.locator('nav a[href*="break-and-repair"]')).toHaveCount(0);
+  const navigation = page.getByRole('navigation', { name: 'Main' });
+  for (const publication of issue14Publications) {
+    await expect(navigation.locator(`a[href="${publication.en}"]`), publication.unitId).toHaveCount(1);
+  }
+  expect(failures).toEqual([]);
 });

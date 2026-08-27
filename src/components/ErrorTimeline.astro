@@ -1,0 +1,866 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import {
+  ERROR_TIMELINE_SCENARIOS,
+  ERROR_TIMELINE_STAGES,
+  type ErrorTimelineScenarioId,
+  type ErrorTimelineStageId,
+} from '../visuals/error-timeline-model';
+
+type ErrorTimelineLocale = 'zh-CN' | 'en';
+
+interface Props {
+  locale: ErrorTimelineLocale;
+}
+
+type EventCopy = Readonly<{
+  title: string;
+  description: string;
+}>;
+
+type ScenarioCopy = Readonly<{
+  title: string;
+  summary: string;
+  events: Readonly<Record<ErrorTimelineStageId, EventCopy>>;
+}>;
+
+type TimelineCopy = Readonly<{
+  eyebrow: string;
+  title: string;
+  summary: string;
+  caveat: string;
+  evidenceNotice: string;
+  staticHeading: string;
+  staticIntro: string;
+  controlsLabel: string;
+  scenarioLabel: string;
+  play: string;
+  pause: string;
+  step: string;
+  reset: string;
+  scrub: string;
+  stageNames: Readonly<Record<ErrorTimelineStageId, string>>;
+  scenarios: Readonly<Record<ErrorTimelineScenarioId, ScenarioCopy>>;
+}>;
+
+const COPY: Readonly<Record<ErrorTimelineLocale, TimelineCopy>> = {
+  'zh-CN': {
+    eyebrow: '错误暴露时间线',
+    title: '同一次 launch，不同的 host 可见边界',
+    summary:
+      '沿固定的五个阶段比较两种情景：launch configuration 在提交路径被拒绝，device execution error 则在工作被接受后才发生。',
+    caveat:
+      '“在哪次 API 调用看到错误”不必然等于“错误从哪行代码产生”。CUDA Runtime API 还明确提示：调用可能返回此前异步 launch 的错误。',
+    evidenceNotice:
+      '这是确定性的浏览器教学模型。它不编译或执行 CUDA，也不读取 EX04 日志。它不授予 Compile-Checked、Community-Observed 或 Runtime-Verified 这三种 Evidence Status。',
+    staticHeading: '两条完整静态时间线',
+    staticIntro:
+      '即使脚本不可用，下面两条时间线仍按相同的五阶段顺序完整呈现。增强后的控件只改变当前高亮，不删除静态文字。',
+    controlsLabel: '错误时间线播放控件',
+    scenarioLabel: '情景',
+    play: '播放',
+    pause: '暂停',
+    step: '下一步',
+    reset: '重置',
+    scrub: '阶段',
+    stageNames: {
+      'launch-submission': 'Launch 提交',
+      'immediate-check': '即时检查',
+      'device-execution': 'Device 执行',
+      synchronization: '同步边界',
+      'host-visible-result': 'Host 可见结果',
+    },
+    scenarios: {
+      'launch-configuration': {
+        title: '情景 A：launch configuration 不被接受',
+        summary: '错误属于提交路径；kernel body 没有开始执行。',
+        events: {
+          'launch-submission': {
+            title: 'Runtime 处理 execution configuration',
+            description: '本情景的配置无法形成可执行 launch，因此提交在 device 工作开始前失败。',
+          },
+          'immediate-check': {
+            title: '紧邻 launch 的检查看到失败',
+            description:
+              '检查 last-error state 可以在这里取得 launch 边界的结果；若此前状态未被处理，观察仍可能来自旧错误。',
+          },
+          'device-execution': {
+            title: 'Kernel body 未执行',
+            description: '没有被接受的 device 工作可在这一阶段产生执行结果。',
+          },
+          synchronization: {
+            title: '同步不是首次发现点',
+            description: '等待不能把被拒绝的 launch 变成已执行工作；canonical 路径已经在即时检查处停止依赖操作。',
+          },
+          'host-visible-result': {
+            title: 'Host 得到 launch 失败结论',
+            description: '程序报告 launch 边界失败、进入 cleanup，并且不读取依赖该 kernel 的输出。',
+          },
+        },
+      },
+      'deferred-execution': {
+        title: '情景 B：device execution 之后失败',
+        summary: 'Launch 被接受；执行阶段的问题在显式同步边界才对 host 可见。',
+        events: {
+          'launch-submission': {
+            title: 'Runtime 接受 launch',
+            description: 'Host 提交工作后继续运行；这一步尚未证明 kernel body 已完成。',
+          },
+          'immediate-check': {
+            title: '未观察到新的 launch configuration 失败',
+            description: '即时检查只覆盖此时可见的 launch 边界，不等待未来的 device execution。',
+          },
+          'device-execution': {
+            title: 'Device 执行期间发生问题',
+            description: '错误在已提交工作实际执行时产生，因此 host 先前的即时检查无法预知它。',
+          },
+          synchronization: {
+            title: '显式同步返回失败',
+            description: 'Host 等待此前 device 工作；这个返回点把延后执行失败变为 host 可见结果。',
+          },
+          'host-visible-result': {
+            title: 'Host 得到 execution 失败结论',
+            description: '程序报告同步边界失败、进入 cleanup，并且不把未建立为有效的输出交给 correctness comparison。',
+          },
+        },
+      },
+    },
+  },
+  en: {
+    eyebrow: 'Error-surfacing timeline',
+    title: 'One launch, different host-visible boundaries',
+    summary:
+      'Compare two scenarios across the same five stages: a launch configuration is rejected on the submission path, while a device-execution error occurs only after work is accepted.',
+    caveat:
+      'The API call that reports an error is not necessarily the source line that caused it. The CUDA Runtime API also warns that a call may return an error from an earlier asynchronous launch.',
+    evidenceNotice:
+      'This is a deterministic browser teaching model. It compiles and executes no CUDA and reads no EX04 log. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
+    staticHeading: 'Two complete static timelines',
+    staticIntro:
+      'Both timelines remain complete and follow the same five-stage order when scripts are unavailable. Enhanced controls change only the current highlight; they do not remove the static text.',
+    controlsLabel: 'Error timeline playback controls',
+    scenarioLabel: 'Scenario',
+    play: 'Play',
+    pause: 'Pause',
+    step: 'Step',
+    reset: 'Reset',
+    scrub: 'Stage',
+    stageNames: {
+      'launch-submission': 'Launch submission',
+      'immediate-check': 'Immediate check',
+      'device-execution': 'Device execution',
+      synchronization: 'Synchronization boundary',
+      'host-visible-result': 'Host-visible result',
+    },
+    scenarios: {
+      'launch-configuration': {
+        title: 'Scenario A: launch configuration is not accepted',
+        summary: 'The error belongs to the submission path; the kernel body never begins.',
+        events: {
+          'launch-submission': {
+            title: 'The Runtime processes the execution configuration',
+            description:
+              'This configuration cannot form an executable launch, so submission fails before device work begins.',
+          },
+          'immediate-check': {
+            title: 'The check adjacent to the launch observes failure',
+            description:
+              'Inspecting last-error state can retrieve the launch-boundary result here; if earlier state was not handled, the observation can still be stale.',
+          },
+          'device-execution': {
+            title: 'The kernel body does not execute',
+            description: 'No accepted device work exists to produce an execution result at this stage.',
+          },
+          synchronization: {
+            title: 'Synchronization is not the first discovery point',
+            description:
+              'Waiting cannot turn a rejected launch into executed work; the canonical path already stops dependent operations at the immediate check.',
+          },
+          'host-visible-result': {
+            title: 'The host has a launch-failure result',
+            description:
+              'The program reports the launch-boundary failure, enters cleanup, and does not read output that depended on this kernel.',
+          },
+        },
+      },
+      'deferred-execution': {
+        title: 'Scenario B: device execution fails later',
+        summary: 'The launch is accepted; an execution problem becomes host-visible at the explicit synchronization boundary.',
+        events: {
+          'launch-submission': {
+            title: 'The Runtime accepts the launch',
+            description: 'The host submits work and continues; this step does not prove that the kernel body completed.',
+          },
+          'immediate-check': {
+            title: 'No new launch-configuration failure is observed',
+            description:
+              'The immediate check covers the launch boundary visible at this time; it does not wait for future device execution.',
+          },
+          'device-execution': {
+            title: 'A problem occurs during device execution',
+            description:
+              'The error originates while accepted work is actually executing, so the host-side immediate check could not predict it.',
+          },
+          synchronization: {
+            title: 'Explicit synchronization returns failure',
+            description:
+              'The host waits for preceding device work, and this return point makes the deferred execution failure host-visible.',
+          },
+          'host-visible-result': {
+            title: 'The host has an execution-failure result',
+            description:
+              'The program reports the synchronization-boundary failure, enters cleanup, and does not send unestablished output to correctness comparison.',
+          },
+        },
+      },
+    },
+  },
+};
+
+const { locale } = Astro.props;
+const copy = COPY[locale];
+const initialScenario = ERROR_TIMELINE_SCENARIOS[0];
+const initialScenarioCopy = copy.scenarios[initialScenario.id];
+const initialEvent = initialScenario.events[0];
+const initialEventCopy = initialScenarioCopy.events[initialEvent.stageId];
+---
+
+<cuda-error-timeline
+  class="error-timeline not-content"
+  data-visual-id="VIS19"
+  data-locale={locale}
+  data-scenario="launch-configuration"
+  data-stage="launch-submission"
+>
+  <div class="timeline-shell">
+    <header class="timeline-header">
+      <p class="timeline-eyebrow">{copy.eyebrow}</p>
+      <h3>{copy.title}</h3>
+      <p class="timeline-summary" data-conceptual-only>{copy.summary}</p>
+    </header>
+
+    <p class="timeline-caveat">{copy.caveat}</p>
+    <p class="timeline-evidence" data-no-evidence>{copy.evidenceNotice}</p>
+
+    <section class="timeline-static" data-static-fallback aria-labelledby={`error-timeline-static-${locale}`}>
+      <h4 id={`error-timeline-static-${locale}`}>{copy.staticHeading}</h4>
+      <p>{copy.staticIntro}</p>
+
+      <div class="scenario-grid">
+        {
+          ERROR_TIMELINE_SCENARIOS.map((scenario, scenarioIndex) => {
+            const scenarioCopy = copy.scenarios[scenario.id];
+            return (
+              <article
+                class="scenario-card"
+                data-scenario={scenario.id}
+                data-selected={scenarioIndex === 0 ? 'true' : 'false'}
+              >
+                <header class="scenario-header">
+                  <h5 data-scenario-title>{scenarioCopy.title}</h5>
+                  <p>{scenarioCopy.summary}</p>
+                </header>
+                <ol class="timeline-events">
+                  {scenario.events.map((event, eventIndex) => {
+                    const eventCopy = scenarioCopy.events[event.stageId];
+                    const isInitiallyActive = scenarioIndex === 0 && eventIndex === 0;
+                    return (
+                      <li
+                        class="timeline-event"
+                        data-event
+                        data-stage-index={eventIndex}
+                        data-stage-id={event.stageId}
+                        data-disposition={event.disposition}
+                        data-activity={isInitiallyActive ? 'active' : scenarioIndex === 0 ? 'future' : 'inactive'}
+                        aria-current={isInitiallyActive ? 'step' : undefined}
+                      >
+                        <span class="timeline-marker" aria-hidden="true">
+                          {String(eventIndex + 1).padStart(2, '0')}
+                        </span>
+                        <div class="timeline-event-copy">
+                          <span class="timeline-stage" data-stage-label>{copy.stageNames[event.stageId]}</span>
+                          <strong class="timeline-event-title" data-event-title>{eventCopy.title}</strong>
+                          <p data-event-description>{eventCopy.description}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </article>
+            );
+          })
+        }
+      </div>
+    </section>
+
+    <div class="timeline-controls" data-timeline-controls data-visual-controls hidden role="group" aria-label={copy.controlsLabel}>
+      <label class="scenario-picker">
+        <span>{copy.scenarioLabel}</span>
+        <select data-action="select-scenario" autocomplete="off">
+          {
+            ERROR_TIMELINE_SCENARIOS.map((scenario, index) => (
+              <option value={scenario.id} selected={index === 0}>{copy.scenarios[scenario.id].title}</option>
+            ))
+          }
+        </select>
+      </label>
+      <div class="timeline-buttons">
+        <button type="button" data-action="play">{copy.play}</button>
+        <button type="button" data-action="pause" disabled>{copy.pause}</button>
+        <button type="button" data-action="step">{copy.step}</button>
+        <button type="button" data-action="reset">{copy.reset}</button>
+      </div>
+      <label class="timeline-scrubber">
+        <span>{copy.scrub}</span>
+        <input
+          type="range"
+          min="0"
+          max={ERROR_TIMELINE_STAGES.length - 1}
+          step="1"
+          value="0"
+          data-action="scrub"
+          aria-valuetext={initialEventCopy.title}
+        />
+      </label>
+    </div>
+
+    <p class="timeline-live" data-live-status role="status" aria-live="polite" aria-atomic="true">
+      {initialScenarioCopy.title} | {copy.stageNames[initialEvent.stageId]} | {initialEventCopy.title}
+    </p>
+  </div>
+</cuda-error-timeline>
+
+<script>
+  import {
+    ERROR_TIMELINE_STAGES,
+    createErrorTimelineState,
+    isErrorTimelineScenarioId,
+    reduceErrorTimeline,
+    type ErrorTimelineAction,
+    type ErrorTimelineState,
+  } from '../visuals/error-timeline-model';
+
+  class CudaErrorTimeline extends HTMLElement {
+    private state: ErrorTimelineState = createErrorTimelineState();
+    private timer: number | undefined;
+
+    connectedCallback() {
+      if (this.dataset.enhanced === 'true') return;
+
+      const controls = this.querySelector<HTMLElement>('[data-timeline-controls]');
+      const scenario = this.querySelector<HTMLSelectElement>('[data-action="select-scenario"]');
+      const play = this.querySelector<HTMLButtonElement>('[data-action="play"]');
+      const pause = this.querySelector<HTMLButtonElement>('[data-action="pause"]');
+      const step = this.querySelector<HTMLButtonElement>('[data-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-action="reset"]');
+      const scrub = this.querySelector<HTMLInputElement>('[data-action="scrub"]');
+      if (!controls || !scenario || !play || !pause || !step || !reset || !scrub) return;
+
+      this.dataset.enhanced = 'true';
+      controls.hidden = false;
+
+      scenario.addEventListener('change', () => {
+        const scenarioId = scenario.value;
+        if (!isErrorTimelineScenarioId(scenarioId)) return;
+        this.apply({ type: 'select-scenario', scenarioId });
+      });
+      play.addEventListener('click', () => {
+        this.apply({ type: 'play' });
+        pause.focus();
+      });
+      pause.addEventListener('click', () => {
+        this.apply({ type: 'pause' });
+        play.focus();
+      });
+      step.addEventListener('click', () => {
+        this.apply({ type: 'step' });
+        if (step.disabled) reset.focus();
+      });
+      reset.addEventListener('click', () => this.apply({ type: 'reset' }));
+      scrub.addEventListener('input', () => this.apply({ type: 'scrub', stageIndex: Number(scrub.value) }));
+
+      this.render();
+    }
+
+    disconnectedCallback() {
+      this.stopTimer();
+    }
+
+    private apply(action: ErrorTimelineAction) {
+      this.state = reduceErrorTimeline(this.state, action);
+      this.render();
+      if (this.state.isPlaying) this.startTimer();
+      else this.stopTimer();
+    }
+
+    private startTimer() {
+      if (this.timer !== undefined) return;
+      this.timer = window.setInterval(() => this.apply({ type: 'tick' }), 1_500);
+    }
+
+    private stopTimer() {
+      if (this.timer === undefined) return;
+      window.clearInterval(this.timer);
+      this.timer = undefined;
+    }
+
+    private render() {
+      const finalStageIndex = ERROR_TIMELINE_STAGES.length - 1;
+      const stage = ERROR_TIMELINE_STAGES[this.state.stageIndex];
+      if (!stage) return;
+
+      this.dataset.scenario = this.state.scenarioId;
+      this.dataset.stage = stage.id;
+      this.dataset.playing = String(this.state.isPlaying);
+
+      this.querySelectorAll<HTMLElement>('[data-scenario]').forEach((scenario) => {
+        scenario.dataset.selected = String(scenario.dataset.scenario === this.state.scenarioId);
+      });
+      this.querySelectorAll<HTMLElement>('[data-event]').forEach((event) => {
+        const owner = event.closest<HTMLElement>('[data-scenario]');
+        const eventIndex = Number(event.dataset.stageIndex);
+        const isSelectedScenario = owner?.dataset.scenario === this.state.scenarioId;
+        const isActive = isSelectedScenario && eventIndex === this.state.stageIndex;
+        event.dataset.activity = !isSelectedScenario
+          ? 'inactive'
+          : isActive
+            ? 'active'
+            : eventIndex < this.state.stageIndex
+              ? 'past'
+              : 'future';
+        if (isActive) event.setAttribute('aria-current', 'step');
+        else event.removeAttribute('aria-current');
+      });
+
+      const scenarioPicker = this.querySelector<HTMLSelectElement>('[data-action="select-scenario"]');
+      const scrub = this.querySelector<HTMLInputElement>('[data-action="scrub"]');
+      const play = this.querySelector<HTMLButtonElement>('[data-action="play"]');
+      const pause = this.querySelector<HTMLButtonElement>('[data-action="pause"]');
+      const step = this.querySelector<HTMLButtonElement>('[data-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-action="reset"]');
+      const focusedControl = this.ownerDocument.activeElement;
+      const currentEvent = this.querySelector<HTMLElement>(
+        `[data-scenario="${this.state.scenarioId}"] [data-stage-index="${this.state.stageIndex}"]`,
+      );
+      const scenarioTitle = this.querySelector<HTMLElement>(
+        `[data-scenario="${this.state.scenarioId}"] [data-scenario-title]`,
+      )?.textContent?.trim();
+      const stageLabel = currentEvent?.querySelector<HTMLElement>('[data-stage-label]')?.textContent?.trim();
+      const eventTitle = currentEvent?.querySelector<HTMLElement>('[data-event-title]')?.textContent?.trim();
+      const eventDescription = currentEvent
+        ?.querySelector<HTMLElement>('[data-event-description]')
+        ?.textContent?.trim();
+      const live = this.querySelector<HTMLElement>('[data-live-status]');
+
+      if (scenarioPicker) scenarioPicker.value = this.state.scenarioId;
+      if (scrub) {
+        scrub.value = String(this.state.stageIndex);
+        if (eventTitle) scrub.setAttribute('aria-valuetext', eventTitle);
+      }
+      if (live) {
+        live.textContent = [scenarioTitle, stageLabel, eventTitle, eventDescription].filter(Boolean).join(' | ');
+      }
+      if (play) play.disabled = this.state.isPlaying || this.state.stageIndex === finalStageIndex;
+      if (pause) pause.disabled = !this.state.isPlaying;
+      if (step) step.disabled = this.state.stageIndex === finalStageIndex;
+
+      if (play && focusedControl === play && play.disabled) pause?.focus();
+      else if (pause && focusedControl === pause && pause.disabled) {
+        if (this.state.stageIndex === finalStageIndex) reset?.focus();
+        else play?.focus();
+      } else if (step && focusedControl === step && step.disabled) reset?.focus();
+    }
+  }
+
+  if (!customElements.get('cuda-error-timeline')) {
+    customElements.define('cuda-error-timeline', CudaErrorTimeline);
+  }
+</script>
+
+<style>
+  .error-timeline {
+    display: block;
+    margin-block: 2rem;
+  }
+
+  .timeline-shell {
+    --timeline-border: var(--sl-color-gray-5, #b8c0cc);
+    --timeline-muted: var(--sl-color-gray-2, #52606d);
+    --timeline-panel: var(--sl-color-gray-7, #f6f8fa);
+    --timeline-accent: var(--sl-color-accent-high, #3157a4);
+    --timeline-accent-soft: var(--sl-color-accent-low, #e8eefb);
+    --timeline-error: var(--sl-color-red-high, #a93226);
+    border: 1px solid var(--timeline-border);
+    border-radius: 0.85rem;
+    overflow: hidden;
+    color: var(--sl-color-text, #182230);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--timeline-accent) 7%, transparent) 1px, transparent 1px),
+      var(--sl-color-bg, #ffffff);
+    background-size: 2rem 100%;
+    box-shadow: 0 0.8rem 2rem color-mix(in srgb, #000000 10%, transparent);
+  }
+
+  .timeline-header,
+  .timeline-static,
+  .timeline-controls,
+  .timeline-live,
+  .timeline-caveat,
+  .timeline-evidence {
+    margin: 0;
+    padding-inline: clamp(1rem, 3vw, 2rem);
+  }
+
+  .timeline-header {
+    padding-block: 1.5rem 1.25rem;
+    background: color-mix(in srgb, var(--timeline-panel) 92%, transparent);
+    border-bottom: 1px solid var(--timeline-border);
+  }
+
+  .timeline-eyebrow {
+    margin: 0 0 0.4rem;
+    color: var(--timeline-accent);
+    font-family: var(--__sl-font-mono, ui-monospace, monospace);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .timeline-header h3 {
+    margin: 0;
+    font-size: clamp(1.2rem, 3vw, 1.75rem);
+  }
+
+  .timeline-summary {
+    max-width: 72ch;
+    margin: 0.65rem 0 0;
+    color: var(--timeline-muted);
+  }
+
+  .timeline-caveat,
+  .timeline-evidence {
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--timeline-border);
+    background: var(--sl-color-bg, #ffffff);
+  }
+
+  .timeline-caveat {
+    border-inline-start: 0.3rem solid var(--timeline-accent);
+  }
+
+  .timeline-evidence {
+    border-inline-start: 0.3rem solid var(--timeline-error);
+    font-weight: 650;
+  }
+
+  .timeline-static {
+    padding-block: 1.35rem 1.5rem;
+  }
+
+  .timeline-static > h4,
+  .timeline-static > p {
+    margin: 0;
+  }
+
+  .timeline-static > p {
+    max-width: 78ch;
+    margin-top: 0.4rem;
+    color: var(--timeline-muted);
+  }
+
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  .scenario-card {
+    min-width: 0;
+    border: 1px solid var(--timeline-border);
+    border-radius: 0.65rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--sl-color-bg, #ffffff) 94%, var(--timeline-panel));
+  }
+
+  .scenario-card[data-selected='true'] {
+    border-color: var(--timeline-accent);
+    box-shadow: inset 0 0 0 1px var(--timeline-accent);
+  }
+
+  .scenario-header {
+    min-height: 8.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--timeline-border);
+    background: var(--timeline-panel);
+  }
+
+  .scenario-header h5,
+  .scenario-header p {
+    margin: 0;
+  }
+
+  .scenario-header h5 {
+    font-size: 1rem;
+  }
+
+  .scenario-header p {
+    margin-top: 0.4rem;
+    color: var(--timeline-muted);
+    font-size: 0.9rem;
+  }
+
+  .timeline-events {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline-event {
+    display: grid;
+    grid-template-columns: 2.35rem minmax(0, 1fr);
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--timeline-border);
+  }
+
+  .timeline-event:last-child {
+    border-bottom: 0;
+  }
+
+  .timeline-event[data-activity='past'] {
+    background: color-mix(in srgb, var(--timeline-accent-soft) 48%, transparent);
+  }
+
+  .timeline-event[data-activity='active'] {
+    outline: 3px solid var(--timeline-accent);
+    outline-offset: -3px;
+    background: var(--timeline-accent-soft);
+  }
+
+  .timeline-marker {
+    display: inline-grid;
+    place-items: center;
+    align-self: start;
+    width: 2.15rem;
+    aspect-ratio: 1;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    color: var(--timeline-accent);
+    font-family: var(--__sl-font-mono, ui-monospace, monospace);
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  [data-disposition='rejected'] .timeline-marker,
+  [data-disposition='error-observed'] .timeline-marker,
+  [data-disposition='failure-occurs'] .timeline-marker,
+  [data-disposition='boundary-observes-error'] .timeline-marker,
+  [data-disposition='launch-failed'] .timeline-marker,
+  [data-disposition='execution-failed'] .timeline-marker {
+    color: var(--timeline-error);
+  }
+
+  [data-disposition='not-reached'] .timeline-marker,
+  [data-disposition='not-first-observation'] .timeline-marker {
+    border-style: dashed;
+  }
+
+  .timeline-event-copy {
+    min-width: 0;
+  }
+
+  .timeline-stage {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--timeline-muted);
+    font-family: var(--__sl-font-mono, ui-monospace, monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .timeline-event-title {
+    display: block;
+    line-height: 1.35;
+  }
+
+  .timeline-event-copy p {
+    margin: 0.35rem 0 0;
+    color: var(--timeline-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .timeline-controls {
+    display: grid;
+    grid-template-columns: minmax(11rem, 1.2fr) auto minmax(10rem, 1fr);
+    gap: 1rem;
+    align-items: end;
+    padding-block: 1rem;
+    border-top: 1px solid var(--timeline-border);
+    background: var(--timeline-panel);
+  }
+
+  .timeline-controls[hidden] {
+    display: none;
+  }
+
+  .scenario-picker,
+  .timeline-scrubber {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+    color: var(--timeline-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .scenario-picker select,
+  .timeline-controls button {
+    min-height: 2.45rem;
+    border: 1px solid var(--timeline-border);
+    border-radius: 0.35rem;
+    color: inherit;
+    background: var(--sl-color-bg, #ffffff);
+    font: inherit;
+  }
+
+  .scenario-picker select {
+    width: 100%;
+    padding-inline: 0.55rem;
+  }
+
+  .timeline-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .timeline-controls button {
+    padding-inline: 0.75rem;
+    color: var(--sl-color-text, #182230);
+    cursor: pointer;
+  }
+
+  .timeline-controls button:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  .timeline-controls :focus-visible {
+    outline: 3px solid var(--timeline-accent);
+    outline-offset: 2px;
+  }
+
+  .timeline-scrubber input {
+    width: 100%;
+    accent-color: var(--timeline-accent);
+  }
+
+  .timeline-live {
+    min-height: 3rem;
+    padding-block: 0.8rem;
+    border-top: 1px solid var(--timeline-border);
+    background: var(--sl-color-bg, #ffffff);
+    font-family: var(--__sl-font-mono, ui-monospace, monospace);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 52rem) {
+    .scenario-grid,
+    .timeline-controls {
+      grid-template-columns: 1fr;
+    }
+
+    .scenario-header {
+      min-height: auto;
+    }
+
+    .timeline-buttons {
+      order: 3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .timeline-shell,
+    .timeline-shell * {
+      scroll-behavior: auto !important;
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .timeline-shell,
+    .timeline-header,
+    .timeline-caveat,
+    .timeline-evidence,
+    .scenario-card,
+    .scenario-header,
+    .timeline-event,
+    .timeline-controls,
+    .timeline-live,
+    .scenario-picker select,
+    .timeline-controls button {
+      border-color: CanvasText;
+      color: CanvasText;
+      background: Canvas;
+      box-shadow: none;
+    }
+
+    .scenario-card[data-selected='true'],
+    .timeline-event[data-activity='active'] {
+      outline: 3px solid Highlight;
+      outline-offset: -3px;
+    }
+
+    .timeline-marker {
+      color: CanvasText;
+    }
+  }
+
+  @media print {
+    .timeline-shell {
+      border: 1px solid #000000;
+      color: #000000;
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    .timeline-controls,
+    .timeline-live {
+      display: none !important;
+    }
+
+    .scenario-grid {
+      display: block;
+    }
+
+    .scenario-card {
+      margin-top: 1rem;
+      break-inside: avoid;
+      border-color: #000000;
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    .timeline-event,
+    .timeline-header,
+    .timeline-caveat,
+    .timeline-evidence,
+    .scenario-header {
+      color: #000000;
+      background: #ffffff;
+      border-color: #000000;
+    }
+
+    .timeline-event[data-activity] {
+      opacity: 1;
+      outline: 0;
+    }
+  }
+</style>

@@ -46,9 +46,13 @@ head:
 
 ## The route published today
 
-The Stable Curriculum now completely publishes the O01-O08 orientation and foundational Learning Units F01-F04. The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. LAB01 requires both O03 and O08 and uses the EX01 environment-report Runnable Example. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04. LAB02 still requires O03 and F01 and uses EX02.
+The Stable Curriculum now completely publishes the O01-O08 orientation and foundational Learning Units F01-F08. The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. LAB01 requires both O03 and O08 and uses the EX01 environment-report Runnable Example. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06. [EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04; [EX04 Error Handling Lifecycle](/en/examples/error-handling-lifecycle/) depends only on F05. LAB02 requires O03 and F01 and uses EX02; [LAB03 Break and Repair Indexing](/en/labs/break-and-repair-indexing/) requires F03 and F05 and uses EX04. F08 is related to LAB03 but is not a LAB03 prerequisite.
 
-F01-F04 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), and [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/). O02-O08 retain their own Exercises and separate solutions. EX03 shares one original C++17 source across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1 and provides host-only checks, but its compilation evidence is empty, so it is not Compile-Checked; runtime is Pending Hardware Verification. The site ran no EX03 CUDA binary and publishes no EX03 performance number. This expansion reuses VIS01/VIS02. F04's original static lifecycle table is neither a new Visual Explainer nor an evidence source. Navigation still publishes only LAB01/LAB02, with no LAB03 or unfinished Learning Unit; the Practice Bank now contains thirteen complete entries, and the Glossary and source records are expanded.
+F01-F08 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/), [F05 Exercises](/en/foundations/asynchronous-errors/exercises/) and [solutions](/en/foundations/asynchronous-errors/solutions/), [F06 Exercises](/en/foundations/compute-capability/exercises/) and [solutions](/en/foundations/compute-capability/solutions/), [F07 Exercises](/en/foundations/runtime-driver-api/exercises/) and [solutions](/en/foundations/runtime-driver-api/solutions/), and [F08 Exercises](/en/foundations/launch-geometry/exercises/) and [solutions](/en/foundations/launch-geometry/solutions/). O02-O08 retain their own Exercises and separate solutions.
+
+EX03 retains its existing status: the three Toolkit Lanes share one original C++17 source, host-only checks compile or execute no CUDA, compilation evidence is empty, and runtime is Pending Hardware Verification. EX04 and LAB03 also each have empty compilation evidence and Pending Hardware Verification runtime. The site ran no EX03 or EX04 CUDA binary and publishes no actual output, error code, timing, or performance number for either subject.
+
+The site has six formal Visual Explainers. VIS01/VIS02 use standalone pages; [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22) are embedded in F05-F08 respectively. The Visual Explainer Index deep-links to those anchors, while navigation creates no four duplicate standalone pages. All six provide static or textual fallbacks, execute no CUDA, and create no Evidence Status. F04's original static lifecycle table remains neither a Visual Explainer nor an evidence source. Navigation now publishes LAB01-LAB03; the Practice Bank contains seventeen complete entries, and the Glossary and source records are expanded.
 
 ## Boundaries first
 
@@ -117,6 +121,26 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>The Explicit Host-Device Resource Lifecycle</strong>
     <small>Read the complete order through ownership, last use, and release.</small>
   </a>
+  <a className="route-card" href="/en/foundations/asynchronous-errors/">
+    <span>F05 · ERROR BOUNDARIES</span>
+    <strong>CUDA Errors Are Often Asynchronous</strong>
+    <small>Separate last-error state, immediate launch checks, and deferred completion errors.</small>
+  </a>
+  <a className="route-card" href="/en/foundations/compute-capability/">
+    <span>F06 · FEATURE CONTRACT</span>
+    <strong>Compute Capability Is a Feature Contract</strong>
+    <small>Keep GPU identity, features, limits, and compiler targets reviewable and distinct.</small>
+  </a>
+  <a className="route-card" href="/en/foundations/runtime-driver-api/">
+    <span>F07 · API BOUNDARY</span>
+    <strong>Distinguish CUDA Runtime API and Driver API Roles</strong>
+    <small>Compare management layers, handles, and ownership across two host API paths.</small>
+  </a>
+  <a className="route-card" href="/en/foundations/launch-geometry/">
+    <span>F08 · LAUNCH GEOMETRY</span>
+    <strong>Prove Geometry Correct and Feasible Before Speed</strong>
+    <small>Check bounds, resource limits, safe arithmetic, and results first.</small>
+  </a>
   <a className="route-card" href="/en/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>Environment Report Runnable Example</strong>
@@ -132,6 +156,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Multidimensional Indexing Runnable Example</strong>
     <small>Get the shared implementation and host-only checks while CUDA evidence remains pending.</small>
   </a>
+  <a className="route-card" href="/en/examples/error-handling-lifecycle/">
+    <span>EX04 · ERROR LIFECYCLE</span>
+    <strong>Error Handling Lifecycle Runnable Example</strong>
+    <small>Run canonical source for four isolated scenarios while compilation evidence remains empty.</small>
+  </a>
   <a className="route-card" href="/en/labs/record-cuda-environment/">
     <span>LAB01 · CAPTURE</span>
     <strong>Record and Interpret a CUDA Environment</strong>
@@ -141,6 +170,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <span>LAB02 · VERIFY</span>
     <strong>Run and Verify Vector Addition</strong>
     <small>Record a manifest, runtime, and correctness in native Linux.</small>
+  </a>
+  <a className="route-card" href="/en/labs/break-and-repair-indexing/">
+    <span>LAB03 · BREAK / REPAIR</span>
+    <strong>Break and Repair Indexing</strong>
+    <small>Separate EX04 error boundaries and accept the repair through an independent host comparison.</small>
   </a>
   <a className="route-card" href="/en/labs/">
     <span>LAB INDEX · LOOKUP</span>
@@ -165,7 +199,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, C++, Linux, architecture, and kernel models through thirteen original problems.</small>
+    <small>Transfer evidence, environment, C++, Linux, architecture, and kernel models through seventeen original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>

@@ -90,6 +90,22 @@ describe('GitHub Actions quality contract', () => {
     );
   });
 
+  it('runs the full accessibility scan without competing browser workers', async () => {
+    const manifest = JSON.parse(await readProjectFile('package.json')) as {
+      scripts: Record<string, string>;
+    };
+
+    expect(manifest.scripts['test:e2e']).toBe(
+      'playwright test --grep-invert @accessibility && npm run test:e2e:accessibility',
+    );
+    expect(manifest.scripts['test:e2e:accessibility']).toBe(
+      'playwright test --project=chromium --grep @accessibility --workers=1',
+    );
+    expect(manifest.scripts['test:e2e:cross-browser']).toBe(
+      'playwright test --project=firefox --project=webkit --project=mobile-safari --grep-invert "@accessibility|@visual" --workers=1',
+    );
+  });
+
   it('provides an owner-dispatched remote release smoke gate without becoming a deploy authority', async () => {
     const workflow = await readProjectFile('.github/workflows/release-smoke.yml');
 

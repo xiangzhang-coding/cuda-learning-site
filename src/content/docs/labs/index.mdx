@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/labs/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-08-26，共有两个已发布实验：LAB01 与 LAB02。每张卡片显示受控的证据状态（Evidence Status）；未完成的规划条目不会显示，也没有“即将推出”目标。
+本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-08-26，共有三个已发布实验：LAB01、LAB02 与 LAB03。每张卡片显示受控的证据状态（Evidence Status）；未完成的规划条目不会显示，也没有“即将推出”目标。
 
 ## 已发布实验
 
@@ -34,8 +34,8 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 顺序与直接查找
 
-当前顺序先列 [LAB01：记录并解读 CUDA 环境](/labs/record-cuda-environment/)，再列 [LAB02：运行并验证向量加法](/labs/vector-addition/)。LAB01 同时依赖 O03 与 O08，并使用 EX01；LAB02 同时依赖 O03 与 F01，并使用 EX02。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
+当前顺序依次列出 [LAB01：记录并解读 CUDA 环境](/labs/record-cuda-environment/)、[LAB02：运行并验证向量加法](/labs/vector-addition/)与 [LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)。LAB01 同时依赖 O03 与 O08，并使用 EX01；LAB02 同时依赖 O03 与 F01，并使用 EX02；LAB03 同时依赖 F03 与 F05，并使用 [EX04 错误处理生命周期](/examples/error-handling-lifecycle/)。F08 与 LAB03 相关，但不是它的先修条件。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
 
 ## 证据边界
 
-卡片中的编译和运行状态直接复制自链接实验的受控证据字段，不会把网站构建、筛选或浏览器测试升级为 CUDA 证据。LAB01 的编译轴为空，没有编译已检查（Compile-Checked）声明，运行轴为待硬件验证（Pending Hardware Verification）。LAB02 保留编译已检查状态，运行轴仍为待硬件验证。
+卡片中的编译和运行状态直接复制自链接实验的受控证据字段，不会把网站构建、筛选或浏览器测试升级为 CUDA 证据。LAB01 的编译轴为空，没有编译已检查（Compile-Checked）声明，运行轴为待硬件验证（Pending Hardware Verification）。LAB02 保留编译已检查状态，运行轴仍为待硬件验证。LAB03 与它使用的 EX04 的 compilation evidence 都为空，因此都不是 Compile-Checked；两者的 runtime 都是 Pending Hardware Verification。Host-only test、学习者本机构建和预期观察都不会改变这些状态。

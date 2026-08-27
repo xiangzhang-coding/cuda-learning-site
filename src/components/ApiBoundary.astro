@@ -1,0 +1,799 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import {
+  API_BOUNDARY_STAGES,
+  createApiBoundaryState,
+  getApiBoundaryStage,
+  type ApiBoundaryStageId,
+} from '../visuals/api-boundary-model';
+
+interface Props {
+  locale: 'zh-CN' | 'en';
+}
+
+const { locale } = Astro.props;
+const copies = {
+  'zh-CN': {
+    eyebrow: 'F07 / API 边界模型',
+    title: '同一驱动栈，不同的生命周期所有权',
+    summary: '逐阶段比较 Runtime API 与 Driver API 在一条受限生命周期中的责任。它不是 API 对照表，也不暗示调用一一对应。',
+    notice: '教学范围：初始化与 device、context、module/function、memory、launch、completion/error。选择只改变解释，不执行 CUDA。',
+    controls: '选择生命周期责任',
+    selected: '已选择',
+    runtime: 'Runtime API（入门路径）',
+    driver: 'Driver API（比较边界）',
+    calls: '代表性调用',
+    handles: '可见 handle 或身份',
+    management: '管理方式',
+    shared: '共同边界',
+    stack: '两条 host API 路径都进入 CUDA driver 栈，再到设备。这里不把每个 Runtime 调用画成一个同名 Driver wrapper。',
+    status: '当前阶段 {current}/{total}：{stage}',
+    staticTitle: '完整静态回退：层次与责任表',
+    staticIntro: '即使脚本不可用，下面的语义图、完整表格和文字读法仍保留全部六个阶段。',
+    application: 'Host 应用',
+    runtimeLayer: 'Runtime API · cuda* · 较多隐式管理',
+    driverLayer: 'Driver API · cu* · 显式 handle 与控制',
+    driverStack: 'CUDA driver 栈',
+    device: 'CUDA device',
+    stage: '阶段',
+    runtimeResponsibility: 'Runtime 责任',
+    driverResponsibility: 'Driver 责任',
+    invariant: '不变边界',
+    reading: '文字读法：Runtime 路径通常隐式建立 primary context 并管理 module；Driver 路径先显式初始化，再取得 device、context、module 与 function handle。两条路径都要求程序管理 buffer、参数、完成边界和错误检查。它们可以按文档规定的 context 规则互操作，但选择任一 API 都不会把异步 launch 变成同步完成。',
+    evidence: '该浏览器构图没有加载 CUDA、没有提交 kernel、没有观察 GPU，也不会改变 EX04 或任何 Lab 的证据状态。它不授予 Compile-Checked、Community-Observed 或 Runtime-Verified 这三种 Evidence Status。',
+    managementLabels: {
+      'implicit-primary-context': '隐式 primary-context 管理',
+      'implicit-module': '隐式 module 管理',
+      'explicit-resource': '显式资源责任',
+      'higher-level-launch': '较高层 launch 接口',
+      'explicit-boundary': '显式检查/完成边界',
+      explicit: '显式 handle 与调用',
+    },
+    stages: {
+      'initialize-device': {
+        label: '初始化与 device',
+        runtime: '选择 device 时，由 Runtime 按需建立其较高层运行状态；通常不要求应用先取得 CUdevice handle。',
+        driver: '应用先调用 cuInit，再用 device ordinal 取得 CUdevice；初始化与 device 身份属于显式控制流。',
+        invariant: 'Device 选择不等于 kernel 已提交或完成。',
+      },
+      context: {
+        label: 'Context',
+        runtime: '若调用线程没有合适的 current Driver context，Runtime 通常按需使用 device 的 primary context。',
+        driver: '应用选择 retain primary context 或创建 context，并负责 current-context 与生命周期规则。',
+        invariant: '互操作取决于调用线程的 current context 与精确版本文档中的例外。',
+      },
+      'module-function': {
+        label: 'Module 与 function',
+        runtime: 'CUDA C++ 路径通常让 Runtime 隐式管理已注册的 device code 与 module，并通过 kernel symbol 发起 launch。',
+        driver: '应用显式加载 module，再按名称取得 CUfunction，并决定 module 的保留与卸载边界。',
+        invariant: '两种代码管理角色不同，不能据此建立逐调用一一映射。',
+      },
+      memory: {
+        label: 'Memory',
+        runtime: 'cudaMalloc/cudaMemcpy/cudaFree 仍要求应用记录 allocation、方向、last use 与 release。较高层 API 不消除资源 ownership。',
+        driver: 'cuMemAlloc/cuMemcpy*/cuMemFree 使用 CUdeviceptr；应用同样承担 allocation、transfer 与 release 责任。',
+        invariant: '成功取得的资源必须在对应 context 中保持有效，并在最后使用后释放。',
+      },
+      launch: {
+        label: 'Launch',
+        runtime: 'Runtime 接受 kernel symbol、execution configuration 与参数；CUDA C++ 还提供熟悉的尖括号 launch 语法。',
+        driver: 'cuLaunchKernel 接受 CUfunction、显式 grid/block 配置和参数数组；function/module/context 必须已经有效。',
+        invariant: '提交 launch 与建立完成是两个边界。',
+      },
+      'completion-errors': {
+        label: '完成与错误',
+        runtime: 'cudaError_t、launch 检查和 cudaDeviceSynchronize 等边界区分提交时错误与延后执行错误。',
+        driver: 'Driver 调用返回 CUresult，并通过 context、stream 或 event 同步建立相应完成边界；某些调用也可能报告此前异步工作错误。',
+        invariant: 'API 选择不会消除异步错误边界；必须检查提交与后续完成观察点。',
+      },
+    },
+  },
+  en: {
+    eyebrow: 'F07 / API boundary model',
+    title: 'One driver stack, different lifecycle ownership',
+    summary: 'Compare Runtime API and Driver API responsibilities stage by stage within one bounded lifecycle. This is not an API crosswalk and does not imply one-to-one calls.',
+    notice: 'Teaching scope: initialization and device, context, module/function, memory, launch, and completion/error. A selection changes only the explanation; it executes no CUDA.',
+    controls: 'Select a lifecycle responsibility',
+    selected: 'Selected',
+    runtime: 'Runtime API (introductory path)',
+    driver: 'Driver API (comparative boundary)',
+    calls: 'Representative calls',
+    handles: 'Visible handles or identities',
+    management: 'Management mode',
+    shared: 'Shared boundary',
+    stack: 'Both host API paths enter the CUDA driver stack and then reach the device. This model does not draw each Runtime call as a same-named Driver wrapper.',
+    status: 'Current stage {current}/{total}: {stage}',
+    staticTitle: 'Complete static fallback: layers and responsibility table',
+    staticIntro: 'If scripting is unavailable, the semantic diagram, complete table, and textual reading below still preserve all six stages.',
+    application: 'Host application',
+    runtimeLayer: 'Runtime API · cuda* · more implicit management',
+    driverLayer: 'Driver API · cu* · explicit handles and control',
+    driverStack: 'CUDA driver stack',
+    device: 'CUDA device',
+    stage: 'Stage',
+    runtimeResponsibility: 'Runtime responsibility',
+    driverResponsibility: 'Driver responsibility',
+    invariant: 'Invariant boundary',
+    reading: 'Textual reading: the Runtime path commonly establishes a primary context and manages modules implicitly; the Driver path explicitly initializes and obtains device, context, module, and function handles. Both paths leave buffer, parameter, completion-boundary, and error-checking responsibilities in the program. They may interoperate under documented context rules, but choosing either API does not turn an asynchronous launch into synchronous completion.',
+    evidence: 'This browser composition loads no CUDA, submits no kernel, observes no GPU, and changes no evidence status for EX04 or any Lab. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
+    managementLabels: {
+      'implicit-primary-context': 'Implicit primary-context management',
+      'implicit-module': 'Implicit module management',
+      'explicit-resource': 'Explicit resource responsibility',
+      'higher-level-launch': 'Higher-level launch interface',
+      'explicit-boundary': 'Explicit check/completion boundary',
+      explicit: 'Explicit handles and calls',
+    },
+    stages: {
+      'initialize-device': {
+        label: 'Initialization and device',
+        runtime: 'When a device is selected, the Runtime establishes its higher-level runtime state as needed; the application usually does not first acquire a CUdevice handle.',
+        driver: 'The application calls cuInit, then resolves a device ordinal to CUdevice; initialization and device identity are explicit control flow.',
+        invariant: 'Selecting a device says neither that a kernel was submitted nor that work completed.',
+      },
+      context: {
+        label: 'Context',
+        runtime: 'If the calling thread has no suitable current Driver context, the Runtime commonly uses the device primary context as needed.',
+        driver: 'The application chooses to retain a primary context or create a context, then owns current-context and lifetime rules.',
+        invariant: 'Interoperation depends on the calling thread current context and exceptions in the exact-version documentation.',
+      },
+      'module-function': {
+        label: 'Module and function',
+        runtime: 'The CUDA C++ path commonly lets the Runtime manage registered device code and modules implicitly and launches through a kernel symbol.',
+        driver: 'The application explicitly loads a module, resolves a CUfunction by name, and chooses module retention and unload boundaries.',
+        invariant: 'The code-management roles differ; they do not establish a call-by-call mapping.',
+      },
+      memory: {
+        label: 'Memory',
+        runtime: 'cudaMalloc/cudaMemcpy/cudaFree still require the application to track allocation, direction, last use, and release. A higher-level API does not erase resource ownership.',
+        driver: 'cuMemAlloc/cuMemcpy*/cuMemFree use CUdeviceptr; the application has the same allocation, transfer, and release obligations.',
+        invariant: 'An acquired resource must remain valid in its applicable context and be released after last use.',
+      },
+      launch: {
+        label: 'Launch',
+        runtime: 'The Runtime accepts a kernel symbol, execution configuration, and arguments; CUDA C++ also supplies the familiar angle-bracket launch syntax.',
+        driver: 'cuLaunchKernel accepts a CUfunction, explicit grid/block configuration, and parameter array after function, module, and context are valid.',
+        invariant: 'Launch submission and established completion are separate boundaries.',
+      },
+      'completion-errors': {
+        label: 'Completion and errors',
+        runtime: 'cudaError_t, launch checks, and boundaries such as cudaDeviceSynchronize separate submission-time errors from deferred execution errors.',
+        driver: 'Driver calls return CUresult and use context, stream, or event synchronization for completion boundaries; some calls may also report errors from earlier asynchronous work.',
+        invariant: 'API choice does not remove asynchronous error boundaries; check both submission and a later completion observation point.',
+      },
+    },
+  },
+} as const;
+const copy = copies[locale];
+const initialState = createApiBoundaryState();
+const initialStage = getApiBoundaryStage(initialState.stageId);
+const initialCopy = copy.stages[initialStage.id];
+const panelId = `api-boundary-panel-${locale}`;
+const tabId = (stageId: ApiBoundaryStageId) => `api-boundary-tab-${locale}-${stageId}`;
+const codeList = (values: readonly string[]) => values.join(' · ');
+---
+
+<cuda-api-boundary class="api-boundary not-content" data-visual-id="VIS21" data-locale={locale} data-current-stage={initialStage.id}>
+  <header class="api-boundary-header">
+    <p>{copy.eyebrow}</p>
+    <h3>{copy.title}</h3>
+    <p data-conceptual-only>{copy.summary}</p>
+  </header>
+
+  <p class="api-boundary-notice">{copy.notice}</p>
+
+  <div class="api-boundary-tabs" data-api-boundary-controls data-visual-controls hidden role="tablist" aria-label={copy.controls}>
+    {API_BOUNDARY_STAGES.map((stage, index) => (
+      <button
+        id={tabId(stage.id)}
+        type="button"
+        role="tab"
+        aria-selected={index === 0 ? 'true' : 'false'}
+        aria-controls={panelId}
+        tabindex={index === 0 ? 0 : -1}
+        data-stage-tab={stage.id}
+      >
+        <span class="api-boundary-tab-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+        <span>{copy.stages[stage.id].label}</span>
+        <span class="api-boundary-tab-state" data-tab-state>{index === 0 ? copy.selected : ''}</span>
+      </button>
+    ))}
+  </div>
+
+  <section
+    id={panelId}
+    class="api-boundary-current"
+    data-api-boundary-panel
+    hidden
+    role="tabpanel"
+    aria-labelledby={tabId(initialStage.id)}
+    tabindex="0"
+  >
+    <p class="api-boundary-live" data-api-boundary-status role="status" aria-live="polite" aria-atomic="true">
+      {copy.status.replace('{current}', '1').replace('{total}', String(API_BOUNDARY_STAGES.length)).replace('{stage}', initialCopy.label)}
+    </p>
+    <div class="api-boundary-compare">
+      <article data-api-family="runtime">
+        <p class="api-family-label">{copy.runtime}</p>
+        <h4 data-stage-title>{initialCopy.label}</h4>
+        <p data-runtime-responsibility>{initialCopy.runtime}</p>
+        <dl>
+          <div><dt>{copy.management}</dt><dd data-runtime-management>{copy.managementLabels[initialStage.runtime.management]}</dd></div>
+          <div><dt>{copy.calls}</dt><dd><code data-runtime-calls>{codeList(initialStage.runtime.apis)}</code></dd></div>
+          <div><dt>{copy.handles}</dt><dd><code data-runtime-handles>{codeList(initialStage.runtime.handles)}</code></dd></div>
+        </dl>
+      </article>
+      <article data-api-family="driver">
+        <p class="api-family-label">{copy.driver}</p>
+        <h4 data-stage-title>{initialCopy.label}</h4>
+        <p data-driver-responsibility>{initialCopy.driver}</p>
+        <dl>
+          <div><dt>{copy.management}</dt><dd data-driver-management>{copy.managementLabels[initialStage.driver.management]}</dd></div>
+          <div><dt>{copy.calls}</dt><dd><code data-driver-calls>{codeList(initialStage.driver.apis)}</code></dd></div>
+          <div><dt>{copy.handles}</dt><dd><code data-driver-handles>{codeList(initialStage.driver.handles)}</code></dd></div>
+        </dl>
+      </article>
+    </div>
+    <div class="api-boundary-shared">
+      <strong>{copy.shared}</strong>
+      <p data-shared-invariant>{initialCopy.invariant}</p>
+      <p>{copy.stack}</p>
+    </div>
+  </section>
+
+  <section class="api-boundary-static" data-static-fallback aria-label={copy.staticTitle}>
+    <h4>{copy.staticTitle}</h4>
+    <p>{copy.staticIntro}</p>
+    <div class="api-layer-diagram" role="img" aria-label={`${copy.application}: ${copy.runtimeLayer} or ${copy.driverLayer}; ${copy.driverStack}; ${copy.device}.`}>
+      <div class="api-layer-host">{copy.application}</div>
+      <div class="api-layer-paths">
+        <div><strong>Runtime</strong><span>{copy.runtimeLayer}</span></div>
+        <div><strong>Driver</strong><span>{copy.driverLayer}</span></div>
+      </div>
+      <div class="api-layer-arrow" aria-hidden="true">↓</div>
+      <div class="api-layer-driver">{copy.driverStack}</div>
+      <div class="api-layer-arrow" aria-hidden="true">↓</div>
+      <div class="api-layer-device">{copy.device}</div>
+    </div>
+    <div class="api-boundary-table-wrap" tabindex="0" aria-label={copy.staticTitle}>
+      <table>
+        <thead>
+          <tr><th scope="col">{copy.stage}</th><th scope="col">{copy.runtimeResponsibility}</th><th scope="col">{copy.driverResponsibility}</th><th scope="col">{copy.invariant}</th></tr>
+        </thead>
+        <tbody>
+          {API_BOUNDARY_STAGES.map((stage) => (
+            <tr>
+              <th scope="row">{copy.stages[stage.id].label}</th>
+              <td><p>{copy.stages[stage.id].runtime}</p><code>{codeList(stage.runtime.apis)}</code></td>
+              <td><p>{copy.stages[stage.id].driver}</p><code>{codeList(stage.driver.apis)}</code></td>
+              <td>{copy.stages[stage.id].invariant}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="api-boundary-reading">{copy.reading}</p>
+  </section>
+
+  <p class="api-boundary-evidence" data-no-evidence>{copy.evidence}</p>
+</cuda-api-boundary>
+
+<script>
+  import {
+    API_BOUNDARY_STAGES,
+    createApiBoundaryState,
+    getApiBoundaryStage,
+    reduceApiBoundary,
+    type ApiBoundaryAction,
+    type ApiBoundaryStageId,
+    type ApiBoundaryState,
+  } from '../visuals/api-boundary-model';
+
+  class CudaApiBoundary extends HTMLElement {
+    private state: ApiBoundaryState = createApiBoundaryState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-api-boundary-controls]');
+      const panel = this.querySelector<HTMLElement>('[data-api-boundary-panel]');
+      const tabs = [...this.querySelectorAll<HTMLButtonElement>('[data-stage-tab]')];
+      if (!controls || !panel || tabs.length !== API_BOUNDARY_STAGES.length) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      panel.hidden = false;
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => this.select(tab));
+        tab.addEventListener('keydown', (event) => this.handleKeydown(event, tab));
+      });
+      this.render();
+    }
+
+    private select(tab: HTMLButtonElement) {
+      const stageId = tab.dataset.stageTab;
+      if (!this.isStageId(stageId)) return;
+      this.apply({ type: 'select', stageId });
+    }
+
+    private handleKeydown(event: KeyboardEvent, tab: HTMLButtonElement) {
+      const actions: Partial<Record<string, ApiBoundaryAction>> = {
+        ArrowRight: { type: 'next' },
+        ArrowDown: { type: 'next' },
+        ArrowLeft: { type: 'previous' },
+        ArrowUp: { type: 'previous' },
+        Home: { type: 'first' },
+        End: { type: 'last' },
+      };
+      const action = actions[event.key];
+      if (!action) return;
+      event.preventDefault();
+      const stageId = tab.dataset.stageTab;
+      if (this.isStageId(stageId) && this.state.stageId !== stageId) {
+        this.state = createApiBoundaryState(stageId);
+      }
+      this.apply(action, true);
+    }
+
+    private apply(action: ApiBoundaryAction, moveFocus = false) {
+      this.state = reduceApiBoundary(this.state, action);
+      this.render();
+      if (moveFocus) {
+        this.querySelector<HTMLButtonElement>(`[data-stage-tab="${this.state.stageId}"]`)?.focus();
+      }
+    }
+
+    private render() {
+      const locale = this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+      const copy = this.copy(locale);
+      const stage = getApiBoundaryStage(this.state.stageId);
+      const stageCopy = copy.stages[stage.id];
+      const stageIndex = API_BOUNDARY_STAGES.findIndex(({ id }) => id === stage.id);
+      this.dataset.currentStage = stage.id;
+
+      this.querySelectorAll<HTMLButtonElement>('[data-stage-tab]').forEach((tab) => {
+        const selected = tab.dataset.stageTab === stage.id;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        const state = tab.querySelector<HTMLElement>('[data-tab-state]');
+        if (state) state.textContent = selected ? copy.selected : '';
+      });
+
+      const panel = this.querySelector<HTMLElement>('[data-api-boundary-panel]');
+      const activeTab = this.querySelector<HTMLButtonElement>(`[data-stage-tab="${stage.id}"]`);
+      if (panel && activeTab?.id) panel.setAttribute('aria-labelledby', activeTab.id);
+      this.setText('[data-api-boundary-status]', copy.status
+        .replace('{current}', String(stageIndex + 1))
+        .replace('{total}', String(API_BOUNDARY_STAGES.length))
+        .replace('{stage}', stageCopy.label));
+      this.querySelectorAll<HTMLElement>('[data-stage-title]').forEach((title) => { title.textContent = stageCopy.label; });
+      this.setText('[data-runtime-responsibility]', stageCopy.runtime);
+      this.setText('[data-driver-responsibility]', stageCopy.driver);
+      this.setText('[data-runtime-management]', copy.managementLabels[stage.runtime.management]);
+      this.setText('[data-driver-management]', copy.managementLabels[stage.driver.management]);
+      this.setText('[data-runtime-calls]', stage.runtime.apis.join(' · '));
+      this.setText('[data-driver-calls]', stage.driver.apis.join(' · '));
+      this.setText('[data-runtime-handles]', stage.runtime.handles.join(' · '));
+      this.setText('[data-driver-handles]', stage.driver.handles.join(' · '));
+      this.setText('[data-shared-invariant]', stageCopy.invariant);
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+
+    private isStageId(value: string | undefined): value is ApiBoundaryStageId {
+      return API_BOUNDARY_STAGES.some(({ id }) => id === value);
+    }
+
+    private copy(locale: 'zh-CN' | 'en') {
+      const labels = {
+        'zh-CN': {
+          selected: '已选择',
+          status: '当前阶段 {current}/{total}：{stage}',
+          managementLabels: {
+            'implicit-primary-context': '隐式 primary-context 管理',
+            'implicit-module': '隐式 module 管理',
+            'explicit-resource': '显式资源责任',
+            'higher-level-launch': '较高层 launch 接口',
+            'explicit-boundary': '显式检查/完成边界',
+            explicit: '显式 handle 与调用',
+          },
+          stages: {
+            'initialize-device': { label: '初始化与 device', runtime: '选择 device 时，由 Runtime 按需建立其较高层运行状态；通常不要求应用先取得 CUdevice handle。', driver: '应用先调用 cuInit，再用 device ordinal 取得 CUdevice；初始化与 device 身份属于显式控制流。', invariant: 'Device 选择不等于 kernel 已提交或完成。' },
+            context: { label: 'Context', runtime: '若调用线程没有合适的 current Driver context，Runtime 通常按需使用 device 的 primary context。', driver: '应用选择 retain primary context 或创建 context，并负责 current-context 与生命周期规则。', invariant: '互操作取决于调用线程的 current context 与精确版本文档中的例外。' },
+            'module-function': { label: 'Module 与 function', runtime: 'CUDA C++ 路径通常让 Runtime 隐式管理已注册的 device code 与 module，并通过 kernel symbol 发起 launch。', driver: '应用显式加载 module，再按名称取得 CUfunction，并决定 module 的保留与卸载边界。', invariant: '两种代码管理角色不同，不能据此建立逐调用一一映射。' },
+            memory: { label: 'Memory', runtime: 'cudaMalloc/cudaMemcpy/cudaFree 仍要求应用记录 allocation、方向、last use 与 release。较高层 API 不消除资源 ownership。', driver: 'cuMemAlloc/cuMemcpy*/cuMemFree 使用 CUdeviceptr；应用同样承担 allocation、transfer 与 release 责任。', invariant: '成功取得的资源必须在对应 context 中保持有效，并在最后使用后释放。' },
+            launch: { label: 'Launch', runtime: 'Runtime 接受 kernel symbol、execution configuration 与参数；CUDA C++ 还提供熟悉的尖括号 launch 语法。', driver: 'cuLaunchKernel 接受 CUfunction、显式 grid/block 配置和参数数组；function/module/context 必须已经有效。', invariant: '提交 launch 与建立完成是两个边界。' },
+            'completion-errors': { label: '完成与错误', runtime: 'cudaError_t、launch 检查和 cudaDeviceSynchronize 等边界区分提交时错误与延后执行错误。', driver: 'Driver 调用返回 CUresult，并通过 context、stream 或 event 同步建立相应完成边界；某些调用也可能报告此前异步工作错误。', invariant: 'API 选择不会消除异步错误边界；必须检查提交与后续完成观察点。' },
+          },
+        },
+        en: {
+          selected: 'Selected',
+          status: 'Current stage {current}/{total}: {stage}',
+          managementLabels: {
+            'implicit-primary-context': 'Implicit primary-context management',
+            'implicit-module': 'Implicit module management',
+            'explicit-resource': 'Explicit resource responsibility',
+            'higher-level-launch': 'Higher-level launch interface',
+            'explicit-boundary': 'Explicit check/completion boundary',
+            explicit: 'Explicit handles and calls',
+          },
+          stages: {
+            'initialize-device': { label: 'Initialization and device', runtime: 'When a device is selected, the Runtime establishes its higher-level runtime state as needed; the application usually does not first acquire a CUdevice handle.', driver: 'The application calls cuInit, then resolves a device ordinal to CUdevice; initialization and device identity are explicit control flow.', invariant: 'Selecting a device says neither that a kernel was submitted nor that work completed.' },
+            context: { label: 'Context', runtime: 'If the calling thread has no suitable current Driver context, the Runtime commonly uses the device primary context as needed.', driver: 'The application chooses to retain a primary context or create a context, then owns current-context and lifetime rules.', invariant: 'Interoperation depends on the calling thread current context and exceptions in the exact-version documentation.' },
+            'module-function': { label: 'Module and function', runtime: 'The CUDA C++ path commonly lets the Runtime manage registered device code and modules implicitly and launches through a kernel symbol.', driver: 'The application explicitly loads a module, resolves a CUfunction by name, and chooses module retention and unload boundaries.', invariant: 'The code-management roles differ; they do not establish a call-by-call mapping.' },
+            memory: { label: 'Memory', runtime: 'cudaMalloc/cudaMemcpy/cudaFree still require the application to track allocation, direction, last use, and release. A higher-level API does not erase resource ownership.', driver: 'cuMemAlloc/cuMemcpy*/cuMemFree use CUdeviceptr; the application has the same allocation, transfer, and release obligations.', invariant: 'An acquired resource must remain valid in its applicable context and be released after last use.' },
+            launch: { label: 'Launch', runtime: 'The Runtime accepts a kernel symbol, execution configuration, and arguments; CUDA C++ also supplies the familiar angle-bracket launch syntax.', driver: 'cuLaunchKernel accepts a CUfunction, explicit grid/block configuration, and parameter array after function, module, and context are valid.', invariant: 'Launch submission and established completion are separate boundaries.' },
+            'completion-errors': { label: 'Completion and errors', runtime: 'cudaError_t, launch checks, and boundaries such as cudaDeviceSynchronize separate submission-time errors from deferred execution errors.', driver: 'Driver calls return CUresult and use context, stream, or event synchronization for completion boundaries; some calls may also report errors from earlier asynchronous work.', invariant: 'API choice does not remove asynchronous error boundaries; check both submission and a later completion observation point.' },
+          },
+        },
+      } as const;
+      return labels[locale];
+    }
+  }
+
+  if (!customElements.get('cuda-api-boundary')) {
+    customElements.define('cuda-api-boundary', CudaApiBoundary);
+  }
+</script>
+
+<style>
+  .api-boundary {
+    --api-line: color-mix(in srgb, var(--theme-accent) 40%, var(--sl-color-gray-5));
+    --api-panel: color-mix(in srgb, var(--theme-canvas) 92%, var(--theme-accent) 8%);
+    display: grid;
+    min-width: 0;
+    gap: 1rem;
+    margin-block: 1.5rem 2rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    overflow: hidden;
+    border: 1px solid var(--api-line);
+    border-radius: 0.3rem;
+    background:
+      linear-gradient(90deg, var(--theme-grid) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
+      linear-gradient(var(--theme-grid) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
+      var(--theme-canvas);
+    color: var(--theme-ink);
+  }
+
+  .api-boundary [hidden] {
+    display: none !important;
+  }
+
+  .api-boundary-header {
+    display: grid;
+    gap: 0.35rem;
+    padding-block-end: 0.85rem;
+    border-block-end: 1px solid var(--api-line);
+  }
+
+  .api-boundary-header > p:first-child,
+  .api-family-label {
+    margin: 0;
+    color: var(--theme-signal);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .api-boundary-header h3,
+  .api-boundary-header p,
+  .api-boundary-current h4,
+  .api-boundary-current p,
+  .api-boundary-static h4,
+  .api-boundary-static p {
+    margin: 0;
+  }
+
+  .api-boundary-header h3 {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    line-height: 1.15;
+  }
+
+  .api-boundary-header > p:last-child,
+  .api-boundary-static > p {
+    max-width: 76ch;
+    color: var(--sl-color-gray-2);
+  }
+
+  .api-boundary-notice,
+  .api-boundary-evidence,
+  .api-boundary-reading {
+    margin: 0;
+    padding: 0.8rem 0.9rem;
+    border-inline-start: 0.28rem solid var(--theme-signal);
+    background: color-mix(in srgb, var(--theme-signal) 9%, var(--theme-canvas));
+  }
+
+  .api-boundary-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .api-boundary-tabs button {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    min-width: 0;
+    min-height: 3.25rem;
+    gap: 0.25rem 0.55rem;
+    align-items: center;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--sl-color-gray-4);
+    background: var(--sl-color-bg);
+    color: var(--sl-color-text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .api-boundary-tabs button[aria-selected='true'] {
+    border: 2px solid var(--theme-accent-strong);
+    background: color-mix(in srgb, var(--theme-accent) 12%, var(--sl-color-bg));
+  }
+
+  .api-boundary-tab-number {
+    grid-row: 1 / span 2;
+    color: var(--theme-accent-strong);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    font-weight: 850;
+  }
+
+  .api-boundary-tab-state {
+    min-height: 1em;
+    color: var(--theme-signal);
+    font-family: var(--sl-font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .api-boundary-current {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    border: 2px solid var(--theme-accent-strong);
+    background: var(--sl-color-bg-nav);
+  }
+
+  .api-boundary-live {
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-sm);
+    font-weight: 800;
+  }
+
+  .api-boundary-compare {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .api-boundary-compare article {
+    display: grid;
+    min-width: 0;
+    gap: 0.65rem;
+    padding: 0.85rem;
+    border: 1px solid var(--sl-color-gray-5);
+    background: var(--api-panel);
+  }
+
+  .api-boundary-compare article[data-api-family='driver'] {
+    border-block-start: 0.3rem double var(--theme-signal);
+  }
+
+  .api-boundary-compare article[data-api-family='runtime'] {
+    border-block-start: 0.3rem solid var(--theme-accent-strong);
+  }
+
+  .api-boundary-compare dl {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .api-boundary-compare dl > div {
+    display: grid;
+    grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
+    gap: 0.55rem;
+    padding-block-start: 0.45rem;
+    border-block-start: 1px dashed var(--sl-color-gray-5);
+  }
+
+  .api-boundary-compare dt {
+    color: var(--theme-accent-strong);
+    font-family: var(--sl-font-mono);
+    font-size: var(--sl-text-xs);
+    font-weight: 800;
+  }
+
+  .api-boundary-compare dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .api-boundary code {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .api-boundary-shared {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.8rem;
+    border: 1px solid var(--theme-signal);
+    background: color-mix(in srgb, var(--theme-signal) 7%, var(--sl-color-bg));
+  }
+
+  .api-boundary-static {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .api-layer-diagram {
+    display: grid;
+    gap: 0.45rem;
+    max-width: 46rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .api-layer-host,
+  .api-layer-driver,
+  .api-layer-device,
+  .api-layer-paths > div {
+    padding: 0.7rem;
+    border: 1px solid var(--sl-color-gray-4);
+    background: var(--api-panel);
+    font-weight: 750;
+  }
+
+  .api-layer-paths {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .api-layer-paths > div {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .api-layer-paths span {
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+    font-weight: 500;
+  }
+
+  .api-layer-arrow {
+    color: var(--theme-signal);
+    font-family: var(--sl-font-mono);
+    font-weight: 900;
+  }
+
+  .api-layer-driver {
+    border-style: double;
+    border-width: 3px;
+  }
+
+  .api-boundary-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .api-boundary-static table {
+    width: 100%;
+    min-width: 58rem;
+    border-collapse: collapse;
+    font-size: var(--sl-text-sm);
+  }
+
+  .api-boundary-static th,
+  .api-boundary-static td {
+    padding: 0.55rem;
+    border: 1px solid var(--sl-color-gray-5);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .api-boundary-static td p {
+    margin-block-end: 0.35rem;
+  }
+
+  .api-boundary-evidence {
+    border-inline-color: var(--sl-color-orange-high);
+    font-weight: 750;
+  }
+
+  @media (max-width: 50rem) {
+    .api-boundary-tabs,
+    .api-boundary-compare {
+      grid-template-columns: 1fr;
+    }
+
+    .api-layer-paths {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 32rem) {
+    .api-boundary-compare dl > div {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .api-boundary *,
+    .api-boundary *::before,
+    .api-boundary *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.001ms !important;
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .api-boundary,
+    .api-boundary-tabs button,
+    .api-boundary-current,
+    .api-boundary-compare article,
+    .api-boundary-shared,
+    .api-layer-host,
+    .api-layer-driver,
+    .api-layer-device,
+    .api-layer-paths > div,
+    .api-boundary-notice,
+    .api-boundary-evidence,
+    .api-boundary-reading {
+      border-color: CanvasText;
+      background: Canvas;
+      color: CanvasText;
+    }
+
+    .api-boundary-tabs button[aria-selected='true'] {
+      border-color: Highlight;
+      outline: 2px solid Highlight;
+    }
+  }
+
+  @media print {
+    .api-boundary {
+      break-inside: auto;
+      border-color: #555;
+      background: #fff;
+      color: #222;
+    }
+
+    .api-boundary-tabs,
+    .api-boundary-current {
+      display: none !important;
+    }
+
+    .api-boundary-table-wrap {
+      overflow: visible;
+    }
+
+    .api-boundary-static table {
+      min-width: 0;
+      color: #222;
+      font-size: 7.5pt;
+    }
+
+    .api-layer-host,
+    .api-layer-driver,
+    .api-layer-device,
+    .api-layer-paths > div,
+    .api-boundary-notice,
+    .api-boundary-evidence,
+    .api-boundary-reading {
+      border-color: #777;
+      background: #fff;
+      color: #222;
+    }
+  }
+</style>

@@ -57,7 +57,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 2, practice: 13, visuals: 2, glossary: 55, sources: 29 });
+    expect(counts).toEqual({ labs: 3, practice: 17, visuals: 6, glossary: 65, sources: 31 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(122);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexedText = (
@@ -67,7 +68,7 @@ describe('published resource indexes', () => {
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
   });
 
-  it('indexes every built Lab and Visual Explainer subject discovered from production output', async () => {
+  it('indexes every built Lab and formal Visual Explainer identity discovered from production output', async () => {
     const discovered = { labs: new Set<string>(), visuals: new Set<string>() };
     const htmlFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true }))
       .map((file) => file.split(path.sep).join('/'))
@@ -80,6 +81,9 @@ describe('published resource indexes', () => {
       const unitId = metadata(document, 'cuda:unit-id');
       if (resourceKind === 'lab' && unitId) discovered.labs.add(unitId);
       if (resourceKind === 'visual-explainer' && unitId) discovered.visuals.add(unitId);
+      for (const visual of document.querySelectorAll<HTMLElement>('[data-visual-id]')) {
+        if (visual.dataset.visualId) discovered.visuals.add(visual.dataset.visualId);
+      }
     }
 
     for (const group of ['labs', 'visuals'] as const) {
@@ -110,13 +114,22 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]')).toHaveLength(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]')).toHaveLength(2);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]')).toHaveLength(6);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');
         expect(href).toBeTruthy();
-        const visual = await readRoute(href ?? '');
-        expect(card.querySelector('h3 a')?.textContent).toBe(visual.querySelector('main h1')?.textContent);
+        const destination = new URL(href ?? '', 'https://resource-index.invalid');
+        const visual = await readRoute(destination.pathname);
+        if (destination.hash) {
+          const anchor = visual.getElementById(destination.hash.slice(1));
+          const planningId = card.getAttribute('data-resource-id');
+          const embedded = visual.querySelector(`[data-visual-id="${planningId}"]`);
+          expect(anchor, href ?? '').not.toBeNull();
+          expect(embedded, planningId ?? '').not.toBeNull();
+        } else {
+          expect(card.querySelector('h3 a')?.textContent).toBe(visual.querySelector('main h1')?.textContent);
+        }
       }
     }
   });

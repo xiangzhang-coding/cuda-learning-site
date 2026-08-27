@@ -133,6 +133,26 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'F04：显式 host-device 资源生命周期', en: 'F04: The Explicit Host-Device Resource Lifecycle' },
     prerequisites: ['F01'],
   },
+  F05: {
+    href: { 'zh-CN': '/foundations/asynchronous-errors/', en: '/en/foundations/asynchronous-errors/' },
+    title: { 'zh-CN': 'F05：CUDA 错误为何常常延后暴露', en: 'F05: CUDA Errors Are Often Asynchronous' },
+    prerequisites: ['F04'],
+  },
+  F06: {
+    href: { 'zh-CN': '/foundations/compute-capability/', en: '/en/foundations/compute-capability/' },
+    title: { 'zh-CN': 'F06：Compute capability 是功能合同', en: 'F06: Compute Capability Is a Feature Contract' },
+    prerequisites: ['F02', 'O03'],
+  },
+  F07: {
+    href: { 'zh-CN': '/foundations/runtime-driver-api/', en: '/en/foundations/runtime-driver-api/' },
+    title: { 'zh-CN': 'F07：区分 CUDA Runtime API 与 Driver API 的角色', en: 'F07: Distinguish CUDA Runtime API and Driver API Roles' },
+    prerequisites: ['F04', 'F05'],
+  },
+  F08: {
+    href: { 'zh-CN': '/foundations/launch-geometry/', en: '/en/foundations/launch-geometry/' },
+    title: { 'zh-CN': 'F08：Launch geometry 是先于速度的正确性与资源决策', en: 'F08: Launch Geometry Is a Correctness and Resource Decision Before Speed' },
+    prerequisites: ['F02', 'F03', 'F06'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -148,6 +168,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'EX03：多维索引可运行示例', en: 'EX03: Multidimensional Indexing Runnable Example' },
     prerequisites: ['F03'],
   },
+  EX04: {
+    href: { 'zh-CN': '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
+    title: { 'zh-CN': 'EX04：错误处理生命周期可运行示例', en: 'EX04: Error Handling Lifecycle Runnable Example' },
+    prerequisites: ['F05'],
+  },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
     title: { 'zh-CN': 'LAB01：记录并解读 CUDA 环境', en: 'LAB01: Record and Interpret a CUDA Environment' },
@@ -160,6 +185,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     prerequisites: ['O03', 'F01'],
     indexGroup: 'labs',
   },
+  LAB03: {
+    href: { 'zh-CN': '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
+    title: { 'zh-CN': 'LAB03：破坏并修复索引', en: 'LAB03: Break and Repair Indexing' },
+    prerequisites: ['F03', 'F05'],
+    indexGroup: 'labs',
+  },
   VIS01: {
     href: { 'zh-CN': '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     title: { 'zh-CN': 'VIS01：Kernel 从 launch 到完成的路径', en: 'VIS01: A Kernel Journey from Launch to Completion' },
@@ -170,6 +201,30 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/indexing/', en: '/en/visuals/indexing/' },
     title: { 'zh-CN': 'VIS02：Grid、block 与 thread 索引', en: 'VIS02: Grid, Block, and Thread Indexing' },
     prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS19: {
+    href: { 'zh-CN': '/foundations/asynchronous-errors/#vis19', en: '/en/foundations/asynchronous-errors/#vis19' },
+    title: { 'zh-CN': 'VIS19：错误暴露时间线', en: 'VIS19: Error-Surfacing Timeline' },
+    prerequisites: ['F04'],
+    indexGroup: 'visuals',
+  },
+  VIS20: {
+    href: { 'zh-CN': '/foundations/compute-capability/#vis20', en: '/en/foundations/compute-capability/#vis20' },
+    title: { 'zh-CN': 'VIS20：计算能力合同筛选器', en: 'VIS20: Compute-Capability Contract Filter' },
+    prerequisites: ['F02', 'O03'],
+    indexGroup: 'visuals',
+  },
+  VIS21: {
+    href: { 'zh-CN': '/foundations/runtime-driver-api/#vis21', en: '/en/foundations/runtime-driver-api/#vis21' },
+    title: { 'zh-CN': 'VIS21：Runtime/Driver API 边界', en: 'VIS21: Runtime/Driver API Boundary' },
+    prerequisites: ['F04', 'F05'],
+    indexGroup: 'visuals',
+  },
+  VIS22: {
+    href: { 'zh-CN': '/foundations/launch-geometry/#vis22', en: '/en/foundations/launch-geometry/#vis22' },
+    title: { 'zh-CN': 'VIS22：线程块形状约束探索器', en: 'VIS22: Block-Shape Constraint Explorer' },
+    prerequisites: ['F02', 'F03', 'F06'],
     indexGroup: 'visuals',
   },
 };
@@ -330,19 +385,22 @@ export function validateResourceCatalog(
     }
     for (const duplicate of duplicateValues(record.prerequisites)) issues.push(`${prefix} repeats prerequisite ${duplicate}.`);
     for (const duplicate of duplicateValues(record.relatedUnits)) issues.push(`${prefix} repeats related unit ${duplicate}.`);
-    for (const [index, prerequisite] of record.prerequisites.entries()) {
-      const requiredEarlier = new Set<string>();
-      const collect = (unitId: string) => {
-        for (const required of destinations[unitId]?.prerequisites ?? []) {
-          if (requiredEarlier.has(required)) continue;
-          requiredEarlier.add(required);
-          collect(required);
+    const prerequisiteOrderComesFromDestination = record.group === 'labs' || record.group === 'visuals';
+    if (!prerequisiteOrderComesFromDestination) {
+      for (const [index, prerequisite] of record.prerequisites.entries()) {
+        const requiredEarlier = new Set<string>();
+        const collect = (unitId: string) => {
+          for (const required of destinations[unitId]?.prerequisites ?? []) {
+            if (requiredEarlier.has(required)) continue;
+            requiredEarlier.add(required);
+            collect(required);
+          }
+        };
+        collect(prerequisite);
+        for (const required of requiredEarlier) {
+          const requiredIndex = record.prerequisites.indexOf(required);
+          if (requiredIndex > index) issues.push(`${prefix} lists ${prerequisite} before its prerequisite ${required}.`);
         }
-      };
-      collect(prerequisite);
-      for (const required of requiredEarlier) {
-        const requiredIndex = record.prerequisites.indexOf(required);
-        if (requiredIndex > index) issues.push(`${prefix} lists ${prerequisite} before its prerequisite ${required}.`);
       }
     }
 

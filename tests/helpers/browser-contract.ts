@@ -36,6 +36,12 @@ export async function expectRankedSearchResult(page: Page, scenario: SearchScena
   await dialog.getByRole('textbox', { name: scenario.button }).fill(scenario.query);
   const links = dialog.locator('a[href]');
   await expect(links.first()).toBeVisible();
+  await expect.poll(async () => {
+    const hrefs = await links.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
+    const topPaths = hrefs.slice(0, 5).map((href) => new URL(href, page.url()).pathname);
+    return scenario.expectedHrefs.some((href) => topPaths.includes(href));
+  }, { message: scenario.query }).toBe(true);
+
   const hrefs = await links.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
 
   if (scenario.localePrefix) {
@@ -46,7 +52,5 @@ export async function expectRankedSearchResult(page: Page, scenario: SearchScena
     ).toBe(true);
   }
 
-  const topPaths = hrefs.slice(0, 5).map((href) => new URL(href, page.url()).pathname);
-  expect(scenario.expectedHrefs.some((href) => topPaths.includes(href)), scenario.query).toBe(true);
   await page.keyboard.press('Escape');
 }

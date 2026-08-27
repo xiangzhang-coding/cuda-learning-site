@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 65 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-08-26'
@@ -270,8 +270,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 描述一组 GPU 架构功能和技术限制的 major.minor 能力坐标。
 - **避免使用：** GPU 代际、Toolkit 版本。
-- **相关单元：** O03。
-- **版本说明：** 型号映射和功能表必须按当前 NVIDIA 文档复核。
+- **相关资源：** [O03](/start/environment-manifest/)与 [F06](/foundations/compute-capability/)。
+- **版本说明：** 型号映射、功能、限制与编译目标必须按当前 NVIDIA 文档复核。
 
 <span id="term-026" class="resource-target" aria-hidden="true"></span>
 
@@ -543,6 +543,96 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [F04](/foundations/host-device-lifecycle/)、[O04](/start/cpp17-for-cuda/)、[EX03](/examples/multidimensional-indexing/)。
 - **版本说明：** F04 的 CUDA 调用边界按 CUDA Runtime API 13.3.1；EX03 在所选 CUDA 11.8.0、12.9.2 和 13.3.1 Toolkit Lane 中声明同一显式生命周期，Lane 选择不授予编译或运行证据。
 
+<span id="term-056" class="resource-target" aria-hidden="true"></span>
+
+### asynchronous error · 异步错误
+
+- **定义：** 由此前提交的 device work 产生、因为 submission 可在执行完成前返回，所以可能直到后续 API observation 或 completion boundary 才对 host 可见的失败。
+- **避免使用：** 声称所有 CUDA error 都是 asynchronous，或报告失败的 API call 必然就是原因。
+- **相关资源：** [F05](/foundations/asynchronous-errors/)、[F07](/foundations/runtime-driver-api/)、[EX04](/examples/error-handling-lifecycle/)、[LAB03](/labs/break-and-repair-indexing/)。
+- **版本说明：** Error 与 synchronization boundary 按 Runtime API 11.8.0、页面标为 12.9.1 的 12.9.2 archive 和 13.3.1 复核；精确 reporting status 可能不同。
+
+<span id="term-057" class="resource-target" aria-hidden="true"></span>
+
+### last-error state · 末次错误状态
+
+- **定义：** 与 host thread 关联、记录最后一项 Runtime error 的 Runtime-library state；`cudaPeekAtLastError` 读取但不 reset，`cudaGetLastError` 读取后 reset 为 `cudaSuccess`。
+- **避免使用：** 每个 kernel 一条 error queue、direct return value、completion check。
+- **相关资源：** [F05](/foundations/asynchronous-errors/)、[EX04](/examples/error-handling-lifecycle/)、[LAB03](/labs/break-and-repair-indexing/)。
+- **版本说明：** Getter-reset、peek-non-reset 与 previous-asynchronous-launch caveat 在 selected 11.8.0、12.9.2 archive/页面标签 12.9.1 和 13.3.1 Runtime 文档中一致。
+
+<span id="term-058" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Runtime API · CUDA 运行时 API
+
+- **定义：** NVIDIA 较高层的 `cuda*` host API 与 CUDA C++ launch surface；通常隐式管理 primary-context initialization 和 module，但 allocation、argument、status check、completion、correctness 与 release 责任仍属于 application。
+- **避免使用：** 无需所有权的 CUDA、独立 GPU execution system、Driver API 的一对一别名。
+- **相关资源：** [F04](/foundations/host-device-lifecycle/)、[F05](/foundations/asynchronous-errors/)、[F07](/foundations/runtime-driver-api/)、[EX04](/examples/error-handling-lifecycle/)、[LAB03](/labs/break-and-repair-indexing/)。
+- **版本说明：** Implicit state 与 interoperability 细节必须按 selected 11.8.0、12.9.2 archive/页面标签 12.9.1 或 13.3.1 坐标读取；不能把新版 execution-context interface 向旧 Lane 倒推。
+
+<span id="term-059" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Driver API · CUDA 驱动 API
+
+- **定义：** NVIDIA 较低层的 `cu*` host API，把显式 initialization 与 device、context、module、function、memory、launch、synchronization handle 或 operation 暴露给 application control。
+- **避免使用：** 不同的 device stack、自动更快的 Runtime replacement、能消除 asynchronous error 的 API。
+- **相关单元：** [F07](/foundations/runtime-driver-api/)。
+- **版本说明：** Handle ownership、current-context rule、interoperability 与 teardown 按 Driver API 11.8.0、页面标为 12.9.1 的 12.9.2 archive 和 13.3.1 分版本复核。
+
+<span id="term-060" class="resource-target" aria-hidden="true"></span>
+
+### virtual architecture target · 虚拟架构目标
+
+- **定义：** NVCC 的 `compute_XY`、`compute_XYa` 或 `compute_XYf` target，用来选择 device source 在 preprocessing 和编译成 PTX 时采用的 GPU feature assumptions。
+- **避免使用：** Installed GPU、real architecture target、Toolkit version、runtime compatibility verdict。
+- **相关单元：** [F06](/foundations/compute-capability/)。
+- **版本说明：** Accepted name 与 suffix 取决于精确 compiler；F06 复核 NVCC 11.8.0、12.9.2 archive 与 Toolkit 13.3.1 下 current NVCC page 的 selected rows。
+
+<span id="term-061" class="resource-target" aria-hidden="true"></span>
+
+### real architecture target · 实际架构目标
+
+- **定义：** NVCC 的 `sm_XY`、`sm_XYa` 或 `sm_XYf` code target，指定 assembled binary code 面向的 GPU architecture；它必须实现 paired virtual target 的全部 feature assumptions。
+- **避免使用：** Installed GPU 的证明、product model、virtual target、performance prediction。
+- **相关单元：** [F06](/foundations/compute-capability/)。
+- **版本说明：** Compiler acceptance 按版本变化；accepted pair 仍只是一项 compile-plan fact，直到合格 build 记录实际 artifact。
+
+<span id="term-062" class="resource-target" aria-hidden="true"></span>
+
+### architecture-specific feature set · 架构特定功能集
+
+- **定义：** 针对一个 exact compute capability、且不保证在后续 architecture 上可用的完整 specialized feature set；`a` target 启用该集合，并把 code 限定到该 exact capability。
+- **避免使用：** Baseline feature set、family-wide compatibility、“更新 GPU 自动支持”。
+- **相关单元：** [F06](/foundations/compute-capability/)。
+- **版本说明：** 当前 CUDA Programming Guide v13.3 从 compute capability 9.0 开始定义 architecture-specific feature set；精确 target 仍须 selected NVCC 支持。
+
+<span id="term-063" class="resource-target" aria-hidden="true"></span>
+
+### family-specific feature set · 系列特定功能集
+
+- **定义：** 一个 compute-architecture family 中明列成员共享的 architecture-specific feature 子集；`f` target 启用该子集，并把 code 限定到这些 family members。
+- **避免使用：** Baseline set、exact-architecture `a` set、与所有数值更大 capability 兼容。
+- **相关单元：** [F06](/foundations/compute-capability/)。
+- **版本说明：** 当前 CUDA Programming Guide v13.3 从 compute capability 10.0 开始定义 family-specific set；family membership 与 accepted compiler target 需要当前 owner table。
+
+<span id="term-064" class="resource-target" aria-hidden="true"></span>
+
+### launch geometry · 启动几何
+
+- **定义：** 一次 kernel launch 提供的 grid 与 thread-block dimensions，决定创建的 block、每 block thread、coordinate coverage 与 fringe thread，同时与 application logical extent 和 data layout 分开。
+- **避免使用：** Logical extent、仅指 block shape、launch legality 的证明、performance configuration。
+- **相关资源：** [F02](/foundations/execution-hierarchy/)、[F03](/foundations/multidimensional-indexing/)、[F08](/foundations/launch-geometry/)、[LAB03](/labs/break-and-repair-indexing/)。
+- **版本说明：** F08 按 CUDA Programming Guide v13.3 与 Runtime API 13.3.1 device/function limits 复核；实际 launch 必须使用 selected environment 与 kernel 的 properties。
+
+<span id="term-065" class="resource-target" aria-hidden="true"></span>
+
+### block shape · 线程块形状
+
+- **定义：** 为 launch 选择的一维、二维或三维 `blockDim` tuple；每个 axis 及其 checked product 必须通过 device limits，product 与 resource use 还必须通过 specific kernel limits。
+- **避免使用：** 仅指 threads-per-block scalar、logical data tile、occupancy target、fastest configuration。
+- **相关资源：** [F08](/foundations/launch-geometry/)、[LAB03](/labs/break-and-repair-indexing/)。
+- **版本说明：** 相同 thread count 可以有不同 coverage/fringe，device/function limits 也会随 environment、target 与 kernel 改变；只有 controlled measurement 才能比较速度。
+
 ## 维护规则
 
-这些词条及其索引元数据在 **2026-08-26** 与英文对应内容同步复核。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。
+全部 65 个词条及其索引元数据在 **2026-08-26** 与英文对应内容同步复核。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。

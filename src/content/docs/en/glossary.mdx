@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: Published canonical bilingual vocabulary and evidence boundaries for CUDA Learning Site.
+description: Sixty-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-08-26'
@@ -270,8 +270,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** A major.minor capability coordinate describing a set of GPU architectural features and technical limits.
 - **Avoid:** GPU generation, Toolkit version.
-- **Related unit:** O03.
-- **Version note:** Model mappings and feature tables require current NVIDIA documentation.
+- **Related resources:** [O03](/en/start/environment-manifest/) and [F06](/en/foundations/compute-capability/).
+- **Version note:** Model mappings, features, limits, and compiler targets require current NVIDIA documentation.
 
 <span id="term-026" class="resource-target" aria-hidden="true"></span>
 
@@ -543,6 +543,96 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [F04](/en/foundations/host-device-lifecycle/), [O04](/en/start/cpp17-for-cuda/), and [EX03](/en/examples/multidimensional-indexing/).
 - **Version note:** F04's CUDA call boundaries follow CUDA Runtime API 13.3.1. EX03 declares the same explicit lifecycle in its selected CUDA 11.8.0, 12.9.2, and 13.3.1 Toolkit Lanes; Lane selection grants neither compilation nor runtime evidence.
 
+<span id="term-056" class="resource-target" aria-hidden="true"></span>
+
+### asynchronous error · 异步错误
+
+- **Definition:** A failure produced by previously submitted device work that may become host-visible only at a later API observation or completion boundary because submission can return before execution finishes.
+- **Avoid:** Saying every CUDA error is asynchronous, or that the API call reporting the failure necessarily caused it.
+- **Related resources:** [F05](/en/foundations/asynchronous-errors/), [F07](/en/foundations/runtime-driver-api/), [EX04](/en/examples/error-handling-lifecycle/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Version note:** Error and synchronization boundaries were reviewed across Runtime API 11.8.0, the 12.9.2 archive whose pages label themselves 12.9.1, and 13.3.1; exact reporting statuses may vary.
+
+<span id="term-057" class="resource-target" aria-hidden="true"></span>
+
+### last-error state · 末次错误状态
+
+- **Definition:** Runtime-library state associated with a host thread that records the last Runtime error: `cudaPeekAtLastError` reads it without resetting, while `cudaGetLastError` reads it and resets it to `cudaSuccess`.
+- **Avoid:** Per-kernel error queue, direct return value, completion check.
+- **Related resources:** [F05](/en/foundations/asynchronous-errors/), [EX04](/en/examples/error-handling-lifecycle/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Version note:** The getter-reset, peek-non-reset, and previous-asynchronous-launch caveats are shared by the selected 11.8.0, 12.9.2 archive/page-label 12.9.1, and 13.3.1 Runtime documentation.
+
+<span id="term-058" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Runtime API · CUDA 运行时 API
+
+- **Definition:** NVIDIA's higher-level `cuda*` host API and CUDA C++ launch surface, which commonly manage primary-context initialization and modules implicitly while leaving allocation, arguments, status checks, completion, correctness, and release responsibilities with the application.
+- **Avoid:** Ownership-free CUDA, a separate GPU execution system, a one-to-one alias for the Driver API.
+- **Related resources:** [F04](/en/foundations/host-device-lifecycle/), [F05](/en/foundations/asynchronous-errors/), [F07](/en/foundations/runtime-driver-api/), [EX04](/en/examples/error-handling-lifecycle/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Version note:** Implicit-state and interoperability details must be read at the selected 11.8.0, 12.9.2 archive/page-label 12.9.1, or 13.3.1 coordinate; newer execution-context interfaces must not be projected backward.
+
+<span id="term-059" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Driver API · CUDA 驱动 API
+
+- **Definition:** NVIDIA's lower-level `cu*` host API, exposing explicit initialization and device, context, module, function, memory, launch, and synchronization handles or operations to application control.
+- **Avoid:** A different device stack, automatically faster Runtime replacement, an API that removes asynchronous errors.
+- **Related unit:** [F07](/en/foundations/runtime-driver-api/).
+- **Version note:** Handle ownership, current-context rules, interoperability, and teardown are versioned across Driver API 11.8.0, the 12.9.2 archive whose page labels itself 12.9.1, and 13.3.1.
+
+<span id="term-060" class="resource-target" aria-hidden="true"></span>
+
+### virtual architecture target · 虚拟架构目标
+
+- **Definition:** An NVCC `compute_XY`, `compute_XYa`, or `compute_XYf` target that selects the GPU feature assumptions used while preprocessing and compiling device source into PTX.
+- **Avoid:** Installed GPU, real architecture target, Toolkit version, runtime compatibility verdict.
+- **Related unit:** [F06](/en/foundations/compute-capability/).
+- **Version note:** Accepted names and suffixes depend on the exact compiler; F06 reviews selected rows from NVCC 11.8.0, the 12.9.2 archive, and the current NVCC page under Toolkit 13.3.1.
+
+<span id="term-061" class="resource-target" aria-hidden="true"></span>
+
+### real architecture target · 实际架构目标
+
+- **Definition:** An NVCC `sm_XY`, `sm_XYa`, or `sm_XYf` code target naming the GPU architecture for assembled binary code; it must implement every feature assumption of its paired virtual target.
+- **Avoid:** Proof of the installed GPU, product model, virtual target, performance prediction.
+- **Related unit:** [F06](/en/foundations/compute-capability/).
+- **Version note:** Compiler acceptance is versioned, and an accepted pair proves only a compile-plan fact until a qualifying build records the actual artifact.
+
+<span id="term-062" class="resource-target" aria-hidden="true"></span>
+
+### architecture-specific feature set · 架构特定功能集
+
+- **Definition:** The complete set of specialized features for one exact compute capability that are not guaranteed on later architectures; an `a` target enables this set and restricts code to that exact capability.
+- **Avoid:** Baseline feature set, family-wide compatibility, “newer GPUs support it automatically.”
+- **Related unit:** [F06](/en/foundations/compute-capability/).
+- **Version note:** The current CUDA Programming Guide v13.3 defines architecture-specific feature sets beginning with compute capability 9.0; exact targets still require support from the selected NVCC.
+
+<span id="term-063" class="resource-target" aria-hidden="true"></span>
+
+### family-specific feature set · 系列特定功能集
+
+- **Definition:** The subset of architecture-specific features shared by the explicitly listed members of one compute-architecture family; an `f` target enables that subset and restricts code to those family members.
+- **Avoid:** Baseline set, exact-architecture `a` set, compatibility with every numerically later capability.
+- **Related unit:** [F06](/en/foundations/compute-capability/).
+- **Version note:** The current CUDA Programming Guide v13.3 defines family-specific sets beginning with compute capability 10.0; family membership and accepted compiler targets require current owner tables.
+
+<span id="term-064" class="resource-target" aria-hidden="true"></span>
+
+### launch geometry · 启动几何
+
+- **Definition:** The grid and thread-block dimensions supplied for one kernel launch, determining created blocks, threads per block, coordinate coverage, and fringe threads while remaining separate from the application's logical extent and data layout.
+- **Avoid:** Logical extent, block shape alone, proof of launch legality, performance configuration.
+- **Related resources:** [F02](/en/foundations/execution-hierarchy/), [F03](/en/foundations/multidimensional-indexing/), [F08](/en/foundations/launch-geometry/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Version note:** F08 reviews CUDA Programming Guide v13.3 and Runtime API 13.3.1 device/function limits; an actual launch must use properties from its selected environment and kernel.
+
+<span id="term-065" class="resource-target" aria-hidden="true"></span>
+
+### block shape · 线程块形状
+
+- **Definition:** The one-, two-, or three-dimensional `blockDim` tuple chosen for a launch; each axis and their checked product must satisfy device limits, and the product plus resource use must satisfy limits for the specific kernel.
+- **Avoid:** Threads-per-block scalar alone, logical data tile, occupancy target, fastest configuration.
+- **Related resources:** [F08](/en/foundations/launch-geometry/) and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Version note:** Equal thread counts can have different coverage and fringe, while device and function limits can change by environment, target, and kernel; only controlled measurement can compare speed.
+
 ## Maintenance rule
 
-These entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-26**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.
+All 65 entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-26**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.

@@ -1,0 +1,233 @@
+---
+title: 'F06：Compute capability 是功能合同'
+description: 从直接识别的 GPU 走到 compute capability、适用功能与限制和编译目标，同时不合并彼此独立的环境坐标。
+pairId: f06
+counterpart: /en/foundations/compute-capability/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - coordinates
+  - feature-contract
+  - limits
+  - compiler-targets
+  - filter
+  - decisions
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F06
+prerequisites:
+  - F02
+  - O03
+relatedUnits:
+  - F08
+  - VIS20
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Compute Capabilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable compute devices'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Feature Set Compiler Targets'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA baseline, architecture-specific, and family-specific feature sets'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'CUDA compiler targets'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 12.9'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9'
+    platform: 'CUDA compiler targets'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 13.3'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1 current documentation; page label NVCC v13.3'
+    platform: 'CUDA compiler targets'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,coordinates,feature-contract,limits,compiler-targets,filter,decisions,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,O03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F08,VIS20' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3,13.3.1' }
+---
+
+import CapabilityFilter from '../../../components/CapabilityFilter.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/foundations/compute-capability/" lang="en">Read the English counterpart</a>
+
+Compute capability 是由两部分组成的硬件能力标识，不是产品排名，也不是 CUDA 版本。把它放在一条可复核链路中使用：**所选 GPU identity → 直接取得的 compute capability → 适用功能与数值限制 → 所选编译器接受的目标选择**。每个箭头都需要自己的来源；任何一步都不能授权产品型号猜测、环境兼容性结论或性能预测。
+
+## 学完本单元，你应该能
+
+- 从一块已选 GPU 出发，直接取得它的 `major.minor` compute capability，并把型号名称保留为独立 identity 字段。
+- 把功能可用性与数值限制读成硬件合同的两个不同部分。
+- 区分 virtual `compute_XY` target 与 real `sm_XY` target，并核对所选 NVCC 文档是否接受 target plan 两端。
+- 解释 baseline target、架构专用 `a` target 与家族专用 `f` target 的不同范围，同时不把本单元写成完整架构目录。
+- 在做 build decision 时，保持 GPU、compute capability、Toolkit、driver、NVCC、host compiler 与 operating system 相互独立。
+
+## 先修关系
+
+先完成 [F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)，再完成 [O03：读懂环境清单](/start/environment-manifest/)。F02 提供这里会查表的执行概念；O03 提供硬件与软件坐标必须分开的规则。
+
+阅读本学习单元（Learning Unit）不需要 CUDA-capable system。页面、静态表和内嵌浏览器筛选器都不编译或运行 CUDA，因此本单元没有 compilation 或 runtime Evidence Status。
+
+## 坐标：一条链路，彼此独立的事实
+
+当前 Programming Guide 给出三种 owner 支持的 compute-capability 获取方式：用 `nvidia-smi` 查询 `name,compute_cap`，通过 CUDA Runtime 或 Driver API 读取 major/minor device attribute，或使用 NVML。若起点是 inventory 中的型号而不是 live system，则查询 NVIDIA 当前的型号到 capability 映射。不能反向使用该映射：一个 compute capability 可以对应多个型号，本单元绝不从 capability 推导产品。
+
+```text
+nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader
+```
+
+记录该值属于哪一块 visible GPU。多 GPU 系统可以暴露不同 capability；没有 selected device identity 的裸 `9.0` 不是完整环境坐标。
+
+| 坐标 | 它回答的问题 | 它不能建立的事实 |
+| --- | --- | --- |
+| GPU identity / model | 正在审查哪一块 selected device？ | 未直接查询或未按当前 owner 数据映射时的 compute capability |
+| Compute capability | 哪些硬件功能与限制行适用？ | 已安装 Toolkit、driver、compiler、OS、产品型号或性能 |
+| Toolkit Lane | 选择了哪个 release 的 headers、libraries、tools 与 target 文档？ | GPU capability 或已加载 driver |
+| Driver | 当前环境加载了哪个 driver？ | Build compiler 接受哪些 NVCC target |
+| NVCC 与 host compiler | 哪个精确 compiler pair 处理 device 与 host code？ | GPU identity、runtime 结果或 Supported Environment |
+| Operating system | 哪个 host platform 边界适用？ | 任何缺失的硬件或 compiler 坐标 |
+
+“CUDA 13.3”不能填满这些行。一个 Toolkit release 可以为多个 compute capability 编译；一个 compute capability 可以由多个 Toolkit release 使用；driver、compiler、GPU 与 OS 仍需各自观察。
+
+## 功能合同：baseline、精确架构与家族
+
+当前 Programming Guide 区分三类功能集：
+
+- **Baseline feature set** 包含主要功能；这些功能在引入时就以继续适用于后续 compute architecture 为意图。`compute_90` 这类无后缀 target 选择该集合。
+- **Architecture-specific features** 从 compute capability 9.0 开始出现。它们是不能保证在后续 capability 上存在的专用功能。`a` target 启用完整架构专用集合，使用它的代码只限该 target 命名的精确 compute capability。
+- **Family-specific features** 从 compute capability 10.0 开始出现。它们是同一家族多个成员共享的 architecture-specific feature 子集。`f` target 启用该子集，并只限当前 owner 表列出的家族成员。
+
+这里的包含关系描述启用的功能集，不描述速度：在相应集合存在时，baseline 包含于 family-specific，family-specific 又包含于 architecture-specific。选择更大的集合会缩小代码范围；它不证明应用更快。
+
+下面的精选摘录足以支持本单元的 decision，并有意省略许多功能与中间 capability：
+
+| 已复核 compute capability | 硬件加速 `memcpy_async` | Thread Block Cluster | 存在 architecture-specific set | 存在 family-specific set |
+| --- | --- | --- | --- | --- |
+| 7.5 | 否 | 否 | 否 | 否 |
+| 8.0 | 是 | 否 | 否 | 否 |
+| 9.0 | 是 | 是 | 是 | 否 |
+| 10.0 | 是 | 是 | 是 | 是 |
+| 12.0 | 是 | 是 | 是 | 是 |
+
+“是”只表示所选 Programming Guide 行适用于该 capability。它没有说明应用源码使用了该功能、compiler lane 能表达每一种带后缀 target，或 build artifact 已经包含合适代码。
+
+## 限制：最大值不是建议值
+
+功能可用性回答“合同是否包含该功能”；数值限制回答“owner 表声明了什么最大值或固定值”。必须分开这两个问题。Programming Guide 说明这些表中的 KB 与 K 分别按 1024 bytes 与 1024 计算。
+
+| 已复核 compute capability | Warp 大小 | 每 block 最大 thread 数 | 每 SM 最大 shared memory | 每 block 最大 shared memory |
+| --- | ---: | ---: | ---: | ---: |
+| 7.5 | 32 | 1024 | 64 KiB | 64 KiB |
+| 8.0 | 32 | 1024 | 164 KiB | 163 KiB |
+| 9.0 | 32 | 1024 | 228 KiB | 227 KiB |
+| 10.0 | 32 | 1024 | 228 KiB | 227 KiB |
+| 12.0 | 32 | 1024 | 100 KiB | 99 KiB |
+
+按当前 guide，每 block 超过 48 KiB 的 shared-memory allocation 必须使用 dynamic shared memory 并显式 opt in。最大值是 validity boundary，不是建议 block size、occupancy 结果、考虑其他资源使用后某个 kernel 实际可用的容量，也不是性能结论。
+
+## 编译目标：virtual requirement 与 real code
+
+NVCC 的两阶段模型使用两类 target：
+
+- `compute_80` 这类 virtual target 控制 source preprocessing，并按该功能合同编译为 PTX。
+- `sm_80` 这类 real target 命名 assembled binary code 面向的 GPU architecture。
+
+显式使用 `--gpu-code` 时，`--gpu-architecture` 必须命名 virtual target，而且每个 code target 必须实现 virtual feature assumption。`compute_90` 不能和缺少这些 assumption 的更早 real architecture 配对。NVCC 也提供简写，但把它展开成 virtual 与 real 选择更容易审查。
+
+Compiler acceptance 是 versioned fact。下面的 matrix 只是本单元使用的子集，来自精确 NVCC owner 页面：
+
+| Toolkit / NVCC 文档坐标 | 精选 baseline virtual / real pairs | 精选带后缀 pairs |
+| --- | --- | --- |
+| 11.8.0 / NVCC 11.8.0 | `compute_75` / `sm_75`；`compute_80` / `sm_80`；`compute_90` / `sm_90` | 本精选集合中没有 |
+| 12.9.2 archive / 页面标签 NVCC 12.9 | 同样三个，再加 `compute_100` / `sm_100` 与 `compute_120` / `sm_120` | `compute_90a` / `sm_90a`；`compute_100f` / `sm_100f`；`compute_100a` / `sm_100a`；`compute_120f` / `sm_120f`；`compute_120a` / `sm_120a` |
+| 13.3.1 当前 Toolkit / 页面标签 NVCC 13.3 | 与 12.9.2 相同的精选 baseline pairs | 与 12.9.2 相同的精选带后缀 pairs |
+
+后缀范围比数字顺序更严格。`compute_90a` code 面向精确 9.0 architecture-specific contract，不面向 10.0。当前 family table 说明 `compute_100f` 适用于 capability 10.0 与 10.3，而 `compute_120f` 适用于 12.0 与 12.1。`compute_100a` 这类 `a` target 仍只限精确 10.0。绝不能仅因另一个 capability 数字更大就去掉或添加后缀。
+
+一个被接受的 target pair 仍只是 compile-plan fact。Driver support、artifact 实际嵌入的 code、Runtime 与 component、selected GPU、OS、correctness 和 execution 都是独立检查。
+
+## 筛选器：查看已复核子集
+
+下面内嵌的可视化讲解（Visual Explainer）**VIS20：Compute-capability contract filter**（`CapabilityFilter`）复用与上表相同的五行原创数据集，只在 enhancement 成功后显示 native controls，并对格式错误或未复核值 fail closed。永久静态表提供等价的非交互说明。
+
+<span id="vis20" class="resource-target" aria-hidden="true"></span>
+<CapabilityFilter locale="zh-CN" />
+
+筛选器是 lookup aid，不是 hardware probe。选择 `12.0` 不表示读者拥有这种 GPU、不表示已安装 NVCC 13.3.1、不表示 driver 能加载 artifact，也不表示任何 kernel 已运行。
+
+## 决策：只有前提完整时才继续
+
+按以下顺序做 target decision：
+
+1. 选择一块 GPU 并保留其 identity，再直接取得 compute capability，或通过当前 owner 数据映射精确型号。
+2. 分别查询每个 required feature。功能不可用或 reviewed data 中没有该 capability 时停止；不要向附近行取整。
+3. 读取每项 relevant numeric limit，并与 kernel 声明的 resource need 比较。不要把 maximum 改写为 tuning recommendation。
+4. 选择精确 Toolkit Lane 与 NVCC，再从该 compiler 文档或 listing option 核对所需 virtual 与 real target。根据源码 requirement 决定 baseline、`f` 或 `a` scope。
+5. 独立复核 loaded driver、artifact content、Runtime 与 component version、host compiler、OS、permission 和 correctness plan。Compilation 与 GPU execution 需要各自的 evidence record。
+
+任一前提未知时，decision 都是 **indeterminate**。Product name、memory capacity、`nvidia-smi` banner field 或另一台机器的成功结果不能填补空缺。F08 可以在引入后续 target 与 artifact decision 时继续使用这份合同，但不会改变 F06 的独立性规则。
+
+## 离开前检查
+
+1. 从 inventory 中的一块 GPU 型号出发，哪四步链路能到达有效 compiler-target review？其中哪一步不能反向使用？
+2. 即使功能可用性与数值限制都按 compute capability 索引，为什么它们仍是不同合同？
+3. `compute_90` 控制什么，`sm_90` 控制什么，为什么 real target 必须实现 virtual target 的 assumption？
+4. Baseline、`compute_100f` 与 `compute_100a` 的代码范围有何不同？
+5. 为什么 compute capability 12.0 和 NVCC 13.3.1 target listing 都不能建立产品型号、loaded-driver compatibility、runtime success 或 performance？
+
+## 继续练习
+
+- 完成 [F06 练习（Exercise）](/foundations/compute-capability/exercises/)，再查看独立的[参考解答](/foundations/compute-capability/solutions/)。
+- 完成[练习题库（Practice Bank）PB-R1-010](/practice/#pb-r1-010)，修复另一份合并独立坐标的 capability-to-target decision。
+- 在进入 F08 前，写一份 target-decision ledger，记录 selected GPU、direct capability query、required features、numeric limits、精确 Toolkit/NVCC 坐标、virtual target、real target、suffix scope 与仍未解决的 driver/runtime 检查。
+
+## 来源与复核
+
+Compute-capability 获取、功能可用性、功能集范围与技术限制依据当前 NVIDIA [CUDA Programming Guide v13.3 Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)，包括其中的 [Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets)。Owner 页面标为 **2026-05-27 更新**。
+
+Virtual/real target 语义与 accepted target name 还分别对照了精确 owner 坐标：[NVCC 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html)、页面标签为 NVCC 12.9 的 [12.9.2 archive path](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)，以及所选 Toolkit 13.3.1 release 下的[当前 NVCC 13.3 页面](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)。五项 owner 坐标均于 **2026-08-26** 打开；完整坐标也记录在[来源与版本记录](/sources-and-versions/)。
+
+页面文字、精选表格、决策顺序、练习和内嵌筛选器编排均为原创 CC-BY-4.0 内容。精选行不是完整架构目录。本页不作产品推断、环境兼容性结论、性能声明、编译声明或运行声明。
+
+**事实核查日期：2026-08-26。**

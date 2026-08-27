@@ -1,0 +1,233 @@
+---
+title: 'F06: Compute Capability Is a Feature Contract'
+description: Move from a directly identified GPU to its compute capability, applicable features and limits, and compiler targets without collapsing independent environment coordinates.
+pairId: f06
+counterpart: /foundations/compute-capability/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - coordinates
+  - feature-contract
+  - limits
+  - compiler-targets
+  - filter
+  - decisions
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F06
+prerequisites:
+  - F02
+  - O03
+relatedUnits:
+  - F08
+  - VIS20
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Compute Capabilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable compute devices'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Programming Guide - Feature Set Compiler Targets'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA baseline, architecture-specific, and family-specific feature sets'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'CUDA compiler targets'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 12.9'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9'
+    platform: 'CUDA compiler targets'
+    accessDate: '2026-08-26'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 13.3'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1 current documentation; page label NVCC v13.3'
+    platform: 'CUDA compiler targets'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,coordinates,feature-contract,limits,compiler-targets,filter,decisions,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,O03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F08,VIS20' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3,13.3.1' }
+---
+
+import CapabilityFilter from '../../../../components/CapabilityFilter.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/compute-capability/" lang="zh-CN">阅读中文对应页</a>
+
+Compute capability is a two-part hardware capability identifier, not a product ranking or a CUDA version. Use it as one link in a reviewable chain: **selected GPU identity → directly obtained compute capability → applicable features and numeric limits → target choices accepted by the selected compiler**. Every arrow requires its own source. None authorizes a product-name guess, an environment-compatibility verdict, or a performance prediction.
+
+## What you should be able to do
+
+- Start from one selected GPU, obtain its `major.minor` compute capability directly, and keep the model name as a separate identity field.
+- Read feature availability and numeric limits as two different parts of the hardware contract.
+- Distinguish virtual `compute_XY` targets from real `sm_XY` targets and check that the selected NVCC documentation accepts both sides of a target plan.
+- Explain the different scopes of baseline targets, architecture-specific `a` targets, and family-specific `f` targets without treating this unit as a complete architecture catalog.
+- Keep GPU, compute capability, Toolkit, driver, NVCC, host compiler, and operating system independent while making a build decision.
+
+## Prerequisites
+
+Complete [F02: Understanding the CUDA Execution Hierarchy](/en/foundations/execution-hierarchy/) first, then [O03: Reading an Environment Manifest](/en/start/environment-manifest/). F02 supplies the execution concepts whose limits are tabulated here. O03 supplies the rule that hardware and software coordinates remain separate.
+
+Reading this Learning Unit requires no CUDA-capable system. The page, static table, and embedded browser filter compile and run no CUDA, so the unit has no compilation or runtime Evidence Status.
+
+## Coordinates: one chain, independent facts
+
+The current Programming Guide gives three owner-supported ways to obtain compute capability: query `name,compute_cap` with `nvidia-smi`, read the major and minor device attributes through CUDA Runtime or Driver APIs, or use NVML. If starting from a model name in an inventory rather than a live system, consult NVIDIA's current model-to-capability mapping. Do not reverse that mapping: one compute capability can describe multiple models, and this unit never derives a product from a capability.
+
+```text
+nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader
+```
+
+Record which visible GPU the value belongs to. A multi-GPU machine can expose different capabilities, and a bare `9.0` without a selected device identity is not a complete environment coordinate.
+
+| Coordinate | Question it answers | It does not establish |
+| --- | --- | --- |
+| GPU identity / model | Which selected device is under review? | Its compute capability when that value was not queried or mapped from current owner data |
+| Compute capability | Which hardware feature and limit rows apply? | Installed Toolkit, driver, compiler, OS, product name, or performance |
+| Toolkit Lane | Which release's headers, libraries, tools, and target documentation are selected? | The GPU's capability or the loaded driver |
+| Driver | Which driver is loaded for this environment? | Which NVCC targets the build compiler accepts |
+| NVCC and host compiler | Which exact compiler pair processes device and host code? | The GPU identity, runtime result, or Supported Environment |
+| Operating system | Which host platform boundary applies? | Any missing hardware or compiler coordinate |
+
+The words “CUDA 13.3” cannot fill all these rows. A Toolkit release can compile for several compute capabilities; one compute capability can be used with several Toolkit releases; and the driver, compilers, GPU, and OS still need their own observations.
+
+## Feature contract: baseline, exact architecture, and family
+
+The current Programming Guide separates three feature sets:
+
+- The **baseline feature set** contains predominant features introduced with the intent that they remain available on subsequent compute architectures. Unsuffixed targets such as `compute_90` select this set.
+- **Architecture-specific features** begin with compute capability 9.0. They are specialized features not guaranteed on later capabilities. An `a` target enables the complete architecture-specific set, and code using it is restricted to the exact compute capability named by that target.
+- **Family-specific features** begin with compute capability 10.0. They are the subset of architecture-specific features shared by the members of one family. An `f` target enables that subset and is restricted to the family members listed by the current owner table.
+
+The relationship is about enabled feature sets, not speed: baseline is contained in family-specific, and family-specific is contained in architecture-specific where those sets exist. Choosing a larger set narrows code scope; it does not prove that the application is faster.
+
+This selected excerpt is sufficient for the unit's decisions and intentionally omits many features and intermediate capabilities:
+
+| Reviewed compute capability | Hardware-accelerated `memcpy_async` | Thread Block Cluster | Architecture-specific set exists | Family-specific set exists |
+| --- | --- | --- | --- | --- |
+| 7.5 | No | No | No | No |
+| 8.0 | Yes | No | No | No |
+| 9.0 | Yes | Yes | Yes | No |
+| 10.0 | Yes | Yes | Yes | Yes |
+| 12.0 | Yes | Yes | Yes | Yes |
+
+A “Yes” means the selected Programming Guide row applies to that capability. It does not say that the application's source uses the feature, that the compiler lane can express every qualified target, or that a built artifact contains suitable code.
+
+## Limits: maxima are not recommendations
+
+Feature availability answers “does this contract include the feature?” Numeric limits answer “what maximum or fixed value does the owner table state?” Keep those questions separate. The Programming Guide defines KB and K in these tables as 1024 bytes and 1024 respectively.
+
+| Reviewed compute capability | Warp size | Maximum threads per block | Maximum shared memory per SM | Maximum shared memory per block |
+| --- | ---: | ---: | ---: | ---: |
+| 7.5 | 32 | 1024 | 64 KiB | 64 KiB |
+| 8.0 | 32 | 1024 | 164 KiB | 163 KiB |
+| 9.0 | 32 | 1024 | 228 KiB | 227 KiB |
+| 10.0 | 32 | 1024 | 228 KiB | 227 KiB |
+| 12.0 | 32 | 1024 | 100 KiB | 99 KiB |
+
+Shared-memory allocations over 48 KiB per block require dynamic shared memory and explicit opt-in under the current guide. A maximum is a validity boundary, not a recommended block size, occupancy result, capacity available to one particular kernel after all other resource use, or performance conclusion.
+
+## Compiler targets: virtual requirements and real code
+
+NVCC's two-stage model uses two kinds of target:
+
+- A virtual target such as `compute_80` controls source preprocessing and compilation into PTX under that feature contract.
+- A real target such as `sm_80` names the GPU architecture for assembled binary code.
+
+When `--gpu-code` is explicit, `--gpu-architecture` must name a virtual target, and every code target must implement the virtual feature assumptions. `compute_90` cannot be paired with an earlier real architecture that lacks those assumptions. NVCC also offers shorthand forms, but expanding them back into virtual and real choices makes review easier.
+
+Compiler acceptance is versioned. The following matrix is only the subset used by this unit, extracted from the exact NVCC owner pages:
+
+| Toolkit / NVCC documentation coordinate | Selected baseline virtual / real pairs | Selected qualified pairs |
+| --- | --- | --- |
+| 11.8.0 / NVCC 11.8.0 | `compute_75` / `sm_75`; `compute_80` / `sm_80`; `compute_90` / `sm_90` | None in this selected set |
+| 12.9.2 archive / page label NVCC 12.9 | The same three, plus `compute_100` / `sm_100` and `compute_120` / `sm_120` | `compute_90a` / `sm_90a`; `compute_100f` / `sm_100f`; `compute_100a` / `sm_100a`; `compute_120f` / `sm_120f`; `compute_120a` / `sm_120a` |
+| 13.3.1 current Toolkit / page label NVCC 13.3 | The same selected baseline pairs as 12.9.2 | The same selected qualified pairs as 12.9.2 |
+
+Suffix scope is stricter than numeric ordering. `compute_90a` code is for the exact 9.0 architecture-specific contract, not for 10.0. The current family table says `compute_100f` applies to capabilities 10.0 and 10.3, while `compute_120f` applies to 12.0 and 12.1. An `a` target such as `compute_100a` remains exact to 10.0. Never strip or add a suffix merely because another capability number is larger.
+
+An accepted target pair is still only a compile-plan fact. Driver support, code actually embedded in the artifact, runtime APIs and components, selected GPU, OS, correctness, and execution remain separate checks.
+
+## Filter: inspect the reviewed subset
+
+The embedded Visual Explainer **VIS20: Compute-capability contract filter** (`CapabilityFilter`) reuses the same original five-row dataset as the tables above, reveals native controls only after enhancement, and fails closed for malformed or unreviewed values. Its permanent static table is the non-interactive equivalent.
+
+<span id="vis20" class="resource-target" aria-hidden="true"></span>
+<CapabilityFilter locale="en" />
+
+The filter is a lookup aid, not a hardware probe. Selecting `12.0` does not say that the reader owns such a GPU, that NVCC 13.3.1 is installed, that a driver can load an artifact, or that any kernel ran.
+
+## Decisions: move forward only with complete premises
+
+Use this order for a target decision:
+
+1. Select one GPU and preserve its identity, then obtain compute capability directly or map the exact model through current owner data.
+2. Look up each required feature separately. Stop if it is unavailable or the capability is absent from the reviewed data; do not round to a nearby row.
+3. Read every relevant numeric limit and compare it with the kernel's declared resource needs. Do not convert a maximum into a tuning recommendation.
+4. Select the exact Toolkit Lane and NVCC, then verify the required virtual and real targets in that compiler's documentation or with its listing options. Decide whether baseline, `f`, or `a` scope matches the source requirements.
+5. Separately review the loaded driver, artifact contents, Runtime and component versions, host compiler, OS, permissions, and correctness plan. Compilation and GPU execution require their own evidence records.
+
+If any premise is unknown, the decision is **indeterminate**. A product name, memory capacity, `nvidia-smi` banner field, or successful result from another machine must not fill the gap. F08 can build on this contract when it introduces later target and artifact decisions; it does not change F06's independence rules.
+
+## Retrieval check
+
+1. Starting with one GPU model in an inventory, what four-step chain leads to a valid compiler-target review, and which step must not be reversed?
+2. Why are feature availability and numeric limits different contracts even when both are indexed by compute capability?
+3. What does `compute_90` control, what does `sm_90` control, and why must a real target implement the virtual target's assumptions?
+4. How do the execution scopes of baseline, `compute_100f`, and `compute_100a` differ?
+5. Why can neither compute capability 12.0 nor an NVCC 13.3.1 target listing establish the product model, loaded-driver compatibility, runtime success, or performance?
+
+## Continue with practice
+
+- Complete the [F06 Exercises](/en/foundations/compute-capability/exercises/), then inspect the separate [reviewed solutions](/en/foundations/compute-capability/solutions/).
+- Work through [Practice Bank PB-R1-010](/en/practice/#pb-r1-010) to repair another capability-to-target decision that merges independent coordinates.
+- Before F08, write one target-decision ledger that records the selected GPU, direct capability query, required features, numeric limits, exact Toolkit/NVCC coordinate, virtual target, real target, suffix scope, and unresolved driver/runtime checks.
+
+## Sources and review
+
+Compute-capability acquisition, feature availability, feature-set scopes, and technical limits follow the current NVIDIA [CUDA Programming Guide v13.3 Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), including its [Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets). The owner page reports **last updated 2026-05-27**.
+
+Virtual/real target semantics and accepted target names were cross-checked against the exact owner coordinates for [NVCC 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html), the [12.9.2 archive path](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html) whose page label is NVCC 12.9, and the [current NVCC 13.3 page](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html) under the selected Toolkit 13.3.1 release. All five owner coordinates were opened on **2026-08-26**; complete source coordinates are also recorded in the [Sources and Version Record](/en/sources-and-versions/).
+
+The prose, selected tables, decision order, exercises, and embedded filter composition are original CC-BY-4.0 content. The selected rows are not a complete architecture catalog. This page makes no product inference, environment-compatibility verdict, performance claim, compilation claim, or runtime claim.
+
+**Fact checked: 2026-08-26.**

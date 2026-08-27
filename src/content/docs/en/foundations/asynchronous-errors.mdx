@@ -1,0 +1,238 @@
+---
+title: 'F05: CUDA Errors Are Often Asynchronous'
+description: Separate immediate launch-configuration errors, deferred device-execution errors, last-error state, and explicit synchronization boundaries.
+pairId: f05
+counterpart: /foundations/asynchronous-errors/
+factCheckDate: '2026-08-26'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - error-state
+  - immediate
+  - deferred
+  - synchronization
+  - canonical-example
+  - timeline
+  - correctness
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: F05
+prerequisites:
+  - F04
+relatedUnits:
+  - F03
+  - EX04
+  - LAB03
+  - F07
+  - VIS19
+exampleIds:
+  - EX04
+canonicalExample: EX04
+canonicalRanges:
+  - error-lifecycle
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 11.8.0 - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Runtime API 11.8.0'
+    platform: 'CUDA Runtime error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 11.8.0 - API Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/api-sync-behavior.html'
+    version: 'CUDA Runtime API 11.8.0'
+    platform: 'CUDA Runtime synchronization behavior'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 11.8.0 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API 11.8.0'
+    platform: 'cudaDeviceSynchronize reference'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'CUDA Runtime error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - API Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/api-sync-behavior.html'
+    version: 'Archive path 12.9.2; page labels CUDA Runtime API 12.9.1'
+    platform: 'CUDA Runtime synchronization behavior'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API archive 12.9.2 - Reference Manual PDF'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/pdf/CUDA_Runtime_API.pdf'
+    version: 'Archive path 12.9.2; document labels CUDA Runtime API 12.9.1'
+    platform: 'cudaDeviceSynchronize reference'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Error Handling'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html'
+    version: 'CUDA Runtime API 13.3.1'
+    platform: 'CUDA Runtime error handling'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - API Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html'
+    version: 'CUDA Runtime API 13.3.1'
+    platform: 'CUDA Runtime synchronization behavior'
+    accessDate: '2026-08-26'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API 13.3.1'
+    platform: 'cudaDeviceSynchronize reference'
+    accessDate: '2026-08-26'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: f05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,error-state,immediate,deferred,synchronization,canonical-example,timeline,correctness,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: F05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: F04 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'F03,EX04,LAB03,F07,VIS19' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX04 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: error-lifecycle }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+import ErrorTimeline from '../../../../components/ErrorTimeline.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/foundations/asynchronous-errors/" lang="zh-CN">阅读中文对应页</a>
+
+A CUDA kernel launch is normally asynchronous with respect to the host, so an asynchronous error may become host-visible only after the device work that caused it. At the same time, some launch-configuration problems can surface on the submission path immediately. A correct error lifecycle separates when an error originates, where the host observes it, and which state is read or cleared. It neither labels every CUDA call asynchronous nor treats the API call that reports an error as the unique cause.
+
+## What you should be able to do
+
+- Distinguish CUDA Runtime last-error state from the direct return value of an API call.
+- State precisely that `cudaPeekAtLastError` reads without resetting state, while `cudaGetLastError` reads and then resets state to `cudaSuccess`.
+- Place an immediate launch-configuration error and a deferred device-execution error on different timelines.
+- Use an explicit synchronization boundary to wait for preceding device work and inspect its returned status.
+- Keep error checks, result correctness, and CUDA Evidence Status as independent boundaries.
+
+## Prerequisite
+
+Complete [F04: The Explicit Host-Device Resource Lifecycle](/en/foundations/host-device-lifecycle/) first. You should already trace allocation, H2D, launch, synchronization, D2H, comparison, and release, and know that the immediate check after a launch does not mean the kernel completed. F05 expands the asynchronous-error model that F04 deliberately kept narrow.
+
+[F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/) supplies device-access context that can lead to execution problems, but it is related rather than a new prerequisite. EX04 is this page's canonical executable counterpart; [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/) owns the guided observation in a real environment; and F07 will reuse these boundary arguments. This Learning Unit executes no CUDA and has no CUDA Evidence Status.
+
+## Error state: separate direct returns from last-error state
+
+A Runtime API call that returns `cudaError_t` has a direct return value, which callers should inspect at that call site. Kernel launch syntax does not provide an ordinary `cudaError_t` value to assign and inspect, so host code commonly queries last-error state adjacent to the launch. The channels are related but not interchangeable. For example, the direct return from `cudaDeviceSynchronize` must be checked directly rather than reconstructed at a later line.
+
+For the single-Runtime-instance program in this unit, last-error state belongs to the host thread. The CUDA 11.8.0 documentation describes the last error produced by any Runtime call in the same host thread. The 12.9.2 archive and 13.3.1 documentation further identify the same CUDA Runtime library instance in that host thread. This is not a separate error queue for every kernel, stream, or device.
+
+| Operation | What it reads | Does it reset last-error state after the read? | Does it establish device completion? |
+| --- | --- | --- | --- |
+| `cudaPeekAtLastError()` | The current last error for the host thread / Runtime instance | No | No |
+| `cudaGetLastError()` | The same last error | Yes, to `cudaSuccess` | No |
+| `cudaDeviceSynchronize()` | Its own synchronization result | Do not substitute it for either getter above | Yes, it waits for preceding requested device tasks |
+
+`cudaPeekAtLastError` supports observation without consumption. If no new error changes state, repeated peeks continue to observe the same item. `cudaGetLastError` retrieves and consumes the current state, which can establish a deliberate starting point for the next diagnostic interval. If a preflight `cudaGetLastError` retrieves an old error, handle or report it; do not silently discard it merely to manufacture a clean trace.
+
+All three requested Error Handling versions carry an important caveat: `cudaPeekAtLastError` and `cudaGetLastError` may also return errors from previous asynchronous launches. Many other Runtime API entries carry the same note. A call returning an error therefore establishes a host observation point. Without an isolated boundary, it does not prove that this call originated the error.
+
+## Immediate errors: launch configuration fails on the submission path
+
+Kernel launches are asynchronous with respect to the host, but that does not force every launch-related failure to wait until device execution. The Runtime processes the execution configuration on the submission path. When a configuration cannot form an accepted launch, failure can enter last-error state before the kernel body starts. A `cudaGetLastError` or `cudaPeekAtLastError` adjacent to the launch can therefore observe this immediate launch-boundary problem.
+
+The canonical diagnostic sequence handles old last-error state, issues one launch, and queries the launch boundary immediately. If that check fails, synchronization-dependent processing, D2H, and comparison have not met their preconditions, so control enters cleanup. Synchronization cannot repair a rejected launch and should not be the first expected discovery point for this scenario.
+
+Do not bind this teaching classification to one fixed error code. Different configuration defects, Toolkits, devices, or contexts can produce different statuses. The acceptance rule is that **the immediate check observes failure before the device body executes**, not that one enum value was memorized.
+
+## Deferred errors: visibility follows device execution
+
+On the other timeline, the Runtime accepts the launch, the adjacent check observes no new configuration failure, and the host continues. This result describes only the launch boundary visible at that time. It neither waits for the kernel body nor proves successful execution.
+
+When a problem occurs while accepted work is actually executing, the error originates during device execution. The host needs a boundary that waits for the relevant work before it can obtain that deferred result. EX04 uses explicit `cudaDeviceSynchronize` to separate “launch accepted” from “preceding device work completed or failed” into two reviewable return points.
+
+An immediate getter is not an execution probe. Placing `cudaGetLastError` very close to the launch still does not make it wait for the device. Placing it farther away does not automatically produce clear attribution either, because it may retrieve state that was not consumed earlier. Diagnostic quality comes from controlled state and intentional synchronization boundaries, not distance between source lines.
+
+## Synchronization: make the host wait at a deliberate boundary
+
+The `cudaDeviceSynchronize` reference in all three requested versions defines the call as waiting for the device to complete preceding requested tasks and returning an error when one of those tasks has failed. EX04 therefore uses it as an explicit completion/error boundary for a deferred execution error. The caller must inspect this call's own return value and stop treating output as valid when it fails.
+
+Explicit device-wide synchronization is not the only place a CUDA program might wait. Operations such as synchronous D2H transfer can also form waiting boundaries. The API synchronization-behavior documentation also warns against simplifying names into “every function without Async blocks” or “every Async function returns immediately,” and Runtime calls may block for undocumented internal-resource reasons. Correctness may rely only on documented semantics, not one observed timing.
+
+A narrow diagnostic interval is: handle existing last-error state; submit the target launch; check the launch boundary immediately; avoid mixing in unrelated work; wait for the target work; inspect the synchronization return directly. This improves attribution but still does not create a universal rule that “the reporting API is the cause,” especially with multiple streams, host threads, or Runtime-library combinations.
+
+## Canonical example: the EX04 error-lifecycle range
+
+[View the complete EX04 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/1bfe7b2d309db6d733471260c888262e59258660/examples/ex04-error-handling-lifecycle), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/1bfe7b2d309db6d733471260c888262e59258660.zip). After extraction, enter `examples/ex04-error-handling-lifecycle/`. The complete project is the sole canonical source. This page renders only its declared `error-lifecycle` range and maintains no second implementation.
+
+<CanonicalCode exampleId="EX04" range="error-lifecycle" />
+
+Read the excerpt through five boundaries: launch submission, immediate check, device execution, explicit synchronization, and host-visible result. In the launch-configuration scenario, device execution is marked not reached. In the deferred-execution scenario, the immediate check makes no execution-success claim, and the later synchronization return exposes failure. The example checks actual returned statuses, but this page does not promise identical error codes or diagnostic strings in every environment.
+
+## Timeline: compare the two surfacing points
+
+The original embedded Visual Explainer **VIS19: Error-surfacing timeline** below preserves two complete static timelines. Once scripting enhances it, native controls can select a scenario, play, pause, step, reset, or scrub with a range input; every control is keyboard-operable. It executes no CUDA.
+
+<span id="vis19" class="resource-target" aria-hidden="true"></span>
+<ErrorTimeline locale="en" />
+
+The static text and interactive highlight express a causal model, not measured duration. Spacing between cards is not latency, playback speed is not a device/host ratio, and no state grants Compile-Checked, Community-Observed, or Runtime-Verified.
+
+## Correctness: finding no error does not prove the result
+
+Successful immediate and synchronization checks mean only that the checked API boundaries did not return failure. They do not prove indexing, algorithm, numeric tolerance, or output contents. Results still require an independent host reference or another explicit oracle after successful D2H. Conversely, an error enum alone does not identify one unique source line; controlled inputs, boundaries, logs, and appropriate debugging tools are still needed.
+
+EX04 is a Runnable Example, while F05 is the Learning Unit that explains its model. They are separate evidence subjects. This page keeps both compilation and runtime axes empty. The browser timeline, static reading, host-only model test, and source inspection add no GPU runtime observation to EX04 or F05. Only an actual GPU execution record that satisfies its declared environment and acceptance criteria can change the runtime Evidence Status of the relevant executable subject.
+
+## Retrieval check
+
+1. When `cudaPeekAtLastError` and `cudaGetLastError` read the same kind of state, what is their critical side-effect difference? Does either wait for kernel completion?
+2. Why can the check immediately after a launch expose some configuration problems without proving successful device execution?
+3. Where are the origin and host-observation boundaries for a deferred execution error?
+4. Why does a Runtime API call returning an error not, by itself, prove that the call created the error?
+5. After both immediate and synchronization checks succeed, what independent step is still required for a correctness verdict?
+
+## Continue with practice
+
+- Complete the [F05 Exercises](/en/foundations/asynchronous-errors/exercises/), then inspect the separate [reviewed solutions](/en/foundations/asynchronous-errors/solutions/).
+- Review a record that confuses stale last-error state, the immediate check, and the synchronization boundary in [Practice Bank PB-R1-009](/en/practice/#pb-r1-009).
+- In a Supported Environment, open [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/) and carry these predictions into its guided run. Keep observations empty when no real run occurred.
+
+## Sources and review
+
+- [CUDA Runtime API 11.8.0 Error Handling](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA Runtime API 11.8.0 API synchronization behavior](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/api-sync-behavior.html)
+- [CUDA Runtime API 11.8.0 Device Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html)
+- [CUDA Runtime API archive 12.9.2 Error Handling; page label 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA Runtime API archive 12.9.2 API synchronization behavior; page label 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-runtime-api/api-sync-behavior.html)
+- [CUDA Runtime API archive 12.9.2 Reference Manual PDF; document label 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.2/pdf/CUDA_Runtime_API.pdf)
+- [CUDA Runtime API 13.3.1 Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html)
+- [CUDA Runtime API 13.3.1 API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html)
+- [CUDA Runtime API 13.3.1 Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)
+
+All three owner-documentation sets were accessed on **2026-08-26**. CUDA 11.8.0, the 12.9.2 archive, and CUDA 13.3.1 agree on the resetting behavior of `cudaGetLastError`, the non-resetting behavior of `cudaPeekAtLastError`, the previous-asynchronous-launch caveat, kernel launches being asynchronous with respect to the host, and the core explicit-device-synchronization behavior. Pages and the PDF under `archive/12.9.2` label themselves **CUDA Runtime API 12.9.1**, so metadata preserves both the archive path and displayed version. The prose, Exercises, and timeline composition are original and copy no NVIDIA sample, diagram, table, runtime output, or performance number.
+
+**Fact checked: 2026-08-26.**

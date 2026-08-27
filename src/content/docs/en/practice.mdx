@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: Published original cross-unit practice with prerequisite links, layered hints, and solutions.
+description: Seventeen published original cross-unit practice entries with prerequisite links, layered hints, and solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-08-26'
@@ -22,6 +22,10 @@ structure:
   - entry-pb-r1-006
   - entry-pb-r1-007
   - entry-pb-r1-008
+  - entry-pb-r1-009
+  - entry-pb-r1-010
+  - entry-pb-r1-011
+  - entry-pb-r1-012
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -32,6 +36,10 @@ prerequisites:
   - F02
   - F03
   - F04
+  - F05
+  - F06
+  - F07
+  - F08
   - O04
   - O05
   - O06
@@ -44,6 +52,10 @@ relatedUnits:
   - F02
   - F03
   - F04
+  - F05
+  - F06
+  - F07
+  - F08
   - O04
   - O05
   - O06
@@ -63,15 +75,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -90,13 +102,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the thirteen complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the seventeen complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The thirteen complete prompts, prerequisite links, and solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The seventeen complete prompts, prerequisite links, and solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -612,6 +624,166 @@ Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 
 
 **Source basis:** The site's original explicit lifecycle in [F04](/en/foundations/host-device-lifecycle/), lifetime and ownership boundaries in [O04](/en/start/cpp17-for-cuda/), evidence contract in [O02](/en/start/evidence-status/), and canonical lifecycle and current evidence record in [EX03](/en/examples/multidimensional-indexing/), plus NVIDIA [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html).
 
+<span id="pb-r1-009" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-009: Repair stale, immediate, and deferred error attribution
+
+- **ID and Publication Pair:** PB-R1-009 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Error-lifecycle debugging; intermediate.
+- **Direct prerequisite:** [F05: CUDA Errors Are Often Asynchronous](/en/foundations/asynchronous-errors/).
+- **Hardware gate:** None; review a static error-lifecycle record and run no CUDA.
+- **Related Learning Units and resources:** [F05](/en/foundations/asynchronous-errors/), [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [EX04](/en/examples/error-handling-lifecycle/), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** One host thread first records a failed Runtime operation but does not consume its last-error state. A pre-launch `cudaPeekAtLastError` observes that unspecified old failure and is ignored. The thread then submits a prevalidated legal no-op launch; the adjacent `cudaGetLastError` returns the same non-success state, and the reviewer blames the new launch. Because the getter resets the state, a second interval begins cleanly: a launch with a deliberate device-access defect is accepted, its adjacent `cudaGetLastError` returns success, and `cudaDeviceSynchronize` later returns failure. The reviewer now says synchronization caused the defect. Rebuild both intervals with correct origin, observation, state-transition, and control-flow labels.
+
+**Constraints:**
+
+- Keep direct `cudaError_t` returns separate from last-error state, and state whether each operation reads, resets, or waits.
+- Do not assign a fixed enum value or diagnostic string to either hypothetical failure.
+- Stop dependent D2H and verification work after a failed launch or completion boundary; invent no runtime output or Evidence Status.
+
+**Expected evidence:** A two-interval ledger with columns for prior state, operation, direct return or queried state, reset effect, completion effect, attributed origin, and permitted next step, followed by two repaired reviewer conclusions.
+
+**Acceptance criteria:**
+
+- Classify the first adjacent getter as observing stale state because the same failure was visible before the legal target launch; do not attribute it to that launch.
+- State that `cudaPeekAtLastError` observes without resetting, while `cudaGetLastError` observes and resets to `cudaSuccess`; neither establishes device completion.
+- Classify the second immediate success as launch-boundary information only, then place the deliberate access defect at device execution and its host observation at the synchronization return.
+- Treat `cudaDeviceSynchronize` as the reporting/completion boundary, not automatically the origin, and claim no compilation or runtime evidence from the static repair.
+
+<details><summary>Hint 1</summary>If a non-success value is already visible before the target launch, source-line proximity after the launch cannot establish new attribution.</details>
+
+<details><summary>Hint 2</summary>Draw separate rows for launch submission, the adjacent getter, device execution, and synchronization. Only one of those rows waits for preceding device work.</details>
+
+**Solution:** In interval one, the old failed Runtime operation creates the state; the pre-launch peek proves that state predates the target launch and leaves it unchanged. The legal no-op launch does not establish a new failure, and the adjacent getter retrieves the still-stale item and resets the state. The correct conclusion is “an earlier failure remained unconsumed; this trace cannot blame the target launch.” In interval two, the clean starting state and successful adjacent getter show only that no immediate launch failure was observed. The accepted kernel later reaches the deliberate invalid access during device execution. `cudaDeviceSynchronize` waits for preceding work and returns that deferred failure, so D2H and host verification must not proceed. The correct conclusion is “the execution defect originated on the device and became host-visible at the completion boundary.” Neither interval supplies an actual run record.
+
+**Valid alternative:** Run each diagnostic scenario in a separate process, as EX04/LAB03 require, and still record the preflight state plus direct synchronization return. Process isolation narrows attribution but does not turn an immediate getter into a completion check.
+
+**Common errors:** Silently discarding a preflight error; treating last-error state as one queue per kernel; saying `cudaGetLastError` synchronizes; treating immediate success as successful execution; blaming the synchronization call for the device defect; continuing to copy or verify output after failed completion.
+
+**Source basis:** The site's original [F05 error-state and observation contract](/en/foundations/asynchronous-errors/), [EX04 scenario contract](/en/examples/error-handling-lifecycle/), and [SRC-CUDA-015 record](/en/sources-and-versions/#src-cuda-015), plus NVIDIA Runtime API [Error Handling](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__ERROR.html) and [API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html).
+
+<span id="pb-r1-010" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-010: Rebuild a capability-to-compiler-target decision
+
+- **ID and Publication Pair:** PB-R1-010 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Capability and compiler-target review; intermediate.
+- **Direct prerequisite:** [F06: Compute Capability Is a Feature Contract](/en/foundations/compute-capability/).
+- **Hardware gate:** None; review capability, limit, and compiler records without probing a GPU.
+- **Related Learning Units and resources:** [F06](/en/foundations/compute-capability/), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [O03](/en/start/environment-manifest/), and [F08](/en/foundations/launch-geometry/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A packet directly identifies one selected GPU and records compute capability 9.0. Its kernel requires an architecture-specific 9.0 feature. The capability table records 1024 as the device maximum threads per block, and the proposed block is `(32, 32, 1)`. The packet chooses baseline `compute_90` plus `sm_90`, says the same pair must work in NVCC 11.8.0, the 12.9.2 archive, and the selected Toolkit 13.3.1, and declares the block “recommended and faster” because its product equals the maximum. Repair the feature, limit, target, and unresolved-environment decisions.
+
+**Constraints:**
+
+- Preserve GPU identity, compute capability, required feature set, numeric limits, Toolkit, NVCC, virtual target, real target, driver, artifact, and runtime result as independent fields.
+- Use only the selected target rows reviewed by F06; do not infer compiler support from the GPU or from numeric ordering.
+- Make no performance, compatibility, compilation, or runtime claim from a maximum or documentation lookup.
+
+**Expected evidence:** A decision ledger for the three NVCC coordinates, one block-limit clause, and a final list of facts still required before build, launch, correctness, or measurement conclusions.
+
+**Acceptance criteria:**
+
+- Replace the baseline target pair with `compute_90a` / `sm_90a` because the stated source requirement uses the architecture-specific 9.0 set, and restrict that code to exact capability 9.0.
+- Record that the selected NVCC 11.8.0 subset has no qualified target pair, while the 12.9.2 archive and selected Toolkit 13.3.1 coordinates list `compute_90a` / `sm_90a`; reject one unchanged three-Lane plan.
+- Classify 1024 as a device validity maximum. `(32, 32, 1)` reaches that aggregate and passes only if every axis, function-specific limit, register/shared-memory requirement, and launch boundary also passes; it is not a recommendation.
+- Leave driver loading, embedded artifact code, host compiler, OS, permissions, build result, correctness, and performance unresolved.
+
+<details><summary>Hint 1</summary>`compute_90` names the baseline virtual contract. The suffix is part of the feature scope, not decorative spelling.</details>
+
+<details><summary>Hint 2</summary>Read the target matrix by compiler row before reading the device limit. A compiler's accepted targets and a GPU's thread maximum answer different questions.</details>
+
+**Solution:** The direct query establishes capability 9.0 for the selected GPU and selects the applicable feature and limit rows, but it does not identify any compiler. Because the kernel requires the architecture-specific set, baseline `compute_90` / `sm_90` is semantically insufficient; the reviewable plan is `compute_90a` / `sm_90a`, exact to 9.0. F06's selected matrix lists no qualified pair for NVCC 11.8.0 and lists that pair for the 12.9.2 archive and selected Toolkit 13.3.1, so the required source cannot use one unchanged target plan across all three Lanes. The 1024-thread device maximum makes the `(32, 32, 1)` product only provisionally device-legal. Function attributes and other resources can still make it illegal, and equality with a ceiling predicts no speed. Each viable compiler plan still needs a build record, artifact/driver review, actual launch and completion checks, result verification, and a separate measurement contract.
+
+**Valid alternative:** Remove or replace the architecture-specific source dependency, then review a baseline `compute_90` / `sm_90` plan independently in each exact compiler. That broadens scope by changing the program requirement; it is not a suffix-free spelling of the original program.
+
+**Common errors:** Guessing capability from a product name; treating a feature row as a compiler target list; pairing `compute_90a` with baseline `sm_90`; assuming a larger capability number accepts exact-9.0 features; turning `maxThreadsPerBlock` into a preferred block size; claiming all Toolkit Lanes built because their documentation was read.
+
+**Source basis:** The site's original [F06 decision chain](/en/foundations/compute-capability/) and [SRC-CUDA-016 record](/en/sources-and-versions/#src-cuda-016), NVIDIA [Compute Capabilities and Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets), and the exact [NVCC 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html), [12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html), and [current NVCC](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html) owner pages.
+
+<span id="pb-r1-011" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-011: Repair Runtime/Driver ownership and error boundaries
+
+- **ID and Publication Pair:** PB-R1-011 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Mixed-API lifecycle debugging; intermediate.
+- **Direct prerequisite:** [F07: Distinguish CUDA Runtime API and Driver API Roles](/en/foundations/runtime-driver-api/).
+- **Hardware gate:** None; review a mixed-API design and run no CUDA.
+- **Related Learning Units and resources:** [F04](/en/foundations/host-device-lifecycle/), [F05](/en/foundations/asynchronous-errors/), [F07](/en/foundations/runtime-driver-api/), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [EX04](/en/examples/error-handling-lifecycle/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A mixed design calls `cudaSetDevice` and `cudaMalloc`, then `cuInit(0)`, obtains the current context with `cuCtxGetCurrent`, loads a `CUmodule`, resolves a `CUfunction`, and calls `cuLaunchKernel`. The helper labels the obtained context “owned,” ignores every `CUresult` because a later `cudaGetLastError` is supposed to cover them, unloads the module, calls `cuCtxDestroy` on the obtained context, then calls `cudaDeviceSynchronize` and `cudaFree`. Repair initialization, current-context ownership, module/function lifetime, direct status checks, asynchronous completion, and teardown authority.
+
+**Constraints:**
+
+- Keep Runtime `cudaError_t`, Driver `CUresult`, and Runtime last-error state as distinct observation channels.
+- Do not grant context-destruction authority merely because a handle was queried; every release must match an explicit acquisition/ownership rule.
+- Preserve allocation, module, function, and context validity through the launch's completion boundary; invent no output or performance result.
+
+**Expected evidence:** An owner/lifetime ledger for context, allocation, module, and function; a corrected ordered flow; and separate submission, completion, and attribution clauses.
+
+**Acceptance criteria:**
+
+- Check `cuInit(0)` and each Driver call's own `CUresult`, and check each Runtime call's own `cudaError_t`; do not use `cudaGetLastError` as a substitute for `cuLaunchKernel`'s direct return.
+- Treat the context returned by `cuCtxGetCurrent` as a current handle with no demonstrated teardown authority in this packet. Keep it current and valid, and do not call `cuCtxDestroy` unless a matching context-creation ownership path is documented.
+- Keep the application-owned `CUmodule` loaded and its `CUfunction` valid through completion. Synchronize through one documented boundary in the same context, inspect that return directly, then unload the module and free the Runtime-owned allocation after last use.
+- State that Driver submission can still be followed by a deferred execution error at context, stream, or event completion; API choice does not remove F05's attribution boundary.
+
+<details><summary>Hint 1</summary>A queried current handle answers “which context applies?” It does not answer “which helper may destroy shared state?”</details>
+
+<details><summary>Hint 2</summary>Place one status cell immediately beside `cuLaunchKernel` and another beside the chosen synchronization call. They cover different stages.</details>
+
+**Solution:** Establish the Runtime-selected device, call and check `cudaMalloc`, then call and check `cuInit(0)`. Query and record the context current on this host thread without claiming ownership that the packet never acquired. Load the module and resolve the function under that context, checking each `CUresult`. Keep the allocation, context, module, and function valid while calling `cuLaunchKernel`, and inspect its direct return as the submission result. A Runtime last-error getter cannot replace that Driver return. Use a documented completion operation such as `cuCtxSynchronize` while the same context is current and inspect its own `CUresult`; a failure there may report earlier asynchronous device work rather than originate at synchronization. Only after successful completion and any required result transfer or verification may the application unload its module and free the allocation through its recorded Runtime owner. It must not destroy the borrowed current context. This static design review creates no CUDA evidence.
+
+**Valid alternative:** Explicitly retain a primary context or create a Driver-managed context, then pair that acquisition with the exact documented release path and keep all Runtime interoperability clauses explicit. An all-Runtime or all-Driver implementation is also valid when it preserves the same ownership, completion, and correctness boundaries.
+
+**Common errors:** Treating both APIs as different device stacks; assuming each Runtime call maps one-to-one to a Driver call; destroying a primary/current context owned elsewhere; unloading a module before its work completes; using `cudaGetLastError` to check `CUresult`; treating a successful launch return as successful execution.
+
+**Source basis:** The site's original [F07 role and ownership contract](/en/foundations/runtime-driver-api/), [F05 asynchronous-error contract](/en/foundations/asynchronous-errors/), and [SRC-CUDA-015 record](/en/sources-and-versions/#src-cuda-015), plus NVIDIA [Driver versus Runtime API](https://docs.nvidia.com/cuda/cuda-driver-api/driver-vs-runtime-api.html), [Runtime/Driver interactions](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DRIVER.html), and [Driver synchronization behavior](https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html).
+
+<span id="pb-r1-012" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-012: Select legal block shapes before measurement
+
+- **ID and Publication Pair:** PB-R1-012 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Launch-geometry correctness and resource review; intermediate.
+- **Direct prerequisite:** [F08: Launch Geometry Is a Correctness and Resource Decision Before Speed](/en/foundations/launch-geometry/).
+- **Hardware gate:** None; perform static geometry and resource checks only.
+- **Related Learning Units and resources:** [F03](/en/foundations/multidimensional-indexing/), [F06](/en/foundations/compute-capability/), [F08](/en/foundations/launch-geometry/), [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22), and [LAB03](/en/labs/break-and-repair-indexing/).
+- **Last reviewed:** 2026-08-26.
+
+**Prompt:** A fixed logical extent is `width = 1000`, `height = 513`. The selected device record gives `maxThreadsDim = (1024, 1024, 64)`, `maxThreadsPerBlock = 1024`, and grid limits larger than every grid below. The selected kernel reports `maxThreadsPerBlock = 768`; its declared register and shared-memory needs fit for candidates at or below that function limit. Classify A `(32, 32)`, B `(48, 16)`, C `(64, 8)`, and D `(1025, 1)`. For every legal candidate, derive an overflow-safe grid, coverage, and fringe count while preserving the same two-axis bounds check. The packet calls B fastest because it has slightly less fringe than C. Decide which candidates may proceed to correctness verification and what remains before measurement.
+
+**Constraints:**
+
+- Do not round or pad the logical extent, remove either axis bound, or evaluate an unchecked product.
+- Check positive inputs, per-axis device limits, aggregate device limits, function-specific limits, and grid limits as separate gates.
+- Produce no latency, occupancy, throughput, or fastest-shape claim; this exercise runs no kernel.
+
+**Expected evidence:** A four-row legality ledger, exact grid/coverage/fringe arithmetic for B and C, the preserved kernel guard, and a pre-measurement checklist.
+
+**Acceptance criteria:**
+
+- Reject A because 1024 threads exceed the function-specific limit 768 even though the device aggregate limit passes; reject D because x exceeds its axis limit and the aggregate device limit.
+- Accept B provisionally with grid `(21, 33)`, coverage `1008 x 528`, 532,224 launched threads, and 19,224 fringe threads.
+- Accept C provisionally with grid `(16, 65)`, coverage `1024 x 520`, 532,480 launched threads, and 19,480 fringe threads.
+- Preserve `gx < 1000 && gy < 513` before flattening/access, require successful launch/completion and identical result verification for each candidate, and reject “B is fastest” until a controlled measurement contract is executed.
+
+<details><summary>Hint 1</summary>Device legality is not the final block gate: compare each product with 768 after checking each axis against the device record.</details>
+
+<details><summary>Hint 2</summary>For positive `n` and `d`, use `1 + floor((n - 1) / d)`. Coverage is not a replacement logical extent.</details>
+
+**Solution:** A has `32 * 32 = 1024` threads, so its axes and device aggregate pass but its function limit fails. D violates `block.x <= 1024` and has 1025 threads, so it fails before grid derivation. B has 768 threads and gives `grid = (1 + floor(999 / 48), 1 + floor(512 / 16)) = (21, 33)`. Its coverage is `1008 x 528`; checked products give 532,224 launched minus 513,000 logical equals 19,224 fringe. C has 512 threads and gives grid `(16, 65)`, coverage `1024 x 520`, 532,480 launched, and 19,480 fringe. Both remain only provisional because actual launch and completion checks still matter. Their kernel must leave the logical extent unchanged and reject fringe with both predicates before flattening. B's 256 fewer fringe threads are a geometry fact, not a runtime verdict. Only after identical inputs, successful boundaries, independent result comparison, and a declared warm-up/timing/synchronization/repetition method may B and C be measured.
+
+**Valid alternative:** A legal `(16, 16)` candidate may be added to the ledger using the same gates and logical extent. Its legality still does not make it a preferred or faster shape.
+
+**Common errors:** Checking only `maxThreadsPerBlock`; multiplying before checking overflow; ignoring `cudaFuncAttributes.maxThreadsPerBlock`; changing width or height to coverage; using x-only bounds; calling fewer fringe threads faster; treating browser or hand arithmetic as GPU execution.
+
+**Source basis:** The site's original [F08 feasibility and measurement contract](/en/foundations/launch-geometry/), [F03 bounds contract](/en/foundations/multidimensional-indexing/), and [SRC-CUDA-016 record](/en/sources-and-versions/#src-cuda-016), plus NVIDIA [Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [`cudaDeviceProp`](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html), and [`cudaFuncAttributes`](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html).
+
 ## Review record
 
-All thirteen original entries and their Chinese counterparts were reviewed together on **2026-08-26**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.
+All seventeen original entries and their Chinese counterparts were reviewed together on **2026-08-26**. Every scenario, prompt, and solution is original project work. No external question, output, log, or performance figure was copied, and no CUDA execution occurred.

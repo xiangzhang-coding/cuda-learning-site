@@ -3,7 +3,7 @@ title: 可视化讲解索引
 description: 按概念、相关学习单元（Learning Unit）和版本边界查找当前完整发布的可视化讲解。
 pairId: visuals-index
 counterpart: /en/visuals/
-factCheckDate: '2026-08-25'
+factCheckDate: '2026-08-26'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-25' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/visuals/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。未完成的规划条目不会显示。
+本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。VIS01 与 VIS02 使用独立页面；VIS19-VIS22 是嵌入各自学习单元（Learning Unit）的完整双语发布可视化讲解。四张内嵌讲解卡片直接深链到页内锚点，导航不会为它们复制四个独立页面。未完成的规划条目不会显示。
 
 ## 已发布可视化讲解
 
@@ -34,8 +34,8 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 顺序与直接查找
 
-规划 ID 是稳定的讨论标签，不会生成或承诺固定 URL。你可以直接打开当前卡片，也可以先沿相关学习单元（Learning Unit）回到建立该概念的课程位置。
+规划 ID 是稳定的讨论标签，不会生成或承诺固定 URL。卡片目的地可以是独立页面，也可以是学习单元内的明确锚点；你可以直接打开当前卡片，或先沿相关学习单元回到建立该概念的课程位置。
 
 ## 证据边界
 
-可视化讲解在浏览器中运行确定性教学模型，不执行 CUDA。索引明确显示这一边界，且不会为 VIS01 或 VIS02 声明 Compile-Checked、Community-Observed 或 Runtime-Verified。
+VIS01、VIS02、VIS19、VIS20、VIS21 与 VIS22 都只在浏览器中运行确定性教学模型，不执行 CUDA。索引明确显示这一边界，且不会为这六项可视化讲解声明 Compile-Checked、Community-Observed 或 Runtime-Verified。
