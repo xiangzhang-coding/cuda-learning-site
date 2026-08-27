@@ -1,0 +1,133 @@
+---
+title: 'VIS06: Memory Hierarchy, Ownership, and Lifetime'
+description: Filter host, global, constant, shared, local, and register records by accessible scope and operation path while retaining the complete static catalog and lifecycle/release facts.
+pairId: vis06
+counterpart: /visuals/memory-hierarchy-lifetime/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - catalog
+  - filters
+  - address-space-boundaries
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS06
+prerequisites: []
+relatedUnits:
+  - M01
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA memory spaces, scopes, and lifetimes'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-06-25'
+    platform: 'CUDA C++ memory-space guidance'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime allocation, copy, and release interfaces'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived CUDA 11.8 stability boundary'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,catalog,filters,address-space-boundaries,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M01 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0' }
+---
+
+import MemoryHierarchyLifetime from '../../../../components/MemoryHierarchyLifetime.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/memory-hierarchy-lifetime/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS06 is the Visual Explainer related to [M01](/en/memory/address-spaces/). It replaces a misleading “fast-to-slow memory pyramid” with a catalog organized by owner/acquisition, accessible scope, lifetime, release/end condition, and a physical or address-space caveat.
+
+<MemoryHierarchyLifetime locale="en" />
+
+## Six-record catalog
+
+The catalog contains exactly six records:
+
+| Record | Operation path / owner and acquisition | Accessible scope | Lifetime and end |
+| --- | --- | --- | --- |
+| Host | `host-language` allocator/object declaration or `runtime-api` host allocation such as `cudaMallocHost` | Host; device access needs a separately declared mechanism | Allocation/object lifetime; matching host release, `cudaFreeHost`, or process end |
+| Global | `runtime-api`: host acquisition through a CUDA Runtime allocation API | Grid threads with a valid pointer; host manages or copies through APIs | Across launches until release, reset, or context/application end |
+| Constant | `symbol-api`: module/context symbol initialized through symbol APIs | Read-only to grid threads; host APIs can locate the symbol | Module/context lifetime until unload, reset, or context end |
+| Shared | `kernel-declaration`: static or dynamic shared declaration per block | Threads in the owning block | Owning block during kernel execution; ends with block completion |
+| Local | `compiler-placement`: compiler-managed private storage per thread | Owning thread | Owning thread/kernel execution; no host `cudaFree` |
+| Register | `compiler-placement`: compiler-assigned per-thread storage | Owning thread | Owning thread/kernel execution; compiler-managed end |
+
+The longer static table inside the component retains the release and physical/address-space caveat for every record.
+
+## Filters
+
+The scope filter offers host, grid, block, and thread. The bounded operation-path taxonomy maps `host-language` to host, `runtime-api` to Runtime-managed host and global allocations, `symbol-api` to constant, `kernel-declaration` to shared, and `compiler-placement` to local and register. Both filters include and default to `all`. Reset restores that deterministic six-record state.
+
+Filters intersect: selecting thread scope and `compiler-placement` shows local and register; selecting host scope and `runtime-api` shows host memory, while selecting `runtime-api` across all scopes shows host and global memory. Invalid filter identifiers fail closed in the pure model. Lifecycle and release/end remain factual fields in every record and table, but they are no longer filter axes. Filtering never removes records from the permanent static catalog.
+
+## Address-space and physical boundaries
+
+Global, constant, shared, and local are device address-space concepts. Registers are compiler-managed on-SM storage. Host memory is included to expose ownership and transfer boundaries, but it is not another kernel device address space.
+
+L1 and L2 are caches, not extra address spaces with independent source-level allocation lifetimes. Shared memory can share a physical SM resource with L1 while remaining programmer-managed shared address space. Conversely, **local** means logically private to one thread; it does not mean physically on-chip. CUDA local memory resides in device memory, and register pressure can spill thread values there.
+
+The physical-layer diagram is therefore not a latency ranking. It does not claim a cache hit, placement for a selected variable, occupancy effect, or performance result.
+
+## Static fallback
+
+The static fallback contains both a three-layer grouping and a complete six-row table. Both are server-rendered from the same catalog and remain present without JavaScript and in print. The enhanced table is a filtered view, not the sole copy of the facts.
+
+## Evidence boundary
+
+This browser catalog compiles no CUDA, executes no kernel, and probes no allocation, register assignment, cache, or physical placement. Its filters grant no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status. Every publication evidence axis is empty.
+
+## Sources
+
+The current [Writing SIMT Kernels memory-space sections](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) provide the global, constant, shared, local, register, and cache boundaries. [Best Practices memory optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations) cross-check the address-space and physical-placement cautions. Current [Runtime Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) anchors explicit host/device acquisition, copy, and release interfaces.
+
+The archived [CUDA C++ Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy) defines the selected stability boundary. VIS06 keeps durable CUDA C++ ownership/scope/lifetime distinctions and does not turn current cache details into prerequisites. All source coordinates were accessed on **2026-08-27**; the catalog, diagram, tables, filters, and copy are original CC-BY-4.0 content.

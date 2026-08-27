@@ -1,0 +1,130 @@
+---
+title: 'VIS04：内存请求的 segment 分组'
+description: 对一个 global-memory instruction，把每个 active lane 的 naturally aligned 1/2/4/8-byte 请求归入 32-byte segment，同时避免性能推断。
+pairId: vis04
+counterpart: /en/visuals/memory-transactions/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - input-contract
+  - segment-model
+  - accounting
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS04
+prerequisites: []
+relatedUnits:
+  - M02
+  - EX05
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-06-25'
+    platform: 'CUDA C++ memory access guidance'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime allocation and copy interfaces'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 11.8 - Device Memory Accesses'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived CUDA 11.8 stability boundary'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,input-contract,segment-model,accounting,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M02,EX05' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0' }
+---
+
+import MemoryTransactionExplorer from '../../../components/MemoryTransactionExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/memory-transactions/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS04 是一份可视化讲解（Visual Explainer），用于建立 [M02](/memory/coalescing-transactions/) 与 [EX05](/examples/coalesced-strided-access/) 所需的地址分组前提。它只回答一个有边界的问题：选定 active lane 请求的 byte 位于哪些自然对齐的 32-byte segment？
+
+<MemoryTransactionExplorer locale="zh-CN" />
+
+## 输入合同
+
+模型接受 contiguous 或 strided 模式，`1`、`2`、`4`、`8` byte 元素宽度，整数 element stride，byte offset，以及 `1` 到 `32` 个 active lane。它只建模一个 warp 的一次 global-memory instruction；active lane 从 lane zero 开始连续取值，全部地址相对于按 32 byte 对齐的 fixture base `B = 0`。Offset 必须按所选元素宽度自然对齐，即 `O % E = 0`。Contiguous 模式把 stride 固定为一个元素；strided 模式使用输入的正 stride，因此每个 lane 的元素地址也保持自然对齐。
+
+浏览器上限保证生成的 table 有界：stride 最多 `64` 个元素，offset 最多 `4096` byte。这些是 interface limit，不是 CUDA device limit。格式错误、fractional、带符号、指数形式、越界或不满足 `O % E = 0` 的值都会 fail closed，不产生部分分组结果。相对于 32-byte segment 的偏移仍然合法，例如 4-byte 元素可以使用 offset `4`。
+
+## Segment 模型
+
+对 lane `L`、元素宽度 `E`、stride `S` 和起始 offset `O`，请求的闭区间 byte range 为：
+
+```text
+start(L) = O + L * S * E
+end(L)   = start(L) + E - 1
+```
+
+每个请求 byte 属于从 `floor(address / 32) * 32` 开始的自然对齐 segment。因为允许的元素宽度都整除 `32`，且每个元素地址按其宽度自然对齐，所以选定 instruction 中的单个元素不会跨越 32-byte segment boundary。Lane table 仍逐项保留请求 byte range 与对应 segment start。
+
+Fixture 明确采用 compute capability 6.0+ 的 CUDA 规则。学习站的基础 GPU 能力层级从 compute capability 7.5 开始，因此该 fixture 位于本站声明的稳定课程范围内。
+
+## Byte accounting
+
+对齐默认值（`32` lanes、`4` bytes、stride `1`、offset `0`）请求 byte `0` 到 `127`，对应 segment start `0`、`32`、`64`、`96`。Offset `4` 仍满足 4-byte natural alignment，但让最后一个请求延伸到 byte `131`，因此出现五个 segment group。Stride `2` 每隔一个 4-byte word 取值，共占用八个 segment group。只有 lane `0..4` active 的 aligned 4-byte contiguous case 请求 byte `0..19`，只触及一个 segment。
+
+“请求 byte”是各 lane 元素宽度之和。“Segment 覆盖 byte”是 segment group 数乘以 `32`，两者之差只表示地址覆盖账目。它不是 cache traffic、已观察 hardware transaction count、bandwidth、efficiency 或 speedup。
+
+## 静态回退
+
+Workbench 后的四份 ledger 由同一纯 TypeScript 模型生成。禁用 JavaScript 和打印时，default、合法的 segment-relative offset、stride 与 5-lane partial-warp 案例仍完整保留。控件与交互 table 只有在增强成功后才会显示。
+
+## 证据边界
+
+浏览器只求值整数地址方程。它不编译 CUDA、不 launch GPU 工作、不查询 cache，也不读取 profiler。因此选择与静态 ledger 不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**，发布 metadata 的 evidence axes 全部保持为空。
+
+## 来源
+
+当前 [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) 与 [Best Practices memory optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations) 给出该有界 fixture 使用的 32-byte segment 与 coalescing 术语。当前 [Runtime Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) 用于固定 allocation/copy 术语，但本页不会执行其中的 API。
+
+归档的 [CUDA C++ Programming Guide 11.8 device-memory section](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses) 构成 stability boundary：VIS04 只教授与该选定工具包通道共享的地址分组规则，不镜像特定 release 的 diagram。全部数值、ledger、table 与讲解文字均为原创 CC-BY-4.0 内容。来源访问日期为 **2026-08-27**。

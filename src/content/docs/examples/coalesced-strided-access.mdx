@@ -1,0 +1,260 @@
+---
+title: 'EX05：合并与跨步访问可运行示例'
+description: 通过同一份原创 C++17 CUDA 实现和精确的纯 host 参考，对比连续、偏移一个元素和步长为二的 gather。
+pairId: ex05
+counterpart: /en/examples/coalesced-strided-access/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - scenario-contract
+  - access-kernel
+  - scenario-loop
+  - host-reference
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX05
+prerequisites:
+  - M02
+relatedUnits:
+  - VIS04
+exampleIds:
+  - EX05
+canonicalExample: EX05
+canonicalRanges:
+  - access-kernel
+  - scenario-loop
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 3,068 bytes of declared device allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The contiguous, misaligned, and strided scenarios should each report PASS only when all 256 outputs exactly match the pure host reference.
+    - For each warp, the contiguous scenario should read source index logicalIndex and the misaligned scenario should read logicalIndex + 1 while preserving unit stride.
+    - For each warp, the strided scenario should read source index 2 * logicalIndex, selecting every second input element without exceeding the 511-element allocation.
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Coalesced Access to Global Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA global-memory access patterns'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex05
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-27'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,scenario-contract,access-kernel,scenario-loop,host-reference,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX05
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: M02
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: VIS04
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX05
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX05
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'access-kernel,scenario-loop'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 3,068 bytes of declared device allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/coalesced-strided-access/" lang="en">Read the English counterpart</a>
+
+EX05 是一个独立、原创的合并与跨步访问可运行示例（Runnable Example）。一份 C++17 CUDA kernel 和一个场景循环共同覆盖连续、偏移一个元素和步长为二的 gather。网站不会执行 CUDA；项目只报告正确性，不报告性能。
+
+## 用途
+
+先完成 M02。EX05 把其中的全局内存访问模型变成受控的可执行对比，VIS04 是相关的纯浏览器可视化讲解（Visual Explainer）。host test 和 VIS04 都不会执行 kernel，也不会授予 CUDA 证据状态（Evidence Status）。
+
+实验保持元素类型、逻辑数量、launch geometry、输入值、输出布局和验证方式不变，只改变 `offset` 与 `stride`。这种控制变量让 source-index sequence 明确可查，同时不会把尚未测量的 transaction count 或运行时间差写成结果。
+
+## 获取 canonical project
+
+[在固定提交中查看完整 EX05 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex05-coalesced-strided-access)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip)。解压后进入 `examples/ex05-coalesced-strided-access/`。
+
+`project.json` 是机器可读合同，`README.md` 说明独立构建、外部运行和证据边界。实现、host reference、测试与页面文字均为原创，不是从 NVIDIA sample 改写而来。软件文件使用 Apache-2.0。
+
+## 场景合同
+
+三个场景都固定 `logicalCount=256`，并执行 `output[logicalIndex] = input[offset + logicalIndex * stride]`。
+
+| 场景 | Offset | Stride | 第一个 warp 的 source indices | 所需 input elements |
+| --- | ---: | ---: | --- | ---: |
+| `contiguous` | 0 | 1 | 0 到 31 | 256 |
+| `misaligned` | 1 | 1 | 1 到 32 | 257 |
+| `strided` | 0 | 2 | 0, 2, 4, ..., 62 | 511 |
+
+这里的 “misaligned” 指访问序列相对 base 偏移一个四字节元素，并不表示 C++ `std::uint32_t` load 违反类型对齐。表格描述的是确定性索引，不是实测 memory transaction。
+
+## Access kernel
+
+唯一的 kernel 计算一个 logical index，拒绝超过 256 个输出的 thread，然后执行共享的 gather 表达式：
+
+<CanonicalCode exampleId="EX05" range="access-kernel" />
+
+三个场景的 output address 都保持连续，只有 input address 由两个标量参数改变。纯 host reference 会先检查 overflow，再用最大合法 source index 加一得到 allocation size，随后才允许创建 buffer。
+
+## 场景循环
+
+同一个 allocation、launch geometry、kernel、同步边界和 exact verifier 按声明顺序用于三个场景：
+
+<CanonicalCode exampleId="EX05" range="scenario-loop" />
+
+每个场景先计算独立 host 结果，再 launch 共享 kernel、检查 submission、显式同步、回传全部输出并逐个比较 `std::uint32_t`。正常输出只有 `scenario=<identity> result=PASS|FAIL`；没有 event、clock、profiler 调用或推导出的速率。
+
+## Host reference 边界
+
+`include/coalesced_strided_access_reference.hpp` 是纯 C++17。它定义有序场景表，在计算 required input size 前检查乘法与加法，拒绝 undersized allocation 且不改写调用方的 source-index destination，生成每个 reference output，并执行 exact comparison。
+
+`make host-test` 检查 256、257、511 三个 required count；包括 lane 31 和 logical index 255 在内的代表性 source index；越界、undersized、zero-stride 和 overflow 情况；以及三个完整 output array。它不包含 CUDA header 或 device annotation。通过 host test 不能证明 device code 已编译或运行。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+前四步需要所选 CUDA Toolkit，host-test 只需要 host C++17 compiler。CUDA stages 生成 `build/coalesced_strided_access.ii`、`build/coalesced_strided_access.o` 和 `build/ex05-coalesced-strided-access`。Inspect 检查 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。
+
+`scripts/compile-check.sh c++17 ex05 <result-dir>` 执行这些步骤并保留经过扫描的日志与 inspection artifacts。它绝不运行 `build/ex05-coalesced-strided-access`，因此成功的 build gate 不会产生 GPU observation。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 511 个 input 加 256 个 output `std::uint32_t`，device allocation 合计 3,068 bytes，远低于 8 GB |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Toolkit Lane 共用同一份原创 C++17 source |
+
+声明的三条 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 和 CUDA 13.3.1。固定 image 是未来构建目标，不是 compilation record。
+
+## 编译与运行证据
+
+EX05 的 compilation array 为空，因此 **EX05 不是 Compile-Checked**。Build-gate log 是临时 workflow artifact，不会自动成为公开 Evidence Status record。Runtime 仍为 **Pending Hardware Verification**，recorded observations 为空。
+
+本页不声明 GPU output、transaction count、timing、latency、bandwidth、throughput、profiler result 或 speedup。未来 runtime record 必须标明 Reference Environment，附完整环境清单（Environment Manifest），保留全部场景 identity，并先满足 exact output 验收条件。
+
+## 预期观察，不是运行记录
+
+1. 三个场景都应只在 256 个输出全部精确匹配纯 host reference 时报告 `PASS`。
+2. 每个 warp 中，contiguous source index 应为 `logicalIndex`，misaligned 场景应以相同 unit stride 使用 `logicalIndex + 1`。
+3. 每个 warp 中，strided 场景应使用 `2 * logicalIndex`，每隔一个元素取值并保持在 511 个 input 内。
+
+这些是声明的正确性与地址序列预期，不包含性能排序，Learning Site 尚未观察它们。
+
+## 来源与复核
+
+CUDA C++ Best Practices Guide 提供 global-memory coalescing model。三条 NVCC 页面对应精确 Toolkit Lanes，三个 Docker Hub tag API 只提供 container metadata。这些来源都不构成 EX05 的 build 或 runtime evidence。
+
+- [CUDA C++ Best Practices Guide v13.3 - Coalesced Access to Global Memory](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-27。**

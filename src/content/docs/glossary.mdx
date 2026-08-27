@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 65 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 76 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-26'
+factCheckDate: '2026-08-27'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-26'
+      content: '2026-08-27'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -126,7 +126,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 用交互或动画显露空间、时间或架构行为的表示；可以在浏览器中建模 CUDA 概念，但不会执行 CUDA。
 - **避免使用：** 装饰、CUDA 演示。
-- **相关资源：** O01、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)。
+- **相关资源：** O01、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)、[VIS04](/visuals/memory-transactions/)、[VIS05](/visuals/shared-memory-banks/)、[VIS06](/visuals/memory-hierarchy-lifetime/)、[VIS19](/foundations/asynchronous-errors/#vis19)、[VIS20](/foundations/compute-capability/#vis20)、[VIS21](/foundations/runtime-driver-api/#vis21)、[VIS22](/foundations/launch-geometry/#vis22)。
 - **版本说明：** 概念模型和特定硬件行为必须分开说明。
 
 <span id="term-010" class="resource-target" aria-hidden="true"></span>
@@ -633,6 +633,105 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [F08](/foundations/launch-geometry/)、[LAB03](/labs/break-and-repair-indexing/)。
 - **版本说明：** 相同 thread count 可以有不同 coverage/fringe，device/function limits 也会随 environment、target 与 kernel 改变；只有 controlled measurement 才能比较速度。
 
+<span id="term-066" class="resource-target" aria-hidden="true"></span>
+
+### address space · 地址空间
+
+- **定义：** 程序可见的 storage 与 naming domain，用来约束哪些 execution agent 可以寻址某个对象、它们是否共享同一 instance，以及该 instance 在多长时间内有效；它本身不等于 cache、physical chip 或 access time。
+- **避免使用：** Cache level、physical-memory tier、speed class。
+- **相关资源：** [M01](/memory/address-spaces/)、[VIS06](/visuals/memory-hierarchy-lifetime/)。
+- **版本说明：** M01 以 current Programming Guide v13.3，以及 selected Toolkit Lane 的 11.8.0 与 12.9.1 owner documentation 复核。
+
+<span id="term-067" class="resource-target" aria-hidden="true"></span>
+
+### global memory · 全局内存
+
+- **定义：** 一种 device address space；持有合法 device pointer 的 kernel thread 可以寻址其中对象，而对象可以跨越单个 block 或 kernel launch。显式 Runtime allocation 在全部 device user 完成后，由 host 控制流取得和释放。
+- **避免使用：** Device DRAM 的精确同义词、全部 device memory、一定不经过 cache 的 memory。
+- **相关资源：** [M01](/memory/address-spaces/)、[M02](/memory/coalescing-transactions/)、[VIS04](/visuals/memory-transactions/)、[EX05](/examples/coalesced-strided-access/)。
+- **版本说明：** Ownership、accessibility 与 access-shaping semantic 按 selected 11.8.0、12.9.1 和 current v13.3/v13.3.1 坐标复核；cache path 仍取决于 architecture 与 instruction。
+
+<span id="term-068" class="resource-target" aria-hidden="true"></span>
+
+### constant memory · 常量内存
+
+- **定义：** 通过 `__constant__` 声明、随 module/context 存续的 device storage；对 kernel 只读，在一个 device 的 grid 中可见，并由 host symbol operation 初始化或更新。这个 symbol 不是用 `cudaFree` 释放的 allocation。
+- **避免使用：** Constant cache、整个 application 都不可修改、普通 global allocation。
+- **相关资源：** [M01](/memory/address-spaces/)、[VIS06](/visuals/memory-hierarchy-lifetime/)。
+- **版本说明：** Declaration、symbol copy、accessibility 与 lifetime 由 current Programming Guide v13.3、Runtime API v13.3.1 及 selected 11.8.0/12.9.1 owner docs 共同复核。
+
+<span id="term-069" class="resource-target" aria-hidden="true"></span>
+
+### shared memory · 共享内存
+
+- **定义：** 每个 thread block 各自实例化的 programmer-managed on-device storage，由该 block 的 thread 共享，并在 block execution 结束时自动退役。Static declaration 与 dynamic launch allocation 决定 capacity；两者都不会建立由 host free 的 global allocation。
+- **避免使用：** L1 cache alias、跨 block shared object、自动 coherent global cache。
+- **相关资源：** [M01](/memory/address-spaces/)、[M03](/memory/shared-memory-tiling/)、[M04](/memory/bank-conflicts-layouts/)、[VIS05](/visuals/shared-memory-banks/)、[EX06](/examples/shared-memory-tile-bank-padding/)。
+- **版本说明：** M01/M03/M04 使用 selected 11.8.0、12.9.1 与 current v13.3 owner documentation；capacity 和 shared/L1 configuration 必须按 selected architecture 查询。
+
+<span id="term-070" class="resource-target" aria-hidden="true"></span>
+
+### local memory · 本地内存
+
+- **定义：** 用于 compiler-managed automatic object 与 spill 的 thread-private CUDA address space。它在逻辑上只属于一个 thread，但 backing storage 物理位于 device memory，也可能使用 cache。
+- **避免使用：** On-chip local storage、host stack memory、block-private shared memory。
+- **相关资源：** [M01](/memory/address-spaces/)、[VIS06](/visuals/memory-hierarchy-lifetime/)。
+- **版本说明：** Local placement 与 cache behavior 取决于 selected compiler、target、architecture 和 access pattern；M01 在 11.8.0、12.9.1 与 current v13.3 交叉核对 semantic boundary。
+
+<span id="term-071" class="resource-target" aria-hidden="true"></span>
+
+### register · 寄存器
+
+- **定义：** Compiler 为一次 thread invocation 的 value 分配的有限 per-thread hardware resource。Source spelling 不保证 register placement；resource pressure 可以把 value 移到 thread-private local memory，而不改变 owner。
+- **避免使用：** 一定留在 register 的 source variable、cache entry、跨 thread storage。
+- **相关资源：** [M01](/memory/address-spaces/)、[VIS06](/visuals/memory-hierarchy-lifetime/)。
+- **版本说明：** Register limit、allocation 与 spill 随 compute capability、compiler、target 和 kernel 变化，需要 selected environment 与 compilation artifact 才能判断。
+
+<span id="term-072" class="resource-target" aria-hidden="true"></span>
+
+### memory transaction · 内存事务
+
+- **定义：** Hardware memory system 在特定 architecture 与 instruction boundary 上为 requested byte 提供服务的一次 transfer。M02 预测一个 active warp 的 global request 需要覆盖哪些 aligned 32-byte segment；静态 set 不是 observed transaction log。
+- **避免使用：** Source-level load、requested word、改称 measured traffic 的 segment count。
+- **相关资源：** [M02](/memory/coalescing-transactions/)、[VIS04](/visuals/memory-transactions/)、[EX05](/examples/coalesced-strided-access/)。
+- **版本说明：** M02 模型适用于 CC 6.0+ 与本站 CC 7.5+ tier；access size、cache state 和 architecture 仍限制 actual issued transaction。
+
+<span id="term-073" class="resource-target" aria-hidden="true"></span>
+
+### coalescing · 合并访问
+
+- **定义：** Memory system 根据 requested address、access size 与 selected compute-capability rule，把 active warp lane 的 global-memory request 组合成 transaction。Contiguous indexing 可以支持 coalescing，但本身不证明 transaction count 或速度。
+- **避免使用：** 只有 contiguous source order、cache hit、automatic speedup。
+- **相关资源：** [M02](/memory/coalescing-transactions/)、[VIS04](/visuals/memory-transactions/)、[EX05](/examples/coalesced-strided-access/)。
+- **版本说明：** Coalescing rule 会随 architecture generation 改变；M02 明确采用 CC 6.0+ 的 naturally aligned 32-byte segment fixture，并用 current 与 selected archive owner guide 复核。
+
+<span id="term-074" class="resource-target" aria-hidden="true"></span>
+
+### shared-memory bank · 共享内存存储体
+
+- **定义：** Shared memory 中可独立服务的一项 partition，由 architecture-specific mapping 从 word address 选择。M04 fixture 中，连续 32-bit word 依次映射到 32 个 bank。
+- **避免使用：** Warp lane、cache line、每 thread 独占一个 bank。
+- **相关资源：** [M04](/memory/bank-conflicts-layouts/)、[VIS05](/visuals/shared-memory-banks/)、[EX06](/examples/shared-memory-tile-bank-padding/)。
+- **版本说明：** M04 使用 selected CC 7.5+ 的 32-bank、32-bit word fixture；扩展到另一 architecture 或 access size 前必须重新核对 bank width 与 mapping。
+
+<span id="term-075" class="resource-target" aria-hidden="true"></span>
+
+### bank conflict · 存储体冲突
+
+- **定义：** 在 selected shared-memory model 中，一条 warp instruction 请求同一 bank 内多个 distinct word，因而这些 distinct-word access 需要分开服务。同地址读取广播单独分类，不属于 conflict。
+- **避免使用：** 任何重复 bank number、data race、global-memory coalescing failure。
+- **相关资源：** [M04](/memory/bank-conflicts-layouts/)、[VIS05](/visuals/shared-memory-banks/)、[EX06](/examples/shared-memory-tile-bank-padding/)。
+- **版本说明：** Conflict degree 只有在声明 bank mapping、word size、active-lane set 与 read/write pattern 后才有意义，且不是 speedup ratio。
+
+<span id="term-076" class="resource-target" aria-hidden="true"></span>
+
+### tiling · 分块
+
+- **定义：** 把问题划分成 bounded working subset，让 thread cooperative 地 stage、在前后 synchronization 并 reuse。M03 的 shared-memory 形式分开 load、first barrier、use/reuse，以及 shared storage 被覆盖前的 second barrier。
+- **避免使用：** Automatic caching、没有 bounds 的 copy、guaranteed optimization。
+- **相关资源：** [M03](/memory/shared-memory-tiling/)、[M04](/memory/bank-conflicts-layouts/)、[EX06](/examples/shared-memory-tile-bank-padding/)。
+- **版本说明：** M03 为 selected Lane 教授 portable C++17 synchronous baseline；未来 asynchronous tiling interface 按版本隔离，不向旧 Lane 倒推。
+
 ## 维护规则
 
-全部 65 个词条及其索引元数据在 **2026-08-26** 与英文对应内容同步复核。新增词条必须保留规范英文、首选中文、定义、避免别名、相关单元和必要的版本说明；对应的[英文页](/en/glossary/)必须同时完成。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录。TERM-066 至 TERM-076，以及完整 76 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-27** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。

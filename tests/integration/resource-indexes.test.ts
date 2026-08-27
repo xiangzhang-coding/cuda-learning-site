@@ -13,7 +13,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-08-26T12:00:00Z');
+const asOf = new Date('2026-08-27T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -57,14 +57,16 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 3, practice: 17, visuals: 6, glossary: 65, sources: 31 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(122);
+    expect(counts).toEqual({ labs: 3, practice: 21, visuals: 9, glossary: 76, sources: 34 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(143);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexedText = (
       await Promise.all(INDEX_GROUPS.map(async (group) => (await readRoute(INDEX_ROUTES[group].en)).querySelector('main')?.textContent ?? ''))
     ).join(' ');
-    for (const absentId of ['LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) expect(indexedText).not.toContain(absentId);
+    for (const absentId of ['LAB04', 'LAB05', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+      expect(indexedText).not.toContain(absentId);
+    }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
   });
 
@@ -114,7 +116,7 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]')).toHaveLength(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]')).toHaveLength(6);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]')).toHaveLength(9);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');

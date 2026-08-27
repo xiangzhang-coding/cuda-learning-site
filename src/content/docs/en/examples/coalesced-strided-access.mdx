@@ -1,0 +1,260 @@
+---
+title: 'EX05: Coalesced and Strided Access Runnable Example'
+description: Compare contiguous, one-element-offset, and stride-two gathers through one original C++17 CUDA implementation and an exact pure-host reference.
+pairId: ex05
+counterpart: /examples/coalesced-strided-access/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - scenario-contract
+  - access-kernel
+  - scenario-loop
+  - host-reference
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX05
+prerequisites:
+  - M02
+relatedUnits:
+  - VIS04
+exampleIds:
+  - EX05
+canonicalExample: EX05
+canonicalRanges:
+  - access-kernel
+  - scenario-loop
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 3,068 bytes of declared device allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The contiguous, misaligned, and strided scenarios should each report PASS only when all 256 outputs exactly match the pure host reference.
+    - For each warp, the contiguous scenario should read source index logicalIndex and the misaligned scenario should read logicalIndex + 1 while preserving unit stride.
+    - For each warp, the strided scenario should read source index 2 * logicalIndex, selecting every second input element without exceeding the 511-element allocation.
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Coalesced Access to Global Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA global-memory access patterns'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex05
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-27'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,scenario-contract,access-kernel,scenario-loop,host-reference,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX05
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: M02
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: VIS04
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX05
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX05
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'access-kernel,scenario-loop'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 3,068 bytes of declared device allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/coalesced-strided-access/" lang="zh-CN">阅读中文版本</a>
+
+EX05 is a standalone, original coalesced-and-strided-access Runnable Example. One C++17 CUDA kernel and one scenario loop cover contiguous, one-element-offset, and stride-two gathers. The website never executes CUDA, and the project reports correctness rather than performance.
+
+## Purpose
+
+Complete M02 first. EX05 turns its global-memory access model into a controlled executable comparison, while VIS04 is the related browser-only Visual Explainer. Neither the host test nor VIS04 executes the kernel or grants CUDA Evidence Status.
+
+The experiment holds element type, logical count, launch geometry, input values, output layout, and verification constant. Only `offset` and `stride` change. That isolation makes the source-index sequence explicit without treating an unmeasured transaction count or runtime difference as a result.
+
+## Canonical project
+
+[View the complete EX05 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex05-coalesced-strided-access), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip). After extraction, enter `examples/ex05-coalesced-strided-access/`.
+
+`project.json` is the machine-readable contract. `README.md` states the standalone build, runtime, and evidence boundaries. The implementation, host reference, tests, and page prose are original and are not derived from NVIDIA samples. Software files use Apache-2.0.
+
+## Scenario contract
+
+All scenarios fix `logicalCount=256` and apply `output[logicalIndex] = input[offset + logicalIndex * stride]`.
+
+| Scenario | Offset | Stride | First warp's source indices | Required input elements |
+| --- | ---: | ---: | --- | ---: |
+| `contiguous` | 0 | 1 | 0 through 31 | 256 |
+| `misaligned` | 1 | 1 | 1 through 32 | 257 |
+| `strided` | 0 | 2 | 0, 2, 4, ..., 62 | 511 |
+
+Here, “misaligned” means shifted by one four-byte element relative to the base access sequence; it does not mean an improperly aligned C++ `std::uint32_t` load. The table describes deterministic indices, not measured memory transactions.
+
+## Access kernel
+
+The sole kernel derives one logical index, rejects threads beyond 256 outputs, and evaluates the shared gather expression:
+
+<CanonicalCode exampleId="EX05" range="access-kernel" />
+
+The output address remains contiguous in all scenarios. The input address changes under the two scalar parameters. Allocation sizing uses the largest legal source index plus one, with overflow checks in the pure host reference before any buffer is created.
+
+## Scenario loop
+
+The same allocation, launch geometry, kernel, synchronization boundary, and exact verifier are reused in declared scenario order:
+
+<CanonicalCode exampleId="EX05" range="scenario-loop" />
+
+For each scenario, the loop computes the independent host result, launches the shared kernel, checks submission, synchronizes, copies all outputs back, and compares each `std::uint32_t`. Its normal output is only `scenario=<identity> result=PASS|FAIL`. There is no event, clock, profiler invocation, or derived rate.
+
+## Host reference boundary
+
+`include/coalesced_strided_access_reference.hpp` is pure C++17. It defines the ordered scenario table, checks multiplication and addition before deriving required input size, rejects an undersized allocation without mutating the caller's source-index destination, writes each reference output, and compares exactly.
+
+`make host-test` validates required counts 256, 257, and 511; representative source indices including lane 31 and logical index 255; out-of-range, undersized, zero-stride, and overflowing cases; and all three complete output arrays. It includes no CUDA header or device annotation. Passing it does not establish that device code compiled or ran.
+
+## Build contract
+
+From the project directory on Native Linux, run:
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+The first four stages require the selected CUDA Toolkit. Host-test needs only a host C++17 compiler. The CUDA stages create `build/coalesced_strided_access.ii`, `build/coalesced_strided_access.o`, and `build/ex05-coalesced-strided-access`. Inspection checks a native `sm_75` cubin and PTX generated from `compute_75`.
+
+`scripts/compile-check.sh c++17 ex05 <result-dir>` performs those stages and retains sanitized logs plus inspection artifacts. It never runs `build/ex05-coalesced-strided-access`, so a successful build gate supplies no GPU observation.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Runtime gate | One CUDA GPU with compute capability 7.5 or newer |
+| Baseline GPU Capability Tier | 511 input plus 256 output `std::uint32_t` elements, totaling 3,068 device bytes and remaining far below 8 GB |
+| Compiler target | Native `sm_75` cubin plus PTX generated from `compute_75` |
+| Language contract | The same original C++17 source in all three Toolkit Lanes |
+
+The declared Lanes are CUDA 11.8.0 on Ubuntu 22.04 x86-64, CUDA 12.9.2 on Ubuntu 24.04 x86-64, and CUDA 13.3.1 on Ubuntu 24.04 x86-64. Their pinned images are future build targets, not compilation records.
+
+## Compilation and runtime evidence
+
+EX05's compilation array is empty, so **EX05 is not Compile-Checked**. Build-gate logs are ephemeral workflow artifacts and do not become public Evidence Status records. Runtime remains **Pending Hardware Verification**, and recorded observations are empty.
+
+The page claims no GPU output, transaction count, timing, latency, bandwidth, throughput, profiler result, or speedup. A future runtime record must identify a Reference Environment, include its Environment Manifest, preserve all scenario identities, and satisfy exact output acceptance before any observed behavior can be published.
+
+## Expected observations, not runtime records
+
+1. All three scenarios should report `PASS` only when all 256 outputs exactly match the pure host reference.
+2. Per warp, contiguous source indices should be `logicalIndex`, while the misaligned scenario should use `logicalIndex + 1` at the same unit stride.
+3. Per warp, the strided scenario should use `2 * logicalIndex`, selecting every second value while staying inside 511 inputs.
+
+These are declared correctness and address-sequence expectations. They contain no performance ordering and remain unobserved by the Learning Site.
+
+## Sources and review
+
+The CUDA C++ Best Practices Guide supplies the global-memory coalescing model. The three NVCC pages correspond to the exact Toolkit Lanes, and the three Docker Hub tag APIs provide container metadata only. None of those sources is treated as EX05 build or runtime evidence.
+
+- [CUDA C++ Best Practices Guide v13.3 - Coalesced Access to Global Memory](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**Fact-check and all-source access date: 2026-08-27.**

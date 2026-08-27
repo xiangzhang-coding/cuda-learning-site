@@ -1,0 +1,132 @@
+---
+title: 'VIS05：Shared-memory bank 映射'
+description: 把固定 32-lane read pattern 从 word address 映射到 shared-memory bank，区分 same-address broadcast，并在不推断速度的前提下报告 conflict degree。
+pairId: vis05
+counterpart: /en/visuals/shared-memory-banks/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - mapping-model
+  - classification
+  - padding
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS05
+prerequisites: []
+relatedUnits:
+  - M04
+  - EX06
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA shared-memory access patterns'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-06-25'
+    platform: 'CUDA C++ shared-memory bank guidance'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime memory interfaces'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 11.8 - Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#shared-memory'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived CUDA 11.8 stability boundary'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,mapping-model,classification,padding,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M04,EX06' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0' }
+---
+
+import SharedMemoryBankExplorer from '../../../components/SharedMemoryBankExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/shared-memory-banks/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS05 是与 [M04](/memory/bank-conflicts-layouts/) 和 [EX06](/examples/shared-memory-tile-bank-padding/) 相关的确定性 address-to-bank mapper。它先展示每个 lane 选择的 4-byte word、byte address 与 bank，再允许学习者讨论优化主张。
+
+<SharedMemoryBankExplorer locale="zh-CN" />
+
+## 映射模型
+
+默认 source-backed fixture 位于本站 CC 7.5+ 基础 GPU 能力层级内，并固定 `32` 个 lane、`32` 个 bank 和 4-byte word。对 lane `L`、stride `S`、padding `P` 和 bank count `B`，抽象 layout 为：
+
+```text
+laneStep  = S + P
+wordIndex = L * laneStep
+byte      = wordIndex * 4
+bank      = wordIndex mod B
+```
+
+Bank count 可调，便于直接检查算术。只有默认的 `32` banks、连续 4-byte word fixture 被描述为已复核 CUDA 规则；其他有界 bank count 只是抽象比较，不声明对应某个受支持 architecture。
+
+## 分类
+
+Mapper 先按 bank 对 lane 分组，再计算每个 bank 内的**不同 word address**数量。Conflict degree 是这些数量中的最大值。如果每个被访问 bank 只有一个不同 word，则 degree 为一，属于 conflict-free。
+
+这个 fixture 建模一次 shared-memory **read**。如果所有 lane 请求同一个 word，结果单独分类为 **same-address broadcast**，只含一个不同地址，而不是 32-way conflict。Same-address write 不属于 VIS05，因为它不是 read broadcast 情景。
+
+Conflict degree 只是所选地址列表的结构属性。它不是 elapsed time、serialization duration、bandwidth 或 speedup；浏览器也不能判断完整 kernel 的性能。
+
+## Stride 与 padding 案例
+
+在 `32` banks、padding `0` 下，stride `1` 每个 bank 访问一次，属于 conflict-free。Stride `2` 访问 16 个 bank，每个 bank 有两个不同地址，因此是 two-way。Stride `32` 把 32 个不同地址映射到 bank zero，因此是 32-way。
+
+把 stride `32`、padding `0` 改为 stride `32`、padding `1`，lane step 会从 `32` 变为 `33`。因为 `33 mod 32 = 1`，连续 lane 会轮转经过全部 32 个 bank，映射出的 read 变为 conflict-free。这是地址算术，不是 padding 能改进所有 kernel 的承诺。
+
+## 静态回退
+
+五张卡片保留 stride `1`、stride `2`、stride `32`、padding 后的 stride `33` 与 same-address broadcast。它们和交互 table 来自同一个纯模型，在禁用 JavaScript 和打印时仍然完整。
+
+## 证据边界
+
+VIS05 不编译或运行 CUDA、不读取 GPU，也不测量 latency。其 mapping 与 conflict label 不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**。Compilation、runtime、expected-observation 与 recorded-observation metadata 全部为空。
+
+## 来源
+
+当前 shared-memory organization 与 access-pattern 事实依据 [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) 和 [Best Practices memory optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations)。当前 [Runtime Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) 用于固定周边 Runtime memory 术语，但不提供本页的 runtime evidence。
+
+归档的 [CUDA C++ Programming Guide 11.8 shared-memory section](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#shared-memory) 是选定 stability boundary。VIS05 只保留稳定的 32-bank/32-bit-word 教学 fixture，并使用原创 table 而不是复制 NVIDIA figure。全部 source coordinate 访问日期为 **2026-08-27**；mapper、案例、layout 与双语文字均为原创 CC-BY-4.0 内容。

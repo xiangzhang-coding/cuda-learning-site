@@ -5,54 +5,83 @@ import { collectBrowserFailures } from '../helpers/browser-contract';
 
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 
-const issue14Publications = [
+const issue15Publications = [
   {
-    unitId: 'F05',
-    pairId: 'f05',
+    unitId: 'M01',
+    pairId: 'm01',
     resourceKind: 'learning-unit',
-    zh: '/foundations/asynchronous-errors/',
-    en: '/en/foundations/asynchronous-errors/',
+    zh: '/memory/address-spaces/',
+    en: '/en/memory/address-spaces/',
     runtimeEvidence: 'none',
   },
   {
-    unitId: 'F06',
-    pairId: 'f06',
+    unitId: 'M02',
+    pairId: 'm02',
     resourceKind: 'learning-unit',
-    zh: '/foundations/compute-capability/',
-    en: '/en/foundations/compute-capability/',
+    zh: '/memory/coalescing-transactions/',
+    en: '/en/memory/coalescing-transactions/',
     runtimeEvidence: 'none',
   },
   {
-    unitId: 'F07',
-    pairId: 'f07',
+    unitId: 'M03',
+    pairId: 'm03',
     resourceKind: 'learning-unit',
-    zh: '/foundations/runtime-driver-api/',
-    en: '/en/foundations/runtime-driver-api/',
+    zh: '/memory/shared-memory-tiling/',
+    en: '/en/memory/shared-memory-tiling/',
     runtimeEvidence: 'none',
   },
   {
-    unitId: 'F08',
-    pairId: 'f08',
+    unitId: 'M04',
+    pairId: 'm04',
     resourceKind: 'learning-unit',
-    zh: '/foundations/launch-geometry/',
-    en: '/en/foundations/launch-geometry/',
+    zh: '/memory/bank-conflicts-layouts/',
+    en: '/en/memory/bank-conflicts-layouts/',
     runtimeEvidence: 'none',
   },
   {
-    unitId: 'EX04',
-    pairId: 'ex04',
+    unitId: 'EX05',
+    pairId: 'ex05',
     resourceKind: 'runnable-example',
-    zh: '/examples/error-handling-lifecycle/',
-    en: '/en/examples/error-handling-lifecycle/',
+    zh: '/examples/coalesced-strided-access/',
+    en: '/en/examples/coalesced-strided-access/',
     runtimeEvidence: 'Pending Hardware Verification',
+    expectedObservations: '3 declared expectations',
   },
   {
-    unitId: 'LAB03',
-    pairId: 'lab03',
-    resourceKind: 'lab',
-    zh: '/labs/break-and-repair-indexing/',
-    en: '/en/labs/break-and-repair-indexing/',
+    unitId: 'EX06',
+    pairId: 'ex06',
+    resourceKind: 'runnable-example',
+    zh: '/examples/shared-memory-tile-bank-padding/',
+    en: '/en/examples/shared-memory-tile-bank-padding/',
     runtimeEvidence: 'Pending Hardware Verification',
+    expectedObservations: '3 declared expectations',
+  },
+  {
+    unitId: 'VIS04',
+    pairId: 'vis04',
+    resourceKind: 'visual-explainer',
+    zh: '/visuals/memory-transactions/',
+    en: '/en/visuals/memory-transactions/',
+    runtimeEvidence: 'none',
+    expectedObservations: 'none',
+  },
+  {
+    unitId: 'VIS05',
+    pairId: 'vis05',
+    resourceKind: 'visual-explainer',
+    zh: '/visuals/shared-memory-banks/',
+    en: '/en/visuals/shared-memory-banks/',
+    runtimeEvidence: 'none',
+    expectedObservations: 'none',
+  },
+  {
+    unitId: 'VIS06',
+    pairId: 'vis06',
+    resourceKind: 'visual-explainer',
+    zh: '/visuals/memory-hierarchy-lifetime/',
+    en: '/en/visuals/memory-hierarchy-lifetime/',
+    runtimeEvidence: 'none',
+    expectedObservations: 'none',
   },
 ] as const;
 
@@ -79,7 +108,8 @@ test('F03 reuses the deterministic VIS02 interaction and keeps its evidence boun
   expect(failures).toEqual([]);
 });
 
-test('new unit, Exercise, solution, and EX03 pages reflow and switch locale directly', async ({ page }) => {
+test('recent unit, Exercise, solution, example, and visual pages reflow and switch locale directly', async ({ page }) => {
+  test.setTimeout(90_000);
   await page.setViewportSize({ width: 390, height: 844 });
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const pairs = [
@@ -95,6 +125,9 @@ test('new unit, Exercise, solution, and EX03 pages reflow and switch locale dire
     ['/examples/multidimensional-indexing/', '/en/examples/multidimensional-indexing/'],
     ['/examples/error-handling-lifecycle/', '/en/examples/error-handling-lifecycle/'],
     ['/labs/break-and-repair-indexing/', '/en/labs/break-and-repair-indexing/'],
+    ['/memory/address-spaces/exercises/', '/en/memory/address-spaces/exercises/'],
+    ['/memory/address-spaces/solutions/', '/en/memory/address-spaces/solutions/'],
+    ...issue15Publications.map((publication) => [publication.zh, publication.en] as const),
   ] as const;
 
   for (const [chinese, english] of pairs) {
@@ -111,7 +144,7 @@ test('new unit, Exercise, solution, and EX03 pages reflow and switch locale dire
   expect(failures).toEqual([]);
 });
 
-test('F03 no-script and print output retain static indexing and canonical teaching content', async ({ browser, page }, testInfo) => {
+test('F03 and issue-15 canonical pages retain static and print teaching content', async ({ browser, page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'One Chromium static-output probe is sufficient.');
 
   const staticContext = await browser.newContext({
@@ -140,12 +173,23 @@ test('F03 no-script and print output retain static indexing and canonical teachi
 
   await page.goto('/en/examples/multidimensional-indexing/');
   await expect(page.locator('.canonical-code')).toHaveCount(3);
+
+  for (const { route, count } of [
+    { route: '/en/memory/coalescing-transactions/', count: 1 },
+    { route: '/en/memory/shared-memory-tiling/', count: 1 },
+    { route: '/en/memory/bank-conflicts-layouts/', count: 1 },
+    { route: '/en/examples/coalesced-strided-access/', count: 2 },
+    { route: '/en/examples/shared-memory-tile-bank-padding/', count: 2 },
+  ]) {
+    await page.goto(route);
+    await expect(page.locator('.canonical-code')).toHaveCount(count);
+  }
 });
 
-test('F05-F08, EX04, and LAB03 publish paired routes with canonical metadata and honest evidence', async ({ page }) => {
+test('issue-15 publications expose paired routes, canonical metadata, and honest evidence', async ({ page }) => {
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
-  for (const publication of issue14Publications) {
+  for (const publication of issue15Publications) {
     for (const { route, counterpart, lang } of [
       { route: publication.zh, counterpart: publication.en, lang: 'zh-CN' },
       { route: publication.en, counterpart: publication.zh, lang: 'en' },
@@ -164,13 +208,19 @@ test('F05-F08, EX04, and LAB03 publish paired routes with canonical metadata and
         'content',
         publication.runtimeEvidence,
       );
+      if ('expectedObservations' in publication) {
+        await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute(
+          'content',
+          publication.expectedObservations,
+        );
+      }
       await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
     }
   }
 
   await page.goto('/en/start/using-the-learning-site/');
   const navigation = page.getByRole('navigation', { name: 'Main' });
-  for (const publication of issue14Publications) {
+  for (const publication of issue15Publications) {
     await expect(navigation.locator(`a[href="${publication.en}"]`), publication.unitId).toHaveCount(1);
   }
   expect(failures).toEqual([]);

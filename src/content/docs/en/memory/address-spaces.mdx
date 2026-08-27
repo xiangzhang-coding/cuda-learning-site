@@ -1,0 +1,184 @@
+---
+title: 'M01: Address spaces, ownership, scope, and lifetime'
+description: Classify host, global, constant, shared, local, and register memory by allocator and owner, accessibility, lifetime, and release responsibility without treating address spaces as cache levels.
+pairId: m01
+counterpart: /memory/address-spaces/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - classification-model
+  - host-global-constant
+  - shared-local-register
+  - cache-boundary
+  - release-ledger
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M01
+prerequisites:
+  - F04
+  - F06
+relatedUnits:
+  - VIS06
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ memory spaces, scopes, lifetimes, and locations'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime allocation, copy, symbol, and release operations'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 memory hierarchy contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API 11.8 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 Runtime memory operations'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane memory contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API 12.9.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v12.9.1; owner API documentation for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane Runtime memory operations'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,classification-model,host-global-constant,shared-local-register,cache-boundary,release-ledger,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS06 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/memory/address-spaces/" lang="zh-CN">阅读中文对应页</a>
+
+An address space says where an object can be addressed, but a complete decision also records ownership, scope, lifetime, and release responsibility. Host memory, global memory, constant memory, shared memory, local memory, and registers are semantic and resource contracts, not rungs in a cache-level ranking from “fast” to “slow.”
+
+## What you should be able to do
+
+- Record an object's allocator or creator, permitted accessors, sharing scope, valid interval, and release action as separate facts.
+- Distinguish grid-accessible global/constant storage, per-block shared instances, and per-thread local/register storage.
+- Explain why local memory is logically thread-private but physically in device memory, and how register pressure can spill values to local memory.
+- Assign the correct release responsibility to explicit Runtime allocations, language-managed objects, and compiler-managed objects.
+- Reject fixed latency, cache path, capacity, or speed rankings inferred only from an address-space name.
+
+## Prerequisites
+
+Complete [F04: Establish an Explicit Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) and [F06: Treat Compute Capability as a Feature and Limit Contract](/en/foundations/compute-capability/) first. F04 supplies the allocate, copy, launch, synchronize, copy-back, and release timeline; M01 refines it with the owner and release rule for each object. F06 requires capacities, cache configuration, register limits, and compiler outcomes to come from the selected environment rather than a product name or memory.
+
+This Learning Unit needs only reading, hand analysis, and static review. It requires no CUDA-capable system and creates neither Compile-Checked nor runtime Evidence Status. Related VIS06 can display the same classification but cannot change an object's contract.
+
+## A four-axis classification model
+
+Do not ask only where a variable “lives.” Answer four questions in order:
+
+1. **Owner/allocation:** Which host allocator, Runtime API, module declaration, kernel launch, or compiler decision creates storage?
+2. **Accessibility/scope:** Can the host, a whole grid, one block, or one thread name or access the same object instance?
+3. **Lifetime:** Across which host scope, kernel launch, block execution, thread execution, or context/application interval is the object valid?
+4. **Release:** Must the program call a matching release API, or does host language scope, module/context teardown, block/thread completion, or the compiler retire it automatically?
+
+Giving every thread the same pointer does not make their local objects shared. Declaring a value in a kernel does not guarantee a register. Source-level scope, CUDA address-space semantics, and compiler placement remain separate records.
+
+## Host, global, and constant
+
+| space | owner / allocation | accessibility and sharing scope | lifetime | release |
+| --- | --- | --- | --- | --- |
+| host | a host-language allocator or a Runtime host allocator such as `cudaMallocHost` | directly accessible to the CPU; device access requires an explicit copy or mapping contract | defined by the host object/allocation contract | match the host allocator; use `cudaFreeHost` for page-locked Runtime allocations |
+| global | a host-side device allocation such as `cudaMalloc`, or a corresponding device/global object | kernel threads holding a valid device pointer can access it; an allocation can cross blocks and kernel launches | until `cudaFree`, device reset, or owning context/application teardown | explicit allocations use `cudaFree`, after work still using the allocation is complete |
+| constant | a module-scope C++ `__constant__` symbol established with its module/context; host code updates it through symbol APIs | read-only to kernels, grid-visible on one device, and accessible to the host through Runtime symbol operations | valid with the C++ symbol's creating context/module | do not call `cudaFree` on the symbol; module/context lifetime manages it |
+
+“Read-only to kernels” does not prevent the host from initializing or updating constant storage. A host operation such as `cudaMemcpyToSymbol` and a kernel read have different roles. Likewise, “global” does not make an ordinary device pointer directly dereferenceable by the CPU.
+
+## Shared, local, and register
+
+| space | owner / allocation | accessibility and sharing scope | lifetime | release |
+| --- | --- | --- | --- | --- |
+| shared | each block's static `__shared__` declaration or dynamic shared storage requested at launch | threads in the owning block share one instance; different blocks own different instances | the corresponding block/kernel execution interval | automatic at block completion; never `cudaFree` |
+| local | compiler storage for one thread's automatic object, non-constant-indexed array, large object, or spill | only the owning thread under source semantics | the owning thread's kernel invocation | compiler/thread completion manages it |
+| register | finite register resources assigned by the compiler to one thread's values | only the owning thread; there is no cross-thread register object | the owning thread's kernel invocation | compiler/thread completion manages it |
+
+The word **local** describes logical scope, not physical proximity. Local memory is thread-private but physically resides in device memory. Register allocation is not promised by a source declaration either; compiler, target, and resource pressure determine placement. A register spill places values in local memory but does not make them accessible to another thread.
+
+## Address spaces are not cache levels
+
+A cache answers whether recently used data is retained in a hardware cache. An address space answers how a program names, shares, and keeps an object alive. Global and local accesses can use caches, constant storage has its own read behavior, and shared memory can share a physical resource configuration with L1 on selected architectures. None of these facts turns global, local, constant, and shared storage into cache levels of one another.
+
+The table therefore cannot support a universal `register > shared > constant > global` speed order. Capacity, cache organization, shared/L1 configuration, register availability, spilling, and access cost vary with architecture, kernel, compiler target, and access pattern. M01 issues a semantics-and-responsibility contract, not a latency or speed verdict.
+
+## Release ledger: the creator proves the endpoint
+
+For an explicit allocation, record the allocation API, returned object, completion boundary for every user, and matching release. For block/thread/compiler-managed storage, record the automatic lifetime endpoint and do not invent a free operation. A compact review is:
+
+```text
+object -> creator -> permitted accessors -> shared instance scope
+       -> last permitted use -> completion proof -> release owner/action
+```
+
+A `cudaMalloc` buffer cannot be freed while a kernel may still use it. A host cannot free a `__shared__` tile. A local array does not gain a cross-thread pointer-sharing contract merely because its physical storage is device memory. Prove ownership and last use before discussing placement or optimization.
+
+## Retrieval check
+
+1. Why can an address space not serve as a cache hierarchy ordered from fast to slow?
+2. Who creates and releases a global allocation, a `__constant__` symbol, and a `__shared__` tile?
+3. How can local memory have thread-private scope and a physical device-memory location at the same time?
+4. Why does a source-level scalar not guarantee register placement, and why does a register spill preserve thread ownership?
+5. Before releasing a `cudaMalloc` allocation, why must a ledger name both the last user and completion proof?
+
+## Continue with practice
+
+- Complete the [M01 Exercises](/en/memory/address-spaces/exercises/), then inspect the separate [reviewed solutions](/en/memory/address-spaces/solutions/).
+- Review an object inventory that mixes address spaces, caches, and release responsibilities in [Practice Bank PB-R1-013](/en/practice/#pb-r1-013).
+- Related VIS06 should reproduce scope and operation-path filters while preserving every owner/lifetime/release fact. It is not a CUDA runtime observation.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) provides the current memory types, scopes, lifetimes, locations, shared allocation, local placement, and register-spill discussion; the page was updated **2026-05-27**.
+- [CUDA Runtime API v13.3.1: Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) defines current allocation, copy, symbol, and matching release operations; the page was updated **2026-06-29**.
+- The [11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy) and [11.8 Runtime memory API](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html) retain owner documentation for this site's 11.8 lane.
+- The [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html) and [Runtime memory API 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html) are owner documentation used for this site's Toolkit 12.9.2 patch lane.
+
+All six owner sources were accessed on **2026-08-27**. The classification table, release ledger, Exercises, and instructional arrangement are original to this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-27.**

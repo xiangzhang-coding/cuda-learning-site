@@ -58,6 +58,16 @@ export default defineConfig({
           ],
         },
         {
+          label: '内存模型',
+          translations: { en: 'Memory Models' },
+          items: [
+            { slug: 'memory/address-spaces' },
+            { slug: 'memory/coalescing-transactions' },
+            { slug: 'memory/shared-memory-tiling' },
+            { slug: 'memory/bank-conflicts-layouts' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [
@@ -65,6 +75,8 @@ export default defineConfig({
             { slug: 'examples/vector-addition' },
             { slug: 'examples/multidimensional-indexing' },
             { slug: 'examples/error-handling-lifecycle' },
+            { slug: 'examples/coalesced-strided-access' },
+            { slug: 'examples/shared-memory-tile-bank-padding' },
           ],
         },
         {
@@ -80,7 +92,14 @@ export default defineConfig({
         {
           label: '可视化讲解',
           translations: { en: 'Visual Explainers' },
-          items: [{ slug: 'visuals' }, { slug: 'visuals/kernel-journey' }, { slug: 'visuals/indexing' }],
+          items: [
+            { slug: 'visuals' },
+            { slug: 'visuals/kernel-journey' },
+            { slug: 'visuals/indexing' },
+            { slug: 'visuals/memory-transactions' },
+            { slug: 'visuals/shared-memory-banks' },
+            { slug: 'visuals/memory-hierarchy-lifetime' },
+          ],
         },
         { slug: 'practice' },
         { slug: 'glossary' },

@@ -46,6 +46,12 @@ describe('CUDA compile evidence workflow', () => {
       'lane: ex04-cuda-11-8-cxx17',
       'lane: ex04-cuda-12-9-cxx17',
       'lane: ex04-cuda-13-3-cxx17',
+      'lane: ex05-cuda-11-8-cxx17',
+      'lane: ex05-cuda-12-9-cxx17',
+      'lane: ex05-cuda-13-3-cxx17',
+      'lane: ex06-cuda-11-8-cxx17',
+      'lane: ex06-cuda-12-9-cxx17',
+      'lane: ex06-cuda-13-3-cxx17',
     ]) {
       expect(workflow).toContain(coordinate);
     }
@@ -53,7 +59,9 @@ describe('CUDA compile evidence workflow', () => {
 
   it('records manifests, scans retained evidence, and gates all matrix jobs', async () => {
     const workflow = await readProjectFile('.github/workflows/cuda-compile.yml');
-    const ex04Build = workflow.match(/^  ex04-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
+    const ex04Build = workflow.match(/^  ex04-build:\n[\s\S]*?(?=^  ex05-build:)/m)?.[0] ?? '';
+    const ex05Build = workflow.match(/^  ex05-build:\n[\s\S]*?(?=^  ex06-build:)/m)?.[0] ?? '';
+    const ex06Build = workflow.match(/^  ex06-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
     expect(workflow).toContain('node scripts/check-artifacts.mjs');
@@ -70,8 +78,14 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('CUDA_EVIDENCE_RESULT: ${{ needs.cuda-compile.result }}');
     expect(workflow).toContain('EX03_BUILD_RESULT: ${{ needs.ex03-build.result }}');
     expect(workflow).toContain('EX04_BUILD_RESULT: ${{ needs.ex04-build.result }}');
-    expect(workflow).toContain('needs: [cuda-compile, ex03-build, ex04-build]');
+    expect(workflow).toContain('EX05_BUILD_RESULT: ${{ needs.ex05-build.result }}');
+    expect(workflow).toContain('EX06_BUILD_RESULT: ${{ needs.ex06-build.result }}');
+    expect(workflow).toContain(
+      'needs: [cuda-compile, ex03-build, ex04-build, ex05-build, ex06-build]',
+    );
     expect(workflow).toContain('if [ "$EX04_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX05_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX06_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
 
@@ -94,14 +108,56 @@ describe('CUDA compile evidence workflow', () => {
     const uploadOffset = ex04Build.indexOf('uses: actions/upload-artifact@');
     expect(scanOffset).toBeGreaterThan(-1);
     expect(uploadOffset).toBeGreaterThan(scanOffset);
+
+    for (const [exampleId, build, root] of [
+      ['ex05', ex05Build, 'coalesced-strided-access'],
+      ['ex06', ex06Build, 'shared-memory-tile-bank-padding'],
+    ] as const) {
+      expect(build).not.toBe('');
+      expect(build.match(new RegExp(`^\\s+- lane: ${exampleId}-cuda-\\d+-\\d+-cxx17$`, 'gm')))
+        .toHaveLength(3);
+      for (const [laneSuffix, image] of [
+        ['cuda-11-8-cxx17', 'nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f'],
+        ['cuda-12-9-cxx17', 'nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5'],
+        ['cuda-13-3-cxx17', 'nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87'],
+      ]) {
+        expect(build).toContain(
+          `- lane: ${exampleId}-${laneSuffix}\n            image: ${image}`,
+        );
+      }
+      expect(build).toContain('docker pull --platform linux/amd64');
+      expect(build).toContain('docker run --platform linux/amd64 --rm --network none');
+      expect(build).toContain('--user "$(id -u):$(id -g)"');
+      expect(build).toContain(
+        `Compile ${exampleId.toUpperCase()} without granting Evidence Status`,
+      );
+      expect(build).toContain(`--workdir /workspace/examples/${exampleId}-${root}`);
+      expect(build).toContain(`bash scripts/compile-check.sh c++17 ${exampleId}`);
+      expect(build).toContain(`path: artifacts/cuda-${exampleId}/\${{ matrix.lane }}`);
+      expect(build).not.toContain(`/examples/${exampleId}-${root}/evidence`);
+      expect(build).toContain('retention-days: 7');
+      const buildScanOffset = build.indexOf('node scripts/check-artifacts.mjs');
+      const buildUploadOffset = build.indexOf('uses: actions/upload-artifact@');
+      expect(buildScanOffset).toBeGreaterThan(-1);
+      expect(buildUploadOffset).toBeGreaterThan(buildScanOffset);
+    }
   });
 
   it('never executes the generated CUDA binary in the compile boundary', async () => {
-    const [orchestrator, laneScript, ex03LaneScript, ex04LaneScript] = await Promise.all([
+    const [
+      orchestrator,
+      laneScript,
+      ex03LaneScript,
+      ex04LaneScript,
+      ex05LaneScript,
+      ex06LaneScript,
+    ] = await Promise.all([
       readProjectFile('scripts/run-cuda-compile.mjs'),
       readProjectFile('examples/ex02-vector-addition/scripts/compile-check.sh'),
       readProjectFile('examples/ex03-multidimensional-indexing/scripts/compile-check.sh'),
       readProjectFile('examples/ex04-error-handling-lifecycle/scripts/compile-check.sh'),
+      readProjectFile('examples/ex05-coalesced-strided-access/scripts/compile-check.sh'),
+      readProjectFile('examples/ex06-shared-memory-tile-bank-padding/scripts/compile-check.sh'),
     ]);
 
     expect(orchestrator).not.toMatch(/exec(?:File)?Sync\([^\n]*ex02-vector-addition/);
@@ -115,7 +171,15 @@ describe('CUDA compile evidence workflow', () => {
     expect(ex04LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex04-error-handling-lifecycle(?:\s|$)/m);
     for (const target of ['preprocess', 'compile', 'link', 'inspect', 'host-test']) {
       expect(ex04LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+      expect(ex05LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+      expect(ex06LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
     }
+    expect(ex05LaneScript).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/ex05-coalesced-strided-access(?:\s|$)/m,
+    );
+    expect(ex06LaneScript).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/ex06-shared-memory-tile-bank-padding(?:\s|$)/m,
+    );
   });
 
   it('keeps ephemeral EX04 build logs from granting public compilation evidence', async () => {

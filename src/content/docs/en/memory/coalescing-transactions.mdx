@@ -1,0 +1,204 @@
+---
+title: 'M02: Coalescing as transaction shaping'
+description: For CC 6.0+ and this site's CC 7.5+ tier, model one warp instruction's active addresses by the naturally aligned 32-byte segments needed to cover requested words.
+pairId: m02
+counterpart: /memory/coalescing-transactions/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - model
+  - aligned
+  - offset
+  - stride
+  - active-lanes
+  - canonical-example
+  - measurement-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M02
+prerequisites:
+  - M01
+  - F03
+relatedUnits:
+  - EX05
+  - VIS04
+exampleIds:
+  - EX05
+canonicalExample: EX05
+canonicalRanges:
+  - access-kernel
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current CUDA C++ memory optimization context'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Coalesced Access to Global Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current CC 6.0+ global-memory coalescing rules'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 memory-access contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane memory-access contract'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,model,aligned,offset,stride,active-lanes,canonical-example,measurement-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,F03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX05,VIS04' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: access-kernel }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/coalescing-transactions/" lang="zh-CN">阅读中文对应页</a>
+
+In this unit, coalescing is a transaction-shaping analysis: for the active-address set of one warp memory instruction, count the naturally aligned 32-byte segments needed to cover every requested word. This static segment count explains an address pattern. It is not necessarily a profiler's final transaction count and creates no speed claim by itself.
+
+## What you should be able to do
+
+- Construct requested byte ranges from the instruction, active lanes, word width, base alignment, offset, and stride.
+- Apply the CC 6.0+ 32-byte segment model within this site's Baseline GPU Capability Tier of CC 7.5+.
+- Derive segment counts for aligned contiguous, one-word-offset, and stride-two patterns with 32 lanes reading one 4-byte word each.
+- Explain why a tail warp, inactive lanes, and a different instruction require a new address set.
+- Keep static prediction, cache reuse, actual issued transactions, correctness, and timing in separate evidence fields.
+
+## Prerequisites
+
+Complete [M01: Address Spaces, Ownership, Scope, and Lifetime](/en/memory/address-spaces/) and [F03: Make Multidimensional Indexing and Bounds a Correctness Contract](/en/foundations/multidimensional-indexing/) first. M01 establishes that this is global-memory access, not a cache-level ranking. F03 supplies lane/thread indices, logical extent, and bounds, which decide which lanes are active for an instruction and which addresses they request.
+
+This page requires no CUDA-capable system. Hand-calculated segments are an expected model, not Compile-Checked, Runtime-Verified, or Community-Observed evidence. EX05 and VIS04 are related resources, but they do not populate this page's empty evidence axes.
+
+## Model: freeze one instruction first
+
+For compute capability 6.0 and newer, this site uses the following teaching model inside its supported CC 7.5+ tier:
+
+1. Take only byte addresses requested by active lanes in **one global-memory instruction from one warp**.
+2. List the bytes covered by each requested word.
+3. Cover those bytes with naturally aligned 32-byte segments `[32k, 32k + 31]`.
+4. The count is the size of the distinct segment set; address order does not change that set.
+
+For an aligned base `B mod 32 = 0`, lane `i` requesting one 4-byte word has:
+
+```text
+address(i) = B + offsetBytes + i * strideWords * 4
+segment(i) = floor(address(i) / 32)
+```
+
+This model accepts naturally aligned 1-, 2-, 4-, and 8-byte words from a 32-byte-aligned fixture base. Every accepted width divides 32, so each accepted word lies within one segment. A byte offset that is not divisible by the selected word width is outside this single-instruction contract rather than a boundary-crossing case to count.
+
+## Aligned contiguous: four segments
+
+All 32 lanes are active, `offsetBytes = 0`, and `strideWords = 1`. Lanes 0..31 request `B + 4i`, giving requested bytes `[B, B + 127]`. They cover:
+
+```text
+[B + 0,  B + 31]
+[B + 32, B + 63]
+[B + 64, B + 95]
+[B + 96, B + 127]
+```
+
+The aligned contiguous fixture therefore needs **4 naturally aligned 32-byte segments**. Four segments covering 128 requested bytes is an address-accounting conclusion, not a kernel duration.
+
+## Offset by one word: five segments
+
+Keep 32 active lanes and stride 1, but move the first word to `B + 4`. Requested bytes become `[B + 4, B + 131]`, touching **5 segments**, from `[B, B + 31]` through `[B + 128, B + 159]`. The first and last are only partly used.
+
+This fixture shows that alignment relative to 32-byte boundaries changes the coverage set. It does not say how much slower a real run must be. Cache-line reuse across nearby warps, architecture state, and issued requests require measurement.
+
+## Stride two words: eight segments
+
+Restore `offsetBytes = 0` and set `strideWords = 2`. Lane `i` requests `B + 8i`, with starting addresses from `B` through `B + 248`. Each 32-byte segment receives four lanes' 4-byte words, so 32 lanes touch **8 segments**.
+
+The stride-two payload remains 128 requested bytes while segment coverage is 256 bytes. That difference describes transaction shaping. It proves no cache miss, DRAM traffic, latency, bandwidth, or speedup.
+
+## Active lanes, word width, and instruction boundaries
+
+A tail warp may have only some lanes pass F03 bounds. An inactive lane requests no word and must not be added merely to make 32 lanes. For example, lanes 0..4 reading 4-byte words from an aligned base touch only the first segment. A wider accepted word covers more bytes, but natural alignment keeps each selected 1-, 2-, 4-, or 8-byte word inside one 32-byte segment; analyze other widths or alignment contracts separately.
+
+Two source-level accesses may also compile to separate instructions. Apply the model per instruction with that instruction's active mask and request width; do not combine every address from a whole kernel into one segment set.
+
+## Canonical Runnable Example: EX05
+
+EX05 is this unit's canonical Runnable Example. Its `access-kernel` range keeps aligned contiguous, one-word-offset, and stride-two patterns under one correctness contract while separating static expected segment counts from any future runtime observation.
+
+[View the complete EX05 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex05-coalesced-strided-access), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip). The standalone project is the only canonical implementation; this page imports one declared range.
+
+<CanonicalCode exampleId="EX05" range="access-kernel" />
+
+## Measurement boundary: prediction is not observation
+
+The static model predicts a required segment set. Hardware and profilers can report requests or transactions at different layers; cache hits, reuse between nearby warps, load/store paths, replay, and metric definitions affect observations. Actual issued transactions and cache reuse require an exact Environment Manifest, metric name, tool version, and run log.
+
+The values 4, 5, and 8 therefore cannot be rewritten as 1.25x or 2x runtime, nor must a profiler counter equal these integers. First verify that every mode requests the intended logical payload and produces correct results, then compare prediction with observation. Without timing and metric evidence, write neither “faster” nor “speedup.”
+
+## Retrieval check
+
+1. Why must the coalescing model be scoped to one memory instruction from one warp?
+2. Why do 32 active lanes reading aligned contiguous 4-byte words require four rather than one 32-byte segment?
+3. Why does a one-word base offset expand coverage from four segments to five?
+4. Why does stride two touch eight segments, while inactive tail lanes must not count?
+5. Why must expected segment count, actual issued transactions, cache reuse, and elapsed time remain separate records?
+
+## Continue with practice
+
+- Complete the [M02 Exercises](/en/memory/coalescing-transactions/exercises/), then inspect the separate [reviewed solutions](/en/memory/coalescing-transactions/solutions/).
+- Review a record that declares speedup directly from segment arithmetic in [Practice Bank PB-R1-014](/en/practice/#pb-r1-014).
+- EX05 and VIS04 are related resources. Any future observation must retain its Environment Manifest and metric definition.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3: Memory Optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations) provides the current memory-optimization context; [Coalesced Access to Global Memory](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory) gives the CC 6.0+ 32-byte transaction/segment rule.
+- The [CUDA C Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy) retains the owner coordinate for the 11.8 lane.
+- The [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html) is the owner guide used for the Toolkit 12.9.2 patch lane.
+
+All four owner sources were accessed on **2026-08-27**. The segment fixtures, equations, EX05 teaching contract, Exercises, and arrangement are original to this site. No owner example or figure is copied.
+
+**Fact checked: 2026-08-27.**

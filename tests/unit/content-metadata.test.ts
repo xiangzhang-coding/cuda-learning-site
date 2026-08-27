@@ -83,15 +83,15 @@ describe('Visual Explainer metadata', () => {
   });
 });
 
-describe('Foundation and Lab metadata', () => {
-  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
+describe('Learning Unit and Lab metadata', () => {
+  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'M01', 'M01-EXERCISES', 'M01-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
     'accepts the controlled curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
     },
   );
 
-  it.each(['F1', 'F001', 'f01', 'LAB2', 'LAB02-EXERCISES'])(
+  it.each(['F1', 'F001', 'f01', 'M1', 'M001', 'm01', 'LAB2', 'LAB02-EXERCISES'])(
     'rejects the malformed curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(false);
