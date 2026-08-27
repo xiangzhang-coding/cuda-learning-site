@@ -16,7 +16,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex05-coalesced-strided-access');
-const sourceCommit = 'd85a86640b6ec0452542d6e9cbfd5827bb3c87a6';
+const sourceCommit = '79473ddced9c4d284b88f2eab82d31f3034b97cc';
 
 describe('EX05 standalone project boundary', () => {
   it('declares one shared C++17 implementation and immutable project coordinates', async () => {

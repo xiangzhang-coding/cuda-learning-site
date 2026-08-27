@@ -193,7 +193,7 @@ output_valid = output_index is inside the logical output
 
 EX06 是 M03/M04 共用的 canonical Runnable Example。M03 只导入 `tiled-kernels` range：它使用完整固定 32x32 tile，展示一次 synchronous portable C++17 cooperative load、block barrier 和 column read。它没有 edge tile，也没有下一轮 overwrite，所以不会代替本页前面针对一般 loop 给出的 neutral-load 与 B2 proof obligation；M04 将单独审查 layout declaration。
 
-[在固定提交中查看完整 EX06 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex06-shared-memory-tile-bank-padding)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip)。独立 project 是唯一 canonical implementation；本页只导入一个已声明 range。
+[在固定提交中查看完整 EX06 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/79473ddced9c4d284b88f2eab82d31f3034b97cc/examples/ex06-shared-memory-tile-bank-padding)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/79473ddced9c4d284b88f2eab82d31f3034b97cc.zip)。独立 project 是唯一 canonical implementation；本页只导入一个已声明 range。
 
 <CanonicalCode exampleId="EX06" range="tiled-kernels" />
 
