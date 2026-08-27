@@ -95,7 +95,7 @@ The catalog contains exactly six records:
 
 | Record | Operation path / owner and acquisition | Accessible scope | Lifetime and end |
 | --- | --- | --- | --- |
-| Host | `host-language`: allocator or object declaration | Host; device access needs a separately declared mechanism | Allocation/object lifetime; matching host release or process end |
+| Host | `host-language` allocator/object declaration or `runtime-api` host allocation such as `cudaMallocHost` | Host; device access needs a separately declared mechanism | Allocation/object lifetime; matching host release, `cudaFreeHost`, or process end |
 | Global | `runtime-api`: host acquisition through a CUDA Runtime allocation API | Grid threads with a valid pointer; host manages or copies through APIs | Across launches until release, reset, or context/application end |
 | Constant | `symbol-api`: module/context symbol initialized through symbol APIs | Read-only to grid threads; host APIs can locate the symbol | Module/context lifetime until unload, reset, or context end |
 | Shared | `kernel-declaration`: static or dynamic shared declaration per block | Threads in the owning block | Owning block during kernel execution; ends with block completion |
@@ -106,9 +106,9 @@ The longer static table inside the component retains the release and physical/ad
 
 ## Filters
 
-The scope filter offers host, grid, block, and thread. The bounded operation-path taxonomy maps `host-language` to host, `runtime-api` to global, `symbol-api` to constant, `kernel-declaration` to shared, and `compiler-placement` to local and register. Both filters include and default to `all`. Reset restores that deterministic six-record state.
+The scope filter offers host, grid, block, and thread. The bounded operation-path taxonomy maps `host-language` to host, `runtime-api` to Runtime-managed host and global allocations, `symbol-api` to constant, `kernel-declaration` to shared, and `compiler-placement` to local and register. Both filters include and default to `all`. Reset restores that deterministic six-record state.
 
-Filters intersect: selecting thread scope and `compiler-placement` shows local and register; selecting host scope and `runtime-api` shows an explicit empty state. Invalid filter identifiers fail closed in the pure model. Lifecycle and release/end remain factual fields in every record and table, but they are no longer filter axes. Filtering never removes records from the permanent static catalog.
+Filters intersect: selecting thread scope and `compiler-placement` shows local and register; selecting host scope and `runtime-api` shows host memory, while selecting `runtime-api` across all scopes shows host and global memory. Invalid filter identifiers fail closed in the pure model. Lifecycle and release/end remain factual fields in every record and table, but they are no longer filter axes. Filtering never removes records from the permanent static catalog.
 
 ## Address-space and physical boundaries
 

@@ -95,7 +95,7 @@ Catalog 恰好包含六项：
 
 | 记录 | Operation path / owner 与 acquisition | Accessible scope | Lifetime 与 end |
 | --- | --- | --- | --- |
-| Host | `host-language`：allocator 或 object declaration | Host；device 访问需要另行声明机制 | Allocation/object lifetime；匹配的 host release 或 process end |
+| Host | `host-language` allocator/object declaration，或 `runtime-api` host allocation（如 `cudaMallocHost`） | Host；device 访问需要另行声明机制 | Allocation/object lifetime；匹配的 host release、`cudaFreeHost` 或 process end |
 | Global | `runtime-api`：Host 通过 CUDA Runtime allocation API 取得 device allocation | 持有合法 pointer 的 grid thread；host 通过 API 管理或复制 | 跨 launch，直到 release、reset 或 context/application end |
 | Constant | `symbol-api`：Module/context 持有 symbol，host 通过 symbol API 初始化 | Grid thread 只读；host API 可以定位 symbol | Module/context lifetime，直到 unload、reset 或 context end |
 | Shared | `kernel-declaration`：每个 block 的 static 或 dynamic shared declaration | Owning block 中的 thread | Owning block 在 kernel execution 期间；block 完成时结束 |
@@ -106,9 +106,9 @@ Catalog 恰好包含六项：
 
 ## 筛选
 
-Scope filter 提供 host、grid、block、thread。Operation path filter 使用有界 taxonomy：`host-language` 对应 host，`runtime-api` 对应 global，`symbol-api` 对应 constant，`kernel-declaration` 对应 shared，`compiler-placement` 对应 local 与 register。两者都提供 `all` 并默认选中；reset 会恢复确定性的六项状态。
+Scope filter 提供 host、grid、block、thread。Operation path filter 使用有界 taxonomy：`host-language` 对应 host，`runtime-api` 对应由 Runtime 管理的 host 与 global allocation，`symbol-api` 对应 constant，`kernel-declaration` 对应 shared，`compiler-placement` 对应 local 与 register。两者都提供 `all` 并默认选中；reset 会恢复确定性的六项状态。
 
-两个 filter 取交集：选择 thread scope 与 `compiler-placement` 会显示 local 和 register；选择 host scope 与 `runtime-api` 会显示明确的 empty state。纯模型对未知 filter ID fail closed。Lifetime 与 release/end 仍是每条记录和 table 的事实字段，但不再充当筛选轴。筛选永远不会从永久静态 catalog 删除记录。
+两个 filter 取交集：选择 thread scope 与 `compiler-placement` 会显示 local 和 register；选择 host scope 与 `runtime-api` 会显示 host memory，而跨全部 scope 选择 `runtime-api` 会显示 host 与 global memory。纯模型对未知 filter ID fail closed。Lifetime 与 release/end 仍是每条记录和 table 的事实字段，但不再充当筛选轴。筛选永远不会从永久静态 catalog 删除记录。
 
 ## Address-space 与 physical 边界
 
