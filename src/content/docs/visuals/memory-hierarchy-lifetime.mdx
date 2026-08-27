@@ -1,0 +1,133 @@
+---
+title: 'VIS06：Memory hierarchy、ownership 与 lifetime'
+description: 按 accessible scope 与 lifecycle 筛选 host、global、constant、shared、local 和 register，同时保留完整的六项静态 catalog。
+pairId: vis06
+counterpart: /en/visuals/memory-hierarchy-lifetime/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - catalog
+  - filters
+  - address-space-boundaries
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS06
+prerequisites: []
+relatedUnits:
+  - M01
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA memory spaces, scopes, and lifetimes'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-06-25'
+    platform: 'CUDA C++ memory-space guidance'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime allocation, copy, and release interfaces'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived CUDA 11.8 stability boundary'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,catalog,filters,address-space-boundaries,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M01 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0' }
+---
+
+import MemoryHierarchyLifetime from '../../../components/MemoryHierarchyLifetime.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/memory-hierarchy-lifetime/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS06 是与 [M01](/memory/address-spaces/) 相关的可视化讲解（Visual Explainer）。它不用容易误导的“从快到慢 memory pyramid”，而是按 owner/acquisition、accessible scope、lifetime、release/end condition 和 physical/address-space caveat 组织 catalog。
+
+<MemoryHierarchyLifetime locale="zh-CN" />
+
+## 六项 catalog
+
+Catalog 恰好包含六项：
+
+| 记录 | Owner 与 acquisition | Accessible scope | Lifetime 与 end |
+| --- | --- | --- | --- |
+| Host | Host application 通过语言或选定 Runtime host-memory API 取得 | Host；device 访问需要另行声明机制 | Allocation/object lifetime；匹配的 host release 或 process end |
+| Global | 通过 CUDA allocation path 持有 device allocation | 持有合法 pointer 的 grid thread；host 通过 API 管理或复制 | 跨 launch，直到 release、reset 或 context/application end |
+| Constant | 由 module/context 持有、通过 symbol API 初始化 | Grid thread 只读；host API 可以定位 symbol | Module/context lifetime，直到 unload、reset 或 context end |
+| Shared | 每个 block 的 static declaration 或 launch-sized storage | Owning block 中的 thread | Owning block 在 kernel execution 期间；block 完成时结束 |
+| Local | Compiler-managed per-thread private storage | Owning thread | Owning thread/kernel execution；没有 host `cudaFree` |
+| Register | Compiler-assigned per-thread storage | Owning thread | Owning thread/kernel execution；由 compiler 管理结束 |
+
+组件内更完整的静态 table 为每项保留 release 与 physical/address-space caveat。
+
+## 筛选
+
+Scope filter 提供 host、grid、block、thread。Operation/lifecycle filter 区分显式 allocation/release、module/context end、owning-block end 与 owning-thread end。两者默认都是“全部”；reset 会恢复确定性的六项状态。
+
+两个 filter 取交集：选择 thread scope 与 owning-thread end 会显示 local 和 register；选择 host scope 与 owning-thread end 会显示明确的 empty state。纯模型对未知 filter ID fail closed。筛选永远不会从永久静态 catalog 删除记录。
+
+## Address-space 与 physical 边界
+
+Global、constant、shared、local 是 device address-space 概念；register 是 compiler-managed on-SM storage。Host memory 用于揭示 ownership 与 transfer boundary，但它不是另一个 kernel device address space。
+
+L1、L2 是 cache，不是拥有独立 source-level allocation lifetime 的额外 address space。Shared memory 可以与 L1 共享 SM physical resource，同时仍是由程序管理的 shared address space。相反，**local** 表示逻辑上只属于一个 thread，并不表示物理上 on-chip。CUDA local memory 位于 device memory，register pressure 可能把 thread value spill 到这里。
+
+因此 physical-layer diagram 不是 latency 排名。它不声明选定 variable 的 cache hit、placement、occupancy effect 或 performance result。
+
+## 静态回退
+
+静态回退同时包含三层 grouping 与完整六行 table。二者都由同一 catalog 在 server 端生成，禁用 JavaScript 和打印时仍保留。增强 table 只是 filtered view，不是这些事实的唯一副本。
+
+## 证据边界
+
+浏览器 catalog 不编译 CUDA、不执行 kernel，也不探测 allocation、register assignment、cache 或 physical placement。Filter 不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**。全部 publication evidence axis 均为空。
+
+## 来源
+
+当前 [Writing SIMT Kernels memory-space sections](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) 给出 global、constant、shared、local、register 与 cache 边界。[Best Practices memory optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations) 用于交叉核对 address-space 与 physical-placement caveat。当前 [Runtime Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) 固定显式 host/device acquisition、copy 与 release 接口。
+
+归档的 [CUDA C++ Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy) 定义选定 stability boundary。VIS06 保留稳定的 CUDA C++ ownership/scope/lifetime 区分，不把当前 cache detail 变成 prerequisite。全部 source coordinate 访问日期为 **2026-08-27**；catalog、diagram、table、filter 与文字均为原创 CC-BY-4.0 内容。

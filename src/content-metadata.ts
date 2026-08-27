@@ -14,7 +14,7 @@ export const dateSchema = z
   .refine((value) => Boolean(parseIsoDate(value)), 'Date must be a real calendar date.');
 export const curriculumIdSchema = z
   .string()
-  .regex(/^(?:O\d{2}(?:-[A-Z]+)?|F\d{2}(?:-[A-Z]+)?|LAB\d{2}|EX\d{2}|VIS\d{2}|PB-R0(?:-\d{3})?)$/);
+  .regex(/^(?:(?:O|F|M)\d{2}(?:-[A-Z]+)?|LAB\d{2}|EX\d{2}|VIS\d{2}|PB-R0(?:-\d{3})?)$/);
 export const resourceKindSchema = z.enum([
   'learning-unit',
   'lab',

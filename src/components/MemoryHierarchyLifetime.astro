@@ -1,0 +1,256 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import {
+  MEMORY_HIERARCHY_RECORDS,
+  MEMORY_LIFECYCLE_FILTERS,
+  MEMORY_SCOPE_FILTERS,
+  createDefaultMemoryHierarchyFilter,
+  filterMemoryHierarchy,
+} from '../visuals/memory-hierarchy-model';
+import { MEMORY_HIERARCHY_COPY, type MemoryVisualLocale } from '../visuals/memory-visual-copy';
+
+interface Props {
+  locale: MemoryVisualLocale;
+}
+
+const { locale } = Astro.props;
+const copy = MEMORY_HIERARCHY_COPY[locale];
+const defaultFilter = createDefaultMemoryHierarchyFilter();
+const initial = filterMemoryHierarchy(defaultFilter);
+if (!initial.valid) throw new Error('VIS06 default filter must be valid.');
+const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocessor'] as const;
+---
+
+<cuda-memory-hierarchy-lifetime
+  class="visual-explainer memory-visual not-content"
+  data-visual-id="VIS06"
+  data-locale={locale}
+  data-valid="true"
+  data-scope="all"
+  data-lifecycle="all"
+  data-visible-records="6"
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls memory-control-grid hierarchy-control-grid" data-visual-controls hidden>
+      <legend>{copy.controlsLabel}</legend>
+      <label>
+        <span>{copy.scope}</span>
+        <select data-scope-filter autocomplete="off" aria-label={copy.scope}>
+          {MEMORY_SCOPE_FILTERS.map((scope) => <option value={scope} selected={scope === 'all'}>{copy.scopes[scope]}</option>)}
+        </select>
+      </label>
+      <label>
+        <span>{copy.lifecycle}</span>
+        <select data-lifecycle-filter autocomplete="off" aria-label={copy.lifecycle}>
+          {MEMORY_LIFECYCLE_FILTERS.map((lifecycle) => <option value={lifecycle} selected={lifecycle === 'all'}>{copy.lifecycles[lifecycle]}</option>)}
+        </select>
+      </label>
+      <button type="button" data-reset-memory-hierarchy>{copy.reset}</button>
+    </fieldset>
+
+    <section class="memory-workbench hierarchy-workbench" data-interactive-workbench data-pagefind-ignore hidden aria-label={copy.result}>
+      <header class="memory-result-header">
+        <div>
+          <span class="memory-result-kicker">{copy.result}</span>
+          <strong data-hierarchy-count>{initial.records.length} {copy.shown}.</strong>
+        </div>
+        <p data-hierarchy-status role="status" aria-live="polite" aria-atomic="true">{initial.records.length} {copy.shown}.</p>
+      </header>
+      <p class="memory-empty" data-hierarchy-empty hidden>{copy.empty}</p>
+      <div class="memory-table-wrap" data-hierarchy-table-wrap tabindex="0" aria-label={copy.result}>
+        <table class="memory-data-table hierarchy-table">
+          <caption>{copy.result}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Memory</th>
+              <th scope="col">{copy.ownerAcquisition}</th>
+              <th scope="col">{copy.accessibleScope}</th>
+              <th scope="col">{copy.lifetime}</th>
+              <th scope="col">{copy.releaseEnd}</th>
+              <th scope="col">{copy.caveat}</th>
+            </tr>
+          </thead>
+          <tbody data-hierarchy-records>
+            {initial.records.map((record) => {
+              const recordCopy = copy.records[record.id];
+              return (
+                <tr data-memory-record={record.id}>
+                  <th scope="row">{recordCopy.title}</th>
+                  <td>{recordCopy.ownerAcquisition}</td>
+                  <td>{recordCopy.accessibleScope}</td>
+                  <td>{recordCopy.lifetime}</td>
+                  <td>{recordCopy.releaseEnd}</td>
+                  <td>{recordCopy.physicalAddressSpaceCaveat}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="visual-section hierarchy-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+
+      <ol class="memory-layer-list" aria-label={copy.staticHeading}>
+        {physicalLayers.map((layer) => (
+          <li data-physical-layer={layer}>
+            <h4>{copy.layerLabels[layer]}</h4>
+            <ul>
+              {MEMORY_HIERARCHY_RECORDS.filter((record) => record.physicalLayer === layer).map((record) => (
+                <li data-layer-memory={record.id}>
+                  <strong>{copy.records[record.id].title}</strong>
+                  <span>{copy.scopes[record.scope]} · {copy.lifecycles[record.lifecycleKind]}</span>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+
+      <div class="memory-table-wrap static-hierarchy-table-wrap" tabindex="0" aria-label={copy.staticHeading}>
+        <table class="memory-data-table hierarchy-table static-hierarchy-table">
+          <caption>{copy.staticHeading}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Memory</th>
+              <th scope="col">{copy.ownerAcquisition}</th>
+              <th scope="col">{copy.accessibleScope}</th>
+              <th scope="col">{copy.lifetime}</th>
+              <th scope="col">{copy.releaseEnd}</th>
+              <th scope="col">{copy.caveat}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MEMORY_HIERARCHY_RECORDS.map((record) => {
+              const recordCopy = copy.records[record.id];
+              return (
+                <tr data-static-memory-record={record.id}>
+                  <th scope="row">{recordCopy.title}</th>
+                  <td>{recordCopy.ownerAcquisition}</td>
+                  <td>{recordCopy.accessibleScope}</td>
+                  <td>{recordCopy.lifetime}</td>
+                  <td>{recordCopy.releaseEnd}</td>
+                  <td>{recordCopy.physicalAddressSpaceCaveat}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-memory-hierarchy-lifetime>
+
+<script>
+  import {
+    createDefaultMemoryHierarchyFilter,
+    filterMemoryHierarchy,
+    isMemoryLifecycleFilter,
+    isMemoryScopeFilter,
+  } from '../visuals/memory-hierarchy-model';
+  import { MEMORY_HIERARCHY_COPY } from '../visuals/memory-visual-copy';
+
+  class CudaMemoryHierarchyLifetime extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
+      const scope = this.querySelector<HTMLSelectElement>('[data-scope-filter]');
+      const lifecycle = this.querySelector<HTMLSelectElement>('[data-lifecycle-filter]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reset-memory-hierarchy]');
+      if (!controls || !workbench || !scope || !lifecycle || !reset) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      workbench.hidden = false;
+      scope.addEventListener('change', () => this.render());
+      lifecycle.addEventListener('change', () => this.render());
+      reset.addEventListener('click', () => {
+        const defaults = createDefaultMemoryHierarchyFilter();
+        scope.value = defaults.scope;
+        lifecycle.value = defaults.lifecycle;
+        this.render();
+        scope.focus();
+      });
+      this.render();
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private render() {
+      const scope = this.querySelector<HTMLSelectElement>('[data-scope-filter]');
+      const lifecycle = this.querySelector<HTMLSelectElement>('[data-lifecycle-filter]');
+      if (!scope || !lifecycle || !isMemoryScopeFilter(scope.value) || !isMemoryLifecycleFilter(lifecycle.value)) {
+        this.dataset.valid = 'false';
+        return;
+      }
+      const result = filterMemoryHierarchy({ scope: scope.value, lifecycle: lifecycle.value });
+      if (!result.valid) {
+        this.dataset.valid = 'false';
+        return;
+      }
+
+      const copy = MEMORY_HIERARCHY_COPY[this.locale()];
+      this.dataset.valid = 'true';
+      this.dataset.scope = result.filter.scope;
+      this.dataset.lifecycle = result.filter.lifecycle;
+      this.dataset.visibleRecords = String(result.records.length);
+      const status = result.records.length === 0 ? copy.empty : `${result.records.length} ${copy.shown}.`;
+      this.setText('[data-hierarchy-count]', status);
+      this.setText('[data-hierarchy-status]', status);
+      const empty = this.querySelector<HTMLElement>('[data-hierarchy-empty]');
+      const tableWrap = this.querySelector<HTMLElement>('[data-hierarchy-table-wrap]');
+      if (empty) empty.hidden = result.records.length !== 0;
+      if (tableWrap) tableWrap.hidden = result.records.length === 0;
+
+      const body = this.querySelector<HTMLTableSectionElement>('[data-hierarchy-records]');
+      if (body) {
+        body.replaceChildren(...result.records.map((record) => {
+          const recordCopy = copy.records[record.id];
+          const row = document.createElement('tr');
+          row.dataset.memoryRecord = record.id;
+          const name = document.createElement('th');
+          name.scope = 'row';
+          name.textContent = recordCopy.title;
+          const cells = [
+            recordCopy.ownerAcquisition,
+            recordCopy.accessibleScope,
+            recordCopy.lifetime,
+            recordCopy.releaseEnd,
+            recordCopy.physicalAddressSpaceCaveat,
+          ].map((value) => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            return cell;
+          });
+          row.append(name, ...cells);
+          return row;
+        }));
+      }
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-memory-hierarchy-lifetime')) {
+    customElements.define('cuda-memory-hierarchy-lifetime', CudaMemoryHierarchyLifetime);
+  }
+</script>

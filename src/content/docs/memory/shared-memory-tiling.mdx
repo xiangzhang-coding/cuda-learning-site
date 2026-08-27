@@ -1,0 +1,229 @@
+---
+title: 'M03：共享内存分块'
+description: 用 portable C++17 synchronous load -> __syncthreads -> use/reuse baseline 构造 shared-memory tile，并证明 bounds-invalid threads、barrier participation 和 loop reuse 正确。
+pairId: m03
+counterpart: /en/memory/shared-memory-tiling/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - tile-contract
+  - load
+  - first-barrier
+  - use
+  - second-barrier
+  - bounds
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M03
+prerequisites:
+  - M01
+  - M02
+relatedUnits:
+  - EX06
+exampleIds:
+  - EX06
+canonicalExample: EX06
+canonicalRanges:
+  - tiled-kernels
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ shared memory and thread-block synchronization'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current shared-memory tiling context'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory and synchronization contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory contract'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,tile-contract,load,first-barrier,use,second-barrier,bounds,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: tiled-kernels }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/shared-memory-tiling/" lang="en">Read the English counterpart</a>
+
+共享内存分块（shared-memory tiling）让一个 thread block 协作执行加载阶段（load phase）、线程块屏障（thread-block barrier）和使用/复用阶段（use/reuse phase）。本站的 portable C++17 baseline 是同步的 `load -> __syncthreads() -> use/reuse`；当 loop 下一轮会覆盖同一 tile 时，还必须在覆盖前加入第二个 `__syncthreads()`。
+
+## 学完本单元，你应该能
+
+- 从 M01 的 per-block ownership 推导每个 block 拥有独立 shared tile。
+- 写出 portable C++17 synchronous load、first barrier、use/reuse 和 second barrier phase。
+- 让所有 participating threads 到达每个 block barrier，而不让 bounds-invalid thread 提前 return。
+- 让越界 load 写入适合运算的中性值（neutral value），同时只让合法 output thread 提交结果。
+- 用 happens-before phase ledger 证明 tile 不会在其他 thread 仍读取时被下一轮覆盖。
+
+## 先修关系
+
+先完成 [M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)和 [M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)。M01 提供 shared memory 的 per-block scope/lifetime 与 global input ownership；M02 让你在 cooperative load phase 检查 global addresses，而不把 “使用 shared” 本身写成 coalescing 或 speed 证据。
+
+本单元只教 minimum block-wide correctness contract。更细的 synchronization scope、memory ordering 和替代 primitives 留给未来 M05；不能把未来接口倒灌成 M03 prerequisite。本页不需要 CUDA-capable system，也不授予 Evidence Status。
+
+## Tile 合同：一个 block，一份 shared 实例
+
+设 `tile` 是一个 block 的 shared array，`t = threadIdx.x`。同一 block 的 threads 可以通过 `tile[t]` 协作；其他 block 看到的是自己的实例。Tile 的 logical contents 由当前 iteration 定义，不能跨 block 当作 global communication channel，也不能在 block execution 结束后继续持有。
+
+对每一轮 `base`，维护四个 phase：
+
+```text wrap
+L: every participating thread writes its assigned tile slot
+B1: every participating thread reaches the first __syncthreads()
+U: threads read/reuse the completed tile and conditionally write valid output
+B2: every participating thread finishes tile reads before the next overwrite
+```
+
+只有 `L -> B1 -> U -> B2 -> next L` 的循环顺序成立，shared storage reuse 才有简单、portable 的证明。
+
+## Load：每个 slot 都得到定义值
+
+一个 1D teaching baseline 可以写成：
+
+<pre tabindex="0" aria-label="Portable shared-tile phase pseudocode">
+  <code>{`for (int base = 0; base < n; base += blockDim.x) {
+  const int input_index = base + threadIdx.x;
+  tile[threadIdx.x] = input_index < n ? input[input_index] : neutral;
+  __syncthreads();
+
+  if (output_index < n) {
+    // Read/reuse only the tile slots required by the algorithm.
+    accumulate_from(tile);
+  }
+
+  __syncthreads();
+}`}</code>
+</pre>
+
+这是教学骨架，不是完整算法。真实 kernel 必须定义 `output_index`、每个 output 读取哪些 tile slots、`neutral` 对该运算为何保持 identity，以及 loop extent 对整个 block 是否一致。
+
+## First barrier：发布完整 tile
+
+First `__syncthreads()` 的 minimum contract 是：同一 block 的 participating threads 都到达 barrier，随后 use phase 才读取 cooperative writes。不要把它放进只有部分 thread 为 true 的 per-thread bounds branch，也不要让部分 thread 在它之前 return。
+
+```text
+if (input_index >= n) return;  // wrong before a block-wide barrier
+tile[threadIdx.x] = input[input_index];
+__syncthreads();
+```
+
+这个 early return 让 edge block 中一部分 threads 缺席 barrier。正确修复不是删除 bounds；而是让 invalid loader 写 neutral，然后和其他 threads 一起到达 barrier。
+
+## Use/reuse：guard output，不跳过 participation
+
+越界 input thread 仍可以成为 barrier participant；它的 load slot 由 neutral 定义。Output bounds 是另一份合同：invalid output thread 可以跳过 result store 或 arithmetic，但若后面还有 block barrier，它仍必须沿 control flow 到达 barrier。
+
+Neutral 取决于运算。Sum 的 identity 可以是 0；product 可以是 1；max 需要一个对 declared domain 合法的 lower identity。若算法没有合适的 neutral，必须改写 validity handling，不能随手填 0 并声称正确。
+
+Reuse 的价值也必须具体：列出一个 loaded value 被哪些合法 outputs 读取。仅仅把值复制进 shared memory 并不证明 global transactions 减少，更不证明速度提高。
+
+## Second barrier：覆盖前结束上一轮读取
+
+在 loop 中复用同一 shared array 时，某些 threads 可能先完成 use phase 并进入下一轮 load，而其他 threads 仍在读取旧 tile。First barrier 只保护“本轮 load 完成后再读”，不保护“本轮所有 reads 完成后再覆盖”。因此 next iteration overwrite 前需要 second `__syncthreads()`。
+
+第二个 barrier 不必被神秘化：它就是 buffer reuse boundary。若 kernel 没有下一轮 overwrite，或 storage ownership 以另一份已证明合同变化，需求可能不同；但 M03 frozen loop baseline 明确复用同一 tile，所以 B2 是 required。
+
+## Bounds：invalid load 不等于 nonparticipant
+
+对 edge tile，建立两种 predicate：
+
+```text
+load_valid   = input_index is inside the logical input
+output_valid = output_index is inside the logical output
+```
+
+`load_valid` 决定写 input value 还是 neutral；`output_valid` 决定是否提交 output。两者都不能决定某个 thread 是否绕过 block-wide barriers。Loop trip count 和 barrier positions 必须对 participating block threads 一致。
+
+## Canonical Runnable Example：EX06
+
+EX06 是 M03/M04 共用的 canonical Runnable Example。M03 只导入 `tiled-kernels` range：它使用完整固定 32x32 tile，展示一次 synchronous portable C++17 cooperative load、block barrier 和 column read。它没有 edge tile，也没有下一轮 overwrite，所以不会代替本页前面针对一般 loop 给出的 neutral-load 与 B2 proof obligation；M04 将单独审查 layout declaration。
+
+[在固定提交中查看完整 EX06 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex06-shared-memory-tile-bank-padding)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip)。独立 project 是唯一 canonical implementation；本页只导入一个已声明 range。
+
+<CanonicalCode exampleId="EX06" range="tiled-kernels" />
+
+## 证据边界
+
+Phase trace、pseudocode 和 host-side oracle 可以审查 contracts，但不能执行 `__syncthreads()` 的 GPU behavior。没有 qualifying compile record 时 compilation axis 为空；没有 Reference Environment run 时 runtime axis 也为空。本页不声明 tiling 减少 transactions、提高 bandwidth 或加速 kernel。
+
+未来 measurement 必须先验证 untiled/tiled variants 的 logical result 相同，再记录 exact kernel、tile shape、Environment Manifest、metrics 和 timing boundary。M03 的 barrier proof 是 correctness prerequisite，不是 performance result。
+
+## 离开前检查
+
+1. 为什么同名 `__shared__` declaration 会为不同 blocks 产生不同 tile instances？
+2. 为什么 bounds-invalid loader 应写 neutral，而不是在 first barrier 前 return？
+3. First `__syncthreads()` 在 load 与 use 之间建立什么 minimum phase contract？
+4. 为什么 loop 中在 next load 覆盖同一 tile 前需要 second `__syncthreads()`？
+5. 为什么 output-invalid thread 可以跳过 store，却仍必须到达后续 block barrier？
+
+## 继续练习
+
+- 完成 [M03 练习（Exercise）](/memory/shared-memory-tiling/exercises/)，再查看独立的[参考解答](/memory/shared-memory-tiling/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-015](/practice/#pb-r1-015)修复一份 edge tile 在 barrier 前 return 的 kernel review。
+- 使用 EX06 `tiled-kernels` 时先验证 phase 与 output correctness；不要从 shared-memory presence 推断 speedup。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 current shared-memory scope、allocation 与 `__syncthreads()` block synchronization contract；页面更新于 **2026-05-27**。
+- [CUDA C++ Best Practices Guide v13.3：Memory Optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations)提供 current shared-memory tiling context。
+- [CUDA C Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy)保留 11.8 lane 的 owner contract。
+- [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)是 Toolkit 12.9.2 patch lane 使用的 owner guide。
+
+四项 owner source 均访问于 **2026-08-27**。Phase ledger、pseudocode、edge cases、EX06 range contract、练习与编排均为本站原创；没有复制 owner example 或 figure。
+
+**事实核查日期：2026-08-27。**

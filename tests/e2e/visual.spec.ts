@@ -105,6 +105,51 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
   }
 });
 
+test('@visual VIS04-VIS06 stay discoverable and evidence-neutral in every theme', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Semantic visual coverage is owned by pinned Chromium.');
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  for (const theme of THEME_IDS) {
+    await page.goto('/en/');
+    await page.evaluate(
+      ([storageKey, value]) => localStorage.setItem(storageKey, value),
+      [THEME_STORAGE_KEY, theme] as const,
+    );
+
+    for (const visual of [
+      {
+        id: 'VIS04',
+        route: '/en/visuals/memory-transactions/',
+        selector: 'cuda-memory-transactions[data-visual-id="VIS04"]',
+      },
+      {
+        id: 'VIS05',
+        route: '/en/visuals/shared-memory-banks/',
+        selector: 'cuda-shared-memory-banks[data-visual-id="VIS05"]',
+      },
+      {
+        id: 'VIS06',
+        route: '/en/visuals/memory-hierarchy-lifetime/',
+        selector: 'cuda-memory-hierarchy-lifetime[data-visual-id="VIS06"]',
+      },
+    ] as const) {
+      await page.goto(visual.route);
+      await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+      await expect(page.locator('main h1')).toContainText(visual.id);
+      const component = page.locator(visual.selector);
+      await expect(component).toHaveAttribute('data-ready', 'true');
+      await expect(component).toHaveAttribute('data-valid', 'true');
+      await expect(component.locator('[data-visual-controls]')).toBeVisible();
+      await expect(component.locator('[data-interactive-workbench]')).toBeVisible();
+      await expect(component.locator('[data-no-evidence]')).toBeVisible();
+      await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+    }
+  }
+});
+
 test('@visual VIS19-VIS22 expose visible selected and fail-closed states in every theme', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Semantic visual coverage is owned by pinned Chromium.');
   await page.setViewportSize({ width: 1280, height: 800 });

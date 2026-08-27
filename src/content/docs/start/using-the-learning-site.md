@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-08-26'
+factCheckDate: '2026-08-27'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-26'
+      content: '2026-08-27'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -96,7 +96,7 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-截至 **2026-08-26**，完整发布的严格先修关系是：
+截至 **2026-08-27**，完整发布的严格先修关系是：
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -106,15 +106,16 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 6. [EX01 环境报告可运行示例](/examples/environment-report/)没有严格学习单元先修条件；[LAB01：记录并解读 CUDA 环境](/labs/record-cuda-environment/)同时依赖 O03 和 O08，并使用 EX01。
 7. Kernel 路线在完成 O03 后进入 [F01：从预测到第一个 CUDA kernel](/foundations/first-cuda-kernel/)。[F02：理解 CUDA 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)依赖 F02；[F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)也依赖 F01。
 8. [F05：CUDA 错误为何常常延后暴露](/foundations/asynchronous-errors/)仅依赖 F04；[F06：Compute capability 是功能合同](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07：区分 CUDA Runtime API 与 Driver API 的角色](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08：Launch geometry 是先于速度的正确性与资源决策](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
-9. [EX03 多维索引可运行示例](/examples/multidimensional-indexing/)依赖 F03，并为 F03/F04 提供 canonical source；[EX04 错误处理生命周期可运行示例](/examples/error-handling-lifecycle/)仅依赖 F05。[LAB02](/labs/vector-addition/)同时依赖 O03 和 F01，并使用 canonical [EX02](/examples/vector-addition/)；[LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)同时依赖 F03 和 F05，并使用 EX04。F08 与 LAB03 相关，但不是 LAB03 的先修条件。
+9. F01-F08 之后进入内存路线：[M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)同时依赖 F04 和 F06；[M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)同时依赖 M01 和 F03；[M03：共享内存分块](/memory/shared-memory-tiling/)同时依赖 M01 和 M02；[M04：Bank conflict 与布局变换](/memory/bank-conflicts-layouts/)仅依赖 M03。
+10. [EX03 多维索引可运行示例](/examples/multidimensional-indexing/)依赖 F03，并为 F03/F04 提供 canonical source；[EX04 错误处理生命周期可运行示例](/examples/error-handling-lifecycle/)仅依赖 F05；[EX05 合并与跨步访问可运行示例](/examples/coalesced-strided-access/)仅依赖 M02；[EX06 共享内存 tile bank padding 可运行示例](/examples/shared-memory-tile-bank-padding/)同时依赖 M03 和 M04。[LAB02](/labs/vector-addition/)同时依赖 O03 和 F01，并使用 canonical [EX02](/examples/vector-addition/)；[LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)同时依赖 F03 和 F05，并使用 EX04。F08 与 LAB03 相关，但不是 LAB03 的先修条件。
 
-下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01-F08 和 EX02-EX04 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于基础课程。F05 从 F04 继续错误生命周期；F06 汇合 F02/O03；F07 汇合 F04/F05；F08 汇合 F02/F03/F06。这些学习建议不增加上面没有列出的先修边。
+下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01-F08 和 EX02-EX06 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于基础课程。F05 从 F04 继续错误生命周期；F06 汇合 F02/O03；F07 汇合 F04/F05；F08 汇合 F02/F03/F06。内存路线从 F04/F06 汇入 M01，再按 M02、M03、M04 的严格边推进；EX05 位于 M02 之后，EX06 位于 M03/M04 之后。这些学习建议不增加上面没有列出的先修边。
 
-O02-O08 和 F01-F08 都有直接练习和独立参考解答。基础路线可直接进入 [F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
+O02-O08、F01-F08 与 M01-M04 都有直接练习和独立参考解答。基础路线可直接进入 [F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。内存路线可直接进入 [M01 练习](/memory/address-spaces/exercises/)与[解答](/memory/address-spaces/solutions/)、[M02 练习](/memory/coalescing-transactions/exercises/)与[解答](/memory/coalescing-transactions/solutions/)、[M03 练习](/memory/shared-memory-tiling/exercises/)与[解答](/memory/shared-memory-tiling/solutions/)、[M04 练习](/memory/bank-conflicts-layouts/exercises/)与[解答](/memory/bank-conflicts-layouts/solutions/)。
 
-[实验索引](/labs/)按当前顺序直接列出 [LAB01](/labs/record-cuda-environment/)、[LAB02](/labs/vector-addition/)和 [LAB03](/labs/break-and-repair-indexing/)；导航没有未完成学习单元。[可视化讲解索引](/visuals/)列出六项正式讲解：独立页面 VIS01 kernel 路径与 VIS02 索引，以及分别嵌入 F05-F08 的 [VIS19 错误暴露时间线](/foundations/asynchronous-errors/#vis19)、[VIS20 计算能力合同筛选器](/foundations/compute-capability/#vis20)、[VIS21 Runtime/Driver API 边界](/foundations/runtime-driver-api/#vis21)与 [VIS22 线程块形状约束探索器](/foundations/launch-geometry/#vis22)。索引卡片直接链接到四个页内锚点，导航不复制四个独立页面。六项讲解都提供静态或文字回退，不执行 CUDA，也不产生证据。F04 的原创静态生命周期表仍不是 Visual Explainer 或证据来源。[练习题库](/practice/)现收录十七道链接回 O02-O08 与 F01-F08 的完整题目。你还可以直接查阅已经扩展的[术语表](/glossary/)、[来源与版本记录](/sources-and-versions/)和[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
+[实验索引](/labs/)按当前顺序直接列出 [LAB01](/labs/record-cuda-environment/)、[LAB02](/labs/vector-addition/)和 [LAB03](/labs/break-and-repair-indexing/)；公开实验严格只有这三项，导航没有未完成学习单元。[可视化讲解索引](/visuals/)列出九项正式讲解：独立页面 [VIS01 kernel 路径](/visuals/kernel-journey/)、[VIS02 索引](/visuals/indexing/)、[VIS04 内存请求 segment 分组](/visuals/memory-transactions/)、[VIS05 shared-memory bank 映射](/visuals/shared-memory-banks/)与 [VIS06 memory hierarchy、ownership 与 lifetime](/visuals/memory-hierarchy-lifetime/)，以及分别嵌入 F05-F08 的 [VIS19 错误暴露时间线](/foundations/asynchronous-errors/#vis19)、[VIS20 计算能力合同筛选器](/foundations/compute-capability/#vis20)、[VIS21 Runtime/Driver API 边界](/foundations/runtime-driver-api/#vis21)与 [VIS22 线程块形状约束探索器](/foundations/launch-geometry/#vis22)。九项讲解都是确定性的 browser-only model，提供静态或文字回退，不执行 CUDA，也没有 CUDA Evidence Status。F04 的原创静态生命周期表仍不是 Visual Explainer 或证据来源。[练习题库](/practice/)现收录 21 道完整题目；[术语表](/glossary/)有 76 项，[来源与版本记录](/sources-and-versions/)有 34 项。你还可以直接查阅[关于本站](/about/)。导航没有列出的学习材料尚未公开，不应从编号或文字描述中推断存在对应页面。
 
-EX01 保留现有状态：没有 Compile-Checked 声明，runtime 为 Pending Hardware Verification。EX03 也保留现有状态：在 11.8.0、12.9.2 与 13.3.1 三条工具包通道（Toolkit Lane）使用同一份原创 C++17 source，compilation evidence 为空，runtime 为 Pending Hardware Verification。EX04 与 LAB03 的 compilation evidence 同样为空，runtime 都是 Pending Hardware Verification。Host-only checks 不编译或运行 CUDA；本站没有运行 EX03 或 EX04 CUDA binary，也没有记录它们的实际 output、error code、timing 或 performance number。
+EX01 保留现有状态：没有 Compile-Checked 声明，runtime 为 Pending Hardware Verification。EX03-EX06 各自在 11.8.0、12.9.2 与 13.3.1 三条工具包通道（Toolkit Lane）使用一份原创 C++17 实现。EX05 与 EX06 没有符合条件的 retained compile record，因此 compilation evidence 为空；runtime 为 Pending Hardware Verification，recorded observations 为空，只提供 expected observations。Host-only checks 不编译或运行 CUDA；本站没有运行 EX03-EX06 CUDA binary，也没有记录它们的实际 output、timing、speedup 或其他 performance number。
 
 ## 三种视觉主题，一套内容
 
@@ -154,4 +155,4 @@ EX01 保留现有状态：没有 Compile-Checked 声明，runtime 为 Pending Ha
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**事实核查日期：2026-08-26。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**事实核查日期：2026-08-27。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

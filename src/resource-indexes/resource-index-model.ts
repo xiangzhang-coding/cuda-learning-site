@@ -153,6 +153,26 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'F08：Launch geometry 是先于速度的正确性与资源决策', en: 'F08: Launch Geometry Is a Correctness and Resource Decision Before Speed' },
     prerequisites: ['F02', 'F03', 'F06'],
   },
+  M01: {
+    href: { 'zh-CN': '/memory/address-spaces/', en: '/en/memory/address-spaces/' },
+    title: { 'zh-CN': 'M01：地址空间、所有权、作用域与生命周期', en: 'M01: Address spaces, ownership, scope, and lifetime' },
+    prerequisites: ['F04', 'F06'],
+  },
+  M02: {
+    href: { 'zh-CN': '/memory/coalescing-transactions/', en: '/en/memory/coalescing-transactions/' },
+    title: { 'zh-CN': 'M02：把合并访问理解为事务塑形', en: 'M02: Coalescing as transaction shaping' },
+    prerequisites: ['M01', 'F03'],
+  },
+  M03: {
+    href: { 'zh-CN': '/memory/shared-memory-tiling/', en: '/en/memory/shared-memory-tiling/' },
+    title: { 'zh-CN': 'M03：共享内存分块', en: 'M03: Shared-memory tiling' },
+    prerequisites: ['M01', 'M02'],
+  },
+  M04: {
+    href: { 'zh-CN': '/memory/bank-conflicts-layouts/', en: '/en/memory/bank-conflicts-layouts/' },
+    title: { 'zh-CN': 'M04：Bank conflict 与布局变换', en: 'M04: Bank conflicts and layout transforms' },
+    prerequisites: ['M03'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -172,6 +192,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
     title: { 'zh-CN': 'EX04：错误处理生命周期可运行示例', en: 'EX04: Error Handling Lifecycle Runnable Example' },
     prerequisites: ['F05'],
+  },
+  EX05: {
+    href: { 'zh-CN': '/examples/coalesced-strided-access/', en: '/en/examples/coalesced-strided-access/' },
+    title: { 'zh-CN': 'EX05：合并与跨步访问可运行示例', en: 'EX05: Coalesced and Strided Access Runnable Example' },
+    prerequisites: ['M02'],
+  },
+  EX06: {
+    href: { 'zh-CN': '/examples/shared-memory-tile-bank-padding/', en: '/en/examples/shared-memory-tile-bank-padding/' },
+    title: { 'zh-CN': 'EX06：共享内存 tile bank padding 可运行示例', en: 'EX06: Shared-Memory Tile Bank Padding Runnable Example' },
+    prerequisites: ['M03', 'M04'],
   },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
@@ -200,6 +230,24 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
   VIS02: {
     href: { 'zh-CN': '/visuals/indexing/', en: '/en/visuals/indexing/' },
     title: { 'zh-CN': 'VIS02：Grid、block 与 thread 索引', en: 'VIS02: Grid, Block, and Thread Indexing' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS04: {
+    href: { 'zh-CN': '/visuals/memory-transactions/', en: '/en/visuals/memory-transactions/' },
+    title: { 'zh-CN': 'VIS04：内存请求的 segment 分组', en: 'VIS04: Memory-request Segment Grouping' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS05: {
+    href: { 'zh-CN': '/visuals/shared-memory-banks/', en: '/en/visuals/shared-memory-banks/' },
+    title: { 'zh-CN': 'VIS05：Shared-memory bank 映射', en: 'VIS05: Shared-memory Bank Mapping' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS06: {
+    href: { 'zh-CN': '/visuals/memory-hierarchy-lifetime/', en: '/en/visuals/memory-hierarchy-lifetime/' },
+    title: { 'zh-CN': 'VIS06：Memory hierarchy、ownership 与 lifetime', en: 'VIS06: Memory Hierarchy, Ownership, and Lifetime' },
     prerequisites: [],
     indexGroup: 'visuals',
   },

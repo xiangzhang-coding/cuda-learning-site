@@ -189,6 +189,14 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/foundations/runtime-driver-api/exercises/',
     '/foundations/launch-geometry/exercises/',
     '/en/foundations/launch-geometry/exercises/',
+    '/memory/address-spaces/exercises/',
+    '/en/memory/address-spaces/exercises/',
+    '/memory/coalescing-transactions/exercises/',
+    '/en/memory/coalescing-transactions/exercises/',
+    '/memory/shared-memory-tiling/exercises/',
+    '/en/memory/shared-memory-tiling/exercises/',
+    '/memory/bank-conflicts-layouts/exercises/',
+    '/en/memory/bank-conflicts-layouts/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -231,6 +239,14 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/foundations/runtime-driver-api/solutions/',
     '/foundations/launch-geometry/solutions/',
     '/en/foundations/launch-geometry/solutions/',
+    '/memory/address-spaces/solutions/',
+    '/en/memory/address-spaces/solutions/',
+    '/memory/coalescing-transactions/solutions/',
+    '/en/memory/coalescing-transactions/solutions/',
+    '/memory/shared-memory-tiling/solutions/',
+    '/en/memory/shared-memory-tiling/solutions/',
+    '/memory/bank-conflicts-layouts/solutions/',
+    '/en/memory/bank-conflicts-layouts/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -247,7 +263,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes seventeen complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes twenty-one complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     const entryIds = [
@@ -255,15 +271,20 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
       'PB-R1-006', 'PB-R1-007', 'PB-R1-008',
       'PB-R1-009', 'PB-R1-010', 'PB-R1-011', 'PB-R1-012',
+      'PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016',
     ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
     );
-    const focusedPrerequisiteSlugs: Readonly<Record<string, string>> = {
-      'PB-R1-009': 'asynchronous-errors',
-      'PB-R1-010': 'compute-capability',
-      'PB-R1-011': 'runtime-driver-api',
-      'PB-R1-012': 'launch-geometry',
+    const focusedPrerequisitePaths: Readonly<Record<string, string>> = {
+      'PB-R1-009': 'foundations/asynchronous-errors',
+      'PB-R1-010': 'foundations/compute-capability',
+      'PB-R1-011': 'foundations/runtime-driver-api',
+      'PB-R1-012': 'foundations/launch-geometry',
+      'PB-R1-013': 'memory/address-spaces',
+      'PB-R1-014': 'memory/coalescing-transactions',
+      'PB-R1-015': 'memory/shared-memory-tiling',
+      'PB-R1-016': 'memory/bank-conflicts-layouts',
     };
 
     expect(entryHeadings).toHaveLength(entryIds.length);
@@ -290,11 +311,14 @@ describe('Exercises and Practice Bank contract', () => {
       expect(sectionText, `${route} ${entryId}`).toMatch(/Hint 1|提示 1/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Solution|解答/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Source basis|来源依据/);
-      expect(sectionLinks.some((link) => /\/(?:en\/)?(?:start|foundations)\//.test(link.getAttribute('href') ?? ''))).toBe(true);
-      const prerequisiteSlug = focusedPrerequisiteSlugs[entryId];
-      if (prerequisiteSlug) {
+      const prerequisitePath = focusedPrerequisitePaths[entryId];
+      const prerequisiteRoutePattern = prerequisitePath?.startsWith('memory/')
+        ? /\/(?:en\/)?memory\//
+        : /\/(?:en\/)?(?:start|foundations)\//;
+      expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link.getAttribute('href') ?? ''))).toBe(true);
+      if (prerequisitePath) {
         expect(
-          sectionLinks.some((link) => link.getAttribute('href')?.includes(`/foundations/${prerequisiteSlug}/`)),
+          sectionLinks.some((link) => link.getAttribute('href')?.includes(`/${prerequisitePath}/`)),
           `${route} ${entryId} prerequisite`,
         ).toBe(true);
       }
@@ -307,6 +331,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/F01/);
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
+    for (const unitId of ['M01', 'M02', 'M03', 'M04']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
@@ -325,6 +350,9 @@ describe('Exercises and Practice Bank contract', () => {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
     for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {
+      expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
+    }
+    for (const slug of ['address-spaces', 'coalescing-transactions', 'shared-memory-tiling', 'bank-conflicts-layouts']) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
   });

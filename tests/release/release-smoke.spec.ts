@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 import { expect, test } from '@playwright/test';
 
+import ex05Project from '../../examples/ex05-coalesced-strided-access/project.json' with { type: 'json' };
+import ex06Project from '../../examples/ex06-shared-memory-tile-bank-padding/project.json' with { type: 'json' };
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
@@ -18,6 +20,10 @@ const ex04SourceUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
 const ex04DownloadUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${ex04SourceCommit}.zip`;
+const issue15Examples = [
+  { route: '/en/examples/coalesced-strided-access/', project: ex05Project },
+  { route: '/en/examples/shared-memory-tile-bank-padding/', project: ex06Project },
+] as const;
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
@@ -54,16 +60,34 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/foundations/runtime-driver-api/',
     '/foundations/launch-geometry/',
     '/en/foundations/launch-geometry/',
+    '/memory/address-spaces/',
+    '/en/memory/address-spaces/',
+    '/memory/coalescing-transactions/',
+    '/en/memory/coalescing-transactions/',
+    '/memory/shared-memory-tiling/',
+    '/en/memory/shared-memory-tiling/',
+    '/memory/bank-conflicts-layouts/',
+    '/en/memory/bank-conflicts-layouts/',
     '/examples/environment-report/',
     '/en/examples/environment-report/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
     '/en/examples/error-handling-lifecycle/',
+    '/examples/coalesced-strided-access/',
+    '/en/examples/coalesced-strided-access/',
+    '/examples/shared-memory-tile-bank-padding/',
+    '/en/examples/shared-memory-tile-bank-padding/',
     '/labs/record-cuda-environment/',
     '/en/labs/record-cuda-environment/',
     '/labs/break-and-repair-indexing/',
     '/en/labs/break-and-repair-indexing/',
+    '/visuals/memory-transactions/',
+    '/en/visuals/memory-transactions/',
+    '/visuals/shared-memory-banks/',
+    '/en/visuals/shared-memory-banks/',
+    '/visuals/memory-hierarchy-lifetime/',
+    '/en/visuals/memory-hierarchy-lifetime/',
   ]) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -163,6 +187,34 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     query: 'Error Handling Lifecycle Runnable Example',
     expectedHrefs: ['/en/examples/error-handling-lifecycle/'],
   });
+  for (const scenario of [
+    {
+      query: 'Coalesced and Strided Access Runnable Example',
+      expectedHrefs: ['/en/examples/coalesced-strided-access/'],
+    },
+    {
+      query: 'Shared-Memory Tile Bank Padding Runnable Example',
+      expectedHrefs: ['/en/examples/shared-memory-tile-bank-padding/'],
+    },
+    {
+      query: 'Memory-request Segment Grouping',
+      expectedHrefs: ['/en/visuals/memory-transactions/'],
+    },
+    {
+      query: 'Shared-memory Bank Mapping',
+      expectedHrefs: ['/en/visuals/shared-memory-banks/'],
+    },
+    {
+      query: 'Memory Hierarchy Ownership Lifetime',
+      expectedHrefs: ['/en/visuals/memory-hierarchy-lifetime/'],
+    },
+  ] as const) {
+    await expectRankedSearchResult(page, {
+      route: '/en/',
+      button: /Search/,
+      ...scenario,
+    });
+  }
 
   await page.goto('/en/practice/');
   const index = page.locator('cuda-resource-index');
@@ -275,6 +327,9 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
   for (const route of [
     '/visuals/kernel-journey/',
     '/en/visuals/indexing/',
+    '/en/visuals/memory-transactions/',
+    '/en/visuals/shared-memory-banks/',
+    '/en/visuals/memory-hierarchy-lifetime/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
     ...Object.keys(embeddedFallbacks),
@@ -308,7 +363,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
   await staticContext.close();
 });
 
-test('serves immutable canonical downloads and returns a real 404 for unknown application paths', async ({ page, request }) => {
+test('serves immutable canonical downloads, preserves evidence boundaries, and returns a real 404', async ({ page, request }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/examples/vector-addition/');
   await expect(page.locator(`a[href="${downloadUrl}"]`)).toBeVisible();
@@ -343,6 +398,44 @@ test('serves immutable canonical downloads and returns a real 404 for unknown ap
   expect(
     ex04Archive.includes(Buffer.from('/examples/ex04-error-handling-lifecycle/src/error_handling_lifecycle.cu')),
   ).toBe(true);
+
+  for (const { route, project } of issue15Examples) {
+    expect(project.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
+    expect(project.sourceUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${project.sourceCommit}/${project.root}`,
+    );
+    expect(project.downloadUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${project.sourceCommit}.zip`,
+    );
+    expect(project.evidence.compilation).toEqual([]);
+    expect(project.evidence.recordedObservations).toEqual([]);
+
+    await page.goto(route);
+    await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
+    await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+    await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
+      'content',
+      project.evidence.runtime,
+    );
+    await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute(
+      'content',
+      `${project.evidence.expectedObservations.length} declared expectations`,
+    );
+    await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+    const canonicalRanges = Object.keys(project.ranges);
+    const canonicalCode = page.locator(`[data-canonical-example="${project.id}"]`);
+    await expect(canonicalCode).toHaveCount(canonicalRanges.length);
+    expect(await canonicalCode.evaluateAll((figures) => figures.map((figure) => figure.getAttribute('data-canonical-range'))))
+      .toEqual(canonicalRanges);
+  }
+
+  for (const issue15DownloadUrl of new Set(issue15Examples.map(({ project }) => project.downloadUrl))) {
+    const response = await request.get(issue15DownloadUrl);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()['content-type']).toMatch(/zip|octet-stream/);
+    expect((await response.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+  }
 
   const missing = await request.get('/api/r0-smoke-must-not-exist');
   expect(missing.status()).toBe(404);

@@ -19,35 +19,26 @@ const representativeThemeRoutes = [
   '/en/foundations/launch-geometry/',
 ] as const;
 
-const issue14StateScans = [
+const issue15StateScans = [
   {
     theme: 'silicon-light',
-    label: 'F05 deferred synchronization state',
-    route: '/en/foundations/asynchronous-errors/',
-    prepare: async (page: Page) => {
-      await page.locator('[data-action="select-scenario"]').selectOption('deferred-execution');
-      await page.locator('cuda-error-timeline [data-action="scrub"]').fill('3');
-    },
+    label: 'VIS04 offset segment state',
+    route: '/en/visuals/memory-transactions/',
+    prepare: async (page: Page) => page.locator('[data-memory-field="offset"]').fill('4'),
   },
   {
     theme: 'profiler-dark',
-    label: 'F06 unknown capability state',
-    route: '/en/foundations/compute-capability/',
-    prepare: async (page: Page) => page.locator('[data-capability-input]').fill('8.6'),
+    label: 'VIS05 bank-conflict state',
+    route: '/en/visuals/shared-memory-banks/',
+    prepare: async (page: Page) => page.locator('[data-bank-field="stride"]').fill('32'),
   },
   {
     theme: 'blueprint',
-    label: 'F07 completion and error boundary state',
-    route: '/en/foundations/runtime-driver-api/',
-    prepare: async (page: Page) => page.locator('[data-stage-tab="completion-errors"]').click(),
-  },
-  {
-    theme: 'blueprint',
-    label: 'F08 aggregate block-shape error state',
-    route: '/en/foundations/launch-geometry/',
+    label: 'VIS06 empty filtered state',
+    route: '/en/visuals/memory-hierarchy-lifetime/',
     prepare: async (page: Page) => {
-      await page.locator('[data-block-shape-field="blockX"]').fill('1024');
-      await page.locator('[data-block-shape-field="blockY"]').fill('2');
+      await page.locator('[data-scope-filter]').selectOption('thread');
+      await page.locator('[data-lifecycle-filter]').selectOption('explicit-release');
     },
   },
 ] as const;
@@ -104,11 +95,11 @@ test('@accessibility representative pages and visual states have no tagged viola
   }
 });
 
-test('@accessibility issue-14 non-default and error states have no tagged axe violations', async ({ page }, testInfo) => {
+test('@accessibility issue-15 non-default and empty states have no tagged axe violations', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
   await page.goto('/');
 
-  for (const scenario of issue14StateScans) {
+  for (const scenario of issue15StateScans) {
     await page.evaluate(
       ([storageKey, value]) => localStorage.setItem(storageKey, value),
       [THEME_STORAGE_KEY, scenario.theme] as const,

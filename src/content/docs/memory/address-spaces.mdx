@@ -1,0 +1,184 @@
+---
+title: 'M01：地址空间、所有权、作用域与生命周期'
+description: 按分配者与所有者、可访问范围、生命周期和释放责任区分 host、global、constant、shared、local 与 register memory，而不把地址空间误当成缓存层级。
+pairId: m01
+counterpart: /en/memory/address-spaces/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - classification-model
+  - host-global-constant
+  - shared-local-register
+  - cache-boundary
+  - release-ledger
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M01
+prerequisites:
+  - F04
+  - F06
+relatedUnits:
+  - VIS06
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA C++ memory spaces, scopes, lifetimes, and locations'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime allocation, copy, symbol, and release operations'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 memory hierarchy contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API 11.8 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 Runtime memory operations'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane memory contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API 12.9.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v12.9.1; owner API documentation for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane Runtime memory operations'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,classification-model,host-global-constant,shared-local-register,cache-boundary,release-ledger,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS06 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/address-spaces/" lang="en">Read the English counterpart</a>
+
+地址空间（address space）说明一个对象可从哪里被寻址，但完整判断还必须记录所有权（ownership）、作用域（scope）、生命周期（lifetime）和释放责任。主机内存（host memory）、全局内存（global memory）、常量内存（constant memory）、共享内存（shared memory）、本地内存（local memory）与寄存器（register）是语义和资源合同，不是一张按“快到慢”排列的缓存层级（cache level）表。
+
+## 学完本单元，你应该能
+
+- 对一个对象分别写出分配者或创建者、可访问执行者、共享范围、有效时段和释放动作。
+- 区分 grid 可访问的 global/constant、block 私有实例的 shared，以及 thread 私有的 local/register。
+- 解释为什么 local memory 逻辑上 thread-private，却物理位于 device memory；register 不足时值又可能 spill 到 local。
+- 为显式 Runtime allocation、语言管理对象和编译器管理对象选择正确的释放责任。
+- 拒绝从地址空间名称推断固定延迟、固定 cache 路径、固定容量或性能排序。
+
+## 先修关系
+
+先完成 [F04：建立明确的 host-device 生命周期](/foundations/host-device-lifecycle/)和 [F06：把 compute capability 当作 feature 与 limit 合同](/foundations/compute-capability/)。F04 已给出 allocate、copy、launch、synchronize、copy back 和 release 的顺序；M01 把这条时间线细化到每类对象的 owner 与 release。F06 要求容量、cache 配置、register limit 和编译结果来自选定环境，而不是由产品名或记忆补齐。
+
+本学习单元（Learning Unit）只需阅读、手算和静态审查，不需要 CUDA-capable system，也不产生 Compile-Checked 或 runtime Evidence Status。相关的 VIS06 可以显示同一分类，但可视化不会改变对象合同。
+
+## 四轴分类模型
+
+不要只问“变量放在哪里”。依次回答四个问题：
+
+1. **Owner/allocation：** 哪个 host allocator、Runtime API、module declaration、kernel launch 或 compiler decision 创建存储？
+2. **Accessibility/scope：** host、整个 grid、一个 block 还是一个 thread 可以命名或访问同一对象实例？
+3. **Lifetime：** 对象跨多少 host scope、kernel launch、block execution、thread execution 或 context/application 时段保持有效？
+4. **Release：** 程序必须调用匹配的释放 API，还是由 host language、module/context、block/thread completion 或 compiler 自动回收？
+
+“所有 thread 都拿到同一个 pointer”不等于它们拥有同一 local object；“变量写在 kernel 里”也不保证它在 register。Source-level scope、CUDA address-space semantics 与 compiler placement 必须分开记录。
+
+## Host、global 与 constant
+
+| 空间 | owner / allocation | accessibility 与共享 scope | lifetime | release |
+| --- | --- | --- | --- | --- |
+| host | host language allocator，或 `cudaMallocHost` 等 Runtime host allocator | CPU 可访问；device 是否可访问取决于显式 copy/mapping 合同，不能默认 | 由 host object/allocation 合同决定 | 匹配 host allocator；page-locked Runtime allocation 用 `cudaFreeHost` |
+| global | host 侧 `cudaMalloc` 等 device allocation，或相应 device/global object | 持有合法 device pointer 的 kernel thread 可访问；allocation 可跨 block 和 kernel 使用 | 直到 `cudaFree`、device reset 或 owning context/application 结束 | 显式 allocation 用 `cudaFree`；释放前必须满足仍在使用该 allocation 的工作已完成 |
+| constant | C++ 中的 module-scope `__constant__` symbol，由 module/context 建立；host 通过 symbol API 更新 | kernel 只读；同一 device 上 grid 范围可见，host 通过 Runtime symbol operations 访问 | C++ symbol 随创建它的 context/module 有效 | 不是对 symbol 调用 `cudaFree`；由 module/context 生命周期管理 |
+
+Constant 的“kernel 只读”不等于 host 永远不能初始化或更新。`cudaMemcpyToSymbol` 等 host Runtime operation 与 kernel 读取属于不同访问角色。Global 的“全局”也不代表 host 可直接把普通 device pointer 当 CPU pointer 解引用。
+
+## Shared、local 与 register
+
+| 空间 | owner / allocation | accessibility 与共享 scope | lifetime | release |
+| --- | --- | --- | --- | --- |
+| shared | 每个 block 的静态 `__shared__` declaration，或 launch 请求的 dynamic shared storage | owning block 中的 thread 共享该实例；不同 block 拥有不同实例 | 对应 block/kernel execution 时段 | block 完成后自动结束，不调用 `cudaFree` |
+| local | compiler 为单个 thread 的 automatic object、无法静态索引的数组、大对象或 spill 分配 | 只有 owning thread 能按 source semantics 访问 | owning thread 的 kernel invocation | compiler/thread completion 管理 |
+| register | compiler 为单个 thread 的值分配有限 register resource | 只有 owning thread；没有可供其他 thread 共享的 register object | owning thread 的 kernel invocation | compiler/thread completion 管理 |
+
+Local 的 **local** 描述逻辑 scope，不描述物理距离：它是 thread-private，但物理位于 device memory。Register allocation 也不是 source declaration 的保证；编译器、target 和 resource pressure 决定实际 placement。Register 不足时发生的寄存器溢出（register spill）会把值放入 local memory。不要把 spill 说成“另一个 thread 可以读到该值”；scope 仍然 thread-private。
+
+## 地址空间不是 cache level
+
+Cache 回答近期数据是否在某个硬件缓存中；address space 回答程序如何命名、共享和维持对象。Global 与 local access 可能经过 cache，constant 有自己的读取行为，shared 与 L1 在某些架构上共享物理资源配置，但这些事实不会把 global、local、constant 或 shared 变成彼此的 cache level。
+
+因此不能从表格写出通用的“register > shared > constant > global”速度结论。容量、cache 组织、shared/L1 配置、register 数量、spill 与实际 access cost 都随 architecture、kernel、compiler target 和访问模式变化。M01 只签发语义与责任合同，不签发 latency 或 speed verdict。
+
+## Release ledger：谁创建，谁证明结束
+
+对显式 allocation，ledger 至少记录 allocation API、返回对象、所有使用者完成的同步边界和匹配 release。对 block/thread/compiler-managed storage，记录自动 lifetime endpoint，禁止制造不存在的 free。一个安全审查可以写成：
+
+```text
+object -> creator -> permitted accessors -> shared instance scope
+       -> last permitted use -> completion proof -> release owner/action
+```
+
+例如，`cudaMalloc` buffer 在 kernel 尚可能访问时不能释放；`__shared__` tile 不应被 host 释放；local array 不应因“位于 device memory”就获得跨 thread pointer-sharing 合同。每一行都先证明 ownership 和 last use，再讨论 placement 或优化。
+
+## 离开前检查
+
+1. 为什么 address space 不能当成从快到慢的 cache hierarchy？
+2. Global allocation、`__constant__` symbol 与 `__shared__` tile 的创建和释放责任分别由谁承担？
+3. Local memory 为什么同时满足 thread-private scope 与 physical device-memory location？
+4. 为什么 source-level scalar 不能保证 register placement，register spill 又不会改变 thread ownership？
+5. 在释放 `cudaMalloc` allocation 前，ledger 为什么既要记录最后使用者，也要记录 completion proof？
+
+## 继续练习
+
+- 完成 [M01 练习（Exercise）](/memory/address-spaces/exercises/)，再查看独立的[参考解答](/memory/address-spaces/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-013](/practice/#pb-r1-013)审查一份把 address space、cache 和 release responsibility 混为一谈的对象清单。
+- 相关的 VIS06 应复现 owner/scope/lifetime 过滤结果；它不是 CUDA runtime observation。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)给出 current memory type、scope、lifetime、location、shared allocation、local placement 与 register spill 说明；页面更新于 **2026-05-27**。
+- [CUDA Runtime API v13.3.1：Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)定义 current allocation、copy、symbol 与 matching release operations；页面更新于 **2026-06-29**。
+- [11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy)与 [11.8 Runtime memory](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html)保留本站 11.8 lane 的 owner documentation。
+- [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)与 [Runtime memory 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html)是本站 Toolkit 12.9.2 patch lane 使用的 owner documentation。
+
+六项 owner source 均访问于 **2026-08-27**。分类表、release ledger、练习和教学编排均为本站原创；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-27。**

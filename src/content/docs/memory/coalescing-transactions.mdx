@@ -1,0 +1,204 @@
+---
+title: 'M02：把合并访问理解为事务塑形'
+description: 对 CC 6.0+ 和本站 CC 7.5+ tier，用一条 warp memory instruction 的 active addresses 覆盖多少个自然对齐 32-byte segment 来推导 transaction-shaping model。
+pairId: m02
+counterpart: /en/memory/coalescing-transactions/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - model
+  - aligned
+  - offset
+  - stride
+  - active-lanes
+  - canonical-example
+  - measurement-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M02
+prerequisites:
+  - M01
+  - F03
+relatedUnits:
+  - EX05
+  - VIS04
+exampleIds:
+  - EX05
+canonicalExample: EX05
+canonicalRanges:
+  - access-kernel
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current CUDA C++ memory optimization context'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Coalesced Access to Global Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current CC 6.0+ global-memory coalescing rules'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 memory-access contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane memory-access contract'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,model,aligned,offset,stride,active-lanes,canonical-example,measurement-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,F03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX05,VIS04' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: access-kernel }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/coalescing-transactions/" lang="en">Read the English counterpart</a>
+
+合并访问（coalescing）在本单元中是一种事务塑形（transaction shaping）推理：给定一条 warp memory instruction 的活跃地址（active address）集合，数出覆盖每个请求 word 所需的自然对齐（naturally aligned）32-byte segment。这个静态 segment count 解释 address pattern，不等于 profiler 的最终 transaction count，更不自动产生 speed claim。
+
+## 学完本单元，你应该能
+
+- 从 instruction、active lanes、word width、base alignment、offset 和 stride 构造请求 byte ranges。
+- 对本站 Baseline GPU Capability Tier（CC 7.5+）使用 CC 6.0+ 的 32-byte segment model。
+- 推导 32 lanes、每 lane 一个 4-byte word 时 aligned contiguous、one-word offset 和 stride-two 的 segment count。
+- 解释 tail warp、inactive lanes 和不同 instruction 为什么必须重新计算 address set。
+- 把静态 prediction、cache reuse、实际 issued transactions、correctness 和 timing 分成不同 evidence fields。
+
+## 先修关系
+
+先完成 [M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)和 [F03：把多维索引与边界写成正确性合同](/foundations/multidimensional-indexing/)。M01 说明这里讨论的是 global-memory access，而不是把 global 当 cache level；F03 提供 lane/thread index、logical extent 和 bounds，决定某条 instruction 中哪些 lane active 以及它们请求什么地址。
+
+本页不需要 CUDA-capable system。手算 segment 是 expected model，不是 Compile-Checked、Runtime-Verified 或 Community-Observed evidence。EX05 与 VIS04 是相关资源，但本页的空 evidence axes 不会被它们代填。
+
+## 模型：先固定一条 instruction
+
+对 CC 6.0 及更新架构，本站在自己的 CC 7.5+ supported tier 中采用以下教学模型：
+
+1. 只取**同一 warp、同一条 global-memory instruction** 中 active lanes 请求的 byte addresses。
+2. 对每个请求 word，列出它覆盖的 bytes。
+3. 用自然对齐 32-byte segments `[32k, 32k + 31]` 覆盖这些 bytes。
+4. Count 是 distinct segment 集合的大小；地址顺序不改变集合。
+
+设 aligned base `B mod 32 = 0`，lane `i` 请求一个 4-byte word，segment index 可写为：
+
+```text
+address(i) = B + offsetBytes + i * strideWords * 4
+segment(i) = floor(address(i) / 32)
+```
+
+若 word 跨 segment boundary，两个 segment 都要计入。下面的 frozen fixtures 都使用自然对齐 4-byte words，因此每个 word 落在单个 segment 中。
+
+## Aligned contiguous：四个 segment
+
+默认 32 个 lane 都 active，`offsetBytes = 0`，`strideWords = 1`。Lane 0..31 请求 `B + 4i`，总 requested bytes 是 `[B, B + 127]`。它们覆盖：
+
+```text
+[B + 0,  B + 31]
+[B + 32, B + 63]
+[B + 64, B + 95]
+[B + 96, B + 127]
+```
+
+所以 aligned contiguous fixture 需要 **4 个 32-byte segments**。这是 128 requested bytes 被四个 segment 覆盖的 address-accounting 结论，不是 kernel duration。
+
+## Offset one word：五个 segment
+
+保持 32 active lanes 与 stride 1，把 first word 移到 `B + 4`。Requested bytes 变为 `[B + 4, B + 131]`，触及从 `[B, B + 31]` 到 `[B + 128, B + 159]` 的 **5 个 segments**。首尾 segment 都只被部分使用。
+
+这个 fixture 说明 alignment relative to 32-byte boundaries 改变覆盖集合。它没有说明真实运行一定比 aligned case 慢多少；邻近 warp 的 cache-line reuse、architecture state 和实际 issued requests 需要 measurement。
+
+## Stride two words：八个 segment
+
+恢复 `offsetBytes = 0`，令 `strideWords = 2`。Lane `i` 请求 `B + 8i`，start addresses 从 `B` 延伸到 `B + 248`。每个 32-byte segment 接收四个 lane 的 4-byte words，32 lanes 总共触及 **8 个 segments**。
+
+Stride 2 的 requested payload 仍是 128 bytes，但 segment coverage 是 256 bytes。这个差异描述 transaction shaping；它不证明 cache miss、DRAM traffic、latency、bandwidth 或 speedup。
+
+## Active lanes、word width 与 instruction boundary
+
+Tail warp 可能只有一部分 lane 通过 F03 bounds。Inactive lane 不请求 word，因此不能为了凑满 32 lanes 把它加入集合。例如 aligned base 上只有 lane 0..4 active 且每 lane 请求 4 bytes，只触及第一个 segment。反过来，更宽 word 可能让一个 lane 覆盖更多 bytes，甚至跨越 segment boundary。
+
+两条 source-level access 也可能编译成不同 instructions。Model 必须逐 instruction 使用其 active mask 和 request width，不能把整段 kernel 的所有 address 混在一个 segment set 中。
+
+## Canonical Runnable Example：EX05
+
+EX05 是本单元的 canonical Runnable Example。`access-kernel` range 应把 aligned contiguous、one-word offset 与 stride-two patterns 保持在同一 correctness contract 中，并把静态 expected segment count 与任何未来 runtime observation 分开。
+
+[在固定提交中查看完整 EX05 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex05-coalesced-strided-access)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip)。独立 project 是唯一 canonical implementation；本页只导入一个已声明 range。
+
+<CanonicalCode exampleId="EX05" range="access-kernel" />
+
+## 测量边界：prediction 不是 observation
+
+Static model 可以预测 required segment set。Hardware 和 profiler 可能报告不同层次的 requests/transactions；cache hits、邻近 warp reuse、load/store path、replay 与 metric definition 都会影响观测。Actual issued transactions 与 cache reuse 必须由精确 Environment Manifest、metric name、tool version 和 run log 解释。
+
+因此 4、5、8 不能被改写成 1.25x 或 2x runtime，也不能保证 profiler counter 恰好等于这些整数。先验证每个 mode 请求相同 logical payload 并得到正确结果，再把 prediction 和 observation 并排比较；没有计时与 metric evidence 时不写 “faster” 或 “speedup”。
+
+## 离开前检查
+
+1. 为什么 coalescing model 必须固定到一个 warp 的一条 memory instruction？
+2. 32 active lanes 各读 aligned contiguous 4-byte word 时，为什么是四个而不是一个 32-byte segment？
+3. Base offset 一个 4-byte word 为什么把覆盖从四个 segment 扩展到五个？
+4. Stride 2 为什么触及八个 segment，而 inactive tail lanes 又为什么不应计入？
+5. 为什么 expected segment count、actual issued transactions、cache reuse 和 elapsed time 必须分别记录？
+
+## 继续练习
+
+- 完成 [M02 练习（Exercise）](/memory/coalescing-transactions/exercises/)，再查看独立的[参考解答](/memory/coalescing-transactions/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-014](/practice/#pb-r1-014)审查一份从 segment arithmetic 直接宣布 speedup 的记录。
+- 相关资源是 EX05 与 VIS04；任何未来 observation 都必须保留 Environment Manifest 和 metric definition。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3：Memory Optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations)提供 current memory optimization context；[Coalesced Access to Global Memory](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory)给出 CC 6.0+ 的 32-byte transaction/segment 规则。
+- [CUDA C Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy)保留 11.8 lane 的 owner coordinate。
+- [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)是 Toolkit 12.9.2 patch lane 使用的 owner guide。
+
+四项 owner source 均访问于 **2026-08-27**。Segment fixtures、equations、EX05 teaching contract、练习与编排均为本站原创；没有复制 owner example 或 figure。
+
+**事实核查日期：2026-08-27。**

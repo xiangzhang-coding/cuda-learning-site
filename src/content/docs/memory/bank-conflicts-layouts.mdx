@@ -1,0 +1,209 @@
+---
+title: 'M04：Bank conflict 与布局变换'
+description: 在 selected CC 7.5+ fixture 中用 32 banks 和 bank = word index mod 32 推导 stride conflicts、same-address read broadcast 与 32x33 padding transform。
+pairId: m04
+counterpart: /en/memory/bank-conflicts-layouts/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - fixture
+  - conflict-broadcast
+  - strides
+  - tile-layout
+  - padding
+  - canonical-example
+  - measurement-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M04
+prerequisites:
+  - M03
+relatedUnits:
+  - EX06
+  - VIS05
+exampleIds:
+  - EX06
+canonicalExample: EX06
+canonicalRanges:
+  - shared-layouts
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current CUDA C++ shared-memory optimization context'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Shared Memory and Memory Banks'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current 32-bank mapping, conflicts, and broadcast contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory bank contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory bank contract'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,fixture,conflict-broadcast,strides,tile-layout,padding,canonical-example,measurement-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: M03 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX06,VIS05' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: shared-layouts }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/bank-conflicts-layouts/" lang="en">Read the English counterpart</a>
+
+存储体冲突（bank conflict）不是 global-memory coalescing。它描述同一 warp shared-memory instruction 中，多个 threads 请求映射到同一个 bank 的**不同 words**。布局变换（layout transform）可以在不改变 logical tile 的情况下改变 word stride；同地址读取广播（same-address read broadcast）则是明确例外，不应误报为 conflict。
+
+## 学完本单元，你应该能
+
+- 在 selected CC 7.5+ fixture 中把 aligned 32-bit shared word 映射到 32 banks。
+- 区分 distinct-word same-bank conflict 与 same-word read broadcast。
+- 推导 stride 1、2 和 32 的 bank sets 与 conflict degree。
+- 证明 32x32 row-major tile 的 column read 是 32-way conflict，而 32x33 padding 使该 fixture conflict-free。
+- 把 bank prediction、logical correctness、shared footprint、profiler observation 和 timing 分开记录。
+
+## 先修关系
+
+先完成 [M03：共享内存分块](/memory/shared-memory-tiling/)。M03 已证明每个 block 的 tile ownership、load/B1/use/B2 phases、edge neutral 和 reuse boundary。M04 只改变 use phase 中 shared addresses 的 layout；它不能删除 M03 barriers、改变 logical matrix 或让 invalid threads 提前 return。
+
+本页不需要 CUDA-capable system。Bank table 和 padding proof 是静态 expected model，不是 GPU runtime observation。EX06 与 VIS05 相关，但不会自动填充本页的空 evidence axes。
+
+## Selected fixture：32 banks 与 32-bit words
+
+本站 Baseline GPU Capability Tier 是 CC 7.5+。本单元为这条路径冻结一个明确 fixture：shared memory 有 **32 banks**，连续 32-bit words 映射到连续 banks。对相对 shared byte offset 能被 4 整除的 word：
+
+```text
+word_index = byte_offset / 4
+bank(word_index) = word_index mod 32
+```
+
+Model 固定到同一 warp 的一条 shared-memory instruction。Active lanes、access width、word addresses 和 read/write role 都是输入；不能把另一 instruction 或 inactive lane 混入。更宽 type、不同 subword access 或 future architecture detail 需要自己的明确 contract。
+
+## Conflict 与 broadcast
+
+若同一 instruction 中多个 active lanes 访问**不同 word indices**，但这些 words 具有同一 bank index，就发生 bank conflict；这些 same-bank distinct-word accesses 必须序列化为多个 bank service steps。N-way 表示该 bank 在这条 instruction 中需要服务的最大 distinct-word 数，不是精确 cycle count。
+
+若多个 lanes **读取同一个 shared word address**，该 value 可以 broadcast 给请求者，这不是 bank conflict。判断顺序因此是：先按 exact word address 去重同地址 reads，再按 bank 汇总 distinct words。只看 “32 lanes 都落到 bank 0” 会把合法 broadcast 误报成 32-way conflict。
+
+本单元只冻结 same-address **read** rule；不要把它扩写成并发写入的确定值合同。
+
+## Stride fixtures
+
+设 lane `i` 读取 `word_index(i) = i * strideWords`：
+
+| stride | bank sequence | distinct words per busiest bank | classification |
+| ---: | --- | ---: | --- |
+| 1 | `0,1,2,...,31` | 1 | conflict-free |
+| 2 | `0,2,4,...,30,0,2,...,30` | 2 | 2-way conflict |
+| 32 | `0,0,...,0` | 32 | 32-way conflict |
+
+Stride 2 使用 16 个 even-numbered banks，每个 bank 对应两个不同 words；stride 32 的 32 lanes 请求 `0,32,64,...,992`，它们都是不同 words，却全部映射 bank 0。若 32 lanes 都读取 word 0，bank sequence 看似相同，但 exact address 相同，因此是 broadcast，不是 stride-32 conflict。
+
+## 32x32 tile：column read 为什么冲突
+
+对 row-major `float tile[32][32]`，word index 是：
+
+```text
+word(row, column) = row * 32 + column
+```
+
+让 warp lane `i` 固定 column `c`、读取 row `i`。Bank 是 `(i * 32 + c) mod 32 = c`。32 lanes 请求 32 个不同 words，却都命中 bank `c`，所以 selected fixture 是 **32-way bank conflict**。Row read 固定 row、让 column 随 lane 增长，则是 stride 1 和 conflict-free。
+
+这解释的是 shared layout，不是 global coalescing。Kernel 可以在 global load/store 与 shared use phases 中拥有不同 address patterns，必须分别审查。
+
+## 32x33 padding：改变 storage stride，不改 logical shape
+
+把 storage declaration 改为 `float tile[32][33]`，logical tile 仍是 32 rows x 32 columns；第 33 列只是 padding，不属于 logical matrix。Column read 的 word index 变为 `i * 33 + c`，bank 是：
+
+```text
+(i * 33 + c) mod 32 = (i + c) mod 32
+```
+
+当 `i = 0..31` 时，这 32 个 bank indices 是 0..31 的一个 permutation，因此 column read 在 selected fixture 中 **conflict-free**。Storage 从 1024 增加到 1056 个 32-bit words，多 32 words，也就是 128 bytes per tile。这个 footprint 必须进入 kernel resource feasibility review。
+
+Padding 消除了这个特定 column-access fixture 的 bank conflict；它没有证明整个 kernel 更快。额外 shared footprint、其他 instructions、occupancy/resource effects 和实际 timing 都需要 measurement。
+
+## Canonical Runnable Example：EX06
+
+M04 使用 EX06 的 `shared-layouts` canonical range 固定 `float[32][32]` 与 `float[32][33]` 两份 storage declarations。本页的 modular arithmetic 从这些 row strides 推导 bank mapping；EX06 的 host reference 与 `tiled-kernels` range 负责独立的 equal-result contract。一个 layout transform 不能替代 M03 barrier proof。
+
+[在固定提交中查看完整 EX06 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex06-shared-memory-tile-bank-padding)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip)。独立 project 是唯一 canonical implementation；本页只导入一个已声明 range。
+
+<CanonicalCode exampleId="EX06" range="shared-layouts" />
+
+## 测量边界：conflict-free 不是 speedup
+
+Static bank model 预测 named instruction 的 conflict degree。Profiler metric 必须记录 tool/version、metric definition、kernel/source range、tile shape 和 Environment Manifest；timing 还需要 correctness pass、warm-up、同步边界、repetition 和 samples。Observed bank conflicts 也可能来自未建模的其他 instructions。
+
+所以合法结论是“在 selected 32-bank, 32-bit-word fixture 下，这个 column access 从 32-way expected conflict 变为 conflict-free expected mapping”。没有 runtime logs 时，不能写 elapsed time、bandwidth、occupancy 或 speedup。
+
+## 离开前检查
+
+1. 在 selected fixture 中，32-bit shared word 的 bank index 如何计算？
+2. 为什么 distinct words 同 bank 会 conflict，而多个 lanes 读取同一个 word 是 broadcast？
+3. 为什么 stride 1、2、32 分别是 conflict-free、2-way 和 32-way？
+4. 32x32 row-major tile 的 column read 为什么全部映射到一个 bank？
+5. 32x33 padding 为什么使该 column read conflict-free，却仍不能产生 speedup claim？
+
+## 继续练习
+
+- 完成 [M04 练习（Exercise）](/memory/bank-conflicts-layouts/exercises/)，再查看独立的[参考解答](/memory/bank-conflicts-layouts/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-016](/practice/#pb-r1-016)审查一份把 broadcast 误判为 conflict、又从 padding 虚构 speedup 的记录。
+- EX06 `shared-layouts` 与 VIS05 都必须显示 exact word 与 bank mapping，而不是只画 bank color。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3：Memory Optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations)提供 current shared-memory context；[Shared Memory and Memory Banks](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks)给出 32 banks、successive 32-bit words、conflict serialization 与 read broadcast rules。
+- [CUDA C Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy)保留 11.8 lane 的 owner contract。
+- [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)是 Toolkit 12.9.2 patch lane 使用的 owner guide。
+
+四项 owner source 均访问于 **2026-08-27**。Stride fixtures、padding proof、EX06 range contract、练习与编排均为本站原创；没有复制 owner example 或 figure。
+
+**事实核查日期：2026-08-27。**

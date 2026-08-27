@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 17 个跨单元原创练习，包含先修链接、分层提示和解答。
+description: 当前已发布的 21 个跨单元原创练习，包含先修链接、分层提示和解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-08-26'
+factCheckDate: '2026-08-27'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -26,6 +26,10 @@ structure:
   - entry-pb-r1-010
   - entry-pb-r1-011
   - entry-pb-r1-012
+  - entry-pb-r1-013
+  - entry-pb-r1-014
+  - entry-pb-r1-015
+  - entry-pb-r1-016
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -45,6 +49,10 @@ prerequisites:
   - O06
   - O07
   - O08
+  - M01
+  - M02
+  - M03
+  - M04
 relatedUnits:
   - O02
   - O03
@@ -61,6 +69,10 @@ relatedUnits:
   - O06
   - O07
   - O08
+  - M01
+  - M02
+  - M03
+  - M04
 hardwareGate: none
 evidence:
   compilation: []
@@ -71,19 +83,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -102,13 +114,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面十七个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面二十一个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方十七道完整题目、先修链接和解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方二十一道完整题目、先修链接和解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -784,6 +796,196 @@ output[index] = input[index];
 
 **来源依据（Source basis）：** 本站原创的 [F08 feasibility/measurement contract](/foundations/launch-geometry/)、[F03 bounds contract](/foundations/multidimensional-indexing/)与 [SRC-CUDA-016 记录](/sources-and-versions/#src-cuda-016)，以及 NVIDIA [Compute Capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[`cudaDeviceProp`](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaDeviceProp.html)和 [`cudaFuncAttributes`](https://docs.nvidia.com/cuda/cuda-runtime-api/structcudaFuncAttributes.html)。
 
+<span id="pb-r1-013" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-013：按所有权、作用域与生命周期分类六种 memory object
+
+- **ID 与双语发布对：** PB-R1-013；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Memory model 分类；中级。
+- **直接先修条件：** [M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)。
+- **硬件门槛（Hardware gate）：** 无；只审查静态 object inventory，不运行 CUDA。
+- **相关学习单元与资源：** [M01](/memory/address-spaces/)、[VIS06](/visuals/memory-hierarchy-lifetime/)、[F04](/foundations/host-device-lifecycle/)和 [F06](/foundations/compute-capability/)。
+- **最后复核（Last reviewed）：** 2026-08-27。
+
+**题目：** 分类这六项对象：A. host 上的 `std::vector<float> input`；B. `cudaMalloc` 成功后由 host variable `d_input` 指向的 device allocation；C. module scope 的 `__constant__ float coefficients[64]`；D. 某个 block 的 `__shared__ float tile[32]`；E. compiler 为某个 thread 的动态索引 `scratch[96]` 建立的 local-memory slot；F. selected compilation 把该 thread 的 scalar `sum` 分配到一个 register。逐项记录 creator/owner、accessibility 与 shared-instance scope、有效 lifetime 以及 release/end action。修复 reviewer 的三条结论：“local 就是在片上”“global memory 是一定绕过 cache 的一个 cache level”“每种对象都需要 `cudaFree`”。
+
+**约束：**
+
+- 把 host pointer value `d_input` 与它指向的 device allocation 分开；不能因为 pointer 作为 argument 传给 kernel 就转移 ownership。
+- 把地址空间（address space）、物理位置、cache path、capacity 与预期 access cost 作为独立字段；不能推出固定 latency 或速度顺序。
+- 不运行 compiler 或 GPU 命令，不在题目陈述以外虚构 placement，也不授予 CUDA Evidence Status。
+
+**预期证据：** 一张六行 ledger，包含 owner/allocation、accessibility/scope、lifetime 和 release/end 四列，再附三条修正后的 local placement、cache behavior 与 release responsibility 结论。
+
+**验收条件：**
+
+- A 属于 host C++ scope，由 language-managed destruction 结束。B 是显式 global allocation，release obligation 属于 host 控制流；持有合法 device pointer 的 thread 可以跨 block 或 launch 访问它，直到 owner 证明最后使用并调用 `cudaFree`，或到达另一项有文档依据的 teardown boundary。
+- C 是 module/context lifetime 的 constant symbol，对 kernel 只读、由 host symbol operation 更新，不使用 `cudaFree` 释放。D 是每个 block 一个 shared instance，只允许该 block 的 thread 访问，并在 block execution 结束时自动退役。
+- E 与 F 都是一次 thread invocation 内 thread-private、compiler-managed 的 storage。Local memory 可以物理位于 device memory；register assignment 也可能 spill 到 local memory。两者都不产生跨 thread access，也不需要 `cudaFree`。
+- 拒绝全部 cache rank 或速度结论。Address space 定义 naming、sharing 与 lifetime semantic；cache use 和 physical resource behavior 需要 selected architecture、compiler 与 access pattern 才能判断。
+
+<details><summary>提示 1</summary>每行先写创建 storage 的事件：C++ construction、Runtime allocation、module declaration、block launch、thread invocation 或 compiler placement。</details>
+
+<details><summary>提示 2</summary>“Local”回答谁可以命名对象，不回答 backing bytes 是否物理靠近执行 core。</details>
+
+**解答：** A 的 owner 是 host C++ scope，CPU 可直接访问，vector 在 scope exit 时销毁。`d_input` 只是 host handle；成功的 `cudaMalloc` 建立 B，也给 host 建立责任：保留 allocation 直到所有 user 完成，再调用 `cudaFree`。C 属于 module/context interval，对 device kernel grid 只读，通过 symbol API 初始化或更新，而不是作为 allocation 释放。每个 block 各自创建 D，只让本 block thread 共享，并在 block completion 时自动退役。E 在逻辑上只属于一个 thread，即使它的 physical backing 位于 device memory。F 同样是 thread-private 且由 compiler 管理；题目给定的 register placement 只持续这次 invocation，但另一次 compilation 可能把它 spill 到 local memory。因此 local 不是 on-chip 的同义词，global 不是 cache level，而且 inventory 中只有显式 Runtime allocation 带有配对的 `cudaFree` 责任。
+
+**有效替代方案：** 可以用六条 swim lane 的 lifecycle diagram 代替表格，但每条 lane 仍须写明 creator、permitted accessor、最后合法使用或自动 endpoint、release authority，并单独标记未知的 cache/placement facts。
+
+**常见错误：** 把 host pointer 当成 allocation owner；让 kernel free 借来的 storage；释放 constant symbol 或 shared tile；因为 local storage 物理位于 device memory 就认为它可跨 thread 共享；承诺 source scalar 一定留在 register；把 address space 排成 cache level。
+
+**来源依据（Source basis）：** 本站原创的 [M01 分类与 release 合同](/memory/address-spaces/)、[VIS06](/visuals/memory-hierarchy-lifetime/)、[F04](/foundations/host-device-lifecycle/)和 [SRC-CUDA-017](/sources-and-versions/#src-cuda-017)，以及 NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)与 Runtime API [Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)。
+
+<span id="pb-r1-014" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-014：推导 aligned、offset 与 stride 的 segment set
+
+- **ID 与双语发布对：** PB-R1-014；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Address set 推导与 claim 审查；中级。
+- **直接先修条件：** [M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态 address 与 segment 算术。
+- **相关学习单元与资源：** [M02](/memory/coalescing-transactions/)、[VIS04](/visuals/memory-transactions/)、[EX05](/examples/coalesced-strided-access/)和 [F03](/foundations/multidimensional-indexing/)。
+- **最后复核（Last reviewed）：** 2026-08-27。
+
+**题目：** 在 M02 限定的 CC 6.0+ 模型中，一条 warp instruction 的 32 个 lane 全部 active，每个 lane 请求一个 4-byte word，base byte address 在 128 自然对齐。分别推导 A. `128 + 4 * lane`、B. `132 + 4 * lane`、C. `128 + 8 * lane` 所需的 naturally aligned 32-byte segment-start set，并包含每个 requested word 的全部 byte。Reviewer 随后写道：“A 用 4 个 segment、B 用 5 个、C 用 8 个，所以 A 比 B 快 1.25 倍、比 C 快 2 倍；EX05 已经证明。”修复这条结论。
+
+**约束：**
+
+- 计数 distinct segment start 前，先写 lane-address formula、第一/最后 requested byte，以及 `segment_start = 32 * floor(byte_address / 32)`。
+- 把 logical source index、requested bytes、modeled segment coverage、actual issued transaction、cache reuse、runtime 与 speedup 分开。
+- 不执行 EX05 或 profiler；不虚构 timing、throughput、cache event 或 Evidence Status。
+
+**预期证据：** 三个明确的 segment-start set 及其 cardinality、一段 offset/stride effect 解释，以及一条修订后的 EX05 evidence statement。
+
+**验收条件：**
+
+- A 请求 byte 128 到 255，得到 `{128, 160, 192, 224}`，cardinality 为 4。
+- B 请求 byte 132 到 259，得到 `{128, 160, 192, 224, 256}`，cardinality 为 5；4-byte offset 跨入一个额外 segment。
+- C 的 lane word start 从 128 到 376，最后一个 byte 是 379，得到 `{128, 160, 192, 224, 256, 288, 320, 352}`，cardinality 为 8；stride two 让每个 covered segment 含 4 个 requested word。
+- 拒绝两项 speedup ratio。这些 set 只是对一条 warp instruction 的静态 coverage 预测，不是 timing。EX05 compilation evidence 为空、runtime 为 Pending Hardware Verification，因此其 source 和 host reference 都没有提供 GPU execution result 或 speed claim。
+
+<details><summary>提示 1</summary>B 中 lane 31 从 byte 256 开始，并触及 256 到 259，所以不能省略从 256 开始的 segment。</details>
+
+<details><summary>提示 2</summary>C 中 word start 每隔 8 byte；按 `floor(address / 32)` 分组后，每个 segment 对应 4 个 lane，共 8 个 segment。</details>
+
+**解答：** A 中 lane `l` 请求 `[128 + 4l, 131 + 4l]`，union 覆盖 128 到 255，并映射到 128、160、192、224 四个 start。B 把每个 interval 平移 4 byte，成为 `[132 + 4l, 135 + 4l]`；lane 0 仍位于 start 128 的 segment，但 lane 31 触及 byte 256 到 259，因此 set 新增 256，共 5 项。C 请求 `[128 + 8l, 131 + 8l]`；start 128 到 376 覆盖从 128 到 352 的 8 个 aligned 32-byte segment。Cardinality 只能说明 requested byte 的分散方式，不含 elapsed time、cache observation、issued-transaction record 或 controlled comparison，因此任何比例都不能改写为 speedup。EX05 的 pure-host checks 可以验证 indexing logic，但 compilation axis 为空，runtime 仍是 Pending Hardware Verification。
+
+**有效替代方案：** 可以用 lane-to-segment table 或 VIS04 风格的 set diagram，只要覆盖全部 32 个 lane、保留 byte range 而不只写 word start，并在没有性能语言的前提下推导出同样三个 ordered set。
+
+**常见错误：** 因为 offset pattern 仍只有 32 个 word 就计为 4 个 segment；省略一个 word 的末尾 3 byte；stride case 按每 lane 一个 segment 计数；用 logical index 替代 byte address；把 browser model、source listing 或 host reference 当成 GPU timing。
+
+**来源依据（Source basis）：** 本站原创的 [M02 segment model](/memory/coalescing-transactions/)、[VIS04 确定性可视化](/visuals/memory-transactions/)、[EX05 canonical indexing case 与当前证据记录](/examples/coalesced-strided-access/)和 [SRC-CUDA-018](/sources-and-versions/#src-cuda-018)，以及 NVIDIA CUDA C++ Best Practices Guide [Coalesced Access to Global Memory](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory)。
+
+<span id="pb-r1-015" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-015：修复 edge tile early return 与缺失的 reuse barrier
+
+- **ID 与双语发布对：** PB-R1-015；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Shared-memory 正确性调试；中级。
+- **直接先修条件：** [M03：共享内存分块](/memory/shared-memory-tiling/)。
+- **硬件门槛（Hardware gate）：** 无；只审查和修复源码，不运行 CUDA。
+- **相关学习单元与资源：** [M03](/memory/shared-memory-tiling/)、[EX06](/examples/shared-memory-tile-bank-padding/)、[M01](/memory/address-spaces/)和 [M02](/memory/coalescing-transactions/)。
+- **最后复核（Last reviewed）：** 2026-08-27。
+
+**题目：** 一个 32-thread block 循环处理 `n = 45` 的 input，并反复使用同一个 shared tile。第二次 iteration 只有 13 个 input lane 合法。修复这份 review draft 中的两个缺陷：
+
+```cpp
+for (std::size_t tile_base = 0; tile_base < n; tile_base += blockDim.x) {
+  const std::size_t input_index = tile_base + threadIdx.x;
+  if (input_index >= n) {
+    return;
+  }
+  tile[threadIdx.x] = input[input_index];
+  __syncthreads();
+  output[input_index] = tile[(threadIdx.x + 1) % blockDim.x];
+  // 下一次 iteration 会立即覆盖 tile。
+}
+```
+
+**约束：**
+
+- 保留 portable C++17 synchronous `load -> __syncthreads() -> use/reuse -> __syncthreads()` baseline 和 32-thread block。
+- Block 中 participating 的每个 thread 都必须在同一次 loop iteration 到达每个 barrier；bounds 可以保护 memory access，不能保护 barrier participation。
+- Invalid edge load 使用明确的 neutral value；不运行 build 或 kernel，也不虚构 output、timing 或 Evidence Status。
+
+**预期证据：** 一份最小 source repair、一张覆盖两次 iteration 的 valid/invalid lane participation ledger，以及一段分别说明两个 barrier 作用的解释。
+
+**验收条件：**
+
+- 删除依赖 lane 的 early return。Edge iteration 中 lane 0 到 12 load input，lane 13 到 31 在 first barrier 前各自把 neutral value 写入自己的 tile slot，32 个 lane 全部参与。
+- 用 `input_index < n` 保护 output write；invalid loader 虽然不执行 global input/output access，仍参与两个 barrier。
+- First barrier 位于 tile write 与任何 tile read 之间；在最后一次 tile read 之后、任何 lane 可以在下一次 iteration 覆盖 shared storage 之前加入 second barrier。
+- 明确静态修复不产生 compilation 或 runtime observation；EX06 compilation evidence 保持为空，runtime 保持 Pending Hardware Verification。
+
+<details><summary>提示 1</summary>把“invalid lane 退出”改成“invalid lane 提供 neutral value”，再只把 global access 放进 bounds condition。</details>
+
+<details><summary>提示 2</summary>First barrier 防止读取尚未完成的 write；second barrier 防止下一轮 write 覆盖本轮仍在进行的 read。</details>
+
+**解答：** 一份完整修复是：
+
+```cpp
+for (std::size_t tile_base = 0; tile_base < n; tile_base += blockDim.x) {
+  const std::size_t input_index = tile_base + threadIdx.x;
+  const bool valid = input_index < n;
+
+  tile[threadIdx.x] = valid ? input[input_index] : 0.0f;
+  __syncthreads();
+
+  if (valid) {
+    output[input_index] = tile[(threadIdx.x + 1) % blockDim.x];
+  }
+  __syncthreads();
+}
+```
+
+Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 lane load input，19 个 lane 写 `0.0f`。全部 32 个 lane 随后到达 first barrier，所以任何 read 开始前每个 tile slot 都已建立。只有 13 个 valid output owner 写 global output；全部 32 个 lane 再到达 second barrier，阻止较快 lane 在其他 lane 仍读取当前 tile 时开始下一轮 load。这份 review 没有编译或执行 EX06；其 compilation axis 为空，runtime 为 Pending Hardware Verification。
+
+**有效替代方案：** 如果改变算法，并证明每个 block 恰好只处理一个 tile、之后不会再写这个 shared object，则 final reuse barrier 可能不需要。这个 single-iteration contract 不能作为删除上述 loop 中 second barrier 的理由；neutral edge load 与 first barrier 仍然必需。
+
+**常见错误：** 在 block-wide barrier 前 return；把 `__syncthreads()` 放进 `if (valid)`；让 invalid tile slot 未初始化；保护 barrier 而不是 memory access；认为 warp lockstep 可以替代 block barrier；因为 first barrier 已保护 load 就省略 second barrier。
+
+**来源依据（Source basis）：** 本站原创的 [M03 load、participation 与 reuse 合同](/memory/shared-memory-tiling/)、[M01 address-space lifetime model](/memory/address-spaces/)、[EX06 canonical synchronous implementation 与当前证据记录](/examples/shared-memory-tile-bank-padding/)和 [SRC-CUDA-019](/sources-and-versions/#src-cuda-019)，以及 NVIDIA [Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)。
+
+<span id="pb-r1-016" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-016：区分 broadcast、bank conflict 与 32x33 padding
+
+- **ID 与双语发布对：** PB-R1-016；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Shared-memory bank 与 layout 推理；中级。
+- **直接先修条件：** [M04：Bank conflict 与布局变换](/memory/bank-conflicts-layouts/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态 word-address 与 bank mapping。
+- **相关学习单元与资源：** [M04](/memory/bank-conflicts-layouts/)、[VIS05](/visuals/shared-memory-banks/)、[EX06](/examples/shared-memory-tile-bank-padding/)和 [M03](/memory/shared-memory-tiling/)。
+- **最后复核（Last reviewed）：** 2026-08-27。
+
+**题目：** 使用 M04 selected fixture：32 个 bank、连续 32-bit word，并且 `bank(word_index) = word_index mod 32`。分类 A. 32 个 lane 都从 `float tile[32][32]` 读取同一个 `tile[0][5]`；B. lane `i` 从这份 unpadded tile 读取 `tile[i][5]`；C. declaration 改为 `float tile[32][33]` 后，lane `i` 读取 `tile[i][5]`。逐项推导 row stride、word-index formula、bank set、每个 bank 的 distinct-word count 和 classification。修复声明：“A 与 B 都是 32-way conflict，而 C 快 32 倍。”
+
+**约束：**
+
+- 把同地址读取广播（same-address read broadcast）与多个 distinct word 映射到同一 bank 分开。
+- 从 declaration 推导 unpadded/padded row stride；保留 logical `32 x 32` payload，并计算 padding bytes。
+- 不运行 EX06 build、CUDA kernel、timer 或 profiler；不推出 latency、throughput 或 speedup。
+
+**预期证据：** 一张三行 bank ledger、padded layout 的 modulo 推导、padding capacity 算术，以及一条修订后的 evidence/performance statement。
+
+**验收条件：**
+
+- A 的 declaration stride 为 32，但每个 lane 都请求相同 word index 5 和 bank 5；这是 same-address read broadcast，不是 32-way bank conflict。
+- B 使用 word index `32i + 5`；`(32i + 5) mod 32 = 5`，所以 bank 5 收到 32 个 distinct word，在 selected fixture 中属于 32-way conflict。
+- C 使用 word index `33i + 5`；`(33i + 5) mod 32 = (i + 5) mod 32`，恰好遍历全部 32 个 bank，因此该 instruction conflict-free。额外一列使每 tile 增加 32 个 float，即 128 byte，不改变 logical payload。
+- 拒绝“快 32 倍”。Mapping 只预测 conflict classification。EX06 compilation evidence 为空、runtime 为 Pending Hardware Verification；VIS05 与 host arithmetic 都不是 timing evidence。
+
+<details><summary>提示 1</summary>统计每个 bank 内 distinct requested word index 的数量；对一个 word 的 32 次请求与对 32 个不同 word 的请求不是同一情况。</details>
+
+<details><summary>提示 2</summary>因为 `33 mod 32 = 1`，padding 后 successive row 会让 selected column 每次前进一个 bank。</details>
+
+**解答：** A 把全部 lane 都送到 bank 5 的 word 5，但 distinct requested word 只有一个，因此使用 selected model 的 broadcast exception。B 的 row stride 为 32 word，lane `i` 选择 `32i + 5`，32 个 distinct word 全部约简为 bank 5，所以在该 fixture 中是 32-way conflict。Padding 把 physical row stride 改为 33，同时保留 32 个 logical column；C 因此把 lane `i` 映射到 `33i + 5`，其 bank 为 `(i + 5) mod 32`。32 个 lane 构成 bank 0 到 31 的一个 permutation，所以 modeled instruction conflict-free。Physical allocation 增加 `32 * 1 * 4 = 128` byte。这些事实不能预测 elapsed-time ratio 或 end-to-end speed：EX06 没有合格 compile record 或 GPU runtime observation，仍是 Pending Hardware Verification。
+
+**有效替代方案：** 可以 transpose 或 remap cooperative load/use index，让同一组 logical value 以与 32 互质的 stride 被读取。替代方案必须完整推导 word index 与 bank，保留 bounds/synchronization，并在测量前计算 storage 或 indexing cost。
+
+**常见错误：** 因为一个 bank 被命名 32 次就把 broadcast 称为 conflict；统计 request 而不是 distinct word；声明 33 列后仍使用 stride 32；认为 padding 改变 logical matrix；忘记 128-byte capacity cost；把 conflict degree 直接换算成 speedup。
+
+**来源依据（Source basis）：** 本站原创的 [M04 selected bank fixture 与 padding 推导](/memory/bank-conflicts-layouts/)、[VIS05 确定性 mapper](/visuals/shared-memory-banks/)、[EX06 canonical layout 与当前证据记录](/examples/shared-memory-tile-bank-padding/)和 [SRC-CUDA-019](/sources-and-versions/#src-cuda-019)，以及 NVIDIA CUDA C++ Best Practices Guide [Shared Memory and Memory Banks](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks)。
+
 ## 复核记录
 
-十七个原创条目及其英文对应内容在 **2026-08-26** 同步复核。所有情景、题目和解答均为项目原创；没有复制外部题目、输出、日志或性能数字，也没有执行 CUDA。
+既有十七个条目保留各自 **2026-08-26** 的 item-level review record。PB-R1-013 至 PB-R1-016，以及完整二十一个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-27** 同步复核。所有情景、题目、推导、代码修复和解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。

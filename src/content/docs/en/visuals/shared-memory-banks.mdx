@@ -1,0 +1,132 @@
+---
+title: 'VIS05: Shared-memory Bank Mapping'
+description: Map a fixed 32-lane read pattern from word addresses to shared-memory banks, distinguish same-address broadcast, and report conflict degree without inferring speed.
+pairId: vis05
+counterpart: /visuals/shared-memory-banks/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - mapping-model
+  - classification
+  - padding
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS05
+prerequisites: []
+relatedUnits:
+  - M04
+  - EX06
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA shared-memory access patterns'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-06-25'
+    platform: 'CUDA C++ shared-memory bank guidance'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime memory interfaces'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 11.8 - Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#shared-memory'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived CUDA 11.8 stability boundary'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,mapping-model,classification,padding,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M04,EX06' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0' }
+---
+
+import SharedMemoryBankExplorer from '../../../../components/SharedMemoryBankExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/shared-memory-banks/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS05 is the deterministic address-to-bank mapper related to [M04](/en/memory/bank-conflicts-layouts/) and [EX06](/en/examples/shared-memory-tile-bank-padding/). It makes each lane’s selected 4-byte word, byte address, and bank visible before any optimization claim is considered.
+
+<SharedMemoryBankExplorer locale="en" />
+
+## Mapping model
+
+The default source-backed fixture is inside this site’s CC 7.5+ Baseline GPU Capability Tier and contains `32` lanes, `32` banks, and 4-byte words. For lane `L`, stride `S`, padding `P`, and bank count `B`, the abstract layout is:
+
+```text
+laneStep  = S + P
+wordIndex = L * laneStep
+byte      = wordIndex * 4
+bank      = wordIndex mod B
+```
+
+Bank count is controllable so the arithmetic can be inspected directly. Only the default `32`-bank, successive-4-byte-word fixture is presented as the reviewed CUDA rule; other bounded bank counts are abstract comparisons and do not claim a supported architecture.
+
+## Classification
+
+The mapper groups lanes by bank, then counts **distinct word addresses** in each bank. Conflict degree is the largest such count. A degree of one is conflict-free when lanes address different banks or when each addressed bank contains only one distinct word.
+
+This fixture models one shared-memory **read**. If all lanes request the same word, the result is classified separately as **same-address broadcast**, with one distinct address rather than a 32-way conflict. Same-address writes are intentionally outside VIS05 because their semantics are not the read-broadcast case.
+
+Conflict degree is a structural property of this selected address list. It is not elapsed time, serialization duration, bandwidth, or speedup, and the browser cannot decide how a complete kernel will perform.
+
+## Stride and padding cases
+
+With `32` banks and padding `0`, stride `1` visits every bank once and is conflict-free. Stride `2` reaches 16 banks with two distinct addresses per bank, so it is two-way. Stride `32` sends 32 distinct addresses to bank zero, so it is 32-way.
+
+Changing stride `32`, padding `0` to stride `32`, padding `1` changes the lane step from `32` to `33`. Since `33 mod 32 = 1`, consecutive lanes rotate across all 32 banks and the mapped read becomes conflict-free. This is address arithmetic, not a promise that padding improves every kernel.
+
+## Static fallback
+
+Five cards preserve stride `1`, stride `2`, stride `32`, padded stride `33`, and same-address broadcast. They are produced by the same pure model as the interactive table and remain complete with JavaScript disabled and in print.
+
+## Evidence boundary
+
+VIS05 compiles and executes no CUDA, reads no GPU, and measures no latency. Its mapping and conflict labels grant no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status. Compilation, runtime, expected-observation, and recorded-observation metadata are all empty.
+
+## Sources
+
+Current shared-memory organization and access-pattern facts were checked against [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) and [Best Practices memory optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations). The current [Runtime Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) page fixes the surrounding Runtime memory vocabulary but supplies no runtime evidence here.
+
+The archived [CUDA C++ Programming Guide 11.8 shared-memory section](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#shared-memory) is the selected stability boundary. VIS05 keeps only the durable 32-bank/32-bit-word teaching fixture and uses an original table rather than reproducing NVIDIA figures. All source coordinates were accessed on **2026-08-27**; the mapper, cases, layout, and bilingual prose are original CC-BY-4.0 content.

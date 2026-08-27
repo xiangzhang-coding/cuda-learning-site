@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: Sixty-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: Seventy-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-26'
+factCheckDate: '2026-08-27'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-26'
+      content: '2026-08-27'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -126,7 +126,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** An interactive or animated representation that exposes spatial, temporal, or architectural behavior. It may model CUDA concepts in the browser but never executes CUDA.
 - **Avoid:** Decoration, CUDA demo.
-- **Related resources:** O01, [VIS01](/en/visuals/kernel-journey/), and [VIS02](/en/visuals/indexing/).
+- **Related resources:** O01, [VIS01](/en/visuals/kernel-journey/), [VIS02](/en/visuals/indexing/), [VIS04](/en/visuals/memory-transactions/), [VIS05](/en/visuals/shared-memory-banks/), [VIS06](/en/visuals/memory-hierarchy-lifetime/), [VIS19](/en/foundations/asynchronous-errors/#vis19), [VIS20](/en/foundations/compute-capability/#vis20), [VIS21](/en/foundations/runtime-driver-api/#vis21), and [VIS22](/en/foundations/launch-geometry/#vis22).
 - **Version note:** Conceptual models must be separated from hardware-specific behavior.
 
 <span id="term-010" class="resource-target" aria-hidden="true"></span>
@@ -633,6 +633,105 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [F08](/en/foundations/launch-geometry/) and [LAB03](/en/labs/break-and-repair-indexing/).
 - **Version note:** Equal thread counts can have different coverage and fringe, while device and function limits can change by environment, target, and kernel; only controlled measurement can compare speed.
 
+<span id="term-066" class="resource-target" aria-hidden="true"></span>
+
+### address space · 地址空间
+
+- **Definition:** A program-visible storage and naming domain that constrains which execution agents may address an object, whether they share one instance, and how long that instance remains valid. It does not by itself identify a cache, physical chip, or access time.
+- **Avoid:** Cache level, physical-memory tier, speed class.
+- **Related resources:** [M01](/en/memory/address-spaces/) and [VIS06](/en/visuals/memory-hierarchy-lifetime/).
+- **Version note:** M01 reviews the current Programming Guide v13.3 together with 11.8.0 and 12.9.1 owner documentation for the selected Toolkit Lanes.
+
+<span id="term-067" class="resource-target" aria-hidden="true"></span>
+
+### global memory · 全局内存
+
+- **Definition:** A device address space whose objects can be addressed by kernel threads holding valid device pointers and can outlive one block or kernel launch. Explicit Runtime allocations are acquired and released by host control flow after every device user has completed.
+- **Avoid:** Device DRAM as an exact synonym, all device memory, always-uncached memory.
+- **Related resources:** [M01](/en/memory/address-spaces/), [M02](/en/memory/coalescing-transactions/), [VIS04](/en/visuals/memory-transactions/), and [EX05](/en/examples/coalesced-strided-access/).
+- **Version note:** Ownership, accessibility, and access-shaping semantics are reviewed at selected 11.8.0, 12.9.1, and current v13.3/v13.3.1 coordinates; cache paths remain architecture- and instruction-dependent.
+
+<span id="term-068" class="resource-target" aria-hidden="true"></span>
+
+### constant memory · 常量内存
+
+- **Definition:** Module/context-lifetime device storage declared with `__constant__`, read-only to kernels, grid-visible on one device, and initialized or updated by host symbol operations. The symbol is not an allocation released with `cudaFree`.
+- **Avoid:** Constant cache, immutable for the whole application, ordinary global allocation.
+- **Related resources:** [M01](/en/memory/address-spaces/) and [VIS06](/en/visuals/memory-hierarchy-lifetime/).
+- **Version note:** Declaration, symbol-copy, accessibility, and lifetime details are reviewed in current Programming Guide v13.3 and Runtime API v13.3.1 plus the selected 11.8.0 and 12.9.1 owner documents.
+
+<span id="term-069" class="resource-target" aria-hidden="true"></span>
+
+### shared memory · 共享内存
+
+- **Definition:** Programmer-managed on-device storage instantiated per thread block, shared by threads in that block, and retired automatically when the block's execution ends. Static declarations and dynamic launch allocation establish capacity; neither creates a host-freed global allocation.
+- **Avoid:** L1 cache alias, cross-block shared object, automatically coherent global cache.
+- **Related resources:** [M01](/en/memory/address-spaces/), [M03](/en/memory/shared-memory-tiling/), [M04](/en/memory/bank-conflicts-layouts/), [VIS05](/en/visuals/shared-memory-banks/), and [EX06](/en/examples/shared-memory-tile-bank-padding/).
+- **Version note:** M01/M03/M04 use selected 11.8.0, 12.9.1, and current v13.3 owner documentation; capacity and shared/L1 configuration must be queried for the selected architecture.
+
+<span id="term-070" class="resource-target" aria-hidden="true"></span>
+
+### local memory · 本地内存
+
+- **Definition:** A thread-private CUDA address space used for compiler-managed automatic objects and spills. Its logical scope belongs to one thread even though its backing storage is physically in device memory and may use caches.
+- **Avoid:** On-chip local storage, host stack memory, block-private shared memory.
+- **Related resources:** [M01](/en/memory/address-spaces/) and [VIS06](/en/visuals/memory-hierarchy-lifetime/).
+- **Version note:** Local placement and cache behavior depend on the selected compiler, target, architecture, and access pattern; M01 cross-checks the semantic boundary at 11.8.0, 12.9.1, and current v13.3.
+
+<span id="term-071" class="resource-target" aria-hidden="true"></span>
+
+### register · 寄存器
+
+- **Definition:** A finite per-thread hardware resource assigned by the compiler to values for one thread invocation. Source spelling does not guarantee register placement, and pressure can move a value into thread-private local memory without changing its owner.
+- **Avoid:** Source variable that must stay in a register, cache entry, cross-thread storage.
+- **Related resources:** [M01](/en/memory/address-spaces/) and [VIS06](/en/visuals/memory-hierarchy-lifetime/).
+- **Version note:** Register limits, allocation, and spills vary by compute capability, compiler, target, and kernel; they require the selected environment and compilation artifacts.
+
+<span id="term-072" class="resource-target" aria-hidden="true"></span>
+
+### memory transaction · 内存事务
+
+- **Definition:** A hardware memory-system transfer that services requested bytes at a particular architecture and instruction boundary. M02 predicts the aligned 32-byte segments needed to cover one active warp's global requests; that static set is not an observed transaction log.
+- **Avoid:** Source-level load, requested word, segment count relabeled as measured traffic.
+- **Related resources:** [M02](/en/memory/coalescing-transactions/), [VIS04](/en/visuals/memory-transactions/), and [EX05](/en/examples/coalesced-strided-access/).
+- **Version note:** M02's model applies to CC 6.0+ and this site's CC 7.5+ tier; access size, cache state, and architecture still bound actual issued transactions.
+
+<span id="term-073" class="resource-target" aria-hidden="true"></span>
+
+### coalescing · 合并访问
+
+- **Definition:** The memory system's grouping of active warp lanes' global-memory requests into transactions according to requested addresses, access sizes, and the selected compute-capability rules. Contiguous indexing can support coalescing but does not itself prove a transaction count or speed.
+- **Avoid:** Contiguous source order alone, cache hit, automatic speedup.
+- **Related resources:** [M02](/en/memory/coalescing-transactions/), [VIS04](/en/visuals/memory-transactions/), and [EX05](/en/examples/coalesced-strided-access/).
+- **Version note:** Coalescing rules change across architecture generations; M02 explicitly uses the CC 6.0+ naturally aligned 32-byte segment fixture reviewed against current and selected archive owner guides.
+
+<span id="term-074" class="resource-target" aria-hidden="true"></span>
+
+### shared-memory bank · 共享内存存储体
+
+- **Definition:** One independently serviceable partition in shared memory selected from a word address by an architecture-specific mapping. In M04's fixture, successive 32-bit words map successively across 32 banks.
+- **Avoid:** Warp lane, cache line, one private bank per thread.
+- **Related resources:** [M04](/en/memory/bank-conflicts-layouts/), [VIS05](/en/visuals/shared-memory-banks/), and [EX06](/en/examples/shared-memory-tile-bank-padding/).
+- **Version note:** M04 uses a selected CC 7.5+ fixture with 32 banks and 32-bit words; bank width and mapping must be rechecked before extending the model to another architecture or access size.
+
+<span id="term-075" class="resource-target" aria-hidden="true"></span>
+
+### bank conflict · 存储体冲突
+
+- **Definition:** In the selected shared-memory model, one warp instruction's request for multiple distinct words in the same bank, requiring those distinct-word accesses to be serviced separately. A same-address read broadcast is classified separately and is not a conflict.
+- **Avoid:** Any repeated bank number, data race, global-memory coalescing failure.
+- **Related resources:** [M04](/en/memory/bank-conflicts-layouts/), [VIS05](/en/visuals/shared-memory-banks/), and [EX06](/en/examples/shared-memory-tile-bank-padding/).
+- **Version note:** Conflict degree is meaningful only with a declared bank mapping, word size, active-lane set, and read/write pattern; it is not a speedup ratio.
+
+<span id="term-076" class="resource-target" aria-hidden="true"></span>
+
+### tiling · 分块
+
+- **Definition:** Partitioning a problem into bounded working subsets that threads cooperatively stage, synchronize around, and reuse. M03's shared-memory form separates load, first barrier, use/reuse, and a second barrier before shared storage is overwritten.
+- **Avoid:** Automatic caching, bounds-free copy, guaranteed optimization.
+- **Related resources:** [M03](/en/memory/shared-memory-tiling/), [M04](/en/memory/bank-conflicts-layouts/), and [EX06](/en/examples/shared-memory-tile-bank-padding/).
+- **Version note:** M03 teaches the portable C++17 synchronous baseline for the selected Lanes; future asynchronous tiling interfaces are version-gated and are not projected backward.
+
 ## Maintenance rule
 
-All 65 entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-26**. A new entry must include the canonical English, preferred Chinese, definition, aliases to avoid, related units, and a version note when needed. Its [Chinese counterpart](/glossary/) must be complete at the same time.
+All 76 entries and their index metadata were reviewed with their Chinese counterparts on **2026-08-27**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.

@@ -1,0 +1,209 @@
+---
+title: 'M04: Bank conflicts and layout transforms'
+description: In a selected CC 7.5+ fixture, use 32 banks and bank = word index mod 32 to derive strided conflicts, same-address read broadcast, and the 32x33 padding transform.
+pairId: m04
+counterpart: /memory/bank-conflicts-layouts/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - fixture
+  - conflict-broadcast
+  - strides
+  - tile-layout
+  - padding
+  - canonical-example
+  - measurement-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M04
+prerequisites:
+  - M03
+relatedUnits:
+  - EX06
+  - VIS05
+exampleIds:
+  - EX06
+canonicalExample: EX06
+canonicalRanges:
+  - shared-layouts
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current CUDA C++ shared-memory optimization context'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Shared Memory and Memory Banks'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current 32-bank mapping, conflicts, and broadcast contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Hierarchy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory bank contract'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 12.9.1'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory bank contract'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,fixture,conflict-broadcast,strides,tile-layout,padding,canonical-example,measurement-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: M03 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX06,VIS05' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: shared-layouts }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/bank-conflicts-layouts/" lang="zh-CN">阅读中文对应页</a>
+
+A bank conflict is not global-memory coalescing. It describes active threads in one warp shared-memory instruction requesting **distinct words** that map to the same bank. A layout transform can change word stride without changing the logical tile. Same-address read broadcast is an explicit exception and must not be mislabeled as a conflict.
+
+## What you should be able to do
+
+- Map aligned 32-bit shared words to 32 banks in the selected CC 7.5+ fixture.
+- Distinguish a distinct-word same-bank conflict from same-word read broadcast.
+- Derive bank sets and conflict degrees for strides 1, 2, and 32.
+- Prove that a column read from a row-major 32x32 tile is a 32-way conflict while 32x33 padding makes this fixture conflict-free.
+- Keep bank prediction, logical correctness, shared footprint, profiler observation, and timing separate.
+
+## Prerequisite
+
+Complete [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/) first. M03 already proves per-block tile ownership, load/B1/use/B2 phases, edge neutral values, and the reuse boundary. M04 changes only shared addresses in the use phase. It cannot remove M03 barriers, change the logical matrix, or let invalid threads return early.
+
+This page requires no CUDA-capable system. Bank tables and padding proofs are static expected models, not GPU runtime observations. EX06 and VIS05 are related, but do not automatically populate this page's empty evidence axes.
+
+## Selected fixture: 32 banks and 32-bit words
+
+This site's Baseline GPU Capability Tier is CC 7.5+. This unit freezes an explicit fixture for that path: shared memory has **32 banks**, and successive 32-bit words map to successive banks. For a word whose relative shared byte offset is divisible by 4:
+
+```text
+word_index = byte_offset / 4
+bank(word_index) = word_index mod 32
+```
+
+The model applies to one shared-memory instruction from one warp. Active lanes, access width, exact word addresses, and read/write role are inputs. Do not combine another instruction or inactive lane. Wider types, subword accesses, or future architectural details need their own explicit contract.
+
+## Conflict and broadcast
+
+When active lanes in one instruction access **distinct word indices** that share a bank index, a bank conflict occurs. Those same-bank distinct-word accesses serialize into multiple bank service steps. N-way means the maximum number of distinct words one bank must serve for that instruction; it is not an exact cycle count.
+
+When multiple lanes **read the same shared word address**, the value can be broadcast to requesters, which is not a bank conflict. Deduplicate same-address reads first, then group distinct words by bank. Looking only at “all 32 lanes map to bank 0” would misclassify a valid broadcast as a 32-way conflict.
+
+This unit freezes only the same-address **read** rule. Do not generalize it into a deterministic concurrent-write value contract.
+
+## Stride fixtures
+
+Let lane `i` read `word_index(i) = i * strideWords`:
+
+| stride | bank sequence | distinct words per busiest bank | classification |
+| ---: | --- | ---: | --- |
+| 1 | `0,1,2,...,31` | 1 | conflict-free |
+| 2 | `0,2,4,...,30,0,2,...,30` | 2 | 2-way conflict |
+| 32 | `0,0,...,0` | 32 | 32-way conflict |
+
+Stride two uses 16 even-numbered banks, each with two distinct words. At stride 32, lanes request distinct words `0,32,64,...,992`, all mapped to bank 0. If all 32 lanes instead read word 0, the bank sequence looks the same but the exact address is shared, so the operation is broadcast rather than a stride-32 conflict.
+
+## 32x32 tile: why a column read conflicts
+
+For row-major `float tile[32][32]`, word index is:
+
+```text
+word(row, column) = row * 32 + column
+```
+
+Let warp lane `i` hold column `c` fixed and read row `i`. Its bank is `(i * 32 + c) mod 32 = c`. The 32 lanes request 32 distinct words in bank `c`, producing a **32-way bank conflict** in the selected fixture. Holding row fixed and advancing column with lane gives stride one and is conflict-free.
+
+This is a shared-layout analysis, not global coalescing. A kernel can have different address patterns in global load/store and shared use phases, which must be reviewed separately.
+
+## 32x33 padding: change storage stride, not logical shape
+
+Change storage declaration to `float tile[32][33]`. The logical tile remains 32 rows x 32 columns; the 33rd column is padding and not part of the logical matrix. The column-read word index becomes `i * 33 + c`, with bank:
+
+```text
+(i * 33 + c) mod 32 = (i + c) mod 32
+```
+
+For `i = 0..31`, those bank indices form a permutation of 0..31, so the column read is **conflict-free** in this fixture. Storage grows from 1024 to 1056 32-bit words: 32 extra words, or 128 bytes per tile. That footprint belongs in kernel resource-feasibility review.
+
+Padding removes the bank conflict from this particular column-access fixture. It does not prove that the whole kernel is faster. Extra shared footprint, other instructions, occupancy/resource effects, and timing require measurement.
+
+## Canonical Runnable Example: EX06
+
+M04 uses EX06's `shared-layouts` canonical range to fix the two storage declarations, `float[32][32]` and `float[32][33]`. This page's modular arithmetic derives bank mappings from those row strides; EX06's host reference and `tiled-kernels` range independently own the equal-result contract. A layout transform cannot replace M03's barrier proof.
+
+[View the complete EX06 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex06-shared-memory-tile-bank-padding), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip). The standalone project is the only canonical implementation; this page imports one declared range.
+
+<CanonicalCode exampleId="EX06" range="shared-layouts" />
+
+## Measurement boundary: conflict-free is not a speedup
+
+The static bank model predicts conflict degree for a named instruction. A profiler metric records tool/version, metric definition, kernel/source range, tile shape, and Environment Manifest. Timing also requires correctness, warm-up, synchronization boundary, repetitions, and samples. Observed bank conflicts may come from other unmodeled instructions.
+
+The allowed conclusion is therefore: “Under the selected 32-bank, 32-bit-word fixture, this column access changes from an expected 32-way conflict to an expected conflict-free mapping.” Without runtime logs, there is no elapsed-time, bandwidth, occupancy, or speedup claim.
+
+## Retrieval check
+
+1. How is a 32-bit shared word mapped to a bank in the selected fixture?
+2. Why do distinct words in one bank conflict while several lanes reading one word receive a broadcast?
+3. Why are strides 1, 2, and 32 respectively conflict-free, 2-way, and 32-way?
+4. Why does a row-major 32x32 tile map a warp's column read to one bank?
+5. Why does 32x33 padding make that column read conflict-free without establishing speedup?
+
+## Continue with practice
+
+- Complete the [M04 Exercises](/en/memory/bank-conflicts-layouts/exercises/), then inspect the separate [reviewed solutions](/en/memory/bank-conflicts-layouts/solutions/).
+- Review a record that mistakes broadcast for conflict and invents speedup from padding in [Practice Bank PB-R1-016](/en/practice/#pb-r1-016).
+- EX06 `shared-layouts` and VIS05 must expose exact word and bank mappings rather than only bank colors.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3: Memory Optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations) provides current shared-memory context; [Shared Memory and Memory Banks](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks) supplies the 32-bank, successive-32-bit-word, conflict-serialization, and read-broadcast rules.
+- The [CUDA C Programming Guide 11.8 memory hierarchy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-hierarchy) retains the owner contract for the 11.8 lane.
+- The [CUDA C++ Programming Guide 12.9.1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html) is the owner guide used for the Toolkit 12.9.2 patch lane.
+
+All four owner sources were accessed on **2026-08-27**. The stride fixtures, padding proof, EX06 range contract, Exercises, and arrangement are original to this site. No owner example or figure is copied.
+
+**Fact checked: 2026-08-27.**

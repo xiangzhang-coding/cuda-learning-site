@@ -1,0 +1,273 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import {
+  SHARED_MEMORY_BANK_LIMITS,
+  SHARED_MEMORY_BANK_STATIC_CASES,
+  createDefaultSharedMemoryBankInput,
+  mapSharedMemoryBanks,
+} from '../visuals/shared-memory-bank-model';
+import { SHARED_MEMORY_BANK_COPY, type MemoryVisualLocale } from '../visuals/memory-visual-copy';
+
+interface Props {
+  locale: MemoryVisualLocale;
+}
+
+const { locale } = Astro.props;
+const copy = SHARED_MEMORY_BANK_COPY[locale];
+const defaultInput = createDefaultSharedMemoryBankInput();
+const initial = mapSharedMemoryBanks(defaultInput);
+if (!initial.valid) throw new Error('VIS05 default input must be valid.');
+const staticCases = SHARED_MEMORY_BANK_STATIC_CASES.map(({ id, input }) => {
+  const result = mapSharedMemoryBanks(input);
+  if (!result.valid) throw new Error(`VIS05 static case ${id} must be valid.`);
+  return { id, input, result };
+});
+---
+
+<cuda-shared-memory-banks
+  class="visual-explainer memory-visual not-content"
+  data-visual-id="VIS05"
+  data-locale={locale}
+  data-valid="true"
+  data-classification={initial.classification}
+  data-conflict-degree={initial.conflictDegree}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls memory-control-grid bank-control-grid" data-visual-controls hidden>
+      <legend>{copy.controlsLabel}</legend>
+      <label>
+        <span>{copy.bankCount}</span>
+        <input data-bank-field="bankCount" type="number" inputmode="numeric" min="1" max={SHARED_MEMORY_BANK_LIMITS.maxBankCount} step="1" value={defaultInput.bankCount} autocomplete="off" aria-label={copy.bankCount} aria-invalid="false" />
+      </label>
+      <label>
+        <span>{copy.stride}</span>
+        <input data-bank-field="stride" type="number" inputmode="numeric" min="0" max={SHARED_MEMORY_BANK_LIMITS.maxStrideWords} step="1" value={defaultInput.stride} autocomplete="off" aria-label={copy.stride} aria-invalid="false" />
+      </label>
+      <label>
+        <span>{copy.padding}</span>
+        <input data-bank-field="padding" type="number" inputmode="numeric" min="0" max={SHARED_MEMORY_BANK_LIMITS.maxPaddingWords} step="1" value={defaultInput.padding} autocomplete="off" aria-label={copy.padding} aria-invalid="false" />
+      </label>
+      <button type="button" data-reset-bank-mapping>{copy.reset}</button>
+      <small>{copy.limits}</small>
+    </fieldset>
+
+    <p class="memory-validation" data-bank-validation role="status" aria-live="polite" aria-atomic="true" hidden></p>
+
+    <section class="memory-workbench" data-interactive-workbench data-pagefind-ignore hidden aria-label={copy.result}>
+      <header class="memory-result-header">
+        <div>
+          <span class="memory-result-kicker">{copy.result}</span>
+          <strong data-bank-verdict>{copy.classifications[initial.classification]}</strong>
+        </div>
+        <p data-bank-status role="status" aria-live="polite" aria-atomic="true">
+          {copy.classifications[initial.classification]}. {copy.conflictDegree}: {initial.conflictDegree}.
+        </p>
+      </header>
+
+      <dl class="memory-metrics bank-metrics">
+        <div><dt>{copy.conflictDegree}</dt><dd data-conflict-degree-output>{initial.conflictDegree}</dd></div>
+        <div><dt>{copy.laneStep}</dt><dd><span data-lane-step>{initial.configuration.laneStepWords}</span> × 4 B</dd></div>
+        <div><dt>{copy.bankGroups}</dt><dd data-addressed-banks>{initial.banks.length}</dd></div>
+      </dl>
+
+      <p class="memory-broadcast-note">{copy.broadcastNote}</p>
+
+      <section class="memory-ledger-panel" aria-label={copy.bankSummary}>
+        <h3>{copy.bankSummary}</h3>
+        <ol class="memory-bank-list" data-bank-groups>
+          {initial.banks.map((bank) => (
+            <li data-bank={bank.bank}>
+              <strong>B{bank.bank}</strong>
+              <span>lanes {bank.laneIds.join(', ')}</span>
+              <span>{bank.distinctAddressCount} {copy.distinctAddresses}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div class="memory-table-wrap">
+        <table class="memory-data-table">
+          <caption>{copy.mappingTable}</caption>
+          <thead>
+            <tr><th scope="col">{copy.lane}</th><th scope="col">{copy.wordIndex}</th><th scope="col">{copy.byteAddress}</th><th scope="col">{copy.bank}</th></tr>
+          </thead>
+          <tbody data-bank-mappings>
+            {initial.mappings.map((mapping) => (
+              <tr data-lane={mapping.lane}>
+                <th scope="row">{mapping.lane}</th>
+                <td>{mapping.wordIndex}</td>
+                <td>{mapping.byteAddress}</td>
+                <td>B{mapping.bank}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="visual-section" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="visual-static-grid memory-static-grid bank-static-grid">
+        {staticCases.map(({ id, input, result }) => (
+          <article class="visual-static-card" data-static-case={id}>
+            <h4>{copy.staticLabels[id]}</h4>
+            <p><code>wordIndex = lane × ({input.stride} + {input.padding}); bank = wordIndex mod {input.bankCount}</code></p>
+            <dl>
+              <div><dt>{copy.result}</dt><dd><strong>{copy.classifications[result.classification]}</strong></dd></div>
+              <div><dt>{copy.conflictDegree}</dt><dd>{result.conflictDegree}</dd></div>
+              <div><dt>{copy.bankGroups}</dt><dd>{result.banks.length}</dd></div>
+            </dl>
+            <p class="memory-static-bank-map">
+              {result.banks.map((bank) => `B${bank.bank}: L${bank.laneIds.join('/')} (${bank.distinctAddressCount})`).join(' · ')}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-shared-memory-banks>
+
+<script>
+  import {
+    createDefaultSharedMemoryBankInput,
+    mapSharedMemoryBanks,
+    type SharedMemoryBankInput,
+    type SharedMemoryBankIssue,
+  } from '../visuals/shared-memory-bank-model';
+  import { SHARED_MEMORY_BANK_COPY } from '../visuals/memory-visual-copy';
+
+  const issueFields: Record<SharedMemoryBankIssue, keyof SharedMemoryBankInput> = {
+    'bank-count-invalid': 'bankCount',
+    'stride-invalid': 'stride',
+    'padding-invalid': 'padding',
+  };
+
+  class CudaSharedMemoryBanks extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reset-bank-mapping]');
+      if (!controls || !workbench || !reset || this.fields().size !== 3) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      workbench.hidden = false;
+      this.fields().forEach((field) => field.addEventListener('input', () => this.render()));
+      reset.addEventListener('click', () => {
+        const defaults = createDefaultSharedMemoryBankInput();
+        this.fields().forEach((field, key) => {
+          field.value = defaults[key];
+        });
+        this.render();
+        this.fields().get('bankCount')?.focus();
+      });
+      this.render();
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private fields() {
+      const fields = new Map<keyof SharedMemoryBankInput, HTMLInputElement>();
+      this.querySelectorAll<HTMLInputElement>('[data-bank-field]').forEach((field) => {
+        const key = field.dataset.bankField;
+        if (key === 'bankCount' || key === 'stride' || key === 'padding') fields.set(key, field);
+      });
+      return fields;
+    }
+
+    private render() {
+      const fields = this.fields();
+      const input = Object.fromEntries([...fields].map(([key, field]) => [key, field.value])) as SharedMemoryBankInput;
+      const result = mapSharedMemoryBanks(input);
+      const copy = SHARED_MEMORY_BANK_COPY[this.locale()];
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
+      const validation = this.querySelector<HTMLElement>('[data-bank-validation]');
+      fields.forEach((field) => field.setAttribute('aria-invalid', 'false'));
+
+      if (!result.valid) {
+        this.dataset.valid = 'false';
+        if (workbench) workbench.hidden = true;
+        for (const issue of result.issues) fields.get(issueFields[issue])?.setAttribute('aria-invalid', 'true');
+        if (validation) {
+          validation.hidden = false;
+          validation.textContent = `${copy.invalid} ${result.issues.map((issue) => copy.issues[issue]).join(' ')}`;
+        }
+        return;
+      }
+
+      this.dataset.valid = 'true';
+      this.dataset.classification = result.classification;
+      this.dataset.conflictDegree = String(result.conflictDegree);
+      if (workbench) workbench.hidden = false;
+      if (validation) {
+        validation.hidden = true;
+        validation.textContent = '';
+      }
+      const verdict = copy.classifications[result.classification];
+      this.setText('[data-bank-verdict]', verdict);
+      this.setText('[data-bank-status]', `${verdict}. ${copy.conflictDegree}: ${result.conflictDegree}.`);
+      this.setText('[data-conflict-degree-output]', String(result.conflictDegree));
+      this.setText('[data-lane-step]', String(result.configuration.laneStepWords));
+      this.setText('[data-addressed-banks]', String(result.banks.length));
+
+      const bankList = this.querySelector<HTMLOListElement>('[data-bank-groups]');
+      if (bankList) {
+        bankList.replaceChildren(...result.banks.map((bank) => {
+          const item = document.createElement('li');
+          item.dataset.bank = String(bank.bank);
+          const name = document.createElement('strong');
+          name.textContent = `B${bank.bank}`;
+          const lanes = document.createElement('span');
+          lanes.textContent = `lanes ${bank.laneIds.join(', ')}`;
+          const addresses = document.createElement('span');
+          addresses.textContent = `${bank.distinctAddressCount} ${copy.distinctAddresses}`;
+          item.append(name, lanes, addresses);
+          return item;
+        }));
+      }
+
+      const mappingTable = this.querySelector<HTMLTableSectionElement>('[data-bank-mappings]');
+      if (mappingTable) {
+        mappingTable.replaceChildren(...result.mappings.map((mapping) => {
+          const row = document.createElement('tr');
+          row.dataset.lane = String(mapping.lane);
+          const lane = document.createElement('th');
+          lane.scope = 'row';
+          lane.textContent = String(mapping.lane);
+          const word = document.createElement('td');
+          word.textContent = String(mapping.wordIndex);
+          const address = document.createElement('td');
+          address.textContent = String(mapping.byteAddress);
+          const bank = document.createElement('td');
+          bank.textContent = `B${mapping.bank}`;
+          row.append(lane, word, address, bank);
+          return row;
+        }));
+      }
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-shared-memory-banks')) {
+    customElements.define('cuda-shared-memory-banks', CudaSharedMemoryBanks);
+  }
+</script>

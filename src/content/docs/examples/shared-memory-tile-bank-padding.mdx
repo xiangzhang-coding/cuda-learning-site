@@ -1,0 +1,257 @@
+---
+title: 'EX06：共享内存 tile bank padding 可运行示例'
+description: 通过同一份模板化 C++17 CUDA 实现和纯 host bank model，对比明确的 32 x 32 与 32 x 33 共享内存 tile 布局。
+pairId: ex06
+counterpart: /en/examples/shared-memory-tile-bank-padding/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - layout-contract
+  - shared-layouts
+  - tiled-kernels
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX06
+prerequisites:
+  - M03
+  - M04
+relatedUnits:
+  - VIS05
+exampleIds:
+  - EX06
+canonicalExample: EX06
+canonicalRanges:
+  - shared-layouts
+  - tiled-kernels
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 8,576-byte global-plus-shared problem bound and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The unpadded and padded kernel variants should each report PASS only when all 32 lane outputs exactly match the pure host tile reference.
+    - For concurrent tile[lane][5] reads, the 32 x 32 host bank model predicts that the unpadded layout maps 32 distinct words to bank 5.
+    - For the same logical reads, the 32 x 33 host bank model predicts one distinct bank per lane while preserving exactly the same 32 output values.
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory and Memory Banks'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA shared-memory layout and bank model'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex06
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-27'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,layout-contract,shared-layouts,tiled-kernels,host-model,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX06
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: 'M03,M04'
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: VIS05
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX06
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX06
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'shared-layouts,tiled-kernels'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 8,576-byte global-plus-shared problem bound and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/shared-memory-tile-bank-padding/" lang="en">Read the English counterpart</a>
+
+EX06 是一个独立、原创的共享内存 tile bank-padding 可运行示例（Runnable Example）。同一份模板化 C++17 CUDA 实现实例化明确的 unpadded `float[32][32]` 和 padded `float[32][33]` 共享布局。网站不会执行 CUDA，也不会发布实测 bank-conflict 或性能结果。
+
+## 用途
+
+先完成 M03，再完成 M04；这个顺序属于 prerequisite contract。EX06 把 shared-memory layout 与 bank-address arithmetic 变成可执行项目，VIS05 是相关的纯浏览器可视化讲解（Visual Explainer）。host model 和 VIS05 都不提供 GPU observation 或 CUDA Evidence Status。
+
+对比保持 input tile、单 warp launch、cooperative load order、barrier、read column、output values 与 verifier 不变，唯一布局变量是 padding。这样可以隔离 address map，同时保持数学输出不变。
+
+## 获取 canonical project
+
+[在固定提交中查看完整 EX06 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex06-shared-memory-tile-bank-padding)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip)。解压后进入 `examples/ex06-shared-memory-tile-bank-padding/`。
+
+`project.json` 声明 build inputs、两个 canonical range、正确性维度、保守内存上界、Toolkit Lanes 和空证据轴。项目实现与页面文字均为原创，不是从 NVIDIA sample 改写而来；软件文件使用 Apache-2.0。
+
+## 布局合同
+
+一个 block 只包含一个 32-thread warp。确定性 input 是 row-major 32 x 32 float tile。加载时，lane `l` 先写 row 0、column `l`，再写 row 1、column `l`，并持续给 linear input index 加 32。因此每次循环迭代都由整个 warp 协作加载完整的一行。
+
+全部 1,024 个值写入后，`__syncthreads()` 建立 block-wide barrier。随后每个 lane 读取 `tile[lane][5]` 并写一个连续 output。两种布局必须产生完全相同的 32 个值，因为 padding 只改变 storage pitch，不改变逻辑 row 或 column。
+
+## Shared layouts
+
+源码明确写出两个物理 extent，并用 template parameter 选择其一：
+
+<CanonicalCode exampleId="EX06" range="shared-layouts" />
+
+Unpadded pitch 是 32 words，padded pitch 是 33。显式类型避免 runtime pitch 掩盖每个 kernel specialization 实际持有的 shared-memory object。
+
+## Tiled kernels
+
+两个 kernel variant 来自同一份模板实现：
+
+<CanonicalCode exampleId="EX06" range="tiled-kernels" />
+
+Launch 使用同一 input、固定 column 5 与两个独立的 32-element output 实例化 `Padding=0` 和 `Padding=1`。Barrier 位于所有 lane 完成 cooperative store 之后、任何 lane 开始转置式 column access 之前。
+
+在声明的 32-bank、four-byte-word model 下，unpadded 中 lane `l` 的 access word 是 `l * 32 + 5`，因此所有 lane 都选择 bank 5，但指向不同 word。Padded word 是 `l * 33 + 5`，bank 为 `(l + 5) % 32`，每个 lane 对应一个不同 bank。这些是 host-model prediction，不是 profiler observation。
+
+## Host model 边界
+
+`include/shared_memory_tile_bank_padding_reference.hpp` 是纯 C++17。它验证 row-major input index、padding 为零和一时的 physical shared-word index、bank number、确定性 float value，以及两种布局生成的完整 output。
+
+`make host-test` 检查已知 tile position 与拒绝的 coordinate，证明 unpadded lane words 互不相同但共享 bank 5，证明 padded mapping 恰好访问每个 bank 一次，并精确比较两个 output array。值都以 `.25` 结尾，在这里可由 binary `float` 精确表示，因此测试不需要 tolerance。它不编译或运行 CUDA。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+前四步需要所选 CUDA Toolkit，host-test 只需要 host C++17 compiler。CUDA stages 生成 `build/shared_memory_tile_bank_padding.ii`、`build/shared_memory_tile_bank_padding.o` 和 `build/ex06-shared-memory-tile-bank-padding`。Inspect 检查 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。
+
+`scripts/compile-check.sh c++17 ex06 <result-dir>` 执行这些步骤，扫描生成的日志与 inspection artifacts，并且绝不运行 CUDA binary。因此 compile workflow 不提供 shared-memory runtime observation。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 4,352 bytes global allocations 加上较大的 4,224-byte shared tile，保守合计 8,576 bytes，远低于 8 GB |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Toolkit Lane 共用同一份原创 C++17 source |
+
+三条 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 和 CUDA 13.3.1。固定 container coordinates 只定义未来构建目标，不是成功记录。
+
+## 编译与运行证据
+
+EX06 的 compilation array 为空，因此 **EX06 不是 Compile-Checked**。Matrix build gate 保留临时、经过扫描的日志，但不会添加公开 compilation record。Runtime 是 **Pending Hardware Verification**，recorded observations 为空。
+
+本页不发布 GPU output、实测 conflict count、timing、latency、bandwidth、throughput、profiler counter 或 speedup。未来 runtime submission 需要声明 Reference Environment、完整环境清单（Environment Manifest）、两个 correctness verdict，以及适合其声明的 observation method。
+
+## 预期观察，不是运行记录
+
+1. Unpadded 与 padded variant 都应只在 32 个 output 全部精确匹配纯 host tile reference 时报告 `PASS`。
+2. 对并发 `tile[lane][5]` read，32 x 32 host model 预测 bank 5 中存在 32 个 distinct word。
+3. 对同样的逻辑 read，32 x 33 host model 预测每个 lane 对应不同 bank，同时保持相同 value。
+
+第二与第三项是 address-model prediction，不是实测 conflict counter，也不承诺性能排序。
+
+## 来源与复核
+
+CUDA C++ Best Practices Guide 提供 shared-memory bank model 与 padding rationale。三条 NVCC 文档覆盖声明的 Toolkit Lanes，三个 Docker Hub tag API 只提供 container metadata。它们都不能证明 EX06 已编译或运行。
+
+- [CUDA C++ Best Practices Guide v13.3 - Shared Memory and Memory Banks](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-27。**

@@ -1,0 +1,130 @@
+---
+title: 'VIS04: Memory-request Segment Grouping'
+description: Group every active lane’s requested byte range into naturally aligned 32-byte segments without treating the browser model as a transaction or performance measurement.
+pairId: vis04
+counterpart: /visuals/memory-transactions/
+factCheckDate: '2026-08-27'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - input-contract
+  - segment-model
+  - accounting
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS04
+prerequisites: []
+relatedUnits:
+  - M02
+  - EX05
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA-capable systems'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Best Practices Guide - Memory Optimizations'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-06-25'
+    platform: 'CUDA C++ memory access guidance'
+    accessDate: '2026-08-27'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'CUDA Runtime allocation and copy interfaces'
+    accessDate: '2026-08-27'
+  - title: 'CUDA C++ Programming Guide 11.8 - Device Memory Accesses'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived CUDA 11.8 stability boundary'
+    accessDate: '2026-08-27'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,input-contract,segment-model,accounting,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M02,EX05' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0' }
+---
+
+import MemoryTransactionExplorer from '../../../../components/MemoryTransactionExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/memory-transactions/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS04 is a Visual Explainer for the address-grouping prerequisite behind [M02](/en/memory/coalescing-transactions/) and [EX05](/en/examples/coalesced-strided-access/). It answers one bounded question: which naturally aligned 32-byte segments contain the bytes requested by the selected active lanes?
+
+<MemoryTransactionExplorer locale="en" />
+
+## Input contract
+
+The model accepts a contiguous or strided pattern, an element width of `1`, `2`, `4`, or `8` bytes, an integer element stride, a byte offset, and `1` through `32` active lanes. It models one global-memory instruction from one warp; active lanes are consecutive from lane zero, and all addresses are relative to a fixture base `B = 0` aligned to 32 bytes. Contiguous mode fixes the stride at one element. Strided mode uses the entered positive stride.
+
+Browser caps keep the generated table bounded: stride is at most `64` elements and offset is at most `4096` bytes. These are interface limits, not CUDA device limits. A malformed, fractional, signed, exponential, or out-of-range value produces no partial grouping.
+
+## Segment model
+
+For lane `L`, element width `E`, stride `S`, and starting offset `O`, the requested inclusive byte range is:
+
+```text
+start(L) = O + L * S * E
+end(L)   = start(L) + E - 1
+```
+
+Every requested byte belongs to the naturally aligned segment beginning at `floor(address / 32) * 32`. If one element crosses a boundary, that lane appears in both segment groups. The lane table therefore retains the byte range and every segment start rather than assigning one element to only its first segment.
+
+The fixture explicitly applies the CUDA rule for compute capability 6.0 and newer. The Learning Site’s Baseline GPU Capability Tier begins at compute capability 7.5, so the fixture lies inside the site’s declared Stable Curriculum scope.
+
+## Byte accounting
+
+The aligned default (`32` lanes, `4` bytes, stride `1`, offset `0`) requests bytes `0` through `127` and occupies segment starts `0`, `32`, `64`, and `96`. Offset `4` extends the final request through byte `131`, so five segment groups are present. Stride `2` addresses every other 4-byte word and occupies eight segment groups.
+
+“Requested bytes” is the sum of lane element widths. “Segment coverage bytes” is the number of represented segment groups multiplied by `32`. Their difference is displayed only as address coverage accounting. It is not cache traffic, an observed hardware transaction count, bandwidth, efficiency, or speedup.
+
+## Static fallback
+
+The four ledgers after the workbench are generated by the same pure TypeScript model. They preserve the required default, offset, stride, and boundary-crossing cases with JavaScript disabled and in print. Controls and the interactive table remain hidden until successful enhancement.
+
+## Evidence boundary
+
+The browser evaluates integer address equations only. It compiles no CUDA, launches no GPU work, queries no cache, and reads no profiler. Consequently, selections and static ledgers grant no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status, and all publication evidence axes remain empty.
+
+## Sources
+
+The current [Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) chapter and [Best Practices memory optimizations](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#memory-optimizations) establish the 32-byte segment and coalescing vocabulary used by the bounded fixture. The current [Runtime Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) page anchors allocation/copy terminology but is not executed here.
+
+The archived [CUDA C++ Programming Guide 11.8 device-memory section](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses) is the stability boundary: VIS04 teaches only the address-grouping rule shared with that selected Toolkit Lane rather than mirroring a release-specific diagram. All values, ledgers, tables, and explanatory copy are original CC-BY-4.0 content. Sources were accessed on **2026-08-27**.
