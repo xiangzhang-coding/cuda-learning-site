@@ -4,9 +4,9 @@
   "id": "EX05",
   "title": "Coalesced and strided access",
   "root": "examples/ex05-coalesced-strided-access",
-  "sourceCommit": "09aa5ea16bf9a997b2711e4e96f15ec63623f3ee",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex05-coalesced-strided-access",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip",
+  "sourceCommit": "d85a86640b6ec0452542d6e9cbfd5827bb3c87a6",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex05-coalesced-strided-access",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

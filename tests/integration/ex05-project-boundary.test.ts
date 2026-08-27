@@ -16,7 +16,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex05-coalesced-strided-access');
-const sourceCommit = '09aa5ea16bf9a997b2711e4e96f15ec63623f3ee';
+const sourceCommit = 'd85a86640b6ec0452542d6e9cbfd5827bb3c87a6';
 
 describe('EX05 standalone project boundary', () => {
   it('declares one shared C++17 implementation and immutable project coordinates', async () => {
@@ -34,6 +34,11 @@ describe('EX05 standalone project boundary', () => {
       license: 'Apache-2.0',
       provenance: 'original',
     });
+    await expect(execFileAsync(
+      'git',
+      ['cat-file', '-e', `${sourceCommit}:examples/ex05-coalesced-strided-access/project.json`],
+      { cwd: projectRoot },
+    )).resolves.toBeDefined();
     expect(example.build).toEqual({
       standard: 'c++17',
       inputs: [

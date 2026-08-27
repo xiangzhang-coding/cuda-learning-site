@@ -174,7 +174,7 @@ Padding removes the bank conflict from this particular column-access fixture. It
 
 M04 uses EX06's `shared-layouts` canonical range to fix the two storage declarations, `float[32][32]` and `float[32][33]`. This page's modular arithmetic derives bank mappings from those row strides; EX06's host reference and `tiled-kernels` range independently own the equal-result contract. A layout transform cannot replace M03's barrier proof.
 
-[View the complete EX06 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee/examples/ex06-shared-memory-tile-bank-padding), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/09aa5ea16bf9a997b2711e4e96f15ec63623f3ee.zip). The standalone project is the only canonical implementation; this page imports one declared range.
+[View the complete EX06 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex06-shared-memory-tile-bank-padding), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip). The standalone project is the only canonical implementation; this page imports one declared range.
 
 <CanonicalCode exampleId="EX06" range="shared-layouts" />
 
