@@ -94,7 +94,7 @@ const staticCases = SHARED_MEMORY_BANK_STATIC_CASES.map(({ id, input }) => {
         </ol>
       </section>
 
-      <div class="memory-table-wrap">
+      <div class="memory-table-wrap" tabindex="0" aria-label={copy.mappingTableScrollLabel}>
         <table class="memory-data-table">
           <caption>{copy.mappingTable}</caption>
           <thead>

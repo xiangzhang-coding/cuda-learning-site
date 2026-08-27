@@ -18,6 +18,7 @@ function glossaryRecord(
   relatedUnits: readonly string[],
   versionZh: string,
   versionEn: string,
+  reviewedOn = '2026-08-26',
 ): ResourceIndexRecord {
   const anchor = planningId.toLowerCase();
   return {
@@ -30,7 +31,7 @@ function glossaryRecord(
     relatedUnits,
     hardwareGate: noHardware,
     versionGate: localized(versionZh, versionEn),
-    reviewedOn: '2026-08-27',
+    reviewedOn,
   };
 }
 
@@ -636,17 +637,17 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-063', 'family-specific feature set · 系列特定功能集', 'environment-vocabulary', ['F06'], 'CUDA Programming Guide v13.3；从 compute capability 10.0 开始。', 'CUDA Programming Guide v13.3; available beginning with compute capability 10.0.'),
   glossaryRecord('TERM-064', 'launch geometry · 启动几何', 'kernel-vocabulary', ['F02', 'F03', 'F08', 'LAB03'], 'Programming Guide v13.3 与 Runtime API 13.3.1 device/function limits。', 'Programming Guide v13.3 and Runtime API 13.3.1 device/function limits.'),
   glossaryRecord('TERM-065', 'block shape · 线程块形状', 'kernel-vocabulary', ['F08', 'LAB03'], '轴向、总 thread 与 kernel-specific limit 必须分开核对。', 'Per-axis, aggregate-thread, and kernel-specific limits require separate checks.'),
-  glossaryRecord('TERM-066', 'address space · 地址空间', 'kernel-vocabulary', ['M01', 'VIS06'], 'M01 按 Programming Guide v13.3、11.8.0 与 12.9.1 owner 文档复核。', 'M01 reviews Programming Guide v13.3 and the 11.8.0 and 12.9.1 owner documentation.'),
-  glossaryRecord('TERM-067', 'global memory · 全局内存', 'kernel-vocabulary', ['M01', 'M02', 'VIS04', 'EX05'], '语义合同按 selected 11.8.0、12.9.1 与 current v13.3 坐标复核。', 'The semantic contract is reviewed at selected 11.8.0, 12.9.1, and current v13.3 coordinates.'),
-  glossaryRecord('TERM-068', 'constant memory · 常量内存', 'kernel-vocabulary', ['M01', 'VIS06'], '声明、symbol copy 与 lifetime 按 selected Programming Guide/Runtime 文档复核。', 'Declaration, symbol-copy, and lifetime details are reviewed in selected Programming Guide and Runtime documentation.'),
-  glossaryRecord('TERM-069', 'shared memory · 共享内存', 'kernel-vocabulary', ['M01', 'M03', 'M04', 'VIS05', 'EX06'], 'M01/M03/M04 使用 selected 11.8.0、12.9.1 与 current v13.3 owner 文档。', 'M01/M03/M04 use selected 11.8.0, 12.9.1, and current v13.3 owner documentation.'),
-  glossaryRecord('TERM-070', 'local memory · 本地内存', 'kernel-vocabulary', ['M01', 'VIS06'], 'Local address space 是 thread-private，但 physical placement 与 cache behavior 必须按 architecture 复核。', 'The local address space is thread-private, while physical placement and cache behavior require architecture-specific review.'),
-  glossaryRecord('TERM-071', 'register · 寄存器', 'kernel-vocabulary', ['M01', 'VIS06'], 'Register allocation 与 spill 由 compiler/target 决定，不能从 source spelling 保证。', 'Register allocation and spilling depend on the compiler and target and are not guaranteed by source spelling.'),
-  glossaryRecord('TERM-072', 'memory transaction · 内存事务', 'kernel-vocabulary', ['M02', 'VIS04', 'EX05'], 'M02 的 CC 6.0+ fixture 只推导 naturally aligned 32-byte segment coverage。', 'The M02 CC 6.0+ fixture derives only naturally aligned 32-byte segment coverage.'),
-  glossaryRecord('TERM-073', 'coalescing · 合并访问', 'kernel-vocabulary', ['M02', 'VIS04', 'EX05'], '规则随 compute capability 与 access size 变化；M02 明确限定到 selected 32-byte segment model。', 'Rules vary with compute capability and access size; M02 is explicitly limited to the selected 32-byte segment model.'),
-  glossaryRecord('TERM-074', 'shared-memory bank · 共享内存存储体', 'kernel-vocabulary', ['M04', 'VIS05', 'EX06'], 'M04 使用 selected CC 7.5+ 的 32-bank、32-bit word fixture；其他 architecture 必须重新核对。', 'M04 uses a selected CC 7.5+ fixture with 32 banks and 32-bit words; other architectures require renewed review.'),
-  glossaryRecord('TERM-075', 'bank conflict · 存储体冲突', 'kernel-vocabulary', ['M04', 'VIS05', 'EX06'], 'Conflict classification 绑定 selected bank mapping；same-address read broadcast 单独处理。', 'Conflict classification is bound to the selected bank mapping; same-address read broadcast is handled separately.'),
-  glossaryRecord('TERM-076', 'tiling · 分块', 'kernel-vocabulary', ['M03', 'M04', 'EX06'], 'M03 教授 portable C++17 synchronous baseline；未来 async interface 不向当前 Lane 倒推。', 'M03 teaches the portable C++17 synchronous baseline; future asynchronous interfaces are not projected backward into current Lanes.'),
+  glossaryRecord('TERM-066', 'address space · 地址空间', 'kernel-vocabulary', ['M01', 'VIS06'], 'M01 按 Programming Guide v13.3、11.8.0 与 12.9.1 owner 文档复核。', 'M01 reviews Programming Guide v13.3 and the 11.8.0 and 12.9.1 owner documentation.', '2026-08-27'),
+  glossaryRecord('TERM-067', 'global memory · 全局内存', 'kernel-vocabulary', ['M01', 'M02', 'VIS04', 'EX05'], '语义合同按 selected 11.8.0、12.9.1 与 current v13.3 坐标复核。', 'The semantic contract is reviewed at selected 11.8.0, 12.9.1, and current v13.3 coordinates.', '2026-08-27'),
+  glossaryRecord('TERM-068', 'constant memory · 常量内存', 'kernel-vocabulary', ['M01', 'VIS06'], '声明、symbol copy 与 lifetime 按 selected Programming Guide/Runtime 文档复核。', 'Declaration, symbol-copy, and lifetime details are reviewed in selected Programming Guide and Runtime documentation.', '2026-08-27'),
+  glossaryRecord('TERM-069', 'shared memory · 共享内存', 'kernel-vocabulary', ['M01', 'M03', 'M04', 'VIS05', 'EX06'], 'M01/M03/M04 使用 selected 11.8.0、12.9.1 与 current v13.3 owner 文档。', 'M01/M03/M04 use selected 11.8.0, 12.9.1, and current v13.3 owner documentation.', '2026-08-27'),
+  glossaryRecord('TERM-070', 'local memory · 本地内存', 'kernel-vocabulary', ['M01', 'VIS06'], 'Local address space 是 thread-private，但 physical placement 与 cache behavior 必须按 architecture 复核。', 'The local address space is thread-private, while physical placement and cache behavior require architecture-specific review.', '2026-08-27'),
+  glossaryRecord('TERM-071', 'register · 寄存器', 'kernel-vocabulary', ['M01', 'VIS06'], 'Register allocation 与 spill 由 compiler/target 决定，不能从 source spelling 保证。', 'Register allocation and spilling depend on the compiler and target and are not guaranteed by source spelling.', '2026-08-27'),
+  glossaryRecord('TERM-072', 'memory transaction · 内存事务', 'kernel-vocabulary', ['M02', 'VIS04', 'EX05'], 'M02 的 CC 6.0+ fixture 只推导 naturally aligned 32-byte segment coverage。', 'The M02 CC 6.0+ fixture derives only naturally aligned 32-byte segment coverage.', '2026-08-27'),
+  glossaryRecord('TERM-073', 'coalescing · 合并访问', 'kernel-vocabulary', ['M02', 'VIS04', 'EX05'], '规则随 compute capability 与 access size 变化；M02 明确限定到 selected 32-byte segment model。', 'Rules vary with compute capability and access size; M02 is explicitly limited to the selected 32-byte segment model.', '2026-08-27'),
+  glossaryRecord('TERM-074', 'shared-memory bank · 共享内存存储体', 'kernel-vocabulary', ['M04', 'VIS05', 'EX06'], 'M04 使用 selected CC 7.5+ 的 32-bank、32-bit word fixture；其他 architecture 必须重新核对。', 'M04 uses a selected CC 7.5+ fixture with 32 banks and 32-bit words; other architectures require renewed review.', '2026-08-27'),
+  glossaryRecord('TERM-075', 'bank conflict · 存储体冲突', 'kernel-vocabulary', ['M04', 'VIS05', 'EX06'], 'Conflict classification 绑定 selected bank mapping；same-address read broadcast 单独处理。', 'Conflict classification is bound to the selected bank mapping; same-address read broadcast is handled separately.', '2026-08-27'),
+  glossaryRecord('TERM-076', 'tiling · 分块', 'kernel-vocabulary', ['M03', 'M04', 'EX06'], 'M03 教授 portable C++17 synchronous baseline；未来 async interface 不向当前 Lane 倒推。', 'M03 teaches the portable C++17 synchronous baseline; future asynchronous interfaces are not projected backward into current Lanes.', '2026-08-27'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -678,28 +679,28 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-007',
     localized('Docker Engine 与 Buildx', 'Docker Engine and Buildx'),
     'publishing-interface',
-    ['EX02', 'EX03', 'EX05', 'EX06'],
+    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06'],
     localized('每条编译记录保存 runner 实际版本', 'Each compile record captures the runner-provided versions'),
   ),
   sourceRecord(
     'SRC-CUDA-001',
     localized('CUDA 11.8 Lane 来源', 'CUDA 11.8 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX05', 'EX06', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'LAB02'],
     localized('Toolkit 11.8.0；Ubuntu 22.04 x86-64；C++17', 'Toolkit 11.8.0; Ubuntu 22.04 x86-64; C++17'),
   ),
   sourceRecord(
     'SRC-CUDA-002',
     localized('CUDA 12.9 Lane 来源', 'CUDA 12.9 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX05', 'EX06', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'LAB02'],
     localized('Toolkit 12.9.2；Ubuntu 24.04 x86-64；C++17/C++20', 'Toolkit 12.9.2; Ubuntu 24.04 x86-64; C++17/C++20'),
   ),
   sourceRecord(
     'SRC-CUDA-003',
     localized('CUDA 13.3 Lane 来源', 'CUDA 13.3 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX05', 'EX06', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'LAB02'],
     localized('Toolkit 13.3.1；Ubuntu 24.04 x86-64；C++17/C++20 与 C++23 probe', 'Toolkit 13.3.1; Ubuntu 24.04 x86-64; C++17/C++20 plus a C++23 probe'),
   ),
   sourceRecord(
@@ -748,7 +749,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-010',
     localized('容器身份', 'Container identities'),
     'cuda-version-record',
-    ['EX02', 'EX03', 'EX05', 'EX06'],
+    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06'],
     same('11.8.0-devel-ubuntu22.04; 12.9.2-devel-ubuntu24.04; 13.3.1-devel-ubuntu24.04'),
   ),
   sourceRecord(

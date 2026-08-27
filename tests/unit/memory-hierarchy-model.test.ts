@@ -4,15 +4,16 @@ import { describe, expect, it } from 'vitest';
 import {
   MEMORY_HIERARCHY_MODEL_CONTRACT,
   MEMORY_HIERARCHY_RECORDS,
+  MEMORY_OPERATION_FILTERS,
   createDefaultMemoryHierarchyFilter,
   filterMemoryHierarchy,
-  isMemoryLifecycleFilter,
+  isMemoryOperationFilter,
   isMemoryScopeFilter,
   type MemoryHierarchyFilter,
 } from '../../src/visuals/memory-hierarchy-model';
 
-describe('VIS06 memory hierarchy and lifetime model', () => {
-  it('catalogs all six records in deterministic layer order with complete lifecycle fields', () => {
+describe('VIS06 memory hierarchy, scope, and operation model', () => {
+  it('catalogs all six records with the exact operation inventory and complete lifecycle fields', () => {
     expect(MEMORY_HIERARCHY_RECORDS.map(({ id }) => id)).toEqual([
       'host',
       'global',
@@ -20,6 +21,22 @@ describe('VIS06 memory hierarchy and lifetime model', () => {
       'shared',
       'local',
       'register',
+    ]);
+    expect(MEMORY_OPERATION_FILTERS).toEqual([
+      'all',
+      'host-language',
+      'runtime-api',
+      'symbol-api',
+      'kernel-declaration',
+      'compiler-placement',
+    ]);
+    expect(MEMORY_HIERARCHY_RECORDS.map(({ id, operationPath }) => [id, operationPath])).toEqual([
+      ['host', 'host-language'],
+      ['global', 'runtime-api'],
+      ['constant', 'symbol-api'],
+      ['shared', 'kernel-declaration'],
+      ['local', 'compiler-placement'],
+      ['register', 'compiler-placement'],
     ]);
     for (const record of MEMORY_HIERARCHY_RECORDS) {
       expect(record.ownerAcquisition.length).toBeGreaterThan(30);
@@ -48,38 +65,41 @@ describe('VIS06 memory hierarchy and lifetime model', () => {
   });
 
   it.each([
-    [{ scope: 'grid', lifecycle: 'all' }, ['global', 'constant']],
-    [{ scope: 'thread', lifecycle: 'all' }, ['local', 'register']],
-    [{ scope: 'all', lifecycle: 'explicit-release' }, ['host', 'global']],
-    [{ scope: 'block', lifecycle: 'block-end' }, ['shared']],
-    [{ scope: 'thread', lifecycle: 'thread-end' }, ['local', 'register']],
-    [{ scope: 'host', lifecycle: 'thread-end' }, []],
+    [{ scope: 'grid', operation: 'all' }, ['global', 'constant']],
+    [{ scope: 'thread', operation: 'all' }, ['local', 'register']],
+    [{ scope: 'all', operation: 'host-language' }, ['host']],
+    [{ scope: 'all', operation: 'runtime-api' }, ['global']],
+    [{ scope: 'all', operation: 'symbol-api' }, ['constant']],
+    [{ scope: 'block', operation: 'kernel-declaration' }, ['shared']],
+    [{ scope: 'thread', operation: 'compiler-placement' }, ['local', 'register']],
+    [{ scope: 'host', operation: 'runtime-api' }, []],
   ] as const)('filters %j without changing catalog order', (filter, expected) => {
     const result = filterMemoryHierarchy(filter);
     expect(result.valid).toBe(true);
     expect(result.records.map(({ id }) => id)).toEqual(expected);
   });
 
-  it('fails closed for unknown scope or lifecycle values', () => {
+  it('fails closed for unknown scope or operation values', () => {
     const badScope = filterMemoryHierarchy(
-      { scope: 'device', lifecycle: 'all' } as unknown as MemoryHierarchyFilter,
+      { scope: 'device', operation: 'all' } as unknown as MemoryHierarchyFilter,
     );
-    const badLifecycle = filterMemoryHierarchy(
-      { scope: 'all', lifecycle: 'launch' } as unknown as MemoryHierarchyFilter,
+    const badOperation = filterMemoryHierarchy(
+      { scope: 'all', operation: 'launch' } as unknown as MemoryHierarchyFilter,
     );
 
     expect(badScope).toMatchObject({ valid: false, issues: ['scope-invalid'], filter: null, records: [] });
-    expect(badLifecycle).toMatchObject({ valid: false, issues: ['lifecycle-invalid'], filter: null, records: [] });
+    expect(badOperation).toMatchObject({ valid: false, issues: ['operation-invalid'], filter: null, records: [] });
     expect(isMemoryScopeFilter('device')).toBe(false);
-    expect(isMemoryLifecycleFilter('launch')).toBe(false);
+    expect(isMemoryOperationFilter('launch')).toBe(false);
   });
 
   it('resets to the complete catalog and remains evidence-neutral', () => {
-    expect(createDefaultMemoryHierarchyFilter()).toEqual({ scope: 'all', lifecycle: 'all' });
+    expect(createDefaultMemoryHierarchyFilter()).toEqual({ scope: 'all', operation: 'all' });
     const result = filterMemoryHierarchy(createDefaultMemoryHierarchyFilter());
     expect(result.records).toHaveLength(6);
     expect(MEMORY_HIERARCHY_MODEL_CONTRACT).toMatchObject({
       executesCuda: false,
+      filterAxes: 'scope-and-operation-path',
       placementProbe: 'none',
       performanceInference: 'none',
       evidenceStatusEffect: 'none',

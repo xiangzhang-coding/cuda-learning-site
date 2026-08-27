@@ -38,7 +38,7 @@ const issue15StateScans = [
     route: '/en/visuals/memory-hierarchy-lifetime/',
     prepare: async (page: Page) => {
       await page.locator('[data-scope-filter]').selectOption('thread');
-      await page.locator('[data-lifecycle-filter]').selectOption('explicit-release');
+      await page.locator('[data-operation-filter]').selectOption('runtime-api');
     },
   },
 ] as const;

@@ -40,18 +40,18 @@ describe('VIS04 memory-transaction grouping model', () => {
     });
   });
 
-  it('assigns an element to every segment that its requested byte range crosses', () => {
-    const result = groupMemoryByteRequests(input({ elementSize: '8', offset: '28', activeLanes: '2' }));
+  it('keeps naturally aligned elements within one segment each at a segment boundary', () => {
+    const result = groupMemoryByteRequests(input({ elementSize: '8', offset: '24', activeLanes: '2' }));
 
     expect(result.valid).toBe(true);
-    if (!result.valid) throw new Error('Expected a valid crossing case.');
+    if (!result.valid) throw new Error('Expected a valid naturally aligned case.');
     expect(result.lanes).toEqual([
-      { lane: 0, startByte: 28, endByte: 35, segmentStarts: [0, 32] },
-      { lane: 1, startByte: 36, endByte: 43, segmentStarts: [32] },
+      { lane: 0, startByte: 24, endByte: 31, segmentStarts: [0] },
+      { lane: 1, startByte: 32, endByte: 39, segmentStarts: [32] },
     ]);
     expect(result.segments).toEqual([
-      { startByte: 0, endByte: 31, laneIds: [0], requestedBytes: 4 },
-      { startByte: 32, endByte: 63, laneIds: [0, 1], requestedBytes: 12 },
+      { startByte: 0, endByte: 31, laneIds: [0], requestedBytes: 8 },
+      { startByte: 32, endByte: 63, laneIds: [1], requestedBytes: 8 },
     ]);
   });
 
@@ -63,6 +63,9 @@ describe('VIS04 memory-transaction grouping model', () => {
     [{ stride: '2' }, 'contiguous-stride-mismatch'],
     [{ offset: '-1' }, 'offset-invalid'],
     [{ offset: '1e3' }, 'offset-invalid'],
+    [{ elementSize: '2', offset: '1' }, 'offset-element-misaligned'],
+    [{ elementSize: '4', offset: '2' }, 'offset-element-misaligned'],
+    [{ elementSize: '8', offset: '28' }, 'offset-element-misaligned'],
   ] as const)('fails closed for %j', (override, issue) => {
     const result = groupMemoryByteRequests(input(override));
     expect(result).toMatchObject({ valid: false, configuration: null, lanes: [], segments: [], accounting: null });
@@ -94,13 +97,14 @@ describe('VIS04 memory-transaction grouping model', () => {
       ['aligned-contiguous', 4],
       ['offset-four', 5],
       ['stride-two', 8],
-      ['crossing-element', 2],
+      ['partial-warp', 1],
     ]);
     expect(MEMORY_TRANSACTION_MODEL_CONTRACT).toMatchObject({
       architectureScope: 'compute-capability-6.0-or-newer',
       siteCapabilityScope: 'compute-capability-7.5-or-newer',
       instructionScope: 'one-global-memory-instruction-from-one-warp',
       baseAddressBytes: 0,
+      elementAlignment: 'offset-multiple-of-element-size',
       observationScope: 'address-arithmetic-only',
       executesCuda: false,
       performanceInference: 'none',

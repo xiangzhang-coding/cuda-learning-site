@@ -1,6 +1,6 @@
 ---
 title: 'VIS06：Memory hierarchy、ownership 与 lifetime'
-description: 按 accessible scope 与 lifecycle 筛选 host、global、constant、shared、local 和 register，同时保留完整的六项静态 catalog。
+description: 按 accessible scope 与 operation path 筛选 host、global、constant、shared、local 和 register，同时保留完整的六项静态 catalog 与 lifecycle/release facts。
 pairId: vis06
 counterpart: /en/visuals/memory-hierarchy-lifetime/
 factCheckDate: '2026-08-27'
@@ -93,22 +93,22 @@ VIS06 是与 [M01](/memory/address-spaces/) 相关的可视化讲解（Visual Ex
 
 Catalog 恰好包含六项：
 
-| 记录 | Owner 与 acquisition | Accessible scope | Lifetime 与 end |
+| 记录 | Operation path / owner 与 acquisition | Accessible scope | Lifetime 与 end |
 | --- | --- | --- | --- |
-| Host | Host application 通过语言或选定 Runtime host-memory API 取得 | Host；device 访问需要另行声明机制 | Allocation/object lifetime；匹配的 host release 或 process end |
-| Global | 通过 CUDA allocation path 持有 device allocation | 持有合法 pointer 的 grid thread；host 通过 API 管理或复制 | 跨 launch，直到 release、reset 或 context/application end |
-| Constant | 由 module/context 持有、通过 symbol API 初始化 | Grid thread 只读；host API 可以定位 symbol | Module/context lifetime，直到 unload、reset 或 context end |
-| Shared | 每个 block 的 static declaration 或 launch-sized storage | Owning block 中的 thread | Owning block 在 kernel execution 期间；block 完成时结束 |
-| Local | Compiler-managed per-thread private storage | Owning thread | Owning thread/kernel execution；没有 host `cudaFree` |
-| Register | Compiler-assigned per-thread storage | Owning thread | Owning thread/kernel execution；由 compiler 管理结束 |
+| Host | `host-language`：allocator 或 object declaration | Host；device 访问需要另行声明机制 | Allocation/object lifetime；匹配的 host release 或 process end |
+| Global | `runtime-api`：Host 通过 CUDA Runtime allocation API 取得 device allocation | 持有合法 pointer 的 grid thread；host 通过 API 管理或复制 | 跨 launch，直到 release、reset 或 context/application end |
+| Constant | `symbol-api`：Module/context 持有 symbol，host 通过 symbol API 初始化 | Grid thread 只读；host API 可以定位 symbol | Module/context lifetime，直到 unload、reset 或 context end |
+| Shared | `kernel-declaration`：每个 block 的 static 或 dynamic shared declaration | Owning block 中的 thread | Owning block 在 kernel execution 期间；block 完成时结束 |
+| Local | `compiler-placement`：Compiler-managed per-thread private storage | Owning thread | Owning thread/kernel execution；没有 host `cudaFree` |
+| Register | `compiler-placement`：Compiler-assigned per-thread storage | Owning thread | Owning thread/kernel execution；由 compiler 管理结束 |
 
 组件内更完整的静态 table 为每项保留 release 与 physical/address-space caveat。
 
 ## 筛选
 
-Scope filter 提供 host、grid、block、thread。Operation/lifecycle filter 区分显式 allocation/release、module/context end、owning-block end 与 owning-thread end。两者默认都是“全部”；reset 会恢复确定性的六项状态。
+Scope filter 提供 host、grid、block、thread。Operation path filter 使用有界 taxonomy：`host-language` 对应 host，`runtime-api` 对应 global，`symbol-api` 对应 constant，`kernel-declaration` 对应 shared，`compiler-placement` 对应 local 与 register。两者都提供 `all` 并默认选中；reset 会恢复确定性的六项状态。
 
-两个 filter 取交集：选择 thread scope 与 owning-thread end 会显示 local 和 register；选择 host scope 与 owning-thread end 会显示明确的 empty state。纯模型对未知 filter ID fail closed。筛选永远不会从永久静态 catalog 删除记录。
+两个 filter 取交集：选择 thread scope 与 `compiler-placement` 会显示 local 和 register；选择 host scope 与 `runtime-api` 会显示明确的 empty state。纯模型对未知 filter ID fail closed。Lifetime 与 release/end 仍是每条记录和 table 的事实字段，但不再充当筛选轴。筛选永远不会从永久静态 catalog 删除记录。
 
 ## Address-space 与 physical 边界
 

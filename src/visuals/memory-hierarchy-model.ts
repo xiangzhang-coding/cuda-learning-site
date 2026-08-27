@@ -2,12 +2,18 @@
 
 export type MemoryHierarchyRecordId = 'host' | 'global' | 'constant' | 'shared' | 'local' | 'register';
 export type MemoryScopeFilter = 'all' | 'host' | 'grid' | 'block' | 'thread';
-export type MemoryLifecycleFilter = 'all' | 'explicit-release' | 'context-end' | 'block-end' | 'thread-end';
+export type MemoryOperationFilter =
+  | 'all'
+  | 'host-language'
+  | 'runtime-api'
+  | 'symbol-api'
+  | 'kernel-declaration'
+  | 'compiler-placement';
 
 export type MemoryHierarchyRecord = Readonly<{
   id: MemoryHierarchyRecordId;
   scope: Exclude<MemoryScopeFilter, 'all'>;
-  lifecycleKind: Exclude<MemoryLifecycleFilter, 'all'>;
+  operationPath: Exclude<MemoryOperationFilter, 'all'>;
   physicalLayer: 'host-system' | 'device-memory' | 'streaming-multiprocessor';
   ownerAcquisition: string;
   accessibleScope: string;
@@ -18,6 +24,7 @@ export type MemoryHierarchyRecord = Readonly<{
 
 export const MEMORY_HIERARCHY_MODEL_CONTRACT = {
   catalog: 'host-global-constant-shared-local-register',
+  filterAxes: 'scope-and-operation-path',
   cachesAreAddressSpaces: false,
   executesCuda: false,
   placementProbe: 'none',
@@ -26,32 +33,33 @@ export const MEMORY_HIERARCHY_MODEL_CONTRACT = {
 } as const;
 
 export const MEMORY_SCOPE_FILTERS = ['all', 'host', 'grid', 'block', 'thread'] as const;
-export const MEMORY_LIFECYCLE_FILTERS = [
+export const MEMORY_OPERATION_FILTERS = [
   'all',
-  'explicit-release',
-  'context-end',
-  'block-end',
-  'thread-end',
+  'host-language',
+  'runtime-api',
+  'symbol-api',
+  'kernel-declaration',
+  'compiler-placement',
 ] as const;
 
 export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'host',
     scope: 'host',
-    lifecycleKind: 'explicit-release',
+    operationPath: 'host-language',
     physicalLayer: 'host-system',
-    ownerAcquisition: 'The host application acquires a bounded host allocation through a language or Runtime host-memory API.',
+    ownerAcquisition: 'The host application acquires a bounded host allocation or object through the host language.',
     accessibleScope: 'Host code; device access requires a separately declared mapped or managed mechanism.',
     lifetime: 'The allocation or host object lifetime, independent of any single kernel launch.',
-    releaseEnd: 'The matching host deallocation or unregister operation, or process termination.',
+    releaseEnd: 'The matching host-language deallocation or object destruction, or process termination.',
     physicalAddressSpaceCaveat: 'Host memory is not one of the kernel device address spaces; mapping does not erase host ownership.',
   },
   {
     id: 'global',
     scope: 'grid',
-    lifecycleKind: 'explicit-release',
+    operationPath: 'runtime-api',
     physicalLayer: 'device-memory',
-    ownerAcquisition: 'The host or device acquires device allocation storage, commonly through a CUDA allocation API.',
+    ownerAcquisition: 'The host acquires device allocation storage through a CUDA Runtime allocation API.',
     accessibleScope: 'Threads with a valid pointer across grids; host code manages or copies it through CUDA APIs.',
     lifetime: 'Persists across kernel launches until the owning allocation is released or the CUDA context ends.',
     releaseEnd: 'The matching release operation such as cudaFree, device reset, or context/application termination.',
@@ -60,7 +68,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'constant',
     scope: 'grid',
-    lifecycleKind: 'context-end',
+    operationPath: 'symbol-api',
     physicalLayer: 'device-memory',
     ownerAcquisition: 'A module/context owns a __constant__ symbol; host code initializes it through symbol APIs.',
     accessibleScope: 'Read-only to kernel threads in a grid; host-side Runtime APIs can address the symbol.',
@@ -71,7 +79,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'shared',
     scope: 'block',
-    lifecycleKind: 'block-end',
+    operationPath: 'kernel-declaration',
     physicalLayer: 'streaming-multiprocessor',
     ownerAcquisition: 'Each thread block receives static declarations and/or dynamic launch-sized shared storage.',
     accessibleScope: 'Threads of the owning block, subject to the program\'s synchronization and ordering.',
@@ -82,7 +90,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'local',
     scope: 'thread',
-    lifecycleKind: 'thread-end',
+    operationPath: 'compiler-placement',
     physicalLayer: 'device-memory',
     ownerAcquisition: 'The compiler gives each thread private local storage for selected automatic objects and spills.',
     accessibleScope: 'Only the owning thread through its private logical addresses.',
@@ -93,7 +101,7 @@ export const MEMORY_HIERARCHY_RECORDS = [
   {
     id: 'register',
     scope: 'thread',
-    lifecycleKind: 'thread-end',
+    operationPath: 'compiler-placement',
     physicalLayer: 'streaming-multiprocessor',
     ownerAcquisition: 'The compiler assigns per-thread values to registers when resources and code generation permit.',
     accessibleScope: 'Only the owning thread; registers are not a block-shared address space.',
@@ -105,13 +113,13 @@ export const MEMORY_HIERARCHY_RECORDS = [
 
 export type MemoryHierarchyFilter = Readonly<{
   scope: MemoryScopeFilter;
-  lifecycle: MemoryLifecycleFilter;
+  operation: MemoryOperationFilter;
 }>;
 
 export type MemoryHierarchyFilterResult =
   | Readonly<{
       valid: false;
-      issues: readonly ('scope-invalid' | 'lifecycle-invalid')[];
+      issues: readonly ('scope-invalid' | 'operation-invalid')[];
       filter: null;
       records: readonly [];
       contract: typeof MEMORY_HIERARCHY_MODEL_CONTRACT;
@@ -125,22 +133,22 @@ export type MemoryHierarchyFilterResult =
     }>;
 
 export function createDefaultMemoryHierarchyFilter(): MemoryHierarchyFilter {
-  return { scope: 'all', lifecycle: 'all' };
+  return { scope: 'all', operation: 'all' };
 }
 
 export function isMemoryScopeFilter(value: string): value is MemoryScopeFilter {
   return MEMORY_SCOPE_FILTERS.some((filter) => filter === value);
 }
 
-export function isMemoryLifecycleFilter(value: string): value is MemoryLifecycleFilter {
-  return MEMORY_LIFECYCLE_FILTERS.some((filter) => filter === value);
+export function isMemoryOperationFilter(value: string): value is MemoryOperationFilter {
+  return MEMORY_OPERATION_FILTERS.some((filter) => filter === value);
 }
 
 export function filterMemoryHierarchy(filter: MemoryHierarchyFilter): MemoryHierarchyFilterResult {
-  const issues: ('scope-invalid' | 'lifecycle-invalid')[] = [];
+  const issues: ('scope-invalid' | 'operation-invalid')[] = [];
   if (!isMemoryScopeFilter(filter.scope)) issues.push('scope-invalid');
-  if (!isMemoryLifecycleFilter(filter.lifecycle)) issues.push('lifecycle-invalid');
-  if (issues.length > 0 || !isMemoryScopeFilter(filter.scope) || !isMemoryLifecycleFilter(filter.lifecycle)) {
+  if (!isMemoryOperationFilter(filter.operation)) issues.push('operation-invalid');
+  if (issues.length > 0 || !isMemoryScopeFilter(filter.scope) || !isMemoryOperationFilter(filter.operation)) {
     return {
       valid: false,
       issues,
@@ -156,7 +164,7 @@ export function filterMemoryHierarchy(filter: MemoryHierarchyFilter): MemoryHier
     filter,
     records: MEMORY_HIERARCHY_RECORDS.filter((record) =>
       (filter.scope === 'all' || record.scope === filter.scope)
-      && (filter.lifecycle === 'all' || record.lifecycleKind === filter.lifecycle)),
+      && (filter.operation === 'all' || record.operationPath === filter.operation)),
     contract: MEMORY_HIERARCHY_MODEL_CONTRACT,
   };
 }

@@ -1,6 +1,6 @@
 ---
 title: 'VIS06: Memory Hierarchy, Ownership, and Lifetime'
-description: Filter host, global, constant, shared, local, and register records by accessible scope and lifecycle while retaining a complete static six-record catalog.
+description: Filter host, global, constant, shared, local, and register records by accessible scope and operation path while retaining the complete static catalog and lifecycle/release facts.
 pairId: vis06
 counterpart: /visuals/memory-hierarchy-lifetime/
 factCheckDate: '2026-08-27'
@@ -93,22 +93,22 @@ VIS06 is the Visual Explainer related to [M01](/en/memory/address-spaces/). It r
 
 The catalog contains exactly six records:
 
-| Record | Owner and acquisition | Accessible scope | Lifetime and end |
+| Record | Operation path / owner and acquisition | Accessible scope | Lifetime and end |
 | --- | --- | --- | --- |
-| Host | Host application through a language or selected Runtime host-memory API | Host; device access needs a separately declared mechanism | Allocation/object lifetime; matching host release or process end |
-| Global | Device allocation owned through a CUDA allocation path | Grid threads with a valid pointer; host manages or copies through APIs | Across launches until release, reset, or context/application end |
-| Constant | Module/context symbol initialized through symbol APIs | Read-only to grid threads; host APIs can locate the symbol | Module/context lifetime until unload, reset, or context end |
-| Shared | Static declaration or launch-sized storage per block | Threads in the owning block | Owning block during kernel execution; ends with block completion |
-| Local | Compiler-managed private storage per thread | Owning thread | Owning thread/kernel execution; no host `cudaFree` |
-| Register | Compiler-assigned per-thread storage | Owning thread | Owning thread/kernel execution; compiler-managed end |
+| Host | `host-language`: allocator or object declaration | Host; device access needs a separately declared mechanism | Allocation/object lifetime; matching host release or process end |
+| Global | `runtime-api`: host acquisition through a CUDA Runtime allocation API | Grid threads with a valid pointer; host manages or copies through APIs | Across launches until release, reset, or context/application end |
+| Constant | `symbol-api`: module/context symbol initialized through symbol APIs | Read-only to grid threads; host APIs can locate the symbol | Module/context lifetime until unload, reset, or context end |
+| Shared | `kernel-declaration`: static or dynamic shared declaration per block | Threads in the owning block | Owning block during kernel execution; ends with block completion |
+| Local | `compiler-placement`: compiler-managed private storage per thread | Owning thread | Owning thread/kernel execution; no host `cudaFree` |
+| Register | `compiler-placement`: compiler-assigned per-thread storage | Owning thread | Owning thread/kernel execution; compiler-managed end |
 
 The longer static table inside the component retains the release and physical/address-space caveat for every record.
 
 ## Filters
 
-The scope filter offers host, grid, block, and thread. The operation/lifecycle filter separates explicit allocation/release, module/context end, owning-block end, and owning-thread end. Both default to “all.” Reset restores that deterministic six-record state.
+The scope filter offers host, grid, block, and thread. The bounded operation-path taxonomy maps `host-language` to host, `runtime-api` to global, `symbol-api` to constant, `kernel-declaration` to shared, and `compiler-placement` to local and register. Both filters include and default to `all`. Reset restores that deterministic six-record state.
 
-Filters intersect: selecting thread scope and owning-thread end shows local and register; selecting host scope and owning-thread end shows an explicit empty state. Invalid filter identifiers fail closed in the pure model. Filtering never removes records from the permanent static catalog.
+Filters intersect: selecting thread scope and `compiler-placement` shows local and register; selecting host scope and `runtime-api` shows an explicit empty state. Invalid filter identifiers fail closed in the pure model. Lifecycle and release/end remain factual fields in every record and table, but they are no longer filter axes. Filtering never removes records from the permanent static catalog.
 
 ## Address-space and physical boundaries
 

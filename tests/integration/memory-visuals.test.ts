@@ -113,13 +113,20 @@ describe('VIS04-VIS06 memory Visual Explainers', () => {
         'activeLanes',
       ]);
       expect(visual?.querySelector('[data-memory-pattern]')).not.toBeNull();
+      const tableWrap = visual?.querySelector('.memory-table-wrap');
+      expect(tableWrap?.getAttribute('tabindex')).toBe('0');
+      expect(tableWrap?.getAttribute('aria-label')).toBe(
+        route.startsWith('/en/')
+          ? 'Scrollable lane, address, and segment mapping table'
+          : '可横向滚动的 lane、地址与 segment 映射表',
+      );
       expect(visual?.querySelectorAll('[data-memory-lanes] tr')).toHaveLength(32);
       expect(visual?.querySelectorAll('[data-memory-segments] li')).toHaveLength(4);
       expect([...visual!.querySelectorAll('[data-static-case]')].map((card) => card.getAttribute('data-static-case'))).toEqual([
         'aligned-contiguous',
         'offset-four',
         'stride-two',
-        'crossing-element',
+        'partial-warp',
       ]);
       expect(visual?.querySelector('[data-static-case="offset-four"] dd strong')?.textContent).toBe('5');
       expect(visual?.querySelector('[data-static-case="stride-two"] dd strong')?.textContent).toBe('8');
@@ -133,6 +140,13 @@ describe('VIS04-VIS06 memory Visual Explainers', () => {
 
       expect(visual?.getAttribute('data-classification')).toBe('conflict-free');
       expect(visual?.getAttribute('data-conflict-degree')).toBe('1');
+      const tableWrap = visual?.querySelector('.memory-table-wrap');
+      expect(tableWrap?.getAttribute('tabindex')).toBe('0');
+      expect(tableWrap?.getAttribute('aria-label')).toBe(
+        route.startsWith('/en/')
+          ? 'Scrollable lane, word address, and bank mapping table'
+          : '可横向滚动的 lane、word address 与 bank 映射表',
+      );
       expect([...visual!.querySelectorAll('[data-bank-field]')].map((field) => field.getAttribute('data-bank-field'))).toEqual([
         'bankCount',
         'stride',
@@ -159,8 +173,17 @@ describe('VIS04-VIS06 memory Visual Explainers', () => {
       const visual = document.querySelector('cuda-memory-hierarchy-lifetime');
 
       expect(visual?.getAttribute('data-visible-records')).toBe('6');
+      expect(visual?.getAttribute('data-operation')).toBe('all');
       expect(visual?.querySelector('[data-scope-filter]')).not.toBeNull();
-      expect(visual?.querySelector('[data-lifecycle-filter]')).not.toBeNull();
+      expect(visual?.querySelectorAll('[data-operation-filter]')).toHaveLength(1);
+      expect([...visual!.querySelectorAll('[data-operation-filter] option')].map((option) => option.getAttribute('value'))).toEqual([
+        'all',
+        'host-language',
+        'runtime-api',
+        'symbol-api',
+        'kernel-declaration',
+        'compiler-placement',
+      ]);
       expect([...visual!.querySelectorAll('[data-static-memory-record]')].map((row) => row.getAttribute('data-static-memory-record'))).toEqual(expected);
       expect([...visual!.querySelectorAll('[data-layer-memory]')].map((item) => item.getAttribute('data-layer-memory')).sort()).toEqual([...expected].sort());
       expect(visual?.querySelectorAll('[data-physical-layer]')).toHaveLength(3);

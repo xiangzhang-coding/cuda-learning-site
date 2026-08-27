@@ -107,7 +107,7 @@ const segmentList = (segments: readonly number[]) => segments.map((segment) => `
         </ol>
       </section>
 
-      <div class="memory-table-wrap">
+      <div class="memory-table-wrap" tabindex="0" aria-label={copy.laneTableScrollLabel}>
         <table class="memory-data-table">
           <caption>{copy.laneTable}</caption>
           <thead>
@@ -171,6 +171,7 @@ const segmentList = (segments: readonly number[]) => segments.map((segment) => `
     'stride-invalid': ['stride'],
     'contiguous-stride-mismatch': ['stride'],
     'offset-invalid': ['offset'],
+    'offset-element-misaligned': ['offset'],
     'active-lanes-invalid': ['activeLanes'],
   };
 

@@ -3,7 +3,7 @@
 import '../styles/visual-explainers.css';
 import {
   MEMORY_HIERARCHY_RECORDS,
-  MEMORY_LIFECYCLE_FILTERS,
+  MEMORY_OPERATION_FILTERS,
   MEMORY_SCOPE_FILTERS,
   createDefaultMemoryHierarchyFilter,
   filterMemoryHierarchy,
@@ -28,7 +28,7 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
   data-locale={locale}
   data-valid="true"
   data-scope="all"
-  data-lifecycle="all"
+  data-operation="all"
   data-visible-records="6"
 >
   <div class="visual-shell">
@@ -49,9 +49,9 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
         </select>
       </label>
       <label>
-        <span>{copy.lifecycle}</span>
-        <select data-lifecycle-filter autocomplete="off" aria-label={copy.lifecycle}>
-          {MEMORY_LIFECYCLE_FILTERS.map((lifecycle) => <option value={lifecycle} selected={lifecycle === 'all'}>{copy.lifecycles[lifecycle]}</option>)}
+        <span>{copy.operation}</span>
+        <select data-operation-filter autocomplete="off" aria-label={copy.operation}>
+          {MEMORY_OPERATION_FILTERS.map((operation) => <option value={operation} selected={operation === 'all'}>{copy.operations[operation]}</option>)}
         </select>
       </label>
       <button type="button" data-reset-memory-hierarchy>{copy.reset}</button>
@@ -110,7 +110,7 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
               {MEMORY_HIERARCHY_RECORDS.filter((record) => record.physicalLayer === layer).map((record) => (
                 <li data-layer-memory={record.id}>
                   <strong>{copy.records[record.id].title}</strong>
-                  <span>{copy.scopes[record.scope]} · {copy.lifecycles[record.lifecycleKind]}</span>
+                  <span>{copy.scopes[record.scope]} · {copy.operations[record.operationPath]}</span>
                 </li>
               ))}
             </ul>
@@ -158,7 +158,7 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
   import {
     createDefaultMemoryHierarchyFilter,
     filterMemoryHierarchy,
-    isMemoryLifecycleFilter,
+    isMemoryOperationFilter,
     isMemoryScopeFilter,
   } from '../visuals/memory-hierarchy-model';
   import { MEMORY_HIERARCHY_COPY } from '../visuals/memory-visual-copy';
@@ -169,19 +169,19 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
       const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
       const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
       const scope = this.querySelector<HTMLSelectElement>('[data-scope-filter]');
-      const lifecycle = this.querySelector<HTMLSelectElement>('[data-lifecycle-filter]');
+      const operation = this.querySelector<HTMLSelectElement>('[data-operation-filter]');
       const reset = this.querySelector<HTMLButtonElement>('[data-reset-memory-hierarchy]');
-      if (!controls || !workbench || !scope || !lifecycle || !reset) return;
+      if (!controls || !workbench || !scope || !operation || !reset) return;
 
       this.dataset.ready = 'true';
       controls.hidden = false;
       workbench.hidden = false;
       scope.addEventListener('change', () => this.render());
-      lifecycle.addEventListener('change', () => this.render());
+      operation.addEventListener('change', () => this.render());
       reset.addEventListener('click', () => {
         const defaults = createDefaultMemoryHierarchyFilter();
         scope.value = defaults.scope;
-        lifecycle.value = defaults.lifecycle;
+        operation.value = defaults.operation;
         this.render();
         scope.focus();
       });
@@ -194,12 +194,12 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
 
     private render() {
       const scope = this.querySelector<HTMLSelectElement>('[data-scope-filter]');
-      const lifecycle = this.querySelector<HTMLSelectElement>('[data-lifecycle-filter]');
-      if (!scope || !lifecycle || !isMemoryScopeFilter(scope.value) || !isMemoryLifecycleFilter(lifecycle.value)) {
+      const operation = this.querySelector<HTMLSelectElement>('[data-operation-filter]');
+      if (!scope || !operation || !isMemoryScopeFilter(scope.value) || !isMemoryOperationFilter(operation.value)) {
         this.dataset.valid = 'false';
         return;
       }
-      const result = filterMemoryHierarchy({ scope: scope.value, lifecycle: lifecycle.value });
+      const result = filterMemoryHierarchy({ scope: scope.value, operation: operation.value });
       if (!result.valid) {
         this.dataset.valid = 'false';
         return;
@@ -208,7 +208,7 @@ const physicalLayers = ['host-system', 'device-memory', 'streaming-multiprocesso
       const copy = MEMORY_HIERARCHY_COPY[this.locale()];
       this.dataset.valid = 'true';
       this.dataset.scope = result.filter.scope;
-      this.dataset.lifecycle = result.filter.lifecycle;
+      this.dataset.operation = result.filter.operation;
       this.dataset.visibleRecords = String(result.records.length);
       const status = result.records.length === 0 ? copy.empty : `${result.records.length} ${copy.shown}.`;
       this.setText('[data-hierarchy-count]', status);

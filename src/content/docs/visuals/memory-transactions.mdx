@@ -1,6 +1,6 @@
 ---
 title: 'VIS04：内存请求的 segment 分组'
-description: 把每个 active lane 的请求 byte range 归入自然对齐的 32-byte segment，同时避免把浏览器模型误读为 transaction 或性能测量。
+description: 对一个 global-memory instruction，把每个 active lane 的 naturally aligned 1/2/4/8-byte 请求归入 32-byte segment，同时避免性能推断。
 pairId: vis04
 counterpart: /en/visuals/memory-transactions/
 factCheckDate: '2026-08-27'
@@ -92,9 +92,9 @@ VIS04 是一份可视化讲解（Visual Explainer），用于建立 [M02](/memor
 
 ## 输入合同
 
-模型接受 contiguous 或 strided 模式，`1`、`2`、`4`、`8` byte 元素宽度，整数 element stride，byte offset，以及 `1` 到 `32` 个 active lane。它建模一个 warp 的一次 global-memory instruction；active lane 从 lane zero 开始连续取值，全部地址相对于按 32 byte 对齐的 fixture base `B = 0`。Contiguous 模式把 stride 固定为一个元素；strided 模式使用输入的正 stride。
+模型接受 contiguous 或 strided 模式，`1`、`2`、`4`、`8` byte 元素宽度，整数 element stride，byte offset，以及 `1` 到 `32` 个 active lane。它只建模一个 warp 的一次 global-memory instruction；active lane 从 lane zero 开始连续取值，全部地址相对于按 32 byte 对齐的 fixture base `B = 0`。Offset 必须按所选元素宽度自然对齐，即 `O % E = 0`。Contiguous 模式把 stride 固定为一个元素；strided 模式使用输入的正 stride，因此每个 lane 的元素地址也保持自然对齐。
 
-浏览器上限保证生成的 table 有界：stride 最多 `64` 个元素，offset 最多 `4096` byte。这些是 interface limit，不是 CUDA device limit。格式错误、fractional、带符号、指数形式或越界的值不会产生部分分组结果。
+浏览器上限保证生成的 table 有界：stride 最多 `64` 个元素，offset 最多 `4096` byte。这些是 interface limit，不是 CUDA device limit。格式错误、fractional、带符号、指数形式、越界或不满足 `O % E = 0` 的值都会 fail closed，不产生部分分组结果。相对于 32-byte segment 的偏移仍然合法，例如 4-byte 元素可以使用 offset `4`。
 
 ## Segment 模型
 
@@ -105,19 +105,19 @@ start(L) = O + L * S * E
 end(L)   = start(L) + E - 1
 ```
 
-每个请求 byte 属于从 `floor(address / 32) * 32` 开始的自然对齐 segment。如果一个元素跨过边界，该 lane 会同时出现在两个 segment group 中。因此 lane table 保留 byte range 与全部 segment start，不会只把元素分给第一个 segment。
+每个请求 byte 属于从 `floor(address / 32) * 32` 开始的自然对齐 segment。因为允许的元素宽度都整除 `32`，且每个元素地址按其宽度自然对齐，所以选定 instruction 中的单个元素不会跨越 32-byte segment boundary。Lane table 仍逐项保留请求 byte range 与对应 segment start。
 
 Fixture 明确采用 compute capability 6.0+ 的 CUDA 规则。学习站的基础 GPU 能力层级从 compute capability 7.5 开始，因此该 fixture 位于本站声明的稳定课程范围内。
 
 ## Byte accounting
 
-对齐默认值（`32` lanes、`4` bytes、stride `1`、offset `0`）请求 byte `0` 到 `127`，对应 segment start `0`、`32`、`64`、`96`。Offset `4` 让最后一个请求延伸到 byte `131`，因此出现五个 segment group。Stride `2` 每隔一个 4-byte word 取值，共占用八个 segment group。
+对齐默认值（`32` lanes、`4` bytes、stride `1`、offset `0`）请求 byte `0` 到 `127`，对应 segment start `0`、`32`、`64`、`96`。Offset `4` 仍满足 4-byte natural alignment，但让最后一个请求延伸到 byte `131`，因此出现五个 segment group。Stride `2` 每隔一个 4-byte word 取值，共占用八个 segment group。只有 lane `0..4` active 的 aligned 4-byte contiguous case 请求 byte `0..19`，只触及一个 segment。
 
 “请求 byte”是各 lane 元素宽度之和。“Segment 覆盖 byte”是 segment group 数乘以 `32`，两者之差只表示地址覆盖账目。它不是 cache traffic、已观察 hardware transaction count、bandwidth、efficiency 或 speedup。
 
 ## 静态回退
 
-Workbench 后的四份 ledger 由同一纯 TypeScript 模型生成。禁用 JavaScript 和打印时，必需的 default、offset、stride 与跨边界案例仍完整保留。控件与交互 table 只有在增强成功后才会显示。
+Workbench 后的四份 ledger 由同一纯 TypeScript 模型生成。禁用 JavaScript 和打印时，default、合法的 segment-relative offset、stride 与 5-lane partial-warp 案例仍完整保留。控件与交互 table 只有在增强成功后才会显示。
 
 ## 证据边界
 

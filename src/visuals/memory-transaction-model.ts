@@ -13,6 +13,7 @@ export const MEMORY_TRANSACTION_MODEL_CONTRACT = {
   siteCapabilityScope: 'compute-capability-7.5-or-newer',
   instructionScope: 'one-global-memory-instruction-from-one-warp',
   baseAddressBytes: 0,
+  elementAlignment: 'offset-multiple-of-element-size',
   groupingUnit: 'naturally-aligned-32-byte-segment',
   observationScope: 'address-arithmetic-only',
   executesCuda: false,
@@ -36,6 +37,7 @@ export type MemoryTransactionIssue =
   | 'stride-invalid'
   | 'contiguous-stride-mismatch'
   | 'offset-invalid'
+  | 'offset-element-misaligned'
   | 'active-lanes-invalid';
 
 export type MemoryLaneRequest = Readonly<{
@@ -96,8 +98,8 @@ export const MEMORY_TRANSACTION_STATIC_CASES = [
     input: { pattern: 'strided', elementSize: '4', stride: '2', offset: '0', activeLanes: '32' },
   },
   {
-    id: 'crossing-element',
-    input: { pattern: 'contiguous', elementSize: '8', stride: '1', offset: '28', activeLanes: '2' },
+    id: 'partial-warp',
+    input: { pattern: 'contiguous', elementSize: '4', stride: '1', offset: '0', activeLanes: '5' },
   },
 ] as const satisfies readonly { id: string; input: MemoryTransactionInput }[];
 
@@ -145,6 +147,14 @@ export function groupMemoryByteRequests(input: MemoryTransactionInput): MemoryTr
   }
   const offset = parseBoundedMemoryInteger(input.offset, 0, MEMORY_TRANSACTION_LIMITS.maxOffsetBytes);
   if (offset === null) issues.push('offset-invalid');
+  if (
+    offset !== null
+    && elementSize !== null
+    && MEMORY_TRANSACTION_LIMITS.elementSizes.includes(elementSize as 1 | 2 | 4 | 8)
+    && offset % elementSize !== 0
+  ) {
+    issues.push('offset-element-misaligned');
+  }
   const activeLanes = parseBoundedMemoryInteger(input.activeLanes, 1, MEMORY_TRANSACTION_LIMITS.maxActiveLanes);
   if (activeLanes === null) issues.push('active-lanes-invalid');
 

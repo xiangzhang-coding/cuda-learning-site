@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { expect, test } from '@playwright/test';
 
-test('VIS04 groups bounded lane ranges, crossing elements, invalid input, and reset deterministically', async ({ page }) => {
+test('VIS04 groups naturally aligned lane ranges, rejects element-misaligned offsets, and resets deterministically', async ({ page }) => {
   await page.goto('/en/visuals/memory-transactions/');
   const visual = page.locator('cuda-memory-transactions');
   await expect(visual).toHaveAttribute('data-ready', 'true');
@@ -21,9 +21,17 @@ test('VIS04 groups bounded lane ranges, crossing elements, invalid input, and re
   await visual.getByRole('button', { name: 'Reset address grouping' }).click();
   await visual.locator('[data-memory-field="elementSize"]').selectOption('8');
   await visual.locator('[data-memory-field="offset"]').fill('28');
+  await expect(visual).toHaveAttribute('data-valid', 'false');
+  await expect(visual.locator('[data-interactive-workbench]')).toBeHidden();
+  await expect(visual.locator('[data-memory-field="offset"]')).toHaveAttribute('aria-invalid', 'true');
+  await expect(visual.locator('[data-memory-validation]')).toContainText('multiple of the selected element width');
+
   await visual.locator('[data-memory-field="activeLanes"]').fill('2');
+  await visual.locator('[data-memory-field="offset"]').fill('24');
+  await expect(visual).toHaveAttribute('data-valid', 'true');
   await expect(visual).toHaveAttribute('data-segment-groups', '2');
-  await expect(visual.locator('[data-memory-lanes] tr[data-lane="0"]')).toContainText('[0–31], [32–63]');
+  await expect(visual.locator('[data-memory-lanes] tr[data-lane="0"] td').nth(1)).toHaveText('[0–31]');
+  await expect(visual.locator('[data-memory-lanes] tr[data-lane="1"] td').nth(1)).toHaveText('[32–63]');
 
   await visual.locator('[data-memory-field="activeLanes"]').fill('33');
   await expect(visual).toHaveAttribute('data-valid', 'false');
@@ -76,11 +84,11 @@ test('VIS05 maps required stride and padding cases and keeps broadcast separate'
   await expect(visual.locator('[data-bank-field="bankCount"]')).toBeFocused();
 });
 
-test('VIS06 intersects scope and lifecycle filters and restores the six-record catalog', async ({ page }) => {
+test('VIS06 intersects scope and operation filters and restores the six-record catalog', async ({ page }) => {
   await page.goto('/en/visuals/memory-hierarchy-lifetime/');
   const visual = page.locator('cuda-memory-hierarchy-lifetime');
   const scope = visual.locator('[data-scope-filter]');
-  const lifecycle = visual.locator('[data-lifecycle-filter]');
+  const operation = visual.locator('[data-operation-filter]');
   await expect(visual).toHaveAttribute('data-ready', 'true');
   await expect(visual).toHaveAttribute('data-visible-records', '6');
 
@@ -90,7 +98,7 @@ test('VIS06 intersects scope and lifecycle filters and restores the six-record c
   await expect(visual.locator('[data-hierarchy-records]')).toContainText('Local memory');
   await expect(visual.locator('[data-hierarchy-records]')).toContainText('Register storage');
 
-  await lifecycle.selectOption('explicit-release');
+  await operation.selectOption('runtime-api');
   await expect(visual).toHaveAttribute('data-visible-records', '0');
   await expect(visual.locator('[data-hierarchy-empty]')).toBeVisible();
   await expect(visual.locator('[data-hierarchy-table-wrap]')).toBeHidden();
@@ -104,6 +112,10 @@ test('VIS06 intersects scope and lifecycle filters and restores the six-record c
   await scope.selectOption('grid');
   await expect(visual.locator('[data-hierarchy-records] tr')).toHaveCount(2);
   await expect(visual.locator('[data-hierarchy-records]')).toContainText('Global memory');
+  await expect(visual.locator('[data-hierarchy-records]')).toContainText('Constant memory');
+
+  await operation.selectOption('symbol-api');
+  await expect(visual.locator('[data-hierarchy-records] tr')).toHaveCount(1);
   await expect(visual.locator('[data-hierarchy-records]')).toContainText('Constant memory');
 });
 
