@@ -16,7 +16,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex06-shared-memory-tile-bank-padding');
-const sourceCommit = 'd85a86640b6ec0452542d6e9cbfd5827bb3c87a6';
+const sourceCommit = '79473ddced9c4d284b88f2eab82d31f3034b97cc';
 
 describe('EX06 standalone project boundary', () => {
   it('declares one templated C++17 CUDA implementation and immutable project coordinates', async () => {

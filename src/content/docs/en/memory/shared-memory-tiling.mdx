@@ -193,7 +193,7 @@ output_valid = output_index is inside the logical output
 
 EX06 is the canonical Runnable Example shared by M03 and M04. M03 uses only the `tiled-kernels` range: its complete fixed 32x32 tile demonstrates one synchronous portable C++17 cooperative load, block barrier, and column read. It has neither an edge tile nor a next overwrite, so it does not replace the neutral-load and B2 proof obligations established above for a general loop. M04 reviews the layout declarations separately.
 
-[View the complete EX06 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6/examples/ex06-shared-memory-tile-bank-padding), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d85a86640b6ec0452542d6e9cbfd5827bb3c87a6.zip). The standalone project is the only canonical implementation; this page imports one declared range.
+[View the complete EX06 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/79473ddced9c4d284b88f2eab82d31f3034b97cc/examples/ex06-shared-memory-tile-bank-padding), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/79473ddced9c4d284b88f2eab82d31f3034b97cc.zip). The standalone project is the only canonical implementation; this page imports one declared range.
 
 <CanonicalCode exampleId="EX06" range="tiled-kernels" />
 
