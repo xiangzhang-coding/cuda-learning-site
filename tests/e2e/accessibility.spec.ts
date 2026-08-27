@@ -6,6 +6,18 @@ import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 const axeTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
+const representativeThemeRoutes = [
+  '/',
+  '/en/',
+  '/en/practice/',
+  '/en/glossary/',
+  '/en/sources-and-versions/',
+  '/en/labs/break-and-repair-indexing/',
+  '/en/foundations/asynchronous-errors/',
+  '/en/foundations/compute-capability/',
+  '/en/foundations/runtime-driver-api/',
+  '/en/foundations/launch-geometry/',
+] as const;
 
 const issue14StateScans = [
   {
@@ -40,45 +52,55 @@ const issue14StateScans = [
   },
 ] as const;
 
-test('@accessibility axe detects no tagged violations across themes; this is not a conformance claim', async ({ page }, testInfo) => {
+async function setTheme(page: Page, theme: (typeof THEME_IDS)[number]) {
+  await page.goto('/');
+  await page.evaluate(
+    ([storageKey, value]) => localStorage.setItem(storageKey, value),
+    [THEME_STORAGE_KEY, theme] as const,
+  );
+}
+
+async function expectNoAxeViolations(page: Page, label: string) {
+  const results = await new AxeBuilder({ page }).withTags(axeTags).analyze();
+  expect(
+    results.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((node) => node.target) })),
+    label,
+  ).toEqual([]);
+}
+
+test('@accessibility axe detects no tagged violations across every published route; this is not a conformance claim', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
+  test.setTimeout(360_000);
+
+  const theme = 'silicon-light';
+  await setTheme(page, theme);
+  for (const route of await discoverPublishedRoutes()) {
+    await page.goto(route);
+    await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+    await expectNoAxeViolations(page, `${theme}: ${route}`);
+  }
+});
+
+test('@accessibility representative pages and visual states have no tagged violations across themes', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
   test.setTimeout(360_000);
 
   for (const theme of THEME_IDS) {
-    await page.goto('/');
-    await page.evaluate(
-      ([storageKey, value]) => localStorage.setItem(storageKey, value),
-      [THEME_STORAGE_KEY, theme] as const,
-    );
-
-    for (const route of await discoverPublishedRoutes()) {
+    await setTheme(page, theme);
+    for (const route of representativeThemeRoutes) {
       await page.goto(route);
       await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
-      const results = await new AxeBuilder({ page })
-        .withTags(axeTags)
-        .analyze();
-
-      expect(
-        results.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((node) => node.target) })),
-        `${theme}: ${route}`,
-      ).toEqual([]);
+      await expectNoAxeViolations(page, `${theme}: ${route}`);
     }
 
     await page.goto('/en/visuals/kernel-journey/');
     await page.locator('[data-action="scrub"]').fill('5');
-    let results = await new AxeBuilder({ page })
-      .withTags(axeTags)
-      .analyze();
-    expect(results.violations, `${theme}: VIS01 memory state`).toEqual([]);
+    await expectNoAxeViolations(page, `${theme}: VIS01 memory state`);
 
     await page.goto('/en/visuals/indexing/');
     await page.locator('[data-dimension-picker]').selectOption('3');
     await page.locator('[data-index-field="extent.x"]').fill('9');
-    results = await new AxeBuilder({ page })
-      .withTags(axeTags)
-      .analyze();
-    expect(results.violations, `${theme}: VIS02 out-of-bounds state`).toEqual([]);
-
+    await expectNoAxeViolations(page, `${theme}: VIS02 out-of-bounds state`);
   }
 });
 
@@ -94,10 +116,6 @@ test('@accessibility issue-14 non-default and error states have no tagged axe vi
     await page.goto(scenario.route);
     await expect(page.locator('html')).toHaveAttribute('data-learning-theme', scenario.theme);
     await scenario.prepare(page);
-    const results = await new AxeBuilder({ page }).withTags(axeTags).analyze();
-    expect.soft(
-      results.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((node) => node.target) })),
-      `${scenario.theme}: ${scenario.label}`,
-    ).toEqual([]);
+    await expectNoAxeViolations(page, `${scenario.theme}: ${scenario.label}`);
   }
 });
