@@ -101,6 +101,9 @@ describe('GitHub Actions quality contract', () => {
     expect(manifest.scripts['test:e2e:accessibility']).toBe(
       'playwright test --project=chromium --grep @accessibility --workers=1',
     );
+    expect(manifest.scripts['test:e2e:cross-browser']).toBe(
+      'playwright test --project=firefox --project=webkit --project=mobile-safari --grep-invert "@accessibility|@visual" --workers=1',
+    );
   });
 
   it('provides an owner-dispatched remote release smoke gate without becoming a deploy authority', async () => {
