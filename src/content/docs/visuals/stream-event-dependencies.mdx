@@ -112,7 +112,7 @@ producer operation -> record(event) -> wait(event) -> consumer operation
 
 这条教学 edge 对应两个 Runtime API role。事件记录（event record）`cudaEventRecord` 捕获调用时所属 stream 中的 work；事件等待（event wait）`cudaStreamWaitEvent` 则让 wait 之后加入的 work 延迟到被捕获的 event work 完成。模型把这些 event edge 与 same-stream order edge 分开推导。
 
-有界 event-generation ledger 用确定性顺序 `record-E1`、`wait-E1`、`record-E2`、`wait-E2` 复用同一个 handle。Handle 被 re-record 为 E2 后，第一个 wait 仍绑定 E1；较晚的 wait 绑定 E2。显式 record marker 与 wait edge 展示这些绑定，不执行 CUDA。
+有界 event-generation ledger 是独立于 editable operation graph 的 fixture。它用确定性顺序 `record-E1`、`wait-E1`、`record-E2`、`wait-E2` 复用同一个 handle；其中 `generation-*` operation ID 不会向上方 graph 添加 edge。Handle 被 re-record 为 E2 后，第一个 wait 仍绑定 E1，较晚的 wait 绑定 E2；显式 record marker 与 wait edge 展示这些绑定，不执行 CUDA。
 
 Edit 采用 fail-closed。未知 operation/stream ID、self-dependency、重复 event edge、已经被现有 path 蕴含的 edge，以及会形成 cycle 的 edge 都会被拒绝，原 graph 保持不变。每次 edit attempt 都会停止 playback 并回到 trace 第一帧；因此 rejected input 不会留下部分修改的 graph 或 stale animation。
 

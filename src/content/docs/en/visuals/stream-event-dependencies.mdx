@@ -112,7 +112,7 @@ producer operation -> record(event) -> wait(event) -> consumer operation
 
 The teaching edge reflects two Runtime API roles. `cudaEventRecord` captures the work in its stream at that call, while `cudaStreamWaitEvent` delays work added after the wait until the captured event work completes. The model derives these event edges separately from same-stream order edges.
 
-The bounded event-generation ledger reuses one handle in the deterministic order `record-E1`, `wait-E1`, `record-E2`, `wait-E2`. The first wait remains bound to E1 after the handle is re-recorded as E2; the later wait binds to E2. Explicit record markers and wait edges show those bindings without executing CUDA.
+The bounded event-generation ledger is a separate fixture from the editable operation graph. It reuses one handle in the deterministic order `record-E1`, `wait-E1`, `record-E2`, `wait-E2`; its `generation-*` operation IDs add no edge to the graph above. The first wait remains bound to E1 after the handle is re-recorded as E2, while the later wait binds to E2. Explicit record markers and wait edges show those bindings without executing CUDA.
 
 Edits fail closed. Unknown operation or stream IDs, self-dependencies, duplicate event edges, edges already implied by an existing path, and cycle-producing edges are rejected. The previous graph is preserved. Every edit attempt stops playback and returns the teaching trace to its first frame; rejected input therefore cannot leave a partially changed graph or a stale animation.
 

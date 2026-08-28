@@ -93,7 +93,7 @@ Write lane predicates before masks, distinguish current activity from intended p
 
 ## Exercise 3: Separate source facts from schedule guesses
 
-**Goal:** Classify ten statements about a divergent `if/else` as source guarantee, API guarantee, or unknown implementation detail.
+**Goal:** Classify ten statements about a divergent `if/else` as source guarantee, API guarantee, rejected claim, or unknown implementation detail.
 
 Use an eight-lane teaching subset with predicate `lane < 3`: the true path assigns scalar `result = 1`, the false path assigns `result = 0`, and both paths lead to source statement `C`. Classify these statements:
 

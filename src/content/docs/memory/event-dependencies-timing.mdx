@@ -161,7 +161,7 @@ stream_consumer: wait(event_ready) -> C1
 
 ## Re-record：替换 captured state
 
-每个 event API 调用在提交时都会绑定当时为该 handle 选定的事件快照（event snapshot）。之后的 `cudaEventRecord` 会更新该 handle 供后续调用使用的 snapshot，但不能改写已经进入队列的 wait。
+`cudaEventQuery`、`cudaEventSynchronize` 与 `cudaStreamWaitEvent` 分别作用于调用当时为该 handle 选定的 event state。之后的 `cudaEventRecord` 会改变后续调用观察的 state，却不能重新指向（retarget）已经进入队列的 stream wait。
 
 Handle name 即使复用，ledger 仍应 version state：
 

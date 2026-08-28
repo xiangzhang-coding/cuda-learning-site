@@ -163,7 +163,7 @@ The new edge is `P1 -> C1`; there is no inferred `P2 -> C1`. This precision is w
 
 ## Re-record: replace captured state
 
-Each event API call binds the event snapshot selected for that handle when the call is submitted. A later `cudaEventRecord` updates the handle's snapshot for future calls, but it cannot rewrite a wait that is already queued.
+`cudaEventQuery`, `cudaEventSynchronize`, and `cudaStreamWaitEvent` act on the event state selected when each call is made. A later `cudaEventRecord` changes the state that future calls observe, but it cannot retarget a stream wait that is already queued.
 
 Use a versioned ledger even though the handle name is reused:
 

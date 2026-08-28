@@ -90,6 +90,9 @@ describe('VIS03 and VIS07 synchronization Visual Explainers', () => {
     expect(generationLedger?.querySelectorAll('[data-event-wait-edge]')).toHaveLength(2);
     expect(generationLedger?.querySelector('[data-event-generation-row="E1"]')?.getAttribute('data-bound-generation')).toBe('E1');
     expect(generationLedger?.querySelector('[data-event-generation-row="E2"]')?.getAttribute('data-bound-generation')).toBe('E2');
+    expect(generationLedger?.textContent).toMatch(/generation-producer-P1/);
+    expect(generationLedger?.textContent).toMatch(/generation-consumer-C2/);
+    expect(generationLedger?.textContent).not.toMatch(/\bop-0[1-5]\b/);
     expect(generationLedger?.textContent).toMatch(/earlier wait remains bound to E1|较早的 wait 仍绑定 E1/i);
 
     const timingBracket = visual?.querySelector('[data-event-timing-bracket="timing-bracket-01"]');

@@ -296,7 +296,7 @@ const units: readonly UnitContract[] = [
       'cudaEventSynchronize',
       'cudaEventElapsedTime',
       're-record',
-      'event snapshot',
+      'event state',
       'timing-disabled events',
       'cudaEventDisableTiming',
       'device-time measurement',
@@ -390,19 +390,18 @@ function assertEmptyEvidence(metadataSource: string) {
   expect(metadataSource).not.toMatch(/^canonicalExample:|^exampleIds:|^canonicalRanges:/m);
 }
 
-function assertHeadProjection(
-  metadataSource: string,
-  expected: {
-    pairId: string;
-    structure: readonly string[];
-    resourceKind: string;
-    unitId: string;
-    prerequisites: readonly string[];
-    relatedUnits: readonly string[];
-    sourceCount?: number;
-    sourceVersions?: string;
-  },
-) {
+type HeadExpectation = {
+  pairId: string;
+  structure: readonly string[];
+  resourceKind: string;
+  unitId: string;
+  prerequisites: readonly string[];
+  relatedUnits: readonly string[];
+  sourceCount?: number;
+  sourceVersions?: string;
+};
+
+function expectedHeadValues(expected: HeadExpectation) {
   const values = new Map<string, string>([
     ['cuda:pair-id', expected.pairId],
     ['cuda:fact-check-date', reviewDate],
@@ -419,42 +418,18 @@ function assertHeadProjection(
   ]);
   if (expected.sourceCount !== undefined) values.set('cuda:source-count', String(expected.sourceCount));
   if (expected.sourceVersions !== undefined) values.set('cuda:source-versions', expected.sourceVersions);
+  return values;
+}
 
-  for (const [name, value] of values) {
+function assertHeadProjection(metadataSource: string, expected: HeadExpectation) {
+  for (const [name, value] of expectedHeadValues(expected)) {
     expect(projectedMetadata(metadataSource, name), name).toBe(value);
   }
 }
 
-function assertRenderedHead(
-  document: Document,
-  expected: {
-    pairId: string;
-    structure: readonly string[];
-    resourceKind: string;
-    unitId: string;
-    prerequisites: readonly string[];
-    relatedUnits: readonly string[];
-    sourceCount?: number;
-    sourceVersions?: string;
-  },
-) {
-  expect(metadata(document, 'cuda:pair-id')).toBe(expected.pairId);
-  expect(metadata(document, 'cuda:fact-check-date')).toBe(reviewDate);
-  expect(metadata(document, 'cuda:license')).toBe('CC-BY-4.0');
-  expect(metadata(document, 'cuda:structure')).toBe(expected.structure.join(','));
-  expect(metadata(document, 'cuda:resource-kind')).toBe(expected.resourceKind);
-  expect(metadata(document, 'cuda:unit-id')).toBe(expected.unitId);
-  expect(metadata(document, 'cuda:prerequisites')).toBe(expected.prerequisites.join(',') || 'none');
-  expect(metadata(document, 'cuda:related-units')).toBe(expected.relatedUnits.join(',') || 'none');
-  expect(metadata(document, 'cuda:hardware-gate')).toBe('none');
-  expect(metadata(document, 'cuda:evidence-compilation')).toBe('none');
-  expect(metadata(document, 'cuda:evidence-runtime')).toBe('none');
-  expect(metadata(document, 'cuda:recorded-observations')).toBe('none');
-  if (expected.sourceCount !== undefined) {
-    expect(metadata(document, 'cuda:source-count')).toBe(String(expected.sourceCount));
-  }
-  if (expected.sourceVersions !== undefined) {
-    expect(metadata(document, 'cuda:source-versions')).toBe(expected.sourceVersions);
+function assertRenderedHead(document: Document, expected: HeadExpectation) {
+  for (const [name, value] of expectedHeadValues(expected)) {
+    expect(metadata(document, name), name).toBe(value);
   }
 }
 
@@ -720,18 +695,19 @@ describe('M06-M08 content-review contracts', () => {
     const ownerPhrase = 'most recently captured state at the time of the API call';
     const expectedWording = {
       zh: [
-        '每个 event API 调用在提交时都会绑定当时为该 handle 选定的事件快照（event snapshot）。',
-        '之后的 `cudaEventRecord` 会更新该 handle 供后续调用使用的 snapshot，但不能改写已经进入队列的 wait。',
+        '`cudaEventQuery`、`cudaEventSynchronize` 与 `cudaStreamWaitEvent` 分别作用于调用当时为该 handle 选定的 event state。',
+        '之后的 `cudaEventRecord` 会改变后续调用观察的 state，却不能重新指向（retarget）已经进入队列的 stream wait。',
       ],
       en: [
-        'Each event API call binds the event snapshot selected for that handle when the call is submitted.',
-        "A later `cudaEventRecord` updates the handle's snapshot for future calls, but it cannot rewrite a wait that is already queued.",
+        '`cudaEventQuery`, `cudaEventSynchronize`, and `cudaStreamWaitEvent` act on the event state selected when each call is made.',
+        'A later `cudaEventRecord` changes the state that future calls observe, but it cannot retarget a stream wait that is already queued.',
       ],
     } as const;
 
     for (const localePrefix of ['', 'en/'] as const) {
       const source = await readSource(localePrefix, 'event-dependencies-timing');
       expect(source).not.toContain(ownerPhrase);
+      expect(source).not.toMatch(/Each event API call|每个 event API 调用/);
       for (const sentence of expectedWording[localePrefix === 'en/' ? 'en' : 'zh']) {
         expect(source).toContain(sentence);
       }

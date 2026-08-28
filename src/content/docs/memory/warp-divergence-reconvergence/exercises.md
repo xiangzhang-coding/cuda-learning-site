@@ -93,7 +93,7 @@ head:
 
 ## 练习 3：区分 source fact 与 schedule guess
 
-**目标：** 把关于 divergent `if/else` 的十条 statement 分类为 source guarantee、API guarantee 或 unknown implementation detail。
+**目标：** 把关于 divergent `if/else` 的十条 statement 分类为 source guarantee、API guarantee、rejected claim 或 unknown implementation detail。
 
 使用一个只观察 lanes 0 到 7 的 teaching fixture：predicate 是 `lane < 3`；true path 把 scalar `result` 设为 `1`，false path 把它设为 `0`；两条 path 随后都进入 source statement `C`。逐条分类以下 statements：
 

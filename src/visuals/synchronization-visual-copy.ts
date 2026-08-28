@@ -322,7 +322,7 @@ export const STREAM_EVENT_COPY: Readonly<Record<SynchronizationVisualLocale, Str
     staticIntro: '三条具名 stream、五个 operation、两类 edge 和全部六个 trace frame 永久可见。Event-generation 与 timing-bracket ledger 也始终可见；静态表与互动区来自同一个纯模型。',
     eventGeneration: {
       heading: 'Event generation 与复用 handle ledger',
-      intro: '同一个 event handle 先 record 为 E1 并提交 wait-E1，随后 re-record 为 E2 并提交较晚的 wait-E2。较早的 wait 仍绑定 E1；这是有界纯模型，不执行 CUDA。',
+      intro: '这是独立于上方 editable graph 的有界 fixture：同一个 event handle 先 record 为 E1 并提交 wait-E1，随后 re-record 为 E2 并提交较晚的 wait-E2。Fixture operation ID 不会向上方 graph 添加 edge；较早的 wait 仍绑定 E1，且模型不执行 CUDA。',
       generation: 'Generation',
       handle: '复用 handle',
       recordMarker: 'Record marker',
@@ -433,7 +433,7 @@ export const STREAM_EVENT_COPY: Readonly<Record<SynchronizationVisualLocale, Str
     staticIntro: 'Three named streams, five operations, both edge classes, and all six trace frames remain visible. The event-generation and timing-bracket ledgers also remain visible; the static tables and workbench use the same pure model.',
     eventGeneration: {
       heading: 'Event generation and reused-handle ledger',
-      intro: 'One event handle is recorded as E1 and receives wait-E1, then is re-recorded as E2 before the later wait-E2. The earlier wait remains bound to E1. This is a bounded pure model and executes no CUDA.',
+      intro: 'This bounded fixture is separate from the editable graph above. One event handle is recorded as E1 and receives wait-E1, then is re-recorded as E2 before the later wait-E2. Its fixture operation IDs add no edge to the graph above; the earlier wait remains bound to E1, and the model executes no CUDA.',
       generation: 'Generation',
       handle: 'Reused handle',
       recordMarker: 'Record marker',
