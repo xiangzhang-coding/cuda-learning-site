@@ -1,0 +1,225 @@
+---
+title: 'Q01：CPU 参考实现、容差与不变量'
+description: 在性能测量前，用独立 CPU reference、scale-aware absolute-plus-relative tolerance、离散量精确检查与 independent invariants 构建分层 correctness oracle。
+pairId: q01
+counterpart: /en/correctness/cpu-references-tolerances-invariants/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - correctness-first
+  - cpu-reference
+  - abs-rel-tolerance
+  - scale-aware-policy
+  - exact-discrete
+  - independent-invariants
+  - decision-ledger
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q01
+prerequisites:
+  - F04
+  - O04
+relatedUnits:
+  - Q03
+  - Q05
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Verification'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#verification'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current reference comparison, unit testing, and numerical accuracy guidance'
+    accessDate: '2026-08-28'
+  - title: 'Floating Point and IEEE 754 - Verifying GPU Results'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#verifying-gpu-results'
+    version: 'Floating Point and IEEE 754 v13.3; last updated 2026-06-25'
+    platform: 'Current CPU/GPU comparison and floating-point implementation differences'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide 11.8 - Verification'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#verification'
+    version: 'CUDA C++ Best Practices Guide v11.8.0'
+    platform: 'Toolkit 11.8 reference comparison and numerical accuracy guidance'
+    accessDate: '2026-08-28'
+  - title: 'Floating Point and IEEE 754 11.8 - Verifying GPU Results'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#verifying-gpu-results'
+    version: 'Floating Point and IEEE 754 v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 CPU/GPU comparison guidance'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide 12.9 - Verification'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-best-practices-guide/index.html#verification'
+    version: 'CUDA C++ Best Practices Guide v12.9; Toolkit 12.9 Update 1 archive'
+    platform: 'Toolkit 12.9 reference comparison and numerical accuracy guidance'
+    accessDate: '2026-08-28'
+  - title: 'Floating Point and IEEE 754 12.9 - Verifying GPU Results'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#verifying-gpu-results'
+    version: 'Floating Point and IEEE 754 v12.9; last updated 2025-05-31'
+    platform: 'Toolkit 12.9 CPU/GPU comparison guidance'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,correctness-first,cpu-reference,abs-rel-tolerance,scale-aware-policy,exact-discrete,independent-invariants,decision-ledger,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,O04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q03,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/cpu-references-tolerances-invariants/" lang="en">Read the English counterpart</a>
+
+可信的 CUDA 结果不能只靠一次 comparison 或一个很快的 timing 来成立。应构建分层 oracle：可独立复核的 CPU 参考实现（CPU reference）给出 expected numerical values；绝对容差（absolute tolerance）与相对容差（relative tolerance）组成预先声明的 finite floating-point comparison；discrete outputs 使用 exact checks；独立的不变量（invariant）检验两种 implementation 都必须保持的性质。Correctness first：所有适用 gate 通过后，才能开始 timing 或 optimization。
+
+## 学完本单元，你应该能
+
+- 设计实现同一 contract、却不照抄 GPU indexing/synchronization structure 的 CPU reference。
+- 对 finite floating-point values 使用 absolute-plus-relative tolerance。
+- 根据 scale、precision、operation structure 与 domain requirement 选择容差，而不是根据一次 observed mismatch 调参。
+- 精确检查 index、count、flag、category 与 shape。
+- 加入能够发现 CPU/GPU shared mistake 的 independent invariants。
+
+## 先修关系
+
+先完成 [F04：Host-Device 生命周期与显式数据移动](/foundations/host-device-lifecycle/)和 [O04：面向 CUDA 的 C++17](/start/cpp17-for-cuda/)。F04 提供 host validation 前所需 completion/copy-back boundary；O04 提供表达 reference 与 comparator 所需的 C++ types、containers 和 deterministic host-side logic。
+
+本单元只设计 static correctness contract，不编译 CUDA、不运行 GPU，也不为某个 application 验证具体 threshold。
+
+## Correctness 先于 performance
+
+未验证结果的 performance number 只是在奖励错误程序。顺序应为：
+
+```text
+define the result contract
+-> build and review the oracle
+-> validate representative and adversarial cases
+-> investigate every failure
+-> only then measure or optimize
+```
+
+Optimization 可能改变 reduction order、precision 或 intermediate representation。每次此类改动后都要重跑全部 correctness gates。Speedup 不能抵消 unexplained mismatch。
+
+## CPU reference：通往同一 contract 的第二条路径
+
+CPU reference 是对同一 logical inputs 执行 specified operation 的小型清晰实现，应优先 auditability，而不是 speed。Serial loop 通常有用，因为它避开 GPU launch geometry、shared-memory staging 与 parallel index decomposition。
+
+Independence 很重要。把 kernel 逐行翻译到 host 可能复制同一个 off-by-one error。应从 input/output contract 重新推导 indexing 与 boundary handling，并记录 reference precision、operation order、NaN/infinity policy 及 library functions。Higher precision 可以提供有价值的 comparison target，但不会模拟 lower-precision GPU algorithm 的每一步 rounding，也不会自动成为 mathematical truth。
+
+还要用 hand-computable cases、identities 或第二种 trusted method 验证 reference 本身。CPU result 是 evidence，不会因为被命名为 reference 就自动正确。
+
+## Absolute plus relative tolerance
+
+对 finite candidate value `g` 与 finite reference value `r`，本单元使用 reference-anchored rule：
+
+```text
+error = abs(g - r)
+limit = atol + rtol * abs(r)
+pass  = error <= limit
+```
+
+`atol` 与 `rtol` 都必须非负，并且要在查看 candidate result 前固定。Absolute term 保护接近零的值，此时 relative ratio 不稳定或没有意义；relative term 则让 allowed difference 随 reference magnitude 增长。第一次 failure 至少报告 `g`、`r`、`error` 与 `limit`，使 decision 可复核。
+
+使用公式前先处理 non-finite values。要明确 matching signed infinities 是否有效，以及 NaN 是否属于 expected domain result。普通 ordering comparison 遇到 NaN 会返回 false，不能因此意外让 NaN pass。
+
+## Scale-aware policy，不是 magic constant
+
+不存在通用 epsilon。Machine epsilon 描述 floating-point format 在 1 附近的 spacing，不是 application-wide acceptance threshold。Defensible policy 至少考虑：
+
+- output precision 与 mixed-precision intermediates；
+- operation count 与 reduction shape；
+- cancellation、conditioning 与 expected numerical scale；
+- 适用时的 documented library accuracy bounds；
+- downstream error budget 与 domain consequences。
+
+至少覆盖 zero/near-zero outputs、ordinary-scale outputs、large-magnitude outputs、cancellation-heavy inputs 与 boundary sizes。不同 output fields 可以采用不同 declared policies。不得把 tolerance 调大到 failing implementation 刚好通过；那会让 oracle 变成 bug 的记录。
+
+## Discrete outputs 使用 exact checks
+
+Tolerance 只适用于 contract 允许 numerical approximation 的 quantity。Discrete outputs 通常必须 exact equality：
+
+- array length、tensor shape 与 element count；
+- selected index、class label、boolean flag 与 status code；
+- histogram bucket count 与 integer ownership metadata；
+- sentinel placement 与 permutation membership。
+
+同一 result structure 可以混合 comparators：floating values 使用 declared numerical policy，indices/counts 使用 exact checks。对 `winner_index` 使用 floating tolerance 可能接受错误 winner。
+
+## Independent invariants
+
+Invariant 是从 problem specification 推出的、与 implementation route 无关的 required property，例如 known-sum conservation、output bounds、monotonicity、symmetry、normalization、sortedness、uniqueness 或 permutation preservation。
+
+每条 invariant 都应从 specification 推导，不能从 CPU output 反推。这样它才有 independent failure mode。若 CPU/GPU 都漏掉最后一个 element，两份 array 可能彼此相等，但 conservation check 会失败。反过来，invariant 单独使用又可能过弱：许多错误 array 也有正确 sum。Reference comparison 与 invariants 互补，不能互相替代。
+
+## Correctness decision ledger
+
+执行前写清：
+
+1. Input domain 与 representative edge cases。
+2. CPU reference algorithm、precision 与 independent derivation。
+3. Exact fields 与 approximate fields。
+4. 每个 approximate field 的 `atol`/`rtol` 及理由。
+5. Non-finite-value policy。
+6. Independent invariants 及其推导。
+7. Failure diagnostics，以及所有 gate 通过后才允许 timing 的规则。
+
+这份 ledger 让 future pass/failure 可复现，同时避免假装一个 threshold 适用于所有 CUDA programs。
+
+## 证据边界
+
+本页的 formula、ledgers 与 Exercises 都是 static review artifacts；它们不包含 compiled executable、GPU observation、measured error distribution 或 performance result。Compilation 与 runtime evidence axes 保持为空。未来 Lab 必须在运行前选择 thresholds，记录 Environment Manifest 与 raw results，并把 observation 与本单元分开。
+
+## 离开前检查
+
+1. 为什么 CPU reference 应从 contract 独立推导 indexing，而不是照抄 CUDA kernel？
+2. Combined comparison formula 中 `atol` 与 `rtol` 各自承担什么作用？
+3. 为什么一个 machine epsilon 不能成为 universal acceptance threshold？
+4. 哪些 output kinds 通常应 exact check，而不是使用 tolerance？
+5. Independent invariant 如何发现 CPU/GPU implementations 共同拥有的 defect？
+
+## 继续练习
+
+- 完成 [Q01 练习（Exercise）](/correctness/cpu-references-tolerances-invariants/exercises/)，再查看独立的[参考解答](/correctness/cpu-references-tolerances-invariants/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-021](/practice/#pb-r1-021)设计 layered oracle。
+- 进入 Q03 前保留 correctness gate；进入 Q05 测量 asynchronous work 前仍要先通过它。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3：Verification](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#verification)提供 current owner guidance，包括 representative known-good references、algorithm-specific comparison criteria 与 unit-level verification。
+- [Floating Point and IEEE 754 v13.3：Verifying GPU Results](https://docs.nvidia.com/cuda/floating-point/index.html#verifying-gpu-results)解释 CPU/GPU implementations 为什么会因 operation order、precision、FMA 与 math-library choices 产生合理差异。
+- [CUDA C++ Best Practices Guide 11.8：Verification](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#verification)与 [Floating Point and IEEE 754 11.8：Verifying GPU Results](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#verifying-gpu-results)保留 Toolkit 11.8 guidance。
+- [CUDA C++ Best Practices Guide 12.9：Verification](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-best-practices-guide/index.html#verification)与 [Floating Point and IEEE 754 12.9：Verifying GPU Results](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#verifying-gpu-results)保留 Toolkit 12.9 guidance。
+
+NVIDIA guides 要求 comparator 采用适合 algorithm 的 criteria；它们没有定义本页的 absolute-plus-relative formula，也没有给出 universal threshold。Layered oracle、formula、ledgers、Exercises 与编排均为本站原创。当前 Context7 的 `/websites/nvidia_cuda` retrieval 只用于交叉检查 current owner pages 的检索结果；Context7 不是本页 factual source，也不进入 source coordinates。
+
+六项 NVIDIA owner source 均访问于 **2026-08-28**。
+
+**事实核查日期：2026-08-28。**

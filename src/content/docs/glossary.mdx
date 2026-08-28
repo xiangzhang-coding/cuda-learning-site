@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 86 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 95 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-08-28'
@@ -822,6 +822,87 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [O06](/start/architecture-refresher/)、[M08](/memory/event-dependencies-timing/)和 [VIS07](/visuals/stream-event-dependencies/)。
 - **版本说明：** Runtime API v13.3.1 的 `cudaEventElapsedTime` 不接受 timing-disabled endpoint；可解释记录还需要 Environment Manifest、included-work boundary 与 measurement method，archive 版本必须单独核对。
 
+<span id="term-087" class="resource-target" aria-hidden="true"></span>
+
+### CPU reference · CPU 参考实现
+
+- **定义：** 从问题的 input/output contract 独立实现的 host-side expected-result path，用于在 GPU completion 与 copy-back 后比较 numerical/discrete output；它应避免复用可能携带同一缺陷的 kernel indexing、synchronization 或 launch structure。
+- **避免使用：** 逐行复制到 CPU 的 kernel、自动 ground truth、GPU runtime evidence。
+- **相关资源：** [Q01：CPU reference、容差与不变量](/correctness/cpu-references-tolerances-invariants/)。
+- **版本说明：** Q01 按 current v13.3 与 11.8.0/12.9.1 owner documentation 复核 reference-comparison guidance；host-only result 不授予 GPU runtime evidence。
+
+<span id="term-088" class="resource-target" aria-hidden="true"></span>
+
+### tolerance · 容差
+
+- **定义：** 在查看 candidate result 前声明的 floating-point acceptance bound；Q01 对 finite value 使用 absolute term 与随 reference magnitude 缩放的 relative term，并把 non-finite policy 单独处理。
+- **避免使用：** Universal epsilon、看到 mismatch 后调大的 threshold、integer comparator。
+- **相关资源：** [Q01](/correctness/cpu-references-tolerances-invariants/)。
+- **版本说明：** Threshold 必须按 data scale、precision、operation structure、error budget 与 domain requirement 解释；NVIDIA current/archive guidance 不提供一个适用于所有算法的数值。
+
+<span id="term-089" class="resource-target" aria-hidden="true"></span>
+
+### invariant · 不变量
+
+- **定义：** 由问题规范要求、与实现路径无关的 property，例如 conservation、bounds、normalization、sortedness 或 permutation preservation；它可以发现 CPU 与 GPU 实现共享的缺陷。
+- **避免使用：** 从 candidate output 反推的 target、reference comparison 的替代品、任意 pass flag。
+- **相关资源：** [Q01](/correctness/cpu-references-tolerances-invariants/)。
+- **版本说明：** Invariant 只覆盖它实际检查的 property；必须与 reference comparison、exact checks 和所用 precision policy 分开记录。
+
+<span id="term-090" class="resource-target" aria-hidden="true"></span>
+
+### memcheck · 内存检查工具
+
+- **定义：** Compute Sanitizer 的 runtime detector，用于报告其 documented coverage 内已执行路径上的 supported out-of-bounds/misaligned access、leak 与部分 CUDA API error；full leak checking 有独立 enablement 和 teardown boundary。
+- **避免使用：** Static proof、all-path correctness proof、其他 sanitizer 的总称。
+- **相关资源：** [Q03](/correctness/memcheck-invalid-memory-access/)、[EX16](/examples/sanitizer-defect-suite/)和 [LAB07](/labs/diagnose-four-sanitizer-failures/)。
+- **版本说明：** Command、report 与 limitation 必须按 selected Lane 的 Compute Sanitizer version 复核；clean executed-path report 不是程序正确性证明。
+
+<span id="term-091" class="resource-target" aria-hidden="true"></span>
+
+### racecheck · 数据访问危害检查工具
+
+- **定义：** Compute Sanitizer 中检测 shared memory data access hazard 的 tool，按 documented analysis 报告 WAW、WAR 或 RAW hazard，并要求 reviewer 结合 source protocol 判断严重性与修复。
+- **避免使用：** 任意 global-memory race proof、memcheck replacement、全程序 synchronization proof。
+- **相关资源：** [Q04](/correctness/racecheck-initcheck-synccheck/)、[EX16](/examples/sanitizer-defect-suite/)和 [LAB07](/labs/diagnose-four-sanitizer-failures/)。
+- **版本说明：** Stable baseline 绑定 shared-memory hazard；report levels、analysis details 与 architecture/tool support 按 selected Compute Sanitizer version 复核。
+
+<span id="term-092" class="resource-target" aria-hidden="true"></span>
+
+### initcheck · 未初始化读取检查工具
+
+- **定义：** Compute Sanitizer 中检测未初始化 device global memory read 的 stable-baseline tool；它与 memcheck 的 invalid access、racecheck 的 shared hazard 和 synccheck 的 primitive misuse 分工不同。
+- **避免使用：** 通用 memory sanitizer、race detector、默认覆盖所有 address space。
+- **相关资源：** [Q04](/correctness/racecheck-initcheck-synccheck/)、[EX16](/examples/sanitizer-defect-suite/)和 [LAB07](/labs/diagnose-four-sanitizer-failures/)。
+- **版本说明：** Shared-memory initcheck extension 必须按 current supporting version 显式 gate，不能倒推到 CUDA 11.8；cross-Lane claim 保持 device-global baseline。
+
+<span id="term-093" class="resource-target" aria-hidden="true"></span>
+
+### synccheck · 同步原语检查工具
+
+- **定义：** Compute Sanitizer 中报告 synchronization primitive misuse 的 runtime tool，包括其 documented coverage 内的 divergent block/warp barrier 与 invalid primitive argument 等类别。
+- **避免使用：** Memory-order proof、所有 deadlock 的 detector、source-level join checker。
+- **相关资源：** [Q04](/correctness/racecheck-initcheck-synccheck/)、[EX16](/examples/sanitizer-defect-suite/)和 [LAB07](/labs/diagnose-four-sanitizer-failures/)。
+- **版本说明：** Report class 与 limitation 按 selected Compute Sanitizer version 复核；clean run 只描述对应 binary/input 的 executed path。
+
+<span id="term-094" class="resource-target" aria-hidden="true"></span>
+
+### warm-up · 预热
+
+- **定义：** 在 measured repetitions 之前执行并完成、用于触发 first-use effects 或建立预声明 steady condition、但明确不进入 retained timing samples 的工作。
+- **避免使用：** 被隐藏的首个 sample、固定的 universal iteration count、无需 completion 的 launch。
+- **相关资源：** [Q05](/correctness/timing-asynchronous-gpu-work/)、[LAB04](/labs/observe-coalescing/)和 [LAB05](/labs/remove-shared-memory-bank-conflicts/)。
+- **版本说明：** Lazy loading 与 tool/runtime first-use behavior 随版本和 environment 变化；warm-up work、count、completion boundary 与 exclusion 必须写入每份 measurement plan。
+
+<span id="term-095" class="resource-target" aria-hidden="true"></span>
+
+### measurement statistic · 测量统计量
+
+- **定义：** 在采集前指定、把一组 retained raw samples 映射为 summary 的规则，例如 median，并与同样预声明的 spread 一起报告；它不替代 samples、method 或 Environment Manifest。
+- **避免使用：** 只有一个值的 average、采集后挑选的最好结果、跨方法混合 summary。
+- **相关资源：** [Q05](/correctness/timing-asynchronous-gpu-work/)、[LAB04](/labs/observe-coalescing/)和 [LAB05](/labs/remove-shared-memory-bank-conflicts/)。
+- **版本说明：** Statistic 不由 CUDA API 自动选择；必须绑定 frozen workload、measurement method、sample-retention rule、raw samples 和 observation coordinates。
+
 ## 维护规则
 
-TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27** 的记录。TERM-077 至 TERM-086，以及完整 86 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-28** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27** 的记录。TERM-077 至 TERM-095，以及完整 95 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-28** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。

@@ -72,6 +72,16 @@ export default defineConfig({
           ],
         },
         {
+          label: '正确性与质量',
+          translations: { en: 'Correctness and Quality' },
+          items: [
+            { slug: 'correctness/cpu-references-tolerances-invariants' },
+            { slug: 'correctness/memcheck-invalid-memory-access' },
+            { slug: 'correctness/racecheck-initcheck-synccheck' },
+            { slug: 'correctness/timing-asynchronous-gpu-work' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [
@@ -81,6 +91,7 @@ export default defineConfig({
             { slug: 'examples/error-handling-lifecycle' },
             { slug: 'examples/coalesced-strided-access' },
             { slug: 'examples/shared-memory-tile-bank-padding' },
+            { slug: 'examples/sanitizer-defect-suite' },
           ],
         },
         {
@@ -91,6 +102,9 @@ export default defineConfig({
             { slug: 'labs/record-cuda-environment' },
             { slug: 'labs/vector-addition' },
             { slug: 'labs/break-and-repair-indexing' },
+            { slug: 'labs/observe-coalescing' },
+            { slug: 'labs/remove-shared-memory-bank-conflicts' },
+            { slug: 'labs/diagnose-four-sanitizer-failures' },
           ],
         },
         {

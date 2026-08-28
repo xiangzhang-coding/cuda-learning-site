@@ -21,6 +21,7 @@ const representativeThemeRoutes = [
   '/en/memory/warp-divergence-reconvergence/',
   '/en/memory/stream-ordering/',
   '/en/memory/event-dependencies-timing/',
+  '/en/correctness/timing-asynchronous-gpu-work/',
   '/en/visuals/warp-divergence/',
   '/en/visuals/stream-event-dependencies/',
 ] as const;

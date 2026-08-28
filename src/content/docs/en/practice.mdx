@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: Twenty-five published original cross-unit practice entries with prerequisite links, layered hints, and solutions.
+description: Twenty-nine published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-08-28'
@@ -34,6 +34,10 @@ structure:
   - entry-pb-r1-018
   - entry-pb-r1-019
   - entry-pb-r1-020
+  - entry-pb-r1-021
+  - entry-pb-r1-022
+  - entry-pb-r1-023
+  - entry-pb-r1-024
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -61,6 +65,10 @@ prerequisites:
   - M06
   - M07
   - M08
+  - Q01
+  - Q03
+  - Q04
+  - Q05
 relatedUnits:
   - O02
   - O03
@@ -85,6 +93,10 @@ relatedUnits:
   - M06
   - M07
   - M08
+  - Q01
+  - Q03
+  - Q04
+  - Q05
 hardwareGate: none
 evidence:
   compilation: []
@@ -99,15 +111,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,Q01,Q03,Q04,Q05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,Q01,Q03,Q04,Q05' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -126,13 +138,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the solution. Open hints in order. The solution checks boundaries rather than replacing the work. This page publishes only the twenty-five complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the twenty-nine complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The twenty-five complete prompts, prerequisite links, and solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The twenty-nine complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -1158,6 +1170,174 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Source basis:** The site's original [M08 event-generation and timing contract](/en/memory/event-dependencies-timing/), [M07 partial-order model](/en/memory/stream-ordering/), [VIS07 deterministic trace](/en/visuals/stream-event-dependencies/), [O02 Evidence Status contract](/en/start/evidence-status/), and [SRC-CUDA-021](/en/sources-and-versions/#src-cuda-021), plus NVIDIA Runtime API [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html) and [Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html).
 
+<span id="pb-r1-021" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-021: Design an independent CPU reference, tolerances, and invariants
+
+- **ID and Publication Pair:** PB-R1-021 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness-oracle design and debugging; intermediate.
+- **Direct prerequisite:** [Q01: CPU references, tolerances, and invariants](/en/correctness/cpu-references-tolerances-invariants/).
+- **Hardware gate:** None; design and review a static correctness oracle without running CUDA.
+- **Related Learning Units and resources:** [Q01](/en/correctness/cpu-references-tolerances-invariants/), [F04](/en/foundations/host-device-lifecycle/), and [O04](/en/start/cpp17-for-cuda/).
+- **Last reviewed:** 2026-08-28.
+
+**Prompt:** A GPU histogram emits 16 floating-point probabilities, 16 integer counts, and one `max_bin`. A reviewer copies the kernel's flattening and loop order line for line into the CPU reference, enlarges `epsilon` after seeing one mismatch, checks only the probability sum, and starts timing. Design a layered correctness oracle that can expose an indexing defect shared by the CPU and GPU paths.
+
+**Constraints:**
+
+- Derive the CPU reference independently from the input/output contract; reuse neither a kernel-indexing helper nor launch geometry.
+- Use a predeclared absolute-plus-relative rule for floating-point fields, exact comparison for counts and `max_bin`, and separate NaN, infinity, and tie policies.
+- Add at least two invariants derived from the problem specification rather than candidate output. Timing is forbidden when any gate fails.
+
+**Expected evidence:** An oracle ledger naming the independent reference path, comparator for each field, threshold rationale, exact checks, invariants, first-failure report, and timing gate. It is a design artifact, not a run record.
+
+**Acceptance criteria:**
+
+- The CPU reference re-derives bin ownership and bounds; comparison occurs only after explicit GPU completion and copy-back.
+- Every finite probability uses `abs(g - r) <= atol + rtol * abs(r)`, with `atol` and `rtol` fixed before results and justified by scale, precision, and an error budget or domain requirement.
+- Counts, `max_bin`, and the tie rule are exact. Independent invariants such as `sum(counts) == sample_count`, non-negative counts, and normalization remain separate from reference agreement.
+- Remove the universal epsilon and premature timing. A host-only oracle test grants no GPU runtime evidence.
+
+<details><summary>Hint 1</summary>Write the input/output contract that both paths must satisfy, then rebuild the host path with different loop nesting.</details>
+
+<details><summary>Hint 2</summary>Put “the arrays agree” and “no sample was dropped or duplicated” in separate verdict columns.</details>
+
+**Reviewed solution:** The CPU implementation iterates directly over input samples, computes bins from the specification, and accumulates counts on the host without reading grid, block, or thread formulas. After GPU completion and copy-back, each probability first passes a non-finite policy and then `error <= atol + rtol * abs(reference)`; counts and `max_bin` under the declared tie rule compare exactly. Independent invariants check at least count conservation, non-negativity, probability range or normalization, and consistency between `max_bin` and the maximal count. Agreement with a failed invariant still rejects, while invariants alone cannot replace the reference. There is no valid timing input before every gate passes.
+
+**Valid alternative:** A second independent host library path or property-based fixtures may extend coverage when every comparator, invariant, and generation seed remains explicit.
+
+**Common errors:** Translating the kernel line for line; tuning thresholds after a mismatch; applying tolerance to integers; allowing NaN to pass accidentally; checking only a sum; relabeling a host-only pass as Runtime-Verified.
+
+**Source basis:** The site's original [Q01 layered-oracle contract](/en/correctness/cpu-references-tolerances-invariants/) and [SRC-CUDA-022](/en/sources-and-versions/#src-cuda-022), plus NVIDIA CUDA C++ Best Practices Guide [Verification](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#verification) and [Floating Point and IEEE 754: Verifying GPU Results](https://docs.nvidia.com/cuda/floating-point/index.html#verifying-gpu-results).
+
+**Source date:** 2026-08-28.
+
+<span id="pb-r1-022" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-022: Audit a lane-safe memcheck plan
+
+- **ID and Publication Pair:** PB-R1-022 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Memcheck correctness debugging; intermediate.
+- **Direct prerequisite:** [Q03: Memcheck and invalid memory access](/en/correctness/memcheck-invalid-memory-access/).
+- **Hardware gate:** None; review commands, coverage, and expected report classes without running Compute Sanitizer.
+- **Related Learning Units and resources:** [Q03](/en/correctness/memcheck-invalid-memory-access/), [Q01](/en/correctness/cpu-references-tolerances-invariants/), [F05](/en/foundations/asynchronous-errors/), [EX16](/en/examples/sanitizer-defect-suite/), and [LAB07](/en/labs/diagnose-four-sanitizer-failures/).
+- **Last reviewed:** 2026-08-28.
+
+**Prompt:** A plan says only `compute-sanitizer ./app`, loops over four inputs in one process, checks no application return, launch, or completion error, and defines no full-leak boundary. Its reviewer prewrites, “All three Toolkit Lanes should report zero errors, so the program is correct.” Repair it into a reviewable memcheck plan for the selected Lanes.
+
+**Constraints:**
+
+- Record the selected Toolkit Lane, actual Compute Sanitizer version, binary identity, exact command, input, and Environment Manifest. Do not assume identical defaults across Lanes.
+- Keep access checking, full leak checking, application correctness, and path coverage in separate columns. Memcheck precedes every other sanitizer.
+- Use a fresh process per scenario and invent no report, exit status, clean result, or Evidence Status.
+
+**Expected evidence:** A run matrix containing an access run, a through-teardown leak run, application error and completion checks, a Q01 correctness gate, an executed-path inventory, expected report classes, and blank observation fields.
+
+**Acceptance criteria:**
+
+- The baseline selects memcheck explicitly and retains tool and application stdout, stderr, and exit status; the application still checks API returns, launch errors, and a completion boundary.
+- A full-leak run enables full leak checking explicitly and includes CUDA context teardown in its observation boundary. An ordinary access run cannot supply its leak result.
+- The input matrix exercises declared bounds and alignment branches, each isolated scenario uses a fresh process, and an independent CPU reference, exact check, or invariant runs outside the sanitizer.
+- A clean report describes only the selected tool, version, binary, input, and executed path. The plan grants neither Community-Observed nor Runtime-Verified.
+
+<details><summary>Hint 1</summary>Separate what the tool observes from what the application checks into two tables.</details>
+
+<details><summary>Hint 2</summary>For leak observation, ask whether the process reached context destruction, not merely whether the kernel returned.</details>
+
+**Reviewed solution:** Each Lane first records an Environment Manifest, `compute-sanitizer --version`, the binary hash, and the exact command. Every input starts a fresh process. An explicit memcheck access run retains application launch and completion checks plus the Q01 oracle verdict; another fresh process uses the Lane-supported full-leak option and completes teardown. The matrix names the intended path and expected report class, while observations, raw logs, and criteria remain blank before execution. Racecheck, initcheck, and synccheck are scheduled only after memcheck. Even a future clean memcheck result is limited to its executed paths and documented coverage.
+
+**Valid alternative:** Access and leak runs may live in separate scripts when both preserve the same binary identity and record their own command, process boundary, and criteria.
+
+**Common errors:** Depending on a default tool; treating sanitizer exit status as application correctness; omitting completion errors; judging leaks before context destruction; running every scenario in one process; treating a clean report as a correctness proof.
+
+**Source basis:** The site's original [Q03 memcheck contract](/en/correctness/memcheck-invalid-memory-access/), [EX16 scenario boundary](/en/examples/sanitizer-defect-suite/), and [SRC-CUDA-023](/en/sources-and-versions/#src-cuda-023), plus NVIDIA [Compute Sanitizer memcheck tool](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html#memcheck-tool) and its [11.8 archive](https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html).
+
+**Source date:** 2026-08-28.
+
+<span id="pb-r1-023" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-023: Select the right Sanitizer for four defect classes
+
+- **ID and Publication Pair:** PB-R1-023 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Sanitizer selection and claim debugging; intermediate.
+- **Direct prerequisite:** [Q04: Diagnose with racecheck, initcheck, and synccheck](/en/correctness/racecheck-initcheck-synccheck/).
+- **Hardware gate:** None; classify static defect scenarios without running Compute Sanitizer.
+- **Related Learning Units and resources:** [Q04](/en/correctness/racecheck-initcheck-synccheck/), [Q03](/en/correctness/memcheck-invalid-memory-access/), [EX16](/en/examples/sanitizer-defect-suite/), and [LAB07](/en/labs/diagnose-four-sanitizer-failures/).
+- **Last reviewed:** 2026-08-28.
+
+**Prompt:** Four independent executables contain a global out-of-bounds write, a shared-memory RAW hazard caused by a missing block barrier, an uninitialized device-global read, and a divergent `__syncthreads()`. A reviewer runs racecheck once and claims that “no report proves all four error classes are absent.” Select the right tools, order, and process boundaries, then repair the conclusion.
+
+**Constraints:**
+
+- Begin with memcheck, then select racecheck, initcheck, or synccheck for the matching scenario. One process carries only one defect or corrected case.
+- Use the stable cross-Lane baseline. A current-only initcheck shared-memory option needs an explicit version gate and cannot be projected into 11.8.
+- Every corrected case still needs a Q01 correctness gate. Do not turn a clean tool report, host test, or expected class into proof of GPU correctness.
+
+**Expected evidence:** A four-row tool-selection matrix, a memcheck-first dependency, a plan for eight isolated processes, defect and corrected acceptance for each pair, and version and coverage caveats.
+
+**Acceptance criteria:**
+
+- Memcheck owns the global bounds defect, racecheck the shared-memory data access hazard, initcheck the uninitialized device-global read, and synccheck the synchronization primitive misuse.
+- Each narrower tool runs only against its matching fresh process with separate tool and application logs and statuses. A corrected variant inherits no record from its defect run.
+- The shared-memory initcheck extension is used only after recording an actual supporting version; the stable baseline does not claim shared-memory coverage.
+- Delete “all four classes are absent.” Every clean result covers only its documented detector, binary, input, and executed path, while numerical correctness is accepted separately.
+
+<details><summary>Hint 1</summary>Name the storage or primitive involved in each defect before choosing a detector.</details>
+
+<details><summary>Hint 2</summary>Ask whether “this tool emitted no report” can rule out a class owned by another tool.</details>
+
+**Reviewed solution:** Every case first passes memcheck and application error checks. The global OOB case targets memcheck; the missing shared barrier creates a shared-memory RAW hazard for racecheck; initcheck targets the uninitialized device-global input; synccheck targets the divergent block barrier. Defect and corrected binaries run in separate fresh processes with independent records. If the current initcheck shared-memory extension is used, its tool version and support are recorded first; CUDA 11.8 inherits no such conclusion. Corrected cases also pass a host reference or invariant. A clean report proves nothing about another detector, an unexecuted path, or whole-program correctness.
+
+**Valid alternative:** Four tool-specific runners may each own one defect and corrected pair, but global orchestration must preserve the memcheck-first edge and separate process and log identities.
+
+**Common errors:** Using racecheck for a global OOB; calling initcheck a general race detector; allowing one crash to contaminate later scenarios; projecting a current option into an archive; running only the corrected binary; treating zero reports as proof.
+
+**Source basis:** The site's original [Q04 detector boundaries](/en/correctness/racecheck-initcheck-synccheck/), [four independent EX16 pairs](/en/examples/sanitizer-defect-suite/), [LAB07](/en/labs/diagnose-four-sanitizer-failures/), and [SRC-CUDA-023](/en/sources-and-versions/#src-cuda-023), plus NVIDIA [Compute Sanitizer User Guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html) and [Release Notes](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html).
+
+**Source date:** 2026-08-28.
+
+<span id="pb-r1-024" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-024: Repair a one-shot asynchronous GPU timing claim
+
+- **ID and Publication Pair:** PB-R1-024 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Timing-evidence review; intermediate.
+- **Direct prerequisite:** [Q05: Time asynchronous GPU work honestly](/en/correctness/timing-asynchronous-gpu-work/).
+- **Hardware gate:** None; review a measurement plan, raw samples, and claim boundaries without running a benchmark.
+- **Related Learning Units and resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/), [Q01](/en/correctness/cpu-references-tolerances-invariants/), [M08](/en/memory/event-dependencies-timing/), [O03](/en/start/environment-manifest/), [LAB04](/en/labs/observe-coalescing/), and [LAB05](/en/labs/remove-shared-memory-bank-conflicts/).
+- **Last reviewed:** 2026-08-28.
+
+**Prompt:** A reviewer places a host clock around one asynchronous kernel launch, performs no synchronization, retains the first iteration with lazy loading, checks no output, and publishes a `0.04 ms average` without raw samples, spread, exact command, or Environment Manifest. Repair this one-shot claim into an honest timing plan without supplying a replacement number.
+
+**Constraints:**
+
+- The correctness gate passes first. Warm-up and measured repetitions are separate, with declared work and completion boundaries for both.
+- CUDA-event device time and host wall-clock time are distinct methods. Each explicitly waits for included work to finish, and their samples are never mixed.
+- Declare sample retention, statistic, and spread before collection. Retain every raw repeated sample and a complete Environment Manifest.
+
+**Expected evidence:** A measurement protocol with no prefilled value, containing a correctness verdict, warm-up exclusion, timing bracket, completion and API checks, raw-sample schema, predeclared statistic, manifest fields, and an allowed claim template.
+
+**Acceptance criteria:**
+
+- Delete the `0.04 ms average`. Wrong or unchecked output never enters timing, and a host-only check grants no GPU runtime evidence.
+- Warm-up executes and reaches completion but is excluded from samples. Measured iterations use the same frozen work and establish a completion boundary for every sample.
+- The event method uses timing-enabled start and stop events, record calls, stop completion, and checked `cudaEventElapsedTime`. A host method includes explicit completion within its wall-clock bracket and reports separately.
+- Publish every raw sample, a predeclared median and spread, exact source, build, and command, and a complete Environment Manifest. Limit the conclusion to recorded coordinates.
+
+<details><summary>Hint 1</summary>Mark launch return and GPU completion as two different events inside the original host-clock bracket.</details>
+
+<details><summary>Hint 2</summary>With one retained number, no one can inspect a distribution or tell whether warm-up was mixed in.</details>
+
+**Reviewed solution:** The repaired protocol freezes source, build, input, and launch geometry, then completes the Q01 CPU-reference, tolerance, and invariant gate. It executes a declared warm-up to explicit completion but retains no warm-up sample. For device time, every repetition records timing-enabled events around declared stream work, waits for stop completion, checks every API result, and then stores elapsed time. A separate host-wall-clock experiment includes submission and explicit completion within its bracket and never merges with event values. All repetitions enter a raw table; median and spread are selected before collection; and the O03 GPU, driver, Toolkit and component, compiler, OS, workload, memory, permissions, command, correctness, and observation-date coordinates accompany the record. Every result field remains blank until a real run exists.
+
+**Valid alternative:** Profiler duration is a separate method when profiler version, metric, replay, and options are frozen, the raw report is retained, and its samples stay separate from event and host values. LAB04 and LAB05 define that tool gate.
+
+**Common errors:** Timing an asynchronous enqueue; retaining first-use work as a normal sample; skipping output validation; using a timing-disabled event; publishing only an average; discarding raw values; mixing profiler, event, and wall-clock samples; comparing machines without manifests.
+
+**Source basis:** The site's original [Q05 measurement contract](/en/correctness/timing-asynchronous-gpu-work/), [M08 event contract](/en/memory/event-dependencies-timing/), [LAB04](/en/labs/observe-coalescing/), [LAB05](/en/labs/remove-shared-memory-bank-conflicts/), and [SRC-CUDA-024](/en/sources-and-versions/#src-cuda-024), plus NVIDIA CUDA C++ Best Practices Guide [Timing](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#timing), Runtime API [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html), and the [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html).
+
+**Source date:** 2026-08-28.
+
 ## Review record
 
-The existing seventeen entries retain their **2026-08-26** item-level review records, and PB-R1-013 through PB-R1-016 retain their **2026-08-27** records. PB-R1-017 through PB-R1-020 and the complete twenty-five-entry Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-28**. Every scenario, prompt, derivation, code repair, and solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, timing, or performance result was copied, and no CUDA execution occurred.
+The existing seventeen entries retain their **2026-08-26** item-level review records, and PB-R1-013 through PB-R1-016 retain their **2026-08-27** records. PB-R1-017 through PB-R1-024 and the complete twenty-nine-entry Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-28**. Every scenario, prompt, derivation, code repair, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, timing, or performance result was copied, and no CUDA execution occurred.

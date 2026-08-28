@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 
 import ex05Project from '../../examples/ex05-coalesced-strided-access/project.json' with { type: 'json' };
 import ex06Project from '../../examples/ex06-shared-memory-tile-bank-padding/project.json' with { type: 'json' };
+import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
@@ -20,12 +21,21 @@ const ex04SourceUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
 const ex04DownloadUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${ex04SourceCommit}.zip`;
-const issue15Examples = [
+const projectExamples = [
   { route: '/en/examples/coalesced-strided-access/', project: ex05Project },
   { route: '/en/examples/shared-memory-tile-bank-padding/', project: ex06Project },
+  { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
+] as const;
+const releaseCatalogCounts = [
+  { route: '/en/labs/', count: 6 },
+  { route: '/en/practice/', count: 29 },
+  { route: '/en/visuals/', count: 11 },
+  { route: '/en/glossary/', count: 95 },
+  { route: '/en/sources-and-versions/', count: 39 },
 ] as const;
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
+  test.setTimeout(120_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
@@ -42,6 +52,8 @@ test('serves the exact static release with production canonical metadata and no 
   for (const route of [
     '/',
     '/en/',
+    '/about/',
+    '/en/about/',
     '/start/using-the-learning-site/',
     '/en/start/using-the-learning-site/',
     '/start/reference-environment-candidate/',
@@ -76,8 +88,18 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/memory/stream-ordering/',
     '/memory/event-dependencies-timing/',
     '/en/memory/event-dependencies-timing/',
+    '/correctness/cpu-references-tolerances-invariants/',
+    '/en/correctness/cpu-references-tolerances-invariants/',
+    '/correctness/memcheck-invalid-memory-access/',
+    '/en/correctness/memcheck-invalid-memory-access/',
+    '/correctness/racecheck-initcheck-synccheck/',
+    '/en/correctness/racecheck-initcheck-synccheck/',
+    '/correctness/timing-asynchronous-gpu-work/',
+    '/en/correctness/timing-asynchronous-gpu-work/',
     '/examples/environment-report/',
     '/en/examples/environment-report/',
+    '/examples/vector-addition/',
+    '/en/examples/vector-addition/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
@@ -86,10 +108,22 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/examples/coalesced-strided-access/',
     '/examples/shared-memory-tile-bank-padding/',
     '/en/examples/shared-memory-tile-bank-padding/',
+    '/examples/sanitizer-defect-suite/',
+    '/en/examples/sanitizer-defect-suite/',
+    '/labs/',
+    '/en/labs/',
     '/labs/record-cuda-environment/',
     '/en/labs/record-cuda-environment/',
+    '/labs/vector-addition/',
+    '/en/labs/vector-addition/',
     '/labs/break-and-repair-indexing/',
     '/en/labs/break-and-repair-indexing/',
+    '/labs/observe-coalescing/',
+    '/en/labs/observe-coalescing/',
+    '/labs/remove-shared-memory-bank-conflicts/',
+    '/en/labs/remove-shared-memory-bank-conflicts/',
+    '/labs/diagnose-four-sanitizer-failures/',
+    '/en/labs/diagnose-four-sanitizer-failures/',
     '/visuals/memory-transactions/',
     '/en/visuals/memory-transactions/',
     '/visuals/shared-memory-banks/',
@@ -107,12 +141,49 @@ test('serves the exact static release with production canonical metadata and no 
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${canonicalOrigin}${route}`);
   }
 
+  await page.goto('/en/about/');
+  await expect(page.locator('main')).toContainText(/109 Publication Pairs/);
+  await expect(page.locator('main')).toContainText(/218 source routes/);
+  const navigation = page.getByRole('navigation', { name: 'Main' });
+  expect(
+    await navigation.locator('a[href^="/en/examples/"]').evaluateAll((links) =>
+      [...new Set(links.map((link) => new URL(link.getAttribute('href') ?? '', location.origin).pathname))].sort(),
+    ),
+  ).toEqual([
+    '/en/examples/coalesced-strided-access/',
+    '/en/examples/environment-report/',
+    '/en/examples/error-handling-lifecycle/',
+    '/en/examples/multidimensional-indexing/',
+    '/en/examples/sanitizer-defect-suite/',
+    '/en/examples/shared-memory-tile-bank-padding/',
+    '/en/examples/vector-addition/',
+  ]);
+
+  expect(releaseCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(180);
+  for (const { route, count } of releaseCatalogCounts) {
+    await page.goto(route);
+    await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
+  }
+
+  await page.goto('/en/labs/');
+  const labCards = page.locator('[data-resource-card]');
+  await expect(labCards).toHaveCount(6);
+  expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
+    'LAB01',
+    'LAB02',
+    'LAB03',
+    'LAB04',
+    'LAB05',
+    'LAB07',
+  ]);
+
   if (releaseKind === 'production') expect(releaseOrigin).toBe(canonicalOrigin);
   else expect(releaseOrigin).not.toBe(canonicalOrigin);
   expect(failures).toEqual([]);
 });
 
 test('supports direct locale navigation, keyboard flow, and relevant bilingual search', async ({ page }) => {
+  test.setTimeout(90_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/start/using-the-learning-site/');
   await page.keyboard.press('Tab');
@@ -209,6 +280,38 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/examples/shared-memory-tile-bank-padding/'],
     },
     {
+      query: 'Q01 CPU references tolerances invariants',
+      expectedHrefs: ['/en/correctness/cpu-references-tolerances-invariants/'],
+    },
+    {
+      query: 'Q03 Memcheck and invalid memory access',
+      expectedHrefs: ['/en/correctness/memcheck-invalid-memory-access/'],
+    },
+    {
+      query: 'Q04 Diagnose with racecheck initcheck synccheck',
+      expectedHrefs: ['/en/correctness/racecheck-initcheck-synccheck/'],
+    },
+    {
+      query: 'Q05 Time asynchronous GPU work honestly',
+      expectedHrefs: ['/en/correctness/timing-asynchronous-gpu-work/'],
+    },
+    {
+      query: 'EX16 Compute Sanitizer Defect Suite Runnable Example',
+      expectedHrefs: ['/en/examples/sanitizer-defect-suite/'],
+    },
+    {
+      query: 'LAB04 Observe Coalescing',
+      expectedHrefs: ['/en/labs/observe-coalescing/'],
+    },
+    {
+      query: 'LAB05 Remove Shared-Memory Bank Conflicts',
+      expectedHrefs: ['/en/labs/remove-shared-memory-bank-conflicts/'],
+    },
+    {
+      query: 'LAB07 Diagnose Four Sanitizer Failures',
+      expectedHrefs: ['/en/labs/diagnose-four-sanitizer-failures/'],
+    },
+    {
       query: 'Memory-request Segment Grouping',
       expectedHrefs: ['/en/visuals/memory-transactions/'],
     },
@@ -284,6 +387,7 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
 });
 
 test('keeps mobile pages and no-script teaching fallbacks complete', async ({ browser, page }) => {
+  test.setTimeout(90_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of [
@@ -315,12 +419,28 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/memory/stream-ordering/',
     '/memory/event-dependencies-timing/',
     '/en/memory/event-dependencies-timing/',
+    '/correctness/cpu-references-tolerances-invariants/',
+    '/en/correctness/cpu-references-tolerances-invariants/',
+    '/correctness/memcheck-invalid-memory-access/',
+    '/en/correctness/memcheck-invalid-memory-access/',
+    '/correctness/racecheck-initcheck-synccheck/',
+    '/en/correctness/racecheck-initcheck-synccheck/',
+    '/correctness/timing-asynchronous-gpu-work/',
+    '/en/correctness/timing-asynchronous-gpu-work/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
     '/en/examples/error-handling-lifecycle/',
+    '/examples/sanitizer-defect-suite/',
+    '/en/examples/sanitizer-defect-suite/',
     '/labs/break-and-repair-indexing/',
     '/en/labs/break-and-repair-indexing/',
+    '/labs/observe-coalescing/',
+    '/en/labs/observe-coalescing/',
+    '/labs/remove-shared-memory-bank-conflicts/',
+    '/en/labs/remove-shared-memory-bank-conflicts/',
+    '/labs/diagnose-four-sanitizer-failures/',
+    '/en/labs/diagnose-four-sanitizer-failures/',
   ]) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
@@ -398,6 +518,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
 });
 
 test('serves immutable canonical downloads, preserves evidence boundaries, and returns a real 404', async ({ page, request }) => {
+  test.setTimeout(120_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/examples/vector-addition/');
   await expect(page.locator(`a[href="${downloadUrl}"]`)).toBeVisible();
@@ -433,7 +554,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     ex04Archive.includes(Buffer.from('/examples/ex04-error-handling-lifecycle/src/error_handling_lifecycle.cu')),
   ).toBe(true);
 
-  for (const { route, project } of issue15Examples) {
+  for (const { route, project } of projectExamples) {
     expect(project.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
     expect(project.sourceUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${project.sourceCommit}/${project.root}`,
@@ -464,8 +585,8 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       .toEqual(canonicalRanges);
   }
 
-  for (const issue15DownloadUrl of new Set(issue15Examples.map(({ project }) => project.downloadUrl))) {
-    const response = await request.get(issue15DownloadUrl);
+  for (const projectDownloadUrl of new Set(projectExamples.map(({ project }) => project.downloadUrl))) {
+    const response = await request.get(projectDownloadUrl);
     expect(response.ok()).toBe(true);
     expect(response.headers()['content-type']).toMatch(/zip|octet-stream/);
     expect((await response.body()).subarray(0, 2).toString('ascii')).toBe('PK');

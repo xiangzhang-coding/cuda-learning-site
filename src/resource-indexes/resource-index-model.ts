@@ -193,6 +193,26 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'M08：用事件表达依赖并测量设备时间', en: 'M08: Events as dependencies and device-time measurements' },
     prerequisites: ['M07'],
   },
+  Q01: {
+    href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
+    title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
+    prerequisites: ['F04', 'O04'],
+  },
+  Q03: {
+    href: { 'zh-CN': '/correctness/memcheck-invalid-memory-access/', en: '/en/correctness/memcheck-invalid-memory-access/' },
+    title: { 'zh-CN': 'Q03：用 memcheck 定位非法内存访问', en: 'Q03: Memcheck and invalid memory access' },
+    prerequisites: ['F05', 'Q01'],
+  },
+  Q04: {
+    href: { 'zh-CN': '/correctness/racecheck-initcheck-synccheck/', en: '/en/correctness/racecheck-initcheck-synccheck/' },
+    title: { 'zh-CN': 'Q04：用 racecheck、initcheck 与 synccheck 定位缺陷', en: 'Q04: Diagnose with racecheck, initcheck, and synccheck' },
+    prerequisites: ['M05', 'M06', 'Q03'],
+  },
+  Q05: {
+    href: { 'zh-CN': '/correctness/timing-asynchronous-gpu-work/', en: '/en/correctness/timing-asynchronous-gpu-work/' },
+    title: { 'zh-CN': 'Q05：诚实计时异步 GPU 工作', en: 'Q05: Time asynchronous GPU work honestly' },
+    prerequisites: ['M08', 'Q01'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -223,6 +243,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'EX06：共享内存 tile bank padding 可运行示例', en: 'EX06: Shared-Memory Tile Bank Padding Runnable Example' },
     prerequisites: ['M03', 'M04'],
   },
+  EX16: {
+    href: { 'zh-CN': '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
+    title: { 'zh-CN': 'EX16：Compute Sanitizer 缺陷套件可运行示例', en: 'EX16: Compute Sanitizer Defect Suite Runnable Example' },
+    prerequisites: ['Q03', 'Q04'],
+  },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
     title: { 'zh-CN': 'LAB01：记录并解读 CUDA 环境', en: 'LAB01: Record and Interpret a CUDA Environment' },
@@ -239,6 +264,24 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
     title: { 'zh-CN': 'LAB03：破坏并修复索引', en: 'LAB03: Break and Repair Indexing' },
     prerequisites: ['F03', 'F05'],
+    indexGroup: 'labs',
+  },
+  LAB04: {
+    href: { 'zh-CN': '/labs/observe-coalescing/', en: '/en/labs/observe-coalescing/' },
+    title: { 'zh-CN': 'LAB04：观察合并访问', en: 'LAB04: Observe Coalescing' },
+    prerequisites: ['M02', 'Q05'],
+    indexGroup: 'labs',
+  },
+  LAB05: {
+    href: { 'zh-CN': '/labs/remove-shared-memory-bank-conflicts/', en: '/en/labs/remove-shared-memory-bank-conflicts/' },
+    title: { 'zh-CN': 'LAB05：消除共享内存存储体冲突', en: 'LAB05: Remove Shared-Memory Bank Conflicts' },
+    prerequisites: ['M04', 'Q05'],
+    indexGroup: 'labs',
+  },
+  LAB07: {
+    href: { 'zh-CN': '/labs/diagnose-four-sanitizer-failures/', en: '/en/labs/diagnose-four-sanitizer-failures/' },
+    title: { 'zh-CN': 'LAB07：诊断四类 Sanitizer 故障', en: 'LAB07: Diagnose Four Sanitizer Failures' },
+    prerequisites: ['Q03', 'Q04'],
     indexGroup: 'labs',
   },
   VIS01: {

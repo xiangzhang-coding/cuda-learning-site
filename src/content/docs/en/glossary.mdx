@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: Eighty-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: Ninety-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-08-28'
@@ -822,6 +822,87 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [O06](/en/start/architecture-refresher/), [M08](/en/memory/event-dependencies-timing/), and [VIS07](/en/visuals/stream-event-dependencies/).
 - **Version note:** Runtime API v13.3.1 `cudaEventElapsedTime` does not accept timing-disabled endpoints. An interpretable record also needs an Environment Manifest, included-work boundary, and measurement method; archive versions require separate review.
 
+<span id="term-087" class="resource-target" aria-hidden="true"></span>
+
+### CPU reference · CPU 参考实现
+
+- **Definition:** A host-side expected-result path implemented independently from the problem's input/output contract and used after GPU completion and copy-back to compare numerical or discrete output. It avoids reusing kernel indexing, synchronization, or launch structure that could carry the same defect.
+- **Avoid:** Kernel copied line for line onto the CPU, automatic ground truth, GPU runtime evidence.
+- **Related resource:** [Q01: CPU references, tolerances, and invariants](/en/correctness/cpu-references-tolerances-invariants/).
+- **Version note:** Q01 reviews reference-comparison guidance in current v13.3 and the 11.8.0/12.9.1 owner documentation. A host-only result grants no GPU runtime evidence.
+
+<span id="term-088" class="resource-target" aria-hidden="true"></span>
+
+### tolerance · 容差
+
+- **Definition:** A floating-point acceptance bound declared before candidate results are inspected. Q01 combines an absolute term with a relative term scaled by reference magnitude for finite values and handles non-finite values under a separate policy.
+- **Avoid:** Universal epsilon, threshold enlarged after a mismatch, integer comparator.
+- **Related resource:** [Q01](/en/correctness/cpu-references-tolerances-invariants/).
+- **Version note:** Thresholds require a rationale from data scale, precision, operation structure, an error budget, and domain requirements. NVIDIA current and archive guidance supplies no one value for every algorithm.
+
+<span id="term-089" class="resource-target" aria-hidden="true"></span>
+
+### invariant · 不变量
+
+- **Definition:** A property required by the problem specification independently of implementation path, such as conservation, bounds, normalization, sortedness, or permutation preservation. It can expose a defect shared by CPU and GPU implementations.
+- **Avoid:** Target derived from candidate output, replacement for reference comparison, arbitrary pass flag.
+- **Related resource:** [Q01](/en/correctness/cpu-references-tolerances-invariants/).
+- **Version note:** An invariant covers only the property it actually checks and remains separate from reference comparison, exact checks, and the selected precision policy.
+
+<span id="term-090" class="resource-target" aria-hidden="true"></span>
+
+### memcheck · 内存检查工具
+
+- **Definition:** A Compute Sanitizer runtime detector for supported out-of-bounds or misaligned accesses, leaks, and some CUDA API errors on executed paths within its documented coverage. Full leak checking has a separate enablement and teardown boundary.
+- **Avoid:** Static proof, all-path correctness proof, collective name for every sanitizer.
+- **Related resources:** [Q03](/en/correctness/memcheck-invalid-memory-access/), [EX16](/en/examples/sanitizer-defect-suite/), and [LAB07](/en/labs/diagnose-four-sanitizer-failures/).
+- **Version note:** Commands, reports, and limitations require review for the selected Lane's Compute Sanitizer version. A clean executed-path report is not proof of program correctness.
+
+<span id="term-091" class="resource-target" aria-hidden="true"></span>
+
+### racecheck · 数据访问危害检查工具
+
+- **Definition:** The Compute Sanitizer tool for detecting shared-memory data access hazards, reporting documented WAW, WAR, or RAW classes for a reviewer to interpret against the source protocol and repair.
+- **Avoid:** Proof against arbitrary global-memory races, memcheck replacement, whole-program synchronization proof.
+- **Related resources:** [Q04](/en/correctness/racecheck-initcheck-synccheck/), [EX16](/en/examples/sanitizer-defect-suite/), and [LAB07](/en/labs/diagnose-four-sanitizer-failures/).
+- **Version note:** The stable baseline covers shared-memory hazards. Report levels, analysis details, architecture behavior, and tool support require review for the selected Compute Sanitizer version.
+
+<span id="term-092" class="resource-target" aria-hidden="true"></span>
+
+### initcheck · 未初始化读取检查工具
+
+- **Definition:** The Compute Sanitizer tool whose stable baseline detects uninitialized device-global-memory reads. Its role differs from memcheck invalid accesses, racecheck shared hazards, and synccheck primitive misuse.
+- **Avoid:** General memory sanitizer, race detector, default coverage of every address space.
+- **Related resources:** [Q04](/en/correctness/racecheck-initcheck-synccheck/), [EX16](/en/examples/sanitizer-defect-suite/), and [LAB07](/en/labs/diagnose-four-sanitizer-failures/).
+- **Version note:** The shared-memory initcheck extension needs an explicit gate on a current supporting version and cannot be projected into CUDA 11.8. Cross-Lane claims retain the device-global baseline.
+
+<span id="term-093" class="resource-target" aria-hidden="true"></span>
+
+### synccheck · 同步原语检查工具
+
+- **Definition:** The Compute Sanitizer runtime tool for synchronization primitive misuse, including documented report classes for divergent block or warp barriers and invalid primitive arguments within its coverage.
+- **Avoid:** Memory-order proof, detector for every deadlock, source-level join checker.
+- **Related resources:** [Q04](/en/correctness/racecheck-initcheck-synccheck/), [EX16](/en/examples/sanitizer-defect-suite/), and [LAB07](/en/labs/diagnose-four-sanitizer-failures/).
+- **Version note:** Report classes and limitations require review for the selected Compute Sanitizer version. A clean run describes only the corresponding binary and input's executed path.
+
+<span id="term-094" class="resource-target" aria-hidden="true"></span>
+
+### warm-up · 预热
+
+- **Definition:** Work executed to completion before measured repetitions to trigger first-use effects or establish a predeclared steady condition, while being explicitly excluded from retained timing samples.
+- **Avoid:** Hidden first sample, fixed universal iteration count, launch without a completion boundary.
+- **Related resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/), [LAB04](/en/labs/observe-coalescing/), and [LAB05](/en/labs/remove-shared-memory-bank-conflicts/).
+- **Version note:** Lazy loading and tool or runtime first-use behavior vary by version and environment. Every measurement plan declares warm-up work, count, completion boundary, and exclusion.
+
+<span id="term-095" class="resource-target" aria-hidden="true"></span>
+
+### measurement statistic · 测量统计量
+
+- **Definition:** A rule selected before collection that maps retained raw samples to a summary, such as a median, and is reported with a likewise predeclared spread. It replaces neither samples, method, nor Environment Manifest.
+- **Avoid:** Average of one value, best result selected after collection, summary mixing different methods.
+- **Related resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/), [LAB04](/en/labs/observe-coalescing/), and [LAB05](/en/labs/remove-shared-memory-bank-conflicts/).
+- **Version note:** No CUDA API selects a statistic automatically. It must bind to a frozen workload, measurement method, sample-retention rule, raw samples, and observation coordinates.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, and TERM-066 through TERM-076 retain their **2026-08-27** records. TERM-077 through TERM-086 and the complete 86-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-28**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, and TERM-066 through TERM-076 retain their **2026-08-27** records. TERM-077 through TERM-095 and the complete 95-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-28**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.

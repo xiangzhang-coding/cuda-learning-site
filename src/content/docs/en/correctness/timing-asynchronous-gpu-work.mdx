@@ -1,0 +1,241 @@
+---
+title: 'Q05: Time asynchronous GPU work honestly'
+description: Gate on correctness, exclude warm-up, wait explicitly for completion, distinguish CUDA event time from host wall-clock time, and retain raw samples with a complete Environment Manifest.
+pairId: q05
+counterpart: /correctness/timing-asynchronous-gpu-work/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - correctness-gate
+  - warm-up
+  - completion
+  - cuda-events
+  - host-timers
+  - samples-statistics
+  - environment-manifest
+  - claim-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q05
+prerequisites:
+  - M08
+  - Q01
+relatedUnits:
+  - LAB04
+  - LAB05
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Timing'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#timing'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-05-27'
+    platform: 'Current CPU-timer and CUDA-event timing guidance'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 13.3.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current event creation, record, synchronize, and elapsed-time contracts'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Lazy Loading'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/lazy-loading.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current lazy-loading history, controls, and measurement caveat'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide 11.8 - Timing'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#timing'
+    version: 'CUDA C++ Best Practices Guide v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 CPU/GPU timer guidance'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 12.9.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Archived Toolkit 12.9.1 event timing contracts'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.2 - Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.2.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit Release Notes v12.2; last updated 2023-06-28'
+    platform: 'Archived Linux lazy-loading default change and component-version coordinates'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,correctness-gate,warm-up,completion,cuda-events,host-timers,samples-statistics,environment-manifest,claim-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M08,Q01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'LAB04,LAB05' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.2,12.9.1,13.3,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/timing-asynchronous-gpu-work/" lang="zh-CN">阅读中文对应页</a>
+
+Honest timing defines a warm-up that is excluded from samples, establishes completion through explicit synchronization, brackets device work with timing-enabled events, preserves every raw repeated sample, predeclares a statistic, and includes a complete Environment Manifest. Correctness is a precondition before timing begins. Wrong output has no speedup.
+
+## What you should be able to do
+
+- Execute and record a correctness gate before any timing loop.
+- Separate warm-up from measured repetitions and explain why lazy loading makes first-use timing hazardous.
+- Place an explicit completion boundary around asynchronous GPU work.
+- Use timing-enabled start and stop events with `cudaEventRecord`, `cudaEventSynchronize`, and `cudaEventElapsedTime` correctly.
+- Distinguish device event time from host wall-clock time and publish raw samples, predeclared median and spread, and a complete manifest rather than one isolated average.
+
+## Prerequisites
+
+Complete [M08: Events as Dependencies and Device-Time Measurements](/en/memory/event-dependencies-timing/) and [Q01: CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) first. M08 supplies event capture, stream order, and timing-endpoint contracts. Q01 supplies the independent correctness criteria that must hold before a performance claim.
+
+This unit does not run a benchmark or prescribe one iteration count for every workload. It defines a measurement contract. LAB04 and LAB05 later record real results under that contract.
+
+## Correctness gate before timing
+
+Correctness is not a footnote to a performance report. It is a precondition before measurement. Give baseline and candidate the same logical input, shape, data type, and result specification, then complete these steps before collecting samples:
+
+1. Check every CUDA API result, immediate launch error, and completion error.
+2. Bring the result to a valid host observation boundary.
+3. Apply Q01's CPU reference, absolute or relative tolerance, or invariant.
+4. Save the pass/fail criteria and actual verdict.
+
+When any candidate is wrong, the conclusion is a correctness failure. Do not calculate, display, or imply a speedup because the broken kernel appears faster. After repair, pass the gate again and collect new samples. Timings attached to the wrong result cannot be mixed into the repaired record.
+
+## Run warm-up separately and exclude it
+
+Warm-up runs before sample collection, and every warm-up observation is excluded from measured samples. It exercises at least the same code path, shape, libraries, and stream dependencies as the measured region, then waits for that work to complete before entering the timing loop.
+
+First use can include context or runtime initialization, module or kernel lazy loading, PTX JIT, allocation, library handle or plan creation, autotuning, and cache or clock transients. The current CUDA Programming Guide explicitly warns that lazy loading can move module initialization into the measured window and recommends warming up or preloading the benchmarked kernel.
+
+One warm-up is not a universal purification ritual. It cannot touch an untaken branch, unused library path, or shape first encountered later, and it does not prove fixed cache, temperature, or clocks. Predeclare the warm-up count and exclusion rule. Record `CUDA_MODULE_LOADING` or the queried loading mode, preload actions, and library setup. Lazy loading appeared in CUDA 11.7, the CUDA 12.2 release notes record default enablement on Linux, and the current guide records default enablement on all platforms from CUDA 12.3. The lane and version therefore belong in the manifest.
+
+## Asynchronous submission needs a completion boundary
+
+Kernel launches and many APIs ending in `Async` return control before device work completes. Measuring host submission duration does not automatically measure GPU execution duration. Every protocol states:
+
+```text
+what starts the interval
+-> exactly which submitted work is included
+-> what operation proves completion
+-> what timer is read afterward
+```
+
+For a device-event protocol, the stop event captures the intended stream prefix and `cudaEventSynchronize(stop)` completes the host wait. For a host wall-clock protocol, drain prior work that would contaminate the interval before the start timestamp, then use `cudaDeviceSynchronize`, stream synchronization, or event synchronization with the declared scope before the end timestamp. A narrower boundary is valid only if it covers every measured operation; waiting on one stream does not complete unrelated streams.
+
+## Time a device interval with timing-enabled CUDA events
+
+`start` and `stop` must be timing-enabled events, which means they are not created with `cudaEventDisableTiming`. One symbolic single-stream sample is:
+
+```cpp
+cudaEventCreateWithFlags(&start, cudaEventDefault);
+cudaEventCreateWithFlags(&stop, cudaEventDefault);
+
+cudaEventRecord(start, measured_stream);
+launch_measured_work(measured_stream);
+cudaEventRecord(stop, measured_stream);
+cudaEventSynchronize(stop);
+cudaEventElapsedTime(&elapsed_ms, start, stop);
+```
+
+Check every API result and launch or completion error. Placement of `cudaEventRecord(start, stream)` and `cudaEventRecord(stop, stream)` defines the endpoints. Elapsed time is measured between two device timestamps; it is not host wall-clock time. A region spanning streams needs explicit dependencies that converge into the stop endpoint. One unconnected stream cannot be smuggled into a completed claim.
+
+The Runtime API also warns that other work can occur between asynchronously recorded points in non-NULL streams and enlarge the elapsed interval. A report therefore records the start and stop recording streams, their order, included work, and concurrent-activity policy. Moving an endpoint changes the metric.
+
+## Host wall-clock measures another metric
+
+A host wall-clock timer can measure end-to-end latency, such as host preparation, API submission, declared transfers, and a completion wait. It must stop after suitable synchronization or it commonly measures enqueue latency only. Whether prior work is drained, allocation or copies are included, and the final wait is device-wide or stream-scoped all belong to the metric definition.
+
+Device event time and host wall-clock time are not interchangeable. If both are reported, use separate fields, endpoints, and raw samples, and explain how their included work differs.
+
+## Preserve raw samples and predeclare statistics
+
+Before seeing any time value, declare the sampling unit, repetition count, run order, warm-up exclusion, completion method, and statistic. The site's basic comparison contract requires:
+
+- keeping all raw repeated samples in acquisition order instead of only an aggregate;
+- predeclaring the median as the primary statistic and choosing one spread measure in advance, such as interquartile range or min/max range;
+- using the same input and protocol for baseline and candidate while recording their order or interleaving policy;
+- no silent outlier deletion. If a predeclared mechanical rule flags a sample, retain the raw value, flag reason, and results both with and without it;
+- no post-hoc switch to whichever statistic makes a candidate look faster.
+
+The mean may be supplementary, but it does not replace the predeclared median and spread. Without raw samples, a reader cannot audit transients, drift, or transcription mistakes. Without a real run, no numerical duration, bandwidth, throughput, or speedup may be filled in. Do not fabricate numbers.
+
+## Performance Environment Manifest
+
+A complete Environment Manifest cannot be abbreviated to a GPU name and CUDA version. Record at least the following coordinates and replace every placeholder with an observation. Write unknown when a field is unknown; never guess:
+
+| group | required coordinates |
+| --- | --- |
+| hardware | **GPU identity** (model and UUID), **compute capability** and query method, visible and used **GPU count**, device and host **memory** requirement, relevant topology |
+| software | exact **driver** version, exact **CUDA Toolkit** X.Y.Z, relevant **component versions** (CUDA Runtime, libraries, timer or profiler), **NVCC** version, **host compiler** name and version, **operating system** distribution/release/architecture/kernel |
+| source and build | source repository and commit, build type, C++ dialect, architecture target, optimization/debug flags, link mode, environment variables, unabridged **exact command** for build and run |
+| workload and input | program and variant identity, **workload** shape, data type, batch/dimensions/iterations, input generation and seed or dataset identity, allocation and memory footprint |
+| access conditions | device visibility, container/MIG/MPS state, profiler or counter **permissions**, background and concurrent load |
+| correctness | **correctness method** (CPU reference, tolerance, or invariant), predeclared **correctness criteria**, and verdict for every timed variant |
+| clock-power state | persistence mode, application clocks or dynamic-clock policy, power limit or policy, thermal state before and after, cooldown policy; record observed policy rather than pretending clocks were fixed |
+| timing protocol | timer and exact version, warm-up count and exclusion, start and stop **endpoints** and included work, recording streams, explicit synchronization or completion boundary, repetition count/order, raw-sample artifact |
+| statistics | predeclared median, chosen spread, outlier policy, baseline/candidate pairing, interpretation boundary |
+| custody | **observation date**, observer, raw-log path or hash, and machine or Reference Environment status |
+
+These fields distinguish “same code” from “same experiment.” Compiler flags, lazy-loading mode, clocks or power, input, and endpoints can each change the measurement contract.
+
+## Boundary of a speedup claim
+
+Only when baseline and candidate both pass correctness, use the same workload and input under the declared metric, and retain repeated raw samples under comparable manifests and protocols may a speedup be computed from the predeclared statistics. Report both baseline and candidate statistics and spreads, not only a ratio.
+
+If correctness failed, endpoints differ, samples were silently deleted, or the manifest is incomplete, speedup is unsupported rather than approximately valid. Do not label event time as whole-application latency or host wall-clock time as pure kernel duration.
+
+## Evidence boundary
+
+This page provides symbolic protocols and field contracts only. It creates no event, runs no warm-up, synchronizes no GPU, and collects no sample. There is no numerical result or fabricated number. Compilation, runtime, expected-observation, and recorded-observation arrays remain empty.
+
+## Retrieval check
+
+1. Why must correctness pass before the timing loop, and why can a wrong result have no speedup?
+2. Why is warm-up excluded from samples, and what lazy-loading caveat remains?
+3. Which four event API operations and completion boundary define a valid timing-enabled start/stop sample?
+4. What does CUDA event device time include versus synchronized host wall-clock time?
+5. Why does a reviewable comparison need raw repeated samples, a predeclared median and spread, and a complete Environment Manifest?
+
+## Continue with practice
+
+- Complete the [Q05 Exercises](/en/correctness/timing-asynchronous-gpu-work/exercises/), then inspect the separate [reviewed solutions](/en/correctness/timing-asynchronous-gpu-work/solutions/).
+- Repair an asynchronous one-shot timing claim in [Practice Bank PB-R1-024](/en/practice/#pb-r1-024).
+- Carry the contract into related [LAB04: Observe Coalescing](/en/labs/observe-coalescing/) and [LAB05: Remove Shared-Memory Bank Conflicts](/en/labs/remove-shared-memory-bank-conflicts/) without prefilling results.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3: Timing](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#timing) distinguishes CPU timers from CUDA events and requires completion of asynchronous work.
+- [CUDA Runtime API v13.3.1: Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html) defines timing flags, record, synchronize, and elapsed-time contracts.
+- [CUDA Programming Guide v13.3: Lazy Loading](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/lazy-loading.html) supplies version history, loading-mode controls, and the performance-measurement caveat.
+- [CUDA C++ Best Practices Guide 11.8: Timing](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#timing) preserves the Toolkit 11.8 timer guidance.
+- [CUDA Runtime API 12.9.1: Event Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EVENT.html) preserves the Toolkit 12.9.1 event contract.
+- [CUDA Toolkit 12.2 Release Notes](https://docs.nvidia.com/cuda/archive/12.2.0/cuda-toolkit-release-notes/index.html) record the Linux lazy-loading default change and independent component versions.
+
+Context7 was used only as a retrieval cross-check. The factual authorities are the current and archived NVIDIA owner documentation and release notes above. All six owner sources were accessed on **2026-08-28**. The measurement protocol, statistics discipline, manifest extension, Exercises, and arrangement are original composition for this site; no owner-documentation benchmark result is copied.
+
+**Fact checked: 2026-08-28.**

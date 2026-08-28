@@ -1,0 +1,225 @@
+---
+title: 'Q01: CPU references, tolerances, and invariants'
+description: Build a layered correctness oracle from an independent CPU reference, a scale-aware absolute-plus-relative tolerance, exact discrete checks, and independent invariants before measuring performance.
+pairId: q01
+counterpart: /correctness/cpu-references-tolerances-invariants/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - correctness-first
+  - cpu-reference
+  - abs-rel-tolerance
+  - scale-aware-policy
+  - exact-discrete
+  - independent-invariants
+  - decision-ledger
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q01
+prerequisites:
+  - F04
+  - O04
+relatedUnits:
+  - Q03
+  - Q05
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Verification'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#verification'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current reference comparison, unit testing, and numerical accuracy guidance'
+    accessDate: '2026-08-28'
+  - title: 'Floating Point and IEEE 754 - Verifying GPU Results'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#verifying-gpu-results'
+    version: 'Floating Point and IEEE 754 v13.3; last updated 2026-06-25'
+    platform: 'Current CPU/GPU comparison and floating-point implementation differences'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide 11.8 - Verification'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#verification'
+    version: 'CUDA C++ Best Practices Guide v11.8.0'
+    platform: 'Toolkit 11.8 reference comparison and numerical accuracy guidance'
+    accessDate: '2026-08-28'
+  - title: 'Floating Point and IEEE 754 11.8 - Verifying GPU Results'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#verifying-gpu-results'
+    version: 'Floating Point and IEEE 754 v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 CPU/GPU comparison guidance'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide 12.9 - Verification'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-best-practices-guide/index.html#verification'
+    version: 'CUDA C++ Best Practices Guide v12.9; Toolkit 12.9 Update 1 archive'
+    platform: 'Toolkit 12.9 reference comparison and numerical accuracy guidance'
+    accessDate: '2026-08-28'
+  - title: 'Floating Point and IEEE 754 12.9 - Verifying GPU Results'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#verifying-gpu-results'
+    version: 'Floating Point and IEEE 754 v12.9; last updated 2025-05-31'
+    platform: 'Toolkit 12.9 CPU/GPU comparison guidance'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q01 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,correctness-first,cpu-reference,abs-rel-tolerance,scale-aware-policy,exact-discrete,independent-invariants,decision-ledger,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,O04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q03,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/cpu-references-tolerances-invariants/" lang="zh-CN">阅读中文对应页</a>
+
+A trustworthy CUDA result is not established by one comparison or by a fast timing. Build a layered oracle: an independently reviewable CPU reference supplies expected numerical values, a declared absolute-plus-relative rule compares finite floating-point outputs, exact checks protect discrete outputs, and independent invariants test properties that both implementations must preserve. Correctness comes first; timing and optimization begin only after every applicable gate passes.
+
+## What you should be able to do
+
+- Specify a CPU reference that implements the same contract without copying GPU indexing or synchronization structure.
+- Apply a combined absolute tolerance and relative tolerance to finite floating-point values.
+- Select tolerances from scale, precision, operation structure, and domain requirements rather than from one observed mismatch.
+- Check indices, counts, flags, categories, and shapes exactly.
+- Add independent invariants that can catch a shared mistake in both implementations.
+
+## Prerequisites
+
+Complete [F04: Host-Device Lifecycle and Explicit Data Movement](/en/foundations/host-device-lifecycle/) and [O04: C++17 for CUDA](/en/start/cpp17-for-cuda/) first. F04 supplies the completion and copy-back boundary needed before host validation. O04 supplies the C++ types, containers, and deterministic host-side logic used to express a reference and comparator.
+
+This unit designs static correctness contracts. It does not compile CUDA, run a GPU, or validate a particular threshold for an application.
+
+## Correctness before performance
+
+A performance number for an unvalidated result rewards the wrong program. Use this order:
+
+```text
+define the result contract
+-> build and review the oracle
+-> validate representative and adversarial cases
+-> investigate every failure
+-> only then measure or optimize
+```
+
+An optimization may change reduction order, precision, or intermediate representation. Re-run all correctness gates after each such change. A speedup never compensates for an unexplained mismatch.
+
+## CPU reference: a second route to the contract
+
+A CPU reference is a small, clear implementation of the specified operation on the same logical inputs. It should favor auditability over speed. A serial loop is often useful because it avoids GPU launch geometry, shared-memory staging, and parallel index decomposition.
+
+Independence matters. Translating the kernel line for line onto the host can reproduce the same off-by-one error. Instead, derive indexing and boundary handling again from the input/output contract. Record the reference precision, operation order, NaN and infinity policy, and any library functions used. Higher precision can provide a useful comparison target, but it does not simulate every rounding step of a lower-precision GPU algorithm and is not automatically mathematical truth.
+
+Validate the reference itself with hand-computable cases, identities, or a second trusted method. The CPU result is evidence, not an oracle by declaration.
+
+## Absolute plus relative tolerance
+
+For finite candidate value `g` and finite reference value `r`, this unit uses a reference-anchored rule:
+
+```text
+error = abs(g - r)
+limit = atol + rtol * abs(r)
+pass  = error <= limit
+```
+
+Both `atol` and `rtol` are non-negative and fixed before inspecting the candidate result. The absolute term protects values near zero, where a relative ratio is unstable or meaningless. The relative term lets the permitted difference grow with the reference magnitude. Report `g`, `r`, `error`, and `limit` for the first failure so the decision remains inspectable.
+
+Handle non-finite values before this formula. Decide explicitly whether matching signed infinities are valid and whether any NaN is an expected domain result. Never let a NaN comparison pass accidentally because ordinary ordering comparisons with NaN are false.
+
+## A scale-aware policy, not a magic constant
+
+There is no universal epsilon. Machine epsilon describes spacing near one for a floating-point format; it is not an application-wide acceptance threshold. A defensible policy considers:
+
+- output precision and any mixed-precision intermediates;
+- the operation count and reduction shape;
+- cancellation, conditioning, and expected numerical scale;
+- documented library accuracy bounds when applicable;
+- the downstream error budget and domain consequences.
+
+Test at least zero or near-zero outputs, ordinary-scale outputs, large-magnitude outputs, cancellation-heavy inputs, and boundary sizes. Different output fields may need different declared policies. Do not increase a tolerance until a failing implementation passes. That turns an oracle into a record of the bug.
+
+## Exact checks for discrete outputs
+
+Tolerance is for quantities whose contract permits numerical approximation. Discrete outputs normally require exact equality:
+
+- array length, tensor shape, and element count;
+- selected index, class label, boolean flag, and status code;
+- histogram bucket count and integer ownership metadata;
+- sentinel placement and permutation membership.
+
+A result structure can therefore mix comparators. Its floating values use the declared numerical policy while its indices and counts use exact checks. Applying a floating tolerance to `winner_index` can accept the wrong winner.
+
+## Independent invariants
+
+An invariant is a property required by the problem regardless of the implementation route. Useful examples include conservation of a known sum, output bounds, monotonicity, symmetry, normalization, sortedness, uniqueness, or preservation of a permutation.
+
+Derive each invariant from the specification, not from the CPU output. This gives it an independent failure mode. If CPU and GPU both omit the last element, their arrays might agree while a conservation check fails. Conversely, an invariant alone may be too weak: many wrong arrays can share the correct sum. Reference comparison and invariants complement rather than replace each other.
+
+## Correctness decision ledger
+
+Before execution, write these fields:
+
+1. Input domain and representative edge cases.
+2. CPU reference algorithm, precision, and independent derivation.
+3. Exact fields and approximate fields.
+4. `atol` and `rtol` per approximate field, with rationale.
+5. Non-finite-value policy.
+6. Independent invariants and their derivation.
+7. Failure diagnostics and the rule that every gate must pass before timing.
+
+This ledger makes a later pass or failure reproducible without pretending that one threshold fits every CUDA program.
+
+## Evidence boundary
+
+The formula, ledgers, and Exercises on this page are static review artifacts. They contain no compiled executable, GPU observation, measured error distribution, or performance result. Compilation and runtime evidence axes remain empty. A future Lab must choose thresholds before its run, record its Environment Manifest and raw results, and keep those observations separate from this unit.
+
+## Retrieval check
+
+1. Why should a CPU reference derive indexing independently from the CUDA kernel?
+2. What roles do `atol` and `rtol` play in the combined comparison formula?
+3. Why is one machine epsilon not a universal acceptance threshold?
+4. Which output kinds should normally be checked exactly rather than with a tolerance?
+5. How can an independent invariant catch a defect shared by CPU and GPU implementations?
+
+## Continue with practice
+
+- Complete the [Q01 Exercises](/en/correctness/cpu-references-tolerances-invariants/exercises/), then inspect the separate [reviewed solutions](/en/correctness/cpu-references-tolerances-invariants/solutions/).
+- Design a layered oracle in [Practice Bank PB-R1-021](/en/practice/#pb-r1-021).
+- Carry the correctness gate into Q03 before interpreting sanitizer reports, and into Q05 before timing asynchronous work.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3: Verification](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#verification) supplies the current owner guidance on representative known-good references, algorithm-specific comparison criteria, and unit-level verification.
+- [Floating Point and IEEE 754 v13.3: Verifying GPU Results](https://docs.nvidia.com/cuda/floating-point/index.html#verifying-gpu-results) explains why CPU and GPU implementations can legitimately differ through operation order, precision, FMA, and math-library choices.
+- [CUDA C++ Best Practices Guide 11.8: Verification](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#verification) and [Floating Point and IEEE 754 11.8: Verifying GPU Results](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#verifying-gpu-results) preserve the Toolkit 11.8 guidance.
+- [CUDA C++ Best Practices Guide 12.9: Verification](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-best-practices-guide/index.html#verification) and [Floating Point and IEEE 754 12.9: Verifying GPU Results](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#verifying-gpu-results) preserve the Toolkit 12.9 guidance.
+
+The NVIDIA guides require criteria appropriate to the algorithm; they do not define this page's absolute-plus-relative formula or a universal threshold. The layered oracle, formula, ledgers, Exercises, and arrangement are original composition. A current Context7 retrieval against `/websites/nvidia_cuda` was used only to cross-check discovery of the current owner pages; Context7 is not a factual source or source coordinate here.
+
+All six NVIDIA owner sources were accessed on **2026-08-28**.
+
+**Fact checked: 2026-08-28.**

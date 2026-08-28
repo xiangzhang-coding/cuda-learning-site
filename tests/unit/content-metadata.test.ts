@@ -84,14 +84,14 @@ describe('Visual Explainer metadata', () => {
 });
 
 describe('Learning Unit and Lab metadata', () => {
-  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'M01', 'M05', 'M08', 'M01-EXERCISES', 'M01-SOLUTIONS', 'M08-EXERCISES', 'M08-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
+  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'M01', 'M05', 'M08', 'M01-EXERCISES', 'M01-SOLUTIONS', 'M08-EXERCISES', 'M08-SOLUTIONS', 'Q01', 'Q03', 'Q04', 'Q05', 'Q01-EXERCISES', 'Q01-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
     'accepts the controlled curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
     },
   );
 
-  it.each(['F1', 'F001', 'f01', 'M1', 'M001', 'm01', 'LAB2', 'LAB02-EXERCISES'])(
+  it.each(['F1', 'F001', 'f01', 'M1', 'M001', 'm01', 'Q1', 'Q001', 'q01', 'Q01-exercises', 'LAB2', 'LAB02-EXERCISES'])(
     'rejects the malformed curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(false);

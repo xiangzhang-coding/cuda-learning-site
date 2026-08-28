@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 25 个跨单元原创练习，包含先修链接、分层提示和解答。
+description: 当前已发布的 29 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-08-28'
@@ -34,6 +34,10 @@ structure:
   - entry-pb-r1-018
   - entry-pb-r1-019
   - entry-pb-r1-020
+  - entry-pb-r1-021
+  - entry-pb-r1-022
+  - entry-pb-r1-023
+  - entry-pb-r1-024
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -61,6 +65,10 @@ prerequisites:
   - M06
   - M07
   - M08
+  - Q01
+  - Q03
+  - Q04
+  - Q05
 relatedUnits:
   - O02
   - O03
@@ -85,6 +93,10 @@ relatedUnits:
   - M06
   - M07
   - M08
+  - Q01
+  - Q03
+  - Q04
+  - Q05
 hardwareGate: none
 evidence:
   compilation: []
@@ -99,15 +111,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,Q01,Q03,Q04,Q05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,Q01,Q03,Q04,Q05' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -126,13 +138,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面二十五个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面二十九个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方二十五道完整题目、先修链接和解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方二十九道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -1158,6 +1170,174 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源依据（Source basis）：** 本站原创的 [M08 event-generation/timing contract](/memory/event-dependencies-timing/)、[M07 partial-order model](/memory/stream-ordering/)、[VIS07 deterministic trace](/visuals/stream-event-dependencies/)、[O02 Evidence Status contract](/start/evidence-status/)和 [SRC-CUDA-021](/sources-and-versions/#src-cuda-021)，以及 NVIDIA Runtime API [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)与 [Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)。
 
+<span id="pb-r1-021" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-021：设计独立 CPU reference、容差与不变量
+
+- **ID 与双语发布对：** PB-R1-021；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Correctness oracle 设计与调试；中级。
+- **直接先修条件：** [Q01：CPU reference、容差与不变量](/correctness/cpu-references-tolerances-invariants/)。
+- **硬件门槛（Hardware gate）：** 无；只设计和审查静态 correctness oracle，不运行 CUDA。
+- **相关学习单元与资源：** [Q01](/correctness/cpu-references-tolerances-invariants/)、[F04](/foundations/host-device-lifecycle/)和 [O04](/start/cpp17-for-cuda/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 一个 GPU histogram 同时输出 16 个 floating-point probability、16 个 integer count 和一个 `max_bin`。Reviewer 把 kernel 的 flattening 与 loop 顺序逐行复制到 CPU reference，在看到一次 mismatch 后把 `epsilon` 调大到通过，只检查 probability sum，并开始计时。设计一套能发现 CPU/GPU 共同索引缺陷的 layered correctness oracle。
+
+**约束：**
+
+- CPU reference 必须从 input/output contract 独立推导，不能复用 kernel indexing helper 或 launch geometry。
+- Floating-point field 使用预先声明的 absolute-plus-relative rule；count 和 `max_bin` 精确比较，并单独声明 NaN/infinity 与 tie policy。
+- 至少加入两个从问题规范推导、而不是从 candidate output 推导的不变量；任何 gate 失败时禁止计时。
+
+**预期证据：** 一份 oracle ledger，列出独立 reference path、每种 field 的 comparator、阈值依据、exact checks、不变量、first-failure report 和 timing gate；这是设计产物，不是运行记录。
+
+**验收条件：**
+
+- CPU reference 重新推导 bin ownership 与 bounds，且在显式 GPU completion 和 copy-back 后才比较。
+- 每个 finite probability 使用 `abs(g - r) <= atol + rtol * abs(r)`，`atol`/`rtol` 在查看结果前固定并有 scale/precision/error-budget 理由。
+- Count、`max_bin` 与 tie rule 精确；`sum(counts) == sample_count`、count 非负和 normalization 等独立不变量与 reference agreement 分开判定。
+- 删除 universal epsilon 与 premature timing；host-only oracle 测试不授予 GPU runtime evidence。
+
+<details><summary>提示 1</summary>先写 CPU 与 GPU 都必须满足的 input/output contract，再用不同 loop nesting 重建 host path。</details>
+
+<details><summary>提示 2</summary>把“数组相同”和“样本没有丢失或重复”放在两个独立判定栏。</details>
+
+**参考解答（Reviewed solution）：** CPU 实现直接遍历输入 sample，按规范计算 bin，并在 host 上独立累积 count；它不读取 grid、block 或 thread 公式。完成 GPU 工作并复制结果后，probability 先经过 non-finite policy，再按 `error <= atol + rtol * abs(reference)` 比较；count 和按既定 tie rule 得出的 `max_bin` 逐项精确比较。独立 invariants 至少检查 count 总和、非负、probability range/normalization，以及 `max_bin` 与 count 最大值一致。CPU/GPU 数组一致但 invariant 失败仍拒绝，反之只满足 invariant 也不足以替代 reference。全部 gate 通过前没有合法 timing input。
+
+**有效替代方案：** 可以用第二种独立 host library path 或 property-based fixtures 增加覆盖，但每个 comparator、不变量与生成 seed 都必须显式记录。
+
+**常见错误：** 逐行翻译 kernel；看到 mismatch 后调阈值；对 integer 使用 tolerance；让 NaN 意外通过；只检查 sum；把 host-only pass 写成 Runtime-Verified。
+
+**来源依据（Source basis）：** 本站原创的 [Q01 layered oracle contract](/correctness/cpu-references-tolerances-invariants/)与 [SRC-CUDA-022](/sources-and-versions/#src-cuda-022)，以及 NVIDIA CUDA C++ Best Practices Guide [Verification](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#verification)和 [Floating Point and IEEE 754：Verifying GPU Results](https://docs.nvidia.com/cuda/floating-point/index.html#verifying-gpu-results)。
+
+**来源日期（Source date）：** 2026-08-28。
+
+<span id="pb-r1-022" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-022：审查 lane-safe memcheck 计划
+
+- **ID 与双语发布对：** PB-R1-022；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Memcheck correctness debugging；中级。
+- **直接先修条件：** [Q03：用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)。
+- **硬件门槛（Hardware gate）：** 无；只审查命令、覆盖范围与预期 report class，不运行 Compute Sanitizer。
+- **相关学习单元与资源：** [Q03](/correctness/memcheck-invalid-memory-access/)、[Q01](/correctness/cpu-references-tolerances-invariants/)、[F05](/foundations/asynchronous-errors/)、[EX16](/examples/sanitizer-defect-suite/)和 [LAB07](/labs/diagnose-four-sanitizer-failures/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 一份计划只写 `compute-sanitizer ./app`，让同一进程循环四个输入，不检查 application return、launch 或 completion error，也没有 full leak boundary。Reviewer 预先写下“所有三条 Toolkit Lane 都应零错误，因此程序已正确”。把它修成可跨 selected Lane 复核的 memcheck plan。
+
+**约束：**
+
+- 记录 selected Toolkit Lane、实际 Compute Sanitizer version、binary identity、精确命令、输入与 Environment Manifest；不能假定各 Lane 默认值完全相同。
+- Access checking、full leak checking、application correctness 与 path coverage 分栏，memcheck 必须先于其他 sanitizer。
+- 每个 scenario 使用 fresh process；不虚构 report、exit status、clean result 或 Evidence Status。
+
+**预期证据：** 一张 run matrix，包含 access run、through-teardown leak run、application error/completion checks、Q01 correctness gate、executed-path inventory、预期 report class 与空白 observation fields。
+
+**验收条件：**
+
+- Baseline 明确选择 memcheck 并保存 tool/application stdout、stderr 与 exit status；application 仍检查 API return、launch error 和 completion boundary。
+- Full leak run 显式启用 full leak checking，并让 CUDA context teardown 进入 observation boundary；不能从普通 access run 推断 leak result。
+- 输入矩阵覆盖声明的 bounds/alignment 分支，每个独立 scenario 使用 fresh process，并在 sanitizer 之外运行 CPU reference、exact check 或 invariant。
+- Clean report 只描述 selected tool、version、binary、input 与 executed path；计划本身不授予 Community-Observed 或 Runtime-Verified。
+
+<details><summary>提示 1</summary>把“工具看到什么”和“应用自己检查什么”拆成两张表。</details>
+
+<details><summary>提示 2</summary>Leak observation 要问进程是否真正走到 context destruction，而不只是 kernel 是否返回。</details>
+
+**参考解答（Reviewed solution）：** 每条 Lane 先记录 Environment Manifest、`compute-sanitizer --version`、binary hash 与 exact command。每个输入启动 fresh process，先执行明确的 memcheck access run，同时保留 application launch/completion error 和 Q01 oracle verdict；另一个 fresh process 使用该 Lane 文档支持的 full leak option 并走完 teardown。Run matrix 逐项标明 intended path 与 expected report class，但 observation、raw logs 和 criteria result 在真实运行前留空。Racecheck、initcheck 和 synccheck 只有在 memcheck 阶段完成后才排队。即使某次真实 memcheck clean，也只能约束其 executed paths 和 documented coverage。
+
+**有效替代方案：** 可以把 access 和 leak 两类 run 拆成独立脚本，只要二者都记录同一 binary identity、各自命令、process boundary 和 criteria。
+
+**常见错误：** 依赖默认 tool；把 sanitizer exit status 当 application correctness；漏掉 completion error；在 context destruction 前判断 leak；一进程运行所有 scenarios；把 clean report 当 correctness proof。
+
+**来源依据（Source basis）：** 本站原创的 [Q03 memcheck contract](/correctness/memcheck-invalid-memory-access/)、[EX16 scenario boundary](/examples/sanitizer-defect-suite/)与 [SRC-CUDA-023](/sources-and-versions/#src-cuda-023)，以及 NVIDIA [Compute Sanitizer memcheck tool](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html#memcheck-tool)和 [11.8 archive](https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html)。
+
+**来源日期（Source date）：** 2026-08-28。
+
+<span id="pb-r1-023" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-023：为四类缺陷选择正确的 Sanitizer
+
+- **ID 与双语发布对：** PB-R1-023；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Sanitizer selection 与 claim debugging；中级。
+- **直接先修条件：** [Q04：用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)。
+- **硬件门槛（Hardware gate）：** 无；只分类静态 defect scenarios，不运行 Compute Sanitizer。
+- **相关学习单元与资源：** [Q04](/correctness/racecheck-initcheck-synccheck/)、[Q03](/correctness/memcheck-invalid-memory-access/)、[EX16](/examples/sanitizer-defect-suite/)和 [LAB07](/labs/diagnose-four-sanitizer-failures/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 四个独立 executable 分别包含 global out-of-bounds write、缺失 block barrier 的 shared-memory RAW hazard、uninitialized device-global read 和 divergent `__syncthreads()`。Reviewer 只运行 racecheck 一次，随后声明“无报告证明四类错误都不存在”。选择正确工具、顺序与 process boundary，并修复结论。
+
+**约束：**
+
+- 顺序从 memcheck 开始，再按 scenario 选择 racecheck、initcheck 或 synccheck；一个 process 只承载一个 defect/corrected case。
+- 使用 cross-Lane stable baseline；current-only initcheck shared-memory option 必须显式 version-gate，不能倒推到 11.8。
+- 每个 corrected case 仍需 Q01 correctness gate；不把 clean tool report、host test 或 expected class 改写成 GPU correctness proof。
+
+**预期证据：** 一张四行 tool-selection matrix、memcheck-first dependency、八个隔离 process 的计划、每项 defect/corrected acceptance 和 version/coverage caveat。
+
+**验收条件：**
+
+- Global bounds defect 先由 memcheck；shared-memory data access hazard 由 racecheck；uninitialized device-global read 由 initcheck；synchronization primitive misuse 由 synccheck。
+- 每个 narrower tool 只在 matching fresh process 上运行，保存独立 tool/application logs 与 statuses；corrected variant 不能继承 defect run 的记录。
+- Shared-memory initcheck extension 只在记录 actual supporting version 后单独使用；stable baseline 不声称它覆盖 shared memory。
+- 删除“四类错误都不存在”；每个 clean result 只覆盖 documented detector、binary、input 与 executed path，且 numerical correctness 另行验收。
+
+<details><summary>提示 1</summary>先写 defect 涉及的 storage 或 primitive，再选择 detector name。</details>
+
+<details><summary>提示 2</summary>问“这个工具没有报告”能否推出另一个工具负责的 defect class 不存在。</details>
+
+**参考解答（Reviewed solution）：** 所有 cases 都先经过 memcheck 与 application error checks。Global OOB case 的 targeted detector 是 memcheck；missing shared barrier 形成 shared-memory RAW hazard，由 racecheck 检查；未初始化的 device-global input 由 initcheck 检查；divergent block barrier 由 synccheck 检查。Defect 与 corrected binaries 各在 fresh process 中运行并保留独立 records。Current initcheck 的 shared-memory extension 如果被使用，必须先记录 tool version/support；CUDA 11.8 不继承该结论。Corrected case 还要通过 host reference 或 invariant。任何 clean report 都不是对其他 detector、未执行 path 或总体程序正确性的证明。
+
+**有效替代方案：** 可以按 tool 分成四个 runner，每个 runner 固定一个 defect/corrected pair；但全局 orchestration 仍必须保留 memcheck-first edge 和独立 process/log identity。
+
+**常见错误：** 用 racecheck 检查 global OOB；把 initcheck 称为通用 race detector；让一个 crash 污染后续 scenario；把 current option 投射到 archive；只运行 corrected binary；把 zero report 当 proof。
+
+**来源依据（Source basis）：** 本站原创的 [Q04 detector boundaries](/correctness/racecheck-initcheck-synccheck/)、[EX16 四组独立 pair](/examples/sanitizer-defect-suite/)、[LAB07](/labs/diagnose-four-sanitizer-failures/)与 [SRC-CUDA-023](/sources-and-versions/#src-cuda-023)，以及 NVIDIA [Compute Sanitizer User Guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)和 [Release Notes](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html)。
+
+**来源日期（Source date）：** 2026-08-28。
+
+<span id="pb-r1-024" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-024：修复一次异步 GPU 工作计时声明
+
+- **ID 与双语发布对：** PB-R1-024；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Timing evidence review；中级。
+- **直接先修条件：** [Q05：诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)。
+- **硬件门槛（Hardware gate）：** 无；只审查 measurement plan、raw samples 与 claim boundary，不运行 benchmark。
+- **相关学习单元与资源：** [Q05](/correctness/timing-asynchronous-gpu-work/)、[Q01](/correctness/cpu-references-tolerances-invariants/)、[M08](/memory/event-dependencies-timing/)、[O03](/start/environment-manifest/)、[LAB04](/labs/observe-coalescing/)和 [LAB05](/labs/remove-shared-memory-bank-conflicts/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** Reviewer 用 host clock 包围一次 asynchronous kernel launch，没有同步，保留包含 lazy loading 的首轮，未检查 output，只发布 `0.04 ms average`，没有 raw samples、spread、exact command 或 Environment Manifest。把这条 one-shot claim 修成 honest timing plan；不要提供替代数值。
+
+**约束：**
+
+- Correctness gate 必须先通过；warm-up 与 measured repetitions 分开，二者的工作和 completion boundary 都要声明。
+- CUDA event device time 与 host wall-clock 是不同方法；每种方法必须显式等待 included work 完成，不能混合样本。
+- 采集前声明 sample retention、statistic 与 spread；保留全部 raw repeated samples 和完整 Environment Manifest。
+
+**预期证据：** 一份无预填数值的 measurement protocol，包含 correctness verdict、warm-up exclusion、timing bracket、completion/API checks、raw-sample schema、预声明统计量、manifest fields 和 allowed claim template。
+
+**验收条件：**
+
+- 删除 `0.04 ms average`；wrong 或 unchecked output 不进入 timing，且 host-only check 不授予 GPU runtime evidence。
+- Warm-up 明确执行并等待完成但不进入 samples；measured iteration 使用相同 frozen work，并为每个 sample 建立完成边界。
+- Event method 使用 timing-enabled start/stop、record、stop completion 与 checked `cudaEventElapsedTime`；host method 则把显式 completion 包含在 wall-clock bracket 中，二者分别报告。
+- 发布全部 raw samples、预先声明的 median 与 spread、exact source/build/command 和完整 Environment Manifest；只对 recorded coordinates 作有限结论。
+
+<details><summary>提示 1</summary>先在原 host-clock bracket 中标出 launch return 与 GPU completion 是两个不同事件。</details>
+
+<details><summary>提示 2</summary>如果只剩一个数，就无法审查 sample distribution，也无法确认 warm-up 是否混入。</details>
+
+**参考解答（Reviewed solution）：** 修订后的 protocol 先冻结 source、build、input 与 launch geometry，完成 Q01 CPU reference/tolerance/invariant gate。随后执行声明的 warm-up 并显式等待，但不保留为 sample。Device-time path 为每个 repetition 使用 timing-enabled events 包围 declared stream work，等待 stop 完成，检查所有 API result，再保存 elapsed value；host wall-clock path 若另做实验，则把 submission 和显式 completion 都放在其 bracket 内，不与 event values 合并。全部 repetitions 写入 raw table，采集前指定 median 与 spread，并附 O03 的 GPU、driver、Toolkit/component、compiler、OS、workload、memory、permissions、command、correctness 和 observation-date coordinates。真实记录产生前，所有 result fields 保持空白。
+
+**有效替代方案：** Profiler duration 可以作为另一种独立方法，但必须冻结 profiler version/metric/replay/options，保留 raw report，并与 event/host sample 分开；这正是 LAB04/LAB05 的工具门槛。
+
+**常见错误：** 计时 asynchronous enqueue；把首轮当普通 sample；未验证 output；用 timing-disabled event；只报 average；丢弃 raw values；混合 profiler/event/wall-clock；缺少 manifest 却跨机器比较。
+
+**来源依据（Source basis）：** 本站原创的 [Q05 measurement contract](/correctness/timing-asynchronous-gpu-work/)、[M08 event contract](/memory/event-dependencies-timing/)、[LAB04](/labs/observe-coalescing/)、[LAB05](/labs/remove-shared-memory-bank-conflicts/)与 [SRC-CUDA-024](/sources-and-versions/#src-cuda-024)，以及 NVIDIA CUDA C++ Best Practices Guide [Timing](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#timing)、Runtime API [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)和 [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)。
+
+**来源日期（Source date）：** 2026-08-28。
+
 ## 复核记录
 
-既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-020，以及完整二十五个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-28** 同步复核。所有情景、题目、推导、代码修复和解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。
+既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-024，以及完整二十九个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-28** 同步复核。所有情景、题目、推导、代码修复和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。

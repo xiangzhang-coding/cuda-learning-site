@@ -1,0 +1,369 @@
+---
+title: 'LAB04: Observe Coalescing'
+description: 'Accept EX05 exactly on native Linux, then observe its three global-memory access patterns through repeated Nsight Compute records with explicit version, metric, and permission gates.'
+pairId: lab04
+counterpart: /labs/observe-coalescing/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - manifest
+  - source-review
+  - build
+  - correctness
+  - measurement-plan
+  - profiler-gate
+  - collect
+  - interpret
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB04
+prerequisites:
+  - M02
+  - Q05
+relatedUnits:
+  - EX05
+exampleIds:
+  - EX05
+canonicalExample: EX05
+canonicalRanges:
+  - access-kernel
+  - scenario-loop
+hardwareGate: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Nsight Compute CLI and authorized performance-counter access; at most 3,068 bytes of problem allocation'
+estimatedMinutes: 90
+difficulty: intermediate
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 3068
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, the EX05 binary, and Nsight Compute CLI ncu'
+  - 'Create and remove EX05 build files, profiler reports, and learner-owned evidence logs'
+  - 'Read NVIDIA GPU performance counters under an administrator-approved non-admin profiling policy; this Lab does not authorize privilege escalation'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The contiguous, misaligned, and strided scenarios should each pass exact comparison against the CPU reference before profiling begins.
+    - With source, build, logical work, launch geometry, profiler options, and device frozen, each scenario should produce a labeled raw profiler record only when the selected metric is available and collection is permitted.
+    - Repeated profiler samples should be retained without a predicted ordering among contiguous, misaligned, and strided; the predeclared statistic summarizes only those retained samples.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; Nsight Compute 2022.3.0.22'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / 12.9.2 Lane; Nsight Compute 2025.2.1.3'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / 13.3.1 Lane; Nsight Compute 2026.2.1.5'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute CLI 2022.3'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3.0'
+    platform: 'Linux CLI for the cuda-11.8 Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute CLI 2025.2'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2.1'
+    platform: 'Linux CLI for the cuda-12.9 Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute CLI 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Linux CLI for the cuda-13.3 Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute Profiling Guide 2026.2.1'
+    platform: 'GPU metrics, replay, overhead, permissions, and reproducibility'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide - Coalesced Access to Global Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA global-memory access model'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,manifest,source-review,build,correctness,measurement-plan,profiler-gate,collect,interpret,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M02,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX05 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'access-kernel,scenario-loop' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Nsight Compute CLI and authorized performance-counter access; at most 3,068 bytes of problem allocation' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '90' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: intermediate }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '3068' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'CUDA device; compiler, make, binary, and ncu execution; build/report/log writes; administrator-approved performance-counter access' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,2022.3.0,2025.2.1,2026.2.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/observe-coalescing/" lang="zh-CN">阅读中文对应页</a>
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+LAB04 is a Lab. You perform correctness acceptance and profiler collection for canonical EX05 outside the website. The site executes no CUDA and supplies no prefilled result.
+
+## Lab contract
+
+| Coordinate | Requirement |
+| --- | --- |
+| Difficulty and time | Intermediate, about 90 minutes |
+| Prerequisites | M02 and Q05 |
+| Supported Environment | Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer |
+| Toolkit Lane | CUDA 11.8.0, 12.9.2, or 13.3.1 under C++17 |
+| Workload | EX05 fixes 256 `std::uint32_t` outputs; maximum problem allocation is 3,068 bytes |
+| Tool | The Lane-matched Nsight Compute CLI (`ncu`) and relevant metrics available on that GPU |
+| Permissions | Device and executable access, evidence-directory writes, and administrator-approved NVIDIA GPU performance counter permission; this Lab does not authorize `sudo` or temporary elevation |
+| Acceptance order | Exact CPU-reference correctness, then the profiler gate, repeated collection, and interpretation |
+| Evidence | Compilation is empty; runtime is Pending Hardware Verification; recorded observations are empty |
+
+## Prerequisite check
+
+1. Complete [M02](/en/memory/coalescing-transactions/) and distinguish contiguous, misaligned, and strided source-index sequences without treating a static segment model as a measured transaction count.
+2. Complete [Q05](/en/correctness/timing-asynchronous-gpu-work/) and explain warm-up, explicit completion boundaries, raw repeated samples, and a predeclared statistic.
+3. Confirm that exactly one GPU is visible to this process and that you can retain raw stdout/stderr, exit statuses, profiler reports, and a complete Environment Manifest.
+
+## Obtain the canonical project
+
+[View the complete EX05 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/79473ddced9c4d284b88f2eab82d31f3034b97cc/examples/ex05-coalesced-strided-access), or [download the source archive for that commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/79473ddced9c4d284b88f2eab82d31f3034b97cc.zip). One reviewable acquisition path is:
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout 79473ddced9c4d284b88f2eab82d31f3034b97cc
+cd examples/ex05-coalesced-strided-access
+```
+
+Do not change the kernel, scenario order, build flags, input initialization, logical count, or launch geometry. Any source or build change is a new experiment and cannot inherit LAB04's comparison contract.
+
+## Create the unfilled Environment Manifest
+
+Copy and fill this template before running. Replace every angle-bracketed field with an observed value; neither the template, a command name, nor a version from an owner release is your observation:
+
+```text
+subject: EX05 / LAB04
+source_commit: 79473ddced9c4d284b88f2eab82d31f3034b97cc
+observation_date_utc: <fill>
+gpu_identity: <fill after privacy review>
+compute_capability: <fill>
+compute_capability_query: <fill exact command or API>
+gpu_count_used: <fill; must be 1>
+driver: <fill>
+toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+cuda_toolkit: <fill exact version>
+nsight_compute_version: <fill exact ncu --version output>
+nvcc: <fill exact version>
+host_compiler: <fill exact version>
+operating_system: <fill native Linux distribution, version, architecture>
+workload:
+  <fill contiguous, misaligned, strided and logical count 256>
+launch_geometry: <fill grid, block, stream, scenario order>
+memory: <fill actual allocations; maximum_problem_memory_bytes 3068>
+permissions: <fill device, executable, filesystem, performance-counter policy>
+exact_commands: <fill ordered, fully expanded argv>
+correctness_method: <fill EX05 CPU reference and exact comparison>
+correctness_criteria: <fill all scenarios, all 256 outputs, CUDA boundaries, statuses>
+measurement_method: <fill ncu metric names, units, options, repetitions, statistic>
+measurement_details: <fill warm-up exclusion and invalid-sample policy>
+raw_logs: <fill raw stdout/stderr paths>
+raw_measurements: <fill report/CSV paths>
+exit_statuses: <fill one status path per command>
+criteria_result: <fill only after execution>
+```
+
+## Review canonical source
+
+The access expression comes only from EX05's `access-kernel` range:
+
+<CanonicalCode exampleId="EX05" range="access-kernel" />
+
+Scenario identity, CPU-reference invocation, launch, explicit synchronization, and exact comparison come from the second range:
+
+<CanonicalCode exampleId="EX05" range="scenario-loop" />
+
+Frozen dimensions are the commit, binary, 256 logical outputs, element type, input formula, output layout, launch geometry, and verifier. The only declared scenario variables are canonical `offset`/`stride` and the legal input extent they determine. Do not falsely claim equal allocation sizes.
+
+## Build and retain records
+
+Run the C++17 contract from the project directory:
+
+```sh
+mkdir -p lab04-evidence
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/ex05-coalesced-strided-access
+```
+
+Save raw stdout/stderr and the exit status for every command separately. On any nonzero status, record a blocker and stop dependent stages. A local build, host-only test, or website build does not populate the empty compilation evidence.
+
+## Verify correctness
+
+First run the binary without profiler instrumentation:
+
+```sh
+./build/ex05-coalesced-strided-access \
+  >lab04-evidence/correctness.stdout.log \
+  2>lab04-evidence/correctness.stderr.log
+status=$?
+printf '%s\n' "$status" >lab04-evidence/correctness.status
+```
+
+Continue only if every one of the 256 outputs in each of the three scenarios matches the independent CPU reference by **exact comparison**, every CUDA boundary succeeds, and application status is zero. A tolerance, a subset of elements, or the printed word `PASS` alone cannot replace exact comparison. Exact correctness is a precondition before any profiling or interpretation. Reject timing and every performance claim when it fails.
+
+## Freeze the measurement plan
+
+Write this contract before the first profiler collection:
+
+1. Freeze source commit, binary SHA-256, Lane, device, scenario order, logical work, build flags, launch geometry, `ncu` options, and metric list. Preserve only the canonical `offset`/`stride` differences.
+2. Directly run the complete binary once more as a process-level warm-up. Check correctness but exclude that run from every statistic. It cannot remove all startup or replay effects in a new profiler process, so do not call it a steady-state event warm-up.
+3. Make 10 independent, complete measured profiler invocations of the same unchanged binary. Retain every raw value and do not delete samples merely because they look unusual.
+4. Predeclare the summary statistic for each scenario/metric as the median of 10 qualifying raw samples. Only a nonzero tool/application status, correctness failure, missing target kernel, or missing metric value makes a sample invalid; retain that record and reason.
+
+These rules freeze equal work/build/launch. If any frozen dimension changes, discard the batch and restart rather than joining samples from different contracts.
+
+## Profiler gate
+
+Capture version, help, and the metric query before profiling:
+
+```sh
+ncu --version >lab04-evidence/ncu-version.stdout.log \
+  2>lab04-evidence/ncu-version.stderr.log
+ncu --help >lab04-evidence/ncu-help.stdout.log \
+  2>lab04-evidence/ncu-help.stderr.log
+ncu --devices 0 --query-metrics --query-metrics-mode all \
+  >lab04-evidence/ncu-query.stdout.log \
+  2>lab04-evidence/ncu-query.stderr.log
+```
+
+Save each exit status. Owner release coordinates are CUDA 11.8.0 / Nsight Compute 2022.3.0.22, the CUDA 12.9.2 Lane / 2025.2.1.3, and the CUDA 13.3.1 Lane / 2026.2.1.5. The actual `ncu --version` output fills `nsight_compute_version`. Record a blocker if the version does not correspond, `--query-metrics` fails, or its output lacks the predeclared global-memory request/sector/transaction metric class. Never borrow a metric name from another GPU or a documentation example.
+
+Probe one complete EX05 process with the selected metric. On `ERR_NVGPUCTRPERM`, another performance counter permission failure, an unsupported metric, `n/a`, or report-write failure, stop and preserve raw logs. An administrator may establish a compliant policy outside the Lab; do not elevate privileges here. If required metrics are unavailable, record the blocker rather than substituting wall-clock time or a predicted value.
+
+## Collect repeated profiles
+
+Fill one fixed comma-separated list with complete metric names returned by this GPU's query. Do not copy another architecture's names:
+
+```sh
+metric_csv='<fill exact queried metric names>'
+sample=1
+while [ "$sample" -le 10 ]; do
+  id=$(printf '%02d' "$sample")
+  ncu --devices 0 --metrics "$metric_csv" --page raw --csv \
+    ./build/ex05-coalesced-strided-access \
+    >"lab04-evidence/profile-${id}.stdout.log" \
+    2>"lab04-evidence/profile-${id}.stderr.log"
+  status=$?
+  printf '%s\n' "$status" \
+    >"lab04-evidence/profile-${id}.status"
+  sample=$((sample + 1))
+done
+```
+
+EX05 fixes scenario order as contiguous, misaligned, then strided. Map each report's kernel invocation to application scenario identity and preserve `ncu` replay information. Do not retain only summary rows. Maintain at least this unfilled `raw_measurements` ledger:
+
+| sample_id | scenario | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+
+## Interpret the records
+
+CUDA event timing and a profiler measurement are different records. Timing-enabled events mark a device-timeline interval through `cudaEventRecord`; after completion, `cudaEventElapsedTime` reports that interval's elapsed time. Canonical EX05 contains no event instrumentation. `ncu` inserts measurement libraries and may serialize or replay kernels, control cache or clocks, and make multiple passes. It reports selected metrics under that collection contract, not an interchangeable event sample.
+
+LAB04 therefore adds no event-instrumented binary and does not combine profiler duration, host wall-clock, and event time. A separate event experiment must redeclare source/build, warm-up, completion boundary, and statistic instead of borrowing this Lab's frozen-binary record.
+
+State only what each metric's owner definition supports, compare the same metric and unit under identical collection options, and report the median with paths to all samples. This Lab predicts no metric ordering, latency, bandwidth, throughput, or speedup among contiguous, misaligned, and strided. Preserve equal, noisy, or model-disagreeing results and investigate rather than rewriting expectations.
+
+## Expected observations, not recorded results
+
+- Contiguous, misaligned, and strided should first pass exact CPU-reference comparison for all 256 outputs.
+- After version, metric-query, and permission gates pass, each scenario should map to its own raw profiler record and exit status; this promises no direction or magnitude.
+- The warm-up should be excluded, all 10 measured samples should be retained, and only the predeclared median should summarize them.
+
+These are expected observations, not recorded results. There is no prefilled numeric GPU result, runtime output, or profiler result on this page; `recordedObservations` remains empty.
+
+## Keep evidence axes separate
+
+| Axis | Current status | Boundary |
+| --- | --- | --- |
+| Compilation | Empty | A local build log does not automatically become a Compile-Checked record |
+| Runtime | Pending Hardware Verification | No maintainer Reference Environment run record exists |
+| Recorded observations | Empty | Only a real manifest, raw logs, exit statuses, raw measurements, and criterion result can enter a record for assessment |
+
+A profiler report, successful query, or static source review alone upgrades none of these statuses and proves no general performance claim.
+
+## Clean up and retain
+
+First preserve the manifest, raw stdout/stderr, exit statuses, `raw_measurements`, profiler reports, blockers, and criterion-by-criterion result under learner control. Then run:
+
+```sh
+make clean BUILD_DIR=build
+```
+
+Do not submit binaries, credentials, private device identifiers, or unreviewed large profiler artifacts.
+
+## Sources and review
+
+The three Toolkit owner releases pin the Lane and bundled Nsight Compute component: [CUDA 11.8.0 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html), [CUDA 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html), and [CUDA 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html). The CLI gate follows the [2022.3 CLI](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html), [2025.2 CLI](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html), and [2026.2.1 CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html). The [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) governs metric availability, replay, overhead, permission, and reproducibility. The [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#coalesced-access-to-global-memory) supplies only the coalescing model.
+
+Context7 `/websites/nvidia_cuda` is used only for retrieval cross-checking. It does not replace the exact NVIDIA owner docs/releases above and grants no evidence.
+
+**Fact checked: 2026-08-28.** Compilation is empty, and runtime is Pending Hardware Verification.

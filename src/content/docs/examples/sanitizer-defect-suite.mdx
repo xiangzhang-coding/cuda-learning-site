@@ -1,0 +1,243 @@
+---
+title: 'EX16：Compute Sanitizer 缺陷套件可运行示例'
+description: 通过八个独立的 C++17 CUDA 进程，对比 memcheck、racecheck、initcheck 与 synccheck 的单一缺陷和同语义最小修复。
+pairId: ex16
+counterpart: /en/examples/sanitizer-defect-suite/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - scenario-contract
+  - memcheck
+  - racecheck
+  - initcheck
+  - synccheck
+  - host-utility
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX16
+prerequisites:
+  - Q03
+  - Q04
+relatedUnits:
+  - LAB07
+exampleIds:
+  - EX16
+canonicalExample: EX16
+canonicalRanges:
+  - memcheck-defect
+  - memcheck-corrected
+  - racecheck-defect
+  - racecheck-corrected
+  - initcheck-defect
+  - initcheck-corrected
+  - synccheck-defect
+  - synccheck-corrected
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for all eight CUDA binaries; runtime: Native Linux only, one CUDA GPU with compute capability 7.5 or newer, with at most 128 bytes of declared global-plus-shared problem memory and under 8 GB'
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 128
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, the eight binaries, and Compute Sanitizer from the selected Toolkit Lane'
+  - 'Create and remove files in the EX16 build directory and a learner-owned evidence directory'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - Memcheck should identify the defect executable's single global-memory out-of-bounds write, while the corrected executable should preserve the 32 intended writes without that bounds defect.
+    - Racecheck should identify the defect executable's plain shared-memory read-after-write ordering hazard, while the corrected executable should preserve the produced value with a block barrier.
+    - Initcheck should identify the defect executable's read from uninitialized device global memory, while the corrected executable should preserve the increment work after zero-initializing the input.
+    - Synccheck should identify the defect executable's divergent conditional __syncthreads, while the corrected executable should preserve the phase copy with uniform block participation.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8.0 archive - Compute Sanitizer'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html'
+    version: 'CUDA Toolkit 11.8.0; last updated 2022-10-03'
+    platform: 'Linux x86-64 archive baseline for memcheck, racecheck, initcheck, and synccheck scope'
+    accessDate: '2026-08-28'
+  - title: 'Compute Sanitizer 2026.2.1'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html'
+    version: 'Compute Sanitizer 2026.2.1; last updated 2026-06-23'
+    platform: 'CUDA-capable systems; current tool scope and command-line contract'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: ex16 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,project,scenario-contract,memcheck,racecheck,initcheck,synccheck,host-utility,build,compatibility,evidence,expected-observations,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: runnable-example }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: EX16 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q03,Q04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: LAB07 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX16 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX16 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'memcheck-defect,memcheck-corrected,racecheck-defect,racecheck-corrected,initcheck-defect,initcheck-corrected,synccheck-defect,synccheck-corrected' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for all eight CUDA binaries; runtime: Native Linux only, one CUDA GPU with compute capability 7.5 or newer, with at most 128 bytes of declared global-plus-shared problem memory and under 8 GB' }
+  - tag: meta
+    attrs: { name: 'cuda:tool-gate', content: 'Use Compute Sanitizer from the selected Toolkit Lane; run memcheck first; run each tool only against its matching one-case executable in a separate process' }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '128' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device; compiler, make, binary, and Compute Sanitizer execution; EX16 build/evidence-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '4 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,2026.2.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/sanitizer-defect-suite/" lang="en">Read the English counterpart</a>
+
+EX16 是一个独立、原创的 Compute Sanitizer 缺陷套件可运行示例（Runnable Example）。八个 C++17 CUDA binary 各自只运行一个 case：四个 case 各包含一个刻意隔离的缺陷，另外四个保留相同预期工作并实施最小修复。网站不执行 CUDA，也不保存任何工具诊断或运行日志。
+
+## 用途
+
+先完成 [Q03：用 memcheck 定位无效内存访问](/correctness/memcheck-invalid-memory-access/)，再完成 [Q04：区分 racecheck、initcheck 与 synccheck](/correctness/racecheck-initcheck-synccheck/)。Q03 建立先运行 memcheck 的顺序，Q04 建立后三种工具的检测边界。[LAB07](/labs/diagnose-four-sanitizer-failures/) 使用同一个 EX16 project 指导外部运行和证据采集。
+
+一个进程只执行一个 case。这样，越界访问或无效同步导致的 CUDA context 状态不会进入下一项工具检查。Defect 与 corrected variant 使用同样的 problem size、launch geometry 和预期输出；每一对只改变造成缺陷的那一处条件或缺失操作。
+
+## 获取 canonical project
+
+[在固定提交中查看完整 EX16 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0c1ac1b3125a92a35270ec2a498f009125b89597/examples/ex16-sanitizer-defect-suite)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0c1ac1b3125a92a35270ec2a498f009125b89597.zip)。解压后进入 `examples/ex16-sanitizer-defect-suite/`。
+
+`project.json` 声明八个 build input、三条固定 Toolkit Lane、128-byte 上界、四对预期行为和空证据轴。`README.md` 给出独立运行命令。项目源码使用 Apache-2.0，页面文字使用 CC-BY-4.0；两者均不是 NVIDIA sample source 的改写。
+
+## 场景合同
+
+| Tool | Defect category | 最小修复 | 正确性检查 |
+| --- | --- | --- | --- |
+| `memcheck` | 单个 global-memory 越界写 | `index <= count` 改为 `index < count` | 32 个合法元素匹配确定性 sequence |
+| `racecheck` | plain shared-memory RAW ordering hazard | producer 与 consumer 之间加入一次 block barrier | consumer 得到 42 |
+| `initcheck` | 读取未初始化的 device global memory | launch 前把同一 input allocation 清零 | 16 个 output 都等于 1 |
+| `synccheck` | divergent conditional `__syncthreads()` | 把同一个 barrier 移到所有 thread 都会到达的位置 | 16 个 thread 保留各自的 phase-copy value |
+
+每个 executable 都检查 launch submission、显式 completion 和可定义的 output。App 自身的 `PASS` 不能替代工具报告；defect 在某次 schedule 下产生预期值，也不能说明 hazard 不存在。
+
+## Memcheck pair
+
+Defect variant 启动 33 个 thread 处理 32 个元素。唯一的 bounds error 是 `<=`，因此恰好一个 thread 尝试写 allocation 末端之后的位置：
+
+<CanonicalCode exampleId="EX16" range="memcheck-defect" />
+
+Corrected variant 保留 33-thread launch 和全部 32 个合法写入，只把 bounds predicate 修复为严格小于：
+
+<CanonicalCode exampleId="EX16" range="memcheck-corrected" />
+
+## Racecheck pair
+
+Defect variant 使用一个 plain shared `uint32_t`。Thread 0 写 41，thread 1 在没有 ordering primitive 的情况下读取并加一；没有 atomic 或第二种故障机制：
+
+<CanonicalCode exampleId="EX16" range="racecheck-defect" />
+
+Corrected variant 只在 write 与 read 之间加入 block-wide `__syncthreads()`，发布值和 consumer 计算都保持不变：
+
+<CanonicalCode exampleId="EX16" range="racecheck-corrected" />
+
+## Initcheck pair
+
+Defect variant 分配 16-element input 和 output，却没有在 kernel 读取 input 前初始化 input。Allocation 里的物理位偶然为零也不会把这次读取变成已初始化读取：
+
+<CanonicalCode exampleId="EX16" range="initcheck-defect" />
+
+Corrected variant 保留同一 increment kernel，只在 launch 前对 input 执行一次 `cudaMemset`：
+
+<CanonicalCode exampleId="EX16" range="initcheck-corrected" />
+
+## Synccheck pair
+
+Defect variant 让 16-thread block 中只有 even lane 进入 `__syncthreads()`。每个 lane 只读写自己的 shared element，因此该 case 用来隔离 barrier participation，而不是引入跨 thread 数据交换：
+
+<CanonicalCode exampleId="EX16" range="synccheck-defect" />
+
+Corrected variant 把 barrier 移到 branch 之外。Shared write、output read、value 与 launch geometry 均未改变：
+
+<CanonicalCode exampleId="EX16" range="synccheck-corrected" />
+
+## Host utility 边界
+
+`include/sanitizer_suite_contract.hpp` 是纯 host C++17 metadata：它按页面顺序列出 scenario ID、tool、variant、完整命令和 category。`tests/host_utility_test.cpp` 只验证这五类 metadata 的 identity、顺序、唯一性与成对关系。
+
+`make host-test` 不包含 CUDA header，不编译 `.cu`，也不启动 GPU 或 Compute Sanitizer。通过该 utility **不能建立 GPU 正确性，也不能建立 sanitizer 行为**；它只防止文档命令与 executable identity 漂移。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行 `make preprocess DIALECT=c++17`、`make compile DIALECT=c++17`、`make link DIALECT=c++17`、`make inspect DIALECT=c++17` 和 `make host-test DIALECT=c++17`。前四个 stage 处理全部八个 binary；host-test 只需要 x86-64 host C++17 compiler。
+
+每个 CUDA source 产生一个 `.ii`、一个 `.o` 和一个同名 hyphenated executable。Inspect 对全部八个 executable 分别确认 native `sm_75` cubin 与从 `compute_75` 生成的 forward-compatible PTX。`scripts/compile-check.sh c++17 ex16 <result-dir>` 只运行这些 build stage 和 host utility，绝不启动 CUDA executable 或 Compute Sanitizer。
+
+## 兼容性与精确门槛
+
+**Hardware gate：** 构建需要 x86-64 CPU、host C++17 compiler 与所选 CUDA Toolkit；运行只属于原生 Linux Supported Environment，需要恰好一张 compute capability 7.5 或更新的 CUDA GPU。任何进程的 global-plus-shared problem memory 最多 128 bytes，低于 Baseline GPU Capability Tier 的 8 GB 边界。
+
+**Tool gate：** 使用所选 Toolkit Lane 自带的 `compute-sanitizer`，记录其实际版本；先运行 `memcheck`，再分别运行 `racecheck`、`initcheck` 和 `synccheck`；每个工具只检查匹配的 defect/corrected executable，每条命令启动新进程。不同工具的 clean result 不能互相替代。
+
+| Toolkit Lane | OS / architecture | 固定 development image tag |
+| --- | --- | --- |
+| CUDA 11.8.0 | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04` |
+| CUDA 12.9.2 | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04` |
+| CUDA 13.3.1 | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04` |
+
+固定 image 与 digest 只是未来 evidence target。它们不能证明项目已经在任一 Lane 编译或运行。
+
+## 编译与运行证据
+
+EX16 的 compilation array 为空，所以项目没有 Compile-Checked 状态。Runtime Evidence Status 是 **Pending Hardware Verification**，recorded observations 为空。源码存在、host utility 通过或工具文档描述某类检测能力，都不是 EX16 的 GPU observation。
+
+本页没有复制 sanitizer diagnostic、summary、stdout/stderr、exit status、correctness result、timing 或性能结果。未来候选记录必须提供完整环境清单（Environment Manifest）、精确命令、每个进程的 raw stdout/stderr 与退出状态，以及 defect/corrected correctness verdict；在审核前不得把它们写成本站结论。
+
+## 预期观察，不是记录结果
+
+1. Memcheck 应定位 defect executable 的单个 global-memory 越界写；corrected executable 应保留 32 个预期写入而不再包含该 bounds defect。
+2. Racecheck 应定位 defect executable 的 plain shared-memory RAW ordering hazard；corrected executable 应通过 block barrier 保留发布值。
+3. Initcheck 应定位 defect executable 对未初始化 device global memory 的读取；corrected executable 应在 input 清零后保留 increment 工作。
+4. Synccheck 应定位 defect executable 的 divergent conditional `__syncthreads()`；corrected executable 应让整个 block 一致参与并保留 phase copy。
+
+四项都是事先写入 manifest 的 acceptance direction，不是本站已观察到的 sanitizer output。Corrected variant 的预期 clean behavior 同样需要合格记录，不能从 source inspection 推定。
+
+## 来源与复核
+
+CUDA Toolkit 11.8.0 archive 页面提供最早声明 Lane 的四工具范围；当前 Compute Sanitizer 2026.2.1 文档提供现行命令形式与 memcheck、racecheck、initcheck、synccheck 的检测边界。页面只概述这些边界，没有复制文档中的示例诊断。
+
+- [CUDA Toolkit 11.8.0 archive - Compute Sanitizer](https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html)
+- [Compute Sanitizer 2026.2.1](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)
+
+**事实核查与全部来源访问日期：2026-08-28。**

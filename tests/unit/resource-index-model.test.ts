@@ -23,17 +23,36 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(161);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(180);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 3, practice: 25, visuals: 11, glossary: 86, sources: 36 });
-    for (const absentId of ['LAB04', 'LAB05', 'LAB06', 'EX07']) {
+    ).toEqual({ labs: 6, practice: 29, visuals: 11, glossary: 95, sources: 39 });
+    for (const absentId of ['LAB06', 'EX07']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
+
+    expect(Object.fromEntries(
+      ['Q01', 'Q03', 'Q04', 'Q05', 'EX16', 'LAB04', 'LAB05', 'LAB07'].map((planningId) => [
+        planningId,
+        {
+          href: PUBLISHED_DESTINATIONS[planningId].href.en,
+          prerequisites: PUBLISHED_DESTINATIONS[planningId].prerequisites,
+        },
+      ]),
+    )).toEqual({
+      Q01: { href: '/en/correctness/cpu-references-tolerances-invariants/', prerequisites: ['F04', 'O04'] },
+      Q03: { href: '/en/correctness/memcheck-invalid-memory-access/', prerequisites: ['F05', 'Q01'] },
+      Q04: { href: '/en/correctness/racecheck-initcheck-synccheck/', prerequisites: ['M05', 'M06', 'Q03'] },
+      Q05: { href: '/en/correctness/timing-asynchronous-gpu-work/', prerequisites: ['M08', 'Q01'] },
+      EX16: { href: '/en/examples/sanitizer-defect-suite/', prerequisites: ['Q03', 'Q04'] },
+      LAB04: { href: '/en/labs/observe-coalescing/', prerequisites: ['M02', 'Q05'] },
+      LAB05: { href: '/en/labs/remove-shared-memory-bank-conflicts/', prerequisites: ['M04', 'Q05'] },
+      LAB07: { href: '/en/labs/diagnose-four-sanitizer-failures/', prerequisites: ['Q03', 'Q04'] },
+    });
   });
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
@@ -91,6 +110,50 @@ describe('resource index catalog', () => {
       ['F05', '/en/foundations/asynchronous-errors/'],
     ]);
     expect(lab03?.searchText).toContain('EX04');
+
+    for (const expected of [
+      {
+        planningId: 'LAB04',
+        href: '/en/labs/observe-coalescing/',
+        counterpart: '/labs/observe-coalescing/',
+        prerequisites: ['M02', 'Q05'],
+        relatedUnits: ['EX05'],
+        memory: '3,068 bytes',
+      },
+      {
+        planningId: 'LAB05',
+        href: '/en/labs/remove-shared-memory-bank-conflicts/',
+        counterpart: '/labs/remove-shared-memory-bank-conflicts/',
+        prerequisites: ['M04', 'Q05'],
+        relatedUnits: ['EX06'],
+        memory: '8,576 bytes',
+      },
+      {
+        planningId: 'LAB07',
+        href: '/en/labs/diagnose-four-sanitizer-failures/',
+        counterpart: '/labs/diagnose-four-sanitizer-failures/',
+        prerequisites: ['Q03', 'Q04'],
+        relatedUnits: ['EX16'],
+        memory: '128 bytes',
+      },
+    ]) {
+      const releaseLab = labs.find(({ planningId }) => planningId === expected.planningId);
+      expect(releaseLab).toMatchObject({
+        planningId: expected.planningId,
+        href: expected.href,
+        counterpart: expected.counterpart,
+        difficulty: 'intermediate',
+        evidence: {
+          compilation: [],
+          runtime: ['Pending Hardware Verification'],
+        },
+        reviewedOn: '2026-08-28',
+      });
+      expect(releaseLab?.prerequisites.map(({ id }) => id)).toEqual(expected.prerequisites);
+      expect(releaseLab?.relatedUnits.map(({ id }) => id)).toEqual(expected.relatedUnits);
+      expect(releaseLab?.hardwareGate).toContain(expected.memory);
+      expect(releaseLab?.versionGate).toContain('CUDA Toolkit Lane 11.8.0, 12.9.2, or 13.3.1');
+    }
 
     const visuals = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'visuals', 'en', { asOf });
     expect(visuals.map(({ planningId }) => planningId)).toEqual([
@@ -202,7 +265,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(111);
+    expect(projected).toHaveLength(120);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
     );

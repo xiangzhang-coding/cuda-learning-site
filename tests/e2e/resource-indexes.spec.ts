@@ -12,6 +12,7 @@ const expectedCount = (group: (typeof INDEX_GROUPS)[number]) =>
 const releasePracticeIds = [
   'PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016',
   'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
+  'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
 ] as const;
 const releaseGlossaryIds = [
   'TERM-066',
@@ -35,13 +36,34 @@ const releaseGlossaryIds = [
   'TERM-084',
   'TERM-085',
   'TERM-086',
+  'TERM-087',
+  'TERM-088',
+  'TERM-089',
+  'TERM-090',
+  'TERM-091',
+  'TERM-092',
+  'TERM-093',
+  'TERM-094',
+  'TERM-095',
 ] as const;
-const releaseSourceIds = ['SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021'] as const;
+const releaseSourceIds = [
+  'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
+  'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
+] as const;
+const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
 const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07'] as const;
+const issue17Ids = new Set<string>([
+  ...releaseLabIds,
+  'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
+  'TERM-087', 'TERM-088', 'TERM-089', 'TERM-090', 'TERM-091',
+  'TERM-092', 'TERM-093', 'TERM-094', 'TERM-095',
+  'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
-  practice: 'PB-R1-020',
-  glossary: 'TERM-086',
-  sources: 'SRC-CUDA-021',
+  labs: 'LAB07',
+  practice: 'PB-R1-024',
+  glossary: 'TERM-095',
+  sources: 'SRC-CUDA-024',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -109,25 +131,30 @@ test('filter controls and direct resource links support keyboard operation', asy
   await expect(page).toHaveURL(/\/en\/labs\/vector-addition\/$/);
 });
 
-test('issue-16 release records keep exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
+test('issue-17 release records keep exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
-  expect(counts.labs).toBe(3);
-  expect(counts.practice).toBe(25);
+  expect(counts.labs).toBe(6);
+  expect(counts.practice).toBe(29);
   expect(counts.visuals).toBe(11);
-  expect(counts.glossary).toBe(86);
-  expect(counts.sources).toBe(36);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(161);
+  expect(counts.glossary).toBe(95);
+  expect(counts.sources).toBe(39);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(180);
 
-  const expectedIds = [...releaseVisualIds, ...releasePracticeIds, ...releaseGlossaryIds, ...releaseSourceIds];
+  const expectedIds = [
+    ...releaseLabIds,
+    ...releaseVisualIds,
+    ...releasePracticeIds,
+    ...releaseGlossaryIds,
+    ...releaseSourceIds,
+  ];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
     expect(record, planningId).toBeDefined();
     return record!;
   });
-  for (const record of records.filter(({ planningId }) =>
-    /^(?:PB-R1-0(?:17|18|19|20)|VIS0[37]|TERM-0(?:7[7-9]|8[0-6])|SRC-CUDA-02[01])$/.test(planningId))) {
+  for (const record of records.filter(({ planningId }) => issue17Ids.has(planningId))) {
     expect(record.reviewedOn, record.planningId).toBe('2026-08-28');
   }
 
@@ -144,8 +171,8 @@ test('issue-16 release records keep exact cards, anchors, counts, freshness, and
       await expect(index.locator(`[data-resource-id="${terminalId}"]`)).toHaveCount(1);
     }
     if (group === 'labs') {
-      await expect(index.locator('[data-resource-id="LAB04"], [data-resource-id="LAB05"], [data-resource-id="LAB06"], [data-resource-id="EX07"]')).toHaveCount(0);
-      await expect(index.locator('h3 a', { hasText: /^(?:LAB0[456]|EX07)\b/ })).toHaveCount(0);
+      await expect(index.locator('[data-resource-id="LAB06"], [data-resource-id="EX07"]')).toHaveCount(0);
+      await expect(index.locator('h3 a', { hasText: /^(?:LAB06|EX07)\b/ })).toHaveCount(0);
     }
 
     for (const record of groupRecords) {
