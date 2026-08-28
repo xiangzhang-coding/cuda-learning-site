@@ -9,8 +9,11 @@ import { collectBrowserFailures } from '../helpers/browser-contract';
 const expectedCount = (group: (typeof INDEX_GROUPS)[number]) =>
   RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length;
 
-const issue15PracticeIds = ['PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016'] as const;
-const issue15GlossaryIds = [
+const releasePracticeIds = [
+  'PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016',
+  'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
+] as const;
+const releaseGlossaryIds = [
   'TERM-066',
   'TERM-067',
   'TERM-068',
@@ -22,13 +25,23 @@ const issue15GlossaryIds = [
   'TERM-074',
   'TERM-075',
   'TERM-076',
+  'TERM-077',
+  'TERM-078',
+  'TERM-079',
+  'TERM-080',
+  'TERM-081',
+  'TERM-082',
+  'TERM-083',
+  'TERM-084',
+  'TERM-085',
+  'TERM-086',
 ] as const;
-const issue15SourceIds = ['SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019'] as const;
-const issue15VisualIds = ['VIS04', 'VIS05', 'VIS06'] as const;
+const releaseSourceIds = ['SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021'] as const;
+const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07'] as const;
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
-  practice: 'PB-R1-016',
-  glossary: 'TERM-076',
-  sources: 'SRC-CUDA-019',
+  practice: 'PB-R1-020',
+  glossary: 'TERM-086',
+  sources: 'SRC-CUDA-021',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -96,23 +109,27 @@ test('filter controls and direct resource links support keyboard operation', asy
   await expect(page).toHaveURL(/\/en\/labs\/vector-addition\/$/);
 });
 
-test('issue-15 records keep exact cards, anchors, counts, and the three-Lab publication boundary', async ({ page }) => {
+test('issue-16 release records keep exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(3);
-  expect(counts.practice).toBe(21);
-  expect(counts.visuals).toBe(9);
-  expect(counts.glossary).toBe(76);
-  expect(counts.sources).toBe(34);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(143);
+  expect(counts.practice).toBe(25);
+  expect(counts.visuals).toBe(11);
+  expect(counts.glossary).toBe(86);
+  expect(counts.sources).toBe(36);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(161);
 
-  const expectedIds = [...issue15VisualIds, ...issue15PracticeIds, ...issue15GlossaryIds, ...issue15SourceIds];
+  const expectedIds = [...releaseVisualIds, ...releasePracticeIds, ...releaseGlossaryIds, ...releaseSourceIds];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
     expect(record, planningId).toBeDefined();
     return record!;
   });
+  for (const record of records.filter(({ planningId }) =>
+    /^(?:PB-R1-0(?:17|18|19|20)|VIS0[37]|TERM-0(?:7[7-9]|8[0-6])|SRC-CUDA-02[01])$/.test(planningId))) {
+    expect(record.reviewedOn, record.planningId).toBe('2026-08-28');
+  }
 
   for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {
     const groupRecords = records.filter((record) => record.group === group);
@@ -127,8 +144,8 @@ test('issue-15 records keep exact cards, anchors, counts, and the three-Lab publ
       await expect(index.locator(`[data-resource-id="${terminalId}"]`)).toHaveCount(1);
     }
     if (group === 'labs') {
-      await expect(index.locator('[data-resource-id="LAB04"], [data-resource-id="LAB05"]')).toHaveCount(0);
-      await expect(index.locator('h3 a', { hasText: /^LAB0[45]\b/ })).toHaveCount(0);
+      await expect(index.locator('[data-resource-id="LAB04"], [data-resource-id="LAB05"], [data-resource-id="LAB06"], [data-resource-id="EX07"]')).toHaveCount(0);
+      await expect(index.locator('h3 a', { hasText: /^(?:LAB0[456]|EX07)\b/ })).toHaveCount(0);
     }
 
     for (const record of groupRecords) {

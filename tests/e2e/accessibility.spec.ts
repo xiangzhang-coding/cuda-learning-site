@@ -17,9 +17,15 @@ const representativeThemeRoutes = [
   '/en/foundations/compute-capability/',
   '/en/foundations/runtime-driver-api/',
   '/en/foundations/launch-geometry/',
+  '/en/memory/synchronization-scopes/',
+  '/en/memory/warp-divergence-reconvergence/',
+  '/en/memory/stream-ordering/',
+  '/en/memory/event-dependencies-timing/',
+  '/en/visuals/warp-divergence/',
+  '/en/visuals/stream-event-dependencies/',
 ] as const;
 
-const issue15StateScans = [
+const releaseVisualStateScans = [
   {
     theme: 'silicon-light',
     label: 'VIS04 offset segment state',
@@ -40,6 +46,21 @@ const issue15StateScans = [
       await page.locator('[data-scope-filter]').selectOption('thread');
       await page.locator('[data-operation-filter]').selectOption('runtime-api');
     },
+  },
+  {
+    theme: 'profiler-dark',
+    label: 'VIS03 alternating divergence state',
+    route: '/en/visuals/warp-divergence/',
+    prepare: async (page: Page) => {
+      await page.locator('[data-warp-preset]').selectOption('alternating');
+      await page.locator('[data-warp-step]').click();
+    },
+  },
+  {
+    theme: 'silicon-light',
+    label: 'VIS07 three-stream dependency state',
+    route: '/en/visuals/stream-event-dependencies/',
+    prepare: async (page: Page) => page.locator('select[data-stream-count]').selectOption('3'),
   },
 ] as const;
 
@@ -95,11 +116,11 @@ test('@accessibility representative pages and visual states have no tagged viola
   }
 });
 
-test('@accessibility issue-15 non-default and empty states have no tagged axe violations', async ({ page }, testInfo) => {
+test('@accessibility release visual non-default and empty states have no tagged axe violations', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
   await page.goto('/');
 
-  for (const scenario of issue15StateScans) {
+  for (const scenario of releaseVisualStateScans) {
     await page.evaluate(
       ([storageKey, value]) => localStorage.setItem(storageKey, value),
       [THEME_STORAGE_KEY, scenario.theme] as const,

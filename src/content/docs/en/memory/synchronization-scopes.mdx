@@ -1,0 +1,203 @@
+---
+title: 'M05: Synchronization scopes and memory visibility'
+description: Select warp, block, device, or system coordination from the participants and communication scope while keeping rendezvous, ordering, visibility, and atomicity distinct.
+pairId: m05
+counterpart: /memory/synchronization-scopes/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - scope-ledger
+  - rendezvous
+  - ordering-visibility
+  - atomicity
+  - barriers-fences
+  - selection
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M05
+prerequisites:
+  - F02
+  - M01
+relatedUnits: []
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Thread hierarchy, shared memory, and block synchronization'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Thread scopes, scoped atomics, barriers, and memory visibility'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - CUDA C++ Memory Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cuda-cpp-memory-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Scope relationships, atomicity, data races, and ordering'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Fence Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-fence-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 fence and synchronization semantics'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Memory Fence Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#memory-fence-functions'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 fence and synchronization semantics'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,scope-ledger,rendezvous,ordering-visibility,atomicity,barriers-fences,selection,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,M01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/memory/synchronization-scopes/" lang="zh-CN">阅读中文对应页</a>
+
+A synchronization scope is chosen from the participants that must coordinate and the communication scope that carries their data. Warp, block, device, and system are not four strengths of one universal operation. They name different participant sets and available protocols. A correct protocol states separately whether it needs rendezvous, ordering, memory visibility, or atomicity.
+
+## What you should be able to do
+
+- Name every producer, consumer, and memory location before selecting a synchronization primitive.
+- Choose warp, block, device, or system coordination from participant and communication scope.
+- Distinguish rendezvous from memory ordering and visibility.
+- Distinguish an atomic access from a barrier or memory fence.
+- Explain why a fence alone neither makes peers arrive nor publishes a completion flag.
+
+## Prerequisites
+
+Complete [F02: Build an Execution-Hierarchy Mental Model](/en/foundations/execution-hierarchy/) and [M01: Address Spaces, Ownership, Scope, and Lifetime](/en/memory/address-spaces/) first. F02 supplies thread, warp, block, grid, device, and host participants. M01 supplies the ownership, location, lifetime, and accessibility of the communicated object.
+
+This unit does not teach a catalog of every CUDA synchronization interface. It establishes the selection proof that later interfaces must satisfy. It requires no CUDA-capable system and grants no compilation, runtime, or performance Evidence Status.
+
+## Scope ledger: who communicates with whom?
+
+Start with a ledger rather than a primitive name:
+
+| coordination scope | possible participants | communication location | minimum question |
+| --- | --- | --- | --- |
+| warp | named lanes in one warp | registers via collectives, or shared/global memory | Which lanes are in the mask, and do all named lanes execute the operation? |
+| block | threads in one thread block | usually shared or global memory | Do all required block participants reach the same barrier phase? |
+| device | threads in different blocks on one device | global memory plus a device-scope protocol | What orders publication and observation without assuming block scheduling? |
+| system | GPU and CPU threads, or participants spanning devices | memory accessible to all named participants | Does the allocation and primitive actually support system-scope communication? |
+
+The table is a selection map, not a promise that every row has one built-in global barrier. In particular, ordinary blocks cannot wait on each other by assuming they are resident together. Device- and system-scope communication needs an interface whose documented scope includes every participant and whose progress conditions are valid.
+
+## Rendezvous: participant progress at a phase
+
+Rendezvous answers, “Which participants must reach this phase before any of them proceed?” A block barrier such as `__syncthreads()` is a rendezvous for participating threads in a block and also carries documented memory effects. A warp operation such as `__syncwarp(mask)` names participating lanes through a mask. The mask is part of the contract; “same warp” is not a substitute for naming participants.
+
+Rendezvous does not follow from source proximity. Two blocks reaching adjacent source lines are not thereby joined, and a host call appearing after a launch does not imply that the device work completed unless the API contract creates that boundary.
+
+## Ordering and visibility: before, after, and observable
+
+Ordering constrains how operations relate, such as a producer's data write preceding publication of a ready flag. Memory visibility asks whether the intended consumer can observe those writes after following the protocol. Both questions must be answered at a scope that includes producer and consumer.
+
+A useful producer-consumer proof is:
+
+```text
+producer writes payload
+-> release publication
+   at sufficient scope
+-> consumer observes publication
+   with matching acquire at sufficient scope
+-> consumer reads payload
+```
+
+This is a relation between operations, not a claim that caches are “flushed everywhere.” A smaller scope does not cover a participant outside that scope. A larger scope does not repair a missing publication or an inaccessible memory location.
+
+## Atomicity: one indivisible access is not the whole protocol
+
+Atomicity means the specified access cannot be observed as a torn read-modify-write within its documented scope. It does not automatically provide a rendezvous, and a relaxed atomic can provide atomicity without ordering unrelated payload accesses. Conversely, a barrier may coordinate participants and establish visibility while not turning an arbitrary conflicting update into an atomic read-modify-write.
+
+For a counter, atomicity may be the central requirement. For message passing, the flag needs both suitable atomicity and ordering, while the payload needs the visibility relation created by that publication protocol. Name those obligations separately.
+
+## Barriers versus memory fences
+
+A barrier coordinates a declared participant set at a phase. A memory fence orders memory operations performed by the calling thread according to its documented scope. A fence does **not** make another thread execute a matching line, wait for a phase, or learn that the producer is finished. A separate synchronization action, often a suitable atomic publication, must connect producer and consumer.
+
+This distinction prevents two common errors:
+
+- replacing a missing block rendezvous with `__threadfence()`;
+- inserting `__syncthreads()` and assuming it coordinates a different block or the host.
+
+Use each primitive only for the guarantees its contract supplies.
+
+## Selection procedure
+
+For each communication edge, write six fields:
+
+1. **Participants:** exact producers and consumers.
+2. **Location:** the address space and allocation visible to them.
+3. **Progress:** whether any participant may wait safely.
+4. **Rendezvous:** whether a phase requires every named participant.
+5. **Ordering and visibility:** the before/after relation and observation mechanism.
+6. **Atomicity:** which conflicting access, if any, must be indivisible.
+
+Only then select the narrowest documented scope that includes every participant. If no available primitive satisfies all six fields, redesign the communication pattern rather than widening a fence and guessing.
+
+## Evidence boundary
+
+The ledgers on this page are static semantic proofs. They do not compile or execute a CUDA primitive, observe a hardware schedule, or measure performance. The evidence axes therefore remain empty. A future executable must declare its Environment Manifest and verify a concrete result before any runtime or performance statement can be made.
+
+## Retrieval check
+
+1. Why must participant and communication scope be named before choosing a synchronization primitive?
+2. What does rendezvous guarantee that a memory fence alone does not?
+3. Why can a relaxed atomic provide atomicity without publishing an unrelated payload?
+4. Why cannot `__syncthreads()` coordinate a consumer in another block?
+5. What six fields belong in a scope-selection ledger?
+
+## Continue with practice
+
+- Complete the [M05 Exercises](/en/memory/synchronization-scopes/exercises/), then inspect the separate [reviewed solutions](/en/memory/synchronization-scopes/solutions/).
+- Classify a broken producer-consumer protocol in [Practice Bank PB-R1-017](/en/practice/#pb-r1-017).
+- Carry the participant-mask rule into M06 before reasoning about warp control flow.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies the current thread hierarchy, shared-memory, and block-synchronization baseline.
+- [CUDA Programming Guide v13.3: Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) defines thread scopes and relates scoped atomics, barriers, ordering, and visibility.
+- [CUDA Programming Guide v13.3: CUDA C++ Memory Model](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cuda-cpp-memory-model.html) supplies scope relationships, atomicity, and data-race rules.
+- [CUDA C Programming Guide 11.8: Memory Fence Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-fence-functions) preserves the Toolkit 11.8 fence contract.
+- [CUDA C++ Programming Guide 12.9.1: Memory Fence Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#memory-fence-functions) preserves the Toolkit 12.9.1 fence contract.
+
+All five owner sources were accessed on **2026-08-28**. The scope ledger, distinctions, selection procedure, Exercises, and arrangement are original composition for this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-28.**

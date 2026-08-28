@@ -195,6 +195,7 @@ test('issue-15 publications expose paired routes, canonical metadata, and honest
       { route: publication.en, counterpart: publication.zh, lang: 'en' },
     ] as const) {
       const response = await page.goto(route);
+      await page.waitForLoadState('networkidle');
       expect(response?.ok(), route).toBe(true);
       await expect(page.locator('html')).toHaveAttribute('lang', lang);
       await expect(page.locator('main h1')).toContainText(publication.unitId);
@@ -219,6 +220,7 @@ test('issue-15 publications expose paired routes, canonical metadata, and honest
   }
 
   await page.goto('/en/start/using-the-learning-site/');
+  await page.waitForLoadState('networkidle');
   const navigation = page.getByRole('navigation', { name: 'Main' });
   for (const publication of issue15Publications) {
     await expect(navigation.locator(`a[href="${publication.en}"]`), publication.unitId).toHaveCount(1);

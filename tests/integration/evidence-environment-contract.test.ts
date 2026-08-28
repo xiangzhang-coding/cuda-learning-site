@@ -197,6 +197,14 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/memory/shared-memory-tiling/exercises/',
     '/memory/bank-conflicts-layouts/exercises/',
     '/en/memory/bank-conflicts-layouts/exercises/',
+    '/memory/synchronization-scopes/exercises/',
+    '/en/memory/synchronization-scopes/exercises/',
+    '/memory/warp-divergence-reconvergence/exercises/',
+    '/en/memory/warp-divergence-reconvergence/exercises/',
+    '/memory/stream-ordering/exercises/',
+    '/en/memory/stream-ordering/exercises/',
+    '/memory/event-dependencies-timing/exercises/',
+    '/en/memory/event-dependencies-timing/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -247,6 +255,14 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/memory/shared-memory-tiling/solutions/',
     '/memory/bank-conflicts-layouts/solutions/',
     '/en/memory/bank-conflicts-layouts/solutions/',
+    '/memory/synchronization-scopes/solutions/',
+    '/en/memory/synchronization-scopes/solutions/',
+    '/memory/warp-divergence-reconvergence/solutions/',
+    '/en/memory/warp-divergence-reconvergence/solutions/',
+    '/memory/stream-ordering/solutions/',
+    '/en/memory/stream-ordering/solutions/',
+    '/memory/event-dependencies-timing/solutions/',
+    '/en/memory/event-dependencies-timing/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -263,7 +279,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes twenty-one complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes twenty-five complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     const entryIds = [
@@ -272,6 +288,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-006', 'PB-R1-007', 'PB-R1-008',
       'PB-R1-009', 'PB-R1-010', 'PB-R1-011', 'PB-R1-012',
       'PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016',
+      'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
     ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
@@ -285,6 +302,10 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-014': 'memory/coalescing-transactions',
       'PB-R1-015': 'memory/shared-memory-tiling',
       'PB-R1-016': 'memory/bank-conflicts-layouts',
+      'PB-R1-017': 'memory/synchronization-scopes',
+      'PB-R1-018': 'memory/warp-divergence-reconvergence',
+      'PB-R1-019': 'memory/stream-ordering',
+      'PB-R1-020': 'memory/event-dependencies-timing',
     };
 
     expect(entryHeadings).toHaveLength(entryIds.length);
@@ -331,7 +352,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/F01/);
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
-    for (const unitId of ['M01', 'M02', 'M03', 'M04']) expect(text).toContain(unitId);
+    for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
@@ -352,7 +373,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
-    for (const slug of ['address-spaces', 'coalescing-transactions', 'shared-memory-tiling', 'bank-conflicts-layouts']) {
+    for (const slug of ['address-spaces', 'coalescing-transactions', 'shared-memory-tiling', 'bank-conflicts-layouts', 'synchronization-scopes', 'warp-divergence-reconvergence', 'stream-ordering', 'event-dependencies-timing']) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
   });

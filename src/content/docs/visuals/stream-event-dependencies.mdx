@@ -1,0 +1,143 @@
+---
+title: 'VIS07：Stream 与 event dependency trace'
+description: 在具名 non-default stream 中建立有界 ordered-work graph，添加显式 event record/wait dependency，并检查不声明并发或 CUDA timing 的确定性 ready-set trace。
+pairId: vis07
+counterpart: /en/visuals/stream-event-dependencies/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - stream-order
+  - event-dependencies
+  - deterministic-trace
+  - event-timing
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS07
+prerequisites: []
+relatedUnits:
+  - M07
+  - M08
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA stream ordering, events, and explicit synchronization'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'cudaStreamWaitEvent and stream management interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API - Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Event record, completion, flags, and elapsed-time conditions'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 11.8 - Asynchronous Concurrent Execution'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution'
+    version: 'CUDA C++ Programming Guide v11.8.0; archived'
+    platform: 'Archived stream and event ordering boundary'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9 - Asynchronous Concurrent Execution'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution'
+    version: 'CUDA C++ Programming Guide v12.9.1; archived'
+    platform: 'Archived stream and event ordering boundary'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,stream-order,event-dependencies,deterministic-trace,event-timing,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0,12.9.1' }
+---
+
+import StreamEventDependencyExplorer from '../../../components/StreamEventDependencyExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/stream-event-dependencies/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS07 是与 M07、M08 相关的独立 Visual Explainer。它先用每条 CUDA 流（CUDA stream）的 enqueue order 和显式事件依赖（event dependency）替换“全局有序”心智模型，再允许讨论 overlap。
+
+<StreamEventDependencyExplorer locale="zh-CN" />
+
+## Stream order
+
+模型只包含两条或三条显式具名的非默认流（non-default stream）。这里排除 default-stream behavior，避免 legacy 或 per-thread default-stream rule 静默添加 edge。Operation vocabulary 固定为 H2D copy、kernel 与 D2H copy；每个被接受的 operation 都获得 `op-06` 这样的确定性 ID。
+
+同一 stream 内的连续 operation 按 enqueue order 获得隐式同流顺序（same-stream order）edge。不同 stream 之间不会产生隐式 edge。若两个 cross-stream operation 之间没有 dependency path，VIS07 把它们称为未排序（unordered）。Unordered **不证明并发**：实际 overlap 取决于 operation、resource、hardware、runtime behavior 与完整程序。
+
+## Event dependency
+
+显式 dependency 显示为：
+
+```text
+producer operation -> record(event) -> wait(event) -> consumer operation
+```
+
+这条教学 edge 对应两个 Runtime API role。事件记录（event record）`cudaEventRecord` 捕获调用时所属 stream 中的 work；事件等待（event wait）`cudaStreamWaitEvent` 则让 wait 之后加入的 work 延迟到被捕获的 event work 完成。模型把这些 event edge 与 same-stream order edge 分开推导。
+
+有界 event-generation ledger 是独立于 editable operation graph 的 fixture。它用确定性顺序 `record-E1`、`wait-E1`、`record-E2`、`wait-E2` 复用同一个 handle；其中 `generation-*` operation ID 不会向上方 graph 添加 edge。Handle 被 re-record 为 E2 后，第一个 wait 仍绑定 E1，较晚的 wait 绑定 E2；显式 record marker 与 wait edge 展示这些绑定，不执行 CUDA。
+
+Edit 采用 fail-closed。未知 operation/stream ID、self-dependency、重复 event edge、已经被现有 path 蕴含的 edge，以及会形成 cycle 的 edge 都会被拒绝，原 graph 保持不变。每次 edit attempt 都会停止 playback 并回到 trace 第一帧；因此 rejected input 不会留下部分修改的 graph 或 stale animation。
+
+## 确定性 trace
+
+每一帧都暴露 completed set 与前驱已完成的完整就绪集（ready set）。模型按升序 deterministic operation ID 选择一个 operation。这个 stable tie-break 让测试和复习可重复；它不声明 CUDA scheduling、stream priority、start order、finish order 或 concurrent execution。
+
+Play、Pause、Step、Reset 与原生 range scrubber 只移动这条拓扑序（topological order）教学 trace。Graph edit 会从 accepted graph 重建 trace 并重置 playback。
+
+## Event timing 边界
+
+页面展示一组位于具名 non-default stream 中的有效 timing bracket。Start/stop event 均启用 timing，两个 record 都已完成，并明确纳入 `op-01` 与 `op-02`。Renderer 使用的同一个纯 assessment 返回 `formula-only` 与 `null` milliseconds：页面只显示符号关系 `elapsed = timestamp(stop) - timestamp(start)`，不虚构 timestamp 或 elapsed value。在实际 Runtime API 中，timing 被禁用（timing disabled）时不能计算 elapsed time；event 从未记录（unrecorded）时输入无效；任一已 record event 尚未完成（incomplete）时结果也未就绪。Visual 始终把这三种情况分开。
+
+动画间隔只是为了可读性的 browser pacing。**浏览器 pacing 不是 CUDA 时间**、device timestamp、profiling evidence 或 performance result。真实 event measurement 需要实际创建与 record event、等待 device work 完成、检查 API result；若把结果报告为 evidence，还要附 Environment Manifest。
+
+## 静态回退
+
+永久 fallback 使用三条 stream fixture，列出五个 operation、两个 same-stream edge、一个 event edge、一条模型推导的 unordered relation verdict，以及包含最终空 ready set 在内的全部六帧。禁用 JavaScript 和打印时，两行 event-generation ledger 与完整 timing-bracket ledger 会和 graph、edge ledger、formula、trace 一起保留；每种状态都有文字，不依赖颜色。
+
+## 证据边界
+
+VIS07 不编译或运行 CUDA、不观察 stream/event，也不测量 device time。Graph 与 browser animation 不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**。Compilation、runtime、expected-observation 与 recorded-observation metadata 均为空。
+
+## 来源
+
+当前 stream ordering、event role 与 explicit synchronization 依据 [CUDA Programming Guide v13.3 的 Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)、[CUDA Runtime API v13.3.1 Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html) 与 [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)。稳定术语与 ordering boundary 还与精确的 [CUDA 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution) 和 [CUDA 12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution) 做了比较。
+
+全部 source coordinate 的 access date 为 **2026-08-28**。没有复制 NVIDIA diagram、figure 或 example；有界 graph、fixture、controls、trace 与双语解释都是原创 CC-BY-4.0 内容。

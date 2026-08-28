@@ -12,7 +12,7 @@ import {
   type ResourceIndexRecord,
 } from '../../src/resource-indexes/resource-index-model';
 
-const asOf = new Date('2026-08-27T12:00:00Z');
+const asOf = new Date('2026-08-28T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -23,25 +23,26 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(143);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(161);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 3, practice: 21, visuals: 9, glossary: 76, sources: 34 });
-    for (const absentId of ['LAB04', 'LAB05']) {
+    ).toEqual({ labs: 3, practice: 25, visuals: 11, glossary: 86, sources: 36 });
+    for (const absentId of ['LAB04', 'LAB05', 'LAB06', 'EX07']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
+      expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
   });
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-26T16:00:00Z'),
+      asOf: new Date('2026-08-27T16:00:00Z'),
     })).not.toThrow();
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-26T15:59:59Z'),
+      asOf: new Date('2026-08-27T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
 
@@ -95,15 +96,23 @@ describe('resource index catalog', () => {
     expect(visuals.map(({ planningId }) => planningId)).toEqual([
       'VIS01',
       'VIS02',
+      'VIS03',
       'VIS04',
       'VIS05',
       'VIS06',
+      'VIS07',
       'VIS19',
       'VIS20',
       'VIS21',
       'VIS22',
     ]);
     for (const expected of [
+      {
+        planningId: 'VIS03',
+        href: '/en/visuals/warp-divergence/',
+        counterpart: '/visuals/warp-divergence/',
+        prerequisites: [],
+      },
       {
         planningId: 'VIS04',
         href: '/en/visuals/memory-transactions/',
@@ -120,6 +129,12 @@ describe('resource index catalog', () => {
         planningId: 'VIS06',
         href: '/en/visuals/memory-hierarchy-lifetime/',
         counterpart: '/visuals/memory-hierarchy-lifetime/',
+        prerequisites: [],
+      },
+      {
+        planningId: 'VIS07',
+        href: '/en/visuals/stream-event-dependencies/',
+        counterpart: '/visuals/stream-event-dependencies/',
         prerequisites: [],
       },
       {
@@ -187,7 +202,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(101);
+    expect(projected).toHaveLength(111);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
     );

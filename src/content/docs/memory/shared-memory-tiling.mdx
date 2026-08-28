@@ -114,7 +114,7 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 先完成 [M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)和 [M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)。M01 提供 shared memory 的 per-block scope/lifetime 与 global input ownership；M02 让你在 cooperative load phase 检查 global addresses，而不把 “使用 shared” 本身写成 coalescing 或 speed 证据。
 
-本单元只教 minimum block-wide correctness contract。更细的 synchronization scope、memory ordering 和替代 primitives 留给未来 M05；不能把未来接口倒灌成 M03 prerequisite。本页不需要 CUDA-capable system，也不授予 Evidence Status。
+本单元只教 minimum block-wide correctness contract。更细的 synchronization scope、memory ordering 和替代 primitives 由后续的 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)直接讲授；M05 仍是下游学习单元，不能倒灌成 M03 prerequisite。本页不需要 CUDA-capable system，也不授予 Evidence Status。
 
 ## Tile 合同：一个 block，一份 shared 实例
 

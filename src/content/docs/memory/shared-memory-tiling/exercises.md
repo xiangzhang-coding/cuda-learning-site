@@ -89,7 +89,7 @@ if (output_index < n) consume(tile);
 // next iteration overwrites tile
 ```
 
-**约束：** 保留 input/output bounds；只用 portable C++17 synchronous baseline；不能引入 async copy、warp-only assumption 或 future M05 primitives；所有 block threads 采用相同 loop trip count。
+**约束：** 保留 input/output bounds；只用 portable C++17 synchronous baseline；不能引入 async copy、warp-only assumption，或把后续 [M05](/memory/synchronization-scopes/) 的 primitives 倒灌进 M03 baseline；所有 block threads 采用相同 loop trip count。
 
 **预期证据：** 修复后的 pseudocode、before/after phase graph、对 uninitialized read、barrier nonparticipation 和 read/overwrite race 的逐项解释。
 

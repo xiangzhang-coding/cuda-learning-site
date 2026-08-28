@@ -15,6 +15,8 @@ async function readRoute(route: string) {
 const visualPairs = [
   { id: 'VIS01', tag: 'cuda-kernel-journey', zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
   { id: 'VIS02', tag: 'cuda-indexing-explorer', zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
+  { id: 'VIS03', tag: 'cuda-warp-divergence', zh: '/visuals/warp-divergence/', en: '/en/visuals/warp-divergence/' },
+  { id: 'VIS07', tag: 'cuda-stream-event-dependencies', zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
 ] as const;
 
 const embeddedVisuals = [
@@ -188,7 +190,7 @@ describe('built Visual Explainers', () => {
     }
   });
 
-  it('publishes empty CUDA evidence axes for both conceptual models', async () => {
+  it('publishes empty CUDA evidence axes for every standalone conceptual model in this contract', async () => {
     for (const route of visualPairs.flatMap(({ zh, en }) => [zh, en])) {
       const document = await readRoute(route);
       for (const name of [

@@ -1,0 +1,200 @@
+---
+title: 'M06: Divergence, reconvergence, and warp-safe reasoning'
+description: Reason about active and participation masks, divergence, reconvergence, and CC 7.0+ Independent Thread Scheduling without assuming implicit lockstep or an exact hardware schedule.
+pairId: m06
+counterpart: /memory/warp-divergence-reconvergence/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - active-masks
+  - divergence
+  - reconvergence
+  - independent-thread-scheduling
+  - unsafe-lockstep
+  - source-join
+  - schedule-boundary
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M06
+prerequisites:
+  - F02
+  - M05
+relatedUnits:
+  - VIS03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Warps, active lanes, masks, and SIMT control flow'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Divergence, reconvergence, and Independent Thread Scheduling'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Device-Callable APIs and Intrinsics'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Warp synchronization, vote, shuffle, and active-mask contracts'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C Programming Guide 11.8 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 SIMT and Independent Thread Scheduling contract'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 SIMT and Independent Thread Scheduling contract'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,active-masks,divergence,reconvergence,independent-thread-scheduling,unsafe-lockstep,source-join,schedule-boundary,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS03 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/memory/warp-divergence-reconvergence/" lang="zh-CN">阅读中文对应页</a>
+
+Warp divergence occurs when lanes of one warp follow different control-flow paths. Reconvergence describes lanes becoming eligible to execute a common region again; it does not reveal the exact instruction schedule. Warp-safe reasoning therefore names active lanes, an intended participation mask, and every required synchronization edge instead of relying on implicit lockstep.
+
+## What you should be able to do
+
+- Trace active and inactive lanes through a divergent branch.
+- Distinguish the current active mask from an intended participation mask.
+- Explain what changed with Independent Thread Scheduling on CC 7.0+.
+- Reject code whose correctness relies on unsafe implicit lockstep.
+- State why a source-level join is not synchronization and why the exact hardware schedule is unknown.
+
+## Prerequisites
+
+Complete [F02: Build an Execution-Hierarchy Mental Model](/en/foundations/execution-hierarchy/) and [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) first. F02 supplies warp and lane identity. M05 supplies participant masks, memory visibility, and the rule that source proximity is not a synchronization edge.
+
+This unit reasons about SIMT C++ control flow. It does not expose or infer an instruction-by-instruction scheduler trace, and it requires no CUDA-capable system.
+
+## Active masks and participation masks
+
+An active mask answers, “Which lanes are executing this instruction now?” A participation mask answers, “Which lanes are required to take part in this collective protocol?” They can differ. A lane can be inactive at one path instruction yet still belong to a collective that occurs after the paths join.
+
+`__activemask()` reports the lanes active at the call. It does not recover an intended group omitted by earlier divergence. If a protocol needs all lanes satisfying predicate `p`, derive that participation set at a point where the required voters are active, for example with a documented ballot, then carry the mask into later warp collectives.
+
+For every mask-sensitive operation, prove:
+
+```text
+mask members = intended participants
+every named lane reaches the operation under its contract
+every consumed source lane is named and supplies a value
+```
+
+## Divergence: paths and disabled lanes
+
+When a data-dependent branch splits a warp, each taken path executes with lanes not on that path disabled. Divergence occurs within a warp; different warps already execute independently. A source trace may represent path A followed by path B for explanation, but that diagram is not a promise of which path hardware issues first or how instructions interleave.
+
+The correctness question is not “Which branch wins?” It is whether each lane's own scalar semantics are correct and whether any cross-lane exchange uses a valid participant set plus required synchronization.
+
+## Reconvergence: common eligibility, not a clock tick
+
+Reconvergence is a control-flow concept: lanes that followed different paths can later be eligible for a common region. It does not mean every lane completed at the same instant, nor does it create memory ordering merely because the source has one closing brace.
+
+A reconvergence diagram can show masks by source region. It cannot prove an exact program-counter stack, issue order, or cycle count. Those implementation details are outside the portable source contract.
+
+## Independent Thread Scheduling on CC 7.0+
+
+For devices with compute capability below 7.0, a warp used one shared program counter plus an active mask. On CC 7.0+, Independent Thread Scheduling maintains execution state per thread and permits divergence and reconvergence at sub-warp granularity. A schedule optimizer groups active threads into SIMT units.
+
+The practical compatibility rule is direct: code written around implicit warp-synchronous behavior must be revisited. CC 7.0+ does not make every intra-warp communication incorrect; it makes implicit lockstep an invalid correctness argument. Use documented synchronized warp operations and explicit masks.
+
+## Unsafe implicit lockstep
+
+This argument is unsafe:
+
+```text
+lane i writes shared[i]
+lane i immediately reads shared[i - 1]
+there is no race because lanes are in one warp
+```
+
+“One warp” identifies an execution group, not the memory ordering edge required by the exchange. The repair must define participating lanes, place a documented warp synchronization where shared-memory visibility is needed, and guard any source lane that does not exist. A suitable shuffle collective can instead move register values when its mask and source-lane contracts are satisfied.
+
+## A source-level join is not synchronization
+
+After both arms of an `if` reach the statement following the branch, the source has a join. The statement `source-level join is not synchronization` remains true: the join alone is neither a barrier nor a memory fence. If path A writes data consumed by a lane from path B, the program still needs a documented cross-lane protocol.
+
+This also prevents a subtler mistake: taking `__activemask()` independently inside each branch and later pretending both branch-local masks name one group. Capture the intended participation mask at the protocol's valid formation point.
+
+## Schedule boundary
+
+Portable reasoning may state lane predicates, active masks at modeled source regions, required participation masks, and documented synchronization relations. It must leave path issue order, instruction interleaving, reconvergence-stack details, and timing unspecified. In short, the exact hardware schedule is unknown.
+
+That boundary is not ignorance about the program. It is a deliberate separation between guarantees needed for correctness and implementation freedom retained by the GPU.
+
+## Visual model: VIS03
+
+[VIS03: Warp Divergence and Reconvergence](/en/visuals/warp-divergence/) provides a deterministic source-region trace with masks and a textual fallback. It models legal explanatory steps, not a captured GPU scheduler. Use it to compare lane predicates and participant sets, never to infer an exact hardware path order.
+
+## Evidence boundary
+
+All examples here are static traces. They do not compile a kernel, inspect machine instructions, execute on a GPU, or establish a performance result. Compilation and runtime evidence axes remain empty.
+
+## Retrieval check
+
+1. How does an active mask differ from an intended participation mask?
+2. Why can calling `__activemask()` inside one divergent arm omit lanes needed later?
+3. What correctness assumption became unsafe with Independent Thread Scheduling on CC 7.0+?
+4. Why is a source-level join not synchronization?
+5. Which schedule facts must remain unknown in portable warp-safe reasoning?
+
+## Continue with practice
+
+- Complete the [M06 Exercises](/en/memory/warp-divergence-reconvergence/exercises/), then inspect the separate [reviewed solutions](/en/memory/warp-divergence-reconvergence/solutions/).
+- Audit an implicit-lockstep exchange in [Practice Bank PB-R1-018](/en/practice/#pb-r1-018).
+- Replay the participant masks in [VIS03](/en/visuals/warp-divergence/) without treating its deterministic trace as hardware evidence.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html) supplies the current warp, lane, active-mask, and SIMT overview.
+- [CUDA Programming Guide v13.3: Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) supplies divergence, reconvergence, and CC 7.0+ Independent Thread Scheduling semantics.
+- [CUDA Programming Guide v13.3: Device-Callable APIs and Intrinsics](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html) supplies current synchronized warp-operation contracts.
+- [CUDA C Programming Guide 11.8: SIMT Architecture](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture) preserves the Toolkit 11.8 execution-model contract.
+- [CUDA C++ Programming Guide 12.9.1: SIMT Architecture](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture) preserves the Toolkit 12.9.1 execution-model contract.
+
+All five owner sources were accessed on **2026-08-28**. The mask ledgers, branch traces, unsafe-code analysis, Exercises, and arrangement are original composition for this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-28.**

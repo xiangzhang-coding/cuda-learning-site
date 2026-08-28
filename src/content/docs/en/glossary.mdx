@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: Seventy-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: Eighty-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-27'
+factCheckDate: '2026-08-28'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-27'
+      content: '2026-08-28'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -732,6 +732,96 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [M03](/en/memory/shared-memory-tiling/), [M04](/en/memory/bank-conflicts-layouts/), and [EX06](/en/examples/shared-memory-tile-bank-padding/).
 - **Version note:** M03 teaches the portable C++17 synchronous baseline for the selected Lanes; future asynchronous tiling interfaces are version-gated and are not projected backward.
 
+<span id="term-077" class="resource-target" aria-hidden="true"></span>
+
+### synchronization scope · 同步作用域
+
+- **Definition:** The range of execution agents covered by a synchronization or atomic operation's documented guarantees. A scope must include every producer and consumer, but it is not by itself a complete rendezvous, ordering, visibility, or atomicity protocol.
+- **Avoid:** Synchronization strength level, universal barrier, wider is always correct.
+- **Related resources:** [M05: Synchronization scopes and memory visibility](/en/memory/synchronization-scopes/).
+- **Version note:** M05 reviews durable scope boundaries in CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 archives. The selected Toolkit and architecture still govern each primitive, memory order, and supported scope.
+
+<span id="term-078" class="resource-target" aria-hidden="true"></span>
+
+### memory visibility · 内存可见性
+
+- **Definition:** The property that lets an intended consumer observe a producer's writes to specified memory locations after following a valid ordering and synchronization protocol. Source proximity or a fence alone does not establish it.
+- **Avoid:** Flush every cache, rendezvous, ordinary-load eventual consistency.
+- **Related resources:** [M05: Synchronization scopes and memory visibility](/en/memory/synchronization-scopes/).
+- **Version note:** Visibility must bind to a CUDA Programming Guide v13.3 memory-model relation, a scope covering both sides, and storage accessible to both. Cache implementation and architecture do not replace the protocol proof.
+
+<span id="term-079" class="resource-target" aria-hidden="true"></span>
+
+### active mask · 活动掩码
+
+- **Definition:** The set of warp lanes active at one execution point. It describes momentary control-flow participation and is not automatically the algorithm's intended collective participant set.
+- **Avoid:** Permanent warp membership, intended participation mask, hardware schedule trace.
+- **Related resources:** [F02](/en/foundations/execution-hierarchy/), [M06: Divergence, reconvergence, and warp-safe reasoning](/en/memory/warp-divergence-reconvergence/), and [VIS03](/en/visuals/warp-divergence/).
+- **Version note:** CUDA Programming Guide v13.3 specifies Independent Thread Scheduling for CC 7.0+. A branch-local `__activemask()` cannot be projected backward into a stable group across divergence, and older architectures require separate archive review.
+
+<span id="term-080" class="resource-target" aria-hidden="true"></span>
+
+### divergence · 分支发散
+
+- **Definition:** Participating lanes in one warp following different control-flow paths because their predicates differ. It describes an active-lane partition, not path issue order, instruction interleaving, or elapsed time.
+- **Avoid:** Fixed serial order, data race, permanently split warp.
+- **Related resources:** [M06](/en/memory/warp-divergence-reconvergence/) and [VIS03](/en/visuals/warp-divergence/).
+- **Version note:** M06/VIS03 use Programming Guide v13.3 and the 11.8.0/12.9.1 SIMT archives as boundaries. Per-thread state on CC 7.0+ changes which lockstep assumptions are valid but supplies no exact schedule.
+
+<span id="term-081" class="resource-target" aria-hidden="true"></span>
+
+### reconvergence · 重汇合
+
+- **Definition:** Divergent lanes reaching a control-flow region where they may continue together. The site separates a source-level logical join from the hardware's actual reconvergence mechanism.
+- **Avoid:** Warp barrier, memory fence, shared-memory visibility guarantee.
+- **Related resources:** [M06](/en/memory/warp-divergence-reconvergence/) and [VIS03](/en/visuals/warp-divergence/).
+- **Version note:** VIS03 displays only a deterministic logical join. Programming Guide v13.3 and its archives do not authorize synchronization, fixed path order, or an architecture-specific reconvergence stack to be inferred from a closing brace.
+
+<span id="term-082" class="resource-target" aria-hidden="true"></span>
+
+### warp-safe reasoning · 线程束安全推理
+
+- **Definition:** Explicitly proving intended participants, a consistent mask, collective reachability, source-lane validity, and required ordering or visibility for warp-level communication without relying on implicit lockstep.
+- **Avoid:** Same warp therefore safe, closing-brace synchronization, mask-free collective reasoning.
+- **Related resources:** [M05](/en/memory/synchronization-scopes/), [M06](/en/memory/warp-divergence-reconvergence/), and [VIS03](/en/visuals/warp-divergence/).
+- **Version note:** The proof must be reviewed against the selected intrinsic and architecture contract. CC 7.0+ Independent Thread Scheduling especially prevents historical implicit-lockstep assumptions from becoming portable guarantees.
+
+<span id="term-083" class="resource-target" aria-hidden="true"></span>
+
+### stream · 流
+
+- **Definition:** A CUDA Runtime sequence whose operations are ordered by enqueue order. One stream supplies documented order; host source order does not create a global device order between different streams without a dependency edge.
+- **Avoid:** GPU thread, necessarily concurrent queue, global timeline for the whole device.
+- **Related resources:** [F05](/en/foundations/asynchronous-errors/), [M07: Streams replace a global-order mental model](/en/memory/stream-ordering/), and [VIS07](/en/visuals/stream-event-dependencies/).
+- **Version note:** M07 uses Programming Guide v13.3 and Runtime API v13.3.1. Default-stream relationships vary with legacy or per-thread mode and stream flags; 11.8.0/12.9.1 behavior requires its corresponding owner documentation.
+
+<span id="term-084" class="resource-target" aria-hidden="true"></span>
+
+### event · 事件
+
+- **Definition:** A CUDA Runtime object whose record captures the relevant stream work state at call time. Later query, synchronize, stream-wait, or timing operations use its most recently captured state and creation flags.
+- **Avoid:** Host callback, automatic global barrier, immutable timestamp.
+- **Related resources:** [M08: Events as dependencies and device-time measurements](/en/memory/event-dependencies-timing/) and [VIS07](/en/visuals/stream-event-dependencies/).
+- **Version note:** Runtime API v13.3.1 and the 11.8.0/12.9.1 archives govern record, re-record, completion, and flags. A later re-record of one handle does not retroactively retarget an earlier wait.
+
+<span id="term-085" class="resource-target" aria-hidden="true"></span>
+
+### event dependency · 事件依赖
+
+- **Definition:** An explicit ordering edge from an event record in a producer stream to a wait in a consumer stream, making consumer work submitted after the wait depend on the event generation captured at call time.
+- **Avoid:** Host-blocking wait, observed concurrency, automatic inclusion of all later producer work.
+- **Related resources:** [M07](/en/memory/stream-ordering/), [M08](/en/memory/event-dependencies-timing/), and [VIS07](/en/visuals/stream-event-dependencies/).
+- **Version note:** Record and wait contracts are reviewed in Runtime API v13.3.1 and the 11.8.0/12.9.1 archives. A dependency establishes only the declared partial order and proves neither hardware overlap nor timing.
+
+<span id="term-086" class="resource-target" aria-hidden="true"></span>
+
+### device-time measurement · 设备时间测量
+
+- **Definition:** Measuring elapsed time for a declared device-work interval with timing-enabled recorded event endpoints, then reporting it only after endpoint completion and API-result checks.
+- **Avoid:** Browser animation interval, unconditional synonym for host wall-clock time, symbolic subtraction by itself.
+- **Related resources:** [O06](/en/start/architecture-refresher/), [M08](/en/memory/event-dependencies-timing/), and [VIS07](/en/visuals/stream-event-dependencies/).
+- **Version note:** Runtime API v13.3.1 `cudaEventElapsedTime` does not accept timing-disabled endpoints. An interpretable record also needs an Environment Manifest, included-work boundary, and measurement method; archive versions require separate review.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records. TERM-066 through TERM-076 and the complete 76-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-27**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, and TERM-066 through TERM-076 retain their **2026-08-27** records. TERM-077 through TERM-086 and the complete 86-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-28**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.

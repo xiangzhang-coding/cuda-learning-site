@@ -1,0 +1,295 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/synchronization-visuals.css';
+import {
+  WARP_DIVERGENCE_PRESETS,
+  WARP_DIVERGENCE_STAGES,
+  createWarpDivergenceState,
+  createWarpDivergenceTrace,
+  type WarpDivergenceTrace,
+} from '../visuals/warp-divergence-model';
+import {
+  WARP_DIVERGENCE_COPY,
+  type SynchronizationVisualLocale,
+} from '../visuals/synchronization-visual-copy';
+
+interface Props {
+  locale: SynchronizationVisualLocale;
+}
+
+const { locale } = Astro.props;
+const copy = WARP_DIVERGENCE_COPY[locale];
+const initialState = createWarpDivergenceState();
+const initialTrace = createWarpDivergenceTrace(initialState.presetId);
+const initialStage = initialTrace.stages[initialState.stageIndex];
+if (!initialStage) throw new Error('VIS03 initial stage must exist.');
+const staticCases = (['lower-half', 'uniform-true'] as const).map((presetId) => ({
+  presetId,
+  trace: createWarpDivergenceTrace(presetId),
+}));
+
+function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: number) {
+  const mask = path === 'true' ? trace.trueMask : trace.falseMask;
+  if (mask.length === 0) return { state: 'skipped', text: copy.skipped } as const;
+  return mask.includes(lane)
+    ? { state: 'active', text: copy.active } as const
+    : { state: 'inactive', text: copy.inactive } as const;
+}
+---
+
+<cuda-warp-divergence
+  class="visual-explainer synchronization-visual not-content"
+  data-visual-id="VIS03"
+  data-locale={locale}
+  data-preset={initialState.presetId}
+  data-stage={initialStage.id}
+  data-stage-index={initialState.stageIndex}
+  data-lane-set-meaning={initialStage.laneSetMeaning}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls sync-controls" data-visual-controls hidden>
+      <legend>{copy.controlsLabel}</legend>
+      <label>
+        <span>{copy.presetLabel}</span>
+        <select data-warp-preset aria-label={copy.presetLabel}>
+          {WARP_DIVERGENCE_PRESETS.map(({ id }) => (
+            <option value={id} selected={id === initialState.presetId}>{copy.presets[id]}</option>
+          ))}
+        </select>
+      </label>
+      <button type="button" data-warp-step>{copy.step}</button>
+      <button type="button" data-warp-reset>{copy.reset}</button>
+    </fieldset>
+
+    <section class="sync-workbench" data-interactive-workbench data-pagefind-ignore hidden aria-label={copy.currentStage}>
+      <ol class="warp-stage-track">
+        {WARP_DIVERGENCE_STAGES.map(({ id }, index) => (
+          <li data-warp-stage={id} aria-current={index === initialState.stageIndex ? 'step' : undefined}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <strong>{copy.stages[id].title}</strong>
+          </li>
+        ))}
+      </ol>
+
+      <section class="sync-current">
+        <div>
+          <span class="sync-kicker">{copy.currentStage}</span>
+          <h3 data-warp-stage-title>{copy.stages[initialStage.id].title}</h3>
+          <p data-warp-stage-counter>{copy.stageCounter.replace('{current}', '1').replace('{total}', String(WARP_DIVERGENCE_STAGES.length))}</p>
+        </div>
+        <div>
+          <p data-warp-stage-description>{copy.stages[initialStage.id].description}</p>
+          <p class="sync-mask"><strong data-warp-lane-set-label>{copy.laneSetLabels[initialStage.laneSetMeaning]}</strong>: <span data-warp-lane-set>{initialStage.laneSet.join(', ')}</span></p>
+          <p class="sync-disposition" data-warp-disposition>{copy.executed}</p>
+        </div>
+      </section>
+
+      <p data-warp-status role="status" aria-live="polite" aria-atomic="true">
+        {copy.status[initialStage.laneSetMeaning]
+          .replace('{preset}', copy.presets[initialState.presetId])
+          .replace('{stage}', copy.stages[initialStage.id].title)
+          .replace('{laneSet}', initialStage.laneSet.join(', '))}
+      </p>
+
+      <div class="sync-table-wrap" tabindex="0" aria-label={copy.laneTableScrollLabel}>
+        <table class="sync-lane-table">
+          <caption>{copy.laneTable}</caption>
+          <thead><tr><th scope="col">{copy.lane}</th><th scope="col">{copy.predicate}</th><th scope="col">{copy.currentState}</th></tr></thead>
+          <tbody data-warp-lanes>
+            {initialTrace.lanes.map(({ lane, predicate }) => (
+              <tr data-lane={lane}>
+                <th scope="row">{lane}</th>
+                <td data-lane-predicate>{predicate ? copy.predicateTrue : copy.predicateFalse}</td>
+                <td data-lane-current data-lane-state="active">{copy.participating}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="visual-section" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="warp-static-grid">
+        {staticCases.map(({ presetId, trace }) => (
+          <article class="warp-static-case" data-static-case={presetId}>
+            <h4>{copy.staticCaseLabels[presetId]}</h4>
+            <p class="sync-case-verdict">{trace.divergent ? copy.divergent : copy.uniform}</p>
+            <div class="sync-table-wrap" tabindex="0" aria-label={`${copy.staticCaseLabels[presetId]}: ${copy.laneTableScrollLabel}`}>
+              <table class="sync-lane-table">
+                <caption>{copy.staticCaseLabels[presetId]}</caption>
+                <thead>
+                  <tr><th scope="col">{copy.lane}</th><th scope="col">{copy.predicate}</th><th scope="col">{copy.truePath}</th><th scope="col">{copy.falsePath}</th><th scope="col" data-warp-static-join-label>{copy.join}</th></tr>
+                </thead>
+                <tbody>
+                  {trace.lanes.map(({ lane, predicate }) => {
+                    const trueState = pathState(trace, 'true', lane);
+                    const falseState = pathState(trace, 'false', lane);
+                    return (
+                      <tr data-lane={lane}>
+                        <th scope="row">{lane}</th>
+                        <td>{predicate ? copy.predicateTrue : copy.predicateFalse}</td>
+                        <td data-static-state={trueState.state}>{trueState.text}</td>
+                        <td data-static-state={falseState.state}>{falseState.text}</td>
+                        <td data-static-state="source-level-participating-set" data-lane-set-meaning="source-level-participating-set">{copy.sourceSuccessorParticipating}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-warp-divergence>
+
+<script>
+  import {
+    WARP_DIVERGENCE_STAGES,
+    createWarpDivergenceState,
+    createWarpDivergenceTrace,
+    reduceWarpDivergenceState,
+    type WarpDivergenceAction,
+    type WarpDivergenceState,
+    type WarpDivergenceTraceStage,
+  } from '../visuals/warp-divergence-model';
+  import { WARP_DIVERGENCE_COPY } from '../visuals/synchronization-visual-copy';
+
+  class CudaWarpDivergence extends HTMLElement {
+    private state: WarpDivergenceState = createWarpDivergenceState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
+      const preset = this.querySelector<HTMLSelectElement>('[data-warp-preset]');
+      const step = this.querySelector<HTMLButtonElement>('[data-warp-step]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-warp-reset]');
+      if (!controls || !workbench || !preset || !step || !reset) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      workbench.hidden = false;
+      preset.addEventListener('change', () => this.apply({ type: 'select-preset', presetId: preset.value }));
+      step.addEventListener('click', () => {
+        this.apply({ type: 'step' });
+        if (step.disabled) reset.focus();
+      });
+      reset.addEventListener('click', () => {
+        this.apply({ type: 'reset' });
+        preset.focus();
+      });
+      this.render();
+    }
+
+    private apply(action: WarpDivergenceAction) {
+      this.state = reduceWarpDivergenceState(this.state, action);
+      this.render();
+    }
+
+    private locale() {
+      return this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en';
+    }
+
+    private laneState(stage: WarpDivergenceTraceStage, predicate: boolean) {
+      const copy = WARP_DIVERGENCE_COPY[this.locale()];
+      if (stage.disposition === 'skipped') return { state: 'skipped', text: copy.skipped } as const;
+      if (stage.id === 'true-path' || stage.id === 'false-path') {
+        const active = stage.id === 'true-path' ? predicate : !predicate;
+        return active
+          ? { state: 'active', text: copy.active } as const
+          : { state: 'inactive', text: copy.inactive } as const;
+      }
+      if (stage.id === 'predicate-evaluated') {
+        return { state: 'active', text: `${copy.predicate}: ${predicate ? copy.predicateTrue : copy.predicateFalse}` } as const;
+      }
+      if (stage.id === 'logical-join') {
+        return { state: 'source-level-participating-set', text: copy.sourceSuccessorParticipating } as const;
+      }
+      return { state: 'active', text: copy.participating } as const;
+    }
+
+    private render() {
+      const copy = WARP_DIVERGENCE_COPY[this.locale()];
+      const trace = createWarpDivergenceTrace(this.state.presetId);
+      const stage = trace.stages[this.state.stageIndex];
+      if (!stage) return;
+
+      this.dataset.preset = this.state.presetId;
+      this.dataset.stage = stage.id;
+      this.dataset.stageIndex = String(this.state.stageIndex);
+      this.dataset.laneSetMeaning = stage.laneSetMeaning;
+      this.querySelectorAll<HTMLElement>('[data-warp-stage]').forEach((item, index) => {
+        if (index === this.state.stageIndex) item.setAttribute('aria-current', 'step');
+        else item.removeAttribute('aria-current');
+      });
+
+      const preset = this.querySelector<HTMLSelectElement>('[data-warp-preset]');
+      const step = this.querySelector<HTMLButtonElement>('[data-warp-step]');
+      if (preset) preset.value = this.state.presetId;
+      if (step) step.disabled = this.state.stageIndex === WARP_DIVERGENCE_STAGES.length - 1;
+      this.setText('[data-warp-stage-title]', copy.stages[stage.id].title);
+      this.setText('[data-warp-stage-description]', copy.stages[stage.id].description);
+      this.setText(
+        '[data-warp-stage-counter]',
+        copy.stageCounter
+          .replace('{current}', String(this.state.stageIndex + 1))
+          .replace('{total}', String(WARP_DIVERGENCE_STAGES.length)),
+      );
+      const laneSet = stage.laneSet.length > 0 ? stage.laneSet.join(', ') : copy.emptyMask;
+      this.setText('[data-warp-lane-set-label]', copy.laneSetLabels[stage.laneSetMeaning]);
+      this.setText('[data-warp-lane-set]', laneSet);
+      this.setText(
+        '[data-warp-disposition]',
+        stage.disposition === 'skipped'
+          ? copy.skipped
+          : stage.disposition === 'logical-join'
+            ? copy.logicalJoin
+            : copy.executed,
+      );
+      this.setText(
+        '[data-warp-status]',
+        copy.status[stage.laneSetMeaning]
+          .replace('{preset}', copy.presets[this.state.presetId])
+          .replace('{stage}', copy.stages[stage.id].title)
+          .replace('{laneSet}', laneSet),
+      );
+
+      this.querySelectorAll<HTMLTableRowElement>('[data-warp-lanes] tr[data-lane]').forEach((row) => {
+        const lane = Number(row.dataset.lane);
+        const laneRecord = trace.lanes[lane];
+        if (!laneRecord) return;
+        const predicate = row.querySelector<HTMLElement>('[data-lane-predicate]');
+        if (predicate) predicate.textContent = laneRecord.predicate ? copy.predicateTrue : copy.predicateFalse;
+        const current = row.querySelector<HTMLElement>('[data-lane-current]');
+        if (!current) return;
+        const state = this.laneState(stage, laneRecord.predicate);
+        current.dataset.laneState = state.state;
+        current.textContent = state.text;
+      });
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-warp-divergence')) {
+    customElements.define('cuda-warp-divergence', CudaWarpDivergence);
+  }
+</script>

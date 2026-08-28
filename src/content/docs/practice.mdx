@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 21 个跨单元原创练习，包含先修链接、分层提示和解答。
+description: 当前已发布的 25 个跨单元原创练习，包含先修链接、分层提示和解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-08-27'
+factCheckDate: '2026-08-28'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -30,6 +30,10 @@ structure:
   - entry-pb-r1-014
   - entry-pb-r1-015
   - entry-pb-r1-016
+  - entry-pb-r1-017
+  - entry-pb-r1-018
+  - entry-pb-r1-019
+  - entry-pb-r1-020
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -53,6 +57,10 @@ prerequisites:
   - M02
   - M03
   - M04
+  - M05
+  - M06
+  - M07
+  - M08
 relatedUnits:
   - O02
   - O03
@@ -73,6 +81,10 @@ relatedUnits:
   - M02
   - M03
   - M04
+  - M05
+  - M06
+  - M07
+  - M08
 hardwareGate: none
 evidence:
   compilation: []
@@ -83,19 +95,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -114,13 +126,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面二十一个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看解答完成自己的产物。提示按层展开；解答用于复核边界，不替代作答。当前页面只发布下面二十五个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方二十一道完整题目、先修链接和解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方二十五道完整题目、先修链接和解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -986,6 +998,166 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源依据（Source basis）：** 本站原创的 [M04 selected bank fixture 与 padding 推导](/memory/bank-conflicts-layouts/)、[VIS05 确定性 mapper](/visuals/shared-memory-banks/)、[EX06 canonical layout 与当前证据记录](/examples/shared-memory-tile-bank-padding/)和 [SRC-CUDA-019](/sources-and-versions/#src-cuda-019)，以及 NVIDIA CUDA C++ Best Practices Guide [Shared Memory and Memory Banks](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks)。
 
+<span id="pb-r1-017" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-017：按参与者与通信范围选择同步作用域
+
+- **ID 与双语发布对：** PB-R1-017；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 同步作用域选择与协议审查；中级。
+- **直接先修条件：** [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。
+- **硬件门槛（Hardware gate）：** 无；只审查静态同步协议，不运行 CUDA。
+- **相关学习单元与资源：** [M05](/memory/synchronization-scopes/)、[F02](/foundations/execution-hierarchy/)和 [M01](/memory/address-spaces/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 为四条 communication edge 选择最窄的 candidate scope：A. 同一 warp 中 lane 0 至 7 交换 register value；B. 一个 block 的 128 个 thread 在读取 shared tile 前会合；C. producer block 写 global payload，另一个 block 看到 completion flag 后读取；D. CPU 在 GPU 完成后读取 system-accessible allocation。Reviewer 对四项都加入 `__threadfence_system()`，并声称“最大 scope 同时提供 rendezvous、notification、visibility 与 atomicity”。修复这份 review。
+
+**约束：**
+
+- 每项分别写 participant、memory location、rendezvous、ordering/visibility、atomicity 与 progress obligation。
+- C 不能依赖普通 blocks 同时 resident，也不能把 fence 本身当作 completion notification。
+- 不执行 kernel，不虚构 output、timing、cache behavior 或 Evidence Status。
+
+**预期证据：** 一张四行 scope ledger、C 的 producer-consumer ordering graph、每项对一个过窄或过宽选择的拒绝理由，以及修订后的证据声明。
+
+**验收条件：**
+
+- A 使用显式 mask 命名 participating lanes；B 保持 block scope，并要求全部 required block threads 到达同一 barrier phase。
+- C 使用 device-scope publication protocol：payload write 先于 release publication，consumer 通过 matching acquire observation 后才能读 payload；standalone fence 既不发布 flag，也不让 consumer 会合。
+- D 先证明 allocation 对 CPU/GPU 都可访问，再使用覆盖二者的 system-scope protocol 或明确的 host completion boundary。
+- 拒绝“最大 scope 自动包含全部 guarantee”；scope、primitive guarantee 与 Evidence Status 始终分开。
+
+<details><summary>提示 1</summary>先圈出每项中距离最远的 producer 与 consumer，再决定 scope，而不是先挑 primitive name。</details>
+
+<details><summary>提示 2</summary>把 C 写成 payload write、flag publication、flag observation、payload read 四个节点。</details>
+
+**解答：** A 的 participant set 只有同一 warp 中 lane 0 至 7，因此 warp candidate 足够，但 mask 必须精确命名这八个 lane，而且所有 named lane 都要执行 collective。B 的 shared object 每 block 一个 instance，128 个 required thread 需要 block barrier；warp scope 太窄，device/system scope 又没有替代 barrier participation。C 跨 block，因此 block operation 无法覆盖 consumer；一条完整静态修复是 `write payload -> device-scope release store ready=1 -> device-scope acquire load observes 1 -> read payload`。Fence-only 版本缺少 observable publication 和 consumer-side ordering。D 包含 CPU participant，必须先证明 system accessibility，再使用 documented system relation；host API completion boundary 也可以在控制流上建立消费前的完成关系。四项都没有要求用 system fence 充当万能操作。
+
+**有效替代方案：** C 可以拆成两个 kernel，并用明确的 host 或 stream submission boundary 让 consumer kernel 只在 producer 完成后启动；这改变协议结构，但仍需保留 global allocation lifetime，且不会产生性能结论。
+
+**常见错误：** 把 fence 当 barrier；用 `__syncthreads()` 协调不同 block；让 plain flag 承担 atomic publication；忽略 CPU accessibility；因为 system scope 更宽就默认更正确；把静态 ledger 当成 CUDA execution。
+
+**来源依据（Source basis）：** 本站原创的 [M05 scope-selection contract](/memory/synchronization-scopes/)、[F02 participant hierarchy](/foundations/execution-hierarchy/)、[M01 ownership/scope model](/memory/address-spaces/)和 [SRC-CUDA-020](/sources-and-versions/#src-cuda-020)，以及 NVIDIA [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)与 [CUDA C++ Memory Model](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cuda-cpp-memory-model.html)。
+
+<span id="pb-r1-018" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-018：修复不安全的 warp collective
+
+- **ID 与双语发布对：** PB-R1-018；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Warp correctness debugging；中级。
+- **直接先修条件：** [M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)。
+- **硬件门槛（Hardware gate）：** 无；只推导 predicate、mask 与 synchronization edge，不运行 CUDA。
+- **相关学习单元与资源：** [M06](/memory/warp-divergence-reconvergence/)、[VIS03](/visuals/warp-divergence/)、[M05](/memory/synchronization-scopes/)和 [F02](/foundations/execution-hierarchy/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 一个算法让 lane 0 至 7 参与。它先按 `lane < 4` 分成两条 branch，每条 branch 内各自保存 `__activemask()`，随后在 source-level join 后调用 `__shfl_sync(saved_mask, value, lane == 0 ? 0 : lane - 1)`。Reviewer 认为 closing brace 会自动把八个 lane 重汇合，所以两个 branch-local mask 可以互换使用。修复 collective，并说明 CC 7.0+ Independent Thread Scheduling 下哪些 schedule facts 仍未知。
+
+**约束：**
+
+- Intended participant set 必须在 divergence 前由所有 required participants 一致建立；每个 mask 中 named lane 都必须执行 matching collective。
+- Lane 0 不读取不存在的 predecessor；lane 1 至 7 的 source lane 必须 active、named 且有效。
+- 不依赖 implicit lockstep，不把 VIS03 path order 当成 hardware issue order，也不虚构 timing。
+
+**预期证据：** 八行 predicate/mask table、原协议的 missing-edge diagnosis、最小 shuffle repair、一个 shared-memory alternative，以及已知/未知 schedule facts 列表。
+
+**验收条件：**
+
+- 原 branch-local masks 分别只覆盖 lane 0 至 3 和 4 至 7，无法作为八-lane collective 的统一 participant contract；lane 4 的 predecessor lane 3 尤其跨越两个 mask。
+- 修复在 outer divergence 前建立 lane 0 至 7 的一致 mask，在 inner branch 的 common region 让八个 named lane 都执行 collective，并单独 guard lane 0 的消费。
+- Source-level join 不是 memory synchronization；shared-memory alternative 显式加入覆盖相同 participant mask 的 warp synchronization。
+- Exact branch issue order、instruction interleaving 与 hardware reconvergence mechanism 保持未知。
+
+<details><summary>提示 1</summary>分别写出两个 `__activemask()` 返回的集合，再检查 lane 4 请求的 source lane 3 是否属于同一 collective contract。</details>
+
+<details><summary>提示 2</summary>把“谁需要结果”与“谁必须执行 collective 才能提供结果”分成两列。</details>
+
+**解答：** 原程序让 lane 0 至 3 保存 lower mask，让 lane 4 至 7 保存 upper mask。Closing brace 只给出共同 source successor，不会让不同 mask 变成同一个 synchronization group。修复时先由当前 warp participants 一致计算 `participants = ballot(lane < 8)`；lane 0 至 7 可以执行各自 scalar branch，之后在共同 region 全部调用 `__shfl_sync(participants, value, lane == 0 ? 0 : lane - 1)`，再只让 lane 1 至 7 消费 predecessor value。这样 source lane 0 至 6 都属于 mask 且执行同一 collective，lane 0 的 self-source 结果被忽略。CC 7.0+ 允许 per-thread execution state 和 sub-warp regrouping，但不提供可移植的 path order 或 instruction trace。
+
+**有效替代方案：** 八个 lane 可以先写 shared storage，执行 `__syncwarp(participants)`，再让 lane 1 至 7 读取 predecessor slot。这个版本仍需相同 mask proof，而且 barrier 必须位于 write 与 peer read 之间。
+
+**常见错误：** 在 branch 内用 `__activemask()` 推导 intended group；在 mask 中命名不会到达 collective 的 lane；读取 inactive source lane；把 closing brace 当 barrier；认为同一 warp 天然 lockstep；把 VIS03 的确定性绘制顺序当硬件 schedule。
+
+**来源依据（Source basis）：** 本站原创的 [M06 mask 与 warp-safe reasoning contract](/memory/warp-divergence-reconvergence/)、[VIS03 predicate trace](/visuals/warp-divergence/)、[M05 synchronization distinctions](/memory/synchronization-scopes/)和 [SRC-CUDA-020](/sources-and-versions/#src-cuda-020)，以及 NVIDIA [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)与 [Device-Callable APIs](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html)。
+
+<span id="pb-r1-019" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-019：修复两条 stream 的 partial order 与 lifetime
+
+- **ID 与双语发布对：** PB-R1-019；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Stream-order 与 lifetime correctness debugging；中级。
+- **直接先修条件：** [M07：用流取代全局顺序心智模型](/memory/stream-ordering/)。
+- **硬件门槛（Hardware gate）：** 无；只审查静态 stream graph 与 allocation lifetime。
+- **相关学习单元与资源：** [M07](/memory/stream-ordering/)、[VIS07](/visuals/stream-event-dependencies/)、[F05](/foundations/asynchronous-errors/)和 [M01](/memory/address-spaces/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 两条显式 `cudaStreamNonBlocking` stream 承载 `stream_prepare: H2D(h_input -> d_input) -> prepare(d_input, d_stage)` 与 `stream_consume: consume(d_stage, d_output) -> D2H(d_output -> h_output)`。Host 按这个文字顺序提交全部操作，随后立即销毁 `h_input` 并释放三个 device allocation。Reviewer 声称“host submission order 已经形成全局队列，而且两条 stream 证明 kernels 并发”。修复 partial-order graph、data dependency 与所有 object lifetime。
+
+**约束：**
+
+- 只自动添加每条 stream 内的 enqueue-order edge；跨 stream edge 必须有 documented mechanism。
+- 分别记录 `h_input`、`h_output`、`d_input`、`d_stage` 与 `d_output` 的 last asynchronous user 和 release boundary。
+- 不借助 default-stream implicit rule，不声明 observed overlap、duration 或 performance。
+
+**预期证据：** 两条 stream lane、完整 same-stream edge set、一个 missing cross-stream edge、五行 lifetime ledger，以及修复后的 host completion/release sequence。
+
+**验收条件：**
+
+- 初始图只有 `H2D -> prepare` 与 `consume -> D2H`；host call order 不建立 `prepare -> consume`。
+- 在 prepare completion 与 consume eligibility 之间加入最窄的 explicit dependency，或把 dependent chain 放入同一 stream。
+- `h_input` 至少保留到 H2D 完成；`d_input` 保留到 prepare 完成；`d_stage` 保留到 consume 完成；`d_output` 与 `h_output` 保留到 D2H 完成和 host verification boundary。
+- 不把 unordered 改写为 concurrent；静态 graph 和 lifetime repair 不授予 CUDA Evidence Status。
+
+<details><summary>提示 1</summary>先画两条互不连接的 horizontal chain，再问哪个 consumer input 没有 predecessor edge。</details>
+
+<details><summary>提示 2</summary>对每个 object 写“最后一次可能仍在使用它的 asynchronous operation”，不要把 enqueue return 当作 last use。</details>
+
+**解答：** 初始 partial order 只有两条 lane 内边。`consume` 读取 `prepare` 产生的 `d_stage`，因此需要 `prepare -> consume` 的显式跨流依赖，例如在 producer stream 的 prepare 后 record event，再让 consumer stream 在 consume 前 wait；event generation 细节由 M08 继续约束。这个 edge 使 consumer 不会过早 eligible，但不证明两条 stream 曾重叠。修复后的 host 还要让 `h_input` 活到 H2D 完成，让 `d_input` 活到 prepare 完成，让 `d_stage` 活到 consume 完成，并让 `d_output` 与 `h_output` 活到 D2H 完成。覆盖最终 D2H 的 host completion boundary 通过后，host 才能验证 `h_output` 并释放对应 storage；每项 release 仍需遵守实际 API 的 documented contract。
+
+**有效替代方案：** 把 H2D、prepare、consume 与 D2H 全部放进一条 non-default stream，可以用 per-stream order 表达同一 correctness graph。Device-wide host synchronization也能建立更宽的 completion boundary，但不应在只需一条 dependency edge 时被描述成唯一方案。
+
+**常见错误：** 把 host source order 当 device global order；因为 stream 名称不同就宣布 concurrency；忘记 asynchronous copy 的 host-buffer lifetime；在 consumer last use 前释放 `d_stage`；只同步 producer stream 就读取 `h_output`；用 default-stream 行为补上未声明 edge。
+
+**来源依据（Source basis）：** 本站原创的 [M07 stream-order contract](/memory/stream-ordering/)、[VIS07 dependency graph](/visuals/stream-event-dependencies/)、[M01 lifetime ledger](/memory/address-spaces/)、[F05 asynchronous boundary](/foundations/asynchronous-errors/)和 [SRC-CUDA-021](/sources-and-versions/#src-cuda-021)，以及 NVIDIA [Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)与 Runtime API [Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)。
+
+<span id="pb-r1-020" class="resource-target" aria-hidden="true"></span>
+
+## PB-R1-020：审查 event dependency 与 device-time evidence
+
+- **ID 与双语发布对：** PB-R1-020；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Event generation 与计时证据审查；中级。
+- **直接先修条件：** [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)。
+- **硬件门槛（Hardware gate）：** 无；只审查 event generation、dependency 与 timing evidence。
+- **相关学习单元与资源：** [M08](/memory/event-dependencies-timing/)、[M07](/memory/stream-ordering/)、[VIS07](/visuals/stream-event-dependencies/)和 [O02](/start/evidence-status/)。
+- **最后复核（Last reviewed）：** 2026-08-28。
+
+**题目：** 一个 producer stream 在 `P1` 后 record handle `E`，consumer 随后提交 `W1 = wait(E)`；producer 又执行 `P2` 并 re-record 同一 handle，随后提交 `W2`。另外，`ready` event 以 `cudaEventDisableTiming` 创建，却被 reviewer 当作 elapsed-time 的 start endpoint。Review 还把 VIS07 的 browser pacing 写成“实测 0.8 ms 且两条 stream 已并发”。给出 generation、dependency、timing 与 Evidence Status 四部分修订。
+
+**约束：**
+
+- 用教学标签 `E1`、`E2` 表示同一 handle 的两次 captured state，不能虚构两个 handle。
+- 区分 non-blocking query、host-blocking synchronize、stream wait 与 elapsed-time calculation。
+- 不提供任何替代数值，不把 browser animation、静态 formula 或 owner documentation 当作 runtime observation。
+
+**预期证据：** 一张 API-call/generation 表、两条 wait edge、三-event flag table、合法 timing bracket 与一条 evidence-neutral review conclusion。
+
+**验收条件：**
+
+- `W1` 绑定调用时的 `E1`，后来 re-record 不会把它改绑到 `E2`；`W2` 使用 re-record 后的 `E2`。
+- `ready` 可以用于 documented dependency/query/synchronize operation，但因禁用 timing，不能作为 `cudaEventElapsedTime` endpoint。
+- 合法计时使用 timing-enabled `start`/`stop`，明确 included work，等待 recorded endpoints 完成，检查 API result，并只在真实运行后报告值和 Environment Manifest。
+- 删除 0.8 ms 与 observed-concurrency claim；VIS07 与本题都没有 CUDA Evidence Status。
+
+<details><summary>提示 1</summary>在每个 Runtime API call 旁写下“此调用当时 handle 最近捕获的是哪一代”。</details>
+
+<details><summary>提示 2</summary>Creation flag 是 event contract 的一部分；dependency-capable 不等于 timing-capable。</details>
+
+**解答：** 第一条 record 建立 `E1 = work through P1`，所以随后提交的 W1 只让其后 consumer work 等待 E1。第二条 record 把 handle 的 future selection 更新为 `E2 = work through P2`；W2 绑定 E2，而 W1 不会 retroactively retarget。`cudaEventQuery` 只报告 selected captured state 是否完成，不阻塞 host；`cudaEventSynchronize` 等待 host；`cudaStreamWaitEvent` 约束 wait 后提交到该 stream 的 work。Dependency-only `ready` 保持合法 dependency object，却不能进入 elapsed calculation。若要计时，必须创建 timing-enabled start/stop、在声明的 stream order 中 record、等待 stop 完成，再检查 `elapsed_ms = timestamp(stop) - timestamp(start)`；这个 symbolic formula 没有提供 value。Browser interval 只控制可读性，因此 0.8 ms 与 overlap 两项都必须删除。
+
+**有效替代方案：** 为 `E1` 与 `E2` 使用两个不同 handle 可以让 generation ownership 更容易审查；也可以扩大 timing bracket，但必须重新声明 included work、completion boundary 与 measurement method。
+
+**常见错误：** 让 earlier wait 跟随 re-record；认为 record host call return 表示 event 已完成；把 query 当 blocking wait；把 timing-disabled event 传给 elapsed API；从 browser cadence 抄一个 duration；把 dependency edge 当 concurrency observation。
+
+**来源依据（Source basis）：** 本站原创的 [M08 event-generation/timing contract](/memory/event-dependencies-timing/)、[M07 partial-order model](/memory/stream-ordering/)、[VIS07 deterministic trace](/visuals/stream-event-dependencies/)、[O02 Evidence Status contract](/start/evidence-status/)和 [SRC-CUDA-021](/sources-and-versions/#src-cuda-021)，以及 NVIDIA Runtime API [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)与 [Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)。
+
 ## 复核记录
 
-既有十七个条目保留各自 **2026-08-26** 的 item-level review record。PB-R1-013 至 PB-R1-016，以及完整二十一个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-27** 同步复核。所有情景、题目、推导、代码修复和解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。
+既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-020，以及完整二十五个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-28** 同步复核。所有情景、题目、推导、代码修复和解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。

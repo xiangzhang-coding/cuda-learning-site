@@ -68,6 +68,14 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/memory/shared-memory-tiling/',
     '/memory/bank-conflicts-layouts/',
     '/en/memory/bank-conflicts-layouts/',
+    '/memory/synchronization-scopes/',
+    '/en/memory/synchronization-scopes/',
+    '/memory/warp-divergence-reconvergence/',
+    '/en/memory/warp-divergence-reconvergence/',
+    '/memory/stream-ordering/',
+    '/en/memory/stream-ordering/',
+    '/memory/event-dependencies-timing/',
+    '/en/memory/event-dependencies-timing/',
     '/examples/environment-report/',
     '/en/examples/environment-report/',
     '/examples/multidimensional-indexing/',
@@ -88,6 +96,10 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/visuals/shared-memory-banks/',
     '/visuals/memory-hierarchy-lifetime/',
     '/en/visuals/memory-hierarchy-lifetime/',
+    '/visuals/warp-divergence/',
+    '/en/visuals/warp-divergence/',
+    '/visuals/stream-event-dependencies/',
+    '/en/visuals/stream-event-dependencies/',
   ]) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -208,6 +220,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       query: 'Memory Hierarchy Ownership Lifetime',
       expectedHrefs: ['/en/visuals/memory-hierarchy-lifetime/'],
     },
+    {
+      query: 'Warp Divergence and Logical Join',
+      expectedHrefs: ['/en/visuals/warp-divergence/'],
+    },
+    {
+      query: 'Streams replace a global-order mental model',
+      expectedHrefs: ['/en/memory/stream-ordering/'],
+    },
+    {
+      query: 'Stream and Event Dependency Traces',
+      expectedHrefs: ['/en/visuals/stream-event-dependencies/'],
+    },
   ] as const) {
     await expectRankedSearchResult(page, {
       route: '/en/',
@@ -283,6 +307,14 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/foundations/runtime-driver-api/',
     '/foundations/launch-geometry/',
     '/en/foundations/launch-geometry/',
+    '/memory/synchronization-scopes/',
+    '/en/memory/synchronization-scopes/',
+    '/memory/warp-divergence-reconvergence/',
+    '/en/memory/warp-divergence-reconvergence/',
+    '/memory/stream-ordering/',
+    '/en/memory/stream-ordering/',
+    '/memory/event-dependencies-timing/',
+    '/en/memory/event-dependencies-timing/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
@@ -330,6 +362,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/memory-transactions/',
     '/en/visuals/shared-memory-banks/',
     '/en/visuals/memory-hierarchy-lifetime/',
+    '/en/visuals/warp-divergence/',
+    '/en/visuals/stream-event-dependencies/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
     ...Object.keys(embeddedFallbacks),

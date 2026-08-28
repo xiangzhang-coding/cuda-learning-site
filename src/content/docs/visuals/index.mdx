@@ -3,7 +3,7 @@ title: 可视化讲解索引
 description: 按概念、相关学习单元（Learning Unit）和版本边界查找当前完整发布的可视化讲解。
 pairId: visuals-index
 counterpart: /en/visuals/
-factCheckDate: '2026-08-27'
+factCheckDate: '2026-08-28'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-27' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/visuals/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。九项正式讲解中，VIS01、VIS02、VIS04 内存请求 segment 分组、VIS05 shared-memory bank 映射与 VIS06 memory hierarchy/ownership/lifetime 使用独立页面；VIS19-VIS22 嵌入各自学习单元（Learning Unit）。四张内嵌讲解卡片直接深链到页内锚点，导航不会为它们复制四个独立页面。未完成的规划条目不会显示。
+本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。十一项正式讲解中，VIS01、VIS02、VIS03 warp divergence、VIS04 内存请求 segment 分组、VIS05 shared-memory bank 映射、VIS06 memory hierarchy/ownership/lifetime 与 VIS07 stream/event dependency 使用七个独立页面；VIS19-VIS22 嵌入各自学习单元（Learning Unit）。四张内嵌讲解卡片直接深链到页内锚点，导航不会为它们复制四个独立页面。未完成的规划条目不会显示。
 
 ## 已发布可视化讲解
 
@@ -38,4 +38,4 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 证据边界
 
-VIS01、VIS02、VIS04、VIS05、VIS06、VIS19、VIS20、VIS21 与 VIS22 都只在浏览器中运行确定性教学模型，提供静态或文字回退，并且不执行 CUDA。索引明确显示这一边界；九项可视化讲解都没有 CUDA Evidence Status，也不会声明 Compile-Checked、Community-Observed 或 Runtime-Verified。
+VIS01-VIS07 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，提供静态或文字回退，并且不执行 CUDA。索引明确显示这一边界；十一项可视化讲解都没有 CUDA Evidence Status，也不会声明 Compile-Checked、Community-Observed 或 Runtime-Verified。

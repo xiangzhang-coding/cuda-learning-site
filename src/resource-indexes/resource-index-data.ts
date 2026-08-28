@@ -65,9 +65,11 @@ const lab02Destination = PUBLISHED_DESTINATIONS.LAB02;
 const lab03Destination = PUBLISHED_DESTINATIONS.LAB03;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
+const vis03Destination = PUBLISHED_DESTINATIONS.VIS03;
 const vis04Destination = PUBLISHED_DESTINATIONS.VIS04;
 const vis05Destination = PUBLISHED_DESTINATIONS.VIS05;
 const vis06Destination = PUBLISHED_DESTINATIONS.VIS06;
+const vis07Destination = PUBLISHED_DESTINATIONS.VIS07;
 const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
 const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
 const vis21Destination = PUBLISHED_DESTINATIONS.VIS21;
@@ -428,6 +430,70 @@ const practice: readonly ResourceIndexRecord[] = [
     versionGate: localized('Best Practices Guide v13.3；selected CC 7.5+ 的 32-bank、32-bit word 教学 fixture。', 'Best Practices Guide v13.3; selected CC 7.5+ teaching fixture with 32 banks and 32-bit words.'),
     reviewedOn: '2026-08-27',
   },
+  {
+    planningId: 'PB-R1-017',
+    group: 'practice',
+    title: localized('按参与者与通信范围选择同步作用域', 'Select synchronization scope from participants and communication'),
+    href: localized('/practice/#pb-r1-017', '/en/practice/#pb-r1-017'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'intermediate',
+    prerequisites: ['M05'],
+    relatedUnits: ['F02', 'M01', 'M05'],
+    hardwareGate: localized('无；只审查静态同步协议，不运行 CUDA。', 'None; review a static synchronization protocol and run no CUDA.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3；11.8.0 与 12.9.1 archive 用于 scope 与 fence 边界。',
+      'CUDA Programming Guide v13.3; the 11.8.0 and 12.9.1 archives bound scope and fence semantics.',
+    ),
+    reviewedOn: '2026-08-28',
+  },
+  {
+    planningId: 'PB-R1-018',
+    group: 'practice',
+    title: localized('修复不安全的 warp collective', 'Repair an unsafe warp collective'),
+    href: localized('/practice/#pb-r1-018', '/en/practice/#pb-r1-018'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['M06'],
+    relatedUnits: ['F02', 'M05', 'M06', 'VIS03'],
+    hardwareGate: localized('无；只推导 predicate、mask 与同步边，不运行 CUDA。', 'None; derive predicates, masks, and synchronization edges without running CUDA.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 CC 7.0+ Independent Thread Scheduling；11.8.0/12.9.1 archive 交叉核对。',
+      'CUDA Programming Guide v13.3 and CC 7.0+ Independent Thread Scheduling, cross-checked at the 11.8.0 and 12.9.1 archives.',
+    ),
+    reviewedOn: '2026-08-28',
+  },
+  {
+    planningId: 'PB-R1-019',
+    group: 'practice',
+    title: localized('修复两条 stream 的 partial order 与 lifetime', 'Repair a two-stream partial order and lifetime'),
+    href: localized('/practice/#pb-r1-019', '/en/practice/#pb-r1-019'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['M07'],
+    relatedUnits: ['F05', 'M01', 'M07', 'VIS07'],
+    hardwareGate: localized('无；只审查静态 stream graph 与 allocation lifetime。', 'None; review a static stream graph and allocation lifetime.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3、Runtime API v13.3.1，以及 11.8.0/12.9.1 stream owner documentation。',
+      'CUDA Programming Guide v13.3, Runtime API v13.3.1, and 11.8.0/12.9.1 stream owner documentation.',
+    ),
+    reviewedOn: '2026-08-28',
+  },
+  {
+    planningId: 'PB-R1-020',
+    group: 'practice',
+    title: localized('审查 event dependency 与 device-time evidence', 'Review event dependencies and device-time evidence'),
+    href: localized('/practice/#pb-r1-020', '/en/practice/#pb-r1-020'),
+    resourceType: 'evidence-review',
+    difficulty: 'intermediate',
+    prerequisites: ['M08'],
+    relatedUnits: ['O02', 'M07', 'M08', 'VIS07'],
+    hardwareGate: localized('无；只审查 event generation、依赖与计时证据。', 'None; review event generations, dependencies, and timing evidence only.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3、Runtime API v13.3.1，以及 11.8.0/12.9.1 event owner documentation。',
+      'CUDA Programming Guide v13.3, Runtime API v13.3.1, and 11.8.0/12.9.1 event owner documentation.',
+    ),
+    reviewedOn: '2026-08-28',
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -456,6 +522,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     versionGate: localized('CUDA Programming Guide v13.3；1D/2D/3D 索引与本站声明的 row-major extent。', 'CUDA Programming Guide v13.3; 1D/2D/3D indexing with site-declared row-major extents.'),
     reviewedOn: '2026-08-24',
     keywords: localized('gridDim blockDim blockIdx threadIdx bounds row-major', 'gridDim blockDim blockIdx threadIdx bounds row-major'),
+  },
+  {
+    planningId: 'VIS03',
+    group: 'visuals',
+    title: vis03Destination.title,
+    href: vis03Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis03Destination.prerequisites,
+    relatedUnits: ['M06'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Programming Guide v13.3；CC 7.0+ Independent Thread Scheduling，另以 11.8.0 与 12.9.1 archive 复核。',
+      'CUDA Programming Guide v13.3; CC 7.0+ Independent Thread Scheduling, with 11.8.0 and 12.9.1 archive review.',
+    ),
+    reviewedOn: '2026-08-28',
+    keywords: localized('warp divergence active mask reconvergence logical join', 'warp divergence active mask reconvergence logical join'),
   },
   {
     planningId: 'VIS04',
@@ -504,6 +586,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     ),
     reviewedOn: '2026-08-27',
     keywords: localized('address space owner scope lifetime release cache', 'address space owner scope lifetime release cache'),
+  },
+  {
+    planningId: 'VIS07',
+    group: 'visuals',
+    title: vis07Destination.title,
+    href: vis07Destination.href,
+    resourceType: 'execution-model',
+    prerequisites: vis07Destination.prerequisites,
+    relatedUnits: ['M07', 'M08'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 Runtime API v13.3.1；11.8.0 和 12.9.1 archive 复核 stream/event 边界。',
+      'CUDA Programming Guide v13.3 and Runtime API v13.3.1; the 11.8.0 and 12.9.1 archives bound stream and event semantics.',
+    ),
+    reviewedOn: '2026-08-28',
+    keywords: localized('stream event dependency ready set timing browser pacing', 'stream event dependency ready set timing browser pacing'),
   },
   {
     planningId: 'VIS19',
@@ -580,7 +678,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-006', 'Lab · 实验', 'resource-vocabulary', ['O01', 'LAB02'], '每个 Lab 单独声明环境要求。', 'Each Lab declares its environment requirements.'),
   glossaryRecord('TERM-007', 'Exercise · 练习', 'resource-vocabulary', ['O01'], '资源类型本身不受版本约束。', 'The resource type is version-independent.'),
   glossaryRecord('TERM-008', 'Practice Bank · 练习题库', 'resource-vocabulary', ['O01'], '具体条目按需声明版本边界。', 'Individual entries declare version boundaries as needed.'),
-  glossaryRecord('TERM-009', 'Visual Explainer · 可视化讲解', 'resource-vocabulary', ['O01', 'VIS01', 'VIS02', 'VIS04', 'VIS05', 'VIS06', 'VIS19', 'VIS20', 'VIS21', 'VIS22'], '概念模型与硬件行为必须分开。', 'Conceptual models remain separate from hardware behavior.'),
+  glossaryRecord('TERM-009', 'Visual Explainer · 可视化讲解', 'resource-vocabulary', ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS19', 'VIS20', 'VIS21', 'VIS22'], '概念模型与硬件行为必须分开。', 'Conceptual models remain separate from hardware behavior.'),
   glossaryRecord('TERM-010', 'Glossary · 术语表', 'resource-vocabulary', ['O01'], '随课程复核，不暗示接口兼容性。', 'Reviewed with the curriculum without implying interface compatibility.'),
   glossaryRecord('TERM-011', 'Evidence Status · 证据状态', 'evidence-vocabulary', ['O02'], '状态绑定对象、环境、标准和日期。', 'Status is scoped to a subject, environment, criteria, and date.'),
   glossaryRecord('TERM-012', 'Compile-Checked · 编译已检查', 'evidence-vocabulary', ['O02', 'O03'], '每项声明绑定精确 Toolkit Lane。', 'Every claim binds to an exact Toolkit Lane.'),
@@ -613,7 +711,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-039', 'latency · 延迟', 'kernel-vocabulary', ['O06'], '必须绑定具体操作、路径与计时边界。', 'Must bind to a named operation, path, and timing boundary.'),
   glossaryRecord('TERM-040', 'throughput · 吞吐量', 'kernel-vocabulary', ['O06', 'O07'], '峰值 issue rate 不等于应用实际吞吐量。', 'Peak issue rate is not achieved application throughput.'),
   glossaryRecord('TERM-041', 'bandwidth · 带宽', 'kernel-vocabulary', ['O06'], '必须记录 memory path、单位与 theoretical/effective/actual 口径。', 'Requires a memory path, units, and theoretical/effective/actual convention.'),
-  glossaryRecord('TERM-042', 'concurrency · 并发', 'kernel-vocabulary', ['O06'], '必须说明 resident work、kernel、stream、copy/compute 或 host/device scope。', 'Must name resident-work, kernel, stream, copy/compute, or host/device scope.'),
+  glossaryRecord('TERM-042', 'concurrency · 并发', 'kernel-vocabulary', ['O06', 'M07', 'VIS07'], '必须说明 resident work、kernel、stream、copy/compute 或 host/device scope。', 'Must name resident-work, kernel, stream, copy/compute, or host/device scope.'),
   glossaryRecord('TERM-043', 'arithmetic intensity · 算术强度', 'kernel-vocabulary', ['O06'], '工作计数与 memory-traffic boundary 决定数值。', 'The work count and memory-traffic boundary determine the value.'),
   glossaryRecord('TERM-044', 'occupancy · 占用率', 'kernel-vocabulary', ['O06'], 'Occupancy 不是 utilization，也不是性能目标值。', 'Occupancy is neither utilization nor a target performance value.'),
   glossaryRecord('TERM-045', 'programmable shader stage · 可编程着色器阶段', 'kernel-vocabulary', ['O07'], '历史接口仍受 graphics pipeline input/output 约束。', 'Historical interfaces remain constrained by graphics-pipeline inputs and outputs.'),
@@ -621,8 +719,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-047', 'compatibility assessment · 兼容性评估', 'environment-vocabulary', ['O08'], '只输出 documented-path、not-documented 或 indeterminate，不授予证据状态。', 'Produces only documented-path, not-documented, or indeterminate and grants no Evidence Status.'),
   glossaryRecord('TERM-048', 'Reference Environment candidate · 基准环境候选配置', 'environment-vocabulary', ['O08', 'LAB01'], '候选配置不是声明；仍需 maintainer control 与成功 baseline run。', 'A candidate is not a declaration; maintainer control and a successful baseline run remain required.'),
   glossaryRecord('TERM-049', 'streaming multiprocessor (SM) · 流式多处理器', 'kernel-vocabulary', ['F02', 'VIS01'], 'CUDA Programming Guide v13.3；SM 是硬件资源，不是 launch 坐标。', 'CUDA Programming Guide v13.3; an SM is a hardware resource, not a launch coordinate.'),
-  glossaryRecord('TERM-050', 'warp · 线程束', 'kernel-vocabulary', ['F02', 'VIS01', 'VIS02'], 'CUDA Programming Guide v13.3；当前 warp 包含 32 个 lane。', 'CUDA Programming Guide v13.3; a current warp contains 32 lanes.'),
-  glossaryRecord('TERM-051', 'lane · 通道', 'kernel-vocabulary', ['F02', 'VIS02'], 'Lane 是 warp 内位置，不是全局数据索引或时间顺序。', 'A lane is a position within a warp, not a global data index or time order.'),
+  glossaryRecord('TERM-050', 'warp · 线程束', 'kernel-vocabulary', ['F02', 'VIS01', 'VIS02', 'M05', 'M06', 'VIS03'], 'CUDA Programming Guide v13.3；当前 warp 包含 32 个 lane。', 'CUDA Programming Guide v13.3; a current warp contains 32 lanes.'),
+  glossaryRecord('TERM-051', 'lane · 通道', 'kernel-vocabulary', ['F02', 'VIS02', 'M06', 'VIS03'], 'Lane 是 warp 内位置，不是全局数据索引或时间顺序。', 'A lane is a position within a warp, not a global data index or time order.'),
   glossaryRecord('TERM-052', 'dim3 · 三分量 launch 配置类型', 'kernel-vocabulary', ['F03', 'EX03'], 'CUDA Programming Guide v13.3；省略的分量默认为 1。', 'CUDA Programming Guide v13.3; omitted components default to 1.'),
   glossaryRecord('TERM-053', 'logical extent · 逻辑范围', 'kernel-vocabulary', ['F03', 'VIS02', 'EX03'], 'Extent 由应用声明，不由 execution geometry 自动推断。', 'The application declares its extent; execution geometry does not infer it.'),
   glossaryRecord('TERM-054', 'row-major layout · 行主序布局', 'kernel-vocabulary', ['F03', 'VIS02', 'EX03'], 'EX03 显式声明 x-fastest layout；CUDA launch geometry 不声明数据布局。', 'EX03 explicitly declares an x-fastest layout; CUDA launch geometry declares no data layout.'),
@@ -648,6 +746,16 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-074', 'shared-memory bank · 共享内存存储体', 'kernel-vocabulary', ['M04', 'VIS05', 'EX06'], 'M04 使用 selected CC 7.5+ 的 32-bank、32-bit word fixture；其他 architecture 必须重新核对。', 'M04 uses a selected CC 7.5+ fixture with 32 banks and 32-bit words; other architectures require renewed review.', '2026-08-27'),
   glossaryRecord('TERM-075', 'bank conflict · 存储体冲突', 'kernel-vocabulary', ['M04', 'VIS05', 'EX06'], 'Conflict classification 绑定 selected bank mapping；same-address read broadcast 单独处理。', 'Conflict classification is bound to the selected bank mapping; same-address read broadcast is handled separately.', '2026-08-27'),
   glossaryRecord('TERM-076', 'tiling · 分块', 'kernel-vocabulary', ['M03', 'M04', 'EX06'], 'M03 教授 portable C++17 synchronous baseline；未来 async interface 不向当前 Lane 倒推。', 'M03 teaches the portable C++17 synchronous baseline; future asynchronous interfaces are not projected backward into current Lanes.', '2026-08-27'),
+  glossaryRecord('TERM-077', 'synchronization scope · 同步作用域', 'kernel-vocabulary', ['M05'], 'Programming Guide v13.3；11.8.0 与 12.9.1 archive 用于核对 durable scope boundary。', 'Programming Guide v13.3, with 11.8.0 and 12.9.1 archives bounding durable scope semantics.', '2026-08-28'),
+  glossaryRecord('TERM-078', 'memory visibility · 内存可见性', 'kernel-vocabulary', ['M05'], 'Visibility 必须绑定 documented ordering、scope 与可访问 storage。', 'Visibility must bind to documented ordering, scope, and accessible storage.', '2026-08-28'),
+  glossaryRecord('TERM-079', 'active mask · 活动掩码', 'kernel-vocabulary', ['F02', 'M06', 'VIS03'], 'CC 7.0+ Independent Thread Scheduling 下不能把某时刻 active mask 当作永久参与组。', 'Under CC 7.0+ Independent Thread Scheduling, a momentary active mask is not a permanent participant group.', '2026-08-28'),
+  glossaryRecord('TERM-080', 'divergence · 分支发散', 'kernel-vocabulary', ['M06', 'VIS03'], 'Programming Guide v13.3；VIS03 不模拟 exact issue order 或 latency。', 'Programming Guide v13.3; VIS03 models neither exact issue order nor latency.', '2026-08-28'),
+  glossaryRecord('TERM-081', 'reconvergence · 重汇合', 'kernel-vocabulary', ['M06', 'VIS03'], 'Source-level logical join 不等于 memory synchronization，hardware reconvergence 仍属 implementation detail。', 'A source-level logical join is not memory synchronization; hardware reconvergence remains an implementation detail.', '2026-08-28'),
+  glossaryRecord('TERM-082', 'warp-safe reasoning · 线程束安全推理', 'kernel-vocabulary', ['M05', 'M06', 'VIS03'], 'Participant mask、source-lane validity 与 ordering 必须按所用 intrinsic 和 architecture contract 复核。', 'Participant masks, source-lane validity, and ordering require review against the selected intrinsic and architecture contract.', '2026-08-28'),
+  glossaryRecord('TERM-083', 'stream · 流', 'kernel-vocabulary', ['F05', 'M07', 'VIS07'], 'Programming Guide v13.3 与 Runtime API v13.3.1；default-stream relationship 取决于 mode 与 flags。', 'Programming Guide v13.3 and Runtime API v13.3.1; default-stream relationships depend on mode and flags.', '2026-08-28'),
+  glossaryRecord('TERM-084', 'event · 事件', 'kernel-vocabulary', ['M08', 'VIS07'], 'Runtime API v13.3.1；recorded generation、creation flags 与 completion state 都属于 event contract。', 'Runtime API v13.3.1; recorded generation, creation flags, and completion state all belong to the event contract.', '2026-08-28'),
+  glossaryRecord('TERM-085', 'event dependency · 事件依赖', 'kernel-vocabulary', ['M07', 'M08', 'VIS07'], 'Record/wait semantics 按 Runtime API 13.3.1 及 11.8.0/12.9.1 archive 复核；dependency 不证明 overlap。', 'Record/wait semantics are reviewed in Runtime API 13.3.1 and the 11.8.0/12.9.1 archives; a dependency does not prove overlap.', '2026-08-28'),
+  glossaryRecord('TERM-086', 'device-time measurement · 设备时间测量', 'kernel-vocabulary', ['O06', 'M08', 'VIS07'], 'Timing-enabled recorded events、完成边界与 Environment Manifest 缺一不可；browser pacing 不是 device time。', 'Timing-enabled recorded events, completion boundaries, and an Environment Manifest are all required; browser pacing is not device time.', '2026-08-28'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -672,7 +780,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02', 'VIS04', 'VIS05', 'VIS06', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
+    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
@@ -913,6 +1021,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-08-27',
     '2026-08-27',
+  ),
+  sourceRecord(
+    'SRC-CUDA-020',
+    localized('M05/M06/VIS03 synchronization、warp 与 Independent Thread Scheduling', 'M05/M06/VIS03 synchronization, warps, and Independent Thread Scheduling'),
+    'cuda-version-record',
+    ['F02', 'M05', 'M06', 'VIS03'],
+    localized(
+      'CUDA Programming Guide v13.3；11.8.0 与 12.9.1 archived synchronization/SIMT owner documentation。',
+      'CUDA Programming Guide v13.3; archived 11.8.0 and 12.9.1 synchronization and SIMT owner documentation.',
+    ),
+    '2026-08-28',
+    '2026-08-28',
+  ),
+  sourceRecord(
+    'SRC-CUDA-021',
+    localized('M07/M08/VIS07 stream、event dependency 与 timing', 'M07/M08/VIS07 streams, event dependencies, and timing'),
+    'cuda-version-record',
+    ['F05', 'M07', 'M08', 'VIS07'],
+    localized(
+      'CUDA Programming Guide v13.3；Runtime API v13.3.1；11.8.0 与 12.9.1 archived stream/event owner documentation。',
+      'CUDA Programming Guide v13.3; Runtime API v13.3.1; archived 11.8.0 and 12.9.1 stream and event owner documentation.',
+    ),
+    '2026-08-28',
+    '2026-08-28',
   ),
 ];
 

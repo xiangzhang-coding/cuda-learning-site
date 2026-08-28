@@ -1,0 +1,143 @@
+---
+title: 'VIS07: Stream and Event Dependency Traces'
+description: Build a bounded graph of ordered work in named non-default streams, add explicit event record/wait dependencies, and inspect a deterministic ready-set trace without claiming concurrency or CUDA timing.
+pairId: vis07
+counterpart: /visuals/stream-event-dependencies/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - stream-order
+  - event-dependencies
+  - deterministic-trace
+  - event-timing
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS07
+prerequisites: []
+relatedUnits:
+  - M07
+  - M08
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'CUDA stream ordering, events, and explicit synchronization'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'cudaStreamWaitEvent and stream management interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API - Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Event record, completion, flags, and elapsed-time conditions'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 11.8 - Asynchronous Concurrent Execution'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution'
+    version: 'CUDA C++ Programming Guide v11.8.0; archived'
+    platform: 'Archived stream and event ordering boundary'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9 - Asynchronous Concurrent Execution'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution'
+    version: 'CUDA C++ Programming Guide v12.9.1; archived'
+    platform: 'Archived stream and event ordering boundary'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,stream-order,event-dependencies,deterministic-trace,event-timing,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,11.8.0,12.9.1' }
+---
+
+import StreamEventDependencyExplorer from '../../../../components/StreamEventDependencyExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/stream-event-dependencies/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS07 is the standalone Visual Explainer related to M07 and M08. It replaces a global-order mental model with per-stream enqueue order and explicit event dependencies before any discussion of overlap.
+
+<StreamEventDependencyExplorer locale="en" />
+
+## Stream order
+
+The model contains exactly two or three explicitly named **non-default streams**. Default-stream behavior is excluded so that no legacy or per-thread default-stream rule silently adds an edge. The operation vocabulary is fixed to H2D copy, kernel, and D2H copy, and every accepted operation receives a deterministic ID such as `op-06`.
+
+Within one stream, consecutive operations receive implicit same-stream order edges in enqueue order. No implicit edge is added between different streams. If two cross-stream operations have no dependency path, VIS07 calls them **unordered**. Unordered does **not** mean proven concurrent: actual overlap depends on the operations, resources, hardware, runtime behavior, and the complete program.
+
+## Event dependencies
+
+An explicit dependency is displayed as:
+
+```text
+producer operation -> record(event) -> wait(event) -> consumer operation
+```
+
+The teaching edge reflects two Runtime API roles. `cudaEventRecord` captures the work in its stream at that call, while `cudaStreamWaitEvent` delays work added after the wait until the captured event work completes. The model derives these event edges separately from same-stream order edges.
+
+The bounded event-generation ledger is a separate fixture from the editable operation graph. It reuses one handle in the deterministic order `record-E1`, `wait-E1`, `record-E2`, `wait-E2`; its `generation-*` operation IDs add no edge to the graph above. The first wait remains bound to E1 after the handle is re-recorded as E2, while the later wait binds to E2. Explicit record markers and wait edges show those bindings without executing CUDA.
+
+Edits fail closed. Unknown operation or stream IDs, self-dependencies, duplicate event edges, edges already implied by an existing path, and cycle-producing edges are rejected. The previous graph is preserved. Every edit attempt stops playback and returns the teaching trace to its first frame; rejected input therefore cannot leave a partially changed graph or a stale animation.
+
+## Deterministic trace
+
+Each frame exposes the completed set and the full **ready set** of operations whose predecessors are complete. One operation is selected by ascending deterministic operation ID. That stable tie-break makes tests and repeated study reproducible; it is not a claim about CUDA scheduling, stream priority, start order, finish order, or concurrent execution.
+
+Play, pause, Step, Reset, and the native range scrubber move only through this topological teaching trace. Graph edits rebuild the trace from the accepted graph and reset playback.
+
+## Event timing boundary
+
+The page shows one valid timing bracket in a named non-default stream. Timing is enabled for its start and stop events, both records are complete, and `op-01` plus `op-02` are explicitly included. The same pure assessment used by the renderer returns `formula-only` and `null` milliseconds: the page shows only the symbolic relation `elapsed = timestamp(stop) - timestamp(start)` and invents no timestamp or elapsed value. In the actual Runtime API, elapsed-time calculation is unavailable when timing is disabled, invalid when an event was never recorded, and incomplete while either recorded event has not completed. Those three conditions remain separate in the visual.
+
+The animation interval is browser pacing for legibility. **Browser pacing is not CUDA time**, a device timestamp, profiling evidence, or a performance result. A real event measurement needs actual event creation and recording, completed device work, checked API results, and an Environment Manifest when it is reported as evidence.
+
+## Static fallback
+
+The permanent fallback uses a three-stream fixture. It lists five operations, two same-stream edges, one event edge, a model-derived unordered relation verdict, and all six ready-set frames, including the final empty ready set. The two-row event-generation ledger and complete timing-bracket ledger remain visible with the graph, edge ledgers, formula, and trace without JavaScript and in print; text labels carry every state without relying on color.
+
+## Evidence boundary
+
+VIS07 compiles and executes no CUDA, observes no stream or event, and measures no device time. Its graph and browser animation confer no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status. Compilation, runtime, expected-observation, and recorded-observation metadata remain empty.
+
+## Sources
+
+Current stream ordering, event roles, and explicit synchronization were checked against [CUDA Programming Guide v13.3, Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html), [CUDA Runtime API v13.3.1 Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html), and [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html). Durable terminology and ordering boundaries were compared with the exact [CUDA 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution) and [CUDA 12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-concurrent-execution).
+
+All source coordinates were accessed on **2026-08-28**. No NVIDIA diagram, figure, or example is copied. The bounded graph, fixture, controls, trace, and bilingual explanations are original CC-BY-4.0 material.

@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 76 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 86 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-27'
+factCheckDate: '2026-08-28'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-27'
+      content: '2026-08-28'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -732,6 +732,96 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [M03](/memory/shared-memory-tiling/)、[M04](/memory/bank-conflicts-layouts/)、[EX06](/examples/shared-memory-tile-bank-padding/)。
 - **版本说明：** M03 为 selected Lane 教授 portable C++17 synchronous baseline；未来 asynchronous tiling interface 按版本隔离，不向旧 Lane 倒推。
 
+<span id="term-077" class="resource-target" aria-hidden="true"></span>
+
+### synchronization scope · 同步作用域
+
+- **定义：** 一项 synchronization 或 atomic operation 的 documented guarantee 所覆盖的 execution-agent 范围；scope 必须包含所有 producer 与 consumer，但本身不等于 rendezvous、ordering、visibility 或 atomicity 的完整协议。
+- **避免使用：** 同步强度等级、万能 barrier、越宽越正确。
+- **相关资源：** [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。
+- **版本说明：** M05 按 CUDA Programming Guide v13.3 以及 11.8.0/12.9.1 archive 复核 durable scope boundary；具体 primitive、memory order 与支持的 scope 仍须按 selected Toolkit 和 architecture 核对。
+
+<span id="term-078" class="resource-target" aria-hidden="true"></span>
+
+### memory visibility · 内存可见性
+
+- **定义：** Intended consumer 在遵守有效 ordering 与 synchronization protocol 后，可以观察 producer 对指定 memory location 所做写入的性质；它不由 source proximity 或单独 fence 自动建立。
+- **避免使用：** Flush every cache、rendezvous、ordinary-load eventual consistency。
+- **相关资源：** [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。
+- **版本说明：** Visibility 必须绑定 CUDA Programming Guide v13.3 memory-model relation、覆盖双方的 scope 和双方可访问的 storage；cache implementation 与 architecture 不能替代 protocol proof。
+
+<span id="term-079" class="resource-target" aria-hidden="true"></span>
+
+### active mask · 活动掩码
+
+- **定义：** 在某个执行点当前 active 的 warp lane 集合；它描述该时刻的 control-flow participation，不自动等于算法期望的 collective participant set。
+- **避免使用：** 永久 warp membership、intended participation mask、hardware schedule trace。
+- **相关资源：** [F02](/foundations/execution-hierarchy/)、[M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)和 [VIS03](/visuals/warp-divergence/)。
+- **版本说明：** CUDA Programming Guide v13.3 在 CC 7.0+ 使用 Independent Thread Scheduling；不能把 branch-local `__activemask()` 倒推成跨 divergence 的稳定 group，旧 architecture 的执行模型也必须按 archive 单独复核。
+
+<span id="term-080" class="resource-target" aria-hidden="true"></span>
+
+### divergence · 分支发散
+
+- **定义：** 同一 warp 的 participating lanes 因 predicate 不同而沿不同 control-flow path 前进；它说明 active-lane partition，不规定 path issue order、instruction interleaving 或 elapsed time。
+- **避免使用：** 固定 serial order、data race、warp 已永久拆分。
+- **相关资源：** [M06](/memory/warp-divergence-reconvergence/)和 [VIS03](/visuals/warp-divergence/)。
+- **版本说明：** M06/VIS03 以 Programming Guide v13.3 及 11.8.0/12.9.1 SIMT archive 为边界；CC 7.0+ 的 per-thread state 改变可依赖的 lockstep assumption，但不提供 exact schedule。
+
+<span id="term-081" class="resource-target" aria-hidden="true"></span>
+
+### reconvergence · 重汇合
+
+- **定义：** Divergent lanes 再次到达可共同继续的 control-flow region；本站区分 source-level logical join 与 hardware 实际采用的 reconvergence mechanism。
+- **避免使用：** Warp barrier、memory fence、shared-memory visibility guarantee。
+- **相关资源：** [M06](/memory/warp-divergence-reconvergence/)和 [VIS03](/visuals/warp-divergence/)。
+- **版本说明：** VIS03 只显示 deterministic logical join；Programming Guide v13.3 与 archive 不授权从 closing brace 推断同步、固定 path order 或 architecture-specific reconvergence stack。
+
+<span id="term-082" class="resource-target" aria-hidden="true"></span>
+
+### warp-safe reasoning · 线程束安全推理
+
+- **定义：** 对 warp-level communication 显式证明 intended participants、一致 mask、collective reachability、source-lane validity，以及需要的 ordering/visibility，而不依赖 implicit lockstep。
+- **避免使用：** Same-warp therefore safe、closing-brace synchronization、mask-free collective reasoning。
+- **相关资源：** [M05](/memory/synchronization-scopes/)、[M06](/memory/warp-divergence-reconvergence/)和 [VIS03](/visuals/warp-divergence/)。
+- **版本说明：** Proof 必须按 selected intrinsic contract 与 architecture 复核；CC 7.0+ Independent Thread Scheduling 尤其禁止把历史 implicit-lockstep assumption 当作 portable guarantee。
+
+<span id="term-083" class="resource-target" aria-hidden="true"></span>
+
+### stream · 流
+
+- **定义：** CUDA Runtime 中按 enqueue order 排列 operations 的 sequence；同一 stream 提供 documented order，不同 stream 若无 dependency edge 则不能从 host source order 推出全局 device order。
+- **避免使用：** GPU thread、必然并发的 queue、整个 device 的 global timeline。
+- **相关资源：** [F05](/foundations/asynchronous-errors/)、[M07：用流取代全局顺序心智模型](/memory/stream-ordering/)和 [VIS07](/visuals/stream-event-dependencies/)。
+- **版本说明：** M07 使用 Programming Guide v13.3 与 Runtime API v13.3.1；default-stream relationship 会随 legacy/per-thread mode 与 stream flags 改变，11.8.0/12.9.1 行为必须按对应 owner docs 复核。
+
+<span id="term-084" class="resource-target" aria-hidden="true"></span>
+
+### event · 事件
+
+- **定义：** CUDA Runtime object；一次 record 会捕获该调用时相应 stream 的 work state，后续 query、synchronize、stream wait 或 timing operation 按最近捕获状态和 creation flags 工作。
+- **避免使用：** Host callback、自动全局 barrier、永不变化的 timestamp。
+- **相关资源：** [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)和 [VIS07](/visuals/stream-event-dependencies/)。
+- **版本说明：** Runtime API v13.3.1 以及 11.8.0/12.9.1 archive 规定 record、re-record、completion 与 flags；同一 handle 的 earlier wait 不会因 later re-record 被 retroactively retarget。
+
+<span id="term-085" class="resource-target" aria-hidden="true"></span>
+
+### event dependency · 事件依赖
+
+- **定义：** Producer stream 的 event record 与 consumer stream 的 wait 组成的 explicit ordering edge，使 wait 后提交的 consumer work 等待调用时捕获的 event generation。
+- **避免使用：** Host-blocking wait、observed concurrency、自动包含 producer 后续全部 work。
+- **相关资源：** [M07](/memory/stream-ordering/)、[M08](/memory/event-dependencies-timing/)和 [VIS07](/visuals/stream-event-dependencies/)。
+- **版本说明：** Record/wait contract 按 Runtime API v13.3.1 与 11.8.0/12.9.1 archive 复核；dependency 只建立 declared partial order，不证明 hardware overlap 或 timing。
+
+<span id="term-086" class="resource-target" aria-hidden="true"></span>
+
+### device-time measurement · 设备时间测量
+
+- **定义：** 使用 timing-enabled recorded event endpoints 对 declared device-work interval 取得 elapsed time，并在 endpoint 完成和 API result 检查后报告的方法。
+- **避免使用：** Browser animation interval、host wall-clock 的无条件同义词、symbolic subtraction 本身。
+- **相关资源：** [O06](/start/architecture-refresher/)、[M08](/memory/event-dependencies-timing/)和 [VIS07](/visuals/stream-event-dependencies/)。
+- **版本说明：** Runtime API v13.3.1 的 `cudaEventElapsedTime` 不接受 timing-disabled endpoint；可解释记录还需要 Environment Manifest、included-work boundary 与 measurement method，archive 版本必须单独核对。
+
 ## 维护规则
 
-TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录。TERM-066 至 TERM-076，以及完整 76 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-27** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27** 的记录。TERM-077 至 TERM-086，以及完整 86 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-28** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。

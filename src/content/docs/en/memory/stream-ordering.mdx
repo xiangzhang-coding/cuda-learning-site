@@ -1,0 +1,225 @@
+---
+title: 'M07: Streams replace a global-order mental model'
+description: Use explicitly named non-default streams, per-stream order, and explicit dependencies instead of assuming one global submission order or inferring observed overlap.
+pairId: m07
+counterpart: /memory/stream-ordering/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - named-streams
+  - per-stream-order
+  - cross-stream-order
+  - eligibility
+  - default-stream
+  - dependency-ledger
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M07
+prerequisites:
+  - F05
+  - M01
+relatedUnits:
+  - M08
+  - VIS07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current stream ordering, default-stream, and concurrency model'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 13.3.1 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current stream creation, query, synchronization, and wait interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 13.3.1 - Stream Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/stream-sync-behavior.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current legacy and per-thread default-stream behavior'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C Programming Guide 11.8 - Streams'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#streams'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 stream-ordering contract'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 11.8.0 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 stream interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 11.8.0 - Stream Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/stream-sync-behavior.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 default-stream behavior'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Streams'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#streams'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 stream-ordering contract'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 12.9.1 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 stream interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 12.9.1 - Stream Synchronization Behavior'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/stream-sync-behavior.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 default-stream behavior'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,named-streams,per-stream-order,cross-stream-order,eligibility,default-stream,dependency-ledger,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F05,M01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M08,VIS07' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/memory/stream-ordering/" lang="zh-CN">阅读中文对应页</a>
+
+A CUDA stream is an ordered sequence of submitted work, not a device-wide timeline. The stable baseline in this unit uses explicitly named non-default streams. It applies per-stream order, treats different streams as unordered without an explicit dependency, and keeps execution eligibility separate from any measured concurrency result.
+
+## What you should be able to do
+
+- Name non-default streams and place each operation in exactly one stream ledger.
+- Derive per-stream order from enqueue order.
+- Refuse to infer cross-stream order from host source order alone.
+- Explain why eligibility is not observed overlap.
+- Treat default-stream behavior as version- and configuration-dependent rather than universal.
+
+## Prerequisites
+
+Complete [F05: CUDA Errors Are Often Asynchronous](/en/foundations/asynchronous-errors/) and [M01: Address Spaces, Ownership, Scope, and Lifetime](/en/memory/address-spaces/) first. F05 separates submission from completion and supplies explicit host observation boundaries. M01 lets you identify which memory object moves or is consumed by each operation.
+
+M07 establishes ordering only. [M08: Events as Dependencies and Device-Time Measurements](/en/memory/event-dependencies-timing/) will add event edges. This page does not attempt a concurrency experiment and grants no compilation, runtime, or performance Evidence Status.
+
+## Explicitly named non-default streams
+
+Give streams role-bearing names rather than calling them “first” and “second”:
+
+```text
+stream_prepare: H2D(input) -> prepare_kernel
+stream_consume: consume_kernel -> D2H(output)
+```
+
+The names identify queues, not execution precedence. In a C++ program, `cudaStreamCreate` creates a non-default stream with default flags. The more explicit baseline for this unit is `cudaStreamCreateWithFlags(..., cudaStreamNonBlocking)`, producing named non-default streams that do not implicitly synchronize with the legacy default stream.
+
+Creation does not prove that work in two streams runs simultaneously. It only gives the application separate ordering domains whose dependencies must be stated.
+
+## Per-stream order
+
+Within one ordinary CUDA stream, operations execute in enqueue order. If `A1`, `A2`, and `A3` are submitted to `stream_a`, the stable reasoning edge is:
+
+```text
+A1 -> A2 -> A3
+```
+
+The host may return from asynchronous submissions before those operations complete, but later work in that same stream does not leapfrog earlier work. This queue order can safely carry a data dependency when producer and consumer are placed in the same stream.
+
+## Different streams are unordered
+
+If `A1` is in `stream_a` and `B1` is in `stream_b`, host source order alone adds no `A1 -> B1` device edge. Different streams are unordered unless an API contract, event dependency, synchronization boundary, or applicable default-stream rule supplies an edge.
+
+This graph is incomplete for a consumer that needs `A1`'s output:
+
+```text
+stream_a: A1
+stream_b: B1 consumes A1.output
+cross-stream edge: missing
+```
+
+The repair is to express a dependency, not to hope that submitting `A1` first makes it finish first. M08 supplies the focused event semantics for that repair.
+
+## Eligibility is not observed overlap
+
+Removing an ordering edge can make operations eligible to execute during intersecting intervals. It does not establish that they did so. Actual execution depends on resources, operation types, memory conditions, device capability, and runtime behavior. A source graph can prove only the absence or presence of ordering constraints.
+
+Therefore, eligibility is not observed overlap. A visual timeline that places eligible boxes side by side is a dependency model, not a profiler trace or performance result.
+
+## Default-stream behavior is conditional
+
+Current CUDA supports legacy and per-thread default-stream modes. Legacy default-stream actions synchronize with blocking streams in the documented context relationship, but not with streams created using `cudaStreamNonBlocking`. Per-thread default streams are local to a host thread and context and have different relationships. Selection can be controlled per compilation unit by the `--default-stream` option or the documented macro.
+
+Historical Toolkit versions and build configuration matter, so default-stream behavior is version- and configuration-dependent. Code review must record the lane and build setting before using an implicit default-stream edge. M07's teaching fixtures avoid that ambiguity by naming non-default streams and drawing every required cross-stream dependency.
+
+## Dependency ledger
+
+Build a directed graph from only documented edges:
+
+1. Add one edge between consecutive operations in each named stream.
+2. Add an explicit cross-stream edge only when a documented API creates it.
+3. Add a host-wait edge only at the boundary actually called.
+4. Record default-stream mode before adding any implicit legacy relationship.
+5. Label unordered pairs “eligible relative to this graph,” never “concurrent.”
+
+For every consumer, walk backward until all producers are connected. A missing path is a correctness defect even when one accidental schedule often appears to work.
+
+## Visual model: VIS07
+
+[VIS07: Stream and Event Dependencies](/en/visuals/stream-event-dependencies/) shows deterministic stream lanes and dependency edges with a textual fallback. For M07, use only its per-stream and missing-edge states. The display communicates order and eligibility, not actual device timing.
+
+## Evidence boundary
+
+The queue diagrams and Exercises are static conceptual artifacts. They do not submit CUDA work, inspect a timeline, or measure concurrent execution. The evidence axes remain empty, and no operation-duration or performance claim follows from the drawings.
+
+## Retrieval check
+
+1. What order is guaranteed for three ordinary operations enqueued in one named stream?
+2. Why does host submission order not order operations placed in different streams?
+3. What additional edge is required when a consumer in one stream needs a producer from another?
+4. Why is execution eligibility not evidence of observed overlap?
+5. Which version and configuration facts must be recorded before reasoning from the default stream?
+
+## Continue with practice
+
+- Complete the [M07 Exercises](/en/memory/stream-ordering/exercises/), then inspect the separate [reviewed solutions](/en/memory/stream-ordering/solutions/).
+- Repair a missing cross-stream edge in [Practice Bank PB-R1-019](/en/practice/#pb-r1-019).
+- Use [VIS07](/en/visuals/stream-event-dependencies/) to compare ordered and eligible states, then continue to M08 for event semantics.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html) supplies current stream, ordering, default-stream, and eligibility context.
+- [CUDA Runtime API v13.3.1: Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html) supplies current creation, query, synchronization, and wait contracts.
+- [CUDA Runtime API v13.3.1: Stream Synchronization Behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/stream-sync-behavior.html) defines current legacy and per-thread default-stream relationships.
+- [CUDA C Programming Guide 11.8: Streams](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#streams), [CUDA Runtime API 11.8.0: Stream Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__STREAM.html), and [Stream Synchronization Behavior](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/stream-sync-behavior.html) preserve the Toolkit 11.8 contracts.
+- [CUDA C++ Programming Guide 12.9.1: Streams](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#streams), [CUDA Runtime API 12.9.1: Stream Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__STREAM.html), and [Stream Synchronization Behavior](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/stream-sync-behavior.html) preserve the Toolkit 12.9.1 contracts.
+
+All nine owner sources were accessed on **2026-08-28**. The stream ledgers, dependency fixtures, default-stream review procedure, Exercises, and arrangement are original composition for this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-28.**
