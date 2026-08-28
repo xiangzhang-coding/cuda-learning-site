@@ -23,6 +23,13 @@ test('VIS03 supports native keyboard stepping and deterministic reset', async ({
   await page.keyboard.press('Space');
   await expect(visual).toHaveAttribute('data-stage', 'false-path');
   await expect(visual.locator('[data-warp-disposition]')).toContainText('Skipped');
+  await page.keyboard.press('Space');
+  await expect(visual).toHaveAttribute('data-stage', 'logical-join');
+  await expect(visual).toHaveAttribute('data-lane-set-meaning', 'source-level-participating-set');
+  await expect(visual.locator('[data-warp-lane-set-label]')).toHaveText('Source-level participating set');
+  await expect(visual.locator('[data-warp-status]')).toContainText('source-level participating set');
+  await expect(visual.locator('[data-warp-status]')).not.toContainText('current active mask');
+  await expect(visual.locator('[data-warp-lanes] tr').first()).toContainText('ITS may regroup sub-warps');
 
   await reset.focus();
   await page.keyboard.press('Enter');
@@ -42,6 +49,14 @@ test('VIS07 resets playback on edits, rejects an invalid edge fail-closed, and d
   await expect(visual).toHaveAttribute('data-ready', 'true');
   await expect(visual).toHaveAttribute('data-operation-count', '4');
   await expect(visual).toHaveAttribute('data-event-count', '1');
+  await expect(visual.locator('[data-event-generation-ledger]')).toBeVisible();
+  await expect(visual.locator('[data-event-generation-row]')).toHaveCount(2);
+  await expect(visual.locator('[data-event-timing-bracket]')).toHaveAttribute('data-timing-status', 'formula-only');
+  await expect(visual.locator('[data-event-timing-bracket]')).toHaveAttribute('data-elapsed-milliseconds', 'null');
+  await expect(visual.locator('[data-stream-relation-verdict]')).toHaveAttribute(
+    'data-stream-relation-verdict',
+    'unordered-not-proven-concurrent',
+  );
 
   await play.focus();
   await page.keyboard.press('Enter');
@@ -119,6 +134,10 @@ test('synchronization visuals reflow on mobile and honor reduced-motion and prin
   await expect(page.locator('[data-interactive-workbench]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
   await expect(page.locator('[data-static-trace-frame]')).toHaveCount(6);
+  await expect(page.locator('[data-event-generation-ledger]')).toBeVisible();
+  await expect(page.locator('[data-event-generation-row]')).toHaveCount(2);
+  await expect(page.locator('[data-event-timing-bracket]')).toBeVisible();
+  await expect(page.locator('[data-event-timing-bracket-row]')).toHaveCount(2);
 });
 
 test('both Publication Pairs retain complete static teaching output without JavaScript', async ({ browser }, testInfo) => {
@@ -146,5 +165,9 @@ test('both Publication Pairs retain complete static teaching output without Java
   await page.goto('http://127.0.0.1:4321/en/visuals/stream-event-dependencies/');
   await expect(page.locator('[data-static-operation]')).toHaveCount(5);
   await expect(page.locator('[data-static-trace-frame]')).toHaveCount(6);
+  await expect(page.locator('[data-event-generation-ledger]')).toBeVisible();
+  await expect(page.locator('[data-event-generation-row]')).toHaveCount(2);
+  await expect(page.locator('[data-event-timing-bracket]')).toBeVisible();
+  await expect(page.locator('[data-event-timing-bracket-row]')).toHaveCount(2);
   await context.close();
 });

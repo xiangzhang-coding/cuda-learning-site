@@ -83,9 +83,16 @@ Register alternative 使用带同一 participant mask 的 synchronized shuffle o
 
 ## 解答 3：区分 source fact 与 schedule guess
 
-Source guarantees 包括每个 lane 的 predicate 与 scalar branch result。API guarantees 包括正确使用 warp intrinsic 时的 participant/synchronization semantics。Source-level join 只标识 common source region；它不是 synchronization。Exact path issue order、instruction interleaving、reconvergence-stack operation 与 elapsed execution 都是 unknown implementation details。
-
-CC 7.0+ Independent Thread Scheduling 允许 per-thread execution state 与 sub-warp regrouping，但不提供 schedule trace。Cross-lane data 只有在 API 或 memory-model relation 提供所需 mask、ordering 与 visibility 时才有效。
+1. **分类：source guarantee（源码保证）。** 计算 `lane < 3` 后，lanes 0 到 2 为 true，lanes 3 到 7 为 false；这是逐 lane 的 source fact。
+2. **分类：source guarantee（源码保证）。** 在题设的 eight-lane fixture 中，`0x07 & 0xf8 == 0` 且 `0x07 | 0xf8 == 0xff`，所以两个 masks 互不重叠并完整覆盖参与者。
+3. **分类：source guarantee（源码保证）。** 每个 lane 只走一条 scalar branch，并保留该 branch 写入的 `result`；这个结论不需要任何 cross-lane schedule claim。
+4. **分类：rejected claim（拒绝该说法）。** Closing brace 只表示 control flow，不等同于 `__syncwarp`；algorithm 需要同步时必须加入 documented synchronization operation。
+5. **分类：rejected claim（拒绝该说法）。** `C` 是 common source successor，但这不能建立一个 current active mask，也不能证明所有 lanes 同时执行一个 dynamic instruction instance。只能说每个尚未退出的 lane 最终沿 source path 到达 `C`。
+6. **分类：rejected claim（拒绝该说法）。** Source-level join 不提供 memory-visibility edge。Cross-lane communication 必须使用具备所需 participants 与 scope 的 documented synchronization 或 memory-model relation。
+7. **分类：API guarantee（API 保证）。** 当 `0xff` 命名的每个 non-exited lane 都按要求执行 `__syncwarp(0xff)` 时，该 intrinsic 为这些 lanes 提供 documented synchronization semantics。
+8. **分类：rejected claim（拒绝该说法）。** `__activemask()` 报告调用当下 active 的 lanes，不能重建 earlier pre-branch group；应在 divergence 前计算或保存 intended participation mask。
+9. **分类：unknown implementation detail（未知实现细节）。** Programming model 不规定 true path 与 false path 的 exact issue order；portable account 必须允许任一路径先 issue。
+10. **分类：unknown implementation detail（未知实现细节）。** CC 7.0+ Independent Thread Scheduling 允许 per-thread execution state 与 sub-warp regrouping，但 source code 不能确定 exact instruction interleaving 或 timing。
 
 ## 有效替代方案
 

@@ -96,6 +96,17 @@ head:
 
 **目标：** 把关于两个 named streams 的八条 claim 分类为 guaranteed order、unordered、eligible under the graph 或 unsupported execution claim。
 
+使用以下 graph：`stream_left` 包含 `A -> B -> record(done)`，`stream_right` 包含 `X -> wait(done) -> C`；提交这些 work 后，host 调用 `cudaStreamSynchronize(stream_right)`，再读取 `C` 的 output。逐条分类以下 claims：
+
+1. Same-stream edge `A -> B` 保证 `A` 完成后 `B` 才开始。
+2. 因为 host 先提交 `A` 再提交 `X`，所以跨 streams 的 host submission order 保证 `A` 完成后 `X` 才开始。
+3. 在 `B` 后 record `done`，并在 `C` 前 wait 该 event，会建立 documented event edge `B -> C`。
+4. `B` 与 `X` 之间没有 edge，因此两者保持 unordered。
+5. `cudaStreamSynchronize(stream_right)` 返回时形成 host completion boundary，覆盖此前提交到 `stream_right` 的 work，所以之后的 host read 发生在 `C` 完成后。
+6. 把 `B` 与 `X` 的 boxes side by side 绘制，就能证明两者的 execution intervals 发生 overlap。
+7. 把 `B` 与 `X` 放入 separate streams，即可保证 simultaneous execution。
+8. 当各自 predecessors 允许时，`B` 与 `X` eligible under the graph；因此该 graph 证明 performance improvement。
+
 **约束：** 覆盖 same-stream operations、有/无 edge 的 different-stream operations、host wait 与 side-by-side visual；不使用 duration 或 throughput values。
 
 **预期证据：** 一张八行 classification table；每项 guarantee 指向 exact graph edge，unsupported claim 给出 corrected wording。

@@ -102,13 +102,13 @@ Five reviewed presets make the partition deterministic: uniform true, uniform fa
 
 The five teaching stages are `before-branch`, `predicate-evaluated`, `true-path`, `false-path`, and `logical-join`. VIS03 deliberately displays the true path before the false path so Step has one stable outcome. That ordering is **not hardware scheduling** and must not be used to predict which path a warp scheduler issues first.
 
-At the logical join, the participating lanes have a common control-flow successor in this model. A logical join is **not memory synchronization**: it is not `__syncwarp()`, a block barrier, a memory fence, or proof that memory communication is safe.
+At the logical join, the 32 lanes form a **source-level participating set** with a common control-flow successor in this model. This is not a claim that they share one current instruction or active mask: Independent Thread Scheduling may regroup sub-warps as execution progresses. A logical join is **not memory synchronization**: it is not `__syncwarp()`, a block barrier, a memory fence, or proof that memory communication is safe.
 
 ## Independent Thread Scheduling boundary
 
 On devices with compute capability below 7.0, a warp used a shared program counter plus an active mask. On **CC 7.0+**, Independent Thread Scheduling maintains execution state per thread and allows sub-warp divergence and reconvergence. Code that assumes lanes permanently execute every instruction in implicit lockstep can therefore be incorrect. Required coordination must use an appropriate explicit primitive, such as `__syncwarp()` for the intended participating mask when that primitive fits the communication contract.
 
-The lane table is a predicate and control-flow model. It does not expose an instruction trace, a scheduler trace, latency, or the exact lane grouping chosen by hardware.
+The lane table is a predicate and control-flow model. Its logical-join column names a source-level participating set, not a current instruction or active mask. It does not expose an instruction trace, a scheduler trace, latency, or the exact sub-warp grouping chosen by hardware.
 
 ## Static fallback
 

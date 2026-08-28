@@ -3,10 +3,12 @@
 import '../styles/visual-explainers.css';
 import '../styles/synchronization-visuals.css';
 import {
-  EVENT_ELAPSED_TIME_FORMULA,
   STREAM_EVENT_OPERATION_KINDS,
   buildStreamEventTrace,
+  classifyStreamEventRelation,
+  createStreamEventGenerationScenario,
   createStreamEventGraph,
+  createStreamEventTimingBracket,
   deriveStreamEventDependencies,
   type StreamEventOperation,
 } from '../visuals/stream-event-model';
@@ -27,6 +29,13 @@ const initialDependencies = deriveStreamEventDependencies(initialGraph);
 const staticGraph = createStreamEventGraph(3);
 const staticTrace = buildStreamEventTrace(staticGraph);
 const staticDependencies = deriveStreamEventDependencies(staticGraph);
+const eventGenerationScenario = createStreamEventGenerationScenario();
+const timingBracket = createStreamEventTimingBracket();
+const timingEventRows = [
+  { role: 'start', event: timingBracket.startEvent },
+  { role: 'stop', event: timingBracket.stopEvent },
+] as const;
+const staticRelation = classifyStreamEventRelation(staticGraph, 'op-04', 'op-05');
 
 function operationLabel(operation: StreamEventOperation) {
   return `${operation.id} · ${copy.operationKinds[operation.kind]}`;
@@ -182,9 +191,118 @@ function operationLabel(operation: StreamEventOperation) {
       </section>
     </section>
 
-    <section class="event-formula-panel" aria-label={copy.formulaHeading}>
-      <h3>{copy.formulaHeading}</h3>
-      <code data-event-formula>{EVENT_ELAPSED_TIME_FORMULA}</code>
+    <section
+      class="event-generation-panel"
+      data-event-generation-ledger={eventGenerationScenario.id}
+      aria-label={copy.eventGeneration.heading}
+    >
+      <h3>{copy.eventGeneration.heading}</h3>
+      <p>{copy.eventGeneration.intro}</p>
+      <div class="sync-table-wrap" tabindex="0" aria-label={copy.eventGeneration.heading}>
+        <table class="sync-lane-table event-generation-table">
+          <caption>{copy.eventGeneration.heading}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{copy.eventGeneration.generation}</th>
+              <th scope="col">{copy.eventGeneration.handle}</th>
+              <th scope="col">{copy.eventGeneration.recordMarker}</th>
+              <th scope="col">{copy.eventGeneration.recordAfter}</th>
+              <th scope="col">{copy.eventGeneration.waitEdge}</th>
+              <th scope="col">{copy.eventGeneration.waitBefore}</th>
+              <th scope="col">{copy.eventGeneration.boundGeneration}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {eventGenerationScenario.generations.map(({ generationId, handleId, recordMarker, waitEdge }) => (
+              <tr
+                data-event-generation-row={generationId}
+                data-event-generation-ledger-row={generationId}
+                data-event-handle={handleId}
+                data-bound-generation={waitEdge.boundGenerationId}
+              >
+                <th scope="row">{generationId}</th>
+                <td><code>{handleId}</code></td>
+                <td>
+                  <code data-event-record-marker={recordMarker.id}>
+                    #{recordMarker.sequence} {copy.eventGeneration.recordKinds[recordMarker.kind]}({recordMarker.id})
+                  </code>
+                </td>
+                <td><code>{recordMarker.afterOperationId}</code></td>
+                <td>
+                  <code data-event-wait-edge={waitEdge.id}>
+                    #{waitEdge.sequence} {waitEdge.id}: {waitEdge.fromRecordMarkerId} -&gt; {waitEdge.waitBeforeOperationId}
+                  </code>
+                </td>
+                <td><code>{waitEdge.waitBeforeOperationId}</code></td>
+                <td><strong>{waitEdge.boundGenerationId}</strong></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p data-earlier-wait-binding={eventGenerationScenario.earlierWaitBindingAfterRerecord.waitEdgeId}>
+        {copy.eventGeneration.earlierWaitBinding}
+      </p>
+    </section>
+
+    <section
+      class="event-formula-panel"
+      data-event-timing-bracket={timingBracket.id}
+      data-timing-status={timingBracket.assessment.status}
+      data-elapsed-milliseconds="null"
+      aria-label={copy.timingBracket.heading}
+    >
+      <h3>{copy.timingBracket.heading}</h3>
+      <p>{copy.timingBracket.intro}</p>
+      <dl class="event-bracket-summary">
+        <div data-timing-stream={timingBracket.stream.id}>
+          <dt>{copy.timingBracket.stream}</dt>
+          <dd>{copy.streamNames[timingBracket.stream.id]}</dd>
+        </div>
+        <div>
+          <dt>{copy.timingBracket.includedOperations}</dt>
+          <dd data-timing-included-operations>{timingBracket.includedOperationIds.join(', ')}</dd>
+        </div>
+        <div>
+          <dt>{copy.timingBracket.assessment}</dt>
+          <dd data-timing-assessment>{copy.timingBracket.formulaOnly}</dd>
+        </div>
+        <div>
+          <dt>{copy.timingBracket.elapsedMilliseconds}</dt>
+          <dd data-elapsed-value="null">{copy.timingBracket.noMilliseconds}</dd>
+        </div>
+      </dl>
+      <div class="sync-table-wrap" tabindex="0" aria-label={copy.timingBracket.heading}>
+        <table class="sync-lane-table event-timing-table">
+          <caption>{copy.timingBracket.heading}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{copy.timingBracket.role}</th>
+              <th scope="col">{copy.timingBracket.event}</th>
+              <th scope="col">{copy.timingBracket.recordMarker}</th>
+              <th scope="col">{copy.timingBracket.position}</th>
+              <th scope="col">{copy.timingBracket.timingEnabled}</th>
+              <th scope="col">{copy.timingBracket.recorded}</th>
+              <th scope="col">{copy.timingBracket.complete}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {timingEventRows.map(({ role, event }) => (
+              <tr data-event-timing-bracket-row={event.id}>
+                <th scope="row">{copy.timingBracket[role]}</th>
+                <td><code>{event.id}</code></td>
+                <td><code>{event.recordMarker.id}</code></td>
+                <td>{copy.timingBracket.positions[event.recordMarker.position]}</td>
+                <td>{copy.timingBracket.yes}</td>
+                <td>{copy.timingBracket.yes}</td>
+                <td>{copy.timingBracket.yes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <h4>{copy.formulaHeading}</h4>
+      <code data-event-formula>{timingBracket.assessment.formula}</code>
       <p data-timing-caveats>{copy.timingCaveats}</p>
       <p>{copy.pacingBoundary}</p>
     </section>
@@ -193,6 +311,17 @@ function operationLabel(operation: StreamEventOperation) {
       <h3>{copy.staticHeading}</h3>
       <p class="visual-section-intro">{copy.staticIntro}</p>
       <p>{copy.orderingBoundary}</p>
+      <p
+        class="stream-relation-verdict"
+        data-stream-relation-verdict={staticRelation}
+        data-relation-from="op-04"
+        data-relation-to="op-05"
+      >
+        {copy.relationVerdict
+          .replace('{from}', 'op-04')
+          .replace('{to}', 'op-05')
+          .replace('{verdict}', copy.relationVerdicts[staticRelation])}
+      </p>
 
       <div class="stream-graph-grid">
         {staticGraph.streams.map(({ id }) => (

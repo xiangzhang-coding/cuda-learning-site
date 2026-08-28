@@ -296,7 +296,7 @@ const units: readonly UnitContract[] = [
       'cudaEventSynchronize',
       'cudaEventElapsedTime',
       're-record',
-      'most recently captured state at the time of the API call',
+      'event snapshot',
       'timing-disabled events',
       'cudaEventDisableTiming',
       'device-time measurement',
@@ -465,6 +465,31 @@ function numberedQuestions(source: string, english: boolean) {
   return match?.[1].match(/^\d+\. /gm) ?? [];
 }
 
+function exerciseThreeFixture(source: string) {
+  const section = /^## (?:练习|Exercise) 3[^\n]*\n([\s\S]*?)(?=^## |\Z)/m.exec(source);
+  expect(section, 'Exercise 3').not.toBeNull();
+  const constraintsIndex = (section?.[1] ?? '').search(/^\*\*(?:约束：|Constraints:)\*\*/m);
+  expect(constraintsIndex, 'Exercise 3 Constraints').toBeGreaterThanOrEqual(0);
+  return [...(section?.[1] ?? '').slice(0, constraintsIndex).matchAll(/^(\d+)\. (.+)$/gm)]
+    .map(([, number, claim]) => ({ number: Number(number), claim }));
+}
+
+function solutionThreeClassifications(source: string) {
+  const section = /^## (?:解答|Solution) 3[^\n]*\n([\s\S]*?)(?=^## |\Z)/m.exec(source);
+  expect(section, 'Solution 3').not.toBeNull();
+  const category =
+    '(source guarantee|API guarantee|unknown implementation detail|rejected claim|guaranteed order|unordered|eligible under the graph|unsupported execution claim)';
+  return [...(section?.[1] ?? '').matchAll(
+    new RegExp(
+      `^(\\d+)\\. \\*\\*(?:Classification: |分类：)${category}(?:（[^）]+）)?[.。]\\*\\*`,
+      'gm',
+    ),
+  )].map(([, number, classification]) => ({
+    number: Number(number),
+    classification,
+  }));
+}
+
 describe('M05-M08 source and built-route publication contracts', () => {
   for (const unit of units) {
     it(`publishes ${unit.id} as a complete bilingual Learning Unit with static practice`, async () => {
@@ -629,6 +654,87 @@ describe('M05-M08 source and built-route publication contracts', () => {
       expect(sourceCoordinates(parseFrontmatter(chinese)), unit.id).toEqual(
         sourceCoordinates(parseFrontmatter(english)),
       );
+    }
+  });
+});
+
+describe('M06-M08 content-review contracts', () => {
+  const exerciseThreeContracts = [
+    {
+      id: 'M06',
+      slug: 'warp-divergence-reconvergence',
+      classifications: [
+        'source guarantee',
+        'source guarantee',
+        'source guarantee',
+        'rejected claim',
+        'rejected claim',
+        'rejected claim',
+        'API guarantee',
+        'rejected claim',
+        'unknown implementation detail',
+        'unknown implementation detail',
+      ],
+    },
+    {
+      id: 'M07',
+      slug: 'stream-ordering',
+      classifications: [
+        'guaranteed order',
+        'unsupported execution claim',
+        'guaranteed order',
+        'unordered',
+        'guaranteed order',
+        'unsupported execution claim',
+        'unsupported execution claim',
+        'eligible under the graph',
+      ],
+    },
+  ] as const;
+
+  for (const contract of exerciseThreeContracts) {
+    it(`publishes and classifies every explicit ${contract.id} Exercise 3 fixture item`, async () => {
+      for (const localePrefix of ['', 'en/'] as const) {
+        const [exercise, solution] = await Promise.all([
+          readSource(localePrefix, contract.slug, 'exercises'),
+          readSource(localePrefix, contract.slug, 'solutions'),
+        ]);
+        const fixture = exerciseThreeFixture(exercise);
+        const classifications = solutionThreeClassifications(solution);
+        const expectedNumbers = contract.classifications.map((_, index) => index + 1);
+
+        expect(fixture, `${localePrefix}${contract.id} fixture`).toHaveLength(
+          contract.classifications.length,
+        );
+        expect(fixture.map(({ number }) => number)).toEqual(expectedNumbers);
+        expect(fixture.every(({ claim }) => claim.trim().length > 0)).toBe(true);
+        expect(classifications.map(({ number }) => number)).toEqual(expectedNumbers);
+        expect(classifications.map(({ classification }) => classification)).toEqual(
+          contract.classifications,
+        );
+      }
+    });
+  }
+
+  it('states the M08 re-record boundary in original wording', async () => {
+    const ownerPhrase = 'most recently captured state at the time of the API call';
+    const expectedWording = {
+      zh: [
+        '每个 event API 调用在提交时都会绑定当时为该 handle 选定的事件快照（event snapshot）。',
+        '之后的 `cudaEventRecord` 会更新该 handle 供后续调用使用的 snapshot，但不能改写已经进入队列的 wait。',
+      ],
+      en: [
+        'Each event API call binds the event snapshot selected for that handle when the call is submitted.',
+        "A later `cudaEventRecord` updates the handle's snapshot for future calls, but it cannot rewrite a wait that is already queued.",
+      ],
+    } as const;
+
+    for (const localePrefix of ['', 'en/'] as const) {
+      const source = await readSource(localePrefix, 'event-dependencies-timing');
+      expect(source).not.toContain(ownerPhrase);
+      for (const sentence of expectedWording[localePrefix === 'en/' ? 'en' : 'zh']) {
+        expect(source).toContain(sentence);
+      }
     }
   });
 });

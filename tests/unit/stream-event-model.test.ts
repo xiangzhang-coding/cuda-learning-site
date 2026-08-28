@@ -12,8 +12,10 @@ import {
   assessStreamEventTiming,
   buildStreamEventTrace,
   classifyStreamEventRelation,
+  createStreamEventGenerationScenario,
   createStreamEventGraph,
   createStreamEventPlaybackState,
+  createStreamEventTimingBracket,
   deriveStreamEventDependencies,
   reduceStreamEventPlaybackState,
 } from '../../src/visuals/stream-event-model';
@@ -112,6 +114,52 @@ describe('VIS07 stream/event dependency model', () => {
     }
   });
 
+  it('binds waits to deterministic generations when one event handle is re-recorded', () => {
+    expect(createStreamEventGenerationScenario()).toEqual({
+      id: 'reused-event-handle',
+      handleId: 'event-handle-01',
+      maximumGenerations: 2,
+      generations: [
+        {
+          generationId: 'E1',
+          handleId: 'event-handle-01',
+          recordMarker: {
+            id: 'record-E1',
+            kind: 'record',
+            sequence: 1,
+            afterOperationId: 'op-02',
+          },
+          waitEdge: {
+            id: 'wait-E1',
+            sequence: 2,
+            fromRecordMarkerId: 'record-E1',
+            waitBeforeOperationId: 'op-03',
+            boundGenerationId: 'E1',
+          },
+        },
+        {
+          generationId: 'E2',
+          handleId: 'event-handle-01',
+          recordMarker: {
+            id: 'record-E2',
+            kind: 're-record',
+            sequence: 3,
+            afterOperationId: 'op-04',
+          },
+          waitEdge: {
+            id: 'wait-E2',
+            sequence: 4,
+            fromRecordMarkerId: 'record-E2',
+            waitBeforeOperationId: 'op-05',
+            boundGenerationId: 'E2',
+          },
+        },
+      ],
+      earlierWaitBindingAfterRerecord: { waitEdgeId: 'wait-E1', generationId: 'E1' },
+      executesCuda: false,
+    });
+  });
+
   it('bounds operation growth and does not consume an ID for a rejected edit', () => {
     let graph = createStreamEventGraph(3);
     for (let ordinal = 6; ordinal <= STREAM_EVENT_LIMITS.maximumOperations; ordinal += 1) {
@@ -181,9 +229,47 @@ describe('VIS07 stream/event dependency model', () => {
     });
     expect(EVENT_ELAPSED_TIME_FORMULA).toBe('elapsed = timestamp(stop) - timestamp(start)');
     expect(STREAM_EVENT_MODEL_CONTRACT).toMatchObject({
+      eventGenerationScenario: 'bounded-two-generations-one-reused-handle',
+      timingBracket: 'formula-only-null-milliseconds',
       browserPacing: 'not-cuda-time-or-evidence',
       executesCuda: false,
       evidenceStatusEffect: 'none',
+    });
+  });
+
+  it('builds a valid one-stream timing bracket with a formula-only assessment', () => {
+    expect(createStreamEventTimingBracket()).toEqual({
+      id: 'timing-bracket-01',
+      stream: { id: 'prepare-stream', name: 'Prepare stream', isDefault: false },
+      startEvent: {
+        id: 'timing-start',
+        timingEnabled: true,
+        recorded: true,
+        complete: true,
+        recordMarker: {
+          id: 'record-timing-start',
+          sequence: 1,
+          position: 'before-included-operations',
+        },
+      },
+      stopEvent: {
+        id: 'timing-stop',
+        timingEnabled: true,
+        recorded: true,
+        complete: true,
+        recordMarker: {
+          id: 'record-timing-stop',
+          sequence: 4,
+          position: 'after-included-operations',
+        },
+      },
+      includedOperationIds: ['op-01', 'op-02'],
+      assessment: {
+        status: 'formula-only',
+        formula: EVENT_ELAPSED_TIME_FORMULA,
+        elapsedMilliseconds: null,
+      },
+      executesCuda: false,
     });
   });
 });

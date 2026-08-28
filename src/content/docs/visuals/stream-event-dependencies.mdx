@@ -112,6 +112,8 @@ producer operation -> record(event) -> wait(event) -> consumer operation
 
 这条教学 edge 对应两个 Runtime API role。事件记录（event record）`cudaEventRecord` 捕获调用时所属 stream 中的 work；事件等待（event wait）`cudaStreamWaitEvent` 则让 wait 之后加入的 work 延迟到被捕获的 event work 完成。模型把这些 event edge 与 same-stream order edge 分开推导。
 
+有界 event-generation ledger 用确定性顺序 `record-E1`、`wait-E1`、`record-E2`、`wait-E2` 复用同一个 handle。Handle 被 re-record 为 E2 后，第一个 wait 仍绑定 E1；较晚的 wait 绑定 E2。显式 record marker 与 wait edge 展示这些绑定，不执行 CUDA。
+
 Edit 采用 fail-closed。未知 operation/stream ID、self-dependency、重复 event edge、已经被现有 path 蕴含的 edge，以及会形成 cycle 的 edge 都会被拒绝，原 graph 保持不变。每次 edit attempt 都会停止 playback 并回到 trace 第一帧；因此 rejected input 不会留下部分修改的 graph 或 stale animation。
 
 ## 确定性 trace
@@ -122,13 +124,13 @@ Play、Pause、Step、Reset 与原生 range scrubber 只移动这条拓扑序（
 
 ## Event timing 边界
 
-页面只显示符号关系 `elapsed = timestamp(stop) - timestamp(start)`，不虚构 timestamp 或 elapsed value。在实际 Runtime API 中，timing 被禁用（timing disabled）时不能计算 elapsed time；event 从未记录（unrecorded）时输入无效；任一已 record event 尚未完成（incomplete）时结果也未就绪。Visual 始终把这三种情况分开。
+页面展示一组位于具名 non-default stream 中的有效 timing bracket。Start/stop event 均启用 timing，两个 record 都已完成，并明确纳入 `op-01` 与 `op-02`。Renderer 使用的同一个纯 assessment 返回 `formula-only` 与 `null` milliseconds：页面只显示符号关系 `elapsed = timestamp(stop) - timestamp(start)`，不虚构 timestamp 或 elapsed value。在实际 Runtime API 中，timing 被禁用（timing disabled）时不能计算 elapsed time；event 从未记录（unrecorded）时输入无效；任一已 record event 尚未完成（incomplete）时结果也未就绪。Visual 始终把这三种情况分开。
 
 动画间隔只是为了可读性的 browser pacing。**浏览器 pacing 不是 CUDA 时间**、device timestamp、profiling evidence 或 performance result。真实 event measurement 需要实际创建与 record event、等待 device work 完成、检查 API result；若把结果报告为 evidence，还要附 Environment Manifest。
 
 ## 静态回退
 
-永久 fallback 使用三条 stream fixture，列出五个 operation、两个 same-stream edge、一个 event edge，以及包含最终空 ready set 在内的全部六帧。禁用 JavaScript 和打印时，graph、edge ledger、formula 与 trace 仍然可用；每种状态都有文字，不依赖颜色。
+永久 fallback 使用三条 stream fixture，列出五个 operation、两个 same-stream edge、一个 event edge、一条模型推导的 unordered relation verdict，以及包含最终空 ready set 在内的全部六帧。禁用 JavaScript 和打印时，两行 event-generation ledger 与完整 timing-bracket ledger 会和 graph、edge ledger、formula、trace 一起保留；每种状态都有文字，不依赖颜色。
 
 ## 证据边界
 

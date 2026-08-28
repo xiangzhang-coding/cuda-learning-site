@@ -79,16 +79,14 @@ Rewrite 删除 accidental legacy edge，但不声称 newly unordered operations 
 
 ## 解答 3：分类 order、eligibility 与 evidence
 
-- 同一 stream 的 consecutive operations 有 guaranteed per-stream order。
-- Different-stream operations 没有 edge 时 unordered。
-- Documented cross-stream dependency ordering producer 与 dependent consumer。
-- Host synchronization ordering host access 与该 boundary 覆盖的 work。
-- Unordered pair 在 graph 下可以 eligible，但仍受其他 constraints。
-- Side-by-side boxes 不建立 execution intervals。
-- 创建 separate streams 不建立 simultaneous execution。
-- Static graph 不产生 performance conclusion。
-
-每项 accepted order claim 都指向 stream、dependency 或 host-boundary edge；更强的 execution claim 只能改写为 eligibility。
+1. **分类：guaranteed order（有保证的顺序）。** Exact support 是 per-stream edge `A -> B`：`A` 完成后 `B` 才开始。
+2. **分类：unsupported execution claim（不受支持的执行说法）。** Host submission order 本身不会增加 cross-stream device edge。修正后应写成：若没有 documented dependency，`A` 与 `X` 保持 unordered。
+3. **分类：guaranteed order（有保证的顺序）。** `B` 后的 record 与 `C` 前的 wait 共同建立 documented event edge `B -> C`；该结论不扩展到 unrelated work。
+4. **分类：unordered（无既定顺序）。** Graph 中没有 edge ordering `B` 与 `X`，所以不能推导 `B -> X` 或 `X -> B`。
+5. **分类：guaranteed order（有保证的顺序）。** `cudaStreamSynchronize(stream_right)` 成功返回后，随后的 host read 位于该 stream 此前 work（包括 `C`）完成之后；这不是对 unrelated streams 的 blanket claim。
+6. **分类：unsupported execution claim（不受支持的执行说法）。** Side-by-side boxes 只表达 graph placement，不是 measured execution intervals。修正后只能称 `B` 与 `X` unordered 或 potentially eligible。
+7. **分类：unsupported execution claim（不受支持的执行说法）。** Separate streams 允许 independent scheduling，但不保证 simultaneous execution。修正后只能说 graph 没有 serializing `B` 与 `X`。
+8. **分类：eligible under the graph（依赖图允许进入执行资格）。** 各自 predecessors 满足后，graph 可以让两项 operation 同时具备 eligibility，但仍受其他 constraints。Performance clause 必须拒绝：eligibility 既不是 observed overlap，也不是 improvement evidence。
 
 ## 有效替代方案
 

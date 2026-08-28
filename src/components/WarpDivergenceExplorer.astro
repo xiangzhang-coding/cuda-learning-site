@@ -45,6 +45,7 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
   data-preset={initialState.presetId}
   data-stage={initialStage.id}
   data-stage-index={initialState.stageIndex}
+  data-lane-set-meaning={initialStage.laneSetMeaning}
 >
   <div class="visual-shell">
     <header class="visual-header">
@@ -87,16 +88,16 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
         </div>
         <div>
           <p data-warp-stage-description>{copy.stages[initialStage.id].description}</p>
-          <p class="sync-mask"><strong>{copy.activeMask}:</strong> <span data-warp-active-mask>{initialStage.activeMask.join(', ')}</span></p>
+          <p class="sync-mask"><strong data-warp-lane-set-label>{copy.laneSetLabels[initialStage.laneSetMeaning]}</strong>: <span data-warp-lane-set>{initialStage.laneSet.join(', ')}</span></p>
           <p class="sync-disposition" data-warp-disposition>{copy.executed}</p>
         </div>
       </section>
 
       <p data-warp-status role="status" aria-live="polite" aria-atomic="true">
-        {copy.status
+        {copy.status[initialStage.laneSetMeaning]
           .replace('{preset}', copy.presets[initialState.presetId])
           .replace('{stage}', copy.stages[initialStage.id].title)
-          .replace('{mask}', initialStage.activeMask.join(', '))}
+          .replace('{laneSet}', initialStage.laneSet.join(', '))}
       </p>
 
       <div class="sync-table-wrap" tabindex="0" aria-label={copy.laneTableScrollLabel}>
@@ -128,7 +129,7 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
               <table class="sync-lane-table">
                 <caption>{copy.staticCaseLabels[presetId]}</caption>
                 <thead>
-                  <tr><th scope="col">{copy.lane}</th><th scope="col">{copy.predicate}</th><th scope="col">{copy.truePath}</th><th scope="col">{copy.falsePath}</th><th scope="col">{copy.join}</th></tr>
+                  <tr><th scope="col">{copy.lane}</th><th scope="col">{copy.predicate}</th><th scope="col">{copy.truePath}</th><th scope="col">{copy.falsePath}</th><th scope="col" data-warp-static-join-label>{copy.join}</th></tr>
                 </thead>
                 <tbody>
                   {trace.lanes.map(({ lane, predicate }) => {
@@ -140,7 +141,7 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
                         <td>{predicate ? copy.predicateTrue : copy.predicateFalse}</td>
                         <td data-static-state={trueState.state}>{trueState.text}</td>
                         <td data-static-state={falseState.state}>{falseState.text}</td>
-                        <td data-static-state="active">{copy.participating}</td>
+                        <td data-static-state="source-level-participating-set" data-lane-set-meaning="source-level-participating-set">{copy.sourceSuccessorParticipating}</td>
                       </tr>
                     );
                   })}
@@ -216,6 +217,9 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
       if (stage.id === 'predicate-evaluated') {
         return { state: 'active', text: `${copy.predicate}: ${predicate ? copy.predicateTrue : copy.predicateFalse}` } as const;
       }
+      if (stage.id === 'logical-join') {
+        return { state: 'source-level-participating-set', text: copy.sourceSuccessorParticipating } as const;
+      }
       return { state: 'active', text: copy.participating } as const;
     }
 
@@ -228,6 +232,7 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
       this.dataset.preset = this.state.presetId;
       this.dataset.stage = stage.id;
       this.dataset.stageIndex = String(this.state.stageIndex);
+      this.dataset.laneSetMeaning = stage.laneSetMeaning;
       this.querySelectorAll<HTMLElement>('[data-warp-stage]').forEach((item, index) => {
         if (index === this.state.stageIndex) item.setAttribute('aria-current', 'step');
         else item.removeAttribute('aria-current');
@@ -245,8 +250,9 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
           .replace('{current}', String(this.state.stageIndex + 1))
           .replace('{total}', String(WARP_DIVERGENCE_STAGES.length)),
       );
-      const mask = stage.activeMask.length > 0 ? stage.activeMask.join(', ') : copy.emptyMask;
-      this.setText('[data-warp-active-mask]', mask);
+      const laneSet = stage.laneSet.length > 0 ? stage.laneSet.join(', ') : copy.emptyMask;
+      this.setText('[data-warp-lane-set-label]', copy.laneSetLabels[stage.laneSetMeaning]);
+      this.setText('[data-warp-lane-set]', laneSet);
       this.setText(
         '[data-warp-disposition]',
         stage.disposition === 'skipped'
@@ -257,10 +263,10 @@ function pathState(trace: WarpDivergenceTrace, path: 'true' | 'false', lane: num
       );
       this.setText(
         '[data-warp-status]',
-        copy.status
+        copy.status[stage.laneSetMeaning]
           .replace('{preset}', copy.presets[this.state.presetId])
           .replace('{stage}', copy.stages[stage.id].title)
-          .replace('{mask}', mask),
+          .replace('{laneSet}', laneSet),
       );
 
       this.querySelectorAll<HTMLTableRowElement>('[data-warp-lanes] tr[data-lane]').forEach((row) => {

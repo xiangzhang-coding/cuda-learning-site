@@ -20,6 +20,11 @@ export const WARP_DIVERGENCE_MODEL_CONTRACT = {
   lanes: 32,
   teachingPathOrder: 'deterministic-not-hardware-scheduling',
   logicalJoin: 'control-flow-only-not-memory-synchronization',
+  stageLaneSetMeaning: {
+    executableStages: 'active-mask',
+    logicalJoin: 'source-level-participating-set',
+  },
+  logicalJoinInstructionClaim: 'none-its-may-regroup-sub-warps',
   independentThreadScheduling: 'compute-capability-7.0-or-newer',
   implicitLockstepAssumptions: 'invalid',
   executesCuda: false,
@@ -29,12 +34,21 @@ export const WARP_DIVERGENCE_MODEL_CONTRACT = {
 
 export type WarpDivergenceStageId = (typeof WARP_DIVERGENCE_STAGES)[number]['id'];
 export type WarpDivergencePresetId = (typeof WARP_DIVERGENCE_PRESETS)[number]['id'];
+export type WarpDivergenceLaneSetMeaning = 'active-mask' | 'source-level-participating-set';
 
-export type WarpDivergenceTraceStage = Readonly<{
-  id: WarpDivergenceStageId;
-  activeMask: readonly number[];
-  disposition: 'executed' | 'skipped' | 'logical-join';
-}>;
+export type WarpDivergenceTraceStage =
+  | Readonly<{
+      id: Exclude<WarpDivergenceStageId, 'logical-join'>;
+      laneSet: readonly number[];
+      laneSetMeaning: 'active-mask';
+      disposition: 'executed' | 'skipped';
+    }>
+  | Readonly<{
+      id: 'logical-join';
+      laneSet: readonly number[];
+      laneSetMeaning: 'source-level-participating-set';
+      disposition: 'logical-join';
+    }>;
 
 export type WarpDivergenceTrace = Readonly<{
   presetId: WarpDivergencePresetId;
@@ -66,10 +80,11 @@ export function createWarpDivergenceTrace(presetId: WarpDivergencePresetId): War
   const trueSet = new Set<number>(preset.trueLanes);
   const trueMask = participatingMask.filter((lane) => trueSet.has(lane));
   const falseMask = participatingMask.filter((lane) => !trueSet.has(lane));
-  const pathStage = (id: 'true-path' | 'false-path', activeMask: readonly number[]): WarpDivergenceTraceStage => ({
+  const pathStage = (id: 'true-path' | 'false-path', laneSet: readonly number[]): WarpDivergenceTraceStage => ({
     id,
-    activeMask,
-    disposition: activeMask.length === 0 ? 'skipped' : 'executed',
+    laneSet,
+    laneSetMeaning: 'active-mask',
+    disposition: laneSet.length === 0 ? 'skipped' : 'executed',
   });
 
   return {
@@ -80,11 +95,16 @@ export function createWarpDivergenceTrace(presetId: WarpDivergencePresetId): War
     falseMask,
     divergent: trueMask.length > 0 && falseMask.length > 0,
     stages: [
-      { id: 'before-branch', activeMask: [...participatingMask], disposition: 'executed' },
-      { id: 'predicate-evaluated', activeMask: [...participatingMask], disposition: 'executed' },
+      { id: 'before-branch', laneSet: [...participatingMask], laneSetMeaning: 'active-mask', disposition: 'executed' },
+      { id: 'predicate-evaluated', laneSet: [...participatingMask], laneSetMeaning: 'active-mask', disposition: 'executed' },
       pathStage('true-path', trueMask),
       pathStage('false-path', falseMask),
-      { id: 'logical-join', activeMask: [...participatingMask], disposition: 'logical-join' },
+      {
+        id: 'logical-join',
+        laneSet: [...participatingMask],
+        laneSetMeaning: 'source-level-participating-set',
+        disposition: 'logical-join',
+      },
     ],
     contract: WARP_DIVERGENCE_MODEL_CONTRACT,
   };

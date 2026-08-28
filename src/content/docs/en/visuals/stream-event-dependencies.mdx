@@ -112,6 +112,8 @@ producer operation -> record(event) -> wait(event) -> consumer operation
 
 The teaching edge reflects two Runtime API roles. `cudaEventRecord` captures the work in its stream at that call, while `cudaStreamWaitEvent` delays work added after the wait until the captured event work completes. The model derives these event edges separately from same-stream order edges.
 
+The bounded event-generation ledger reuses one handle in the deterministic order `record-E1`, `wait-E1`, `record-E2`, `wait-E2`. The first wait remains bound to E1 after the handle is re-recorded as E2; the later wait binds to E2. Explicit record markers and wait edges show those bindings without executing CUDA.
+
 Edits fail closed. Unknown operation or stream IDs, self-dependencies, duplicate event edges, edges already implied by an existing path, and cycle-producing edges are rejected. The previous graph is preserved. Every edit attempt stops playback and returns the teaching trace to its first frame; rejected input therefore cannot leave a partially changed graph or a stale animation.
 
 ## Deterministic trace
@@ -122,13 +124,13 @@ Play, pause, Step, Reset, and the native range scrubber move only through this t
 
 ## Event timing boundary
 
-The page shows only the symbolic relation `elapsed = timestamp(stop) - timestamp(start)`. It invents no timestamp and no elapsed value. In the actual Runtime API, elapsed-time calculation is unavailable when timing is disabled, invalid when an event was never recorded, and incomplete while either recorded event has not completed. Those three conditions remain separate in the visual.
+The page shows one valid timing bracket in a named non-default stream. Timing is enabled for its start and stop events, both records are complete, and `op-01` plus `op-02` are explicitly included. The same pure assessment used by the renderer returns `formula-only` and `null` milliseconds: the page shows only the symbolic relation `elapsed = timestamp(stop) - timestamp(start)` and invents no timestamp or elapsed value. In the actual Runtime API, elapsed-time calculation is unavailable when timing is disabled, invalid when an event was never recorded, and incomplete while either recorded event has not completed. Those three conditions remain separate in the visual.
 
 The animation interval is browser pacing for legibility. **Browser pacing is not CUDA time**, a device timestamp, profiling evidence, or a performance result. A real event measurement needs actual event creation and recording, completed device work, checked API results, and an Environment Manifest when it is reported as evidence.
 
 ## Static fallback
 
-The permanent fallback uses a three-stream fixture. It lists five operations, two same-stream edges, one event edge, and all six ready-set frames, including the final empty ready set. The graph, edge ledgers, formula, and trace remain available without JavaScript and in print; text labels carry every state without relying on color.
+The permanent fallback uses a three-stream fixture. It lists five operations, two same-stream edges, one event edge, a model-derived unordered relation verdict, and all six ready-set frames, including the final empty ready set. The two-row event-generation ledger and complete timing-bracket ledger remain visible with the graph, edge ledgers, formula, and trace without JavaScript and in print; text labels carry every state without relying on color.
 
 ## Evidence boundary
 

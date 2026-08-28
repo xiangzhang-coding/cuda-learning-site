@@ -96,6 +96,17 @@ Name every stream, add only documented edges, and label unordered pairs as eligi
 
 **Goal:** Classify eight claims about two named streams as guaranteed order, unordered, eligible under the graph, or unsupported execution claim.
 
+Use this graph: `stream_left` contains `A -> B -> record(done)`; `stream_right` contains `X -> wait(done) -> C`; after submitting the work, the host calls `cudaStreamSynchronize(stream_right)` and then reads `C`'s output. Classify these claims:
+
+1. The same-stream edge `A -> B` guarantees that `A` completes before `B` begins.
+2. Because the host submits `A` before `X`, host submission order across streams guarantees that `A` completes before `X` starts.
+3. Recording `done` after `B` and waiting on it before `C` creates a documented event edge `B -> C`.
+4. `B` and `X` have no edge between them and therefore remain unordered.
+5. Return from `cudaStreamSynchronize(stream_right)` is a host completion boundary for the previously submitted work in `stream_right`, so the following host read occurs after `C` completes.
+6. Drawing the `B` and `X` boxes side by side proves that their execution intervals overlapped.
+7. Putting `B` and `X` in separate streams guarantees simultaneous execution.
+8. Once their own predecessors permit it, `B` and `X` are eligible under the graph; therefore the graph proves a performance improvement.
+
 **Constraints:** Include same-stream operations, different-stream operations with and without an edge, a host wait, and a side-by-side visual. Use no duration or throughput values.
 
 **Expected evidence:** An eight-row classification table with the exact graph edge supporting each guarantee and corrected wording for unsupported claims.

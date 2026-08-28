@@ -95,6 +95,19 @@ Write lane predicates before masks, distinguish current activity from intended p
 
 **Goal:** Classify ten statements about a divergent `if/else` as source guarantee, API guarantee, or unknown implementation detail.
 
+Use an eight-lane teaching subset with predicate `lane < 3`: the true path assigns scalar `result = 1`, the false path assigns `result = 0`, and both paths lead to source statement `C`. Classify these statements:
+
+1. The per-lane predicates are true for lanes 0, 1, and 2 and false for lanes 3 through 7.
+2. `true_mask = 0x07` and `false_mask = 0xf8` are disjoint and together cover every participating lane in the fixture.
+3. After the `if/else`, each lane's scalar branch result is `1` on the true path and `0` on the false path.
+4. The closing brace of the `if/else` has the same synchronization effect as `__syncwarp(0xff)`.
+5. Because `C` is the common source successor, all eight lanes must currently execute one instance of `C` under active mask `0xff`.
+6. Reaching the source-level join makes writes from either branch visible to lanes that took the other branch.
+7. If every lane named by `0xff` follows its contract, a correctly used `__syncwarp(0xff)` provides documented warp synchronization for those lanes.
+8. Calling `__activemask()` inside the true branch reconstructs the pre-branch group and therefore returns `0xff`.
+9. The GPU always issues the true path before the false path.
+10. On CC 7.0+ Independent Thread Scheduling, the exact instruction interleaving and timing of the true and false paths can be derived from this source.
+
 **Constraints:** Include statements about lane predicates, active masks, source-level join, memory visibility, path issue order, instruction interleaving, and CC 7.0+ Independent Thread Scheduling. Correct every false statement without adding a timing claim.
 
 **Expected evidence:** A ten-row classification table and corrected wording for each rejected statement.

@@ -36,11 +36,19 @@ describe('VIS03 warp-divergence model', () => {
         trace.participatingMask,
       );
       expect(trace.stages.map(({ id }) => id)).toEqual(WARP_DIVERGENCE_STAGES.map(({ id }) => id));
-      expect(trace.stages[0]?.activeMask).toEqual(trace.participatingMask);
-      expect(trace.stages[1]?.activeMask).toEqual(trace.participatingMask);
-      expect(trace.stages[2]?.activeMask).toEqual(trace.trueMask);
-      expect(trace.stages[3]?.activeMask).toEqual(trace.falseMask);
-      expect(trace.stages[4]?.activeMask).toEqual(trace.participatingMask);
+      expect(trace.stages.map(({ laneSetMeaning }) => laneSetMeaning)).toEqual([
+        'active-mask',
+        'active-mask',
+        'active-mask',
+        'active-mask',
+        'source-level-participating-set',
+      ]);
+      expect(trace.stages[0]?.laneSet).toEqual(trace.participatingMask);
+      expect(trace.stages[1]?.laneSet).toEqual(trace.participatingMask);
+      expect(trace.stages[2]?.laneSet).toEqual(trace.trueMask);
+      expect(trace.stages[3]?.laneSet).toEqual(trace.falseMask);
+      expect(trace.stages[4]?.laneSet).toEqual(trace.participatingMask);
+      expect(trace.stages.every((stage) => !('activeMask' in stage))).toBe(true);
       expect(trace.contract).toBe(WARP_DIVERGENCE_MODEL_CONTRACT);
     }
   });
@@ -53,12 +61,14 @@ describe('VIS03 warp-divergence model', () => {
     });
     expect(createWarpDivergenceTrace('uniform-true').stages[3]).toMatchObject({
       id: 'false-path',
-      activeMask: [],
+      laneSet: [],
+      laneSetMeaning: 'active-mask',
       disposition: 'skipped',
     });
     expect(createWarpDivergenceTrace('uniform-false').stages[2]).toMatchObject({
       id: 'true-path',
-      activeMask: [],
+      laneSet: [],
+      laneSetMeaning: 'active-mask',
       disposition: 'skipped',
     });
     expect(createWarpDivergenceTrace('lower-half').trueMask).toEqual(
@@ -96,6 +106,11 @@ describe('VIS03 warp-divergence model', () => {
       lanes: 32,
       teachingPathOrder: 'deterministic-not-hardware-scheduling',
       logicalJoin: 'control-flow-only-not-memory-synchronization',
+      stageLaneSetMeaning: {
+        executableStages: 'active-mask',
+        logicalJoin: 'source-level-participating-set',
+      },
+      logicalJoinInstructionClaim: 'none-its-may-regroup-sub-warps',
       independentThreadScheduling: 'compute-capability-7.0-or-newer',
       implicitLockstepAssumptions: 'invalid',
       executesCuda: false,

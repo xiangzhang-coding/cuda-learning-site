@@ -19,9 +19,17 @@ function metadata(document: Document, name: string) {
 
 describe('VIS03 and VIS07 synchronization Visual Explainers', () => {
   it.each([
-    { route: '/visuals/warp-divergence/', counterpart: '/en/visuals/warp-divergence/' },
-    { route: '/en/visuals/warp-divergence/', counterpart: '/visuals/warp-divergence/' },
-  ])('renders the complete VIS03 static contract at $route', async ({ route, counterpart }) => {
+    {
+      route: '/visuals/warp-divergence/',
+      counterpart: '/en/visuals/warp-divergence/',
+      joinLabel: '源代码级参与集合',
+    },
+    {
+      route: '/en/visuals/warp-divergence/',
+      counterpart: '/visuals/warp-divergence/',
+      joinLabel: 'Source-level participating set',
+    },
+  ])('renders the complete VIS03 static contract at $route', async ({ route, counterpart, joinLabel }) => {
     const document = await readRoute(route);
     const visual = document.querySelector('cuda-warp-divergence[data-visual-id="VIS03"]');
 
@@ -32,6 +40,10 @@ describe('VIS03 and VIS07 synchronization Visual Explainers', () => {
     expect(visual?.querySelectorAll('[data-static-case="lower-half"] tbody tr')).toHaveLength(32);
     expect(visual?.querySelectorAll('[data-static-case="uniform-true"] tbody tr')).toHaveLength(32);
     expect(visual?.querySelector('[data-static-case="uniform-true"]')?.textContent).toMatch(/skipped|跳过/i);
+    expect(visual?.querySelector('[data-warp-static-join-label]')?.textContent?.trim()).toBe(joinLabel);
+    expect(visual?.querySelectorAll('[data-static-state="source-level-participating-set"]')).toHaveLength(64);
+    expect(visual?.querySelector('[data-warp-active-mask]')).toBeNull();
+    expect(visual?.textContent).toMatch(/ITS.*regroup sub-warps.*does not claim one current instruction or mask|ITS.*重新组合 sub-warp.*不声称.*同一条当前指令.*同一个当前掩码/is);
     expect(visual?.querySelector('[role="status"][aria-live="polite"]')).not.toBeNull();
     expect(visual?.querySelector('canvas, img, iframe, object, embed, form')).toBeNull();
     expect(visual?.textContent).toMatch(/not hardware scheduling|不是硬件调度顺序/i);
@@ -71,6 +83,23 @@ describe('VIS03 and VIS07 synchronization Visual Explainers', () => {
     expect(visual?.querySelectorAll('[data-static-same-stream-edge]')).toHaveLength(2);
     expect(visual?.querySelectorAll('[data-static-event-edge]')).toHaveLength(1);
     expect(visual?.querySelectorAll('[data-static-trace-frame]')).toHaveLength(6);
+    const generationLedger = visual?.querySelector('[data-event-generation-ledger="reused-event-handle"]');
+    expect(generationLedger).not.toBeNull();
+    expect(generationLedger?.querySelectorAll('[data-event-generation-row]')).toHaveLength(2);
+    expect(generationLedger?.querySelectorAll('[data-event-record-marker]')).toHaveLength(2);
+    expect(generationLedger?.querySelectorAll('[data-event-wait-edge]')).toHaveLength(2);
+    expect(generationLedger?.querySelector('[data-event-generation-row="E1"]')?.getAttribute('data-bound-generation')).toBe('E1');
+    expect(generationLedger?.querySelector('[data-event-generation-row="E2"]')?.getAttribute('data-bound-generation')).toBe('E2');
+    expect(generationLedger?.textContent).toMatch(/earlier wait remains bound to E1|较早的 wait 仍绑定 E1/i);
+
+    const timingBracket = visual?.querySelector('[data-event-timing-bracket="timing-bracket-01"]');
+    expect(timingBracket).not.toBeNull();
+    expect(timingBracket?.getAttribute('data-timing-status')).toBe('formula-only');
+    expect(timingBracket?.getAttribute('data-elapsed-milliseconds')).toBe('null');
+    expect(timingBracket?.querySelectorAll('[data-event-timing-bracket-row]')).toHaveLength(2);
+    expect(timingBracket?.querySelector('[data-timing-stream="prepare-stream"]')).not.toBeNull();
+    expect(timingBracket?.querySelector('[data-timing-included-operations]')?.textContent?.trim()).toBe('op-01, op-02');
+    expect(timingBracket?.textContent).not.toMatch(/\d+(?:\.\d+)?\s*ms\b/i);
     expect(visual?.querySelector('[data-event-formula]')?.textContent?.trim()).toBe(
       'elapsed = timestamp(stop) - timestamp(start)',
     );
@@ -78,6 +107,7 @@ describe('VIS03 and VIS07 synchronization Visual Explainers', () => {
     expect(visual?.querySelector('[role="status"][aria-live="polite"]')).not.toBeNull();
     expect(visual?.querySelector('canvas, img, iframe, object, embed, form')).toBeNull();
     expect(visual?.textContent).toMatch(/unordered.*not.*concurrent|未排序.*不.*并发/is);
+    expect(visual?.querySelector('[data-stream-relation-verdict="unordered-not-proven-concurrent"]')).not.toBeNull();
     expect(visual?.textContent).toMatch(/browser pacing.*not CUDA time|浏览器 pacing.*不是 CUDA 时间/i);
     expect(document.querySelector('[data-locale-counterpart]')?.getAttribute('href')).toBe(counterpart);
 

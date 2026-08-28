@@ -95,6 +95,19 @@ head:
 
 **目标：** 把关于 divergent `if/else` 的十条 statement 分类为 source guarantee、API guarantee 或 unknown implementation detail。
 
+使用一个只观察 lanes 0 到 7 的 teaching fixture：predicate 是 `lane < 3`；true path 把 scalar `result` 设为 `1`，false path 把它设为 `0`；两条 path 随后都进入 source statement `C`。逐条分类以下 statements：
+
+1. Per-lane predicates 在 lanes 0、1、2 上为 true，在 lanes 3 到 7 上为 false。
+2. `true_mask = 0x07` 与 `false_mask = 0xf8` 互不重叠，合起来恰好覆盖 fixture 中的全部 participating lanes。
+3. `if/else` 之后，每个 lane 的 scalar branch result 在 true path 上为 `1`，在 false path 上为 `0`。
+4. `if/else` 的 closing brace 与 `__syncwarp(0xff)` 具有相同 synchronization effect。
+5. 因为 `C` 是 common source successor，八个 lanes 此时必然在 active mask `0xff` 下共同执行同一个 `C` instruction instance。
+6. 到达 source-level join 会让任一 branch 的 writes 对走另一 branch 的 lanes 可见。
+7. 如果 `0xff` 命名的每个 lane 都遵守 operation contract，正确使用的 `__syncwarp(0xff)` 会为这些 lanes 提供 documented warp synchronization。
+8. 在 true branch 内调用 `__activemask()` 可以重建 pre-branch group，因此会返回 `0xff`。
+9. GPU 总是先 issue true path，再 issue false path。
+10. 在 CC 7.0+ Independent Thread Scheduling 下，可以从这段 source 推导 true/false paths 的 exact instruction interleaving 与 timing。
+
 **约束：** Statements 必须覆盖 lane predicates、active masks、source-level join、memory visibility、path issue order、instruction interleaving 与 CC 7.0+ Independent Thread Scheduling；修正每条 false statement，但不添加 timing claim。
 
 **预期证据：** 一张十行 classification table，以及每条 rejected statement 的 corrected wording。

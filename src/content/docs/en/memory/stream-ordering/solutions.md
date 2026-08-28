@@ -79,16 +79,14 @@ The rewrite removes an accidental legacy edge. It does not assert that the now-u
 
 ## Solution 3: Classify order, eligibility, and evidence
 
-- Consecutive operations in one stream have guaranteed per-stream order.
-- Different-stream operations without an edge are unordered.
-- A documented cross-stream dependency orders its producer before the dependent consumer.
-- A host synchronization orders host access after the work covered by that boundary.
-- An unordered pair can be eligible under the graph, subject to other constraints.
-- Side-by-side boxes do not establish execution intervals.
-- Separate stream creation does not establish simultaneous execution.
-- No performance conclusion follows from the static graph.
-
-Every accepted order claim points to a stream, dependency, or host-boundary edge. Every stronger execution claim is rewritten as eligibility only.
+1. **Classification: guaranteed order.** The per-stream edge `A -> B` is the exact support: `A` completes before `B` begins.
+2. **Classification: unsupported execution claim.** Host submission order alone adds no cross-stream device edge. The correction is that `A` and `X` remain unordered unless a documented dependency connects them.
+3. **Classification: guaranteed order.** The record after `B` and wait before `C` form the documented event edge `B -> C`; the claim does not extend to unrelated work.
+4. **Classification: unordered.** No graph edge orders `B` against `X`, so neither `B -> X` nor `X -> B` may be inferred.
+5. **Classification: guaranteed order.** Successful return from `cudaStreamSynchronize(stream_right)` places the following host read after completion of earlier work in that stream, including `C`; it is not a blanket claim about unrelated streams.
+6. **Classification: unsupported execution claim.** Side-by-side boxes encode graph placement, not measured execution intervals. The correction describes `B` and `X` only as unordered or potentially eligible.
+7. **Classification: unsupported execution claim.** Separate streams permit independent scheduling but do not guarantee simultaneous execution. The corrected claim is only that the graph does not serialize `B` and `X`.
+8. **Classification: eligible under the graph.** The graph can allow both operations to become eligible once their predecessors are satisfied, subject to other constraints. Reject the performance clause: eligibility is neither observed overlap nor evidence of improvement.
 
 ## Valid alternatives
 

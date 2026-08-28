@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type {
+  WarpDivergenceLaneSetMeaning,
   WarpDivergencePresetId,
   WarpDivergenceStageId,
 } from './warp-divergence-model';
@@ -25,7 +26,7 @@ type WarpDivergenceCopy = Readonly<{
   currentStage: string;
   stageCounter: string;
   stages: Readonly<Record<WarpDivergenceStageId, Readonly<{ title: string; description: string }>>>;
-  activeMask: string;
+  laneSetLabels: Readonly<Record<WarpDivergenceLaneSetMeaning, string>>;
   emptyMask: string;
   executed: string;
   skipped: string;
@@ -40,6 +41,7 @@ type WarpDivergenceCopy = Readonly<{
   active: string;
   inactive: string;
   participating: string;
+  sourceSuccessorParticipating: string;
   staticHeading: string;
   staticIntro: string;
   staticCaseLabels: Readonly<Record<'lower-half' | 'uniform-true', string>>;
@@ -48,7 +50,7 @@ type WarpDivergenceCopy = Readonly<{
   join: string;
   divergent: string;
   uniform: string;
-  status: string;
+  status: Readonly<Record<WarpDivergenceLaneSetMeaning, string>>;
   noEvidence: string;
 }>;
 
@@ -76,13 +78,16 @@ export const WARP_DIVERGENCE_COPY: Readonly<Record<SynchronizationVisualLocale, 
       'predicate-evaluated': { title: 'Predicate 已求值', description: '每个 lane 已得到 true 或 false；两个 mask 互斥且覆盖 participating mask。' },
       'true-path': { title: 'True path', description: '只高亮 predicate 为 true 的 lane；空 mask 会明确标记为“跳过”。' },
       'false-path': { title: 'False path', description: '只高亮 predicate 为 false 的 lane；空 mask 会明确标记为“跳过”。' },
-      'logical-join': { title: '逻辑汇合', description: '所有 participating lane 都到达共同的逻辑后继；这不是 barrier 或 memory fence。' },
+      'logical-join': { title: '逻辑汇合', description: '源代码级参与集合中的 lane 拥有共同后继；ITS 可能重新组合 sub-warp，本模型不声称它们位于同一条当前指令或同一个当前活动掩码。这不是 barrier 或 memory fence。' },
     },
-    activeMask: '当前 active mask',
+    laneSetLabels: {
+      'active-mask': '当前活动掩码',
+      'source-level-participating-set': '源代码级参与集合',
+    },
     emptyMask: '空',
     executed: '已展示',
     skipped: '跳过：该 path 的 mask 为空',
-    logicalJoin: '逻辑汇合；不是内存同步',
+    logicalJoin: '源代码级参与集合到达逻辑汇合；不是内存同步',
     laneTable: '32-lane 当前状态表',
     laneTableScrollLabel: '可横向滚动的 32-lane predicate 与当前状态表',
     lane: 'Lane',
@@ -92,7 +97,8 @@ export const WARP_DIVERGENCE_COPY: Readonly<Record<SynchronizationVisualLocale, 
     predicateFalse: 'false',
     active: 'ACTIVE：参与当前阶段',
     inactive: 'INACTIVE：当前 path 禁用',
-    participating: 'PARTICIPATING：位于共同控制流',
+    participating: 'ACTIVE：参与当前可执行阶段',
+    sourceSuccessorParticipating: '参与：位于共同的源代码后继；ITS 可能重新组合 sub-warp，本模型不声称这些 lane 处于同一条当前指令或同一个当前掩码',
     staticHeading: '无脚本完整对照',
     staticIntro: '下面两张 32-row table 始终可见，分别保存 divergent 与 uniform 情况；文字标签与边框共同表达状态，不只依赖颜色。',
     staticCaseLabels: {
@@ -101,10 +107,13 @@ export const WARP_DIVERGENCE_COPY: Readonly<Record<SynchronizationVisualLocale, 
     },
     truePath: 'True path',
     falsePath: 'False path',
-    join: 'Logical join',
+    join: '源代码级参与集合',
     divergent: 'DIVERGENT：两个 path 都非空',
     uniform: 'UNIFORM：false path 跳过',
-    status: '{preset}；{stage}；active lanes：{mask}。',
+    status: {
+      'active-mask': '{preset}；{stage}；当前活动掩码：{laneSet}。',
+      'source-level-participating-set': '{preset}；{stage}；源代码级参与集合：{laneSet}。ITS 可能重新组合 sub-warp；本模型不声称这些 lane 属于同一条当前指令或同一个当前掩码。',
+    },
     noEvidence: '此浏览器模型不编译或运行 CUDA，也不产生计时或性能证据；它不会授予 Compile-Checked、Community-Observed 或 Runtime-Verified Evidence Status。',
   },
   en: {
@@ -130,13 +139,16 @@ export const WARP_DIVERGENCE_COPY: Readonly<Record<SynchronizationVisualLocale, 
       'predicate-evaluated': { title: 'Predicate evaluated', description: 'Every lane now has true or false; the masks are disjoint and cover the participating mask.' },
       'true-path': { title: 'True path', description: 'Only lanes with a true predicate are highlighted; an empty mask is explicitly marked skipped.' },
       'false-path': { title: 'False path', description: 'Only lanes with a false predicate are highlighted; an empty mask is explicitly marked skipped.' },
-      'logical-join': { title: 'Logical join', description: 'All participating lanes have a common logical successor; this is not a barrier or memory fence.' },
+      'logical-join': { title: 'Logical join', description: 'The source-level participating set has a common successor. ITS may regroup sub-warps, so this model does not claim one current instruction or active mask. This is not a barrier or memory fence.' },
     },
-    activeMask: 'Current active mask',
+    laneSetLabels: {
+      'active-mask': 'Current active mask',
+      'source-level-participating-set': 'Source-level participating set',
+    },
     emptyMask: 'empty',
     executed: 'shown',
     skipped: 'Skipped: this path has an empty mask',
-    logicalJoin: 'Logical join; not memory synchronization',
+    logicalJoin: 'Source-level participating set at a logical join; not memory synchronization',
     laneTable: 'Current 32-lane state',
     laneTableScrollLabel: 'Scrollable 32-lane predicate and current-state table',
     lane: 'Lane',
@@ -146,7 +158,8 @@ export const WARP_DIVERGENCE_COPY: Readonly<Record<SynchronizationVisualLocale, 
     predicateFalse: 'false',
     active: 'ACTIVE: participates in this stage',
     inactive: 'INACTIVE: disabled on this path',
-    participating: 'PARTICIPATING: at common control flow',
+    participating: 'ACTIVE: participates in this executable stage',
+    sourceSuccessorParticipating: 'PARTICIPATING: at a common source successor; ITS may regroup sub-warps, so this model does not claim one current instruction or mask',
     staticHeading: 'Complete no-script comparison',
     staticIntro: 'These two 32-row tables remain visible for divergent and uniform cases. Text labels and borders carry meaning in addition to color.',
     staticCaseLabels: {
@@ -155,10 +168,13 @@ export const WARP_DIVERGENCE_COPY: Readonly<Record<SynchronizationVisualLocale, 
     },
     truePath: 'True path',
     falsePath: 'False path',
-    join: 'Logical join',
+    join: 'Source-level participating set',
     divergent: 'DIVERGENT: both paths are non-empty',
     uniform: 'UNIFORM: false path skipped',
-    status: '{preset}; {stage}; active lanes: {mask}.',
+    status: {
+      'active-mask': '{preset}; {stage}; current active mask: {laneSet}.',
+      'source-level-participating-set': '{preset}; {stage}; source-level participating set: {laneSet}. ITS may regroup sub-warps; this model does not claim one current instruction or mask.',
+    },
     noEvidence: 'This browser model compiles and executes no CUDA and supplies no timing or performance evidence. It grants no Compile-Checked, Community-Observed, or Runtime-Verified Evidence Status.',
   },
 };
@@ -207,9 +223,45 @@ type StreamEventCopy = Readonly<{
   completedState: string;
   staticHeading: string;
   staticIntro: string;
+  eventGeneration: Readonly<{
+    heading: string;
+    intro: string;
+    generation: string;
+    handle: string;
+    recordMarker: string;
+    recordAfter: string;
+    waitEdge: string;
+    waitBefore: string;
+    boundGeneration: string;
+    recordKinds: Readonly<Record<'record' | 're-record', string>>;
+    earlierWaitBinding: string;
+  }>;
+  timingBracket: Readonly<{
+    heading: string;
+    intro: string;
+    role: string;
+    start: string;
+    stop: string;
+    event: string;
+    stream: string;
+    includedOperations: string;
+    recordMarker: string;
+    position: string;
+    positions: Readonly<Record<'before-included-operations' | 'after-included-operations', string>>;
+    timingEnabled: string;
+    recorded: string;
+    complete: string;
+    yes: string;
+    assessment: string;
+    formulaOnly: string;
+    elapsedMilliseconds: string;
+    noMilliseconds: string;
+  }>;
   formulaHeading: string;
   timingCaveats: string;
   orderingBoundary: string;
+  relationVerdict: string;
+  relationVerdicts: Readonly<Record<'ordered' | 'unordered-not-proven-concurrent' | 'unknown-operation', string>>;
   pacingBoundary: string;
   operationAdded: string;
   dependencyAdded: string;
@@ -267,10 +319,53 @@ export const STREAM_EVENT_COPY: Readonly<Record<SynchronizationVisualLocale, Str
     selected: 'SELECTED：按稳定 ID tie-break 选择',
     completedState: 'COMPLETED：此前教学步骤已选择',
     staticHeading: '无脚本 graph 与 trace',
-    staticIntro: '三条具名 stream、五个 operation、两类 edge 和全部六个 trace frame 永久可见。静态表与互动区来自同一个纯模型。',
+    staticIntro: '三条具名 stream、五个 operation、两类 edge 和全部六个 trace frame 永久可见。Event-generation 与 timing-bracket ledger 也始终可见；静态表与互动区来自同一个纯模型。',
+    eventGeneration: {
+      heading: 'Event generation 与复用 handle ledger',
+      intro: '同一个 event handle 先 record 为 E1 并提交 wait-E1，随后 re-record 为 E2 并提交较晚的 wait-E2。较早的 wait 仍绑定 E1；这是有界纯模型，不执行 CUDA。',
+      generation: 'Generation',
+      handle: '复用 handle',
+      recordMarker: 'Record marker',
+      recordAfter: 'Record after',
+      waitEdge: 'Wait edge',
+      waitBefore: 'Wait before',
+      boundGeneration: 'Wait 绑定',
+      recordKinds: { record: 'record', 're-record': 're-record' },
+      earlierWaitBinding: '较早的 wait 仍绑定 E1；之后的 re-record E2 不会改变 wait-E1。',
+    },
+    timingBracket: {
+      heading: '完整 event timing bracket ledger',
+      intro: 'Timing-enabled start/stop event 位于同一条具名 non-default stream，两个 record 都已完成。这里只进行 formula-only assessment，不生成毫秒值。',
+      role: '角色',
+      start: 'Start event',
+      stop: 'Stop event',
+      event: 'Event ID',
+      stream: '具名 non-default stream',
+      includedOperations: '纳入 bracket 的 operation',
+      recordMarker: 'Record marker',
+      position: '位置',
+      positions: {
+        'before-included-operations': '在纳入的 operation 之前',
+        'after-included-operations': '在纳入的 operation 之后',
+      },
+      timingEnabled: 'Timing enabled',
+      recorded: '已 record',
+      complete: 'Record 已完成',
+      yes: '是',
+      assessment: 'Assessment',
+      formulaOnly: '仅公式（formula-only）',
+      elapsedMilliseconds: 'Elapsed milliseconds',
+      noMilliseconds: '未生成（null）',
+    },
     formulaHeading: 'Event elapsed-time 公式边界',
     timingCaveats: 'Timing disabled：event 不记录 timing data。Unrecorded：start 或 stop 尚未 record。Incomplete：已 record 但至少一个 event 尚未完成。这里不生成毫秒值。',
     orderingBoundary: '不同 stream 若没有显式 dependency path，则是未排序（unordered），不证明并发。',
+    relationVerdict: '{from} / {to}：{verdict}',
+    relationVerdicts: {
+      ordered: '有序（ordered）',
+      'unordered-not-proven-concurrent': '未排序（unordered），不证明并发',
+      'unknown-operation': '未知 operation',
+    },
     pacingBoundary: '浏览器 pacing 不是 CUDA 时间、device timestamp 或 Evidence Status。',
     operationAdded: '已添加 {operation}；playback 已停止，trace 已重置。',
     dependencyAdded: '已添加 {event}；playback 已停止，trace 已重置。',
@@ -335,10 +430,53 @@ export const STREAM_EVENT_COPY: Readonly<Record<SynchronizationVisualLocale, Str
     selected: 'SELECTED: chosen by stable ID tie-break',
     completedState: 'COMPLETED: selected by an earlier teaching step',
     staticHeading: 'No-script graph and trace',
-    staticIntro: 'Three named streams, five operations, both edge classes, and all six trace frames remain visible. The static tables and workbench use the same pure model.',
+    staticIntro: 'Three named streams, five operations, both edge classes, and all six trace frames remain visible. The event-generation and timing-bracket ledgers also remain visible; the static tables and workbench use the same pure model.',
+    eventGeneration: {
+      heading: 'Event generation and reused-handle ledger',
+      intro: 'One event handle is recorded as E1 and receives wait-E1, then is re-recorded as E2 before the later wait-E2. The earlier wait remains bound to E1. This is a bounded pure model and executes no CUDA.',
+      generation: 'Generation',
+      handle: 'Reused handle',
+      recordMarker: 'Record marker',
+      recordAfter: 'Record after',
+      waitEdge: 'Wait edge',
+      waitBefore: 'Wait before',
+      boundGeneration: 'Wait binding',
+      recordKinds: { record: 'record', 're-record': 're-record' },
+      earlierWaitBinding: 'The earlier wait remains bound to E1; the later E2 re-record does not change wait-E1.',
+    },
+    timingBracket: {
+      heading: 'Complete event timing-bracket ledger',
+      intro: 'Timing-enabled start and stop events bracket work in one named non-default stream, and both records are complete. The assessment is formula-only and generates no milliseconds.',
+      role: 'Role',
+      start: 'Start event',
+      stop: 'Stop event',
+      event: 'Event ID',
+      stream: 'Named non-default stream',
+      includedOperations: 'Included operations',
+      recordMarker: 'Record marker',
+      position: 'Position',
+      positions: {
+        'before-included-operations': 'Before included operations',
+        'after-included-operations': 'After included operations',
+      },
+      timingEnabled: 'Timing enabled',
+      recorded: 'Recorded',
+      complete: 'Record complete',
+      yes: 'yes',
+      assessment: 'Assessment',
+      formulaOnly: 'formula-only',
+      elapsedMilliseconds: 'Elapsed milliseconds',
+      noMilliseconds: 'not generated (null)',
+    },
     formulaHeading: 'Event elapsed-time formula boundary',
     timingCaveats: 'Timing disabled: the event records no timing data. Unrecorded: start or stop has not been recorded. Incomplete: both were recorded but at least one event has not completed. No millisecond value is generated here.',
     orderingBoundary: 'Different streams without an explicit dependency path are unordered, not proven concurrent.',
+    relationVerdict: '{from} / {to}: {verdict}',
+    relationVerdicts: {
+      ordered: 'ordered',
+      'unordered-not-proven-concurrent': 'unordered, not proven concurrent',
+      'unknown-operation': 'unknown operation',
+    },
     pacingBoundary: 'Browser pacing is not CUDA time, a device timestamp, or Evidence Status.',
     operationAdded: 'Added {operation}; playback stopped and the trace reset.',
     dependencyAdded: 'Added {event}; playback stopped and the trace reset.',

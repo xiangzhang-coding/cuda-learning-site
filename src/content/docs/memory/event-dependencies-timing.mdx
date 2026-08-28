@@ -161,7 +161,7 @@ stream_consumer: wait(event_ready) -> C1
 
 ## Re-record：替换 captured state
 
-对同一 event 再调用 `cudaEventRecord` 会 overwrite previous captured state，但不会 retroactively retarget earlier wait。`cudaStreamWaitEvent` 等 API 使用 `the most recently captured state at the time of the API call`，后续 re-record 不影响已经发出的调用。
+每个 event API 调用在提交时都会绑定当时为该 handle 选定的事件快照（event snapshot）。之后的 `cudaEventRecord` 会更新该 handle 供后续调用使用的 snapshot，但不能改写已经进入队列的 wait。
 
 Handle name 即使复用，ledger 仍应 version state：
 

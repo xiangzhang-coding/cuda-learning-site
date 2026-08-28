@@ -17,6 +17,8 @@ export const STREAM_EVENT_MODEL_CONTRACT = {
   crossStreamOrder: 'unordered-without-explicit-event-dependency',
   unorderedMeaning: 'not-proven-concurrent',
   topologicalTieBreak: 'ascending-deterministic-operation-id-not-hardware-scheduling',
+  eventGenerationScenario: 'bounded-two-generations-one-reused-handle',
+  timingBracket: 'formula-only-null-milliseconds',
   eventFormula: EVENT_ELAPSED_TIME_FORMULA,
   browserPacing: 'not-cuda-time-or-evidence',
   executesCuda: false,
@@ -160,6 +162,52 @@ export function createStreamEventGraph(streamCount: StreamEventStreamCount = 2):
     nextOperationOrdinal: operations.length + 1,
     nextEventOrdinal: 2,
   };
+}
+
+export function createStreamEventGenerationScenario() {
+  return {
+    id: 'reused-event-handle',
+    handleId: 'event-handle-01',
+    maximumGenerations: 2,
+    generations: [
+      {
+        generationId: 'E1',
+        handleId: 'event-handle-01',
+        recordMarker: {
+          id: 'record-E1',
+          kind: 'record',
+          sequence: 1,
+          afterOperationId: 'op-02',
+        },
+        waitEdge: {
+          id: 'wait-E1',
+          sequence: 2,
+          fromRecordMarkerId: 'record-E1',
+          waitBeforeOperationId: 'op-03',
+          boundGenerationId: 'E1',
+        },
+      },
+      {
+        generationId: 'E2',
+        handleId: 'event-handle-01',
+        recordMarker: {
+          id: 'record-E2',
+          kind: 're-record',
+          sequence: 3,
+          afterOperationId: 'op-04',
+        },
+        waitEdge: {
+          id: 'wait-E2',
+          sequence: 4,
+          fromRecordMarkerId: 'record-E2',
+          waitBeforeOperationId: 'op-05',
+          boundGenerationId: 'E2',
+        },
+      },
+    ],
+    earlierWaitBindingAfterRerecord: { waitEdgeId: 'wait-E1', generationId: 'E1' },
+    executesCuda: false,
+  } as const;
 }
 
 export function deriveStreamEventDependencies(graph: StreamEventGraph) {
@@ -317,6 +365,47 @@ export function assessStreamEventTiming(input: StreamEventTimingInput) {
   if (!input.startRecorded || !input.stopRecorded) return { status: 'unrecorded' as const, ...result };
   if (!input.startComplete || !input.stopComplete) return { status: 'incomplete' as const, ...result };
   return { status: 'formula-only' as const, ...result };
+}
+
+export function createStreamEventTimingBracket() {
+  const startEvent = {
+    id: 'timing-start',
+    timingEnabled: true,
+    recorded: true,
+    complete: true,
+    recordMarker: {
+      id: 'record-timing-start',
+      sequence: 1,
+      position: 'before-included-operations',
+    },
+  } as const;
+  const stopEvent = {
+    id: 'timing-stop',
+    timingEnabled: true,
+    recorded: true,
+    complete: true,
+    recordMarker: {
+      id: 'record-timing-stop',
+      sequence: 4,
+      position: 'after-included-operations',
+    },
+  } as const;
+
+  return {
+    id: 'timing-bracket-01',
+    stream: STREAM_EVENT_STREAMS[0],
+    startEvent,
+    stopEvent,
+    includedOperationIds: ['op-01', 'op-02'],
+    assessment: assessStreamEventTiming({
+      timingEnabled: startEvent.timingEnabled && stopEvent.timingEnabled,
+      startRecorded: startEvent.recorded,
+      stopRecorded: stopEvent.recorded,
+      startComplete: startEvent.complete,
+      stopComplete: stopEvent.complete,
+    }),
+    executesCuda: false,
+  } as const;
 }
 
 export function buildStreamEventTrace(graph: StreamEventGraph) {

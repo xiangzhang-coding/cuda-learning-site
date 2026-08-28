@@ -83,9 +83,16 @@ A register alternative uses a synchronized shuffle operation with the same parti
 
 ## Solution 3: Separate source facts from schedule guesses
 
-Source guarantees include each lane's predicate and scalar branch result. API guarantees include the participant and synchronization semantics of a correctly used warp intrinsic. A source-level join only identifies a common source region; it is not synchronization. Exact path issue order, instruction interleaving, reconvergence-stack operation, and elapsed execution are unknown implementation details.
-
-CC 7.0+ Independent Thread Scheduling permits per-thread execution state and sub-warp regrouping. It does not supply a schedule trace. Cross-lane data remains valid only when an API or memory-model relation supplies the required mask, ordering, and visibility.
+1. **Classification: source guarantee.** Evaluating `lane < 3` gives true for lanes 0 through 2 and false for lanes 3 through 7; this is a per-lane source fact.
+2. **Classification: source guarantee.** Within the stated eight-lane fixture, `0x07 & 0xf8 == 0` and `0x07 | 0xf8 == 0xff`, so the two masks are disjoint and complete.
+3. **Classification: source guarantee.** Each lane follows one scalar branch and retains that branch's assigned `result`; no cross-lane schedule claim is needed.
+4. **Classification: rejected claim.** A closing brace marks control flow only. It is not `__syncwarp`, so add a documented synchronization operation when the algorithm needs one.
+5. **Classification: rejected claim.** `C` is a common source successor, but that fact does not establish one current active mask or one simultaneous dynamic instruction instance. State only that each non-exited lane eventually follows its source path to `C`.
+6. **Classification: rejected claim.** A source-level join supplies no memory-visibility edge. Cross-lane communication needs a documented synchronization or memory-model relation with the required participants and scope.
+7. **Classification: API guarantee.** When every non-exited lane named by `0xff` executes `__syncwarp(0xff)` as required, the intrinsic supplies its documented synchronization semantics to those lanes.
+8. **Classification: rejected claim.** `__activemask()` reports lanes active at that call; it does not reconstruct the earlier pre-branch group. Compute or capture the intended participation mask before divergence.
+9. **Classification: unknown implementation detail.** The programming model does not choose an exact true-path/false-path issue order. A portable account leaves either order possible.
+10. **Classification: unknown implementation detail.** CC 7.0+ Independent Thread Scheduling permits per-thread execution state and sub-warp regrouping, but source code does not determine exact instruction interleaving or timing.
 
 ## Valid alternatives
 
