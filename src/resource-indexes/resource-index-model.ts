@@ -173,6 +173,26 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'M04：Bank conflict 与布局变换', en: 'M04: Bank conflicts and layout transforms' },
     prerequisites: ['M03'],
   },
+  M05: {
+    href: { 'zh-CN': '/memory/synchronization-scopes/', en: '/en/memory/synchronization-scopes/' },
+    title: { 'zh-CN': 'M05：同步作用域与内存可见性', en: 'M05: Synchronization scopes and memory visibility' },
+    prerequisites: ['F02', 'M01'],
+  },
+  M06: {
+    href: { 'zh-CN': '/memory/warp-divergence-reconvergence/', en: '/en/memory/warp-divergence-reconvergence/' },
+    title: { 'zh-CN': 'M06：分支发散、重汇合与线程束安全推理', en: 'M06: Divergence, reconvergence, and warp-safe reasoning' },
+    prerequisites: ['F02', 'M05'],
+  },
+  M07: {
+    href: { 'zh-CN': '/memory/stream-ordering/', en: '/en/memory/stream-ordering/' },
+    title: { 'zh-CN': 'M07：用流取代全局顺序心智模型', en: 'M07: Streams replace a global-order mental model' },
+    prerequisites: ['F05', 'M01'],
+  },
+  M08: {
+    href: { 'zh-CN': '/memory/event-dependencies-timing/', en: '/en/memory/event-dependencies-timing/' },
+    title: { 'zh-CN': 'M08：用事件表达依赖并测量设备时间', en: 'M08: Events as dependencies and device-time measurements' },
+    prerequisites: ['M07'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -233,6 +253,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     prerequisites: [],
     indexGroup: 'visuals',
   },
+  VIS03: {
+    href: { 'zh-CN': '/visuals/warp-divergence/', en: '/en/visuals/warp-divergence/' },
+    title: { 'zh-CN': 'VIS03：Warp divergence 与逻辑汇合', en: 'VIS03: Warp Divergence and Logical Join' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
   VIS04: {
     href: { 'zh-CN': '/visuals/memory-transactions/', en: '/en/visuals/memory-transactions/' },
     title: { 'zh-CN': 'VIS04：内存请求的 segment 分组', en: 'VIS04: Memory-request Segment Grouping' },
@@ -248,6 +274,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
   VIS06: {
     href: { 'zh-CN': '/visuals/memory-hierarchy-lifetime/', en: '/en/visuals/memory-hierarchy-lifetime/' },
     title: { 'zh-CN': 'VIS06：Memory hierarchy、ownership 与 lifetime', en: 'VIS06: Memory Hierarchy, Ownership, and Lifetime' },
+    prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS07: {
+    href: { 'zh-CN': '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
+    title: { 'zh-CN': 'VIS07：Stream 与 event dependency trace', en: 'VIS07: Stream and Event Dependency Traces' },
     prerequisites: [],
     indexGroup: 'visuals',
   },

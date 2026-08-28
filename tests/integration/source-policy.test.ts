@@ -46,6 +46,10 @@ describe('source, license, and privacy policy', () => {
       'en/visuals/kernel-journey.mdx',
       'visuals/indexing.mdx',
       'en/visuals/indexing.mdx',
+      'visuals/warp-divergence.mdx',
+      'en/visuals/warp-divergence.mdx',
+      'visuals/stream-event-dependencies.mdx',
+      'en/visuals/stream-event-dependencies.mdx',
     ]) {
       const content = await readFile(path.join(projectRoot, 'src/content/docs', relativePath), 'utf8');
       expect(content, relativePath).toMatch(/^resourceKind: visual-explainer$/m);
@@ -54,7 +58,7 @@ describe('source, license, and privacy policy', () => {
       expect(content, relativePath).toContain('Community-Observed');
       expect(content, relativePath).toContain('Runtime-Verified');
       expect(content, relativePath).toMatch(/original|原创/);
-      expect(content, relativePath).toMatch(/not copied|no .* (?:copied|mirrored)|没有镜像|未复制/i);
+      expect(content, relativePath).toMatch(/not copied|no .* (?:copied|mirrored)|没有复制|没有镜像|未复制/i);
     }
   });
 

@@ -1,0 +1,238 @@
+---
+title: 'M08：用事件表达依赖并测量设备时间'
+description: 使用 event record、stream wait、query、synchronize、re-record 与 elapsed-time semantics，不虚构 duration 或 concurrency result。
+pairId: m08
+counterpart: /en/memory/event-dependencies-timing/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - event-record
+  - stream-wait
+  - query-synchronize
+  - re-record
+  - timing-disabled
+  - elapsed-time
+  - dependency-ledger
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M08
+prerequisites:
+  - M07
+relatedUnits:
+  - VIS07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current event dependency and device-timing model'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 13.3.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current event record, query, synchronize, flags, and elapsed semantics'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 13.3.1 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current stream-wait-event semantics'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C Programming Guide 11.8 - Events'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#events'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 event model'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 11.8.0 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 event interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 11.8.0 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 stream-wait-event interface'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Events'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#events'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 event model'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 12.9.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 event interfaces'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 12.9.1 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 stream-wait-event interface'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,event-record,stream-wait,query-synchronize,re-record,timing-disabled,elapsed-time,dependency-ledger,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: M07 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS07 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/event-dependencies-timing/" lang="en">Read the English counterpart</a>
+
+CUDA 事件（event）在一个记录（record）点捕获 stream 的 submitted-work state。Captured state 可以成为跨 stream 的依赖边（dependency edge）、host completion observation，或设备时间测量（device-time measurement）的 endpoint。等待（wait）、查询（query）、同步等待（synchronize）、重新记录（re-record）、禁用计时事件（timing-disabled event）与经过时间（elapsed time）共享 event handle，却有不同 API/flag contracts。
+
+## 学完本单元，你应该能
+
+- 准确说明 `cudaEventRecord` 捕获什么，以及排除哪些 later stream work。
+- 绘出 `cudaStreamWaitEvent` 创建的 dependency。
+- 区分 non-blocking `cudaEventQuery` 与 host-waiting `cudaEventSynchronize`。
+- 按每个 API-call time 使用的 event state 跟踪 re-record behavior。
+- 拒绝对 timing-disabled events 调用 elapsed time，并且本页只发布 symbolic formula。
+
+## 先修关系
+
+先完成 [M07：用流取代全局顺序心智模型](/memory/stream-ordering/)。你应能为每个 explicitly named stream 绘制 ordered chain，在没有 edge 时让 different streams 保持 unordered，并区分 eligibility 与 execution observation。
+
+M08 加入 selective edges 与 device-time semantics；它不执行 CUDA、不报告 measured duration，也不声明 concurrency result。
+
+## Event record：捕获一个 stream prefix
+
+`cudaEventRecord(event_ready, stream_producer)` 捕获调用时 `stream_producer` 的 contents。之后 query、wait 与 synchronize operations 可以引用该 captured work 的 completion。Record call 后提交到 producer stream 的 work 不会修改这份 event state。
+
+```text
+stream_producer: P1 -> record(event_ready) -> P2
+captured by event_ready: P1 and the record point
+not captured: P2
+```
+
+第一次 record 前，event 代表 empty set of work。Record 对 host 异步；调用成功本身不证明 captured stream prefix 已完成。
+
+## Stream wait：添加 device dependency
+
+`cudaStreamWaitEvent(stream_consumer, event_ready, 0)` 让之后加入 `stream_consumer` 的 work 等待该 API call 选中的 event state。它不让 host wait，也不 ordering captured record point 后提交的 producer work。
+
+```text
+stream_producer: P1 -> record(event_ready) -> P2
+                                      |
+                                      v
+stream_consumer: wait(event_ready) -> C1
+```
+
+新增 edge 是 `P1 -> C1`，不能推导 `P2 -> C1`。因此 event 可以表达比 device-wide host synchronization 更窄的 dependency。
+
+## Query 与 synchronize：两种 host observation
+
+`cudaEventQuery(event_ready)` 是 non-blocking status check。Captured work 全部完成时返回 success，仍有 incomplete work 时返回 not-ready，同时仍需 normal error handling。
+
+`cudaEventSynchronize(event_ready)` 让 host wait，直到 event 当前 captured work 完成。两者都不会把 capture 扩展到 later producer work。Query 只问状态，synchronize 会等待；两者的 returned errors 都必须检查。
+
+## Re-record：替换 captured state
+
+对同一 event 再调用 `cudaEventRecord` 会 overwrite previous captured state，但不会 retroactively retarget earlier wait。`cudaStreamWaitEvent` 等 API 使用 `the most recently captured state at the time of the API call`，后续 re-record 不影响已经发出的调用。
+
+Handle name 即使复用，ledger 仍应 version state：
+
+```text
+E1 = event E recorded after P1
+wait W1 refers to E1
+E2 = event E re-recorded after P2
+query Q2, synchronize S2, and later wait W2 refer to E2
+```
+
+`E1`/`E2` 是 teaching state names，不是不同 CUDA handles。
+
+## Timing-disabled events
+
+Dependency-only event 可以使用 `cudaEventDisableTiming` 创建。Timing-disabled events 仍支持 documented wait、query 与 synchronize uses，但不能作为 `cudaEventElapsedTime` endpoints。若任一 elapsed endpoint 禁用 timing，owner contract 规定 elapsed call 返回 invalid-resource-handle error。
+
+Flags 应由 purpose 决定：dependency marker 或 timing endpoint。不要习惯性让所有 event 记录 timing，也不能从明确禁用 timing 的 event 提取 time。
+
+## Elapsed time：device-time measurement
+
+对 timing-enabled `start`/`stop` events，在 intended region 两侧 record，等待 stop complete，再调用 `cudaEventElapsedTime`。本页只发布公式：
+
+```text
+elapsed_ms = timestamp(stop) - timestamp(start)
+```
+
+结果是 event timestamps 之间的 device-time measurement，不是 host wall-clock time。Asynchronous record 允许 endpoints 之间插入的 unrelated operations 扩大 interval，所以 endpoint stream、order 与 included work 都属于 timing contract。`no measured duration` 是本页边界，公式也不构成 concurrency evidence。
+
+## Dependency 与 timing ledger
+
+对每次 event use 记录：
+
+1. Event handle 与 creation flags。
+2. Recording stream 与 captured prefix。
+3. Handle reuse 时的 record generation。
+4. 每个 wait/query/synchronize 的 API-call point。
+5. 每个 stream wait 之后被 ordering 的 work。
+6. Timing enabled 时的 endpoints、included region 与 completion boundary。
+
+这份 ledger 防止 old wait 悄悄移动到 later record，也防止 dependency-only event 进入 elapsed-time formula。
+
+## 可视化模型：VIS07
+
+[VIS07：Stream 与 Event Dependencies](/visuals/stream-event-dependencies/)展示 record markers、wait edges 与带 textual fallback 的 timing bracket。其 timestamps 是 symbolic labels；它是 deterministic dependency explainer，不是 device run 或 profiler capture。
+
+## 证据边界
+
+Event graphs、symbolic timestamps 与 Exercises 都是 static；它们建立 API semantics，却不产生 compilation、runtime、duration、throughput 或 concurrency evidence。所有 evidence axes 保持为空。
+
+## 离开前检查
+
+1. Event 在 `P1` 与 `P2` 之间 record 时捕获哪些 producer operations？
+2. `cudaStreamWaitEvent` delay 哪些 work？它会 block host 吗？
+3. `cudaEventQuery` 与 `cudaEventSynchronize` 有何区别？
+4. 同一 handle 后续 re-record 时，earlier wait 使用哪个 event generation？
+5. 为什么 `cudaEventDisableTiming` event 不能出现在 elapsed-time formula 中？
+
+## 继续练习
+
+- 完成 [M08 练习（Exercise）](/memory/event-dependencies-timing/exercises/)，再查看独立的[参考解答](/memory/event-dependencies-timing/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-020](/practice/#pb-r1-020)修复 re-recorded-event dependency。
+- 使用 [VIS07](/visuals/stream-event-dependencies/)比较 dependency/timing roles，但不要把 symbolic bracket 当作 result。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)提供 current event dependency 与 timing overview。
+- [CUDA Runtime API v13.3.1：Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)定义 current record、re-record、query、synchronize、flags 与 elapsed semantics。
+- [CUDA Runtime API v13.3.1：Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)定义 current `cudaStreamWaitEvent` semantics。
+- [CUDA C Programming Guide 11.8：Events](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#events)、[CUDA Runtime API 11.8.0：Event Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__EVENT.html)与 [Stream Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__STREAM.html)保留 Toolkit 11.8 contracts。
+- [CUDA C++ Programming Guide 12.9.1：Events](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#events)、[CUDA Runtime API 12.9.1：Event Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EVENT.html)与 [Stream Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__STREAM.html)保留 Toolkit 12.9.1 contracts。
+
+九项 owner source 均访问于 **2026-08-28**。Generation ledger、symbolic formula、dependency fixtures、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-28。**

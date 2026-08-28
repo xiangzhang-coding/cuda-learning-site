@@ -343,7 +343,8 @@ describe('M01-M04 frozen teaching models', () => {
       expect(source).toMatch(/all participating threads|所有 participating threads/i);
       expect(source).toMatch(/invalid loader.*neutral|invalid load.*neutral|越界 load.*中性值/i);
       expect(source).toMatch(/second `__syncthreads\(\)`.*required|需要 second `__syncthreads\(\)`/is);
-      expect(source).toMatch(/future M05|未来 M05/);
+      expect(source).toMatch(/\[M05[^\]]*\]\(\/(?:en\/)?memory\/synchronization-scopes\/\)/);
+      expect(source).not.toMatch(/future M05|未来 M05/);
       expect(source).toMatch(/no.*speedup|不.*speedup/i);
     }
 

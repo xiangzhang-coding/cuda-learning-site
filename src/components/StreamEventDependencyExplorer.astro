@@ -1,0 +1,555 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/synchronization-visuals.css';
+import {
+  EVENT_ELAPSED_TIME_FORMULA,
+  STREAM_EVENT_OPERATION_KINDS,
+  buildStreamEventTrace,
+  createStreamEventGraph,
+  deriveStreamEventDependencies,
+  type StreamEventOperation,
+} from '../visuals/stream-event-model';
+import {
+  STREAM_EVENT_COPY,
+  type SynchronizationVisualLocale,
+} from '../visuals/synchronization-visual-copy';
+
+interface Props {
+  locale: SynchronizationVisualLocale;
+}
+
+const { locale } = Astro.props;
+const copy = STREAM_EVENT_COPY[locale];
+const initialGraph = createStreamEventGraph(2);
+const initialTrace = buildStreamEventTrace(initialGraph);
+const initialDependencies = deriveStreamEventDependencies(initialGraph);
+const staticGraph = createStreamEventGraph(3);
+const staticTrace = buildStreamEventTrace(staticGraph);
+const staticDependencies = deriveStreamEventDependencies(staticGraph);
+
+function operationLabel(operation: StreamEventOperation) {
+  return `${operation.id} · ${copy.operationKinds[operation.kind]}`;
+}
+---
+
+<cuda-stream-event-dependencies
+  class="visual-explainer synchronization-visual not-content"
+  data-visual-id="VIS07"
+  data-locale={locale}
+  data-stream-count="2"
+  data-operation-count={initialGraph.operations.length}
+  data-event-count={initialGraph.eventDependencies.length}
+  data-trace-frame="0"
+  data-playing="false"
+  data-edit-valid="true"
+  data-last-edit="none"
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <div class="visual-controls sync-control-stack" data-visual-controls hidden>
+      <fieldset class="sync-subcontrols">
+        <legend>{copy.graphControls}</legend>
+        <label>
+          <span>{copy.streamCount}</span>
+          <select data-stream-count aria-label={copy.streamCount}>
+            <option value="2" selected>{copy.twoStreams}</option>
+            <option value="3">{copy.threeStreams}</option>
+          </select>
+        </label>
+        <button type="button" data-reset-graph>{copy.resetGraph}</button>
+      </fieldset>
+
+      <fieldset class="sync-subcontrols">
+        <legend>{copy.operationControls}</legend>
+        <label>
+          <span>{copy.operationStream}</span>
+          <select data-operation-stream aria-label={copy.operationStream}>
+            {initialGraph.streams.map(({ id }) => <option value={id}>{copy.streamNames[id]}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>{copy.operationKind}</span>
+          <select data-operation-kind aria-label={copy.operationKind}>
+            {STREAM_EVENT_OPERATION_KINDS.map((kind) => <option value={kind}>{copy.operationKinds[kind]}</option>)}
+          </select>
+        </label>
+        <button type="button" data-add-operation>{copy.addOperation}</button>
+      </fieldset>
+
+      <fieldset class="sync-subcontrols">
+        <legend>{copy.eventControls}</legend>
+        <label>
+          <span>{copy.recordAfter}</span>
+          <select data-event-record aria-label={copy.recordAfter}>
+            {initialGraph.operations.map((operation) => (
+              <option value={operation.id} selected={operation.id === 'op-02'}>{operationLabel(operation)}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>{copy.waitBefore}</span>
+          <select data-event-wait aria-label={copy.waitBefore}>
+            {initialGraph.operations.map((operation) => (
+              <option value={operation.id} selected={operation.id === 'op-03'}>{operationLabel(operation)}</option>
+            ))}
+          </select>
+        </label>
+        <button type="button" data-add-event>{copy.addEvent}</button>
+      </fieldset>
+
+      <fieldset class="sync-subcontrols trace-controls">
+        <legend>{copy.playbackControls}</legend>
+        <button type="button" data-trace-action="play">{copy.play}</button>
+        <button type="button" data-trace-action="pause" disabled>{copy.pause}</button>
+        <button type="button" data-trace-action="step">{copy.step}</button>
+        <button type="button" data-trace-action="reset">{copy.resetTrace}</button>
+        <label class="visual-scrubber">
+          <span>{copy.scrub}</span>
+          <input
+            type="range"
+            min="0"
+            max={initialTrace.frames.length - 1}
+            value="0"
+            step="1"
+            data-trace-scrub
+            aria-valuetext={copy.frameCounter.replace('{current}', '1').replace('{total}', String(initialTrace.frames.length))}
+          />
+        </label>
+      </fieldset>
+
+      <p class="stream-edit-status" data-graph-validation data-invalid="false" role="status" aria-live="polite" aria-atomic="true">
+        {copy.orderingBoundary}
+      </p>
+    </div>
+
+    <section class="sync-workbench" data-interactive-workbench data-pagefind-ignore hidden aria-label={copy.graphHeading}>
+      <h3>{copy.graphHeading}</h3>
+      <div class="stream-graph-grid" data-stream-lanes>
+        {initialGraph.streams.map(({ id }) => (
+          <section class="stream-lane" data-stream-lane={id}>
+            <h4>{copy.streamNames[id]}</h4>
+            <ol class="stream-operation-list">
+              {initialGraph.operations.filter(({ streamId }) => streamId === id).map((operation) => (
+                <li data-operation={operation.id} data-operation-state="waiting">
+                  <strong>{operationLabel(operation)}</strong>
+                  <span data-operation-state-label>{copy.waiting}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
+      </div>
+
+      <div class="stream-edge-ledgers">
+        <section>
+          <h4>{copy.sameStreamOrder}</h4>
+          <ol class="stream-edge-list" data-same-stream-edges>
+            {initialDependencies.sameStreamEdges.map((edge) => (
+              <li data-same-stream-edge={edge.id}><code>{edge.from} -&gt; {edge.to}</code></li>
+            ))}
+          </ol>
+        </section>
+        <section>
+          <h4>{copy.eventDependencies}</h4>
+          <ol class="stream-edge-list" data-event-edges>
+            {initialDependencies.eventEdges.map((edge) => (
+              <li data-event-edge={edge.eventId}>
+                <code>{copy.eventEdge.replace('{from}', edge.from).replaceAll('{event}', edge.eventId).replace('{to}', edge.to)}</code>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <section class="trace-frontier">
+        <h4>{copy.traceHeading}</h4>
+        <p data-trace-status role="status" aria-live="polite" aria-atomic="true">
+          {copy.frameCounter.replace('{current}', '1').replace('{total}', String(initialTrace.frames.length))}
+        </p>
+        <dl>
+          <div><dt>{copy.completed}</dt><dd data-completed-set>{copy.none}</dd></div>
+          <div><dt>{copy.readySet}</dt><dd data-ready-set>{initialTrace.frames[0]?.readyOperationIds.join(', ')}</dd></div>
+          <div><dt>{copy.stableChoice}</dt><dd data-selected-operation>{initialTrace.frames[0]?.selectedOperationId}</dd></div>
+        </dl>
+      </section>
+    </section>
+
+    <section class="event-formula-panel" aria-label={copy.formulaHeading}>
+      <h3>{copy.formulaHeading}</h3>
+      <code data-event-formula>{EVENT_ELAPSED_TIME_FORMULA}</code>
+      <p data-timing-caveats>{copy.timingCaveats}</p>
+      <p>{copy.pacingBoundary}</p>
+    </section>
+
+    <section class="visual-section stream-static-layout" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <p>{copy.orderingBoundary}</p>
+
+      <div class="stream-graph-grid">
+        {staticGraph.streams.map(({ id }) => (
+          <section class="stream-lane" data-static-stream={id}>
+            <h4>{copy.streamNames[id]}</h4>
+            <ol class="stream-operation-list">
+              {staticGraph.operations.filter(({ streamId }) => streamId === id).map((operation) => (
+                <li data-static-operation={operation.id}>
+                  <strong>{operationLabel(operation)}</strong>
+                  <span>{operation.streamId}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
+      </div>
+
+      <div class="stream-edge-ledgers">
+        <section>
+          <h4>{copy.sameStreamOrder}</h4>
+          <ol class="stream-edge-list">
+            {staticDependencies.sameStreamEdges.map((edge) => (
+              <li data-static-same-stream-edge={edge.id}><code>{edge.from} -&gt; {edge.to}</code></li>
+            ))}
+          </ol>
+        </section>
+        <section>
+          <h4>{copy.eventDependencies}</h4>
+          <ol class="stream-edge-list">
+            {staticDependencies.eventEdges.map((edge) => (
+              <li data-static-event-edge={edge.eventId}>
+                <code>{copy.eventEdge.replace('{from}', edge.from).replaceAll('{event}', edge.eventId).replace('{to}', edge.to)}</code>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <section class="stream-static-trace">
+        <h4>{copy.traceHeading}</h4>
+        <div class="sync-table-wrap" tabindex="0" aria-label={copy.traceHeading}>
+          <table class="sync-lane-table stream-trace-table">
+            <caption>{copy.traceHeading}</caption>
+            <thead><tr><th scope="col">#</th><th scope="col">{copy.completed}</th><th scope="col">{copy.readySet}</th><th scope="col">{copy.stableChoice}</th></tr></thead>
+            <tbody>
+              {staticTrace.frames.map((frame, index) => (
+                <tr data-static-trace-frame={index}>
+                  <th scope="row">{index}</th>
+                  <td>{frame.completedOperationIds.join(', ') || copy.none}</td>
+                  <td>{frame.readyOperationIds.join(', ') || copy.none}</td>
+                  <td>{frame.selectedOperationId ?? copy.complete}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-stream-event-dependencies>
+
+<script>
+  import {
+    addStreamEventDependency,
+    addStreamEventOperation,
+    buildStreamEventTrace,
+    createStreamEventGraph,
+    createStreamEventPlaybackState,
+    deriveStreamEventDependencies,
+    reduceStreamEventPlaybackState,
+    type StreamEventGraph,
+    type StreamEventOperation,
+    type StreamEventPlaybackAction,
+    type StreamEventPlaybackState,
+    type StreamEventStreamCount,
+  } from '../visuals/stream-event-model';
+  import { STREAM_EVENT_COPY } from '../visuals/synchronization-visual-copy';
+
+  class CudaStreamEventDependencies extends HTMLElement {
+    private graph: StreamEventGraph = createStreamEventGraph(2);
+    private trace = buildStreamEventTrace(this.graph);
+    private playback: StreamEventPlaybackState = createStreamEventPlaybackState();
+    private timer: number | undefined;
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
+      const streamCount = this.querySelector<HTMLSelectElement>('[data-stream-count]');
+      const resetGraph = this.querySelector<HTMLButtonElement>('[data-reset-graph]');
+      const addOperation = this.querySelector<HTMLButtonElement>('[data-add-operation]');
+      const addEvent = this.querySelector<HTMLButtonElement>('[data-add-event]');
+      const scrub = this.querySelector<HTMLInputElement>('[data-trace-scrub]');
+      if (!controls || !workbench || !streamCount || !resetGraph || !addOperation || !addEvent || !scrub) return;
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      workbench.hidden = false;
+      streamCount.addEventListener('change', () => {
+        const count: StreamEventStreamCount = streamCount.value === '3' ? 3 : 2;
+        this.replaceGraph(createStreamEventGraph(count));
+        this.announce(this.copy().streamCountChanged.replace('{count}', String(count)), false, 'stream-count-changed');
+      });
+      resetGraph.addEventListener('click', () => {
+        const count: StreamEventStreamCount = streamCount.value === '3' ? 3 : 2;
+        this.replaceGraph(createStreamEventGraph(count));
+        this.announce(this.copy().graphReset, false, 'graph-reset');
+        streamCount.focus();
+      });
+      addOperation.addEventListener('click', () => this.addOperation());
+      addEvent.addEventListener('click', () => this.addDependency());
+      this.querySelectorAll<HTMLButtonElement>('[data-trace-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const type = button.dataset.traceAction;
+          if (type === 'play' || type === 'pause' || type === 'step' || type === 'reset') {
+            this.applyPlayback({ type });
+            if (type === 'reset') this.querySelector<HTMLButtonElement>('[data-trace-action="play"]')?.focus();
+          }
+        });
+      });
+      scrub.addEventListener('input', () => this.applyPlayback({ type: 'scrub', frameIndex: Number(scrub.value) }));
+      this.render();
+    }
+
+    disconnectedCallback() {
+      this.stopTimer();
+    }
+
+    private copy() {
+      return STREAM_EVENT_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private maximumFrameIndex() {
+      return this.trace.frames.length - 1;
+    }
+
+    private replaceGraph(graph: StreamEventGraph) {
+      this.stopTimer();
+      this.graph = graph;
+      this.trace = buildStreamEventTrace(graph);
+      this.playback = reduceStreamEventPlaybackState(this.playback, { type: 'graph-edited' }, this.maximumFrameIndex());
+      this.render();
+    }
+
+    private addOperation() {
+      const stream = this.querySelector<HTMLSelectElement>('[data-operation-stream]');
+      const kind = this.querySelector<HTMLSelectElement>('[data-operation-kind]');
+      if (!stream || !kind) return;
+      this.stopTimer();
+      this.playback = reduceStreamEventPlaybackState(this.playback, { type: 'graph-edited' }, this.maximumFrameIndex());
+      const result = addStreamEventOperation(this.graph, { streamId: stream.value, kind: kind.value });
+      if (result.accepted) {
+        this.graph = result.graph;
+        this.trace = buildStreamEventTrace(this.graph);
+        this.announce(this.copy().operationAdded.replace('{operation}', result.operation.id), false, 'operation-added');
+      } else {
+        this.announce(this.copy().issues[result.issue], true, result.issue);
+      }
+      this.render();
+    }
+
+    private addDependency() {
+      const record = this.querySelector<HTMLSelectElement>('[data-event-record]');
+      const wait = this.querySelector<HTMLSelectElement>('[data-event-wait]');
+      if (!record || !wait) return;
+      this.stopTimer();
+      this.playback = reduceStreamEventPlaybackState(this.playback, { type: 'graph-edited' }, this.maximumFrameIndex());
+      const result = addStreamEventDependency(this.graph, {
+        recordOperationId: record.value,
+        waitOperationId: wait.value,
+      });
+      if (result.accepted) {
+        this.graph = result.graph;
+        this.trace = buildStreamEventTrace(this.graph);
+        this.announce(this.copy().dependencyAdded.replace('{event}', result.dependency.id), false, 'dependency-added');
+      } else {
+        this.announce(this.copy().issues[result.issue], true, result.issue);
+      }
+      this.render();
+    }
+
+    private applyPlayback(action: StreamEventPlaybackAction) {
+      this.playback = reduceStreamEventPlaybackState(this.playback, action, this.maximumFrameIndex());
+      this.render();
+      if (this.playback.isPlaying) this.startTimer();
+      else this.stopTimer();
+    }
+
+    private startTimer() {
+      if (this.timer !== undefined) return;
+      this.timer = window.setInterval(() => this.applyPlayback({ type: 'tick' }), 1_000);
+    }
+
+    private stopTimer() {
+      if (this.timer === undefined) return;
+      window.clearInterval(this.timer);
+      this.timer = undefined;
+    }
+
+    private announce(message: string, invalid: boolean, edit: string) {
+      const status = this.querySelector<HTMLElement>('[data-graph-validation]');
+      this.dataset.editValid = String(!invalid);
+      this.dataset.lastEdit = edit;
+      if (!status) return;
+      status.dataset.invalid = String(invalid);
+      status.textContent = message;
+    }
+
+    private operationLabel(operation: StreamEventOperation) {
+      return `${operation.id} · ${this.copy().operationKinds[operation.kind]}`;
+    }
+
+    private render() {
+      const copy = this.copy();
+      const frame = this.trace.frames[this.playback.frameIndex];
+      if (!frame) return;
+      const dependencies = deriveStreamEventDependencies(this.graph);
+      this.dataset.streamCount = String(this.graph.streams.length);
+      this.dataset.operationCount = String(this.graph.operations.length);
+      this.dataset.eventCount = String(this.graph.eventDependencies.length);
+      this.dataset.traceFrame = String(this.playback.frameIndex);
+      this.dataset.playing = String(this.playback.isPlaying);
+
+      this.renderStreamLanes(frame.completedOperationIds, frame.readyOperationIds, frame.selectedOperationId);
+      this.renderEdges(dependencies.sameStreamEdges, dependencies.eventEdges);
+      this.refreshSelects();
+
+      const completed = frame.completedOperationIds.join(', ') || copy.none;
+      const ready = frame.readyOperationIds.join(', ') || copy.none;
+      const selected = frame.selectedOperationId ?? copy.complete;
+      this.setText('[data-completed-set]', completed);
+      this.setText('[data-ready-set]', ready);
+      this.setText('[data-selected-operation]', selected);
+      const counter = copy.frameCounter
+        .replace('{current}', String(this.playback.frameIndex + 1))
+        .replace('{total}', String(this.trace.frames.length));
+      this.setText('[data-trace-status]', `${counter}; ${copy.readySet}: ${ready}; ${copy.stableChoice}: ${selected}.`);
+
+      const scrub = this.querySelector<HTMLInputElement>('[data-trace-scrub]');
+      if (scrub) {
+        scrub.max = String(this.maximumFrameIndex());
+        scrub.value = String(this.playback.frameIndex);
+        scrub.setAttribute('aria-valuetext', counter);
+      }
+      const final = this.playback.frameIndex === this.maximumFrameIndex();
+      const play = this.querySelector<HTMLButtonElement>('[data-trace-action="play"]');
+      const pause = this.querySelector<HTMLButtonElement>('[data-trace-action="pause"]');
+      const step = this.querySelector<HTMLButtonElement>('[data-trace-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-trace-action="reset"]');
+      const focusedControl = this.ownerDocument.activeElement;
+      if (play) play.disabled = this.playback.isPlaying || final;
+      if (pause) pause.disabled = !this.playback.isPlaying;
+      if (step) step.disabled = final;
+      if (play && focusedControl === play && play.disabled) pause?.focus();
+      else if (pause && focusedControl === pause && pause.disabled) {
+        if (final) reset?.focus();
+        else play?.focus();
+      } else if (step && focusedControl === step && step.disabled) reset?.focus();
+    }
+
+    private renderStreamLanes(completed: readonly string[], ready: readonly string[], selected: string | null) {
+      const copy = this.copy();
+      const container = this.querySelector<HTMLElement>('[data-stream-lanes]');
+      if (!container) return;
+      container.replaceChildren(...this.graph.streams.map((stream) => {
+        const section = document.createElement('section');
+        section.className = 'stream-lane';
+        section.dataset.streamLane = stream.id;
+        const heading = document.createElement('h4');
+        heading.textContent = copy.streamNames[stream.id];
+        const list = document.createElement('ol');
+        list.className = 'stream-operation-list';
+        for (const operation of this.graph.operations.filter(({ streamId }) => streamId === stream.id)) {
+          const item = document.createElement('li');
+          item.dataset.operation = operation.id;
+          const state = completed.includes(operation.id)
+            ? 'completed'
+            : operation.id === selected
+              ? 'selected'
+              : ready.includes(operation.id)
+                ? 'ready'
+                : 'waiting';
+          item.dataset.operationState = state;
+          const name = document.createElement('strong');
+          name.textContent = this.operationLabel(operation);
+          const status = document.createElement('span');
+          status.dataset.operationStateLabel = '';
+          status.textContent = state === 'completed'
+            ? copy.completedState
+            : state === 'selected'
+              ? copy.selected
+              : state === 'ready'
+                ? copy.ready
+                : copy.waiting;
+          item.append(name, status);
+          list.append(item);
+        }
+        section.append(heading, list);
+        return section;
+      }));
+    }
+
+    private renderEdges(
+      sameStreamEdges: ReturnType<typeof deriveStreamEventDependencies>['sameStreamEdges'],
+      eventEdges: ReturnType<typeof deriveStreamEventDependencies>['eventEdges'],
+    ) {
+      const sameList = this.querySelector<HTMLOListElement>('[data-same-stream-edges]');
+      const eventList = this.querySelector<HTMLOListElement>('[data-event-edges]');
+      if (sameList) sameList.replaceChildren(...sameStreamEdges.map((edge) => this.edgeItem(edge.id, `${edge.from} -> ${edge.to}`, 'sameStreamEdge')));
+      if (eventList) eventList.replaceChildren(...eventEdges.map((edge) => this.edgeItem(
+        edge.eventId,
+        this.copy().eventEdge.replace('{from}', edge.from).replaceAll('{event}', edge.eventId).replace('{to}', edge.to),
+        'eventEdge',
+      )));
+    }
+
+    private edgeItem(id: string, text: string, datasetKey: 'sameStreamEdge' | 'eventEdge') {
+      const item = document.createElement('li');
+      item.dataset[datasetKey] = id;
+      const code = document.createElement('code');
+      code.textContent = text;
+      item.append(code);
+      return item;
+    }
+
+    private refreshSelects() {
+      const streamSelect = this.querySelector<HTMLSelectElement>('[data-operation-stream]');
+      if (streamSelect) {
+        const previous = streamSelect.value;
+        streamSelect.replaceChildren(...this.graph.streams.map((stream) => this.option(stream.id, this.copy().streamNames[stream.id])));
+        if (this.graph.streams.some(({ id }) => id === previous)) streamSelect.value = previous;
+      }
+      for (const selector of ['[data-event-record]', '[data-event-wait]']) {
+        const select = this.querySelector<HTMLSelectElement>(selector);
+        if (!select) continue;
+        const previous = select.value;
+        select.replaceChildren(...this.graph.operations.map((operation) => this.option(operation.id, this.operationLabel(operation))));
+        if (this.graph.operations.some(({ id }) => id === previous)) select.value = previous;
+      }
+    }
+
+    private option(value: string, label: string) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      return option;
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-stream-event-dependencies')) {
+    customElements.define('cuda-stream-event-dependencies', CudaStreamEventDependencies);
+  }
+</script>

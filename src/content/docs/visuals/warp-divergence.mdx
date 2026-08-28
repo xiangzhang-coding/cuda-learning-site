@@ -1,0 +1,125 @@
+---
+title: 'VIS03：Warp divergence 与逻辑汇合'
+description: 让五种确定性 32-lane predicate 经过 true/false mask、uniform 空路径与逻辑控制流汇合，同时不声明硬件调度顺序或内存同步。
+pairId: vis03
+counterpart: /en/visuals/warp-divergence/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - predicate-masks
+  - path-trace
+  - independent-thread-scheduling
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS03
+prerequisites: []
+relatedUnits:
+  - M06
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'SIMT execution, divergence, and Independent Thread Scheduling'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 11.8 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C++ Programming Guide v11.8.0; archived'
+    platform: 'Archived divergence and scheduling boundary'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C++ Programming Guide v12.9.1; archived'
+    platform: 'Archived divergence and Independent Thread Scheduling boundary'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,predicate-masks,path-trace,independent-thread-scheduling,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M06 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,11.8.0,12.9.1' }
+---
+
+import WarpDivergenceExplorer from '../../../components/WarpDivergenceExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/warp-divergence/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS03 是与 M06 相关的独立 Visual Explainer。它先用逐 lane 的谓词（predicate）解释线程束分支发散（warp divergence），再把控制流重汇合（reconvergence）与同步明确分开。
+
+<WarpDivergenceExplorer locale="zh-CN" />
+
+## Predicate mask
+
+模型始终从包含 lane `0` 到 `31` 的参与掩码（participating mask）开始。所选 predicate 把这个集合分成真值掩码（true mask）与假值掩码（false mask）：
+
+```text
+trueMask  = { lane in participatingMask | predicate(lane) is true }
+falseMask = { lane in participatingMask | predicate(lane) is false }
+
+trueMask intersection falseMask = empty
+trueMask union falseMask = participatingMask
+```
+
+五种经过复核的 preset 固定了 partition：uniform true、uniform false、lower half（`0` 到 `15`）、偶数 lane alternating，以及一组固定的 non-contiguous lane。Uniform preset 必有一条空路径。空路径会明确显示为**跳过（skipped）**，而不是消失或被当作失败阶段。
+
+## 路径跟踪
+
+五个教学阶段依次是 `before-branch`、`predicate-evaluated`、`true-path`、`false-path` 与逻辑汇合（logical join）。VIS03 固定先显示 true path，再显示 false path，让 Step 的结果可重复。这个顺序**不是硬件调度顺序**，不能用于预测 warp scheduler 先 issue 哪条 path。
+
+到达 logical join 时，participating lane 在模型中的源代码级汇合点（source-level join）拥有共同的 control-flow successor。Logical join **不是内存同步**：它不是 `__syncwarp()`、block barrier、memory fence，也不证明 memory communication 安全。
+
+## Independent Thread Scheduling 边界
+
+在 compute capability 低于 7.0 的设备上，一个 warp 使用共享 program counter 和活动掩码（active mask）。在 **CC 7.0+** 上，独立线程调度（Independent Thread Scheduling）保存 per-thread execution state，并允许 sub-warp divergence 与 reconvergence。因此，依赖隐式锁步（implicit lockstep）、把 lane 假定为在每条指令上永久同步执行，可能导致错误。需要 coordination 时，必须选择符合 communication contract 的显式 primitive；例如在适用时用带正确 participating mask 的 `__syncwarp()`。
+
+Lane table 只是 predicate 与 control-flow model。它不暴露 instruction trace、scheduler trace、latency，也不声明硬件实际选择的 lane grouping。
+
+## 静态回退
+
+永久 fallback 含两张完整的 32-row table。Lower-half table 展示两条非空 path；uniform-true table 把 false path 标为 skipped。`ACTIVE`、`INACTIVE` 与“跳过”等文字承担语义，所以颜色绝不是唯一差异。禁用 JavaScript 和打印时，这些 table 仍然可用。
+
+## 证据边界
+
+VIS03 不编译或运行 CUDA、不读取 GPU，也不记录 timing。确定性 mask 不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified**。Compilation、runtime、expected-observation 与 recorded-observation metadata 均为空。
+
+## 来源
+
+当前 SIMT、branch divergence 与 CC 7.0+ scheduling 事实依据 [CUDA Programming Guide v13.3 的 Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)。同一教学边界还与精确的 [CUDA 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture) 和 [CUDA 12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture) 做了比较。
+
+全部 source coordinate 的 access date 为 **2026-08-28**。没有复制 NVIDIA diagram、figure 或 example；mask、table、interaction 与双语解释都是原创 CC-BY-4.0 内容。

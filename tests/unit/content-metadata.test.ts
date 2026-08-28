@@ -69,7 +69,7 @@ describe('content evidence metadata', () => {
 });
 
 describe('Visual Explainer metadata', () => {
-  it.each(['VIS01', 'VIS02', 'VIS19', 'VIS20', 'VIS21', 'VIS22'])('accepts the controlled visual identifier %s', (identifier) => {
+  it.each(['VIS01', 'VIS02', 'VIS03', 'VIS07', 'VIS19', 'VIS20', 'VIS21', 'VIS22'])('accepts the controlled visual identifier %s', (identifier) => {
     expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
   });
 
@@ -84,7 +84,7 @@ describe('Visual Explainer metadata', () => {
 });
 
 describe('Learning Unit and Lab metadata', () => {
-  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'M01', 'M01-EXERCISES', 'M01-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
+  it.each(['F01', 'F01-EXERCISES', 'F01-SOLUTIONS', 'M01', 'M05', 'M08', 'M01-EXERCISES', 'M01-SOLUTIONS', 'M08-EXERCISES', 'M08-SOLUTIONS', 'LAB02', 'PB-R0-005'])(
     'accepts the controlled curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);

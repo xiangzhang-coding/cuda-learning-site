@@ -89,7 +89,7 @@ if (output_index < n) consume(tile);
 // next iteration overwrites tile
 ```
 
-**Constraints:** Keep input/output bounds. Use only the portable C++17 synchronous baseline. Do not introduce asynchronous copy, a warp-only assumption, or future M05 primitives. All block threads use the same loop trip count.
+**Constraints:** Keep input/output bounds. Use only the portable C++17 synchronous baseline. Do not introduce asynchronous copy, a warp-only assumption, or backport primitives from downstream [M05](/en/memory/synchronization-scopes/) into the M03 baseline. All block threads use the same loop trip count.
 
 **Expected evidence:** Repaired pseudocode, a before/after phase graph, and separate explanations for uninitialized reads, barrier nonparticipation, and the read/overwrite race.
 

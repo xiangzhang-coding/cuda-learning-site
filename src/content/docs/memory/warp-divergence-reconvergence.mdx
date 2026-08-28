@@ -1,0 +1,200 @@
+---
+title: 'M06：分支发散、重汇合与线程束安全推理'
+description: 用 active/participation mask 分析 divergence、reconvergence 与 CC 7.0+ Independent Thread Scheduling，不假设 implicit lockstep 或 exact hardware schedule。
+pairId: m06
+counterpart: /en/memory/warp-divergence-reconvergence/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - active-masks
+  - divergence
+  - reconvergence
+  - independent-thread-scheduling
+  - unsafe-lockstep
+  - source-join
+  - schedule-boundary
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M06
+prerequisites:
+  - F02
+  - M05
+relatedUnits:
+  - VIS03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Programming Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Warps, active lanes, masks, and SIMT control flow'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Divergence, reconvergence, and Independent Thread Scheduling'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Device-Callable APIs and Intrinsics'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Warp synchronization, vote, shuffle, and active-mask contracts'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C Programming Guide 11.8 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 SIMT and Independent Thread Scheduling contract'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 SIMT and Independent Thread Scheduling contract'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,active-masks,divergence,reconvergence,independent-thread-scheduling,unsafe-lockstep,source-join,schedule-boundary,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS03 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/warp-divergence-reconvergence/" lang="en">Read the English counterpart</a>
+
+分支发散（warp divergence）发生在同一 warp 的 lanes 进入不同 control-flow paths 时。重汇合（reconvergence）表示 lanes 再次有资格执行共同 source region，却不暴露 exact instruction schedule。线程束安全推理（warp-safe reasoning）因此要命名活动通道（active lanes）、活动掩码（active mask）与 intended 参与掩码（participation mask），并写明 synchronization edge，不能依赖 implicit lockstep。
+
+## 学完本单元，你应该能
+
+- 跟踪 divergent branch 中的 active lanes 与非活动通道（inactive lanes）。
+- 区分 current active mask 与 intended participation mask。
+- 解释 CC 7.0+ 的独立线程调度（Independent Thread Scheduling）改变了什么。
+- 拒绝依靠隐式锁步（implicit lockstep）保证 correctness 的代码。
+- 说明源代码级汇合点（source-level join）为何不是 synchronization，以及 exact hardware schedule 为何 unknown。
+
+## 先修关系
+
+先完成 [F02：建立执行层级心智模型](/foundations/execution-hierarchy/)和 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。F02 提供 warp/lane identity；M05 提供 participant mask、memory visibility，以及 source proximity 不构成 synchronization edge 的规则。
+
+本单元分析 SIMT C++ control flow，不公开或反推 instruction-by-instruction scheduler trace，也不需要 CUDA-capable system。
+
+## Active mask 与 participation mask
+
+Active mask 回答“哪些 lanes 正在执行当前 instruction？”Participation mask 回答“哪些 lanes 必须参与这个 collective protocol？”两者可能不同。某个 lane 在一条 path instruction 上 inactive，却仍可能属于 paths 汇合后执行的 collective。
+
+`__activemask()` 只报告调用点的 active lanes，不能恢复 earlier divergence 已排除的 intended group。若 protocol 需要所有满足 predicate `p` 的 lanes，应在 required voters 均 active 的位置用 documented ballot 等方式形成 participation set，再把该 mask 带入后续 warp collectives。
+
+对每个 mask-sensitive operation 证明：
+
+```text
+mask members = intended participants
+every named lane reaches the operation under its contract
+every consumed source lane is named and supplies a value
+```
+
+## Divergence：路径与 disabled lanes
+
+Data-dependent branch 拆分 warp 时，每条 taken path 执行，而不在该 path 上的 lanes 被 disabled。Divergence 只发生在 warp 内；different warps 本来就独立执行。Source trace 可以为讲解画成 path A 后 path B，但该图不承诺 hardware 先 issue 哪条 path，也不承诺 instructions 如何 interleave。
+
+Correctness question 不是“哪个 branch 获胜”，而是每个 lane 的 scalar semantics 是否正确，以及 cross-lane exchange 是否使用合法 participant set 和所需 synchronization。
+
+## Reconvergence：共同执行资格，不是同一时钟点
+
+Reconvergence 是 control-flow concept：走过不同 paths 的 lanes 后续可以对 common region eligible。它不表示每个 lane 在同一瞬间完成，也不会因为 source 中出现一个 closing brace 就建立 memory ordering。
+
+Reconvergence diagram 可以展示 source region 对应的 masks，但不能证明 exact program-counter stack、issue order 或 cycle count。这些 implementation details 不属于 portable source contract。
+
+## CC 7.0+ 的 Independent Thread Scheduling
+
+Compute capability 低于 7.0 的 device 为一个 warp 使用 shared program counter 与 active mask。CC 7.0+ 的 Independent Thread Scheduling 维护 per-thread execution state，并允许 sub-warp granularity 的 divergence/reconvergence；schedule optimizer 决定怎样把 active threads 组合成 SIMT units。
+
+兼容性规则很直接：依赖 implicit warp-synchronous behavior 的代码必须重新检查。CC 7.0+ 不是说所有 intra-warp communication 都错误，而是说 implicit lockstep 不能作为 correctness argument。应使用 documented synchronized warp operations 与 explicit masks。
+
+## 不安全的 implicit lockstep
+
+下面的论证不安全：
+
+```text
+lane i writes shared[i]
+lane i immediately reads shared[i - 1]
+there is no race because lanes are in one warp
+```
+
+“One warp” 只标识 execution group，不提供 exchange 所需 memory ordering edge。修复必须定义 participating lanes，在 shared-memory visibility 所需位置使用 documented warp synchronization，并 guard 不存在的 source lane。若 mask 与 source-lane contracts 均满足，也可以用 suitable shuffle collective 传递 register values。
+
+## Source-level join 不是 synchronization
+
+一个 `if` 的两个 arms 都到达 branch 后 statement 时，source 出现 join，但 `source-level join is not synchronization` 仍然成立：join 本身既不是 barrier，也不是 memory fence。若 path A 写的数据由 path B 的 lane 消费，程序仍需要 documented cross-lane protocol。
+
+这也防止另一种错误：在两个 branch 内分别调用 `__activemask()`，之后却假装两个 branch-local masks 命名同一 group。应在 protocol 合法的 formation point 捕获 intended participation mask。
+
+## 调度边界
+
+Portable reasoning 可以陈述 lane predicates、modeled source regions 的 active masks、required participation masks，以及 documented synchronization relations；它必须把 path issue order、instruction interleaving、reconvergence-stack details 与 timing 留作 unspecified。简言之：`the exact hardware schedule is unknown`。
+
+这不是对 program 一无所知，而是有意区分 correctness 所需 guarantees 与 GPU 保留的 implementation freedom。
+
+## 可视化模型：VIS03
+
+[VIS03：Warp Divergence 与 Reconvergence](/visuals/warp-divergence/)提供带 masks 的 deterministic source-region trace 和 textual fallback。它建模合法 explanation steps，不是 captured GPU scheduler；可以用它比较 lane predicates 与 participant sets，但不能推断 exact hardware path order。
+
+## 证据边界
+
+本页所有 example 都是 static trace；它们不编译 kernel、不检查 machine instruction、不在 GPU 执行，也不产生 performance result。Compilation 与 runtime evidence axes 保持为空。
+
+## 离开前检查
+
+1. Active mask 与 intended participation mask 有何不同？
+2. 为什么在某个 divergent arm 内调用 `__activemask()` 可能漏掉后续需要的 lanes？
+3. CC 7.0+ Independent Thread Scheduling 让哪种 correctness assumption 变得不安全？
+4. 为什么 source-level join is not synchronization？
+5. Portable warp-safe reasoning 必须把哪些 schedule facts 保持为 unknown？
+
+## 继续练习
+
+- 完成 [M06 练习（Exercise）](/memory/warp-divergence-reconvergence/exercises/)，再查看独立的[参考解答](/memory/warp-divergence-reconvergence/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-018](/practice/#pb-r1-018)审查一份 implicit-lockstep exchange。
+- 在 [VIS03](/visuals/warp-divergence/)重放 participant masks，但不要把 deterministic trace 当作 hardware evidence。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Programming Model](https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html)提供 current warp、lane、active-mask 与 SIMT overview。
+- [CUDA Programming Guide v13.3：Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)提供 divergence、reconvergence 与 CC 7.0+ Independent Thread Scheduling semantics。
+- [CUDA Programming Guide v13.3：Device-Callable APIs and Intrinsics](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html)提供 current synchronized warp-operation contracts。
+- [CUDA C Programming Guide 11.8：SIMT Architecture](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture)保留 Toolkit 11.8 execution-model contract。
+- [CUDA C++ Programming Guide 12.9.1：SIMT Architecture](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture)保留 Toolkit 12.9.1 execution-model contract。
+
+五项 owner source 均访问于 **2026-08-28**。Mask ledger、branch trace、unsafe-code analysis、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-28。**

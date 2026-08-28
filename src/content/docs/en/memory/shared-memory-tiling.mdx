@@ -114,7 +114,7 @@ Shared-memory tiling has one thread block cooperate through a load phase, a thre
 
 Complete [M01: Address Spaces, Ownership, Scope, and Lifetime](/en/memory/address-spaces/) and [M02: Coalescing as Transaction Shaping](/en/memory/coalescing-transactions/) first. M01 supplies per-block shared-memory scope/lifetime and global-input ownership. M02 lets you review global addresses in the cooperative load phase without treating the mere presence of shared memory as coalescing or speed evidence.
 
-This unit teaches only the minimum block-wide correctness contract. Detailed synchronization scopes, memory ordering, and alternative primitives remain for future M05 and are not backported into M03 prerequisites. This page requires no CUDA-capable system and grants no Evidence Status.
+This unit teaches only the minimum block-wide correctness contract. Detailed synchronization scopes, memory ordering, and alternative primitives are taught directly in the downstream [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) and are not backported into M03 prerequisites. This page requires no CUDA-capable system and grants no Evidence Status.
 
 ## Tile contract: one block, one shared instance
 

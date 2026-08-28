@@ -67,6 +67,26 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
         await expect(page.locator('cuda-indexing-explorer')).toHaveAttribute('data-bounds-state', 'out-of-bounds');
       },
     },
+    {
+      id: 'vis03',
+      routes: { zh: '/visuals/warp-divergence/', en: '/en/visuals/warp-divergence/' },
+      prepare: async () => {
+        await page.locator('[data-warp-preset]').selectOption('alternating');
+        await page.locator('[data-warp-step]').click();
+        await page.locator('[data-warp-step]').click();
+        await expect(page.locator('cuda-warp-divergence')).toHaveAttribute('data-stage', 'true-path');
+      },
+    },
+    {
+      id: 'vis07',
+      routes: { zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
+      prepare: async () => {
+        await page.locator('select[data-stream-count]').selectOption('3');
+        await page.locator('[data-trace-action="step"]').click();
+        await expect(page.locator('cuda-stream-event-dependencies')).toHaveAttribute('data-stream-count', '3');
+        await expect(page.locator('cuda-stream-event-dependencies')).toHaveAttribute('data-trace-frame', '1');
+      },
+    },
   ]) {
     for (const locale of ['zh', 'en'] as const) {
       for (const theme of THEME_IDS) {

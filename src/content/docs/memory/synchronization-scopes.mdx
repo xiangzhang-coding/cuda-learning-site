@@ -1,0 +1,203 @@
+---
+title: 'M05：同步作用域与内存可见性'
+description: 根据参与者与通信作用域选择 warp、block、device 或 system coordination，并分别证明 rendezvous、ordering、visibility 与 atomicity。
+pairId: m05
+counterpart: /en/memory/synchronization-scopes/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - scope-ledger
+  - rendezvous
+  - ordering-visibility
+  - atomicity
+  - barriers-fences
+  - selection
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M05
+prerequisites:
+  - F02
+  - M01
+relatedUnits: []
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Thread hierarchy, shared memory, and block synchronization'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Thread scopes, scoped atomics, barriers, and memory visibility'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - CUDA C++ Memory Model'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cuda-cpp-memory-model.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Scope relationships, atomicity, data races, and ordering'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C Programming Guide 11.8 - Memory Fence Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-fence-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 fence and synchronization semantics'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Memory Fence Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#memory-fence-functions'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 fence and synchronization semantics'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,scope-ledger,rendezvous,ordering-visibility,atomicity,barriers-fences,selection,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,M01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/synchronization-scopes/" lang="en">Read the English counterpart</a>
+
+同步作用域（synchronization scope）的选择来自必须协调的参与者（participant）以及承载数据的通信作用域（communication scope）。线程束（warp）、线程块（thread block）、设备（device）与系统（system）不是同一万能操作的四档强度；它们对应不同 participant set 与协议。正确协议必须分别说明是否需要会合（rendezvous）、顺序（ordering）、内存可见性（memory visibility）、原子性（atomicity）、屏障（barrier）或内存栅栏（memory fence）。
+
+## 学完本单元，你应该能
+
+- 在选择 synchronization primitive 前列出所有 producer、consumer 与 memory location。
+- 根据 participant 与 communication scope 选择 warp、block、device 或 system coordination。
+- 区分 rendezvous、memory ordering 与 visibility。
+- 区分 atomic access、barrier 与 memory fence。
+- 解释为何 fence 本身既不会让 peers arrive，也不会发布 completion flag。
+
+## 先修关系
+
+先完成 [F02：建立执行层级心智模型](/foundations/execution-hierarchy/)和 [M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)。F02 提供 thread、warp、block、grid、device 与 host participants；M01 提供 communicated object 的 ownership、location、lifetime 与 accessibility。
+
+本单元不罗列全部 CUDA synchronization interfaces，而是建立后续接口必须满足的选择证明。它不需要 CUDA-capable system，也不授予 compilation、runtime 或 performance Evidence Status。
+
+## 作用域账本：谁与谁通信？
+
+先写 ledger，不要先写 primitive name：
+
+| coordination scope | possible participants | communication location | minimum question |
+| --- | --- | --- | --- |
+| warp | 同一 warp 中明确命名的 lanes | collective 传递的 registers，或 shared/global memory | Mask 包含哪些 lanes，所有 named lanes 是否执行该操作？ |
+| block | 同一 thread block 的 threads | 通常是 shared 或 global memory | 所有 required participants 是否到达同一 barrier phase？ |
+| device | 同一 device 上不同 blocks 的 threads | global memory 加 device-scope protocol | 不假设 block schedule 时，什么操作发布并观察数据？ |
+| system | GPU/CPU threads，或跨 devices 的 participants | 所有 named participants 均可访问的 memory | Allocation 与 primitive 是否真的支持 system-scope communication？ |
+
+这张表是 selection map，不承诺每一行都有一个 built-in global barrier。普通 blocks 尤其不能靠“会同时 resident”而互相等待。Device/system communication 需要 documented scope 覆盖所有 participants，而且 progress condition 必须成立。
+
+## 会合：阶段上的参与进度
+
+Rendezvous 回答：“哪些 participants 必须到达该 phase，之后才允许继续？”`__syncthreads()` 这样的 block barrier 让一个 block 中 participating threads 会合，同时携带 documented memory effects。`__syncwarp(mask)` 这样的 warp operation 则用 mask 命名 participating lanes；“在同一 warp”不能代替 participant mask。
+
+Rendezvous 不由 source proximity 推出。两个 blocks 执行相邻 source lines 不等于它们已会合；host call 写在 launch 后面，也不等于 device work 已完成，除非 API contract 明确建立该 boundary。
+
+## 顺序与可见性：先后关系和可观察性
+
+Ordering 约束 operations 的关系，例如 producer payload write 必须先于 ready flag publication。Visibility 询问 intended consumer 遵守协议后能否观察这些 writes。两项证明都必须采用覆盖 producer 与 consumer 的 scope。
+
+一个 producer-consumer proof 可以写成：
+
+```text
+producer writes payload
+-> release publication
+   at sufficient scope
+-> consumer observes publication
+   with matching acquire at sufficient scope
+-> consumer reads payload
+```
+
+这是 operation relation，不是“把所有 cache flush 掉”的结论。过窄 scope 不包含外部 participant；更宽 scope 也不能修复缺失的 publication 或不可访问的 memory location。
+
+## 原子性：一次不可分割访问不是完整协议
+
+Atomicity 表示 specified access 在 documented scope 内不会被观察成 torn read-modify-write。它不会自动提供 rendezvous；relaxed atomic 可以提供 atomicity，却不 ordering unrelated payload accesses。反过来，barrier 可以协调 participants 并建立 visibility，但不会把任意 conflicting update 变成 atomic read-modify-write。
+
+对 counter，atomicity 可能是主要义务。对 message passing，flag 同时需要合适的 atomicity 与 ordering，payload 则依靠 publication protocol 建立 visibility。应分别写明这些义务。
+
+## 屏障与内存栅栏
+
+Barrier 在一个 phase 协调 declared participant set。Memory fence 按 documented scope ordering 调用 thread 自己的 memory operations。Fence **不会**让其他 thread 执行 matching line、等待某个 phase，或自动知道 producer 已完成。Producer 与 consumer 仍需一项连接双方的 synchronization action，常见形式是 suitable atomic publication。
+
+这个区别可以阻止两类错误：
+
+- 用 `__threadfence()` 替代缺失的 block rendezvous；
+- 加入 `__syncthreads()` 后，误以为它能协调另一个 block 或 host。
+
+每个 primitive 只能承担其 contract 明确提供的 guarantee。
+
+## 选择步骤
+
+对每条 communication edge 写六项：
+
+1. **Participants：** 精确 producer 与 consumer。
+2. **Location：** 它们可见的 address space 与 allocation。
+3. **Progress：** 任一 participant 是否可以安全等待。
+4. **Rendezvous：** phase 是否要求所有 named participants 到达。
+5. **Ordering and visibility：** before/after relation 与 observation mechanism。
+6. **Atomicity：** 哪个 conflicting access（若有）必须不可分割。
+
+之后才选择能包含所有 participants 的最窄 documented scope。若没有 primitive 同时满足六项，应重新设计 communication pattern，而不是扩大 fence 后猜测。
+
+## 证据边界
+
+本页 ledger 是 static semantic proof；它不编译或执行 CUDA primitive，不观察 hardware schedule，也不测量 performance，因此 evidence axes 保持为空。未来 executable 必须声明 Environment Manifest 并验证 concrete result，之后才能产生 runtime 或 performance statement。
+
+## 离开前检查
+
+1. 为什么必须先命名 participant 与 communication scope，再选择 synchronization primitive？
+2. Rendezvous 提供了 memory fence 单独无法提供的什么保证？
+3. 为什么 relaxed atomic 可以提供 atomicity，却不发布 unrelated payload？
+4. 为什么 `__syncthreads()` 不能协调另一个 block 中的 consumer？
+5. Scope-selection ledger 应包含哪六项？
+
+## 继续练习
+
+- 完成 [M05 练习（Exercise）](/memory/synchronization-scopes/exercises/)，再查看独立的[参考解答](/memory/synchronization-scopes/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-017](/practice/#pb-r1-017)分类一份错误的 producer-consumer protocol。
+- 进入 M06 前，把 participant-mask rule 带入 warp control-flow reasoning。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 current thread hierarchy、shared-memory 与 block-synchronization baseline。
+- [CUDA Programming Guide v13.3：Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)定义 thread scopes，并关联 scoped atomics、barriers、ordering 与 visibility。
+- [CUDA Programming Guide v13.3：CUDA C++ Memory Model](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cuda-cpp-memory-model.html)提供 scope relationships、atomicity 与 data-race rules。
+- [CUDA C Programming Guide 11.8：Memory Fence Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#memory-fence-functions)保留 Toolkit 11.8 fence contract。
+- [CUDA C++ Programming Guide 12.9.1：Memory Fence Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#memory-fence-functions)保留 Toolkit 12.9.1 fence contract。
+
+五项 owner source 均访问于 **2026-08-28**。Scope ledger、概念区分、selection procedure、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-28。**

@@ -1,0 +1,125 @@
+---
+title: 'VIS03: Warp Divergence and Logical Join'
+description: Trace five deterministic 32-lane predicates through true and false masks, skipped uniform paths, and a logical control-flow join without claiming a hardware schedule or memory synchronization.
+pairId: vis03
+counterpart: /visuals/warp-divergence/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - predicate-masks
+  - path-trace
+  - independent-thread-scheduling
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS03
+prerequisites: []
+relatedUnits:
+  - M06
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'SIMT execution, divergence, and Independent Thread Scheduling'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 11.8 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C++ Programming Guide v11.8.0; archived'
+    platform: 'Archived divergence and scheduling boundary'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Programming Guide 12.9 - SIMT Architecture'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture'
+    version: 'CUDA C++ Programming Guide v12.9.1; archived'
+    platform: 'Archived divergence and Independent Thread Scheduling boundary'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,predicate-masks,path-trace,independent-thread-scheduling,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M06 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,11.8.0,12.9.1' }
+---
+
+import WarpDivergenceExplorer from '../../../../components/WarpDivergenceExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/warp-divergence/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS03 is the standalone Visual Explainer related to M06. It separates a lane-level predicate from the teaching trace used to inspect **warp divergence**, and it keeps control-flow reconvergence separate from synchronization.
+
+<WarpDivergenceExplorer locale="en" />
+
+## Predicate masks
+
+The model always starts with one participating mask containing lanes `0` through `31`. A selected predicate partitions that set:
+
+```text
+trueMask  = { lane in participatingMask | predicate(lane) is true }
+falseMask = { lane in participatingMask | predicate(lane) is false }
+
+trueMask intersection falseMask = empty
+trueMask union falseMask = participatingMask
+```
+
+Five reviewed presets make the partition deterministic: uniform true, uniform false, lower half (`0` through `15`), alternating even lanes, and one fixed non-contiguous set. Uniform presets have one empty path. The empty path is represented as **skipped**, not as an invisible or failed stage.
+
+## Path trace
+
+The five teaching stages are `before-branch`, `predicate-evaluated`, `true-path`, `false-path`, and `logical-join`. VIS03 deliberately displays the true path before the false path so Step has one stable outcome. That ordering is **not hardware scheduling** and must not be used to predict which path a warp scheduler issues first.
+
+At the logical join, the participating lanes have a common control-flow successor in this model. A logical join is **not memory synchronization**: it is not `__syncwarp()`, a block barrier, a memory fence, or proof that memory communication is safe.
+
+## Independent Thread Scheduling boundary
+
+On devices with compute capability below 7.0, a warp used a shared program counter plus an active mask. On **CC 7.0+**, Independent Thread Scheduling maintains execution state per thread and allows sub-warp divergence and reconvergence. Code that assumes lanes permanently execute every instruction in implicit lockstep can therefore be incorrect. Required coordination must use an appropriate explicit primitive, such as `__syncwarp()` for the intended participating mask when that primitive fits the communication contract.
+
+The lane table is a predicate and control-flow model. It does not expose an instruction trace, a scheduler trace, latency, or the exact lane grouping chosen by hardware.
+
+## Static fallback
+
+The permanent fallback contains two complete 32-row tables. The lower-half table shows both non-empty paths; the uniform-true table labels the false path as skipped. Text such as `ACTIVE`, `INACTIVE`, and `Skipped` carries the state, so color is never the only distinction. These tables remain available without JavaScript and in print.
+
+## Evidence boundary
+
+VIS03 compiles and executes no CUDA, reads no GPU, and records no timing. Its deterministic masks confer no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** status. Compilation, runtime, expected-observation, and recorded-observation metadata remain empty.
+
+## Sources
+
+Current SIMT, branch-divergence, and CC 7.0+ scheduling facts were checked against [CUDA Programming Guide v13.3, Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html). The same teaching boundary was compared with the exact [CUDA 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#simt-architecture) and [CUDA 12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#simt-architecture).
+
+All source coordinates were accessed on **2026-08-28**. No NVIDIA diagram, figure, or example is copied. The masks, tables, interaction, and bilingual explanations are original CC-BY-4.0 material.
