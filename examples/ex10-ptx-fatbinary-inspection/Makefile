@@ -6,7 +6,8 @@ BUILD_DIR ?= build
 
 TARGET_FLAGS := --generate-code=arch=compute_75,code=sm_75 \
 	--generate-code=arch=compute_75,code=compute_75
-NVCC_FLAGS := --compiler-bindir=$(HOST_CXX) --std=$(DIALECT) $(TARGET_FLAGS)
+NVCC_HOST_COMPILER := $(if $(filter g++,$(HOST_CXX)),,--compiler-bindir=$(HOST_CXX))
+NVCC_FLAGS := $(NVCC_HOST_COMPILER) --std=$(DIALECT) $(TARGET_FLAGS)
 RDC_OBJECTS := $(BUILD_DIR)/device_math.o $(BUILD_DIR)/caller.o
 PRIMARY_ARTIFACT_NAMES := artifact_kernel.ii artifact_kernel.ptx artifact_kernel.cubin \
 	artifact_kernel.fatbin device_math.o caller.o device_link.o ex10-ptx-fatbinary-inspection
@@ -28,12 +29,12 @@ $(BUILD_DIR)/artifact_kernel.ii: src/artifact_kernel.cu | $(BUILD_DIR)
 standalone-ptx: $(BUILD_DIR)/artifact_kernel.ptx
 
 $(BUILD_DIR)/artifact_kernel.ptx: src/artifact_kernel.cu | $(BUILD_DIR)
-	$(NVCC) --compiler-bindir=$(HOST_CXX) --std=$(DIALECT) --gpu-architecture=compute_75 --ptx $< -o $@
+	$(NVCC) $(NVCC_HOST_COMPILER) --std=$(DIALECT) --gpu-architecture=compute_75 --ptx $< -o $@
 
 cubin: $(BUILD_DIR)/artifact_kernel.cubin
 
 $(BUILD_DIR)/artifact_kernel.cubin: src/artifact_kernel.cu | $(BUILD_DIR)
-	$(NVCC) --compiler-bindir=$(HOST_CXX) --std=$(DIALECT) --gpu-architecture=sm_75 --cubin $< -o $@
+	$(NVCC) $(NVCC_HOST_COMPILER) --std=$(DIALECT) --gpu-architecture=sm_75 --cubin $< -o $@
 
 fatbin: $(BUILD_DIR)/artifact_kernel.fatbin
 
@@ -56,7 +57,7 @@ $(BUILD_DIR)/device_link.o: $(RDC_OBJECTS)
 host-link: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection
 
 $(BUILD_DIR)/ex10-ptx-fatbinary-inspection: $(RDC_OBJECTS) $(BUILD_DIR)/device_link.o
-	$(NVCC) --compiler-bindir=$(HOST_CXX) --std=$(DIALECT) --no-device-link $^ -o $@
+	$(NVCC) $(NVCC_HOST_COMPILER) --std=$(DIALECT) --no-device-link $^ -o $@
 
 $(BUILD_DIR)/artifact-sha256.txt: $(PRIMARY_ARTIFACTS)
 	cd $(BUILD_DIR) && sha256sum $(PRIMARY_ARTIFACT_NAMES) > artifact-sha256.txt

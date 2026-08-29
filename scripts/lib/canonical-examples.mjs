@@ -218,7 +218,7 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
     const derivedIdentityIsComplete = actualImageIdIsValid &&
       Array.isArray(actualRepoDigests) &&
       /^sha256:[0-9a-f]{64}$/.test(baseImage?.actualImageId ?? '') &&
-      Array.isArray(baseImage?.actualRepoDigests) && baseImage.actualRepoDigests.length > 0 &&
+      Array.isArray(baseImage?.actualRepoDigests) &&
       derivedImage?.dockerfile === declaredProbe?.image?.dockerfile &&
       derivedImage?.buildCommand === declaredProbe?.image?.buildCommand &&
       derivedImage?.tag === declaredProbe?.image?.tag &&

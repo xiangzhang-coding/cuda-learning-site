@@ -14,6 +14,17 @@ build_dir="build"
 host_cxx="${HOST_CXX:-g++}"
 
 mkdir -p "$result_dir"
+report_failure() {
+  status="$?"
+  for log in "$result_dir"/*.log; do
+    [[ -f "$log" ]] || continue
+    printf '\n== %s ==\n' "$(basename "$log")" >&2
+    cat "$log" >&2
+  done
+  exit "$status"
+}
+trap report_failure ERR
+
 make clean BUILD_DIR="$build_dir" > "$result_dir/clean.log" 2>&1
 
 if [[ "$kind" == "ex10" ]]; then
