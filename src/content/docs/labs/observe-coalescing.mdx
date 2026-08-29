@@ -287,7 +287,7 @@ printf '%s\n' "$status" >lab04-evidence/correctness.status
 1. 固定 source commit、binary SHA-256、Lane、device、scenario order、logical work、build flags、launch geometry、`ncu` options 与 metric list。三种访问只保留 canonical `offset`/`stride` 差异。
 2. 再直接运行完整 binary 一次作为 process-level warm-up；检查正确性，但把该次运行明确排除在全部统计之外。它不能消除新 profiler process 的全部启动或 replay 影响，因此不得被描述为 steady-state event warm-up。
 3. 对同一未改动 binary 恰好执行 10 次独立、完整的 measured profiler invocation；按 acquisition order 保留每次尝试，不删除“看起来异常”的样本。
-4. 预先声明每个 scenario/metric 的汇总为该固定 10-attempt batch 的 median 与 min/max spread，并且只有 10 次尝试全部合格时才计算。只有 nonzero tool/application status、正确性失败、缺少目标 kernel 或缺少 metric value 才可标记 invalid，并必须保留该记录和原因；数值很大或不利于结论不构成 invalid。任一次 invalid 时不发布 summary，而是记录 batch blocker；修复原因后必须重做全部 10 次，禁止选择性补样本。
+4. 预先声明每个 scenario/metric 的汇总为该固定 10-attempt batch 的 median 与 min/max spread，并且只有 10 次尝试全部合格时才计算。只有 nonzero tool/application status、正确性失败、缺少目标 kernel 或缺少 metric value 才可标记 invalid，并必须保留该记录和原因；数值很大或不利于结论不构成 invalid。任一次 invalid 时不发布 summary，而是记录 batch blocker；修复原因后必须在新 batch directory 中重做全部 10 次，禁止选择性补样本或覆盖旧记录。
 
 这套冻结规则要求 equal work/build/launch；若中途改变任何固定项，废弃整个 batch 后重新开始，不能拼接前后样本。
 
@@ -315,25 +315,30 @@ ncu --devices 0 --query-metrics --query-metrics-mode all \
 
 ```sh
 metric_csv='<fill exact queried metric names>'
+batch_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+batch_dir="lab04-evidence/batch-${batch_id}"
+mkdir -p "$batch_dir"
 sample=1
 while [ "$sample" -le 10 ]; do
   id=$(printf '%02d' "$sample")
   ncu --devices 0 --metrics "$metric_csv" --page raw --csv \
     ./build/ex05-coalesced-strided-access \
-    >"lab04-evidence/profile-${id}.stdout.log" \
-    2>"lab04-evidence/profile-${id}.stderr.log"
+    >"${batch_dir}/profile-${id}.stdout.log" \
+    2>"${batch_dir}/profile-${id}.stderr.log"
   status=$?
   printf '%s\n' "$status" \
-    >"lab04-evidence/profile-${id}.status"
+    >"${batch_dir}/profile-${id}.status"
   sample=$((sample + 1))
 done
 ```
 
 EX05 的 scenario loop 固定 contiguous、misaligned、strided 顺序；用每个 report 的 kernel invocation 与 application scenario identity 建立映射，并保留 `ncu` replay 信息。不要只复制汇总行。至少维护下面的未填写 `raw_measurements` ledger：
 
-| sample_id | scenario | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+| batch_id | sample_id | scenario | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+
+不得复用 `batch_id` 或覆盖 blocked batch；创建下一批前，先保留旧目录、blocker 与 custody record。
 
 ## 解读记录
 

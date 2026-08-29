@@ -284,7 +284,7 @@ Before the first profiler collection:
 1. Freeze the same source commit, binary SHA-256, Lane, device, input, logical work, variant order, build flags, launch geometry, `ncu` options, and metric list. Padding is the only layout variable.
 2. Directly run the complete binary once more as a process-level warm-up, recheck exact outputs, and exclude it from all statistics. It is not equivalent to steady-state warm-up inside each new profiler process.
 3. Make exactly 10 independent measured profiler invocations of the same binary and retain every unpadded/padded attempt in acquisition order.
-4. Predeclare the summary for each layout/metric as the median and min/max spread of that fixed 10-attempt batch, calculated only when all 10 attempts qualify. Only a nonzero tool/application status, correctness failure, missing kernel, or missing metric value marks an attempt invalid; preserve the record and reason. A large or inconvenient value is not invalid. If any attempt is invalid, publish no summary and record a batch blocker; after correcting the cause, restart all 10 attempts instead of selectively replacing samples.
+4. Predeclare the summary for each layout/metric as the median and min/max spread of that fixed 10-attempt batch, calculated only when all 10 attempts qualify. Only a nonzero tool/application status, correctness failure, missing kernel, or missing metric value marks an attempt invalid; preserve the record and reason. A large or inconvenient value is not invalid. If any attempt is invalid, publish no summary and record a batch blocker; after correcting the cause, restart all 10 attempts in a new batch directory instead of selectively replacing or overwriting samples.
 
 This is the equal work/build/launch freeze. Restart the complete batch after changing a frozen dimension; never select or join samples across contracts.
 
@@ -308,25 +308,30 @@ Probe one full EX06 process with the selected metric. On `ERR_NVGPUCTRPERM`, ano
 
 ```sh
 metric_csv='<fill exact queried metric names>'
+batch_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+batch_dir="lab05-evidence/batch-${batch_id}"
+mkdir -p "$batch_dir"
 sample=1
 while [ "$sample" -le 10 ]; do
   id=$(printf '%02d' "$sample")
   ncu --devices 0 --metrics "$metric_csv" --page raw --csv \
     ./build/ex06-shared-memory-tile-bank-padding \
-    >"lab05-evidence/profile-${id}.stdout.log" \
-    2>"lab05-evidence/profile-${id}.stderr.log"
+    >"${batch_dir}/profile-${id}.stdout.log" \
+    2>"${batch_dir}/profile-${id}.stderr.log"
   status=$?
   printf '%s\n' "$status" \
-    >"lab05-evidence/profile-${id}.status"
+    >"${batch_dir}/profile-${id}.status"
   sample=$((sample + 1))
 done
 ```
 
 Map application variant identity to the report's kernel specialization and preserve replay information, raw stdout/stderr, status, and report. Maintain this unfilled `raw_measurements` ledger:
 
-| sample_id | layout | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+| batch_id | sample_id | layout | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+
+Never reuse a `batch_id` or overwrite a blocked batch. Preserve its directory, blocker, and custody record before creating the next batch.
 
 ## Interpret the records
 

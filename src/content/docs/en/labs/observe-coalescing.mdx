@@ -287,7 +287,7 @@ Write this contract before the first profiler collection:
 1. Freeze source commit, binary SHA-256, Lane, device, scenario order, logical work, build flags, launch geometry, `ncu` options, and metric list. Preserve only the canonical `offset`/`stride` differences.
 2. Directly run the complete binary once more as a process-level warm-up. Check correctness but exclude that run from every statistic. It cannot remove all startup or replay effects in a new profiler process, so do not call it a steady-state event warm-up.
 3. Make exactly 10 independent, complete measured profiler invocations of the same unchanged binary. Retain every attempt in acquisition order and do not delete samples merely because they look unusual.
-4. Predeclare the summary for each scenario/metric as the median and min/max spread of that fixed 10-attempt batch, calculated only when all 10 attempts qualify. Only a nonzero tool/application status, correctness failure, missing target kernel, or missing metric value makes an attempt invalid; retain that record and reason. A large or inconvenient value is not invalid. If any attempt is invalid, publish no summary and record a batch blocker; after correcting the cause, restart all 10 attempts instead of selectively replacing samples.
+4. Predeclare the summary for each scenario/metric as the median and min/max spread of that fixed 10-attempt batch, calculated only when all 10 attempts qualify. Only a nonzero tool/application status, correctness failure, missing target kernel, or missing metric value makes an attempt invalid; retain that record and reason. A large or inconvenient value is not invalid. If any attempt is invalid, publish no summary and record a batch blocker; after correcting the cause, restart all 10 attempts in a new batch directory instead of selectively replacing or overwriting samples.
 
 These rules freeze equal work/build/launch. If any frozen dimension changes, discard the batch and restart rather than joining samples from different contracts.
 
@@ -315,25 +315,30 @@ Fill one fixed comma-separated list with complete metric names returned by this 
 
 ```sh
 metric_csv='<fill exact queried metric names>'
+batch_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+batch_dir="lab04-evidence/batch-${batch_id}"
+mkdir -p "$batch_dir"
 sample=1
 while [ "$sample" -le 10 ]; do
   id=$(printf '%02d' "$sample")
   ncu --devices 0 --metrics "$metric_csv" --page raw --csv \
     ./build/ex05-coalesced-strided-access \
-    >"lab04-evidence/profile-${id}.stdout.log" \
-    2>"lab04-evidence/profile-${id}.stderr.log"
+    >"${batch_dir}/profile-${id}.stdout.log" \
+    2>"${batch_dir}/profile-${id}.stderr.log"
   status=$?
   printf '%s\n' "$status" \
-    >"lab04-evidence/profile-${id}.status"
+    >"${batch_dir}/profile-${id}.status"
   sample=$((sample + 1))
 done
 ```
 
 EX05 fixes scenario order as contiguous, misaligned, then strided. Map each report's kernel invocation to application scenario identity and preserve `ncu` replay information. Do not retain only summary rows. Maintain at least this unfilled `raw_measurements` ledger:
 
-| sample_id | scenario | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+| batch_id | sample_id | scenario | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+
+Never reuse a `batch_id` or overwrite a blocked batch. Preserve its directory, blocker, and custody record before creating the next batch.
 
 ## Interpret the records
 

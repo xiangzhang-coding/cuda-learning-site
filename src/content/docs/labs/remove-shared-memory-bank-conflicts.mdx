@@ -284,7 +284,7 @@ Unpadded 与 padded 必须产生相同 logical outputs；两个 variant 的全�
 1. 同一 source commit、binary SHA-256、Lane、device、input、logical work、variant order、build flags、launch geometry、`ncu` options 和 metric list；唯一 layout 变量是 padding。
 2. 额外直接运行完整 binary 一次作为 process-level warm-up，复核 exact outputs，并从统计中排除。它不等价于在每个新 profiler process 内完成 steady-state warm-up。
 3. 对相同 binary 恰好执行 10 次独立 measured profiler invocation，并按 acquisition order 保留每次 unpadded/padded 尝试。
-4. 预先声明每个 layout/metric 的汇总为该固定 10-attempt batch 的 median 与 min/max spread，并且只有 10 次尝试全部合格时才计算。只有 nonzero tool/application status、correctness failure、missing kernel 或 missing metric value 可标 invalid；原记录和原因仍须保留，数值很大或不利于结论不构成 invalid。任一次 invalid 时不发布 summary，而是记录 batch blocker；修复原因后必须重做全部 10 次，禁止选择性补样本。
+4. 预先声明每个 layout/metric 的汇总为该固定 10-attempt batch 的 median 与 min/max spread，并且只有 10 次尝试全部合格时才计算。只有 nonzero tool/application status、correctness failure、missing kernel 或 missing metric value 可标 invalid；原记录和原因仍须保留，数值很大或不利于结论不构成 invalid。任一次 invalid 时不发布 summary，而是记录 batch blocker；修复原因后必须在新 batch directory 中重做全部 10 次，禁止选择性补样本或覆盖旧记录。
 
 这就是 equal work/build/launch freeze。改变固定项后必须重启整个 batch，不能挑选或拼接样本。
 
@@ -308,25 +308,30 @@ ncu --devices 0 --query-metrics --query-metrics-mode all \
 
 ```sh
 metric_csv='<fill exact queried metric names>'
+batch_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+batch_dir="lab05-evidence/batch-${batch_id}"
+mkdir -p "$batch_dir"
 sample=1
 while [ "$sample" -le 10 ]; do
   id=$(printf '%02d' "$sample")
   ncu --devices 0 --metrics "$metric_csv" --page raw --csv \
     ./build/ex06-shared-memory-tile-bank-padding \
-    >"lab05-evidence/profile-${id}.stdout.log" \
-    2>"lab05-evidence/profile-${id}.stderr.log"
+    >"${batch_dir}/profile-${id}.stdout.log" \
+    2>"${batch_dir}/profile-${id}.stderr.log"
   status=$?
   printf '%s\n' "$status" \
-    >"lab05-evidence/profile-${id}.status"
+    >"${batch_dir}/profile-${id}.status"
   sample=$((sample + 1))
 done
 ```
 
 用 application variant identity 与 report kernel specialization 建立 unpadded/padded 映射，并保留 replay 信息、原始 stdout/stderr、status 与 report。维护未填写的 `raw_measurements` ledger：
 
-| sample_id | layout | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+| batch_id | sample_id | layout | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+
+不得复用 `batch_id` 或覆盖 blocked batch；创建下一批前，先保留旧目录、blocker 与 custody record。
 
 ## 解读记录
 
