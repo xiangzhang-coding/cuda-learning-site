@@ -14,7 +14,7 @@ const releaseKind = process.env.RELEASE_KIND as 'local' | 'preview' | 'productio
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
 const ex01DownloadUrl =
-  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/0fa5667c8b61588cd4ae6db07883e6a16ad16181.zip';
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/4f8ad5fca74599eccf8429362cd2abd5e84983e2.zip';
 const ex03DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6.zip';
 const ex04SourceCommit = 'aeecf72d81d8777d027e6aa84c8614b51e9b0da2';

@@ -35,9 +35,9 @@ describe('EX01 standalone project boundary', () => {
     expect(example.evidence.runtime).toBe('Pending Hardware Verification');
     expect(example.evidence.expectedObservations).toHaveLength(2);
     expect(example.evidence.recordedObservations).toEqual([]);
-    expect(example.sourceUrl).toContain('0fa5667c8b61588cd4ae6db07883e6a16ad16181');
+    expect(example.sourceUrl).toContain('4f8ad5fca74599eccf8429362cd2abd5e84983e2');
     expect(example.downloadUrl).toBe(
-      'https://github.com/xiangzhang-coding/cuda-learning-site/archive/0fa5667c8b61588cd4ae6db07883e6a16ad16181.zip',
+      'https://github.com/xiangzhang-coding/cuda-learning-site/archive/4f8ad5fca74599eccf8429362cd2abd5e84983e2.zip',
     );
     await expect(loadCompileEvidence(projectRoot, 'EX01')).resolves.toEqual([]);
   });
