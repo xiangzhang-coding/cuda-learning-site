@@ -1,0 +1,278 @@
+---
+title: 'M16: PTX, Cubins, SASS, and Fatbinaries'
+description: Distinguish versioned virtual ISA text, architecture-specific binaries, machine instructions inspected from binaries, and multi-image containers while auditing standalone, embedded, selection, JIT, and evidence boundaries.
+pairId: m16
+counterpart: /toolchain/ptx-cubin-fatbinary/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - artifact-vocabulary
+  - ptx-versioning
+  - standalone-embedded
+  - selection
+  - inspection
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M16
+prerequisites:
+  - M15
+  - F06
+relatedUnits:
+  - M17
+  - M18
+  - EX10
+  - VIS09
+exampleIds:
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - artifact-kernel
+  - artifact-pipeline
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Parallel Thread Execution ISA 9.3'
+    url: 'https://docs.nvidia.com/cuda/parallel-thread-execution/index.html'
+    version: 'PTX ISA v9.3; last updated 2026-06-25'
+    platform: 'Current PTX virtual ISA, text format, module versioning, and translation model for the selected Toolkit 13.3.1 Lane'
+    accessDate: '2026-08-29'
+  - title: 'Parallel Thread Execution ISA 8.8 - CUDA Toolkit 12.9.2 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html'
+    version: 'CUDA Toolkit 12.9.2 archive; PTX ISA v8.8; last updated 2025-05-31'
+    platform: 'Archived PTX virtual ISA and module-version coordinate for the selected Toolkit 12.9.2 Lane'
+    accessDate: '2026-08-29'
+  - title: 'Parallel Thread Execution ISA 7.8 - CUDA Toolkit 11.8.0 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html'
+    version: 'CUDA Toolkit v11.8.0; PTX ISA v7.8; last updated 2022-10-03'
+    platform: 'Archived PTX virtual ISA and module-version coordinate for the selected Toolkit 11.8.0 Lane'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 13.3 - Application Compatibility'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#application-compatibility'
+    version: 'NVCC v13.3; Toolkit 13.3.1 current coordinate; last updated 2026-06-25'
+    platform: 'Current two-stage PTX and real-architecture application-compatibility model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 13.3 - Fatbinaries'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#fatbinaries'
+    version: 'NVCC v13.3; Toolkit 13.3.1 current coordinate; last updated 2026-06-25'
+    platform: 'Current multi-image fatbinary and binary-image versus PTX-JIT fallback model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 12.9 - Application Compatibility'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#application-compatibility'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9; last updated 2025-05-31'
+    platform: 'Archived two-stage PTX and real-architecture application-compatibility model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 12.9 - Fatbinaries'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#fatbinaries'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9; last updated 2025-05-31'
+    platform: 'Archived multi-image fatbinary and binary-image versus PTX-JIT fallback model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 11.8.0 - Application Compatibility'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#application-compatibility'
+    version: 'CUDA Toolkit v11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Archived two-stage PTX and real-architecture application-compatibility model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 11.8.0 - Fatbinaries'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#fatbinaries'
+    version: 'CUDA Toolkit v11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Archived multi-image fatbinary and binary-image versus PTX-JIT fallback model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Binary Utilities 13.3'
+    url: 'https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html'
+    version: 'CUDA Binary Utilities v13.3; last updated 2026-06-25'
+    platform: 'Current standalone and embedded cubin and PTX inventory plus SASS disassembly interfaces'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m16 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,artifact-vocabulary,ptx-versioning,standalone-embedded,selection,inspection,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M16 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M15,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M17,M18,EX10,VIS09' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'artifact-kernel,artifact-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '7.8,8.8,9.3,11.8.0,12.9,12.9.2,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/toolchain/ptx-cubin-fatbinary/" lang="zh-CN">阅读中文对应页</a>
+
+[PTX (TERM-118)](/en/glossary/#term-118), [cubin (TERM-119)](/en/glossary/#term-119), [fatbinary (TERM-120)](/en/glossary/#term-120), and [SASS (TERM-121)](/en/glossary/#term-121) are not four names for one thing. They respectively mean versioned virtual ISA text, a binary for a real architecture, a container carrying one or more device-code images, and machine instructions inspected from an architecture-specific binary.
+
+## What you should be able to do
+
+- Distinguish PTX, cubin, SASS, and a fatbinary by content and target scope, not only by a filename suffix.
+- Explain the relationship between standalone `.ptx`, `.cubin`, and `.fatbin` files and device images embedded in a host object or executable.
+- Write a conditional selection tree for a fatbinary containing SASS/cubin images and a PTX fallback.
+- Choose `cuobjdump` or `nvdisasm` operations for inventory, PTX extraction, or SASS disassembly while respecting their input boundaries.
+- State why an image inventory proves no driver selection, JIT, execution, correctness, or performance result.
+
+## Prerequisites
+
+Complete [M15: NVCC Host/Device Compilation Flow](/en/toolchain/nvcc-compilation-flow/) and then [F06: Compute Capability Is a Feature Contract](/en/foundations/compute-capability/). M15 supplies documented NVCC phases and stable-output reasoning. F06 supplies the feature-assumption contract for a [virtual architecture target (TERM-060)](/en/glossary/#term-060) and a [real architecture target (TERM-061)](/en/glossary/#term-061). M16 reads the resulting artifact kinds without redefining compiler phases or target coverage.
+
+[M17: Choosing Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/), M18, [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/) are related resources, not additional M16 prerequisites. This page needs no CUDA-capable system. It compiles and runs no CUDA, so its compilation and runtime evidence arrays are empty.
+
+## Artifact vocabulary: four layers must remain separate
+
+| Name | Precise meaning here | Common carrier | It does not establish |
+| --- | --- | --- | --- |
+| PTX | Low-level virtual ISA text with a `.version` and `.target` module contract | Standalone `.ptx` or a PTX image in a fatbinary/host binary | Native instructions for a GPU, or that a driver will accept or JIT it |
+| cubin | A CUDA ELF binary containing architecture-specific device code | Standalone `.cubin` or a binary image in a fatbinary/host binary | That the current driver selected, loaded, or executed it |
+| SASS | The architecture-specific machine-instruction view of code inside a cubin | Human-readable disassembly from `cuobjdump --dump-sass` or `nvdisasm` | That it is PTX or portable source, or that the displayed disassembly executed |
+| fatbinary | A container that can hold multiple PTX and/or cubin translations of the same device source | Standalone `.fatbin` or a payload embedded in a host object, library, shared object, or executable | That every image will execute, or that any image was selected |
+
+SASS is not a portable file format parallel to a cubin. The cubin is the binary artifact; SASS is an inspected view of its executable instruction encoding. Likewise, a fatbinary is a container, not a synonym for one PTX or cubin image inside it.
+
+## PTX is versioned virtual ISA text
+
+The PTX owner specification defines PTX as a virtual machine and ISA and says that PTX programs are translated to a target hardware instruction set. The NVCC application-compatibility section further states that PTX is represented in text format. Each module declares its PTX language version with `.version` and then its assumed target architecture with `.target`, so “this is PTX” without version and target coordinates remains incomplete.
+
+The curriculum records only these three exact owner-document observations:
+
+| Selected Toolkit Lane | PTX ISA observed at its owner coordinate | Scope of the observation |
+| --- | --- | --- |
+| Toolkit 11.8.0 | Archived PTX ISA 7.8 | Describes only the 11.8.0 archive coordinate |
+| Toolkit 12.9.2 | Archived PTX ISA 8.8 | Describes only the 12.9.2 archive coordinate |
+| Toolkit 13.3.1 | Current PTX ISA 9.3 | Describes only the selected Lane under the current 13.3 documentation coordinate |
+
+`7.8 -> 8.8 -> 9.3` is not a universal compatibility theorem. It does not say that any newer driver accepts arbitrary older or newer PTX, that every artifact emitted by those compilers must use the highest language version shown, or that a target feature, JIT path, or GPU execution is available. An actual review must read the artifact's `.version` and `.target` and bind them to the Toolkit Lane that produced it, the driver expected to accept it, and the selected GPU.
+
+## Standalone artifacts and embedded device images
+
+Documented NVCC phases can directly produce device-only `.ptx`, `.cubin`, or `.fatbin` outputs. These are standalone artifacts that can be retained, hashed, and passed to a binary utility that accepts that input kind. The default host build trajectory instead places generated cubin and/or PTX translations in a fatbinary, embeds that fatbinary in synthesized host code, and ultimately carries it in a host object or executable.
+
+This page uses the following conceptual pipeline, not a transcript of NVCC internal commands:
+
+```text
+device source
+  -> PTX text for a virtual target
+  -> cubin containing instructions for a real target
+  -> one or more PTX/cubin images in a fatbinary
+  -> optionally embedded payload in a host object or executable
+```
+
+The arrows express artifact relationships; they do not require every build to materialize every standalone file. One build may retain PTX plus several cubin translations, while another may emit only one device-only artifact. An embedded image remains a device-code payload inside a container, and its presence does not turn the host executable itself into a cubin.
+
+## SASS-plus-PTX fallback selection
+
+A reviewable fatbinary plan commonly combines two choices: preassembled cubin images for selected real targets, containing SASS, and PTX retained as a fallback for a selected virtual target. The NVCC documentation says embedded PTX is dynamically compiled at runtime if no binary load image is found for the current GPU. Its fatbinary section says the driver selects the most appropriate translation when a device function is launched.
+
+Write this contract as a conditional tree, not a prediction:
+
+1. Record the selected GPU, loaded driver, and complete image inventory of the artifact.
+2. If the driver finds an applicable binary load image, that branch can avoid the PTX fallback for that function; proving it was actually selected still requires selection-specific evidence.
+3. If no applicable binary image exists but there is PTX that the driver accepts and whose target assumptions apply, the PTX is a JIT candidate; inventory alone proves neither that JIT happened nor that it succeeded.
+4. If neither candidate class qualifies, a nonempty fatbinary does not imply executability. Keep the result unsupported, failed, or indeterminate until the corresponding observation exists.
+
+“Most appropriate” is the driver's documented runtime-selection responsibility. It does not authorize this site to simulate every architecture, family, suffix, and driver rule by numeric sorting alone. M17 develops target coverage further; M16 preserves only image kind, declared target, and selection branch.
+
+## Inspect artifacts without testifying for the driver
+
+CUDA Binary Utilities expose different entry points for standalone and embedded cases:
+
+| Inspection question | Suitable static operation | What it establishes | What it does not establish |
+| --- | --- | --- | --- |
+| Which cubin images are in a host binary or external fatbinary? | `cuobjdump --list-elf` | The ELF/cubin inventory listed by that tool output | Which image a launch selected |
+| Which PTX images are present? | `cuobjdump --list-ptx` or PTX extraction/dump | PTX text and declared coordinates listed or shown by the tool | Driver acceptance, JIT, or cache behavior |
+| Which machine instructions are in a cubin? | `cuobjdump --dump-sass` on a standalone or embedded cubin | SASS disassembly of that inspected binary | That those instructions loaded, executed, or were faster |
+| Is richer standalone-cubin disassembly needed? | `nvdisasm` on a standalone cubin | Sections, instructions, and selected display analysis for that cubin | Host-binary inventory or runtime selection |
+
+An inspection log should retain the exact command, tool version, input path, input hash, exit status, and complete output artifact. Even when complete, it remains static artifact evidence, not a driver trace, kernel-completion observation, correctness oracle, or timing record.
+
+## Canonical Runnable Example: EX10
+
+EX10 is the canonical artifact-inspection project for M16. [View the complete EX10 project at the placeholder source commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same placeholder commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip). The project is the only location for the complete implementation; this Learning Unit maintains neither copied owner artifacts nor a hand-maintained complete source listing.
+
+The first canonical range isolates the device function under inspection so artifact identity can be tied to a source scope:
+
+<CanonicalCode exampleId="EX10" range="artifact-kernel" />
+
+The second canonical range declares the build, standalone outputs, embedded image inventory, and disassembly pipeline:
+
+<CanonicalCode exampleId="EX10" range="artifact-pipeline" />
+
+Import order is part of the page contract: `artifact-kernel` first, then `artifact-pipeline`. Canonical source identity grants this page no compilation or runtime status. EX10 evidence must be declared by its own qualifying records.
+
+## Evidence boundary
+
+Each layer of an artifact pipeline answers a different question:
+
+| Claim | Minimum independent evidence |
+| --- | --- |
+| A Toolkit Lane produced an artifact | Exact source commit, command, toolchain, exit status, artifact path/hash, and a qualifying compile record |
+| An artifact contains selected images | Exact binary-utility version, input hash, inventory command, and retained output |
+| The driver selected a cubin image | A selection-specific runtime observation bound to the selected GPU, driver, and artifact |
+| The driver JIT-compiled PTX | A JIT-specific observation bound to the same coordinates; PTX presence is insufficient |
+| A kernel executed | Launch, error/completion boundary, and Environment Manifest |
+| Output is correct | Input, reference or invariant, and comparison result in addition to execution evidence |
+| One path is faster | Correctness-qualified runs, measurement protocol, raw samples, and uncertainty |
+
+This page has no qualifying unit build or runtime record, so every evidence array remains empty. In particular, an image inventory proves no driver selection, JIT, execution, correctness, or performance result. SASS disassembly says only which instructions are in the inspected binary.
+
+## Retrieval check
+
+1. Why is PTX versioned virtual ISA text while a cubin is an architecture-specific binary?
+2. Why should SASS be inspected from a cubin or binary rather than treated as the same artifact kind as PTX or a standalone cubin?
+3. What is shared, and what differs, between a standalone `.fatbin` and a fatbinary payload embedded in a host executable?
+4. When a fatbinary contains both cubin/SASS and PTX, which three conditions separate a binary-image branch, a PTX-JIT branch, and a no-candidate branch?
+5. Why do complete outputs from `cuobjdump --list-elf`, `--list-ptx`, and `--dump-sass` still prove no selection, JIT, execution, correctness, or performance result?
+
+## Continue with practice
+
+- Complete the [M16 Exercises](/en/toolchain/ptx-cubin-fatbinary/exercises/), then inspect the separate [reviewed solutions](/en/toolchain/ptx-cubin-fatbinary/solutions/).
+- Repair an artifact report that treats an image inventory as runtime proof in [Practice Bank PB-R2-008](/en/practice/#pb-r2-008).
+- Revisit [TERM-118 PTX](/en/glossary/#term-118), [TERM-119 cubin](/en/glossary/#term-119), [TERM-120 fatbinary](/en/glossary/#term-120), [TERM-121 SASS](/en/glossary/#term-121), and the [TERM-060](/en/glossary/#term-060)/[TERM-061](/en/glossary/#term-061) target pair. [M17](/en/toolchain/compiler-architecture-targets/), M18, [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/) reuse this artifact contract from target, linking, canonical-project, and visual-pipeline perspectives.
+
+## Sources and review
+
+- [Current PTX ISA 9.3](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html) defines the current virtual ISA, text and module format, `.version` and `.target`, and translation model.
+- [CUDA Toolkit 12.9.2 archived PTX ISA 8.8](https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html) supplies the archived PTX coordinate for the selected 12.9.2 Lane.
+- [CUDA Toolkit 11.8.0 archived PTX ISA 7.8](https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html) supplies the archived PTX coordinate for the selected 11.8.0 Lane.
+- [Current NVCC 13.3 Application Compatibility](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#application-compatibility) defines the current two-stage compatibility model.
+- [Current NVCC 13.3 Fatbinaries](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#fatbinaries) defines the current multi-translation container and runtime-selection/JIT-fallback model.
+- [Archived NVCC 12.9 Application Compatibility](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#application-compatibility) preserves the two-stage model at the 12.9.2 archive path.
+- [Archived NVCC 12.9 Fatbinaries](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#fatbinaries) preserves the multi-image/JIT-fallback model at the 12.9.2 archive path.
+- [Archived NVCC 11.8.0 Application Compatibility](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#application-compatibility) preserves the 11.8.0 two-stage model.
+- [Archived NVCC 11.8.0 Fatbinaries](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#fatbinaries) preserves the 11.8.0 multi-image/JIT-fallback model.
+- [Current CUDA Binary Utilities 13.3](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html) defines cubin ELF, standalone and embedded inspection, PTX inventory/extraction, and SASS disassembly interfaces.
+
+All ten owner sources were accessed and reviewed on **2026-08-29** in the exact frontmatter order. The vocabulary table, pipeline, conditional tree, evidence matrix, questions, and Exercise arrangement are original CC-BY-4.0 work for this site. No owner source, output, example, table, figure, or artifact is copied or redistributed.
+
+**Fact checked: 2026-08-29.**

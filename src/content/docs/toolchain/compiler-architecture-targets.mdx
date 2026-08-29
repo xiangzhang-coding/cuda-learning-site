@@ -1,0 +1,294 @@
+---
+title: 'M17：选择编译器架构目标'
+description: 用显式 --generate-code clauses 把 source feature requirement 变成 virtual/real target plan，设计 SASS 加 PTX fallback，并把 suffix scope、Toolkit Lane acceptance、artifact inspection 与 deployment compatibility 分开。
+pairId: m17
+counterpart: /en/toolchain/compiler-architecture-targets/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - plan-ledger
+  - generate-code
+  - sass-ptx
+  - assumption-matching
+  - feature-scopes
+  - lane-matrix
+  - selected-plans
+  - deployment
+  - related-resources
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M17
+prerequisites:
+  - M16
+  - F06
+relatedUnits:
+  - EX10
+  - VIS09
+exampleIds:
+  - EX10
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - Feature Set Compiler Targets'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Baseline, architecture-specific, and family-specific compiler-target scopes'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 13.3'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1 current documentation; page label NVCC v13.3; last updated 2026-06-25'
+    platform: 'Current --generate-code, virtual architecture, real architecture, fatbinary, and application-compatibility contracts'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 12.9'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9; last updated 2025-05-31'
+    platform: 'Toolkit 12.9.2 --generate-code and accepted-target coordinate'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8.0 --generate-code and accepted-target coordinate'
+    accessDate: '2026-08-29'
+  - title: 'Why CUDA Compatibility'
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html'
+    version: 'Current CUDA Compatibility documentation'
+    platform: 'Toolkit, driver, Runtime, binary, PTX, and deployment compatibility boundaries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Minor Version Compatibility'
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
+    version: 'Current CUDA Compatibility documentation'
+    platform: 'Same-major older-driver restrictions, including PTX and target-architecture caveats'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Forward Compatibility'
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html'
+    version: 'Current CUDA Compatibility documentation'
+    platform: 'Eligible systems, compatibility packages, feature exceptions, and deployment models'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m17 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,plan-ledger,generate-code,sass-ptx,assumption-matching,feature-scopes,lane-matrix,selected-plans,deployment,related-resources,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M17 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M16,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX10,VIS09' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.2,11.8.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/toolchain/compiler-architecture-targets/" lang="en">Read the English counterpart</a>
+
+一份 architecture plan 先声明 source 需要什么 feature scope，再为精确 Toolkit Lane 写出 [虚拟架构目标（virtual architecture target，TERM-060）](/glossary/#term-060)与[实际架构目标（real architecture target，TERM-061）](/glossary/#term-061)。Real target 请求包含 [SASS 机器代码（SASS machine code，TERM-121）](/glossary/#term-121)的 [cubin 二进制（cubin binary，TERM-119）](/glossary/#term-119)；virtual code target 保留 [PTX 中间代码（PTX intermediate code，TERM-118）](/glossary/#term-118)。这些 image 可以进入[胖二进制（fatbinary，TERM-120）](/glossary/#term-120)，但 command、成功 build、artifact contents、deployment compatibility 与 runtime behavior 是五项不同事实。
+
+## 学完本单元，你应该能
+
+- 用完整 `--generate-code=arch=...,code=...` clauses 写出可审查的 virtual/real target plan，而不是依赖模糊 shorthand。
+- 为一个已声明 scope 设计 named SASS image 加 same-scope PTX fallback，同时不声称 driver 最终选择哪项 image。
+- 检查每个 real target 是否实现 paired virtual target 的全部 feature assumptions。
+- 区分无后缀 baseline、exact-architecture `a` 与 family `f` scope，并拒绝按 capability 数字大小推断 suffix semantics。
+- 按 Toolkit Lane 查 compiler acceptance，再把 build、artifact inspection、driver compatibility、runtime 与 performance 留给独立记录。
+
+## 先修关系
+
+先完成 [M16：PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)，再复习 [F06：Compute capability 是功能合同](/foundations/compute-capability/)。M16 提供 artifact layer 与 inspection vocabulary；F06 提供 selected compiler rows，以及 baseline、`a`、`f` feature scope。M17 只把这两份合同组合成 target plan。
+
+M17 的严格先修条件只有 **M16 与 F06**。[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)是 related resources，不是额外先修条件。本页不需要 CUDA-capable system。
+
+## 先写 plan ledger
+
+不要从一个 GPU 名称或一个 `-arch` shorthand 开始。先写一行完整 ledger：
+
+| 字段 | 必须记录什么 | 仍不能推出什么 |
+| --- | --- | --- |
+| Source requirement | baseline、exact architecture 或 named family 中实际需要的 features | Compiler 是否接受 target；程序是否更快 |
+| Toolkit Lane / NVCC | 11.8.0、12.9.2 archive 或 selected 13.3.1 中的一个精确坐标 | Installed driver、selected GPU 或 artifact contents |
+| Virtual target | preprocessing 与 PTX compilation 使用的 feature assumptions | Named SASS image 已生成 |
+| Real target | 要求 assembler 生成的 named architecture code | Artifact 已包含该 image；deployment 已兼容 |
+| PTX fallback target | 要求保留的同 scope virtual code | 任意 future GPU、任意 driver 或实际 JIT 成功 |
+| Verification | Build log 与 artifact-inspection result 的预期记录位置 | Runtime selection、execution、correctness 或 performance |
+
+若 source requirement、Lane 或 suffix scope 未知，plan 是 **indeterminate**。不能用“新一点”或“数字更大”填补字段。
+
+## 用显式 `--generate-code` 展开计划
+
+`--generate-code` 把一次 device compilation 的 virtual assumption 与 requested code output 放在同一 clause 中。本单元使用以下显式形式：
+
+```text
+--generate-code=arch=<virtual-target>,code=<real-target>
+--generate-code=arch=<virtual-target>,code=<virtual-target>
+```
+
+第一行请求面向 named real target 的 assembled binary code；第二行跳过该 real-code assembly，并把同一个 virtual contract 的 PTX 留在 artifact plan 中。若需要多个 target contract，就重复完整 `--generate-code` option；不要把多个 virtual assumptions 压成一个不透明标签。
+
+下面是本页唯一跨三条 selected Lane 使用的 exact baseline fixture：
+
+```bash
+nvcc app.cu \
+  --generate-code=arch=compute_75,code=sm_75 \
+  --generate-code=arch=compute_75,code=compute_75 \
+  -o app
+```
+
+这段 command 只表达 build intent：在 `compute_75` baseline assumptions 下请求 `sm_75` real code，并保留 `compute_75` PTX。它没有钉住实际 `nvcc` executable，也没有 build log 或 artifact inspection，因此自身不是 Compile-Checked evidence。
+
+## SASS 加 PTX fallback 是 artifact strategy
+
+`code=sm_75` 请求面向 named real target 的 assembled binary image；M16 的 artifact model 把其中的 machine instructions 识别为 SASS。`code=compute_75` 请求保留同一 virtual compilation 的 PTX。两项一起形成 **named SASS image + PTX fallback candidate** 的静态计划。
+
+“Fallback”只说明为什么 release author 想保留 PTX：它可以作为一个仍需 driver/PTX compatibility 检查的 JIT input。它不表示本页观察到 image selection、JIT、module load 或 kernel execution。即使 build 成功，也必须用 selected Toolkit 的 owner inspection tool 记录实际 embedded entries，才能从“requested”前进到“present in artifact”。
+
+PTX 也不会自动扩大 source scope。`compute_XYa` PTX 仍携带 exact-architecture assumptions；`compute_XYf` PTX 仍携带 family assumptions。只有无后缀 baseline PTX 才保持 baseline feature scope，而它的具体 deployment 仍取决于 exact driver、device 与 component contract。
+
+## Virtual assumptions 必须由 real target 实现
+
+`arch=` 不是 output filename；它决定 device source preprocessing 与 PTX compilation 可以使用哪些 features。`code=sm_...` 则要求把该 virtual program assemble 到一个 real target。每个 real target 必须实现 paired virtual target 的全部 assumptions。
+
+审查每条 clause 时依次问：
+
+1. Source 是否真的需要该 virtual feature set？
+2. Selected NVCC 是否接受 virtual name 与 real name？
+3. Real target 是否至少实现 virtual assumptions，并保持同一 suffix scope？
+4. PTX clause 是否复用同一个 virtual target，而不是偷偷改写 source contract？
+5. Build 与 inspection record 是否证明 requested entries 实际存在？
+
+本页只展示 F06 已复核的 same-name virtual/real pairs。它不从 feature-set inclusion 推导未复核的 cross-suffix pair，也不把一个 Lane 的 accepted spelling 投射到另一个 Lane。
+
+## 三种 feature scope
+
+无后缀 baseline 与两种 qualified scope 回答“source 可以依赖什么”，不是“哪个数字更新”：
+
+| Scope | Source 可以采用的 contract | 本页 selected pair examples | PTX 仍受什么边界约束 |
+| --- | --- | --- | --- |
+| Baseline, unsuffixed | 以继续适用于后续 compute architecture 为意图的 predominant features | `compute_75` / `sm_75` | `compute_75` baseline assumptions |
+| [架构特定功能集（architecture-specific feature set，TERM-062）](/glossary/#term-062), `a` | 一个 exact compute capability 的完整 specialized set | `compute_90a` / `sm_90a`；`compute_100a` / `sm_100a`；`compute_120a` / `sm_120a` | 同一个 exact capability |
+| [系列特定功能集（family-specific feature set，TERM-063）](/glossary/#term-063), `f` | Current owner table 明列 family members 共享的 specialized subset | `compute_100f` / `sm_100f`；`compute_120f` / `sm_120f` | 同一个 named family |
+
+`a` 与 `f` 是 semantic scope，不是 decimal suffix。`compute_120a` 不会因为 `120 > 100` 就覆盖 `compute_100a` 或 `compute_100f`；`compute_100f` 也不覆盖所有数值大于 10.0 的 capability。要改变 suffix，必须先改变 source feature requirement，并重新核对 current owner family table 与 selected compiler。
+
+## Compiler acceptance 属于 Toolkit Lane
+
+下面的 matrix **只**复用当前 F06 reviewed dataset 中的六个 exact pair。空白之外没有隐含 catalog：
+
+<table tabindex="0" aria-label="已选编译器目标支持矩阵">
+  <thead>
+    <tr>
+      <th scope="col">Selected virtual / real pair</th>
+      <th scope="col">Scope</th>
+      <th scope="col">NVCC 11.8.0</th>
+      <th scope="col">12.9.2 archive / page label 12.9</th>
+      <th scope="col">Selected Toolkit 13.3.1 / page label 13.3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row"><code>compute_75</code> / <code>sm_75</code></th><td>baseline</td><td>reviewed accepted</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_90a</code> / <code>sm_90a</code></th><td>exact 9.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_100f</code> / <code>sm_100f</code></th><td>family 10.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_100a</code> / <code>sm_100a</code></th><td>exact 10.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_120f</code> / <code>sm_120f</code></th><td>family 12.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_120a</code> / <code>sm_120a</code></th><td>exact 12.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+  </tbody>
+</table>
+
+“Reviewed accepted”表示 exact owner page 在 F06 selected row 中接受该 name；它不是本站的 successful build observation。对于 11.8.0 qualified rows，本页只记录 selected dataset 没有这些 pair，不推断其他未列 target。
+
+## 六个 selected SASS/PTX plans
+
+把每个 accepted real pair 展开为一条 SASS clause 与一条 same-scope PTX clause：
+
+<table tabindex="0" aria-label="已选 SASS 与 PTX fallback 方案">
+  <thead><tr><th scope="col">Source requirement</th><th scope="col">SASS clause</th><th scope="col">PTX fallback clause</th><th scope="col">Eligible reviewed Lane rows</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Baseline 7.5</th><td><code>arch=compute_75,code=sm_75</code></td><td><code>arch=compute_75,code=compute_75</code></td><td>11.8.0、12.9.2、13.3.1</td></tr>
+    <tr><th scope="row">Exact 9.0</th><td><code>arch=compute_90a,code=sm_90a</code></td><td><code>arch=compute_90a,code=compute_90a</code></td><td>12.9.2、13.3.1 only</td></tr>
+    <tr><th scope="row">Family 10.0</th><td><code>arch=compute_100f,code=sm_100f</code></td><td><code>arch=compute_100f,code=compute_100f</code></td><td>12.9.2、13.3.1 only</td></tr>
+    <tr><th scope="row">Exact 10.0</th><td><code>arch=compute_100a,code=sm_100a</code></td><td><code>arch=compute_100a,code=compute_100a</code></td><td>12.9.2、13.3.1 only</td></tr>
+    <tr><th scope="row">Family 12.0</th><td><code>arch=compute_120f,code=sm_120f</code></td><td><code>arch=compute_120f,code=compute_120f</code></td><td>12.9.2、13.3.1 only</td></tr>
+    <tr><th scope="row">Exact 12.0</th><td><code>arch=compute_120a,code=sm_120a</code></td><td><code>arch=compute_120a,code=compute_120a</code></td><td>12.9.2、13.3.1 only</td></tr>
+  </tbody>
+</table>
+
+这些是六个独立 review fixtures，不是建议把所有 clauses 塞进一个 artifact。Release plan 只加入 source requirement 和 deployment policy 真正需要、且 selected Lane 接受的 rows。Artifact size、build time、JIT behavior 与 performance 都不由这张静态表决定。
+
+## Deployment compatibility 是后续 gate
+
+Target plan 通过 compiler acceptance 后，仍要单独审查 artifact 与 deployment：
+
+| Gate | 最多能建立什么 | 不能建立什么 |
+| --- | --- | --- |
+| Command review | Requested virtual/real/PTX clauses 与 suffix scope 一致 | Compiler 实际接受、entries 实际存在 |
+| Successful Lane build | Exact compiler 接受 source 与 options | Fatbinary 内容，其他 Lane，GPU execution |
+| Artifact inspection | Selected artifact 中记录了哪些 PTX/cubin entries | Driver 会采用哪项 image，JIT 或 launch 会成功 |
+| Compatibility review | Exact GPU、driver、Runtime、libraries 与 package 是否有 documented path | 实际 runtime selection、correctness 或 speed |
+| Runtime record | 只覆盖该 Environment Manifest 中实际观察的 behavior | 其他环境或 broad catalog coverage |
+
+[Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)明确把 older same-major driver path 限定为需要 target architecture/SASS，并警告依赖 PTX 的 application 会遇到 runtime issue。因此“有 PTX fallback”不能证明 minor-version deployment。反过来，“有 SASS”也不能替代 exact driver floor、feature exception、Runtime 与 library checks。
+
+[Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html)是另一条路径，只适用于 owner 文档列出的 eligible systems，并需要适用的 compatibility package、loader configuration 与 feature review。[Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html)还要求把 Toolkit、driver、Runtime 与 dynamically linked libraries 分开。M17 不选择或模拟任何 runtime image。
+
+## Related EX10 与 VIS09
+
+[EX10：PTX 与 fatbinary inspection](/examples/ptx-fatbinary-inspection/)用于后续把 requested clauses 与 inspected artifact entries 对照；[VIS09：NVCC artifact pipeline](/visuals/artifact-pipeline/)用于追踪 source、virtual target、PTX、real target、cubin 与 fatbinary 的静态流向。两者与 M17 related，但本页没有 canonical import。
+
+在 EX10 完整 publication 到来前，[pinned EX10 placeholder commit `c7326c342c5673de7d17de08d4f56ab836648d5d`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)只固定 repository coordinate。它不是 complete EX10 source、artifact manifest、compile record 或 Runtime-Not-Applicable evidence。
+
+## 证据边界
+
+本页的 commands、matrices、scope classifications 与 compatibility ledgers 都是 static teaching artifacts。本站没有为 M17 执行 `nvcc`、生成或 inspect fatbinary、调用 driver JIT、加载 module 或运行 kernel，因此 hardware gate 是 `none`，compilation/runtime evidence arrays 与 recorded observations 全部为空。
+
+未来 compilation claim 必须绑定 exact source commit、Toolkit Lane、NVCC/host compiler、complete options、exit status、logs 与 inspected artifact identity。Future deployment/runtime claim 还要绑定 Environment Manifest、driver/Runtime/libraries、compatibility path、selected GPU、actual observation 与 correctness oracle。任何 documentation lookup 或 target name 都不能替代这些记录。
+
+## 离开前检查
+
+1. 一条 explicit `--generate-code` clause 中，`arch=` 与 `code=` 分别约束什么？
+2. 为什么 named SASS image 加 PTX fallback 是 artifact plan，而不是 runtime selection report？
+3. Real target 为什么必须实现 virtual target assumptions？同 scope PTX 为什么不会扩大 source scope？
+4. Unsuffixed、`a` 与 `f` 的 scope 有什么不同？为什么 capability 数字大小不能决定 suffix compatibility？
+5. 为什么 12.9.2 接受一个 target、artifact inspection 看到对应 entries，仍不能证明 old-driver deployment 或 kernel execution？
+
+## 继续练习
+
+- 完成 [M17 练习（Exercise）](/toolchain/compiler-architecture-targets/exercises/)，再查看独立的[参考解答](/toolchain/compiler-architecture-targets/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-009](/practice/#pb-r2-009)审查一份跨 Lane、suffix scope、artifact 与 deployment compatibility packet。
+- 复习 [TERM-060 virtual architecture target](/glossary/#term-060)、[TERM-061 real architecture target](/glossary/#term-061)、[TERM-062 architecture-specific feature set](/glossary/#term-062)、[TERM-063 family-specific feature set](/glossary/#term-063)，以及 [TERM-118](/glossary/#term-118) 至 [TERM-121](/glossary/#term-121)的 PTX、cubin、fatbinary 与 SASS vocabulary。
+- 用 [VIS09](/visuals/artifact-pipeline/)复核 artifact flow，再把 plan 与 [EX10](/examples/ptx-fatbinary-inspection/) inspection contract 对照。
+
+## 来源与复核
+
+- Feature scope 使用 NVIDIA 当前 [CUDA Programming Guide v13.3：Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets)。它定义 baseline、exact-architecture `a` 与 family `f`，而不是 broad target catalog。
+- `--generate-code`、virtual/real assumptions、PTX、cubin、fatbinary 与 application-compatibility model 分别按[当前 NVCC 13.3](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)、[12.9.2 archive / 页面标签 NVCC 12.9](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)和 [NVCC 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html)复核。Accepted names 只使用 F06 当前 reviewed rows。
+- Deployment boundary 使用 NVIDIA [Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html)、[Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)和 [Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html)。本页不复制 owner compatibility table，也不推断 runtime image selection。
+
+七项 owner source 均访问并复核于 **2026-08-29**。页面文字、六行 selected-plan ledger、questions 与 Exercises 均为本站 CC-BY-4.0 原创内容；没有复制 owner example、figure、完整 target list 或 deployment result。
+
+**事实核查日期：2026-08-29。**

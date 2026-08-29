@@ -46,11 +46,13 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）现已完整双语发布 O01-O08 导学、F01-F08 基础路线、M01-M14 内存路线，以及非连续编号的 Q01/Q03-Q05 正确性与质量路线，共 34 个学习单元（Learning Unit）。R1 仍是最近一次已完成的聚合发布复核；[Issue #19](https://github.com/xiangzhang-coding/cuda-learning-site/issues/19) 范围内的 M09-M14、EX07-EX09、VIS08 及其配套学习材料现已进入完整的当前增量发布范围，但全部 R2 与 R2 聚合发布复核仍未完成。
+稳定课程（Stable Curriculum）现已完整双语发布 O01-O08 导学、F01-F08 基础路线、M01-M14 内存路线、M15-M19 工具链路线，以及非连续编号的 Q01/Q03-Q05 正确性与质量路线，共 39 个学习单元（Learning Unit）。R1 仍是最近一次已完成的聚合发布复核；[Issue #19](https://github.com/xiangzhang-coding/cuda-learning-site/issues/19) 范围内的 M09-M14、EX07-EX09 与 VIS08 保留在当前发布中，当前增量清单又加入 M15-M19、EX10、VIS09 及其配套学习材料，但 R2 聚合发布复核仍在 [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 中等待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
 [M01 地址空间、所有权、作用域与生命周期](/memory/address-spaces/)同时依赖 F04 和 F06；[M02 合并访问与事务塑形](/memory/coalescing-transactions/)同时依赖 M01 和 F03；[M03 共享内存分块](/memory/shared-memory-tiling/)同时依赖 M01 和 M02；[M04 bank conflict 与布局变换](/memory/bank-conflicts-layouts/)仅依赖 M03；[M05 同步作用域与内存可见性](/memory/synchronization-scopes/)同时依赖 F02 和 M01；[M06 分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)同时依赖 F02 和 M05；[M07 用流取代全局顺序心智模型](/memory/stream-ordering/)同时依赖 F05 和 M01；[M08 用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)仅依赖 M07。[M09 页锁定内存与传输重叠](/memory/pinned-memory-transfer-overlap/)同时依赖 M07 和 M08；[M10 统一内存与页面迁移](/memory/unified-memory-page-migration/)同时依赖 M01 和 M02；[M11 流顺序分配与内存池](/memory/stream-ordered-allocation-memory-pools/)同时依赖 M07 和 M08；[M12 协作组与可组合同步](/memory/cooperative-groups/)同时依赖 M05 和 M06；[M13 异步复制与分阶段流水线](/memory/asynchronous-copy-pipelines/)同时依赖 M03、M05 和 M08；[M14 CUDA 图与重复启动结构](/memory/cuda-graphs/)同时依赖 M07 和 M08。
+
+[M15 NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)同时依赖 F04 和 O04；[M16 PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)同时依赖 M15 和 F06；[M17 选择编译器架构目标](/toolchain/compiler-architecture-targets/)同时依赖 M16 和 F06；[M18 分离编译与设备链接](/toolchain/separate-compilation-device-linking/)同时依赖 M15 和 M16；[M19 CUDA C++17、C++20 与 C++23 方言边界](/toolchain/cpp-dialect-boundaries/)同时依赖 O04 和 M15。
 
 [Q01 CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)同时依赖 F04 和 O04；[Q03 用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)同时依赖 F05 和 Q01；[Q04 用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)同时依赖 M05、M06 和 Q03；[Q05 诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)同时依赖 M08 和 Q01。Q02 没有公开页面或导航占位。
 
@@ -58,17 +60,19 @@ F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](
 
 M01-M14 也按顺序提供完整练习与独立解答：[M01 练习](/memory/address-spaces/exercises/)与[解答](/memory/address-spaces/solutions/)、[M02 练习](/memory/coalescing-transactions/exercises/)与[解答](/memory/coalescing-transactions/solutions/)、[M03 练习](/memory/shared-memory-tiling/exercises/)与[解答](/memory/shared-memory-tiling/solutions/)、[M04 练习](/memory/bank-conflicts-layouts/exercises/)与[解答](/memory/bank-conflicts-layouts/solutions/)、[M05 练习](/memory/synchronization-scopes/exercises/)与[解答](/memory/synchronization-scopes/solutions/)、[M06 练习](/memory/warp-divergence-reconvergence/exercises/)与[解答](/memory/warp-divergence-reconvergence/solutions/)、[M07 练习](/memory/stream-ordering/exercises/)与[解答](/memory/stream-ordering/solutions/)、[M08 练习](/memory/event-dependencies-timing/exercises/)与[解答](/memory/event-dependencies-timing/solutions/)、[M09 练习](/memory/pinned-memory-transfer-overlap/exercises/)与[解答](/memory/pinned-memory-transfer-overlap/solutions/)、[M10 练习](/memory/unified-memory-page-migration/exercises/)与[解答](/memory/unified-memory-page-migration/solutions/)、[M11 练习](/memory/stream-ordered-allocation-memory-pools/exercises/)与[解答](/memory/stream-ordered-allocation-memory-pools/solutions/)、[M12 练习](/memory/cooperative-groups/exercises/)与[解答](/memory/cooperative-groups/solutions/)、[M13 练习](/memory/asynchronous-copy-pipelines/exercises/)与[解答](/memory/asynchronous-copy-pipelines/solutions/)、[M14 练习](/memory/cuda-graphs/exercises/)与[解答](/memory/cuda-graphs/solutions/)。
 
+M15-M19 同样提供完整练习与独立解答：[M15 练习](/toolchain/nvcc-compilation-flow/exercises/)与[解答](/toolchain/nvcc-compilation-flow/solutions/)、[M16 练习](/toolchain/ptx-cubin-fatbinary/exercises/)与[解答](/toolchain/ptx-cubin-fatbinary/solutions/)、[M17 练习](/toolchain/compiler-architecture-targets/exercises/)与[解答](/toolchain/compiler-architecture-targets/solutions/)、[M18 练习](/toolchain/separate-compilation-device-linking/exercises/)与[解答](/toolchain/separate-compilation-device-linking/solutions/)、[M19 练习](/toolchain/cpp-dialect-boundaries/exercises/)与[解答](/toolchain/cpp-dialect-boundaries/solutions/)。
+
 O02-O08 也保留各自的练习与独立解答。
 
 Q01/Q03-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)。
 
-[EX03 多维索引](/examples/multidimensional-indexing/)依赖 F03，并为 F03/F04 提供 canonical source；[EX04 错误处理生命周期](/examples/error-handling-lifecycle/)仅依赖 F05；[EX05 合并与跨步访问](/examples/coalesced-strided-access/)仅依赖 M02；[EX06 共享内存 tile bank padding](/examples/shared-memory-tile-bank-padding/)同时依赖 M03 和 M04；[EX07 Streams、Events 与 Overlap](/examples/streams-events-overlap/)同时依赖 M07、M08 和 M09；[EX08 统一内存迁移](/examples/unified-memory-migration/)仅依赖 M10；[EX09 CUDA Graph Capture](/examples/graph-capture/)仅依赖 M14；[EX16 Compute Sanitizer 缺陷套件](/examples/sanitizer-defect-suite/)同时依赖 Q03 和 Q04。可运行示例（Runnable Example）严格是十个非连续 ID：EX01-EX09 与 EX16；EX10-EX15 没有公开页面或占位。
+[EX03 多维索引](/examples/multidimensional-indexing/)依赖 F03，并为 F03/F04 提供 canonical source；[EX04 错误处理生命周期](/examples/error-handling-lifecycle/)仅依赖 F05；[EX05 合并与跨步访问](/examples/coalesced-strided-access/)仅依赖 M02；[EX06 共享内存 tile bank padding](/examples/shared-memory-tile-bank-padding/)同时依赖 M03 和 M04；[EX07 Streams、Events 与 Overlap](/examples/streams-events-overlap/)同时依赖 M07、M08 和 M09；[EX08 统一内存迁移](/examples/unified-memory-migration/)仅依赖 M10；[EX09 CUDA Graph Capture](/examples/graph-capture/)仅依赖 M14；[EX10 PTX 与 Fatbinary 检查](/examples/ptx-fatbinary-inspection/)同时依赖 M15 和 M16；[EX16 Compute Sanitizer 缺陷套件](/examples/sanitizer-defect-suite/)同时依赖 Q03 和 Q04。可运行示例（Runnable Example）严格是十一个非连续 ID：EX01-EX10 与 EX16；EX11-EX15 没有公开页面或占位。
 
-EX05-EX09 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit Lane）使用一份原创 C++17 实现；EX16 是一个跨相同 Lanes 构建八个隔离 binary 的原创 Apache-2.0 C++17 project。EX05-EX09 与 EX16 的 compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空，只发布 expected observations。Host-only utility 不能建立 GPU correctness、overlap、migration、graph replay 或 sanitizer behavior。本站没有运行 EX03-EX09/EX16 CUDA binary、Compute Sanitizer 或 profiler，也不发布实际 sanitizer report、输出、计时、speedup 或其他性能数字。
+EX05-EX09 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit Lane）使用一份原创 C++17 实现；EX16 是一个跨相同 Lanes 构建八个隔离 binary 的原创 Apache-2.0 C++17 project。EX05-EX09 与 EX16 的 compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空，只发布 expected observations。EX10 的 compilation evidence 也为空；它的 artifact-pipeline acceptance 只生成和检查产物，不执行最终 host artifact 或 GPU executable，因此 runtime 为 Runtime-Not-Applicable。普通 EX10 matrix 与独立 CUDA 13.3/GCC 14 C++23 probe 在合格保留记录提交前都不授予 Compile-Checked。Host-only utility 不能建立 GPU correctness、overlap、migration、graph replay 或 sanitizer behavior。本站没有运行 EX03-EX10/EX16 CUDA binary、Compute Sanitizer 或 profiler，也不发布实际 sanitizer report、输出、计时、speedup 或其他性能数字。
 
 六个非连续实验严格是 LAB01-LAB05 与 LAB07；LAB06 继续缺席，因为所需的 timeline-profiler 先修单元尚未公开。LAB01 同时依赖 O03 和 O08，并使用 EX01；LAB02 依赖 O03 和 F01，并使用 EX02；[LAB03 破坏并修复索引](/labs/break-and-repair-indexing/)同时依赖 F03 和 F05，并使用 EX04；[LAB04 观察合并访问](/labs/observe-coalescing/)同时依赖 M02 和 Q05，并使用 EX05；[LAB05 消除共享内存存储体冲突](/labs/remove-shared-memory-bank-conflicts/)同时依赖 M04 和 Q05，并使用 EX06；[LAB07 诊断四类 Sanitizer 故障](/labs/diagnose-four-sanitizer-failures/)同时依赖 Q03 和 Q04，并使用 EX16。F08 与 LAB03 相关，但不是 LAB03 的先修条件。
 
-正式的可视化讲解（Visual Explainer）共十二项：八个独立页面 [VIS01 kernel 路径](/visuals/kernel-journey/)、[VIS02 索引](/visuals/indexing/)、[VIS03 warp divergence](/visuals/warp-divergence/)、[VIS04 内存请求 segment 分组](/visuals/memory-transactions/)、[VIS05 shared-memory bank 映射](/visuals/shared-memory-banks/)、[VIS06 memory hierarchy、ownership 与 lifetime](/visuals/memory-hierarchy-lifetime/)、[VIS07 stream/event dependency](/visuals/stream-event-dependencies/)与 [VIS08 托管内存页面迁移](/visuals/page-migration/)，以及分别嵌入 F05-F08 的 [VIS19 错误暴露时间线](/foundations/asynchronous-errors/#vis19)、[VIS20 计算能力合同筛选器](/foundations/compute-capability/#vis20)、[VIS21 Runtime/Driver API 边界](/foundations/runtime-driver-api/#vis21)与 [VIS22 线程块形状约束探索器](/foundations/launch-geometry/#vis22)。VIS08 同时依赖 M01、M02 和 M10。十二项讲解都使用确定性的 browser-only model，提供静态或文字回退，不执行 CUDA，也没有 CUDA Evidence Status。F04 的原创静态生命周期表仍不是 Visual Explainer 或证据来源。当前 catalog 为 6 个 Lab、35 个 Practice Bank 条目、12 项 Visual Explainer、114 个 Glossary 词条和 45 条 source record，共 212 条记录；公开源文件形成 131 个双语发布对（Publication Pair），即 262 条 source route。
+正式的可视化讲解（Visual Explainer）共十三项：九个独立页面 [VIS01 kernel 路径](/visuals/kernel-journey/)、[VIS02 索引](/visuals/indexing/)、[VIS03 warp divergence](/visuals/warp-divergence/)、[VIS04 内存请求 segment 分组](/visuals/memory-transactions/)、[VIS05 shared-memory bank 映射](/visuals/shared-memory-banks/)、[VIS06 memory hierarchy、ownership 与 lifetime](/visuals/memory-hierarchy-lifetime/)、[VIS07 stream/event dependency](/visuals/stream-event-dependencies/)、[VIS08 托管内存页面迁移](/visuals/page-migration/)与 [VIS09 NVCC 构建产物流水线](/visuals/artifact-pipeline/)，以及分别嵌入 F05-F08 的 [VIS19 错误暴露时间线](/foundations/asynchronous-errors/#vis19)、[VIS20 计算能力合同筛选器](/foundations/compute-capability/#vis20)、[VIS21 Runtime/Driver API 边界](/foundations/runtime-driver-api/#vis21)与 [VIS22 线程块形状约束探索器](/foundations/launch-geometry/#vis22)。VIS08 同时依赖 M01、M02 和 M10；VIS09 同时依赖 M15、M16 和 M17。十三项讲解都使用确定性的 browser-only model，提供静态或文字回退，不执行 CUDA，也没有 CUDA Evidence Status。F04 的原创静态生命周期表仍不是 Visual Explainer 或证据来源。当前 catalog 为 6 个 Lab、40 个 Practice Bank 条目、13 项 Visual Explainer、125 个 Glossary 词条和 50 条 source record，共 234 条记录；公开源文件形成 148 个双语发布对（Publication Pair），即 296 条 source route。
 
 ## 边界先说清
 
@@ -227,6 +231,31 @@ EX05-EX09 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit L
     <strong>CUDA 图与重复启动结构</strong>
     <small>分开 DAG definition、stream capture、instantiation、launch 与 completion。</small>
   </a>
+  <a className="route-card" href="/toolchain/nvcc-compilation-flow/">
+    <span>M15 · COMPILATION FLOW</span>
+    <strong>NVCC 主机/设备编译流程</strong>
+    <small>区分稳定 phase contract、host/device branches 与可变内部步骤。</small>
+  </a>
+  <a className="route-card" href="/toolchain/ptx-cubin-fatbinary/">
+    <span>M16 · ARTIFACT VOCABULARY</span>
+    <strong>PTX、cubin、SASS 与 fatbinary</strong>
+    <small>分开 virtual ISA、architecture binary、machine instructions 与 image container。</small>
+  </a>
+  <a className="route-card" href="/toolchain/compiler-architecture-targets/">
+    <span>M17 · TARGET PLAN</span>
+    <strong>选择编译器架构目标</strong>
+    <small>把 feature requirement、virtual/real target 与 deployment compatibility 分开。</small>
+  </a>
+  <a className="route-card" href="/toolchain/separate-compilation-device-linking/">
+    <span>M18 · DEVICE LINK</span>
+    <strong>分离编译与设备链接</strong>
+    <small>追踪 relocatable device code、device link 与最终 host link。</small>
+  </a>
+  <a className="route-card" href="/toolchain/cpp-dialect-boundaries/">
+    <span>M19 · DIALECT BOUNDARY</span>
+    <strong>CUDA C++17、C++20 与 C++23 方言边界</strong>
+    <small>把 Toolkit、host compiler、dialect option 与 retained probe 绑定为完整坐标。</small>
+  </a>
   <a className="route-card" href="/correctness/cpu-references-tolerances-invariants/">
     <span>Q01 · CORRECTNESS ORACLE</span>
     <strong>CPU 参考实现、容差与不变量</strong>
@@ -291,6 +320,11 @@ EX05-EX09 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit L
     <span>EX09 · GRAPH CAPTURE</span>
     <strong>CUDA Graph Capture 可运行示例</strong>
     <small>用独立 host oracle 验证三次 replay，不发布 launch-overhead 或 speedup。</small>
+  </a>
+  <a className="route-card" href="/examples/ptx-fatbinary-inspection/">
+    <span>EX10 · ARTIFACT INSPECTION</span>
+    <strong>PTX 与 Fatbinary 检查可运行示例</strong>
+    <small>生成并检查完整 artifact pipeline，但不执行最终 host 或 GPU executable。</small>
   </a>
   <a className="route-card" href="/examples/sanitizer-defect-suite/">
     <span>EX16 · SANITIZER DEFECT SUITE</span>
@@ -377,20 +411,25 @@ EX05-EX09 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit L
     <strong>托管内存页面迁移</strong>
     <small>单步检查 declared residency model，不把 browser transition 当作 runtime trace。</small>
   </a>
+  <a className="route-card" href="/visuals/artifact-pipeline/">
+    <span>VIS09 · ARTIFACT PIPELINE</span>
+    <strong>NVCC 构建产物流水线</strong>
+    <small>检查 host/device 分支、target plan 与可选 device link，不把模型当作构建观察。</small>
+  </a>
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 35 道原创题迁移证据、环境、架构、kernel、内存与正确性判断。</small>
+    <small>用 40 道原创题迁移证据、环境、架构、kernel、内存、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 114 个中英文规范术语。</small>
+    <small>核对本站使用的 125 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 45 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 50 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

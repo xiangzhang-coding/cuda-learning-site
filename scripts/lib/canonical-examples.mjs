@@ -145,32 +145,42 @@ function sameValues(actual, expected) {
 export async function validateCompileEvidenceRecord(projectRoot, exampleId, record) {
   const example = await loadCanonicalExample(projectRoot, exampleId);
   const errors = [];
-  const lane = example.compatibility.lanes.find(
-    (candidate) => candidate.toolkit === record?.toolchain?.toolkit,
-  );
   const isExample = record?.subject === exampleId;
-  const isProbe = record?.subject === 'CUDA-13.3-CXX23-PROBE';
+  const declaredProbe = (example.compatibility.probes ?? []).find(
+    (candidate) => candidate.subject === record?.subject,
+  );
+  const isLegacyProbe = record?.subject === 'CUDA-13.3-CXX23-PROBE';
+  const isProbe = Boolean(declaredProbe) || isLegacyProbe;
+  const lane = declaredProbe
+    ? example.compatibility.lanes.find((candidate) => candidate.id === declaredProbe.toolkitLane)
+    : example.compatibility.lanes.find(
+        (candidate) => candidate.toolkit === record?.toolchain?.toolkit,
+      );
   const expectedCommands = isExample && lane
     ? Object.values(example.build.commands).map((command) =>
         command.replace('{dialect}', record.toolchain.dialect),
       )
-    : [
+    : declaredProbe?.commands ?? [
         'nvcc --help',
         'nvcc --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o',
       ];
   const expectedArtifacts = isExample
     ? example.build.artifacts
-    : record?.result === 'pass' ? ['build/cxx23_probe.o'] : [];
+    : declaredProbe?.artifacts ?? (record?.result === 'pass' ? ['build/cxx23_probe.o'] : []);
 
   if (record?.['SPDX-License-Identifier'] !== 'Apache-2.0' || record?.schemaVersion !== 1) {
     errors.push('record schema and SPDX declaration are invalid');
   }
   const validResult = isExample
     ? record?.result === 'pass'
-    : isProbe && ['pass', 'unsupported'].includes(record?.result);
+    : Boolean(declaredProbe
+      ? declaredProbe.allowedResults.includes(record?.result)
+      : isLegacyProbe && ['pass', 'unsupported'].includes(record?.result));
   if (!validResult) errors.push('record subject or result is invalid');
-  if (isExample && record?.claim !== 'Compile-Checked') errors.push('EX02 record has an invalid claim');
-  if (isProbe && record?.claim !== 'C++23-Dialect-Probe') errors.push('C++23 probe record has an invalid claim');
+  if (isExample && record?.claim !== 'Compile-Checked') errors.push(`${exampleId} record has an invalid claim`);
+  if (isProbe && record?.claim !== (declaredProbe?.claim ?? 'C++23-Dialect-Probe')) {
+    errors.push('C++23 probe record has an invalid claim');
+  }
   if (isProbe && record?.result === 'unsupported' && !record?.probeDiagnostic) {
     errors.push('unsupported C++23 probe requires a diagnostic');
   }
@@ -198,9 +208,26 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
         record?.container?.actualAmd64Digest !== lane.amd64Digest) {
       errors.push('container coordinates do not match the declared Toolkit Lane');
     }
-    if (!/^sha256:[0-9a-f]{64}$/.test(record?.container?.actualImageId ?? '') ||
-        !Array.isArray(record?.container?.actualRepoDigests) ||
-        record.container.actualRepoDigests.length === 0) {
+    const actualImageIdIsValid = /^sha256:[0-9a-f]{64}$/.test(record?.container?.actualImageId ?? '');
+    const actualRepoDigests = record?.container?.actualRepoDigests;
+    const derivedImage = record?.container?.derivedImage;
+    const baseImage = record?.container?.baseImage;
+    const packagePrefix = declaredProbe ? `${declaredProbe.hostCompilerPackage}=` : null;
+    const ordinaryIdentityIsComplete = actualImageIdIsValid &&
+      Array.isArray(actualRepoDigests) && actualRepoDigests.length > 0;
+    const derivedIdentityIsComplete = actualImageIdIsValid &&
+      Array.isArray(actualRepoDigests) &&
+      /^sha256:[0-9a-f]{64}$/.test(baseImage?.actualImageId ?? '') &&
+      Array.isArray(baseImage?.actualRepoDigests) && baseImage.actualRepoDigests.length > 0 &&
+      derivedImage?.dockerfile === declaredProbe?.image?.dockerfile &&
+      derivedImage?.buildCommand === declaredProbe?.image?.buildCommand &&
+      derivedImage?.tag === declaredProbe?.image?.tag &&
+      packagePrefix !== null &&
+      typeof derivedImage?.hostCompilerPackage === 'string' &&
+      derivedImage.hostCompilerPackage.startsWith(packagePrefix) &&
+      derivedImage.hostCompilerPackage.length > packagePrefix.length &&
+      !/\s/.test(derivedImage.hostCompilerPackage);
+    if (declaredProbe?.image ? !derivedIdentityIsComplete : !ordinaryIdentityIsComplete) {
       errors.push('actual container identity is incomplete');
     }
     if (record?.container?.operatingSystem?.id !== 'ubuntu' ||
@@ -208,9 +235,15 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
       errors.push('actual container operating system does not match the Lane');
     }
     if (isExample && !lane.dialects.includes(record?.toolchain?.dialect)) {
-      errors.push('EX02 dialect is not declared for the Lane');
+      errors.push(`${exampleId} dialect is not declared for the Lane`);
     }
-    if (isProbe && !(lane.cxx23Probe && record?.toolchain?.dialect === 'c++23')) {
+    const declaredProbeMatches = declaredProbe &&
+      lane.id === declaredProbe.toolkitLane &&
+      record?.toolchain?.toolkit === lane.toolkit &&
+      record?.toolchain?.dialect === declaredProbe.dialect;
+    const legacyProbeMatches = isLegacyProbe && lane.cxx23Probe &&
+      record?.toolchain?.dialect === 'c++23';
+    if (isProbe && !(declaredProbeMatches || legacyProbeMatches)) {
       errors.push('C++23 probe is not declared for the Lane');
     }
   }
@@ -221,17 +254,34 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
       .some((coordinate) => coordinate?.includes('\n'))) {
     errors.push('toolchain coordinates must be sanitized version lines');
   }
+  const probeCompilerMajor = /g\+\+-(\d+)$/.exec(declaredProbe?.hostCompilerExecutable ?? '')?.[1];
+  if (probeCompilerMajor && !new RegExp(`\\b${probeCompilerMajor}\\.`).test(record?.toolchain?.hostCompiler ?? '')) {
+    errors.push('C++23 probe host compiler does not match the declared compiler');
+  }
   if (!sameValues(record?.toolchain?.target, example.compatibility.target)) errors.push('compiler target is invalid');
   if (!sameValues(record?.commands, expectedCommands)) errors.push('compile commands do not match the build contract');
+  if (record?.commands?.some((command) => command.includes('--allow-unsupported-compiler'))) {
+    errors.push('unsupported host compiler bypass is forbidden');
+  }
   if (!sameValues(record?.artifacts?.map(({ path: artifactPath }) => artifactPath), expectedArtifacts) ||
       record?.artifacts?.some(({ bytes, sha256 }) =>
         !Number.isSafeInteger(bytes) || bytes <= 0 || !/^[0-9a-f]{64}$/.test(sha256))) {
     errors.push('artifact records are incomplete or unexpected');
   }
-  if (record?.gpuExecutableExecuted !== false || record?.hostReferenceExecuted !== isExample) {
+  const expectedHostReferenceExecution = isExample && Boolean(example.build.commands.hostTest);
+  const expectedHostExecutableExecution = isExample
+    ? example.evidence.hostExecutableExecuted
+    : declaredProbe?.hostExecutableExecuted;
+  const hostExecutableBoundaryIsValid = expectedHostExecutableExecution === undefined ||
+    record?.hostExecutableExecuted === expectedHostExecutableExecution;
+  if (record?.gpuExecutableExecuted !== false ||
+      record?.hostReferenceExecuted !== expectedHostReferenceExecution ||
+      !hostExecutableBoundaryIsValid) {
     errors.push('execution boundary is invalid');
   }
-  const expectedRuntime = isExample ? 'Pending Hardware Verification' : 'Runtime-Not-Applicable';
+  const expectedRuntime = isExample
+    ? example.evidence.runtime
+    : declaredProbe?.runtime ?? 'Runtime-Not-Applicable';
   if (record?.runtimeEvidence !== expectedRuntime) errors.push('runtime evidence boundary is invalid');
   return errors;
 }

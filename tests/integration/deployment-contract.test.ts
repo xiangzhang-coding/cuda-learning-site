@@ -92,7 +92,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication).toMatchObject({
       publicationId: 'current',
       releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
-      scope: { publicationPairs: 131, sourceRoutes: 262 },
+      scope: { publicationPairs: 148, sourceRoutes: 296 },
     });
     expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
     expect(builtFiles).not.toContain('_worker.js');
@@ -125,9 +125,11 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('reject tracked or untracked source changes');
     expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
     expect(deployment).toContain('dist/publication.json');
-    expect(deployment).toContain('34 Learning Units through M14');
-    expect(deployment).toContain('five catalog groups total 212 records');
-    expect(deployment).toContain('131 Publication Pairs and 262 source routes');
+    expect(deployment).toContain('39 Learning Units through M19');
+    expect(deployment).toContain('five catalog groups total 234 records');
+    expect(deployment).toContain('148 Publication Pairs and 296 source routes');
+    expect(deployment).toContain('EX10 is Runtime-Not-Applicable');
+    expect(deployment).toMatch(/EX10.*artifact.*C\+\+23 probe.*pending/i);
     expect(deployment).toMatch(/R2 aggregate review.*pending/i);
     expect(deployment).toMatch(/issue #24/i);
     expect(deployment).toContain('npm run test:release-smoke');

@@ -46,11 +46,13 @@ head:
 
 ## The route published today
 
-The Stable Curriculum now completely publishes the O01-O08 orientation, the F01-F08 foundation track, the M01-M14 memory track, and the noncontiguous Q01/Q03-Q05 correctness-and-quality track in both languages, for 34 Learning Units. R1 remains the latest completed aggregate release review. The M09-M14, EX07-EX09, VIS08, and supporting learning material scoped by [Issue #19](https://github.com/xiangzhang-coding/cuda-learning-site/issues/19) now form the complete current incremental publication scope, but all of R2 and the aggregate R2 release review remain incomplete.
+The Stable Curriculum now completely publishes the O01-O08 orientation, the F01-F08 foundation track, the M01-M14 memory track, the M15-M19 toolchain track, and the noncontiguous Q01/Q03-Q05 correctness-and-quality track in both languages, for 39 Learning Units. R1 remains the latest completed aggregate release review. The M09-M14, EX07-EX09, and VIS08 material scoped by [Issue #19](https://github.com/xiangzhang-coding/cuda-learning-site/issues/19) remains in the current publication, and the current incremental manifest now adds M15-M19, EX10, VIS09, and their supporting learning material. The aggregate R2 release review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
 [M01 Address Spaces, Ownership, Scope, and Lifetime](/en/memory/address-spaces/) requires F04 and F06; [M02 Coalescing as Transaction Shaping](/en/memory/coalescing-transactions/) requires M01 and F03; [M03 Shared-memory Tiling](/en/memory/shared-memory-tiling/) requires M01 and M02; [M04 Bank Conflicts and Layout Transforms](/en/memory/bank-conflicts-layouts/) depends only on M03; [M05 Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) requires F02 and M01; [M06 Divergence, Reconvergence, and Warp-safe Reasoning](/en/memory/warp-divergence-reconvergence/) requires F02 and M05; [M07 Streams Replace a Global-order Mental Model](/en/memory/stream-ordering/) requires F05 and M01; and [M08 Events as Dependencies and Device-time Measurements](/en/memory/event-dependencies-timing/) depends only on M07. [M09 Pinned Memory and Transfer Overlap](/en/memory/pinned-memory-transfer-overlap/) requires M07 and M08; [M10 Unified Memory and Page Migration](/en/memory/unified-memory-page-migration/) requires M01 and M02; [M11 Stream-Ordered Allocation and Memory Pools](/en/memory/stream-ordered-allocation-memory-pools/) requires M07 and M08; [M12 Cooperative Groups and Composable Synchronization](/en/memory/cooperative-groups/) requires M05 and M06; [M13 Asynchronous Copy and Staged Pipelines](/en/memory/asynchronous-copy-pipelines/) requires M03, M05, and M08; and [M14 CUDA Graphs and Repeated Launch Structure](/en/memory/cuda-graphs/) requires M07 and M08.
+
+[M15 NVCC Host/Device Compilation Flow](/en/toolchain/nvcc-compilation-flow/) requires F04 and O04; [M16 PTX, cubin, SASS, and fatbinary](/en/toolchain/ptx-cubin-fatbinary/) requires M15 and F06; [M17 Select Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/) requires M16 and F06; [M18 Separate Compilation and Device Linking](/en/toolchain/separate-compilation-device-linking/) requires M15 and M16; and [M19 CUDA C++17, C++20, and C++23 Dialect Boundaries](/en/toolchain/cpp-dialect-boundaries/) requires O04 and M15.
 
 [Q01 CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) requires F04 and O04; [Q03 Memcheck and Invalid Memory Access](/en/correctness/memcheck-invalid-memory-access/) requires F05 and Q01; [Q04 Diagnose with Racecheck, Initcheck, and Synccheck](/en/correctness/racecheck-initcheck-synccheck/) requires M05, M06, and Q03; and [Q05 Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) requires M08 and Q01. Q02 has no public page or navigation placeholder.
 
@@ -58,17 +60,19 @@ F01-F08 each publish complete Exercises and separate reviewed solutions: [F01 Ex
 
 M01-M14 also publish complete Exercises and separate reviewed solutions in order: [M01 Exercises](/en/memory/address-spaces/exercises/) and [solutions](/en/memory/address-spaces/solutions/), [M02 Exercises](/en/memory/coalescing-transactions/exercises/) and [solutions](/en/memory/coalescing-transactions/solutions/), [M03 Exercises](/en/memory/shared-memory-tiling/exercises/) and [solutions](/en/memory/shared-memory-tiling/solutions/), [M04 Exercises](/en/memory/bank-conflicts-layouts/exercises/) and [solutions](/en/memory/bank-conflicts-layouts/solutions/), [M05 Exercises](/en/memory/synchronization-scopes/exercises/) and [solutions](/en/memory/synchronization-scopes/solutions/), [M06 Exercises](/en/memory/warp-divergence-reconvergence/exercises/) and [solutions](/en/memory/warp-divergence-reconvergence/solutions/), [M07 Exercises](/en/memory/stream-ordering/exercises/) and [solutions](/en/memory/stream-ordering/solutions/), [M08 Exercises](/en/memory/event-dependencies-timing/exercises/) and [solutions](/en/memory/event-dependencies-timing/solutions/), [M09 Exercises](/en/memory/pinned-memory-transfer-overlap/exercises/) and [solutions](/en/memory/pinned-memory-transfer-overlap/solutions/), [M10 Exercises](/en/memory/unified-memory-page-migration/exercises/) and [solutions](/en/memory/unified-memory-page-migration/solutions/), [M11 Exercises](/en/memory/stream-ordered-allocation-memory-pools/exercises/) and [solutions](/en/memory/stream-ordered-allocation-memory-pools/solutions/), [M12 Exercises](/en/memory/cooperative-groups/exercises/) and [solutions](/en/memory/cooperative-groups/solutions/), [M13 Exercises](/en/memory/asynchronous-copy-pipelines/exercises/) and [solutions](/en/memory/asynchronous-copy-pipelines/solutions/), and [M14 Exercises](/en/memory/cuda-graphs/exercises/) and [solutions](/en/memory/cuda-graphs/solutions/).
 
+M15-M19 likewise publish complete Exercises and separate reviewed solutions: [M15 Exercises](/en/toolchain/nvcc-compilation-flow/exercises/) and [solutions](/en/toolchain/nvcc-compilation-flow/solutions/), [M16 Exercises](/en/toolchain/ptx-cubin-fatbinary/exercises/) and [solutions](/en/toolchain/ptx-cubin-fatbinary/solutions/), [M17 Exercises](/en/toolchain/compiler-architecture-targets/exercises/) and [solutions](/en/toolchain/compiler-architecture-targets/solutions/), [M18 Exercises](/en/toolchain/separate-compilation-device-linking/exercises/) and [solutions](/en/toolchain/separate-compilation-device-linking/solutions/), and [M19 Exercises](/en/toolchain/cpp-dialect-boundaries/exercises/) and [solutions](/en/toolchain/cpp-dialect-boundaries/solutions/).
+
 O02-O08 retain their own Exercises and separate solutions.
 
 Q01/Q03-Q05 also publish complete Exercises and separate reviewed solutions: [Q01 Exercises](/en/correctness/cpu-references-tolerances-invariants/exercises/) and [solutions](/en/correctness/cpu-references-tolerances-invariants/solutions/), [Q03 Exercises](/en/correctness/memcheck-invalid-memory-access/exercises/) and [solutions](/en/correctness/memcheck-invalid-memory-access/solutions/), [Q04 Exercises](/en/correctness/racecheck-initcheck-synccheck/exercises/) and [solutions](/en/correctness/racecheck-initcheck-synccheck/solutions/), and [Q05 Exercises](/en/correctness/timing-asynchronous-gpu-work/exercises/) and [solutions](/en/correctness/timing-asynchronous-gpu-work/solutions/).
 
-[EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04; [EX04 Error Handling Lifecycle](/en/examples/error-handling-lifecycle/) depends only on F05; [EX05 Coalesced and Strided Access](/en/examples/coalesced-strided-access/) depends only on M02; [EX06 Shared-Memory Tile Bank Padding](/en/examples/shared-memory-tile-bank-padding/) requires M03 and M04; [EX07 Streams, Events, and Overlap](/en/examples/streams-events-overlap/) requires M07, M08, and M09; [EX08 Unified Memory Migration](/en/examples/unified-memory-migration/) depends only on M10; [EX09 CUDA Graph Capture](/en/examples/graph-capture/) depends only on M14; and [EX16 Compute Sanitizer Defect Suite](/en/examples/sanitizer-defect-suite/) requires Q03 and Q04. The Runnable Example set is exactly ten noncontiguous IDs, EX01-EX09 and EX16; EX10-EX15 have no public pages or placeholders.
+[EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04; [EX04 Error Handling Lifecycle](/en/examples/error-handling-lifecycle/) depends only on F05; [EX05 Coalesced and Strided Access](/en/examples/coalesced-strided-access/) depends only on M02; [EX06 Shared-Memory Tile Bank Padding](/en/examples/shared-memory-tile-bank-padding/) requires M03 and M04; [EX07 Streams, Events, and Overlap](/en/examples/streams-events-overlap/) requires M07, M08, and M09; [EX08 Unified Memory Migration](/en/examples/unified-memory-migration/) depends only on M10; [EX09 CUDA Graph Capture](/en/examples/graph-capture/) depends only on M14; [EX10 PTX and Fatbinary Inspection](/en/examples/ptx-fatbinary-inspection/) requires M15 and M16; and [EX16 Compute Sanitizer Defect Suite](/en/examples/sanitizer-defect-suite/) requires Q03 and Q04. The Runnable Example set is exactly eleven noncontiguous IDs, EX01-EX10 and EX16; EX11-EX15 have no public pages or placeholders.
 
-EX05-EX09 each use one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1; EX16 is one original Apache-2.0 C++17 project that builds eight isolated binaries across the same Lanes. EX05-EX09 and EX16 have empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. A host-only utility cannot establish GPU correctness, overlap, migration, graph replay, or sanitizer behavior. The site ran no EX03-EX09/EX16 CUDA binary, Compute Sanitizer tool, or profiler and publishes no sanitizer report, actual output, timing, speedup, or other performance number for them.
+EX05-EX09 each use one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1; EX16 is one original Apache-2.0 C++17 project that builds eight isolated binaries across the same Lanes. EX05-EX09 and EX16 have empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. EX10 also has empty compilation evidence. Its artifact-pipeline acceptance generates and inspects artifacts but executes neither the final host artifact nor a GPU executable, so runtime is Runtime-Not-Applicable. Neither the ordinary EX10 matrix nor the separate CUDA 13.3/GCC 14 C++23 probe grants Compile-Checked until a qualifying retained record is committed. A host-only utility cannot establish GPU correctness, overlap, migration, graph replay, or sanitizer behavior. The site ran no EX03-EX10/EX16 CUDA binary, Compute Sanitizer tool, or profiler and publishes no sanitizer report, actual output, timing, speedup, or other performance number for them.
 
 The six noncontiguous Labs are exactly LAB01-LAB05 and LAB07. LAB06 remains absent because its required timeline-profiler prerequisite is not public. LAB01 requires O03 and O08 and uses EX01; LAB02 requires O03 and F01 and uses EX02; [LAB03 Break and Repair Indexing](/en/labs/break-and-repair-indexing/) requires F03 and F05 and uses EX04; [LAB04 Observe Coalescing](/en/labs/observe-coalescing/) requires M02 and Q05 and uses EX05; [LAB05 Remove Shared-Memory Bank Conflicts](/en/labs/remove-shared-memory-bank-conflicts/) requires M04 and Q05 and uses EX06; and [LAB07 Diagnose Four Sanitizer Failures](/en/labs/diagnose-four-sanitizer-failures/) requires Q03 and Q04 and uses EX16. F08 is related to LAB03 but is not a LAB03 prerequisite.
 
-The site has twelve formal Visual Explainers: eight standalone pages, [VIS01 Kernel Journey](/en/visuals/kernel-journey/), [VIS02 Indexing](/en/visuals/indexing/), [VIS03 Warp Divergence](/en/visuals/warp-divergence/), [VIS04 Memory-request Segment Grouping](/en/visuals/memory-transactions/), [VIS05 Shared-memory Bank Mapping](/en/visuals/shared-memory-banks/), [VIS06 Memory Hierarchy, Ownership, and Lifetime](/en/visuals/memory-hierarchy-lifetime/), [VIS07 Stream and Event Dependencies](/en/visuals/stream-event-dependencies/), and [VIS08 Managed-Memory Page Migration](/en/visuals/page-migration/), plus [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22), embedded in F05-F08 respectively. VIS08 requires M01, M02, and M10. All twelve use deterministic browser-only models, provide static or textual fallbacks, execute no CUDA, and have no CUDA Evidence Status. F04's original static lifecycle table remains neither a Visual Explainer nor an evidence source. The current catalog contains 6 Labs, 35 Practice Bank entries, 12 Visual Explainers, 114 Glossary terms, and 45 source records, for 212 records total. Public source files form 131 Publication Pairs, or 262 source routes.
+The site has thirteen formal Visual Explainers: nine standalone pages, [VIS01 Kernel Journey](/en/visuals/kernel-journey/), [VIS02 Indexing](/en/visuals/indexing/), [VIS03 Warp Divergence](/en/visuals/warp-divergence/), [VIS04 Memory-request Segment Grouping](/en/visuals/memory-transactions/), [VIS05 Shared-memory Bank Mapping](/en/visuals/shared-memory-banks/), [VIS06 Memory Hierarchy, Ownership, and Lifetime](/en/visuals/memory-hierarchy-lifetime/), [VIS07 Stream and Event Dependencies](/en/visuals/stream-event-dependencies/), [VIS08 Managed-Memory Page Migration](/en/visuals/page-migration/), and [VIS09 NVCC Artifact Pipeline](/en/visuals/artifact-pipeline/), plus [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22), embedded in F05-F08 respectively. VIS08 requires M01, M02, and M10; VIS09 requires M15, M16, and M17. All thirteen use deterministic browser-only models, provide static or textual fallbacks, execute no CUDA, and have no CUDA Evidence Status. F04's original static lifecycle table remains neither a Visual Explainer nor an evidence source. The current catalog contains 6 Labs, 40 Practice Bank entries, 13 Visual Explainers, 125 Glossary terms, and 50 source records, for 234 records total. Public source files form 148 Publication Pairs, or 296 source routes.
 
 ## Boundaries first
 
@@ -227,6 +231,31 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>CUDA Graphs and Repeated Launch Structure</strong>
     <small>Separate DAG definition, stream capture, instantiation, launch, and completion.</small>
   </a>
+  <a className="route-card" href="/en/toolchain/nvcc-compilation-flow/">
+    <span>M15 · COMPILATION FLOW</span>
+    <strong>NVCC Host/Device Compilation Flow</strong>
+    <small>Separate stable phase contracts, host/device branches, and changeable internal steps.</small>
+  </a>
+  <a className="route-card" href="/en/toolchain/ptx-cubin-fatbinary/">
+    <span>M16 · ARTIFACT VOCABULARY</span>
+    <strong>PTX, cubin, SASS, and fatbinary</strong>
+    <small>Separate virtual ISA, architecture binaries, machine instructions, and image containers.</small>
+  </a>
+  <a className="route-card" href="/en/toolchain/compiler-architecture-targets/">
+    <span>M17 · TARGET PLAN</span>
+    <strong>Select Compiler Architecture Targets</strong>
+    <small>Keep feature requirements, virtual/real targets, and deployment compatibility distinct.</small>
+  </a>
+  <a className="route-card" href="/en/toolchain/separate-compilation-device-linking/">
+    <span>M18 · DEVICE LINK</span>
+    <strong>Separate Compilation and Device Linking</strong>
+    <small>Trace relocatable device code, the device link, and the final host link.</small>
+  </a>
+  <a className="route-card" href="/en/toolchain/cpp-dialect-boundaries/">
+    <span>M19 · DIALECT BOUNDARY</span>
+    <strong>CUDA C++17, C++20, and C++23 Dialect Boundaries</strong>
+    <small>Bind Toolkit, host compiler, dialect option, and retained probe into one coordinate.</small>
+  </a>
   <a className="route-card" href="/en/correctness/cpu-references-tolerances-invariants/">
     <span>Q01 · CORRECTNESS ORACLE</span>
     <strong>CPU References, Tolerances, and Invariants</strong>
@@ -291,6 +320,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <span>EX09 · GRAPH CAPTURE</span>
     <strong>CUDA Graph Capture Runnable Example</strong>
     <small>Verify three replays with an independent host oracle without launch-overhead or speedup claims.</small>
+  </a>
+  <a className="route-card" href="/en/examples/ptx-fatbinary-inspection/">
+    <span>EX10 · ARTIFACT INSPECTION</span>
+    <strong>PTX and Fatbinary Inspection Runnable Example</strong>
+    <small>Generate and inspect the complete artifact pipeline without executing a final host or GPU executable.</small>
   </a>
   <a className="route-card" href="/en/examples/sanitizer-defect-suite/">
     <span>EX16 · SANITIZER DEFECT SUITE</span>
@@ -377,20 +411,25 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Managed-Memory Page Migration</strong>
     <small>Step through a declared residency model without treating browser transitions as a runtime trace.</small>
   </a>
+  <a className="route-card" href="/en/visuals/artifact-pipeline/">
+    <span>VIS09 · ARTIFACT PIPELINE</span>
+    <strong>NVCC Artifact Pipeline</strong>
+    <small>Inspect host/device branches, target plans, and optional device linking without inventing build observations.</small>
+  </a>
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, architecture, kernel, memory, and correctness models through 35 original problems.</small>
+    <small>Transfer evidence, environment, architecture, kernel, memory, toolchain, and correctness models through 40 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 114-term canonical bilingual vocabulary.</small>
+    <small>Check the 125-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 45 interface and owner-source records with their review dates.</small>
+    <small>Inspect 50 interface and owner-source records with their review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

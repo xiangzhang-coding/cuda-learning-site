@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 import starlight from '@astrojs/starlight';
+import { unified } from '@astrojs/markdown-remark';
 import { defineConfig } from 'astro/config';
+
+function focusableMarkdownTables() {
+  return (tree) => {
+    const nodes = [tree];
+    while (nodes.length > 0) {
+      const node = nodes.pop();
+      if (node?.type === 'element' && node.tagName === 'table') {
+        node.properties = { ...node.properties, tabIndex: 0 };
+      }
+      if (Array.isArray(node?.children)) nodes.push(...node.children);
+    }
+  };
+}
 
 export default defineConfig({
   site: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
@@ -8,6 +22,9 @@ export default defineConfig({
   outDir: './dist',
   trailingSlash: 'always',
   prerenderConflictBehavior: 'error',
+  markdown: {
+    processor: unified({ rehypePlugins: [focusableMarkdownTables] }),
+  },
   integrations: [
     starlight({
       title: {
@@ -78,6 +95,17 @@ export default defineConfig({
           ],
         },
         {
+          label: '工具链',
+          translations: { en: 'Toolchain' },
+          items: [
+            { slug: 'toolchain/nvcc-compilation-flow' },
+            { slug: 'toolchain/ptx-cubin-fatbinary' },
+            { slug: 'toolchain/compiler-architecture-targets' },
+            { slug: 'toolchain/separate-compilation-device-linking' },
+            { slug: 'toolchain/cpp-dialect-boundaries' },
+          ],
+        },
+        {
           label: '正确性与质量',
           translations: { en: 'Correctness and Quality' },
           items: [
@@ -100,6 +128,7 @@ export default defineConfig({
             { slug: 'examples/streams-events-overlap' },
             { slug: 'examples/unified-memory-migration' },
             { slug: 'examples/graph-capture' },
+            { slug: 'examples/ptx-fatbinary-inspection' },
             { slug: 'examples/sanitizer-defect-suite' },
           ],
         },
@@ -129,6 +158,7 @@ export default defineConfig({
             { slug: 'visuals/memory-hierarchy-lifetime' },
             { slug: 'visuals/stream-event-dependencies' },
             { slug: 'visuals/page-migration' },
+            { slug: 'visuals/artifact-pipeline' },
           ],
         },
         { slug: 'practice' },

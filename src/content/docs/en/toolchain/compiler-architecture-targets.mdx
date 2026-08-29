@@ -1,0 +1,294 @@
+---
+title: 'M17: Choosing Compiler Architecture Targets'
+description: Turn source feature requirements into explicit --generate-code virtual/real target plans, design SASS plus PTX fallback, and separate suffix scope, Toolkit Lane acceptance, artifact inspection, and deployment compatibility.
+pairId: m17
+counterpart: /toolchain/compiler-architecture-targets/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - plan-ledger
+  - generate-code
+  - sass-ptx
+  - assumption-matching
+  - feature-scopes
+  - lane-matrix
+  - selected-plans
+  - deployment
+  - related-resources
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M17
+prerequisites:
+  - M16
+  - F06
+relatedUnits:
+  - EX10
+  - VIS09
+exampleIds:
+  - EX10
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - Feature Set Compiler Targets'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Baseline, architecture-specific, and family-specific compiler-target scopes'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 13.3'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1 current documentation; page label NVCC v13.3; last updated 2026-06-25'
+    platform: 'Current --generate-code, virtual architecture, real architecture, fatbinary, and application-compatibility contracts'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 12.9'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9; last updated 2025-05-31'
+    platform: 'Toolkit 12.9.2 --generate-code and accepted-target coordinate'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8.0 --generate-code and accepted-target coordinate'
+    accessDate: '2026-08-29'
+  - title: 'Why CUDA Compatibility'
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html'
+    version: 'Current CUDA Compatibility documentation'
+    platform: 'Toolkit, driver, Runtime, binary, PTX, and deployment compatibility boundaries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Minor Version Compatibility'
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html'
+    version: 'Current CUDA Compatibility documentation'
+    platform: 'Same-major older-driver restrictions, including PTX and target-architecture caveats'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Forward Compatibility'
+    url: 'https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html'
+    version: 'Current CUDA Compatibility documentation'
+    platform: 'Eligible systems, compatibility packages, feature exceptions, and deployment models'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m17 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,plan-ledger,generate-code,sass-ptx,assumption-matching,feature-scopes,lane-matrix,selected-plans,deployment,related-resources,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M17 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M16,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX10,VIS09' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.2,11.8.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/toolchain/compiler-architecture-targets/" lang="zh-CN">阅读中文对应页</a>
+
+An architecture plan first states the feature scope required by source and then names a [virtual architecture target (TERM-060)](/en/glossary/#term-060) and [real architecture target (TERM-061)](/en/glossary/#term-061) for an exact Toolkit Lane. The real target requests a [cubin binary (TERM-119)](/en/glossary/#term-119) containing [SASS machine code (TERM-121)](/en/glossary/#term-121), while a virtual code target retains [PTX intermediate code (TERM-118)](/en/glossary/#term-118). Those images can enter a [fatbinary (TERM-120)](/en/glossary/#term-120), but the command, a successful build, artifact contents, deployment compatibility, and runtime behavior are five different facts.
+
+## What you should be able to do
+
+- Write reviewable virtual/real target plans with complete `--generate-code=arch=...,code=...` clauses rather than ambiguous shorthand.
+- Design a named SASS image plus a same-scope PTX fallback for one declared scope without claiming which image a driver ultimately selects.
+- Check that every real target implements all feature assumptions of its paired virtual target.
+- Distinguish unsuffixed baseline, exact-architecture `a`, and family `f` scopes and reject numeric ordering as a source of suffix semantics.
+- Check compiler acceptance by Toolkit Lane, then leave build, artifact inspection, driver compatibility, runtime, and performance to independent records.
+
+## Prerequisites
+
+Complete [M16: PTX, Cubins, SASS, and Fatbinaries](/en/toolchain/ptx-cubin-fatbinary/) first, then revisit [F06: Compute Capability Is a Feature Contract](/en/foundations/compute-capability/). M16 supplies artifact layers and inspection vocabulary. F06 supplies the selected compiler rows and the baseline, `a`, and `f` feature scopes. M17 only combines those two contracts into a target plan.
+
+M17's only strict prerequisites are **M16 and F06**. [EX10](/en/examples/ptx-fatbinary-inspection/) and [VIS09](/en/visuals/artifact-pipeline/) are related resources, not additional prerequisites. This page requires no CUDA-capable system.
+
+## Start with a plan ledger
+
+Do not start from a GPU name or one `-arch` shorthand. Write one complete ledger row first:
+
+| Field | What must be recorded | What it still cannot establish |
+| --- | --- | --- |
+| Source requirement | Features actually required from baseline, one exact architecture, or one named family | Whether a compiler accepts a target; whether the program is faster |
+| Toolkit Lane / NVCC | One exact 11.8.0, 12.9.2 archive, or selected 13.3.1 coordinate | Installed driver, selected GPU, or artifact contents |
+| Virtual target | Feature assumptions used for preprocessing and PTX compilation | That a named SASS image was generated |
+| Real target | Named architecture code requested from the assembler | That the artifact contains the image or deployment is compatible |
+| PTX fallback target | Same-scope virtual code requested for retention | Any future GPU, arbitrary driver, or successful JIT |
+| Verification | Where a build log and artifact-inspection result are expected to be recorded | Runtime selection, execution, correctness, or performance |
+
+If the source requirement, Lane, or suffix scope is unknown, the plan is **indeterminate**. “Newer” and “numerically larger” cannot fill a field.
+
+## Expand the plan with explicit `--generate-code`
+
+`--generate-code` binds a virtual assumption for one device compilation to a requested code output. This unit uses the explicit forms:
+
+```text
+--generate-code=arch=<virtual-target>,code=<real-target>
+--generate-code=arch=<virtual-target>,code=<virtual-target>
+```
+
+The first line requests assembled binary code for the named real target. The second skips that real-code assembly and retains PTX under the same virtual contract. When several target contracts are needed, repeat the complete `--generate-code` option; do not compress several virtual assumptions into one opaque label.
+
+This is the page's only exact baseline fixture used across all three selected Lanes:
+
+```bash
+nvcc app.cu \
+  --generate-code=arch=compute_75,code=sm_75 \
+  --generate-code=arch=compute_75,code=compute_75 \
+  -o app
+```
+
+The command expresses build intent only: request `sm_75` real code under `compute_75` baseline assumptions and retain `compute_75` PTX. It pins neither the actual `nvcc` executable nor a build log or artifact inspection, so it is not Compile-Checked evidence by itself.
+
+## SASS plus PTX fallback is an artifact strategy
+
+`code=sm_75` requests an assembled binary image for the named real target. M16's artifact model identifies the machine instructions in it as SASS. `code=compute_75` requests retention of PTX from the same virtual compilation. Together they form the static plan **named SASS image + PTX fallback candidate**.
+
+“Fallback” states why a release author wants to retain PTX: it can serve as JIT input for a deployment path that still needs driver/PTX compatibility review. It does not say this page observed image selection, JIT, module loading, or kernel execution. Even after a successful build, an owner inspection tool from the selected Toolkit must record the actual embedded entries before “requested” can become “present in artifact.”
+
+PTX does not automatically broaden source scope. `compute_XYa` PTX still carries exact-architecture assumptions, and `compute_XYf` PTX still carries family assumptions. Only unsuffixed baseline PTX retains baseline feature scope, and its concrete deployment still depends on the exact driver, device, and component contracts.
+
+## Real targets must implement virtual assumptions
+
+`arch=` is not an output filename. It determines which features device-source preprocessing and PTX compilation may use. `code=sm_...` requests assembly of that virtual program for a real target. Every real target must implement all assumptions of its paired virtual target.
+
+Audit each clause in this order:
+
+1. Does the source actually require this virtual feature set?
+2. Does the selected NVCC accept both the virtual and real names?
+3. Does the real target implement at least the virtual assumptions while preserving suffix scope?
+4. Does the PTX clause reuse the same virtual target rather than silently rewrite the source contract?
+5. Do build and inspection records prove that requested entries are present?
+
+This page demonstrates only the same-name virtual/real pairs already reviewed by F06. It derives no unreviewed cross-suffix pair from feature-set inclusion and projects no accepted spelling from one Lane into another.
+
+## Three feature scopes
+
+Unsuffixed baseline and the two qualified scopes answer “what may source depend on?”, not “which number is newer?”:
+
+| Scope | Source contract | Selected pair examples on this page | Boundary retained by PTX |
+| --- | --- | --- | --- |
+| Baseline, unsuffixed | Predominant features intended to remain available on subsequent compute architectures | `compute_75` / `sm_75` | `compute_75` baseline assumptions |
+| [Architecture-specific feature set (TERM-062)](/en/glossary/#term-062), `a` | Complete specialized set for one exact compute capability | `compute_90a` / `sm_90a`; `compute_100a` / `sm_100a`; `compute_120a` / `sm_120a` | That same exact capability |
+| [Family-specific feature set (TERM-063)](/en/glossary/#term-063), `f` | Specialized subset shared by family members explicitly listed in the current owner table | `compute_100f` / `sm_100f`; `compute_120f` / `sm_120f` | That same named family |
+
+`a` and `f` are semantic scopes, not decimal suffixes. `compute_120a` does not cover `compute_100a` or `compute_100f` because `120 > 100`, and `compute_100f` does not cover every capability numerically greater than 10.0. Changing a suffix requires changing the source feature requirement first, then rechecking the current owner family table and selected compiler.
+
+## Compiler acceptance belongs to a Toolkit Lane
+
+The matrix below reuses **only** the six exact pairs in the current F06 reviewed dataset. No catalog is implied outside these cells:
+
+<table tabindex="0" aria-label="Selected compiler-target support matrix">
+  <thead>
+    <tr>
+      <th scope="col">Selected virtual / real pair</th>
+      <th scope="col">Scope</th>
+      <th scope="col">NVCC 11.8.0</th>
+      <th scope="col">12.9.2 archive / page label 12.9</th>
+      <th scope="col">Selected Toolkit 13.3.1 / page label 13.3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row"><code>compute_75</code> / <code>sm_75</code></th><td>baseline</td><td>reviewed accepted</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_90a</code> / <code>sm_90a</code></th><td>exact 9.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_100f</code> / <code>sm_100f</code></th><td>family 10.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_100a</code> / <code>sm_100a</code></th><td>exact 10.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_120f</code> / <code>sm_120f</code></th><td>family 12.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+    <tr><th scope="row"><code>compute_120a</code> / <code>sm_120a</code></th><td>exact 12.0</td><td>selected qualified row absent</td><td>reviewed accepted</td><td>reviewed accepted</td></tr>
+  </tbody>
+</table>
+
+“Reviewed accepted” means that the exact owner page accepts the name in the selected F06 row. It is not a successful build observation by this site. For qualified 11.8.0 rows, this page records only that these pairs are absent from the selected dataset; it infers nothing about unlisted targets.
+
+## Six selected SASS/PTX plans
+
+Expand every accepted real pair into one SASS clause and one same-scope PTX clause:
+
+<table tabindex="0" aria-label="Selected SASS and PTX fallback plans">
+  <thead><tr><th scope="col">Source requirement</th><th scope="col">SASS clause</th><th scope="col">PTX fallback clause</th><th scope="col">Eligible reviewed Lane rows</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Baseline 7.5</th><td><code>arch=compute_75,code=sm_75</code></td><td><code>arch=compute_75,code=compute_75</code></td><td>11.8.0, 12.9.2, 13.3.1</td></tr>
+    <tr><th scope="row">Exact 9.0</th><td><code>arch=compute_90a,code=sm_90a</code></td><td><code>arch=compute_90a,code=compute_90a</code></td><td>12.9.2 and 13.3.1 only</td></tr>
+    <tr><th scope="row">Family 10.0</th><td><code>arch=compute_100f,code=sm_100f</code></td><td><code>arch=compute_100f,code=compute_100f</code></td><td>12.9.2 and 13.3.1 only</td></tr>
+    <tr><th scope="row">Exact 10.0</th><td><code>arch=compute_100a,code=sm_100a</code></td><td><code>arch=compute_100a,code=compute_100a</code></td><td>12.9.2 and 13.3.1 only</td></tr>
+    <tr><th scope="row">Family 12.0</th><td><code>arch=compute_120f,code=sm_120f</code></td><td><code>arch=compute_120f,code=compute_120f</code></td><td>12.9.2 and 13.3.1 only</td></tr>
+    <tr><th scope="row">Exact 12.0</th><td><code>arch=compute_120a,code=sm_120a</code></td><td><code>arch=compute_120a,code=compute_120a</code></td><td>12.9.2 and 13.3.1 only</td></tr>
+  </tbody>
+</table>
+
+These are six independent review fixtures, not a recommendation to place every clause in one artifact. A release plan includes only rows required by its source requirements and deployment policy and accepted by its selected Lane. Artifact size, build time, JIT behavior, and performance do not follow from this static table.
+
+## Deployment compatibility is a later gate
+
+After a target plan passes compiler-acceptance review, artifact and deployment checks remain independent:
+
+| Gate | What it can establish at most | What it cannot establish |
+| --- | --- | --- |
+| Command review | Requested virtual/real/PTX clauses preserve suffix scope | Actual compiler acceptance or embedded entries |
+| Successful Lane build | The exact compiler accepted the source and options | Fatbinary contents, another Lane, or GPU execution |
+| Artifact inspection | Which PTX/cubin entries were recorded in the selected artifact | Which image a driver uses or whether JIT or launch succeeds |
+| Compatibility review | Whether the exact GPU, driver, Runtime, libraries, and package have a documented path | Actual runtime selection, correctness, or speed |
+| Runtime record | Only behavior observed under that Environment Manifest | Other environments or broad catalog coverage |
+
+[Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html) explicitly bounds the older same-major driver path by requiring target architecture/SASS and warning that applications relying on PTX encounter runtime issues. Therefore, “has a PTX fallback” cannot prove minor-version deployment. Conversely, “has SASS” cannot replace exact driver-floor, feature-exception, Runtime, and library checks.
+
+[Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html) is a different path. It applies only to eligible systems listed by the owner documentation and requires the applicable compatibility package, loader configuration, and feature review. [Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html) also keeps Toolkit, driver, Runtime, and dynamically linked libraries separate. M17 selects or simulates no runtime image.
+
+## Related EX10 and VIS09
+
+[EX10: PTX and Fatbinary Inspection](/en/examples/ptx-fatbinary-inspection/) later compares requested clauses with inspected artifact entries. [VIS09: NVCC Artifact Pipeline](/en/visuals/artifact-pipeline/) traces the static flow among source, virtual target, PTX, real target, cubin, and fatbinary. Both are related to M17, but this page has no canonical import.
+
+Until the complete EX10 Publication Pair arrives, the [pinned EX10 placeholder commit `c7326c342c5673de7d17de08d4f56ab836648d5d`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection) fixes only a repository coordinate. It is not complete EX10 source, an artifact manifest, a compile record, or Runtime-Not-Applicable evidence.
+
+## Evidence boundary
+
+The commands, matrices, scope classifications, and compatibility ledgers on this page are static teaching artifacts. The site did not execute `nvcc` for M17, generate or inspect a fatbinary, invoke driver JIT, load a module, or run a kernel. Its hardware gate is therefore `none`, and its compilation and runtime evidence arrays and recorded observations remain empty.
+
+A future compilation claim must bind the exact source commit, Toolkit Lane, NVCC and host compiler, complete options, exit status, logs, and inspected artifact identity. A future deployment or runtime claim additionally needs an Environment Manifest, driver, Runtime and libraries, compatibility path, selected GPU, actual observation, and correctness oracle. No documentation lookup or target name replaces those records.
+
+## Retrieval check
+
+1. In one explicit `--generate-code` clause, what does `arch=` constrain and what does `code=` constrain?
+2. Why is a named SASS image plus PTX fallback an artifact plan rather than a runtime-selection report?
+3. Why must a real target implement its virtual target's assumptions, and why does same-scope PTX not broaden source scope?
+4. How do unsuffixed, `a`, and `f` scopes differ, and why can capability-number ordering not decide suffix compatibility?
+5. Why do 12.9.2 target acceptance and inspected artifact entries still prove neither older-driver deployment nor kernel execution?
+
+## Continue with practice
+
+- Complete the [M17 Exercises](/en/toolchain/compiler-architecture-targets/exercises/), then inspect the separate [reviewed solutions](/en/toolchain/compiler-architecture-targets/solutions/).
+- Audit a cross-Lane suffix-scope, artifact, and deployment-compatibility packet in [Practice Bank PB-R2-009](/en/practice/#pb-r2-009).
+- Revisit [TERM-060 virtual architecture target](/en/glossary/#term-060), [TERM-061 real architecture target](/en/glossary/#term-061), [TERM-062 architecture-specific feature set](/en/glossary/#term-062), [TERM-063 family-specific feature set](/en/glossary/#term-063), and the PTX, cubin, fatbinary, and SASS vocabulary in [TERM-118](/en/glossary/#term-118) through [TERM-121](/en/glossary/#term-121).
+- Review artifact flow with [VIS09](/en/visuals/artifact-pipeline/), then compare the plan with the [EX10](/en/examples/ptx-fatbinary-inspection/) inspection contract.
+
+## Sources and review
+
+- Feature scope follows NVIDIA's current [CUDA Programming Guide v13.3: Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets). It defines baseline, exact-architecture `a`, and family `f`, not a broad target catalog.
+- `--generate-code`, virtual and real assumptions, PTX, cubin, fatbinary, and the application-compatibility model were reviewed separately against [current NVCC 13.3](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html), the [12.9.2 archive whose page label is NVCC 12.9](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html), and [NVCC 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html). Accepted names use only the current reviewed F06 rows.
+- Deployment boundaries follow NVIDIA's [Why CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html), [Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html), and [Forward Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/forward-compatibility.html). This page copies no owner compatibility table and infers no runtime image selection.
+
+All seven owner sources were accessed and reviewed on **2026-08-29**. The prose, six-row selected-plan ledger, questions, and Exercises are original CC-BY-4.0 work for this site. No owner example, figure, complete target list, or deployment result is copied.
+
+**Fact checked: 2026-08-29.**

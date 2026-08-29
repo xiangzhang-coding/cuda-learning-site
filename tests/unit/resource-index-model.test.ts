@@ -23,14 +23,14 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(212);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(234);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 6, practice: 35, visuals: 12, glossary: 114, sources: 45 });
-    for (const absentId of ['Q02', 'LAB06', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15']) {
+    ).toEqual({ labs: 6, practice: 40, visuals: 13, glossary: 125, sources: 50 });
+    for (const absentId of ['Q02', 'LAB06', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -75,15 +75,80 @@ describe('resource index catalog', () => {
       VIS08: { href: '/en/visuals/page-migration/', prerequisites: ['M01', 'M02', 'M10'] },
     });
 
+    expect(Object.fromEntries(
+      ['M15', 'M16', 'M17', 'M18', 'M19', 'EX10', 'VIS09'].map((planningId) => [
+        planningId,
+        {
+          href: PUBLISHED_DESTINATIONS[planningId].href.en,
+          title: PUBLISHED_DESTINATIONS[planningId].title.en,
+          prerequisites: PUBLISHED_DESTINATIONS[planningId].prerequisites,
+        },
+      ]),
+    )).toEqual({
+      M15: {
+        href: '/en/toolchain/nvcc-compilation-flow/',
+        title: 'M15: NVCC Host/Device Compilation Flow',
+        prerequisites: ['F04', 'O04'],
+      },
+      M16: {
+        href: '/en/toolchain/ptx-cubin-fatbinary/',
+        title: 'M16: PTX, Cubins, SASS, and Fatbinaries',
+        prerequisites: ['M15', 'F06'],
+      },
+      M17: {
+        href: '/en/toolchain/compiler-architecture-targets/',
+        title: 'M17: Choosing Compiler Architecture Targets',
+        prerequisites: ['M16', 'F06'],
+      },
+      M18: {
+        href: '/en/toolchain/separate-compilation-device-linking/',
+        title: 'M18: Separate Compilation and Device Linking',
+        prerequisites: ['M15', 'M16'],
+      },
+      M19: {
+        href: '/en/toolchain/cpp-dialect-boundaries/',
+        title: 'M19: CUDA C++17, C++20, and C++23 Dialect Boundaries',
+        prerequisites: ['O04', 'M15'],
+      },
+      EX10: {
+        href: '/en/examples/ptx-fatbinary-inspection/',
+        title: 'EX10: PTX and Fatbinary Inspection Runnable Example',
+        prerequisites: ['M15', 'M16'],
+      },
+      VIS09: {
+        href: '/en/visuals/artifact-pipeline/',
+        title: 'NVCC Artifact Pipeline',
+        prerequisites: ['M15', 'M16', 'M17'],
+      },
+    });
+
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R2-/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
+      'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:0\d|1[0-4]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
-      Array.from({ length: 19 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[01]\d|2[0-5]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 30 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
     );
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|30)$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3[0-5])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
+      'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
     ]);
+
+    const toolchainPractice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R2-0(?:0[7-9]|1[01])$/.test(planningId));
+    expect(toolchainPractice.map(({ planningId, prerequisites }) => [planningId, prerequisites])).toEqual([
+      ['PB-R2-007', ['M15']],
+      ['PB-R2-008', ['M16']],
+      ['PB-R2-009', ['M17']],
+      ['PB-R2-010', ['M18']],
+      ['PB-R2-011', ['M19']],
+    ]);
+    for (const record of toolchainPractice) {
+      expect(record.hardwareGate.en, record.planningId).toMatch(/^None;/);
+      expect(record.versionGate.en, record.planningId).toContain('11.8.0');
+      expect(record.versionGate.en, record.planningId).toContain('12.9.2');
+      expect(record.versionGate.en, record.planningId).toContain('13.3.1');
+      expect(record.relatedUnits, record.planningId).toContain('EX10');
+    }
   });
 
   it('keeps one canonical Glossary entry per term in both locales', () => {
@@ -207,6 +272,7 @@ describe('resource index catalog', () => {
       'VIS06',
       'VIS07',
       'VIS08',
+      'VIS09',
       'VIS19',
       'VIS20',
       'VIS21',
@@ -251,6 +317,16 @@ describe('resource index catalog', () => {
           ['M01', '/en/memory/address-spaces/'],
           ['M02', '/en/memory/coalescing-transactions/'],
           ['M10', '/en/memory/unified-memory-page-migration/'],
+        ],
+      },
+      {
+        planningId: 'VIS09',
+        href: '/en/visuals/artifact-pipeline/',
+        counterpart: '/visuals/artifact-pipeline/',
+        prerequisites: [
+          ['M15', '/en/toolchain/nvcc-compilation-flow/'],
+          ['M16', '/en/toolchain/ptx-cubin-fatbinary/'],
+          ['M17', '/en/toolchain/compiler-architecture-targets/'],
         ],
       },
       {
@@ -318,7 +394,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(139);
+    expect(projected).toHaveLength(150);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

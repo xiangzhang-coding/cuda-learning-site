@@ -1,0 +1,278 @@
+---
+title: 'M16：PTX、cubin、SASS 与 fatbinary'
+description: 区分 versioned virtual ISA text、architecture-specific binary、从 binary 检查的 machine instructions 与多 image container，并审查 standalone、embedded、selection、JIT 和 evidence boundaries。
+pairId: m16
+counterpart: /en/toolchain/ptx-cubin-fatbinary/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - artifact-vocabulary
+  - ptx-versioning
+  - standalone-embedded
+  - selection
+  - inspection
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M16
+prerequisites:
+  - M15
+  - F06
+relatedUnits:
+  - M17
+  - M18
+  - EX10
+  - VIS09
+exampleIds:
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - artifact-kernel
+  - artifact-pipeline
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Parallel Thread Execution ISA 9.3'
+    url: 'https://docs.nvidia.com/cuda/parallel-thread-execution/index.html'
+    version: 'PTX ISA v9.3; last updated 2026-06-25'
+    platform: 'Current PTX virtual ISA, text format, module versioning, and translation model for the selected Toolkit 13.3.1 Lane'
+    accessDate: '2026-08-29'
+  - title: 'Parallel Thread Execution ISA 8.8 - CUDA Toolkit 12.9.2 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html'
+    version: 'CUDA Toolkit 12.9.2 archive; PTX ISA v8.8; last updated 2025-05-31'
+    platform: 'Archived PTX virtual ISA and module-version coordinate for the selected Toolkit 12.9.2 Lane'
+    accessDate: '2026-08-29'
+  - title: 'Parallel Thread Execution ISA 7.8 - CUDA Toolkit 11.8.0 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html'
+    version: 'CUDA Toolkit v11.8.0; PTX ISA v7.8; last updated 2022-10-03'
+    platform: 'Archived PTX virtual ISA and module-version coordinate for the selected Toolkit 11.8.0 Lane'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 13.3 - Application Compatibility'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#application-compatibility'
+    version: 'NVCC v13.3; Toolkit 13.3.1 current coordinate; last updated 2026-06-25'
+    platform: 'Current two-stage PTX and real-architecture application-compatibility model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 13.3 - Fatbinaries'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#fatbinaries'
+    version: 'NVCC v13.3; Toolkit 13.3.1 current coordinate; last updated 2026-06-25'
+    platform: 'Current multi-image fatbinary and binary-image versus PTX-JIT fallback model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 12.9 - Application Compatibility'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#application-compatibility'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9; last updated 2025-05-31'
+    platform: 'Archived two-stage PTX and real-architecture application-compatibility model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 12.9 - Fatbinaries'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#fatbinaries'
+    version: 'CUDA Toolkit 12.9.2 archive path; page label NVCC v12.9; last updated 2025-05-31'
+    platform: 'Archived multi-image fatbinary and binary-image versus PTX-JIT fallback model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 11.8.0 - Application Compatibility'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#application-compatibility'
+    version: 'CUDA Toolkit v11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Archived two-stage PTX and real-architecture application-compatibility model'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 11.8.0 - Fatbinaries'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#fatbinaries'
+    version: 'CUDA Toolkit v11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Archived multi-image fatbinary and binary-image versus PTX-JIT fallback model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Binary Utilities 13.3'
+    url: 'https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html'
+    version: 'CUDA Binary Utilities v13.3; last updated 2026-06-25'
+    platform: 'Current standalone and embedded cubin and PTX inventory plus SASS disassembly interfaces'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m16 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,artifact-vocabulary,ptx-versioning,standalone-embedded,selection,inspection,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M16 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M15,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M17,M18,EX10,VIS09' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'artifact-kernel,artifact-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '7.8,8.8,9.3,11.8.0,12.9,12.9.2,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/toolchain/ptx-cubin-fatbinary/" lang="en">Read the English counterpart</a>
+
+[PTX（TERM-118）](/glossary/#term-118)、[cubin（TERM-119）](/glossary/#term-119)、[fatbinary（TERM-120）](/glossary/#term-120)和 [SASS（TERM-121）](/glossary/#term-121)不是同一事物的四种名称。它们分别表示 versioned virtual ISA text、面向某个 real architecture 的 binary、承载一个或多个 device-code images 的 container，以及从 architecture-specific binary 检查到的 machine instructions。
+
+## 学完本单元，你应该能
+
+- 根据内容与 target scope 区分 PTX、cubin、SASS 和 fatbinary，而不只看 filename suffix。
+- 解释 standalone `.ptx`、`.cubin`、`.fatbin` 与嵌入 host object/executable 的 device images 之间的关系。
+- 为包含 SASS/cubin images 与 PTX fallback 的 fatbinary 写出 conditional selection tree。
+- 用 `cuobjdump` 与 `nvdisasm` 的输入边界选择 inventory、PTX extraction 或 SASS disassembly 操作。
+- 明确 image inventory 不证明 driver selection、JIT、execution、correctness 或 performance。
+
+## 先修关系
+
+先完成 [M15：NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)，再完成 [F06：Compute capability 是功能合同](/foundations/compute-capability/)。M15 提供 documented NVCC phase 与 stable-output reasoning；F06 提供 [virtual architecture target（TERM-060）](/glossary/#term-060)和 [real architecture target（TERM-061）](/glossary/#term-061)的 feature-assumption contract。M16 在这两项基础上读取实际 artifact kinds，不重新定义 compiler phase 或 target coverage。
+
+[M17：选择编译器架构目标](/toolchain/compiler-architecture-targets/)、M18、[EX10](/examples/ptx-fatbinary-inspection/)与 [VIS09](/visuals/artifact-pipeline/)是 related resources，不是 M16 的额外先修条件。本页不需要 CUDA-capable system；它不编译或运行 CUDA，因此 compilation 与 runtime evidence arrays 都为空。
+
+## Artifact vocabulary：四层不能折叠
+
+| 名称 | 这里的精确定义 | 常见承载形式 | 不能据此声称 |
+| --- | --- | --- | --- |
+| PTX | 带 `.version` 与 `.target` module contract 的 low-level virtual ISA text | standalone `.ptx`，或 fatbinary/host binary 中的 PTX image | 已经存在某块 GPU 的 native instructions，或 driver 一定接受/JIT 它 |
+| cubin | 面向 architecture-specific device code 的 CUDA ELF binary | standalone `.cubin`，或 fatbinary/host binary 中的 binary image | 当前 driver 已选择、加载或执行它 |
+| SASS | cubin 内 machine instructions 的 architecture-specific instruction view | `cuobjdump --dump-sass` 或 `nvdisasm` 产生的人类可读 disassembly | 它是 PTX、portable source，或 disassembly 本身被执行 |
+| fatbinary | 可保存同一 device source 的多个 PTX 和/或 cubin translations 的 container | standalone `.fatbin`，或嵌入 host object、library、shared object、executable 的 payload | container 中每个 image 都会执行，或任何 image 已被选择 |
+
+SASS 不是与 cubin 平行的 portable file format。Cubin 是 binary artifact；SASS 是对其 executable instruction encoding 的检查视图。类似地，fatbinary 是 container，不是其中某一个 PTX/cubin image 的同义词。
+
+## PTX 是 versioned virtual ISA text
+
+PTX owner specification 把 PTX 定义为 virtual machine 与 ISA，并说明 PTX program 会被翻译到 target hardware instruction set。NVCC application-compatibility section进一步说明 PTX 总是以 text format 表示。每个 module 以 `.version` 声明 PTX language version，再以 `.target` 声明它假定的 target architecture；所以裸称“这是 PTX”仍缺少 version 与 target coordinates。
+
+本课程只记录以下三个精确 owner-document observations：
+
+| 所选 Toolkit Lane | 对应 owner coordinate 中观察到的 PTX ISA | 这项 observation 的范围 |
+| --- | --- | --- |
+| Toolkit 11.8.0 | archived PTX ISA 7.8 | 只描述 11.8.0 archive coordinate |
+| Toolkit 12.9.2 | archived PTX ISA 8.8 | 只描述 12.9.2 archive coordinate |
+| Toolkit 13.3.1 | current PTX ISA 9.3 | 只描述当前 13.3 documentation coordinate 下的 selected Lane |
+
+`7.8 -> 8.8 -> 9.3` 不是 universal compatibility theorem。它不表示任意较新 driver 接受任意较旧或较新 PTX，不表示这些 compilers 的每份输出都必然使用表中最高 language version，也不表示某个 target feature、JIT path 或 GPU execution 可用。实际 review 必须读取 artifact 的 `.version`/`.target`，并绑定生成它的 Toolkit Lane、接受它的 driver 与 selected GPU。
+
+## Standalone artifacts 与 embedded device images
+
+NVCC 的 documented phases 可以直接产生 device-only `.ptx`、`.cubin` 或 `.fatbin`。这些是 standalone artifacts，可以独立存档、hash 与交给接受该 input kind 的 binary utility。默认 host build trajectory 则把 generated cubin 和/或 PTX 放进 fatbinary，再把 fatbinary 嵌入 synthesized host code，最终进入 host object 或 executable。
+
+下面是本页的概念 pipeline，不是 NVCC internal-command transcript：
+
+```text
+device source
+  -> PTX text for a virtual target
+  -> cubin containing instructions for a real target
+  -> one or more PTX/cubin images in a fatbinary
+  -> optionally embedded payload in a host object or executable
+```
+
+箭头表达 artifact relationship，不要求每次 build 都 materialize 每个 standalone file。一个 build 可以保留 PTX 与多个 cubin translations；另一个 build 可以只输出一种 device-only artifact。Embedded image 仍是 container 中的 device-code payload，host executable 也不会因此变成 cubin。
+
+## SASS-plus-PTX fallback selection
+
+可审查的 fatbinary plan 通常把两类 choice 放在一起：为 selected real targets 预先 assembled 的 cubin images（其中包含 SASS），以及为 selected virtual target 保留的 PTX fallback。NVCC 文档说明：如果 current GPU 找不到 binary load image，embedded PTX 会在 runtime 动态编译；fatbinary section 说明 device function launch 时 driver 选择最合适的 translation。
+
+把这项合同写成 conditional tree，而不是预测：
+
+1. 先记录 selected GPU、loaded driver 和 artifact 的完整 image inventory。
+2. 如果 driver 找到适用的 binary load image，则该 branch 可以避免为该 function 使用 PTX fallback；是否真的选择了它仍需要 selection-specific evidence。
+3. 如果没有适用 binary image，但存在 driver 接受、target assumptions 也适用的 PTX image，则 PTX 是 JIT candidate；inventory 本身不证明 JIT 已发生或成功。
+4. 如果两类 candidate 都不满足，不能从“fatbinary 不为空”推断可执行，必须把结果保留为 unsupported、failed 或 indeterminate，直到有对应 observation。
+
+“最合适”是 driver 的 documented runtime selection responsibility，不授权本站仅按数字排序自行模拟所有 architecture、family、suffix 与 driver rules。M17 会进一步处理 target coverage；M16 只保留 image kind、declared target 与 selection branch。
+
+## 检查 artifact，不替 driver 作证
+
+CUDA Binary Utilities 为 standalone 与 embedded cases 提供不同入口：
+
+| Inspection question | 合适的静态操作 | 操作能建立的事实 | 操作不能建立的事实 |
+| --- | --- | --- | --- |
+| Host binary 或 external fatbinary 中有哪些 cubin images？ | `cuobjdump --list-elf` | tool output 中列出的 ELF/cubin inventory | launch 时选择了哪一个 image |
+| 其中有哪些 PTX images？ | `cuobjdump --list-ptx` 或 extract/dump PTX | tool output 中列出或呈现的 PTX text 与 declared coordinates | driver 接受、JIT 或 cache behavior |
+| Cubin 中有哪些 machine instructions？ | 对 standalone/embedded cubin 使用 `cuobjdump --dump-sass` | 该 inspected binary 的 SASS disassembly | 这些 instructions 已加载、执行或更快 |
+| 需要 richer standalone-cubin disassembly？ | 对 standalone cubin 使用 `nvdisasm` | 该 cubin 的 sections、instructions 与 selected display analysis | Host binary inventory 或 runtime selection |
+
+Inspection log 应记录 exact command、tool version、input path、input hash、exit status 与完整 output artifact。即使这些字段完整，它仍是 static artifact evidence，不是 driver trace、kernel completion、correctness oracle 或 timing record。
+
+## Canonical Runnable Example：EX10
+
+EX10 是 M16 的 canonical artifact-inspection project。[在 placeholder source commit 中查看完整 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 placeholder commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip)。Project 是 complete implementation 的唯一位置；本 Learning Unit 不维护复制的 owner artifact 或手写 complete source listing。
+
+第一个 canonical range 隔离待检查的 device function，使 artifact identity 与 source scope 可定位：
+
+<CanonicalCode exampleId="EX10" range="artifact-kernel" />
+
+第二个 canonical range 声明 build、standalone outputs、embedded image inventory 与 disassembly pipeline：
+
+<CanonicalCode exampleId="EX10" range="artifact-pipeline" />
+
+Import order 是 page contract 的一部分：先 `artifact-kernel`，再 `artifact-pipeline`。Canonical source identity 不会给本页增加 compilation 或 runtime status；EX10 的 evidence 必须由它自己的 qualifying records 声明。
+
+## 证据边界
+
+Artifact pipeline 的每一层回答不同问题：
+
+| Claim | 最少需要的独立 evidence |
+| --- | --- |
+| 某 Toolkit Lane produced artifact | exact source commit、command、toolchain、exit status、artifact path/hash 与 qualifying compile record |
+| Artifact contains selected images | exact binary-utility version、input hash、inventory command 与 retained output |
+| Driver selected a cubin image | 绑定 selected GPU/driver/artifact 的 selection-specific runtime observation |
+| Driver JIT-compiled PTX | 绑定同一 coordinates 的 JIT-specific observation；仅存在 PTX 不够 |
+| Kernel executed | launch、error/completion boundary 与 Environment Manifest |
+| Output is correct | execution evidence之外的 input、reference/invariant 与 comparison result |
+| One path is faster | correctness-qualified runs、measurement protocol、raw samples 与 uncertainty |
+
+本页没有 qualifying unit build 或 runtime record，所有 evidence arrays 保持为空。Image inventory 尤其不证明 driver selection、JIT、execution、correctness 或 performance；SASS disassembly 也只说明 inspected binary 中有什么 instructions。
+
+## 离开前检查
+
+1. 为什么 PTX 是 versioned virtual ISA text，而 cubin 是 architecture-specific binary？
+2. 为什么 SASS 应从 cubin/binary 检查，而不应与 PTX 或 standalone cubin 并列为同一种 artifact？
+3. Standalone `.fatbin` 与 host executable 中 embedded fatbinary payload 有何相同与不同？
+4. 一个 fatbinary 同时包含 cubin/SASS 与 PTX 时，哪三个条件决定 binary-image branch、PTX-JIT branch 或 no-candidate branch？
+5. 为什么 `cuobjdump --list-elf`、`--list-ptx` 和 `--dump-sass` 的完整输出仍不能证明 selection、JIT、execution、correctness 或 performance？
+
+## 继续练习
+
+- 完成 [M16 练习（Exercise）](/toolchain/ptx-cubin-fatbinary/exercises/)，再查看独立的[参考解答](/toolchain/ptx-cubin-fatbinary/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-008](/practice/#pb-r2-008)修复一份把 image inventory 误当 runtime proof 的 artifact report。
+- 复习 [TERM-118 PTX](/glossary/#term-118)、[TERM-119 cubin](/glossary/#term-119)、[TERM-120 fatbinary](/glossary/#term-120)、[TERM-121 SASS](/glossary/#term-121)以及 [TERM-060](/glossary/#term-060)/[TERM-061](/glossary/#term-061) target pair。[M17](/toolchain/compiler-architecture-targets/)、M18、[EX10](/examples/ptx-fatbinary-inspection/)与 [VIS09](/visuals/artifact-pipeline/)会从 target、link、canonical project 与 visual pipeline 角度复用这份 artifact contract。
+
+## 来源与复核
+
+- [Current PTX ISA 9.3](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html)定义 current virtual ISA、text/module format、`.version`/`.target` 与 translation model。
+- [CUDA Toolkit 12.9.2 archived PTX ISA 8.8](https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html)提供 selected 12.9.2 Lane 的 archived PTX coordinate。
+- [CUDA Toolkit 11.8.0 archived PTX ISA 7.8](https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html)提供 selected 11.8.0 Lane 的 archived PTX coordinate。
+- [Current NVCC 13.3 Application Compatibility](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#application-compatibility)定义 current two-stage compatibility model。
+- [Current NVCC 13.3 Fatbinaries](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#fatbinaries)定义 current multi-translation container 与 runtime selection/JIT-fallback model。
+- [Archived NVCC 12.9 Application Compatibility](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#application-compatibility)保留 12.9.2 archive path 的 two-stage model。
+- [Archived NVCC 12.9 Fatbinaries](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#fatbinaries)保留 12.9.2 archive path 的 multi-image/JIT-fallback model。
+- [Archived NVCC 11.8.0 Application Compatibility](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#application-compatibility)保留 11.8.0 two-stage model。
+- [Archived NVCC 11.8.0 Fatbinaries](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#fatbinaries)保留 11.8.0 multi-image/JIT-fallback model。
+- [Current CUDA Binary Utilities 13.3](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html)定义 cubin ELF、standalone/embedded inspection、PTX inventory/extraction 与 SASS disassembly interfaces。
+
+十项 owner source 均访问并复核于 **2026-08-29**，顺序与 frontmatter 完全一致。本文的 vocabulary table、pipeline、conditional tree、evidence matrix、questions 与练习编排均为本站 CC-BY-4.0 原创内容；没有复制 owner source、output、example、table 或 figure，也没有分发 owner artifact。
+
+**事实核查日期：2026-08-29。**

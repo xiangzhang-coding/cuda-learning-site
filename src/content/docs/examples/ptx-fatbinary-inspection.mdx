@@ -1,0 +1,306 @@
+---
+title: 'EX10：PTX 与 Fatbinary 检查可运行示例'
+description: 分阶段生成并检查预处理文件、PTX、cubin、fatbin、可重定位 device code、device-link 对象和最终 host-link 产物，全程不执行可执行文件。
+pairId: ex10
+counterpart: /en/examples/ptx-fatbinary-inspection/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - canonical-project
+  - artifacts
+  - pipeline
+  - compatibility
+  - evidence
+  - boundaries
+  - sources
+resourceKind: runnable-example
+unitId: EX10
+prerequisites:
+  - M15
+  - M16
+relatedUnits:
+  - M17
+  - M18
+  - M19
+  - VIS09
+exampleIds:
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - artifact-kernel
+  - device-link-contract
+  - artifact-pipeline
+  - cxx23-probe
+hardwareGate: 'Build and inspection: x86-64 CPU runner with Docker; runtime: not applicable; no host or GPU executable execution'
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+evidence:
+  compilation: []
+  runtime:
+    - Runtime-Not-Applicable
+  expectedObservations:
+    - 'Artifact tests should find an sm_75 native image and compute_75 PTX without executing the final host artifact.'
+    - 'The symbol/link ledger should expose the cross-translation-unit device reference before device link and its linked definition afterward.'
+  recordedObservations: []
+sources:
+  - title: 'CUDA 11.8.0 Compiler Driver NVCC'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 11.8.0 archive'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 12.9.2 Compiler Driver NVCC'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9 archive at the 12.9.2 path'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 13.3 Compiler Driver NVCC'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1 current owner documentation'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'PTX ISA 7.8'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html'
+    version: 'CUDA Toolkit 11.8.0 archive; PTX ISA 7.8'
+    platform: 'Virtual ISA'
+    accessDate: '2026-08-29'
+  - title: 'PTX ISA 8.8'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html'
+    version: 'CUDA Toolkit 12.9 archive at the 12.9.2 path; PTX ISA 8.8'
+    platform: 'Virtual ISA'
+    accessDate: '2026-08-29'
+  - title: 'Current PTX ISA'
+    url: 'https://docs.nvidia.com/cuda/parallel-thread-execution/index.html'
+    version: 'PTX ISA 9.3 current on 2026-08-29'
+    platform: 'Virtual ISA'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 11.8.0 Binary Utilities'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-binary-utilities/index.html'
+    version: 'CUDA Toolkit 11.8.0 archive'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 12.9.2 Binary Utilities'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-binary-utilities/index.html'
+    version: 'CUDA Toolkit 12.9 archive at the 12.9.2 path'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 13.3 Binary Utilities'
+    url: 'https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html'
+    version: 'CUDA Toolkit 13.3.1 current owner documentation'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 13.3 Linux host compiler and C++ dialect policy'
+    url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Toolkit 13.3.1; GCC 6.x-15.x and C++23'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'Ubuntu Noble Updates g++-14 package'
+    url: 'https://packages.ubuntu.com/noble-updates/g++-14'
+    version: 'g++-14 14.2.0-4ubuntu2~24.04.1 observed on 2026-08-29'
+    platform: 'Ubuntu 24.04 amd64'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA container image source'
+    url: 'https://gitlab.com/nvidia/container-images/cuda'
+    version: 'Owner repository master branch reviewed 2026-08-29'
+    platform: 'OCI container definitions'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 11.8.0 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 12.9.2 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 13.3.1 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex10
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-29'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,canonical-project,artifacts,pipeline,compatibility,evidence,boundaries,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX10
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: 'M15,M16'
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'M17,M18,M19,VIS09'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX10
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX10
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'artifact-kernel,device-link-contract,artifact-pipeline,cxx23-probe'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build and inspection: x86-64 CPU runner with Docker; runtime: not applicable; no host or GPU executable execution'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: Runtime-Not-Applicable
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '2 artifact expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '15'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: 'CUDA 11.8.0,CUDA 12.9.2,CUDA 13.3.1,PTX ISA 7.8/8.8/9.3,GCC 14'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/ptx-fatbinary-inspection/" lang="en">Read the English counterpart</a>
+
+EX10 是一个只构建、只检查的可运行示例（Runnable Example）。它把 NVCC 的公开编译阶段变成可审计的产物链，但不把产物执行当作验收步骤。先完成 [M15](/toolchain/nvcc-compilation-flow/) 和 [M16](/toolchain/ptx-cubin-fatbinary/)；M17、M18、M19 和 VIS09 会继续展开这里看到的 target、链接、检查与可视化模型。
+
+## 用途
+
+这个项目回答的是“每个稳定编译阶段留下什么，以及下一个阶段消费什么”，而不是“kernel 跑得多快”。同一份小 kernel 分别生成预处理文本、独立 PTX、独立 cubin 和同时携带 `sm_75`/`compute_75` 的 fatbin：
+
+<CanonicalCode exampleId="EX10" range="artifact-kernel" />
+
+另一条路径故意跨两个 CUDA translation unit。`src/caller.cu` 只声明并调用 `src/device_math.cu` 定义的 device function，因此两个 `-dc` 对象必须经过显式 device link：
+
+<CanonicalCode exampleId="EX10" range="device-link-contract" />
+
+## 获取 canonical project
+
+[查看固定提交中的完整 EX10 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip)。解压后进入 `examples/ex10-ptx-fatbinary-inspection/`。`project.json` 是机器可读契约；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
+
+## 产物矩阵
+
+| 阶段 | 主要输出 | 检查与记录 |
+| --- | --- | --- |
+| preprocess | `artifact_kernel.ii` | 非空并进入 SHA-256 ledger |
+| standalone PTX | `artifact_kernel.ptx` | 检查 `.target sm_75` 并哈希 |
+| cubin | `artifact_kernel.cubin` | `cuobjdump` 输出 SASS、CUDA ELF 和 symbols，并哈希 cubin |
+| fatbin | `artifact_kernel.fatbin` | dump 内嵌 PTX，确认 `compute_75` 路径，并哈希 |
+| relocatable compile | `device_math.o`、`caller.o` | 对两个 translation unit 分别执行 `-dc`；哈希并记录链接前 symbols |
+| device link | `device_link.o` | 显式 `--device-link`；哈希并记录链接后的 CUDA symbols |
+| host link | `ex10-ptx-fatbinary-inspection` | 使用 `--no-device-link`，只完成 host link；哈希且绝不执行 |
+| inspect | PTX/ELF lists、PTX/SASS/ELF dumps、symbol/link ledger | `cuobjdump`、`nm` 与 SHA-256 的静态证据 |
+| artifact test | `artifact-test-report.txt` | 核对文件、目标、symbols、hash 和禁止执行边界 |
+
+## 完整流水线
+
+Makefile 公开九个分离目标。最终 host-link 不隐式重做 device link：
+
+<CanonicalCode exampleId="EX10" range="artifact-pipeline" />
+
+在受支持的原生 Linux 环境中，可以依次调用：
+
+```sh
+make preprocess DIALECT=c++17
+make standalone-ptx DIALECT=c++17
+make cubin DIALECT=c++17
+make fatbin DIALECT=c++17
+make relocatable-compile DIALECT=c++17
+make device-link DIALECT=c++17
+make host-link DIALECT=c++17
+make inspect DIALECT=c++17
+make artifact-test DIALECT=c++17
+```
+
+`artifact-test` 只读取文件并调用 inspection utilities。它不会启动最终 host artifact，也不会触发 kernel launch。
+
+## Toolkit Lane 与 C++23 probe
+
+| 检查对象 | 方言 | 容器边界 |
+| --- | --- | --- |
+| CUDA 11.8.0 ordinary Lane | C++17 | digest-pinned `linux/amd64` devel image；`--network none`、non-root、无 `--gpus` |
+| CUDA 12.9.2 ordinary Lane | C++17、C++20 | 同一份源码与 digest-pinned image；`--network none`、non-root、无 `--gpus` |
+| CUDA 13.3.1 ordinary Lane | C++17、C++20 | 同一份源码与 digest-pinned image；`--network none`、non-root、无 `--gpus` |
+| CUDA 13.3.1 C++23 probe | C++23 | 仅 probe 使用基于精确 13.3.1 base 的临时 image，并安装 `/usr/bin/g++-14` |
+
+CUDA 13.3 owner guide 在 2026-08-29 声明 Linux GCC 6.x-15.x 和 C++23；Ubuntu Noble Updates 的 `g++-14` 页面当日显示 `14.2.0-4ubuntu2~24.04.1`。Probe 使用真正的 C++23 `if consteval` 语法并要求 `__cplusplus >= 202302L`：
+
+<CanonicalCode exampleId="EX10" range="cxx23-probe" />
+
+临时 image 的 record 必须保存实际安装的 package version、GCC 14 version line、base image identity 和 derived image identity。这个结果只说明 probe object 是否可编译，不把 ordinary EX10 Lane 扩大为 C++23。任何路径都不使用 `--allow-unsupported-compiler`。
+
+## 证据状态
+
+当前 `project.json` 的 compilation evidence 数组为空。Workflow matrix 会生成 sanitized record 和 inspection logs，但在下载、复核、提交 record 并把 `sourceCommit`、`sourceUrl`、`downloadUrl` 重钉到同一个 evidence commit 之前，本页不显示编译已检查（Compile-Checked）。失败、跳过或仅存在镜像都不能授予状态。
+
+运行证据固定为无需运行验证（Runtime-Not-Applicable）。这里的验收条件是编译、hash 和 artifact inspection，不是 GPU 行为。
+
+## 不运行、不测性能
+
+- Workflow 不传 `--gpus`，ordinary containers 以 non-root、`linux/amd64`、`--network none` 运行。
+- 最终 host artifact 只作为 host-link 和 inspection 输入，绝不执行。
+- C++23 probe 只生成并检查 object file，也不执行 host 或 GPU code。
+- 页面不记录 latency、throughput、speedup、occupancy 或任何性能数字。
+- Compile-Checked 以后也不会替代 Runtime-Verified；对 EX10 而言 runtime 本来就不属于 acceptance criteria。
+
+## 来源与复核
+
+NVCC 的 11.8.0 与 12.9.2 archive pages 和当前 13.3 owner page 共同定义稳定 phase options；PTX ISA 的 7.8、8.8 与当前 9.3 pages 用于解释虚拟 ISA；对应 Binary Utilities pages 定义 `cuobjdump --list-ptx`、`--list-elf`、`--dump-ptx`、`--dump-sass`、`--dump-elf` 和 `--dump-elf-symbols`。
+
+- [CUDA 11.8.0 NVCC archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 12.9.2 NVCC archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3 NVCC current owner documentation](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [PTX ISA 7.8 archive](https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html)
+- [PTX ISA 8.8 archive](https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html)
+- [Current PTX ISA 9.3](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html)
+- [CUDA 11.8.0 Binary Utilities archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-binary-utilities/index.html)
+- [CUDA 12.9.2 Binary Utilities archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-binary-utilities/index.html)
+- [CUDA 13.3 Binary Utilities current owner documentation](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html)
+- [CUDA 13.3 Linux host compiler policy](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy)
+- [Ubuntu Noble Updates `g++-14`](https://packages.ubuntu.com/noble-updates/g++-14)
+- [NVIDIA CUDA container image owner repository](https://gitlab.com/nvidia/container-images/cuda)
+- [11.8.0 image tag API](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [12.9.2 image tag API](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [13.3.1 image tag API](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查日期：2026-08-29。** 项目源码和文字均为原创，没有复制 NVIDIA sample listing、私有维护资料、运行输出或性能结果。

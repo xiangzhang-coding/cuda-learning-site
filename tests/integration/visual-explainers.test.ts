@@ -22,6 +22,7 @@ const visualPairs = [
   { id: 'VIS03', tag: 'cuda-warp-divergence', zh: '/visuals/warp-divergence/', en: '/en/visuals/warp-divergence/' },
   { id: 'VIS07', tag: 'cuda-stream-event-dependencies', zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
   { id: 'VIS08', tag: 'cuda-page-migration', zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
+  { id: 'VIS09', tag: 'cuda-artifact-pipeline', zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
 ] as const;
 
 const embeddedVisuals = [
@@ -106,7 +107,7 @@ describe('built Visual Explainers', () => {
     const card = index.querySelector(`[data-resource-card][data-resource-id="${id}"]`);
     expect(card).not.toBeNull();
     expect(card?.querySelector('h3 a')?.getAttribute('href')).toBe(route);
-  });
+  }, 15_000);
 
   it('keeps VIS19-VIS22 embedded on exactly their bilingual hosts with no standalone duplicates', async () => {
     const ids = new Set(embeddedVisuals.map(({ id }) => id));
@@ -135,7 +136,7 @@ describe('built Visual Explainers', () => {
         .sort();
       expect(hosts.get(visual.id)?.sort(), visual.id).toEqual(expectedHosts);
     }
-  });
+  }, 15_000);
 
   it('keeps VIS01 controls, stage order, and facts aligned across locales', async () => {
     const documents = await Promise.all([

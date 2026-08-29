@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: Thirty-five published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: Forty published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-08-29'
@@ -44,6 +44,11 @@ structure:
   - entry-pb-r2-004
   - entry-pb-r2-005
   - entry-pb-r2-006
+  - entry-pb-r2-007
+  - entry-pb-r2-008
+  - entry-pb-r2-009
+  - entry-pb-r2-010
+  - entry-pb-r2-011
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -77,6 +82,11 @@ prerequisites:
   - M12
   - M13
   - M14
+  - M15
+  - M16
+  - M17
+  - M18
+  - M19
   - Q01
   - Q03
   - Q04
@@ -111,6 +121,11 @@ relatedUnits:
   - M12
   - M13
   - M14
+  - M15
+  - M16
+  - M17
+  - M18
+  - M19
   - Q01
   - Q03
   - Q04
@@ -129,15 +144,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,Q01,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,Q01,Q03,Q04,Q05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,Q01,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,Q01,Q03,Q04,Q05' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -156,13 +171,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the thirty-five complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the forty complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The thirty-five complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The forty complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -1608,6 +1623,221 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Source date:** 2026-08-29.
 
+<span id="pb-r2-007" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-007: Audit an NVCC phase ledger
+
+- **ID and Publication Pair:** PB-R2-007 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Compilation-flow and evidence review; advanced.
+- **Direct prerequisite:** [M15: NVCC Host/Device Compilation Flow](/en/toolchain/nvcc-compilation-flow/).
+- **Hardware gate:** None. This is a static ledger only; it runs neither NVCC nor a host or GPU executable.
+- **Version gate:** Every decision binds to Toolkit 11.8.0, the Toolkit 12.9.2 archive, or current NVCC v13.3 under Toolkit 13.3.1 and records that Lane's host compiler. An internal transcript or option support from one Lane cannot be projected into another.
+- **Related Learning Units and resources:** [F04](/en/foundations/host-device-lifecycle/), [O04](/en/start/cpp17-for-cuda/), [M15](/en/toolchain/nvcc-compilation-flow/), [M18](/en/toolchain/separate-compilation-device-linking/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Last reviewed:** 2026-08-29.
+
+**Prompt:** A build note copies temporary files, internal tools, and subcommand order printed by `nvcc --dryrun` into a “stable API.” It claims that a `.cu` file is preprocessed once, `--ptx` produces a host-linkable object, `--compile` completes the final link, and producing an executable proves that a GPU kernel ran faster. Rewrite the note as a phase ledger and host/device trajectory reviewable across the selected Toolkit Lanes, with the narrowest evidence conclusion.
+
+**Constraints:**
+
+- Use only documented compilation phases, input suffixes, requested outputs, and stopping boundaries. Internal steps, temporary names, private options, and `--dryrun` order do not enter the stable build contract.
+- Show device-compilation preprocessing and host-compilation preprocessing as separate paths. Trace PTX/cubin -> fatbinary on the device path and synthesized host C++ -> supported host compiler -> host object on the host path.
+- Keep `--preprocess`, `--cuda`, `--ptx`, `--cubin`, `--fatbin`, `--compile`, final link, and `--run` separate. Invent no command result, artifact hash, execution, correctness, or performance observation.
+
+**Expected evidence:** A phase ledger by selected Lane, input, phase option, primary output, and “not yet established”; a two-path artifact graph; and a claim repair whose compilation, runtime, and performance axes all remain unobserved.
+
+**Acceptance criteria:**
+
+- The ledger states that phase selection depends on both the input suffix and requested-output option. A documented phase is a stable interface; an internal step is not.
+- For `.cu`, `--ptx`, `--cubin`, and `--fatbin` stop at device-only artifacts and discard host code. `--compile` produces a host-linkable object; no phase option enters the default compile-and-link path; `--run` remains a separate convenience phase.
+- The host path retains its second preprocessing pass, fatbinary embedding, synthesized host C++, and supported host compiler. Host object, final host link, and execution are three distinct boundaries.
+- Default device whole-program mode permits no unresolved cross-translation-unit device reference. The existence of a `.ptx`, `.cubin`, `.fatbin`, object, or executable grants no CUDA runtime or performance evidence.
+
+<details><summary>Hint 1</summary>For each command, write what NVCC recognizes as input and at which documented output the caller requests it to stop.</details>
+
+<details><summary>Hint 2</summary>Draw preprocessing once on the device path and once on the host path. Do not remove the host compiler from the NVCC trajectory.</details>
+
+**Reviewed solution:** The repaired ledger retains only owner-documented phase boundaries. A `.cu` file is preprocessed along the device path and produces requested PTX or cubin before selected device images enter a fatbinary. The same input is preprocessed again for the host path, where NVCC synthesizes C++ for the selected supported host compiler and embeds the fatbinary; `--compile` stops no later than the host object. A separate final host link combines objects and libraries. `--run` means only that execution is attempted after building and still needs independent completion, oracle, and observation records. The default whole-program row rejects a cross-file device edge unless it adopts M18's RDC and device-link contract. Because this exercise executes neither compiler nor binary, every result, hash, and runtime field remains blank.
+
+**Valid alternative:** Maintain three smaller ledgers for 11.8.0, 12.9.2, and 13.3.1, provided all use the same column contract, retain their own owner coordinates, and never treat an internal transcript as a phase interface.
+
+**Common errors:** Treating an internal tool as a public phase; drawing only one preprocessing pass; calling `.ptx` a host object; calling `--compile` the final link; omitting the host compiler; asking the host linker to repair an external device reference in whole-program mode; treating executable existence as GPU execution.
+
+**Source basis:** The site's original [M15 phase and trajectory contract](/en/toolchain/nvcc-compilation-flow/), [O04 compilation boundary](/en/start/cpp17-for-cuda/), [EX10 artifact contract](/en/examples/ptx-fatbinary-inspection/), [VIS09](/en/visuals/artifact-pipeline/), and [SRC-CUDA-031](/en/sources-and-versions/#src-cuda-031), plus NVIDIA's current [NVCC v13.3 Supported Phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases), [12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#supported-phases), and [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases).
+
+**Source date:** 2026-08-29.
+
+<span id="pb-r2-008" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-008: Repair PTX, cubin, and fatbinary evidence classification
+
+- **ID and Publication Pair:** PB-R2-008 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Artifact-inspection evidence review; advanced.
+- **Direct prerequisite:** [M16: PTX, Cubin, SASS, and Fatbinaries](/en/toolchain/ptx-cubin-fatbinary/).
+- **Hardware gate:** None. Classification and a static inspection plan need no CUDA-capable GPU and execute no binary.
+- **Version gate:** PTX ISA 7.8, 8.8, and 9.3 bind only to the Toolkit 11.8.0 archive, 12.9.2 archive, and selected Toolkit 13.3.1 current coordinate, respectively. Binary Utilities and NVCC come from the recorded Lane; current-tool output cannot retroactively characterize an archive artifact.
+- **Related Learning Units and resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [M16](/en/toolchain/ptx-cubin-fatbinary/), [M17](/en/toolchain/compiler-architecture-targets/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Last reviewed:** 2026-08-29.
+
+**Prompt:** A report calls `.ptx` a “portable SASS binary,” calls `.cubin` a “fatbinary container,” records expected `cuobjdump --list-elf`, `--list-ptx`, and `--dump-sass` output as if observed, and infers from image inventory that the driver selected `sm_75`, JIT-compiled a fallback, executed a kernel, and gained speedup. Rebuild the artifact taxonomy, inspection record, and evidence ladder.
+
+**Constraints:**
+
+- For PTX, cubin, SASS, and fatbinary, separately state precise meaning, carrier, target scope, and what it cannot establish alone. Also separate standalone files from images embedded in a host object or executable.
+- The PTX row retains `.version` and `.target`; the cubin row binds to a real architecture; SASS is only a machine-instruction view inspected from an architecture-specific binary; fatbinary is only a container.
+- The inspection plan records exact tool and version, command, input path and hash, exit status, and complete output artifact. Inventory, selection, JIT, execution, correctness, and performance fields remain blank until real records exist.
+
+**Expected evidence:** A four-layer artifact-classification matrix, a binary-image/PTX-JIT/no-candidate conditional tree, a `cuobjdump`/`nvdisasm` input-output ledger, and independent evidence rungs from static artifacts to runtime and performance.
+
+**Acceptance criteria:**
+
+- PTX is versioned virtual ISA text with `.version` and `.target`; a cubin is a CUDA ELF binary for a real target; SASS is a disassembly view of instruction encodings in a cubin; a fatbinary can carry one or more PTX or cubin images.
+- Standalone `.ptx`, `.cubin`, and `.fatbin` remain separate from embedded payloads. A host executable does not become a cubin by carrying a fatbinary.
+- `--list-elf` and `--list-ptx` establish inventory only; `--dump-sass` and `nvdisasm` establish an inspected instruction view only. Expected output cannot masquerade as a retained observation.
+- Image presence proves no driver selection, PTX acceptance, JIT, cache behavior, module load, launch, completion, correctness, or speedup. This exercise performs no GPU execution.
+
+<details><summary>Hint 1</summary>Ask first whether the artifact is text, a binary, a container, or a human-readable view of a binary.</details>
+
+<details><summary>Hint 2</summary>Inventory answers what is inside, not what the driver used for this launch.</details>
+
+**Reviewed solution:** The repaired matrix records PTX as virtual ISA text, cubin as a real-architecture CUDA ELF, SASS as machine instructions inspected from a cubin, and fatbinary as a standalone or embedded multi-image container. The inspection ledger fixes the selected Toolkit Lane, tool version, hash, command, and output location for every input, but leaves observation cells blank. The conditional tree says only that an applicable binary image is a load candidate; otherwise compatible PTX can be a JIT candidate; when neither applies, a nonempty fatbinary remains non-executable. With no selection-specific runtime record, the allowed claim is only “classification and inspection plan complete; selection, JIT, and execution unobserved.”
+
+**Valid alternative:** Inspect a standalone cubin first and use `cuobjdump` separately for embedded entries in a host binary, provided each path follows its supported input contract, retains complete output, and is never merged into a runtime trace.
+
+**Common errors:** Treating PTX as native code; treating cubin and SASS as parallel file kinds; treating a fatbinary as one image; applying a current PTX version to an archive artifact; treating `--dump-sass` as an execution trace; inferring JIT or speedup from inventory.
+
+**Source basis:** The site's original [M16 artifact vocabulary and evidence matrix](/en/toolchain/ptx-cubin-fatbinary/), [EX10 inspection contract](/en/examples/ptx-fatbinary-inspection/), [VIS09 static flow](/en/visuals/artifact-pipeline/), and [SRC-CUDA-032](/en/sources-and-versions/#src-cuda-032), plus NVIDIA's [current PTX ISA 9.3](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html), [PTX ISA 8.8 archive](https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html), [PTX ISA 7.8 archive](https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html), and [current CUDA Binary Utilities 13.3](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html).
+
+**Source date:** 2026-08-29.
+
+<span id="pb-r2-009" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-009: Audit a SASS-plus-PTX target plan and `a`/`f` scope
+
+- **ID and Publication Pair:** PB-R2-009 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Compiler-target compatibility review; advanced.
+- **Direct prerequisite:** [M17: Choosing Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/).
+- **Hardware gate:** None. This reviews command intent and a target ledger only and runs neither NVCC, a driver, nor a GPU.
+- **Version gate:** Use only selected rows reviewed by F06. Baseline 7.5 appears in 11.8.0, 12.9.2, and 13.3.1; `90a`, `100f`, `100a`, `120f`, and `120a` enter only the reviewed 12.9.2 and 13.3.1 rows that accept them. Current 13.3 target documentation is not projected backward into the 11.8.0 archive.
+- **Related Learning Units and resources:** [F06](/en/foundations/compute-capability/), [M16](/en/toolchain/ptx-cubin-fatbinary/), [M17](/en/toolchain/compiler-architecture-targets/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Last reviewed:** 2026-08-29.
+
+**Prompt:** A release packet substitutes `-arch=sm_120a` for a complete target plan and claims, “120 is greater than 100, so exact `120a` PTX covers `100a`, `100f`, and every future GPU; 11.8 accepts suffixes from current documentation; PTX in a fatbinary guarantees older-driver deployment.” Write named SASS-image plus same-scope PTX-fallback clauses for baseline 7.5, exact 9.0, and family 10.0 source requirements, then repair the Lane, suffix, and deployment conclusions.
+
+**Constraints:**
+
+- Each row begins with the source feature requirement, exact Toolkit Lane, virtual target, real target, PTX fallback target, and planned verification. Do not start from a GPU product name, shorthand, or capability-number ordering.
+- Use complete, repeatable `--generate-code=arch=...,code=...` clauses. Every real target implements its paired virtual assumptions, and the PTX fallback preserves the same suffix scope.
+- Separate command review, successful Lane build, artifact inspection, driver and deployment compatibility, runtime selection, and performance into six gates. This exercise fills no observation in the last five.
+
+**Expected evidence:** A three-source-requirement by three-Toolkit-Lane plan ledger, a SASS/PTX clause pair for every eligible row, `a`/`f` scope-rejection notes, and a compatibility/evidence decision table.
+
+**Acceptance criteria:**
+
+- The baseline row uses `arch=compute_75,code=sm_75` and `arch=compute_75,code=compute_75`, recording the three Lanes only as owner-page-accepted plans rather than successful builds.
+- The exact 9.0 row uses `compute_90a`/`sm_90a` plus `compute_90a` PTX. The family 10.0 row uses `compute_100f`/`sm_100f` plus `compute_100f` PTX. Both enter only selected 12.9.2 and 13.3.1 rows.
+- `a` covers one exact compute capability and `f` covers only the same family named by the current owner table. Unsuffixed baseline, `a`, and `f` are not interchangeable by number, and same-scope PTX does not broaden the source contract.
+- SASS plus PTX is an artifact strategy only. Accepted spelling, PTX presence, or fatbinary presence proves no embedded entry, minor or forward compatibility, driver selection, JIT, execution, or speedup.
+
+<details><summary>Hint 1</summary>For every source requirement, write one `code=sm_...` clause and one `code=compute_...` clause without changing `arch=` for the PTX clause.</details>
+
+<details><summary>Hint 2</summary>`a` and `f` are feature scopes, not decimal comparison operators.</details>
+
+**Reviewed solution:** The repaired packet separates the three requirements. Baseline 7.5 requests a `compute_75 -> sm_75` SASS image and `compute_75` PTX in all three Lanes. Exact 9.0 requests `compute_90a -> sm_90a` and `compute_90a` PTX in 12.9.2 and 13.3.1. Family 10.0 requests `compute_100f -> sm_100f` and `compute_100f` PTX in those same two Lanes. Qualified 11.8.0 rows say “absent from the selected reviewed dataset” rather than guessing acceptance. Independent build, inspection, compatibility, and runtime cells follow every plan; Minor and Forward Compatibility receive later review against exact driver, package, and feature contracts. The present conclusion only classifies target intent in selected owner rows and generates or selects no image.
+
+**Valid alternative:** Produce separate artifacts for each deployment policy instead of placing every eligible clause in one fatbinary. Each artifact still needs its own source requirement, same-scope SASS/PTX pair, Lane build, and inspection record.
+
+**Common errors:** Hiding two outputs behind `-arch` shorthand; treating `120a` as a superset of `100f`; pairing a real target weaker than virtual assumptions; using PTX with a different suffix as fallback; projecting a current accepted name into 11.8; inferring an older-driver path or future-GPU execution from PTX.
+
+**Source basis:** The site's original [M17 target-plan contract](/en/toolchain/compiler-architecture-targets/), [F06 selected compiler rows](/en/foundations/compute-capability/), [M16 artifact contract](/en/toolchain/ptx-cubin-fatbinary/), [VIS09](/en/visuals/artifact-pipeline/), and [SRC-CUDA-033](/en/sources-and-versions/#src-cuda-033), plus NVIDIA's current [Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets), [NVCC 13.3](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html), [12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html), [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html), and [CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html).
+
+**Source date:** 2026-08-29.
+
+<span id="pb-r2-010" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-010: Repair a separate-compilation device-link graph
+
+- **ID and Publication Pair:** PB-R2-010 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Device-link correctness debugging; advanced.
+- **Direct prerequisite:** [M18: Separate Compilation and Device Linking](/en/toolchain/separate-compilation-device-linking/).
+- **Hardware gate:** None. Repair only the source, object, and link graph; execute neither the final host artifact nor GPU code.
+- **Version gate:** Whole-program, RDC, device-link, library, and object-compatibility decisions bind separately to current NVCC v13.3 under Toolkit 13.3.1, the 12.9.2 archive with page label v12.9, or the 11.8.0 archive. The device-linker version cannot predate the input objects' Toolkit version.
+- **Related Learning Units and resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [M16](/en/toolchain/ptx-cubin-fatbinary/), [M17](/en/toolchain/compiler-architecture-targets/), [M18](/en/toolchain/separate-compilation-device-linking/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Last reviewed:** 2026-08-29.
+
+**Prompt:** A kernel in `caller.cu` calls an external `__device__` function defined only in `device_math.cu`. The build applies `-dc` only to the caller, compiles the definition with ordinary `--compile`, stores the only device definition in a `.so`, skips explicit device link, and goes directly to host link. The two objects also give a same-named template different semantics through different `__CUDA_ARCH__` branches. From final-artifact existence, the author claims that device symbols resolved and the kernel can run. Repair the complete graph and allowed claims.
+
+**Constraints:**
+
+- List the declaration, definition, and cross-translation-unit device edge first, then apply `-dc = --relocatable-device-code=true --compile` to every participating CUDA source. RDC mode in one object cannot retroactively repair another whole-program object.
+- Record complete inputs and outputs separately for RDC compile, explicit `--device-link`, the device-link output, and final host link. Keep static and shared libraries in separate device-linker and host-linker columns.
+- Review device-code ABI, pointer size, link-compatible target, linker version, and header-defined weak or template `__CUDA_ARCH__` semantics. A hash, symbol list, or successful link is not a runtime observation.
+
+**Expected evidence:** A `sources -> RDC objects -> device_link.o -> final host artifact` DAG, phase-command ledger, library-consumer matrix, object-compatibility and semantic checklist, and blank runtime and performance rows.
+
+**Acceptance criteria:**
+
+- Both `caller.cu` and `device_math.cu` produce host objects containing relocatable device code. A declaration is neither a definition nor an observed resolved symbol.
+- Device link receives every RDC object, eligible static archive, and the complete target set, resolves external device symbols, and produces a host object. Final host link still receives the original CUDA objects, `device_link.o`, and required host and CUDA libraries.
+- The device linker can consider `.a` or `.lib` members containing RDC but ignores `.so` or `.dll`. A device definition present only in a shared library cannot satisfy this external device reference.
+- Inputs pass ABI, pointer-size, link-compatible-SM, and linker-version gates and either share one compute target or remove `__CUDA_ARCH__`-dependent shared-header semantics. A successful link still proves no load, launch, correctness, or performance result.
+
+<details><summary>Hint 1</summary>The device-link output is an object for the host linker, not the final executable.</details>
+
+<details><summary>Hint 2</summary>Ask separately which objects and libraries the device linker and host linker see. One `-lfoo` does not make both consume the same content.</details>
+
+**Reviewed solution:** The repaired source graph names the `caller.cu -> ex10_device_scale()` external edge and the definition in `device_math.cu`. Both compile with `-dc` under the same dialect, pointer size, and compatible target clauses, producing `caller.o` and `device_math.o`. Explicit `--device-link` consumes those objects and any static archive containing RDC, fixes the complete target set, and names `device_link.o`. Final link uses `--no-device-link` and receives both original objects, the device-link object, and required libraries so the two boundaries remain auditable. The `.so` remains a host-link input only and cannot supply the device definition. A header ledger either removes differing `__CUDA_ARCH__` behavior or unifies the compute target. With no qualifying command, log, or hash record and no executable execution, the only conclusion is “link graph repaired; build and runtime unobserved.”
+
+**Valid alternative:** If no cross-file device edge is needed, place the required device definition inside the caller's whole-program visibility boundary and remove the RDC/device-link path. The definition can also enter an RDC-containing static archive when archive, target, and compatibility inputs are fully recorded.
+
+**Common errors:** Applying `-dc` to one side only; treating an `extern` declaration as a resolved definition; asking the host linker to resolve a device symbol; treating a shared library as device-link input; dropping original CUDA objects and their host registration code; ignoring linker version or a `__CUDA_ARCH__` semantic mismatch; inferring execution from the final artifact.
+
+**Source basis:** The site's original [M18 object and link contract](/en/toolchain/separate-compilation-device-linking/), [M15 phase boundary](/en/toolchain/nvcc-compilation-flow/), [M16 artifact vocabulary](/en/toolchain/ptx-cubin-fatbinary/), [EX10 device-link contract](/en/examples/ptx-fatbinary-inspection/), and [SRC-CUDA-034](/en/sources-and-versions/#src-cuda-034), plus NVIDIA's [current NVCC v13.3 Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda), [12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda), and [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda).
+
+**Source date:** 2026-08-29.
+
+<span id="pb-r2-011" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-011: Audit a C++ dialect/toolchain gate and narrow probe
+
+- **ID and Publication Pair:** PB-R2-011 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Language-mode evidence review; advanced.
+- **Direct prerequisite:** [M19: CUDA C++17, C++20, and C++23 Dialect Boundaries](/en/toolchain/cpp-dialect-boundaries/).
+- **Hardware gate:** None. Matrix review and a qualifying probe are compile- and artifact-only, forbid host or GPU executable execution, and use Runtime-Not-Applicable.
+- **Version gate:** The ordinary EX10 matrix is fixed at 11.8.0/C++17, 12.9.2/C++17+C++20, and 13.3.1/C++17+C++20. C++23 enters only a separate EX10 + Toolkit 13.3.1 + exact NVCC + supported GCC 14 narrow probe and cannot be projected to another Lane, host compiler, source, or phase.
+- **Related Learning Units and resources:** [O04](/en/start/cpp17-for-cuda/), [M15](/en/toolchain/nvcc-compilation-flow/), [M19](/en/toolchain/cpp-dialect-boundaries/), [EX02](/en/examples/vector-addition/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Last reviewed:** 2026-08-29.
+
+**Prompt:** A reviewer sees C++23 in the current CUDA 13.3 Programming Guide and Linux guide and marks all three Toolkit Lanes C++23 Compile-Checked. They rely on the host compiler's default, use GCC 13.3 with `--allow-unsupported-compiler`, ignore a “requested flag will be ignored” diagnostic, and prepare to delete EX02's historical unsupported record. No retained EX10 object, hash, or inspection output exists. Repair the teaching matrix, documentation boundary, and successful-probe publication gate.
+
+**Constraints:**
+
+- Separate WG21 standard provenance, the CUDA language-support page, Linux host-compiler policy, the NVCC `--std` option reference, and an actual retained build record into five facts. None substitutes for another.
+- Every row explicitly records Toolkit, NVCC, host compiler family and major, dialect option, source commit and range, checked phase, diagnostics, exit status, and artifact identity. Do not rely on a default dialect or unsupported-host bypass.
+- Preserve the immutable `unsupported` history for CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0. C++23 remains blocked/pending while an exact supported-GCC-14 success record is absent.
+
+**Expected evidence:** A three-Lane ordinary/probe matrix, owner-documentation discrepancy ledger, immutable-history note, and an EX10 GCC 14 successful-probe record template with complete acceptance but blank result fields.
+
+**Acceptance criteria:**
+
+- Ordinary rows return to 11.8.0/C++17, 12.9.2/C++17+C++20, and 13.3.1/C++17+C++20. C++23 does not enter the ordinary matrix.
+- Preserve the current Programming Guide and Linux guide C++23 declaration and GCC 14 minimum while also preserving that the current NVCC `--std` accepted-value list stops at C++20. This discrepancy proves neither a broad pass nor broad failure.
+- The historical GCC 13.3 record still proves only that the exact CUDA 13.3.1/NVCC 13.3.73/GCC 13.3.0 probe does not support requested C++23. Do not delete or rewrite it or grant status to EX10.
+- A narrow pass at the recorded coordinate can be published only after a retained successful EX10 record includes the exact source commit and `cxx23-probe` range, native Linux or container, Toolkit 13.3.1, exact NVCC and supported GCC 14, exact command and full diagnostics and exit status, a passing `__cplusplus >= 202302L` plus `if consteval`/`static_assert` guard, object hash, selected artifact inspection, no executable execution, and Runtime-Not-Applicable. The current result remains blocked/pending.
+
+<details><summary>Hint 1</summary>What the standard is, what the owner declares supported, and whether this exact toolchain and source passed are three different questions.</details>
+
+<details><summary>Hint 2</summary>A successful exit is insufficient. The probe proves that the option was not ignored and retains a reviewable artifact.</details>
+
+**Reviewed solution:** The repaired matrix retains only the three ordinary contracts and isolates C++23 in EX10's `cxx23-probe`. The documentation ledger records both C++23 and the GCC 14 minimum in the current guide and Linux policy and the current NVCC option page ending at C++20, without resolving the owner's discrepancy. EX02's GCC 13.3 `unsupported` record remains unchanged. The new probe template fixes native Linux, Toolkit 13.3.1, exact NVCC, supported GCC 14, explicit `--std=c++23`, source commit and range, language guards, full diagnostics, exit status, object and hash, and inspection result, and explicitly executes no binary. Because no successful retained record exists, the result is “blocked/pending probe; no C++23 Compile-Checked claim,” not a pass.
+
+**Valid alternative:** Continue publishing only the ordinary C++20 row for 13.3.1 until the GCC 14 record is complete. Clang 18+ or `nvc++` 24.3+ can form a different, equally narrow retained probe but cannot replace this exercise's GCC 14 gate.
+
+**Common errors:** Using a WG21 draft to prove CUDA acceptance; treating documentation eligibility as compile evidence; relying on the host default; checking only exit status; using `--allow-unsupported-compiler`; deleting unsupported history; inferring probe success from a workflow or site build; generalizing one source's result to all C++23 or runtime behavior.
+
+**Source basis:** The site's original [M19 dialect matrix and publication gate](/en/toolchain/cpp-dialect-boundaries/), [EX10 `cxx23-probe` contract](/en/examples/ptx-fatbinary-inspection/), [EX02 retained history](/en/examples/vector-addition/), and [SRC-CUDA-035](/en/sources-and-versions/#src-cuda-035), plus NVIDIA's current [CUDA C++ Language Support](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-support.html), [Linux Host Compiler Support Policy](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy), [NVCC `--std`](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std), [12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std), [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#options-for-altering-compiler-linker-behavior-std), and WG21 [N4950](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf)/[N4951](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4951.html).
+
+**Source date:** 2026-08-29.
+
 ## Review record
 
-The existing seventeen entries retain their **2026-08-26** item-level review records, PB-R1-013 through PB-R1-016 retain **2026-08-27**, and PB-R1-017 through PB-R1-024 retain **2026-08-28**. PB-R2-001 through PB-R2-006 and the complete thirty-five-entry Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-29**. Every scenario, prompt, derivation, code repair, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, timing, or performance result was copied, and no CUDA execution occurred. LAB06 remains without a public destination.
+The existing seventeen entries retain their **2026-08-26** item-level review records, PB-R1-013 through PB-R1-016 retain **2026-08-27**, and PB-R1-017 through PB-R1-024 retain **2026-08-28**. PB-R2-001 through PB-R2-011 and the complete forty-entry Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-29**. Every scenario, prompt, derivation, code repair, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, or performance result was copied. PB-R2-007 through PB-R2-011 ran no NVCC and executed no host or GPU executable; this page contains no CUDA execution. LAB06 remains without a public destination.

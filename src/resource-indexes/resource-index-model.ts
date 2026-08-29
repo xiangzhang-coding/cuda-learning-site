@@ -223,6 +223,31 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'M14：CUDA 图与重复启动结构', en: 'M14: CUDA Graphs and Repeated Launch Structure' },
     prerequisites: ['M07', 'M08'],
   },
+  M15: {
+    href: { 'zh-CN': '/toolchain/nvcc-compilation-flow/', en: '/en/toolchain/nvcc-compilation-flow/' },
+    title: { 'zh-CN': 'M15：NVCC 主机/设备编译流程', en: 'M15: NVCC Host/Device Compilation Flow' },
+    prerequisites: ['F04', 'O04'],
+  },
+  M16: {
+    href: { 'zh-CN': '/toolchain/ptx-cubin-fatbinary/', en: '/en/toolchain/ptx-cubin-fatbinary/' },
+    title: { 'zh-CN': 'M16：PTX、cubin、SASS 与 fatbinary', en: 'M16: PTX, Cubins, SASS, and Fatbinaries' },
+    prerequisites: ['M15', 'F06'],
+  },
+  M17: {
+    href: { 'zh-CN': '/toolchain/compiler-architecture-targets/', en: '/en/toolchain/compiler-architecture-targets/' },
+    title: { 'zh-CN': 'M17：选择编译器架构目标', en: 'M17: Choosing Compiler Architecture Targets' },
+    prerequisites: ['M16', 'F06'],
+  },
+  M18: {
+    href: { 'zh-CN': '/toolchain/separate-compilation-device-linking/', en: '/en/toolchain/separate-compilation-device-linking/' },
+    title: { 'zh-CN': 'M18：分离编译与设备链接', en: 'M18: Separate Compilation and Device Linking' },
+    prerequisites: ['M15', 'M16'],
+  },
+  M19: {
+    href: { 'zh-CN': '/toolchain/cpp-dialect-boundaries/', en: '/en/toolchain/cpp-dialect-boundaries/' },
+    title: { 'zh-CN': 'M19：CUDA C++17、C++20 与 C++23 方言边界', en: 'M19: CUDA C++17, C++20, and C++23 Dialect Boundaries' },
+    prerequisites: ['O04', 'M15'],
+  },
   Q01: {
     href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
@@ -287,6 +312,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/graph-capture/', en: '/en/examples/graph-capture/' },
     title: { 'zh-CN': 'EX09：CUDA 图捕获', en: 'EX09: CUDA Graph Capture' },
     prerequisites: ['M14'],
+  },
+  EX10: {
+    href: { 'zh-CN': '/examples/ptx-fatbinary-inspection/', en: '/en/examples/ptx-fatbinary-inspection/' },
+    title: { 'zh-CN': 'EX10：PTX 与 Fatbinary 检查可运行示例', en: 'EX10: PTX and Fatbinary Inspection Runnable Example' },
+    prerequisites: ['M15', 'M16'],
   },
   EX16: {
     href: { 'zh-CN': '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
@@ -375,6 +405,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
     title: { 'zh-CN': 'VIS08：托管内存页面迁移', en: 'VIS08: Managed-Memory Page Migration' },
     prerequisites: ['M01', 'M02', 'M10'],
+    indexGroup: 'visuals',
+  },
+  VIS09: {
+    href: { 'zh-CN': '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
+    title: { 'zh-CN': 'NVCC 构建产物流水线', en: 'NVCC Artifact Pipeline' },
+    prerequisites: ['M15', 'M16', 'M17'],
     indexGroup: 'visuals',
   },
   VIS19: {

@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 35 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 40 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-08-29'
@@ -44,6 +44,11 @@ structure:
   - entry-pb-r2-004
   - entry-pb-r2-005
   - entry-pb-r2-006
+  - entry-pb-r2-007
+  - entry-pb-r2-008
+  - entry-pb-r2-009
+  - entry-pb-r2-010
+  - entry-pb-r2-011
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -77,6 +82,11 @@ prerequisites:
   - M12
   - M13
   - M14
+  - M15
+  - M16
+  - M17
+  - M18
+  - M19
   - Q01
   - Q03
   - Q04
@@ -111,6 +121,11 @@ relatedUnits:
   - M12
   - M13
   - M14
+  - M15
+  - M16
+  - M17
+  - M18
+  - M19
   - Q01
   - Q03
   - Q04
@@ -129,15 +144,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,Q01,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,Q01,Q03,Q04,Q05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,Q01,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,Q01,Q03,Q04,Q05' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -156,13 +171,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面三十五个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面四十个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方三十五道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方四十道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -1608,6 +1623,221 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期（Source date）：** 2026-08-29。
 
+<span id="pb-r2-007" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-007：审查 NVCC phase ledger
+
+- **ID 与双语发布对：** PB-R2-007；位于 `practice-bank` Publication Pair。
+- **类型与难度：** 编译流程与证据审查；高级。
+- **直接先修条件：** [M15：NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)。
+- **硬件门槛（Hardware gate）：** 无；只做静态 ledger，不运行 NVCC，也不执行 host 或 GPU executable。
+- **版本门槛（Version gate）：** 每个判断必须绑定 Toolkit 11.8.0、Toolkit 12.9.2 archive 或 Toolkit 13.3.1 下 current NVCC v13.3 之一，并记录该 Lane 的 host compiler；不得把一条 Lane 的内部 transcript 或 option support 投射到另一条 Lane。
+- **相关学习单元与资源：** [F04](/foundations/host-device-lifecycle/)、[O04](/start/cpp17-for-cuda/)、[M15](/toolchain/nvcc-compilation-flow/)、[M18](/toolchain/separate-compilation-device-linking/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一份构建说明把 `nvcc --dryrun` 打印的临时文件、内部工具和子命令顺序复制成“稳定 API”，声称 `.cu` 只 preprocess 一次，`--ptx` 产生 host-linkable object，`--compile` 已经完成 final link，而生成 executable 就证明 GPU kernel 执行且更快。把说明改写成可跨所选 Toolkit Lane 审查的 phase ledger、host/device trajectory 和最窄证据结论。
+
+**约束：**
+
+- 只使用 documented compilation phase、input suffix、requested output 与停止边界；内部 step、temporary name、private option 和 `--dryrun` 顺序不得进入稳定 build contract。
+- 明确 device-compilation preprocess 与 host-compilation preprocess 是两条路径；device path 追踪 PTX/cubin -> fatbinary，host path 追踪 synthesized host C++ -> supported host compiler -> host object。
+- 分开 `--preprocess`、`--cuda`、`--ptx`、`--cubin`、`--fatbin`、`--compile`、final link 与 `--run`；不得填入虚构 command result、artifact hash、execution、correctness 或 performance observation。
+
+**预期证据：** 一张按 selected Lane、input、phase option、primary output 与“尚未证明”列展开的 phase ledger；一张双路径 artifact graph；以及 compilation/runtime/performance 三轴均保持未观察的 claim repair。
+
+**验收条件：**
+
+- Ledger 说明 phase selection 同时取决于 input suffix 与 requested-output option；documented phase 是稳定接口，内部 step 不是。
+- `--ptx`、`--cubin` 与 `--fatbin` 对 `.cu` 停在 device-only artifact 并丢弃 host code；`--compile` 产生 host-linkable object；无 phase option 才进入默认 compile-and-link，`--run` 仍是独立 convenience phase。
+- Host path 保留第二次 preprocessing、fatbinary embedding、synthesized host C++ 和 supported host compiler；host object、final host link 与 execution 是三个不同 boundary。
+- Default whole-program device mode 不允许跨 translation unit 留下 unresolved device reference；任何 `.ptx`、`.cubin`、`.fatbin`、object 或 executable 的存在都不授予 CUDA runtime 或 performance evidence。
+
+<details><summary>提示 1</summary>先为每条 command 写“输入被 NVCC 识别为什么”和“caller 请求在哪个 documented output 停止”。</details>
+
+<details><summary>提示 2</summary>把 device path 与 host path 各画一次 preprocessing；不要把 host compiler 从 NVCC trajectory 中删掉。</details>
+
+**参考解答（Reviewed solution）：** 修订后的 ledger 只保留 owner 文档中的 phase boundaries。`.cu` 先沿 device path preprocess 并形成 requested PTX/cubin，再把 selected device images 封装进 fatbinary；同一输入为 host path 再次 preprocess，NVCC 合成可由 selected supported host compiler 处理的 C++ 并嵌入 fatbinary，`--compile` 最多到 host object。Final host link 另行合并 object 与 library；`--run` 只表示 build 后尝试执行，仍需独立 completion、oracle 与 observation record。Default whole-program row把跨文件 device edge 标成不合法，除非改用 M18 的 RDC/device-link contract。由于本题没有执行 compiler 或 binary，所有 result、hash 与 runtime fields 保持空白。
+
+**有效替代方案：** 可以为 11.8.0、12.9.2 与 13.3.1 分别维护三张较小 ledger，只要三张表使用同一列合同、保留各自 owner coordinate，并且不把任何内部 transcript 当作 phase interface。
+
+**常见错误：** 把 internal tool 当 public phase；只画一次 preprocessing；把 `.ptx` 当 host object；把 `--compile` 当 final link；省略 host compiler；让 host linker 修复 whole-program mode 下的 external device reference；把 executable existence 当 GPU execution。
+
+**来源依据（Source basis）：** 本站原创的 [M15 phase 与 trajectory contract](/toolchain/nvcc-compilation-flow/)、[O04 compilation boundary](/start/cpp17-for-cuda/)、[EX10 artifact contract](/examples/ptx-fatbinary-inspection/)、[VIS09](/visuals/artifact-pipeline/)和 [SRC-CUDA-031](/sources-and-versions/#src-cuda-031)，以及 NVIDIA current [NVCC v13.3 Supported Phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases)、[12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#supported-phases)与 [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-008" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-008：修复 PTX、cubin、fatbinary 证据分类
+
+- **ID 与双语发布对：** PB-R2-008；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Artifact inspection evidence review；高级。
+- **直接先修条件：** [M16：PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)。
+- **硬件门槛（Hardware gate）：** 无；分类与静态检查计划不需要 CUDA-capable GPU，也不执行任何 executable。
+- **版本门槛（Version gate）：** PTX ISA 7.8、8.8、9.3 分别只绑定 Toolkit 11.8.0 archive、12.9.2 archive 与 selected Toolkit 13.3.1 current coordinate；Binary Utilities 与 NVCC 必须来自同一项已记录 Lane，不能由 current tool 输出反推 archive artifact。
+- **相关学习单元与资源：** [M15](/toolchain/nvcc-compilation-flow/)、[M16](/toolchain/ptx-cubin-fatbinary/)、[M17](/toolchain/compiler-architecture-targets/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一份报告把 `.ptx` 称为“portable SASS binary”，把 `.cubin` 称为“fatbinary container”，把 `cuobjdump --list-elf`、`--list-ptx` 与 `--dump-sass` 的预期输出写成已经发生的结果，并由 image inventory 宣称 driver 选择了 `sm_75`、JIT 编译了 fallback、执行了 kernel 且获得 speedup。重建 artifact taxonomy、inspection record 和 evidence ladder。
+
+**约束：**
+
+- 对 PTX、cubin、SASS 与 fatbinary 分别写 precise meaning、carrier、target scope 和 alone-cannot-prove；同时区分 standalone file 与 host object/executable 中的 embedded image。
+- PTX row 必须保留 `.version` 与 `.target`；cubin row 绑定 real architecture；SASS 只能是从 architecture-specific binary 检查出的 machine-instruction view；fatbinary 只能是 container。
+- Inspection plan 记录 exact tool/version、command、input path/hash、exit status 与完整 output artifact；在真实记录出现前，inventory、selection、JIT、execution、correctness 和 performance fields 均为空。
+
+**预期证据：** 一张四层 artifact classification matrix、一棵 binary-image/PTX-JIT/no-candidate conditional tree、一份 `cuobjdump`/`nvdisasm` input-output ledger，以及从 static artifact 到 runtime/performance 的独立证据阶梯。
+
+**验收条件：**
+
+- PTX 被定义为带 `.version`/`.target` 的 versioned virtual ISA text；cubin 是面向 real target 的 CUDA ELF binary；SASS 是 cubin 中指令编码的 disassembly view；fatbinary 可承载一个或多个 PTX/cubin image。
+- Standalone `.ptx`、`.cubin`、`.fatbin` 与 embedded payload 分开记录；host executable 不因携带 fatbinary 就成为 cubin。
+- `--list-elf`/`--list-ptx` 只建立 inventory，`--dump-sass`/`nvdisasm` 只建立 inspected instruction view；任何预期输出都不能冒充 retained observation。
+- Image presence 不证明 driver selection、PTX acceptance、JIT、cache、module load、launch、completion、correctness 或 speedup；本题没有 GPU execution。
+
+<details><summary>提示 1</summary>先问“artifact 是 text、binary、container，还是 binary 的 human-readable view”。</details>
+
+<details><summary>提示 2</summary>Inventory 回答“里面有什么”，不回答“driver 在这次 launch 中用了什么”。</details>
+
+**参考解答（Reviewed solution）：** 修订后的 matrix 把 PTX 记为 virtual ISA text，把 cubin 记为 real-architecture CUDA ELF，把 SASS 记为从 cubin 检查到的 machine instructions，把 fatbinary 记为 standalone 或 embedded multi-image container。Inspection ledger 为每个 input 固定 selected Toolkit Lane、tool version、hash、command 与 output location，但 observation cell 仍为空。Conditional tree 只写：若 applicable binary image 存在则它是 load candidate；否则 compatible PTX 才是 JIT candidate；两类都不适用时 nonempty fatbinary 仍不可执行。由于没有 selection-specific runtime record，allowed claim 只有“分类与检查计划完整；selection、JIT 与 execution 未观察”。
+
+**有效替代方案：** 可以先检查 standalone cubin，再用 `cuobjdump` 检查 host binary 中的 embedded entries；只要两条 path 使用各自支持的 input contract、保留完整 output，并且不合并成 runtime trace。
+
+**常见错误：** 把 PTX 当 native code；把 cubin 与 SASS 当两个同类文件；把 fatbinary 当单一 image；用 current PTX version 给 archive artifact 贴标签；把 `--dump-sass` 当 execution trace；由 inventory 推断 JIT 或 speedup。
+
+**来源依据（Source basis）：** 本站原创的 [M16 artifact vocabulary 与 evidence matrix](/toolchain/ptx-cubin-fatbinary/)、[EX10 inspection contract](/examples/ptx-fatbinary-inspection/)、[VIS09 static flow](/visuals/artifact-pipeline/)和 [SRC-CUDA-032](/sources-and-versions/#src-cuda-032)，以及 NVIDIA [current PTX ISA 9.3](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html)、[PTX ISA 8.8 archive](https://docs.nvidia.com/cuda/archive/12.9.2/parallel-thread-execution/index.html)、[PTX ISA 7.8 archive](https://docs.nvidia.com/cuda/archive/11.8.0/parallel-thread-execution/index.html)与 [current CUDA Binary Utilities 13.3](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-009" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-009：审查 SASS 加 PTX target plan 与 `a`/`f` scope
+
+- **ID 与双语发布对：** PB-R2-009；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Compiler-target compatibility review；高级。
+- **直接先修条件：** [M17：选择编译器架构目标](/toolchain/compiler-architecture-targets/)。
+- **硬件门槛（Hardware gate）：** 无；只审查 command intent 与 target ledger，不运行 NVCC、driver 或 GPU。
+- **版本门槛（Version gate）：** 只使用 F06 已复核的 selected rows：baseline 7.5 可用于 11.8.0/12.9.2/13.3.1；`90a`、`100f`、`100a`、`120f`、`120a` 只进入已复核接受它们的 12.9.2 与 13.3.1 rows。Current 13.3 target 文档不能向 11.8.0 archive 倒投。
+- **相关学习单元与资源：** [F06](/foundations/compute-capability/)、[M16](/toolchain/ptx-cubin-fatbinary/)、[M17](/toolchain/compiler-architecture-targets/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一个 release packet 用 `-arch=sm_120a` 代替完整 target plan，并声称“120 大于 100，所以 exact `120a` PTX 覆盖 `100a`、`100f` 和所有未来 GPU；11.8 也会接受 current 文档里的 suffix；fatbinary 有 PTX 就保证 older-driver deployment”。为 baseline 7.5、exact 9.0 与 family 10.0 三项 source requirement 写出 named SASS image + same-scope PTX fallback clauses，修复 Lane、suffix 与 deployment conclusions。
+
+**约束：**
+
+- 每行先记录 source feature requirement、exact Toolkit Lane、virtual target、real target、PTX fallback target 和 planned verification；不得从 GPU product name、shorthand 或 capability number ordering 开始。
+- 使用完整、可重复的 `--generate-code=arch=...,code=...`；每个 real target 必须实现 paired virtual assumptions，PTX fallback 必须保留同一 suffix scope。
+- 把 command review、successful Lane build、artifact inspection、driver/deployment compatibility、runtime selection 与 performance 分成六个 gate；本题不填写任何后五项 observation。
+
+**预期证据：** 一张三项 source-requirement x 三条 Toolkit Lane 的 plan ledger、每个 eligible row 的 SASS/PTX clause pair、`a`/`f` scope rejection notes，以及 compatibility/evidence decision table。
+
+**验收条件：**
+
+- Baseline row 使用 `arch=compute_75,code=sm_75` 与 `arch=compute_75,code=compute_75`，且只把三条 Lane 写成 owner-page accepted plan，不冒充 successful build。
+- Exact 9.0 row 使用 `compute_90a`/`sm_90a` 加 `compute_90a` PTX；family 10.0 row 使用 `compute_100f`/`sm_100f` 加 `compute_100f` PTX；两行只进入 12.9.2 与 13.3.1 selected rows。
+- `a` 只覆盖一个 exact compute capability，`f` 只覆盖 current owner table 声明的同一 family；无后缀 baseline、`a` 与 `f` 不能靠数字大小互换，same-scope PTX 也不会扩大 source contract。
+- SASS + PTX 只是 artifact strategy；successful spelling、PTX presence 或 fatbinary presence 都不证明 embedded entries、minor/forward compatibility、driver selection、JIT、execution 或 speedup。
+
+<details><summary>提示 1</summary>为每个 source requirement 分别写一对 `code=sm_...` 与 `code=compute_...`，不要让 PTX clause 偷换 `arch=`。</details>
+
+<details><summary>提示 2</summary>`a` 与 `f` 是 feature scope，不是十进制数的比较运算符。</details>
+
+**参考解答（Reviewed solution）：** 修订 packet 先把三项需求分开。Baseline 7.5 在三条 Lane 中请求 `compute_75 -> sm_75` SASS image 和 `compute_75` PTX；exact 9.0 在 12.9.2/13.3.1 中请求 `compute_90a -> sm_90a` 与 `compute_90a` PTX；family 10.0 在同两条 Lane 中请求 `compute_100f -> sm_100f` 与 `compute_100f` PTX。11.8.0 的 qualified rows 标成“不在 selected reviewed dataset”，而不是猜测 accepted。每项 plan 后都留下独立 build、inspection、compatibility 与 runtime cells；Minor/Forward Compatibility 分别按 exact driver/package/feature contract 后续审查。当前结论只证明 target intent 在 selected owner rows 中可分类，没有生成或选择任何 image。
+
+**有效替代方案：** 可以为每个 deployment policy 生成独立 artifact，而不是把所有 eligible clauses 放进一个 fatbinary；每个 artifact 仍需自己的 source requirement、same-scope SASS/PTX pair、Lane build 和 inspection record。
+
+**常见错误：** 用 `-arch` shorthand 隐藏两项 output；把 `120a` 当 `100f` superset；让 real target 弱于 virtual assumptions；用不同 suffix 的 PTX 当 fallback；把 current accepted name 投射到 11.8；由 PTX 推断 older-driver path 或 future-GPU execution。
+
+**来源依据（Source basis）：** 本站原创的 [M17 target-plan contract](/toolchain/compiler-architecture-targets/)、[F06 selected compiler rows](/foundations/compute-capability/)、[M16 artifact contract](/toolchain/ptx-cubin-fatbinary/)、[VIS09](/visuals/artifact-pipeline/)和 [SRC-CUDA-033](/sources-and-versions/#src-cuda-033)，以及 NVIDIA current [Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets)、[NVCC 13.3](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)、[12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)、[11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html)和 [CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/why-cuda-compatibility.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-010" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-010：修复 separate-compilation device-link graph
+
+- **ID 与双语发布对：** PB-R2-010；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Device-link correctness debugging；高级。
+- **直接先修条件：** [M18：分离编译与设备链接](/toolchain/separate-compilation-device-linking/)。
+- **硬件门槛（Hardware gate）：** 无；只修复 source/object/link graph，不执行 final host artifact 或 GPU code。
+- **版本门槛（Version gate）：** Whole-program、RDC、device-link、library 与 object-compatibility 判断分别绑定 current NVCC v13.3 under Toolkit 13.3.1、12.9.2 archive/page label v12.9 或 11.8.0 archive；device linker 版本不得早于 input objects 的 Toolkit version。
+- **相关学习单元与资源：** [M15](/toolchain/nvcc-compilation-flow/)、[M16](/toolchain/ptx-cubin-fatbinary/)、[M17](/toolchain/compiler-architecture-targets/)、[M18](/toolchain/separate-compilation-device-linking/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** `caller.cu` 中的 kernel 调用只在 `device_math.cu` 定义的 external `__device__` function。Build 只对 caller 使用 `-dc`，对 definition 使用普通 `--compile`，把唯一 device definition 放进 `.so`，跳过 explicit device link 后直接 host link；两份 object 还因不同 `__CUDA_ARCH__` branch 生成同名 template 的不同语义。作者由 final artifact existence 宣称 device symbols 已解析且 kernel 可运行。修复完整 graph 与 allowed claims。
+
+**约束：**
+
+- 先列 declaration、definition 与 cross-translation-unit device edge，再为每个 participating CUDA source 应用 `-dc = --relocatable-device-code=true --compile`；一个 whole-program object 不能被其他 object 的 RDC mode 追溯修复。
+- 分别记录 RDC compile、explicit `--device-link`、device-link output 与 final host link 的完整 input/output；static archive 与 shared library 在 device linker/host linker 两栏分开。
+- 审查 device-code ABI、pointer size、link-compatible target、linker version 和 header-defined weak/template `__CUDA_ARCH__` semantics；不得把 hash、symbol list 或 link success 当 runtime observation。
+
+**预期证据：** 一张 `sources -> RDC objects -> device_link.o -> final host artifact` DAG、一份 phase command ledger、library-consumer matrix、object compatibility/semantic checklist，以及空白 runtime/performance rows。
+
+**验收条件：**
+
+- `caller.cu` 与 `device_math.cu` 都产生含 relocatable device code 的 host object；declaration 不是 definition 或 resolved-symbol observation。
+- Device link 接收全部 RDC objects、eligible static archives 和完整 target set，解析 external device symbols 并产生 host object；final host link 仍接收 original CUDA objects、`device_link.o` 与所需 host/CUDA libraries。
+- Device linker 可以考虑含 RDC 的 `.a`/`.lib`，但忽略 `.so`/`.dll`；只存在 shared library 中的 device definition 不能满足本次 external device reference。
+- Inputs 通过 ABI、pointer-size、link-compatible SM 与 linker-version gate，并采用统一 compute target 或消除 `__CUDA_ARCH__`-dependent shared-header semantics；成功 link 仍不证明 load、launch、correctness 或 performance。
+
+<details><summary>提示 1</summary>Device link 的 output 是给 host linker 的 object，不是最终 executable。</details>
+
+<details><summary>提示 2</summary>分别问 device linker 与 host linker 看到了哪些 objects 和 libraries；两者不会因为同一个 `-lfoo` 就消费相同内容。</details>
+
+**参考解答（Reviewed solution）：** 修订后的 source graph 明确 `caller.cu -> ex10_device_scale()` external edge 与 `device_math.cu` definition。两者使用相同 dialect、pointer size 与 compatible target clauses 执行 `-dc`，得到 `caller.o` 和 `device_math.o`。Explicit `--device-link` 接收这两项以及任何含 RDC 的 static archive，固定完整 target set 与 output `device_link.o`；final link 使用 `--no-device-link` 并同时传入两个 original objects、device-link object 与 required libraries，从而保持两个 boundary 可审查。`.so` 只保留为 host-link input，不能提供 device definition。Header ledger 消除不同 `__CUDA_ARCH__` behavior 或统一 compute target。没有 qualifying command/log/hash record，更没有 executable execution，因此唯一结论是“link graph repaired; build and runtime unobserved”。
+
+**有效替代方案：** 若不需要 cross-file device edge，可把 required device definition 置于 caller 的 whole-program visibility boundary 并删除 RDC/device-link path；也可把 definition 放入含 RDC member 的 static archive，只要 archive、target 与 compatibility inputs 都被完整记录。
+
+**常见错误：** 只对一侧使用 `-dc`；把 `extern` declaration 当 resolved definition；让 host linker 解析 device symbol；把 shared library 当 device-link input；遗漏 original CUDA object 的 host registration code；忽略 linker version 或 `__CUDA_ARCH__` semantic mismatch；由 final artifact 推断 execution。
+
+**来源依据（Source basis）：** 本站原创的 [M18 object/link contract](/toolchain/separate-compilation-device-linking/)、[M15 phase boundary](/toolchain/nvcc-compilation-flow/)、[M16 artifact vocabulary](/toolchain/ptx-cubin-fatbinary/)、[EX10 device-link contract](/examples/ptx-fatbinary-inspection/)和 [SRC-CUDA-034](/sources-and-versions/#src-cuda-034)，以及 NVIDIA [current NVCC v13.3 Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)、[12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)与 [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-011" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-011：审查 C++ dialect/toolchain gate 与窄范围 probe
+
+- **ID 与双语发布对：** PB-R2-011；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Language-mode evidence review；高级。
+- **直接先修条件：** [M19：CUDA C++17、C++20 与 C++23 方言边界](/toolchain/cpp-dialect-boundaries/)。
+- **硬件门槛（Hardware gate）：** 无；matrix review 与 qualifying probe 都是 compile/artifact-only，禁止执行 host 或 GPU executable，runtime 使用 Runtime-Not-Applicable。
+- **版本门槛（Version gate）：** Ordinary EX10 matrix 固定为 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20；C++23 只允许进入独立的 EX10 + Toolkit 13.3.1 + exact NVCC + supported GCC 14 narrow probe，不得投射到其他 Lane、host compiler、source 或 phase。
+- **相关学习单元与资源：** [O04](/start/cpp17-for-cuda/)、[M15](/toolchain/nvcc-compilation-flow/)、[M19](/toolchain/cpp-dialect-boundaries/)、[EX02](/examples/vector-addition/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** Reviewer 看到 current CUDA 13.3 Programming Guide/Linux guide 列出 C++23，就把三条 Toolkit Lane 都标成 C++23 Compile-Checked。他依赖 host compiler default，用 GCC 13.3 加 `--allow-unsupported-compiler`，忽略“requested flag will be ignored” diagnostic，并准备删除 EX02 的 historical unsupported record；没有 retained EX10 object、hash 或 inspection output。修复 teaching matrix、documentation boundary 与 successful-probe publication gate。
+
+**约束：**
+
+- 把 WG21 standard provenance、CUDA language-support page、Linux host-compiler policy、NVCC `--std` option reference 与 actual retained build record 分成五个事实；任何一个都不能替代其他项。
+- 每个 row 显式记录 Toolkit、NVCC、host compiler family/major、dialect option、source commit/range、checked phase、diagnostics、exit status 与 artifact identity；不依赖 default dialect 或 unsupported-host bypass。
+- 保留 CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 的 immutable `unsupported` history；在 exact supported GCC 14 success record 缺失时，C++23 必须写 blocked/pending。
+
+**预期证据：** 一张三条 Lane 的 ordinary/probe matrix、一份 owner-documentation discrepancy ledger、immutable-history note，以及字段为空但 acceptance 完整的 EX10 GCC 14 successful-probe record template。
+
+**验收条件：**
+
+- Ordinary rows 恢复为 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20；C++23 不进入 ordinary matrix。
+- Current Programming Guide 与 Linux guide 的 C++23 declaration 和 GCC 14 minimum 被保留，同时 current NVCC `--std` accepted-value list 只到 C++20 的边界也被保留；该差异既不证明 broad pass，也不证明 broad failure。
+- Historical GCC 13.3 record 仍只证明 exact CUDA 13.3.1/NVCC 13.3.73/GCC 13.3.0 probe 不支持 requested C++23；不得删除、改写或授予 EX10 status。
+- 只有 retained successful EX10 record 同时包含 exact source commit/`cxx23-probe` range、Native Linux/container、Toolkit 13.3.1、exact NVCC 与 supported GCC 14、exact command/full diagnostics/exit status、通过 `__cplusplus >= 202302L` 与 `if consteval`/`static_assert` guard、object hash、selected artifact inspection、无 executable execution 和 Runtime-Not-Applicable，才允许发布同坐标的窄范围 pass；当前仍为 blocked/pending。
+
+<details><summary>提示 1</summary>“标准是什么”“owner 宣布支持什么”“这个 exact toolchain/source 是否通过”是三个不同问题。</details>
+
+<details><summary>提示 2</summary>成功 exit 不够；probe 必须证明 option 没被忽略，并留下可复核 artifact。</details>
+
+**参考解答（Reviewed solution）：** 修订后的 matrix 只保留三条 ordinary contract，并把 C++23 隔离到 EX10 `cxx23-probe`。Documentation ledger 同时记录 current guide/Linux policy 的 C++23 与 GCC 14 minimum，以及 current NVCC option page 只列到 C++20；不替 owner 消解差异。EX02 的 GCC 13.3 `unsupported` record 原样保留。New probe template 固定 Native Linux、Toolkit 13.3.1、exact NVCC、supported GCC 14、explicit `--std=c++23`、source commit/range、language guards、full diagnostics、exit status、object/hash 与 inspection result，并明确不执行 binary。因为 successful retained record 尚不存在，result 是“blocked/pending probe；no C++23 Compile-Checked claim”，而不是 pass。
+
+**有效替代方案：** 课程可以继续只发布 13.3.1 ordinary C++20 row，直到 GCC 14 record 完整；Clang 18+ 或 `nvc++` 24.3+ 只能形成另外一条同样窄、独立留存的 probe，不能替代本题要求的 GCC 14 gate。
+
+**常见错误：** 用 WG21 draft 证明 CUDA acceptance；把 documentation eligibility 当 compile evidence；依赖 host default；只看 exit code；使用 `--allow-unsupported-compiler`；删除 unsupported history；由 workflow/site build 推断 probe pass；把一个 source 的成功推广到全部 C++23 或 runtime。
+
+**来源依据（Source basis）：** 本站原创的 [M19 dialect matrix 与 publication gate](/toolchain/cpp-dialect-boundaries/)、[EX10 `cxx23-probe` contract](/examples/ptx-fatbinary-inspection/)、[EX02 retained history](/examples/vector-addition/)和 [SRC-CUDA-035](/sources-and-versions/#src-cuda-035)，以及 NVIDIA current [CUDA C++ Language Support](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-support.html)、[Linux Host Compiler Support Policy](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy)、[NVCC `--std`](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std)、[12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std)、[11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#options-for-altering-compiler-linker-behavior-std)与 WG21 [N4950](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf)/[N4951](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4951.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
 ## 复核记录
 
-既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-024 保留 **2026-08-28** 的记录。PB-R2-001 至 PB-R2-006，以及完整三十五个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-29** 同步复核。所有情景、题目、推导、代码修复和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。LAB06 继续没有公开目标。
+既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-024 保留 **2026-08-28** 的记录。PB-R2-001 至 PB-R2-011，以及完整四十个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-29** 同步复核。所有情景、题目、推导、代码修复和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing 或 performance result。PB-R2-007 至 PB-R2-011 没有运行 NVCC，也没有执行 host 或 GPU executable；本页没有 CUDA execution。LAB06 继续没有公开目标。

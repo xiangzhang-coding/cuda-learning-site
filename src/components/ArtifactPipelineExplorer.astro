@@ -1,0 +1,521 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/compilation-visuals.css';
+import {
+  ARTIFACT_PIPELINE_COPY,
+  formatArtifactPipelineCopy,
+  type ArtifactPipelineLocale,
+} from '../visuals/artifact-pipeline-copy';
+import {
+  ARTIFACT_PIPELINE_MODEL_CONTRACT,
+  ARTIFACT_PIPELINE_REVIEWED_SELECTIONS,
+  ARTIFACT_PIPELINE_STAGES,
+  ARTIFACT_PIPELINE_TOOLKIT_LANES,
+  createArtifactPipelineState,
+  deriveArtifactPipelineFrame,
+  deriveArtifactPipelineFrames,
+  getArtifactPipelineTargetPlans,
+  type ArtifactPipelineFrame,
+  type ArtifactPipelineStageId,
+} from '../visuals/artifact-pipeline-model';
+
+interface Props {
+  locale: ArtifactPipelineLocale;
+}
+
+const { locale } = Astro.props;
+const copy = ARTIFACT_PIPELINE_COPY[locale];
+const initialState = createArtifactPipelineState();
+const initialFrameResult = deriveArtifactPipelineFrame(initialState);
+if (!initialFrameResult.accepted) throw new Error('VIS09 initial model state must be valid.');
+const initialFrame = initialFrameResult.frame;
+const initialTargetPlans = getArtifactPipelineTargetPlans(initialState.lane);
+const staticSelections = ARTIFACT_PIPELINE_REVIEWED_SELECTIONS.map((selection) => {
+  const result = deriveArtifactPipelineFrames(selection.lane, selection.targetPlanId);
+  if (!result.accepted) {
+    throw new Error(`VIS09 static selection ${selection.lane}:${selection.targetPlanId} must be valid.`);
+  }
+  const finalFrame = result.frames.at(-1);
+  if (!finalFrame) throw new Error('VIS09 static selection must contain a final frame.');
+  return finalFrame;
+});
+
+function frameValues(frame: ArtifactPipelineFrame) {
+  return {
+    lane: frame.lane,
+    plan: copy.targetPlans[frame.targetPlan.id].title,
+    scope: copy.targetScopes[frame.targetPlan.targetScope],
+    source: frame.manifest.source,
+    virtual: frame.manifest.virtualTarget,
+    real: frame.manifest.realTarget,
+    ptx: frame.manifest.ptxImage,
+    cubin: frame.manifest.cubinImage,
+  };
+}
+
+function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageId, field: 'description' | 'artifact') {
+  return formatArtifactPipelineCopy(copy.stages[stageId][field], frameValues(frame));
+}
+---
+
+<cuda-artifact-pipeline
+  class="visual-explainer artifact-pipeline-visual not-content"
+  data-visual-id="VIS09"
+  data-locale={locale}
+  data-toolkit-lane={initialState.lane}
+  data-target-plan={initialState.targetPlanId}
+  data-step-index={initialState.stepIndex}
+  data-current-stage={initialFrame.currentStage?.id}
+  data-sequence-complete="false"
+  data-model-id={ARTIFACT_PIPELINE_MODEL_CONTRACT.modelId}
+  data-runtime-image-selection={ARTIFACT_PIPELINE_MODEL_CONTRACT.runtimeImageSelection}
+  data-evidence-status-effect={ARTIFACT_PIPELINE_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <section class="artifact-pipeline-boundary" data-model-boundary={ARTIFACT_PIPELINE_MODEL_CONTRACT.flowMeaning}>
+      <h3>{copy.modelHeading}</h3>
+      <ul>
+        {copy.modelBoundaries.map((boundary) => <li>{boundary}</li>)}
+      </ul>
+    </section>
+
+    <div class="visual-controls artifact-pipeline-controls" data-visual-controls hidden>
+      <fieldset class="artifact-pipeline-control-set">
+        <legend>{copy.controlsHeading}</legend>
+        <label>
+          <span>{copy.laneLabel}</span>
+          <select data-artifact-lane aria-label={copy.laneLabel}>
+            {ARTIFACT_PIPELINE_TOOLKIT_LANES.map((lane) => (
+              <option value={lane} selected={lane === initialState.lane}>{lane}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span>{copy.targetPlanLabel}</span>
+          <select data-artifact-target-plan aria-label={copy.targetPlanLabel}>
+            {initialTargetPlans.map((plan) => (
+              <option value={plan.id} selected={plan.id === initialState.targetPlanId}>
+                {copy.targetPlans[plan.id].title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="button" data-artifact-action="step">{copy.step}</button>
+        <button type="button" data-artifact-action="reset">{copy.reset}</button>
+      </fieldset>
+      <p
+        class="artifact-pipeline-status"
+        data-artifact-status
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {copy.statusReady}
+      </p>
+    </div>
+
+    <section
+      class="artifact-pipeline-workbench"
+      data-live-workbench
+      data-pagefind-ignore
+      hidden
+      aria-label={copy.workbenchHeading}
+    >
+      <header class="artifact-pipeline-selection">
+        <div>
+          <span>{copy.selectionLabel}</span>
+          <h3>{copy.workbenchHeading}</h3>
+        </div>
+        <p data-selection-summary>{initialFrame.lane} · {copy.targetPlans[initialFrame.targetPlan.id].title}</p>
+        <p data-selection-description>{copy.targetPlans[initialFrame.targetPlan.id].description}</p>
+      </header>
+
+      <section class="artifact-pipeline-target-contract">
+        <h4>{copy.targetContractHeading}</h4>
+        <dl>
+          <div>
+            <dt>{copy.lane}</dt>
+            <dd data-manifest-lane>{initialFrame.lane}</dd>
+          </div>
+          <div>
+            <dt>{copy.targetScope}</dt>
+            <dd data-manifest-scope>{copy.targetScopes[initialFrame.targetPlan.targetScope]}</dd>
+          </div>
+          <div>
+            <dt>{copy.virtualTarget}</dt>
+            <dd><code data-manifest-virtual>{initialFrame.manifest.virtualTarget}</code></dd>
+          </div>
+          <div>
+            <dt>{copy.realTarget}</dt>
+            <dd><code data-manifest-real>{initialFrame.manifest.realTarget}</code></dd>
+          </div>
+          <div>
+            <dt>{copy.ptxImage}</dt>
+            <dd><code data-manifest-ptx>{initialFrame.manifest.ptxImage}</code></dd>
+          </div>
+          <div>
+            <dt>{copy.cubinImage}</dt>
+            <dd><code data-manifest-cubin>{initialFrame.manifest.cubinImage} · {initialFrame.manifest.cubinPayload}</code></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="artifact-pipeline-flow-panel">
+        <h4>{copy.flowHeading}</h4>
+        <ol class="artifact-pipeline-flow" data-live-stage-list>
+          {initialFrame.stages.map((stage, index) => (
+            <li
+              data-live-stage={stage.id}
+              data-branch={stage.branch}
+              data-stage-state={stage.state}
+              data-optional={String(stage.optional)}
+              aria-current={stage.state === 'current' ? 'step' : undefined}
+            >
+              <span class="artifact-pipeline-step-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <span class="artifact-pipeline-branch">{copy.branchLabels[stage.branch]}</span>
+              <strong data-stage-label>{copy.stages[stage.id].label}</strong>
+              <p data-stage-description>{stageText(initialFrame, stage.id, 'description')}</p>
+              <span class="artifact-pipeline-output-label">{copy.artifactOutput}</span>
+              <code data-stage-artifact>{stageText(initialFrame, stage.id, 'artifact')}</code>
+              <span class="artifact-pipeline-stage-state" data-stage-state-label>{copy.stageStates[stage.state]}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <p class="artifact-pipeline-runtime" data-runtime-selection="unknown">
+        <strong>{copy.runtimeSelection}: <span data-runtime-selection-value>{copy.runtimeSelectionUnknown}</span></strong>
+        <span>{copy.runtimeSelectionBoundary}</span>
+      </p>
+    </section>
+
+    <section class="visual-section artifact-pipeline-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="artifact-pipeline-static-grid">
+        {staticSelections.map((frame) => (
+          <article
+            data-static-selection={`${frame.lane}:${frame.targetPlan.id}`}
+            data-static-lane={frame.lane}
+            data-static-target-plan={frame.targetPlan.id}
+            data-runtime-image-selection={frame.manifest.runtimeImageSelection}
+          >
+            <header>
+              <p>{formatArtifactPipelineCopy(copy.staticCardKicker, frameValues(frame))}</p>
+              <h4>{copy.targetPlans[frame.targetPlan.id].title}</h4>
+              <p>{copy.targetPlans[frame.targetPlan.id].description}</p>
+            </header>
+
+            <dl class="artifact-pipeline-static-manifest">
+              <div>
+                <dt>{copy.virtualTarget}</dt>
+                <dd><code>{frame.manifest.virtualTarget}</code></dd>
+              </div>
+              <div>
+                <dt>{copy.realTarget}</dt>
+                <dd><code>{frame.manifest.realTarget}</code></dd>
+              </div>
+              <div>
+                <dt>{copy.ptxImage}</dt>
+                <dd><code>{frame.manifest.ptxImage}</code></dd>
+              </div>
+              <div>
+                <dt>{copy.cubinImage}</dt>
+                <dd><code>{frame.manifest.cubinImage} · {frame.manifest.cubinPayload}</code></dd>
+              </div>
+            </dl>
+
+            <section>
+              <h5>{copy.staticFlowHeading}</h5>
+              <ol class="artifact-pipeline-static-flow">
+                {ARTIFACT_PIPELINE_STAGES.map((stage, index) => (
+                  <li
+                    data-static-stage={`${frame.lane}:${frame.targetPlan.id}:${stage.id}`}
+                    data-stage-id={stage.id}
+                    data-branch={stage.branch}
+                    data-optional={String(stage.optional)}
+                  >
+                    <span class="artifact-pipeline-step-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                    <span class="artifact-pipeline-branch">{copy.branchLabels[stage.branch]}</span>
+                    <strong>{copy.stages[stage.id].label}</strong>
+                    <p>{stageText(frame, stage.id, 'description')}</p>
+                    <span class="artifact-pipeline-output-label">{copy.artifactOutput}</span>
+                    <code>{stageText(frame, stage.id, 'artifact')}</code>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <p class="artifact-pipeline-runtime" data-static-runtime-selection="unknown">
+              <strong>{copy.runtimeSelection}: {copy.runtimeSelectionUnknown}</strong>
+              <span>{copy.runtimeSelectionBoundary}</span>
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-artifact-pipeline>
+
+<script>
+  import {
+    ARTIFACT_PIPELINE_COPY,
+    formatArtifactPipelineCopy,
+  } from '../visuals/artifact-pipeline-copy';
+  import {
+    ARTIFACT_PIPELINE_STAGES,
+    createArtifactPipelineState,
+    deriveArtifactPipelineFrame,
+    getArtifactPipelineTargetPlans,
+    reduceArtifactPipelineState,
+    type ArtifactPipelineFrame,
+    type ArtifactPipelineStageId,
+    type ArtifactPipelineState,
+  } from '../visuals/artifact-pipeline-model';
+
+  class CudaArtifactPipeline extends HTMLElement {
+    private state: ArtifactPipelineState = createArtifactPipelineState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const lane = this.querySelector<HTMLSelectElement>('[data-artifact-lane]');
+      const targetPlan = this.querySelector<HTMLSelectElement>('[data-artifact-target-plan]');
+      const step = this.querySelector<HTMLButtonElement>('[data-artifact-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-artifact-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-artifact-status]');
+      const stages = this.querySelectorAll<HTMLElement>('[data-live-stage]');
+      if (!controls || !workbench || !lane || !targetPlan || !step || !reset || !status) return;
+      if (stages.length !== ARTIFACT_PIPELINE_STAGES.length) return;
+      const requiredLiveSelectors = [
+        '[data-selection-summary]',
+        '[data-selection-description]',
+        '[data-manifest-lane]',
+        '[data-manifest-scope]',
+        '[data-manifest-virtual]',
+        '[data-manifest-real]',
+        '[data-manifest-ptx]',
+        '[data-manifest-cubin]',
+        '[data-runtime-selection-value]',
+      ];
+      const requiredStageSelectors = [
+        '[data-stage-label]',
+        '[data-stage-description]',
+        '[data-stage-artifact]',
+        '[data-stage-state-label]',
+      ];
+      if (requiredLiveSelectors.some((selector) => !workbench.querySelector(selector))) return;
+      if ([...stages].some((stage) =>
+        requiredStageSelectors.some((selector) => !stage.querySelector(selector)))) return;
+      if (!this.renderTargetPlanOptions(targetPlan)) return;
+      if (!this.render()) return;
+
+      lane.addEventListener('change', () => {
+        const update = reduceArtifactPipelineState(this.state, {
+          type: 'select-lane',
+          lane: lane.value,
+        });
+        if (!update.accepted) {
+          lane.value = this.state.lane;
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        if (!this.renderTargetPlanOptions(targetPlan)) return;
+        const frame = this.render();
+        if (!frame) return;
+        this.announce(this.format(this.copy().statusLane, frame), false);
+      });
+
+      targetPlan.addEventListener('change', () => {
+        const update = reduceArtifactPipelineState(this.state, {
+          type: 'select-target-plan',
+          targetPlanId: targetPlan.value,
+        });
+        if (!update.accepted) {
+          targetPlan.value = this.state.targetPlanId;
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        const frame = this.render();
+        if (!frame) return;
+        this.announce(this.format(this.copy().statusTargetPlan, frame), false);
+      });
+
+      step.addEventListener('click', () => {
+        const update = reduceArtifactPipelineState(this.state, { type: 'step' });
+        if (!update.accepted) {
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        const frame = this.render();
+        if (!frame) return;
+        const completedStage = ARTIFACT_PIPELINE_STAGES[frame.stepIndex - 1];
+        if (!completedStage) {
+          this.announce(this.copy().issues['invalid-state'], true);
+          return;
+        }
+        const next = frame.sequenceComplete || !frame.currentStage
+          ? this.copy().sequenceComplete
+          : `${this.copy().stageStates.current}: ${this.copy().stages[frame.currentStage.id].label}.`;
+        this.announce(this.format(this.copy().statusStep, frame, {
+          current: String(frame.stepIndex),
+          total: String(frame.stageCount),
+          stage: this.copy().stages[completedStage.id].label,
+          next,
+        }), false);
+      });
+
+      reset.addEventListener('click', () => {
+        const update = reduceArtifactPipelineState(this.state, { type: 'reset' });
+        if (!update.accepted) {
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        if (!this.render()) return;
+        this.announce(this.copy().statusReset, false);
+        lane.focus();
+      });
+
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      workbench.hidden = false;
+    }
+
+    private copy() {
+      return ARTIFACT_PIPELINE_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private values(frame: ArtifactPipelineFrame) {
+      const copy = this.copy();
+      return {
+        lane: frame.lane,
+        plan: copy.targetPlans[frame.targetPlan.id].title,
+        scope: copy.targetScopes[frame.targetPlan.targetScope],
+        source: frame.manifest.source,
+        virtual: frame.manifest.virtualTarget,
+        real: frame.manifest.realTarget,
+        ptx: frame.manifest.ptxImage,
+        cubin: frame.manifest.cubinImage,
+      };
+    }
+
+    private format(
+      template: string,
+      frame: ArtifactPipelineFrame,
+      additions: Readonly<Record<string, string>> = {},
+    ) {
+      return formatArtifactPipelineCopy(template, { ...this.values(frame), ...additions });
+    }
+
+    private announce(message: string, invalid: boolean) {
+      const status = this.querySelector<HTMLElement>('[data-artifact-status]');
+      this.dataset.valid = String(!invalid);
+      if (!status) return;
+      status.dataset.invalid = String(invalid);
+      status.textContent = message;
+    }
+
+    private renderTargetPlanOptions(select: HTMLSelectElement) {
+      const plans = getArtifactPipelineTargetPlans(this.state.lane);
+      if (!plans.some(({ id }) => id === this.state.targetPlanId)) return false;
+      select.replaceChildren(...plans.map((plan) => {
+        const option = this.ownerDocument.createElement('option');
+        option.value = plan.id;
+        option.textContent = this.copy().targetPlans[plan.id].title;
+        option.selected = plan.id === this.state.targetPlanId;
+        return option;
+      }));
+      return true;
+    }
+
+    private render() {
+      const result = deriveArtifactPipelineFrame(this.state);
+      if (!result.accepted) {
+        this.announce(this.copy().issues[result.issue], true);
+        return undefined;
+      }
+      const frame = result.frame;
+      const copy = this.copy();
+
+      this.dataset.toolkitLane = frame.lane;
+      this.dataset.targetPlan = frame.targetPlan.id;
+      this.dataset.stepIndex = String(frame.stepIndex);
+      this.dataset.currentStage = frame.currentStage?.id ?? 'complete';
+      this.dataset.sequenceComplete = String(frame.sequenceComplete);
+      this.dataset.runtimeImageSelection = frame.manifest.runtimeImageSelection;
+      this.dataset.valid = 'true';
+
+      const lane = this.querySelector<HTMLSelectElement>('[data-artifact-lane]');
+      const targetPlan = this.querySelector<HTMLSelectElement>('[data-artifact-target-plan]');
+      const step = this.querySelector<HTMLButtonElement>('[data-artifact-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-artifact-action="reset"]');
+      const focused = this.ownerDocument.activeElement;
+      if (lane) lane.value = frame.lane;
+      if (targetPlan) targetPlan.value = frame.targetPlan.id;
+      if (step) step.disabled = frame.sequenceComplete;
+      if (step && focused === step && step.disabled) reset?.focus();
+
+      this.setText('[data-selection-summary]', `${frame.lane} · ${copy.targetPlans[frame.targetPlan.id].title}`);
+      this.setText('[data-selection-description]', copy.targetPlans[frame.targetPlan.id].description);
+      this.setText('[data-manifest-lane]', frame.lane);
+      this.setText('[data-manifest-scope]', copy.targetScopes[frame.targetPlan.targetScope]);
+      this.setText('[data-manifest-virtual]', frame.manifest.virtualTarget);
+      this.setText('[data-manifest-real]', frame.manifest.realTarget);
+      this.setText('[data-manifest-ptx]', frame.manifest.ptxImage);
+      this.setText('[data-manifest-cubin]', `${frame.manifest.cubinImage} · ${frame.manifest.cubinPayload}`);
+      this.setText('[data-runtime-selection-value]', copy.runtimeSelectionUnknown);
+
+      for (const stage of frame.stages) {
+        const item = this.querySelector<HTMLElement>(`[data-live-stage="${stage.id}"]`);
+        if (!item) continue;
+        item.dataset.stageState = stage.state;
+        if (stage.state === 'current') item.setAttribute('aria-current', 'step');
+        else item.removeAttribute('aria-current');
+        this.setTextWithin(item, '[data-stage-label]', copy.stages[stage.id].label);
+        this.setTextWithin(item, '[data-stage-description]', this.stageText(frame, stage.id, 'description'));
+        this.setTextWithin(item, '[data-stage-artifact]', this.stageText(frame, stage.id, 'artifact'));
+        this.setTextWithin(item, '[data-stage-state-label]', copy.stageStates[stage.state]);
+      }
+
+      return frame;
+    }
+
+    private stageText(
+      frame: ArtifactPipelineFrame,
+      stageId: ArtifactPipelineStageId,
+      field: 'description' | 'artifact',
+    ) {
+      return this.format(this.copy().stages[stageId][field], frame);
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+
+    private setTextWithin(root: ParentNode, selector: string, value: string) {
+      const element = root.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-artifact-pipeline')) {
+    customElements.define('cuda-artifact-pipeline', CudaArtifactPipeline);
+  }
+</script>

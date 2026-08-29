@@ -1,0 +1,266 @@
+---
+title: 'M15：NVCC 主机/设备编译流程'
+description: 区分 NVCC 的稳定编译阶段与可变内部步骤，追踪 CUDA source 的 host/device split、device fatbinary path、synthesized host C++、host object、final link 与 whole-program default。
+pairId: m15
+counterpart: /en/toolchain/nvcc-compilation-flow/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - phase-contract
+  - supported-phases
+  - source-split
+  - device-path
+  - host-path
+  - linking
+  - whole-program
+  - artifact-ledger
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M15
+prerequisites:
+  - F04
+  - O04
+relatedUnits:
+  - M16
+  - M18
+  - EX10
+  - VIS09
+exampleIds:
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - artifact-kernel
+  - artifact-pipeline
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - NVCC Phases'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#nvcc-phases'
+    version: 'NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'Current compilation-phase stability and phase-selection contract'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'Current documented phase outputs and driver defaults'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - The CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'Current host/device trajectory, fatbinary embedding, host object, and whole-program default'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - NVCC Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#nvcc-phases'
+    version: 'CUDA Toolkit 12.9.2 archive; NVIDIA CUDA Compiler Driver v12.9'
+    platform: 'Archived compilation-phase stability and phase-selection contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 12.9.2 archive; NVIDIA CUDA Compiler Driver v12.9'
+    platform: 'Archived documented phase outputs and driver defaults'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - The CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'CUDA Toolkit 12.9.2 archive; NVIDIA CUDA Compiler Driver v12.9'
+    platform: 'Archived host/device trajectory, fatbinary embedding, host object, and whole-program default'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 11.8.0 archive - NVCC Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#nvcc-phases'
+    version: 'CUDA Toolkit 11.8.0 archive; NVCC documentation last updated 2022-10-03'
+    platform: 'Archived compilation-phase stability and phase-selection contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 11.8.0 archive - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0 archive; NVCC documentation last updated 2022-10-03'
+    platform: 'Archived documented phase outputs and driver defaults'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 11.8.0 archive - The CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory'
+    version: 'CUDA Toolkit 11.8.0 archive; NVCC documentation last updated 2022-10-03'
+    platform: 'Archived host/device trajectory, fatbinary embedding, host object, and whole-program default'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m15 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,phase-contract,supported-phases,source-split,device-path,host-path,linking,whole-program,artifact-ledger,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M15 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F04,O04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M16,M18,EX10,VIS09' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'artifact-kernel,artifact-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.2,11.8.0' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/toolchain/nvcc-compilation-flow/" lang="en">Read the English counterpart</a>
+
+[NVCC（NVIDIA CUDA Compiler Driver，TERM-115）](/glossary/#term-115)协调 CUDA source 的多条 translation paths。它把非 CUDA work 交给[主机编译器（host compiler，TERM-116）](/glossary/#term-116)，并用[编译阶段（compilation phase，TERM-117）](/glossary/#term-117)表达 caller 可以依赖的输入、requested output 与停止边界。
+
+## 学完本单元，你应该能
+
+- 只把 documented NVCC compilation phases 当作跨 Toolkit release 的稳定接口，不把 displayed internal steps 复制进 build script。
+- 从一个 mixed `.cu` source 分开 host path 与 device path，并说明两条 path 为什么都需要 preprocessing。
+- 追踪 device preprocessing -> PTX/cubin -> fatbinary，以及 host preprocessing -> synthesized host C++ -> supported host compiler -> host object。
+- 区分 `--ptx`、`--cubin`、`--fatbin`、`--compile`、final link 与 `--run` 的边界。
+- 说明 default whole-program mode 对跨 translation-unit device reference 的限制，并拒绝把 compilation artifact 当作 runtime 或 performance evidence。
+
+## 先修关系
+
+先完成 [F04：显式 host-device 资源生命周期](/foundations/host-device-lifecycle/)和 [O04：面向 CUDA 学习者的 C++17 复习](/start/cpp17-for-cuda/)。F04 提供 host action、submitted device work 与 completion 的区别；O04 提供 translation unit、annotation、compilation、linking 与 execution 边界。M15 不需要 CUDA-capable system，也不授予 Evidence Status。
+
+M16 会深化 PTX、cubin 与 fatbinary 的 compatibility roles，M18 会处理 separate compilation 与 device linking；EX10 是本页 canonical project，VIS09 是 related artifact-pipeline explanation。它们不会改变 M15 的直接先修边 `M15<-[F04,O04]`。
+
+## Stable contract：phase，不是内部 step
+
+NVCC compilation phase 是可由 command-line option 选择的 logical translation step。一个 phase 内部可以拆成多个 smaller steps；这些 steps 依赖 Toolkit 内部 tools 与实现，可能在新 release 中变化。即使 `nvcc` 可以显示它执行的 steps，这类 trace 也只用于 debugging，不能被复制后当作 build script 的稳定接口。
+
+Phase selection 同时依赖 input suffix 与 requested output option：suffix 说明 phase input 是 `.cu`、`.ptx`、`.cubin`、object 或其他 recognized form，phase option 说明 caller 需要在哪个 documented output boundary 停止。`nvcc -v` 或 `--dryrun` 中出现的 temporary file name、private subcommand order 与 internal option 不是另一个 public phase contract。
+
+因此 review build 时先问两个问题：输入被 NVCC 解释成什么？请求的 documented phase output 是什么？不要从一次 release 的 internal transcript 反推永久 pipeline。
+
+## Supported phases 与停止边界
+
+下面是本站原创的 boundary matrix，只选择本单元需要的 documented phases，不复刻 owner table：
+
+| requested boundary | phase selection | primary result | 尚未建立的后续边界 |
+| --- | --- | --- | --- |
+| preprocess source | `--preprocess` / `-E` | preprocessed text | compilation、link、execution |
+| expose synthesized host source | `--cuda` / `-cuda` | `.cu.cpp.ii` host C++ output | host object、final link、execution |
+| device PTX | `--ptx` / `-ptx` | device-only `.ptx` | host object、final link、execution |
+| device cubin | `--cubin` / `-cubin` | device-only `.cubin` | host object、final link、execution |
+| device fatbinary | `--fatbin` / `-fatbin` | device-only `.fatbin` | host object、final link、execution |
+| compile to object | `--compile` / `-c` | `.o` on Linux or `.obj` on Windows | final link、execution |
+| compile and link | no phase option, or explicit link selection | executable | runtime correctness、performance |
+| convenience run | `--run` / `-run` | execution attempt after build | correctness、coverage、performance conclusion |
+
+对 `.cu` 使用 `--ptx`、`--cubin` 或 `--fatbin` 时，phase 在 device-only artifact 处停止并丢弃 host code。`--compile` 的结果则是 host-linkable object；不指定 phase option 时，NVCC 默认 compile 并 link 全部 inputs。`--run` 是独立 convenience phase，不会让之前的 artifact 自动升级为 observed runtime evidence。
+
+## 一个 CUDA source，两条 translation paths
+
+CUDA source 可以在同一 `.cu` 文件中混合 conventional C++ host code 与 GPU device functions。NVCC 负责协调 split，不要求作者手工把 source 拆成“host half”和“device half”。Annotation 决定 entity 必须在哪条 path 合法：unannotated 或 `__host__` entity 进入 host reasoning，`__device__`/`__global__` entity 进入 device reasoning，`__host__ __device__` function 则需要分别成立的 host 与 device versions。
+
+这不是简单的一次 preprocessing 后把字节流切成两半。Documented trajectory 对 device compilation 先 preprocessing；之后 input 再为 host compilation preprocessing，并被 synthesized 成 host compiler 可以处理的 C++。同一个 declaration、macro 或 function body 可能因 compilation path 不同而接受不同约束。
+
+## Device path：preprocess -> PTX/cubin -> fatbinary
+
+Device path 先为 device compilation preprocess input，再把 device functions 编译为 PTX 和/或 CUDA binary（cubin）。PTX 是 intermediate assembly form；cubin 是面向单一 GPU architecture 的 device binary。M15 只追踪它们在 trajectory 中的位置，具体 compatibility 与 target semantics 留给 M16/M17。
+
+生成的 PTX/cubin images 被放进 fatbinary。Ordinary CUDA object build 会把这个 fatbinary image 交给 host path 继续 embedding；显式 `--fatbin` 则在 standalone device-only `.fatbin` output 处停止。二者都不是 kernel 已经运行的记录。
+
+`--ptx`、`--cubin` 与 `--fatbin` 是 caller 可选择的 documented phase boundaries；device-preprocess temporary filename、internal compiler invocation 与 assembler command order 仍是 implementation details。
+
+## Host path：再次 preprocess -> synthesized C++ -> host object
+
+Input 会再次为 host compilation preprocess。NVCC 随后 synthesize host C++：embed device fatbinary，并把 CUDA-specific C++ extensions 转换为 host compiler 可处理的 C++ constructs。`--cuda` 可以把 documented `.cu.cpp.ii` boundary 暴露出来；这个 output 应由 NVCC preprocessing 所使用的同一 host compiler 编译。
+
+NVCC 不是 host C++ compiler 的替代品。它把 non-CUDA steps、所需 preprocessing 与 synthesized host C++ compilation 转发给 NVCC 支持的 host compiler。Support 取决于 selected Toolkit、platform 与 compiler version；只在 PATH 中找到 compiler，或使用 `--allow-unsupported-compiler` 绕过 version check，都不会建立 supported configuration。Unsupported host compiler 可能导致 compilation failure 或 incorrect runtime execution。
+
+Supported host compiler 把 synthesized host code 连同 embedded fatbinary 编译成 host object。这个 `.o`/`.obj` 已是 host-linkable artifact，但它仍不是 final executable，也没有执行 embedded device image。
+
+## Host object 与 final link
+
+`--compile` 在 object boundary 停止。Final link 组合 compatible host objects/libraries、解析 host definitions，并加入 CUDA runtime libraries，产生 executable。Baseline flow 使用 NVCC 驱动 final link，让它协调所需 CUDA link inputs；host object 存在不等于 host link 已成功，host link 成功也不等于 device code 已 launch。
+
+Host link 与 device link 是不同边界。只有 relocatable device-code workflow 才需要 meaningful device-link work；M18 会单独建立其 object graph、options 与 failure modes。本页不会把 final host link 模糊写成“所有 device references 都已解析”。
+
+## Default 是 device whole-program mode
+
+CUDA programs 默认使用 whole-program compilation mode。这个 default 约束的是 device code：device entity 不能从另一个 file 被引用；在 whole-program mode 中，device-link steps 没有效果。它不表示普通 host C++ definitions 不能通过 host linker 跨 objects 解析。
+
+因此，把一个 device callee 的 definition 放在 `producer.cu`，只在 `consumer.cu` 中留下 declaration，再分别 `--compile` 两个 files，不能靠 final host link 补上 default mode 中缺失的 device definition。要么在 whole-program boundary 内让 required device definition 可见，要么有意切换到 M18 介绍的 relocatable device code 与 device-link contract。
+
+Default executable 可以包含 embedded fatbinary，但“fatbinary 已嵌入”与“cross-file device reference 已合法解析”是两个不同命题。
+
+## Artifact ledger：它是什么，不证明什么
+
+| checkpoint / artifact | producer boundary | 可以审查的内容 | 单独不能证明的内容 |
+| --- | --- | --- | --- |
+| device-preprocessed input | documented trajectory checkpoint | device path 看到的 expanded source contract | stable temporary filename 或 internal command |
+| `.ptx` / `.cubin` | explicit device phase | requested device output 存在、type/target metadata 可检查 | kernel execution、correctness、speed |
+| fatbinary image / `.fatbin` | device packaging boundary | selected device images 被 packaged | runtime 为某 GPU 选择了哪个 image |
+| synthesized `.cu.cpp.ii` | `--cuda` boundary | embedded payload 与 transformed host-side constructs 可检查 | host compiler acceptance 或 final link |
+| host `.o` / `.obj` | `--compile` boundary | host object 已由 selected host path 产生 | executable link、GPU launch、output correctness |
+| executable | final host link | link boundary 为 exact inputs 成功 | 程序运行、device path 被到达、performance |
+
+Artifact inspection 必须绑定 exact source、Toolkit、host compiler、options、target request、command result 与 artifact identity，才能支持一个 bounded compilation/inspection claim。即使这些记录完整，claim 也不会自动跨到 runtime 或 performance axis。
+
+## Canonical Runnable Example：EX10
+
+EX10 是 M15 的 canonical PTX/fatbinary inspection project。[在临时固定的 source commit 中查看完整 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip)。Project 是唯一 complete implementation；本 Learning Unit 不维护手写 complete code listing。
+
+第一个 canonical range 提供用于区分 host/device paths 的 focused CUDA source：
+
+<CanonicalCode exampleId="EX10" range="artifact-kernel" />
+
+第二个 canonical range 提供 documented phase outputs 与 artifact inspection pipeline：
+
+<CanonicalCode exampleId="EX10" range="artifact-pipeline" />
+
+Import order 是 page contract 的一部分：先 `artifact-kernel`，再 `artifact-pipeline`。
+
+## 证据边界
+
+本页的 phase matrix、trajectory、artifact ledger、练习和 canonical imports 都是 static teaching/source artifacts。它们不运行 NVCC，也不执行 CUDA binary，因此 M15 的 compilation、runtime、expected-observation 与 recorded-observation arrays 全部保持为空。
+
+一个 `.ptx`、`.cubin`、`.fatbin`、host object 或 executable 的存在，不证明 GPU work 已执行、结果正确、runtime 选择了某个 image、launch latency 更低或 program 更快。Compilation artifact 不是 runtime evidence，也不是 performance evidence。Future claim 必须在对应 evidence axis 上另行记录 exact Toolkit Lane、host compiler、source identity、commands/logs、artifact inspection criteria，以及 runtime claim 所需的 GPU Environment Manifest、inputs、oracle 与 observations。
+
+## 离开前检查
+
+1. 为什么 documented compilation phase 可以进入 build contract，而一次 `--dryrun` 显示的 internal command sequence 不可以？
+2. Input suffix 与 phase option 分别决定 phase selection 的哪一部分？
+3. Device preprocessing 后的 PTX/cubin 如何进入 fatbinary，而 synthesized host C++ 又如何成为 host object？
+4. 为什么 supported host compiler、host object、final link 与 execution 是四个不同 boundaries？
+5. Default whole-program mode 对 cross-file device reference 有什么限制？为什么 executable 存在仍不构成 runtime 或 performance evidence？
+
+## 继续练习
+
+- 完成 [M15 练习（Exercise）](/toolchain/nvcc-compilation-flow/exercises/)，再查看独立的[参考解答](/toolchain/nvcc-compilation-flow/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-007](/practice/#pb-r2-007)审查 phase、artifact、host compiler 与 evidence boundaries。
+- 复习 [TERM-115 NVCC](/glossary/#term-115)、[TERM-116 host compiler](/glossary/#term-116)和 [TERM-117 compilation phase](/glossary/#term-117)。
+
+## 来源与复核
+
+- Current [NVCC v13.3 NVCC Phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#nvcc-phases)、[Supported Phases](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#supported-phases)与[The CUDA Compilation Trajectory](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory)定义当前 phase stability、outputs、host/device path、fatbinary embedding、host object 与 whole-program default。
+- CUDA Toolkit 12.9.2 archive 的 [NVCC Phases](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#nvcc-phases)、[Supported Phases](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#supported-phases)与[The CUDA Compilation Trajectory](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory)保留 12.9 lane 的同类 contracts。
+- CUDA Toolkit 11.8.0 archive 的 [NVCC Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#nvcc-phases)、[Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)与[The CUDA Compilation Trajectory](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory)保留 11.8 lane 的同类 contracts；trajectory 使用该 archive 的 legacy anchor。
+
+九项 owner source 均访问于 **2026-08-29**，并严格按 frontmatter 顺序排列：current v13.3 三个 sections、12.9.2 archive 三个 sections、11.8.0 archive 三个 sections。Phase matrix、artifact ledger、问题、练习与编排均为本站 CC-BY-4.0 原创内容；没有复制 owner figure、table、example 或 build transcript。
+
+**事实核查日期：2026-08-29。**

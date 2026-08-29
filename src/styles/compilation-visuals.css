@@ -1,0 +1,590 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+.artifact-pipeline-visual {
+  --artifact-line: color-mix(in srgb, var(--theme-accent) 42%, var(--sl-color-gray-5));
+  --artifact-panel: color-mix(in srgb, var(--theme-canvas) 91%, var(--theme-accent) 9%);
+  --artifact-device: color-mix(in srgb, var(--theme-accent) 72%, var(--theme-signal));
+  --artifact-host: color-mix(in srgb, var(--theme-signal) 70%, var(--theme-accent));
+}
+
+.artifact-pipeline-boundary,
+.artifact-pipeline-workbench,
+.artifact-pipeline-static-grid > article {
+  min-width: 0;
+  border: 1px solid var(--artifact-line);
+  background: var(--artifact-panel);
+}
+
+.artifact-pipeline-boundary h3,
+.artifact-pipeline-boundary ul,
+.artifact-pipeline-control-set,
+.artifact-pipeline-status,
+.artifact-pipeline-selection h3,
+.artifact-pipeline-selection p,
+.artifact-pipeline-target-contract h4,
+.artifact-pipeline-target-contract dl,
+.artifact-pipeline-flow-panel h4,
+.artifact-pipeline-flow,
+.artifact-pipeline-runtime,
+.artifact-pipeline-static article h4,
+.artifact-pipeline-static article h5,
+.artifact-pipeline-static article p,
+.artifact-pipeline-static-manifest,
+.artifact-pipeline-static-flow {
+  margin: 0;
+}
+
+.artifact-pipeline-boundary {
+  padding: 0.85rem 0.95rem;
+  border-inline-start: 0.35rem solid var(--theme-signal);
+}
+
+.artifact-pipeline-boundary h3,
+.artifact-pipeline-target-contract h4,
+.artifact-pipeline-flow-panel h4 {
+  color: var(--theme-ink);
+  font-size: var(--sl-text-base);
+}
+
+.artifact-pipeline-boundary ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 1.4rem;
+  margin-block-start: 0.55rem;
+  padding-inline-start: 1.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+}
+
+.artifact-pipeline-controls {
+  display: grid;
+  align-items: stretch;
+}
+
+.artifact-pipeline-control-set {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(11rem, 1fr)) auto auto;
+  gap: 0.55rem;
+  align-items: end;
+  padding: 0.7rem;
+  border: 1px solid var(--sl-color-gray-5);
+}
+
+.artifact-pipeline-control-set legend {
+  padding-inline: 0.3rem;
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  font-weight: 800;
+}
+
+.artifact-pipeline-control-set label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-xs);
+}
+
+.artifact-pipeline-control-set select {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 0.55rem;
+}
+
+.artifact-pipeline-control-set :focus-visible,
+.artifact-pipeline-flow [aria-current='step']:focus-visible {
+  outline: 3px solid var(--theme-signal);
+  outline-offset: 2px;
+}
+
+.artifact-pipeline-status {
+  padding: 0.65rem 0.75rem;
+  border-inline-start: 0.3rem solid var(--theme-signal);
+  background: color-mix(in srgb, var(--theme-signal) 8%, var(--theme-canvas));
+  font-size: var(--sl-text-sm);
+}
+
+.artifact-pipeline-status[data-invalid='true'] {
+  border-color: var(--sl-color-red-high);
+  color: var(--sl-color-red-high);
+  font-weight: 750;
+}
+
+.artifact-pipeline-workbench {
+  display: grid;
+  gap: 0.9rem;
+  padding: clamp(0.75rem, 2vw, 1rem);
+  border-width: 2px;
+  border-color: var(--theme-accent-strong);
+  background: var(--sl-color-bg);
+}
+
+.artifact-pipeline-selection {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 0.35rem 1rem;
+  align-items: end;
+  padding-block-end: 0.75rem;
+  border-block-end: 1px solid var(--artifact-line);
+}
+
+.artifact-pipeline-selection > div {
+  grid-row: span 2;
+}
+
+.artifact-pipeline-selection span,
+.artifact-pipeline-static article header > p:first-child,
+.artifact-pipeline-output-label,
+.artifact-pipeline-branch,
+.artifact-pipeline-stage-state,
+.artifact-pipeline-step-number {
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.artifact-pipeline-selection span,
+.artifact-pipeline-static article header > p:first-child {
+  color: var(--theme-signal);
+}
+
+.artifact-pipeline-selection h3 {
+  margin-block-start: 0.2rem;
+  color: var(--theme-ink);
+  font-size: var(--sl-text-lg);
+}
+
+.artifact-pipeline-selection > p {
+  overflow-wrap: anywhere;
+  color: var(--theme-accent-strong);
+  font-size: var(--sl-text-sm);
+  text-align: end;
+}
+
+.artifact-pipeline-selection > p:last-child {
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-xs);
+}
+
+.artifact-pipeline-target-contract,
+.artifact-pipeline-flow-panel {
+  display: grid;
+  min-width: 0;
+  gap: 0.55rem;
+}
+
+.artifact-pipeline-target-contract dl,
+.artifact-pipeline-static-manifest {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.artifact-pipeline-target-contract dl > div,
+.artifact-pipeline-static-manifest > div {
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  border-block-start: 0.24rem solid var(--theme-signal);
+  background: var(--artifact-panel);
+}
+
+.artifact-pipeline-target-contract dt,
+.artifact-pipeline-target-contract dd,
+.artifact-pipeline-static-manifest dt,
+.artifact-pipeline-static-manifest dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.artifact-pipeline-target-contract dt,
+.artifact-pipeline-static-manifest dt {
+  color: var(--sl-color-gray-2);
+  font-family: var(--sl-font-mono);
+  font-size: 0.67rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.artifact-pipeline-target-contract dd,
+.artifact-pipeline-static-manifest dd {
+  margin-block-start: 0.22rem;
+  overflow-wrap: anywhere;
+  color: var(--theme-ink);
+  font-size: var(--sl-text-sm);
+  font-weight: 750;
+}
+
+.artifact-pipeline-target-contract code,
+.artifact-pipeline-static-manifest code {
+  color: var(--theme-accent-strong);
+  font-size: 0.9em;
+}
+
+.artifact-pipeline-flow,
+.artifact-pipeline-static-flow {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0;
+  list-style: none;
+}
+
+.artifact-pipeline-flow > li,
+.artifact-pipeline-static-flow > li {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.35rem;
+  padding: 0.7rem;
+  border: 1px solid var(--artifact-line);
+  border-block-start: 0.3rem solid var(--theme-accent-strong);
+  background: var(--artifact-panel);
+}
+
+.artifact-pipeline-flow > li:nth-child(1),
+.artifact-pipeline-static-flow > li:nth-child(1) {
+  grid-column: 3 / 11;
+}
+
+.artifact-pipeline-flow > li:nth-child(2),
+.artifact-pipeline-static-flow > li:nth-child(2) {
+  grid-column: 1 / 5;
+}
+
+.artifact-pipeline-flow > li:nth-child(3),
+.artifact-pipeline-static-flow > li:nth-child(3) {
+  grid-column: 5 / 9;
+}
+
+.artifact-pipeline-flow > li:nth-child(4),
+.artifact-pipeline-static-flow > li:nth-child(4) {
+  grid-column: 9 / 13;
+}
+
+.artifact-pipeline-flow > li:nth-child(5),
+.artifact-pipeline-static-flow > li:nth-child(5) {
+  grid-column: 1 / 7;
+}
+
+.artifact-pipeline-flow > li:nth-child(6),
+.artifact-pipeline-static-flow > li:nth-child(6) {
+  grid-column: 7 / 13;
+}
+
+.artifact-pipeline-flow > li:nth-child(7),
+.artifact-pipeline-static-flow > li:nth-child(7) {
+  grid-column: 3 / 11;
+}
+
+.artifact-pipeline-flow > li[data-branch='device'],
+.artifact-pipeline-static-flow > li[data-branch='device'] {
+  border-block-start-color: var(--artifact-device);
+}
+
+.artifact-pipeline-flow > li[data-branch='host'],
+.artifact-pipeline-static-flow > li[data-branch='host'] {
+  border-block-start-color: var(--artifact-host);
+  border-block-start-style: double;
+  border-block-start-width: 0.4rem;
+}
+
+.artifact-pipeline-flow > li[data-optional='true'],
+.artifact-pipeline-static-flow > li[data-optional='true'] {
+  border-style: dashed;
+  border-block-start-width: 0.3rem;
+}
+
+.artifact-pipeline-flow > li::after,
+.artifact-pipeline-static-flow > li::after {
+  position: absolute;
+  inset-inline: 35%;
+  inset-block-end: -0.48rem;
+  height: 0.3rem;
+  border-inline: 1px solid var(--artifact-line);
+  border-block-end: 1px solid var(--artifact-line);
+  content: '';
+}
+
+.artifact-pipeline-flow > li:last-child::after,
+.artifact-pipeline-static-flow > li:last-child::after {
+  display: none;
+}
+
+.artifact-pipeline-flow > li[data-stage-state='current'] {
+  outline: 3px double var(--theme-signal);
+  outline-offset: 2px;
+  background: color-mix(in srgb, var(--theme-signal) 12%, var(--theme-canvas));
+}
+
+.artifact-pipeline-flow > li[data-stage-state='complete'] {
+  box-shadow: inset 0.28rem 0 var(--theme-accent-strong);
+}
+
+.artifact-pipeline-flow > li[data-stage-state='pending'] {
+  border-style: dotted;
+}
+
+.artifact-pipeline-step-number {
+  position: absolute;
+  inset-block-start: 0.45rem;
+  inset-inline-end: 0.55rem;
+  color: var(--theme-ink);
+}
+
+.artifact-pipeline-branch {
+  padding-inline-end: 2rem;
+  color: var(--theme-ink);
+}
+
+.artifact-pipeline-flow strong,
+.artifact-pipeline-static-flow strong {
+  padding-inline-end: 1.4rem;
+  color: var(--theme-ink);
+  font-size: var(--sl-text-sm);
+  line-height: 1.25;
+}
+
+.artifact-pipeline-flow p,
+.artifact-pipeline-static-flow p {
+  overflow-wrap: anywhere;
+  color: var(--theme-ink);
+  font-size: var(--sl-text-xs);
+}
+
+.artifact-pipeline-output-label {
+  margin-block-start: 0.2rem;
+  padding-block-start: 0.35rem;
+  border-block-start: 1px dashed var(--sl-color-gray-5);
+  color: var(--theme-ink);
+}
+
+.artifact-pipeline-flow code,
+.artifact-pipeline-static-flow code {
+  overflow-wrap: anywhere;
+  color: var(--theme-ink);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.artifact-pipeline-stage-state {
+  justify-self: start;
+  margin-block-start: 0.25rem;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid currentColor;
+  color: var(--theme-ink);
+}
+
+.artifact-pipeline-flow [data-stage-state='current'] .artifact-pipeline-stage-state {
+  color: var(--theme-signal);
+}
+
+.artifact-pipeline-flow [data-stage-state='complete'] .artifact-pipeline-stage-state {
+  color: var(--theme-accent-strong);
+}
+
+.artifact-pipeline-runtime {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--theme-signal);
+  border-inline-start-width: 0.35rem;
+  background: color-mix(in srgb, var(--theme-signal) 8%, var(--theme-canvas));
+  font-size: var(--sl-text-sm);
+}
+
+.artifact-pipeline-runtime strong {
+  color: var(--theme-ink);
+}
+
+.artifact-pipeline-runtime span {
+  color: var(--sl-color-gray-2);
+}
+
+.artifact-pipeline-static-grid {
+  display: grid;
+  min-width: 0;
+  gap: 0.8rem;
+}
+
+.artifact-pipeline-static-grid > article {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+  padding: 0.8rem;
+}
+
+.artifact-pipeline-static article header {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.artifact-pipeline-static article h4 {
+  color: var(--theme-ink);
+  font-size: var(--sl-text-base);
+}
+
+.artifact-pipeline-static article h5 {
+  margin-block-end: 0.5rem;
+  color: var(--theme-ink);
+  font-size: var(--sl-text-sm);
+}
+
+.artifact-pipeline-static article header > p:last-child {
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .artifact-pipeline-flow > li,
+  .artifact-pipeline-control-set button,
+  .artifact-pipeline-control-set select {
+    transition: border-color 150ms ease, background-color 150ms ease, opacity 150ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .artifact-pipeline-visual,
+  .artifact-pipeline-visual * {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .artifact-pipeline-boundary,
+  .artifact-pipeline-status,
+  .artifact-pipeline-workbench,
+  .artifact-pipeline-target-contract dl > div,
+  .artifact-pipeline-flow > li,
+  .artifact-pipeline-runtime,
+  .artifact-pipeline-static-grid > article,
+  .artifact-pipeline-static-manifest > div,
+  .artifact-pipeline-static-flow > li {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  .artifact-pipeline-flow > li[data-stage-state='current'] {
+    outline-color: Highlight;
+  }
+
+  .artifact-pipeline-flow > li[data-stage-state='complete'] {
+    box-shadow: inset 0.28rem 0 CanvasText;
+  }
+}
+
+@media (max-width: 58rem) {
+  .artifact-pipeline-control-set {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .artifact-pipeline-control-set button {
+    width: 100%;
+  }
+
+  .artifact-pipeline-selection {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .artifact-pipeline-selection > div {
+    grid-row: auto;
+  }
+
+  .artifact-pipeline-selection > p {
+    text-align: start;
+  }
+
+  .artifact-pipeline-target-contract dl,
+  .artifact-pipeline-static-manifest {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 42rem) {
+  .artifact-pipeline-boundary ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .artifact-pipeline-flow,
+  .artifact-pipeline-static-flow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .artifact-pipeline-flow > li,
+  .artifact-pipeline-static-flow > li,
+  .artifact-pipeline-flow > li:nth-child(n),
+  .artifact-pipeline-static-flow > li:nth-child(n) {
+    grid-column: 1;
+  }
+
+  .artifact-pipeline-flow > li::after,
+  .artifact-pipeline-static-flow > li::after {
+    inset-inline: 48%;
+  }
+}
+
+@media (max-width: 34rem) {
+  .artifact-pipeline-control-set,
+  .artifact-pipeline-target-contract dl,
+  .artifact-pipeline-static-manifest {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .artifact-pipeline-control-set button {
+    min-width: 0;
+  }
+}
+
+@media print {
+  .artifact-pipeline-controls,
+  .artifact-pipeline-workbench {
+    display: none !important;
+  }
+
+  .artifact-pipeline-static-grid {
+    display: block;
+  }
+
+  .artifact-pipeline-static-grid > article {
+    margin-block-end: 0.8rem;
+    break-inside: avoid;
+  }
+
+  .artifact-pipeline-boundary,
+  .artifact-pipeline-static-grid > article,
+  .artifact-pipeline-static-manifest > div,
+  .artifact-pipeline-static-flow > li,
+  .artifact-pipeline-runtime {
+    border-color: #777;
+    background: #fff;
+    color: #222;
+    box-shadow: none;
+  }
+
+  .artifact-pipeline-static-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .artifact-pipeline-static-flow > li,
+  .artifact-pipeline-static-flow > li:nth-child(n) {
+    grid-column: auto;
+    break-inside: avoid;
+  }
+
+  .artifact-pipeline-static-flow > li:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .artifact-pipeline-static-flow > li::after {
+    display: none;
+  }
+}
