@@ -218,6 +218,7 @@ function assertCompletePerformanceManifest(source: string) {
   expect(source).toMatch(/restart all 10 attempts|重做全部 10 次/i);
   expect(source).toMatch(/batch_id=.*date -u/is);
   expect(source).toMatch(/batch_dir=.*batch-\$\{batch_id\}/is);
+  expect(source).toMatch(/if ! mkdir "\$batch_dir"; then[\s\S]*exit 1/);
   expect(source).toMatch(/Never reuse a `batch_id`|不得复用 `batch_id`/i);
   expect(source).toMatch(/no-silent-outlier|不构成 invalid/i);
 }

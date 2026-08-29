@@ -310,7 +310,10 @@ Probe one full EX06 process with the selected metric. On `ERR_NVGPUCTRPERM`, ano
 metric_csv='<fill exact queried metric names>'
 batch_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 batch_dir="lab05-evidence/batch-${batch_id}"
-mkdir -p "$batch_dir"
+if ! mkdir "$batch_dir"; then
+  printf 'batch directory already exists: %s\n' "$batch_dir" >&2
+  exit 1
+fi
 sample=1
 while [ "$sample" -le 10 ]; do
   id=$(printf '%02d' "$sample")
