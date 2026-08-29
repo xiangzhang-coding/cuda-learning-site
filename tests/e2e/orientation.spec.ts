@@ -6,11 +6,11 @@ import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/bro
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 test('all published routes load without browser errors', async ({ page }) => {
-  test.setTimeout(270_000);
+  test.setTimeout(330_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(262);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(131);
+  expect(routes).toHaveLength(296);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(148);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -21,7 +21,7 @@ test('all published routes load without browser errors', async ({ page }) => {
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
-  test.setTimeout(150_000);
+  test.setTimeout(180_000);
   for (const { zh, en } of [
     { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
@@ -66,6 +66,11 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/memory/cooperative-groups/', en: '/en/memory/cooperative-groups/' },
     { zh: '/memory/asynchronous-copy-pipelines/', en: '/en/memory/asynchronous-copy-pipelines/' },
     { zh: '/memory/cuda-graphs/', en: '/en/memory/cuda-graphs/' },
+    { zh: '/toolchain/nvcc-compilation-flow/', en: '/en/toolchain/nvcc-compilation-flow/' },
+    { zh: '/toolchain/ptx-cubin-fatbinary/', en: '/en/toolchain/ptx-cubin-fatbinary/' },
+    { zh: '/toolchain/compiler-architecture-targets/', en: '/en/toolchain/compiler-architecture-targets/' },
+    { zh: '/toolchain/separate-compilation-device-linking/', en: '/en/toolchain/separate-compilation-device-linking/' },
+    { zh: '/toolchain/cpp-dialect-boundaries/', en: '/en/toolchain/cpp-dialect-boundaries/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -86,6 +91,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/examples/streams-events-overlap/', en: '/en/examples/streams-events-overlap/' },
     { zh: '/examples/unified-memory-migration/', en: '/en/examples/unified-memory-migration/' },
     { zh: '/examples/graph-capture/', en: '/en/examples/graph-capture/' },
+    { zh: '/examples/ptx-fatbinary-inspection/', en: '/en/examples/ptx-fatbinary-inspection/' },
     { zh: '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
@@ -102,6 +108,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/visuals/memory-hierarchy-lifetime/', en: '/en/visuals/memory-hierarchy-lifetime/' },
     { zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
     { zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
+    { zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
     { zh: '/practice/', en: '/en/practice/' },
     { zh: '/glossary/', en: '/en/glossary/' },
     { zh: '/sources-and-versions/', en: '/en/sources-and-versions/' },
@@ -120,7 +127,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(150_000);
   for (const scenario of [
     { route: '/', button: /搜索/, query: 'page-residency rail', localePrefix: '/', expectedHrefs: ['/visuals/page-migration/'] },
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
@@ -149,6 +156,10 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'M11 流顺序分配与内存池', localePrefix: '/', expectedHrefs: ['/memory/stream-ordered-allocation-memory-pools/'] },
     { route: '/', button: /搜索/, query: 'M13 异步复制与分阶段流水线', localePrefix: '/', expectedHrefs: ['/memory/asynchronous-copy-pipelines/'] },
     { route: '/', button: /搜索/, query: 'managed-workload', localePrefix: '/', expectedHrefs: ['/examples/unified-memory-migration/'] },
+    { route: '/', button: /搜索/, query: 'M15 NVCC 主机 设备编译流程', localePrefix: '/', expectedHrefs: ['/toolchain/nvcc-compilation-flow/'] },
+    { route: '/', button: /搜索/, query: 'M17 选择编译器架构目标', localePrefix: '/', expectedHrefs: ['/toolchain/compiler-architecture-targets/'] },
+    { route: '/', button: /搜索/, query: 'M19 CUDA C++17 C++20 C++23 方言边界', localePrefix: '/', expectedHrefs: ['/toolchain/cpp-dialect-boundaries/'] },
+    { route: '/', button: /搜索/, query: 'NVCC 构建产物流水线', localePrefix: '/', expectedHrefs: ['/visuals/artifact-pipeline/'] },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Recording Evidence Honestly', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/'] },
     { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/', expectedHrefs: ['/en/visuals/indexing/'] },
@@ -176,6 +187,9 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'M14 CUDA Graphs and Repeated Launch Structure', localePrefix: '/en/', expectedHrefs: ['/en/memory/cuda-graphs/'] },
     { route: '/en/', button: /Search/, query: 'EX07 Streams Events Overlap Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/streams-events-overlap/'] },
     { route: '/en/', button: /Search/, query: 'EX09 CUDA Graph Capture Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/graph-capture/'] },
+    { route: '/en/', button: /Search/, query: 'M16 PTX Cubins SASS Fatbinaries', localePrefix: '/en/', expectedHrefs: ['/en/toolchain/ptx-cubin-fatbinary/'] },
+    { route: '/en/', button: /Search/, query: 'target contract spans compile and device link', localePrefix: '/en/', expectedHrefs: ['/en/toolchain/separate-compilation-device-linking/'] },
+    { route: '/en/', button: /Search/, query: 'EX10 PTX and Fatbinary Inspection Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/ptx-fatbinary-inspection/'] },
   ]) {
     await expectRankedSearchResult(page, scenario);
   }
@@ -195,7 +209,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  test.setTimeout(150_000);
+  test.setTimeout(180_000);
   for (const route of [
     '/',
     '/en/',
@@ -281,6 +295,16 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/memory/asynchronous-copy-pipelines/',
     '/memory/cuda-graphs/',
     '/en/memory/cuda-graphs/',
+    '/toolchain/nvcc-compilation-flow/',
+    '/en/toolchain/nvcc-compilation-flow/',
+    '/toolchain/ptx-cubin-fatbinary/',
+    '/en/toolchain/ptx-cubin-fatbinary/',
+    '/toolchain/compiler-architecture-targets/',
+    '/en/toolchain/compiler-architecture-targets/',
+    '/toolchain/separate-compilation-device-linking/',
+    '/en/toolchain/separate-compilation-device-linking/',
+    '/toolchain/cpp-dialect-boundaries/',
+    '/en/toolchain/cpp-dialect-boundaries/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
     '/correctness/cpu-references-tolerances-invariants/exercises/',
@@ -321,6 +345,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/examples/unified-memory-migration/',
     '/examples/graph-capture/',
     '/en/examples/graph-capture/',
+    '/examples/ptx-fatbinary-inspection/',
+    '/en/examples/ptx-fatbinary-inspection/',
     '/examples/sanitizer-defect-suite/',
     '/en/examples/sanitizer-defect-suite/',
     '/labs/',
@@ -353,6 +379,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/visuals/stream-event-dependencies/',
     '/visuals/page-migration/',
     '/en/visuals/page-migration/',
+    '/visuals/artifact-pipeline/',
+    '/en/visuals/artifact-pipeline/',
     '/practice/',
     '/en/practice/',
     '/glossary/',

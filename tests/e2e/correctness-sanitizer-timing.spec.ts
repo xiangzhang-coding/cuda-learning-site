@@ -132,6 +132,7 @@ const exampleSlugs = [
   'streams-events-overlap',
   'unified-memory-migration',
   'graph-capture',
+  'ptx-fatbinary-inspection',
   'sanitizer-defect-suite',
 ] as const;
 const labSlugs = [
@@ -146,10 +147,10 @@ const labSlugs = [
 const sortedRoutes = (routes: readonly string[]) =>
   [...routes].sort((left, right) => left.localeCompare(right, 'en'));
 
-test('issue-19 final publication, Runnable Example, and Lab route scope is exact', async () => {
+test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(262);
-  expect(publishedRoutes.length / 2).toBe(131);
+  expect(publishedRoutes).toHaveLength(296);
+  expect(publishedRoutes.length / 2).toBe(148);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {
@@ -185,6 +186,30 @@ test('issue-19 final publication, Runnable Example, and Lab route scope is exact
   expect(publishedRoutes.filter((route) => /^\/(?:en\/)?labs\/[^/]+\/$/.test(route))).toEqual(
     sortedRoutes(expectedLabRoutes),
   );
+});
+
+test('EX10 is Compile-Checked, Runtime-Not-Applicable, and excluded from pending-hardware evidence', async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ['/examples/ptx-fatbinary-inspection/', '/en/examples/ptx-fatbinary-inspection/']) {
+    await page.goto(route);
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
+      'content',
+      'Compile-Checked',
+    );
+    await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
+      'content',
+      'Runtime-Not-Applicable',
+    );
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
+  }
+
+  const response = await request.get('/publication.json');
+  expect(response.ok()).toBe(true);
+  const publication = await response.json();
+  expect(publication.scope.runnableExamples).toContain('EX10');
+  expect(publication.evidence.compileChecked).toContain('EX10');
+  expect(publication.evidence.noCompileCheckedClaim).not.toContain('EX10');
+  expect(publication.evidence.pendingHardwareVerification).not.toContain('EX10');
 });
 
 test('issue-17 parent publications expose bilingual mobile head and canonical-code contracts', async ({ page }) => {

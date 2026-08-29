@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: One hundred fourteen published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred twenty-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-08-29'
@@ -1074,6 +1074,105 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [M14](/en/memory/cuda-graphs/) and [EX09](/en/examples/graph-capture/).
 - **Version note:** External storage and handles remain live until relevant launches complete. Updates are limited by topology, node type, context, and parameter restrictions; incompatible changes need a new graph and re-instantiation.
 
+<span id="term-115" class="resource-target" aria-hidden="true"></span>
+
+### NVCC · NVIDIA CUDA 编译器驱动
+
+- **Definition:** NVCC, the NVIDIA CUDA Compiler Driver, coordinates documented compilation phases, host and device translation paths, device artifacts, and link boundaries for CUDA source. It delegates applicable non-CUDA preprocessing, compilation, and linking work to the selected host compiler.
+- **Avoid:** Device compiler only, synonym for the host compiler, internal-command list from `--dryrun`, CUDA runtime, GPU execution engine.
+- **Related resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Version note:** The current owner coordinate is NVCC documentation labeled v13.3 under Toolkit 13.3.1. The Toolkit 12.9.2 archive is labeled v12.9, and the Toolkit 11.8.0 archive remains separate. Documented phases and outputs can form versioned contracts; internal steps cannot.
+
+<span id="term-116" class="resource-target" aria-hidden="true"></span>
+
+### host compiler · 主机编译器
+
+- **Definition:** A host compiler is the C++ compiler NVCC invokes for the selected platform to process host preprocessing, synthesized host C++, host objects, and applicable host-link work. Its family, major version, and dialect support belong to the complete toolchain coordinate.
+- **Avoid:** Synonym for NVCC, any compiler found on `PATH`, supported configuration fabricated with `--allow-unsupported-compiler`, GPU code generator.
+- **Related resources:** [O04](/en/start/cpp17-for-cuda/), [M15](/en/toolchain/nvcc-compilation-flow/), [M19](/en/toolchain/cpp-dialect-boundaries/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Version note:** Supported families and ranges and dialect minima require review for the exact Toolkit Lane and OS. The current CUDA 13.3 C++23 path requires GCC 14.0 or newer, while the historical GCC 13.3 probe retains only its exact `unsupported` conclusion.
+
+<span id="term-117" class="resource-target" aria-hidden="true"></span>
+
+### compilation phase · 编译阶段
+
+- **Definition:** A compilation phase is a logical translation boundary selectable by a caller through a documented option, stating how NVCC interprets input, which primary output is requested, and where the pipeline stops.
+- **Avoid:** Internal implementation step, temporary filename, private subcommand, synonym for successful build or execution.
+- **Related resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Version note:** Input suffix and phase option jointly select the boundary, reviewed separately at current v13.3, the 12.9.2 archive, and the 11.8.0 archive. Relatively stable phase names do not make internal tool order stable across versions.
+
+<span id="term-118" class="resource-target" aria-hidden="true"></span>
+
+### PTX · PTX 中间代码
+
+- **Definition:** PTX is versioned virtual ISA text with `.version` and `.target` module declarations, usable as input to later real-architecture translation or as a candidate for an applicable driver JIT path.
+- **Avoid:** SASS, cubin, CUDA C++ source, native binary for any GPU, proof that JIT or execution occurred.
+- **Related resources:** [M16](/en/toolchain/ptx-cubin-fatbinary/), [M17](/en/toolchain/compiler-architecture-targets/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Version note:** The selected Toolkit 11.8.0, 12.9.2, and 13.3.1 owner coordinates record archived PTX ISA 7.8, archived 8.8, and current 9.3, respectively. Numeric order is not a universal driver/PTX compatibility theorem.
+
+<span id="term-119" class="resource-target" aria-hidden="true"></span>
+
+### cubin · cubin 二进制
+
+- **Definition:** A cubin is a CUDA ELF binary for a named real GPU architecture containing architecture-specific executable device code. Binary Utilities can inspect its machine-instruction encoding as SASS.
+- **Avoid:** PTX text, fatbinary container, host executable, proof that a runtime selected or executed the image.
+- **Related resources:** [M16](/en/toolchain/ptx-cubin-fatbinary/), [M17](/en/toolchain/compiler-architecture-targets/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Version note:** Standalone and embedded cubins bind to the exact producing Toolkit and NVCC, real target, artifact hash, and matching Binary Utilities record. Current, 12.9.2 archive, and 11.8.0 archive tools are reviewed separately without cross-Lane projection.
+
+<span id="term-120" class="resource-target" aria-hidden="true"></span>
+
+### fatbinary · 胖二进制
+
+- **Definition:** A fatbinary is a container that can carry one or more PTX and/or cubin translations of the same device source, either as a standalone `.fatbin` or embedded in a host object, library, or executable.
+- **Avoid:** One cubin, synonym for PTX, runtime image selection, successful JIT, execution, portability guarantee.
+- **Related resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [M16](/en/toolchain/ptx-cubin-fatbinary/), [EX10](/en/examples/ptx-fatbinary-inspection/), and [VIS09](/en/visuals/artifact-pipeline/).
+- **Version note:** Current NVCC v13.3, the 12.9.2 archive labeled v12.9, and the 11.8.0 archive all retain multi-image and conditional-fallback models. Inventory states what the container holds, not what a driver used.
+
+<span id="term-121" class="resource-target" aria-hidden="true"></span>
+
+### SASS · SASS 机器代码
+
+- **Definition:** SASS is the view of GPU machine instructions encoded in an architecture-specific cubin and displayed by Binary Utilities such as `cuobjdump --dump-sass` or `nvdisasm`.
+- **Avoid:** PTX, portable standalone format parallel to cubin, source code, runtime instruction trace, performance evidence.
+- **Related resources:** [M16](/en/toolchain/ptx-cubin-fatbinary/), [M17](/en/toolchain/compiler-architecture-targets/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Version note:** Disassembly binds to the exact cubin hash, tool and version, command, and output. Static output from current 13.3, 12.9.2 archive, or 11.8.0 archive Binary Utilities does not prove that displayed instructions loaded or executed.
+
+<span id="term-122" class="resource-target" aria-hidden="true"></span>
+
+### relocatable device code · 可重定位设备代码
+
+- **Definition:** Relocatable device code is intermediate device code retained in a host object that can preserve external device references for a later device linker. NVCC `-dc` is equivalent to `--relocatable-device-code=true --compile`.
+- **Avoid:** Ordinary whole-program device code, arbitrary host object, device-link output, final executable, runtime module.
+- **Related resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [M18](/en/toolchain/separate-compilation-device-linking/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Version note:** Every CUDA source participating in a cross-translation-unit device graph produces a compatible RDC object under the selected current v13.3, 12.9.2 archive, or 11.8.0 archive contract. RDC on one side cannot retroactively repair a whole-program object on the other.
+
+<span id="term-123" class="resource-target" aria-hidden="true"></span>
+
+### device link · 设备链接
+
+- **Definition:** Device link is the compilation phase that reads relocatable-device-code objects and eligible static archives, resolves external device symbols, and produces a host object containing linked executable device code.
+- **Avoid:** Final host link, shared-library device-symbol lookup, runtime loader, kernel launch, final executable.
+- **Related resources:** [M18](/en/toolchain/separate-compilation-device-linking/) and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Version note:** Current v13.3, the 12.9.2 archive, and the 11.8.0 archive require compatible device ABI, pointer size, target, and linker version. Device-link output still enters host link, and link success grants no runtime evidence.
+
+<span id="term-124" class="resource-target" aria-hidden="true"></span>
+
+### host link · 主机链接
+
+- **Definition:** Host link combines original CUDA host objects, a device-link object when needed, other host objects, and libraries into a final host artifact while resolving host symbols, registration stubs, and Runtime references.
+- **Avoid:** Synonym for device link, replacement for device-symbol resolution, proof that an executable ran, GPU code executed, or results were correct.
+- **Related resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [M18](/en/toolchain/separate-compilation-device-linking/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Version note:** The final-link input contract is reviewed against the selected Toolkit and NVCC and host compiler. Producing an executable or library proves only that link boundary, not load, launch, completion, correctness, or performance.
+
+<span id="term-125" class="resource-target" aria-hidden="true"></span>
+
+### C++ dialect · C++ 方言
+
+- **Definition:** A C++ dialect is a language mode named by a standard coordinate such as C++17, C++20, or C++23 and requested inside an exact Toolkit, NVCC, host compiler, explicit option, source identity, and checked phase.
+- **Avoid:** Host compiler default, CUDA support inferred from a WG21 document alone, synonym for documentation eligibility, universal language claim generalized from one probe.
+- **Related resources:** [O04](/en/start/cpp17-for-cuda/), [M19](/en/toolchain/cpp-dialect-boundaries/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
+- **Version note:** The ordinary matrix is 11.8.0/C++17, 12.9.2/C++17+C++20, and 13.3.1/C++17+C++20. Run 33275734951 retains a narrow C++23 probe pass at the EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 coordinate. It is not ordinary C++23 support, while WG21 N4659/N4861/N4950/N4951 still supply standard provenance only.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, and TERM-077 through TERM-095 retain **2026-08-28**. TERM-096 through TERM-114 and the complete 114-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-29**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, and TERM-077 through TERM-095 retain **2026-08-28**. TERM-096 through TERM-125 and the complete 125-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-29**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, examples, artifacts, or diagnostics. TERM-115 through TERM-125 ran no NVCC and executed no GPU code. The [Chinese counterpart](/glossary/) is complete at the same time.

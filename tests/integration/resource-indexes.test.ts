@@ -11,6 +11,7 @@ import {
   INDEX_ROUTES,
   projectResourceIndex,
 } from '../../src/resource-indexes/resource-index-model';
+import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const asOf = new Date('2026-08-29T12:00:00Z');
@@ -22,6 +23,43 @@ async function readRoute(route: string) {
 
 function metadata(document: Document, name: string) {
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content');
+}
+
+function detailSection(source: string, planningId: string) {
+  const marker = `<span id="${planningId.toLowerCase()}"`;
+  const start = source.indexOf(marker);
+  if (start < 0) throw new Error(`Missing detail marker for ${planningId}`);
+  const next = source.indexOf('<span id="', start + marker.length);
+  return source.slice(start, next < 0 ? undefined : next);
+}
+
+function linkedPlanningIds(line = '') {
+  return [...line.matchAll(/\[([A-Z][A-Z0-9-]*\d+)(?:(?::|：)[^\]]*)?\]\(/g)].map((match) => match[1]);
+}
+
+function declaredRelationships(
+  source: string,
+  planningId: string,
+  group: 'practice' | 'glossary' | 'sources',
+  locale: (typeof INDEX_LOCALES)[number],
+) {
+  if (group === 'sources') {
+    const row = detailSection(source, planningId).split('\n')[0];
+    const related = locale === 'en' ? row.match(/Related IDs: ([^.]+)\./) : row.match(/相关 ID：([^。]+)。/);
+    return { prerequisites: [], relatedUnits: related?.[1].split(/,\s*|、/).map((id) => id.trim()) ?? [] };
+  }
+
+  const section = detailSection(source, planningId).split('\n');
+  const relatedLabel = group === 'practice'
+    ? (locale === 'en' ? '**Related Learning Units and resources:**' : '**相关学习单元与资源：**')
+    : (locale === 'en' ? '**Related resources:**' : '**相关资源：**');
+  const prerequisiteLabel = locale === 'en' ? '**Direct prerequisite:**' : '**直接先修条件：**';
+  return {
+    prerequisites: group === 'practice'
+      ? linkedPlanningIds(section.find((line) => line.includes(prerequisiteLabel)))
+      : [],
+    relatedUnits: linkedPlanningIds(section.find((line) => line.includes(relatedLabel))),
+  };
 }
 
 describe('published resource indexes', () => {
@@ -53,12 +91,37 @@ describe('published resource indexes', () => {
     },
   );
 
+  it('matches the exact relationships declared by every bilingual toolchain detail entry', async () => {
+    for (const locale of INDEX_LOCALES) {
+      const localePrefix = locale === 'en' ? 'en/' : '';
+      const detailSources = {
+        practice: await readFile(path.join(projectRoot, 'src/content/docs', localePrefix, 'practice.mdx'), 'utf8'),
+        glossary: await readFile(path.join(projectRoot, 'src/content/docs', localePrefix, 'glossary.mdx'), 'utf8'),
+        sources: await readFile(path.join(projectRoot, 'src/content/docs', localePrefix, 'sources-and-versions.mdx'), 'utf8'),
+      };
+      for (const expected of TOOLCHAIN_CATALOG_RELATIONSHIPS) {
+        const declared = declaredRelationships(
+          detailSources[expected.group],
+          expected.planningId,
+          expected.group,
+          locale,
+        );
+        const catalog = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === expected.planningId);
+        expect(declared, `${locale} ${expected.planningId} detail`).toEqual({
+          prerequisites: expected.prerequisites,
+          relatedUnits: expected.relatedUnits,
+        });
+        expect(catalog, `${locale} ${expected.planningId} catalog`).toMatchObject(declared);
+      }
+    }
+  });
+
   it('publishes no planned placeholder and keeps exact eligible populations', async () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 6, practice: 35, visuals: 12, glossary: 114, sources: 45 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(212);
+    expect(counts).toEqual({ labs: 6, practice: 40, visuals: 13, glossary: 125, sources: 50 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(234);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -66,7 +129,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['Q02', 'LAB06', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['Q02', 'LAB06', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -87,13 +150,19 @@ describe('published resource indexes', () => {
 
     for (const planningId of [
       'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
+      'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
       'TERM-096', 'TERM-097', 'TERM-098', 'TERM-099', 'TERM-100', 'TERM-101',
       'TERM-102', 'TERM-103', 'TERM-104', 'TERM-105', 'TERM-106', 'TERM-107',
       'TERM-108', 'TERM-109', 'TERM-110', 'TERM-111', 'TERM-112', 'TERM-113', 'TERM-114',
+      'TERM-115', 'TERM-116', 'TERM-117', 'TERM-118', 'TERM-119', 'TERM-120',
+      'TERM-121', 'TERM-122', 'TERM-123', 'TERM-124', 'TERM-125',
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
-      'VIS08',
+      'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
+      'VIS08', 'VIS09',
     ]) {
-      expect(RESOURCE_INDEX_RECORDS.find((record) => record.planningId === planningId)?.reviewedOn).toBe('2026-08-29');
+      const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
+      expect(record?.reviewedOn).toBe('2026-08-29');
+      if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate).toBe('2026-08-29');
     }
   });
 
@@ -143,7 +212,7 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]')).toHaveLength(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]')).toHaveLength(12);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]')).toHaveLength(13);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');

@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import ex05Project from '../../examples/ex05-coalesced-strided-access/project.json' with { type: 'json' };
 import ex06Project from '../../examples/ex06-shared-memory-tile-bank-padding/project.json' with { type: 'json' };
 import ex07Project from '../../examples/ex07-streams-events-overlap/project.json' with { type: 'json' };
 import ex08Project from '../../examples/ex08-unified-memory-migration/project.json' with { type: 'json' };
 import ex09Project from '../../examples/ex09-graph-capture/project.json' with { type: 'json' };
+import ex10Project from '../../examples/ex10-ptx-fatbinary-inspection/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
+import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
+import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
+import { zipEntries } from '../../scripts/lib/quality-policy.mjs';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
+const projectRoot = path.resolve(import.meta.dirname, '../..');
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 const releaseOrigin = new URL(process.env.RELEASE_BASE_URL as string).origin;
 const expectedSourceCommit = process.env.RELEASE_SOURCE_COMMIT as string;
@@ -25,20 +32,25 @@ const ex04SourceUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
 const ex04DownloadUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${ex04SourceCommit}.zip`;
+const ex10PublishedProject = {
+  ...ex10Project,
+  ...canonicalExamplePublications.examples.EX10,
+};
 const projectExamples = [
   { route: '/en/examples/coalesced-strided-access/', project: ex05Project },
   { route: '/en/examples/shared-memory-tile-bank-padding/', project: ex06Project },
   { route: '/en/examples/streams-events-overlap/', project: ex07Project },
   { route: '/en/examples/unified-memory-migration/', project: ex08Project },
   { route: '/en/examples/graph-capture/', project: ex09Project },
+  { route: '/en/examples/ptx-fatbinary-inspection/', project: ex10PublishedProject },
   { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
 const currentCatalogCounts = [
   { route: '/en/labs/', count: 6 },
-  { route: '/en/practice/', count: 35 },
-  { route: '/en/visuals/', count: 12 },
-  { route: '/en/glossary/', count: 114 },
-  { route: '/en/sources-and-versions/', count: 45 },
+  { route: '/en/practice/', count: 40 },
+  { route: '/en/visuals/', count: 13 },
+  { route: '/en/glossary/', count: 125 },
+  { route: '/en/sources-and-versions/', count: 50 },
 ] as const;
 
 test('serves the exact current publication while preserving R1 metadata and production canonicals', async ({ page, request }) => {
@@ -79,37 +91,41 @@ test('serves the exact current publication while preserving R1 metadata and prod
     canonicalOrigin,
     releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
     scope: {
-      publicationPairs: 131,
-      sourceRoutes: 262,
+      publicationPairs: 148,
+      sourceRoutes: 296,
       learningUnits: [
         'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
         'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
         'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
         'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
+        'M15', 'M16', 'M17', 'M18', 'M19',
         'Q01', 'Q03', 'Q04', 'Q05',
       ],
       runnableExamples: [
-        'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX16',
+        'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX16',
       ],
       labs: ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'],
       visualExplainers: [
         'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-        'VIS19', 'VIS20', 'VIS21', 'VIS22',
+        'VIS09', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
       ],
-      practiceBankEntries: 35,
-      glossaryTerms: 114,
-      sourceRecords: 45,
+      practiceBankEntries: 40,
+      glossaryTerms: 125,
+      sourceRecords: 50,
     },
     evidence: {
-      compileChecked: ['EX02', 'LAB02'],
+      compileChecked: ['EX02', 'EX10', 'LAB02'],
       noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
       pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
+      runtimeNotApplicable: ['EX10'],
       runtimeVerified: [],
       referenceEnvironments: [],
       performanceObservations: [],
+      retainedCompileRuns: [32720214527, 33275734951],
     },
     knownLimitations: expect.arrayContaining([
       'LAB06 has no current public destination.',
+      'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
       'This incremental publication record is not a completed R2 aggregate release review.',
     ]),
   });
@@ -119,7 +135,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
   expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(262);
+  expect(publishedRoutes).toHaveLength(296);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -128,8 +144,8 @@ test('serves the exact current publication while preserving R1 metadata and prod
   }
 
   await page.goto('/en/about/');
-  await expect(page.locator('main')).toContainText(/131 Publication Pairs/);
-  await expect(page.locator('main')).toContainText(/262 source routes/);
+  await expect(page.locator('main')).toContainText(/148 Publication Pairs/);
+  await expect(page.locator('main')).toContainText(/296 source routes/);
   const navigation = page.getByRole('navigation', { name: 'Main' });
   expect(
     await navigation.locator('a[href^="/en/examples/"]').evaluateAll((links) =>
@@ -141,6 +157,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
     '/en/examples/error-handling-lifecycle/',
     '/en/examples/graph-capture/',
     '/en/examples/multidimensional-indexing/',
+    '/en/examples/ptx-fatbinary-inspection/',
     '/en/examples/sanitizer-defect-suite/',
     '/en/examples/shared-memory-tile-bank-padding/',
     '/en/examples/streams-events-overlap/',
@@ -148,7 +165,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
     '/en/examples/vector-addition/',
   ]);
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(212);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(234);
   for (const { route, count } of currentCatalogCounts) {
     await page.goto(route);
     await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
@@ -349,6 +366,30 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/memory/cuda-graphs/'],
     },
     {
+      query: 'M15 NVCC Host Device Compilation Flow',
+      expectedHrefs: ['/en/toolchain/nvcc-compilation-flow/'],
+    },
+    {
+      query: 'M16 PTX cubin SASS fatbinary',
+      expectedHrefs: ['/en/toolchain/ptx-cubin-fatbinary/'],
+    },
+    {
+      query: 'M17 Select Compiler Architecture Targets',
+      expectedHrefs: ['/en/toolchain/compiler-architecture-targets/'],
+    },
+    {
+      query: 'M18 Separate Compilation and Device Linking',
+      expectedHrefs: [
+        '/en/toolchain/separate-compilation-device-linking/',
+        '/en/toolchain/separate-compilation-device-linking/exercises/',
+        '/en/toolchain/separate-compilation-device-linking/solutions/',
+      ],
+    },
+    {
+      query: 'M19 CUDA C++17 C++20 C++23 Dialect Boundaries',
+      expectedHrefs: ['/en/toolchain/cpp-dialect-boundaries/'],
+    },
+    {
       query: 'EX07 Streams Events and Overlap Runnable Example',
       expectedHrefs: ['/en/examples/streams-events-overlap/'],
     },
@@ -361,8 +402,16 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/examples/graph-capture/'],
     },
     {
+      query: 'EX10 PTX and Fatbinary Inspection Runnable Example',
+      expectedHrefs: ['/en/examples/ptx-fatbinary-inspection/'],
+    },
+    {
       query: 'VIS08 Managed-Memory Page Migration',
       expectedHrefs: ['/en/visuals/page-migration/'],
+    },
+    {
+      query: 'VIS09 NVCC Artifact Pipeline',
+      expectedHrefs: ['/en/visuals/artifact-pipeline/'],
     },
   ] as const) {
     await expectRankedSearchResult(page, {
@@ -405,6 +454,9 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
   await page.goto('/en/visuals/page-migration/');
+  await expect(page.locator('[data-visual-controls]')).toBeHidden();
+  await expect(page.locator('[data-static-fallback]')).toBeVisible();
+  await page.goto('/en/visuals/artifact-pipeline/');
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
   for (const { route, controls } of [
@@ -451,6 +503,16 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/memory/stream-ordering/',
     '/memory/event-dependencies-timing/',
     '/en/memory/event-dependencies-timing/',
+    '/toolchain/nvcc-compilation-flow/',
+    '/en/toolchain/nvcc-compilation-flow/',
+    '/toolchain/ptx-cubin-fatbinary/',
+    '/en/toolchain/ptx-cubin-fatbinary/',
+    '/toolchain/compiler-architecture-targets/',
+    '/en/toolchain/compiler-architecture-targets/',
+    '/toolchain/separate-compilation-device-linking/',
+    '/en/toolchain/separate-compilation-device-linking/',
+    '/toolchain/cpp-dialect-boundaries/',
+    '/en/toolchain/cpp-dialect-boundaries/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
     '/correctness/memcheck-invalid-memory-access/',
@@ -465,6 +527,10 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/examples/error-handling-lifecycle/',
     '/examples/sanitizer-defect-suite/',
     '/en/examples/sanitizer-defect-suite/',
+    '/examples/ptx-fatbinary-inspection/',
+    '/en/examples/ptx-fatbinary-inspection/',
+    '/visuals/artifact-pipeline/',
+    '/en/visuals/artifact-pipeline/',
     '/labs/break-and-repair-indexing/',
     '/en/labs/break-and-repair-indexing/',
     '/labs/observe-coalescing/',
@@ -517,6 +583,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/warp-divergence/',
     '/en/visuals/stream-event-dependencies/',
     '/en/visuals/page-migration/',
+    '/en/visuals/artifact-pipeline/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
     ...Object.keys(embeddedFallbacks),
@@ -592,23 +659,33 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     expect(project.sourceUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${project.sourceCommit}/${project.root}`,
     );
+    const downloadCommit = 'evidenceBundleCommit' in project
+      ? project.evidenceBundleCommit
+      : project.sourceCommit;
     expect(project.downloadUrl).toBe(
-      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${project.sourceCommit}.zip`,
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${downloadCommit}.zip`,
     );
-    expect(project.evidence.compilation).toEqual([]);
+    if (project.id === 'EX10') {
+      expect(project.evidence.compilation).toHaveLength(5);
+    } else {
+      expect(project.evidence.compilation).toEqual([]);
+    }
     expect(project.evidence.recordedObservations).toEqual([]);
 
     await page.goto(route);
     await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
     await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
-    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
+      'content',
+      project.id === 'EX10' ? 'Compile-Checked' : 'none',
+    );
     await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
       'content',
       project.evidence.runtime,
     );
     await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute(
       'content',
-      `${project.evidence.expectedObservations.length} declared expectations`,
+      `${project.evidence.expectedObservations.length} ${project.id === 'EX10' ? 'artifact expectations' : 'declared expectations'}`,
     );
     await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
     const canonicalRanges = Object.keys(project.ranges);
@@ -638,6 +715,47 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
         archive.includes(Buffer.from(`/${project.root}/${relativePath}`)),
         `${project.id} archive contains ${relativePath}`,
       ).toBe(true);
+    }
+
+    if (project.id === 'EX10') {
+      const ex10 = ex10PublishedProject;
+      const entries = zipEntries(archive);
+      const findEntry = (relativePath: string) => {
+        const matches = entries.filter(({ name }) => name.endsWith(`/${ex10.root}/${relativePath}`));
+        expect(matches, `EX10 archive contains one ${relativePath}`).toHaveLength(1);
+        return matches[0];
+      };
+      const archivedManifest = JSON.parse(findEntry('project.json').content.toString('utf8'));
+      expect(archivedManifest).toEqual(ex10Project);
+      expect(archivedManifest).not.toHaveProperty('sourceCommit');
+      expect(archivedManifest).not.toHaveProperty('downloadUrl');
+
+      const buildContractPaths = new Set([
+        ...ex10.build.inputs,
+        ...ex10.build.hostTestInputs,
+        ...ex10.build.contractFiles,
+        ...ex10.build.additionalContractInputs,
+      ]);
+      for (const relativePath of buildContractPaths) {
+        const local = await readFile(path.join(projectRoot, ex10.root, relativePath));
+        expect(findEntry(relativePath).content.equals(local), `EX10 bundle matches ${relativePath}`).toBe(true);
+      }
+
+      const evidenceFiles = [
+        ...ex10.evidence.compilation.map(({ record }) => record),
+        ex10.evidence.dialectProbe,
+      ];
+      const expectedBuildHash = await hashCanonicalBuildContract(projectRoot, 'EX10');
+      for (const relativePath of evidenceFiles) {
+        const archived = findEntry(relativePath).content;
+        const local = await readFile(path.join(projectRoot, ex10.root, relativePath));
+        expect(archived.equals(local), `EX10 bundle matches ${relativePath}`).toBe(true);
+        expect(JSON.parse(archived.toString('utf8'))).toMatchObject({
+          sourceCommit: ex10.sourceCommit,
+          buildContractSha256: expectedBuildHash,
+          workflowRun: ex10.evidence.retainedWorkflowRun,
+        });
+      }
     }
   }
 

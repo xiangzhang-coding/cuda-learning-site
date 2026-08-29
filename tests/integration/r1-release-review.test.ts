@@ -19,11 +19,12 @@ const currentLearningUnits = [
   'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
   'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
   'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
+  'M15', 'M16', 'M17', 'M18', 'M19',
   'Q01', 'Q03', 'Q04', 'Q05',
 ] as const;
 const r1Examples = ['EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX16'] as const;
 const currentExamples = [
-  'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX16',
+  'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX16',
 ] as const;
 const expectedLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
 const r1Visuals = [
@@ -32,11 +33,15 @@ const r1Visuals = [
 ] as const;
 const currentVisuals = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-  'VIS19', 'VIS20', 'VIS21', 'VIS22',
+  'VIS09', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX16',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB07',
+] as const;
+const currentPendingHardwareVerification = [
+  'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX16',
+  ...expectedLabs,
 ] as const;
 
 async function readJson(relativePath: string) {
@@ -163,29 +168,32 @@ describe('R1 release review and current publication boundary', () => {
       canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
       releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
       scope: {
-        publicationPairs: 131,
-        sourceRoutes: 262,
+        publicationPairs: 148,
+        sourceRoutes: 296,
         learningUnits: currentLearningUnits,
         runnableExamples: currentExamples,
         labs: expectedLabs,
         visualExplainers: currentVisuals,
-        practiceBankEntries: 35,
-        glossaryTerms: 114,
-        sourceRecords: 45,
+        practiceBankEntries: 40,
+        glossaryTerms: 125,
+        sourceRecords: 50,
       },
       evidence: {
-        compileChecked: ['EX02', 'LAB02'],
+        compileChecked: ['EX02', 'EX10', 'LAB02'],
         noCompileCheckedClaim: currentNoCompileCheckedClaim,
-        pendingHardwareVerification: [...currentExamples, ...expectedLabs],
+        pendingHardwareVerification: currentPendingHardwareVerification,
+        runtimeNotApplicable: ['EX10'],
         runtimeVerified: [],
         referenceEnvironments: [],
         performanceObservations: [],
-        retainedCompileRun: 32720214527,
+        retainedCompileRuns: [32720214527, 33275734951],
       },
       knownLimitations: [
         'Native Linux is the only Supported Environment; the website executes no CUDA.',
         'No current Reference Environment or Runtime-Verified subject is declared.',
-        'Only EX02 and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.',
+        'EX02, EX10, and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.',
+        'EX10 is Runtime-Not-Applicable because its acceptance contract inspects artifacts without executing the final host artifact or any GPU executable.',
+        'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
         'No measured overlap, migration, graph performance, timing, speedup, or other performance observation is published.',
         'LAB06 has no current public destination.',
         'This incremental publication record is not a completed R2 aggregate release review.',
@@ -210,7 +218,7 @@ describe('R1 release review and current publication boundary', () => {
     expect(recordsByGroup.visuals?.map(({ planningId }) => planningId)).toEqual(currentVisuals);
     expect(recordsByGroup.glossary).toHaveLength(currentManifest.scope.glossaryTerms);
     expect(recordsByGroup.sources).toHaveLength(currentManifest.scope.sourceRecords);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(212);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(234);
 
     expect(publishedRoutes).toHaveLength(currentManifest.scope.sourceRoutes);
     expect(new Set(publishedRoutes).size).toBe(currentManifest.scope.sourceRoutes);
@@ -237,17 +245,25 @@ describe('R1 release review and current publication boundary', () => {
       expect(document).not.toMatch(/\bR2 (?:is|was) (?:now )?complete(?:d)?\b/i);
     }
     for (const document of [readme, deployment, maintenance, contentLicenses]) {
-      expect(document).toMatch(/131 (?:bilingual )?Publication Pairs/i);
-      expect(document).toContain('262 source routes');
+      expect(document).toMatch(/148 (?:bilingual )?Publication Pairs/i);
+      expect(document).toContain('296 source routes');
     }
     expect(maintenance).toContain('Review date: 2026-08-29');
     expect(maintenance).toMatch(/issue #19/i);
     expect(maintenance).toContain('Context7');
+    expect(maintenance).toContain('`/websites/nvidia_cuda` on 2026-08-29');
     expect(maintenance).toContain('exact owner');
+    for (const sourceId of ['SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035']) {
+      expect(maintenance).toContain(sourceId);
+    }
     expect(readme).toContain('make -C examples/ex07-streams-events-overlap host-test');
     expect(readme).toContain('make -C examples/ex08-unified-memory-migration host-test');
     expect(readme).toContain('make -C examples/ex09-graph-capture host-test');
+    expect(readme).toContain('Runtime-Not-Applicable');
+    expect(readme).toMatch(/EX10.*C\+\+23 probe.*(?:passed|pass)/i);
     expect(readme).toMatch(/no measured overlap, migration, or graph performance/i);
+    expect(contentLicenses).toContain('VIS09');
+    expect(contentLicenses).toContain('EX10');
     expect(contentLicenses).toContain('src/current-publication-manifest.json');
   });
 });

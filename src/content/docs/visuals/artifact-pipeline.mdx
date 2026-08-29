@@ -1,0 +1,146 @@
+---
+title: 'NVCC 构建产物流水线'
+description: 在精确 Toolkit Lane 与有界 target plan 下，对比单 TU whole-program image path 与双 TU RDC object、device-link 和 final host-link path。
+pairId: vis09
+counterpart: /en/visuals/artifact-pipeline/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - artifact-flow
+  - target-plans
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS09
+prerequisites:
+  - M15
+  - M16
+  - M17
+relatedUnits:
+  - EX10
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 11.8.0 - CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory'
+    version: 'NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Selected compute_75/sm_75 target; PTX, cubin, fatbinary, host-object trajectory, and optional separate device linking'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 12.9 - CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'Toolkit 12.9.2 archive path; page label NVCC 12.9'
+    platform: 'Selected compute_75, compute_90a, and compute_100f target plans; PTX, cubin, fatbinary, host object, and device-link phases'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 13.3 - CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'Current NVCC 13.3 documentation under selected Toolkit 13.3.1'
+    platform: 'Selected compute_75, compute_90a, and compute_100f target plans; current SIMT PTX, cubin, fatbinary, host object, and device-link phases'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'NVIDIA CUDA Compiler Driver v13.3; last updated 2026-06-25'
+    platform: 'Two translation units, per-TU relocatable device-code host objects, active device-link output, and final host-link inputs'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Feature Set Compiler Targets'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Baseline, architecture-specific a-suffix, and family-specific f-suffix execution scopes'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis09 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,artifact-flow,target-plans,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M15,M16,M17' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3' }
+---
+
+import ArtifactPipelineExplorer from '../../../components/ArtifactPipelineExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/artifact-pipeline/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS09 把 NVCC 的公开 compilation 与 linking boundary 组织成两条可审查的 artifact flow。完成先修 M15、M16 与 M17 后，learner 应能解释单个 whole-program `.cu` translation unit 如何形成 PTX、cubin/SASS、fatbinary 与 `kernel.o`，再把这条 path 和两个 RDC translation unit、各自的 relocatable device-code host object、active device-link object 与 final host link 对比。相关 Runnable Example 是 EX10。
+
+这个 visual 只回答“所选 reviewed plan 声明了哪些阶段与产物”。它不回答某台机器是否安装了 compiler、一次 build 是否成功、某个 driver 是否能加载产物，或某个 GPU 最终选择了哪个 image。
+
+<ArtifactPipelineExplorer locale="zh-CN" />
+
+## 控件
+
+第一个原生 select 选择精确 Toolkit Lane：`11.8.0`、`12.9.2` 或 `13.3.1`。第二个原生 select 只显示该 Lane 中已复核的有界 target plan。`11.8.0` 只有 baseline `compute_75 -> sm_75 + compute_75 PTX`；`12.9.2` 与 `13.3.1` 还提供 `compute_90a` exact plan 和 `compute_100f` family plan。第三个原生 select 独立选择 **whole-program**（默认）或 **separate compilation / RDC**。Target 与 compilation mode 不互相推导；`a`/`f` suffix 只限定 feature scope，不表示 RDC。Visual 不接受自由文本 target 或 mode，也不会把 nearby number 当成同一个 target。
+
+**单步推进**每次完成一个 active artifact stage。Whole-program traversal 有六步，始终把 separate device link 标成 **已跳过**，并从 host object 直接前进到 final host link；RDC traversal 有七步，会先完成 device link，再进入 final host link。**重置 flow**恢复所选 lane/plan/mode 的 step zero，并把焦点送回 Toolkit Lane select；完成最后一步时，disabled Step button 的焦点会修复到 Reset。更换 Lane 会把 target plan 重置为 baseline；更换 Lane、target plan 或 mode 都会重置 traversal。`role="status"` live region 说明每次 accepted transition 或 rejection。三个原生 select 与 button 提供键盘操作，不需要自定义 key map。
+
+页面没有 autoplay、timer、storage、randomness、editable target、device query 或 persisted state。Reducer 接受 `unknown` action；malformed action、unknown Lane、unknown plan、unknown/malformed mode、Lane 不支持的 plan、invalid state 与 sequence 结束后的额外 step 都 fail closed，并保留上一 state object。
+
+## Artifact flow
+
+在 whole-program mode 中，公开 NVCC trajectory 先为 `kernel.cu` 的 device compilation 预处理 input，并产生 PTX intermediate code 和/或 cubin。每个 selected target plan 都保留一份 virtual-target PTX image candidate 和一份 paired real target 的 native cubin/SASS image，再把两者封装进 fatbinary，并把这些 finalized device image 嵌入 `kernel.o`。这里的 stage 是公开 phase model，不是从 `--dryrun` output 复制的内部命令序列。
+
+RDC branch 是另一张 object graph，不是在上面的单 kernel finalized PTX/cubin/fatbinary sequence 后追加一个 node。`caller.cu` 独立产生含 `caller.o::relocatable-device-code` 的 `caller.o`；`device_math.cu` 独立产生含 `device_math.o::relocatable-device-code` 的 `device_math.o`。Active device link 消费这两个 relocatable device-code identity，并产生含 `device_link.o::linked-executable-device-code` 的 `device_link.o`。Final host link 随后消费三个 host object，即 `caller.o + device_math.o + device_link.o`，再加所需 library；两个 original object 不会被 device-link object 取代。
+
+Whole-program mode 仍保留 device-link slot 供审查，但把它标成 **已跳过**：device code 在 `kernel.cu` 内解析，不产生独立 device-link object，final host link 只消费 `kernel.o` 与所需 library。两条 branch 都可能形成 executable 或 shared library，但 VIS09 不运行产物。
+
+Flow 到达 final linked artifact 仍不是 runtime event。Runtime 系统可能检查 embedded device image 并为当前 GPU 寻找合适 image，但 VIS09 没有 selected GPU、loaded driver、device identity、launch 或 loader observation。因此 **runtime image selection 永远保持 `unknown`**；whole-program image inventory 与 RDC linked-device-code identity 都不能决定一次 observed runtime selection。
+
+## Target plans
+
+三个 target plan 是 [F06 compute-capability contract](/foundations/compute-capability/) 已复核 matrix 的严格子集，而不是 architecture catalog：
+
+- 三个 Lane 都包含 baseline `compute_75` virtual target、`sm_75` native image 与 `compute_75` PTX candidate。
+- `12.9.2` archive 与 selected Toolkit `13.3.1` 另外包含 `compute_90a` / `sm_90a`。`a` suffix 启用 architecture-specific feature set，scope 只到精确 compute capability 9.0。
+- 同两条 Lane 还包含 `compute_100f` / `sm_100f`。`f` suffix 启用 family-specific feature set，scope 只到 current owner table 声明的同一 family。
+
+Compiler 接受 target name 只建立 compile-plan premise。PTX candidate 不自动建立 loaded-driver path；qualified `a`/`f` code 也不能按数字大小向任意后续 architecture 扩张。每个实际 build 仍需精确 command、Toolkit/NVCC、host compiler、input digest 与 artifact inspection record。
+
+## 静态回退
+
+服务器为全部七个 lane/plan 组合各渲染 whole-program 与 RDC 两条 branch，共十四张显式 lane/plan/mode card，而不只渲染初始 `11.8.0` baseline。每张 whole-program card 展示 `kernel.cu`、PTX/cubin/fatbinary path、`kernel.o`、**已跳过**的 device link 与 direct final host link。每张 RDC card 则展示 `caller.cu`、`device_math.cu`、两组 per-TU RDC/host-object identity、含 linked executable device code 的 active `device_link.o`，以及 final `caller.o + device_math.o + device_link.o` input set。任何 target suffix 都不决定 branch。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 都保留这份完整 fallback；技术状态由文字与 border pattern 表达，不依赖颜色。
+
+Source HTML 中 native controls 与 live workbench 默认隐藏。Light-DOM custom element 只有在找到全部 required controls、status region 与 stage nodes，并成功推导 initial frame 后才显示它们。`data-pagefind-ignore` 只应用于可变 live workbench；永久 static fallback 仍可索引。Standalone visual 内没有 HTML `id`，也没有复制 NVIDIA figure、SVG 或 image。
+
+## 证据边界
+
+VIS09 不执行 `nvcc`、host compiler、linker 或 CUDA，不读取 `.ptx`、`.cubin`、`.fatbin`、object 或 executable，不取得 Environment Manifest、build log、artifact digest、loader result、kernel result 或 timing。它的 stage progression、target pair 与 artifact label 都是 declared teaching output，不是 compilation、runtime 或 performance evidence。
+
+因此 compilation、runtime、expected-observation 与 recorded-observation metadata 全部为空。该 visual 不授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified** Evidence Status，也不把“可能形成 final artifact”写成“已构建”。
+
+## 来源
+
+Host/device split 与 whole-program PTX/cubin/fatbinary phase 分别和精确 [NVCC 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory)、[Toolkit 12.9.2 archive 中页面标签为 12.9 的 NVCC owner page](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory)，以及 selected Toolkit 13.3.1 下的[current NVCC 13.3 trajectory owner page](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory)复核。双 TU RDC object、含 executable device code 的 device-link output 与 final host-link object set 则直接和精确 current [Using Separate Compilation in CUDA owner section](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)复核。
+
+Baseline、architecture-specific `a` suffix 与 family-specific `f` suffix 的范围来自 current [CUDA Programming Guide v13.3 Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets)，owner page 标为 **2026-05-27 更新**。五项 source coordinate 均于 **2026-08-29** 打开。新增 separate-compilation source 与既有 owner page 共享 NVCC v13.3 version coordinate，因此去重后的 source-version metadata 仍为 `11.8.0,12.9.2,13.3.1,13.3`。没有复制 NVIDIA diagram、table、example、SVG 或 prose；flow composition、lane/plan subset、controls、fallback 与解释均为原创 CC-BY-4.0 教学材料。

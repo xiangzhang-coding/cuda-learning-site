@@ -217,6 +217,16 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/memory/asynchronous-copy-pipelines/exercises/',
     '/memory/cuda-graphs/exercises/',
     '/en/memory/cuda-graphs/exercises/',
+    '/toolchain/nvcc-compilation-flow/exercises/',
+    '/en/toolchain/nvcc-compilation-flow/exercises/',
+    '/toolchain/ptx-cubin-fatbinary/exercises/',
+    '/en/toolchain/ptx-cubin-fatbinary/exercises/',
+    '/toolchain/compiler-architecture-targets/exercises/',
+    '/en/toolchain/compiler-architecture-targets/exercises/',
+    '/toolchain/separate-compilation-device-linking/exercises/',
+    '/en/toolchain/separate-compilation-device-linking/exercises/',
+    '/toolchain/cpp-dialect-boundaries/exercises/',
+    '/en/toolchain/cpp-dialect-boundaries/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -287,6 +297,16 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/memory/asynchronous-copy-pipelines/solutions/',
     '/memory/cuda-graphs/solutions/',
     '/en/memory/cuda-graphs/solutions/',
+    '/toolchain/nvcc-compilation-flow/solutions/',
+    '/en/toolchain/nvcc-compilation-flow/solutions/',
+    '/toolchain/ptx-cubin-fatbinary/solutions/',
+    '/en/toolchain/ptx-cubin-fatbinary/solutions/',
+    '/toolchain/compiler-architecture-targets/solutions/',
+    '/en/toolchain/compiler-architecture-targets/solutions/',
+    '/toolchain/separate-compilation-device-linking/solutions/',
+    '/en/toolchain/separate-compilation-device-linking/solutions/',
+    '/toolchain/cpp-dialect-boundaries/solutions/',
+    '/en/toolchain/cpp-dialect-boundaries/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -304,17 +324,22 @@ describe('Exercises and Practice Bank contract', () => {
   });
 
   it.each([
-    'pinned-memory-transfer-overlap',
-    'unified-memory-page-migration',
-    'stream-ordered-allocation-memory-pools',
-    'cooperative-groups',
-    'asynchronous-copy-pipelines',
-    'cuda-graphs',
-  ].flatMap((slug) => [
-    { slug, localePrefix: '' },
-    { slug, localePrefix: 'en/' },
-  ]))('publishes exactly three layered tasks and three separate solutions for $slug in $localePrefix', async ({ slug, localePrefix }) => {
-    const baseRoute = `/${localePrefix}memory/${slug}/`;
+    'memory/pinned-memory-transfer-overlap',
+    'memory/unified-memory-page-migration',
+    'memory/stream-ordered-allocation-memory-pools',
+    'memory/cooperative-groups',
+    'memory/asynchronous-copy-pipelines',
+    'memory/cuda-graphs',
+    'toolchain/nvcc-compilation-flow',
+    'toolchain/ptx-cubin-fatbinary',
+    'toolchain/compiler-architecture-targets',
+    'toolchain/separate-compilation-device-linking',
+    'toolchain/cpp-dialect-boundaries',
+  ].flatMap((unitPath) => [
+    { unitPath, localePrefix: '' },
+    { unitPath, localePrefix: 'en/' },
+  ]))('publishes exactly three layered tasks and three separate solutions for $unitPath in $localePrefix', async ({ unitPath, localePrefix }) => {
+    const baseRoute = `/${localePrefix}${unitPath}/`;
     const exercises = await readRoute(`${baseRoute}exercises/`);
     const solutions = await readRoute(`${baseRoute}solutions/`);
     const taskHeadings = [...exercises.querySelectorAll('main h2')]
@@ -334,9 +359,16 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes thirty-five complete Practice Bank entries in $route', async (route) => {
-    const document = await readRoute(route);
-    const text = mainText(document);
+  it.each(['/practice/', '/en/practice/'])('publishes forty complete Practice Bank entries in $route', async (route) => {
+    const source = await readFile(
+      path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
+      'utf8',
+    );
+    const text = source.replace(/\s+/g, ' ');
+    const builtHtml = await readFile(
+      path.join(projectRoot, 'dist', route.slice(1), 'index.html'),
+      'utf8',
+    );
     const entryIds = [
       'PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005',
       'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
@@ -346,10 +378,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
       'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
       'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
+      'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
     ];
-    const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
-      entryIds.some((entryId) => heading.textContent?.includes(entryId)),
-    );
+    const entrySections = [...source.matchAll(
+      /^## (PB-R[012]-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
+    )].map(([, id, content]) => ({ id, content }));
     const focusedPrerequisitePaths: Readonly<Record<string, string>> = {
       'PB-R1-009': 'foundations/asynchronous-errors',
       'PB-R1-010': 'foundations/compute-capability',
@@ -373,23 +406,19 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-004': 'memory/cooperative-groups',
       'PB-R2-005': 'memory/asynchronous-copy-pipelines',
       'PB-R2-006': 'memory/cuda-graphs',
+      'PB-R2-007': 'toolchain/nvcc-compilation-flow',
+      'PB-R2-008': 'toolchain/ptx-cubin-fatbinary',
+      'PB-R2-009': 'toolchain/compiler-architecture-targets',
+      'PB-R2-010': 'toolchain/separate-compilation-device-linking',
+      'PB-R2-011': 'toolchain/cpp-dialect-boundaries',
     };
 
-    expect(entryHeadings).toHaveLength(entryIds.length);
+    expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
-      const heading = entryHeadings[index];
-      expect(heading.textContent, route).toContain(entryId);
-
-      const sectionElements: Element[] = [];
-      for (
-        let element = heading.parentElement?.nextElementSibling ?? null;
-        element && !element.querySelector('h2');
-        element = element.nextElementSibling
-      ) {
-        sectionElements.push(element);
-      }
-      const sectionText = sectionElements.map((element) => element.textContent ?? '').join(' ').replace(/\s+/g, ' ');
-      const sectionLinks = sectionElements.flatMap((element) => [...element.querySelectorAll('a[href]')]);
+      const section = entrySections[index];
+      expect(section.id, route).toBe(entryId);
+      const sectionText = section.content.replace(/\s+/g, ' ');
+      const sectionLinks = [...section.content.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]);
 
       expect(sectionText, `${route} ${entryId}`).toMatch(/prerequisite|先修/i);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Hardware gate|硬件门槛/);
@@ -405,36 +434,38 @@ describe('Exercises and Practice Bank contract', () => {
         ? /\/(?:en\/)?memory\//
         : prerequisitePath?.startsWith('correctness/')
           ? /\/(?:en\/)?correctness\//
+          : prerequisitePath?.startsWith('toolchain/')
+            ? /\/(?:en\/)?toolchain\//
         : /\/(?:en\/)?(?:start|foundations)\//;
-      expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link.getAttribute('href') ?? ''))).toBe(true);
+      expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link))).toBe(true);
       if (prerequisitePath) {
         expect(
-          sectionLinks.some((link) => link.getAttribute('href')?.includes(`/${prerequisitePath}/`)),
+          sectionLinks.some((link) => link.includes(`/${prerequisitePath}/`)),
           `${route} ${entryId} prerequisite`,
         ).toBe(true);
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-00[1-6]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1[01])$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
         expect(sectionText, `${route} ${entryId}`).toContain(entryId.startsWith('PB-R2') ? '2026-08-29' : '2026-08-28');
       }
     }
 
-    expect(text).toMatch(/EX01/);
-    expect(text).toMatch(/LAB01/);
+    expect(builtHtml).toMatch(/EX01/);
+    expect(builtHtml).toMatch(/LAB01/);
     expect(text).toMatch(/O02/);
     expect(text).toMatch(/O03/);
     expect(text).toMatch(/F01/);
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
-    for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14']) expect(text).toContain(unitId);
+    for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['Q01', 'Q03', 'Q04', 'Q05']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
-    expect(document.querySelector('a[href*="evidence-status"]')).not.toBeNull();
-    expect(document.querySelector('a[href*="environment-manifest"]')).not.toBeNull();
-    expect(document.querySelector('a[href*="first-cuda-kernel"]')).not.toBeNull();
+    expect(builtHtml).toContain('evidence-status');
+    expect(builtHtml).toContain('environment-manifest');
+    expect(builtHtml).toContain('first-cuda-kernel');
     for (const slug of [
       'execution-hierarchy',
       'multidimensional-indexing',
@@ -444,13 +475,16 @@ describe('Exercises and Practice Bank contract', () => {
       'runtime-driver-api',
       'launch-geometry',
     ]) {
-      expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
+      expect(builtHtml, slug).toContain(slug);
     }
     for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {
-      expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
+      expect(builtHtml, slug).toContain(slug);
     }
     for (const slug of ['address-spaces', 'coalescing-transactions', 'shared-memory-tiling', 'bank-conflicts-layouts', 'synchronization-scopes', 'warp-divergence-reconvergence', 'stream-ordering', 'event-dependencies-timing', 'pinned-memory-transfer-overlap', 'unified-memory-page-migration', 'stream-ordered-allocation-memory-pools', 'cooperative-groups', 'asynchronous-copy-pipelines', 'cuda-graphs']) {
-      expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
+      expect(builtHtml, slug).toContain(slug);
+    }
+    for (const slug of ['nvcc-compilation-flow', 'ptx-cubin-fatbinary', 'compiler-architecture-targets', 'separate-compilation-device-linking', 'cpp-dialect-boundaries']) {
+      expect(builtHtml, slug).toContain(slug);
     }
   });
 });

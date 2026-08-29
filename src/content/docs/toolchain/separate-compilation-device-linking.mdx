@@ -1,0 +1,263 @@
+---
+title: 'M18：分离编译与设备链接'
+description: 从 whole-program default 出发，为跨 translation unit 的 external device reference 启用 relocatable device code，分开 device link 与 final host link，并审查 target、library、object compatibility 和 evidence boundaries。
+pairId: m18
+counterpart: /en/toolchain/separate-compilation-device-linking/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - whole-program-default
+  - external-device-references
+  - relocatable-device-code
+  - device-link
+  - host-link
+  - target-compatibility
+  - libraries
+  - object-compatibility
+  - cuda-arch
+  - canonical-example
+  - artifact-ledger
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M18
+prerequisites:
+  - M15
+  - M16
+relatedUnits:
+  - EX10
+  - M17
+exampleIds:
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - device-link-contract
+  - artifact-pipeline
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'NVIDIA CUDA Compiler Driver v13.3; last updated 2026-06-25'
+    platform: 'Current whole-program default, relocatable device code, device-link, library, compatibility, and __CUDA_ARCH__ contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'CUDA Toolkit 12.9.2 archive; page label NVIDIA CUDA Compiler Driver v12.9; last updated 2025-05-31'
+    platform: 'Archived separate-compilation and device-link contract for the selected Toolkit 12.9.2 Lane'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 11.8.0 archive - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'CUDA Toolkit 11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Archived separate-compilation and device-link contract for the selected Toolkit 11.8.0 Lane'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m18 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,whole-program-default,external-device-references,relocatable-device-code,device-link,host-link,target-compatibility,libraries,object-compatibility,cuda-arch,canonical-example,artifact-ledger,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M18 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M15,M16' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX10,M17' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'device-link-contract,artifact-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.2,11.8.0' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/toolchain/separate-compilation-device-linking/" lang="en">Read the English counterpart</a>
+
+一个[翻译单元（translation unit，TERM-037）](/glossary/#term-037)独立完成 preprocessing 与 compilation。当 device code 需要引用另一个 translation unit 中具有 external linkage 的 device entity 时，构建需要[可重定位设备代码（relocatable device code，TERM-122）](/glossary/#term-122)和[设备链接（device link，TERM-123）](/glossary/#term-123)。Device link 的输出仍是 final [主机链接（host link，TERM-124）](/glossary/#term-124)的输入，不是 runnable program。
+
+## 学完本单元，你应该能
+
+- 从 NVCC 的 whole-program default 开始，判断一个 device call graph 是否跨越 translation-unit boundary。
+- 说明 `-dc` 为什么等价于 `--relocatable-device-code=true --compile`，并为每个 participating CUDA source 生成 relocatable object。
+- 绘出 `CUDA sources -> RDC host objects -> device-link object -> final host artifact`，同时保持 device link 与 host link 是两个阶段。
+- 审查 target、ABI、pointer size、Toolkit linker version、static/shared library 与 `__CUDA_ARCH__` boundaries。
+- 区分 source/link artifact、compilation evidence、runtime evidence 与 performance evidence。
+
+## 先修关系
+
+先完成 [M15：NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)，再完成 [M16：PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)。M15 提供 documented phase 与 host/device artifact trajectory；M16 提供 relocatable object 最终要形成的 device image vocabulary。M18 的严格先修条件恰好是 **M15 与 M16**。
+
+[EX10](/examples/ptx-fatbinary-inspection/)和 [M17：选择编译器架构目标](/toolchain/compiler-architecture-targets/)是 related resources，不是额外先修条件。本页不需要 CUDA-capable system，也不授予 Evidence Status。
+
+## Whole-program device compilation 是默认模式
+
+NVCC 默认以 whole-program mode 编译 device code。每个 CUDA translation unit 的 host object 内嵌 executable device code；该 device code 不能留下对另一个文件中 entity 的 unresolved external reference。在这个模式下，增加一个 device-link step 没有作用，因为输入对象没有 relocatable device code 可供 device linker 合并。
+
+Host code 一直可以分离编译，但这不自动扩展到 device call graph。一个 `.cu` 能在 host side 调用另一个 object 暴露的 host function，不表示该 `.cu` 内的 kernel 也能调用另一个 translation unit 才定义的 `__device__` function。
+
+因此审查从 symbol graph 开始，而不是从“项目有几个文件”开始。若每个 device reference 都在本 translation unit 解析，whole-program default 足够；若 external device edge 跨文件，才切换到 separate compilation。
+
+## External device reference 改变 link graph
+
+考虑 `caller.cu` 中的 kernel 调用 `device_math.cu` 定义的 `ex10_device_scale()`。Declaration 让 compiler 知道 signature，但 definition 不在当前 translation unit。Whole-program object 无法把该 external device edge 留给普通 host linker；host linker 并不解析 CUDA device symbol graph。
+
+正确 graph 把 source、artifact 与 consumer 分开：
+
+| Node | 产生或保留什么 | 下一位 consumer |
+| --- | --- | --- |
+| `caller.cu` | 对 external device function 的 call edge | RDC compile 生成 `caller.o` |
+| `device_math.cu` | external device function definition | RDC compile 生成 `device_math.o` |
+| `caller.o` + `device_math.o` | embedded relocatable device code、host code 与 unresolved/resolved device symbols | device linker |
+| `device_link.o` | embedded executable device code，device references 已按 link contract 解析 | host linker |
+| original objects + `device_link.o` | host symbols、registration code、CUDA runtime references 与 linked device image | final host artifact |
+
+一条 `extern` declaration 不是 link result。它只建立 symbol contract；definition、RDC mode、device-link input set 与 compatible target 仍必须同时成立。
+
+## Relocatable device code 与 `-dc`
+
+`--device-c`（`-dc`）把每个 input 编译为包含 relocatable device code 的 host object。NVCC 文档给出的精确等价关系是：
+
+`-dc` = `--relocatable-device-code=true --compile`
+
+这项 option 必须作用于每个参与 cross-translation-unit device graph 的 CUDA source。只对 caller 或 definition 一侧使用 `-dc`，不能把另一侧已经生成的 whole-program object 追溯改造成 RDC object。每个 compile command 还必须记录同一 build contract 使用的 dialect、host compiler、pointer size 与 target clauses。
+
+Relocatable object 是中间 artifact。它可能保留 external device reference，因而 object generation success 既不证明所有 device definitions 已提供，也不证明 device link 或 host link 会成功。
+
+## Device link 解析 device symbol
+
+`--device-link`（`-dlink`）只调用 device-link phase。它读取包含 relocatable device code 的 objects、可用的 static archives 以及 documented device-code inputs，解析 external device symbols，并产生一个包含 embedded executable device code 的 **host object**。普通 Linux 默认名通常是 `a_dlink.o`；可靠 build 应显式命名 output。
+
+Device-link object 的类型很重要：它是给 host linker 的 object，不是 final executable。所有需要进入 final artifact 的 target architectures 都必须传给 device linker，因为这个阶段决定 linked device image 包含哪些 targets。
+
+`nvcc <objects>` 可以隐式协调 device linker 与 host linker，但这项 convenience 不应模糊两个 acceptance boundaries。要检查 unresolved device symbol，应记录 device-link command、完整 input set、target options、exit status 与 output identity。
+
+## Final host link 是另一个阶段
+
+Host link 消费 original CUDA host objects、device-link object、其他 host objects 与 required CUDA/host libraries，最后产生 executable 或 host library。它解析 host symbols、registration stubs 与 runtime references；它不会替代先前 device symbol resolution。
+
+NVCC 文档给出的通用规则是：包含 device references 的 host objects 应同时被 device linker 与 host linker 看见；pure-host object 可以只进入 host linker。遗漏 original CUDA object 可能丢失隐式生成的 host registration code，即使其 device definition 已参与 device link。
+
+EX10 的显式 pipeline 在 final link 使用 `--no-device-link`，并把 `device_math.o`、`caller.o` 与 `device_link.o` 一起传入。这样 host-link target 不会偷偷重做 device link，两个 artifact boundary 保持可审计。
+
+## Target contract 必须贯穿 compile 与 device link
+
+每个 RDC compile 可以携带一个或多个 virtual/real target outputs；device link 必须收到 final artifact 所需的全部 target architectures。不能假设 device linker 会从一个未声明 target、一个不同 Lane 或一个 shared library 自动补齐缺失 image。
+
+Target audit 至少记录：
+
+1. 每个 object 的 virtual assumptions 与 available real/PTX code。
+2. Device-link command 请求的完整 target set。
+3. 每组 objects 是否具备 link-compatible SM code，或是否有适用于 desired target 的 PTX path。
+4. Final host artifact 预期承载哪些 linked images，以及用什么 inspection record 验证。
+
+M17 负责更广的 target-plan design；M18 只要求 link inputs 和 device-link target selection 保持 compatible。Target spelling success 仍不证明 artifact content 或 runtime selection。
+
+## Static library 会被考虑，shared library 会被忽略
+
+NVCC device linker 能读取 static host library format：Linux 上是 `.a`，Windows 上是 `.lib`。它会在这些 archives 中考虑包含 relocatable device code 的 members；不含 RDC 的 objects 对 device linker 没有贡献。
+
+同一 NVCC 文档明确说明，device linker 忽略 dynamic libraries：Linux `.so` 与 Windows `.dll`。这不是说 host linker 不能处理 shared library，而是说 `.so` 中的 device definition 不能在这个 device-link invocation 中满足 caller object 的 external device reference。如果唯一 definition 只在 shared library 中，device link 仍然缺 symbol。
+
+因此 library ledger 必须分两列：`considered by device linker` 与 `consumed by host linker`。把 `-lfoo` 同时传给两个 linkers，不表示两者从 library 读取相同 content。
+
+## Object compatibility 是机械 gate
+
+NVCC current 与 archive 文档给出同一组核心 object compatibility requirements：只有具有相同 device-code ABI version、相同 pointer size（32 或 64）和 link-compatible SM target architecture 的 relocatable device code 才能链接。Device linker 的 Toolkit version 还必须不早于 object 的 Toolkit version；incompatible inputs 应产生 link error。
+
+“Link-compatible”不等于“target 名字完全相同”，也不等于“任意更大 capability 都可接受”。若 object 还携带适用 PTX，device linker 可以按 documented path 为 desired architecture 生成 cubin 再链接；否则缺少 target-compatible code 仍是 failure。每个结论都要绑定 actual object inventory 与 selected linker version。
+
+Mechanical compatibility 通过也只表示 linker 可以组合 objects。它不检查 algorithm correctness、ABI 之外的 application-level contracts 或下面的 macro-driven semantic mismatch。
+
+## `__CUDA_ARCH__` 可能制造跨 object 语义冲突
+
+Separate compilation 中，不应在 shared header 里让 weak function 或 template function 的 behavior 依赖 `__CUDA_ARCH__`，同时又允许不同 objects 使用不同 `compute_...` assumptions 编译。两个 objects 可能生成同名 specialization 的不同 behavior；link 时只选择一个 version，结果取决于被选择的 definition。
+
+安全策略有两种：所有相关 objects 使用同一 compute architecture 编译，或不要让 shared-header function 的 behavior 由 `__CUDA_ARCH__` 分叉。仅仅满足 link-compatible SM、same ABI 和 same pointer size 不能消除这项 semantic risk。
+
+把这项检查写入 source review：列出 header-defined weak/template entities、每个 translation unit 的 compute target，以及 macro branch 是否改变 observable behavior。没有这份 ledger，就不能把 successful link 当作 semantic consistency proof。
+
+## Canonical Runnable Example：EX10
+
+EX10 是 M18 的 canonical standalone project。[查看 retained run `33275734951` 编译的 build-source commit `904c6da03800ed3012baacb861494377c0fa01f2`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection)，或[下载 evidence-bundle commit `72cf757de9e893479508c24e810fce5ae6bd5275` 的完整归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/72cf757de9e893479508c24e810fce5ae6bd5275.zip)。Bundle 保留 byte-identical build-contract inputs、最终 project manifest 与 retained records；本 Learning Unit 不维护另一份 complete implementation。
+
+第一个 canonical range 展示 `caller.cu` 对另一个 translation unit 中 device definition 的 external reference：
+
+<CanonicalCode exampleId="EX10" range="device-link-contract" />
+
+第二个 canonical range 展示 separate RDC compiles、显式 device link、带 `--no-device-link` 的 final host link，以及后续 artifact inspection：
+
+<CanonicalCode exampleId="EX10" range="artifact-pipeline" />
+
+Import order 是 page contract 的一部分：先 `device-link-contract`，再 `artifact-pipeline`。
+
+## Artifact ledger
+
+| Artifact/boundary | 可以建立的事实 | 不能建立的事实 |
+| --- | --- | --- |
+| Reviewed source graph | Declaration、definition 与 intended cross-TU edge | Compiler 接受、symbols 已解析 |
+| `caller.o` / `device_math.o` | 在 qualifying record 中可证明各自 RDC compile 成功 | Device link、host link 或 execution 成功 |
+| `device_link.o` | 在 qualifying record 中可证明 selected inputs 完成 device link | Final host artifact、load、launch 或 correctness |
+| Final host artifact | 在 qualifying record 中可证明 host link 成功并可供静态 inspection | Artifact 曾执行、GPU code 曾运行或结果正确 |
+| Hash/symbol ledger | Exact bytes 与 inspected symbol observations | Runtime behavior、latency、throughput 或 speedup |
+
+每一行都需要 exact source commit、Toolkit Lane、host compiler、full command、target set、input hashes、exit status 与 output hash 才能成为可复核 build record。下游 artifact 不能补写上游缺失的 provenance。
+
+## 证据边界
+
+本页的 hardware gate 是 `none`，因为 Learning Unit 只做 static reasoning。它没有执行 EX10，也没有发布 qualifying compile record；frontmatter 中 compilation/runtime/expected/recorded arrays 全部为空。
+
+EX10 自己把 artifact-only acceptance 标为 Runtime-Not-Applicable，但该状态不会自动传播给 M18。无论 link object、final executable、symbol listing 或 hash file 是否存在，都不能据此声称 kernel launch、runtime correctness、occupancy、latency、throughput 或 speedup。
+
+EX10 retained compilation claim 绑定 exact commit、Toolkit Lane、host compiler、dialect、target clauses、RDC inputs、device-link command、host-link command、artifact identities 与 logs。任何 runtime 或 performance claim 仍需要独立 execution、completion、correctness oracle 与 measurement record。
+
+## 离开前检查
+
+1. 为什么 whole-program device compilation 是 default，而 host code 可以早已分离编译？
+2. 哪个 source edge要求 RDC？`-dc` 与两个 long options 的精确等价关系是什么？
+3. Device link 解析什么并产出什么？为什么这个 output 仍必须进入独立 host link？
+4. Static archive 与 shared library 在 device linker 中有什么不同？
+5. Same ABI/pointer size/link-compatible SM 通过后，`__CUDA_ARCH__` 还可能留下什么 semantic risk？为什么 `device_link.o` 或 final host artifact 仍都不是 runtime/performance evidence？
+
+## 继续练习
+
+- 完成 [M18 练习（Exercise）](/toolchain/separate-compilation-device-linking/exercises/)，再查看独立的[参考解答](/toolchain/separate-compilation-device-linking/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-010](/practice/#pb-r2-010)审查 cross-translation-unit link graph、library inputs、object compatibility 与 evidence boundaries。
+- 复习 [TERM-037 translation unit](/glossary/#term-037)、[TERM-122 relocatable device code](/glossary/#term-122)、[TERM-123 device link](/glossary/#term-123)和 [TERM-124 host link](/glossary/#term-124)。
+
+## 来源与复核
+
+- [NVIDIA CUDA Compiler Driver v13.3：Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)定义 current whole-program default、RDC/options、device/host link、library、object compatibility 与 `__CUDA_ARCH__` contracts。
+- [CUDA Toolkit 12.9.2 archive：Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)保留 selected 12.9.2 Lane 的相同 boundary。
+- [CUDA Toolkit 11.8.0 archive：Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda)保留 selected 11.8.0 Lane 的相同 boundary。
+
+三项 NVIDIA owner sources 均访问于 **2026-08-29**，并按 current 13.3、12.9.2 archive、11.8.0 archive 排列。Link graph、artifact ledger、questions、Exercises 与编排均为本站 CC-BY-4.0 原创内容；没有复制 owner sample listing、figure、build output 或 performance result。
+
+**事实核查日期：2026-08-29。**

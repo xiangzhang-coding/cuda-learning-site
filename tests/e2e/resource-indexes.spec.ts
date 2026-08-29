@@ -5,6 +5,7 @@ import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-inde
 import { INDEX_GROUPS, INDEX_LOCALES, INDEX_ROUTES } from '../../src/resource-indexes/resource-index-model';
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
 import { collectBrowserFailures } from '../helpers/browser-contract';
+import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const expectedCount = (group: (typeof INDEX_GROUPS)[number]) =>
   RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length;
@@ -16,6 +17,9 @@ const releasePracticeIds = [
 ] as const;
 const issue19PracticeIds = [
   'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
+] as const;
+const toolchainPracticeIds = [
+  'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
 ] as const;
 const releaseGlossaryIds = [
   'TERM-066',
@@ -55,6 +59,10 @@ const issue19GlossaryIds = [
   'TERM-106', 'TERM-107', 'TERM-108', 'TERM-109', 'TERM-110',
   'TERM-111', 'TERM-112', 'TERM-113', 'TERM-114',
 ] as const;
+const toolchainGlossaryIds = [
+  'TERM-115', 'TERM-116', 'TERM-117', 'TERM-118', 'TERM-119', 'TERM-120',
+  'TERM-121', 'TERM-122', 'TERM-123', 'TERM-124', 'TERM-125',
+] as const;
 const releaseSourceIds = [
   'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
   'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
@@ -63,8 +71,11 @@ const issue19SourceIds = [
   'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027',
   'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
 ] as const;
+const toolchainSourceIds = [
+  'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
+] as const;
 const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
-const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08'] as const;
+const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -78,12 +89,18 @@ const issue19Ids = new Set<string>([
   ...issue19SourceIds,
   'VIS08',
 ]);
+const toolchainIds = new Set<string>([
+  ...toolchainPracticeIds,
+  ...toolchainGlossaryIds,
+  ...toolchainSourceIds,
+  'VIS09',
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
   labs: 'LAB07',
-  practice: 'PB-R2-006',
-  visuals: 'VIS08',
-  glossary: 'TERM-114',
-  sources: 'SRC-CUDA-030',
+  practice: 'PB-R2-011',
+  visuals: 'VIS09',
+  glossary: 'TERM-125',
+  sources: 'SRC-CUDA-035',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -116,6 +133,19 @@ test('both locales combine text, type, and related-resource filters without pers
   await expect(glossary.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'TERM-014');
   expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([]);
   expect(failures).toEqual([]);
+});
+
+test('toolchain catalog cards preserve every detail-declared relationship', async ({ page }) => {
+  for (const group of ['practice', 'glossary', 'sources'] as const) {
+    await page.goto(INDEX_ROUTES[group].en);
+    for (const expected of TOOLCHAIN_CATALOG_RELATIONSHIPS.filter((record) => record.group === group)) {
+      const card = page.locator(`[data-resource-id="${expected.planningId}"]`);
+      const prerequisites = card.getByText('Prerequisites', { exact: true }).locator('..').locator('dd a');
+      const relatedUnits = card.getByText('Related resources', { exact: true }).locator('..').locator('dd a');
+      expect(await prerequisites.allTextContents(), expected.planningId).toEqual(expected.prerequisites);
+      expect(await relatedUnits.allTextContents(), expected.planningId).toEqual(expected.relatedUnits);
+    }
+  }
 });
 
 test('filter controls and direct resource links support keyboard operation', async ({ page }, testInfo) => {
@@ -151,26 +181,29 @@ test('filter controls and direct resource links support keyboard operation', asy
   await expect(page).toHaveURL(/\/en\/labs\/vector-addition\/$/);
 });
 
-test('issue-19 final catalog keeps exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
+test('the expanded catalog keeps exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(6);
-  expect(counts.practice).toBe(35);
-  expect(counts.visuals).toBe(12);
-  expect(counts.glossary).toBe(114);
-  expect(counts.sources).toBe(45);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(212);
+  expect(counts.practice).toBe(40);
+  expect(counts.visuals).toBe(13);
+  expect(counts.glossary).toBe(125);
+  expect(counts.sources).toBe(50);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(234);
 
   const expectedIds = [
     ...releaseLabIds,
     ...releaseVisualIds,
     ...releasePracticeIds,
     ...issue19PracticeIds,
+    ...toolchainPracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
+    ...toolchainGlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
+    ...toolchainSourceIds,
   ];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
@@ -182,6 +215,10 @@ test('issue-19 final catalog keeps exact cards, anchors, counts, freshness, and 
   }
   for (const record of records.filter(({ planningId }) => issue19Ids.has(planningId))) {
     expect(record.reviewedOn, record.planningId).toBe('2026-08-29');
+  }
+  for (const record of records.filter(({ planningId }) => toolchainIds.has(planningId))) {
+    expect(record.reviewedOn, record.planningId).toBe('2026-08-29');
+    if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-29');
   }
 
   for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {

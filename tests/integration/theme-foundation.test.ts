@@ -36,7 +36,7 @@ describe('built theme foundation', () => {
       }
       expect(document.querySelector('[data-static-theme-fallback]')?.textContent?.trim(), file).toBe(copy.staticFallback);
     }
-  });
+  }, 15_000);
 
   it('uses one local-storage key and no account or application-state transport', async () => {
     for (const file of await builtHtmlFiles()) {

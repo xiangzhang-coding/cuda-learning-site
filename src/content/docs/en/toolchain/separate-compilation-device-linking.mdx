@@ -1,0 +1,263 @@
+---
+title: 'M18: Separate Compilation and Device Linking'
+description: Start from the whole-program default, enable relocatable device code for external device references across translation units, separate device link from the final host link, and audit target, library, object-compatibility, and evidence boundaries.
+pairId: m18
+counterpart: /toolchain/separate-compilation-device-linking/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - whole-program-default
+  - external-device-references
+  - relocatable-device-code
+  - device-link
+  - host-link
+  - target-compatibility
+  - libraries
+  - object-compatibility
+  - cuda-arch
+  - canonical-example
+  - artifact-ledger
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M18
+prerequisites:
+  - M15
+  - M16
+relatedUnits:
+  - EX10
+  - M17
+exampleIds:
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - device-link-contract
+  - artifact-pipeline
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'NVIDIA CUDA Compiler Driver v13.3; last updated 2026-06-25'
+    platform: 'Current whole-program default, relocatable device code, device-link, library, compatibility, and __CUDA_ARCH__ contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'CUDA Toolkit 12.9.2 archive; page label NVIDIA CUDA Compiler Driver v12.9; last updated 2025-05-31'
+    platform: 'Archived separate-compilation and device-link contract for the selected Toolkit 12.9.2 Lane'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 11.8.0 archive - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'CUDA Toolkit 11.8.0; NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Archived separate-compilation and device-link contract for the selected Toolkit 11.8.0 Lane'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m18 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,whole-program-default,external-device-references,relocatable-device-code,device-link,host-link,target-compatibility,libraries,object-compatibility,cuda-arch,canonical-example,artifact-ledger,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M18 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M15,M16' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX10,M17' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'device-link-contract,artifact-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.2,11.8.0' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/toolchain/separate-compilation-device-linking/" lang="zh-CN">阅读中文对应页</a>
+
+A [translation unit (TERM-037)](/en/glossary/#term-037) is preprocessed and compiled independently. When device code must reference an externally linked device entity from another translation unit, the build needs [relocatable device code (TERM-122)](/en/glossary/#term-122) and a [device link (TERM-123)](/en/glossary/#term-123). The device-link output remains input to the final [host link (TERM-124)](/en/glossary/#term-124); it is not a runnable program.
+
+## What you should be able to do
+
+- Begin with NVCC's whole-program default and decide whether a device call graph crosses a translation-unit boundary.
+- Explain why `-dc` is equivalent to `--relocatable-device-code=true --compile`, and produce a relocatable object for each participating CUDA source.
+- Draw `CUDA sources -> RDC host objects -> device-link object -> final host artifact` while preserving device link and host link as two phases.
+- Audit target, ABI, pointer-size, Toolkit-linker-version, static/shared-library, and `__CUDA_ARCH__` boundaries.
+- Distinguish source and link artifacts from compilation, runtime, and performance evidence.
+
+## Prerequisites
+
+Complete [M15: NVCC Host/Device Compilation Flow](/en/toolchain/nvcc-compilation-flow/) and then [M16: PTX, cubin, SASS, and Fatbinary](/en/toolchain/ptx-cubin-fatbinary/). M15 supplies the documented phases and host/device artifact trajectory. M16 supplies the device-image vocabulary that relocatable objects ultimately form. M18's strict prerequisites are exactly **M15 and M16**.
+
+[EX10](/en/examples/ptx-fatbinary-inspection/) and [M17: Choosing Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/) are related resources, not additional prerequisites. This page requires no CUDA-capable system and grants no Evidence Status.
+
+## Whole-program device compilation is the default
+
+NVCC compiles device code in whole-program mode by default. Each CUDA translation unit's host object embeds executable device code, and that device code cannot leave an unresolved external reference to an entity in another file. Adding a device-link step has no effect in this mode because the input objects contain no relocatable device code for the device linker to combine.
+
+Host code has long supported separate compilation, but that fact does not automatically extend to the device call graph. A `.cu` file may call a host function exposed by another object while a kernel in that same file still cannot call a `__device__` function defined only in another translation unit.
+
+Review therefore starts with the symbol graph, not the number of project files. If every device reference resolves within its own translation unit, the whole-program default is sufficient. Switch to separate compilation only when an external device edge crosses a file boundary.
+
+## An external device reference changes the link graph
+
+Suppose a kernel in `caller.cu` calls `ex10_device_scale()`, whose definition is in `device_math.cu`. The declaration tells the compiler the signature, but the definition is absent from the current translation unit. A whole-program object cannot leave that external device edge for the ordinary host linker; the host linker does not resolve the CUDA device symbol graph.
+
+The correct graph keeps source, artifact, and consumer separate:
+
+| Node | What it produces or preserves | Next consumer |
+| --- | --- | --- |
+| `caller.cu` | call edge to an external device function | RDC compile produces `caller.o` |
+| `device_math.cu` | external device-function definition | RDC compile produces `device_math.o` |
+| `caller.o` + `device_math.o` | embedded relocatable device code, host code, and unresolved/resolved device symbols | device linker |
+| `device_link.o` | embedded executable device code with device references resolved under the link contract | host linker |
+| original objects + `device_link.o` | host symbols, registration code, CUDA Runtime references, and the linked device image | final host artifact |
+
+An `extern` declaration is not a link result. It establishes a symbol contract only; the definition, RDC mode, device-link input set, and compatible target must all still be present.
+
+## Relocatable device code and `-dc`
+
+`--device-c` (`-dc`) compiles each input to a host object containing relocatable device code. The exact equivalence stated by the NVCC documentation is:
+
+`-dc` = `--relocatable-device-code=true --compile`
+
+Apply this option to every CUDA source participating in the cross-translation-unit device graph. Applying `-dc` only to the caller or definition side cannot retroactively turn the other side's existing whole-program object into an RDC object. Each compile command must also record the dialect, host compiler, pointer size, and target clauses used by the same build contract.
+
+A relocatable object is an intermediate artifact. It may retain an external device reference, so successful object generation proves neither that every device definition was supplied nor that device link or host link will succeed.
+
+## Device link resolves device symbols
+
+`--device-link` (`-dlink`) invokes only the device-link phase. It reads objects containing relocatable device code, eligible static archives, and other documented device-code inputs; resolves external device symbols; and emits a **host object** containing embedded executable device code. The ordinary Linux default name is often `a_dlink.o`, but a reliable build names the output explicitly.
+
+The output type matters: the device-link object is input to the host linker, not the final executable. Every target architecture needed in the final artifact must be passed to the device linker because this phase determines which targets enter the linked device image.
+
+`nvcc <objects>` can coordinate the device and host linkers implicitly, but that convenience must not blur their two acceptance boundaries. To audit unresolved device symbols, record the device-link command, complete input set, target options, exit status, and output identity.
+
+## The final host link is another phase
+
+Host link consumes the original CUDA host objects, the device-link object, other host objects, and required CUDA and host libraries, then creates an executable or host library. It resolves host symbols, registration stubs, and Runtime references. It does not replace the earlier device-symbol resolution.
+
+The NVCC documentation gives a general rule: host objects containing device references should be visible to both device linker and host linker; a pure-host object need not be shown to the device linker. Omitting an original CUDA object can discard implicitly generated host registration code even when its device definition participated in device link.
+
+EX10's explicit pipeline uses `--no-device-link` for the final link and passes `device_math.o`, `caller.o`, and `device_link.o` together. The host-link target therefore cannot silently repeat device link, and both artifact boundaries remain auditable.
+
+## The target contract spans compile and device link
+
+Each RDC compile may carry one or more virtual and real target outputs. Device link must receive every target architecture required by the final artifact. Do not assume that the device linker will recover a missing image from an undeclared target, another Toolkit Lane, or a shared library.
+
+A target audit records at least:
+
+1. Each object's virtual assumptions and available real or PTX code.
+2. The complete target set requested by the device-link command.
+3. Whether each object set has link-compatible SM code or a PTX path suitable for the desired target.
+4. Which linked images the final host artifact should contain and which inspection record will check them.
+
+M17 owns the broader target-plan design. M18 only requires link inputs and device-link target selection to remain compatible. Successful target spelling still proves neither artifact contents nor runtime selection.
+
+## Static libraries are considered; shared libraries are ignored
+
+The NVCC device linker can read static host-library formats: `.a` on Linux and `.lib` on Windows. It considers members containing relocatable device code; objects without RDC contribute nothing to device link.
+
+The same NVCC documentation explicitly says that the device linker ignores dynamic libraries: `.so` on Linux and `.dll` on Windows. This does not mean the host linker cannot consume a shared library. It means a device definition stored only in that `.so` cannot satisfy an external device reference in this device-link invocation. Device link still lacks the symbol when the shared library is its only definition source.
+
+Keep two columns in the library ledger: `considered by device linker` and `consumed by host linker`. Passing `-lfoo` to both linkers does not mean they read the same content from the library.
+
+## Object compatibility is a mechanical gate
+
+The current and archived NVCC documentation gives the same core object-compatibility requirements: relocatable device code can link only when it has the same device-code ABI version, the same pointer size (32 or 64), and a link-compatible SM target architecture. The device linker's Toolkit version must also be at least as new as the objects' Toolkit version. Incompatible inputs should produce a link error.
+
+"Link-compatible" means neither "identical target spelling" nor "any larger capability is acceptable." When an object also carries applicable PTX, the device linker may follow the documented path to generate cubin for the desired architecture and then link it. Otherwise, missing target-compatible code remains a failure. Bind every verdict to the actual object inventory and selected linker version.
+
+Passing mechanical compatibility only means the linker can combine the objects. It does not validate algorithm correctness, application contracts outside the ABI, or the macro-driven semantic mismatch below.
+
+## `__CUDA_ARCH__` can create cross-object semantic conflicts
+
+Under separate compilation, do not let the behavior of a weak or template function in a shared header depend on `__CUDA_ARCH__` while allowing different objects to compile with different `compute_...` assumptions. The objects may produce same-named specializations with different behavior. Link selects only one version, so behavior depends on which definition is chosen.
+
+There are two safe policies: compile every affected object for the same compute architecture, or do not branch shared-header function behavior on `__CUDA_ARCH__`. Link-compatible SM code, the same ABI, and the same pointer size do not remove this semantic risk.
+
+Add this check to source review: list header-defined weak and template entities, each translation unit's compute target, and whether the macro branch changes observable behavior. Without that ledger, a successful link is not proof of semantic consistency.
+
+## Canonical Runnable Example: EX10
+
+EX10 is M18's canonical standalone project. [View the build-source commit `904c6da03800ed3012baacb861494377c0fa01f2` compiled by retained run `33275734951`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection), or [download the complete archive at evidence-bundle commit `72cf757de9e893479508c24e810fce5ae6bd5275`](https://github.com/xiangzhang-coding/cuda-learning-site/archive/72cf757de9e893479508c24e810fce5ae6bd5275.zip). The bundle retains byte-identical build-contract inputs, the final project manifest, and the retained records; this Learning Unit keeps no second complete implementation.
+
+The first canonical range shows `caller.cu` making an external reference to a device definition in another translation unit:
+
+<CanonicalCode exampleId="EX10" range="device-link-contract" />
+
+The second canonical range shows separate RDC compiles, explicit device link, final host link with `--no-device-link`, and subsequent artifact inspection:
+
+<CanonicalCode exampleId="EX10" range="artifact-pipeline" />
+
+Import order is part of the page contract: `device-link-contract` first, then `artifact-pipeline`.
+
+## Artifact ledger
+
+| Artifact or boundary | Fact it can establish | Fact it cannot establish |
+| --- | --- | --- |
+| Reviewed source graph | declaration, definition, and intended cross-TU edge | compiler acceptance or resolved symbols |
+| `caller.o` / `device_math.o` | each RDC compile succeeded in a qualifying record | device-link, host-link, or execution success |
+| `device_link.o` | selected inputs completed device link in a qualifying record | final host artifact, load, launch, or correctness |
+| Final host artifact | host link succeeded and produced static-inspection input in a qualifying record | the artifact ran, GPU code executed, or results were correct |
+| Hash or symbol ledger | exact bytes and inspected symbol observations | runtime behavior, latency, throughput, or speedup |
+
+Each row needs an exact source commit, Toolkit Lane, host compiler, full command, target set, input hashes, exit status, and output hash before it becomes a reviewable build record. A downstream artifact cannot repair missing upstream provenance.
+
+## Evidence boundary
+
+This page has hardware gate `none` because the Learning Unit performs static reasoning only. It did not execute EX10 and publishes no qualifying compile record. Its compilation, runtime, expected-observation, and recorded-observation arrays all remain empty.
+
+EX10 separately marks its artifact-only acceptance as Runtime-Not-Applicable, but that status does not propagate automatically to M18. The existence of a link object, final executable, symbol listing, or hash file cannot establish kernel launch, runtime correctness, occupancy, latency, throughput, or speedup.
+
+EX10's retained compilation claim binds the exact commit, Toolkit Lane, host compiler, dialect, target clauses, RDC inputs, device-link command, host-link command, artifact identities, and logs. Any runtime or performance claim still requires a separate execution, completion, correctness-oracle, and measurement record.
+
+## Retrieval check
+
+1. Why is whole-program device compilation the default even though host code can already be separately compiled?
+2. Which source edge requires RDC, and what is the exact equivalence between `-dc` and its two long options?
+3. What does device link resolve and produce, and why must that output still enter a separate host link?
+4. How do a static archive and shared library differ for the device linker?
+5. After same ABI, pointer size, and link-compatible SM pass, what semantic risk can `__CUDA_ARCH__` still leave, and why is neither `device_link.o` nor the final host artifact runtime or performance evidence?
+
+## Continue with practice
+
+- Complete the [M18 Exercises](/en/toolchain/separate-compilation-device-linking/exercises/), then inspect the separate [reviewed solutions](/en/toolchain/separate-compilation-device-linking/solutions/).
+- Audit a cross-translation-unit link graph, library inputs, object compatibility, and evidence boundaries in [Practice Bank PB-R2-010](/en/practice/#pb-r2-010).
+- Revisit [TERM-037 translation unit](/en/glossary/#term-037), [TERM-122 relocatable device code](/en/glossary/#term-122), [TERM-123 device link](/en/glossary/#term-123), and [TERM-124 host link](/en/glossary/#term-124).
+
+## Sources and review
+
+- [NVIDIA CUDA Compiler Driver v13.3: Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda) defines the current whole-program default, RDC options, device and host link, library, object-compatibility, and `__CUDA_ARCH__` contracts.
+- [CUDA Toolkit 12.9.2 archive: Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda) preserves the same boundary for the selected 12.9.2 Lane.
+- [CUDA Toolkit 11.8.0 archive: Using Separate Compilation in CUDA](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda) preserves the same boundary for the selected 11.8.0 Lane.
+
+All three NVIDIA owner sources were accessed on **2026-08-29** and are ordered as current 13.3, the 12.9.2 archive, then the 11.8.0 archive. The link graph, artifact ledger, questions, Exercises, and arrangement are original CC-BY-4.0 work for this site. No owner sample listing, figure, build output, or performance result is copied.
+
+**Fact checked: 2026-08-29.**

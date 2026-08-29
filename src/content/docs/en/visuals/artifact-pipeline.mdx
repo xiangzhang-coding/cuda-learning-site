@@ -1,0 +1,146 @@
+---
+title: 'NVCC Artifact Pipeline'
+description: Compare a single-TU whole-program image path with a two-TU RDC object, device-link, and final host-link path under an exact Toolkit Lane and bounded target plan.
+pairId: vis09
+counterpart: /visuals/artifact-pipeline/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - artifact-flow
+  - target-plans
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS09
+prerequisites:
+  - M15
+  - M16
+  - M17
+relatedUnits:
+  - EX10
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA Compiler Driver NVCC 11.8.0 - CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory'
+    version: 'NVCC v11.8.0; last updated 2022-10-03'
+    platform: 'Selected compute_75/sm_75 target; PTX, cubin, fatbinary, host-object trajectory, and optional separate device linking'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 12.9 - CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'Toolkit 12.9.2 archive path; page label NVCC 12.9'
+    platform: 'Selected compute_75, compute_90a, and compute_100f target plans; PTX, cubin, fatbinary, host object, and device-link phases'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver 13.3 - CUDA Compilation Trajectory'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory'
+    version: 'Current NVCC 13.3 documentation under selected Toolkit 13.3.1'
+    platform: 'Selected compute_75, compute_90a, and compute_100f target plans; current SIMT PTX, cubin, fatbinary, host object, and device-link phases'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - Using Separate Compilation in CUDA'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda'
+    version: 'NVIDIA CUDA Compiler Driver v13.3; last updated 2026-06-25'
+    platform: 'Two translation units, per-TU relocatable device-code host objects, active device-link output, and final host-link inputs'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Feature Set Compiler Targets'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Baseline, architecture-specific a-suffix, and family-specific f-suffix execution scopes'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis09 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,artifact-flow,target-plans,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M15,M16,M17' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3' }
+---
+
+import ArtifactPipelineExplorer from '../../../../components/ArtifactPipelineExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/artifact-pipeline/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS09 arranges documented NVCC compilation and linking boundaries into two reviewable artifact flows. After prerequisites M15, M16, and M17, a learner should be able to explain how one whole-program `.cu` translation unit forms PTX, cubin/SASS, a fatbinary, and `kernel.o`; then contrast that path with two RDC translation units, their separate relocatable device-code host objects, an active device-link object, and the final host link. The related Runnable Example is EX10.
+
+This visual answers only, "Which stages and artifacts does the selected reviewed plan declare?" It does not answer whether a compiler is installed, a build succeeded, a driver can load an artifact, or a GPU would select a particular image.
+
+<ArtifactPipelineExplorer locale="en" />
+
+## Controls
+
+The first native select chooses an exact Toolkit Lane: `11.8.0`, `12.9.2`, or `13.3.1`. The second native select exposes only bounded target plans reviewed for that Lane. `11.8.0` has only baseline `compute_75 -> sm_75 + compute_75 PTX`; `12.9.2` and `13.3.1` also expose the exact `compute_90a` plan and family-scoped `compute_100f` plan. A third native select independently chooses **whole-program** (the default) or **separate compilation / RDC**. Targets and compilation modes do not imply one another: an `a` or `f` suffix scopes features and does not select RDC. The visual accepts no free-form target or mode and never treats a nearby number as the same target.
+
+**Step forward** completes one active artifact stage. The whole-program traversal has six steps, keeps the separate device link explicitly **skipped**, and advances directly from the host object to the final host link. The RDC traversal has seven steps and completes device link before final host link. **Reset flow** restores step zero for the selected lane/plan/mode and returns focus to the Toolkit Lane select. When the final step disables the focused Step button, focus is repaired to Reset. Changing the Lane resets the target plan to baseline; changing the Lane, target plan, or mode resets traversal. A `role="status"` live region describes every accepted transition or rejection. The three native selects and buttons supply keyboard access without a custom key map.
+
+The page has no autoplay, timer, storage, randomness, editable target, device query, or persisted state. The reducer accepts an `unknown` action. A malformed action, unknown Lane, unknown plan, unknown or malformed mode, plan unsupported by the Lane, invalid state, or extra step after completion fails closed and preserves the previous state object.
+
+## Artifact flow
+
+In whole-program mode, the documented NVCC trajectory first preprocesses `kernel.cu` for device compilation and produces PTX intermediate code and/or a cubin. Every selected target plan retains one virtual-target PTX image candidate and one native cubin/SASS image for the paired real target, packages both into a fatbinary, and embeds those finalized device images in `kernel.o`. These stages are a documented phase model, not copied internal commands from `--dryrun` output.
+
+The RDC branch is a different object graph, not that one-kernel finalized PTX/cubin/fatbinary sequence with one extra node. `caller.cu` independently produces `caller.o` containing `caller.o::relocatable-device-code`; `device_math.cu` independently produces `device_math.o` containing `device_math.o::relocatable-device-code`. The active device link consumes those two relocatable device-code identities and emits `device_link.o` containing `device_link.o::linked-executable-device-code`. The final host link then consumes all three host objects, `caller.o + device_math.o + device_link.o`, plus required libraries. The two original objects are not replaced by the device-link object.
+
+Whole-program mode keeps its device-link slot visible for review but marks it **skipped**: device code resolves within `kernel.cu`, so no separate device-link object is produced and the final host link consumes `kernel.o` plus required libraries. Either branch can form an executable or shared library, but VIS09 does not run it.
+
+Reaching a final linked artifact is still not a runtime event. A runtime may inspect embedded device images and seek a suitable image for the current GPU, but VIS09 has no selected GPU, loaded driver, device identity, launch, or loader observation. Therefore **runtime image selection always remains `unknown`**. Neither the whole-program image inventory nor the RDC linked-device-code identity determines an observed runtime selection.
+
+## Target plans
+
+The three target plans are a strict subset of the matrix reviewed by the [F06 compute-capability contract](/en/foundations/compute-capability/), not an architecture catalog:
+
+- All three Lanes contain the baseline `compute_75` virtual target, `sm_75` native image, and `compute_75` PTX candidate.
+- The `12.9.2` archive and selected Toolkit `13.3.1` also contain `compute_90a` / `sm_90a`. The `a` suffix enables an architecture-specific feature set whose scope is exact compute capability 9.0 only.
+- Those same two Lanes contain `compute_100f` / `sm_100f`. The `f` suffix enables a family-specific feature set whose scope is only the family declared by the current owner table.
+
+Compiler acceptance of a target name establishes only a compile-plan premise. A PTX candidate does not automatically establish a loaded-driver path, and qualified `a` or `f` code cannot expand to arbitrary later architectures by numeric ordering. Every real build still needs its exact command, Toolkit/NVCC, host compiler, input digest, and artifact-inspection record.
+
+## Static fallback
+
+For all seven lane/plan combinations, the server renders both branches: fourteen explicit lane/plan/mode cards rather than only the initial `11.8.0` baseline. Each whole-program card shows `kernel.cu`, the PTX/cubin/fatbinary path, `kernel.o`, a **skipped** device link, and its direct final host link. Each RDC card instead shows `caller.cu`, `device_math.cu`, their two per-TU RDC/host-object identities, the active `device_link.o` with linked executable device code, and the final `caller.o + device_math.o + device_link.o` input set. No target suffix chooses either branch. This complete fallback remains available without JavaScript, at a 390-pixel viewport, with reduced motion, in forced colors, and in print. Text and border patterns carry technical states without relying on color.
+
+Native controls and the live workbench are hidden in source HTML. The light-DOM custom element reveals them only after it finds every required control, status region, and stage node and successfully derives the initial frame. `data-pagefind-ignore` applies only to the changing live workbench; the permanent static fallback remains indexable. The standalone visual contains no HTML `id` and copies no NVIDIA figure, SVG, or image.
+
+## Evidence boundary
+
+VIS09 executes no `nvcc`, host compiler, linker, or CUDA. It reads no `.ptx`, `.cubin`, `.fatbin`, object, or executable and obtains no Environment Manifest, build log, artifact digest, loader result, kernel result, or timing. Its stage progression, target pair, and artifact labels are declared teaching output, not compilation, runtime, or performance evidence.
+
+Compilation, runtime, expected-observation, and recorded-observation metadata are therefore all empty. The visual grants no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** Evidence Status and never rewrites "a final artifact may be formed" as "this artifact was built."
+
+## Sources
+
+The host/device split and whole-program PTX/cubin/fatbinary phases were checked against the exact [NVCC 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory), the [NVCC owner page labeled 12.9 in the Toolkit 12.9.2 archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory), and the [current NVCC 13.3 trajectory owner page](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory) under selected Toolkit 13.3.1. The two-TU RDC objects, device-link output containing executable device code, and final host-link object set were checked directly against the exact current [Using Separate Compilation in CUDA owner section](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda).
+
+The scopes of baseline, architecture-specific `a` suffix, and family-specific `f` suffix targets come from the current [CUDA Programming Guide v13.3 Feature Set Compiler Targets](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets), whose owner page reports **last updated 2026-05-27**. All five source coordinates were accessed on **2026-08-29**. The added separate-compilation source shares the existing NVCC v13.3 version coordinate, so the unique source-version metadata remains `11.8.0,12.9.2,13.3.1,13.3`. No NVIDIA diagram, table, example, SVG, or prose is copied. The flow composition, lane/plan subset, controls, fallback, and explanation are original CC-BY-4.0 teaching material.

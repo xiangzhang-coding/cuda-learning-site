@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 114 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 125 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-08-29'
@@ -1074,6 +1074,105 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [M14](/memory/cuda-graphs/)和 [EX09](/examples/graph-capture/)。
 - **版本说明：** External storage/handles 必须活到相关 launch 完成；updates 受 topology、node type、context 与 parameter restrictions 限制，不兼容 change 需要新 graph 与 re-instantiation。
 
+<span id="term-115" class="resource-target" aria-hidden="true"></span>
+
+### NVCC · NVIDIA CUDA 编译器驱动
+
+- **定义：** NVCC（NVIDIA CUDA Compiler Driver）是协调 CUDA source 的 documented compilation phases、host/device translation paths、device artifacts 与 link boundaries 的 compiler driver；它把适用的非 CUDA preprocessing、compilation 和 linking work 交给 selected host compiler。
+- **避免使用：** 只有 device compiler、host compiler 的同义词、`--dryrun` 内部命令清单、CUDA runtime 或 GPU execution engine。
+- **相关资源：** [M15](/toolchain/nvcc-compilation-flow/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **版本说明：** Current owner coordinate 是 Toolkit 13.3.1 下页面标签 v13.3 的 NVCC 文档；Toolkit 12.9.2 archive 页面标为 v12.9，Toolkit 11.8.0 archive 单独保留。Documented phase/output 可以形成版本化合同，内部 steps 不能。
+
+<span id="term-116" class="resource-target" aria-hidden="true"></span>
+
+### host compiler · 主机编译器
+
+- **定义：** 主机编译器（host compiler）是 NVCC 为 selected platform 调用、用于处理 host preprocessing、synthesized host C++、host object 和适用 host-link work 的 C++ compiler；其 family、major version 与 dialect support 属于完整 toolchain coordinate。
+- **避免使用：** NVCC 的别名、`PATH` 上任意 compiler、用 `--allow-unsupported-compiler` 伪造的 supported configuration、GPU code generator。
+- **相关资源：** [O04](/start/cpp17-for-cuda/)、[M15](/toolchain/nvcc-compilation-flow/)、[M19](/toolchain/cpp-dialect-boundaries/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **版本说明：** Supported family/range 与 dialect minimum 必须按 exact Toolkit Lane 和 OS 核对；current CUDA 13.3 C++23 path 对 GCC 的 minimum 是 14.0，而 GCC 13.3 historical probe 只保留其 exact `unsupported` 结论。
+
+<span id="term-117" class="resource-target" aria-hidden="true"></span>
+
+### compilation phase · 编译阶段
+
+- **定义：** 编译阶段（compilation phase）是 caller 可通过 documented option 选择的 logical translation boundary，声明 NVCC 如何解释 input、请求何种 primary output，以及 pipeline 在何处停止。
+- **避免使用：** Internal implementation step、temporary filename、private subcommand、successful build 或 execution 的同义词。
+- **相关资源：** [M15](/toolchain/nvcc-compilation-flow/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **版本说明：** Input suffix 与 phase option 共同决定 boundary；current v13.3、12.9.2 archive 和 11.8.0 archive 分别核对。Phase 名称相对稳定不表示内部 tool order 跨版本稳定。
+
+<span id="term-118" class="resource-target" aria-hidden="true"></span>
+
+### PTX · PTX 中间代码
+
+- **定义：** PTX 中间代码（PTX）是带 `.version` 与 `.target` module declarations 的 versioned virtual ISA text，可作为后续 real-architecture translation 或适用 driver JIT path 的 input candidate。
+- **避免使用：** SASS、cubin、CUDA C++ source、任意 GPU 的 native binary、JIT 或 execution 已发生的证明。
+- **相关资源：** [M16](/toolchain/ptx-cubin-fatbinary/)、[M17](/toolchain/compiler-architecture-targets/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **版本说明：** Selected Toolkit 11.8.0、12.9.2 与 13.3.1 owner coordinates 分别记录 archived PTX ISA 7.8、archived 8.8 与 current 9.3；数字顺序不是 universal driver/PTX compatibility theorem。
+
+<span id="term-119" class="resource-target" aria-hidden="true"></span>
+
+### cubin · cubin 二进制
+
+- **定义：** cubin 二进制（cubin）是面向具名 real GPU architecture、包含 architecture-specific executable device code 的 CUDA ELF binary；其中 machine-instruction encoding 可被 Binary Utilities 检查为 SASS。
+- **避免使用：** PTX text、fatbinary container、host executable、runtime 已选择或执行该 image 的证明。
+- **相关资源：** [M16](/toolchain/ptx-cubin-fatbinary/)、[M17](/toolchain/compiler-architecture-targets/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **版本说明：** Standalone 与 embedded cubin 必须绑定 exact producing Toolkit/NVCC、real target、artifact hash 和 matching Binary Utilities record；current/12.9.2/11.8.0 tools 分别核对，不跨 Lane 外推。
+
+<span id="term-120" class="resource-target" aria-hidden="true"></span>
+
+### fatbinary · 胖二进制
+
+- **定义：** 胖二进制（fatbinary）是可承载同一 device source 的一个或多个 PTX 和/或 cubin translations 的 container，可作为 standalone `.fatbin`，也可嵌入 host object、library 或 executable。
+- **避免使用：** 单一 cubin、PTX 的别名、runtime image selection、JIT success、execution 或 portability guarantee。
+- **相关资源：** [M15](/toolchain/nvcc-compilation-flow/)、[M16](/toolchain/ptx-cubin-fatbinary/)、[EX10](/examples/ptx-fatbinary-inspection/)和 [VIS09](/visuals/artifact-pipeline/)。
+- **版本说明：** Current NVCC v13.3、12.9.2 archive/v12.9 与 11.8.0 archive 都保留 multi-image 和 conditional fallback model；inventory 只说明 container 中有什么，不说明 driver 用了什么。
+
+<span id="term-121" class="resource-target" aria-hidden="true"></span>
+
+### SASS · SASS 机器代码
+
+- **定义：** SASS 机器代码（SASS）是在一个 architecture-specific cubin 中编码、由 `cuobjdump --dump-sass` 或 `nvdisasm` 等 Binary Utilities 显示的 GPU machine instructions 视图。
+- **避免使用：** PTX、与 cubin 并列的 portable standalone format、source code、runtime instruction trace 或 performance evidence。
+- **相关资源：** [M16](/toolchain/ptx-cubin-fatbinary/)、[M17](/toolchain/compiler-architecture-targets/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **版本说明：** Disassembly 绑定 exact cubin hash、tool/version、command 与 output；current 13.3、12.9.2 archive 和 11.8.0 archive Binary Utilities 的 static output 都不证明 displayed instructions 被加载或执行。
+
+<span id="term-122" class="resource-target" aria-hidden="true"></span>
+
+### relocatable device code · 可重定位设备代码
+
+- **定义：** 可重定位设备代码（relocatable device code）是保存在 host object 中、可保留 external device references 并供后续 device linker 合并的中间 device code；NVCC `-dc` 等价于 `--relocatable-device-code=true --compile`。
+- **避免使用：** 普通 whole-program device code、任意 host object、device-link output、final executable 或 runtime module。
+- **相关资源：** [M15](/toolchain/nvcc-compilation-flow/)、[M18](/toolchain/separate-compilation-device-linking/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **版本说明：** 每个参与 cross-translation-unit device graph 的 CUDA source 都必须在 selected current v13.3、12.9.2 archive 或 11.8.0 archive contract 下产生 compatible RDC object；一侧的 RDC 不能追溯修复另一侧 whole-program object。
+
+<span id="term-123" class="resource-target" aria-hidden="true"></span>
+
+### device link · 设备链接
+
+- **定义：** 设备链接（device link）是读取 relocatable device-code objects 与 eligible static archives、解析 external device symbols，并产生嵌有 linked executable device code 的 host object 的 compilation phase。
+- **避免使用：** Final host link、shared-library device-symbol lookup、runtime loader、kernel launch 或最终 executable。
+- **相关资源：** [M18](/toolchain/separate-compilation-device-linking/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **版本说明：** Current v13.3、12.9.2 archive 与 11.8.0 archive 都要求 compatible device ABI、pointer size、target 与 linker version；device-link output 仍须进入 host link，且 link success 不授予 runtime evidence。
+
+<span id="term-124" class="resource-target" aria-hidden="true"></span>
+
+### host link · 主机链接
+
+- **定义：** 主机链接（host link）是把 original CUDA host objects、需要时的 device-link object、其他 host objects 和 libraries 组合成 final host artifact，并解析 host symbols、registration stubs 与 Runtime references 的阶段。
+- **避免使用：** Device link 的同义词、device-symbol resolution 的替代品、executable 已运行、GPU code 已执行或结果正确的证明。
+- **相关资源：** [M15](/toolchain/nvcc-compilation-flow/)、[M18](/toolchain/separate-compilation-device-linking/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **版本说明：** Final link input contract 按 selected Toolkit/NVCC 与 host compiler 核对；成功产生 executable 或 library 只证明该 link boundary，不证明 load、launch、completion、correctness 或 performance。
+
+<span id="term-125" class="resource-target" aria-hidden="true"></span>
+
+### C++ dialect · C++ 方言
+
+- **定义：** C++ 方言（C++ dialect）是由 C++17、C++20 或 C++23 等标准坐标命名、并在 exact Toolkit、NVCC、host compiler、explicit option、source identity 和 checked phase 中请求的 language mode。
+- **避免使用：** Host compiler default、仅凭 WG21 document 得出的 CUDA support、documentation eligibility 的同义词、从一个 probe 推广的 universal language claim。
+- **相关资源：** [O04](/start/cpp17-for-cuda/)、[M19](/toolchain/cpp-dialect-boundaries/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
+- **版本说明：** Ordinary matrix 是 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20。Run 33275734951 在 EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 坐标上保留 narrow C++23 probe pass；它不是 ordinary C++23 support，WG21 N4659/N4861/N4950/N4951 仍只提供标准 provenance。
+
 ## 维护规则
 
-TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**。TERM-096 至 TERM-114，以及完整 114 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-29** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**。TERM-096 至 TERM-125，以及完整 125 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-29** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure、example、artifact 或 diagnostic。TERM-115 至 TERM-125 没有运行 NVCC 或执行 GPU code。对应的[英文页](/en/glossary/)同时完整发布。

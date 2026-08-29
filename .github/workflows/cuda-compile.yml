@@ -579,7 +579,7 @@ jobs:
   cuda-compile-gate:
     name: cuda-compile-gate
     if: ${{ always() }}
-    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex16-build]
+    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex16-build]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -594,6 +594,7 @@ jobs:
           EX07_BUILD_RESULT: ${{ needs.ex07-build.result }}
           EX08_BUILD_RESULT: ${{ needs.ex08-build.result }}
           EX09_BUILD_RESULT: ${{ needs.ex09-build.result }}
+          EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}
           EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}
         run: |
           if [ "$CUDA_EVIDENCE_RESULT" != "success" ]; then exit 1; fi
@@ -605,5 +606,98 @@ jobs:
           if [ "$EX07_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX08_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX09_BUILD_RESULT" != "success" ]; then exit 1; fi
+          if [ "$EX10_COMPILE_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi
           echo "Compile evidence does not grant CUDA runtime evidence."
+
+  ex10-compile:
+    name: ${{ matrix.lane }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: ex10-cuda-11-8-cxx17
+            toolkit_lane: cuda-11.8
+            dialect: c++17
+            kind: ex10
+            image: nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f
+          - lane: ex10-cuda-12-9-cxx17
+            toolkit_lane: cuda-12.9
+            dialect: c++17
+            kind: ex10
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: ex10-cuda-12-9-cxx20
+            toolkit_lane: cuda-12.9
+            dialect: c++20
+            kind: ex10
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: ex10-cuda-13-3-cxx17
+            toolkit_lane: cuda-13.3
+            dialect: c++17
+            kind: ex10
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+          - lane: ex10-cuda-13-3-cxx20
+            toolkit_lane: cuda-13.3
+            dialect: c++20
+            kind: ex10
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+          - lane: ex10-cuda-13-3-gcc14-cxx23-probe
+            toolkit_lane: cuda-13.3
+            dialect: c++23
+            kind: cxx23-probe
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+    steps:
+      - name: Check out canonical public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up exact Node.js for the EX10 evidence recorder
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Record EX10 verification coordinates
+        run: |
+          echo "VERIFICATION_DATE=$(date -u +%F)" >> "$GITHUB_ENV"
+          node -e "console.log(JSON.stringify({ImageOS:process.env.ImageOS,ImageVersion:process.env.ImageVersion,RUNNER_ARCH:process.env.RUNNER_ARCH},null,2))"
+          docker version --format '{{.Server.Version}}'
+          docker buildx version
+
+      - name: Build and inspect EX10 artifacts without execution
+        run: >-
+          node scripts/run-ex10-compile.mjs
+          --check "${{ matrix.lane }}"
+          --toolkit-lane "${{ matrix.toolkit_lane }}"
+          --dialect "${{ matrix.dialect }}"
+          --kind "${{ matrix.kind }}"
+          --image "${{ matrix.image }}"
+
+      - name: Scan sanitized EX10 records and inspection logs
+        run: node scripts/check-artifacts.mjs "artifacts/cuda-ex10/${{ matrix.lane }}"
+
+      - name: Upload sanitized EX10 compile evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuda-compile-${{ matrix.lane }}
+          path: artifacts/cuda-ex10/${{ matrix.lane }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+
+  ex10-compile-gate:
+    name: ex10-compile-gate
+    if: ${{ always() }}
+    needs: [ex10-compile]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every EX10 artifact check
+        env:
+          EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}
+        run: |
+          if [ "$EX10_COMPILE_RESULT" != "success" ]; then exit 1; fi
+          echo "EX10 compilation and inspection do not execute the linked artifact."

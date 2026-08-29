@@ -1,0 +1,214 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "result": "pass",
+  "claim": "Compile-Checked",
+  "subject": "EX10",
+  "check": "ex10-cuda-11-8-cxx17",
+  "sourceCommit": "904c6da03800ed3012baacb861494377c0fa01f2",
+  "buildContractSha256": "9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7",
+  "verificationDate": "2026-08-29",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951",
+  "runner": {
+    "operatingSystem": "Linux",
+    "architecture": "X64",
+    "imageOS": "ubuntu24",
+    "imageVersion": "20260823.283.1",
+    "dockerEngine": "28.0.4",
+    "dockerBuildx": "github.com/docker/buildx v0.36.1 1d8dde89b8aba914e05e45366770736fea1fd690"
+  },
+  "container": {
+    "declaredReference": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+    "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+    "expectedAmd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+    "actualAmd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+    "actualImageId": "sha256:6f9cc9f1ba9ed67d195088555737124e4a2eb54bebaaa7596f44e235428a461c",
+    "actualRepoDigests": [
+      "nvidia/cuda@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f"
+    ],
+    "operatingSystem": {
+      "id": "ubuntu",
+      "versionId": "22.04",
+      "prettyName": "Ubuntu 22.04.3 LTS"
+    }
+  },
+  "toolchain": {
+    "toolkit": "11.8.0",
+    "hostCompiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0",
+    "nvcc": "Cuda compilation tools, release 11.8, V11.8.89",
+    "cuobjdump": "cuobjdump: NVIDIA (R) fat binary listing tool; Cuda compilation tools, release 11.8, V11.8.86",
+    "nm": "GNU nm (GNU Binutils for Ubuntu) 2.38",
+    "dialect": "c++17",
+    "target": [
+      "sm_75",
+      "compute_75"
+    ]
+  },
+  "commands": [
+    "make preprocess DIALECT=c++17 BUILD_DIR=build",
+    "make standalone-ptx DIALECT=c++17 BUILD_DIR=build",
+    "make cubin DIALECT=c++17 BUILD_DIR=build",
+    "make fatbin DIALECT=c++17 BUILD_DIR=build",
+    "make relocatable-compile DIALECT=c++17 BUILD_DIR=build",
+    "make device-link DIALECT=c++17 BUILD_DIR=build",
+    "make host-link DIALECT=c++17 BUILD_DIR=build",
+    "make inspect DIALECT=c++17 BUILD_DIR=build",
+    "make artifact-test DIALECT=c++17 BUILD_DIR=build"
+  ],
+  "artifacts": [
+    {
+      "path": "build/artifact_kernel.ii",
+      "bytes": 1273707,
+      "sha256": "ac5b9c68eb1f6cd675eb7314a2f29d1e7898f6251a1970560f2e54156eb269f8"
+    },
+    {
+      "path": "build/artifact_kernel.ptx",
+      "bytes": 1038,
+      "sha256": "4cdde06dd0b2ea3ac59d11a0db7cbb546ed46609f4c3e83ed6f64d44c642a73f"
+    },
+    {
+      "path": "build/artifact_kernel.cubin",
+      "bytes": 2792,
+      "sha256": "047f16852e899a3a0da0d83a2c3b441175c7db2391c21a490c625cd96e915e8e"
+    },
+    {
+      "path": "build/artifact_kernel.fatbin",
+      "bytes": 3416,
+      "sha256": "0ef35817879b77f051db2d460f39288aeeac847ad6889d01805a80adf8072098"
+    },
+    {
+      "path": "build/device_math.o",
+      "bytes": 5752,
+      "sha256": "072bb00b67ebb4a139ad17598d1e1626e101c953f4261aa10f952e6963ae04b6"
+    },
+    {
+      "path": "build/caller.o",
+      "bytes": 8056,
+      "sha256": "4308155143d3de545977ce10ac8a1ed9e3646968d2f4b48841bba6e82562e058"
+    },
+    {
+      "path": "build/device_link.o",
+      "bytes": 8800,
+      "sha256": "47c19d46e9dd89a5057fe1f276809245041288ea99afb3c79a7ad1b646116e11"
+    },
+    {
+      "path": "build/ex10-ptx-fatbinary-inspection",
+      "bytes": 837696,
+      "sha256": "f5ec645166be4489a548a11084c6da17d134dda6d4ae8b5460f88d0e59718fc0"
+    },
+    {
+      "path": "build/artifact-sha256.txt",
+      "bytes": 679,
+      "sha256": "8d3c40c61aa73f52038a3477dd8a41740f7eec4e1978f186d8e44cbf63dd4b9b"
+    },
+    {
+      "path": "build/cuobjdump-ptx-list.txt",
+      "bytes": 43,
+      "sha256": "498299bc209bb5a1ebc2fe621cfbe81d762805e08c3abd10de7e0e9d68804fe5"
+    },
+    {
+      "path": "build/cuobjdump-elf-list.txt",
+      "bytes": 45,
+      "sha256": "1bc8e686cb0147a5598be64c03d13ed803d3c958b478fa7897d4a828edcb3877"
+    },
+    {
+      "path": "build/cuobjdump-linked-elf-list.txt",
+      "bytes": 59,
+      "sha256": "512ddc420297cd109a47c14dc1331aa71a45730cbe5e04502acb8b483bfad1a1"
+    },
+    {
+      "path": "build/cuobjdump-ptx.txt",
+      "bytes": 1035,
+      "sha256": "f3bc00d90de76d3410536801436e7412656ef6397f5a7667d7f1a7d42ef80ed6"
+    },
+    {
+      "path": "build/cuobjdump-sass.txt",
+      "bytes": 3867,
+      "sha256": "6df344587f2a2a34df4015ba16dfbba2838dd6a45606d8ce178e62d118621d2a"
+    },
+    {
+      "path": "build/cuobjdump-elf.txt",
+      "bytes": 7790,
+      "sha256": "1459bffe78678675568a68161daf68eff02b93d21adc83397740bba0383c573f"
+    },
+    {
+      "path": "build/cuobjdump-symbols.txt",
+      "bytes": 69,
+      "sha256": "81174e6797a93f4552e2638a5e71085edfeeebc90933e3608f5956ed643b8d00"
+    },
+    {
+      "path": "build/caller-symbols.txt",
+      "bytes": 443,
+      "sha256": "d4cd36aa363124a4d0ece5f775620d32558252ef3a8b94c08b88858a7ad7e51f"
+    },
+    {
+      "path": "build/device-link-symbols.txt",
+      "bytes": 236,
+      "sha256": "5c7f3906d614fd3799fe5e5f3d736b5857d02fe8f90402fe1e18a4be9ffe362e"
+    },
+    {
+      "path": "build/symbol-link-ledger.txt",
+      "bytes": 125788,
+      "sha256": "a62222d991bcfaef9d8381d56d34590237fd3450d6156790208ecb28d9a6998b"
+    },
+    {
+      "path": "build/artifact-test-report.txt",
+      "bytes": 301,
+      "sha256": "a24070d8abfc5884d4ecff2275407d9ec18ff4579a1c23d2f228d0bc5ca0dc20"
+    }
+  ],
+  "inspection": {
+    "inventories": {
+      "ptx": [
+        {
+          "index": 1,
+          "file": "artifact_kernel.1.sm_75.ptx"
+        }
+      ],
+      "elf": [
+        {
+          "index": 1,
+          "file": "artifact_kernel.1.sm_75.cubin"
+        }
+      ],
+      "linkedElf": [
+        {
+          "index": 1,
+          "file": "ex10-ptx-fatbinary-inspection.1.sm_75.cubin"
+        }
+      ]
+    },
+    "artifactTestReport": {
+      "artifact-test": "pass",
+      "target-native": "sm_75",
+      "target-virtual": "compute_75",
+      "same-fatbinary-native-and-ptx": "true",
+      "caller-ex10-device-scale": "undefined",
+      "device-link-ex10-device-scale": "defined",
+      "host-executable-executed": "false",
+      "gpu-executable-executed": "false",
+      "runtime-evidence": "Runtime-Not-Applicable",
+      "performance-measured": "false"
+    },
+    "symbols": {
+      "callerUndefined": "STT_FUNC STB_GLOBAL STV_DEFAULT U ex10_device_scale",
+      "deviceLinkDefined": "STT_FUNC STB_GLOBAL STV_DEFAULT ex10_device_scale"
+    },
+    "exitStatuses": {
+      "clean": 0,
+      "preprocess": 0,
+      "standalone-ptx": 0,
+      "cubin": 0,
+      "fatbin": 0,
+      "relocatable-compile": 0,
+      "device-link": 0,
+      "host-link": 0,
+      "inspect": 0,
+      "artifact-test": 0
+    }
+  },
+  "hostReferenceExecuted": false,
+  "hostExecutableExecuted": false,
+  "gpuExecutableExecuted": false,
+  "runtimeEvidence": "Runtime-Not-Applicable"
+}

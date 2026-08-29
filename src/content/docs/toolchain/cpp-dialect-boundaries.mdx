@@ -1,0 +1,274 @@
+---
+title: 'M19：CUDA C++17、C++20 与 C++23 方言边界'
+description: 用精确 Toolkit、host compiler、NVCC option 与 retained probe record 建立 CUDA C++17/C++20 教学矩阵，并把 C++23 保持为受支持 GCC 14.2 组合上的 narrow retained probe pass。
+pairId: m19
+counterpart: /en/toolchain/cpp-dialect-boundaries/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - dialect-coordinate
+  - standard-provenance
+  - teaching-matrix
+  - host-compiler-gate
+  - documentation-boundary
+  - ordinary-and-probe
+  - historical-probe
+  - publication-gate
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M19
+prerequisites:
+  - O04
+  - M15
+relatedUnits:
+  - EX02
+  - EX10
+exampleIds:
+  - EX02
+  - EX10
+canonicalExample: EX10
+canonicalRanges:
+  - cxx23-probe
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - C++ Language Support'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-support.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current CUDA C++17, C++20, and C++23 language support plus C++23 host compiler minima'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Installation Guide for Linux v13.3 - Host Compiler Support Policy and Supported C++ Dialects'
+    url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Toolkit 13.3.1 current Linux installation guide; page label v13.3'
+    platform: 'Current supported Linux host compiler ranges and C++ dialect declarations'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA Compiler Driver v13.3 - --std'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std'
+    version: 'NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'Current documented --std accepted-value list through C++20'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - Linux Host Compiler Support and C++ Dialects'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Toolkit 12.9.2 archive path; Linux guide page label v12.9'
+    platform: 'Archived supported host compiler ranges and C++17/C++20 dialect coordinate'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 12.9.2 archive - NVCC --std'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std'
+    version: 'CUDA Toolkit 12.9.2 archive path; NVIDIA CUDA Compiler Driver v12.9'
+    platform: 'Archived documented --std accepted-value list through C++20'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Toolkit 11.8.0 archive - NVCC --std'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#options-for-altering-compiler-linker-behavior-std'
+    version: 'CUDA Toolkit v11.8.0; NVCC documentation last updated 2022-10-03'
+    platform: 'Archived documented --std accepted-value list through C++17'
+    accessDate: '2026-08-29'
+  - title: 'N4659: Working Draft, Standard for Programming Language C++'
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf'
+    version: 'N4659; 2017-03-21'
+    platform: 'C++17 language and standard library provenance'
+    accessDate: '2026-08-29'
+  - title: 'N4861: Working Draft, Standard for Programming Language C++'
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf'
+    version: 'N4861; 2020-04-01'
+    platform: 'C++20 language and standard library provenance'
+    accessDate: '2026-08-29'
+  - title: 'N4950: Working Draft, Standard for Programming Language C++'
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf'
+    version: 'N4950; 2023-05-10'
+    platform: 'Final C++23 working draft and Draft International Standard basis'
+    accessDate: '2026-08-29'
+  - title: "N4951 Editors' Report: Programming Languages - C++"
+    url: 'https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4951.html'
+    version: 'N4951; 2023-05-10'
+    platform: 'N4950 final-working-draft provenance for C++23'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m19 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,dialect-coordinate,standard-provenance,teaching-matrix,host-compiler-gate,documentation-boundary,ordinary-and-probe,historical-probe,publication-gate,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M19 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'O04,M15' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX02,EX10' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: 'EX02,EX10' }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX10 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: cxx23-probe }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.2,11.8.0,N4659,N4861,N4950,N4951' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/toolchain/cpp-dialect-boundaries/" lang="en">Read the English counterpart</a>
+
+一个 [C++ 方言（C++ dialect，TERM-125）](/glossary/#term-125)名称只有放进完整编译坐标才有 CUDA 教学意义。这个坐标至少包含精确 Toolkit、NVCC、[主机编译器（host compiler，TERM-116）](/glossary/#term-116)及其 major version、显式 dialect option、source identity 和被检查的[编译阶段（compilation phase，TERM-117）](/glossary/#term-117)。只写“CUDA 支持 C++23”会丢失决定结论是否成立的边界。
+
+## 学完本单元，你应该能
+
+- 区分 C++ standard provenance、CUDA language-support documentation、NVCC option reference、Linux host-compiler policy 与实际 build record。
+- 重建本站三条 Toolkit Lane 的明确教学矩阵：11.8.0 只声明 C++17；12.9.2 声明 C++17/C++20；13.3.1 的 ordinary EX10 build 声明 C++17/C++20。
+- 解释为什么 CUDA 13.3 current documentation 与 retained narrow probe pass 都不能变成 ordinary EX10 C++23 support。
+- 把旧的 CUDA 13.3.1 + GCC 13.3 unsupported probe 保持为 immutable R1 history，而不是覆盖或升级它。
+- 审查 EX10 在 CUDA 13.3.1 + supported GCC 14 下的 retained C++23 probe pass，并把声明限制在精确 recorded coordinate。
+
+## 先修关系
+
+先完成 [O04：面向 CUDA 学习者的 C++17 复习](/start/cpp17-for-cuda/)，再完成 [M15：NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)。O04 提供 C++17、translation unit 与 language-mode 基线；M15 提供 host/device split、stable phase 与 artifact boundary。严格边是 `M19<-[O04,M15]`。
+
+[EX02](/examples/vector-addition/)保留 R1 历史 probe；[EX10](/examples/ptx-fatbinary-inspection/)提供 current canonical dialect probe。两者是 related resources，不增加 prerequisite。M19 不需要 CUDA-capable system，也不授予 Evidence Status。
+
+## Dialect coordinate 不只是 `--std`
+
+显式 `--std=c++17`、`--std=c++20` 或 `--std=c++23` 只是 requested language mode。NVCC 还要让自己的 device path 与 selected host compiler path 接受同一 source；host compiler 需要同时位于该 Toolkit 的 supported range，并满足特定 dialect 的 minimum version。Compile command 返回成功也不足以证明 requested mode 生效：diagnostics、language feature guard、output artifact 与 retained record 都必须一致。
+
+不要依赖 host compiler 的 default dialect。Default 会随 host compiler 与 distribution 改变，无法形成可复核的 Toolkit Lane contract。EX10 的 ordinary rows 与 separate probe 都显式选择 dialect。
+
+## C++17、C++20 与 C++23 的标准来源
+
+WG21 documents 锚定语言版本本身，不声明任何 CUDA combination 已通过：
+
+| Dialect | 本页使用的 provenance | 能建立什么 | 不能建立什么 |
+| --- | --- | --- | --- |
+| C++17 | N4659 | C++17 working-draft language/library coordinate | 某个 NVCC/host pair 接受 CUDA source |
+| C++20 | N4861 | C++20 working-draft language/library coordinate | 某条 Toolkit Lane 已成功 build |
+| C++23 | N4950 与 N4951 | N4950 是 final C++23 working draft，N4951 记录其 DIS provenance | CUDA 13.3.1 的任意 host/compiler/platform combination 都通过 |
+
+标准来源回答“C++23 是什么”；CUDA owner documentation 回答“哪些 interfaces 与 compiler minima 被声明”；retained build record 才能回答“这个精确 combination 是否通过 selected phase”。三类结论不能互相替代。
+
+## 本站明确教学矩阵
+
+下表是 M19/EX10 的 declaration matrix，不是本页的 compilation evidence：
+
+| Toolkit Lane | Ordinary EX10 builds | C++23 treatment |
+| --- | --- | --- |
+| CUDA 11.8.0 | C++17 | 不声明 C++23 row |
+| CUDA 12.9.2 | C++17、C++20 | 不声明 C++23 row |
+| CUDA 13.3.1 | C++17、C++20 | 独立 `cxx23-probe`；retained narrow pass |
+
+“Ordinary build”表示 EX10 artifact pipeline 的常规 matrix row。“Probe”是一个隔离问题，只检查 exact source 是否以 requested C++23 mode 完成 compile/inspection contract。Probe 不会把 C++23 加进 11.8.0、12.9.2 或 13.3.1 ordinary rows，也不会把一个 source file 的结果推广到整个 standard library、全部 CUDA APIs 或其他 host compiler。
+
+M19 frontmatter 的 compilation/runtime arrays 都为空。即使 matrix 声明了 ordinary rows，这个静态 Learning Unit 也没有执行它们。
+
+## Host compiler 是 C++23 gate 的一部分
+
+Current CUDA Programming Guide v13.3 的 C++23 section 给出以下 host minima：
+
+| Host compiler family | C++23 minimum in the current guide |
+| --- | --- |
+| GCC | 14.0 或更新 |
+| Clang | 18.0 或更新 |
+| NVHPC / `nvc++` | 24.3 或更新 |
+| Microsoft Visual Studio / MSVC | 不支持 |
+
+Current Linux Installation Guide 另外给出 Toolkit 13.3 的 supported host-compiler major ranges，并把 C++23 列入 supported dialects。一个 candidate 必须同时通过 broad host-support range 与 dialect-specific minimum；通过其中一个表不能绕过另一个表。
+
+因此 R1 的 GCC 13.3 candidate 低于 C++23 的 GCC 14 minimum。它的 unsupported result 是该精确 environment 的有效历史，不是 current guide 自相矛盾，也不是所有 CUDA 13.3.1 C++23 combinations 都失败的证据。
+
+## Current documentation 的边界必须保留
+
+Current Programming Guide v13.3 明确列出 C++23 和 `--std=c++23`，Current Linux Installation Guide v13.3 也列出 C++23 on supported host compilers。与此同时，current NVCC option reference 的 `--std` accepted-value list 仍只列到 `c++20`。
+
+本站不静默消除这项 owner-documentation mismatch。它既不能被改写成 broad C++23 pass，也不能被改写成 broad C++23 impossibility。正确处理是保留三份 source 的原始 scope，并让 exact supported-host probe 决定一个窄范围、可审查的 build claim。
+
+Archived 12.9.2 Linux guide 与 NVCC page 都为本站 C++17/C++20 rows 提供 versioned coordinate；archived 11.8.0 NVCC `--std` page 列到 C++17。这些 archive facts 约束 declared matrix，不从较新文档向旧 Toolkit 反向推断 dialect。
+
+## Ordinary build 与 C++23 probe 分开
+
+EX10 ordinary artifact builds 使用同一 project，但按 Lane 明确选择 C++17/C++20 rows。它们检查 preprocessing、PTX/cubin/fatbinary、relocatable compile、device link、host link 与 artifact inspection，并且不执行 final host/GPU executable。
+
+C++23 只进入 EX10 的 `cxx23-probe` range。该 range 先检查 `__cplusplus >= 202302L`，再使用 `if consteval` 与 `static_assert`，使“option 被忽略但 compile 仍继续”不能冒充 C++23 success。Probe 只要求 compilation/artifact inspection，GPU hardware 与 GPU execution 都不参与。
+
+## Immutable R1 history：CUDA 13.3.1 + GCC 13.3
+
+[Retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json)记录了 CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 13.3.0 与 requested C++23 mode。Compiler diagnostic 明确说明 configured host compiler 不支持该 flag，并会忽略它；record result 是 `unsupported`，artifacts 为空。
+
+这项记录属于 immutable R1 history。不得删除、改写为 pass、替换 host compiler 字段，或因为 current guide 列出 C++23 而授予 EX02/EX10 C++23 Compile-Checked。它只建立一个窄结论：**CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 的该 probe 不支持 requested C++23 mode。**
+
+## C++23 publication gate
+
+本站已在 [run 33275734951](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951) 完成并保留 **EX10 + CUDA 13.3.1 + supported GCC 14** probe。该 record 包含：
+
+1. Exact EX10 source commit 与 `cxx23-probe` range identity。
+2. Native Linux OS/container identity、Toolkit 13.3.1、NVCC build 与 exact GCC 14 version。
+3. Exact command、complete diagnostics、exit status，以及 language guard 确实以 C++23 mode 通过。
+4. Retained object identity/hash 与 selected artifact inspection result。
+5. Host/GPU executable 均未执行，runtime 为 Runtime-Not-Applicable，且没有 correctness/performance claim。
+
+Unsupported-host bypass 不能进入 qualifying command。Gate 的目的就是验证 owner-declared supported combination；绕过 host check 会改变问题，不能产生本页需要的证据。
+
+Retained record 绑定 source commit `904c6da03800ed3012baacb861494377c0fa01f2`、CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0，并保留 SHA-256 为 `1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea` 的 `cxx23_probe.o`；结果是 **pass**。这只是一项 `C++23-Dialect-Probe`，不是 ordinary EX10 C++23 Compile-Checked，也不覆盖其他 compiler、Toolkit、platform、source、runtime 或 performance。
+
+## Canonical Runnable Example：EX10
+
+EX10 是 M19 的 canonical probe project。[查看 retained run `33275734951` 编译的 build-source commit `904c6da03800ed3012baacb861494377c0fa01f2`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection)，或[下载 evidence-bundle commit `72cf757de9e893479508c24e810fce5ae6bd5275` 的完整归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/72cf757de9e893479508c24e810fce5ae6bd5275.zip)。Bundle 保留 byte-identical build-contract inputs、最终 project manifest 与 retained records。
+
+Canonical range 展示 dialect guard 与一个 C++23-only language feature，而不执行 kernel：
+
+<CanonicalCode exampleId="EX10" range="cxx23-probe" />
+
+这份 import 建立 local source/range identity；GCC 14 probe pass 由 retained record 建立，而不是由 import 本身建立。
+
+## 证据边界
+
+M19 的 hardware gate 是 none，因为 matrix review 与 compile-only probe 不需要 GPU。Unit evidence arrays 保持为空，因为 retained build/probe status 属于 EX10，不传播给本 Learning Unit。EX10 的 Runtime-Not-Applicable contract 同样不能反向变成 M19 的 compilation evidence。
+
+Documentation eligibility、workflow presence、successful site build 与 actual probe result 是四个不同事实。当前 narrow pass 只覆盖 retained record 中的 exact EX10 source、Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0、platform、command 与 selected compilation phase；不得推广到其他 compiler、Toolkit、platform、source 或 runtime behavior。
+
+## 离开前检查
+
+1. 为什么 N4950/N4951、CUDA Programming Guide 和 retained compile record 分别回答不同问题？
+2. 三条 Toolkit Lane 的 ordinary EX10 dialect rows 分别是什么？C++23 为什么不在 ordinary matrix 中？
+3. Current Programming Guide/Linux guide 与 current NVCC `--std` reference 在 C++23 上留下了什么 documentation boundary？
+4. 为什么 R1 GCC 13.3 unsupported record 必须保留，而且不能证明 supported GCC 14 probe 的结果？
+5. Retained EX10 GCC 14 record 支持哪项 narrow C++23 pass，又明确不支持哪些 broad claims？
+
+## 继续练习
+
+- 完成 [M19 练习（Exercise）](/toolchain/cpp-dialect-boundaries/exercises/)，再查看独立的[参考解答](/toolchain/cpp-dialect-boundaries/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-011](/practice/#pb-r2-011)审查 dialect matrix、host gate 与 retained probe claim。
+- 复习 [TERM-125 C++ dialect](/glossary/#term-125)、[TERM-116 host compiler](/glossary/#term-116)和 [TERM-117 compilation phase](/glossary/#term-117)。
+- 对照 related [EX02](/examples/vector-addition/) R1 history 与 canonical [EX10](/examples/ptx-fatbinary-inspection/) current probe contract。
+
+## 来源与复核
+
+- [Current CUDA Programming Guide v13.3 C++ Language Support](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-support.html)定义 current C++17/C++20/C++23 language-support surface 与 C++23 host minima。
+- [Current Linux Installation Guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy)定义 supported host compiler ranges 与 dialect policy；[current NVCC `--std` reference](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std)仍只列到 C++20。
+- [12.9.2 Linux guide](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#host-compiler-support-policy)与 [12.9.2 NVCC `--std`](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#std-c-03-c-11-c-14-c-17-c-20-std)约束 C++17/C++20 rows；[11.8.0 NVCC `--std`](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#options-for-altering-compiler-linker-behavior-std)约束 C++17 row。
+- [N4659](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf)、[N4861](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf)、[N4950](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf)与 [N4951](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4951.html)分别提供 C++17、C++20 与 C++23 provenance。
+
+十项 owner/standards sources 均于 **2026-08-29** 访问。Matrix、claim ladder、questions、练习与编排均为本站 CC-BY-4.0 原创内容；没有复制 owner table、example、diagnostic output 或 standard prose。
+
+**事实核查日期：2026-08-29。** EX10 GCC 14 C++23 probe 已保留 narrow pass；ordinary EX10 C++23 support、runtime 与 performance claim 均未声明。
