@@ -83,14 +83,22 @@ $(BUILD_DIR)/cuobjdump-elf.txt: $(BUILD_DIR)/artifact_kernel.cubin
 $(BUILD_DIR)/cuobjdump-symbols.txt: $(BUILD_DIR)/artifact_kernel.cubin
 	cuobjdump --dump-elf-symbols $< > $@
 
-$(BUILD_DIR)/symbol-link-ledger.txt: $(RDC_OBJECTS) $(BUILD_DIR)/device_link.o $(BUILD_DIR)/ex10-ptx-fatbinary-inspection
+$(BUILD_DIR)/caller-symbols.txt: $(BUILD_DIR)/caller.o
+	cuobjdump --dump-elf-symbols $< > $@
+
+$(BUILD_DIR)/device-link-symbols.txt: $(BUILD_DIR)/device_link.o
+	cuobjdump --dump-elf-symbols $< > $@
+
+$(BUILD_DIR)/symbol-link-ledger.txt: $(RDC_OBJECTS) $(BUILD_DIR)/device_link.o \
+	$(BUILD_DIR)/caller-symbols.txt $(BUILD_DIR)/device-link-symbols.txt \
+	$(BUILD_DIR)/ex10-ptx-fatbinary-inspection
 	{ \
 		printf '%s\n' '== device_math.o: CUDA ELF symbols =='; \
 		cuobjdump --dump-elf-symbols $(BUILD_DIR)/device_math.o; \
 		printf '%s\n' '== caller.o: CUDA ELF symbols =='; \
-		cuobjdump --dump-elf-symbols $(BUILD_DIR)/caller.o; \
+		cat $(BUILD_DIR)/caller-symbols.txt; \
 		printf '%s\n' '== device_link.o: CUDA ELF symbols =='; \
-		cuobjdump --dump-elf-symbols $(BUILD_DIR)/device_link.o; \
+		cat $(BUILD_DIR)/device-link-symbols.txt; \
 		printf '%s\n' '== host symbols before and after link =='; \
 		nm -C $(BUILD_DIR)/device_math.o $(BUILD_DIR)/caller.o $(BUILD_DIR)/device_link.o $(BUILD_DIR)/ex10-ptx-fatbinary-inspection; \
 	} > $@
@@ -103,6 +111,8 @@ inspect: $(BUILD_DIR)/artifact-sha256.txt \
 	$(BUILD_DIR)/cuobjdump-sass.txt \
 	$(BUILD_DIR)/cuobjdump-elf.txt \
 	$(BUILD_DIR)/cuobjdump-symbols.txt \
+	$(BUILD_DIR)/caller-symbols.txt \
+	$(BUILD_DIR)/device-link-symbols.txt \
 	$(BUILD_DIR)/symbol-link-ledger.txt
 
 artifact-test: inspect

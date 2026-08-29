@@ -214,7 +214,7 @@ CUDA Binary Utilities 为 standalone 与 embedded cases 提供不同入口：
 | Cubin 中有哪些 machine instructions？ | 对 standalone/embedded cubin 使用 `cuobjdump --dump-sass` | 该 inspected binary 的 SASS disassembly | 这些 instructions 已加载、执行或更快 |
 | 需要 richer standalone-cubin disassembly？ | 对 standalone cubin 使用 `nvdisasm` | 该 cubin 的 sections、instructions 与 selected display analysis | Host binary inventory 或 runtime selection |
 
-Inspection log 应记录 exact command、tool version、input path、input hash、exit status 与完整 output artifact。即使这些字段完整，它仍是 static artifact evidence，不是 driver trace、kernel completion、correctness oracle 或 timing record。
+Inspection record 应保留 exact command、tool version、input path、input hash、exit status，以及完整 compact output，或 normalized complete inventory 加上较大 generated output 的 path、size 与 hash。即使这些字段完整，它仍是 static artifact evidence，不是 driver trace、kernel completion、correctness oracle 或 timing record。
 
 ## Canonical Runnable Example：EX10
 

@@ -97,17 +97,28 @@ describe('VIS09 artifact-pipeline model', () => {
       runtimeEvidence: 'none',
       performanceEvidence: 'none',
       evidenceStatusEffect: 'none',
-      sourceFactIds: ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033'],
+      sourceFactIds: ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034'],
     });
-    expect(ARTIFACT_PIPELINE_STAGES).toEqual([
-      { id: 'source-split', branch: 'host-and-device', optional: false },
-      { id: 'device-ptx', branch: 'device', optional: false },
-      { id: 'device-cubin', branch: 'device', optional: false },
-      { id: 'fatbinary', branch: 'package', optional: false },
-      { id: 'host-object', branch: 'host', optional: false },
-      { id: 'optional-device-link', branch: 'conditional', optional: true },
-      { id: 'final-link', branch: 'link', optional: false },
-    ]);
+    expect(ARTIFACT_PIPELINE_STAGES).toEqual({
+      'whole-program': [
+        { id: 'source-split', identity: 'whole-source-split', mode: 'whole-program', branch: 'host-and-device', optional: false },
+        { id: 'device-ptx', identity: 'whole-ptx-image', mode: 'whole-program', branch: 'device', optional: false },
+        { id: 'device-cubin', identity: 'whole-cubin-image', mode: 'whole-program', branch: 'device', optional: false },
+        { id: 'fatbinary', identity: 'whole-fatbinary', mode: 'whole-program', branch: 'package', optional: false },
+        { id: 'host-object', identity: 'whole-host-object', mode: 'whole-program', branch: 'host', optional: false },
+        { id: 'optional-device-link', identity: 'whole-device-link-skipped', mode: 'whole-program', branch: 'conditional', optional: true },
+        { id: 'final-link', identity: 'whole-final-host-link', mode: 'whole-program', branch: 'link', optional: false },
+      ],
+      'separate-compilation-rdc': [
+        { id: 'source-split', identity: 'rdc-source-pair', mode: 'separate-compilation-rdc', branch: 'host-and-device', optional: false },
+        { id: 'device-ptx', identity: 'rdc-cross-tu-device-edge', mode: 'separate-compilation-rdc', branch: 'device', optional: false },
+        { id: 'device-cubin', identity: 'rdc-caller-object', mode: 'separate-compilation-rdc', branch: 'host-and-device', optional: false },
+        { id: 'fatbinary', identity: 'rdc-device-math-object', mode: 'separate-compilation-rdc', branch: 'host-and-device', optional: false },
+        { id: 'host-object', identity: 'rdc-original-object-set', mode: 'separate-compilation-rdc', branch: 'host', optional: false },
+        { id: 'optional-device-link', identity: 'rdc-device-link-object', mode: 'separate-compilation-rdc', branch: 'conditional', optional: false },
+        { id: 'final-link', identity: 'rdc-final-host-link', mode: 'separate-compilation-rdc', branch: 'link', optional: false },
+      ],
+    });
   });
 
   it('skips rather than completes device link throughout whole-program traversal', () => {
@@ -139,11 +150,31 @@ describe('VIS09 artifact-pipeline model', () => {
       cubinImage: 'sm_90a.cubin',
       cubinPayload: 'SASS',
       fatbinaryImages: ['sm_90a', 'compute_90a'],
-      hostObject: 'host-object-with-embedded-fatbinary',
-      deviceLink: 'skipped-whole-program',
-      finalArtifact: 'linked-executable-or-shared-library',
+      hostObject: {
+        source: 'kernel.cu',
+        object: 'kernel.o',
+        embeddedDeviceCode: 'fatbinary-with-finalized-device-images',
+      },
+      deviceLink: {
+        state: 'skipped-whole-program',
+        object: null,
+        linkedExecutableDeviceCode: null,
+      },
+      finalHostLink: {
+        inputs: ['kernel.o'],
+        artifact: 'linked-executable-or-shared-library',
+      },
       runtimeImageSelection: 'unknown',
     });
+    expect(result.frames[0]?.stages.map(({ identity }) => identity)).toEqual([
+      'whole-source-split',
+      'whole-ptx-image',
+      'whole-cubin-image',
+      'whole-fatbinary',
+      'whole-host-object',
+      'whole-device-link-skipped',
+      'whole-final-host-link',
+    ]);
     expect(result.frames[5]?.stages.map(({ state }) => state)).toEqual([
       'complete',
       'complete',
@@ -178,9 +209,53 @@ describe('VIS09 artifact-pipeline model', () => {
       mode: 'separate-compilation-rdc',
       stepIndex: 5,
       stageCount: 7,
-      currentStage: { id: 'optional-device-link' },
-      manifest: { deviceLink: 'active-separate-compilation-rdc' },
+      currentStage: { id: 'optional-device-link', identity: 'rdc-device-link-object' },
+      manifest: { deviceLink: { state: 'active-separate-compilation-rdc' } },
     });
+    expect(result.frames[0]?.manifest).toEqual({
+      pipelineMode: 'separate-compilation-rdc',
+      virtualTarget: 'compute_90a',
+      realTarget: 'sm_90a',
+      translationUnits: [
+        {
+          source: 'caller.cu',
+          hostObject: 'caller.o',
+          relocatableDeviceCode: 'caller.o::relocatable-device-code',
+        },
+        {
+          source: 'device_math.cu',
+          hostObject: 'device_math.o',
+          relocatableDeviceCode: 'device_math.o::relocatable-device-code',
+        },
+      ],
+      deviceLink: {
+        state: 'active-separate-compilation-rdc',
+        objectInputs: ['caller.o', 'device_math.o'],
+        relocatableDeviceCodeInputs: [
+          'caller.o::relocatable-device-code',
+          'device_math.o::relocatable-device-code',
+        ],
+        object: 'device_link.o',
+        linkedExecutableDeviceCode: 'device_link.o::linked-executable-device-code',
+      },
+      finalHostLink: {
+        inputs: ['caller.o', 'device_math.o', 'device_link.o'],
+        artifact: 'linked-executable-or-shared-library',
+      },
+      runtimeImageSelection: 'unknown',
+    });
+    expect(result.frames[0]?.manifest).not.toHaveProperty('ptxImage');
+    expect(result.frames[0]?.manifest).not.toHaveProperty('cubinImage');
+    expect(result.frames[0]?.manifest).not.toHaveProperty('fatbinaryImages');
+    expect(result.frames[0]?.stages.map(({ identity }) => identity)).toEqual([
+      'rdc-source-pair',
+      'rdc-cross-tu-device-edge',
+      'rdc-caller-object',
+      'rdc-device-math-object',
+      'rdc-original-object-set',
+      'rdc-device-link-object',
+      'rdc-final-host-link',
+    ]);
     expect(result.frames[6]?.currentStage?.id).toBe('final-link');
     expect(result.frames[6]?.stages.find(({ id }) => id === 'optional-device-link')?.state).toBe('complete');
     expect(result.frames.at(-1)?.stages.every(({ state }) => state === 'complete')).toBe(true);
@@ -308,7 +383,10 @@ describe('VIS09 artifact-pipeline model', () => {
     expect(unknownMode).toEqual({ accepted: false, state, issue: 'unknown-mode' });
     expect(unknownMode.state).toBe(state);
 
-    const complete: ArtifactPipelineState = { ...state, stepIndex: ARTIFACT_PIPELINE_STAGES.length - 1 };
+    const complete: ArtifactPipelineState = {
+      ...state,
+      stepIndex: ARTIFACT_PIPELINE_STAGES['whole-program'].length - 1,
+    };
     const extraStep = reduceArtifactPipelineState(complete, { type: 'step' });
     expect(extraStep).toEqual({ accepted: false, state: complete, issue: 'sequence-complete' });
     expect(extraStep.state).toBe(complete);

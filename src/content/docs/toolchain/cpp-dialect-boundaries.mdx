@@ -213,7 +213,7 @@ C++23 只进入 EX10 的 `cxx23-probe` range。该 range 先检查 `__cplusplus 
 
 ## Immutable R1 history：CUDA 13.3.1 + GCC 13.3
 
-[Retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json)记录了 CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 13.3.0 与 requested C++23 mode。Compiler diagnostic 明确说明 configured host compiler 不支持该 flag，并会忽略它；record result 是 `unsupported`，artifacts 为空。
+[Retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json)记录了 CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 13.3.0 与 requested C++23 mode。Compiler diagnostic 明确说明 configured host compiler 不支持该 flag，并会忽略它；record result 是 `unsupported`，artifacts 为空。
 
 这项记录属于 immutable R1 history。不得删除、改写为 pass、替换 host compiler 字段，或因为 current guide 列出 C++23 而授予 EX02/EX10 C++23 Compile-Checked。它只建立一个窄结论：**CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 的该 probe 不支持 requested C++23 mode。**
 

@@ -14,6 +14,11 @@ build_dir="build"
 host_cxx="${HOST_CXX:-g++}"
 
 mkdir -p "$result_dir"
+status_file="$result_dir/exit-statuses.txt"
+: > "$status_file"
+record_success() {
+  printf '%s=0\n' "$1" >> "$status_file"
+}
 report_failure() {
   status="$?"
   for log in "$result_dir"/*.log; do
@@ -26,11 +31,13 @@ report_failure() {
 trap report_failure ERR
 
 make clean BUILD_DIR="$build_dir" > "$result_dir/clean.log" 2>&1
+record_success clean
 
 if [[ "$kind" == "ex10" ]]; then
   for stage in preprocess standalone-ptx cubin fatbin relocatable-compile device-link host-link inspect artifact-test; do
     make "$stage" DIALECT="$dialect" BUILD_DIR="$build_dir" \
       > "$result_dir/${stage}.log" 2>&1
+    record_success "$stage"
   done
   cp "$build_dir"/artifact-sha256.txt \
     "$build_dir"/cuobjdump-ptx-list.txt \
@@ -40,6 +47,8 @@ if [[ "$kind" == "ex10" ]]; then
     "$build_dir"/cuobjdump-sass.txt \
     "$build_dir"/cuobjdump-elf.txt \
     "$build_dir"/cuobjdump-symbols.txt \
+    "$build_dir"/caller-symbols.txt \
+    "$build_dir"/device-link-symbols.txt \
     "$build_dir"/symbol-link-ledger.txt \
     "$build_dir"/artifact-test-report.txt \
     "$result_dir/"
@@ -55,8 +64,11 @@ elif [[ "$kind" == "cxx23-probe" ]]; then
     --generate-code=arch=compute_75,code=compute_75 \
     --compile probes/cxx23.cu -o "$build_dir/cxx23_probe.o" \
     > "$result_dir/compile.log" 2>&1
+  record_success compile
   cuobjdump --list-elf "$build_dir/cxx23_probe.o" > "$result_dir/cuobjdump-elf-list.txt" 2>&1
+  record_success inspect
   sha256sum "$build_dir/cxx23_probe.o" > "$result_dir/artifact-sha256.txt"
+  record_success artifact-hash
 else
   printf 'Unknown compile-check kind: %s\n' "$kind" >&2
   exit 2

@@ -63,6 +63,66 @@ function parseOsRelease(content) {
   };
 }
 
+function compactLines(content, label) {
+  if (content.length > 8 * 1024) throw new Error(`${label} is too large for compact evidence.`);
+  const lines = content.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  if (lines.some((line) => /[^\x20-\x7e]/.test(line))) {
+    throw new Error(`${label} contains non-printable evidence.`);
+  }
+  return lines;
+}
+
+function parseInventory(content, type, label) {
+  const entries = compactLines(content, label).map((line) => {
+    const match = new RegExp(`^${type} file\\s+(\\d+):\\s+([A-Za-z0-9._+-]+)$`).exec(line);
+    if (!match) throw new Error(`${label} contains an unexpected entry: ${line}`);
+    return { index: Number(match[1]), file: match[2] };
+  });
+  if (entries.length === 0) throw new Error(`${label} is empty.`);
+  return entries;
+}
+
+function parseFacts(content, label, numeric = false) {
+  const facts = {};
+  for (const line of compactLines(content, label)) {
+    const match = /^([a-z0-9-]+)=([A-Za-z0-9+._-]+)$/.exec(line);
+    if (!match || Object.hasOwn(facts, match?.[1])) {
+      throw new Error(`${label} contains an unexpected or duplicate fact: ${line}`);
+    }
+    facts[match[1]] = numeric ? Number(match[2]) : match[2];
+    if (numeric && (!Number.isSafeInteger(facts[match[1]]) || facts[match[1]] !== 0)) {
+      throw new Error(`${label} contains a nonzero or invalid exit status: ${line}`);
+    }
+  }
+  return facts;
+}
+
+function requireSymbolLine(content, expected, label) {
+  const lines = compactLines(content, label).map((line) => line.replace(/\s+/g, ' '));
+  if (lines.filter((line) => line === expected).length !== 1) {
+    throw new Error(`${label} does not contain exactly one ${expected} entry.`);
+  }
+  return expected;
+}
+
+function parseArtifactHash(content, expectedPath, label) {
+  const lines = compactLines(content, label);
+  if (lines.length !== 1) throw new Error(`${label} must contain exactly one hash entry.`);
+  const match = /^([0-9a-f]{64})\s+\*?(.+)$/.exec(lines[0]);
+  if (!match || match[2] !== expectedPath) throw new Error(`${label} does not identify ${expectedPath}.`);
+  return { path: expectedPath, sha256: match[1] };
+}
+
+function declaredRepositoryDigest(lane) {
+  const referenceWithoutDigest = lane.image.split('@')[0];
+  const lastSlash = referenceWithoutDigest.lastIndexOf('/');
+  const lastColon = referenceWithoutDigest.lastIndexOf(':');
+  const repository = lastColon > lastSlash
+    ? referenceWithoutDigest.slice(0, lastColon)
+    : referenceWithoutDigest;
+  return `${repository}@${lane.manifestDigest}`;
+}
+
 async function hashFile(file) {
   return createHash('sha256').update(await readFile(file)).digest('hex');
 }
@@ -79,29 +139,57 @@ async function describeArtifacts(exampleRoot, paths) {
   }));
 }
 
-async function assertOrdinaryArtifacts(resultRoot) {
-  const [report, ptxList, elfList, linkedElfList, ptxDump, sassDump, ledger] = await Promise.all([
+async function inspectOrdinaryArtifacts(resultRoot) {
+  const [report, ptxList, elfList, linkedElfList, ptxDump, sassDump, callerSymbols,
+    deviceLinkSymbols, exitStatuses] = await Promise.all([
     readFile(path.join(resultRoot, 'artifact-test-report.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-ptx-list.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-elf-list.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-linked-elf-list.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-ptx.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-sass.txt'), 'utf8'),
-    readFile(path.join(resultRoot, 'symbol-link-ledger.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'caller-symbols.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'device-link-symbols.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'exit-statuses.txt'), 'utf8'),
   ]);
-  if (!/artifact-test=pass/.test(report) ||
-      !/host-executable-executed=false/.test(report) ||
-      !/gpu-executable-executed=false/.test(report) ||
-      !/runtime-evidence=Runtime-Not-Applicable/.test(report)) {
+  const artifactTestReport = parseFacts(report, 'EX10 artifact-test report');
+  if (artifactTestReport['artifact-test'] !== 'pass' ||
+      artifactTestReport['caller-ex10-device-scale'] !== 'undefined' ||
+      artifactTestReport['device-link-ex10-device-scale'] !== 'defined' ||
+      artifactTestReport['host-executable-executed'] !== 'false' ||
+      artifactTestReport['gpu-executable-executed'] !== 'false' ||
+      artifactTestReport['runtime-evidence'] !== 'Runtime-Not-Applicable') {
     throw new Error('EX10 artifact-test report does not preserve the execution boundary.');
   }
-  if (!/sm_75/.test(ptxList) || !/sm_75/.test(elfList) || !/sm_75/.test(linkedElfList) ||
-      !/\.target\s+sm_75/.test(ptxDump) || !/artifact_kernel/.test(sassDump)) {
+  const inventories = {
+    ptx: parseInventory(ptxList, 'PTX', 'EX10 PTX inventory'),
+    elf: parseInventory(elfList, 'ELF', 'EX10 ELF inventory'),
+    linkedElf: parseInventory(linkedElfList, 'ELF', 'EX10 linked ELF inventory'),
+  };
+  if (!/\.target\s+sm_75/.test(ptxDump) || !/artifact_kernel/.test(sassDump)) {
     throw new Error('EX10 inspection outputs do not contain the declared sm_75 and compute_75 images.');
   }
-  if (!/ex10_device_scale/.test(ledger) || !/ex10_caller_kernel/.test(ledger)) {
-    throw new Error('EX10 symbol/link ledger does not show the cross-translation-unit device contract.');
-  }
+  const callerUndefined = requireSymbolLine(
+    callerSymbols,
+    'STT_FUNC STB_GLOBAL STV_DEFAULT U ex10_device_scale',
+    'EX10 caller.o symbols',
+  );
+  requireSymbolLine(
+    callerSymbols,
+    'STT_FUNC STB_GLOBAL STO_ENTRY ex10_caller_kernel',
+    'EX10 caller.o symbols',
+  );
+  const deviceLinkDefined = requireSymbolLine(
+    deviceLinkSymbols,
+    'STT_FUNC STB_GLOBAL STV_DEFAULT ex10_device_scale',
+    'EX10 device_link.o symbols',
+  );
+  return {
+    inventories,
+    artifactTestReport,
+    symbols: { callerUndefined, deviceLinkDefined },
+    exitStatuses: parseFacts(exitStatuses, 'EX10 exit statuses', true),
+  };
 }
 
 const args = parseArguments(process.argv.slice(2));
@@ -115,10 +203,17 @@ if (!['ex10', 'cxx23-probe'].includes(args.kind)) {
 
 const example = await loadCanonicalExample(projectRoot, 'EX10');
 const exampleRoot = path.join(projectRoot, example.root);
-const lane = example.compatibility.lanes.find((candidate) => candidate.id === args['toolkit-lane']);
-const probe = example.compatibility.probes.find((candidate) =>
-  candidate.toolkitLane === args['toolkit-lane'] && candidate.dialect === args.dialect,
-);
+const declaredCheck = example.compatibility.checks.find((candidate) => candidate.id === args.check);
+if (!declaredCheck) throw new Error(`Unknown EX10 check: ${args.check}`);
+if (declaredCheck.toolkitLane !== args['toolkit-lane'] ||
+    declaredCheck.dialect !== args.dialect || declaredCheck.kind !== args.kind) {
+  throw new Error('Workflow check does not match the declared Toolkit Lane, dialect, and kind.');
+}
+const lane = example.compatibility.lanes.find((candidate) => candidate.id === declaredCheck.toolkitLane);
+const probe = args.kind === 'cxx23-probe'
+  ? example.compatibility.probes.find((candidate) =>
+      candidate.toolkitLane === declaredCheck.toolkitLane && candidate.dialect === declaredCheck.dialect)
+  : null;
 if (!lane) throw new Error(`Unknown Toolkit Lane: ${args['toolkit-lane']}`);
 if (args.image !== lane.image) throw new Error('Workflow image does not match the EX10 manifest.');
 if (args.kind === 'ex10' && !lane.dialects.includes(args.dialect)) {
@@ -134,6 +229,11 @@ await mkdir(resultRoot, { recursive: true });
 
 run('docker', ['pull', '--platform', 'linux/amd64', lane.image]);
 const baseInspection = JSON.parse(run('docker', ['image', 'inspect', lane.image], { quiet: true }))[0];
+const baseRepoDigests = baseInspection.RepoDigests ?? [];
+const expectedRepoDigest = declaredRepositoryDigest(lane);
+if (!baseRepoDigests.includes(expectedRepoDigest)) {
+  throw new Error(`Pulled image does not expose the declared repository digest ${expectedRepoDigest}.`);
+}
 const imageIndex = JSON.parse(run(
   'docker',
   ['buildx', 'imagetools', 'inspect', '--raw', lane.image],
@@ -250,11 +350,28 @@ run('docker', [
   `/workspace/artifacts/cuda-ex10/${args.check}`,
 ]);
 
+let inspection;
 if (args.kind === 'ex10') {
-  await assertOrdinaryArtifacts(resultRoot);
+  inspection = await inspectOrdinaryArtifacts(resultRoot);
 } else {
-  const probeElfList = await readFile(path.join(resultRoot, 'cuobjdump-elf-list.txt'), 'utf8');
-  if (!/sm_75/.test(probeElfList)) throw new Error('The C++23 probe object has no sm_75 image.');
+  const [probeElfList, exitStatuses, compilerOutput, artifactHash] = await Promise.all([
+    readFile(path.join(resultRoot, 'cuobjdump-elf-list.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'exit-statuses.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'compile.log'), 'utf8'),
+    readFile(path.join(resultRoot, 'artifact-sha256.txt'), 'utf8'),
+  ]);
+  inspection = {
+    inventories: {
+      elf: parseInventory(probeElfList, 'ELF', 'EX10 C++23 probe ELF inventory'),
+    },
+    compilerOutput: compactLines(compilerOutput, 'EX10 C++23 probe compiler output'),
+    artifactHash: parseArtifactHash(
+      artifactHash,
+      'build/cxx23_probe.o',
+      'EX10 C++23 probe artifact hash',
+    ),
+    exitStatuses: parseFacts(exitStatuses, 'EX10 C++23 probe exit statuses', true),
+  };
 }
 
 const artifactPaths = args.kind === 'ex10' ? example.build.artifacts : probe.artifacts;
@@ -315,13 +432,17 @@ const record = {
     ? Object.values(example.build.commands).map((command) => command.replace('{dialect}', args.dialect))
     : probe.commands,
   artifacts: await describeArtifacts(exampleRoot, artifactPaths),
+  inspection,
   hostReferenceExecuted: false,
   hostExecutableExecuted: false,
   gpuExecutableExecuted: false,
   runtimeEvidence: 'Runtime-Not-Applicable',
 };
 
-const recordErrors = await validateCompileEvidenceRecord(projectRoot, 'EX10', record);
+const recordErrors = await validateCompileEvidenceRecord(projectRoot, 'EX10', record, {
+  expectedSourceCommit: sourceCommit,
+  expectedWorkflowRun: workflowRun,
+});
 if (recordErrors.length > 0) {
   console.error(JSON.stringify({
     subject: record.subject,

@@ -24,6 +24,25 @@ export type ArtifactPipelineStageId = (typeof ARTIFACT_PIPELINE_STAGE_IDS)[numbe
 export type ArtifactPipelineBranch = 'host-and-device' | 'device' | 'package' | 'host' | 'conditional' | 'link';
 export type ArtifactPipelineStageState = 'complete' | 'current' | 'pending' | 'skipped';
 
+export const ARTIFACT_PIPELINE_STAGE_IDENTITIES = [
+  'whole-source-split',
+  'whole-ptx-image',
+  'whole-cubin-image',
+  'whole-fatbinary',
+  'whole-host-object',
+  'whole-device-link-skipped',
+  'whole-final-host-link',
+  'rdc-source-pair',
+  'rdc-cross-tu-device-edge',
+  'rdc-caller-object',
+  'rdc-device-math-object',
+  'rdc-original-object-set',
+  'rdc-device-link-object',
+  'rdc-final-host-link',
+] as const;
+
+export type ArtifactPipelineStageIdentity = (typeof ARTIFACT_PIPELINE_STAGE_IDENTITIES)[number];
+
 export type ArtifactPipelineTargetPlan = Readonly<{
   id: ArtifactPipelineTargetPlanId;
   reviewed: true;
@@ -65,19 +84,32 @@ export const ARTIFACT_PIPELINE_TARGET_PLANS = [
 
 export type ArtifactPipelineStage = Readonly<{
   id: ArtifactPipelineStageId;
+  identity: ArtifactPipelineStageIdentity;
+  mode: ArtifactPipelineMode;
   branch: ArtifactPipelineBranch;
   optional: boolean;
 }>;
 
-export const ARTIFACT_PIPELINE_STAGES = [
-  { id: 'source-split', branch: 'host-and-device', optional: false },
-  { id: 'device-ptx', branch: 'device', optional: false },
-  { id: 'device-cubin', branch: 'device', optional: false },
-  { id: 'fatbinary', branch: 'package', optional: false },
-  { id: 'host-object', branch: 'host', optional: false },
-  { id: 'optional-device-link', branch: 'conditional', optional: true },
-  { id: 'final-link', branch: 'link', optional: false },
-] as const satisfies readonly ArtifactPipelineStage[];
+export const ARTIFACT_PIPELINE_STAGES = {
+  'whole-program': [
+    { id: 'source-split', identity: 'whole-source-split', mode: 'whole-program', branch: 'host-and-device', optional: false },
+    { id: 'device-ptx', identity: 'whole-ptx-image', mode: 'whole-program', branch: 'device', optional: false },
+    { id: 'device-cubin', identity: 'whole-cubin-image', mode: 'whole-program', branch: 'device', optional: false },
+    { id: 'fatbinary', identity: 'whole-fatbinary', mode: 'whole-program', branch: 'package', optional: false },
+    { id: 'host-object', identity: 'whole-host-object', mode: 'whole-program', branch: 'host', optional: false },
+    { id: 'optional-device-link', identity: 'whole-device-link-skipped', mode: 'whole-program', branch: 'conditional', optional: true },
+    { id: 'final-link', identity: 'whole-final-host-link', mode: 'whole-program', branch: 'link', optional: false },
+  ],
+  'separate-compilation-rdc': [
+    { id: 'source-split', identity: 'rdc-source-pair', mode: 'separate-compilation-rdc', branch: 'host-and-device', optional: false },
+    { id: 'device-ptx', identity: 'rdc-cross-tu-device-edge', mode: 'separate-compilation-rdc', branch: 'device', optional: false },
+    { id: 'device-cubin', identity: 'rdc-caller-object', mode: 'separate-compilation-rdc', branch: 'host-and-device', optional: false },
+    { id: 'fatbinary', identity: 'rdc-device-math-object', mode: 'separate-compilation-rdc', branch: 'host-and-device', optional: false },
+    { id: 'host-object', identity: 'rdc-original-object-set', mode: 'separate-compilation-rdc', branch: 'host', optional: false },
+    { id: 'optional-device-link', identity: 'rdc-device-link-object', mode: 'separate-compilation-rdc', branch: 'conditional', optional: false },
+    { id: 'final-link', identity: 'rdc-final-host-link', mode: 'separate-compilation-rdc', branch: 'link', optional: false },
+  ],
+} as const satisfies Readonly<Record<ArtifactPipelineMode, readonly ArtifactPipelineStage[]>>;
 
 export const ARTIFACT_PIPELINE_MODEL_CONTRACT = {
   modelId: 'reviewed-nvcc-artifact-flow',
@@ -95,7 +127,7 @@ export const ARTIFACT_PIPELINE_MODEL_CONTRACT = {
   runtimeEvidence: 'none',
   performanceEvidence: 'none',
   evidenceStatusEffect: 'none',
-  sourceFactIds: ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033'],
+  sourceFactIds: ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034'],
 } as const;
 
 export type ArtifactPipelineReviewedSelection = Readonly<{
@@ -126,23 +158,71 @@ export type ArtifactPipelineIssue =
   | 'unsupported-target-plan'
   | 'sequence-complete';
 
-export type ArtifactPipelineManifest = Readonly<{
-  source: 'kernel.cu';
-  pipelineMode: ArtifactPipelineMode;
+type ArtifactPipelineManifestBase = Readonly<{
   virtualTarget: string;
   realTarget: string;
+  runtimeImageSelection: 'unknown';
+}>;
+
+export type WholeProgramArtifactPipelineManifest = ArtifactPipelineManifestBase & Readonly<{
+  source: 'kernel.cu';
+  pipelineMode: 'whole-program';
   ptxImage: string;
   cubinImage: string;
   cubinPayload: 'SASS';
   fatbinaryImages: readonly [string, string];
-  hostObject: 'host-object-with-embedded-fatbinary';
-  deviceLink: 'skipped-whole-program' | 'active-separate-compilation-rdc';
-  finalArtifact: 'linked-executable-or-shared-library';
-  runtimeImageSelection: 'unknown';
+  hostObject: Readonly<{
+    source: 'kernel.cu';
+    object: 'kernel.o';
+    embeddedDeviceCode: 'fatbinary-with-finalized-device-images';
+  }>;
+  deviceLink: Readonly<{
+    state: 'skipped-whole-program';
+    object: null;
+    linkedExecutableDeviceCode: null;
+  }>;
+  finalHostLink: Readonly<{
+    inputs: readonly ['kernel.o'];
+    artifact: 'linked-executable-or-shared-library';
+  }>;
 }>;
+
+export type RdcArtifactPipelineManifest = ArtifactPipelineManifestBase & Readonly<{
+  pipelineMode: 'separate-compilation-rdc';
+  translationUnits: readonly [
+    Readonly<{
+      source: 'caller.cu';
+      hostObject: 'caller.o';
+      relocatableDeviceCode: 'caller.o::relocatable-device-code';
+    }>,
+    Readonly<{
+      source: 'device_math.cu';
+      hostObject: 'device_math.o';
+      relocatableDeviceCode: 'device_math.o::relocatable-device-code';
+    }>,
+  ];
+  deviceLink: Readonly<{
+    state: 'active-separate-compilation-rdc';
+    objectInputs: readonly ['caller.o', 'device_math.o'];
+    relocatableDeviceCodeInputs: readonly [
+      'caller.o::relocatable-device-code',
+      'device_math.o::relocatable-device-code',
+    ];
+    object: 'device_link.o';
+    linkedExecutableDeviceCode: 'device_link.o::linked-executable-device-code';
+  }>;
+  finalHostLink: Readonly<{
+    inputs: readonly ['caller.o', 'device_math.o', 'device_link.o'];
+    artifact: 'linked-executable-or-shared-library';
+  }>;
+}>;
+
+export type ArtifactPipelineManifest = WholeProgramArtifactPipelineManifest | RdcArtifactPipelineManifest;
 
 export type ArtifactPipelineStageFrame = Readonly<{
   id: ArtifactPipelineStageId;
+  identity: ArtifactPipelineStageIdentity;
+  mode: ArtifactPipelineMode;
   branch: ArtifactPipelineBranch;
   optional: boolean;
   state: ArtifactPipelineStageState;
@@ -213,10 +293,15 @@ function validateSelection(laneValue: unknown, targetPlanValue: unknown, modeVal
   return { accepted: true, lane, targetPlan, mode } as const;
 }
 
+function getModeStages(mode: ArtifactPipelineMode): readonly ArtifactPipelineStage[] {
+  return ARTIFACT_PIPELINE_STAGES[mode];
+}
+
 function getActiveStages(mode: ArtifactPipelineMode): readonly ArtifactPipelineStage[] {
+  const stages = getModeStages(mode);
   return mode === 'whole-program'
-    ? ARTIFACT_PIPELINE_STAGES.filter(({ id }) => id !== 'optional-device-link')
-    : ARTIFACT_PIPELINE_STAGES;
+    ? stages.filter(({ id }) => id !== 'optional-device-link')
+    : stages;
 }
 
 function validateState(state: ArtifactPipelineState) {
@@ -233,18 +318,64 @@ function validateState(state: ArtifactPipelineState) {
 }
 
 function buildManifest(targetPlan: ArtifactPipelineTargetPlan, mode: ArtifactPipelineMode): ArtifactPipelineManifest {
+  if (mode === 'whole-program') {
+    return {
+      source: 'kernel.cu',
+      pipelineMode: 'whole-program',
+      virtualTarget: targetPlan.virtualTarget,
+      realTarget: targetPlan.realTarget,
+      ptxImage: `${targetPlan.virtualTarget}.ptx`,
+      cubinImage: `${targetPlan.realTarget}.cubin`,
+      cubinPayload: 'SASS',
+      fatbinaryImages: [targetPlan.realTarget, targetPlan.virtualTarget],
+      hostObject: {
+        source: 'kernel.cu',
+        object: 'kernel.o',
+        embeddedDeviceCode: 'fatbinary-with-finalized-device-images',
+      },
+      deviceLink: {
+        state: 'skipped-whole-program',
+        object: null,
+        linkedExecutableDeviceCode: null,
+      },
+      finalHostLink: {
+        inputs: ['kernel.o'],
+        artifact: 'linked-executable-or-shared-library',
+      },
+      runtimeImageSelection: ARTIFACT_PIPELINE_MODEL_CONTRACT.runtimeImageSelection,
+    };
+  }
+
   return {
-    source: 'kernel.cu',
-    pipelineMode: mode,
+    pipelineMode: 'separate-compilation-rdc',
     virtualTarget: targetPlan.virtualTarget,
     realTarget: targetPlan.realTarget,
-    ptxImage: `${targetPlan.virtualTarget}.ptx`,
-    cubinImage: `${targetPlan.realTarget}.cubin`,
-    cubinPayload: 'SASS',
-    fatbinaryImages: [targetPlan.realTarget, targetPlan.virtualTarget],
-    hostObject: 'host-object-with-embedded-fatbinary',
-    deviceLink: mode === 'whole-program' ? 'skipped-whole-program' : 'active-separate-compilation-rdc',
-    finalArtifact: 'linked-executable-or-shared-library',
+    translationUnits: [
+      {
+        source: 'caller.cu',
+        hostObject: 'caller.o',
+        relocatableDeviceCode: 'caller.o::relocatable-device-code',
+      },
+      {
+        source: 'device_math.cu',
+        hostObject: 'device_math.o',
+        relocatableDeviceCode: 'device_math.o::relocatable-device-code',
+      },
+    ],
+    deviceLink: {
+      state: 'active-separate-compilation-rdc',
+      objectInputs: ['caller.o', 'device_math.o'],
+      relocatableDeviceCodeInputs: [
+        'caller.o::relocatable-device-code',
+        'device_math.o::relocatable-device-code',
+      ],
+      object: 'device_link.o',
+      linkedExecutableDeviceCode: 'device_link.o::linked-executable-device-code',
+    },
+    finalHostLink: {
+      inputs: ['caller.o', 'device_math.o', 'device_link.o'],
+      artifact: 'linked-executable-or-shared-library',
+    },
     runtimeImageSelection: ARTIFACT_PIPELINE_MODEL_CONTRACT.runtimeImageSelection,
   };
 }
@@ -255,6 +386,7 @@ function buildFrame(
   mode: ArtifactPipelineMode,
   stepIndex: number,
 ): ArtifactPipelineFrame {
+  const modeStages = getModeStages(mode);
   const activeStages = getActiveStages(mode);
   return {
     lane,
@@ -264,7 +396,7 @@ function buildFrame(
     stageCount: activeStages.length,
     sequenceComplete: stepIndex === activeStages.length,
     currentStage: activeStages[stepIndex] ?? null,
-    stages: ARTIFACT_PIPELINE_STAGES.map((stage) => {
+    stages: modeStages.map((stage) => {
       const activeIndex = activeStages.findIndex(({ id }) => id === stage.id);
       const state: ArtifactPipelineStageState = activeIndex === -1
         ? 'skipped'

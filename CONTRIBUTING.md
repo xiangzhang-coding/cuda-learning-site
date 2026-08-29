@@ -22,6 +22,8 @@ A Runnable Example is a standalone source project and the only canonical executa
 
 Example changes must keep build inputs, displayed ranges, downloads, compatibility metadata, and compile checks pointed at the same source tree and commit.
 
+An evidence-bearing example may separate its immutable build-source commit from a later evidence-bundle commit through `src/canonical-example-publications.json`. The bundle must contain byte-identical build-contract inputs from the source commit plus the final project manifest and retained records. Release checks must inspect the downloaded archive and verify those inputs, records, source identities, and build-contract hashes rather than accepting path presence alone.
+
 ## Evidence and environment claims
 
 Compilation evidence and runtime Evidence Status are independent:

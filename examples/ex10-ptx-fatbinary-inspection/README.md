@@ -22,7 +22,7 @@ make artifact-test DIALECT=c++17
 
 `relocatable-compile` applies `-dc` separately to `src/device_math.cu` and `src/caller.cu`. `device-link` creates `build/device_link.o`. `host-link` consumes that object with `--no-device-link`, so the explicit device link is not repeated.
 
-`inspect` hashes the preprocessing, PTX, cubin, fatbin, relocatable objects, device-link object, and final linked artifact. It writes PTX and ELF inventories from the same standalone fatbinary, a separate ELF inventory for the linked artifact, PTX/SASS/ELF dumps, CUDA symbols, and a symbol/link ledger. `artifact-test` checks those files and writes a boundary report.
+`inspect` hashes the preprocessing, PTX, cubin, fatbin, relocatable objects, device-link object, and final linked artifact. It writes PTX and ELF inventories from the same standalone fatbinary, a separate ELF inventory for the linked artifact, PTX/SASS/ELF dumps, dedicated pre-link and post-link CUDA symbol files, and a combined symbol/link ledger. `artifact-test` checks those files and writes a boundary report. The evidence recorder keeps the complete compact inventories, normalized symbol-transition lines, report facts, and zero exit statuses in each retained record; paths, byte counts, and SHA-256 values bind the larger generated files without copying their full dumps into the record.
 
 ## Execution boundary
 

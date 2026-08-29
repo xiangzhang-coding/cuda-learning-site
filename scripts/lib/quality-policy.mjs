@@ -159,7 +159,7 @@ function pngMetadataViolations(buffer, relativePath) {
   return violations;
 }
 
-function zipEntries(buffer) {
+export function zipEntries(buffer) {
   const eocdSignature = 0x06054b50;
   const centralSignature = 0x02014b50;
   const localSignature = 0x04034b50;

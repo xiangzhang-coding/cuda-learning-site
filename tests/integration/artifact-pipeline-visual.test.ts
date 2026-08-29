@@ -49,6 +49,26 @@ const stageIds = [
   'final-link',
 ];
 
+const wholeProgramStageIdentities = [
+  'whole-source-split',
+  'whole-ptx-image',
+  'whole-cubin-image',
+  'whole-fatbinary',
+  'whole-host-object',
+  'whole-device-link-skipped',
+  'whole-final-host-link',
+];
+
+const rdcStageIdentities = [
+  'rdc-source-pair',
+  'rdc-cross-tu-device-edge',
+  'rdc-caller-object',
+  'rdc-device-math-object',
+  'rdc-original-object-set',
+  'rdc-device-link-object',
+  'rdc-final-host-link',
+];
+
 describe('VIS09 artifact-pipeline Visual Explainer', () => {
   it('keeps the bilingual source pair, typed copy, pure model, and adaptive light-DOM source aligned', async () => {
     const [zh, en, model, typedCopy, component, styles] = await Promise.all([
@@ -72,15 +92,16 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
       expect(source).toContain("factCheckDate: '2026-08-29'");
       expect(source).toContain("hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'");
       expect(source).toMatch(/evidence:\n  compilation: \[\]\n  runtime: \[\]\n  expectedObservations: \[\]\n  recordedObservations: \[\]/);
-      expect(source.match(/accessDate: '2026-08-29'/g)).toHaveLength(4);
+      expect(source.match(/accessDate: '2026-08-29'/g)).toHaveLength(5);
       expect(source).toContain("content: '11.8.0,12.9.2,13.3.1,13.3'");
       expect(source).toContain('https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#cuda-compilation-trajectory');
       expect(source).toContain('https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory');
       expect(source).toContain('https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#the-cuda-compilation-trajectory');
+      expect(source).toContain('https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#using-separate-compilation-in-cuda');
       expect(source).toContain('https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#feature-set-compiler-targets');
       expect(source).toMatch(/runtime image selection/i);
       expect(source).toMatch(/no autoplay|没有 autoplay/);
-      expect(source).toMatch(/optional device link|按需 device link/i);
+      expect(source).toMatch(/device-link object/i);
       expect(source).toMatch(/whole-program/);
       expect(source).toMatch(/separate compilation \/ RDC/i);
       expect(source).toMatch(/suffix.*(does not select RDC|不表示 RDC|不决定 branch|chooses either branch)/i);
@@ -91,7 +112,7 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(model).toContain("runtimeEvidence: 'none'");
     expect(model).toContain("performanceEvidence: 'none'");
     expect(model).toContain("targetModeRelationship: 'independent-explicit-selections'");
-    for (const sourceFactId of ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033']) {
+    for (const sourceFactId of ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034']) {
       expect(model).toContain(sourceFactId);
     }
     expect(model).toContain('action: unknown');
@@ -99,6 +120,11 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(typedCopy).toContain('Readonly<Record<ArtifactPipelineLocale, ArtifactPipelineCopy>>');
     expect(typedCopy).toContain("'whole-program'");
     expect(typedCopy).toContain("'separate-compilation-rdc'");
+    expect(model).toContain("source: 'caller.cu'");
+    expect(model).toContain("source: 'device_math.cu'");
+    expect(model).toContain("relocatableDeviceCode: 'caller.o::relocatable-device-code'");
+    expect(model).toContain("relocatableDeviceCode: 'device_math.o::relocatable-device-code'");
+    expect(model).toContain("linkedExecutableDeviceCode: 'device_link.o::linked-executable-device-code'");
     expect(typedCopy).toMatch(/skipped|已跳过/);
     for (const target of ['baseline-75', 'exact-90a', 'family-100f']) expect(typedCopy).toContain(target);
     for (const stage of stageIds) expect(typedCopy).toContain(stage);
@@ -185,18 +211,31 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
       expect(deviceLink?.getAttribute('data-stage-state')).toBe('skipped');
       expect(deviceLink?.textContent).toMatch(/skipped|已跳过/);
       expect(deviceLink?.textContent).toMatch(/no device-link object|不产生 device-link object/);
+      expect(attributeValues(card, '[data-static-stage]', 'data-stage-identity')).toEqual(wholeProgramStageIdentities);
+      expect(card.querySelector('[data-static-manifest-sources]')?.textContent).toBe('kernel.cu');
+      expect(card.querySelector('[data-static-manifest-objects]')?.textContent).toContain('kernel.o [fatbinary-with-finalized-device-images]');
+      expect(card.querySelector('[data-static-manifest-device-link]')?.textContent).toContain('skipped-whole-program');
+      expect(card.querySelector('[data-static-manifest-final-inputs]')?.textContent).toBe('kernel.o');
     }
     for (const card of rdcCards) {
       const deviceLink = card.querySelector('[data-stage-id="optional-device-link"]');
       expect(deviceLink?.getAttribute('data-stage-state')).toBe('complete');
-      expect(deviceLink?.textContent).toMatch(/a_dlink/);
+      expect(deviceLink?.textContent).toContain('device_link.o');
+      expect(deviceLink?.textContent).toContain('device_link.o::linked-executable-device-code');
+      expect(attributeValues(card, '[data-static-stage]', 'data-stage-identity')).toEqual(rdcStageIdentities);
+      expect(card.querySelector('[data-static-manifest-sources]')?.textContent).toBe('caller.cu + device_math.cu');
+      expect(card.querySelector('[data-static-manifest-objects]')?.textContent).toContain('caller.o [caller.o::relocatable-device-code]');
+      expect(card.querySelector('[data-static-manifest-objects]')?.textContent).toContain('device_math.o [device_math.o::relocatable-device-code]');
+      expect(card.querySelector('[data-static-manifest-device-link]')?.textContent).toBe('device_link.o [device_link.o::linked-executable-device-code]');
+      expect(card.querySelector('[data-static-manifest-final-inputs]')?.textContent).toBe('caller.o + device_math.o + device_link.o');
+      expect(card.textContent).not.toMatch(/PTX image candidate|cubin \/ SASS image/);
     }
     expect(visual.textContent).toMatch(/compute_75/);
     expect(visual.textContent).toMatch(/compute_90a/);
     expect(visual.textContent).toMatch(/compute_100f/);
     expect(visual.textContent).toMatch(/fatbinary/i);
     expect(visual.textContent).toMatch(/host object/i);
-    expect(visual.textContent).toMatch(/a_dlink/);
+    expect(visual.textContent).toMatch(/device_link\.o/);
     expect(visual.textContent).toMatch(/linked executable \/ shared library/);
     expect(visual.querySelector('[data-measured], [data-observed-artifact], [data-runtime-selected-image]')).toBeNull();
 
@@ -208,7 +247,7 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(metadata(document, 'cuda:prerequisites')).toBe('M15,M16,M17');
     expect(metadata(document, 'cuda:related-units')).toBe('EX10');
     expect(metadata(document, 'cuda:hardware-gate')).toBe('None: deterministic browser model; no CUDA-capable system required');
-    expect(metadata(document, 'cuda:source-count')).toBe('4');
+    expect(metadata(document, 'cuda:source-count')).toBe('5');
     expect(metadata(document, 'cuda:source-versions')).toBe('11.8.0,12.9.2,13.3.1,13.3');
     for (const field of ['compilation', 'runtime', 'expected-observations', 'recorded-observations']) {
       expect(metadata(document, `cuda:evidence-${field}`) ?? metadata(document, `cuda:${field}`)).toBe('none');
@@ -227,6 +266,8 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
       ['[data-static-selection]', 'data-static-mode'],
       ['[data-static-stage]', 'data-static-stage'],
       ['[data-static-stage]', 'data-stage-id'],
+      ['[data-static-stage]', 'data-stage-identity'],
+      ['[data-static-stage]', 'data-stage-mode'],
       ['[data-static-stage]', 'data-branch'],
       ['[data-static-stage]', 'data-optional'],
       ['[data-static-stage]', 'data-stage-state'],

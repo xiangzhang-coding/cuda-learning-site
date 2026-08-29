@@ -214,7 +214,7 @@ CUDA Binary Utilities expose different entry points for standalone and embedded 
 | Which machine instructions are in a cubin? | `cuobjdump --dump-sass` on a standalone or embedded cubin | SASS disassembly of that inspected binary | That those instructions loaded, executed, or were faster |
 | Is richer standalone-cubin disassembly needed? | `nvdisasm` on a standalone cubin | Sections, instructions, and selected display analysis for that cubin | Host-binary inventory or runtime selection |
 
-An inspection log should retain the exact command, tool version, input path, input hash, exit status, and complete output artifact. Even when complete, it remains static artifact evidence, not a driver trace, kernel-completion observation, correctness oracle, or timing record.
+An inspection record should retain the exact command, tool version, input path, input hash, exit status, and either the complete compact output or a normalized complete inventory plus the path, size, and hash of a larger generated output. Even when complete, it remains static artifact evidence, not a driver trace, kernel-completion observation, correctness oracle, or timing record.
 
 ## Canonical Runnable Example: EX10
 

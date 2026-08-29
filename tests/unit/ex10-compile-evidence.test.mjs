@@ -31,6 +31,63 @@ function artifactRecords(paths) {
   }));
 }
 
+function ordinaryInspection() {
+  return {
+    inventories: {
+      ptx: [{ index: 1, file: 'artifact_kernel.1.sm_75.ptx' }],
+      elf: [{ index: 1, file: 'artifact_kernel.1.sm_75.cubin' }],
+      linkedElf: [{ index: 1, file: 'ex10-ptx-fatbinary-inspection.1.sm_75.cubin' }],
+    },
+    artifactTestReport: {
+      'artifact-test': 'pass',
+      'target-native': 'sm_75',
+      'target-virtual': 'compute_75',
+      'same-fatbinary-native-and-ptx': 'true',
+      'caller-ex10-device-scale': 'undefined',
+      'device-link-ex10-device-scale': 'defined',
+      'host-executable-executed': 'false',
+      'gpu-executable-executed': 'false',
+      'runtime-evidence': 'Runtime-Not-Applicable',
+      'performance-measured': 'false',
+    },
+    symbols: {
+      callerUndefined: 'STT_FUNC STB_GLOBAL STV_DEFAULT U ex10_device_scale',
+      deviceLinkDefined: 'STT_FUNC STB_GLOBAL STV_DEFAULT ex10_device_scale',
+    },
+    exitStatuses: {
+      clean: 0,
+      preprocess: 0,
+      'standalone-ptx': 0,
+      cubin: 0,
+      fatbin: 0,
+      'relocatable-compile': 0,
+      'device-link': 0,
+      'host-link': 0,
+      inspect: 0,
+      'artifact-test': 0,
+    },
+  };
+}
+
+function probeInspection() {
+  return {
+    inventories: {
+      elf: [{ index: 1, file: 'cxx23_probe.1.sm_75.cubin' }],
+    },
+    compilerOutput: [],
+    artifactHash: {
+      path: 'build/cxx23_probe.o',
+      sha256: 'c'.repeat(64),
+    },
+    exitStatuses: {
+      clean: 0,
+      compile: 0,
+      inspect: 0,
+      'artifact-hash': 0,
+    },
+  };
+}
+
 async function ordinaryRecord() {
   const example = await loadCanonicalExample(projectRoot, 'EX10');
   const lane = example.compatibility.lanes[0];
@@ -41,10 +98,10 @@ async function ordinaryRecord() {
     claim: 'Compile-Checked',
     subject: 'EX10',
     check: 'ex10-cuda-11-8-cxx17',
-    sourceCommit: 'a'.repeat(40),
+    sourceCommit: example.sourceCommit,
     buildContractSha256: await hashCanonicalBuildContract(projectRoot, 'EX10'),
     verificationDate: '2026-08-29',
-    workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/12345',
+    workflowRun: example.evidence.retainedWorkflowRun,
     runner: runner(),
     container: {
       declaredReference: lane.image,
@@ -71,6 +128,7 @@ async function ordinaryRecord() {
     commands: Object.values(example.build.commands).map((command) =>
       command.replace('{dialect}', 'c++17')),
     artifacts: artifactRecords(example.build.artifacts),
+    inspection: ordinaryInspection(),
     hostReferenceExecuted: false,
     hostExecutableExecuted: false,
     gpuExecutableExecuted: false,
@@ -89,10 +147,10 @@ async function probeRecord() {
     claim: probe.claim,
     subject: probe.subject,
     check: 'ex10-cuda-13-3-gcc14-cxx23-probe',
-    sourceCommit: 'a'.repeat(40),
+    sourceCommit: example.sourceCommit,
     buildContractSha256: await hashCanonicalBuildContract(projectRoot, 'EX10'),
     verificationDate: '2026-08-29',
-    workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/12345',
+    workflowRun: example.evidence.retainedWorkflowRun,
     runner: runner(),
     container: {
       declaredReference: lane.image,
@@ -128,6 +186,7 @@ async function probeRecord() {
     },
     commands: probe.commands,
     artifacts: artifactRecords(probe.artifacts),
+    inspection: probeInspection(),
     hostReferenceExecuted: false,
     hostExecutableExecuted: false,
     gpuExecutableExecuted: false,
@@ -176,6 +235,31 @@ describe('EX10 compile evidence validation', () => {
     await expect(validateCompileEvidenceRecord(projectRoot, 'EX10', missingPackage)).resolves.toContain(
       'actual container identity is incomplete',
     );
+
+    const unrelatedBaseDigest = {
+      ...record,
+      container: {
+        ...record.container,
+        baseImage: {
+          ...record.container.baseImage,
+          actualRepoDigests: [`unrelated/cuda@${record.container.manifestDigest}`],
+        },
+      },
+    };
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX10', unrelatedBaseDigest)).resolves.toContain(
+      'base-image repository digests do not include the declared image digest',
+    );
+
+    const unrelatedArtifactHash = {
+      ...record,
+      inspection: {
+        ...record.inspection,
+        artifactHash: { ...record.inspection.artifactHash, sha256: 'f'.repeat(64) },
+      },
+    };
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX10', unrelatedArtifactHash)).resolves.toContain(
+      'inspection evidence is incomplete or unexpected',
+    );
   });
 
   it('rejects any probe command that bypasses NVCC host compiler support checks', async () => {
@@ -189,36 +273,108 @@ describe('EX10 compile evidence validation', () => {
     expect(errors).toContain('unsupported host compiler bypass is forbidden');
   });
 
+  it('accepts explicit current-run and current-commit overrides for CI recording', async () => {
+    const record = {
+      ...await ordinaryRecord(),
+      sourceCommit: 'b'.repeat(40),
+      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/99999',
+    };
+
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX10', record, {
+      expectedSourceCommit: record.sourceCommit,
+      expectedWorkflowRun: record.workflowRun,
+    })).resolves.toEqual([]);
+    const retainedErrors = await validateCompileEvidenceRecord(projectRoot, 'EX10', record);
+    expect(retainedErrors).toContain('source commit does not match the expected commit');
+    expect(retainedErrors).toContain('workflow run does not match the expected run');
+  });
+
+  it('rejects unrelated check, run, source, repository digest, and inspection data', async () => {
+    const record = await ordinaryRecord();
+    const mutations = [
+      {
+        record: { ...record, check: 'ex10-cuda-12-9-cxx17' },
+        error: 'check does not match its declared Toolkit Lane, dialect, and kind',
+      },
+      {
+        record: {
+          ...record,
+          workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/99999',
+        },
+        error: 'workflow run does not match the expected run',
+      },
+      {
+        record: { ...record, sourceCommit: 'b'.repeat(40) },
+        error: 'source commit does not match the expected commit',
+      },
+      {
+        record: {
+          ...record,
+          container: {
+            ...record.container,
+            actualRepoDigests: [`unrelated/cuda@${record.container.manifestDigest}`],
+          },
+        },
+        error: 'actual repository digests do not include the declared image digest',
+      },
+      {
+        record: {
+          ...record,
+          inspection: {
+            ...record.inspection,
+            inventories: {
+              ...record.inspection.inventories,
+              ptx: [{ index: 1, file: 'unrelated.1.sm_75.ptx' }],
+            },
+          },
+        },
+        error: 'inspection evidence is incomplete or unexpected',
+      },
+      {
+        record: {
+          ...record,
+          inspection: {
+            ...record.inspection,
+            symbols: {
+              ...record.inspection.symbols,
+              callerUndefined: 'STT_FUNC STB_GLOBAL STV_DEFAULT ex10_device_scale',
+            },
+          },
+        },
+        error: 'inspection evidence is incomplete or unexpected',
+      },
+    ];
+
+    for (const mutation of mutations) {
+      await expect(validateCompileEvidenceRecord(projectRoot, 'EX10', mutation.record))
+        .resolves.toContain(mutation.error);
+    }
+  });
+
   it('keeps all committed EX02 evidence valid after the EX10 generalization', async () => {
     await expect(loadCompileEvidence(projectRoot, 'EX02')).resolves.toHaveLength(6);
   });
 
-  it('loads the exact retained EX10 matrix and separate probe at the pinned source commit', async () => {
-    const [example, records] = await Promise.all([
-      loadCanonicalExample(projectRoot, 'EX10'),
-      loadCompileEvidence(projectRoot, 'EX10'),
-    ]);
-    const ordinary = records.filter(({ subject }) => subject === 'EX10');
-    const probes = records.filter(({ claim }) => claim === 'C++23-Dialect-Probe');
-
+  it('declares the retained EX10 run and exact six-check matrix', async () => {
+    const example = await loadCanonicalExample(projectRoot, 'EX10');
     expect(example.sourceCommit).toBe('8b4af3965147f2ead99e72a73f5fe2f92fa0114b');
+    expect(example.evidence.retainedWorkflowRun).toBe(
+      'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
+    );
     expect(example.evidence.compilation).toHaveLength(5);
     expect(example.evidence.dialectProbe).toBe('evidence/cuda-13-3-gcc14-cxx23-probe.json');
-    expect(ordinary.map(({ toolchain }) => `${toolchain.toolkit}/${toolchain.dialect}`).sort()).toEqual([
-      '11.8.0/c++17',
-      '12.9.2/c++17',
-      '12.9.2/c++20',
-      '13.3.1/c++17',
-      '13.3.1/c++20',
+    expect(example.compatibility.checks).toEqual([
+      { id: 'ex10-cuda-11-8-cxx17', toolkitLane: 'cuda-11.8', dialect: 'c++17', kind: 'ex10' },
+      { id: 'ex10-cuda-12-9-cxx17', toolkitLane: 'cuda-12.9', dialect: 'c++17', kind: 'ex10' },
+      { id: 'ex10-cuda-12-9-cxx20', toolkitLane: 'cuda-12.9', dialect: 'c++20', kind: 'ex10' },
+      { id: 'ex10-cuda-13-3-cxx17', toolkitLane: 'cuda-13.3', dialect: 'c++17', kind: 'ex10' },
+      { id: 'ex10-cuda-13-3-cxx20', toolkitLane: 'cuda-13.3', dialect: 'c++20', kind: 'ex10' },
+      {
+        id: 'ex10-cuda-13-3-gcc14-cxx23-probe',
+        toolkitLane: 'cuda-13.3',
+        dialect: 'c++23',
+        kind: 'cxx23-probe',
+      },
     ]);
-    expect(probes).toHaveLength(1);
-    expect(probes[0]).toMatchObject({
-      result: 'pass',
-      subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
-      sourceCommit: example.sourceCommit,
-      buildContractSha256: '4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb',
-      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
-    });
-    expect(records.flatMap(({ commands }) => commands).join('\n')).not.toContain('--allow-unsupported-compiler');
   });
 });

@@ -213,7 +213,7 @@ C++23 appears only in EX10's `cxx23-probe` range. The range first requires `__cp
 
 ## Immutable R1 history: CUDA 13.3.1 + GCC 13.3
 
-The [retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json) records CUDA Toolkit 13.3.1, NVCC 13.3.73, GCC 13.3.0, and requested C++23 mode. Its compiler diagnostic says that the configured host compiler does not support the flag and that it will be ignored. The record result is `unsupported`, with no artifacts.
+The [retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json) records CUDA Toolkit 13.3.1, NVCC 13.3.73, GCC 13.3.0, and requested C++23 mode. Its compiler diagnostic says that the configured host compiler does not support the flag and that it will be ignored. The record result is `unsupported`, with no artifacts.
 
 That record is immutable R1 history. Do not delete it, rewrite it as a pass, replace its host-compiler field, or grant EX02/EX10 C++23 Compile-Checked because the current guide lists C++23. It establishes only this narrow conclusion: **the probe under CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 does not support the requested C++23 mode.**
 

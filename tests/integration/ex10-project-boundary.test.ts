@@ -9,7 +9,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   loadCanonicalExample,
-  loadCompileEvidence,
   readCanonicalRange,
   validateCanonicalExample,
 } from '../../scripts/lib/canonical-examples.mjs';
@@ -18,6 +17,7 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex10-ptx-fatbinary-inspection');
 const sourceCommit = '8b4af3965147f2ead99e72a73f5fe2f92fa0114b';
+const evidenceBundleCommit = '8b4af3965147f2ead99e72a73f5fe2f92fa0114b';
 const rangeNames = [
   'artifact-kernel',
   'device-link-contract',
@@ -27,7 +27,10 @@ const rangeNames = [
 
 describe('EX10 PTX and fatbinary inspection boundary', () => {
   it('declares the complete artifact pipeline and four canonical ranges in order', async () => {
-    const example = await loadCanonicalExample(projectRoot, 'EX10');
+    const [example, standaloneManifest] = await Promise.all([
+      loadCanonicalExample(projectRoot, 'EX10'),
+      readFile(path.join(exampleRoot, 'project.json'), 'utf8').then(JSON.parse),
+    ]);
 
     expect(await validateCanonicalExample(projectRoot, 'EX10')).toEqual([]);
     expect(example).toMatchObject({
@@ -36,9 +39,13 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       id: 'EX10',
       root: 'examples/ex10-ptx-fatbinary-inspection',
       sourceCommit,
+      evidenceBundleCommit,
       license: 'Apache-2.0',
       provenance: 'original',
     });
+    expect(standaloneManifest).not.toHaveProperty('sourceCommit');
+    expect(standaloneManifest).not.toHaveProperty('sourceUrl');
+    expect(standaloneManifest).not.toHaveProperty('downloadUrl');
     expect(example.build.stages).toEqual([
       'preprocess',
       'standalone-ptx',
@@ -56,7 +63,10 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     }
     expect(example.sourceUrl).toContain(`/tree/${sourceCommit}/`);
     expect(example.downloadUrl).toBe(
-      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${sourceCommit}.zip`,
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${evidenceBundleCommit}.zip`,
+    );
+    expect(await readFile(path.join(projectRoot, 'CONTRIBUTING.md'), 'utf8')).toContain(
+      'separate its immutable build-source commit from a later evidence-bundle commit',
     );
   });
 
@@ -125,6 +135,8 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       'build/cuobjdump-linked-elf-list.txt',
       'build/cuobjdump-sass.txt',
       'build/cuobjdump-elf.txt',
+      'build/caller-symbols.txt',
+      'build/device-link-symbols.txt',
       'build/symbol-link-ledger.txt',
       'build/artifact-test-report.txt',
     ]) {
@@ -143,9 +155,16 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-ptx-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin');
     expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-elf-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin');
     expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-linked-elf-list.txt: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection');
+    expect(makefile).toContain('$(BUILD_DIR)/caller-symbols.txt: $(BUILD_DIR)/caller.o');
+    expect(makefile).toContain('$(BUILD_DIR)/device-link-symbols.txt: $(BUILD_DIR)/device_link.o');
     expect(makefile).toContain('sha256sum $(PRIMARY_ARTIFACT_NAMES)');
     expect(artifactTest).toContain('sha256sum --check artifact-sha256.txt');
+    expect(artifactTest).toContain('U[[:space:]]+ex10_device_scale');
+    expect(artifactTest).toContain('"$build_dir/caller-symbols.txt"');
+    expect(artifactTest).toContain('"$build_dir/device-link-symbols.txt"');
     expect(artifactTest).toContain('same-fatbinary-native-and-ptx=true');
+    expect(artifactTest).toContain('caller-ex10-device-scale=undefined');
+    expect(artifactTest).toContain('device-link-ex10-device-scale=defined');
     expect(artifactTest).toContain('host-executable-executed=false');
     expect(artifactTest).toContain('runtime-evidence=Runtime-Not-Applicable');
     expect(`${compileScript}\n${artifactTest}`).not.toMatch(
@@ -166,6 +185,19 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     );
 
     expect(example.compatibility.target).toEqual(['sm_75', 'compute_75']);
+    expect(example.compatibility.checks.map(({ id, toolkitLane, dialect, kind }: {
+      id: string;
+      toolkitLane: string;
+      dialect: string;
+      kind: string;
+    }) => `${id}/${toolkitLane}/${dialect}/${kind}`)).toEqual([
+      'ex10-cuda-11-8-cxx17/cuda-11.8/c++17/ex10',
+      'ex10-cuda-12-9-cxx17/cuda-12.9/c++17/ex10',
+      'ex10-cuda-12-9-cxx20/cuda-12.9/c++20/ex10',
+      'ex10-cuda-13-3-cxx17/cuda-13.3/c++17/ex10',
+      'ex10-cuda-13-3-cxx20/cuda-13.3/c++20/ex10',
+      'ex10-cuda-13-3-gcc14-cxx23-probe/cuda-13.3/c++23/cxx23-probe',
+    ]);
     expect(example.compatibility.lanes.map((lane: { toolkit: string; dialects: string[] }) => ({
       toolkit: lane.toolkit,
       dialects: lane.dialects,
@@ -193,6 +225,13 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     expect(recorder).toMatch(/'--user',\s*\n\s*uid/);
     expect(recorder).not.toContain("'--gpus'");
     expect(compileScriptCommands(recorder)).not.toContain('ex10-ptx-fatbinary-inspection');
+    expect(recorder).toContain('example.compatibility.checks.find');
+    expect(recorder).toContain('actualRepoDigests: runtimeInspection.RepoDigests ?? []');
+    expect(recorder).toContain('actualRepoDigests: baseInspection.RepoDigests ?? []');
+    expect(recorder).toContain('expectedSourceCommit: sourceCommit');
+    expect(recorder).toContain('expectedWorkflowRun: workflowRun');
+    expect(recorder).toContain('callerUndefined');
+    expect(recorder).toContain('deviceLinkDefined');
     expect(ex10Job.match(/kind: ex10/g)).toHaveLength(5);
     expect(ex10Job.match(/kind: cxx23-probe/g)).toHaveLength(1);
     expect(ex10Job).toContain('node scripts/run-ex10-compile.mjs');
@@ -200,12 +239,30 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     expect(workflow).toContain('needs: [ex10-compile]');
   });
 
-  it('retains five ordinary records and one separate probe with Runtime-Not-Applicable', async () => {
+  it('rejects a workflow tuple that is unrelated to its declared check before Docker runs', async () => {
+    await expect(execFileAsync(process.execPath, [
+      'scripts/run-ex10-compile.mjs',
+      '--check', 'ex10-cuda-11-8-cxx17',
+      '--toolkit-lane', 'cuda-12.9',
+      '--dialect', 'c++17',
+      '--kind', 'ex10',
+      '--image', 'not-used-before-contract-validation',
+    ], { cwd: projectRoot })).rejects.toThrow(
+      'Workflow check does not match the declared Toolkit Lane, dialect, and kind.',
+    );
+  });
+
+  it('reads five retained ordinary records and one separate probe without reclassifying runtime', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX10');
     const evidenceFiles = await readdir(path.join(exampleRoot, 'evidence'));
-    const records = await loadCompileEvidence(projectRoot, 'EX10');
+    // A fresh CI run will make these records current against the changed build contract.
+    const records = await Promise.all(evidenceFiles
+      .filter((file) => file.endsWith('.json'))
+      .sort()
+      .map(async (file) => JSON.parse(await readFile(path.join(exampleRoot, 'evidence', file), 'utf8'))));
 
     expect(example.evidence).toMatchObject({
+      retainedWorkflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
       compilation: [
         { status: 'Compile-Checked', record: 'evidence/cuda-11-8-cxx17.json' },
         { status: 'Compile-Checked', record: 'evidence/cuda-12-9-cxx17.json' },
@@ -229,6 +286,12 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       'cuda-13-3-gcc14-cxx23-probe.json',
     ]);
     expect(records).toHaveLength(6);
+    expect(new Set(records.map(({ workflowRun }: { workflowRun: string }) => workflowRun))).toEqual(
+      new Set([example.evidence.retainedWorkflowRun]),
+    );
+    expect(new Set(records.map(({ sourceCommit: recordCommit }: { sourceCommit: string }) => recordCommit))).toEqual(
+      new Set([example.sourceCommit]),
+    );
     expect(records.filter(({ subject }: { subject: string }) => subject === 'EX10').map(
       ({ toolchain }: { toolchain: { toolkit: string; dialect: string } }) =>
         `${toolchain.toolkit}/${toolchain.dialect}`,
@@ -243,8 +306,8 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       result: 'pass',
       subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
       sourceCommit,
-      buildContractSha256: '4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb',
-      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
+      buildContractSha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+      workflowRun: example.evidence.retainedWorkflowRun,
       toolchain: {
         toolkit: '13.3.1',
         hostCompiler: 'g++-14 (Ubuntu 14.2.0-4ubuntu2~24.04.1) 14.2.0',
@@ -319,7 +382,7 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       expect(page).toContain('| host link |');
       expect(page).toContain('`--gpus`');
       expect(page).toContain(`tree/${sourceCommit}/examples/ex10-ptx-fatbinary-inspection`);
-      expect(page).toContain(`/archive/${sourceCommit}.zip`);
+      expect(page).toContain(`/archive/${evidenceBundleCommit}.zip`);
       expect(page.match(/^  - title:/gm)).toHaveLength(17);
       expect(page).toContain('title "CUDA 13.3.1"; committed 2026-07-28');
       expect(page).not.toMatch(/master\s+branch/);

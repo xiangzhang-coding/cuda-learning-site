@@ -2096,7 +2096,7 @@ const publicationPairs: readonly PublicationPair[] = [
     evidenceRuntime: 'none',
     expectedObservations: 'none',
     recordedObservations: 'none',
-    sourceCount: '4',
+    sourceCount: '5',
     sourceVersions: '11.8.0,12.9.2,13.3.1,13.3',
     zh: '/visuals/artifact-pipeline/',
     en: '/en/visuals/artifact-pipeline/',

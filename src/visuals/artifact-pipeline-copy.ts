@@ -11,6 +11,12 @@ import type {
 
 export type ArtifactPipelineLocale = 'zh-CN' | 'en';
 
+type ArtifactPipelineStageCopy = Readonly<{
+  label: string;
+  description: string;
+  artifact: string;
+}>;
+
 type ArtifactPipelineCopy = Readonly<{
   eyebrow: string;
   title: string;
@@ -45,17 +51,16 @@ type ArtifactPipelineCopy = Readonly<{
   realTarget: string;
   ptxImage: string;
   cubinImage: string;
+  sourceInputs: string;
+  hostObjects: string;
+  deviceLinkObject: string;
+  finalHostLinkInputs: string;
   flowHeading: string;
   artifactOutput: string;
-  stages: Readonly<Record<ArtifactPipelineStageId, Readonly<{
-    label: string;
-    description: string;
-    artifact: string;
-  }>>>;
-  modeStages: Readonly<Record<ArtifactPipelineMode, Readonly<Record<
-    Extract<ArtifactPipelineStageId, 'optional-device-link' | 'final-link'>,
-    Readonly<{ description: string; artifact: string }>
-  >>>>;
+  modeStages: Readonly<Record<
+    ArtifactPipelineMode,
+    Readonly<Record<ArtifactPipelineStageId, ArtifactPipelineStageCopy>>
+  >>;
   runtimeSelection: string;
   runtimeSelectionUnknown: string;
   runtimeSelectionBoundary: string;
@@ -78,14 +83,14 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
   'zh-CN': {
     eyebrow: 'VIS09 · HOST/DEVICE BRANCHES · ARTIFACT PACKAGING',
     title: 'NVCC 构建产物流水线',
-    summary: '在精确 Toolkit Lane、有界 target plan 与显式 compilation mode 中，逐步追踪 .cu source 如何形成 PTX、cubin/SASS、fatbinary、host object 与最终链接产物。',
-    conceptualNotice: '这是基于公开 NVCC phase/trajectory 的确定性浏览器模型，不是一次 compiler trace。它不执行 nvcc、不检查生成文件，也不知道 runtime 最终选择 fatbinary 中的哪个 image。',
+    summary: '在精确 Toolkit Lane、有界 target plan 与显式 compilation mode 中，对比单 translation unit 的 whole-program image path 与双 translation unit 的 RDC object/device-link path。',
+    conceptualNotice: '这是基于公开 NVCC phase/trajectory 与 separate-compilation contract 的确定性浏览器模型，不是一次 compiler trace。它不执行 nvcc、不检查生成文件，也不知道 runtime 最终选择哪个 device image。',
     modelHeading: '模型边界',
     modelBoundaries: [
       'Host 与 device path 是概念分支；模型不展开 Toolkit 可变的内部子命令。',
-      'PTX image 与 native cubin/SASS 同时进入所选教学 fatbinary；这只是声明的 target plan。',
+      'Whole-program branch 声明 PTX 与 native cubin/SASS 的教学 fatbinary；RDC branch 不把这条 finalized-image path 复制到每个 translation unit。',
       'Target plan 与 compilation mode 是独立的显式选择；a/f target suffix 不会选择 whole-program 或 RDC。',
-      'Separate device link 只在 relocatable device code 跨 translation unit 时按需出现；whole-program path 不虚构该阶段。',
+      'RDC branch 固定建模 caller.cu 与 device_math.cu、各自的 relocatable device code/host object，以及 required device link；whole-program path 不虚构该阶段。',
       '最终 linked artifact 仍不能证明 build 成功、driver compatibility、GPU execution、correctness 或 performance。',
     ],
     controlsHeading: 'Artifact flow 控制',
@@ -101,7 +106,7 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
       },
       'separate-compilation-rdc': {
         title: 'Separate compilation / RDC（执行 device link）',
-        description: 'Relocatable device code 先经过独立 device link，再进入最终 host link。',
+        description: 'caller.cu 与 device_math.cu 分别产生含 relocatable device code 的 host object；device link 再生成含 linked executable device code 的 device_link.o。',
       },
     },
     targetPlans: {
@@ -147,72 +152,93 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
     realTarget: 'Real target / native code',
     ptxImage: 'PTX image candidate',
     cubinImage: 'cubin / SASS image',
+    sourceInputs: 'CUDA source input',
+    hostObjects: 'Host object / device-code identity',
+    deviceLinkObject: 'Device-link object',
+    finalHostLinkInputs: 'Final host-link object inputs',
     flowHeading: 'Host/device artifact flow',
     artifactOutput: '阶段产物',
-    stages: {
-      'source-split': {
-        label: '分流 CUDA translation unit',
-        description: 'NVCC 对 {source} 分别准备 device compilation 与 host compilation 路径；公开 phase 是稳定教学边界。',
-        artifact: '{source} -> host path | device path',
-      },
-      'device-ptx': {
-        label: '按 virtual target 生成 PTX',
-        description: 'Device path 按 {virtual} feature assumption 产生 PTX intermediate code。',
-        artifact: '{ptx}',
-      },
-      'device-cubin': {
-        label: '组装 native cubin / SASS',
-        description: 'Device assembler 为 real target {real} 产生包含 SASS 的 architecture-specific cubin image。',
-        artifact: '{cubin} · SASS',
-      },
-      fatbinary: {
-        label: '封装 fatbinary',
-        description: '所选教学 plan 把 {real} native image 与 {virtual} PTX image candidate 放入同一个 fatbinary。',
-        artifact: 'fatbinary[{real}, {virtual}]',
-      },
-      'host-object': {
-        label: '生成带 embedded fatbinary 的 host object',
-        description: 'Host path 再次预处理并合成 standard C++，随后 host compiler 生成包含 embedded fatbinary 的 object。',
-        artifact: 'host object + embedded fatbinary',
-      },
-      'optional-device-link': {
-        label: 'Separate device-link boundary',
-        description: 'Compilation mode 明确决定这个 conditional boundary 是跳过还是执行。',
-        artifact: 'mode-dependent device-link output',
-      },
-      'final-link': {
-        label: '执行最终 host link',
-        description: 'Host object、按需的 device-link output 与所需 library 汇合为最终 linked artifact；这里不运行该产物。',
-        artifact: 'linked executable / shared library',
-      },
-    },
     modeStages: {
       'whole-program': {
+        'source-split': {
+          label: '分流单个 CUDA translation unit',
+          description: 'NVCC 对 {source} 分别准备 device compilation 与 host compilation 路径；公开 phase 是稳定教学边界。',
+          artifact: '{source} -> host path | device path',
+        },
+        'device-ptx': {
+          label: '按 virtual target 生成 PTX',
+          description: 'Device path 按 {virtual} feature assumption 产生 PTX intermediate code。',
+          artifact: '{ptx}',
+        },
+        'device-cubin': {
+          label: '组装 native cubin / SASS',
+          description: 'Device assembler 为 real target {real} 产生包含 SASS 的 architecture-specific cubin image。',
+          artifact: '{cubin} · SASS',
+        },
+        fatbinary: {
+          label: '封装 finalized device images',
+          description: '所选教学 plan 把 {real} native image 与 {virtual} PTX image candidate 放入单 translation unit 的 fatbinary。',
+          artifact: 'fatbinary[{real}, {virtual}]',
+        },
+        'host-object': {
+          label: '生成带 embedded fatbinary 的 kernel.o',
+          description: 'Host path 再次预处理并合成 standard C++，随后 host compiler 生成包含 embedded finalized device images 的 {hostObject}。',
+          artifact: '{source} -> {hostObject} + embedded fatbinary',
+        },
         'optional-device-link': {
+          label: '跳过 separate device link',
           description: 'Whole-program mode 跳过此阶段：device code 在一个 compilation unit 内解析，因此没有独立 device-link object 进入 host link。',
           artifact: '已跳过 · 不产生 device-link object',
         },
         'final-link': {
-          description: 'Host object 与所需 library 直接汇合为最终 linked artifact；whole-program mode 没有独立 device-link output，这里也不运行产物。',
-          artifact: 'linked executable / shared library',
+          label: '执行最终 host link',
+          description: '{finalInputs} 与所需 library 直接汇合为最终 linked artifact；whole-program mode 没有独立 device-link output，这里也不运行产物。',
+          artifact: '{finalInputs} -> linked executable / shared library',
         },
       },
       'separate-compilation-rdc': {
+        'source-split': {
+          label: '声明两个 CUDA translation unit',
+          description: 'RDC branch 明确使用 {callerSource} 与 {deviceMathSource}；它不是把单 kernel finalized-image path 再追加一个 node。',
+          artifact: '{callerSource} + {deviceMathSource}',
+        },
+        'device-ptx': {
+          label: '建立跨 translation unit 的 device edge',
+          description: '{callerSource} 中的 kernel 保留对 {deviceMathSource} 中 external device definition 的 reference，因此两个 source 都必须进入 RDC compilation。',
+          artifact: '{callerSource}::kernel -> {deviceMathSource}::__device__ definition',
+        },
+        'device-cubin': {
+          label: '把 caller.cu 编译为 RDC object',
+          description: '{callerSource} 独立产生 {callerObject}；该 host object 保留身份明确的 {callerRdc}，不在此阶段伪装成 finalized cubin/fatbinary。',
+          artifact: '{callerSource} -> {callerObject} [{callerRdc}]',
+        },
+        fatbinary: {
+          label: '把 device_math.cu 编译为 RDC object',
+          description: '{deviceMathSource} 独立产生 {deviceMathObject}；该 host object 保留身份明确的 {deviceMathRdc}。',
+          artifact: '{deviceMathSource} -> {deviceMathObject} [{deviceMathRdc}]',
+        },
+        'host-object': {
+          label: '保留两个 original host object',
+          description: '{callerObject} 与 {deviceMathObject} 同时携带各自 host code 与 relocatable device code；它们既是 device-link input，也必须保留给最终 host link。',
+          artifact: '{callerObject} + {deviceMathObject}',
+        },
         'optional-device-link': {
-          description: 'Separate compilation / RDC mode 在此解析跨 translation unit 的 device symbol，并产生可交给 host linker 的 device-link object。',
-          artifact: 'a_dlink.o / a_dlink.obj（active）',
+          label: '链接两份 relocatable device code',
+          description: 'Device linker 读取 {callerRdc} 与 {deviceMathRdc}，解析跨 translation unit 的 device symbol，并生成含 linked executable device code 的 {deviceLinkObject}。',
+          artifact: '{callerRdc} + {deviceMathRdc} -> {deviceLinkObject} [{linkedDeviceCode}]',
         },
         'final-link': {
-          description: 'Host object、已生成的 device-link object 与所需 library 汇合为最终 linked artifact；这里不运行该产物。',
-          artifact: 'linked executable / shared library',
+          label: '消费三个 object 执行最终 host link',
+          description: 'Final host linker 明确消费两个 original object 与 device-link object：{finalInputs}，再加所需 library；这里不运行产物。',
+          artifact: '{finalInputs} -> linked executable / shared library',
         },
       },
     },
     runtimeSelection: 'Runtime image selection',
     runtimeSelectionUnknown: 'unknown',
-    runtimeSelectionBoundary: '没有 selected GPU、loaded driver、device query 或 launch observation，因此不能从 fatbinary 内容推断 runtime 会选择 native cubin 还是 PTX path。',
+    runtimeSelectionBoundary: '没有 selected GPU、loaded driver、device query 或 launch observation，因此不能从 whole-program image inventory 或 RDC linked device code 推断 runtime image path。',
     staticHeading: '无脚本 reviewed lane / target / mode plans',
-    staticIntro: '全部十四个精确 lane/plan/mode 组合都由服务器渲染：每个 target plan 分别展示 whole-program 的 skipped device link 与 RDC 的 active device link；禁用 JavaScript 与打印时不依赖 live workbench。',
+    staticIntro: '全部十四个精确 lane/plan/mode 组合都由服务器渲染：whole-program 展示单 TU finalized-image path 与 skipped device link，RDC 展示 caller.cu/device_math.cu 的独立 object、active device_link.o 与三 object final host link；禁用 JavaScript 与打印时不依赖 live workbench。',
     staticCardKicker: '{lane} · {scope} · {mode}',
     staticFlowHeading: '完整静态 artifact flow',
     statusReady: '模型已在默认 whole-program mode 就绪；device-link stage 标记为已跳过，尚未推进 active artifact stage。',
@@ -236,14 +262,14 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
   en: {
     eyebrow: 'VIS09 · HOST/DEVICE BRANCHES · ARTIFACT PACKAGING',
     title: 'NVCC Artifact Pipeline',
-    summary: 'Within an exact Toolkit Lane, bounded target plan, and explicit compilation mode, trace how a .cu source can become PTX, cubin/SASS, a fatbinary, a host object, and a final linked artifact.',
-    conceptualNotice: 'This is a deterministic browser model of the documented NVCC phases and trajectory, not a compiler trace. It runs no nvcc, inspects no generated file, and does not know which image a runtime would select from the fatbinary.',
+    summary: 'Within an exact Toolkit Lane, bounded target plan, and explicit compilation mode, compare a single-translation-unit whole-program image path with a two-translation-unit RDC object and device-link path.',
+    conceptualNotice: 'This is a deterministic browser model of the documented NVCC phases, trajectory, and separate-compilation contract, not a compiler trace. It runs no nvcc, inspects no generated file, and does not know which device image a runtime would select.',
     modelHeading: 'Model boundaries',
     modelBoundaries: [
       'The host and device paths are conceptual branches; the model does not expose Toolkit-variable internal commands.',
-      'A PTX image and native cubin/SASS enter the selected teaching fatbinary together; this is only a declared target plan.',
+      'The whole-program branch declares a teaching fatbinary containing PTX and native cubin/SASS; the RDC branch does not copy that finalized-image path onto each translation unit.',
       'The target plan and compilation mode are independent explicit selections; an a/f target suffix does not select whole-program or RDC.',
-      'A separate device link appears only when relocatable device code crosses translation units; the whole-program path does not invent that stage.',
+      'The RDC branch fixes caller.cu and device_math.cu, their per-TU relocatable device-code/host-object identities, and a required device link; the whole-program path does not invent that stage.',
       'A final linked artifact still proves no successful build, driver compatibility, GPU execution, correctness, or performance.',
     ],
     controlsHeading: 'Artifact flow controls',
@@ -259,7 +285,7 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
       },
       'separate-compilation-rdc': {
         title: 'Separate compilation / RDC (device link active)',
-        description: 'Relocatable device code passes through a separate device link before the final host link.',
+        description: 'caller.cu and device_math.cu each produce a host object containing relocatable device code; device link then emits device_link.o with linked executable device code.',
       },
     },
     targetPlans: {
@@ -305,72 +331,93 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
     realTarget: 'Real target / native code',
     ptxImage: 'PTX image candidate',
     cubinImage: 'cubin / SASS image',
+    sourceInputs: 'CUDA source input(s)',
+    hostObjects: 'Host object / device-code identity',
+    deviceLinkObject: 'Device-link object',
+    finalHostLinkInputs: 'Final host-link object inputs',
     flowHeading: 'Host/device artifact flow',
     artifactOutput: 'Stage artifact',
-    stages: {
-      'source-split': {
-        label: 'Split the CUDA translation unit',
-        description: 'NVCC prepares device-compilation and host-compilation paths from {source}; documented phases are the durable teaching boundary.',
-        artifact: '{source} -> host path | device path',
-      },
-      'device-ptx': {
-        label: 'Generate PTX for the virtual target',
-        description: 'The device path produces PTX intermediate code under the {virtual} feature assumptions.',
-        artifact: '{ptx}',
-      },
-      'device-cubin': {
-        label: 'Assemble native cubin / SASS',
-        description: 'The device assembler produces an architecture-specific cubin image containing SASS for real target {real}.',
-        artifact: '{cubin} · SASS',
-      },
-      fatbinary: {
-        label: 'Package the fatbinary',
-        description: 'The selected teaching plan places the {real} native image and {virtual} PTX image candidate into one fatbinary.',
-        artifact: 'fatbinary[{real}, {virtual}]',
-      },
-      'host-object': {
-        label: 'Create the host object with embedded fatbinary',
-        description: 'The host path preprocesses again and synthesizes standard C++, then the host compiler creates an object containing the embedded fatbinary.',
-        artifact: 'host object + embedded fatbinary',
-      },
-      'optional-device-link': {
-        label: 'Separate device-link boundary',
-        description: 'The explicit compilation mode determines whether this conditional boundary is skipped or traversed.',
-        artifact: 'mode-dependent device-link output',
-      },
-      'final-link': {
-        label: 'Perform the final host link',
-        description: 'The host object, optional device-link output, and required libraries meet in the final linked artifact; this model does not run it.',
-        artifact: 'linked executable / shared library',
-      },
-    },
     modeStages: {
       'whole-program': {
+        'source-split': {
+          label: 'Split one CUDA translation unit',
+          description: 'NVCC prepares device-compilation and host-compilation paths from {source}; documented phases are the durable teaching boundary.',
+          artifact: '{source} -> host path | device path',
+        },
+        'device-ptx': {
+          label: 'Generate PTX for the virtual target',
+          description: 'The device path produces PTX intermediate code under the {virtual} feature assumptions.',
+          artifact: '{ptx}',
+        },
+        'device-cubin': {
+          label: 'Assemble native cubin / SASS',
+          description: 'The device assembler produces an architecture-specific cubin image containing SASS for real target {real}.',
+          artifact: '{cubin} · SASS',
+        },
+        fatbinary: {
+          label: 'Package finalized device images',
+          description: 'The selected teaching plan places the {real} native image and {virtual} PTX image candidate into the single translation unit fatbinary.',
+          artifact: 'fatbinary[{real}, {virtual}]',
+        },
+        'host-object': {
+          label: 'Create kernel.o with the embedded fatbinary',
+          description: 'The host path preprocesses again and synthesizes standard C++, then the host compiler creates {hostObject} containing the embedded finalized device images.',
+          artifact: '{source} -> {hostObject} + embedded fatbinary',
+        },
         'optional-device-link': {
+          label: 'Skip the separate device link',
           description: 'Whole-program mode skips this stage: device code resolves within one compilation unit, so no separate device-link object enters the host link.',
           artifact: 'skipped · no device-link object',
         },
         'final-link': {
-          description: 'The host object and required libraries meet directly in the final linked artifact; whole-program mode has no separate device-link output, and this model does not run the artifact.',
-          artifact: 'linked executable / shared library',
+          label: 'Perform the final host link',
+          description: '{finalInputs} and required libraries meet directly in the final linked artifact; whole-program mode has no separate device-link output, and this model does not run the artifact.',
+          artifact: '{finalInputs} -> linked executable / shared library',
         },
       },
       'separate-compilation-rdc': {
+        'source-split': {
+          label: 'Declare two CUDA translation units',
+          description: 'The RDC branch explicitly uses {callerSource} and {deviceMathSource}; it is not a single-kernel finalized-image path with one node appended.',
+          artifact: '{callerSource} + {deviceMathSource}',
+        },
+        'device-ptx': {
+          label: 'Establish the cross-TU device edge',
+          description: 'A kernel in {callerSource} retains a reference to an external device definition in {deviceMathSource}, so both sources must enter RDC compilation.',
+          artifact: '{callerSource}::kernel -> {deviceMathSource}::__device__ definition',
+        },
+        'device-cubin': {
+          label: 'Compile caller.cu to an RDC object',
+          description: '{callerSource} independently produces {callerObject}; that host object retains the identified {callerRdc} instead of pretending to be a finalized cubin/fatbinary.',
+          artifact: '{callerSource} -> {callerObject} [{callerRdc}]',
+        },
+        fatbinary: {
+          label: 'Compile device_math.cu to an RDC object',
+          description: '{deviceMathSource} independently produces {deviceMathObject}; that host object retains the identified {deviceMathRdc}.',
+          artifact: '{deviceMathSource} -> {deviceMathObject} [{deviceMathRdc}]',
+        },
+        'host-object': {
+          label: 'Retain both original host objects',
+          description: '{callerObject} and {deviceMathObject} each carry host code and per-TU relocatable device code; both feed device link and remain required by the final host link.',
+          artifact: '{callerObject} + {deviceMathObject}',
+        },
         'optional-device-link': {
-          description: 'Separate compilation / RDC resolves device symbols across translation units here and produces a device-link object for the host linker.',
-          artifact: 'a_dlink.o / a_dlink.obj (active)',
+          label: 'Link both relocatable device-code inputs',
+          description: 'The device linker reads {callerRdc} and {deviceMathRdc}, resolves cross-translation-unit device symbols, and emits {deviceLinkObject} containing linked executable device code.',
+          artifact: '{callerRdc} + {deviceMathRdc} -> {deviceLinkObject} [{linkedDeviceCode}]',
         },
         'final-link': {
-          description: 'The host object, completed device-link object, and required libraries meet in the final linked artifact; this model does not run it.',
-          artifact: 'linked executable / shared library',
+          label: 'Consume three objects in the final host link',
+          description: 'The final host linker explicitly consumes both original objects plus the device-link object, {finalInputs}, along with required libraries; this model does not run the artifact.',
+          artifact: '{finalInputs} -> linked executable / shared library',
         },
       },
     },
     runtimeSelection: 'Runtime image selection',
     runtimeSelectionUnknown: 'unknown',
-    runtimeSelectionBoundary: 'Without a selected GPU, loaded driver, device query, or launch observation, fatbinary contents cannot tell us whether a runtime would select the native cubin or a PTX path.',
+    runtimeSelectionBoundary: 'Without a selected GPU, loaded driver, device query, or launch observation, neither the whole-program image inventory nor RDC linked device code determines a runtime image path.',
     staticHeading: 'No-script reviewed lane / target / mode plans',
-    staticIntro: 'All fourteen exact lane/plan/mode combinations are server-rendered: every target plan shows both the whole-program branch with a skipped device link and the RDC branch with an active device link; no JavaScript or live workbench is needed in print.',
+    staticIntro: 'All fourteen exact lane/plan/mode combinations are server-rendered: whole-program shows the single-TU finalized-image path and skipped device link, while RDC shows separate caller.cu/device_math.cu objects, active device_link.o, and a three-object final host link; no JavaScript or live workbench is needed in print.',
     staticCardKicker: '{lane} · {scope} · {mode}',
     staticFlowHeading: 'Complete static artifact flow',
     statusReady: 'Model ready in the default whole-program mode; the device-link stage is marked skipped, and no active artifact stage has advanced.',

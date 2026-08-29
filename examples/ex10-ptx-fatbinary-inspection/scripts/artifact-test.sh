@@ -18,6 +18,8 @@ for artifact in \
   device_math.o \
   caller.o \
   device_link.o \
+  caller-symbols.txt \
+  device-link-symbols.txt \
   ex10-ptx-fatbinary-inspection; do
   test -s "$build_dir/$artifact"
 done
@@ -32,14 +34,17 @@ grep -Eq '(Fatbin ptx code:|\.target[[:space:]]+sm_75)' "$build_dir/cuobjdump-pt
 grep -Eq 'artifact_kernel' "$build_dir/cuobjdump-sass.txt"
 grep -Eq '(EF_CUDA_SM75|\.text\.artifact_kernel)' "$build_dir/cuobjdump-elf.txt"
 grep -Eq 'artifact_kernel' "$build_dir/cuobjdump-symbols.txt"
-grep -Eq 'ex10_device_scale' "$build_dir/symbol-link-ledger.txt"
-grep -Eq 'ex10_caller_kernel' "$build_dir/symbol-link-ledger.txt"
+grep -Eq 'STT_FUNC[[:space:]]+STB_GLOBAL[[:space:]]+STV_DEFAULT[[:space:]]+U[[:space:]]+ex10_device_scale[[:space:]]*$' "$build_dir/caller-symbols.txt"
+grep -Eq 'STT_FUNC[[:space:]]+STB_GLOBAL[[:space:]]+STV_DEFAULT[[:space:]]+ex10_device_scale[[:space:]]*$' "$build_dir/device-link-symbols.txt"
+grep -Eq 'STT_FUNC[[:space:]]+STB_GLOBAL[[:space:]]+STO_ENTRY[[:space:]]+ex10_caller_kernel[[:space:]]*$' "$build_dir/caller-symbols.txt"
 
 {
   printf '%s\n' 'artifact-test=pass'
   printf '%s\n' 'target-native=sm_75'
   printf '%s\n' 'target-virtual=compute_75'
   printf '%s\n' 'same-fatbinary-native-and-ptx=true'
+  printf '%s\n' 'caller-ex10-device-scale=undefined'
+  printf '%s\n' 'device-link-ex10-device-scale=defined'
   printf '%s\n' 'host-executable-executed=false'
   printf '%s\n' 'gpu-executable-executed=false'
   printf '%s\n' 'runtime-evidence=Runtime-Not-Applicable'

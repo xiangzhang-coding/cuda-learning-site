@@ -1613,9 +1613,9 @@ const sources: readonly ResourceIndexRecord[] = [
   ),
   sourceRecord(
     'SRC-CUDA-034',
-    localized('M18/EX10 separate compilation 与 device linking', 'M18/EX10 separate compilation and device linking'),
+    localized('M18/EX10/VIS09 separate compilation 与 device linking', 'M18/EX10/VIS09 separate compilation and device linking'),
     'cuda-version-record',
-    ['M15', 'M16', 'M17', 'M18', 'EX10'],
+    ['M15', 'M16', 'M17', 'M18', 'EX10', 'VIS09'],
     localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9，以及 Toolkit 13.3.1 下的 NVCC 13.3 RDC、device-link 与 host-link contracts。',
       'RDC, device-link, and host-link contracts in NVCC 11.8.0, NVCC 12.9 in the Toolkit 12.9.2 archive, and NVCC 13.3 under Toolkit 13.3.1.',

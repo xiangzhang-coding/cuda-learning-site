@@ -34,13 +34,30 @@ async function findManifest(projectRoot, exampleId) {
   return matches[0];
 }
 
+async function readPublicationCoordinates(projectRoot, exampleId) {
+  try {
+    const registry = JSON.parse(await readFile(
+      path.join(projectRoot, 'src/canonical-example-publications.json'),
+      'utf8',
+    ));
+    if (registry['SPDX-License-Identifier'] !== 'Apache-2.0' || registry.schemaVersion !== 1) {
+      throw new Error('Canonical example publication registry is invalid');
+    }
+    return registry.examples?.[exampleId] ?? null;
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
 export async function loadCanonicalExample(projectRoot, exampleId) {
   const { manifest, manifestPath } = await findManifest(projectRoot, exampleId);
   const expectedRoot = path.relative(projectRoot, path.dirname(manifestPath)).split(path.sep).join('/');
   if (manifest.root !== expectedRoot) {
     throw new Error(`${exampleId} declares root ${manifest.root}, expected ${expectedRoot}`);
   }
-  return manifest;
+  const publication = await readPublicationCoordinates(projectRoot, exampleId);
+  return publication ? { ...manifest, ...publication } : manifest;
 }
 
 export async function readCanonicalRange(projectRoot, exampleId, rangeName) {
@@ -99,6 +116,48 @@ export async function validateCanonicalExample(projectRoot, exampleId) {
     errors.push(`${exampleId} must declare build inputs`);
   }
 
+  const checks = example.compatibility?.checks;
+  if (checks !== undefined) {
+    if (!Array.isArray(checks) || checks.length === 0) {
+      errors.push(`${exampleId} must declare at least one explicit check`);
+    } else {
+      const checkIds = checks.map((check) => check?.id);
+      if (checkIds.some((id) => !/^[a-z0-9-]+$/.test(id ?? '')) ||
+          new Set(checkIds).size !== checkIds.length) {
+        errors.push(`${exampleId} check identifiers must be unique and valid`);
+      }
+      const expectedCoordinates = [
+        ...(example.compatibility.lanes ?? []).flatMap((lane) =>
+          (lane.dialects ?? []).map((dialect) => `${lane.id}\0${dialect}\0ex10`)),
+        ...(example.compatibility.probes ?? []).map((probe) =>
+          `${probe.toolkitLane}\0${probe.dialect}\0cxx23-probe`),
+      ].sort();
+      const actualCoordinates = checks.map((check) =>
+        `${check?.toolkitLane}\0${check?.dialect}\0${check?.kind}`).sort();
+      if (!sameValues(actualCoordinates, expectedCoordinates)) {
+        errors.push(`${exampleId} explicit checks do not match its Lane, dialect, and kind matrix`);
+      }
+    }
+  }
+  if (example.evidence?.retainedWorkflowRun !== undefined &&
+      !isWorkflowRun(example.evidence.retainedWorkflowRun)) {
+    errors.push(`${exampleId} retained workflow run is invalid`);
+  }
+  if (example.evidenceBundleCommit !== undefined) {
+    if (!/^[0-9a-f]{40}$/.test(example.sourceCommit ?? '') ||
+        !/^[0-9a-f]{40}$/.test(example.evidenceBundleCommit ?? '')) {
+      errors.push(`${exampleId} publication commits must be full Git SHAs`);
+    }
+    if (example.sourceUrl !==
+        `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${example.sourceCommit}/${example.root}`) {
+      errors.push(`${exampleId} source URL does not match its build source commit`);
+    }
+    if (example.downloadUrl !==
+        `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${example.evidenceBundleCommit}.zip`) {
+      errors.push(`${exampleId} download URL does not match its evidence bundle commit`);
+    }
+  }
+
   const exampleRoot = path.join(projectRoot, example.root);
   for (const input of example.build?.inputs ?? []) {
     try {
@@ -142,7 +201,82 @@ function sameValues(actual, expected) {
   return JSON.stringify(actual) === JSON.stringify(expected);
 }
 
-export async function validateCompileEvidenceRecord(projectRoot, exampleId, record) {
+function isWorkflowRun(value) {
+  return /^https:\/\/github\.com\/xiangzhang-coding\/cuda-learning-site\/actions\/runs\/\d+$/.test(value ?? '');
+}
+
+function declaredRepositoryDigest(lane) {
+  const referenceWithoutDigest = lane.image.split('@')[0];
+  const lastSlash = referenceWithoutDigest.lastIndexOf('/');
+  const lastColon = referenceWithoutDigest.lastIndexOf(':');
+  const repository = lastColon > lastSlash
+    ? referenceWithoutDigest.slice(0, lastColon)
+    : referenceWithoutDigest;
+  return `${repository}@${lane.manifestDigest}`;
+}
+
+function expectedEx10Inspection(kind) {
+  if (kind === 'cxx23-probe') {
+    return {
+      inventories: {
+        elf: [{ index: 1, file: 'cxx23_probe.1.sm_75.cubin' }],
+      },
+      exitStatuses: {
+        clean: 0,
+        compile: 0,
+        inspect: 0,
+        'artifact-hash': 0,
+      },
+    };
+  }
+  return {
+    inventories: {
+      ptx: [{ index: 1, file: 'artifact_kernel.1.sm_75.ptx' }],
+      elf: [{ index: 1, file: 'artifact_kernel.1.sm_75.cubin' }],
+      linkedElf: [{ index: 1, file: 'ex10-ptx-fatbinary-inspection.1.sm_75.cubin' }],
+    },
+    artifactTestReport: {
+      'artifact-test': 'pass',
+      'target-native': 'sm_75',
+      'target-virtual': 'compute_75',
+      'same-fatbinary-native-and-ptx': 'true',
+      'caller-ex10-device-scale': 'undefined',
+      'device-link-ex10-device-scale': 'defined',
+      'host-executable-executed': 'false',
+      'gpu-executable-executed': 'false',
+      'runtime-evidence': 'Runtime-Not-Applicable',
+      'performance-measured': 'false',
+    },
+    symbols: {
+      callerUndefined: 'STT_FUNC STB_GLOBAL STV_DEFAULT U ex10_device_scale',
+      deviceLinkDefined: 'STT_FUNC STB_GLOBAL STV_DEFAULT ex10_device_scale',
+    },
+    exitStatuses: {
+      clean: 0,
+      preprocess: 0,
+      'standalone-ptx': 0,
+      cubin: 0,
+      fatbin: 0,
+      'relocatable-compile': 0,
+      'device-link': 0,
+      'host-link': 0,
+      inspect: 0,
+      'artifact-test': 0,
+    },
+  };
+}
+
+function isSanitizedOutputLines(value) {
+  return Array.isArray(value) && value.every((line) =>
+    typeof line === 'string' && line.length <= 8 * 1024 && !/[\r\n]|[^\x20-\x7e]/.test(line));
+}
+
+export async function validateCompileEvidenceRecord(
+  projectRoot,
+  exampleId,
+  record,
+  expectations = {},
+) {
   const example = await loadCanonicalExample(projectRoot, exampleId);
   const errors = [];
   const isExample = record?.subject === exampleId;
@@ -151,7 +285,12 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
   );
   const isLegacyProbe = record?.subject === 'CUDA-13.3-CXX23-PROBE';
   const isProbe = Boolean(declaredProbe) || isLegacyProbe;
-  const lane = declaredProbe
+  const recordKind = isExample ? 'ex10' : (isProbe ? 'cxx23-probe' : null);
+  const declaredChecks = example.compatibility.checks ?? [];
+  const declaredCheck = declaredChecks.find((candidate) => candidate.id === record?.check);
+  const lane = declaredCheck
+    ? example.compatibility.lanes.find((candidate) => candidate.id === declaredCheck.toolkitLane)
+    : declaredProbe
     ? example.compatibility.lanes.find((candidate) => candidate.id === declaredProbe.toolkitLane)
     : example.compatibility.lanes.find(
         (candidate) => candidate.toolkit === record?.toolchain?.toolkit,
@@ -184,13 +323,45 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
   if (isProbe && record?.result === 'unsupported' && !record?.probeDiagnostic) {
     errors.push('unsupported C++23 probe requires a diagnostic');
   }
+  if (declaredChecks.length > 0) {
+    const checkMatchesRecord = declaredCheck && lane &&
+      declaredCheck.kind === recordKind &&
+      declaredCheck.dialect === record?.toolchain?.dialect &&
+      lane.toolkit === record?.toolchain?.toolkit &&
+      (!declaredProbe ||
+        (declaredCheck.toolkitLane === declaredProbe.toolkitLane &&
+         declaredCheck.dialect === declaredProbe.dialect));
+    if (!declaredCheck) {
+      errors.push('check is not declared by the canonical project');
+    } else if (!checkMatchesRecord) {
+      errors.push('check does not match its declared Toolkit Lane, dialect, and kind');
+    }
+  }
+  const expectedSourceCommit = Object.hasOwn(expectations, 'expectedSourceCommit')
+    ? expectations.expectedSourceCommit
+    : (declaredChecks.length > 0 ? example.sourceCommit : undefined);
+  const expectedWorkflowRun = Object.hasOwn(expectations, 'expectedWorkflowRun')
+    ? expectations.expectedWorkflowRun
+    : example.evidence?.retainedWorkflowRun;
   if (!/^[0-9a-f]{40}$/.test(record?.sourceCommit ?? '')) errors.push('source commit is not a full Git SHA');
+  if (expectedSourceCommit !== undefined && !/^[0-9a-f]{40}$/.test(expectedSourceCommit ?? '')) {
+    errors.push('expected source commit is invalid');
+  }
+  if (expectedSourceCommit !== undefined && record?.sourceCommit !== expectedSourceCommit) {
+    errors.push('source commit does not match the expected commit');
+  }
   if (record?.buildContractSha256 !== await hashCanonicalBuildContract(projectRoot, exampleId)) {
     errors.push('build contract hash does not match the canonical project');
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(record?.verificationDate ?? '')) errors.push('verification date is invalid');
-  if (!/^https:\/\/github\.com\/xiangzhang-coding\/cuda-learning-site\/actions\/runs\/\d+$/.test(record?.workflowRun ?? '')) {
+  if (!isWorkflowRun(record?.workflowRun)) {
     errors.push('workflow run URL is invalid');
+  }
+  if (expectedWorkflowRun !== undefined && !isWorkflowRun(expectedWorkflowRun)) {
+    errors.push('expected workflow run is invalid');
+  }
+  if (expectedWorkflowRun !== undefined && record?.workflowRun !== expectedWorkflowRun) {
+    errors.push('workflow run does not match the expected run');
   }
   if (record?.runner?.architecture !== 'X64' || !record?.runner?.imageOS || !record?.runner?.imageVersion) {
     errors.push('runner coordinates are incomplete');
@@ -210,15 +381,19 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
     }
     const actualImageIdIsValid = /^sha256:[0-9a-f]{64}$/.test(record?.container?.actualImageId ?? '');
     const actualRepoDigests = record?.container?.actualRepoDigests;
+    const expectedRepoDigest = declaredRepositoryDigest(lane);
+    const hasExpectedRepoDigest = Array.isArray(actualRepoDigests) &&
+      actualRepoDigests.includes(expectedRepoDigest);
     const derivedImage = record?.container?.derivedImage;
     const baseImage = record?.container?.baseImage;
+    const baseHasExpectedRepoDigest = Array.isArray(baseImage?.actualRepoDigests) &&
+      baseImage.actualRepoDigests.includes(expectedRepoDigest);
     const packagePrefix = declaredProbe ? `${declaredProbe.hostCompilerPackage}=` : null;
     const ordinaryIdentityIsComplete = actualImageIdIsValid &&
-      Array.isArray(actualRepoDigests) && actualRepoDigests.length > 0;
+      hasExpectedRepoDigest;
     const derivedIdentityIsComplete = actualImageIdIsValid &&
-      Array.isArray(actualRepoDigests) &&
       /^sha256:[0-9a-f]{64}$/.test(baseImage?.actualImageId ?? '') &&
-      Array.isArray(baseImage?.actualRepoDigests) &&
+      baseHasExpectedRepoDigest &&
       derivedImage?.dockerfile === declaredProbe?.image?.dockerfile &&
       derivedImage?.buildCommand === declaredProbe?.image?.buildCommand &&
       derivedImage?.tag === declaredProbe?.image?.tag &&
@@ -227,6 +402,12 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
       derivedImage.hostCompilerPackage.startsWith(packagePrefix) &&
       derivedImage.hostCompilerPackage.length > packagePrefix.length &&
       !/\s/.test(derivedImage.hostCompilerPackage);
+    if (!declaredProbe?.image && !hasExpectedRepoDigest) {
+      errors.push('actual repository digests do not include the declared image digest');
+    }
+    if (declaredProbe?.image && !baseHasExpectedRepoDigest) {
+      errors.push('base-image repository digests do not include the declared image digest');
+    }
     if (declaredProbe?.image ? !derivedIdentityIsComplete : !ordinaryIdentityIsComplete) {
       errors.push('actual container identity is incomplete');
     }
@@ -268,6 +449,21 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
       record?.artifacts?.some(({ bytes, sha256 }) =>
         !Number.isSafeInteger(bytes) || bytes <= 0 || !/^[0-9a-f]{64}$/.test(sha256))) {
     errors.push('artifact records are incomplete or unexpected');
+  }
+  if (declaredChecks.length > 0 && recordKind) {
+    let inspectionIsValid;
+    if (recordKind === 'cxx23-probe') {
+      const { compilerOutput, artifactHash, ...stableInspection } = record?.inspection ?? {};
+      const probeArtifact = record?.artifacts?.find(({ path: artifactPath }) =>
+        artifactPath === 'build/cxx23_probe.o');
+      inspectionIsValid = sameValues(stableInspection, expectedEx10Inspection(recordKind)) &&
+        isSanitizedOutputLines(compilerOutput) &&
+        artifactHash?.path === 'build/cxx23_probe.o' &&
+        artifactHash?.sha256 === probeArtifact?.sha256;
+    } else {
+      inspectionIsValid = sameValues(record?.inspection, expectedEx10Inspection(recordKind));
+    }
+    if (!inspectionIsValid) errors.push('inspection evidence is incomplete or unexpected');
   }
   const expectedHostReferenceExecution = isExample && Boolean(example.build.commands.hostTest);
   const expectedHostExecutableExecution = isExample
@@ -322,6 +518,13 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
     const checks = new Set(records.map((record) => record.check));
     if (sourceCommits.size !== 1) throw new Error(`${exampleId} evidence records reference different source commits`);
     if (checks.size !== records.length) throw new Error(`${exampleId} evidence records duplicate a check`);
+    const declaredChecks = example.compatibility.checks ?? [];
+    if (declaredChecks.length > 0 && !sameValues(
+      [...checks].sort(),
+      declaredChecks.map(({ id }) => id).sort(),
+    )) {
+      throw new Error(`${exampleId} evidence records do not match its explicit checks`);
+    }
     const [sourceCommit] = sourceCommits;
     if (example.sourceCommit && example.sourceCommit !== sourceCommit) {
       throw new Error(`${exampleId} source commit does not match its evidence records`);
@@ -329,14 +532,20 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
     if (!example.sourceUrl.includes(sourceCommit)) {
       throw new Error(`${exampleId} source URL does not resolve to its evidence commit`);
     }
-    if (!example.downloadUrl?.includes(sourceCommit)) {
-      throw new Error(`${exampleId} download URL does not resolve to its evidence commit`);
+    const downloadCommit = example.evidenceBundleCommit ?? sourceCommit;
+    if (!example.downloadUrl?.includes(downloadCommit)) {
+      throw new Error(`${exampleId} download URL does not resolve to its evidence bundle commit`);
     }
 
     const ordinaryRecords = records.filter((record) => record.subject === exampleId);
-    const expectedCoordinates = example.compatibility.lanes.flatMap((lane) =>
-      lane.dialects.map((dialect) => `${lane.toolkit}\0${dialect}`),
-    ).sort();
+    const expectedCoordinates = (declaredChecks.length > 0
+      ? declaredChecks.filter(({ kind }) => kind === 'ex10').map((check) => {
+          const lane = example.compatibility.lanes.find(({ id }) => id === check.toolkitLane);
+          return `${lane.toolkit}\0${check.dialect}`;
+        })
+      : example.compatibility.lanes.flatMap((lane) =>
+          lane.dialects.map((dialect) => `${lane.toolkit}\0${dialect}`)))
+      .sort();
     const actualCoordinates = ordinaryRecords.map((record) =>
       `${record.toolchain.toolkit}\0${record.toolchain.dialect}`,
     ).sort();

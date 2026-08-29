@@ -22,7 +22,12 @@ test('VIS09 native controls support bounded plans, keyboard stepping, reset focu
   await expect(visual.locator('[data-static-selection]')).toHaveCount(14);
   await expect(visual.locator('[data-static-stage]')).toHaveCount(98);
   await expect(visual.locator('[data-live-stage="optional-device-link"]')).toHaveAttribute('data-stage-state', 'skipped');
+  await expect(visual.locator('[data-live-stage="optional-device-link"]')).toHaveAttribute('data-stage-identity', 'whole-device-link-skipped');
   await expect(visual.locator('[data-live-stage="optional-device-link"] [data-stage-state-label]')).toHaveText('skipped');
+  await expect(visual.locator('[data-manifest-sources]')).toHaveText('kernel.cu');
+  await expect(visual.locator('[data-manifest-objects]')).toContainText('kernel.o [fatbinary-with-finalized-device-images]');
+  await expect(visual.locator('[data-manifest-device-link]')).toContainText('skipped-whole-program');
+  await expect(visual.locator('[data-manifest-final-inputs]')).toHaveText('kernel.o');
   await expect(visual.locator('[data-artifact-action="play"], input[type="range"]')).toHaveCount(0);
 
   const storageBefore = await page.evaluate(() => ({
@@ -65,9 +70,19 @@ test('VIS09 native controls support bounded plans, keyboard stepping, reset focu
   await expect(visual).toHaveAttribute('data-pipeline-mode', 'separate-compilation-rdc');
   await expect(visual).toHaveAttribute('data-step-index', '0');
   await expect(visual.locator('[data-live-stage="optional-device-link"]')).toHaveAttribute('data-stage-state', 'pending');
+  await expect(visual.locator('[data-live-stage="optional-device-link"]')).toHaveAttribute('data-stage-identity', 'rdc-device-link-object');
+  await expect(visual.locator('[data-manifest-sources]')).toHaveText('caller.cu + device_math.cu');
+  await expect(visual.locator('[data-manifest-objects]')).toContainText('caller.o [caller.o::relocatable-device-code]');
+  await expect(visual.locator('[data-manifest-objects]')).toContainText('device_math.o [device_math.o::relocatable-device-code]');
+  await expect(visual.locator('[data-manifest-device-link]')).toHaveText('device_link.o [device_link.o::linked-executable-device-code]');
+  await expect(visual.locator('[data-manifest-final-inputs]')).toHaveText('caller.o + device_math.o + device_link.o');
+  await expect(visual.locator('[data-manifest-whole-program]').first()).toBeHidden();
   await mode.selectOption('whole-program');
   await expect(visual).toHaveAttribute('data-pipeline-mode', 'whole-program');
   await expect(visual).toHaveAttribute('data-step-index', '0');
+  await expect(visual.locator('[data-manifest-whole-program]').first()).toBeVisible();
+  await expect(visual.locator('[data-manifest-ptx]')).toHaveText('compute_100f.ptx');
+  await expect(visual.locator('[data-manifest-final-inputs]')).toHaveText('kernel.o');
 
   await step.focus();
   for (let index = 1; index <= 6; index += 1) {
@@ -97,7 +112,8 @@ test('VIS09 native controls support bounded plans, keyboard stepping, reset focu
   }
   await expect(visual).toHaveAttribute('data-sequence-complete', 'true');
   await expect(visual.locator('[data-live-stage="optional-device-link"]')).toHaveAttribute('data-stage-state', 'complete');
-  await expect(visual.locator('[data-live-stage="optional-device-link"]')).toContainText('a_dlink');
+  await expect(visual.locator('[data-live-stage="optional-device-link"]')).toContainText('device_link.o::linked-executable-device-code');
+  await expect(visual.locator('[data-live-stage="final-link"]')).toContainText('caller.o + device_math.o + device_link.o');
   await expect(visual.locator('[data-live-stage][data-stage-state="complete"]')).toHaveCount(7);
 
   await lane.selectOption('11.8.0');
@@ -142,6 +158,10 @@ test('VIS09 keeps complete bilingual static fallbacks without JavaScript at 390p
     await expect(visual.locator('[data-static-runtime-selection="unknown"]')).toHaveCount(14);
     await expect(visual.locator('[data-static-mode="whole-program"] [data-stage-id="optional-device-link"][data-stage-state="skipped"]')).toHaveCount(7);
     await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-stage-id="optional-device-link"][data-stage-state="complete"]')).toHaveCount(7);
+    await expect(visual.locator('[data-static-mode="whole-program"] [data-static-manifest-sources]').first()).toHaveText('kernel.cu');
+    await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-static-manifest-sources]').first()).toHaveText('caller.cu + device_math.cu');
+    await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-static-manifest-device-link]').first()).toHaveText('device_link.o [device_link.o::linked-executable-device-code]');
+    await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-static-manifest-final-inputs]').first()).toHaveText('caller.o + device_math.o + device_link.o');
     await expect(visual.locator('[data-conceptual-only]')).toBeVisible();
     await expect(visual.locator('[data-no-evidence]')).toBeVisible();
     await expect(visual.locator('[id]')).toHaveCount(0);
@@ -191,5 +211,7 @@ test('VIS09 reflows on mobile and preserves reduced-motion, forced-color, print,
   await expect(visual.locator('[data-static-stage]')).toHaveCount(98);
   await expect(visual.locator('[data-static-mode="whole-program"] [data-stage-id="optional-device-link"][data-stage-state="skipped"]')).toHaveCount(7);
   await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-stage-id="optional-device-link"][data-stage-state="complete"]')).toHaveCount(7);
+  await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-stage-identity="rdc-device-link-object"]')).toHaveCount(7);
+  await expect(visual.locator('[data-static-mode="separate-compilation-rdc"] [data-static-manifest-final-inputs]').first()).toHaveText('caller.o + device_math.o + device_link.o');
   await expect(visual.locator('[data-no-evidence]')).toBeVisible();
 });

@@ -119,7 +119,7 @@ export const TOOLCHAIN_CATALOG_RELATIONSHIPS = [
     planningId: 'SRC-CUDA-034',
     group: 'sources',
     prerequisites: [],
-    relatedUnits: ['M15', 'M16', 'M17', 'M18', 'EX10'],
+    relatedUnits: ['M15', 'M16', 'M17', 'M18', 'EX10', 'VIS09'],
   },
   {
     planningId: 'SRC-CUDA-035',

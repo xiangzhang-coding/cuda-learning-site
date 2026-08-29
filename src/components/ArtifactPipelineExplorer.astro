@@ -42,23 +42,61 @@ const staticSelections = ARTIFACT_PIPELINE_REVIEWED_SELECTIONS.map((selection) =
 });
 
 function frameValues(frame: ArtifactPipelineFrame) {
-  return {
+  const shared = {
     lane: frame.lane,
     plan: copy.targetPlans[frame.targetPlan.id].title,
     mode: copy.modes[frame.mode].title,
     scope: copy.targetScopes[frame.targetPlan.targetScope],
-    source: frame.manifest.source,
     virtual: frame.manifest.virtualTarget,
     real: frame.manifest.realTarget,
-    ptx: frame.manifest.ptxImage,
-    cubin: frame.manifest.cubinImage,
+  };
+
+  if (frame.manifest.pipelineMode === 'whole-program') {
+    return {
+      ...shared,
+      source: frame.manifest.source,
+      sourceInputs: frame.manifest.source,
+      hostObject: frame.manifest.hostObject.object,
+      hostObjects: `${frame.manifest.hostObject.object} [${frame.manifest.hostObject.embeddedDeviceCode}]`,
+      deviceLinkObject: `${frame.manifest.deviceLink.state} · object: none`,
+      finalInputs: frame.manifest.finalHostLink.inputs.join(' + '),
+      ptx: frame.manifest.ptxImage,
+      cubin: frame.manifest.cubinImage,
+      callerSource: '',
+      deviceMathSource: '',
+      callerObject: '',
+      deviceMathObject: '',
+      callerRdc: '',
+      deviceMathRdc: '',
+      linkedDeviceCode: '',
+    };
+  }
+
+  const [caller, deviceMath] = frame.manifest.translationUnits;
+  return {
+    ...shared,
+    source: `${caller.source} + ${deviceMath.source}`,
+    sourceInputs: `${caller.source} + ${deviceMath.source}`,
+    hostObject: `${caller.hostObject} + ${deviceMath.hostObject}`,
+    hostObjects: `${caller.hostObject} [${caller.relocatableDeviceCode}] · ${deviceMath.hostObject} [${deviceMath.relocatableDeviceCode}]`,
+    deviceLinkObject: `${frame.manifest.deviceLink.object} [${frame.manifest.deviceLink.linkedExecutableDeviceCode}]`,
+    finalInputs: frame.manifest.finalHostLink.inputs.join(' + '),
+    ptx: '',
+    cubin: '',
+    callerSource: caller.source,
+    deviceMathSource: deviceMath.source,
+    callerObject: caller.hostObject,
+    deviceMathObject: deviceMath.hostObject,
+    callerRdc: caller.relocatableDeviceCode,
+    deviceMathRdc: deviceMath.relocatableDeviceCode,
+    linkedDeviceCode: frame.manifest.deviceLink.linkedExecutableDeviceCode,
   };
 }
 
+const initialValues = frameValues(initialFrame);
+
 function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageId, field: 'description' | 'artifact') {
-  const template = stageId === 'optional-device-link' || stageId === 'final-link'
-    ? copy.modeStages[frame.mode][stageId][field]
-    : copy.stages[stageId][field];
+  const template = copy.modeStages[frame.mode][stageId][field];
   return formatArtifactPipelineCopy(template, frameValues(frame));
 }
 ---
@@ -175,13 +213,29 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
             <dt>{copy.realTarget}</dt>
             <dd><code data-manifest-real>{initialFrame.manifest.realTarget}</code></dd>
           </div>
-          <div>
+          <div data-manifest-whole-program>
             <dt>{copy.ptxImage}</dt>
-            <dd><code data-manifest-ptx>{initialFrame.manifest.ptxImage}</code></dd>
+            <dd><code data-manifest-ptx>{initialValues.ptx}</code></dd>
+          </div>
+          <div data-manifest-whole-program>
+            <dt>{copy.cubinImage}</dt>
+            <dd><code data-manifest-cubin>{initialValues.cubin} · SASS</code></dd>
           </div>
           <div>
-            <dt>{copy.cubinImage}</dt>
-            <dd><code data-manifest-cubin>{initialFrame.manifest.cubinImage} · {initialFrame.manifest.cubinPayload}</code></dd>
+            <dt>{copy.sourceInputs}</dt>
+            <dd><code data-manifest-sources>{initialValues.sourceInputs}</code></dd>
+          </div>
+          <div>
+            <dt>{copy.hostObjects}</dt>
+            <dd><code data-manifest-objects>{initialValues.hostObjects}</code></dd>
+          </div>
+          <div>
+            <dt>{copy.deviceLinkObject}</dt>
+            <dd><code data-manifest-device-link>{initialValues.deviceLinkObject}</code></dd>
+          </div>
+          <div>
+            <dt>{copy.finalHostLinkInputs}</dt>
+            <dd><code data-manifest-final-inputs>{initialValues.finalInputs}</code></dd>
           </div>
         </dl>
       </section>
@@ -192,14 +246,16 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
           {initialFrame.stages.map((stage, index) => (
             <li
               data-live-stage={stage.id}
+              data-stage-identity={stage.identity}
+              data-stage-mode={stage.mode}
               data-branch={stage.branch}
               data-stage-state={stage.state}
               data-optional={String(stage.optional)}
               aria-current={stage.state === 'current' ? 'step' : undefined}
             >
               <span class="artifact-pipeline-step-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-              <span class="artifact-pipeline-branch">{copy.branchLabels[stage.branch]}</span>
-              <strong data-stage-label>{copy.stages[stage.id].label}</strong>
+              <span class="artifact-pipeline-branch" data-stage-branch-label>{copy.branchLabels[stage.branch]}</span>
+              <strong data-stage-label>{copy.modeStages[initialFrame.mode][stage.id].label}</strong>
               <p data-stage-description>{stageText(initialFrame, stage.id, 'description')}</p>
               <span class="artifact-pipeline-output-label">{copy.artifactOutput}</span>
               <code data-stage-artifact>{stageText(initialFrame, stage.id, 'artifact')}</code>
@@ -219,7 +275,9 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       <h3>{copy.staticHeading}</h3>
       <p class="visual-section-intro">{copy.staticIntro}</p>
       <div class="artifact-pipeline-static-grid">
-        {staticSelections.map((frame) => (
+        {staticSelections.map((frame) => {
+          const values = frameValues(frame);
+          return (
           <article
             data-static-selection={`${frame.lane}:${frame.targetPlan.id}:${frame.mode}`}
             data-static-lane={frame.lane}
@@ -246,13 +304,33 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
                 <dt>{copy.realTarget}</dt>
                 <dd><code>{frame.manifest.realTarget}</code></dd>
               </div>
+              {frame.manifest.pipelineMode === 'whole-program' && (
+                <div>
+                  <dt>{copy.ptxImage}</dt>
+                  <dd><code>{frame.manifest.ptxImage}</code></dd>
+                </div>
+              )}
+              {frame.manifest.pipelineMode === 'whole-program' && (
+                <div>
+                  <dt>{copy.cubinImage}</dt>
+                  <dd><code>{frame.manifest.cubinImage} · {frame.manifest.cubinPayload}</code></dd>
+                </div>
+              )}
               <div>
-                <dt>{copy.ptxImage}</dt>
-                <dd><code>{frame.manifest.ptxImage}</code></dd>
+                <dt>{copy.sourceInputs}</dt>
+                <dd><code data-static-manifest-sources>{values.sourceInputs}</code></dd>
               </div>
               <div>
-                <dt>{copy.cubinImage}</dt>
-                <dd><code>{frame.manifest.cubinImage} · {frame.manifest.cubinPayload}</code></dd>
+                <dt>{copy.hostObjects}</dt>
+                <dd><code data-static-manifest-objects>{values.hostObjects}</code></dd>
+              </div>
+              <div>
+                <dt>{copy.deviceLinkObject}</dt>
+                <dd><code data-static-manifest-device-link>{values.deviceLinkObject}</code></dd>
+              </div>
+              <div>
+                <dt>{copy.finalHostLinkInputs}</dt>
+                <dd><code data-static-manifest-final-inputs>{values.finalInputs}</code></dd>
               </div>
             </dl>
 
@@ -263,13 +341,15 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
                   <li
                     data-static-stage={`${frame.lane}:${frame.targetPlan.id}:${frame.mode}:${stage.id}`}
                     data-stage-id={stage.id}
+                    data-stage-identity={stage.identity}
+                    data-stage-mode={stage.mode}
                     data-branch={stage.branch}
                     data-optional={String(stage.optional)}
                     data-stage-state={stage.state}
                   >
                     <span class="artifact-pipeline-step-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
                     <span class="artifact-pipeline-branch">{copy.branchLabels[stage.branch]}</span>
-                    <strong>{copy.stages[stage.id].label}</strong>
+                    <strong>{copy.modeStages[frame.mode][stage.id].label}</strong>
                     <p>{stageText(frame, stage.id, 'description')}</p>
                     <span class="artifact-pipeline-output-label">{copy.artifactOutput}</span>
                     <code>{stageText(frame, stage.id, 'artifact')}</code>
@@ -284,7 +364,8 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
               <span>{copy.runtimeSelectionBoundary}</span>
             </p>
           </article>
-        ))}
+          );
+        })}
       </div>
     </section>
 
@@ -298,7 +379,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
     formatArtifactPipelineCopy,
   } from '../visuals/artifact-pipeline-copy';
   import {
-    ARTIFACT_PIPELINE_STAGES,
+    ARTIFACT_PIPELINE_STAGE_IDS,
     createArtifactPipelineState,
     deriveArtifactPipelineFrame,
     getArtifactPipelineTargetPlans,
@@ -323,7 +404,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       const status = this.querySelector<HTMLElement>('[data-artifact-status]');
       const stages = this.querySelectorAll<HTMLElement>('[data-live-stage]');
       if (!controls || !workbench || !lane || !targetPlan || !mode || !step || !reset || !status) return;
-      if (stages.length !== ARTIFACT_PIPELINE_STAGES.length) return;
+      if (stages.length !== ARTIFACT_PIPELINE_STAGE_IDS.length) return;
       const requiredLiveSelectors = [
         '[data-selection-summary]',
         '[data-selection-description]',
@@ -334,10 +415,15 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
         '[data-manifest-real]',
         '[data-manifest-ptx]',
         '[data-manifest-cubin]',
+        '[data-manifest-sources]',
+        '[data-manifest-objects]',
+        '[data-manifest-device-link]',
+        '[data-manifest-final-inputs]',
         '[data-runtime-selection-value]',
       ];
       const requiredStageSelectors = [
         '[data-stage-label]',
+        '[data-stage-branch-label]',
         '[data-stage-description]',
         '[data-stage-artifact]',
         '[data-stage-state-label]',
@@ -413,11 +499,11 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
         }
         const next = frame.sequenceComplete || !frame.currentStage
           ? this.copy().sequenceComplete
-          : `${this.copy().stageStates.current}: ${this.copy().stages[frame.currentStage.id].label}.`;
+          : `${this.copy().stageStates.current}: ${this.copy().modeStages[frame.mode][frame.currentStage.id].label}.`;
         this.announce(this.format(this.copy().statusStep, frame, {
           current: String(frame.stepIndex),
           total: String(frame.stageCount),
-          stage: this.copy().stages[completedStage.id].label,
+          stage: this.copy().modeStages[frame.mode][completedStage.id].label,
           next,
         }), false);
       });
@@ -445,16 +531,54 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
 
     private values(frame: ArtifactPipelineFrame) {
       const copy = this.copy();
-      return {
+      const shared = {
         lane: frame.lane,
         plan: copy.targetPlans[frame.targetPlan.id].title,
         mode: copy.modes[frame.mode].title,
         scope: copy.targetScopes[frame.targetPlan.targetScope],
-        source: frame.manifest.source,
         virtual: frame.manifest.virtualTarget,
         real: frame.manifest.realTarget,
-        ptx: frame.manifest.ptxImage,
-        cubin: frame.manifest.cubinImage,
+      };
+
+      if (frame.manifest.pipelineMode === 'whole-program') {
+        return {
+          ...shared,
+          source: frame.manifest.source,
+          sourceInputs: frame.manifest.source,
+          hostObject: frame.manifest.hostObject.object,
+          hostObjects: `${frame.manifest.hostObject.object} [${frame.manifest.hostObject.embeddedDeviceCode}]`,
+          deviceLinkObject: `${frame.manifest.deviceLink.state} · object: none`,
+          finalInputs: frame.manifest.finalHostLink.inputs.join(' + '),
+          ptx: frame.manifest.ptxImage,
+          cubin: frame.manifest.cubinImage,
+          callerSource: '',
+          deviceMathSource: '',
+          callerObject: '',
+          deviceMathObject: '',
+          callerRdc: '',
+          deviceMathRdc: '',
+          linkedDeviceCode: '',
+        };
+      }
+
+      const [caller, deviceMath] = frame.manifest.translationUnits;
+      return {
+        ...shared,
+        source: `${caller.source} + ${deviceMath.source}`,
+        sourceInputs: `${caller.source} + ${deviceMath.source}`,
+        hostObject: `${caller.hostObject} + ${deviceMath.hostObject}`,
+        hostObjects: `${caller.hostObject} [${caller.relocatableDeviceCode}] · ${deviceMath.hostObject} [${deviceMath.relocatableDeviceCode}]`,
+        deviceLinkObject: `${frame.manifest.deviceLink.object} [${frame.manifest.deviceLink.linkedExecutableDeviceCode}]`,
+        finalInputs: frame.manifest.finalHostLink.inputs.join(' + '),
+        ptx: '',
+        cubin: '',
+        callerSource: caller.source,
+        deviceMathSource: deviceMath.source,
+        callerObject: caller.hostObject,
+        deviceMathObject: deviceMath.hostObject,
+        callerRdc: caller.relocatableDeviceCode,
+        deviceMathRdc: deviceMath.relocatableDeviceCode,
+        linkedDeviceCode: frame.manifest.deviceLink.linkedExecutableDeviceCode,
       };
     }
 
@@ -524,17 +648,30 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       this.setText('[data-manifest-scope]', copy.targetScopes[frame.targetPlan.targetScope]);
       this.setText('[data-manifest-virtual]', frame.manifest.virtualTarget);
       this.setText('[data-manifest-real]', frame.manifest.realTarget);
-      this.setText('[data-manifest-ptx]', frame.manifest.ptxImage);
-      this.setText('[data-manifest-cubin]', `${frame.manifest.cubinImage} · ${frame.manifest.cubinPayload}`);
+      const values = this.values(frame);
+      this.setText('[data-manifest-ptx]', values.ptx);
+      this.setText('[data-manifest-cubin]', values.cubin ? `${values.cubin} · SASS` : '');
+      this.setText('[data-manifest-sources]', values.sourceInputs);
+      this.setText('[data-manifest-objects]', values.hostObjects);
+      this.setText('[data-manifest-device-link]', values.deviceLinkObject);
+      this.setText('[data-manifest-final-inputs]', values.finalInputs);
       this.setText('[data-runtime-selection-value]', copy.runtimeSelectionUnknown);
+      for (const field of this.querySelectorAll<HTMLElement>('[data-manifest-whole-program]')) {
+        field.hidden = frame.manifest.pipelineMode !== 'whole-program';
+      }
 
       for (const stage of frame.stages) {
         const item = this.querySelector<HTMLElement>(`[data-live-stage="${stage.id}"]`);
         if (!item) continue;
+        item.dataset.stageIdentity = stage.identity;
+        item.dataset.stageMode = stage.mode;
+        item.dataset.branch = stage.branch;
+        item.dataset.optional = String(stage.optional);
         item.dataset.stageState = stage.state;
         if (stage.state === 'current') item.setAttribute('aria-current', 'step');
         else item.removeAttribute('aria-current');
-        this.setTextWithin(item, '[data-stage-label]', copy.stages[stage.id].label);
+        this.setTextWithin(item, '[data-stage-branch-label]', copy.branchLabels[stage.branch]);
+        this.setTextWithin(item, '[data-stage-label]', copy.modeStages[frame.mode][stage.id].label);
         this.setTextWithin(item, '[data-stage-description]', this.stageText(frame, stage.id, 'description'));
         this.setTextWithin(item, '[data-stage-artifact]', this.stageText(frame, stage.id, 'artifact'));
         this.setTextWithin(item, '[data-stage-state-label]', copy.stageStates[stage.state]);
@@ -549,9 +686,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       field: 'description' | 'artifact',
     ) {
       const copy = this.copy();
-      const template = stageId === 'optional-device-link' || stageId === 'final-link'
-        ? copy.modeStages[frame.mode][stageId][field]
-        : copy.stages[stageId][field];
+      const template = copy.modeStages[frame.mode][stageId][field];
       return this.format(template, frame);
     }
 

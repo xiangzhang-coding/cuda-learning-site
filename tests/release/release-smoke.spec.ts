@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import ex05Project from '../../examples/ex05-coalesced-strided-access/project.json' with { type: 'json' };
 import ex06Project from '../../examples/ex06-shared-memory-tile-bank-padding/project.json' with { type: 'json' };
@@ -8,9 +10,13 @@ import ex08Project from '../../examples/ex08-unified-memory-migration/project.js
 import ex09Project from '../../examples/ex09-graph-capture/project.json' with { type: 'json' };
 import ex10Project from '../../examples/ex10-ptx-fatbinary-inspection/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
+import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
+import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
+import { zipEntries } from '../../scripts/lib/quality-policy.mjs';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
+const projectRoot = path.resolve(import.meta.dirname, '../..');
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 const releaseOrigin = new URL(process.env.RELEASE_BASE_URL as string).origin;
 const expectedSourceCommit = process.env.RELEASE_SOURCE_COMMIT as string;
@@ -26,13 +32,17 @@ const ex04SourceUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${ex04SourceCommit}/examples/ex04-error-handling-lifecycle`;
 const ex04DownloadUrl =
   `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${ex04SourceCommit}.zip`;
+const ex10PublishedProject = {
+  ...ex10Project,
+  ...canonicalExamplePublications.examples.EX10,
+};
 const projectExamples = [
   { route: '/en/examples/coalesced-strided-access/', project: ex05Project },
   { route: '/en/examples/shared-memory-tile-bank-padding/', project: ex06Project },
   { route: '/en/examples/streams-events-overlap/', project: ex07Project },
   { route: '/en/examples/unified-memory-migration/', project: ex08Project },
   { route: '/en/examples/graph-capture/', project: ex09Project },
-  { route: '/en/examples/ptx-fatbinary-inspection/', project: ex10Project },
+  { route: '/en/examples/ptx-fatbinary-inspection/', project: ex10PublishedProject },
   { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
 const currentCatalogCounts = [
@@ -649,8 +659,11 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     expect(project.sourceUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${project.sourceCommit}/${project.root}`,
     );
+    const downloadCommit = 'evidenceBundleCommit' in project
+      ? project.evidenceBundleCommit
+      : project.sourceCommit;
     expect(project.downloadUrl).toBe(
-      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${project.sourceCommit}.zip`,
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${downloadCommit}.zip`,
     );
     if (project.id === 'EX10') {
       expect(project.evidence.compilation).toHaveLength(5);
@@ -702,6 +715,47 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
         archive.includes(Buffer.from(`/${project.root}/${relativePath}`)),
         `${project.id} archive contains ${relativePath}`,
       ).toBe(true);
+    }
+
+    if (project.id === 'EX10') {
+      const ex10 = ex10PublishedProject;
+      const entries = zipEntries(archive);
+      const findEntry = (relativePath: string) => {
+        const matches = entries.filter(({ name }) => name.endsWith(`/${ex10.root}/${relativePath}`));
+        expect(matches, `EX10 archive contains one ${relativePath}`).toHaveLength(1);
+        return matches[0];
+      };
+      const archivedManifest = JSON.parse(findEntry('project.json').content.toString('utf8'));
+      expect(archivedManifest).toEqual(ex10Project);
+      expect(archivedManifest).not.toHaveProperty('sourceCommit');
+      expect(archivedManifest).not.toHaveProperty('downloadUrl');
+
+      const buildContractPaths = new Set([
+        ...ex10.build.inputs,
+        ...ex10.build.hostTestInputs,
+        ...ex10.build.contractFiles,
+        ...ex10.build.additionalContractInputs,
+      ]);
+      for (const relativePath of buildContractPaths) {
+        const local = await readFile(path.join(projectRoot, ex10.root, relativePath));
+        expect(findEntry(relativePath).content.equals(local), `EX10 bundle matches ${relativePath}`).toBe(true);
+      }
+
+      const evidenceFiles = [
+        ...ex10.evidence.compilation.map(({ record }) => record),
+        ex10.evidence.dialectProbe,
+      ];
+      const expectedBuildHash = await hashCanonicalBuildContract(projectRoot, 'EX10');
+      for (const relativePath of evidenceFiles) {
+        const archived = findEntry(relativePath).content;
+        const local = await readFile(path.join(projectRoot, ex10.root, relativePath));
+        expect(archived.equals(local), `EX10 bundle matches ${relativePath}`).toBe(true);
+        expect(JSON.parse(archived.toString('utf8'))).toMatchObject({
+          sourceCommit: ex10.sourceCommit,
+          buildContractSha256: expectedBuildHash,
+          workflowRun: ex10.evidence.retainedWorkflowRun,
+        });
+      }
     }
   }
 
