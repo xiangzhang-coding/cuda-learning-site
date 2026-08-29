@@ -1,6 +1,6 @@
 ---
 title: 'M14 练习：构造并审查重复 CUDA Graph work'
-description: 用三道静态任务通过两种 construction mechanisms 建立同一 DAG、unwind invalid capture，并修复 executable-graph lifetime、completion、replay 与 update contracts。
+description: 用三道静态任务对比 ordinary repeated submission 与两种 graph-construction mechanisms、unwind invalid capture，并修复 executable-graph lifetime、completion、replay 与 update contracts。
 pairId: m14-exercises
 counterpart: /en/memory/cuda-graphs/exercises/
 factCheckDate: '2026-08-29'
@@ -64,17 +64,17 @@ head:
 
 写出每个 node、edge、graph/capture handle、external resource、immediate API check 与 completion boundary。Explicit construction 与 capture 分开，graph definition 与 executable launch 也分开。完成三类 boundary audit 后再查看[参考解答](/memory/cuda-graphs/solutions/)。
 
-## 练习 1：用两种方式构造同一 DAG
+## 练习 1：对比 ordinary submission 与两种 graph construction
 
-**目标：** 对四项 operations 建模：`H2D`、`clear`、`compute`、`D2H`。`compute` 同时需要 `H2D`/`clear`；`D2H` 需要 `compute`。写 node/edge set 并证明 acyclicity，再分别描述产生该 DAG 的 explicit Graph API construction 与 two-stream capture construction。
+**目标：** 对四项 operations 建模：`H2D`、`clear`、`compute`、`D2H`。`compute` 同时需要 `H2D`/`clear`；`D2H` 需要 `compute`。写 node/edge set 并证明 acyclicity，再对比保留该 DAG 的 ordinary per-iteration stream submission、explicit Graph API construction 与 two-stream capture construction。
 
-**约束：** `H2D`/`clear` 保持 unordered。Explicit plan 中标出 node handles 与 dependency additions；capture plan 中标出 origin stream、用于 fork/join 的 captured events 和 final rejoin。不得执行 work 或声明 concurrency。
+**约束：** `H2D`/`clear` 保持 unordered。Ordinary plan 中标出 host 每次重复的 calls 与 completion boundary；explicit plan 中标出 node handles/dependency additions；capture plan 中标出 origin stream、用于 fork/join 的 captured events 和 final rejoin。不得执行 work 或声明 concurrency。
 
-**预期证据：** Four-node adjacency list、一个 topological order，以及两个 separately labeled、final dependencies 相同的 construction plans。
+**预期证据：** Four-node adjacency list、一个 topological order，以及三份 separately labeled、final dependencies/output oracle 相同的 submission/construction plans。
 
-**验收条件：** Required edges 只有 `H2D -> compute`、`clear -> compute` 与 `compute -> D2H`；没有 path 从某 node 回到自身；capture 在所有 auxiliary streams rejoin 后由 origin end；construction equivalence 不作为 execution evidence。
+**验收条件：** Required edges 只有 `H2D -> compute`、`clear -> compute` 与 `compute -> D2H`；没有 path 从某 node 回到自身；ordinary path 每次 iteration 重新提交全部 operations 并观察 completion；capture 在所有 auxiliary streams rejoin 后由 origin end；construction equivalence 不作为 execution evidence。
 
-<details><summary>提示 1</summary>两个 root nodes unordered，所以有效 topological order 不止一种。</details>
+<details><summary>提示 1</summary>两个 root nodes unordered，所以有效 topological order 不止一种；ordinary submission 每次 iteration 仍需保留两条 dependency path。</details>
 
 <details><summary>提示 2</summary>用一个 captured event fork work，再用另一个 captured event 把 auxiliary stream rejoin 到 origin。</details>
 

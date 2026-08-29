@@ -2,7 +2,7 @@
 
 # Cloudflare Deployment
 
-The production Learning Site is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R1 remains the latest completed aggregate release review and its reviewed artifact is an immutable historical subset. The deployed static surface now contains 131 Publication Pairs and 262 source routes, recorded by `src/current-publication-manifest.json` without calling that incremental publication a completed R2 review. The R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R1 remains the latest completed aggregate release review and its reviewed artifact is an immutable historical subset. The current source tree builds 131 Publication Pairs and 262 source routes, recorded by `src/current-publication-manifest.json` without calling that incremental publication a completed R2 review. Production may claim that current surface only after the exact `main` commit passes the acceptance steps below. The R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
 
 Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R1, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
 

@@ -162,7 +162,7 @@ Pipeline submission is also warp-entangled on the relevant implementation path. 
 
 ## Capability, alignment, and type constraints
 
-The `cuda::memcpy_async` overloads using `cuda::barrier` or `cuda::pipeline` are available on CC 7.0+. The hardware-accelerated global-to-shared asynchronous copy path requires CC 8.0+. On eligible CC 8.x paths, copy sizes of 4, 8, or 16 bytes and matching source/destination alignment can enable the asynchronous instruction path; the copied element type must be trivially copyable for that path.
+The `cuda::memcpy_async` overloads using `cuda::barrier` or `cuda::pipeline` are available on CC 7.0+. The hardware-accelerated global-to-shared asynchronous copy path requires CC 8.0+. On eligible CC 8.0-or-newer paths, copy sizes of 4, 8, or 16 bytes and matching source/destination alignment can enable the asynchronous instruction path; the copied element type must be trivially copyable for that path.
 
 `cuda::aligned_size_t<N>` is a programmer-supplied proof that both pointers meet alignment `N` and that the byte count is a multiple of `N`. Supplying a false proof is undefined behavior. Without a valid compile-time proof, the implementation may need a runtime alignment check or may use a fallback. API spelling, a CC 8.0+ target, and an aligned-looking declaration therefore do not independently prove which instruction was emitted.
 

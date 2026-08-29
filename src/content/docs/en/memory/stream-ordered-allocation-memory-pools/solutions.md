@@ -1,6 +1,6 @@
 ---
 title: 'M11 Reviewed Solutions: Order allocation lifetimes and pool policy'
-description: Reviewed same-stream and cross-stream lifetime graphs plus a bounded memory-pool policy verdict for the M11 Exercises.
+description: Reviewed ordinary, same-stream, and cross-stream lifetime graphs plus a bounded memory-pool policy verdict for the M11 Exercises.
 pairId: m11-solutions
 counterpart: /memory/stream-ordered-allocation-memory-pools/solutions/
 factCheckDate: '2026-08-29'
@@ -60,17 +60,21 @@ head:
 
 These answers solve the [M11 Exercises](/en/memory/stream-ordered-allocation-memory-pools/exercises/) as static dependency and policy records. They contain no support-query result, allocator address, memory statistic, or timing measurement.
 
-## Solution 1: Bound one same-stream lifetime
+## Solution 1: Compare ordinary and same-stream lifetimes
 
-The stream ledger is:
+The two ledgers keep the workload fixed while moving the allocation and release boundaries:
 
 ```text
-host:        cudaMallocAsync returns ptr
-stream_work: malloc operation -> initialize(ptr) -> consume(ptr) -> free operation
-logical use:                    [================]
+ordinary host: cudaMalloc(ptr) --------------------------------> cudaFree(ptr)
+ordinary work:                 initialize(ptr) -> consume(ptr) -> completion
+logical use:                   [===========================================]
+
+async host:   cudaMallocAsync returns ptr
+stream_work:  malloc operation -> initialize(ptr) -> consume(ptr) -> free operation
+logical use:                     [================]
 ```
 
-The API return exposes the pointer value to host code but is not allocation-operation completion. Per-stream order delays both kernels until the allocation operation has completed and places the free after both kernels. An access before the left boundary or after execution reaches the right boundary is undefined behavior. Nothing in this graph identifies the backing-resource decision or a duration.
+The ordinary calls have no caller-selected stream; the review records completion of both asynchronous uses before `cudaFree` rather than relying on an implicit broad wait to hide ownership. In the async path, the API return exposes the pointer value to host code but is not allocation-operation completion. Per-stream order delays both kernels until that operation completes and places the free after both kernels. Neither ledger permits access before readiness or after release, and neither identifies a backing-resource decision or duration.
 
 ## Solution 2: Join every last use before freeing
 

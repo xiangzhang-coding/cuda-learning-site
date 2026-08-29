@@ -228,9 +228,26 @@ describe('VIS08 page-migration Visual Explainer', () => {
         expect(attributeValues(representation!, contract.selector, contract.attribute), file).toEqual(contract.ids);
         alignedIds.push(attributeValues(representation!, contract.selector, contract.attribute));
 
+        if (contract.kind === 'allocation') {
+          expect(
+            attributeValues(
+              representation!,
+              '[data-allocation-pool-row]',
+              'data-allocation-pool-row',
+            ),
+            file,
+          ).toEqual(['pool-source', 'logical-free', 'reuse-policy']);
+        }
         if (contract.kind === 'group') {
           expect(representation?.querySelectorAll('[data-group-tile]'), file).toHaveLength(2);
           expect(representation?.querySelector('[data-all-participant-collective]'), file).not.toBeNull();
+          expect(representation?.querySelector('[data-group-dynamic-membership]'), file).not.toBeNull();
+          expect(
+            representation?.querySelector(
+              '[data-group-grid-gate][data-cooperative-launch-required="true"]',
+            ),
+            file,
+          ).not.toBeNull();
         }
         if (contract.kind === 'pipeline') {
           expect(representation?.querySelector('[data-pipeline-path="portable-baseline"]'), file).not.toBeNull();

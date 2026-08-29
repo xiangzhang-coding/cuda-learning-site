@@ -10,6 +10,7 @@ structure:
   - outcome
   - prerequisites
   - graph-model
+  - ordinary-launches
   - explicit-graph-api
   - stream-capture
   - capture-boundaries
@@ -80,7 +81,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,graph-model,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources' }
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,graph-model,ordinary-launches,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: learning-unit }
   - tag: meta
@@ -137,6 +138,18 @@ A CUDA graph is a directed acyclic graph (DAG). Nodes represent operations such 
 Edges constrain execution; source layout and node numbering do not. Once all dependencies of a node are complete, the CUDA system may schedule it. Two nodes with no path between them are unordered by the graph. That is eligibility, not evidence that they ran concurrently.
 
 For review, record each node's type, parameters, external resources, incoming edges, outgoing edges, and completion consumer. Reject a cycle, a missing producer-to-consumer edge, or an accidental edge that serializes otherwise independent work before instantiation.
+
+## Ordinary repeated launches as the baseline
+
+Start with the ordinary stream-based loop. On every iteration, the host submits the workload's copies, kernels, event edges, and completion boundary again. Stream order and event waits define correctness for that iteration; repeated source order alone does not create a reusable graph object.
+
+| Submission path | How structure is defined | What the host repeats |
+| --- | --- | --- |
+| ordinary stream launches | enqueue calls, stream order, and event dependencies made during each iteration | every operation submission and the required completion observation |
+| stream capture | execute the stream-based authoring path once in capture mode, then instantiate its derived DAG | `cudaGraphLaunch` of the executable graph plus the selected completion observation |
+| explicit Graph API | add typed nodes and dependency edges directly, then instantiate that DAG | `cudaGraphLaunch` of the executable graph plus the selected completion observation |
+
+All three paths need the same external-resource lifetime and output oracle. Graph construction can move repeated setup out of the per-iteration submission path, but this source-level comparison records no launch-overhead reduction or end-to-end speedup.
 
 ## Explicit Graph API: construct the DAG directly
 
@@ -219,7 +232,7 @@ A future claim must bind the exact EX09 source commit, Toolkit Lane, Environment
 ## Retrieval check
 
 1. What do nodes and directed edges represent, and why must a CUDA graph remain acyclic?
-2. How do the explicit Graph API and stream capture differ even when they produce the same DAG?
+2. What does the host repeat in an ordinary launch loop, and how do the explicit Graph API and stream capture move that DAG into a reusable executable?
 3. What must happen to auxiliary captured streams before the origin stream ends capture, and what follows an invalidating operation?
 4. Why are definition, instantiation, launch, and completion four distinct lifecycle boundaries?
 5. Which requested graph changes can require re-instantiation, and why does a successful update still prove no performance result?

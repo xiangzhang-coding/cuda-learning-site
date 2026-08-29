@@ -36,6 +36,12 @@ const REPRESENTATION_COPY = {
         'last-use': ['Last use', 'The dependency graph identifies the final ordered use.'],
         free: ['Free', 'Free is ordered after the last use; the diagram does not claim immediate physical release.'],
       },
+      poolContract: 'Pool and reuse-policy boundary',
+      poolRows: {
+        'pool-source': ['Pool source', 'The stream device selects its current pool unless the allocation names an explicit pool.'],
+        'logical-free': ['Logical free', 'Execution reaching free ends pointer use; the pool may still retain backing resources.'],
+        'reuse-policy': ['Reuse policy', 'A policy permits candidate reuse or inserted ordering; it guarantees neither address identity nor speedup.'],
+      },
     },
     group: {
       title: 'Group membership and collective contract',
@@ -47,6 +53,10 @@ const REPRESENTATION_COPY = {
       tileMembers: 'Tile members',
       collective: 'All-participant collective',
       collectiveText: 'Every required member of the selected group participates; a partial caller set does not satisfy this static contract.',
+      dynamicMembership: 'Dynamic coalesced set',
+      dynamicMembershipText: 'coalesced_threads() names threads active at that call. The set is not a permanent 32-thread warp contract and must not be reused as one.',
+      gridGate: 'Grid-group gate',
+      gridGateText: 'Grid-wide synchronization requires checked cooperative-launch support, a legal resident grid, cooperative launch, and participation by the complete grid group.',
     },
     pipeline: {
       title: 'Portable baseline and CC 8.0+ pipeline',
@@ -98,6 +108,12 @@ const REPRESENTATION_COPY = {
         'last-use': ['最后使用（last use）', 'Dependency graph 标出最后一个有序 use。'],
         free: ['释放（free）', 'Free 排在 last use 之后；本图不声明物理内存立即释放。'],
       },
+      poolContract: 'Pool 与 reuse-policy boundary',
+      poolRows: {
+        'pool-source': ['Pool 来源', '除非 allocation 显式指定 pool，否则由 stream 所属 device 的 current pool 提供资源。'],
+        'logical-free': ['逻辑 free', '执行到 free 后 pointer lifetime 结束；pool 仍可能保留 backing resource。'],
+        'reuse-policy': ['Reuse policy', 'Policy 只允许候选复用或插入 ordering；它不保证 address identity 或 speedup。'],
+      },
     },
     group: {
       title: 'Group membership 与 collective contract',
@@ -109,6 +125,10 @@ const REPRESENTATION_COPY = {
       tileMembers: 'Tile members',
       collective: '全员 collective（all-participant collective）',
       collectiveText: 'Selected group 的每个 required member 都参与；partial caller set 不满足这份静态 contract。',
+      dynamicMembership: '动态 coalesced set',
+      dynamicMembershipText: '`coalesced_threads()` 命名该 call point 的 active threads；这不是永久 32-thread warp contract，也不能按永久 membership 复用。',
+      gridGate: 'Grid-group gate',
+      gridGateText: 'Grid-wide synchronization 需要已检查的 cooperative-launch support、legal resident grid、cooperative launch，以及 complete grid group participation。',
     },
     pipeline: {
       title: 'Portable baseline 与 CC 8.0+ pipeline',
@@ -170,19 +190,33 @@ const selected = copy[kind];
   <p class="advanced-memory-reading" data-representation-reading>{selected.reading}</p>
 
   {kind === 'allocation' && (
-    <ol
-      class="advanced-memory-sequence"
-      data-allocation-sequence="allocate,cross-stream-edge,uses,last-use,free"
-      aria-label={copy.allocation.title}
-    >
-      {Object.entries(copy.allocation.steps).map(([id, [label, description]]) => (
-        <li data-allocation-step={id}>
-          <code>{id}</code>
-          <strong>{label}</strong>
-          <span>{description}</span>
-        </li>
-      ))}
-    </ol>
+    <>
+      <ol
+        class="advanced-memory-sequence"
+        data-allocation-sequence="allocate,cross-stream-edge,uses,last-use,free"
+        aria-label={copy.allocation.title}
+      >
+        {Object.entries(copy.allocation.steps).map(([id, [label, description]]) => (
+          <li data-allocation-step={id}>
+            <code>{id}</code>
+            <strong>{label}</strong>
+            <span>{description}</span>
+          </li>
+        ))}
+      </ol>
+      <dl
+        class="advanced-memory-edge-list"
+        data-allocation-pool-contract
+        aria-label={copy.allocation.poolContract}
+      >
+        {Object.entries(copy.allocation.poolRows).map(([id, [label, description]]) => (
+          <div data-allocation-pool-row={id}>
+            <dt>{label}</dt>
+            <dd>{description}</dd>
+          </div>
+        ))}
+      </dl>
+    </>
   )}
 
   {kind === 'group' && (
@@ -211,6 +245,14 @@ const selected = copy[kind];
       <p class="advanced-memory-contract" data-all-participant-collective>
         <strong>{copy.group.collective}:</strong> {copy.group.collectiveText}
       </p>
+      <section data-group-dynamic-membership>
+        <h4>{copy.group.dynamicMembership}</h4>
+        <p>{copy.group.dynamicMembershipText}</p>
+      </section>
+      <section data-group-grid-gate data-cooperative-launch-required="true">
+        <h4>{copy.group.gridGate}</h4>
+        <p>{copy.group.gridGateText}</p>
+      </section>
     </div>
   )}
 

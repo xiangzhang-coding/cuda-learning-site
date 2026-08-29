@@ -95,7 +95,7 @@ VIS08 helps a CUDA learner keep two statements separate: a teaching model can **
 
 ## Controls
 
-Choose one of three reviewed scenarios with the native select. **Step access** applies exactly one fixed CPU or GPU access. **Reset sequence** restores the selected scenario's initial declarations and returns keyboard focus to the scenario select. There is no autoplay, scrubber, editable page size, or persisted state. Reloading starts again with `gpu-linear-sweep` at step zero.
+Choose one of three reviewed scenarios with the native select. Each scenario controls a reviewed access-origin and page sequence as one bounded unit; the visual intentionally does not accept an arbitrary sequence that could imply a broader residency predictor. **Step access** applies exactly one fixed CPU or GPU access. **Reset sequence** restores the selected scenario's initial declarations and returns keyboard focus to the scenario select. There is no autoplay, scrubber, editable page size, or persisted state. Reloading starts again with `gpu-linear-sweep` at step zero.
 
 The model rejects an unknown scenario, malformed action, invalid step index, or step beyond the end without changing the previous state. The live status region names each accepted step or rejection. Native select and button behavior supplies keyboard operation without a custom key map.
 

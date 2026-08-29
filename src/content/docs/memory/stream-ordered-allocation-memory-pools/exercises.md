@@ -1,6 +1,6 @@
 ---
 title: 'M11 练习：排列分配生命周期与内存池策略'
-description: 构造 same-stream lifetime，修复 multi-stream free，并复核 memory-pool controls，不虚构 address reuse 或 performance evidence。
+description: 对比 ordinary 与 same-stream-ordered lifetime，修复 multi-stream free，并复核 memory-pool controls，不虚构 address reuse 或 performance evidence。
 pairId: m11-exercises
 counterpart: /en/memory/stream-ordered-allocation-memory-pools/exercises/
 factCheckDate: '2026-08-29'
@@ -62,21 +62,21 @@ head:
 
 ## 作答方法
 
-对每次 allocation 标出 allocation-operation completion、每个 stream 中的 first/last use 与 free-operation boundary。对每项 pool claim，分开 permitted policy 与 observed outcome。完成三题后再查看[参考解答](/memory/stream-ordered-allocation-memory-pools/solutions/)。
+对每次 allocation 标出 allocation readiness、每个 stream 中的 first/last use 与 release boundary；把 ordinary host-call path 与 stream-ordered operations 分开。对每项 pool claim，分开 permitted policy 与 observed outcome。完成三题后再查看[参考解答](/memory/stream-ordered-allocation-memory-pools/solutions/)。
 
-## 练习 1：限定一个 same-stream lifetime
+## 练习 1：对比 ordinary 与 same-stream lifetime
 
-**目标（Goal）：** 把 `cudaMallocAsync`、初始化与消费 `ptr` 的两个 kernels，以及 `cudaFreeAsync` 改写为一条 ordered `stream_work` ledger，并包含 host-return/allocation-completion distinction。
+**目标（Goal）：** 把同一 initialize-and-consume workload 画两次：先使用 ordinary `cudaMalloc`/`cudaFree`，再使用同一 ordered `stream_work` 中的 `cudaMallocAsync`、两个 kernels 与 `cudaFreeAsync`。
 
-**约束（Constraints）：** 四项 operations 必须位于同一个 explicitly named stream。不得添加 device-wide synchronization。不得把 host 收到 pointer 当作 allocation operation 已完成的 proof。
+**约束（Constraints）：** 两条 path 保持 logical input、两个 kernels 与 output oracle 不变。Ordinary path 要在 host release 前显示全部 asynchronous uses completion，并标出 broader synchronization boundary。Stream-ordered path 的四项 operations 必须位于同一 explicitly named stream，不得添加 device-wide synchronization。不得把 async pointer return 当作 allocation-operation completion。
 
-**预期证据（Expected evidence）：** 一条 stream lane、一个 logical usable interval、host API return/stream execution labels，以及分别判定 allocation 前 use 与 free 后 use 的一句话。
+**预期证据（Expected evidence）：** 一张 side-by-side lifetime table、async path 的一条 stream lane、logical usable intervals、host API return/stream execution labels，以及分别判定 readiness 前 use 与 release 后 use 的一句话。
 
-**验收条件（Acceptance criteria）：** 两个 kernels 都 ordering 在 allocation completion 后、execution reaches free 前；host return 不标为 completion；allocation completion 前 use 与 free 后 use 都分类为 undefined behavior；没有 address 或 speed claim。
+**验收条件（Acceptance criteria）：** 两条 path 都把同样两个 kernels ordering 在 valid lifetime 内；ordinary path 在 `cudaFree` 前完成每个 asynchronous use；async kernels 在 allocation completion 后、execution reaches `cudaFreeAsync` 前执行；host return 不标为 async completion；没有 address 或 speed claim。
 
-<details><summary>提示 1（Hint 1）</summary>把 allocation call return 放在 lane 旁边，不要把它放入 lane 充当 completion marker。</details>
+<details><summary>提示 1（Hint 1）</summary>Ordinary allocation/free calls 没有 caller-selected stream；把 host boundary 与 named work stream 分开画。</details>
 
-<details><summary>提示 2（Hint 2）</summary>当所有 uses/free 与 allocation 共用一个 stream 时，per-stream order 提供全部 required edges。</details>
+<details><summary>提示 2（Hint 2）</summary>对 async path，把 pointer return 放在 lane 旁边；per-stream order 提供 required execution edges。</details>
 
 ## 练习 2：Free 前 join 每个 last use
 

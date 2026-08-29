@@ -1,6 +1,6 @@
 ---
 title: 'M14 参考解答：构造并审查重复 CUDA Graph work'
-description: M14 三道练习的 equivalent explicit/captured DAG plans、invalid-capture recovery，以及 replay、lifetime、completion 与 update repairs。
+description: M14 练习的 equivalent ordinary/explicit/captured DAG plans、invalid-capture recovery，以及 replay、lifetime、completion 与 update repairs。
 pairId: m14-solutions
 counterpart: /en/memory/cuda-graphs/solutions/
 factCheckDate: '2026-08-29'
@@ -60,15 +60,17 @@ head:
 
 这些答案把 [M14 练习（Exercise）](/memory/cuda-graphs/exercises/)作为 static graph/lifecycle review 解答。它们不替代 canonical EX09 source，不执行 capture、不 instantiate executable、不 launch graph，也不建立 performance evidence。
 
-## 解答 1：用两种方式构造同一 DAG
+## 解答 1：对比 ordinary submission 与两种 graph construction
 
 Node set 是 `{H2D, clear, compute, D2H}`。Adjacency list 是 `H2D: [compute]`、`clear: [compute]`、`compute: [D2H]`、`D2H: []`。Valid topological orders 可以让 `H2D`/`clear` 以任一顺序开头，随后是 `compute`、`D2H`。每条 edge 在任一 order 中都向前，因此没有 directed cycle。
+
+**Ordinary plan：** 每次 iteration 都把 `H2D`/`clear` enqueue 到 separate named streams，用 explicit event edges 让 `compute` wait 两个 roots，在 `compute` 后 enqueue `D2H`，并在 host consume/reuse 前观察 covering completion。Host 每次都重复全部 operation submissions 与 completion boundary。
 
 **Explicit plan：** 创建 graph，把 `H2D`/`clear` 加为 roots，把两者 handles 作为 dependencies 加入 `compute`，再把 `compute` 作为 dependency 加入 `D2H`。也可以在 node creation 后加入相同 edges，但 final node/edge set 必须一致。
 
 **Capture plan：** 在 `origin` begin。Record captured fork event，让 `worker` wait 并加入同一 capture graph。在 `origin` capture `H2D`，在 `worker` capture `clear`。在 `worker` record captured completion event，让 `origin` 在 capture `compute` 前 wait；随后在 `origin` 上 capture `D2H` 并 end。该 event wait 让 `worker` 在 end 前 rejoin。
 
-两种 plan 定义同一 partial order；都不证明 `H2D`/`clear` concurrent execution。
+三种 plan 定义同一 partial order，并使用同一 output oracle；都不证明 `H2D`/`clear` concurrent execution 或 graph submission 更快。
 
 ## 解答 2：unwind invalidated stream capture
 

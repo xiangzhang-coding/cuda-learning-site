@@ -162,7 +162,7 @@ acquire stage -> submit cuda::memcpy_async -> commit stage
 
 ## Capability、alignment 与 type constraints
 
-使用 `cuda::barrier` 或 `cuda::pipeline` 的 `cuda::memcpy_async` overloads 在 CC 7.0+ 可用；hardware-accelerated global-to-shared asynchronous copy path 要求 CC 8.0+。在 eligible CC 8.x path 上，4、8 或 16-byte copy size 以及匹配的 source/destination alignment 可以启用 asynchronous instruction path；该 path 还要求 copied element type 为 trivially copyable。
+使用 `cuda::barrier` 或 `cuda::pipeline` 的 `cuda::memcpy_async` overloads 在 CC 7.0+ 可用；hardware-accelerated global-to-shared asynchronous copy path 要求 CC 8.0+。在 eligible CC 8.0-or-newer path 上，4、8 或 16-byte copy size 以及匹配的 source/destination alignment 可以启用 asynchronous instruction path；该 path 还要求 copied element type 为 trivially copyable。
 
 `cuda::aligned_size_t<N>` 是 programmer-supplied proof，声明两个 pointers 都满足 alignment `N`，且 byte count 是 `N` 的倍数。错误 proof 会产生 undefined behavior。若没有 valid compile-time proof，implementation 可能执行 runtime alignment check 或使用 fallback。因此 API spelling、CC 8.0+ target 与看似 aligned 的 declaration 都不能单独证明 emitted instruction。
 

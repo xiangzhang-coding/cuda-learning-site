@@ -221,7 +221,7 @@ EX08 is the canonical implementation for this unit. The `access-sequence` range 
 
 ## Visual model: VIS08
 
-[VIS08: Page Migration](/en/visuals/page-migration/) should show the same access-origin and page-sequence ledger with explicit system-model branches and a textual fallback. Its page colors are deterministic teaching state, not queried residency. Browser execution neither faults CUDA pages nor observes a migration.
+[VIS08: Page Migration](/en/visuals/page-migration/) applies one explicitly declared software-coherent branch to fixed, reviewed access-origin and page sequences and preserves every scenario in a textual fallback. It deliberately excludes hardware-coherent direct access, remote mapping, prefetch, advice, and other system branches rather than presenting them as observed alternatives. Its page colors are deterministic teaching state, not queried residency. Browser execution neither faults CUDA pages nor observes a migration.
 
 ## Evidence boundary
 

@@ -205,7 +205,7 @@ Copy engine 是一种 hardware resource，可以独立于 SM compute 执行 data
 
 ## Canonical Runnable Example：EX07
 
-EX07 是本单元的 canonical implementation。`chunk-contract` range 建立 bounded chunk offset、tail size 与 ownership；`stream-pipeline` range 应用 named streams 与 event-protected reuse。Standalone project 保留 serialized correctness path，source 本身不编码 observed-overlap claim。
+EX07 是本单元的 canonical implementation。`chunk-contract` range 建立 bounded chunk offset、tail size 与 ownership；`stream-pipeline` range 使用 named streams、same-stream slot reuse、从 serialized baseline 发出的 event edge，以及供 host completion 使用的 terminal events。Standalone project 保留 serialized correctness path，source 本身不编码 observed-overlap claim。
 
 [在固定提交中查看完整 EX07 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f/examples/ex07-streams-events-overlap)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f.zip)。Standalone project 是唯一 canonical implementation；本页按 contract 顺序导入两个 declared ranges。
 

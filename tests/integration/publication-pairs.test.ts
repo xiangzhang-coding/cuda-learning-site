@@ -1046,7 +1046,7 @@ const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'm11',
     factCheckDate: '2026-08-29',
-    structure: 'outcome,prerequisites,support-gate,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources',
+    structure: 'outcome,prerequisites,support-gate,ordinary-comparison,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources',
     resourceKind: 'learning-unit',
     unitId: 'M11',
     prerequisites: 'M07,M08',
@@ -1160,7 +1160,7 @@ const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'm14',
     factCheckDate: '2026-08-29',
-    structure: 'outcome,prerequisites,graph-model,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources',
+    structure: 'outcome,prerequisites,graph-model,ordinary-launches,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources',
     resourceKind: 'learning-unit',
     unitId: 'M14',
     prerequisites: 'M07,M08',

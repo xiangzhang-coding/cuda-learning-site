@@ -117,6 +117,7 @@ describe('issue #19 semantic contracts', () => {
       ]);
       expect(text).toMatch(/All uses must precede free|所有 uses 必须位于 free 前/);
       expect(text).toMatch(/free must be reachable from every last-use completion|free 必须 reachable from 每个 last-use completion/);
+      expect(text).toMatch(/Ordinary and stream-ordered lifetimes|Ordinary 与 stream-ordered lifetime 对比/);
     }
   });
 
@@ -171,6 +172,7 @@ describe('issue #19 semantic contracts', () => {
       ]);
       expect(text).toMatch(/equivalent DAGs|等价 DAG/);
       expect(text).toMatch(/Two nodes with no path between them are unordered|两个 nodes 之间若没有 path，则 graph 不 ordering 它们/);
+      expect(text).toMatch(/Ordinary repeated launches as the baseline|以 ordinary repeated launches 作为 baseline/);
     }
   });
 });

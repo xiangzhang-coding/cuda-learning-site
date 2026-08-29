@@ -10,6 +10,7 @@ structure:
   - outcome
   - prerequisites
   - graph-model
+  - ordinary-launches
   - explicit-graph-api
   - stream-capture
   - capture-boundaries
@@ -80,7 +81,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,graph-model,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources' }
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,graph-model,ordinary-launches,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: learning-unit }
   - tag: meta
@@ -137,6 +138,18 @@ CUDA graph 是有向无环图（directed acyclic graph，DAG）。Nodes 表示 k
 Edges 约束 execution；source layout 与 node numbering 不约束。一个 node 的全部 dependencies 完成后，CUDA system 可以 schedule 它。两个 nodes 之间若没有 path，则 graph 不 ordering 它们。这表示 eligibility，不是它们 concurrent execution 的证据。
 
 Review 时记录每个 node 的 type、parameters、external resources、incoming/outgoing edges 与 completion consumer。Instantiation 前应拒绝 cycle、缺失的 producer-to-consumer edge，或让原本 independent work 意外 serializing 的 edge。
+
+## 以 ordinary repeated launches 作为 baseline
+
+先写 ordinary stream-based loop。每次 iteration 都由 host 再次提交 workload 的 copies、kernels、event edges 与 completion boundary。Stream order/event waits 定义该次 iteration 的 correctness；重复 source order 本身不会创建 reusable graph object。
+
+| Submission path | 如何定义 structure | Host 重复什么 |
+| --- | --- | --- |
+| ordinary stream launches | 每次 iteration 执行 enqueue calls、stream order 与 event dependencies | 每项 operation submission 与 required completion observation |
+| stream capture | 在 capture mode 中运行一次 stream-based authoring path，再 instantiate 导出的 DAG | executable graph 的 `cudaGraphLaunch` 与 selected completion observation |
+| explicit Graph API | 直接加入 typed nodes/dependency edges，再 instantiate 该 DAG | executable graph 的 `cudaGraphLaunch` 与 selected completion observation |
+
+三条 path 都需要同一 external-resource lifetime 与 output oracle。Graph construction 可以把 repeated setup 移出 per-iteration submission path，但这份 source-level comparison 不记录 launch-overhead reduction 或 end-to-end speedup。
 
 ## Explicit Graph API：直接构造 DAG
 
@@ -219,7 +232,7 @@ Future claim 必须绑定 exact EX09 source commit、Toolkit Lane、Environment 
 ## 离开前检查
 
 1. Nodes 与 directed edges 分别表示什么？为什么 CUDA graph 必须保持 acyclic？
-2. 即使产生同一 DAG，explicit Graph API 与 stream capture 仍有哪些不同？
+2. Ordinary launch loop 中 host 每次重复什么？Explicit Graph API 与 stream capture 又如何把该 DAG 移入 reusable executable？
 3. Origin stream 结束 capture 前，auxiliary captured streams 必须发生什么？Invalidating operation 后又必须怎样处理？
 4. 为什么 definition、instantiation、launch 与 completion 是四个不同 lifecycle boundaries？
 5. 哪些 requested graph changes 可能需要 re-instantiation？为什么 successful update 仍不证明 performance result？

@@ -10,6 +10,7 @@ structure:
   - outcome
   - prerequisites
   - support-gate
+  - ordinary-comparison
   - allocation-completion
   - same-stream-lifetime
   - cross-stream-use
@@ -75,7 +76,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,support-gate,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources' }
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,support-gate,ordinary-comparison,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: learning-unit }
   - tag: meta
@@ -131,6 +132,19 @@ cudaDeviceGetAttribute(
 ```
 
 The query return must be checked before using `pools_supported`. This static fragment declares a gate but records no result for any device.
+
+## Ordinary and stream-ordered lifetimes
+
+The ordinary path uses `cudaMalloc` and `cudaFree`, which take no caller-selected stream. In the reviewed Programming Guide, these allocation calls can synchronize across executing CUDA streams. Before the host releases an ordinary allocation, every asynchronous use still needs a completion proof; relying on a broad synchronization side effect hides the dependency graph rather than removing the lifetime obligation.
+
+| Boundary | Ordinary `cudaMalloc` / `cudaFree` | Stream-ordered `cudaMallocAsync` / `cudaFreeAsync` |
+| --- | --- | --- |
+| allocation becomes usable | after the successful host allocation call and its API contract | after the allocation operation executes in its stream; later same-stream work is ordered after it |
+| cross-stream use | the application still orders every producer and consumer | an event or synchronization path carries allocation completion to each other stream |
+| lifetime ends | the host calls `cudaFree` only after all asynchronous uses are complete | execution reaches `cudaFreeAsync` only after every last-use edge |
+| synchronization scope | allocation/free can impose broader synchronization than the logical consumer needs | ordering can remain local to named streams and explicit dependencies |
+
+The comparison changes where lifetime boundaries live, not the correctness rule: no use may occur before allocation is ready or after release. It also proves no performance advantage; broader or narrower synchronization must be evaluated with a declared workload and measurements.
 
 ## Allocation operation completion
 
@@ -223,7 +237,7 @@ The API fragments, dependency graphs, policy table, visual representation, and E
 
 ## Retrieval check
 
-1. Why may same-stream work submitted after `cudaMallocAsync` use the pointer even though the host call returns before allocation completion?
+1. How does an ordinary `cudaMalloc`/`cudaFree` lifetime differ from same-stream `cudaMallocAsync`/`cudaFreeAsync`, and what correctness rule stays unchanged?
 2. Which two event edges are required when allocation, use, and free occupy three different streams?
 3. What must be true of every use before execution reaches `cudaFreeAsync`?
 4. How do the default/current pool path and `cudaMallocFromPoolAsync` differ?

@@ -1,6 +1,6 @@
 ---
 title: 'M11 Exercises: Order allocation lifetimes and pool policy'
-description: Build a same-stream lifetime, repair a multi-stream free, and review memory-pool controls without inventing address reuse or performance evidence.
+description: Compare ordinary and same-stream-ordered lifetimes, repair a multi-stream free, and review memory-pool controls without inventing address reuse or performance evidence.
 pairId: m11-exercises
 counterpart: /memory/stream-ordered-allocation-memory-pools/exercises/
 factCheckDate: '2026-08-29'
@@ -62,21 +62,21 @@ Complete [M11: Stream-Ordered Allocation and Memory Pools](/en/memory/stream-ord
 
 ## Instructions
 
-For each allocation, mark allocation-operation completion, first and last use in every stream, and the free-operation boundary. For each pool claim, separate permitted policy from observed outcome. Finish all three tasks before consulting the [reviewed solutions](/en/memory/stream-ordered-allocation-memory-pools/solutions/).
+For each allocation, mark allocation readiness, first and last use in every stream, and the release boundary. Keep the ordinary host-call path separate from stream-ordered operations. For each pool claim, separate permitted policy from observed outcome. Finish all three tasks before consulting the [reviewed solutions](/en/memory/stream-ordered-allocation-memory-pools/solutions/).
 
-## Exercise 1: Bound one same-stream lifetime
+## Exercise 1: Compare ordinary and same-stream lifetimes
 
-**Goal:** Rewrite `cudaMallocAsync`, two kernels that initialize and consume `ptr`, and `cudaFreeAsync` as one ordered `stream_work` ledger, including the host-return and allocation-completion distinction.
+**Goal:** Draw the same initialize-and-consume workload twice: first with ordinary `cudaMalloc`/`cudaFree`, then with `cudaMallocAsync`, two kernels, and `cudaFreeAsync` in one ordered `stream_work` ledger.
 
-**Constraints:** Keep all four operations in one explicitly named stream. Do not add a device-wide synchronization. Do not treat the pointer returned to the host as proof that the allocation operation has completed.
+**Constraints:** Keep the logical input, two kernels, and output oracle identical. For the ordinary path, show completion of all asynchronous uses before host release and label the broader synchronization boundary. For the stream-ordered path, keep all four operations in one explicitly named stream and do not add device-wide synchronization. Do not treat the async pointer return as allocation-operation completion.
 
-**Expected evidence:** One stream lane, a logical usable interval, labels for host API return and stream execution, and a sentence classifying each possible use before allocation or after free.
+**Expected evidence:** A side-by-side lifetime table, one stream lane for the async path, logical usable intervals, labels for host API return versus stream execution, and a sentence classifying each possible use before readiness or after release.
 
-**Acceptance criteria:** Both kernels are ordered after allocation completion and before execution reaches the free; host return is not labeled completion; use before allocation completion and use after free are classified as undefined behavior; no address or speed claim appears.
+**Acceptance criteria:** Both paths order the same two kernels inside a valid lifetime; the ordinary path completes every asynchronous use before `cudaFree`; the async kernels execute after allocation completion and before execution reaches `cudaFreeAsync`; host return is not labeled async completion; no address or speed claim appears.
 
-<details><summary>Hint 1</summary>Put the allocation call return beside the lane, not inside the lane as a completion marker.</details>
+<details><summary>Hint 1</summary>Ordinary allocation/free calls have no caller-selected stream; draw their host boundary separately from the named work stream.</details>
 
-<details><summary>Hint 2</summary>Per-stream order supplies every required edge when all uses and the free share the allocation stream.</details>
+<details><summary>Hint 2</summary>For the async path, put the pointer return beside the lane; per-stream order supplies the required execution edges.</details>
 
 ## Exercise 2: Join every last use before freeing
 

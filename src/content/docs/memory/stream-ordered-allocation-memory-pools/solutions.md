@@ -1,6 +1,6 @@
 ---
 title: 'M11 参考解答：排列分配生命周期与内存池策略'
-description: M11 练习的 reviewed same-stream/cross-stream lifetime graphs 与 bounded memory-pool policy verdict。
+description: M11 练习的 reviewed ordinary、same-stream/cross-stream lifetime graphs 与 bounded memory-pool policy verdict。
 pairId: m11-solutions
 counterpart: /en/memory/stream-ordered-allocation-memory-pools/solutions/
 factCheckDate: '2026-08-29'
@@ -60,17 +60,21 @@ head:
 
 这些答案把 [M11 练习（Exercise）](/memory/stream-ordered-allocation-memory-pools/exercises/)解答为 static dependency/policy records。它们不包含 support-query result、allocator address、memory statistic 或 timing measurement。
 
-## 解答 1：限定一个 same-stream lifetime
+## 解答 1：对比 ordinary 与 same-stream lifetime
 
-Stream ledger 是：
+两条 ledger 保持 workload 不变，只移动 allocation/release boundaries：
 
 ```text
-host:        cudaMallocAsync returns ptr
-stream_work: malloc operation -> initialize(ptr) -> consume(ptr) -> free operation
-logical use:                    [================]
+ordinary host: cudaMalloc(ptr) --------------------------------> cudaFree(ptr)
+ordinary work:                 initialize(ptr) -> consume(ptr) -> completion
+logical use:                   [===========================================]
+
+async host:   cudaMallocAsync returns ptr
+stream_work:  malloc operation -> initialize(ptr) -> consume(ptr) -> free operation
+logical use:                     [================]
 ```
 
-API return 让 host code 得到 pointer value，却不代表 allocation-operation completion。Per-stream order 让两个 kernels 等到 allocation operation complete，并把 free 放在两个 kernels 后。Left boundary 前或 execution reaches right boundary 后的 access 都是 undefined behavior。该 graph 不说明 backing-resource decision 或 duration。
+Ordinary calls 没有 caller-selected stream；review 在 `cudaFree` 前记录两个 asynchronous uses 的 completion，而不是依赖 implicit broad wait 隐藏 ownership。Async path 中，API return 让 host code 得到 pointer value，却不代表 allocation-operation completion。Per-stream order 让两个 kernels 等到该 operation complete，并把 free 放在两个 kernels 后。两条 ledger 都不允许 readiness 前或 release 后 access，也都不说明 backing-resource decision 或 duration。
 
 ## 解答 2：Free 前 join 每个 last use
 

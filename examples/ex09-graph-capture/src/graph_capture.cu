@@ -71,6 +71,8 @@ int main() {
   CUDA_CHECK(cudaMemcpy(
       device_input, host_input.data(), bytes, cudaMemcpyHostToDevice));
   CUDA_CHECK(cudaMemset(device_state, 0, bytes));
+  // Complete non-captured initialization before the nonblocking stream uses these buffers.
+  CUDA_CHECK(cudaDeviceSynchronize());
   CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
 
   CUDA_CHECK(cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal));

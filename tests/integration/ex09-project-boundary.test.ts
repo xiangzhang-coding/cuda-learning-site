@@ -100,12 +100,24 @@ describe('EX09 standalone project boundary', () => {
     expect(cudaSources).toEqual(['src/graph_capture.cu']);
   });
 
-  it('pins the temporary source commit to a tree containing EX09', async () => {
+  it('pins the source commit to the exact EX09 canonical build inputs', async () => {
     await expect(execFileAsync(
       'git',
       ['cat-file', '-e', `${sourceCommit}:examples/ex09-graph-capture/project.json`],
       { cwd: projectRoot },
     )).resolves.toBeDefined();
+
+    for (const input of ['include/graph_capture_reference.hpp', 'src/graph_capture.cu']) {
+      const [{ stdout: pinned }, current] = await Promise.all([
+        execFileAsync(
+          'git',
+          ['show', `${sourceCommit}:examples/ex09-graph-capture/${input}`],
+          { cwd: projectRoot },
+        ),
+        readFile(path.join(exampleRoot, input), 'utf8'),
+      ]);
+      expect(pinned, input).toBe(current);
+    }
   });
 
   it('pins three C++17 lanes, the fixed DAG, and complete expected results', async () => {
@@ -163,6 +175,10 @@ describe('EX09 standalone project boundary', () => {
     expect(replay.code).toContain('cudaGraphInstantiate');
     expect(replay.code).toContain('cudaGraphLaunch');
     expect(replay.code).toContain('cudaStreamSynchronize');
+    const initializationCompletion = replay.code.indexOf('cudaDeviceSynchronize');
+    const captureStart = replay.code.indexOf('cudaStreamBeginCapture');
+    expect(initializationCompletion).toBeGreaterThanOrEqual(0);
+    expect(captureStart).toBeGreaterThan(initializationCompletion);
   });
 
   it('runs a CUDA-free host DAG and result model with complete error coverage', async () => {

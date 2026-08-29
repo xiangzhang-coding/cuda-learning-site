@@ -1,6 +1,6 @@
 ---
 title: 'M14 Reviewed Solutions: Construct and Audit Repeated CUDA Graph Work'
-description: Equivalent explicit and captured DAG plans, invalid-capture recovery, and replay, lifetime, completion, and update repairs for the three M14 Exercises.
+description: Equivalent ordinary, explicit, and captured DAG plans, invalid-capture recovery, and replay, lifetime, completion, and update repairs for the M14 Exercises.
 pairId: m14-solutions
 counterpart: /memory/cuda-graphs/solutions/
 factCheckDate: '2026-08-29'
@@ -60,15 +60,17 @@ head:
 
 These answers solve the [M14 Exercises](/en/memory/cuda-graphs/exercises/) as static graph and lifecycle reviews. They do not replace the canonical EX09 source, execute capture, instantiate an executable, launch a graph, or establish performance.
 
-## Solution 1: Construct one DAG in two different ways
+## Solution 1: Compare ordinary submission and two graph constructions
 
 The node set is `{H2D, clear, compute, D2H}`. The adjacency list is `H2D: [compute]`, `clear: [compute]`, `compute: [D2H]`, and `D2H: []`. Valid topological orders begin with `H2D, clear` in either order, followed by `compute`, then `D2H`. Every edge moves forward in either order, so there is no directed cycle.
+
+**Ordinary plan:** On every iteration, enqueue `H2D` and `clear` into separate named streams, use explicit event edges to make `compute` wait for both roots, enqueue `D2H` after `compute`, and observe the covering completion before host consumption or reuse. The host repeats every operation submission and completion boundary.
 
 **Explicit plan:** Create the graph, add `H2D` and `clear` as roots, add `compute` with both root handles as dependencies, then add `D2H` with `compute` as its dependency. The same edges could be added after node creation, but the final node/edge set must match.
 
 **Capture plan:** Begin on `origin`. Record a captured fork event and have `worker` wait so it joins the same capture graph. Capture `H2D` on `origin` and `clear` on `worker`. Record a captured completion event on `worker`; make `origin` wait on it before capturing `compute`. Capture `D2H` after `compute` on `origin`, then end capture on `origin`. That event wait rejoins `worker` before the end call.
 
-Both plans define the same partial order. Neither plan proves that `H2D` and `clear` execute concurrently.
+All three plans define the same partial order and use the same output oracle. None proves that `H2D` and `clear` execute concurrently or that graph submission is faster.
 
 ## Solution 2: Unwind an invalidated stream capture
 

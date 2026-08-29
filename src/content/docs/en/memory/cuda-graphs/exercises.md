@@ -1,6 +1,6 @@
 ---
 title: 'M14 Exercises: Construct and Audit Repeated CUDA Graph Work'
-description: Build one DAG through two construction mechanisms, unwind an invalid capture, and repair executable-graph lifetime, completion, replay, and update contracts in three static tasks.
+description: Compare ordinary repeated submission with two graph-construction mechanisms, unwind an invalid capture, and repair executable-graph lifetime, completion, replay, and update contracts.
 pairId: m14-exercises
 counterpart: /memory/cuda-graphs/exercises/
 factCheckDate: '2026-08-29'
@@ -64,17 +64,17 @@ Complete [M14: CUDA Graphs and Repeated Launch Structure](/en/memory/cuda-graphs
 
 Name every node, edge, graph/capture handle, external resource, immediate API check, and completion boundary. Keep explicit construction separate from capture, and keep graph definition separate from executable launch. Compare your work with the [reviewed solutions](/en/memory/cuda-graphs/solutions/) only after auditing all three boundaries.
 
-## Exercise 1: Construct one DAG in two different ways
+## Exercise 1: Compare ordinary submission and two graph constructions
 
-**Goal:** Model four operations: `H2D`, `clear`, `compute`, and `D2H`. `compute` needs both `H2D` and `clear`; `D2H` needs `compute`. Write the node/edge set, prove acyclicity, then describe one explicit Graph API construction and one two-stream capture construction that yield that DAG.
+**Goal:** Model four operations: `H2D`, `clear`, `compute`, and `D2H`. `compute` needs both `H2D` and `clear`; `D2H` needs `compute`. Write the node/edge set, prove acyclicity, then compare an ordinary per-iteration stream submission, one explicit Graph API construction, and one two-stream capture construction that preserve that DAG.
 
-**Constraints:** Keep `H2D` and `clear` unordered. In the explicit plan, identify node handles and dependency additions. In the capture plan, identify origin stream, captured events used to fork/join, and the final rejoin. Do not execute work or claim concurrency.
+**Constraints:** Keep `H2D` and `clear` unordered. In the ordinary plan, identify every call and completion boundary repeated by the host. In the explicit plan, identify node handles and dependency additions. In the capture plan, identify origin stream, captured events used to fork/join, and the final rejoin. Do not execute work or claim concurrency.
 
-**Expected evidence:** A four-node adjacency list, a topological order, and two separately labeled construction plans with the same final dependencies.
+**Expected evidence:** A four-node adjacency list, a topological order, and three separately labeled submission/construction plans with the same final dependencies and output oracle.
 
-**Acceptance criteria:** The only required edges are `H2D -> compute`, `clear -> compute`, and `compute -> D2H`; no path runs from a node back to itself; the capture ends on its origin after every auxiliary stream rejoins; construction equivalence is not presented as execution evidence.
+**Acceptance criteria:** The only required edges are `H2D -> compute`, `clear -> compute`, and `compute -> D2H`; no path runs from a node back to itself; the ordinary path resubmits all operations and observes completion each iteration; capture ends on its origin after every auxiliary stream rejoins; construction equivalence is not presented as execution evidence.
 
-<details><summary>Hint 1</summary>More than one topological order is valid because the two root nodes are unordered.</details>
+<details><summary>Hint 1</summary>More than one topological order is valid because the two root nodes are unordered; ordinary submission still needs both dependency paths each iteration.</details>
 
 <details><summary>Hint 2</summary>Use a captured event to fork work and another captured event to rejoin the auxiliary stream to the origin.</details>
 

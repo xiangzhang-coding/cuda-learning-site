@@ -205,7 +205,7 @@ Record the exact device query and returned value in the Environment Manifest. Tr
 
 ## Canonical Runnable Example: EX07
 
-EX07 is the canonical implementation for this unit. The `chunk-contract` range establishes bounded chunk offsets, tail sizes, and ownership; the `stream-pipeline` range applies named streams and event-protected reuse. The standalone project retains the serialized correctness path and does not encode an observed-overlap claim in source.
+EX07 is the canonical implementation for this unit. The `chunk-contract` range establishes bounded chunk offsets, tail sizes, and ownership; the `stream-pipeline` range applies named streams, same-stream slot reuse, an event edge from the serialized baseline, and terminal events for host completion. The standalone project retains the serialized correctness path and does not encode an observed-overlap claim in source.
 
 [View the complete EX07 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f/examples/ex07-streams-events-overlap), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f.zip). The standalone project is the only canonical implementation; this page imports the two declared ranges in contract order.
 

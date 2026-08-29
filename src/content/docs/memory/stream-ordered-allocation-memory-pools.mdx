@@ -10,6 +10,7 @@ structure:
   - outcome
   - prerequisites
   - support-gate
+  - ordinary-comparison
   - allocation-completion
   - same-stream-lifetime
   - cross-stream-use
@@ -75,7 +76,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,support-gate,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources' }
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,support-gate,ordinary-comparison,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: learning-unit }
   - tag: meta
@@ -131,6 +132,19 @@ cudaDeviceGetAttribute(
 ```
 
 使用 `pools_supported` 前必须检查 query return。这段 static fragment 只声明 gate，没有记录任何 device result。
+
+## Ordinary 与 stream-ordered lifetime 对比
+
+Ordinary path 使用不接收 caller-selected stream 的 `cudaMalloc` 与 `cudaFree`。Reviewed Programming Guide 说明这些 allocation calls 可能跨 executing CUDA streams 触发 synchronization。Host 释放 ordinary allocation 前，每个 asynchronous use 仍需要 completion proof；依赖 broad synchronization side effect 只是隐藏 dependency graph，不会消除 lifetime obligation。
+
+| Boundary | Ordinary `cudaMalloc` / `cudaFree` | Stream-ordered `cudaMallocAsync` / `cudaFreeAsync` |
+| --- | --- | --- |
+| allocation 可用 | successful host allocation call 及其 API contract 完成后 | allocation operation 在其 stream 中执行后；later same-stream work ordering 在它之后 |
+| cross-stream use | application 仍需 ordering 每个 producer 与 consumer | event 或 synchronization path 把 allocation completion 传给每条 other stream |
+| lifetime 结束 | 所有 asynchronous uses 完成后，host 才调用 `cudaFree` | 每条 last-use edge 完成后，execution 才到达 `cudaFreeAsync` |
+| synchronization scope | allocation/free 可能施加比 logical consumer 更宽的 synchronization | ordering 可以局限在 named streams 与 explicit dependencies |
+
+这个比较改变 lifetime boundaries 放在哪里，不改变 correctness rule：allocation ready 前或 release 后都不得 use。它也不证明 performance advantage；broader/narrower synchronization 仍需用 declared workload 与 measurements 评估。
 
 ## Allocation operation completion
 
@@ -223,7 +237,7 @@ API fragments、dependency graphs、policy table、visual representation 与 Exe
 
 ## 离开前检查
 
-1. 为什么 host call 在 allocation completion 前 return，same-stream 中 `cudaMallocAsync` 后提交的 work 仍可使用 pointer？
+1. Ordinary `cudaMalloc`/`cudaFree` lifetime 与 same-stream `cudaMallocAsync`/`cudaFreeAsync` 有何不同？哪条 correctness rule 保持不变？
 2. Allocation、use 与 free 位于三个 different streams 时，需要哪两条 event edges？
 3. Execution reaches `cudaFreeAsync` 前，每次 use 必须满足什么条件？
 4. Default/current pool path 与 `cudaMallocFromPoolAsync` 有何区别？
