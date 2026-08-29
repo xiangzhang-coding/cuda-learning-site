@@ -1,0 +1,252 @@
+---
+title: 'M09：页锁定内存与传输重叠'
+description: 使用页锁定 host buffer 构建正确的分块 copy-compute pipeline，再把 overlap eligibility、hardware capability 与 observed execution 分成独立 evidence records。
+pairId: m09
+counterpart: /en/memory/pinned-memory-transfer-overlap/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - page-locked-host-memory
+  - asynchronous-copy
+  - overlap-eligibility
+  - chunk-pipeline
+  - copy-engines
+  - canonical-example
+  - hardware-gate
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M09
+prerequisites:
+  - M07
+  - M08
+relatedUnits:
+  - M10
+  - Q05
+exampleIds:
+  - EX07
+canonicalExample: EX07
+canonicalRanges:
+  - chunk-contract
+  - stream-pipeline
+hardwareGate: 'Baseline correctness: native Linux, one CUDA GPU with compute capability 7.5 or newer; overlap observation additionally requires page-locked host buffers, eligible asynchronous copy/compute capability, and recorded timeline evidence'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Unified and System Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current page-locked host-memory allocation, registration, and release model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current asynchronous transfer, stream ordering, and concurrency eligibility model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current page-locked allocation, registration, asynchronous copy, and release interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current device capability query interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Page-Locked Host Memory'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#page-locked-host-memory'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 page-locked host-memory contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Overlap of Data Transfer and Kernel Execution'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#overlap-of-data-transfer-and-kernel-execution'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 copy-compute overlap eligibility contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 host-memory and asynchronous-copy interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 device capability query interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Page-Locked Host Memory'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#page-locked-host-memory'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 page-locked host-memory contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Overlap of Data Transfer and Kernel Execution'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#overlap-of-data-transfer-and-kernel-execution'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 copy-compute overlap eligibility contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 host-memory and asynchronous-copy interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 device capability query interfaces'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m09 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,page-locked-host-memory,asynchronous-copy,overlap-eligibility,chunk-pipeline,copy-engines,canonical-example,hardware-gate,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M10,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX07 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX07 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'chunk-contract,stream-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Baseline correctness: native Linux, one CUDA GPU with compute capability 7.5 or newer; overlap observation additionally requires page-locked host buffers, eligible asynchronous copy/compute capability, and recorded timeline evidence' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '12' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/pinned-memory-transfer-overlap/" lang="en">Read the English counterpart</a>
+
+页锁定主机内存（page-locked host memory）是本单元中真正 asynchronous CPU-GPU copy 所需的 CPU-side storage contract。传输重叠（transfer overlap）是另一类 execution observation：pinned buffer、asynchronous API、independent stream work 与复制引擎（copy engine）capability 可以让 overlap eligible，但只有记录下来的 device timeline 才能说明 intervals 确实发生重叠。
+
+## 学完本单元，你应该能
+
+- 为每种 page-locked allocation 或 registration API 匹配正确的 release action 与 lifetime。
+- 说明为什么 `cudaMemcpyAsync` 加 pageable host memory 不是 overlap contract。
+- 在询问是否更快之前，画出 copy、kernel 与 buffer reuse dependencies 都正确的 chunk pipeline。
+- 分开 source-level eligibility、查询得到的 copy/compute capability 与 observed transfer overlap。
+- 即使所选 hardware 不能 overlap copy/compute，也保留 serialized correctness baseline。
+
+## 先修关系
+
+先完成 [M07：用流取代全局顺序心智模型](/memory/stream-ordering/)，再完成 [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)。M07 提供 named non-default streams，以及 different streams 没有 edge 时保持 unordered 的规则；M08 提供 event generation、selective wait 与保护 buffer reuse 的 completion observation。
+
+M09 改变 data movement 与 pipeline shape，不改变 correctness standard。后续任何 timing claim 都由 [Q05：诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)约束。[M10：统一内存与页面迁移](/memory/unified-memory-page-migration/)研究另一种 placement model，不能被静默替换进这份 explicit-copy contract。
+
+## 页锁定主机内存
+
+`cudaMallocHost` 与 `cudaHostAlloc` 创建 page-locked host allocation，并使用 `cudaFreeHost` 释放。`cudaHostRegister` 对 eligible existing host range 加 page lock；匹配动作是 `cudaHostUnregister`，之后才由原 allocator 在 allocation 不再需要时释放。两条路径都能提供 pinned transfer buffer，但 allocation 与 registration 的 ownership 不同。
+
+Pinning 阻止 operating system 在 CUDA 使用覆盖范围时把对应 physical storage 换出或移动。这让 direct asynchronous CPU-GPU transfer 成为可能，但会占用有限 host resource。应在 steady-state pipeline 前分配经过复核的 working set，让每个 range 保持有效直到最后一个 asynchronous user 完成，并且只释放一次。把 page-locked allocation 插在本来 independent 的 work 之间还可能引入 synchronization，所以它不应位于 hot enqueue sequence 中。
+
+Pinned 不等于 device-resident，不等于已经为每种 intended access 完成 mapping，也不等于已经 in flight。它是 host-memory property 和这条 transfer path 的先决条件，不是 overlap result。
+
+## Asynchronous copy contract
+
+`cudaMemcpyAsync` 把 transfer 加入 stream，并在 transfer 不一定完成时返回。对涉及 CPU memory 的 copy，current Programming Guide 要求 host buffer page-locked 才具有 asynchronous behavior。Pageable host buffer 仍可能得到正确 copy，但本单元把这条路径判为不具备 overlap claim 资格，因为它可能退化为 synchronous staging behavior。
+
+因此每个 asynchronous copy 都带五项记录：source/destination ranges、byte count 与 direction、owning stream、completion boundary，以及两个 buffer 最早合法 reuse/release 的时点。API submission 成功不证明任何 buffer 已可供 host reuse。必须用 same-stream order 或 M08 event edge 连接 producer 与 consumer；host 还必须等待能够保护 verification 与 cleanup 的 completion。
+
+## Overlap eligibility 不是 observation
+
+只有所有 ordering/resource gates 都允许时，copy 与 kernel intervals 才具备 overlap eligibility：
+
+1. 两项 operation 之间没有会把它们 serialization 的 required edge。
+2. CPU-side transfer ranges 已 page-locked，并在使用期间保持有效。
+3. Copies/kernels 位于 named streams，且所有真实 data dependency 都已表达。
+4. 所选 device 报告 compatible asynchronous copy/compute capability。
+5. Allocation、default-stream relationship、host wait 或其他 synchronization point 没有关闭 intended window。
+6. Runtime 有足够 applicable resources 调度这些 operations。
+
+通过这些 gates 只证明 submitted graph 在 capable system 上允许 overlap；它不证明 transfer 使用了 copy engine，不证明 kernel 留出了所需资源，也不证明 execution intervals 相交。来自 exact run 的 profiler 或等价 device timeline 才是 observation boundary。
+
+## 先构建正确的 chunk pipeline
+
+在不改变 logical result 的前提下，把一个 workload 划分成 chunks。每个 chunk `i` 都保留以下 data path：
+
+```text
+H2D(i) -> kernel(i) -> D2H(i) -> output-ready(i)
+```
+
+把完整 chunk chains 放入有界数量的 named non-default streams。Different chunks 可以同时变得 eligible，而每个 chunk 内部仍保持 order。若复用 ring slot，必须从该 slot 上一次的 `output-ready` event 添加 dependency，连接到下一次会 overwrite 它的 host fill 或 transfer。Host 不能在 H2D copy 完成前修改 input chunk，也不能在 D2H copy 完成前读取 output chunk。
+
+Serialized path 与 pipeline 必须使用相同 logical input、kernel work、output oracle 和 error checks。只有每个 element 恰好覆盖一次、tail size 有边界且 buffer ownership 无歧义时，chunking 才正确。更小 chunk 可以暴露更多 pipeline stages，也会改变 launch/transfer overhead；graph 不能推出 optimal chunk count。
+
+## Copy engine 是带 capability 的 resource
+
+Copy engine 是一种 hardware resource，可以独立于 SM compute 执行 data movement。Asynchronous-engine 等 device properties 描述所选 device/path 的可用 capability。Engine 的数量和可用 direction 会变化，current owner documentation 也不保证每个 `cudaMemcpy*` call 都一定使用 copy engine。
+
+在 Environment Manifest 中记录 exact device query 与 returned value。把它视为“可能发生什么”的 gate，不是“实际发生什么”的 timestamped account。即使 device 有 eligible engines，某个 workload 仍可能因 dependency、transfer direction、resource contention、staging 或 runtime decision 而 serialization。
+
+## Canonical Runnable Example：EX07
+
+EX07 是本单元的 canonical implementation。`chunk-contract` range 建立 bounded chunk offset、tail size 与 ownership；`stream-pipeline` range 应用 named streams 与 event-protected reuse。Standalone project 保留 serialized correctness path，source 本身不编码 observed-overlap claim。
+
+[在临时固定提交中查看完整 EX07 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex07-streams-events-overlap)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/6f7c2339f5eb9997298cf8590755a6a7debbdaf9.zip)。Standalone project 是唯一 canonical implementation；本页按 contract 顺序导入两个 declared ranges。
+
+<CanonicalCode exampleId="EX07" range="chunk-contract" />
+
+<CanonicalCode exampleId="EX07" range="stream-pipeline" />
+
+## Hardware gate：correctness 先于 overlap
+
+Baseline correctness 以 Native Linux 与基础 GPU 能力层级（Baseline GPU Capability Tier）为目标，也就是 compute capability 7.5 或更新、bounded workload 低于 8 GB。即使 device 把 copies/kernels serialization，也仍可满足 correctness contract。Output oracle、API error checks、event dependencies 与 release order 都必须在不假设 overlap 的条件下通过。
+
+Overlap observation 还有额外 gate：page-locked host buffers、让 intended copy/kernel 保持 unordered 的 graph、所选 device/path 的 compatible asynchronous copy/compute capability，以及来自 exact run 的 timeline evidence。任一 gate 缺失时，只报告正确的 serialized result，并让 overlap 保持 unobserved。
+
+## 证据边界
+
+Dependency diagrams、canonical source excerpts 与练习都不运行 CUDA，也不检查 device timeline。本学习单元的 compilation、runtime、expected-observation 与 recorded-observation axes 保持为空。Browser layout、source order、capability value 或 event formula 都不被报告为 measured overlap、duration、bandwidth 或 speedup。
+
+## 离开前检查
+
+1. 哪些 allocation/registration paths 创建 page-locked host memory？每条路径如何释放？
+2. 即使 copied result 正确，为什么 `cudaMemcpyAsync` 使用 pageable host range 仍不满足本单元的 overlap contract？
+3. 哪些 edges 必须保护一个 chunk 从 input fill 到 output reuse 的全过程？
+4. Copy/compute capability 建立了什么事实，又留下什么尚未观测？
+5. 为什么 qualifying baseline GPU 上的正确 pipeline 仍可能报告没有 transfer overlap？
+
+## 继续练习
+
+- 完成 [M09 练习（Exercise）](/memory/pinned-memory-transfer-overlap/exercises/)，再查看独立的[参考解答](/memory/pinned-memory-transfer-overlap/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-001](/practice/#pb-r2-001)复核一项 pipeline claim。
+- 复习 [TERM-096：page-locked host memory](/glossary/#term-096)、[TERM-097：transfer overlap](/glossary/#term-097)与 [TERM-098：copy engine](/glossary/#term-098)，再进入 M10 学习 managed placement。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Unified and System Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html)定义 current page-locked allocation、registration、mapping 与 release concepts。
+- [CUDA Programming Guide v13.3：Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)定义 current pinned-buffer requirement、stream order 与 concurrency boundary。
+- [CUDA Runtime API v13.3.1：Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)提供 current host allocation、registration、copy 与 release interfaces；[Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)提供 capability queries。
+- [CUDA C++ Programming Guide 12.9.1：Page-Locked Host Memory](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#page-locked-host-memory)与 [Overlap of Data Transfer and Kernel Execution](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#overlap-of-data-transfer-and-kernel-execution)保留 12.9.1 teaching contracts。
+- [CUDA Runtime API 12.9.1：Memory Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html)与 [Device Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__DEVICE.html)保留 12.9.1 interfaces/queries。
+- [CUDA C Programming Guide 11.8：Page-Locked Host Memory](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#page-locked-host-memory)与 [Overlap of Data Transfer and Kernel Execution](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#overlap-of-data-transfer-and-kernel-execution)保留 11.8 teaching contracts。
+- [CUDA Runtime API 11.8.0：Memory Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html)与 [Device Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html)保留 11.8 interfaces/queries。
+
+十二项 owner source 均访问于 **2026-08-29**。Chunk ledger、capability/observation gate、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-29。**

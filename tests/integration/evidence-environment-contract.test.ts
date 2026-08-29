@@ -205,6 +205,18 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/memory/stream-ordering/exercises/',
     '/memory/event-dependencies-timing/exercises/',
     '/en/memory/event-dependencies-timing/exercises/',
+    '/memory/pinned-memory-transfer-overlap/exercises/',
+    '/en/memory/pinned-memory-transfer-overlap/exercises/',
+    '/memory/unified-memory-page-migration/exercises/',
+    '/en/memory/unified-memory-page-migration/exercises/',
+    '/memory/stream-ordered-allocation-memory-pools/exercises/',
+    '/en/memory/stream-ordered-allocation-memory-pools/exercises/',
+    '/memory/cooperative-groups/exercises/',
+    '/en/memory/cooperative-groups/exercises/',
+    '/memory/asynchronous-copy-pipelines/exercises/',
+    '/en/memory/asynchronous-copy-pipelines/exercises/',
+    '/memory/cuda-graphs/exercises/',
+    '/en/memory/cuda-graphs/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -263,6 +275,18 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/memory/stream-ordering/solutions/',
     '/memory/event-dependencies-timing/solutions/',
     '/en/memory/event-dependencies-timing/solutions/',
+    '/memory/pinned-memory-transfer-overlap/solutions/',
+    '/en/memory/pinned-memory-transfer-overlap/solutions/',
+    '/memory/unified-memory-page-migration/solutions/',
+    '/en/memory/unified-memory-page-migration/solutions/',
+    '/memory/stream-ordered-allocation-memory-pools/solutions/',
+    '/en/memory/stream-ordered-allocation-memory-pools/solutions/',
+    '/memory/cooperative-groups/solutions/',
+    '/en/memory/cooperative-groups/solutions/',
+    '/memory/asynchronous-copy-pipelines/solutions/',
+    '/en/memory/asynchronous-copy-pipelines/solutions/',
+    '/memory/cuda-graphs/solutions/',
+    '/en/memory/cuda-graphs/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -279,7 +303,38 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes twenty-nine complete Practice Bank entries in $route', async (route) => {
+  it.each([
+    'pinned-memory-transfer-overlap',
+    'unified-memory-page-migration',
+    'stream-ordered-allocation-memory-pools',
+    'cooperative-groups',
+    'asynchronous-copy-pipelines',
+    'cuda-graphs',
+  ].flatMap((slug) => [
+    { slug, localePrefix: '' },
+    { slug, localePrefix: 'en/' },
+  ]))('publishes exactly three layered tasks and three separate solutions for $slug in $localePrefix', async ({ slug, localePrefix }) => {
+    const baseRoute = `/${localePrefix}memory/${slug}/`;
+    const exercises = await readRoute(`${baseRoute}exercises/`);
+    const solutions = await readRoute(`${baseRoute}solutions/`);
+    const taskHeadings = [...exercises.querySelectorAll('main h2')]
+      .map((heading) => heading.textContent?.trim() ?? '')
+      .filter((heading) => /^(?:Exercise|练习) [1-3](?::|：)/.test(heading));
+    const solutionHeadings = [...solutions.querySelectorAll('main h2')]
+      .map((heading) => heading.textContent?.trim() ?? '')
+      .filter((heading) => /^(?:Solution|解答) [1-3](?::|：)/.test(heading));
+    const hintSummaries = [...exercises.querySelectorAll('main details summary')]
+      .map((summary) => summary.textContent?.replace(/（.*?）/g, '').trim() ?? '');
+
+    expect(taskHeadings).toHaveLength(3);
+    expect(solutionHeadings).toHaveLength(3);
+    expect(hintSummaries.filter((summary) => /^(?:Hint|提示) 1$/.test(summary))).toHaveLength(3);
+    expect(hintSummaries.filter((summary) => /^(?:Hint|提示) 2$/.test(summary))).toHaveLength(3);
+    expect(mainText(exercises)).not.toMatch(/(?:Solution|解答) 1(?::|：)/);
+    expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
+  });
+
+  it.each(['/practice/', '/en/practice/'])('publishes thirty-five complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     const entryIds = [
@@ -290,6 +345,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016',
       'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
       'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
+      'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
     ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
@@ -311,6 +367,12 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-022': 'correctness/memcheck-invalid-memory-access',
       'PB-R1-023': 'correctness/racecheck-initcheck-synccheck',
       'PB-R1-024': 'correctness/timing-asynchronous-gpu-work',
+      'PB-R2-001': 'memory/pinned-memory-transfer-overlap',
+      'PB-R2-002': 'memory/unified-memory-page-migration',
+      'PB-R2-003': 'memory/stream-ordered-allocation-memory-pools',
+      'PB-R2-004': 'memory/cooperative-groups',
+      'PB-R2-005': 'memory/asynchronous-copy-pipelines',
+      'PB-R2-006': 'memory/cuda-graphs',
     };
 
     expect(entryHeadings).toHaveLength(entryIds.length);
@@ -351,10 +413,10 @@ describe('Exercises and Practice Bank contract', () => {
           `${route} ${entryId} prerequisite`,
         ).toBe(true);
       }
-      if (/^PB-R1-02[1-4]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-00[1-6]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        expect(sectionText, `${route} ${entryId}`).toContain('2026-08-28');
+        expect(sectionText, `${route} ${entryId}`).toContain(entryId.startsWith('PB-R2') ? '2026-08-29' : '2026-08-28');
       }
     }
 
@@ -365,7 +427,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/F01/);
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
-    for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08']) expect(text).toContain(unitId);
+    for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14']) expect(text).toContain(unitId);
     for (const unitId of ['Q01', 'Q03', 'Q04', 'Q05']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
@@ -387,7 +449,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const slug of ['cpp17-for-cuda', 'linux-command-line', 'architecture-refresher', 'programmable-gpus', 'reference-environment-candidate']) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
-    for (const slug of ['address-spaces', 'coalescing-transactions', 'shared-memory-tiling', 'bank-conflicts-layouts', 'synchronization-scopes', 'warp-divergence-reconvergence', 'stream-ordering', 'event-dependencies-timing']) {
+    for (const slug of ['address-spaces', 'coalescing-transactions', 'shared-memory-tiling', 'bank-conflicts-layouts', 'synchronization-scopes', 'warp-divergence-reconvergence', 'stream-ordering', 'event-dependencies-timing', 'pinned-memory-transfer-overlap', 'unified-memory-page-migration', 'stream-ordered-allocation-memory-pools', 'cooperative-groups', 'asynchronous-copy-pipelines', 'cuda-graphs']) {
       expect(document.querySelector(`a[href*="${slug}"]`), slug).not.toBeNull();
     }
   });

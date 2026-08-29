@@ -1,0 +1,206 @@
+---
+title: 'M13：异步复制与分阶段流水线'
+description: 先建立 portable synchronous global-to-shared baseline，再推理 cuda::memcpy_async 与 cuda::pipeline 的 stage ownership、participation、completion、capability 和 evidence boundaries。
+pairId: m13
+counterpart: /en/memory/asynchronous-copy-pipelines/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - synchronous-baseline
+  - asynchronous-copy
+  - stage-lifecycle
+  - participants-convergence
+  - capability-constraints
+  - representation
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M13
+prerequisites:
+  - M03
+  - M05
+  - M08
+relatedUnits:
+  - M12
+hardwareGate: 'CC 7.0+ for the applicable cuda::memcpy_async and cuda::pipeline APIs; CC 8.0+ for the hardware-accelerated global-to-shared asynchronous copy path'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - Asynchronous Data Copies'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current global-to-shared asynchronous copy, completion, alignment, and hardware-path contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide 13.3 - Pipelines'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current pipeline stage, participation, release, early-exit, and warp-entanglement contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Asynchronous Data Copies and cuda::pipeline'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-data-copies'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 asynchronous-copy and staged-pipeline contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8.0 - Asynchronous Data Copies and cuda::pipeline'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#async_data_operations'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 asynchronous-copy and staged-pipeline contract'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m13 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,synchronous-baseline,asynchronous-copy,stage-lifecycle,participants-convergence,capability-constraints,representation,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M05,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M12 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'CC 7.0+ API; CC 8.0+ hardware-accelerated global-to-shared path' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import AdvancedMemoryRepresentation from '../../../components/AdvancedMemoryRepresentation.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/asynchronous-copy-pipelines/" lang="en">Read the English counterpart</a>
+
+[异步复制（asynchronous copy，TERM-108）](/glossary/#term-108)改变 copy 的提交与完成方式，却不会消除此前建立的 shared-memory ownership 与 synchronization proof。[流水线（pipeline，TERM-109）](/glossary/#term-109)加入一个由有限个可复用[流水线阶段（pipeline stage，TERM-110）](/glossary/#term-110)组成的 FIFO。正确性仍从简单 synchronous phase order 开始，再逐项替换边界。
+
+## 学完本单元，你应该能
+
+- 先写出 portable synchronous `global load -> shared store -> barrier -> use -> barrier before reuse` baseline。
+- 把一个 logical batch 映射到 `producer_acquire -> cuda::memcpy_async -> producer_commit -> consumer_wait -> use -> consumer_release`。
+- 写清每个 producer/consumer participant，包括 bounds-invalid 与 early-exit behavior。
+- 区分 CC 7.0+ API availability 和 CC 8.0+ hardware-accelerated global-to-shared path 及其 alignment/type constraints。
+- 拒绝从 source code 本身推断特定 hardware instruction 或 copy/compute overlap。
+
+## 先修关系
+
+按顺序先完成 [M03：共享内存分块](/memory/shared-memory-tiling/)、[M05：同步作用域与内存可见性](/memory/synchronization-scopes/)和 [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)。M03 提供 load/use/reuse phase proof；M05 提供 participant/visibility reasoning；M08 防止把 asynchronous submission boundary 误当成 completion 或 timing evidence。
+
+M12 是 related Learning Unit，但不是 prerequisite。本单元不执行 CUDA，也不授予 compilation/runtime Evidence Status。
+
+## 先建立 portable synchronous baseline
+
+从一个 shared buffer 和明确的 phase ledger 开始：
+
+```cpp
+for (int batch = 0; batch < batch_count; ++batch) {
+  shared[threadIdx.x] = load_valid ? global[input_index] : neutral;
+  __syncthreads();
+
+  if (output_valid) {
+    consume(shared);
+  }
+
+  __syncthreads();
+}
+```
+
+First barrier ordering 所有 participating loads 与 cross-thread use；second barrier ordering 所有 uses 与下一轮对同一 storage 的 overwrite。Bounds 选择 value 或 output action，不能悄悄把 thread 移出 block-wide barrier。这份 baseline 对 Stable Curriculum 的 C++17 lanes 可移植；当 asynchronous path 不可用、不满足条件或没有充分理由时，它仍是 fallback。
+
+不要优化一份尚未证明的 protocol。先记录 source range、destination range、每个 shared slot 的 assigned writer、每个 slot 的 readers、neutral/validity rule、participants 与 next-overwrite point。
+
+## 替换 copy，不替换 proof
+
+使用 pipeline completion mechanism 时，一个 batch 的抽象顺序是：
+
+```text wrap
+acquire stage -> submit cuda::memcpy_async -> commit stage
+              -> wait for that stage -> use completed data -> release stage
+```
+
+`producer_acquire()` 预留 pipeline head；acquire 后提交的 copies 属于该 stage。`producer_commit()` 推进 head，并把 batch 发布到 pipeline sequence。`consumer_wait()` 按 pipeline contract 等待 oldest committed stage 完成；只有随后 consumer 才能读取该 stage。`consumer_release()` 把 oldest stage 交回 pipeline，供之后 acquire/reuse。
+
+“Asynchronous” 不允许提前访问。Documented completion boundary 之前读取或写入 destination，或修改 copy 仍需要的 source data，都会形成 race。若某些 threads 消费由其他 threads 复制的 shared values，设计还必须包含让所有 peer-produced values 可安全使用所需的 group synchronization；不能把 thread-local completion wait 扩大解释成 block-wide guarantee。
+
+## Stage lifecycle 与 reuse
+
+为每个 logical batch 保留 stage ledger：
+
+| state | owner action | permitted shared-buffer action |
+| --- | --- | --- |
+| available | producer 完成 `producer_acquire()` | producer 可向 acquired stage 提交 copies |
+| committed | producer 完成 `producer_commit()` | stage pending；consumer 尚不可读取 |
+| ready | consumer 完成相应 `consumer_wait()` 和 required group synchronization | declared consumers 可读取 stage |
+| released | 所有 declared consumers 完成读取，并按要求 collectively 完成 `consumer_release()` | stage 可被后续 batch acquire/overwrite |
+
+多个 stages 把正在填充的 stage 与正在消费的 stage 分开。它们创造 overlap opportunity，却不证明 hardware 实际发生 overlap。Prologue、steady-state rotation 与 drain 必须保持同一 batch-to-stage mapping；最后几个 committed batches 仍需 wait、use 和 release。
+
+**Use** 前完成 copy，防止读取 unfinished copy；**release/reuse** 前完成所有 declared reads，防止 later producer 覆盖仍 live 的 stage。这是两条不同 edges，正如 M03 的 first/second barrier 分别保护不同 hazard。
+
+## 完整 participant 与 convergence contract
+
+对于 shared block-scope pipeline，必须声明 unified/partitioned、stage count、producer set、consumer set 与每个 thread 的 fixed role。Producer operations 对 producer set collective；consumer operations 对 consumer set collective。每个 participant 都必须对每个 logical stage 执行相同的 required acquire/commit 或 wait/release sequence。Bounds-invalid participant 可以在 selected overload contract 下不提交 useful bytes，或采用 neutral/validity path，但不能直接从 collective sequence 中 return。若 participating thread 必须提前退出，应先遵循 documented `pipeline.quit()` contract。
+
+相关 implementation path 上的 pipeline submission 还存在 warp entanglement。Converged threads 可以把 commit coalesce 成一个 actual batch；divergent commits 可能让 warp-shared actual sequence 的推进次数多于每个 thread 的 perceived sequence。之后的 wait 可能因此多等更晚的 batches。Commit operations 应保持 converged；若此前 control flow 已 divergence，应在 commit 前用正确 scoped `__syncwarp` reconverge。这是 convergence/performance contract，不能代替 pipeline 的完整 participant contract。
+
+## Capability、alignment 与 type constraints
+
+使用 `cuda::barrier` 或 `cuda::pipeline` 的 `cuda::memcpy_async` overloads 在 CC 7.0+ 可用；hardware-accelerated global-to-shared asynchronous copy path 要求 CC 8.0+。在 eligible CC 8.x path 上，4、8 或 16-byte copy size 以及匹配的 source/destination alignment 可以启用 asynchronous instruction path；该 path 还要求 copied element type 为 trivially copyable。
+
+`cuda::aligned_size_t<N>` 是 programmer-supplied proof，声明两个 pointers 都满足 alignment `N`，且 byte count 是 `N` 的倍数。错误 proof 会产生 undefined behavior。若没有 valid compile-time proof，implementation 可能执行 runtime alignment check 或使用 fallback。因此 API spelling、CC 8.0+ target 与看似 aligned 的 declaration 都不能单独证明 emitted instruction。
+
+本 Learning Unit 只覆盖 portable baseline 与 `cuda::memcpy_async` 加 `cuda::pipeline` 的 staged path；architecture-specific bulk-copy systems 不在教学范围内。
+
+## Pipeline representation
+
+<AdvancedMemoryRepresentation kind="pipeline" locale="zh-CN" />
+
+该 representation 标注 stage ownership、pending completion、use 与 release。它是 deterministic browser model，不是 CUDA execution trace；布局中看似同时发生的动作只用于讲解，不提供 overlap evidence。
+
+## 证据边界
+
+Source review 可以证明 participant sets、stage rotation、completion edges 与 declared alignment assumptions，却不能证明 compiler 发出了 hardware asynchronous-copy instruction。该 claim 需要 pinned build 与 artifact inspection。Source review 也不能证明 copy/compute overlap 或 speedup；这些 claim 需要带 Environment Manifest、correctness oracle、明确 timing boundaries 与 retained observations 的 Runtime-Verified measurement。
+
+本页、visual 与 Exercises 都不执行 CUDA。Compilation、runtime、expected-observation 与 recorded-observation arrays 保持为空。
+
+## 离开前检查
+
+1. Portable synchronous baseline 中的两个 barriers 分别防止什么 hazard？
+2. 对一个 pipeline stage，acquire、commit、wait 与 release 分别完成什么 ownership transition？
+3. 为什么 bounds-invalid thread 仍必须遵循 shared pipeline 的 participant sequence？
+4. Divergent warp commits 为什么可能让 consumer 等待比 source-level sequence 更多的 stages？
+5. 为什么 `cuda::memcpy_async`、CC 8.0+ target 与 alignment annotation 既不证明 hardware instruction，也不证明 copy/compute overlap？
+
+## 继续练习
+
+- 完成 [M13 练习（Exercise）](/memory/asynchronous-copy-pipelines/exercises/)，再查看独立的[参考解答](/memory/asynchronous-copy-pipelines/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-005](/practice/#pb-r2-005)审查 staged-copy participant 与 evidence contract。
+- 在提出 hardware/overlap claim 前复习 [TERM-108 asynchronous copy](/glossary/#term-108)、[TERM-109 pipeline](/glossary/#term-109)和 [TERM-110 pipeline stage](/glossary/#term-110)。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Asynchronous Data Copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html)定义 current global-to-shared copy direction、completion mechanism 与 CC 8.0+ LDGSTS path。
+- [CUDA Programming Guide v13.3：Pipelines](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html)定义 current acquire/commit/wait/release stages、shared participation、early exit 与 warp entanglement。
+- [CUDA C++ Programming Guide 12.9.1：Asynchronous Data Copies](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-data-copies)保留 12.9.1 archive 的 CC 7.0+ API、CC 8.0+ acceleration、alignment、trivially-copyable 与 staged-pipeline contracts。
+- [CUDA C Programming Guide 11.8.0：Asynchronous Data Copies](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#async_data_operations)保留对应 CUDA 11.8 contracts。
+
+四项 owner source 均访问于 **2026-08-29**，并严格按上方顺序排列。Phase ledger、stage table、teaching skeleton、questions、练习与编排均为本站 CC-BY-4.0 原创内容；没有复制 owner example、figure 或 performance result。
+
+**事实核查日期：2026-08-29。**

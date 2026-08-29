@@ -1,0 +1,134 @@
+---
+title: '托管内存页面迁移'
+description: 通过固定 CPU/GPU access sequence 区分显式声明的 software-coherent page-residency model 与经过测量的 managed-memory behavior。
+pairId: vis08
+counterpart: /en/visuals/page-migration/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - declared-model
+  - transition-ledger
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS08
+prerequisites:
+  - M01
+  - M02
+  - M10
+relatedUnits:
+  - M10
+  - EX08
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Unified Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Unified Memory paradigms, software and hardware coherence, paging, placement, and migration boundaries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'cudaMallocManaged, cudaMemAdvise, cudaMemPrefetchAsync, and memory-range interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd'
+    version: 'CUDA C++ Programming Guide v12.9.1; archived'
+    platform: 'Archived managed-memory programming, page placement, and migration boundary'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 11.8 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd'
+    version: 'CUDA C++ Programming Guide v11.8.0; archived'
+    platform: 'Archived managed-memory programming, page placement, and migration boundary'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,declared-model,transition-ledger,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02,M10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M10,EX08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.1,11.8.0' }
+---
+
+import PageMigrationExplorer from '../../../components/PageMigrationExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/page-migration/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+VIS08 帮助 CUDA learner 分开两类陈述：教学模型可以在固定 access sequence 后**声明**每个托管内存（managed memory）页面的驻留位置（residency），而 runtime claim 必须来自具名环境中的 observation。该 visual 与 M10、EX08 相关，并要求 metadata 中列出的 M01、M02 与 M10 概念。
+
+<PageMigrationExplorer locale="zh-CN" />
+
+## 控件
+
+使用原生 select 选择三个 reviewed scenario 之一。**单步 access**每次只应用一个固定 CPU 或 GPU access；**重置 sequence**恢复所选 scenario 的初始声明，并把键盘焦点送回 scenario select。页面没有 autoplay、scrubber、可编辑 page size 或持久化 state；reload 后总是回到 `gpu-linear-sweep` 的 step zero。
+
+模型对 unknown scenario、malformed action、invalid step index 或 sequence 结束后的额外 step 采用 fail-closed：上一状态保持不变。Live status region 会说明 accepted step 或 rejection。原生 select 与 button 已提供键盘操作，无需自定义 key map。
+
+## 声明模型
+
+模型为这节有界课程显式选择软件一致性（software-coherent）分支。在每个模型 step 中，每个教学页面都只有一个声明位置：CPU 或 GPU。当访问来源（access origin）与该声明不同时，模型把声明位置改为 access origin，并增加一次**模型 residency transition**；origin 与声明相同时，位置保持不变。
+
+声明 page size 为 `65,536 B`（`64 KiB`）。它只是教学符号，不是被检测到的 operating-system page、GPU page、transfer granularity，也不保证一次 runtime action 恰好移动这些字节。符号字节表达式只有：
+
+```text
+modeled transition count x declared page size
+```
+
+固定 scenario 刻意排除 hardware-coherent direct access、remote mapping、prefetch、memory advice、access-counter policy、oversubscription、multi-GPU placement、concurrent CPU/GPU access 与 eviction。这些 mechanism 会改变真实 placement 与 access behavior，因此不能把这条窄规则扩写成 platform-independent residency predictor。
+
+## Transition ledger
+
+页面的 signature element 是保持确定性 page ID 顺序的 page-residency rail。Transition ledger 记录 access ID、CPU/GPU origin、read/write operation、before/after residency、声明是否改变、累计 transition count 与累计 symbolic bytes。全部 ID、scenario、access sequence 与无 tie 的顺序都固定在 source 中；模型不使用 clock、randomness、storage 或 device query。
+
+Rail 与 ledger 只回答“这份 declared model 对 reviewed input 产生什么结果”。它们不回答某次 CUDA run 是否生成 fault、移动 data、选择了何种 transfer granularity，或产生了多少 elapsed duration。
+
+## 静态回退
+
+服务器会渲染全部三个 scenario，而不只渲染初始选中项。每张 static card 都包含 initial-condition description、final residency rail、完整四行 before/after ledger、transition total 与 symbolic-byte expression。在禁用 JavaScript、390-pixel viewport、forced colors、reduced motion 与 print 中，同一份完整 fallback 都会保留。CPU/GPU 和 changed/unchanged 均有文字标签，不依赖颜色。
+
+Source HTML 中 controls 与 interactive workbench 默认隐藏。只有 light-DOM custom element 找到全部 required native control，并成功推导 initial frame 后，它们才会显示。若 enhancement 未完成，完整 static representation 仍然承担教学任务。
+
+## 证据边界
+
+VIS08 不编译或运行 CUDA，也不取得 Environment Manifest、profiler output、page-fault record、transfer record、residency query、byte count 或 elapsed-time result。模型 transition count 与 symbolic bytes 不是 measured migration evidence，也不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified** Evidence Status。Compilation、runtime、expected-observation 与 recorded-observation metadata 全部为空。
+
+## 来源
+
+当前 behavior boundary 依据 [CUDA Programming Guide v13.3 Unified Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html) 与 [CUDA Runtime API v13.3.1 Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) 复核。Software-coherent paging、hardware-coherent access、advice、prefetch 与 implementation-dependent page size 之间的区别，正是 VIS08 声明窄模型而不把 rail 写成 trace 的原因。
+
+稳定的 managed-memory terminology 与旧版 programming boundary 还和精确的 [CUDA 12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd) 及 [CUDA 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd) 做了比较。全部 source coordinate 的 access date 为 **2026-08-29**。没有复制 NVIDIA diagram、table、example 或 prose；residency rail、scenario、model、control、ledger、fallback 与解释都是原创 CC-BY-4.0 教学材料。

@@ -21,9 +21,19 @@ const representativeThemeRoutes = [
   '/en/memory/warp-divergence-reconvergence/',
   '/en/memory/stream-ordering/',
   '/en/memory/event-dependencies-timing/',
+  '/en/memory/pinned-memory-transfer-overlap/',
+  '/en/memory/unified-memory-page-migration/',
+  '/en/memory/stream-ordered-allocation-memory-pools/',
+  '/en/memory/cooperative-groups/',
+  '/en/memory/asynchronous-copy-pipelines/',
+  '/en/memory/cuda-graphs/',
   '/en/correctness/timing-asynchronous-gpu-work/',
+  '/en/examples/streams-events-overlap/',
+  '/en/examples/unified-memory-migration/',
+  '/en/examples/graph-capture/',
   '/en/visuals/warp-divergence/',
   '/en/visuals/stream-event-dependencies/',
+  '/en/visuals/page-migration/',
 ] as const;
 
 const releaseVisualStateScans = [
@@ -83,7 +93,7 @@ async function expectNoAxeViolations(page: Page, label: string) {
 
 test('@accessibility axe detects no tagged violations across every published route; this is not a conformance claim', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
-  test.setTimeout(360_000);
+  test.setTimeout(420_000);
 
   const theme = 'silicon-light';
   await setTheme(page, theme);
@@ -96,7 +106,7 @@ test('@accessibility axe detects no tagged violations across every published rou
 
 test('@accessibility representative pages and visual states have no tagged violations across themes', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
-  test.setTimeout(360_000);
+  test.setTimeout(420_000);
 
   for (const theme of THEME_IDS) {
     await setTheme(page, theme);
@@ -114,6 +124,14 @@ test('@accessibility representative pages and visual states have no tagged viola
     await page.locator('[data-dimension-picker]').selectOption('3');
     await page.locator('[data-index-field="extent.x"]').fill('9');
     await expectNoAxeViolations(page, `${theme}: VIS02 out-of-bounds state`);
+
+    await page.goto('/en/visuals/page-migration/');
+    const migration = page.locator('cuda-page-migration[data-visual-id="VIS08"]');
+    await expect(migration).toHaveAttribute('data-ready', 'true');
+    await migration.locator('[data-page-migration-scenario]').selectOption('alternating-hot-page');
+    await migration.locator('[data-page-migration-action="step"]').click();
+    await expect(migration).toHaveAttribute('data-step-index', '1');
+    await expectNoAxeViolations(page, `${theme}: VIS08 alternating migration state`);
   }
 });
 

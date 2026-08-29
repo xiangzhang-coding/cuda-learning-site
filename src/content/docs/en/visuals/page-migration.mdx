@@ -1,0 +1,134 @@
+---
+title: 'Managed-Memory Page Migration'
+description: Distinguish a declared software-coherent page-residency model from measured managed-memory behavior by stepping through fixed CPU and GPU access sequences.
+pairId: vis08
+counterpart: /visuals/page-migration/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - declared-model
+  - transition-ledger
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS08
+prerequisites:
+  - M01
+  - M02
+  - M10
+relatedUnits:
+  - M10
+  - EX08
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Unified Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Unified Memory paradigms, software and hardware coherence, paging, placement, and migration boundaries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'cudaMallocManaged, cudaMemAdvise, cudaMemPrefetchAsync, and memory-range interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd'
+    version: 'CUDA C++ Programming Guide v12.9.1; archived'
+    platform: 'Archived managed-memory programming, page placement, and migration boundary'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 11.8 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd'
+    version: 'CUDA C++ Programming Guide v11.8.0; archived'
+    platform: 'Archived managed-memory programming, page placement, and migration boundary'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis08 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,declared-model,transition-ledger,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02,M10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M10,EX08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.1,11.8.0' }
+---
+
+import PageMigrationExplorer from '../../../../components/PageMigrationExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/page-migration/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+VIS08 helps a CUDA learner keep two statements separate: a teaching model can **declare** where each managed-memory page resides after a fixed access sequence, while a runtime claim needs observations from a stated environment. The visual is related to M10 and EX08 and requires the M01, M02, and M10 concepts listed in metadata.
+
+<PageMigrationExplorer locale="en" />
+
+## Controls
+
+Choose one of three reviewed scenarios with the native select. **Step access** applies exactly one fixed CPU or GPU access. **Reset sequence** restores the selected scenario's initial declarations and returns keyboard focus to the scenario select. There is no autoplay, scrubber, editable page size, or persisted state. Reloading starts again with `gpu-linear-sweep` at step zero.
+
+The model rejects an unknown scenario, malformed action, invalid step index, or step beyond the end without changing the previous state. The live status region names each accepted step or rejection. Native select and button behavior supplies keyboard operation without a custom key map.
+
+## Declared model
+
+The model explicitly chooses the **software-coherent** branch for a bounded lesson. At each model step, every teaching page has exactly one declared location, CPU or GPU. When an access origin differs from that declaration, the model changes the declaration to the access origin and increments a **modeled residency transition** count. A matching-origin access leaves the declaration unchanged.
+
+The declared page size is `65,536 B` (`64 KiB`). It is a teaching symbol, not a detected operating-system page, GPU page, transfer granularity, or promise that one runtime action moves exactly that amount. The symbolic byte expression is only:
+
+```text
+modeled transition count x declared page size
+```
+
+The fixed scenarios intentionally exclude hardware-coherent direct access, remote mappings, prefetch, memory advice, access-counter policy, oversubscription, multi-GPU placement, concurrent CPU/GPU access, and eviction. Those mechanisms can change real placement and access behavior, so this deliberately narrow rule must not be generalized into a platform-independent residency predictor.
+
+## Transition ledger
+
+The signature page-residency rail preserves deterministic page ID order. The transition ledger records access ID, CPU or GPU origin, read or write operation, residency before and after, whether the declaration changed, cumulative transition count, and cumulative symbolic bytes. All IDs, scenarios, access sequences, and tie-free ordering are fixed in source; the model uses no clock, randomness, storage, or device query.
+
+The rail and ledger answer only, "What does this declared model produce for this reviewed input?" They do not answer whether a CUDA run generated a fault, moved data, selected a transfer granularity, or incurred an elapsed duration.
+
+## Static fallback
+
+The server renders all three scenarios, not only the initially selected one. Each static card includes its initial-condition description, final residency rail, full four-row before/after ledger, transition total, and symbolic-byte expression. The same complete fallback remains visible without JavaScript, at a 390-pixel viewport, in forced colors, with reduced motion, and in print. Text labels carry CPU/GPU and changed/unchanged states without relying on color.
+
+Controls and the interactive workbench are hidden in source HTML. They become visible only after the light-DOM custom element finds every required native control and successfully derives the initial frame. If enhancement does not complete, the full static representation remains the lesson.
+
+## Evidence boundary
+
+VIS08 compiles and executes no CUDA. It obtains no Environment Manifest, profiler output, page-fault record, transfer record, residency query, byte count, or elapsed-time result. Its modeled transition count and symbolic bytes are not measured migration evidence and grant no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** Evidence Status. Compilation, runtime, expected-observation, and recorded-observation metadata are all empty.
+
+## Sources
+
+The current behavior boundary was checked against [CUDA Programming Guide v13.3 Unified Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html) and [CUDA Runtime API v13.3.1 Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html). The distinction among software-coherent paging, hardware-coherent access, advice, prefetch, and implementation-dependent page sizes is why VIS08 declares a narrow model rather than presenting its rail as a trace.
+
+Durable managed-memory terminology and the older programming boundary were compared with the exact [CUDA 12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd) and [CUDA 11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd). All source coordinates were accessed on **2026-08-29**. No NVIDIA diagram, table, example, or prose is copied; the residency rail, scenarios, model, controls, ledger, fallback, and explanations are original CC-BY-4.0 teaching material.

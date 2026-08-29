@@ -1,0 +1,254 @@
+---
+title: 'M10：统一内存与页面迁移'
+description: 建模 managed-memory accessibility、residency、possible page migration 与 migration cost，不假设每个 CUDA system 都会 fault-migrate data，也不把 browser model 当成 runtime evidence。
+pairId: m10
+counterpart: /en/memory/unified-memory-page-migration/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - managed-memory
+  - accessibility-residency
+  - access-sequence
+  - page-migration-cost
+  - prefetch-advice
+  - system-variation
+  - canonical-example
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M10
+prerequisites:
+  - M01
+  - M02
+relatedUnits:
+  - M09
+  - VIS08
+exampleIds:
+  - EX08
+canonicalExample: EX08
+canonicalRanges:
+  - access-sequence
+  - managed-workload
+hardwareGate: 'None for static modeling; runtime migration claims require native Linux, a CUDA GPU with managed-memory support, and an Environment Manifest recording the applicable memory paradigm'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Unified and System Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current unified-memory paradigms, managed allocation, placement, and prefetch overview'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Unified Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current paging, migration, hardware-coherency, direct-access, and performance-hint model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current managed allocation, advice, prefetch, range-query, and release interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current unified-memory capability query interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#unified-memory-programming'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 managed-memory, migration, and advice contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 managed-memory interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 unified-memory capability queries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#unified-memory-programming'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 managed-memory, migration, and advice contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 managed-memory interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 unified-memory capability queries'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m10 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,managed-memory,accessibility-residency,access-sequence,page-migration-cost,prefetch-advice,system-variation,canonical-example,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M09,VIS08' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX08 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX08 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'access-sequence,managed-workload' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None for static modeling; runtime migration claims require native Linux, a CUDA GPU with managed-memory support, and an Environment Manifest recording the applicable memory paradigm' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/unified-memory-page-migration/" lang="en">Read the English counterpart</a>
+
+统一内存（Unified Memory）让 CPU/GPU code 都能寻址托管内存（managed memory），但同一个 pointer 不等于同一 physical memory、zero movement 或免费的 concurrent sharing。页面迁移（page migration）只是 system 改变 locality 的一种可能方式。驻留位置（residency）、accessibility、migration、remote access 与 coherence 必须分开记录；其 behavior 取决于 operating system、driver、device 与 interconnect。
+
+## 学完本单元，你应该能
+
+- 说明 `cudaMallocManaged` allocation 的 owner、lifetime 与 access contract。
+- 区分 legal accessibility 与 current/inferred residency。
+- 用 conditional migration、remote-access 与 no-migration branches 跟踪 page access sequence。
+- 建模 fault/data movement 的 possible cost，不填写虚构 duration 或 migration count。
+- 把 `cudaMemAdvise`、prefetch 与 VIS08 视为 guidance/model，而不是 runtime placement proof。
+
+## 先修关系
+
+先完成 [M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)，再完成 [M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)。M01 提供 allocation ownership、valid accessors、last use 与 matching release；M02 提供先固定 access set 再推理 movement 的纪律，但它的 32-byte transaction model 不能与 page-level placement 混为一谈。
+
+M10 与 [M09：页锁定内存与传输重叠](/memory/pinned-memory-transfer-overlap/)相关，但 managed access 不是 M09 explicit-copy pipeline 的 implicit version。M10 询问 touched data 可以从哪里得到服务，以及 movement 可能付出什么成本；它不声明 migration 或 direct access 更快。
+
+## Managed memory 是 allocation contract
+
+`cudaMallocManaged` 创建由 Unified Memory system 管理的 allocation；所有 users 完成后用 `cudaFree` 释放。CPU/GPU code 可以在适用 system contract 下使用 managed pointer。Allocation 仍有单一 owner、有限 lifetime、data dependencies 与 synchronization requirements。
+
+“两个 processor 都能访问”不表示 CPU/GPU 可以对这些 bytes 发生 race，不表示两者 access 同样 local，也不表示没有 transfer。Kernel launch 仍是 asynchronous，所以 host 在读取 GPU-produced values 前要建立 completion boundary，除非 documented concurrent-access/synchronization design 明确允许其他做法。Unified Memory 减少一部分 explicit copy bookkeeping，但不会删除 correctness bookkeeping。
+
+## Accessibility 不是 residency
+
+Accessibility 回答 processor 是否可以合法 address managed range；residency 描述 stated time 上 physical backing 在哪里 local。一个稳定 virtual address 可以对应 CPU-memory-resident pages、GPU-memory-resident pages，或依 system 而通过 coherent/remote mapping 访问的数据。
+
+在 software-coherent full-support system 上，访问 local 于另一 processor 的 page 可能 fault 并触发 migration。在 hardware-coherent system 上，processor 可能无需移动 page 就 remote access。Limited-support system 可以在更粗的 execution boundaries 移动 managed data。这些是 conditional branches，不是每个 allocation 都依次经历的三阶段。
+
+Source pointer 与 allocation API 建立 accessibility/ownership facts，但不会显示 execution 中每个 page 的 physical locality。
+
+## 跟踪 access sequence，不写 universal migration story
+
+从 symbolic pages 与 unknown residency state 开始。考虑以下 ordered workload：
+
+```text
+CPU writes pages A and B
+completion/order edge
+GPU reads B and C, then writes C
+GPU completion edge
+CPU reads C
+```
+
+对每次 access，记录 accessor、touched pages、required synchronization、prior known state 与 permitted system behaviors。在 software-coherent fault-and-migrate model 下，GPU access B 可能迁移 host-local page，之后 CPU read C 可能把 device-local page 迁回。在 hardware coherence 或 documented direct access 下，两次 access 都可能无需 migration 得到服务。在 limited model 下，movement 可能发生在 launch/synchronization，而不是每个 first GPU touch。
+
+因此，只有 locality/capability premises 支持时，ledger 才写 “migration candidate”。它不能把 browser colored page 或 source access order 变成 recorded migration。
+
+## 有条件地建模 page-migration cost
+
+Page migration 发生时，其工作可以包括 fault detection/service、mapping/ownership updates、coherence actions 与 backing-data movement。Transfer granularity 可以大于触发 access 的少量 bytes，所以在 fault-and-migrate system 上交替由 CPU/GPU 写同一组 pages，可能造成 repeated movement 或 thrashing。
+
+使用 symbolic cost decomposition：
+
+```text
+access episode = useful memory access
+               + possible fault/coherence work
+               + possible data movement
+```
+
+每个 “possible” term 都必须先取得 Environment Manifest 与 runtime evidence，之后才能成为 observation。Page size、migration granularity、remote-access policy、caching 与 interconnect 都会变化。M02 segment count 不能预测 page fault 或 migrated bytes。
+
+## Prefetch 与 advice 不是 placement proof
+
+`cudaMemPrefetchAsync` 使用 stream ordering 请求把 range 向 declared location prefetch。Consuming work 应位于该 operation 之后的同一 stream，或通过 documented event edge 连接。该 call 可以把工作提前，也可能在 suitable system 上减少 demand fault，但它有成本，而且不承诺 range 永久驻留在那里。
+
+`cudaMemAdvise` 传达 preferred location、read-mostly behavior、expected access 等 usage hints。Hint 可能帮助或损害真实 pattern/platform。Advice/prefetch 都不能替代 synchronization、output verification，或对 actual fault、movement、residency behavior 的 measurement。
+
+On-demand、advised 与 prefetched modes 必须共用一个 correctness oracle。只有记录 selected Toolkit API contract、destination semantics、capability attributes 与 run evidence 后才能比较。
+
+## 必须记录适用的 system model
+
+Current owner documentation 区分 explicit managed allocation full support、all-allocation software-coherent full support、all-allocation hardware-coherent full support 与 limited support。Native Linux 是本站唯一受支持环境（Supported Environment），但 Native Linux systems 仍会因 kernel、driver、GPU 与 interconnect 而不同。
+
+至少记录 selected device，以及 `cudaDevAttrConcurrentManagedAccess`、`cudaDevAttrPageableMemoryAccess`、`cudaDevAttrPageableMemoryAccessUsesHostPageTables` 的结果。Host-direct-access claim 依赖时，还要记录 `cudaDevAttrDirectManagedMemAccessFromHost`。同时加入 operating-system/kernel versions、driver、Toolkit Lane、CPU-GPU topology、allocation API、access sequence 与 synchronization boundaries。
+
+这些 facts 选择 permissible model，但不提供 migration timeline，也不保证 particular page 确实移动。
+
+## Canonical Runnable Example：EX08
+
+EX08 是本单元的 canonical implementation。`access-sequence` range 声明 CPU/GPU order 与 correctness boundaries；`managed-workload` range 负责 managed allocation、optional advice/prefetch modes、kernel work、host verification 与 release。它对跨 system 的 migration behavior 保留 conditional wording。
+
+[在临时固定提交中查看完整 EX08 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex08-unified-memory-migration)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/6f7c2339f5eb9997298cf8590755a6a7debbdaf9.zip)。Standalone project 是唯一 canonical implementation；本页按 contract 顺序导入两个 declared ranges。
+
+<CanonicalCode exampleId="EX08" range="access-sequence" />
+
+<CanonicalCode exampleId="EX08" range="managed-workload" />
+
+## 可视化模型：VIS08
+
+[VIS08：Page Migration](/visuals/page-migration/)应使用 explicit system-model branches 与 textual fallback 展示同一 access-origin/page-sequence ledger。Page colors 是 deterministic teaching state，不是 queried residency。Browser execution 既不会 fault CUDA pages，也不会观察 migration。
+
+## 证据边界
+
+Access ledgers、symbolic costs、canonical excerpts、Visual Explainer 与练习都是 static artifacts。本学习单元的 compilation、runtime、expected-observation 与 recorded-observation axes 保持为空。它不报告 page-fault count、migrated byte count、residence history、duration、bandwidth 或 speedup。
+
+## 离开前检查
+
+1. `cudaMallocManaged` 对 ownership、accessibility、lifetime 与 release 建立哪些事实？
+2. 为什么一个 stable pointer 可以同时让 CPU/GPU access，却不能证明每个 page 驻留在哪里？
+3. 哪些 system branches 可以用 migration、remote access 或 coarser movement 服务 cross-processor access？
+4. Migration episode 可能包含哪些成本？为什么 M02 的 32-byte segment model 不能预测这些成本？
+5. 为什么 prefetch、advice 与 VIS08 都不能证明 page 确实迁移或持续驻留？
+
+## 继续练习
+
+- 完成 [M10 练习（Exercise）](/memory/unified-memory-page-migration/exercises/)，再查看独立的[参考解答](/memory/unified-memory-page-migration/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-002](/practice/#pb-r2-002)复核一项 unconditional migration claim。
+- 结合 [VIS08](/visuals/page-migration/)复习 [TERM-099：managed memory](/glossary/#term-099)、[TERM-100：page migration](/glossary/#term-100)与 [TERM-101：residency](/glossary/#term-101)。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Unified and System Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html)定义 current paradigms、managed allocation、placement 与 prefetch concepts。
+- [CUDA Programming Guide v13.3：Unified Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html)定义 current paging、migration、hardware-coherence、direct-access 与 performance-hint behavior。
+- [CUDA Runtime API v13.3.1：Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)提供 current managed allocation、advice、prefetch、range-query 与 release interfaces；[Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html)提供 capability queries。
+- [CUDA C++ Programming Guide 12.9.1：Unified Memory Programming](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#unified-memory-programming)、[Runtime Memory Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html)与 [Runtime Device Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__DEVICE.html)保留 12.9.1 contracts。
+- [CUDA C Programming Guide 11.8：Unified Memory Programming](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#unified-memory-programming)、[Runtime Memory Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html)与 [Runtime Device Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html)保留 11.8 contracts。
+
+十项 owner source 均访问于 **2026-08-29**。Conditional residency ledger、symbolic cost model、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-29。**

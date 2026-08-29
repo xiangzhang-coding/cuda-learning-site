@@ -1,0 +1,267 @@
+---
+title: 'EX09：CUDA Graph Capture 可运行示例'
+description: 通过固定的双节点 DAG、全局 stream capture、三次 executable graph launch 和独立纯 host oracle，验证确定性 CUDA Graph replay。
+pairId: ex09
+counterpart: /en/examples/graph-capture/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - workload-contract
+  - graph-contract
+  - captured-replay
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX09
+prerequisites:
+  - M14
+relatedUnits:
+  - M07
+  - M08
+exampleIds:
+  - EX09
+canonicalExample: EX09
+canonicalRanges:
+  - graph-contract
+  - captured-replay
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with 64 bytes of declared device-buffer allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The executable should report PASS only when all eight device results exactly match the independent pure-host oracle after three executable-graph launches.
+    - Stream capture should produce a graph whose accumulate-input kernel precedes its affine-transform kernel, preserving the fixed two-node topological contract on every launch.
+    - Starting from zero state with input values 1 through 8, three replay iterations should produce the complete result 21, 35, 49, 63, 77, 91, 105, 119.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'CUDA Graphs and stream capture'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'cudaStreamBeginCapture and cudaStreamEndCapture'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - High Level API'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__HIGHLEVEL.html'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'cudaGraphInstantiate and executable graph lifecycle'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex09
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-29'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,workload-contract,graph-contract,captured-replay,host-model,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX09
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: M14
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'M07,M08'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX09
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX09
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'graph-contract,captured-replay'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with 64 bytes of declared device-buffer allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '9'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/graph-capture/" lang="en">Read the English counterpart</a>
+
+EX09 是一个独立、原创的 CUDA Graph Capture 可运行示例（Runnable Example）。它在 nonblocking stream 上捕获固定的双 kernel 工作负载，实例化 executable graph，launch 三次，并在明确的 observation boundary 后逐项核对独立纯 host oracle。网站不会执行 CUDA；项目不报告 timing、launch overhead 或 speedup。
+
+## 用途
+
+先完成 M14；这是 EX09 唯一的先修条件。M07 与 M08 提供相关的 stream ordering 和 asynchronous execution 背景，但不是额外先修条件。EX09 聚焦 capture、instantiate、launch、completion 与 cleanup 的生命周期，而不是性能比较。
+
+## 获取 canonical project
+
+[在固定提交中查看完整 EX09 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex09-graph-capture)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/6f7c2339f5eb9997298cf8590755a6a7debbdaf9.zip)。解压后进入 `examples/ex09-graph-capture/`。
+
+`project.json` 声明 build inputs、两个 canonical range、固定 DAG、三次 replay、64-byte device-buffer 上界、Toolkit Lanes 与空证据轴。实现、host model、测试和页面文字均为原创，不是从 NVIDIA sample 改写而来；软件文件使用 Apache-2.0。
+
+## 工作负载合同
+
+项目固定八个 `std::uint32_t` 元素。Input 为 `input[index] = index + 1`，state 初始为零。每次 graph launch 按顺序运行两个 node：`accumulate-input` 先执行 `state[index] += input[index]`，`affine-transform` 再执行 `state[index] = 2 * state[index] + 1`。
+
+因此一次完整迭代等价于 `state[index] = 2 * (state[index] + input[index]) + 1`。三次迭代后的 literal expected result 是 `21, 35, 49, 63, 77, 91, 105, 119`。这个列表由 host test 直接核对，不从 CUDA output 反推。
+
+## Graph 合同
+
+纯 C++17 header 明确声明两个 node、一条 directed edge 与唯一合法的 topological order，然后独立验证这个合同：
+
+<CanonicalCode exampleId="EX09" range="graph-contract" />
+
+Validator 在接受拓扑顺序前检查 known node set、重复 node、edge endpoint、self-edge、duplicate edge、size 和每条 edge 的相对位置。Cycle 不可能满足所有 `from` 先于 `to` 的约束，因此会被拒绝。Oracle 先验证 exact buffer size 与 iteration range，再在本地临时 state 中计算，只有成功时才写 output。
+
+## Capture 与 replay
+
+CUDA source 创建两个 device buffer 和一个 `cudaStreamNonBlocking` stream。初始数据准备完成后，以下 canonical range 包含 capture、instantiation、三次 launch、显式 completion boundary、完整回传验证与有序 cleanup：
+
+<CanonicalCode exampleId="EX09" range="captured-replay" />
+
+`cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal)` 与 `cudaStreamEndCapture` 只括住两个 kernel launch；每次 launch 后立即检查 `cudaGetLastError()`。`cudaGraphInstantiate(&graph_exec, graph, nullptr, nullptr, 0U)` 使用三条 Lane 都能编译的 CUDA 11.8 五参数签名。
+
+三个 `cudaGraphLaunch` 被提交到同一个 stream。`cudaStreamSynchronize(stream)` 是明确的 observation boundary；只有它成功后，程序才回传全部八个值并与 host oracle 精确比较。`graphExec`、`graph`、stream 和 buffers 都在完成与验证之后销毁，所有 CUDA Runtime call 都检查返回值。
+
+## Host model 边界
+
+`make host-test` 只编译 `tests/host_reference_test.cpp` 与 pure C++17 header。它验证固定 DAG，显式拒绝 cycle、unknown endpoint、self-edge、duplicate edge、逆序 topology 和错误 size；还检查 invalid size/iteration 不改写 destination、三次 host recurrence 的 literal result，以及 deterministic mismatch index。
+
+这个 host test 无法证明 stream capture、CUDA graph 实例化或执行、executable graph replay 或性能。它不包含 CUDA header，不创建 graph，也不 launch kernel；通过测试不会授予 CUDA Evidence Status。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+前四步需要所选 CUDA Toolkit，host-test 只需要 host C++17 compiler。CUDA stages 生成 `build/graph_capture.ii`、`build/graph_capture.o` 和 `build/ex09-graph-capture`。Inspect 检查 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。
+
+`scripts/compile-check.sh c++17 ex09 <result-dir>` 执行这些步骤并保留经过扫描的日志与 inspection artifacts。它绝不运行 `build/ex09-graph-capture`，因此成功的 build gate 不会产生 graph runtime observation。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 两个八元素 `std::uint32_t` device buffer，共 64 bytes，远低于 8 GB |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Toolkit Lane 共用同一份原创 C++17 source 与 CUDA 11.8-compatible graph instantiation call |
+
+三条 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 和 CUDA 13.3.1。固定 digest image 是未来构建目标，不是 compilation record。
+
+## 编译与运行证据
+
+EX09 的 compilation array 为空，因此 **EX09 不是 Compile-Checked**。Runtime 是 **Pending Hardware Verification**，recorded observations 为空。host-test 的通过结果不会填充 compilation 或 runtime axis。
+
+本页不声明 GPU output、capture success、graph shape observation、replay result、timing、launch overhead、latency、throughput、profiler result 或 speedup。未来 runtime record 必须标明 Reference Environment，附完整环境清单（Environment Manifest），保留固定 DAG 与三次 launch identity，并先满足全部 exact output 验收条件。
+
+## 预期观察，不是运行记录
+
+1. Executable 应只在三次 graph launch 后的八个 device result 全部精确匹配独立纯 host oracle 时报告 `PASS`。
+2. Stream capture 应产生 `accumulate-input` 先于 `affine-transform` 的 graph，并在每次 launch 中保持固定双节点 topological contract。
+3. 从 zero state 与 input 1 到 8 开始，三次 replay iteration 应产生完整结果 `21, 35, 49, 63, 77, 91, 105, 119`。
+
+这些是尚未由 Learning Site 观察的正确性与 ordering 验收条件，不包含性能判断。
+
+## 来源与复核
+
+CUDA Programming Guide 提供 stream capture 与 CUDA Graph 生命周期。CUDA 11.8 Runtime API 坐标用于核对 begin/end capture 与五参数 instantiate 合同。三条 NVCC 文档和三个 Docker Hub tag API 对应精确 Toolkit Lane 与 digest-pinned container metadata；它们都不构成 EX09 build 或 runtime evidence。
+
+- [CUDA Programming Guide v13.3 - CUDA Graphs](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html)
+- [CUDA Runtime API 11.8.0 - Stream Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__STREAM.html)
+- [CUDA Runtime API 11.8.0 - High Level API](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__HIGHLEVEL.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-29。**

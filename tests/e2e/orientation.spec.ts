@@ -6,11 +6,11 @@ import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/bro
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 test('all published routes load without browser errors', async ({ page }) => {
-  test.setTimeout(210_000);
+  test.setTimeout(270_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(218);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(109);
+  expect(routes).toHaveLength(262);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(131);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -21,7 +21,7 @@ test('all published routes load without browser errors', async ({ page }) => {
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
-  test.setTimeout(120_000);
+  test.setTimeout(150_000);
   for (const { zh, en } of [
     { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
@@ -60,6 +60,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/memory/event-dependencies-timing/', en: '/en/memory/event-dependencies-timing/' },
     { zh: '/memory/event-dependencies-timing/exercises/', en: '/en/memory/event-dependencies-timing/exercises/' },
     { zh: '/memory/event-dependencies-timing/solutions/', en: '/en/memory/event-dependencies-timing/solutions/' },
+    { zh: '/memory/pinned-memory-transfer-overlap/', en: '/en/memory/pinned-memory-transfer-overlap/' },
+    { zh: '/memory/unified-memory-page-migration/', en: '/en/memory/unified-memory-page-migration/' },
+    { zh: '/memory/stream-ordered-allocation-memory-pools/', en: '/en/memory/stream-ordered-allocation-memory-pools/' },
+    { zh: '/memory/cooperative-groups/', en: '/en/memory/cooperative-groups/' },
+    { zh: '/memory/asynchronous-copy-pipelines/', en: '/en/memory/asynchronous-copy-pipelines/' },
+    { zh: '/memory/cuda-graphs/', en: '/en/memory/cuda-graphs/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -77,6 +83,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
     { zh: '/examples/coalesced-strided-access/', en: '/en/examples/coalesced-strided-access/' },
     { zh: '/examples/shared-memory-tile-bank-padding/', en: '/en/examples/shared-memory-tile-bank-padding/' },
+    { zh: '/examples/streams-events-overlap/', en: '/en/examples/streams-events-overlap/' },
+    { zh: '/examples/unified-memory-migration/', en: '/en/examples/unified-memory-migration/' },
+    { zh: '/examples/graph-capture/', en: '/en/examples/graph-capture/' },
     { zh: '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
@@ -92,6 +101,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/visuals/shared-memory-banks/', en: '/en/visuals/shared-memory-banks/' },
     { zh: '/visuals/memory-hierarchy-lifetime/', en: '/en/visuals/memory-hierarchy-lifetime/' },
     { zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
+    { zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
     { zh: '/practice/', en: '/en/practice/' },
     { zh: '/glossary/', en: '/en/glossary/' },
     { zh: '/sources-and-versions/', en: '/en/sources-and-versions/' },
@@ -110,7 +120,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   for (const scenario of [
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/', expectedHrefs: ['/start/environment-manifest/', '/labs/record-cuda-environment/', '/practice/', '/glossary/'] },
@@ -134,6 +144,11 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: '可复现命令记录', localePrefix: '/', expectedHrefs: ['/start/linux-command-line/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '基准环境候选配置', localePrefix: '/', expectedHrefs: ['/start/reference-environment-candidate/', '/labs/record-cuda-environment/'] },
     { route: '/', button: /搜索/, query: 'TERM-034 容差', localePrefix: '/', expectedHrefs: ['/glossary/'] },
+    { route: '/', button: /搜索/, query: 'M09 页锁定内存与传输重叠', localePrefix: '/', expectedHrefs: ['/memory/pinned-memory-transfer-overlap/'] },
+    { route: '/', button: /搜索/, query: 'M11 流顺序分配与内存池', localePrefix: '/', expectedHrefs: ['/memory/stream-ordered-allocation-memory-pools/'] },
+    { route: '/', button: /搜索/, query: 'M13 异步复制与分阶段流水线', localePrefix: '/', expectedHrefs: ['/memory/asynchronous-copy-pipelines/'] },
+    { route: '/', button: /搜索/, query: 'EX08 统一内存迁移可运行示例', localePrefix: '/', expectedHrefs: ['/examples/unified-memory-migration/'] },
+    { route: '/', button: /搜索/, query: 'VIS08 托管内存页面迁移', localePrefix: '/', expectedHrefs: ['/visuals/page-migration/'] },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Recording Evidence Honestly', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/'] },
     { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/', expectedHrefs: ['/en/visuals/indexing/'] },
@@ -156,6 +171,11 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'arithmetic intensity occupancy', localePrefix: '/en/', expectedHrefs: ['/en/start/architecture-refresher/', '/en/start/architecture-refresher/exercises/', '/en/start/architecture-refresher/solutions/'] },
     { route: '/en/', button: /Search/, query: 'Environment Report Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/environment-report/'] },
     { route: '/en/', button: /Search/, query: 'SRC-WEB-003 Pagefind 1.5.2', localePrefix: '/en/', expectedHrefs: ['/en/sources-and-versions/'] },
+    { route: '/en/', button: /Search/, query: 'M10 Unified Memory and Page Migration', localePrefix: '/en/', expectedHrefs: ['/en/memory/unified-memory-page-migration/'] },
+    { route: '/en/', button: /Search/, query: 'M12 Cooperative Groups and Composable Synchronization', localePrefix: '/en/', expectedHrefs: ['/en/memory/cooperative-groups/'] },
+    { route: '/en/', button: /Search/, query: 'M14 CUDA Graphs and Repeated Launch Structure', localePrefix: '/en/', expectedHrefs: ['/en/memory/cuda-graphs/'] },
+    { route: '/en/', button: /Search/, query: 'EX07 Streams Events Overlap Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/streams-events-overlap/'] },
+    { route: '/en/', button: /Search/, query: 'EX09 CUDA Graph Capture Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/graph-capture/'] },
   ]) {
     await expectRankedSearchResult(page, scenario);
   }
@@ -175,7 +195,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  test.setTimeout(120_000);
+  test.setTimeout(150_000);
   for (const route of [
     '/',
     '/en/',
@@ -249,6 +269,18 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/memory/event-dependencies-timing/exercises/',
     '/memory/event-dependencies-timing/solutions/',
     '/en/memory/event-dependencies-timing/solutions/',
+    '/memory/pinned-memory-transfer-overlap/',
+    '/en/memory/pinned-memory-transfer-overlap/',
+    '/memory/unified-memory-page-migration/',
+    '/en/memory/unified-memory-page-migration/',
+    '/memory/stream-ordered-allocation-memory-pools/',
+    '/en/memory/stream-ordered-allocation-memory-pools/',
+    '/memory/cooperative-groups/',
+    '/en/memory/cooperative-groups/',
+    '/memory/asynchronous-copy-pipelines/',
+    '/en/memory/asynchronous-copy-pipelines/',
+    '/memory/cuda-graphs/',
+    '/en/memory/cuda-graphs/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
     '/correctness/cpu-references-tolerances-invariants/exercises/',
@@ -283,6 +315,12 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/examples/coalesced-strided-access/',
     '/examples/shared-memory-tile-bank-padding/',
     '/en/examples/shared-memory-tile-bank-padding/',
+    '/examples/streams-events-overlap/',
+    '/en/examples/streams-events-overlap/',
+    '/examples/unified-memory-migration/',
+    '/en/examples/unified-memory-migration/',
+    '/examples/graph-capture/',
+    '/en/examples/graph-capture/',
     '/examples/sanitizer-defect-suite/',
     '/en/examples/sanitizer-defect-suite/',
     '/labs/',
@@ -313,6 +351,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/visuals/memory-hierarchy-lifetime/',
     '/visuals/stream-event-dependencies/',
     '/en/visuals/stream-event-dependencies/',
+    '/visuals/page-migration/',
+    '/en/visuals/page-migration/',
     '/practice/',
     '/en/practice/',
     '/glossary/',

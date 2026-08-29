@@ -1,0 +1,140 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX08",
+  "title": "Unified Memory Migration",
+  "purpose": "Execute a phased managed-memory workload and report capabilities while correctness remains independent of migration observation.",
+  "root": "examples/ex08-unified-memory-migration",
+  "sourceCommit": "6f7c2339f5eb9997298cf8590755a6a7debbdaf9",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex08-unified-memory-migration",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/6f7c2339f5eb9997298cf8590755a6a7debbdaf9.zip",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/unified_memory_migration_reference.hpp",
+      "src/unified_memory_migration.cu"
+    ],
+    "hostTestInputs": [
+      "include/unified_memory_migration_reference.hpp",
+      "tests/host_reference_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link",
+      "inspect"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/unified_memory_migration.ii",
+      "build/unified_memory_migration.o",
+      "build/ex08-unified-memory-migration"
+    ]
+  },
+  "correctness": {
+    "cpuReference": "include/unified_memory_migration_reference.hpp",
+    "pageBytes": 4096,
+    "pageCount": 16,
+    "elementCount": 16384,
+    "accessCount": 48,
+    "phases": [
+      {
+        "id": "host-initialize",
+        "origin": "host"
+      },
+      {
+        "id": "device-transform",
+        "origin": "device"
+      },
+      {
+        "id": "host-verify",
+        "origin": "host"
+      }
+    ],
+    "transformRule": "output[index] = input[index] XOR 0x5a5a5a5a",
+    "softwareTransitionCount": 32,
+    "softwareMovedPagesProxy": 32,
+    "softwareMovedBytesProxy": 131072
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "maximumProblemMemoryBytes": 65536,
+    "target": [
+      "sm_75",
+      "compute_75"
+    ],
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "access-sequence": {
+      "file": "include/unified_memory_migration_reference.hpp",
+      "startMarker": "// [ex08-access-sequence-start]",
+      "endMarker": "// [ex08-access-sequence-end]",
+      "language": "cpp"
+    },
+    "managed-workload": {
+      "file": "src/unified_memory_migration.cu",
+      "startMarker": "// [ex08-managed-workload-start]",
+      "endMarker": "// [ex08-managed-workload-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "The managed workload should report PASS only when all 16,384 values exactly match the complete pure host oracle after explicit CUDA completion.",
+      "managedMemory and concurrentManagedAccess should be reported only as device capabilities, while advice and prefetch calls remain optional guarded requests rather than observations of movement.",
+      "The declared software access sequence should derive 32 transitions, 32 moved-page units, and 131,072 moved-byte units as a cost proxy only, independent of runtime residency, faults, or migration."
+    ],
+    "recordedObservations": []
+  }
+}

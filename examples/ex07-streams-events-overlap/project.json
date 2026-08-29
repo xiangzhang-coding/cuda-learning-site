@@ -1,0 +1,130 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX07",
+  "title": "Streams, Events, and Overlap",
+  "purpose": "Compare serial and chunked stream/event structures for the same transform while proving correctness only, never timing or overlap.",
+  "root": "examples/ex07-streams-events-overlap",
+  "sourceCommit": "6f7c2339f5eb9997298cf8590755a6a7debbdaf9",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/6f7c2339f5eb9997298cf8590755a6a7debbdaf9/examples/ex07-streams-events-overlap",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/6f7c2339f5eb9997298cf8590755a6a7debbdaf9.zip",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/streams_events_overlap_reference.hpp",
+      "src/streams_events_overlap.cu"
+    ],
+    "hostTestInputs": [
+      "include/streams_events_overlap_reference.hpp",
+      "tests/host_reference_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link",
+      "inspect"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/streams_events_overlap.ii",
+      "build/streams_events_overlap.o",
+      "build/ex07-streams-events-overlap"
+    ]
+  },
+  "correctness": {
+    "cpuReference": "include/streams_events_overlap_reference.hpp",
+    "elementCount": 4099,
+    "chunkElements": 1024,
+    "chunkCount": 5,
+    "lastChunkElements": 3,
+    "chunkStreamCount": 2,
+    "paths": [
+      "serial",
+      "chunked"
+    ],
+    "transformRule": "output[index] = input[index] * 3 + 7",
+    "pageLockedHostMemoryBytes": 49188,
+    "maximumDeviceMemoryBytes": 49176
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "maximumProblemMemoryBytes": 49176,
+    "target": [
+      "sm_75",
+      "compute_75"
+    ],
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "chunk-contract": {
+      "file": "include/streams_events_overlap_reference.hpp",
+      "startMarker": "// [ex07-chunk-contract-start]",
+      "endMarker": "// [ex07-chunk-contract-end]",
+      "language": "cpp"
+    },
+    "stream-pipeline": {
+      "file": "src/streams_events_overlap.cu",
+      "startMarker": "// [ex07-stream-pipeline-start]",
+      "endMarker": "// [ex07-stream-pipeline-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "The serial and chunked paths should each report PASS only when all 4,099 outputs exactly match the pure host reference.",
+      "The pure host contract should partition 4,099 elements into four 1,024-element chunks followed by one 3-element chunk without gaps or overlap.",
+      "deviceOverlap and asyncEngineCount should be reported only as device capabilities; the program should make no claim that copy, kernel, or stream work overlapped."
+    ],
+    "recordedObservations": []
+  }
+}

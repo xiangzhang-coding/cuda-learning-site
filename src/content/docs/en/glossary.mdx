@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: Ninety-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred fourteen published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-28'
+factCheckDate: '2026-08-29'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-28'
+      content: '2026-08-29'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -903,6 +903,177 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/), [LAB04](/en/labs/observe-coalescing/), and [LAB05](/en/labs/remove-shared-memory-bank-conflicts/).
 - **Version note:** No CUDA API selects a statistic automatically. It must bind to a frozen workload, measurement method, sample-retention rule, raw samples, and observation coordinates.
 
+<span id="term-096" class="resource-target" aria-hidden="true"></span>
+
+### page-locked host memory · 页锁定主机内存
+
+- **Definition:** A host range created by a CUDA host-allocation API or locked by a registration API so the operating system cannot page out or relocate its physical storage while CUDA uses it. The allocation path releases with `cudaFreeHost`; the registration path uses `cudaHostUnregister` after the last asynchronous use, then the original allocator's release.
+- **Avoid:** Automatically device-resident memory, transfer already in flight, proof of transfer overlap, unlimited host resource.
+- **Related resources:** [M09: Pinned Memory and Transfer Overlap](/en/memory/pinned-memory-transfer-overlap/) and [EX07](/en/examples/streams-events-overlap/).
+- **Version note:** Programming Guide v13.3, Runtime API v13.3.1, and the 12.9.1/11.8.0 archives retain the allocation-versus-registration and matching-release distinction. Pinning establishes storage eligibility only; it observes no overlap.
+
+<span id="term-097" class="resource-target" aria-hidden="true"></span>
+
+### transfer overlap · 传输重叠
+
+- **Definition:** A runtime observation in a named run that a data-transfer execution interval actually intersects another transfer or compute interval.
+- **Avoid:** Unordered operations, overlap eligibility, copy-engine capability, two streams, source graph, browser animation.
+- **Related resources:** [M09](/en/memory/pinned-memory-transfer-overlap/), [Q05](/en/correctness/timing-asynchronous-gpu-work/), and [EX07](/en/examples/streams-events-overlap/).
+- **Version note:** Page-locked ranges, asynchronous APIs, a dependency graph, and device capability only open an eligibility gate. An exact-run device timeline and Environment Manifest support an observation, which still does not automatically prove speedup.
+
+<span id="term-098" class="resource-target" aria-hidden="true"></span>
+
+### copy engine · 复制引擎
+
+- **Definition:** A hardware resource on a CUDA-capable device that may execute data movement independently of SM compute. Its available count and directions are capabilities of the selected device and path.
+- **Avoid:** Fixed DMA lane used by every `cudaMemcpy*`, transfer-overlap observation, synonym for a stream.
+- **Related resources:** [M09](/en/memory/pinned-memory-transfer-overlap/) and [EX07](/en/examples/streams-events-overlap/).
+- **Version note:** Runtime device properties can report asynchronous-engine capability, but API spelling and a nonzero value prove neither copy-engine use by one operation nor overlap with a kernel. Exact-run observation is required.
+
+<span id="term-099" class="resource-target" aria-hidden="true"></span>
+
+### managed memory · 托管内存
+
+- **Definition:** An allocation managed by the CUDA Unified Memory system and addressable by CPU and GPU code under the applicable system contract. It still has an owner, finite lifetime, data dependencies, synchronization, and a matching release.
+- **Avoid:** One physical memory, zero data movement, unsynchronized concurrent CPU/GPU access, automatically fastest memory.
+- **Related resources:** [M10: Unified Memory and Page Migration](/en/memory/unified-memory-page-migration/), [VIS08](/en/visuals/page-migration/), and [EX08](/en/examples/unified-memory-migration/).
+- **Version note:** Programming Guide v13.3, Runtime API v13.3.1, and the 12.9.1/11.8.0 archives define multiple support and coherence paradigms. A stable pointer from `cudaMallocManaged` does not promise stable physical locality.
+
+<span id="term-100" class="resource-target" aria-hidden="true"></span>
+
+### page migration · 页面迁移
+
+- **Definition:** A conditional runtime action, under a system model that supports it, to change processor locality for a managed backing range. It can include fault service, mapping or ownership updates, coherence actions, and data movement.
+- **Avoid:** Mandatory stage of every managed access, prefetch call, browser page transition, M02 memory transaction.
+- **Related resources:** [M10](/en/memory/unified-memory-page-migration/), [VIS08](/en/visuals/page-migration/), and [EX08](/en/examples/unified-memory-migration/).
+- **Version note:** Software-coherent fault-and-migrate, hardware-coherent or direct access, and limited coarse movement branch by exact environment. Source order, advice, and a model supply no migration-count, byte, or timing evidence.
+
+<span id="term-101" class="resource-target" aria-hidden="true"></span>
+
+### residency · 驻留位置
+
+- **Definition:** The state of which processor or local memory has local physical backing for a declared range at a stated time. It can coexist with a stable virtual address and multi-processor accessibility.
+- **Avoid:** Accessibility, ownership, virtual address, permanent placement, runtime fact inferred from page color.
+- **Related resources:** [M10](/en/memory/unified-memory-page-migration/), [VIS08](/en/visuals/page-migration/), and [EX08](/en/examples/unified-memory-migration/).
+- **Version note:** A residency claim binds to a range, time, OS and kernel, driver, device and interconnect, capability model, and observation method. Prefetch and advice affect a request or hint, not a permanent-residency guarantee.
+
+<span id="term-102" class="resource-target" aria-hidden="true"></span>
+
+### stream-ordered allocation · 流顺序分配
+
+- **Definition:** An allocator contract representing allocation and deallocation as CUDA stream operations. A pointer is accessed only after its allocation operation completes and before its free operation executes under documented order.
+- **Avoid:** Host call return means allocation complete, lexical pointer lifetime, implicit cross-stream ownership, device-wide free barrier.
+- **Related resource:** [M11: Stream-Ordered Allocation and Memory Pools](/en/memory/stream-ordered-allocation-memory-pools/).
+- **Version note:** Programming Guide v13.3, Runtime API v13.3.1, and the 12.9.1/11.8.0 archives require cross-stream first-use and last-use edges. The actual path also requires a checked `cudaDevAttrMemoryPoolsSupported` result.
+
+<span id="term-103" class="resource-target" aria-hidden="true"></span>
+
+### memory pool · 内存池
+
+- **Definition:** An allocator object supplying backing resources and policy attributes for stream-ordered allocations. An allocation can use a device's current or default pool or an explicitly selected pool.
+- **Avoid:** Logical allocation itself, stale-pointer cache, same-address guarantee, fixed physical footprint.
+- **Related resource:** [M11](/en/memory/stream-ordered-allocation-memory-pools/).
+- **Version note:** A pool may retain backing resources after logical free but does not extend pointer lifetime. Default, current, and explicit selection, access, ownership, release-threshold, and trim contracts require review for the selected Runtime version.
+
+<span id="term-104" class="resource-target" aria-hidden="true"></span>
+
+### reuse policy · 复用策略
+
+- **Definition:** Memory-pool attributes granting permission for the allocator to consider selected ordered relationships, including follow-event dependencies, opportunistic reuse, and internal dependencies.
+- **Avoid:** Reuse observation, same-pointer promise, absence of added ordering, speedup guarantee.
+- **Related resource:** [M11](/en/memory/stream-ordered-allocation-memory-pools/).
+- **Version note:** Enabling a policy is permission, not an outcome. Opportunistic results can vary with progress, internal dependencies can add serialization, and address, footprint, or performance claims need independent observation.
+
+<span id="term-105" class="resource-target" aria-hidden="true"></span>
+
+### Cooperative Groups · 协作组
+
+- **Definition:** A programming model and API that represents collaborating CUDA threads with explicit group handles and interprets synchronization, partitioning, and collective operations against named membership, scope, and participants.
+- **Avoid:** Automatic whole-grid cooperation, implicit warp lockstep, barrier library where every group is interchangeable.
+- **Related resource:** [M12: Cooperative Groups and Composable Synchronization](/en/memory/cooperative-groups/).
+- **Version note:** The CUDA 13.3 current baseline includes the single-device cooperative-grid path. Deprecated multi-device material in the 12.9.1/11.8.0 archives is historical and is not projected as current support.
+
+<span id="term-106" class="resource-target" aria-hidden="true"></span>
+
+### thread group · 协作线程组
+
+- **Definition:** A collaborating thread set named by one concrete Cooperative Groups handle with explicit membership, synchronization scope, and required participants. It can come from launch geometry, partitioning, or an active set.
+- **Avoid:** Permanent warp synonym, threads that merely look together in source, unnamed participant set.
+- **Related resource:** [M12](/en/memory/cooperative-groups/).
+- **Version note:** `thread_block`, tile, `coalesced_group`, and a gated `grid_group` have different membership and lifetime. A dynamic active set binds only to the control-flow point that captured it.
+
+<span id="term-107" class="resource-target" aria-hidden="true"></span>
+
+### collective operation · 集合操作
+
+- **Definition:** An operation relative to a named thread group that requires the group's documented participants to reach the same operation instance and satisfy group-wide argument agreement. Some APIs explicitly permit different per-thread inputs.
+- **Avoid:** Single-thread call, matching call-site text, implicit synchronization, blanket rule that every argument must be bitwise identical.
+- **Related resource:** [M12](/en/memory/cooperative-groups/).
+- **Version note:** Review participants and argument exceptions per API for `sync`, reduce, scan, partition, and other collectives. A missing participant or illegal group-wide disagreement can cause deadlock, corruption, or undefined behavior.
+
+<span id="term-108" class="resource-target" aria-hidden="true"></span>
+
+### asynchronous copy · 异步复制
+
+- **Definition:** A data-movement operation separating copy submission from completion. In M13 it specifically names the global-to-shared `cuda::memcpy_async` path with a documented completion mechanism.
+- **Avoid:** Copy without completion, automatic overlap, guaranteed hardware instruction, collective name for every `cudaMemcpyAsync`.
+- **Related resource:** [M13: Asynchronous Copy and Staged Pipelines](/en/memory/asynchronous-copy-pipelines/).
+- **Version note:** Applicable APIs require CC 7.0+. The hardware-accelerated global-to-shared path requires CC 8.0+ and size, alignment, and type constraints. Source proves neither an emitted instruction nor runtime overlap.
+
+<span id="term-109" class="resource-target" aria-hidden="true"></span>
+
+### pipeline · 流水线
+
+- **Definition:** A FIFO contract of finite reusable stages coordinating logical batches through producer acquire and commit and consumer wait and release sequences.
+- **Avoid:** Automatic performance optimization, infinite queue, copy-only timeline, overlap evidence.
+- **Related resource:** [M13](/en/memory/asynchronous-copy-pipelines/).
+- **Version note:** A unified or partitioned pipeline declares stage count, producer and consumer sets, collective sequences, early exit, and warp convergence under the selected CUDA contract. Multiple stages create overlap opportunity only.
+
+<span id="term-110" class="resource-target" aria-hidden="true"></span>
+
+### pipeline stage · 流水线阶段
+
+- **Definition:** A reusable storage and sequence slot in a pipeline mapped to one logical batch, progressing through available, acquired or filled, committed or pending, ready, used, and released states.
+- **Avoid:** Shared buffer that never expires, ready when copy is submitted, overwrite before consumers finish.
+- **Related resource:** [M13](/en/memory/asynchronous-copy-pipelines/).
+- **Version note:** Completion-before-use and all-declared-reads-before-release-or-reuse are distinct edges. Prologue, steady-state rotation, and drain all preserve batch-to-stage mapping.
+
+<span id="term-111" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Graph · CUDA 图
+
+- **Definition:** A directed acyclic graph (DAG) representing CUDA operations as nodes and documented dependencies as directed edges, independently of later instantiation and execution.
+- **Avoid:** Source-order list, scheduler trace, executable graph handle, automatic concurrency or performance result.
+- **Related resources:** [M14: CUDA Graphs and Repeated Launch Structure](/en/memory/cuda-graphs/) and [EX09](/en/examples/graph-capture/).
+- **Version note:** Programming Guide v13.3, Runtime API v13.3.1, and the 12.9.1/11.8.0 archives allow construction through the explicit API or stream capture. A static DAG proves intended dependency structure only.
+
+<span id="term-112" class="resource-target" aria-hidden="true"></span>
+
+### graph node · 图节点
+
+- **Definition:** An object representing one typed operation in a CUDA Graph, such as a kernel, copy, memset, host function, event operation, or child graph, with parameters, external resources, and incoming and outgoing dependencies.
+- **Avoid:** Arbitrary source statement, order implied by node number, operation that automatically owns pointee lifetime.
+- **Related resources:** [M14](/en/memory/cuda-graphs/) and [EX09](/en/examples/graph-capture/).
+- **Version note:** Node types and parameter or update restrictions require review for the selected Runtime API. Only a directed path creates a dependency; numbering, UI position, and source layout do not.
+
+<span id="term-113" class="resource-target" aria-hidden="true"></span>
+
+### stream capture · 流捕获
+
+- **Definition:** A construction mechanism whose begin and end boundaries on an origin stream turn supported stream submissions and captured event dependencies into a CUDA Graph template. Those operations do not execute normally during capture.
+- **Avoid:** Graph execution mode, arbitrary API recorder, multi-stream capture without origin and rejoin, automatic error recovery.
+- **Related resources:** [M14](/en/memory/cuda-graphs/) and [EX09](/en/examples/graph-capture/).
+- **Version note:** Auxiliary streams rejoin before the origin ends capture. Prohibited query, synchronization, or legacy interactions can invalidate capture; the origin must still end capture, check the error and null graph, and skip instantiation.
+
+<span id="term-114" class="resource-target" aria-hidden="true"></span>
+
+### executable graph · 可执行图
+
+- **Definition:** A `cudaGraphExec_t` snapshot produced by successful graph instantiation and submitted repeatedly and asynchronously through `cudaGraphLaunch`.
+- **Avoid:** Mutable graph template, completion of one launch, owner of external resources, proof that replay is faster.
+- **Related resources:** [M14](/en/memory/cuda-graphs/) and [EX09](/en/examples/graph-capture/).
+- **Version note:** External storage and handles remain live until relevant launches complete. Updates are limited by topology, node type, context, and parameter restrictions; incompatible changes need a new graph and re-instantiation.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, and TERM-066 through TERM-076 retain their **2026-08-27** records. TERM-077 through TERM-095 and the complete 95-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-28**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, and TERM-077 through TERM-095 retain **2026-08-28**. TERM-096 through TERM-114 and the complete 114-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-29**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, or examples. The [Chinese counterpart](/glossary/) is complete at the same time.

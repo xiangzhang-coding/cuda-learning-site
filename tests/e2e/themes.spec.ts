@@ -9,6 +9,20 @@ import {
   type LearningTheme,
 } from '../../src/theme-contract';
 
+const themeReflowRoutes = [
+  '/en/start/using-the-learning-site/',
+  '/en/memory/pinned-memory-transfer-overlap/',
+  '/en/memory/unified-memory-page-migration/',
+  '/en/memory/stream-ordered-allocation-memory-pools/',
+  '/en/memory/cooperative-groups/',
+  '/en/memory/asynchronous-copy-pipelines/',
+  '/en/memory/cuda-graphs/',
+  '/en/examples/streams-events-overlap/',
+  '/en/examples/unified-memory-migration/',
+  '/en/examples/graph-capture/',
+  '/en/visuals/page-migration/',
+] as const;
+
 async function persistTheme(page: Page, theme: LearningTheme) {
   await page.goto('/en/');
   await page.evaluate(
@@ -69,17 +83,22 @@ test('theme control supports keyboard selection with a visible focus indicator',
   }
 });
 
-test('all themes reflow at the CSS viewport equivalent of 200% zoom', async ({ page }, testInfo) => {
+test('all themes reflow issue-19 pages at the CSS viewport equivalent of 200% zoom', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'The pinned Chromium project owns the 200% reflow probe.');
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 640, height: 720 });
 
   for (const theme of THEME_IDS) {
     await persistTheme(page, theme);
-    await page.goto('/en/start/using-the-learning-site/');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), theme).toBe(
-      true,
-    );
-    await expect(page.getByRole('main')).toBeVisible();
+    for (const route of themeReflowRoutes) {
+      await page.goto(route);
+      await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+        `${theme}: ${route}`,
+      ).toBe(true);
+      await expect(page.getByRole('main')).toBeVisible();
+    }
   }
 });
 

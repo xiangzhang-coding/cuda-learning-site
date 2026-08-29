@@ -1,0 +1,482 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/advanced-memory-visuals.css';
+import { PAGE_MIGRATION_COPY, type PageMigrationLocale } from '../visuals/page-migration-copy';
+import {
+  PAGE_MIGRATION_MODEL_CONTRACT,
+  PAGE_MIGRATION_SCENARIOS,
+  createPageMigrationState,
+  derivePageMigrationFrame,
+  derivePageMigrationFrames,
+  type PageMigrationFrame,
+  type PageMigrationLedgerRow,
+} from '../visuals/page-migration-model';
+
+interface Props {
+  locale: PageMigrationLocale;
+}
+
+const { locale } = Astro.props;
+const copy = PAGE_MIGRATION_COPY[locale];
+const initialState = createPageMigrationState();
+const initialFrameResult = derivePageMigrationFrame(initialState);
+if (!initialFrameResult.accepted) throw new Error('VIS08 initial model state must be valid.');
+const initialFrame = initialFrameResult.frame;
+const staticScenarios = PAGE_MIGRATION_SCENARIOS.map((scenario) => {
+  const result = derivePageMigrationFrames(scenario.id);
+  if (!result.accepted) throw new Error(`VIS08 static scenario ${scenario.id} must be valid.`);
+  const finalFrame = result.frames.at(-1);
+  if (!finalFrame) throw new Error(`VIS08 static scenario ${scenario.id} must contain a frame.`);
+  return { scenario, finalFrame };
+});
+
+function transitionLabel(row: PageMigrationLedgerRow) {
+  return row.modeledTransition ? copy.transitionYes : copy.transitionNo;
+}
+
+function accessSummary(frame: PageMigrationFrame) {
+  const access = frame.nextAccess;
+  if (!access) return copy.sequenceComplete;
+  return `${frame.stepIndex + 1}/${frame.sequenceLength} · ${copy.origins[access.origin]} ${copy.operations[access.operation]} · ${access.pageId}`;
+}
+---
+
+<cuda-page-migration
+  class="visual-explainer memory-visual page-migration-visual not-content"
+  data-visual-id="VIS08"
+  data-locale={locale}
+  data-scenario-id={initialState.scenarioId}
+  data-step-index={initialState.stepIndex}
+  data-transition-count={initialFrame.transitionCount}
+  data-symbolic-bytes={initialFrame.symbolicBytes.totalBytes}
+  data-sequence-complete="false"
+  data-assumption-id={PAGE_MIGRATION_MODEL_CONTRACT.assumptionId}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <section class="page-migration-assumptions" data-model-assumptions={PAGE_MIGRATION_MODEL_CONTRACT.assumptionId}>
+      <h3>{copy.assumptionsHeading}</h3>
+      <ul>
+        {copy.assumptions.map((assumption) => <li>{assumption}</li>)}
+      </ul>
+    </section>
+
+    <div class="visual-controls page-migration-controls" data-visual-controls hidden>
+      <fieldset class="page-migration-control-set">
+        <legend>{copy.controlsHeading}</legend>
+        <label>
+          <span>{copy.scenarioLabel}</span>
+          <select data-page-migration-scenario aria-label={copy.scenarioLabel}>
+            {PAGE_MIGRATION_SCENARIOS.map((scenario) => (
+              <option value={scenario.id} selected={scenario.id === initialState.scenarioId}>
+                {copy.scenarioCopy[scenario.id].title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="button" data-page-migration-action="step">{copy.step}</button>
+        <button type="button" data-page-migration-action="reset">{copy.reset}</button>
+      </fieldset>
+      <p
+        class="page-migration-status"
+        data-page-migration-status
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {copy.statusReady}
+      </p>
+    </div>
+
+    <section
+      class="page-migration-workbench"
+      data-interactive-workbench
+      data-pagefind-ignore
+      hidden
+      aria-label={copy.workbenchHeading}
+    >
+      <header class="page-migration-current">
+        <div>
+          <span class="memory-result-kicker">{copy.currentAccess}</span>
+          <h3>{copy.workbenchHeading}</h3>
+        </div>
+        <p data-current-access-summary>{accessSummary(initialFrame)}</p>
+      </header>
+
+      <section class="page-migration-rail-panel">
+        <h4>{copy.railHeading}</h4>
+        <ol class="page-residency-rail" data-page-residency-rail>
+          {initialFrame.residency.map(({ pageId, location }) => (
+            <li data-page-id={pageId} data-residency={location} data-next-access={initialFrame.nextAccess?.pageId === pageId ? 'true' : 'false'}>
+              <code>{pageId}</code>
+              <span>{copy.residency}: <strong>{copy.origins[location]}</strong></span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <dl class="page-migration-metrics">
+        <div>
+          <dt>{copy.transitionCount}</dt>
+          <dd data-transition-count-value>{initialFrame.transitionCount}</dd>
+        </div>
+        <div>
+          <dt>{copy.symbolicBytes}</dt>
+          <dd data-symbolic-bytes-value>{initialFrame.symbolicBytes.expression}</dd>
+        </div>
+      </dl>
+      <p class="page-migration-byte-boundary">{copy.symbolicBytesBoundary}</p>
+
+      <section class="page-migration-ledger-panel">
+        <h4>{copy.ledgerHeading}</h4>
+        <div class="advanced-memory-table-wrap" tabindex="0" aria-label={copy.ledgerHeading}>
+          <table class="page-migration-ledger">
+            <caption>{copy.ledgerHeading}</caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Access ID</th>
+                <th scope="col">{copy.page}</th>
+                <th scope="col">{copy.origin}</th>
+                <th scope="col">{copy.operation}</th>
+                <th scope="col">{copy.residencyBefore}</th>
+                <th scope="col">{copy.residencyAfter}</th>
+                <th scope="col">{copy.transition}</th>
+                <th scope="col">{copy.transitionCount}</th>
+                <th scope="col">{copy.symbolicBytes}</th>
+              </tr>
+            </thead>
+            <tbody data-page-migration-ledger>
+              <tr data-ledger-empty>
+                <td colspan="10">{copy.noCompletedAccesses}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section class="visual-section page-migration-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="page-migration-static-grid">
+        {staticScenarios.map(({ scenario, finalFrame }) => (
+          <article data-static-scenario={scenario.id} data-static-assumption-id={scenario.assumptionId}>
+            <header>
+              <p class="memory-result-kicker">{scenario.id}</p>
+              <h4>{copy.scenarioCopy[scenario.id].title}</h4>
+              <p>{copy.scenarioCopy[scenario.id].description}</p>
+            </header>
+
+            <section>
+              <h5>{copy.finalResidency}</h5>
+              <ol class="page-residency-rail page-residency-rail--static" data-static-residency-rail={scenario.id}>
+                {finalFrame.residency.map(({ pageId, location }) => (
+                  <li data-static-page={`${scenario.id}:${pageId}`} data-page-id={pageId} data-residency={location}>
+                    <code>{pageId}</code>
+                    <span>{copy.residency}: <strong>{copy.origins[location]}</strong></span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <dl class="page-migration-metrics page-migration-metrics--static">
+              <div>
+                <dt>{copy.transitionCount}</dt>
+                <dd>{finalFrame.transitionCount}</dd>
+              </div>
+              <div>
+                <dt>{copy.symbolicBytes}</dt>
+                <dd>{finalFrame.symbolicBytes.expression}</dd>
+              </div>
+            </dl>
+
+            <div class="advanced-memory-table-wrap" tabindex="0" aria-label={`${copy.ledgerHeading}: ${copy.scenarioCopy[scenario.id].title}`}>
+              <table class="page-migration-ledger page-migration-ledger--static">
+                <caption>{copy.ledgerHeading}: {copy.scenarioCopy[scenario.id].title}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Access ID</th>
+                    <th scope="col">{copy.page}</th>
+                    <th scope="col">{copy.origin}</th>
+                    <th scope="col">{copy.operation}</th>
+                    <th scope="col">{copy.residencyBefore}</th>
+                    <th scope="col">{copy.residencyAfter}</th>
+                    <th scope="col">{copy.transition}</th>
+                    <th scope="col">{copy.transitionCount}</th>
+                    <th scope="col">{copy.symbolicBytes}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {finalFrame.ledger.map((row) => (
+                    <tr
+                      data-static-access-row={`${scenario.id}:${row.accessId}`}
+                      data-modeled-transition={String(row.modeledTransition)}
+                    >
+                      <th scope="row">{row.sequence}</th>
+                      <td><code>{row.accessId}</code></td>
+                      <td><code>{row.pageId}</code></td>
+                      <td>{copy.origins[row.origin]}</td>
+                      <td>{copy.operations[row.operation]}</td>
+                      <td>{copy.origins[row.residencyBefore]}</td>
+                      <td>{copy.origins[row.residencyAfter]}</td>
+                      <td>{transitionLabel(row)}</td>
+                      <td>{row.transitionCountAfter}</td>
+                      <td>{row.symbolicBytesAfter} B</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </article>
+        ))}
+      </div>
+      <p class="page-migration-byte-boundary">{copy.symbolicBytesBoundary}</p>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-page-migration>
+
+<script>
+  import { PAGE_MIGRATION_COPY } from '../visuals/page-migration-copy';
+  import {
+    PAGE_MIGRATION_SCENARIOS,
+    createPageMigrationState,
+    derivePageMigrationFrame,
+    reducePageMigrationState,
+    type PageMigrationFrame,
+    type PageMigrationLedgerRow,
+    type PageMigrationState,
+  } from '../visuals/page-migration-model';
+
+  class CudaPageMigration extends HTMLElement {
+    private state: PageMigrationState = createPageMigrationState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-interactive-workbench]');
+      const scenario = this.querySelector<HTMLSelectElement>('[data-page-migration-scenario]');
+      const step = this.querySelector<HTMLButtonElement>('[data-page-migration-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-page-migration-action="reset"]');
+      if (!controls || !workbench || !scenario || !step || !reset) return;
+
+      scenario.addEventListener('change', () => {
+        const update = reducePageMigrationState(this.state, {
+          type: 'select-scenario',
+          scenarioId: scenario.value,
+        });
+        if (!update.accepted) {
+          scenario.value = this.state.scenarioId;
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        this.render();
+        this.announce(
+          this.copy().statusScenario.replace('{scenario}', this.copy().scenarioCopy[this.state.scenarioId].title),
+          false,
+        );
+      });
+
+      step.addEventListener('click', () => {
+        const previousFrame = derivePageMigrationFrame(this.state);
+        const update = reducePageMigrationState(this.state, { type: 'step' });
+        if (!update.accepted || !previousFrame.accepted) {
+          const issue = update.accepted ? 'invalid-state' : update.issue;
+          this.announce(this.copy().issues[issue], true);
+          return;
+        }
+        const appliedAccess = previousFrame.frame.nextAccess;
+        this.state = update.state;
+        const frame = this.render();
+        if (!appliedAccess || !frame) {
+          this.announce(this.copy().issues['invalid-state'], true);
+          return;
+        }
+        const row = frame.ledger.at(-1);
+        if (!row) {
+          this.announce(this.copy().issues['invalid-state'], true);
+          return;
+        }
+        this.announce(this.stepStatus(frame, row), false);
+      });
+
+      reset.addEventListener('click', () => {
+        const update = reducePageMigrationState(this.state, { type: 'reset' });
+        if (!update.accepted) {
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        this.render();
+        this.announce(this.copy().statusReset, false);
+        scenario.focus();
+      });
+
+      const frame = this.render();
+      if (!frame) return;
+      this.dataset.ready = 'true';
+      controls.hidden = false;
+      workbench.hidden = false;
+    }
+
+    private copy() {
+      return PAGE_MIGRATION_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private announce(message: string, invalid: boolean) {
+      const status = this.querySelector<HTMLElement>('[data-page-migration-status]');
+      this.dataset.valid = String(!invalid);
+      if (!status) return;
+      status.dataset.invalid = String(invalid);
+      status.textContent = message;
+    }
+
+    private stepStatus(frame: PageMigrationFrame, row: PageMigrationLedgerRow) {
+      const copy = this.copy();
+      return copy.statusStep
+        .replace('{current}', String(frame.stepIndex))
+        .replace('{total}', String(frame.sequenceLength))
+        .replace('{origin}', copy.origins[row.origin])
+        .replace('{operation}', copy.operations[row.operation])
+        .replace('{page}', row.pageId)
+        .replace('{before}', copy.origins[row.residencyBefore])
+        .replace('{after}', copy.origins[row.residencyAfter])
+        .replace('{count}', String(frame.transitionCount))
+        .replace('{bytes}', frame.symbolicBytes.expression);
+    }
+
+    private render() {
+      const result = derivePageMigrationFrame(this.state);
+      if (!result.accepted) {
+        this.announce(this.copy().issues[result.issue], true);
+        return undefined;
+      }
+      const frame = result.frame;
+      const copy = this.copy();
+      const scenario = PAGE_MIGRATION_SCENARIOS.find(({ id }) => id === this.state.scenarioId);
+      if (!scenario) {
+        this.announce(copy.issues['unknown-scenario'], true);
+        return undefined;
+      }
+
+      this.dataset.scenarioId = scenario.id;
+      this.dataset.stepIndex = String(frame.stepIndex);
+      this.dataset.transitionCount = String(frame.transitionCount);
+      this.dataset.symbolicBytes = String(frame.symbolicBytes.totalBytes);
+      this.dataset.sequenceComplete = String(frame.sequenceComplete);
+      this.dataset.valid = 'true';
+
+      const select = this.querySelector<HTMLSelectElement>('[data-page-migration-scenario]');
+      if (select) select.value = scenario.id;
+      const step = this.querySelector<HTMLButtonElement>('[data-page-migration-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-page-migration-action="reset"]');
+      const focused = this.ownerDocument.activeElement;
+      if (step) step.disabled = frame.sequenceComplete;
+      if (step && focused === step && step.disabled) reset?.focus();
+
+      this.setText('[data-current-access-summary]', this.accessSummary(frame));
+      this.setText('[data-transition-count-value]', String(frame.transitionCount));
+      this.setText('[data-symbolic-bytes-value]', frame.symbolicBytes.expression);
+      this.renderRail(frame);
+      this.renderLedger(frame.ledger);
+      return frame;
+    }
+
+    private accessSummary(frame: PageMigrationFrame) {
+      const access = frame.nextAccess;
+      if (!access) return this.copy().sequenceComplete;
+      return `${frame.stepIndex + 1}/${frame.sequenceLength} · ${this.copy().origins[access.origin]} ${this.copy().operations[access.operation]} · ${access.pageId}`;
+    }
+
+    private renderRail(frame: PageMigrationFrame) {
+      const rail = this.querySelector<HTMLOListElement>('[data-page-residency-rail]');
+      if (!rail) return;
+      rail.replaceChildren(...frame.residency.map(({ pageId, location }) => {
+        const item = document.createElement('li');
+        item.dataset.pageId = pageId;
+        item.dataset.residency = location;
+        item.dataset.nextAccess = String(frame.nextAccess?.pageId === pageId);
+        const id = document.createElement('code');
+        id.textContent = pageId;
+        const label = document.createElement('span');
+        label.append(`${this.copy().residency}: `);
+        const value = document.createElement('strong');
+        value.textContent = this.copy().origins[location];
+        label.append(value);
+        item.append(id, label);
+        return item;
+      }));
+    }
+
+    private renderLedger(rows: readonly PageMigrationLedgerRow[]) {
+      const body = this.querySelector<HTMLTableSectionElement>('[data-page-migration-ledger]');
+      if (!body) return;
+      if (rows.length === 0) {
+        const row = document.createElement('tr');
+        row.dataset.ledgerEmpty = '';
+        const cell = document.createElement('td');
+        cell.colSpan = 10;
+        cell.textContent = this.copy().noCompletedAccesses;
+        row.append(cell);
+        body.replaceChildren(row);
+        return;
+      }
+      body.replaceChildren(...rows.map((row) => this.ledgerRow(row)));
+    }
+
+    private ledgerRow(row: PageMigrationLedgerRow) {
+      const item = document.createElement('tr');
+      item.dataset.accessRow = row.accessId;
+      item.dataset.modeledTransition = String(row.modeledTransition);
+      const sequence = document.createElement('th');
+      sequence.scope = 'row';
+      sequence.textContent = String(row.sequence);
+      item.append(
+        sequence,
+        this.cell(row.accessId, true),
+        this.cell(row.pageId, true),
+        this.cell(this.copy().origins[row.origin]),
+        this.cell(this.copy().operations[row.operation]),
+        this.cell(this.copy().origins[row.residencyBefore]),
+        this.cell(this.copy().origins[row.residencyAfter]),
+        this.cell(row.modeledTransition ? this.copy().transitionYes : this.copy().transitionNo),
+        this.cell(String(row.transitionCountAfter)),
+        this.cell(`${row.symbolicBytesAfter} B`),
+      );
+      return item;
+    }
+
+    private cell(text: string, code = false) {
+      const cell = document.createElement('td');
+      if (!code) {
+        cell.textContent = text;
+        return cell;
+      }
+      const value = document.createElement('code');
+      value.textContent = text;
+      cell.append(value);
+      return cell;
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-page-migration')) {
+    customElements.define('cuda-page-migration', CudaPageMigration);
+  }
+</script>

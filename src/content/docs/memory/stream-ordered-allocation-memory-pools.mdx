@@ -1,0 +1,247 @@
+---
+title: 'M11：流顺序分配与内存池'
+description: 在 CUDA streams 之间 ordering allocation、每次 use 与 free；选择 default 或 explicit memory pool；把 reuse policies 与 release threshold 视为 controls，而不是 address 或 speed guarantees。
+pairId: m11
+counterpart: /en/memory/stream-ordered-allocation-memory-pools/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - support-gate
+  - allocation-completion
+  - same-stream-lifetime
+  - cross-stream-use
+  - all-uses-before-free
+  - pool-selection
+  - reuse-policies
+  - release-threshold
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M11
+prerequisites:
+  - M07
+  - M08
+relatedUnits:
+  - M09
+  - M14
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Stream-Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current allocation lifetime, memory pool, reuse policy, and release-threshold model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current allocator support gate, operation completion, pool, and attribute contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 allocator and memory-pool model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 allocator interfaces and attributes'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 allocator and memory-pool model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 allocator interfaces and attributes'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m11 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,support-gate,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M09,M14' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import AdvancedMemoryRepresentation from '../../../components/AdvancedMemoryRepresentation.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/stream-ordered-allocation-memory-pools/" lang="en">Read the English counterpart</a>
+
+流顺序分配（stream-ordered allocation，[TERM-102](/glossary/#term-102)）把 allocation/deallocation operations 放入 CUDA stream order。内存池（memory pool，[TERM-103](/glossary/#term-103)）提供 resources，复用策略（reuse policy，[TERM-104](/glossary/#term-104)）控制 allocator 可以考虑哪些 ordered relationships。它们是 lifetime/policy contracts，不承诺 later allocation 得到相同 address，也不承诺运行更快。
+
+## 学完本单元，你应该能
+
+- 把 `cudaMallocAsync`、每次 use 与 `cudaFreeAsync` 放入同一 dependency graph。
+- 区分 host return 与 allocation operation completion。
+- 用 stream order 使 same-stream use 有效，用 explicit edges 使 cross-stream use 有效。
+- 检查 device support 后，选择 current default pool 或 explicit pool。
+- 解释 reuse policies 与 release threshold，不承诺 address reuse、retained bytes 或 speedup。
+
+## 先修关系
+
+先完成 [M07：用流取代全局顺序心智模型](/memory/stream-ordering/)，再完成 [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)。M07 提供 per-stream order，并规定没有 edge 时 different streams 保持 unordered；M08 提供 event record/wait semantics，用来构造下面的 cross-stream lifetime graphs。
+
+M11 改变 allocation lifetime 的 representation。它不发布 canonical Runnable Example、不执行 CUDA，也不从 API choice 推断 performance。
+
+## 用 device support gate 保护 allocator path
+
+选择该 allocator 前，用 `cudaDeviceGetAttribute` 与 `cudaDevAttrMemoryPoolsSupported` 查询 target device。Nonzero result 允许该 device 进入 stream-ordered allocator path；zero result 要求另一种 allocation strategy。Installed headers 中存在 declarations，不等于 device-support observation。
+
+```cpp
+int pools_supported = 0;
+cudaDeviceGetAttribute(
+    &pools_supported,
+    cudaDevAttrMemoryPoolsSupported,
+    device);
+```
+
+使用 `pools_supported` 前必须检查 query return。这段 static fragment 只声明 gate，没有记录任何 device result。
+
+## Allocation operation completion
+
+`cudaMallocAsync(&ptr, bytes, stream_allocate)` 把 allocation operation 插入 `stream_allocate`，并立即通过 `ptr` 返回 pointer。Host-side return 不证明 allocation operation 已执行；该 operation complete 前不得访问 allocation。
+
+因此 usable interval 由 stream execution 限定，而不是只由 `ptr` 的 lexical scope 限定：
+
+```text
+allocation operation completes -> permitted ordered uses -> free operation begins
+```
+
+同一 stream 中，allocation 后 enqueue 的 future work ordering 在它之后。另一个 stream 的 work 需要从 allocation completion 到该 work 的 path，可以使用 event 或适当的 stream/host synchronization boundary。Pointer value 本身不携带这种 edge。
+
+## Same-stream lifetime
+
+最小的 reviewable lifetime 使用一个 stream：
+
+```text
+stream_work: malloc_async(ptr) -> initialize(ptr) -> consume(ptr) -> free_async(ptr)
+```
+
+Per-stream order 让两次 uses 都位于 allocation completion 之后、execution reaches free 之前。`cudaFreeAsync(ptr, stream_work)` 插入 free operation，而不是施加 device-wide host synchronization。Execution 到达该 free 后，不得再访问 allocation。
+
+如果每次 use 都已显示，这张 graph 可以证明 valid order；它不能证明 allocator reused cached resources、返回 particular virtual address 或改善 elapsed time。
+
+## Cross-stream use 需要两侧 boundary edges
+
+Allocation、use 与 free 位于不同 streams 时，lifetime 两侧都需要 edge：
+
+```text
+stream_allocate: malloc_async(ptr) -> record(ready)
+                                           |
+                                           v
+stream_use:              wait(ready) -> use(ptr) -> record(done)
+                                                        |
+                                                        v
+stream_release:                         wait(done) -> free_async(ptr)
+```
+
+`ready` event 让 use 等待 captured allocation-stream prefix；`done` event 让 free 等待 captured use-stream prefix。Lanes 之间的 host submission order 不能替代任一 edge。若多个 streams 使用 allocation，free 必须 reachable from 每个 last-use completion，不能只画最方便的一次 use。
+
+## 所有 uses 必须位于 free 前
+
+把一次 allocation 作为 directed acyclic graph 复核，并回答四个问题：
+
+1. Allocation operation 位于哪个 stream？
+2. 每个 first use 如何 ordering 在 allocation completion 后？
+3. 每个 participating stream 的 last use 在哪里？
+4. Free 如何 ordering 在所有 last uses 后？
+
+在 promised stream order 下，所有 asynchronous accesses 必须发生在 allocation execution 与 free execution 之间。Allocation complete 前使用，或 execution reaches free 后使用，都是 undefined behavior。因此调用 `cudaFreeAsync` 不能替代对 all uses incoming edges 的证明。
+
+Logical allocation freed 后，pool 仍可能保留 underlying resources。这种 caching 不会延长 pointer lifetime，也不会让 stale pointer 再次有效。
+
+## Default 与 explicit memory pools
+
+每个 `cudaMallocAsync` allocation 都使用 pool。没有 explicit pool 时，它使用 supplied stream device 的 current memory pool。每个 device 都有 default pool，可通过 `cudaDeviceGetDefaultMemPool` 获取；application 未用 `cudaDeviceSetMemPool` 设置另一 current pool 时，它保持 current。
+
+`cudaMemPoolCreate` 根据 declared properties 创建 explicit pool。`cudaMallocFromPoolAsync` 为一次 allocation 选择该 pool，同时仍由 stream 建立 ordering contract。Default 与 explicit pools 遵守同一 lifetime rule：pool selection 不会 ordering cross-stream consumer，也不能免除 missing last-use edge。
+
+应按 required properties、ownership、access 与 lifecycle 选择 pool，不能推断 explicit pool 天生比 default pool 快。
+
+## Reuse policies 是 permissions，不是 outcomes
+
+Allocator 在请求更多 backing memory 前，会尝试复用先前经 `cudaFreeAsync` released 的 memory。Pool attributes 控制它可以利用哪些 relationships：
+
+- `cudaMemPoolReuseFollowEventDependencies` 允许沿 documented event dependency 进行 reuse。
+- `cudaMemPoolReuseAllowOpportunistic` 允许考虑 completed frees，即使 free/allocation 之间没有 explicit dependency。
+- `cudaMemPoolReuseAllowInternalDependencies` 允许 allocator 插入建立 safe reuse 所需的 dependency。
+
+这些 policies 可以影响 allocation patterns 与 ordering。Opportunistic decisions 可能随 progress 改变；internal dependency insertion 也可能 serialize source graph 没有明确画出的 work。应根据 reviewed policy 设置，而不是假设 reuse 越多越好。
+
+即使 reuse 被允许，CUDA 也不承诺 next allocation 返回相同 pointer value。Pointer equality 不是 allocator acceptance criterion，policy enablement 也不是 performance evidence。
+
+## Release threshold 控制 caching attempt
+
+`cudaMemPoolAttrReleaseThreshold` 是 byte threshold：pool 保留多少 reserved memory 后，才会在之后的 stream、event 或 device synchronization 尝试向 operating system 释放 excess backing memory。Reviewed Runtime contracts 中 default value 为 zero。较大值可要求 pool 在 synchronization points 之间保留较大 footprint；`cudaMemPoolTrimTo` 可以请求 explicit trim。
+
+Threshold 不是 hard pool-size cap、exact retained-byte guarantee，也不承诺某次 synchronization 会释放特定数量。它在 possible backing-memory retention 与 future allocation work 之间取舍。任何 footprint、latency 或 speedup claim 都需要本单元之外的 declared workload 与 measurements。
+
+## 可视化模型
+
+<AdvancedMemoryRepresentation kind="allocation" locale="zh-CN" />
+
+该 representation 分开 logical allocation interval、cross-stream dependency edges、pool resources 与 release policy。它是 deterministic browser model，不是 allocator trace，也不是 address reuse proof。
+
+## 证据边界
+
+API fragments、dependency graphs、policy table、visual representation 与 Exercises 都是 static。没有 source 被编译，没有在 real device 上查询 support attribute，也没有观察 allocation、address、footprint、duration 或 speedup。Learning Unit 的每条 evidence axis 都保持为空。
+
+## 离开前检查
+
+1. 为什么 host call 在 allocation completion 前 return，same-stream 中 `cudaMallocAsync` 后提交的 work 仍可使用 pointer？
+2. Allocation、use 与 free 位于三个 different streams 时，需要哪两条 event edges？
+3. Execution reaches `cudaFreeAsync` 前，每次 use 必须满足什么条件？
+4. Default/current pool path 与 `cudaMallocFromPoolAsync` 有何区别？
+5. 为什么 reuse policy 与 release threshold 都不能保证 pointer equality 或 speedup？
+
+## 继续练习
+
+- 完成 [M11 练习（Exercise）](/memory/stream-ordered-allocation-memory-pools/exercises/)，再查看独立的[参考解答](/memory/stream-ordered-allocation-memory-pools/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-003](/practice/#pb-r2-003)修复 incomplete allocation lifetime 与 pool claim。
+- 命名三个 independent contracts 时，复核 [TERM-102 stream-ordered allocation](/glossary/#term-102)、[TERM-103 memory pool](/glossary/#term-103)与 [TERM-104 reuse policy](/glossary/#term-104)。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Stream-Ordered Memory Allocator](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html)提供 current lifetime、pool、reuse-policy 与 release-threshold model。
+- [CUDA Runtime API v13.3.1：Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html)定义 current support gate、allocation/free operation contracts、pool interfaces 与 attributes。
+- [CUDA C++ Programming Guide 12.9.1：Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator)与 [CUDA Runtime API 12.9.1：Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html)保留 Toolkit 12.9.1 model/interfaces。
+- [CUDA C Programming Guide 11.8：Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator)与 [CUDA Runtime API 11.8.0：Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html)保留 Toolkit 11.8 model/interfaces。
+
+六项 owner source 均访问于 **2026-08-29**。Current conclusions 以 CUDA Programming Guide v13.3 与 CUDA Runtime API v13.3.1 为准；archives 是 comparison coordinates。Lifetime ledgers、policy distinctions、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-29。**

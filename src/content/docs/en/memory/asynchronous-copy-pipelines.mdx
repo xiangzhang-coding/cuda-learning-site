@@ -1,0 +1,206 @@
+---
+title: 'M13: Asynchronous Copy and Staged Pipelines'
+description: Start from a portable synchronous global-to-shared baseline, then reason about cuda::memcpy_async and cuda::pipeline stage ownership, participation, completion, capability, and evidence boundaries.
+pairId: m13
+counterpart: /memory/asynchronous-copy-pipelines/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - synchronous-baseline
+  - asynchronous-copy
+  - stage-lifecycle
+  - participants-convergence
+  - capability-constraints
+  - representation
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M13
+prerequisites:
+  - M03
+  - M05
+  - M08
+relatedUnits:
+  - M12
+hardwareGate: 'CC 7.0+ for the applicable cuda::memcpy_async and cuda::pipeline APIs; CC 8.0+ for the hardware-accelerated global-to-shared asynchronous copy path'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - Asynchronous Data Copies'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current global-to-shared asynchronous copy, completion, alignment, and hardware-path contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide 13.3 - Pipelines'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current pipeline stage, participation, release, early-exit, and warp-entanglement contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Asynchronous Data Copies and cuda::pipeline'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-data-copies'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 asynchronous-copy and staged-pipeline contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8.0 - Asynchronous Data Copies and cuda::pipeline'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#async_data_operations'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 asynchronous-copy and staged-pipeline contract'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m13 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,synchronous-baseline,asynchronous-copy,stage-lifecycle,participants-convergence,capability-constraints,representation,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M05,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M12 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'CC 7.0+ API; CC 8.0+ hardware-accelerated global-to-shared path' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import AdvancedMemoryRepresentation from '../../../../components/AdvancedMemoryRepresentation.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/asynchronous-copy-pipelines/" lang="zh-CN">阅读中文对应页</a>
+
+An [asynchronous copy (TERM-108)](/en/glossary/#term-108) changes how a copy is submitted and completed; it does not remove the shared-memory ownership and synchronization proof learned earlier. A [pipeline (TERM-109)](/en/glossary/#term-109) adds a finite FIFO of reusable [pipeline stages (TERM-110)](/en/glossary/#term-110). Correctness still begins with a simple synchronous phase order, then replaces each boundary deliberately.
+
+## What you should be able to do
+
+- Write the portable synchronous `global load -> shared store -> barrier -> use -> barrier before reuse` baseline first.
+- Map one logical batch to `producer_acquire -> cuda::memcpy_async -> producer_commit -> consumer_wait -> use -> consumer_release`.
+- State every producer and consumer participant, including bounds-invalid and early-exit behavior.
+- Separate CC 7.0+ API availability from the CC 8.0+ hardware-accelerated global-to-shared path and its alignment/type constraints.
+- Refuse to infer a particular hardware instruction or copy/compute overlap from source code alone.
+
+## Prerequisites
+
+Complete [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/), [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/), and [M08: Events as Dependencies and Device-Time Measurements](/en/memory/event-dependencies-timing/) in that order. M03 supplies the load/use/reuse phase proof, M05 supplies participant and visibility reasoning, and M08 prevents an asynchronous submission boundary from being mistaken for completion or timing evidence.
+
+M12 is related but is not a prerequisite. This unit requires no CUDA execution and grants no compilation or runtime Evidence Status.
+
+## Portable synchronous baseline first
+
+Begin with one shared buffer and an explicit phase ledger:
+
+```cpp
+for (int batch = 0; batch < batch_count; ++batch) {
+  shared[threadIdx.x] = load_valid ? global[input_index] : neutral;
+  __syncthreads();
+
+  if (output_valid) {
+    consume(shared);
+  }
+
+  __syncthreads();
+}
+```
+
+The first barrier orders all participating loads before cross-thread use. The second orders all uses before the next iteration overwrites the same storage. Bounds select a value or output action; they do not silently remove a thread from a block-wide barrier. This baseline is portable across the Stable Curriculum's C++17 lanes and remains the fallback when an asynchronous path is unavailable, ineligible, or not justified.
+
+Do not optimize an unproved protocol. First record the source range, destination range, assigned writer for every shared slot, readers of each slot, neutral or validity rule, participants, and next-overwrite point.
+
+## Replace the copy, not the proof
+
+With a pipeline completion mechanism, one batch has this abstract order:
+
+```text wrap
+acquire stage -> submit cuda::memcpy_async -> commit stage
+              -> wait for that stage -> use completed data -> release stage
+```
+
+`producer_acquire()` reserves the pipeline head. Copies submitted after acquire belong to that stage. `producer_commit()` advances the head and publishes that batch to the pipeline sequence. `consumer_wait()` waits for completion of the oldest committed stage selected by the pipeline contract. Only then may the consumer read that stage. `consumer_release()` returns the oldest stage for later acquisition and reuse.
+
+The word “asynchronous” does not authorize early access. Reading or writing the destination, or modifying source data still needed by the copy, before the documented completion boundary creates a race. If threads consume shared values copied by other threads, the design must also include the group synchronization required to make all peer-produced values safe to use; a thread-local completion wait must not be inflated into a block-wide guarantee.
+
+## Stage lifecycle and reuse
+
+For each logical batch, keep a stage ledger:
+
+| state | owner action | permitted shared-buffer action |
+| --- | --- | --- |
+| available | producer completes `producer_acquire()` | producer may submit copies into the acquired stage |
+| committed | producer completes `producer_commit()` | stage is pending; consumers must not read it yet |
+| ready | consumer completes the applicable `consumer_wait()` and required group synchronization | declared consumers may read the stage |
+| released | all declared consumers finish and collectively complete `consumer_release()` where required | stage may be acquired and overwritten for a later batch |
+
+Multiple stages separate the stage being filled from the stage being consumed. They create an opportunity for overlap, not proof that hardware performed overlap. Prologue, steady-state rotation, and drain must preserve the same batch-to-stage mapping; the final committed batches still need waits, uses, and releases.
+
+Completion before **use** prevents reading an unfinished copy. Completion of all declared reads before **release/reuse** prevents a later producer from overwriting a live stage. These are distinct edges, just as M03's first and second barriers protect different hazards.
+
+## Full participant and convergence contract
+
+For a shared, block-scope pipeline, declare whether it is unified or partitioned, the stage count, the producer set, the consumer set, and each thread's fixed role. Producer operations are collective across the producer set, and consumer operations are collective across the consumer set. Every participant must execute the same required acquire/commit or wait/release sequence for each logical stage. A bounds-invalid participant can submit no useful bytes or choose a neutral/validity path under the selected overload, but it cannot simply return through a collective sequence. A participating thread that must exit early follows the documented `pipeline.quit()` contract before exit.
+
+Pipeline submission is also warp-entangled on the relevant implementation path. Converged threads can coalesce a commit into one actual batch; divergent commits can advance the warp-shared actual sequence more times than each thread's perceived sequence. A later wait can therefore wait for more recent batches than intended. Keep commit operations converged; if preceding control flow diverged, reconverge with a correctly scoped `__syncwarp` before commit. This is a convergence and performance contract, not permission to omit the pipeline's full participant contract.
+
+## Capability, alignment, and type constraints
+
+The `cuda::memcpy_async` overloads using `cuda::barrier` or `cuda::pipeline` are available on CC 7.0+. The hardware-accelerated global-to-shared asynchronous copy path requires CC 8.0+. On eligible CC 8.x paths, copy sizes of 4, 8, or 16 bytes and matching source/destination alignment can enable the asynchronous instruction path; the copied element type must be trivially copyable for that path.
+
+`cuda::aligned_size_t<N>` is a programmer-supplied proof that both pointers meet alignment `N` and that the byte count is a multiple of `N`. Supplying a false proof is undefined behavior. Without a valid compile-time proof, the implementation may need a runtime alignment check or may use a fallback. API spelling, a CC 8.0+ target, and an aligned-looking declaration therefore do not independently prove which instruction was emitted.
+
+This Learning Unit stays with the portable baseline and the `cuda::memcpy_async` plus `cuda::pipeline` staged path. Architecture-specific bulk-copy systems are outside its teaching scope.
+
+## Pipeline representation
+
+<AdvancedMemoryRepresentation kind="pipeline" locale="en" />
+
+The representation labels stage ownership, pending completion, use, and release. It is a deterministic browser model, not a CUDA execution trace. Its apparent simultaneity is explanatory layout and supplies no overlap evidence.
+
+## Evidence boundary
+
+Source review can prove participant sets, stage rotation, completion edges, and declared alignment assumptions. It cannot prove that the compiler emitted a hardware asynchronous-copy instruction. That claim requires a pinned build and artifact inspection. It also cannot prove copy/compute overlap or speedup; those require Runtime-Verified measurements with an Environment Manifest, a correctness oracle, explicit timing boundaries, and retained observations.
+
+This page, its visual, and its Exercises execute no CUDA. Compilation, runtime, expected-observation, and recorded-observation arrays remain empty.
+
+## Retrieval check
+
+1. Which two hazards are prevented by the two barriers in the portable synchronous baseline?
+2. What ownership transition does each of acquire, commit, wait, and release perform for one pipeline stage?
+3. Why must a bounds-invalid thread still follow a shared pipeline's participant sequence?
+4. How can divergent warp commits cause a consumer to wait for more stages than its source-level sequence suggests?
+5. Why do `cuda::memcpy_async`, a CC 8.0+ target, and an alignment annotation prove neither a hardware instruction nor copy/compute overlap?
+
+## Continue with practice
+
+- Complete the [M13 Exercises](/en/memory/asynchronous-copy-pipelines/exercises/), then inspect the separate [reviewed solutions](/en/memory/asynchronous-copy-pipelines/solutions/).
+- Audit a staged-copy participant and evidence contract in [Practice Bank PB-R2-005](/en/practice/#pb-r2-005).
+- Revisit [TERM-108 asynchronous copy](/en/glossary/#term-108), [TERM-109 pipeline](/en/glossary/#term-109), and [TERM-110 pipeline stage](/en/glossary/#term-110) before making a hardware or overlap claim.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Asynchronous Data Copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html) defines the current global-to-shared copy directions, completion mechanisms, and CC 8.0+ LDGSTS path.
+- [CUDA Programming Guide v13.3: Pipelines](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html) defines current acquire/commit/wait/release stages, shared participation, early exit, and warp entanglement.
+- [CUDA C++ Programming Guide 12.9.1: Asynchronous Data Copies](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#asynchronous-data-copies) preserves the CC 7.0+ API, CC 8.0+ acceleration, alignment, trivially-copyable, and staged-pipeline contracts for the 12.9.1 archive.
+- [CUDA C Programming Guide 11.8.0: Asynchronous Data Copies](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#async_data_operations) preserves the corresponding CUDA 11.8 contracts.
+
+All four owner sources were accessed on **2026-08-29** in the exact order listed above. The phase ledger, stage table, teaching skeleton, questions, Exercises, and arrangement are original CC-BY-4.0 work for this site. No owner example, figure, or performance result is copied.
+
+**Fact checked: 2026-08-29.**

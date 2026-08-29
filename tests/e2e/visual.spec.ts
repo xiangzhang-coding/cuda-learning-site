@@ -125,7 +125,7 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
   }
 });
 
-test('@visual VIS04-VIS06 stay discoverable and evidence-neutral in every theme', async ({ page }, testInfo) => {
+test('@visual VIS04-VIS06 and VIS08 stay discoverable and evidence-neutral in every theme', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Semantic visual coverage is owned by pinned Chromium.');
   test.setTimeout(90_000);
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -167,6 +167,23 @@ test('@visual VIS04-VIS06 stay discoverable and evidence-neutral in every theme'
       await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
       await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
     }
+
+    await page.goto('/en/visuals/page-migration/');
+    await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+    await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', 'VIS08');
+    const migration = page.locator('cuda-page-migration[data-visual-id="VIS08"]');
+    await expect(migration).toHaveAttribute('data-ready', 'true');
+    await migration.locator('[data-page-migration-scenario]').selectOption('alternating-hot-page');
+    await migration.locator('[data-page-migration-action="step"]').click();
+    await expect(migration).toHaveAttribute('data-scenario-id', 'alternating-hot-page');
+    await expect(migration).toHaveAttribute('data-step-index', '1');
+    await expect(migration).toHaveAttribute('data-transition-count', '1');
+    await expect(migration.locator('[data-visual-controls]')).toBeVisible();
+    await expect(migration.locator('[data-interactive-workbench]')).toBeVisible();
+    await expect(migration.locator('[data-no-evidence]')).toBeVisible();
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+    await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
+    await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
   }
 });
 

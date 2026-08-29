@@ -1,0 +1,247 @@
+---
+title: 'M11: Stream-Ordered Allocation and Memory Pools'
+description: Order allocation, every use, and free across CUDA streams; select default or explicit memory pools; and treat reuse policies and release thresholds as controls rather than address or speed guarantees.
+pairId: m11
+counterpart: /memory/stream-ordered-allocation-memory-pools/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - support-gate
+  - allocation-completion
+  - same-stream-lifetime
+  - cross-stream-use
+  - all-uses-before-free
+  - pool-selection
+  - reuse-policies
+  - release-threshold
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M11
+prerequisites:
+  - M07
+  - M08
+relatedUnits:
+  - M09
+  - M14
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Stream-Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current allocation lifetime, memory pool, reuse policy, and release-threshold model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current allocator support gate, operation completion, pool, and attribute contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 allocator and memory-pool model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 allocator interfaces and attributes'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 allocator and memory-pool model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Stream Ordered Memory Allocator'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 allocator interfaces and attributes'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m11 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,support-gate,allocation-completion,same-stream-lifetime,cross-stream-use,all-uses-before-free,pool-selection,reuse-policies,release-threshold,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M09,M14' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import AdvancedMemoryRepresentation from '../../../../components/AdvancedMemoryRepresentation.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/stream-ordered-allocation-memory-pools/" lang="zh-CN">阅读中文对应页</a>
+
+[Stream-ordered allocation (TERM-102)](/en/glossary/#term-102) makes allocation and deallocation operations part of a CUDA stream's order. A [memory pool (TERM-103)](/en/glossary/#term-103) supplies the resources, while a [reuse policy (TERM-104)](/en/glossary/#term-104) controls which ordered relationships the allocator may consider. These are lifetime and policy contracts, not promises that a later allocation receives the same address or runs faster.
+
+## What you should be able to do
+
+- Place `cudaMallocAsync`, every use, and `cudaFreeAsync` in one dependency graph.
+- Distinguish the host return from completion of the allocation operation.
+- Make same-stream use valid through stream order and cross-stream use valid through explicit edges.
+- Select the current default pool or an explicit pool only after checking device support.
+- Explain reuse policies and the release threshold without promising address reuse, retained bytes, or speedup.
+
+## Prerequisites
+
+Complete [M07: Streams Replace a Global-Order Mental Model](/en/memory/stream-ordering/) and then [M08: Events as Dependencies and Device-Time Measurements](/en/memory/event-dependencies-timing/). M07 supplies per-stream order and the rule that different streams remain unordered without an edge. M08 supplies event record and wait semantics for the cross-stream lifetime graphs below.
+
+M11 changes the representation of allocation lifetime. It does not publish a canonical Runnable Example, execute CUDA, or infer performance from an API choice.
+
+## Gate the allocator path on device support
+
+Before selecting this allocator, query the target device with `cudaDeviceGetAttribute` and `cudaDevAttrMemoryPoolsSupported`. A nonzero result admits the stream-ordered allocator path for that device. A zero result requires a different allocation strategy; the presence of declarations in installed headers is not a device-support observation.
+
+```cpp
+int pools_supported = 0;
+cudaDeviceGetAttribute(
+    &pools_supported,
+    cudaDevAttrMemoryPoolsSupported,
+    device);
+```
+
+The query return must be checked before using `pools_supported`. This static fragment declares a gate but records no result for any device.
+
+## Allocation operation completion
+
+`cudaMallocAsync(&ptr, bytes, stream_allocate)` inserts an allocation operation into `stream_allocate` and returns a pointer through `ptr` immediately. The host-side return does not prove that the allocation operation has executed. The allocation must not be accessed until that operation completes.
+
+The usable interval is therefore bounded by stream execution, not merely by the lexical scope of `ptr`:
+
+```text
+allocation operation completes -> permitted ordered uses -> free operation begins
+```
+
+Future work enqueued in the same stream after the allocation is ordered after it. Work in another stream needs a path from allocation completion to that work, using an event or an appropriate stream/host synchronization boundary. A pointer value alone carries no such edge.
+
+## Same-stream lifetime
+
+The smallest reviewable lifetime uses one stream:
+
+```text
+stream_work: malloc_async(ptr) -> initialize(ptr) -> consume(ptr) -> free_async(ptr)
+```
+
+Per-stream order places both uses after allocation completion and before execution reaches the free. `cudaFreeAsync(ptr, stream_work)` inserts a free operation rather than imposing a device-wide host synchronization. Once execution reaches that free, the allocation can no longer be accessed.
+
+This graph proves a valid order if every use is shown. It does not prove that the allocator reused cached resources, returned a particular virtual address, or improved elapsed time.
+
+## Cross-stream use requires both boundary edges
+
+When allocation, use, and free occupy different streams, an edge is needed at each lifetime boundary:
+
+```text
+stream_allocate: malloc_async(ptr) -> record(ready)
+                                           |
+                                           v
+stream_use:              wait(ready) -> use(ptr) -> record(done)
+                                                        |
+                                                        v
+stream_release:                         wait(done) -> free_async(ptr)
+```
+
+The `ready` event makes the use wait for the captured allocation-stream prefix. The `done` event makes the free wait for the captured use-stream prefix. Host submission order between these lanes does not replace either edge. If several streams use the allocation, the free must be reachable from every last-use completion, not just from whichever use is easiest to draw.
+
+## All uses must precede free
+
+Review one allocation as a directed acyclic graph with four questions:
+
+1. Which stream contains the allocation operation?
+2. How does every first use become ordered after allocation completion?
+3. Where is the last use in each participating stream?
+4. How does the free become ordered after all of those last uses?
+
+All asynchronous accesses must occur between execution of the allocation and execution of the free under the promised stream order. Use before allocation completion or use after execution reaches the free is undefined behavior. Calling `cudaFreeAsync` is therefore not a substitute for proving the incoming edges from all uses.
+
+The pool may keep underlying resources after the logical allocation is freed. That caching does not extend the pointer's lifetime or make a stale pointer valid again.
+
+## Default and explicit memory pools
+
+Every `cudaMallocAsync` allocation uses a pool. Without an explicitly supplied pool, it uses the current memory pool associated with the supplied stream's device. Each device has a default pool, obtainable with `cudaDeviceGetDefaultMemPool`; it remains current unless the application sets another current pool with `cudaDeviceSetMemPool`.
+
+An explicit pool is created with `cudaMemPoolCreate` from declared properties. `cudaMallocFromPoolAsync` selects that pool for one allocation while its stream still establishes the ordering contract. Default and explicit pools share the same lifetime rule: pool selection never orders a cross-stream consumer and never excuses a missing last-use edge.
+
+Choose a pool by required properties, ownership, access, and lifecycle. Do not infer that an explicit pool is inherently faster than the default pool.
+
+## Reuse policies are permissions, not outcomes
+
+The allocator attempts to reuse memory previously released by `cudaFreeAsync` before requesting more backing memory. Pool attributes control which relationships it may use:
+
+- `cudaMemPoolReuseFollowEventDependencies` permits reuse across a documented event dependency.
+- `cudaMemPoolReuseAllowOpportunistic` permits consideration of completed frees without an explicit dependency between free and allocation.
+- `cudaMemPoolReuseAllowInternalDependencies` permits the allocator to insert a dependency needed to establish safe reuse.
+
+These policies can affect allocation patterns and ordering. In particular, opportunistic decisions can vary with progress, and internal dependency insertion can serialize work that the source graph did not explicitly draw. Set them from a reviewed policy, not from the assumption that more reuse is always better.
+
+Even when reuse is permitted, CUDA does not promise that the next allocation returns the same pointer value. Pointer equality is not an allocator acceptance criterion, and policy enablement is not performance evidence.
+
+## Release threshold controls a caching attempt
+
+`cudaMemPoolAttrReleaseThreshold` is a byte threshold for how much reserved memory a pool should hold before trying to release excess backing memory to the operating system at a later stream, event, or device synchronization. The default value in the reviewed Runtime contracts is zero. A larger value can ask the pool to retain a larger footprint between synchronization points; `cudaMemPoolTrimTo` can request an explicit trim.
+
+The threshold is not a hard pool-size cap, an exact retained-byte guarantee, or a promise that a synchronization releases a particular amount. It trades possible backing-memory retention against future allocation work. Any claim about footprint, latency, or speedup requires a declared workload and measurements outside this unit.
+
+## Visual model
+
+<AdvancedMemoryRepresentation kind="allocation" locale="en" />
+
+The representation separates the logical allocation interval, cross-stream dependency edges, pool resources, and release policy. It is a deterministic browser model, not an allocator trace and not proof of address reuse.
+
+## Evidence boundary
+
+The API fragments, dependency graphs, policy table, visual representation, and Exercises are static. No source was compiled, no support attribute was queried on a real device, and no allocation, address, footprint, duration, or speedup was observed. Every Learning Unit evidence axis remains empty.
+
+## Retrieval check
+
+1. Why may same-stream work submitted after `cudaMallocAsync` use the pointer even though the host call returns before allocation completion?
+2. Which two event edges are required when allocation, use, and free occupy three different streams?
+3. What must be true of every use before execution reaches `cudaFreeAsync`?
+4. How do the default/current pool path and `cudaMallocFromPoolAsync` differ?
+5. Why do a reuse policy and release threshold guarantee neither pointer equality nor speedup?
+
+## Continue with practice
+
+- Complete the [M11 Exercises](/en/memory/stream-ordered-allocation-memory-pools/exercises/), then inspect the separate [reviewed solutions](/en/memory/stream-ordered-allocation-memory-pools/solutions/).
+- Repair an incomplete allocation lifetime and pool claim in [Practice Bank PB-R2-003](/en/practice/#pb-r2-003).
+- Review [TERM-102 stream-ordered allocation](/en/glossary/#term-102), [TERM-103 memory pool](/en/glossary/#term-103), and [TERM-104 reuse policy](/en/glossary/#term-104) when naming the three independent contracts.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Stream-Ordered Memory Allocator](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html) supplies the current lifetime, pool, reuse-policy, and release-threshold model.
+- [CUDA Runtime API v13.3.1: Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html) defines the current support gate, allocation/free operation contracts, pool interfaces, and attributes.
+- [CUDA C++ Programming Guide 12.9.1: Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator) and [CUDA Runtime API 12.9.1: Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html) preserve the Toolkit 12.9.1 model and interfaces.
+- [CUDA C Programming Guide 11.8: Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#stream-ordered-memory-allocator) and [CUDA Runtime API 11.8.0: Stream Ordered Memory Allocator](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html) preserve the Toolkit 11.8 model and interfaces.
+
+All six owner sources were accessed on **2026-08-29**. Current conclusions follow CUDA Programming Guide v13.3 and CUDA Runtime API v13.3.1; the archives are comparison coordinates. The lifetime ledgers, policy distinctions, Exercises, and arrangement are original composition for this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-29.**

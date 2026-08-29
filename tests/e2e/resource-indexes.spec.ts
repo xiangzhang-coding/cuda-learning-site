@@ -14,6 +14,9 @@ const releasePracticeIds = [
   'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
 ] as const;
+const issue19PracticeIds = [
+  'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
+] as const;
 const releaseGlossaryIds = [
   'TERM-066',
   'TERM-067',
@@ -46,12 +49,22 @@ const releaseGlossaryIds = [
   'TERM-094',
   'TERM-095',
 ] as const;
+const issue19GlossaryIds = [
+  'TERM-096', 'TERM-097', 'TERM-098', 'TERM-099', 'TERM-100',
+  'TERM-101', 'TERM-102', 'TERM-103', 'TERM-104', 'TERM-105',
+  'TERM-106', 'TERM-107', 'TERM-108', 'TERM-109', 'TERM-110',
+  'TERM-111', 'TERM-112', 'TERM-113', 'TERM-114',
+] as const;
 const releaseSourceIds = [
   'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
   'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
 ] as const;
+const issue19SourceIds = [
+  'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027',
+  'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
+] as const;
 const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
-const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07'] as const;
+const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -59,11 +72,18 @@ const issue17Ids = new Set<string>([
   'TERM-092', 'TERM-093', 'TERM-094', 'TERM-095',
   'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
 ]);
+const issue19Ids = new Set<string>([
+  ...issue19PracticeIds,
+  ...issue19GlossaryIds,
+  ...issue19SourceIds,
+  'VIS08',
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
   labs: 'LAB07',
-  practice: 'PB-R1-024',
-  glossary: 'TERM-095',
-  sources: 'SRC-CUDA-024',
+  practice: 'PB-R2-006',
+  visuals: 'VIS08',
+  glossary: 'TERM-114',
+  sources: 'SRC-CUDA-030',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -131,23 +151,26 @@ test('filter controls and direct resource links support keyboard operation', asy
   await expect(page).toHaveURL(/\/en\/labs\/vector-addition\/$/);
 });
 
-test('issue-17 release records keep exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
+test('issue-19 final catalog keeps exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(6);
-  expect(counts.practice).toBe(29);
-  expect(counts.visuals).toBe(11);
-  expect(counts.glossary).toBe(95);
-  expect(counts.sources).toBe(39);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(180);
+  expect(counts.practice).toBe(35);
+  expect(counts.visuals).toBe(12);
+  expect(counts.glossary).toBe(114);
+  expect(counts.sources).toBe(45);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(212);
 
   const expectedIds = [
     ...releaseLabIds,
     ...releaseVisualIds,
     ...releasePracticeIds,
+    ...issue19PracticeIds,
     ...releaseGlossaryIds,
+    ...issue19GlossaryIds,
     ...releaseSourceIds,
+    ...issue19SourceIds,
   ];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
@@ -156,6 +179,9 @@ test('issue-17 release records keep exact cards, anchors, counts, freshness, and
   });
   for (const record of records.filter(({ planningId }) => issue17Ids.has(planningId))) {
     expect(record.reviewedOn, record.planningId).toBe('2026-08-28');
+  }
+  for (const record of records.filter(({ planningId }) => issue19Ids.has(planningId))) {
+    expect(record.reviewedOn, record.planningId).toBe('2026-08-29');
   }
 
   for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {
@@ -171,8 +197,8 @@ test('issue-17 release records keep exact cards, anchors, counts, freshness, and
       await expect(index.locator(`[data-resource-id="${terminalId}"]`)).toHaveCount(1);
     }
     if (group === 'labs') {
-      await expect(index.locator('[data-resource-id="LAB06"], [data-resource-id="EX07"]')).toHaveCount(0);
-      await expect(index.locator('h3 a', { hasText: /^(?:LAB06|EX07)\b/ })).toHaveCount(0);
+      await expect(index.locator('[data-resource-id="LAB06"]')).toHaveCount(0);
+      await expect(index.locator('h3 a', { hasText: /^LAB06\b/ })).toHaveCount(0);
     }
 
     for (const record of groupRecords) {

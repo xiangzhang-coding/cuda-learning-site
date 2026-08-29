@@ -3,6 +3,9 @@ import { expect, test } from '@playwright/test';
 
 import ex05Project from '../../examples/ex05-coalesced-strided-access/project.json' with { type: 'json' };
 import ex06Project from '../../examples/ex06-shared-memory-tile-bank-padding/project.json' with { type: 'json' };
+import ex07Project from '../../examples/ex07-streams-events-overlap/project.json' with { type: 'json' };
+import ex08Project from '../../examples/ex08-unified-memory-migration/project.json' with { type: 'json' };
+import ex09Project from '../../examples/ex09-graph-capture/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
@@ -25,17 +28,20 @@ const ex04DownloadUrl =
 const projectExamples = [
   { route: '/en/examples/coalesced-strided-access/', project: ex05Project },
   { route: '/en/examples/shared-memory-tile-bank-padding/', project: ex06Project },
+  { route: '/en/examples/streams-events-overlap/', project: ex07Project },
+  { route: '/en/examples/unified-memory-migration/', project: ex08Project },
+  { route: '/en/examples/graph-capture/', project: ex09Project },
   { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
-const releaseCatalogCounts = [
+const currentCatalogCounts = [
   { route: '/en/labs/', count: 6 },
-  { route: '/en/practice/', count: 29 },
-  { route: '/en/visuals/', count: 11 },
-  { route: '/en/glossary/', count: 95 },
-  { route: '/en/sources-and-versions/', count: 39 },
+  { route: '/en/practice/', count: 35 },
+  { route: '/en/visuals/', count: 12 },
+  { route: '/en/glossary/', count: 114 },
+  { route: '/en/sources-and-versions/', count: 45 },
 ] as const;
 
-test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
+test('serves the exact current publication while preserving R1 metadata and production canonicals', async ({ page, request }) => {
   test.setTimeout(300_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
@@ -62,12 +68,58 @@ test('serves the exact static release with production canonical metadata and no 
     knownLimitations: expect.arrayContaining(['R2 and later curriculum material is outside this release.']),
   });
 
+  const publicationResponse = await request.get('/publication.json');
+  expect(publicationResponse.ok()).toBe(true);
+  await expect(publicationResponse.json()).resolves.toMatchObject({
+    schemaVersion: 1,
+    publicationId: 'current',
+    reviewDate: '2026-08-29',
+    sourceCommit: expectedSourceCommit,
+    artifactType: 'static-assets',
+    canonicalOrigin,
+    releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
+    scope: {
+      publicationPairs: 131,
+      sourceRoutes: 262,
+      learningUnits: [
+        'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
+        'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
+        'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
+        'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
+        'Q01', 'Q03', 'Q04', 'Q05',
+      ],
+      runnableExamples: [
+        'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX16',
+      ],
+      labs: ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'],
+      visualExplainers: [
+        'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
+        'VIS19', 'VIS20', 'VIS21', 'VIS22',
+      ],
+      practiceBankEntries: 35,
+      glossaryTerms: 114,
+      sourceRecords: 45,
+    },
+    evidence: {
+      compileChecked: ['EX02', 'LAB02'],
+      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
+      pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
+      runtimeVerified: [],
+      referenceEnvironments: [],
+      performanceObservations: [],
+    },
+    knownLimitations: expect.arrayContaining([
+      'LAB06 has no current public destination.',
+      'This incremental publication record is not a completed R2 aggregate release review.',
+    ]),
+  });
+
   const legalResponse = await request.get('/legal/THIRD_PARTY_NOTICES.md');
   expect(legalResponse.ok()).toBe(true);
   expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(218);
+  expect(publishedRoutes).toHaveLength(262);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -76,8 +128,8 @@ test('serves the exact static release with production canonical metadata and no 
   }
 
   await page.goto('/en/about/');
-  await expect(page.locator('main')).toContainText(/109 Publication Pairs/);
-  await expect(page.locator('main')).toContainText(/218 source routes/);
+  await expect(page.locator('main')).toContainText(/131 Publication Pairs/);
+  await expect(page.locator('main')).toContainText(/262 source routes/);
   const navigation = page.getByRole('navigation', { name: 'Main' });
   expect(
     await navigation.locator('a[href^="/en/examples/"]').evaluateAll((links) =>
@@ -87,14 +139,17 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/examples/coalesced-strided-access/',
     '/en/examples/environment-report/',
     '/en/examples/error-handling-lifecycle/',
+    '/en/examples/graph-capture/',
     '/en/examples/multidimensional-indexing/',
     '/en/examples/sanitizer-defect-suite/',
     '/en/examples/shared-memory-tile-bank-padding/',
+    '/en/examples/streams-events-overlap/',
+    '/en/examples/unified-memory-migration/',
     '/en/examples/vector-addition/',
   ]);
 
-  expect(releaseCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(180);
-  for (const { route, count } of releaseCatalogCounts) {
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(212);
+  for (const { route, count } of currentCatalogCounts) {
     await page.goto(route);
     await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
   }
@@ -117,7 +172,7 @@ test('serves the exact static release with production canonical metadata and no 
 });
 
 test('supports direct locale navigation, keyboard flow, and relevant bilingual search', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(150_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/start/using-the-learning-site/');
   await page.keyboard.press('Tab');
@@ -269,6 +324,46 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       query: 'Stream and Event Dependency Traces',
       expectedHrefs: ['/en/visuals/stream-event-dependencies/'],
     },
+    {
+      query: 'M09 Pinned Memory and Transfer Overlap',
+      expectedHrefs: ['/en/memory/pinned-memory-transfer-overlap/'],
+    },
+    {
+      query: 'M10 Unified Memory and Page Migration',
+      expectedHrefs: ['/en/memory/unified-memory-page-migration/'],
+    },
+    {
+      query: 'M11 Stream-Ordered Allocation and Memory Pools',
+      expectedHrefs: ['/en/memory/stream-ordered-allocation-memory-pools/'],
+    },
+    {
+      query: 'M12 Cooperative Groups and Composable Synchronization',
+      expectedHrefs: ['/en/memory/cooperative-groups/'],
+    },
+    {
+      query: 'M13 Asynchronous Copy and Staged Pipelines',
+      expectedHrefs: ['/en/memory/asynchronous-copy-pipelines/'],
+    },
+    {
+      query: 'M14 CUDA Graphs and Repeated Launch Structure',
+      expectedHrefs: ['/en/memory/cuda-graphs/'],
+    },
+    {
+      query: 'EX07 Streams Events and Overlap Runnable Example',
+      expectedHrefs: ['/en/examples/streams-events-overlap/'],
+    },
+    {
+      query: 'EX08 Unified Memory Migration Runnable Example',
+      expectedHrefs: ['/en/examples/unified-memory-migration/'],
+    },
+    {
+      query: 'EX09 CUDA Graph Capture Runnable Example',
+      expectedHrefs: ['/en/examples/graph-capture/'],
+    },
+    {
+      query: 'VIS08 Managed-Memory Page Migration',
+      expectedHrefs: ['/en/visuals/page-migration/'],
+    },
   ] as const) {
     await expectRankedSearchResult(page, {
       route: '/en/',
@@ -307,6 +402,9 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
 
   await page.goto('/en/visuals/kernel-journey/');
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' });
+  await expect(page.locator('[data-visual-controls]')).toBeHidden();
+  await expect(page.locator('[data-static-fallback]')).toBeVisible();
+  await page.goto('/en/visuals/page-migration/');
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
   for (const { route, controls } of [
@@ -418,6 +516,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/memory-hierarchy-lifetime/',
     '/en/visuals/warp-divergence/',
     '/en/visuals/stream-event-dependencies/',
+    '/en/visuals/page-migration/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
     ...Object.keys(embeddedFallbacks),
@@ -519,12 +618,17 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       .toEqual(canonicalRanges);
   }
 
+  const archives = new Map<string, Buffer>();
   for (const { project } of projectExamples) {
-    const response = await request.get(project.downloadUrl);
-    expect(response.ok()).toBe(true);
-    expect(response.headers()['content-type']).toMatch(/zip|octet-stream/);
-    const archive = await response.body();
-    expect(archive.subarray(0, 2).toString('ascii')).toBe('PK');
+    let archive = archives.get(project.downloadUrl);
+    if (!archive) {
+      const response = await request.get(project.downloadUrl);
+      expect(response.ok()).toBe(true);
+      expect(response.headers()['content-type']).toMatch(/zip|octet-stream/);
+      archive = await response.body();
+      expect(archive.subarray(0, 2).toString('ascii')).toBe('PK');
+      archives.set(project.downloadUrl, archive);
+    }
     for (const relativePath of new Set([
       ...project.build.inputs,
       ...project.build.hostTestInputs,
@@ -537,7 +641,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     }
   }
 
-  const missing = await request.get('/api/r1-smoke-must-not-exist');
+  const missing = await request.get('/api/publication-smoke-must-not-exist');
   expect(missing.status()).toBe(404);
   expect(failures).toEqual([]);
 });

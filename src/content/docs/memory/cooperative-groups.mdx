@@ -1,0 +1,264 @@
+---
+title: 'M12：协作组与可组合同步'
+description: 明确 group membership、scope、participants、partitioning、synchronization、collective arguments、dynamic active sets 与 cooperative grid-launch gate。
+pairId: m12
+counterpart: /en/memory/cooperative-groups/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - group-contract
+  - thread-block
+  - tiled-partition
+  - synchronization-collectives
+  - collective-arguments
+  - coalesced-threads
+  - grid-synchronization
+  - version-boundary
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M12
+prerequisites:
+  - M05
+  - M06
+relatedUnits:
+  - M13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Cooperative Groups'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current group, partition, synchronization, collective, and large-scale group model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Device-Callable Cooperative Groups API'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html#cooperative-groups-api'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, tile, coalesced-group, partition, and collective API contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Execution Control'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current single-device cooperative launch gate and size constraints'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Cooperative Groups'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cooperative-groups'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 Cooperative Groups model, including historical multi-device material'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Execution Control'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EXECUTION.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 cooperative launch interfaces, including the deprecated multi-device API'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Cooperative Groups'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cooperative-groups'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 Cooperative Groups model, including historical multi-device material'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Execution Control'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__EXECUTION.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 cooperative launch interfaces, including the deprecated multi-device API'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m12 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,group-contract,thread-block,tiled-partition,synchronization-collectives,collective-arguments,coalesced-threads,grid-synchronization,version-boundary,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M05,M06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M13 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import AdvancedMemoryRepresentation from '../../../components/AdvancedMemoryRepresentation.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/cooperative-groups/" lang="en">Read the English counterpart</a>
+
+协作组（Cooperative Groups，[TERM-105](/glossary/#term-105)）把协作线程组（thread group，[TERM-106](/glossary/#term-106)）表示为 explicit handle。每项集合操作（collective operation，[TERM-107](/glossary/#term-107)）都相对于该 handle 的 membership、scope、participants 与 argument contract 解释。这种 representation 让 synchronization 可组合，同时不会把 assumed warp 或 whole grid 变成 default scope。
+
+## 学完本单元，你应该能
+
+- 使用 group 前说明 handle membership、synchronization scope 与 required participants。
+- 以 `this_thread_block` 作为 stable block-wide baseline，并 collectively 使用 `tiled_partition` 分组。
+- 仅在 named group 正确参与时使用 `sync`、reduce、scan 与 related collectives。
+- 执行 group-wide argument contract，同时识别 API 明确允许 per-thread 不同的 arguments。
+- 把 `coalesced_threads` 限定在 dynamic active-set boundary 内，把 grid synchronization 放在 cooperative-launch gate 后。
+
+## 先修关系
+
+先完成 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)，再完成 [M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)。M05 提供 barrier scope 与 visibility reasoning；M06 规定不能用 implicit lockstep assumptions 替代 active-thread sets 与 warp progress。
+
+M12 引入 explicit group contracts。它没有 canonical Runnable Example，不 launch kernel，也不授予 compilation/runtime evidence。
+
+## 四部分 group contract
+
+调用 group operation 前写出四个 fields：
+
+| Field | Review question |
+| --- | --- |
+| handle | 哪个 object 在该 call site 命名 group？ |
+| membership | 哪些 threads 属于这个 exact group instance？ |
+| scope | 该 operation 可以协调哪些 threads 与 memory effects？ |
+| participants | 哪些 members 必须到达 construction 或 collective call？ |
+
+把 handle 传入 helper，可以在 function boundary 暴露 contract：
+
+```cpp
+template <class Group>
+__device__ void publish_then_sync(const Group& group, int* shared_value, int value) {
+  if (group.thread_rank() == 0) *shared_value = value;
+  group.sync();
+}
+```
+
+Caller 必须提供 members 能合法访问 `shared_value` 的 group，每个 required participant 都必须调用 helper。Templated signature 让 algorithm 可组合，但不会让所有 group types 在 semantics 上 interchangeable。
+
+## `this_thread_block`：stable baseline
+
+`cooperative_groups::this_thread_block()` 返回包含 caller block 全部 threads 的 `thread_block` handle。`thread_rank()`/`num_threads()` 描述 membership。`sync()` 是 block-group collective：所有 member threads 必须参与；所有成员到达后任何成员才能继续；documented pre-sync memory accesses 在该点后对 group members visible。
+
+```cpp
+namespace cg = cooperative_groups;
+cg::thread_block block = cg::this_thread_block();
+block.sync();
+```
+
+M12 以 block-wide handle 为 baseline，因为 launch geometry 已定义它的 membership，ordinary kernels 就能使用它。把 `block` explicit 传给 helper，比在 caller contract 不说明 participation 的 function 中隐藏 block barrier 更容易复核。
+
+## `tiled_partition`：collective 构造 subgroups
+
+`cg::tiled_partition<32>(block)` 把 parent block 分为 fixed-size、one-dimensional row-major tiles，并向每个 caller 返回其 tile handle。Partition operation 本身是 parent group collective；`block` 每个 member 都必须参与。只在部分 block threads 到达的 branch 中构造 tile，可能 deadlock 或 corrupt data。
+
+```cpp
+cg::thread_block block = cg::this_thread_block();
+auto tile = cg::tiled_partition<32>(block); // reached by the complete parent block
+
+if (tile.thread_rank() == 0) {
+  // one leader per tile
+}
+tile.sync(); // all members of this tile participate
+```
+
+按 documented API constraints 与 parent size 复核 tile size。Partition 后，`tile.sync()` 只命名 tile，不命名 parent block。Handle 同时改变 membership 与 synchronization scope。
+
+## Synchronization 与 collectives 使用 named group
+
+`group.sync()` 是 named threads 的 collective barrier。Cooperative Groups 还为 supported group types 提供 reduce、inclusive/exclusive scan 等 collectives。每种情况下，group handle 都标识 participant set；source proximity、warp membership 或相同 branch text 都不能扩大它。
+
+Tile reduction 可以写为：
+
+```cpp
+int tile_sum = cg::reduce(tile, value, cg::plus<int>());
+```
+
+每个 tile member 参与同一个 collective instance。每个 thread 可以提供不同 `value`，因为该 parameter 被明确规定为 per-thread reduction input；group 与 operation 仍必须在 collective 中 agree。
+
+## Group-wide argument contract
+
+对 collective call，group 全部 threads 必须向对应 arguments 传递相同 values，除非 API 明确允许 differences。违反该 rule 是 undefined behavior。应逐个 argument 应用 contract，不能模糊地说“threads 调用同一 function”。
+
+对于 `reduce(tile, value, cg::plus<int>())`：
+
+- `tile` 必须为所有 participants 命名同一 group instance。
+- `value` 可以不同，因为 reduce API 明确接受每 thread 一项 contribution。
+- Operation object 必须在 group 中描述同一种 reduction operation。
+- 每个 tile member 必须执行该 collective instance。
+
+若 divergent control 只让部分 group 到达，相同 call-site appearance 仍不够。Participation 与 argument agreement 是不同 review columns。
+
+## `coalesced_threads`：dynamic set boundary
+
+`coalesced_threads()` 从 warp 在该点 active 的 threads 中发现 `coalesced_group`。Construction 是 opportunistic：returned members 是 active，但 API 不保证 particular active subset，也不保证这些 threads 在 later execution 中一直 coalesced。执行 collective 时它们会被带回一起，之后仍可再次 diverge。
+
+把 returned handle 视为 point-specific dynamic set：
+
+```text
+branch path -> coalesced_threads() captures active members -> collective on that handle
+```
+
+不要把它改名为“the warp”、假设 32 members，或复用另一 control-flow point 的 membership claim。Divergence/reconvergence 后 fresh call 可能代表 different group。
+
+## Grid synchronization 需要 cooperative-launch gate
+
+`this_grid()` 得到的 `grid_group` 可以命名 one grid 全部 threads，但 grid-wide `sync()` 仅对 cooperatively launched kernel 合法。Host path 必须：
+
+1. 查询 `cudaDevAttrCooperativeLaunch`，并检查 nonzero result。
+2. 选择满足 cooperative launch residency/size constraints 的 grid。
+3. 使用 `cudaLaunchCooperativeKernel` launch。
+4. 确保每个 grid-group participant 到达每项 grid collective。
+
+Normal `<<<...>>>` launch 不能替代该 gate。Runtime contract 还使用 active blocks per multiprocessor 乘 multiprocessor count 限制 total block count。该 path 增加 hardware、launch、occupancy 与 full-grid participation obligations，因此 M12 不把 grid groups 当作 baseline。先使用 block/tile groups；只有 algorithm 确实需要 inter-block synchronization 且 gate 可复核时，才选择 grid group。
+
+## CUDA 13 version boundary
+
+Current CUDA 13 Cooperative Groups 支持 single-device cooperative grid synchronization，但 multi-device Cooperative Groups launch APIs 与 related references 已被移除。CUDA 12.9.1/11.8 archive pages 仍含已 deprecated 的 `cudaLaunchCooperativeKernelMultiDevice` 与 multi-grid material。这些 archive sections 是 historical coordinates，不是 current CUDA 13 guidance。
+
+不得从 archived example 推导 current multi-device synchronization path。本 Learning Unit 不教授 multi-device Cooperative Groups baseline。
+
+## 可视化模型
+
+<AdvancedMemoryRepresentation kind="group" locale="zh-CN" />
+
+该 representation 比较 block、tile、dynamic coalesced set 与 gated grid 的 explicit membership、scope 与 participation boundaries。它在 browser 中建模 contracts，不执行 CUDA collective。
+
+## 证据边界
+
+Group tables、code fragments、participation graphs、visual representation 与 Exercises 都是 static。没有 source 被编译，没有查询 cooperative-launch attribute/occupancy limit，也没有 collective 或 grid synchronization 运行。Learning Unit 的每条 evidence axis 都保持为空。
+
+## 离开前检查
+
+1. 哪四个 fields 让 helper-function boundary 的 group operation 可复核？
+2. 即使 later branch 只使用一个 tile，为什么 parent-block 全部 members 仍必须参与 `tiled_partition`？
+3. 对 `reduce(tile, value, op)`，哪些 arguments 可以不同，哪些必须 group-wide agree？
+4. 为什么 `coalesced_threads()` 返回的 handle 不是某个 warp 的 permanent synonym？
+5. 合法 `grid_group::sync()` 前有哪些 support、launch、size 与 participation gates？
+
+## 继续练习
+
+- 完成 [M12 练习（Exercise）](/memory/cooperative-groups/exercises/)，再查看独立的[参考解答](/memory/cooperative-groups/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-004](/practice/#pb-r2-004)修复 hidden participant mismatch 与 ungated grid barrier。
+- 编写 helper contracts 时复核 [TERM-105 Cooperative Groups](/glossary/#term-105)、[TERM-106 thread group](/glossary/#term-106)与 [TERM-107 collective operation](/glossary/#term-107)。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Cooperative Groups](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html)提供 current group、partition、synchronization、collective、argument 与 large-scale group model。
+- [CUDA Programming Guide v13.3：Device-Callable Cooperative Groups API](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html#cooperative-groups-api)定义 current `thread_block`、tile、`coalesced_group`、partition 与 collective details。
+- [CUDA Runtime API v13.3.1：Execution Control](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html)定义 current single-device cooperative launch gate 与 size constraints。
+- [CUDA C++ Programming Guide 12.9.1：Cooperative Groups](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cooperative-groups)与 [CUDA Runtime API 12.9.1：Execution Control](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EXECUTION.html)保留 Toolkit 12.9.1 contracts 与 historical deprecated multi-device path。
+- [CUDA C Programming Guide 11.8：Cooperative Groups](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cooperative-groups)与 [CUDA Runtime API 11.8.0：Execution Control](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__EXECUTION.html)保留 Toolkit 11.8 contracts 与 historical deprecated multi-device path。
+
+七项 owner source 均访问于 **2026-08-29**。Current conclusions 以 CUDA Programming Guide v13.3 与 CUDA Runtime API v13.3.1 为准；archive-only multi-device material 不进入 current baseline。Contract tables、participant fixtures、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 figure。
+
+**事实核查日期：2026-08-29。**
