@@ -57,7 +57,7 @@ evidence:
   expectedObservations:
     - The contiguous, misaligned, and strided scenarios should each pass exact comparison against the CPU reference before profiling begins.
     - With source, build, logical work, launch geometry, profiler options, and device frozen, each scenario should produce a labeled raw profiler record only when the selected metric is available and collection is permitted.
-    - Repeated profiler samples should be retained without a predicted ordering among contiguous, misaligned, and strided; the predeclared median and min/max spread summarize only the qualifying samples while every attempt remains retained.
+    - Repeated profiler samples should be retained without a predicted ordering among contiguous, misaligned, and strided; the predeclared median and min/max spread summarize the fixed 10-attempt batch only when all 10 attempts qualify.
   recordedObservations: []
 sources:
   - title: 'CUDA Toolkit 11.8 Release Notes'
@@ -230,7 +230,7 @@ correctness_method: <fill EX05 CPU reference and exact comparison>
 correctness_criteria: <fill all scenarios, all 256 outputs, CUDA boundaries, statuses>
 measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
 measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
-statistics: <fill predeclared median, min/max spread, and all-attempt retention policy>
+statistics: <fill fixed 10-attempt batch, predeclared median, min/max spread, and all-attempt retention policy>
 raw_logs: <fill raw stdout/stderr paths>
 raw_measurements: <fill report/CSV paths>
 exit_statuses: <fill one status path per command>
@@ -286,8 +286,8 @@ Write this contract before the first profiler collection:
 
 1. Freeze source commit, binary SHA-256, Lane, device, scenario order, logical work, build flags, launch geometry, `ncu` options, and metric list. Preserve only the canonical `offset`/`stride` differences.
 2. Directly run the complete binary once more as a process-level warm-up. Check correctness but exclude that run from every statistic. It cannot remove all startup or replay effects in a new profiler process, so do not call it a steady-state event warm-up.
-3. Make independent, complete measured profiler invocations of the same unchanged binary until 10 samples satisfy the predeclared validity rule. Retain every attempt in acquisition order and do not delete samples merely because they look unusual.
-4. Predeclare the summary for each scenario/metric as the median and min/max spread of the 10 qualifying raw samples. Only a nonzero tool/application status, correctness failure, missing target kernel, or missing metric value makes a sample invalid; retain that record and reason. A large or inconvenient value is not an invalid sample.
+3. Make exactly 10 independent, complete measured profiler invocations of the same unchanged binary. Retain every attempt in acquisition order and do not delete samples merely because they look unusual.
+4. Predeclare the summary for each scenario/metric as the median and min/max spread of that fixed 10-attempt batch, calculated only when all 10 attempts qualify. Only a nonzero tool/application status, correctness failure, missing target kernel, or missing metric value makes an attempt invalid; retain that record and reason. A large or inconvenient value is not invalid. If any attempt is invalid, publish no summary and record a batch blocker; after correcting the cause, restart all 10 attempts instead of selectively replacing samples.
 
 These rules freeze equal work/build/launch. If any frozen dimension changes, discard the batch and restart rather than joining samples from different contracts.
 
@@ -341,13 +341,13 @@ CUDA event timing and a profiler measurement are different records. Timing-enabl
 
 LAB04 therefore adds no event-instrumented binary and does not combine profiler duration, host wall-clock, and event time. A separate event experiment must redeclare source/build, warm-up, completion boundary, and statistic instead of borrowing this Lab's frozen-binary record.
 
-State only what each metric's owner definition supports, compare the same metric and unit under identical collection options, and report the median and min/max spread with paths to every attempt. This Lab predicts no metric ordering, latency, bandwidth, throughput, or speedup among contiguous, misaligned, and strided. Preserve equal, noisy, or model-disagreeing results and investigate rather than rewriting expectations.
+State only what each metric's owner definition supports. If all 10 attempts qualify under the same metric, unit, options, and device, report the median and min/max spread with paths to every attempt; otherwise report the blocker and no summary. This Lab predicts no metric ordering, latency, bandwidth, throughput, or speedup among contiguous, misaligned, and strided. Preserve equal, noisy, or model-disagreeing results and investigate rather than rewriting expectations.
 
 ## Expected observations, not recorded results
 
 - Contiguous, misaligned, and strided should first pass exact CPU-reference comparison for all 256 outputs.
 - After version, metric-query, and permission gates pass, each scenario should map to its own raw profiler record and exit status; this promises no direction or magnitude.
-- The warm-up should be excluded, every attempt should be retained, and the predeclared median plus min/max spread should summarize the 10 qualifying samples.
+- The warm-up should be excluded and all 10 attempts retained; the predeclared median plus min/max spread should be reported only when the complete fixed batch qualifies.
 
 These are expected observations, not recorded results. There is no prefilled numeric GPU result, runtime output, or profiler result on this page; `recordedObservations` remains empty.
 

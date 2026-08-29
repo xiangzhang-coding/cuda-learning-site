@@ -57,7 +57,7 @@ evidence:
   expectedObservations:
     - The unpadded and padded variants should produce the same logical outputs and each pass exact comparison against the CPU reference before profiling begins.
     - With source, build, logical work, launch geometry, profiler options, and device frozen, each layout should produce a labeled raw bank-conflict profiler record only when the selected metric is available and collection is permitted.
-    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared median and min/max spread summarize only the qualifying samples while every attempt remains retained.
+    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared median and min/max spread summarize the fixed 10-attempt batch only when all 10 attempts qualify.
   recordedObservations: []
 sources:
   - title: 'CUDA Toolkit 11.8 Release Notes'
@@ -229,7 +229,7 @@ correctness_method: <fill EX06 CPU reference and exact comparison>
 correctness_criteria: <fill same logical outputs, all 32 lanes, CUDA boundaries, statuses>
 measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
 measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
-statistics: <fill predeclared median, min/max spread, and all-attempt retention policy>
+statistics: <fill fixed 10-attempt batch, predeclared median, min/max spread, and all-attempt retention policy>
 raw_logs: <fill raw stdout/stderr paths>
 raw_measurements: <fill report/CSV paths>
 exit_statuses: <fill one status path per command>
@@ -283,8 +283,8 @@ Before the first profiler collection:
 
 1. Freeze the same source commit, binary SHA-256, Lane, device, input, logical work, variant order, build flags, launch geometry, `ncu` options, and metric list. Padding is the only layout variable.
 2. Directly run the complete binary once more as a process-level warm-up, recheck exact outputs, and exclude it from all statistics. It is not equivalent to steady-state warm-up inside each new profiler process.
-3. Make independent measured profiler invocations of the same binary until 10 samples satisfy the predeclared validity rule. Retain every unpadded/padded attempt in acquisition order.
-4. Predeclare the summary for each layout/metric as the median and min/max spread of the 10 qualifying samples. Only a nonzero tool/application status, correctness failure, missing kernel, or missing metric value marks a sample invalid; preserve the record and reason. A large or inconvenient value is not an invalid sample.
+3. Make exactly 10 independent measured profiler invocations of the same binary and retain every unpadded/padded attempt in acquisition order.
+4. Predeclare the summary for each layout/metric as the median and min/max spread of that fixed 10-attempt batch, calculated only when all 10 attempts qualify. Only a nonzero tool/application status, correctness failure, missing kernel, or missing metric value marks an attempt invalid; preserve the record and reason. A large or inconvenient value is not invalid. If any attempt is invalid, publish no summary and record a batch blocker; after correcting the cause, restart all 10 attempts instead of selectively replacing samples.
 
 This is the equal work/build/launch freeze. Restart the complete batch after changing a frozen dimension; never select or join samples across contracts.
 
@@ -334,13 +334,13 @@ Event timing and a profiler measurement are not interchangeable. A timing-enable
 
 LAB05 does not modify the binary to add events and does not mix event, wall-clock, and profiler samples. A new event experiment must redeclare build, warm-up, synchronization boundary, and statistic.
 
-Compare the 10 qualifying samples only under the same metric, unit, options, and device, and attach every attempt's path to the median and min/max spread. The address model can explain bank mapping, but this Lab predicts no profiler ordering, duration, latency, throughput, or speedup between unpadded and padded. A missing required metric or result that cannot support interpretation remains a blocker or uncertainty, not a prediction.
+If all 10 attempts qualify under the same metric, unit, options, and device, attach every path to the median and min/max spread; otherwise report the blocker and no summary. The address model can explain bank mapping, but this Lab predicts no profiler ordering, duration, latency, throughput, or speedup between unpadded and padded. A missing required metric or result that cannot support interpretation remains a blocker or uncertainty, not a prediction.
 
 ## Expected observations, not recorded results
 
 - Unpadded and padded should produce the same logical outputs and each exactly match the CPU reference for all 32 lanes.
 - After the gates pass, each layout should map to its raw bank-conflict profiler measurement, report, and status; no direction or value is promised.
-- The warm-up should be excluded, every attempt retained, and the predeclared median plus min/max spread used to summarize the 10 qualifying samples.
+- The warm-up should be excluded and all 10 attempts retained; the predeclared median plus min/max spread should be reported only when the complete fixed batch qualifies.
 
 These are expected observations, not recorded results. There is no prefilled numeric GPU result, runtime output, or profiler result on this page, and `recordedObservations` is empty.
 

@@ -57,7 +57,7 @@ evidence:
   expectedObservations:
     - The unpadded and padded variants should produce the same logical outputs and each pass exact comparison against the CPU reference before profiling begins.
     - With source, build, logical work, launch geometry, profiler options, and device frozen, each layout should produce a labeled raw bank-conflict profiler record only when the selected metric is available and collection is permitted.
-    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared median and min/max spread summarize only the qualifying samples while every attempt remains retained.
+    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared median and min/max spread summarize the fixed 10-attempt batch only when all 10 attempts qualify.
   recordedObservations: []
 sources:
   - title: 'CUDA Toolkit 11.8 Release Notes'
@@ -229,7 +229,7 @@ correctness_method: <fill EX06 CPU reference and exact comparison>
 correctness_criteria: <fill same logical outputs, all 32 lanes, CUDA boundaries, statuses>
 measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
 measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
-statistics: <fill predeclared median, min/max spread, and all-attempt retention policy>
+statistics: <fill fixed 10-attempt batch, predeclared median, min/max spread, and all-attempt retention policy>
 raw_logs: <fill raw stdout/stderr paths>
 raw_measurements: <fill report/CSV paths>
 exit_statuses: <fill one status path per command>
@@ -283,8 +283,8 @@ Unpadded 与 padded 必须产生相同 logical outputs；两个 variant 的全�
 
 1. 同一 source commit、binary SHA-256、Lane、device、input、logical work、variant order、build flags、launch geometry、`ncu` options 和 metric list；唯一 layout 变量是 padding。
 2. 额外直接运行完整 binary 一次作为 process-level warm-up，复核 exact outputs，并从统计中排除。它不等价于在每个新 profiler process 内完成 steady-state warm-up。
-3. 对相同 binary 做独立 measured profiler invocation，直到 10 个样本满足预先声明的 validity rule；按 acquisition order 保留每次 unpadded/padded 尝试。
-4. 预先声明每个 layout/metric 的汇总为 10 个合格样本的 median 与 min/max spread。只有 nonzero tool/application status、correctness failure、missing kernel 或 missing metric value 可标 invalid；原记录和原因仍须保留，数值很大或不利于结论不构成 invalid。
+3. 对相同 binary 恰好执行 10 次独立 measured profiler invocation，并按 acquisition order 保留每次 unpadded/padded 尝试。
+4. 预先声明每个 layout/metric 的汇总为该固定 10-attempt batch 的 median 与 min/max spread，并且只有 10 次尝试全部合格时才计算。只有 nonzero tool/application status、correctness failure、missing kernel 或 missing metric value 可标 invalid；原记录和原因仍须保留，数值很大或不利于结论不构成 invalid。任一次 invalid 时不发布 summary，而是记录 batch blocker；修复原因后必须重做全部 10 次，禁止选择性补样本。
 
 这就是 equal work/build/launch freeze。改变固定项后必须重启整个 batch，不能挑选或拼接样本。
 
@@ -334,13 +334,13 @@ Event timing 与 profiler measurement 不能互换。Timing-enabled event 由 `c
 
 LAB05 不修改 binary 来添加 event，也不混合 event、wall-clock 与 profiler sample。新 event 实验必须重新声明 build、warm-up、同步边界与 statistic。
 
-只在相同 metric、unit、options 与 device 下比较 10 个合格样本，并把每次尝试的路径附到 median 与 min/max spread。地址模型可以解释 bank mapping，但本 Lab 不预言 unpadded/padded 的 profiler ordering、duration、latency、throughput 或 speedup。若 required metric 缺失或结果不支持解释，结论就是 blocker 或不确定，而不是预测。
+只有固定 10 次尝试在相同 metric、unit、options 与 device 下全部合格时，才把每次路径附到 median 与 min/max spread；否则只报告 blocker，不给 summary。地址模型可以解释 bank mapping，但本 Lab 不预言 unpadded/padded 的 profiler ordering、duration、latency、throughput 或 speedup。若 required metric 缺失或结果不支持解释，结论就是 blocker 或不确定，而不是预测。
 
 ## 预期观察，不是记录结果
 
 - Unpadded 与 padded **应当**产生相同 logical outputs，并分别对全部 32 个 lane 通过 CPU reference exact comparison。
 - Gate 通过后，每个 layout **应当**能关联自己的 raw bank-conflict profiler measurement、report 与 status；不承诺方向或数值。
-- Warm-up **应当**被排除，每次尝试都**应当**保留，并用预先声明的 median 与 min/max spread 汇总 10 个合格样本。
+- Warm-up **应当**被排除，固定 10 次尝试都**应当**保留；只有整批合格时才报告预先声明的 median 与 min/max spread。
 
 这些是预期观察，不是记录结果。本页没有预填任何 GPU 数值、运行输出或 profiler 结果，`recordedObservations` 为空。
 

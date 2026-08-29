@@ -212,8 +212,10 @@ function assertCompletePerformanceManifest(source: string) {
   for (const pattern of fieldPatterns) expect(source, pattern.source).toMatch(pattern);
   expect(source).toMatch(/median/i);
   expect(source).toMatch(/min\/max spread/i);
-  expect(source).toMatch(/10 (?:qualifying|个合格).{0,80}(?:samples?|样本)/is);
-  expect(source).toMatch(/every attempt|每次尝试/i);
+  expect(source).toMatch(/(?:fixed 10-attempt batch|固定 10-attempt batch)/i);
+  expect(source).toMatch(/all 10 attempts qualify|10 次尝试全部合格/i);
+  expect(source).toMatch(/every.{0,40}attempt|每次.{0,30}尝试/i);
+  expect(source).toMatch(/restart all 10 attempts|重做全部 10 次/i);
   expect(source).toMatch(/no-silent-outlier|不构成 invalid/i);
 }
 
