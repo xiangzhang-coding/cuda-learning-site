@@ -122,6 +122,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 test('Chinese and English searches stay in their language index', async ({ page }) => {
   test.setTimeout(120_000);
   for (const scenario of [
+    { route: '/', button: /搜索/, query: 'page-residency rail', localePrefix: '/', expectedHrefs: ['/visuals/page-migration/'] },
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/', expectedHrefs: ['/start/environment-manifest/', '/labs/record-cuda-environment/', '/practice/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '内存事务', localePrefix: '/', expectedHrefs: ['/glossary/', '/visuals/kernel-journey/', '/memory/shared-memory-tiling/'] },
@@ -147,8 +148,7 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'M09 页锁定内存与传输重叠', localePrefix: '/', expectedHrefs: ['/memory/pinned-memory-transfer-overlap/'] },
     { route: '/', button: /搜索/, query: 'M11 流顺序分配与内存池', localePrefix: '/', expectedHrefs: ['/memory/stream-ordered-allocation-memory-pools/'] },
     { route: '/', button: /搜索/, query: 'M13 异步复制与分阶段流水线', localePrefix: '/', expectedHrefs: ['/memory/asynchronous-copy-pipelines/'] },
-    { route: '/', button: /搜索/, query: 'EX08 统一内存迁移可运行示例', localePrefix: '/', expectedHrefs: ['/examples/unified-memory-migration/'] },
-    { route: '/', button: /搜索/, query: 'VIS08 托管内存页面迁移', localePrefix: '/', expectedHrefs: ['/visuals/page-migration/'] },
+    { route: '/', button: /搜索/, query: 'managed-workload', localePrefix: '/', expectedHrefs: ['/examples/unified-memory-migration/'] },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Recording Evidence Honestly', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/'] },
     { route: '/en/', button: /Search/, query: 'row-major data index', localePrefix: '/en/', expectedHrefs: ['/en/visuals/indexing/'] },

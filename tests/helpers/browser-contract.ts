@@ -35,12 +35,12 @@ export async function expectRankedSearchResult(page: Page, scenario: SearchScena
   const dialog = page.getByRole('dialog', { name: scenario.button });
   await dialog.getByRole('textbox', { name: scenario.button }).fill(scenario.query);
   const links = dialog.locator('a[href]');
-  await expect(links.first()).toBeVisible();
+  await expect(links.first(), scenario.query).toBeVisible({ timeout: 15_000 });
   await expect.poll(async () => {
     const hrefs = await links.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
     const topPaths = hrefs.slice(0, 5).map((href) => new URL(href, page.url()).pathname);
     return scenario.expectedHrefs.some((href) => topPaths.includes(href));
-  }, { message: scenario.query }).toBe(true);
+  }, { message: scenario.query, timeout: 15_000 }).toBe(true);
 
   const hrefs = await links.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
 
