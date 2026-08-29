@@ -17,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex08-unified-memory-migration');
-const sourceCommit = '6f7c2339f5eb9997298cf8590755a6a7debbdaf9';
+const sourceCommit = '818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f';
 
 const lanes = [
   {
