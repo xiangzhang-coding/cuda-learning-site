@@ -121,8 +121,11 @@ Toolkit 与 Compute Sanitizer 是两个都必须记录的 version coordinates。
 
 本单元教授的 conservative command intersection 是：
 
-```text
-compute-sanitizer --tool memcheck --report-api-errors explicit ./app [app_options]
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  ./app [app_options]
 ```
 
 显式写 option values，不依赖 defaults。Current releases 新增了 `extended` API-report mode 并改变 default；不能把该变化倒推到 11.8/12.9。本单元也不使用 current-only compile-time instrumentation。用 lane compiler 构建时可加入 line information 改善 source attribution；这只改变 report location quality，不改变 access 是否有效。
@@ -139,8 +142,12 @@ compute-sanitizer --tool memcheck --report-api-errors explicit ./app [app_option
 
 Basic access command 不启用 leak checking，必须显式请求：
 
-```text
-compute-sanitizer --tool memcheck --report-api-errors explicit --leak-check full ./app [app_options]
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  --leak-check full \
+  ./app [app_options]
 ```
 
 Memcheck 把 associated CUDA context 销毁时仍未释放的 tracked allocations 分类为 memory leaks。Current owner manual 列出的 destruction boundaries 包括 program exit、`cudaDeviceReset()` 与 `cuCtxDestroy()`。Historical release notes 说明，自 2021.3 起 accurate reporting 已不再要求 explicit `cudaDeviceReset()`，早于 11.8 lane。

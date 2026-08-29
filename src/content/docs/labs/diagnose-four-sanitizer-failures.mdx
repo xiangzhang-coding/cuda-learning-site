@@ -189,37 +189,70 @@ cd examples/ex16-sanitizer-defect-suite
 
 尖括号字段都必须由实际记录填写：
 
-```text
+```yaml
 subject: EX16 / LAB07
-source_commit: 48367dfafe809bb15f0f7f6117eab37e88403391
-observation_date_utc: <fill>
-gpu_identity: <fill after privacy review>
+source_commit:
+  48367dfafe809bb15f0f7f6117eab37e88403391
+observation_date_utc:
+  <fill>
+gpu_identity:
+  <fill after privacy review>
 compute_capability: <fill>
-compute_capability_query: <fill exact command or API>
+compute_capability_query:
+  <fill exact command or API>
 gpu_count_used: <fill; must be 1>
 driver: <fill>
-toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+toolkit_lane:
+  <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
 cuda_toolkit: <fill exact version>
-compute_sanitizer_version: <fill exact compute-sanitizer --version output>
-compute_sanitizer_help: <fill raw help path and digest>
+compute_sanitizer_version:
+  exact_output: <fill>
+compute_sanitizer_help:
+  raw_path: <fill>
+  digest: <fill>
 nvcc: <fill exact version>
 host_compiler: <fill exact version>
-operating_system: <fill native Linux distribution, version, architecture>
+operating_system:
+  distribution: <fill native Linux distribution>
+  version: <fill>
+  architecture: <fill>
 workload:
   <fill eight ordered tool/scenario processes>
-process_isolation: <fill one scenario per process and one tool per invocation>
-memory: <fill per-process bytes; maximum_problem_memory_bytes 128>
-permissions: <fill device, executable, instrumentation, filesystem; no counter access>
-exact_commands: <fill every fully expanded argv in order>
-correctness_method: <fill corrected executable exact host reference>
-correctness_criteria: <fill corrected output/API/status and targeted-report absence>
-measurement_method: <fill report-class review; no timing or performance measurement>
-measurement_details: <fill predeclared classes, channel separation, run order>
-raw_logs: <fill build/version/help paths>
-raw_sanitizer_logs: <fill one tool log per invocation>
-raw_application_logs: <fill separate stdout/stderr per invocation>
-exit_statuses: <fill separate application and tool status paths>
-criteria_result: <fill only after execution>
+process_isolation:
+  scenario_per_process: <fill>
+  tool_per_invocation: <fill>
+memory:
+  per_process_bytes: <fill>
+  maximum_problem_memory_bytes: 128
+permissions:
+  - <fill device access>
+  - <fill executable and instrumentation access>
+  - <fill filesystem access; no counter access>
+exact_commands:
+  <fill every fully expanded argv in order>
+correctness_method:
+  <fill corrected executable exact host reference>
+correctness_criteria:
+  corrected_output: <fill>
+  api_and_application_status: <fill>
+  targeted_report_absence: <fill>
+measurement_method:
+  report-class review; no timing measurement
+measurement_details:
+  predeclared_classes: <fill>
+  channel_separation: <fill>
+  run_order: <fill>
+raw_logs:
+  build_version_help_paths: <fill>
+raw_sanitizer_logs:
+  one_tool_log_per_invocation: <fill>
+raw_application_logs:
+  stdout_stderr_per_invocation: <fill>
+exit_statuses:
+  application_status_paths: <fill>
+  tool_status_paths: <fill>
+criteria_result:
+  <fill only after execution>
 ```
 
 ## 复核八个 canonical source pair
@@ -360,11 +393,12 @@ printf '%s\n' "$tool_status" >"${prefix}.tool.status"
 
 这套 wrapper 通过 `--target-processes all` 让 tool 跟踪唯一 child binary，同时保留 separate tool/application logs and statuses。先用一行 probe 确认当前版本确实按该 contract 分离 channel；否则记录 blocker。不要并行运行、合并多个 scenario、重用失败后的 process，或只保存终端截图。
 
-至少填写下面的未完成记录表；原始文件是事实来源，表格不能替代它们：
+每一行都要增加一条 ledger record。原始文件是事实来源，每条 record 必须包含：
 
-| order | tool | scenario | predeclared_report_class | application_status | tool_status | application_stdout | application_stderr | raw_sanitizer_log | targeted_class_observed | corrected_exact_result |
-| ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+1. Identity：`order`、`tool`、`scenario` 与 `predeclared_report_class`。
+2. 分开的 statuses：`application_status` 与 `tool_status`。
+3. 分开的 paths：`application_stdout`、`application_stderr` 与 `raw_sanitizer_log`。
+4. Reviewed verdicts：`targeted_class_observed` 与 `corrected_exact_result`。
 
 ## 解读 defect/corrected 记录
 

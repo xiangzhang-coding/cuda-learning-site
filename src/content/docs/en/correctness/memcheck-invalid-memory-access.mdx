@@ -121,8 +121,11 @@ The Toolkit and Compute Sanitizer are versioned coordinates that must both be re
 
 The conservative command intersection taught here is:
 
-```text
-compute-sanitizer --tool memcheck --report-api-errors explicit ./app [app_options]
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  ./app [app_options]
 ```
 
 Use explicit option values instead of relying on defaults. In particular, current releases added an `extended` API-report mode and changed the default; that change must not be projected backward into 11.8 or 12.9. This unit also omits current-only compile-time instrumentation. Optional source attribution can be improved by building the lane's target with line information, but line information changes report location quality, not whether an access is valid.
@@ -139,8 +142,12 @@ This page intentionally gives no sample sanitizer transcript. Actual logs belong
 
 Leak checking is not enabled by the basic access command. Request it explicitly:
 
-```text
-compute-sanitizer --tool memcheck --report-api-errors explicit --leak-check full ./app [app_options]
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  --leak-check full \
+  ./app [app_options]
 ```
 
 Memcheck classifies tracked allocations that remain unfreed when their associated CUDA context is destroyed as memory leaks. The current owner manual names program exit, `cudaDeviceReset()`, and `cuCtxDestroy()` as destruction boundaries. Historical release notes state that an explicit `cudaDeviceReset()` call stopped being required for accurate reporting in the 2021.3 release, before the 11.8 lane.

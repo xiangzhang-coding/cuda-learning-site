@@ -196,46 +196,100 @@ Do not change the kernel, scenario order, build flags, input initialization, log
 
 Copy and fill this template before running. Replace every angle-bracketed field with an observed value; neither the template, a command name, nor a version from an owner release is your observation:
 
-```text
+```yaml
 subject: EX05 / LAB04
-source_commit: 79473ddced9c4d284b88f2eab82d31f3034b97cc
-observation_date_utc: <fill>
-gpu_identity: <fill after privacy review>
+source_commit:
+  79473ddced9c4d284b88f2eab82d31f3034b97cc
+observation_date_utc:
+  <fill>
+gpu_identity:
+  <fill after privacy review>
 compute_capability: <fill>
-compute_capability_query: <fill exact command or API>
+compute_capability_query:
+  <fill exact command or API>
 gpu_count_used: <fill; must be 1>
 driver: <fill>
-toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+toolkit_lane:
+  <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
 cuda_toolkit: <fill exact version>
 cuda_runtime: <fill exact component version or unknown>
-nsight_compute_version: <fill exact ncu --version output>
+nsight_compute_version:
+  exact_output: <fill>
 nvcc: <fill exact version>
 host_compiler: <fill exact version>
-operating_system: <fill native Linux distribution, version, architecture, and kernel>
-topology: <fill relevant CPU/GPU/interconnect topology or not relevant with reason>
-source_repository: <fill acquisition URL or repository coordinate>
+operating_system:
+  distribution: <fill native Linux distribution>
+  version: <fill>
+  architecture: <fill>
+  kernel: <fill>
+topology:
+  relevant_coordinates: <fill or not relevant with reason>
+source_repository:
+  acquisition_url: <fill>
 binary_sha256: <fill>
-build_contract: <fill build type, c++17, architecture targets, optimization/debug flags, link mode, and relevant environment variables>
+build_contract:
+  build_type: <fill>
+  cxx_dialect: c++17
+  architecture_targets: <fill>
+  optimization_debug_flags: <fill>
+  link_mode: <fill>
+  environment_variables: <fill>
 workload:
-  <fill contiguous, misaligned, strided and logical count 256>
-input_generation: <fill element type, input formula, dimensions, and any seed/dataset identity>
-launch_geometry: <fill grid, block, stream, scenario order>
-memory: <fill device and host allocations/requirements; maximum_problem_memory_bytes 3068>
-permissions: <fill device, executable, filesystem, performance-counter policy>
-device_access_state: <fill visibility, container, MIG, and MPS state>
-concurrent_load: <fill background and concurrent workload policy>
-clock_power_thermal: <fill persistence, clock policy, power policy, pre/post thermal state, and cooldown policy>
-exact_commands: <fill ordered, fully expanded argv>
-correctness_method: <fill EX05 CPU reference and exact comparison>
-correctness_criteria: <fill all scenarios, all 256 outputs, CUDA boundaries, statuses>
-measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
-measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
-statistics: <fill fixed 10-attempt batch, predeclared median, min/max spread, and all-attempt retention policy>
-raw_logs: <fill raw stdout/stderr paths>
-raw_measurements: <fill report/CSV paths>
-exit_statuses: <fill one status path per command>
-custody: <fill observer, raw-log path or hash, and machine or Reference Environment status>
-criteria_result: <fill only after execution>
+  scenarios: [contiguous, misaligned, strided]
+  logical_count: 256
+input_generation:
+  element_type: <fill>
+  formula_and_dimensions: <fill>
+  seed_or_dataset: <fill or not applicable>
+launch_geometry:
+  grid_block_stream: <fill>
+  scenario_order: <fill>
+memory:
+  device_and_host_requirements: <fill>
+  maximum_problem_memory_bytes: 3068
+permissions:
+  - <fill device and executable access>
+  - <fill filesystem access>
+  - <fill performance-counter policy>
+device_access_state:
+  visibility_container_mig_mps: <fill>
+concurrent_load:
+  background_and_concurrent_policy: <fill>
+clock_power_thermal:
+  persistence_and_clock_policy: <fill>
+  power_policy: <fill>
+  thermal_before_after: <fill>
+  cooldown_policy: <fill>
+exact_commands:
+  ordered_expanded_argv: <fill>
+correctness_method:
+  ex05_cpu_reference_exact_comparison: <fill>
+correctness_criteria:
+  all_scenarios_and_outputs: <fill>
+  cuda_boundaries_and_statuses: <fill>
+measurement_method:
+  ncu_metrics_units_options: <fill>
+  repetition_order: <fill>
+measurement_details:
+  warm_up_and_completion: <fill>
+  included_work: <fill>
+  invalid_and_outlier_policy: <fill>
+statistics:
+  batch: fixed 10 attempts
+  summary: median and min/max spread
+  retention_policy: <fill>
+raw_logs:
+  stdout_stderr_paths: <fill>
+raw_measurements:
+  report_csv_paths: <fill>
+exit_statuses:
+  one_status_path_per_command: <fill>
+custody:
+  observer: <fill>
+  raw_log_path_or_hash: <fill>
+  machine_or_reference_status: <fill>
+criteria_result:
+  <fill only after execution>
 ```
 
 ## Review canonical source
@@ -335,11 +389,12 @@ while [ "$sample" -le 10 ]; do
 done
 ```
 
-EX05 fixes scenario order as contiguous, misaligned, then strided. Map each report's kernel invocation to application scenario identity and preserve `ncu` replay information. Do not retain only summary rows. Maintain at least this unfilled `raw_measurements` ledger:
+EX05 fixes scenario order as contiguous, misaligned, then strided. Map each report's kernel invocation to application scenario identity and preserve `ncu` replay information. Do not retain only summary rows. Add one `raw_measurements` ledger record per value with:
 
-| batch_id | sample_id | scenario | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+1. Identity: `batch_id`, `sample_id`, `scenario`, `metric_name`, and `unit`.
+2. Measurement: `raw_value` and `binary_sha256`.
+3. Statuses: `ncu_status` and `correctness_status`.
+4. Review: `report_path` and `valid_or_blocker`.
 
 Never reuse a `batch_id` or overwrite a blocked batch. Preserve its directory, blocker, and custody record before creating the next batch.
 

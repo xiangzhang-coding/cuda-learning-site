@@ -78,9 +78,17 @@ The first two categories are precise only when they are supported instrumented a
 
 Use these templates in each installed lane after confirming lane-local help:
 
-```text
-compute-sanitizer --tool memcheck --report-api-errors explicit ./app [app_options]
-compute-sanitizer --tool memcheck --report-api-errors explicit --leak-check full ./app [app_options]
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  ./app [app_options]
+
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  --leak-check full \
+  ./app [app_options]
 ```
 
 For each of 11.8, 12.9, and current, record Toolkit version, driver, `compute-sanitizer --version`, OS, compiler/build flags, exact command, executable identity, and raw-output location. The 12.9 row notes that its archived Toolkit index delegates the detailed tool manual to the standalone documentation; it does not pretend that today's page is a frozen 12.9 copy.

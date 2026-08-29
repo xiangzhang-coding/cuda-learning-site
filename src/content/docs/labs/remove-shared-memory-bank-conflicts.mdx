@@ -196,45 +196,101 @@ cd examples/ex06-shared-memory-tile-bank-padding
 
 执行前填写所有尖括号字段；模板和 owner version 不能冒充实际观察：
 
-```text
+```yaml
 subject: EX06 / LAB05
-source_commit: 79473ddced9c4d284b88f2eab82d31f3034b97cc
-observation_date_utc: <fill>
-gpu_identity: <fill after privacy review>
+source_commit:
+  79473ddced9c4d284b88f2eab82d31f3034b97cc
+observation_date_utc:
+  <fill>
+gpu_identity:
+  <fill after privacy review>
 compute_capability: <fill>
-compute_capability_query: <fill exact command or API>
+compute_capability_query:
+  <fill exact command or API>
 gpu_count_used: <fill; must be 1>
 driver: <fill>
-toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+toolkit_lane:
+  <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
 cuda_toolkit: <fill exact version>
 cuda_runtime: <fill exact component version or unknown>
-nsight_compute_version: <fill exact ncu --version output>
+nsight_compute_version:
+  exact_output: <fill>
 nvcc: <fill exact version>
 host_compiler: <fill exact version>
-operating_system: <fill native Linux distribution, version, architecture, and kernel>
-topology: <fill relevant CPU/GPU/interconnect topology or not relevant with reason>
-source_repository: <fill acquisition URL or repository coordinate>
+operating_system:
+  distribution: <fill native Linux distribution>
+  version: <fill>
+  architecture: <fill>
+  kernel: <fill>
+topology:
+  relevant_coordinates: <fill or not relevant with reason>
+source_repository:
+  acquisition_url: <fill>
 binary_sha256: <fill>
-build_contract: <fill build type, c++17, architecture targets, optimization/debug flags, link mode, and relevant environment variables>
-workload: <fill unpadded, padded, 32 lanes, read column 5>
-input_generation: <fill element type, tile dimensions, input formula, and any seed/dataset identity>
-launch_geometry: <fill one block, 32 threads, stream, variant order>
-memory: <fill device and host allocations/requirements, including global/shared bytes; maximum_problem_memory_bytes 8576>
-permissions: <fill device, executable, filesystem, performance-counter policy>
-device_access_state: <fill visibility, container, MIG, and MPS state>
-concurrent_load: <fill background and concurrent workload policy>
-clock_power_thermal: <fill persistence, clock policy, power policy, pre/post thermal state, and cooldown policy>
-exact_commands: <fill ordered, fully expanded argv>
-correctness_method: <fill EX06 CPU reference and exact comparison>
-correctness_criteria: <fill same logical outputs, all 32 lanes, CUDA boundaries, statuses>
-measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
-measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
-statistics: <fill fixed 10-attempt batch, predeclared median, min/max spread, and all-attempt retention policy>
-raw_logs: <fill raw stdout/stderr paths>
-raw_measurements: <fill report/CSV paths>
-exit_statuses: <fill one status path per command>
-custody: <fill observer, raw-log path or hash, and machine or Reference Environment status>
-criteria_result: <fill only after execution>
+build_contract:
+  build_type: <fill>
+  cxx_dialect: c++17
+  architecture_targets: <fill>
+  optimization_debug_flags: <fill>
+  link_mode: <fill>
+  environment_variables: <fill>
+workload:
+  layouts: [unpadded, padded]
+  lanes: 32
+  read_column: 5
+input_generation:
+  element_type_and_tile_dimensions: <fill>
+  formula: <fill>
+  seed_or_dataset: <fill or not applicable>
+launch_geometry:
+  grid_block_stream: <fill>
+  variant_order: <fill>
+memory:
+  device_and_host_requirements: <fill>
+  maximum_problem_memory_bytes: 8576
+permissions:
+  - <fill device and executable access>
+  - <fill filesystem access>
+  - <fill performance-counter policy>
+device_access_state:
+  visibility_container_mig_mps: <fill>
+concurrent_load:
+  background_and_concurrent_policy: <fill>
+clock_power_thermal:
+  persistence_and_clock_policy: <fill>
+  power_policy: <fill>
+  thermal_before_after: <fill>
+  cooldown_policy: <fill>
+exact_commands:
+  ordered_expanded_argv: <fill>
+correctness_method:
+  ex06_cpu_reference_exact_comparison: <fill>
+correctness_criteria:
+  same_outputs_and_all_lanes: <fill>
+  cuda_boundaries_and_statuses: <fill>
+measurement_method:
+  ncu_metrics_units_options: <fill>
+  repetition_order: <fill>
+measurement_details:
+  warm_up_and_completion: <fill>
+  included_work: <fill>
+  invalid_and_outlier_policy: <fill>
+statistics:
+  batch: fixed 10 attempts
+  summary: median and min/max spread
+  retention_policy: <fill>
+raw_logs:
+  stdout_stderr_paths: <fill>
+raw_measurements:
+  report_csv_paths: <fill>
+exit_statuses:
+  one_status_path_per_command: <fill>
+custody:
+  observer: <fill>
+  raw_log_path_or_hash: <fill>
+  machine_or_reference_status: <fill>
+criteria_result:
+  <fill only after execution>
 ```
 
 ## 复核 canonical source
@@ -328,11 +384,12 @@ while [ "$sample" -le 10 ]; do
 done
 ```
 
-用 application variant identity 与 report kernel specialization 建立 unpadded/padded 映射，并保留 replay 信息、原始 stdout/stderr、status 与 report。维护未填写的 `raw_measurements` ledger：
+用 application variant identity 与 report kernel specialization 建立 unpadded/padded 映射，并保留 replay 信息、原始 stdout/stderr、status 与 report。每个 raw value 都增加一条 `raw_measurements` ledger record，包含：
 
-| batch_id | sample_id | layout | metric_name | unit | raw_value | binary_sha256 | ncu_status | correctness_status | report_path | valid_or_blocker |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` | `<fill>` |
+1. Identity：`batch_id`、`sample_id`、`layout`、`metric_name` 与 `unit`。
+2. Measurement：`raw_value` 与 `binary_sha256`。
+3. Statuses：`ncu_status` 与 `correctness_status`。
+4. Review：`report_path` 与 `valid_or_blocker`。
 
 不得复用 `batch_id` 或覆盖 blocked batch；创建下一批前，先保留旧目录、blocker 与 custody record。
 

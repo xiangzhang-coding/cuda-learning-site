@@ -78,9 +78,17 @@ head:
 
 确认 lane-local help 后，在每个 installed lane 使用：
 
-```text
-compute-sanitizer --tool memcheck --report-api-errors explicit ./app [app_options]
-compute-sanitizer --tool memcheck --report-api-errors explicit --leak-check full ./app [app_options]
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  ./app [app_options]
+
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  --leak-check full \
+  ./app [app_options]
 ```
 
 对 11.8、12.9 与 current 分别记录 Toolkit version、driver、`compute-sanitizer --version`、OS、compiler/build flags、exact command、executable identity 与 raw-output location。12.9 row 要说明 archived Toolkit index 把 detailed tool manual 委托给 standalone docs，不能假装 today page 是 frozen 12.9 copy。

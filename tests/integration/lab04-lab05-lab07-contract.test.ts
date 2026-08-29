@@ -198,9 +198,9 @@ function assertCompletePerformanceManifest(source: string) {
     /source_repository/i,
     /binary_sha256/i,
     /build_contract/i,
-    /operating_system: <fill [^\n]*kernel>/i,
+    /operating_system:\n[\s\S]*?kernel:/i,
     /topology/i,
-    /memory: <fill device and host/i,
+    /memory:\n[\s\S]*?device_and_host_requirements:/i,
     /input_generation/i,
     /device_access_state/i,
     /concurrent_load/i,
@@ -220,7 +220,9 @@ function assertCompletePerformanceManifest(source: string) {
   expect(source).toMatch(/batch_dir=.*batch-\$\{batch_id\}/is);
   expect(source).toMatch(/if ! mkdir "\$batch_dir"; then[\s\S]*exit 1/);
   expect(source).toMatch(/Never reuse a `batch_id`|不得复用 `batch_id`/i);
-  expect(source).toMatch(/no-silent-outlier|不构成 invalid/i);
+  expect(source).toMatch(
+    /invalid_and_outlier_policy|do not delete samples|不删除.{0,20}样本|不构成 invalid/i,
+  );
 }
 
 function assertCorrectnessBeforeInterpretation(source: string) {
