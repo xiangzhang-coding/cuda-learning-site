@@ -1,0 +1,280 @@
+---
+title: 'EX07：Streams、Events 与 Overlap 可运行示例'
+description: 用同一个确定性 transform 对比 serial 与有界 chunked stream/event 结构，只发布正确性，不发布 timing 或 overlap 声明。
+pairId: ex07
+counterpart: /en/examples/streams-events-overlap/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - chunk-contract
+  - stream-pipeline
+  - host-reference
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX07
+prerequisites:
+  - M07
+  - M08
+  - M09
+relatedUnits:
+  - Q05
+exampleIds:
+  - EX07
+canonicalExample: EX07
+canonicalRanges:
+  - chunk-contract
+  - stream-pipeline
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 49,176 bytes of declared device allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The serial and chunked paths should each report PASS only when all 4,099 outputs exactly match the pure host reference.
+    - The pure host contract should partition 4,099 elements into four 1,024-element chunks followed by one 3-element chunk without gaps or overlap.
+    - asyncEngineCount and concurrentKernels should be reported only as device capabilities; the program should make no claim that copy, kernel, or stream work overlapped.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Asynchronous Execution'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current streams, events, asynchronous-copy, page-locking, and concurrency conditions'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'cudaMallocHost, cudaFreeHost, and cudaMemcpyAsync contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Nonblocking stream creation and stream-wait-event contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Timing-disabled event record and synchronization contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex07
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-29'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,chunk-contract,stream-pipeline,host-reference,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX07
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: 'M07,M08,M09'
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: Q05
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX07
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX07
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'chunk-contract,stream-pipeline'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 49,176 bytes of declared device allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '10'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3,13.3.1'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/streams-events-overlap/" lang="en">Read the English counterpart</a>
+
+EX07 是独立、原创的 Streams、Events 与 Overlap 可运行示例（Runnable Example）。它用 serial stream 结构和有界 chunked stream/event 结构执行同一个确定性 transform。项目只给出完整正确性 verdict；没有 timer，也不对 concurrent execution 下结论。
+
+## 用途
+
+按顺序完成 M07、M08 与 M09。EX07 把 named-stream ordering、timing-disabled dependency event、page-locked host buffer 和 asynchronous copy 放进一个小型项目。Q05 说明真实测量需要哪些条件，但 EX07 有意不执行这种测量。
+
+两条 GPU path 保持 input value、transform、element count、output order 与 exact verifier 不变，只改变 submission structure。这种对比可以证明两种结构是否保持同一结果，不能证明 operations 的时间区间是否相交。
+
+## 获取 canonical project
+
+[在固定提交中查看完整 EX07 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b065ba16066f12d4c98b3057a9ee8ba8b6a1b3cd/examples/ex07-streams-events-overlap)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/b065ba16066f12d4c98b3057a9ee8ba8b6a1b3cd.zip)。解压后进入 `examples/ex07-streams-events-overlap/`。
+
+`project.json` 声明两个 build input、两个 canonical range、精确 Toolkit Lane、memory bound 与空 evidence record。实现、host contract、测试和页面文字均为原创。软件文件使用 Apache-2.0；本教学页面使用 CC-BY-4.0。
+
+## Chunk contract
+
+Workload 包含 4,099 个 `std::uint32_t` element，最大 chunk extent 为 1,024 个 element：
+
+| Chunk | Offset | Count | End-exclusive |
+| ---: | ---: | ---: | ---: |
+| 0 | 0 | 1,024 | 1,024 |
+| 1 | 1,024 | 1,024 | 2,048 |
+| 2 | 2,048 | 1,024 | 3,072 |
+| 3 | 3,072 | 1,024 | 4,096 |
+| 4 | 4,096 | 3 | 4,099 |
+
+纯 header 在不使用 CUDA 的情况下计算 partition，并在任何 allocation 或 copy 前验证 byte arithmetic：
+
+<CanonicalCode exampleId="EX07" range="chunk-contract" />
+
+Zero chunk size、invalid index、overflowing product 与 undersized destination 被拒绝时，调用方 output 保持不变。同一 header 还定义 deterministic input、`output[index] = input[index] * 3 + 7` 与 exact comparison。
+
+## Stream pipeline
+
+Serial path 在 named nonblocking stream 中依次 enqueue 一次 H2D、一次 kernel 与一次 D2H，随后 record timing-disabled completion event。每条 chunk stream 先等待这段 captured serial prefix。随后，每个 chunk 把 H2D、同一个 transform kernel 与 D2H 放进同一条 named nonblocking stream，通过 same-stream order 保持 data dependency：
+
+<CanonicalCode exampleId="EX07" range="stream-pipeline" />
+
+Chunks 在两个固定 device slot 间交替。复用 slot 是安全的，因为同一 stream 中的 earlier operation 排在 later operation 之前。每次 launch 后立即调用 `cudaGetLastError`；每条 stream 的最后一次 D2H 后 record completion event，并在 host verification 前 synchronize。Events 使用 `cudaEventDisableTiming`，source 不调用 elapsed-time API。
+
+Host input 与两个 returned output 都由 `cudaMallocHost` 分配。`asyncEngineCount` 和 `concurrentKernels` 只作为 capability field 打印。Page locking、multiple streams、异步 API 名称与 capability value 都不能证明 copy engine 被使用，也不能证明任何 interval 发生 overlap。
+
+## Host reference 边界
+
+`make host-test` 只使用 C++17 header 与 host test。它覆盖精确的五段 partition、zero elements、最后三个 element、overflow 与 undersized rejection、完整 4,099-element expected transform、first-mismatch report，以及 rejected call 后的 nonmutation。
+
+通过此测试只能建立纯软件 arithmetic 与 oracle behavior。它不能证明 host allocation 已 page-lock、CUDA source 已编译、copy engine 执行 transfer、stream 已运行或 device work 发生 overlap。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+CUDA stages 生成 `build/streams_events_overlap.ii`、`build/streams_events_overlap.o` 与 `build/ex07-streams-events-overlap`。Inspection 检查 native `sm_75` cubin 和从 `compute_75` 生成的 PTX。Host-test 只需要 host C++17 compiler。
+
+`scripts/compile-check.sh c++17 ex07 <result-dir>` 执行这些 stage，并保留 log 与 inspection artifact。它不会执行 CUDA binary，因此输出不能成为 runtime 或 concurrency evidence。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 声明的 device allocation 为 49,176 bytes，远低于 8 GB |
+| Host allocation | 三个 page-locked 4,099-element buffer，共 49,188 bytes |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Toolkit Lane 共用同一份原创 C++17 source |
+
+三条 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 和 CUDA 13.3.1。Digest-pinned image 是 build target，不是 compilation record。
+
+## 编译与运行证据
+
+EX07 的 compilation array 为空，因此 **EX07 不是 Compile-Checked**。Runtime 仍为 **Pending Hardware Verification**，recorded observations 为空。Learning Site 尚未在 Reference Environment 中执行此 binary。
+
+本页不发布 duration、bandwidth、throughput、speedup、copy-engine trace、stream timeline 或 overlap verdict。未来 observation 需要完整环境清单（Environment Manifest）以及足以支持具体声明的方法；正确性通过仍是前提。
+
+## 预期观察，不是运行记录
+
+1. Serial 与 chunked path 都应只在全部 4,099 个 output 精确匹配纯 host reference 时报告 `PASS`。
+2. 纯 host contract 应生成四个 1,024-element chunk，再生成一个 3-element chunk；逻辑范围没有 gap，也不相交。
+3. `asyncEngineCount` 与 `concurrentKernels` 只应解释为 capability，不能当作 submitted work 发生 overlap 的证据。
+
+这些是验收条件，不是已记录的 GPU observation。
+
+## 来源与复核
+
+当前 Programming Guide 与 Runtime API 页面定义 asynchronous submission、page-locked host memory、named stream、event dependency 与 completion behavior。三份 NVCC 文档覆盖精确 Toolkit Lane。Docker Hub tag API 只提供 container metadata，不建立 build 或 runtime 结果。
+
+- [CUDA Programming Guide v13.3 - Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)
+- [CUDA Runtime API v13.3.1 - Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)
+- [CUDA Runtime API v13.3.1 - Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)
+- [CUDA Runtime API v13.3.1 - Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-29。**

@@ -44,16 +44,24 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("['status', '--porcelain=v1', '--untracked-files=all']");
     expect(guard).toContain("['rev-parse', 'HEAD']");
     expect(guard).toContain("['branch', '--show-current']");
-    expect(guard).toContain("release.sourceCommit !== head");
-    expect(guard).toContain("JSON.stringify(embeddedManifest) !== JSON.stringify(sourceManifest)");
+    expect(guard).toContain("'src/current-publication-manifest.json'");
+    expect(guard).toContain("'dist/publication.json'");
+    expect(guard).toContain('releaseSourceCommit !== head');
+    expect(guard).toContain('publicationSourceCommit !== head');
+    expect(guard).toContain('JSON.stringify(embeddedReleaseManifest) !== JSON.stringify(sourceManifest)');
+    expect(guard).toContain(
+      'JSON.stringify(embeddedPublicationManifest) !== JSON.stringify(currentSourceManifest)',
+    );
     expect(guard).toContain("requireMain && branch !== 'main'");
     expect(guard).toContain('Release upload requires a clean tracked and untracked source tree.');
   });
 
-  it('emits a source identity and complete project and bundled-interface notices without a Worker application', async () => {
-    const [release, sourceManifest] = await Promise.all([
+  it('emits both source identities and complete project and bundled-interface notices without a Worker application', async () => {
+    const [release, publication, sourceManifest, currentSourceManifest] = await Promise.all([
       readFile(path.join(projectRoot, 'dist/release.json'), 'utf8').then(JSON.parse),
+      readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'src/r1-release-manifest.json'), 'utf8').then(JSON.parse),
+      readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8').then(JSON.parse),
     ]);
     const builtFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true })).map((file) =>
       file.split(path.sep).join('/'),
@@ -75,6 +83,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     );
 
     expect(release).toEqual({ ...sourceManifest, sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/) });
+    expect(publication).toEqual({
+      ...currentSourceManifest,
+      sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/),
+    });
+    expect(publication.sourceCommit).toBe(release.sourceCommit);
+    expect(release.releaseId).toBe('R1');
+    expect(publication).toMatchObject({
+      publicationId: 'current',
+      releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
+      scope: { publicationPairs: 131, sourceRoutes: 262 },
+    });
+    expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
     expect(builtFiles).not.toContain('_worker.js');
     expect(builtFiles.some((file) => /(?:^|\/)server(?:\/|$)/.test(file))).toBe(false);
     expect(legalFiles.get('Apache-2.0.txt')).toContain('Apache License');
@@ -103,14 +123,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('Production deploy command: `npm run deploy`');
     expect(deployment).toContain('Preview deploy command: `npm run deploy:preview`');
     expect(deployment).toContain('reject tracked or untracked source changes');
-    expect(deployment).toContain('production additionally requires the checked-out branch to be `main`');
+    expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
+    expect(deployment).toContain('dist/publication.json');
+    expect(deployment).toContain('34 Learning Units through M14');
+    expect(deployment).toContain('five catalog groups total 212 records');
+    expect(deployment).toContain('131 Publication Pairs and 262 source routes');
+    expect(deployment).toMatch(/R2 aggregate review.*pending/i);
+    expect(deployment).toMatch(/issue #24/i);
     expect(deployment).toContain('npm run test:release-smoke');
     expect(deployment).toContain('wrangler rollback');
     expect(deployment).toContain('No Worker application code or runtime binding');
-    expect(readme).toContain('repository-pinned Wrangler deploys reviewed static output from a clean `main` checkout');
-    expect(readme).toContain('Workers Builds behavior is reviewed but its account automation is disabled for R1');
-    expect(chineseSources).toContain('R1 未启用其账户自动化');
-    expect(englishSources).toContain('account automation disabled for R1');
+    expect(readme).toContain('Repository-pinned Wrangler deploys static output from a clean `main` checkout');
+    expect(readme).toContain('Workers Builds behavior is reviewed but its account automation remains disabled');
 
     for (const sourceRecord of [maintenanceSources, chineseSources, englishSources]) {
       expect(sourceRecord).toContain('4.125.0');

@@ -1,0 +1,318 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/advanced-memory-visuals.css';
+
+type AdvancedMemoryRepresentationKind = 'allocation' | 'group' | 'pipeline' | 'graph';
+type AdvancedMemoryRepresentationLocale = 'zh-CN' | 'en';
+
+interface Props {
+  kind: AdvancedMemoryRepresentationKind;
+  locale: AdvancedMemoryRepresentationLocale;
+}
+
+const { kind, locale } = Astro.props;
+const representationId = `advanced-memory-${kind}-${locale.toLowerCase()}`;
+const groupMembers = ['thread-00', 'thread-01', 'thread-02', 'thread-03', 'thread-04', 'thread-05', 'thread-06', 'thread-07'] as const;
+const groupTiles = [
+  { id: 'tile-00', members: groupMembers.slice(0, 4) },
+  { id: 'tile-01', members: groupMembers.slice(4, 8) },
+] as const;
+const graphNodes = ['node-H2D', 'node-kernel', 'node-D2H'] as const;
+const graphEdges = [
+  { id: 'edge-01', from: 'node-H2D', to: 'node-kernel' },
+  { id: 'edge-02', from: 'node-kernel', to: 'node-D2H' },
+] as const;
+
+const REPRESENTATION_COPY = {
+  en: {
+    allocation: {
+      title: 'Stream-ordered allocation lifetime',
+      summary: 'A pointer becomes usable and reusable through explicit stream order and cross-stream dependencies.',
+      reading: 'Read left to right: allocate in the owner stream, establish a cross-stream edge before another stream uses the pointer, identify every use and the final use, then enqueue free only after that lifetime boundary.',
+      steps: {
+        allocate: ['Allocate', 'The owner stream establishes the allocation in stream order.'],
+        'cross-stream-edge': ['Cross-stream edge', 'An explicit dependency carries usability to another stream.'],
+        uses: ['Uses', 'All participating streams use the allocation after their required edges.'],
+        'last-use': ['Last use', 'The dependency graph identifies the final ordered use.'],
+        free: ['Free', 'Free is ordered after the last use; the diagram does not claim immediate physical release.'],
+      },
+      poolContract: 'Pool and reuse-policy boundary',
+      poolRows: {
+        'pool-source': ['Pool source', 'The stream device selects its current pool unless the allocation names an explicit pool.'],
+        'logical-free': ['Logical free', 'Execution reaching free ends pointer use; the pool may still retain backing resources.'],
+        'reuse-policy': ['Reuse policy', 'A policy permits candidate reuse or inserted ordering; it guarantees neither address identity nor speedup.'],
+      },
+    },
+    group: {
+      title: 'Group membership and collective contract',
+      summary: 'A parent thread block is partitioned into explicit tiles without losing the parent membership boundary.',
+      reading: 'The parent contains eight named participants. Two four-thread tiles partition that membership. A collective is valid only when every required participant in the target group reaches the collective contract.',
+      parent: 'Parent group: thread block',
+      membership: 'Parent membership',
+      tile: 'Tile',
+      tileMembers: 'Tile members',
+      collective: 'All-participant collective',
+      collectiveText: 'Every required member of the selected group participates; a partial caller set does not satisfy this static contract.',
+      dynamicMembership: 'Dynamic coalesced set',
+      dynamicMembershipText: 'coalesced_threads() names threads active at that call. The set is not a permanent 32-thread warp contract and must not be reused as one.',
+      gridGate: 'Grid-group gate',
+      gridGateText: 'Grid-wide synchronization requires checked cooperative-launch support, a legal resident grid, cooperative launch, and participation by the complete grid group.',
+    },
+    pipeline: {
+      title: 'Portable baseline and CC 8.0+ pipeline',
+      summary: 'The same staged data dependency is shown as a portable synchronization baseline and as a capability-gated asynchronous-copy path.',
+      reading: 'Use the portable path as the baseline. On a declared compute-capability-8.0-or-newer path, read the stage contract as acquire, copy, commit, wait, use, release. The sequence is conceptual and reports no speedup or overlap.',
+      baseline: 'Portable synchronization baseline',
+      gated: 'CC 8.0+ gated path',
+      baselineSteps: {
+        load: ['Load', 'Participating threads load the stage.'],
+        synchronize: ['Synchronize', 'The group establishes visibility before use.'],
+        use: ['Use', 'The group consumes the complete stage.'],
+        'synchronize-before-reuse': ['Synchronize before reuse', 'The group protects the next producer phase.'],
+      },
+      gatedSteps: {
+        acquire: ['Acquire', 'Acquire an available producer stage.'],
+        copy: ['Copy', 'Issue the staged asynchronous copy.'],
+        commit: ['Commit', 'Commit the producer operations for this stage.'],
+        wait: ['Wait', 'Wait for the required consumer stage.'],
+        use: ['Use', 'Consume data only after the wait contract.'],
+        release: ['Release', 'Release the stage for later producer reuse.'],
+      },
+    },
+    graph: {
+      title: 'CUDA Graph structure and resource lifetime',
+      summary: 'Explicit nodes and dependency edges remain distinct from capture, instantiation, replay, and resource ownership.',
+      reading: 'The graph contains H2D, kernel, and D2H nodes connected by two explicit edges. Capture or explicit construction defines structure, instantiation creates an executable graph, replay launches that executable structure, and resources remain valid for every use that depends on them.',
+      nodes: 'Explicit nodes',
+      edges: 'Explicit dependency edges',
+      from: 'From',
+      to: 'To',
+      lifecycle: 'Graph and resource lifetime',
+      lifecycleRows: {
+        capture: ['Capture or construct', 'Define nodes and dependency edges.'],
+        instantiate: ['Instantiate', 'Create an executable graph from the definition.'],
+        replay: ['Replay', 'Launch the executable graph without changing the declared edges.'],
+        'resource-lifetime': ['Resource lifetime', 'Keep referenced storage and host-owned resources valid through their dependent work.'],
+      },
+    },
+  },
+  'zh-CN': {
+    allocation: {
+      title: 'Stream-ordered allocation lifetime',
+      summary: 'Pointer 通过显式 stream order 与 cross-stream dependency 获得可用与可复用边界。',
+      reading: '从左向右阅读：在 owner stream 中 allocate，在另一条 stream 使用 pointer 前建立 cross-stream edge，列出每次 use 与 last use，最后只在该 lifetime boundary 之后 enqueue free。',
+      steps: {
+        allocate: ['分配（allocate）', 'Owner stream 按 stream order 建立 allocation。'],
+        'cross-stream-edge': ['跨流边（cross-stream edge）', '显式 dependency 把 usability 传递到另一条 stream。'],
+        uses: ['使用（uses）', '所有参与 stream 都在各自所需 edge 之后使用 allocation。'],
+        'last-use': ['最后使用（last use）', 'Dependency graph 标出最后一个有序 use。'],
+        free: ['释放（free）', 'Free 排在 last use 之后；本图不声明物理内存立即释放。'],
+      },
+      poolContract: 'Pool 与 reuse-policy boundary',
+      poolRows: {
+        'pool-source': ['Pool 来源', '除非 allocation 显式指定 pool，否则由 stream 所属 device 的 current pool 提供资源。'],
+        'logical-free': ['逻辑 free', '执行到 free 后 pointer lifetime 结束；pool 仍可能保留 backing resource。'],
+        'reuse-policy': ['Reuse policy', 'Policy 只允许候选复用或插入 ordering；它不保证 address identity 或 speedup。'],
+      },
+    },
+    group: {
+      title: 'Group membership 与 collective contract',
+      summary: '一个 parent thread block 被分成显式 tile，同时保留 parent membership boundary。',
+      reading: 'Parent 包含八个具名 participant；两个四线程 tile 划分这组 membership。只有 target group 中每个 required participant 都到达 collective contract，collective 才有效。',
+      parent: '父组（parent group）：thread block',
+      membership: 'Parent membership',
+      tile: 'Tile',
+      tileMembers: 'Tile members',
+      collective: '全员 collective（all-participant collective）',
+      collectiveText: 'Selected group 的每个 required member 都参与；partial caller set 不满足这份静态 contract。',
+      dynamicMembership: '动态 coalesced set',
+      dynamicMembershipText: '`coalesced_threads()` 命名该 call point 的 active threads；这不是永久 32-thread warp contract，也不能按永久 membership 复用。',
+      gridGate: 'Grid-group gate',
+      gridGateText: 'Grid-wide synchronization 需要已检查的 cooperative-launch support、legal resident grid、cooperative launch，以及 complete grid group participation。',
+    },
+    pipeline: {
+      title: 'Portable baseline 与 CC 8.0+ pipeline',
+      summary: '同一个 staged data dependency 同时显示 portable synchronization baseline 与 capability-gated asynchronous-copy path。',
+      reading: '先把 portable path 当作 baseline。对于明确声明 compute capability 8.0 或更新的 path，按 acquire、copy、commit、wait、use、release 阅读 stage contract。该 sequence 只是概念表示，不报告 speedup 或 overlap。',
+      baseline: 'Portable synchronization baseline',
+      gated: 'CC 8.0+ gated path',
+      baselineSteps: {
+        load: ['加载（load）', '参与线程加载 stage。'],
+        synchronize: ['同步（synchronize）', 'Group 在 use 前建立 visibility。'],
+        use: ['使用（use）', 'Group 消费完整 stage。'],
+        'synchronize-before-reuse': ['复用前同步', 'Group 在下一 producer phase 前保护 stage。'],
+      },
+      gatedSteps: {
+        acquire: ['获取（acquire）', '获取可用的 producer stage。'],
+        copy: ['复制（copy）', '发出 staged asynchronous copy。'],
+        commit: ['提交（commit）', '提交该 stage 的 producer operation。'],
+        wait: ['等待（wait）', '等待所需 consumer stage。'],
+        use: ['使用（use）', '只在 wait contract 后消费 data。'],
+        release: ['释放（release）', '释放 stage，供后续 producer 复用。'],
+      },
+    },
+    graph: {
+      title: 'CUDA Graph structure 与 resource lifetime',
+      summary: '显式 node/dependency edge 与 capture、instantiate、replay、resource ownership 保持分离。',
+      reading: 'Graph 包含 H2D、kernel 与 D2H node，并由两条显式 edge 连接。Capture 或 explicit construction 定义 structure，instantiate 创建 executable graph，replay launch 该 executable structure；每个被依赖的 resource 都必须在对应 use 期间保持有效。',
+      nodes: '显式节点（explicit nodes）',
+      edges: '显式依赖边（explicit dependency edges）',
+      from: 'From',
+      to: 'To',
+      lifecycle: 'Graph 与 resource lifetime',
+      lifecycleRows: {
+        capture: ['捕获或构建（capture or construct）', '定义 node 与 dependency edge。'],
+        instantiate: ['实例化（instantiate）', '从 definition 创建 executable graph。'],
+        replay: ['重放（replay）', '在不改变声明 edge 的前提下 launch executable graph。'],
+        'resource-lifetime': ['资源生命周期（resource lifetime）', '让 referenced storage 与 host-owned resource 在 dependent work 期间保持有效。'],
+      },
+    },
+  },
+} as const;
+
+const copy = REPRESENTATION_COPY[locale];
+const selected = copy[kind];
+---
+
+<section
+  class="advanced-memory-representation not-content"
+  data-static-fallback
+  data-representation-kind={kind}
+  data-conceptual-only
+  aria-labelledby={representationId}
+>
+  <header class="advanced-memory-representation__header">
+    <p class="memory-result-kicker">STATIC CONCEPT MODEL · {kind.toUpperCase()}</p>
+    <h3 id={representationId}>{selected.title}</h3>
+    <p>{selected.summary}</p>
+  </header>
+
+  <p class="advanced-memory-reading" data-representation-reading>{selected.reading}</p>
+
+  {kind === 'allocation' && (
+    <>
+      <ol
+        class="advanced-memory-sequence"
+        data-allocation-sequence="allocate,cross-stream-edge,uses,last-use,free"
+        aria-label={copy.allocation.title}
+      >
+        {Object.entries(copy.allocation.steps).map(([id, [label, description]]) => (
+          <li data-allocation-step={id}>
+            <code>{id}</code>
+            <strong>{label}</strong>
+            <span>{description}</span>
+          </li>
+        ))}
+      </ol>
+      <dl
+        class="advanced-memory-edge-list"
+        data-allocation-pool-contract
+        aria-label={copy.allocation.poolContract}
+      >
+        {Object.entries(copy.allocation.poolRows).map(([id, [label, description]]) => (
+          <div data-allocation-pool-row={id}>
+            <dt>{label}</dt>
+            <dd>{description}</dd>
+          </div>
+        ))}
+      </dl>
+    </>
+  )}
+
+  {kind === 'group' && (
+    <div class="advanced-memory-group" data-group-parent="thread-block">
+      <section>
+        <h4>{copy.group.parent}</h4>
+        <p>{copy.group.membership}</p>
+        <ul class="advanced-memory-member-list" data-group-membership>
+          {groupMembers.map((member) => <li data-group-member={member}><code>{member}</code></li>)}
+        </ul>
+      </section>
+      <div class="advanced-memory-table-wrap" tabindex="0" aria-label={copy.group.tileMembers}>
+        <table class="advanced-memory-table" data-group-tiles>
+          <caption>{copy.group.tileMembers}</caption>
+          <thead><tr><th scope="col">{copy.group.tile}</th><th scope="col">{copy.group.tileMembers}</th></tr></thead>
+          <tbody>
+            {groupTiles.map((tile) => (
+              <tr data-group-tile={tile.id}>
+                <th scope="row"><code>{tile.id}</code></th>
+                <td>{tile.members.map((member) => <code>{member} </code>)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="advanced-memory-contract" data-all-participant-collective>
+        <strong>{copy.group.collective}:</strong> {copy.group.collectiveText}
+      </p>
+      <section data-group-dynamic-membership>
+        <h4>{copy.group.dynamicMembership}</h4>
+        <p>{copy.group.dynamicMembershipText}</p>
+      </section>
+      <section data-group-grid-gate data-cooperative-launch-required="true">
+        <h4>{copy.group.gridGate}</h4>
+        <p>{copy.group.gridGateText}</p>
+      </section>
+    </div>
+  )}
+
+  {kind === 'pipeline' && (
+    <div class="advanced-memory-comparison">
+      <section data-pipeline-path="portable-baseline">
+        <h4>{copy.pipeline.baseline}</h4>
+        <ol>
+          {Object.entries(copy.pipeline.baselineSteps).map(([id, [label, description]]) => (
+            <li data-pipeline-step={id}>
+              <code>{id}</code><strong>{label}</strong><span>{description}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section data-pipeline-path="cc8-plus" data-minimum-compute-capability="8.0">
+        <h4>{copy.pipeline.gated}</h4>
+        <ol data-pipeline-sequence="acquire,copy,commit,wait,use,release">
+          {Object.entries(copy.pipeline.gatedSteps).map(([id, [label, description]]) => (
+            <li data-pipeline-step={id}>
+              <code>{id}</code><strong>{label}</strong><span>{description}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
+  )}
+
+  {kind === 'graph' && (
+    <div class="advanced-memory-graph">
+      <section>
+        <h4>{copy.graph.nodes}</h4>
+        <ol class="advanced-memory-node-list" data-graph-nodes>
+          {graphNodes.map((node) => <li data-graph-node={node}><code>{node}</code></li>)}
+        </ol>
+      </section>
+      <section>
+        <h4>{copy.graph.edges}</h4>
+        <dl class="advanced-memory-edge-list" data-graph-edges>
+          {graphEdges.map((edge) => (
+            <div data-graph-edge={edge.id}>
+              <dt><code>{edge.id}</code></dt>
+              <dd>{copy.graph.from}: <code>{edge.from}</code> -&gt; {copy.graph.to}: <code>{edge.to}</code></dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <div class="advanced-memory-table-wrap" tabindex="0" aria-label={copy.graph.lifecycle}>
+        <table class="advanced-memory-table" data-graph-lifecycle>
+          <caption>{copy.graph.lifecycle}</caption>
+          <tbody>
+            {Object.entries(copy.graph.lifecycleRows).map(([id, [label, description]]) => (
+              <tr data-graph-lifecycle-stage={id}>
+                <th scope="row">{label}</th>
+                <td>{description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )}
+</section>

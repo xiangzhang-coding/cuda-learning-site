@@ -12,7 +12,7 @@ import {
   type ResourceIndexRecord,
 } from '../../src/resource-indexes/resource-index-model';
 
-const asOf = new Date('2026-08-28T12:00:00Z');
+const asOf = new Date('2026-08-29T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -23,14 +23,14 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(180);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(212);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 6, practice: 29, visuals: 11, glossary: 95, sources: 39 });
-    for (const absentId of ['LAB06', 'EX07']) {
+    ).toEqual({ labs: 6, practice: 35, visuals: 12, glossary: 114, sources: 45 });
+    for (const absentId of ['Q02', 'LAB06', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -53,6 +53,37 @@ describe('resource index catalog', () => {
       LAB05: { href: '/en/labs/remove-shared-memory-bank-conflicts/', prerequisites: ['M04', 'Q05'] },
       LAB07: { href: '/en/labs/diagnose-four-sanitizer-failures/', prerequisites: ['Q03', 'Q04'] },
     });
+
+    expect(Object.fromEntries(
+      ['M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'EX07', 'EX08', 'EX09', 'VIS08'].map((planningId) => [
+        planningId,
+        {
+          href: PUBLISHED_DESTINATIONS[planningId].href.en,
+          prerequisites: PUBLISHED_DESTINATIONS[planningId].prerequisites,
+        },
+      ]),
+    )).toEqual({
+      M09: { href: '/en/memory/pinned-memory-transfer-overlap/', prerequisites: ['M07', 'M08'] },
+      M10: { href: '/en/memory/unified-memory-page-migration/', prerequisites: ['M01', 'M02'] },
+      M11: { href: '/en/memory/stream-ordered-allocation-memory-pools/', prerequisites: ['M07', 'M08'] },
+      M12: { href: '/en/memory/cooperative-groups/', prerequisites: ['M05', 'M06'] },
+      M13: { href: '/en/memory/asynchronous-copy-pipelines/', prerequisites: ['M03', 'M05', 'M08'] },
+      M14: { href: '/en/memory/cuda-graphs/', prerequisites: ['M07', 'M08'] },
+      EX07: { href: '/en/examples/streams-events-overlap/', prerequisites: ['M07', 'M08', 'M09'] },
+      EX08: { href: '/en/examples/unified-memory-migration/', prerequisites: ['M10'] },
+      EX09: { href: '/en/examples/graph-capture/', prerequisites: ['M14'] },
+      VIS08: { href: '/en/visuals/page-migration/', prerequisites: ['M01', 'M02', 'M10'] },
+    });
+
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R2-/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
+    ]);
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:0\d|1[0-4]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 19 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
+    );
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|30)$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
+    ]);
   });
 
   it('keeps one canonical Glossary entry per term in both locales', () => {
@@ -69,10 +100,10 @@ describe('resource index catalog', () => {
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-27T16:00:00Z'),
+      asOf: new Date('2026-08-28T16:00:00Z'),
     })).not.toThrow();
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-27T15:59:59Z'),
+      asOf: new Date('2026-08-28T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
 
@@ -175,6 +206,7 @@ describe('resource index catalog', () => {
       'VIS05',
       'VIS06',
       'VIS07',
+      'VIS08',
       'VIS19',
       'VIS20',
       'VIS21',
@@ -210,6 +242,16 @@ describe('resource index catalog', () => {
         href: '/en/visuals/stream-event-dependencies/',
         counterpart: '/visuals/stream-event-dependencies/',
         prerequisites: [],
+      },
+      {
+        planningId: 'VIS08',
+        href: '/en/visuals/page-migration/',
+        counterpart: '/visuals/page-migration/',
+        prerequisites: [
+          ['M01', '/en/memory/address-spaces/'],
+          ['M02', '/en/memory/coalescing-transactions/'],
+          ['M10', '/en/memory/unified-memory-page-migration/'],
+        ],
       },
       {
         planningId: 'VIS19',
@@ -261,7 +303,7 @@ describe('resource index catalog', () => {
     const base = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === 'TERM-034');
     expect(base).toBeDefined();
     const growth = Array.from({ length: 25 }, (_, index) => {
-      const suffix = String(100 + (24 - index));
+      const suffix = String(200 + (24 - index));
       return {
         ...base,
         planningId: `TERM-${suffix}`,
@@ -276,9 +318,9 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(120);
+    expect(projected).toHaveLength(139);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
-      Array.from({ length: 25 }, (_, index) => `TERM-${100 + index}`),
+      Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );
   });
 

@@ -3,7 +3,7 @@ title: Visual Explainer Index
 description: Find every completely published Visual Explainer by concept, related Learning Unit, and version boundary.
 pairId: visuals-index
 counterpart: /visuals/
-factCheckDate: '2026-08-28'
+factCheckDate: '2026-08-29'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/visuals/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. Of the eleven formal explainers, VIS01, VIS02, VIS03 Warp Divergence, VIS04 Memory-request Segment Grouping, VIS05 Shared-memory Bank Mapping, VIS06 Memory Hierarchy, Ownership, and Lifetime, and VIS07 Stream and Event Dependencies use seven standalone pages. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors, and navigation does not duplicate them as four standalone pages. Incomplete planned work does not appear.
+This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. Of the twelve formal explainers, VIS01, VIS02, VIS03 Warp Divergence, VIS04 Memory-request Segment Grouping, VIS05 Shared-memory Bank Mapping, VIS06 Memory Hierarchy, Ownership, and Lifetime, VIS07 Stream and Event Dependencies, and VIS08 Managed-Memory Page Migration use eight standalone pages. VIS08 requires M01, M02, and M10 and relates to M10 and EX08. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors, and navigation does not duplicate them as four standalone pages. Incomplete planned work does not appear.
 
 ## Published Visual Explainers
 
@@ -38,4 +38,4 @@ A planning ID is a stable discussion label. It neither generates nor promises a 
 
 ## Evidence boundary
 
-VIS01-VIS07 and VIS19-VIS22 run deterministic teaching models only in the browser, provide static or textual fallbacks, and execute no CUDA. The index states that boundary: none of the eleven Visual Explainers has CUDA Evidence Status or a Compile-Checked, Community-Observed, or Runtime-Verified claim.
+VIS01-VIS08 and VIS19-VIS22 run deterministic teaching models only in the browser, provide static or textual fallbacks, and execute no CUDA. VIS08's residency rail and page transitions are a browser-only model, not a fault, migration, residency, byte-count, or timing observation. The index states that boundary: none of the twelve Visual Explainers has CUDA Evidence Status or a Compile-Checked, Community-Observed, or Runtime-Verified claim. Reviewed: **2026-08-29**.

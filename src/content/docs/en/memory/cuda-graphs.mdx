@@ -1,0 +1,255 @@
+---
+title: 'M14: CUDA Graphs and Repeated Launch Structure'
+description: Model repeated CUDA work as a DAG, construct it with either the explicit Graph API or stream capture, instantiate an executable graph, and preserve capture, lifetime, completion, update, and evidence boundaries.
+pairId: m14
+counterpart: /memory/cuda-graphs/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - graph-model
+  - ordinary-launches
+  - explicit-graph-api
+  - stream-capture
+  - capture-boundaries
+  - instantiate-launch
+  - lifetimes-completion
+  - updates
+  - canonical-example
+  - representation
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M14
+prerequisites:
+  - M07
+  - M08
+relatedUnits:
+  - M11
+exampleIds:
+  - EX09
+canonicalExample: EX09
+canonicalRanges:
+  - graph-contract
+  - captured-replay
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current graph structure, construction, capture, lifecycle, and update model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Graph Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__GRAPH.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current graph object, node, instantiation, launch, capture, update, and destruction interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cuda-graphs'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 graph and stream-capture contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Graph Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__GRAPH.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 graph management interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8.0 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cuda-graphs'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 graph and stream-capture contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Graph Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__GRAPH.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 graph management interfaces'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m14 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,graph-model,ordinary-launches,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M14 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M11 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX09 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX09 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'graph-contract,captured-replay' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.1,11.8.0' }
+---
+
+import AdvancedMemoryRepresentation from '../../../../components/AdvancedMemoryRepresentation.astro';
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/cuda-graphs/" lang="zh-CN">阅读中文对应页</a>
+
+A [CUDA Graph (TERM-111)](/en/glossary/#term-111) records operations and their dependencies separately from execution. Each [graph node (TERM-112)](/en/glossary/#term-112) is an operation, directed edges are dependencies, [stream capture (TERM-113)](/en/glossary/#term-113) is one construction mechanism, and an [executable graph (TERM-114)](/en/glossary/#term-114) is the instantiated object submitted for execution.
+
+## What you should be able to do
+
+- Draw a repeated workload as a directed acyclic graph of operation nodes and dependency edges.
+- Keep the explicit Graph API and stream capture as separate graph-construction mechanisms.
+- Audit capture prohibitions, invalidation, origin-stream ownership, and cross-stream rejoin boundaries.
+- Follow `definition -> instantiate executable -> repeated launch` while preserving external resource lifetimes and explicit completion.
+- Classify an update as permitted, restricted, or requiring re-instantiation without making a performance claim.
+
+## Prerequisites
+
+Complete [M07: Streams Replace a Global-Order Mental Model](/en/memory/stream-ordering/) and then [M08: Events as Dependencies and Device-Time Measurements](/en/memory/event-dependencies-timing/). M07 supplies per-stream order and unordered-stream reasoning. M08 supplies captured event generations, stream wait edges, and explicit completion observations. A graph does not erase either contract; it freezes a declared dependency structure for later instantiation and launch.
+
+M11 is related but not a prerequisite. This page requires no CUDA-capable system and grants no Evidence Status.
+
+## Graph model: nodes, edges, and a DAG
+
+A CUDA graph is a directed acyclic graph (DAG). Nodes represent operations such as kernels, memory copies, memory sets, host functions, event records or waits, and child graphs. An edge `A -> B` means B depends on A under that edge's documented semantics. Acyclic means following directed dependencies can never return to the same node.
+
+Edges constrain execution; source layout and node numbering do not. Once all dependencies of a node are complete, the CUDA system may schedule it. Two nodes with no path between them are unordered by the graph. That is eligibility, not evidence that they ran concurrently.
+
+For review, record each node's type, parameters, external resources, incoming edges, outgoing edges, and completion consumer. Reject a cycle, a missing producer-to-consumer edge, or an accidental edge that serializes otherwise independent work before instantiation.
+
+## Ordinary repeated launches as the baseline
+
+Start with the ordinary stream-based loop. On every iteration, the host submits the workload's copies, kernels, event edges, and completion boundary again. Stream order and event waits define correctness for that iteration; repeated source order alone does not create a reusable graph object.
+
+| Submission path | How structure is defined | What the host repeats |
+| --- | --- | --- |
+| ordinary stream launches | enqueue calls, stream order, and event dependencies made during each iteration | every operation submission and the required completion observation |
+| stream capture | execute the stream-based authoring path once in capture mode, then instantiate its derived DAG | `cudaGraphLaunch` of the executable graph plus the selected completion observation |
+| explicit Graph API | add typed nodes and dependency edges directly, then instantiate that DAG | `cudaGraphLaunch` of the executable graph plus the selected completion observation |
+
+All three paths need the same external-resource lifetime and output oracle. Graph construction can move repeated setup out of the per-iteration submission path, but this source-level comparison records no launch-overhead reduction or end-to-end speedup.
+
+## Explicit Graph API: construct the DAG directly
+
+The explicit Graph API creates a `cudaGraph_t`, adds typed nodes, and supplies dependencies at node creation or through edge APIs. The program keeps node handles, so it can inspect or update selected node parameters under the API's restrictions. This mechanism is appropriate when the application owns the graph structure and can describe node parameters directly.
+
+Graph definition is not graph execution. Adding a kernel node does not launch the kernel, adding a memory node does not move bytes, and a valid DAG does not establish that its external pointers or callback data will remain live through a future launch.
+
+## Stream capture: derive a graph from stream-based work
+
+Stream capture brackets an existing stream-based sequence with `cudaStreamBeginCapture()` and `cudaStreamEndCapture()`. While a stream is in capture mode, supported operations submitted to it are appended to a capture graph rather than enqueued for execution. Ending capture successfully returns a `cudaGraph_t` template.
+
+Capture is a different construction mechanism, not a second execution mode. It derives nodes and edges from stream order and captured event dependencies. Explicit Graph API calls and capture may produce equivalent DAGs, but their authoring, error, and ownership boundaries differ.
+
+## Capture prohibitions, invalidation, and rejoin
+
+The stream that begins capture is the **origin stream**, and capture must end on that same stream. A captured event can fork work into another stream through an event wait. Every additional stream joined to the same capture graph must be joined back to the origin stream before `cudaStreamEndCapture()`; otherwise the overall capture fails.
+
+During active capture, it is invalid to query or synchronize a captured stream or captured event, or a broader device/context handle that encompasses the capture. Prohibited legacy-stream interactions, synchronous APIs such as `cudaMemcpy()` in the documented capture context, attempts to merge separate capture graphs, and unsupported capture operations must not be hidden inside a captured library call.
+
+An invalid operation invalidates the associated capture graph. Further use of its capturing streams or captured events is invalid until the program calls `cudaStreamEndCapture()` to leave capture mode. That end call reports an error and returns a null graph. Error handling must therefore preserve the origin stream, finish the failed capture boundary, discard the null result, and avoid instantiation.
+
+## Definition, instantiation, and repeated launch
+
+Graph work submission has three distinct stages:
+
+1. **Definition:** create a graph template with either the explicit API or stream capture.
+2. **Instantiation:** validate and snapshot the template with `cudaGraphInstantiate()`, producing a `cudaGraphExec_t` executable graph.
+3. **Execution:** submit that executable with `cudaGraphLaunch(graphExec, stream)` as often as the application contract permits.
+
+Instantiation is not a launch, and launch is asynchronous with respect to the host. Repeated launch reuses the instantiated structure; it does not re-run capture and does not imply that previous launches have completed. Every API result still needs its immediate error check, and asynchronous work still needs a declared completion observation.
+
+## Resource lifetimes and explicit completion
+
+Graph and executable handles do not make external resources immortal. A node's device allocations, host buffers, kernel/module state, event or semaphore objects, host-function callback data, and pointer pointees must satisfy the selected node API's lifetime and accessibility contract through every launch that can use them. Capture-only objects must also remain valid until capture ends successfully or is unwound after invalidation.
+
+Treat each `cudaGraphLaunch` as submitted stream work. Record an event after the launch or synchronize the containing stream at the intended host boundary. Only after that completion may the host consume copied-back data, release resources used by the launch, or destroy the executable under the chosen teardown contract. Destroying a graph template or executable handle is not a substitute for proving completion of external resource use.
+
+Use a lifecycle ledger:
+
+| object | created/selected | last graph use | completion boundary | release action |
+| --- | --- | --- | --- | --- |
+| `cudaGraph_t` template | explicit construction or successful capture | instantiation or later update source | host API completion | `cudaGraphDestroy` when no longer needed |
+| `cudaGraphExec_t` | successful instantiation | final graph launch | final launch's explicit stream/event completion | `cudaGraphExecDestroy` |
+| external storage/handles | allocation or creation | last node use in the final relevant launch | completion covering that node | matching free/destroy API |
+
+## Updates are bounded
+
+An executable graph is a snapshot, not a freely mutable workflow. Whole-graph `cudaGraphExecUpdate()` is bounded by topology identity, dependency ordering, node-type, context, and parameter restrictions. Individual executable-node update APIs support only their documented node types and parameter changes. Updates affect subsequent launches, not launches already submitted.
+
+Classify each requested change before applying it. A compatible parameter update may use a documented update API. A topology change, node-type change, or rejected update requires a new valid graph and re-instantiation. Always inspect the returned update status; never assume an attempted update succeeded or silently broaden its contract.
+
+Neither a reusable executable nor a successful update is a performance result. Launch-overhead, end-to-end time, and any concurrency claim require separate measurement.
+
+## Canonical Runnable Example: EX09
+
+EX09 is the canonical standalone project for M14. [View the complete EX09 project at the pinned source commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a/examples/ex09-graph-capture), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a.zip). The project is the only complete implementation; this Learning Unit keeps no hand-maintained complete code listing.
+
+The first canonical range declares and validates the fixed two-node DAG, its single edge and topological order, the deterministic input, the pure-host replay reference, and exact verification:
+
+<CanonicalCode exampleId="EX09" range="graph-contract" />
+
+The second canonical range shows stream creation, captured construction, instantiation, three repeated launches, explicit completion, exact result verification, and teardown:
+
+<CanonicalCode exampleId="EX09" range="captured-replay" />
+
+The import order is part of the page contract: `graph-contract` first, then `captured-replay`.
+
+## Graph representation
+
+<AdvancedMemoryRepresentation kind="graph" locale="en" />
+
+The representation exposes nodes, dependency edges, capture boundaries, instantiation, and repeated submissions. It is a deterministic browser explanation, not a CUDA graph launch, scheduler trace, or timing result.
+
+## Evidence boundary
+
+A static DAG can establish intended dependencies. EX09 canonical ranges can establish source identity once the project manifest resolves. Neither artifact executes the graph. This Learning Unit reports no compilation, runtime, launch-overhead, elapsed-time, concurrency, or speedup observation, so every evidence array remains empty.
+
+A future claim must bind the exact EX09 source commit, Toolkit Lane, Environment Manifest, correctness oracle, graph construction mechanism, launch count, warm-up and completion boundaries, raw measurements, and comparison path. Graph use alone is not a performance claim.
+
+## Retrieval check
+
+1. What do nodes and directed edges represent, and why must a CUDA graph remain acyclic?
+2. What does the host repeat in an ordinary launch loop, and how do the explicit Graph API and stream capture move that DAG into a reusable executable?
+3. What must happen to auxiliary captured streams before the origin stream ends capture, and what follows an invalidating operation?
+4. Why are definition, instantiation, launch, and completion four distinct lifecycle boundaries?
+5. Which requested graph changes can require re-instantiation, and why does a successful update still prove no performance result?
+
+## Continue with practice
+
+- Complete the [M14 Exercises](/en/memory/cuda-graphs/exercises/), then inspect the separate [reviewed solutions](/en/memory/cuda-graphs/solutions/).
+- Audit capture, replay, lifetime, and update boundaries in [Practice Bank PB-R2-006](/en/practice/#pb-r2-006).
+- Revisit [TERM-111 CUDA Graph](/en/glossary/#term-111), [TERM-112 graph node](/en/glossary/#term-112), [TERM-113 stream capture](/en/glossary/#term-113), and [TERM-114 executable graph](/en/glossary/#term-114).
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: CUDA Graphs](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html) defines the current DAG, construction, capture, instantiation, execution, and update model.
+- [CUDA Runtime API v13.3.1: Graph Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__GRAPH.html) defines the current graph object, node, capture, executable, launch, update, and destruction interfaces.
+- [CUDA C++ Programming Guide 12.9.1: CUDA Graphs](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cuda-graphs) and [CUDA Runtime API 12.9.1: Graph Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__GRAPH.html) preserve the Toolkit 12.9.1 contracts.
+- [CUDA C Programming Guide 11.8.0: CUDA Graphs](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cuda-graphs) and [CUDA Runtime API 11.8.0: Graph Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__GRAPH.html) preserve the Toolkit 11.8 contracts.
+
+All six owner sources were accessed on **2026-08-29** in the exact order recorded in frontmatter: current v13.3, current v13.3.1, the 12.9.1 archive pair, then the 11.8.0 archive pair. The DAG ledger, lifecycle table, questions, Exercises, and arrangement are original CC-BY-4.0 work for this site. No owner example, figure, or performance result is copied.
+
+**Fact checked: 2026-08-29.**

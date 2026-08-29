@@ -113,6 +113,15 @@ const correctnessSlugs = [
   'racecheck-initcheck-synccheck',
   'timing-asynchronous-gpu-work',
 ] as const;
+const issue19MemorySlugs = [
+  'pinned-memory-transfer-overlap',
+  'unified-memory-page-migration',
+  'stream-ordered-allocation-memory-pools',
+  'cooperative-groups',
+  'asynchronous-copy-pipelines',
+  'cuda-graphs',
+] as const;
+const issue19MemorySlugSet = new Set<string>(issue19MemorySlugs);
 const exampleSlugs = [
   'environment-report',
   'vector-addition',
@@ -120,6 +129,9 @@ const exampleSlugs = [
   'error-handling-lifecycle',
   'coalesced-strided-access',
   'shared-memory-tile-bank-padding',
+  'streams-events-overlap',
+  'unified-memory-migration',
+  'graph-capture',
   'sanitizer-defect-suite',
 ] as const;
 const labSlugs = [
@@ -134,11 +146,17 @@ const labSlugs = [
 const sortedRoutes = (routes: readonly string[]) =>
   [...routes].sort((left, right) => left.localeCompare(right, 'en'));
 
-test('issue-17 publication, Runnable Example, and Lab route scope is exact', async () => {
+test('issue-19 final publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(218);
-  expect(publishedRoutes.length / 2).toBe(109);
+  expect(publishedRoutes).toHaveLength(262);
+  expect(publishedRoutes.length / 2).toBe(131);
 
+  const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
+    ['', 'exercises', 'solutions'].flatMap((child) => {
+      const route = `/memory/${slug}/${child ? `${child}/` : ''}`;
+      return [route, `/en${route}`];
+    }),
+  );
   const expectedCorrectnessRoutes = correctnessSlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {
       const route = `/correctness/${slug}/${child ? `${child}/` : ''}`;
@@ -154,6 +172,10 @@ test('issue-17 publication, Runnable Example, and Lab route scope is exact', asy
     `/en/labs/${slug}/`,
   ]);
 
+  expect(publishedRoutes.filter((route) => {
+    const slug = route.match(/^\/(?:en\/)?memory\/([^/]+)\//)?.[1];
+    return slug !== undefined && issue19MemorySlugSet.has(slug);
+  })).toEqual(sortedRoutes(expectedIssue19MemoryRoutes));
   expect(publishedRoutes.filter((route) => /^\/(?:en\/)?correctness\//.test(route))).toEqual(
     sortedRoutes(expectedCorrectnessRoutes),
   );

@@ -1,0 +1,264 @@
+---
+title: 'M12: Cooperative Groups and Composable Synchronization'
+description: Make group membership, scope, participants, partitioning, synchronization, collective arguments, dynamic active sets, and the cooperative grid-launch gate explicit.
+pairId: m12
+counterpart: /memory/cooperative-groups/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - group-contract
+  - thread-block
+  - tiled-partition
+  - synchronization-collectives
+  - collective-arguments
+  - coalesced-threads
+  - grid-synchronization
+  - version-boundary
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M12
+prerequisites:
+  - M05
+  - M06
+relatedUnits:
+  - M13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Cooperative Groups'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current group, partition, synchronization, collective, and large-scale group model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Device-Callable Cooperative Groups API'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html#cooperative-groups-api'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, tile, coalesced-group, partition, and collective API contracts'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Execution Control'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current single-device cooperative launch gate and size constraints'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Cooperative Groups'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cooperative-groups'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 Cooperative Groups model, including historical multi-device material'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Execution Control'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EXECUTION.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 cooperative launch interfaces, including the deprecated multi-device API'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Cooperative Groups'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cooperative-groups'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 Cooperative Groups model, including historical multi-device material'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Execution Control'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__EXECUTION.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 cooperative launch interfaces, including the deprecated multi-device API'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m12 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,group-contract,thread-block,tiled-partition,synchronization-collectives,collective-arguments,coalesced-threads,grid-synchronization,version-boundary,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M05,M06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M13 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import AdvancedMemoryRepresentation from '../../../../components/AdvancedMemoryRepresentation.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/cooperative-groups/" lang="zh-CN">阅读中文对应页</a>
+
+[Cooperative Groups (TERM-105)](/en/glossary/#term-105) makes a collaborating [thread group (TERM-106)](/en/glossary/#term-106) an explicit handle. Every [collective operation (TERM-107)](/en/glossary/#term-107) is interpreted against that handle's membership, scope, participants, and argument contract. This representation makes synchronization composable without turning an assumed warp or the whole grid into the default scope.
+
+## What you should be able to do
+
+- State a group handle's membership, synchronization scope, and required participants before using it.
+- Use `this_thread_block` as the stable block-wide baseline and partition it with `tiled_partition` collectively.
+- Apply `sync`, reduce, scan, and related collectives only when the named group participates correctly.
+- Enforce the group-wide argument contract while recognizing arguments explicitly allowed to vary by thread.
+- Keep `coalesced_threads` within its dynamic active-set boundary and grid synchronization behind a cooperative-launch gate.
+
+## Prerequisites
+
+Complete [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) and then [M06: Divergence, Reconvergence, and Warp-Safe Reasoning](/en/memory/warp-divergence-reconvergence/). M05 supplies barrier scope and visibility reasoning. M06 supplies the rule that active-thread sets and warp progress must not be replaced by implicit lockstep assumptions.
+
+M12 introduces explicit group contracts. It has no canonical Runnable Example, does not launch a kernel, and does not grant compilation or runtime evidence.
+
+## The four-part group contract
+
+Before calling a group operation, write four fields:
+
+| Field | Review question |
+| --- | --- |
+| handle | Which object names the group at this call site? |
+| membership | Which threads belong to that exact group instance? |
+| scope | Which threads and memory effects can this operation coordinate? |
+| participants | Which members must reach this construction or collective call? |
+
+Passing the handle into a helper exposes the contract at the function boundary:
+
+```cpp wrap
+template <class Group>
+__device__ void publish_then_sync(const Group& group, int* shared_value, int value) {
+  if (group.thread_rank() == 0) *shared_value = value;
+  group.sync();
+}
+```
+
+The caller must supply a group whose members can legally access `shared_value`, and every required participant must call the helper. A templated signature makes the algorithm composable; it does not make every group type semantically interchangeable.
+
+## `this_thread_block`: the stable baseline
+
+`cooperative_groups::this_thread_block()` returns a `thread_block` handle containing all threads in the caller's block. Its `thread_rank()` and `num_threads()` describe membership. Its `sync()` is a block-group collective: all member threads must participate, all reach the point before any proceeds, and documented pre-sync memory accesses become visible to group members after the point.
+
+```cpp wrap
+namespace cg = cooperative_groups;
+cg::thread_block block = cg::this_thread_block();
+block.sync();
+```
+
+This block-wide handle is the baseline for M12 because launch geometry already defines its membership and ordinary kernels can use it. Explicitly passing `block` to a helper is safer to review than hiding a block barrier inside a function whose caller contract says nothing about participation.
+
+## `tiled_partition`: collective construction of subgroups
+
+`cg::tiled_partition<32>(block)` partitions the parent block into fixed-size, one-dimensional row-major tiles and returns each caller's tile handle. The partition operation is itself collective over the parent group. Every member of `block` must participate; constructing the tile only in a branch reached by some block threads can deadlock or corrupt data.
+
+```cpp wrap
+cg::thread_block block = cg::this_thread_block();
+auto tile = cg::tiled_partition<32>(block); // reached by the complete parent block
+
+if (tile.thread_rank() == 0) {
+  // one leader per tile
+}
+tile.sync(); // all members of this tile participate
+```
+
+Review tile size against the documented API constraints and parent size. After partitioning, `tile.sync()` names only the tile, not the parent block. The handle changes both membership and synchronization scope.
+
+## Synchronization and collectives use the named group
+
+`group.sync()` is a collective barrier for the threads named by `group`. Cooperative Groups also supplies collectives such as reduce and inclusive/exclusive scan for supported group types. In every case, the group handle identifies the participant set; source proximity, warp membership, or matching branch text does not enlarge it.
+
+For a tile reduction:
+
+```cpp wrap
+int tile_sum = cg::reduce(tile, value, cg::plus<int>());
+```
+
+Every tile member participates in the same collective instance. Each thread may provide its own `value` because that parameter is explicitly the per-thread reduction input. The group and operation must still agree across the collective.
+
+## The group-wide argument contract
+
+For a collective call, all threads in the group must pass the same corresponding argument values unless that API explicitly permits differences. Violating this rule is undefined behavior. Apply the contract argument by argument rather than saying vaguely that "threads call the same function."
+
+For `reduce(tile, value, cg::plus<int>())`:
+
+- `tile` must name the same group instance for all participants.
+- `value` may differ because the reduce API explicitly accepts one contribution per thread.
+- The operation object must describe the same reduction operation across the group.
+- Every tile member must execute that collective instance.
+
+The same-call-site appearance is insufficient if divergent control causes only part of the group to arrive. Participation and argument agreement are separate review columns.
+
+## `coalesced_threads`: a dynamic set boundary
+
+`coalesced_threads()` discovers a `coalesced_group` from threads active at that point in a warp. Construction is opportunistic: the returned members are active, but the API does not guarantee a particular active subset or that those threads remain coalesced throughout later execution. They are brought together for a collective and may diverge again afterward.
+
+Treat the returned handle as a point-specific dynamic set:
+
+```text wrap
+branch path -> coalesced_threads() captures active members -> collective on that handle
+```
+
+Do not rename it "the warp," assume 32 members, or reuse a membership claim from a different control-flow point. A fresh call after divergence or reconvergence may represent a different group.
+
+## Grid synchronization requires a cooperative-launch gate
+
+A `grid_group` from `this_grid()` can name all threads in one grid, but grid-wide `sync()` is legal only for a cooperatively launched kernel. The host path must:
+
+1. Query `cudaDevAttrCooperativeLaunch` and check a nonzero result.
+2. Choose a grid that satisfies the cooperative launch residency/size constraints.
+3. Launch with `cudaLaunchCooperativeKernel`.
+4. Ensure every grid-group participant reaches each grid collective.
+
+A normal `<<<...>>>` launch is not a substitute for this gate. The Runtime contract also limits the total block count using active blocks per multiprocessor times multiprocessor count. Because this path adds hardware, launch, occupancy, and full-grid participation obligations, M12 does not use grid groups as its baseline. Start with block and tile groups; select a grid group only when an algorithm genuinely requires inter-block synchronization and the gate is reviewable.
+
+## CUDA 13 version boundary
+
+Current CUDA 13 Cooperative Groups supports single-device cooperative grid synchronization, but multi-device Cooperative Groups launch APIs and related references were removed. CUDA 12.9.1 and 11.8 archive pages still contain the already-deprecated `cudaLaunchCooperativeKernelMultiDevice` and multi-grid material. Those archive sections are historical coordinates, not current CUDA 13 guidance.
+
+Do not infer a current multi-device synchronization path from an archived example. This Learning Unit teaches no multi-device Cooperative Groups baseline.
+
+## Visual model
+
+<AdvancedMemoryRepresentation kind="group" locale="en" />
+
+The representation compares explicit membership, scope, and participation boundaries for a block, tile, dynamic coalesced set, and gated grid. It models contracts in the browser and executes no CUDA collective.
+
+## Evidence boundary
+
+The group tables, code fragments, participation graphs, visual representation, and Exercises are static. No source was compiled, no cooperative-launch attribute or occupancy limit was queried, and no collective or grid synchronization ran. Every Learning Unit evidence axis remains empty.
+
+## Retrieval check
+
+1. Which four fields make a group operation reviewable at a helper-function boundary?
+2. Why must all parent-block members participate in `tiled_partition` even if only one tile is later used in a branch?
+3. For `reduce(tile, value, op)`, which arguments may differ and which must agree group-wide?
+4. Why is a handle returned by `coalesced_threads()` not a permanent synonym for one warp?
+5. Which support, launch, size, and participation gates precede a legal `grid_group::sync()`?
+
+## Continue with practice
+
+- Complete the [M12 Exercises](/en/memory/cooperative-groups/exercises/), then inspect the separate [reviewed solutions](/en/memory/cooperative-groups/solutions/).
+- Repair a hidden participant mismatch and an ungated grid barrier in [Practice Bank PB-R2-004](/en/practice/#pb-r2-004).
+- Review [TERM-105 Cooperative Groups](/en/glossary/#term-105), [TERM-106 thread group](/en/glossary/#term-106), and [TERM-107 collective operation](/en/glossary/#term-107) when writing helper contracts.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Cooperative Groups](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html) supplies the current group, partition, synchronization, collective, argument, and large-scale group model.
+- [CUDA Programming Guide v13.3: Device-Callable Cooperative Groups API](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html#cooperative-groups-api) defines current `thread_block`, tile, `coalesced_group`, partition, and collective details.
+- [CUDA Runtime API v13.3.1: Execution Control](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html) defines the current single-device cooperative launch gate and size constraints.
+- [CUDA C++ Programming Guide 12.9.1: Cooperative Groups](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cooperative-groups) and [CUDA Runtime API 12.9.1: Execution Control](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EXECUTION.html) preserve the Toolkit 12.9.1 contracts and historical deprecated multi-device path.
+- [CUDA C Programming Guide 11.8: Cooperative Groups](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cooperative-groups) and [CUDA Runtime API 11.8.0: Execution Control](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__EXECUTION.html) preserve the Toolkit 11.8 contracts and historical deprecated multi-device path.
+
+All seven owner sources were accessed on **2026-08-29**. Current conclusions follow CUDA Programming Guide v13.3 and CUDA Runtime API v13.3.1; archive-only multi-device material is not carried into the current baseline. The contract tables, participant fixtures, Exercises, and arrangement are original composition for this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-29.**

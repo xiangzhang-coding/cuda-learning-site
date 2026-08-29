@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 95 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 114 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-28'
+factCheckDate: '2026-08-29'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-28'
+      content: '2026-08-29'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -903,6 +903,177 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [Q05](/correctness/timing-asynchronous-gpu-work/)、[LAB04](/labs/observe-coalescing/)和 [LAB05](/labs/remove-shared-memory-bank-conflicts/)。
 - **版本说明：** Statistic 不由 CUDA API 自动选择；必须绑定 frozen workload、measurement method、sample-retention rule、raw samples 和 observation coordinates。
 
+<span id="term-096" class="resource-target" aria-hidden="true"></span>
+
+### page-locked host memory · 页锁定主机内存
+
+- **定义：** 由 CUDA host-allocation API 创建或由 registration API 锁定的 host range；操作系统在 CUDA 使用期间不能把其 physical storage 换出或重定位。Allocation path 以 `cudaFreeHost` 释放；registration path 在 last asynchronous use 后先 `cudaHostUnregister`，再由 original allocator 释放。
+- **避免使用：** 自动 device-resident memory、transfer 已经开始、transfer overlap proof、无限 host resource。
+- **相关资源：** [M09：Pinned memory 与传输重叠](/memory/pinned-memory-transfer-overlap/)和 [EX07](/examples/streams-events-overlap/)。
+- **版本说明：** Programming Guide v13.3、Runtime API v13.3.1 与 12.9.1/11.8.0 archive 都保留 allocation/registration 与 matching release 的区别；pinning 只建立 storage eligibility，不观察 overlap。
+
+<span id="term-097" class="resource-target" aria-hidden="true"></span>
+
+### transfer overlap · 传输重叠
+
+- **定义：** 在一个具名 run 中，data-transfer execution interval 与另一项 transfer 或 compute interval 实际相交的 runtime observation。
+- **避免使用：** Unordered operations、overlap eligibility、copy-engine capability、两条 stream、source graph 或 browser animation。
+- **相关资源：** [M09](/memory/pinned-memory-transfer-overlap/)、[Q05](/correctness/timing-asynchronous-gpu-work/)和 [EX07](/examples/streams-events-overlap/)。
+- **版本说明：** Page-locked ranges、asynchronous API、dependency graph 与 device capability 只能打开 eligibility gate；exact-run device timeline 与 Environment Manifest 才能支撑 observation，且不会自动证明 speedup。
+
+<span id="term-098" class="resource-target" aria-hidden="true"></span>
+
+### copy engine · 复制引擎
+
+- **定义：** CUDA-capable device 上可能独立于 SM compute 执行 data movement 的 hardware resource；其可用数量与方向属于所选 device/path 的 capability。
+- **避免使用：** 每次 `cudaMemcpy*` 都使用的固定 DMA lane、transfer overlap observation、stream 的同义词。
+- **相关资源：** [M09](/memory/pinned-memory-transfer-overlap/)和 [EX07](/examples/streams-events-overlap/)。
+- **版本说明：** Runtime device properties 可以报告 asynchronous-engine capability，但 API spelling 与 nonzero value 都不能证明某次 copy 使用了 engine 或与 kernel overlap；需要 exact-run observation。
+
+<span id="term-099" class="resource-target" aria-hidden="true"></span>
+
+### managed memory · 托管内存
+
+- **定义：** 由 CUDA Unified Memory system 管理、在适用 system contract 下可由 CPU 与 GPU code address 的 allocation；它仍有 owner、finite lifetime、data dependencies、synchronization 和 matching release。
+- **避免使用：** 单一 physical memory、零 data movement、CPU/GPU 可无同步并发读写、自动最快 memory。
+- **相关资源：** [M10：Unified Memory 与 page migration](/memory/unified-memory-page-migration/)、[VIS08](/visuals/page-migration/)和 [EX08](/examples/unified-memory-migration/)。
+- **版本说明：** Programming Guide v13.3、Runtime API v13.3.1 与 12.9.1/11.8.0 archive 定义多个 support/coherence paradigms；`cudaMallocManaged` 的 stable pointer 不承诺 stable physical locality。
+
+<span id="term-100" class="resource-target" aria-hidden="true"></span>
+
+### page migration · 页面迁移
+
+- **定义：** 在支持该 behavior 的 system model 中，runtime 为改变一段 managed backing 的 processor locality 而执行的 conditional action；它可能包含 fault service、mapping/ownership update、coherence action 和 data movement。
+- **避免使用：** 每次 managed access 的必经阶段、prefetch call、browser page transition、M02 memory transaction。
+- **相关资源：** [M10](/memory/unified-memory-page-migration/)、[VIS08](/visuals/page-migration/)和 [EX08](/examples/unified-memory-migration/)。
+- **版本说明：** Software-coherent fault-and-migrate、hardware-coherent/direct access 与 limited coarse movement 必须按 exact environment 分支；source order、advice 或 model 不构成 migration count、bytes 或 timing evidence。
+
+<span id="term-101" class="resource-target" aria-hidden="true"></span>
+
+### residency · 驻留位置
+
+- **定义：** 某个 physical backing range 在一个声明时间点对哪个 processor/local memory 属于 local 的状态；它可与 stable virtual address 和多 processor accessibility 并存。
+- **避免使用：** Accessibility、ownership、virtual address、永久 placement、由 page color 推断的 runtime fact。
+- **相关资源：** [M10](/memory/unified-memory-page-migration/)、[VIS08](/visuals/page-migration/)和 [EX08](/examples/unified-memory-migration/)。
+- **版本说明：** Residency claim 绑定 range、time、OS/kernel、driver、device/interconnect、capability model 与 observation method；prefetch/advice 只影响 request/hint，不保证永久 residency。
+
+<span id="term-102" class="resource-target" aria-hidden="true"></span>
+
+### stream-ordered allocation · 流顺序分配
+
+- **定义：** 把 allocation 与 deallocation 表示为 CUDA stream operations 的 allocator contract；pointer 只能在 allocation operation 完成后、free operation 执行前按 documented order 访问。
+- **避免使用：** Host call return 即 allocation complete、lexical pointer lifetime、implicit cross-stream ownership、device-wide free barrier。
+- **相关资源：** [M11：Stream-ordered allocation 与 memory pool](/memory/stream-ordered-allocation-memory-pools/)。
+- **版本说明：** Programming Guide v13.3、Runtime API v13.3.1 与 12.9.1/11.8.0 archive 都要求 cross-stream first-use 和 last-use edges；实际 path 还需 checked `cudaDevAttrMemoryPoolsSupported`。
+
+<span id="term-103" class="resource-target" aria-hidden="true"></span>
+
+### memory pool · 内存池
+
+- **定义：** 为 stream-ordered allocations 提供 backing resources 与 policy attributes 的 allocator object；allocation 可使用 device current/default pool 或显式选择的 pool。
+- **避免使用：** Logical allocation 本身、stale pointer cache、相同 address guarantee、固定 physical footprint。
+- **相关资源：** [M11](/memory/stream-ordered-allocation-memory-pools/)。
+- **版本说明：** Pool 可能在 logical free 后保留 backing resources，但不会延长 pointer lifetime；default/current/explicit selection、access、ownership、release threshold 与 trim contract 按 selected Runtime version 复核。
+
+<span id="term-104" class="resource-target" aria-hidden="true"></span>
+
+### reuse policy · 复用策略
+
+- **定义：** Memory-pool attributes 对 allocator 可考虑哪些 ordered relationships 的权限设置，包括 follow-event dependencies、opportunistic reuse 与 internal dependencies。
+- **避免使用：** Reuse observation、same-pointer promise、无额外 ordering、speedup guarantee。
+- **相关资源：** [M11](/memory/stream-ordered-allocation-memory-pools/)。
+- **版本说明：** Policy enablement 是 permission 而不是 outcome；opportunistic result 可随 progress 变化，internal dependencies 可添加 serialization，任何 address/footprint/performance claim 都需独立 observation。
+
+<span id="term-105" class="resource-target" aria-hidden="true"></span>
+
+### Cooperative Groups · 协作组
+
+- **定义：** 以 explicit group handles 表示 collaborating CUDA threads，并让 synchronization、partition 与 collective operations 相对于具名 membership、scope 和 participants 解释的 programming model/API。
+- **避免使用：** 自动 whole-grid cooperation、implicit warp lockstep、任意 group 可互换的 barrier library。
+- **相关资源：** [M12：Cooperative Groups 与可组合同步](/memory/cooperative-groups/)。
+- **版本说明：** CUDA 13.3 current baseline 包含 single-device cooperative grid path；12.9.1/11.8.0 archive 的 deprecated multi-device material 仅作历史边界，不投射为 current support。
+
+<span id="term-106" class="resource-target" aria-hidden="true"></span>
+
+### thread group · 协作线程组
+
+- **定义：** 由一个具体 Cooperative Groups handle 命名、拥有明确 membership、synchronization scope 与 required participants 的协作线程集合；它可以由 launch geometry、partition 或 active set 构成。
+- **避免使用：** 永久 warp synonym、source branch 中“看起来一起”的 threads、未具名 participant set。
+- **相关资源：** [M12](/memory/cooperative-groups/)。
+- **版本说明：** `thread_block`、tile、`coalesced_group` 与 gated `grid_group` 的 membership/lifetime 不同；dynamic active set 只绑定捕获它的 control-flow point。
+
+<span id="term-107" class="resource-target" aria-hidden="true"></span>
+
+### collective operation · 集合操作
+
+- **定义：** 相对于一个 named thread group 执行、要求该 group 的 documented participants 到达同一 operation instance，并满足 group-wide argument agreement 的 operation；部分 API 明确允许 per-thread input 不同。
+- **避免使用：** 单 thread call、same call-site text、implicit synchronization、所有参数必须逐 bit 相同的笼统规则。
+- **相关资源：** [M12](/memory/cooperative-groups/)。
+- **版本说明：** `sync`、reduce、scan、partition 等逐 API 复核 participants 与 argument exceptions；missing participant 或不合法 group-wide disagreement 可产生 deadlock、corruption 或 undefined behavior。
+
+<span id="term-108" class="resource-target" aria-hidden="true"></span>
+
+### asynchronous copy · 异步复制
+
+- **定义：** 把 copy submission 与 completion 分离的 data-movement operation；在 M13 中特指有 documented completion mechanism 的 global-to-shared `cuda::memcpy_async` path。
+- **避免使用：** Completion-free copy、automatic overlap、必定发出某个 hardware instruction、所有 `cudaMemcpyAsync` 的总称。
+- **相关资源：** [M13：Asynchronous copy 与 staged pipeline](/memory/asynchronous-copy-pipelines/)。
+- **版本说明：** Applicable API 需要 CC 7.0+；hardware-accelerated global-to-shared path 需要 CC 8.0+ 及 size/alignment/type constraints。Source 不能证明 emitted instruction 或 runtime overlap。
+
+<span id="term-109" class="resource-target" aria-hidden="true"></span>
+
+### pipeline · 流水线
+
+- **定义：** 由有限 reusable stages 组成、通过 producer acquire/commit 与 consumer wait/release sequence 协调 logical batches 的 FIFO contract。
+- **避免使用：** 自动 performance optimization、infinite queue、只包含 copy 的 timeline、overlap evidence。
+- **相关资源：** [M13](/memory/asynchronous-copy-pipelines/)。
+- **版本说明：** Unified/partitioned pipeline 的 stage count、producer/consumer sets、collective sequence、early exit 与 warp convergence 按 selected CUDA contract 声明；多 stage 只创建 overlap opportunity。
+
+<span id="term-110" class="resource-target" aria-hidden="true"></span>
+
+### pipeline stage · 流水线阶段
+
+- **定义：** Pipeline 中映射一个 logical batch 的 reusable storage/sequence slot，依次经历 available、acquired/filled、committed/pending、ready、used 与 released states。
+- **避免使用：** 一块永不失效的 shared buffer、copy 已提交就 ready、consumer 未完成即可 overwrite。
+- **相关资源：** [M13](/memory/asynchronous-copy-pipelines/)。
+- **版本说明：** Completion-before-use 与 all-declared-reads-before-release/reuse 是两条独立 edge；prologue、steady-state rotation 与 drain 都必须保持 batch-to-stage mapping。
+
+<span id="term-111" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Graph · CUDA 图
+
+- **定义：** 把 CUDA operations 表示为 nodes、把 documented dependencies 表示为 directed edges 的有向无环图（DAG），独立于后续 instantiation 与 execution。
+- **避免使用：** Source-order list、scheduler trace、executable graph handle、automatic concurrency 或 performance result。
+- **相关资源：** [M14：CUDA Graphs 与 repeated launch structure](/memory/cuda-graphs/)和 [EX09](/examples/graph-capture/)。
+- **版本说明：** Programming Guide v13.3、Runtime API v13.3.1 与 12.9.1/11.8.0 archive 允许 explicit API 或 stream capture 构造；static DAG 只证明 intended dependency structure。
+
+<span id="term-112" class="resource-target" aria-hidden="true"></span>
+
+### graph node · 图节点
+
+- **定义：** CUDA Graph 中表示一项 typed operation 的 object，例如 kernel、copy、memset、host function、event operation 或 child graph，并带 parameters、external resources 与 incoming/outgoing dependencies。
+- **避免使用：** 任意 source statement、node number 所隐含的 order、自动拥有 pointee lifetime 的 operation。
+- **相关资源：** [M14](/memory/cuda-graphs/)和 [EX09](/examples/graph-capture/)。
+- **版本说明：** Node type 与 parameter/update restrictions 按 selected Runtime API 复核；只有 directed path 创建 dependency，编号、UI 位置和 source layout 都不会。
+
+<span id="term-113" class="resource-target" aria-hidden="true"></span>
+
+### stream capture · 流捕获
+
+- **定义：** 用 origin stream 的 begin/end capture boundary 把 supported stream submissions 与 captured event dependencies 转成 CUDA Graph template 的 construction mechanism；capture 期间这些 operations 不按普通方式执行。
+- **避免使用：** Graph execution mode、任意 API recorder、无需 origin/rejoin 的 multi-stream capture、error 自动恢复。
+- **相关资源：** [M14](/memory/cuda-graphs/)和 [EX09](/examples/graph-capture/)。
+- **版本说明：** Auxiliary streams 必须在 origin end 前 rejoin；prohibited query/synchronization/legacy interactions 可 invalidate capture，随后仍需在 origin end capture、检查 error/null graph 并放弃 instantiation。
+
+<span id="term-114" class="resource-target" aria-hidden="true"></span>
+
+### executable graph · 可执行图
+
+- **定义：** 由 successful graph instantiation 产生、可通过 `cudaGraphLaunch` 重复异步提交的 `cudaGraphExec_t` snapshot。
+- **避免使用：** Mutable graph template、一次 launch 的 completion、external-resource owner、replay speedup proof。
+- **相关资源：** [M14](/memory/cuda-graphs/)和 [EX09](/examples/graph-capture/)。
+- **版本说明：** External storage/handles 必须活到相关 launch 完成；updates 受 topology、node type、context 与 parameter restrictions 限制，不兼容 change 需要新 graph 与 re-instantiation。
+
 ## 维护规则
 
-TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27** 的记录。TERM-077 至 TERM-095，以及完整 95 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-28** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**。TERM-096 至 TERM-114，以及完整 114 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-29** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure 或 example。对应的[英文页](/en/glossary/)同时完整发布。

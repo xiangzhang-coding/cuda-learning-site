@@ -12,11 +12,16 @@ async function readRoute(route: string) {
   return parseHTML(html).document;
 }
 
+function metadata(document: Document, name: string) {
+  return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content');
+}
+
 const visualPairs = [
   { id: 'VIS01', tag: 'cuda-kernel-journey', zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
   { id: 'VIS02', tag: 'cuda-indexing-explorer', zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
   { id: 'VIS03', tag: 'cuda-warp-divergence', zh: '/visuals/warp-divergence/', en: '/en/visuals/warp-divergence/' },
   { id: 'VIS07', tag: 'cuda-stream-event-dependencies', zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
+  { id: 'VIS08', tag: 'cuda-page-migration', zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
 ] as const;
 
 const embeddedVisuals = [
@@ -46,6 +51,13 @@ const embeddedVisuals = [
   },
 ] as const;
 
+const advancedRepresentations = [
+  { unitId: 'M11', kind: 'allocation', slug: 'stream-ordered-allocation-memory-pools' },
+  { unitId: 'M12', kind: 'group', slug: 'cooperative-groups' },
+  { unitId: 'M13', kind: 'pipeline', slug: 'asynchronous-copy-pipelines' },
+  { unitId: 'M14', kind: 'graph', slug: 'cuda-graphs' },
+] as const;
+
 describe('built Visual Explainers', () => {
   it.each(visualPairs.flatMap((pair) => [{ ...pair, route: pair.zh }, { ...pair, route: pair.en }]))(
     'renders $id semantic output and a purpose-built fallback at $route',
@@ -64,7 +76,9 @@ describe('built Visual Explainers', () => {
       expect(visual?.querySelector('form')).toBeNull();
       expect(visual?.querySelector('img, iframe, object, embed')).toBeNull();
       expect(visual?.querySelectorAll('[id]').length).toBe(0);
-      if (id === 'VIS02') expect(visual?.querySelector('[data-interactive-workbench][hidden]')).not.toBeNull();
+      if (id === 'VIS02' || id === 'VIS08') {
+        expect(visual?.querySelector('[data-interactive-workbench][hidden]')).not.toBeNull();
+      }
     },
   );
 
@@ -188,6 +202,56 @@ describe('built Visual Explainers', () => {
       expect(visual?.textContent).toContain('OUT OF BOUNDS');
       expect(visual?.textContent).not.toMatch(/six CUDA built-ins|六个 CUDA 内建量/);
     }
+  });
+
+  it('keeps the VIS08 page, pure model, component, and complete static fallback aligned', async () => {
+    const [zhSource, enSource, modelSource, componentSource, ...documents] = await Promise.all([
+      readFile(path.join(projectRoot, 'src/content/docs/visuals/page-migration.mdx'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/content/docs/en/visuals/page-migration.mdx'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/visuals/page-migration-model.ts'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/components/PageMigrationExplorer.astro'), 'utf8'),
+      readRoute('/visuals/page-migration/'),
+      readRoute('/en/visuals/page-migration/'),
+    ]);
+
+    for (const source of [zhSource, enSource]) {
+      expect(source).toContain('unitId: VIS08');
+      expect(source).toMatch(/prerequisites:\n  - M01\n  - M02\n  - M10/);
+      expect(source).toContain("factCheckDate: '2026-08-29'");
+    }
+    expect(modelSource).toContain("coherence: 'software-coherent'");
+    expect(modelSource).toContain('observedPageFaults: false');
+    expect(modelSource).toContain('observedMigrations: false');
+    expect(modelSource).toContain('measuredLatency: false');
+    expect(modelSource).not.toMatch(/Date\.now|Math\.random|localStorage|sessionStorage|indexedDB/);
+    expect(componentSource).toContain('data-visual-id="VIS08"');
+    expect(componentSource).toContain('data-page-residency-rail');
+    expect(componentSource).toContain('data-page-migration-ledger');
+    expect(componentSource).toContain('data-static-fallback');
+
+    for (const document of documents) {
+      const visual = document.querySelector('cuda-page-migration[data-visual-id="VIS08"]');
+      expect(visual?.querySelectorAll('[data-static-scenario]')).toHaveLength(3);
+      expect(visual?.querySelectorAll('[data-static-access-row]')).toHaveLength(12);
+      expect(visual?.querySelector('[data-static-fallback]')?.textContent).toMatch(/65,?536 B/);
+      expect(visual?.querySelector('[data-measured], [data-observed-migration], [data-latency]')).toBeNull();
+    }
+  });
+
+  it.each(advancedRepresentations.flatMap((representation) => [
+    { ...representation, route: `/memory/${representation.slug}/` },
+    { ...representation, route: `/en/memory/${representation.slug}/` },
+  ]))('renders the ID-free static $kind representation for $unitId at $route', async ({ unitId, kind, route }) => {
+    const document = await readRoute(route);
+    const representation = document.querySelector(
+      `[data-static-fallback][data-representation-kind="${kind}"][data-conceptual-only]`,
+    );
+
+    expect(metadata(document, 'cuda:unit-id')).toBe(unitId);
+    expect(representation).not.toBeNull();
+    expect(representation?.querySelector('[data-representation-reading]')?.textContent?.trim().length).toBeGreaterThan(80);
+    expect(representation?.hasAttribute('data-visual-id')).toBe(false);
+    expect(representation?.querySelector('[data-visual-id]')).toBeNull();
   });
 
   it('publishes empty CUDA evidence axes for every standalone conceptual model in this contract', async () => {

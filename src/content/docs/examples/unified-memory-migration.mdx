@@ -1,0 +1,282 @@
+---
+title: 'EX08：统一内存迁移可运行示例'
+description: 执行分阶段 managed-memory workload、报告 capability 并验证每个 value，同时让正确性独立于任何 migration observation。
+pairId: ex08
+counterpart: /en/examples/unified-memory-migration/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - access-sequence
+  - managed-workload
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX08
+prerequisites:
+  - M10
+relatedUnits:
+  - M01
+  - M02
+  - VIS08
+exampleIds:
+  - EX08
+canonicalExample: EX08
+canonicalRanges:
+  - access-sequence
+  - managed-workload
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with one 65,536-byte managed allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The managed workload should report PASS only when all 16,384 values exactly match the complete pure host oracle after explicit CUDA completion.
+    - managedMemory and concurrentManagedAccess should be reported only as device capabilities, while advice and prefetch calls remain optional guarded requests rather than observations of movement.
+    - The declared software access sequence should derive 32 transitions, 32 moved-page units, and 131,072 moved-byte units as a cost proxy only, independent of runtime residency, faults, or migration.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Unified and System Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current managed-memory capabilities, allocation, advice, prefetch, and access boundaries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 managed allocation and integer-destination advice/prefetch interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9 managed allocation and advice/prefetch interface transition'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current managed allocation and location-based advice/prefetch interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex08
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-29'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,access-sequence,managed-workload,host-model,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX08
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: M10
+  - tag: meta
+    attrs:
+      name: 'cuda:related-units'
+      content: 'M01,M02,VIS08'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX08
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX08
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'access-sequence,managed-workload'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with one 65,536-byte managed allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '10'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.1,12.9.2,13.3,13.3.1'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/unified-memory-migration/" lang="en">Read the English counterpart</a>
+
+EX08 是独立、原创的统一内存迁移可运行示例（Unified Memory Migration Runnable Example）。分阶段 workload 在 host 初始化 managed allocation，在 device 执行 transform，完成 CUDA stream，然后在 host 验证每个 value。Capability report 与独立 software model 都不能替代对 memory behavior 的 runtime observation。
+
+## 用途
+
+先完成 M10。M01 与 M02 提供相关 address-space 和 global-memory context，VIS08 是相关 browser model。EX08 关注正确 program structure 与对 memory system 内部行为作出无依据推断之间的边界。
+
+正确性只依赖 deterministic initialization、一个声明的 transform、explicit completion 与 exact full-array comparison。它不依赖 page 位于何处、是否发生 fault、bytes 是否移动，或 optional hint 是否改变 behavior。
+
+## 获取 canonical project
+
+[在固定提交中查看完整 EX08 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f/examples/ex08-unified-memory-migration)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f.zip)。解压后进入 `examples/ex08-unified-memory-migration/`。
+
+`project.json` 声明一个 65,536-byte managed allocation、三阶段 software access sequence、精确 Toolkit Lane、两个 canonical range，以及相互独立且为空的 compilation 与 recorded-observation axis。软件文件使用 Apache-2.0；本原创教学页面使用 CC-BY-4.0。
+
+## Access sequence 与 software proxy
+
+纯 C++17 model 接收 `(page, access origin)` record sequence。声明的 fixture 按以下顺序列出 16 个 logical page：
+
+| Phase | Access origin | Pages |
+| --- | --- | --- |
+| host initialization | host | 0 到 15 |
+| device transform | device | 0 到 15 |
+| host verification | host | 0 到 15 |
+
+每个 page 的首次 access 建立 software-model initial origin。之后 origin 每改变一次，ledger 追加一条 transition；重复相同 origin 不追加：
+
+<CanonicalCode exampleId="EX08" range="access-sequence" />
+
+对声明 sequence，model 推导 32 次 transition。使用声明的 4,096-byte logical page size，cost proxy 是 32 个 moved-page unit 和 131,072 个 moved-byte unit。这些值只是 supplied sequence 的 arithmetic output。Model 不查询 CUDA、operating system、physical page size、hardware coherence、residency、fault 或 movement。
+
+函数在写入 ledger 或 summary 前验证每个 page 和 origin、moved-byte multiplication 与 output capacity。Invalid 或 undersized input 因此不会改写调用方 output。
+
+## Managed workload
+
+CUDA source 调用 `cudaMallocManaged`，执行 deterministic host initialization，构造独立 expected array，并在 named nonblocking stream 中 launch 一个 in-place XOR kernel：
+
+<CanonicalCode exampleId="EX08" range="managed-workload" />
+
+Program 从 `cudaDeviceProp` 查询 `managedMemory` 与 `concurrentManagedAccess`，并把两者只作为 capability 打印。当 `concurrentManagedAccess` 非零时，它在 kernel 前提交 preferred-device advice 与 prefetch request，随后在同一 stream 中提交 host prefetch request。这些 call 是 optional hint。Call 成功只表示 API 接受 request，不表示实测 placement 或 transfer。
+
+CUDA 11.8 的 `cudaMemAdvise` 与 `cudaMemPrefetchAsync` 使用 integer destination argument。CUDA 12.9 保留这些 interface，同时引入 location-based variant。CUDA 13.3 在 current name 下使用 location-based signature。Source 根据 `CUDART_VERSION` 分支，因此同一个 C++17 build input 在每条声明 Lane 中使用对应合同。
+
+Kernel launch 后立即调用 `cudaGetLastError`。`cudaStreamSynchronize` 是 explicit completion 与 completion-error boundary。只有它成功后，host 才读取 managed data 并比较全部 16,384 个 value。Stream destruction 与 `cudaFree` 位于 completion 和 verification 之后。
+
+## Host model 边界
+
+`make host-test` 不使用 CUDA。它覆盖无 transition 的 sequence、repeated origin、alternating host/device origin、invalid page 与 origin、moved-byte overflow、undersized ledger、精确的 32-transition declared fixture、完整 expected output、first mismatch，以及 rejection 后的 nonmutation。
+
+通过 host test 只能建立 software model 与 oracle。它不能证明 managed-memory availability、optional-hint support、runtime residency、fault 或 migration。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+CUDA stages 生成 `build/unified_memory_migration.ii`、`build/unified_memory_migration.o` 与 `build/ex08-unified-memory-migration`。Inspection 检查 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。Host-test 只需要 host C++17 compiler。
+
+`scripts/compile-check.sh c++17 ex08 <result-dir>` 执行这些 stage，并保留 log 与 inspection artifact。它不会执行 CUDA binary，因此不提供 managed-memory runtime observation。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新且提供 `managedMemory` 的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 一个 65,536-byte managed allocation，远低于 8 GB |
+| Optional-hint gate | 仅当 `concurrentManagedAccess` 非零时提交 advice 与 prefetch |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 同一份原创 C++17 source，包含 cross-Lane API-signature branch |
+
+精确 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 与 CUDA 13.3.1。Digest-pinned image 是 build target，不是 evidence record。
+
+## 编译与运行证据
+
+EX08 的 compilation array 为空，因此 **EX08 不是 Compile-Checked**。Runtime 是 **Pending Hardware Verification**，recorded observations 为空。Learning Site 尚未在 Reference Environment 中运行 workload。
+
+本页没有声明 page fault 或 migration 已发生。Capability value、source-level phase、accepted advice、accepted prefetch 与 software proxy 都不等于 observed runtime mechanism。未来声明除正确性外，还需要适合的 observation method 与完整环境清单（Environment Manifest）。
+
+## 预期观察，不是运行记录
+
+1. Workload 应只在 explicit completion 之后精确比较全部 16,384 个 value 并通过时报告 `PASS`。
+2. `managedMemory` 与 `concurrentManagedAccess` 应作为 capability field；advice 和 prefetch 应保持 optional guarded request，而不是 movement observation。
+3. Software fixture 应推导 32 次 transition、32 个 moved-page unit 与 131,072 个 moved-byte unit；它们是独立于 runtime behavior 的 cost proxy。
+
+这些是验收条件与 model output，不是已记录的 migration evidence。
+
+## 来源与复核
+
+当前 Programming Guide 提供 managed-memory capability 与 hint boundary。11.8、12.9.1 与 13.3.1 Runtime API 页面建立 source 使用的 signature transition。三份 NVCC 页面覆盖精确 Toolkit Lane，Docker Hub tag API 只提供 container metadata。
+
+- [CUDA Programming Guide v13.3 - Unified and System Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html)
+- [CUDA Runtime API v11.8.0 - Memory Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html)
+- [CUDA Runtime API v12.9.1 - Memory Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html)
+- [CUDA Runtime API v13.3.1 - Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-29。**

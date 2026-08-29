@@ -193,6 +193,36 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'M08：用事件表达依赖并测量设备时间', en: 'M08: Events as dependencies and device-time measurements' },
     prerequisites: ['M07'],
   },
+  M09: {
+    href: { 'zh-CN': '/memory/pinned-memory-transfer-overlap/', en: '/en/memory/pinned-memory-transfer-overlap/' },
+    title: { 'zh-CN': 'M09：页锁定内存与传输重叠', en: 'M09: Pinned Memory and Transfer Overlap' },
+    prerequisites: ['M07', 'M08'],
+  },
+  M10: {
+    href: { 'zh-CN': '/memory/unified-memory-page-migration/', en: '/en/memory/unified-memory-page-migration/' },
+    title: { 'zh-CN': 'M10：统一内存与页面迁移', en: 'M10: Unified Memory and Page Migration' },
+    prerequisites: ['M01', 'M02'],
+  },
+  M11: {
+    href: { 'zh-CN': '/memory/stream-ordered-allocation-memory-pools/', en: '/en/memory/stream-ordered-allocation-memory-pools/' },
+    title: { 'zh-CN': 'M11：流顺序分配与内存池', en: 'M11: Stream-Ordered Allocation and Memory Pools' },
+    prerequisites: ['M07', 'M08'],
+  },
+  M12: {
+    href: { 'zh-CN': '/memory/cooperative-groups/', en: '/en/memory/cooperative-groups/' },
+    title: { 'zh-CN': 'M12：协作组与可组合同步', en: 'M12: Cooperative Groups and Composable Synchronization' },
+    prerequisites: ['M05', 'M06'],
+  },
+  M13: {
+    href: { 'zh-CN': '/memory/asynchronous-copy-pipelines/', en: '/en/memory/asynchronous-copy-pipelines/' },
+    title: { 'zh-CN': 'M13：异步复制与分阶段流水线', en: 'M13: Asynchronous Copy and Staged Pipelines' },
+    prerequisites: ['M03', 'M05', 'M08'],
+  },
+  M14: {
+    href: { 'zh-CN': '/memory/cuda-graphs/', en: '/en/memory/cuda-graphs/' },
+    title: { 'zh-CN': 'M14：CUDA 图与重复启动结构', en: 'M14: CUDA Graphs and Repeated Launch Structure' },
+    prerequisites: ['M07', 'M08'],
+  },
   Q01: {
     href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
@@ -242,6 +272,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/shared-memory-tile-bank-padding/', en: '/en/examples/shared-memory-tile-bank-padding/' },
     title: { 'zh-CN': 'EX06：共享内存 tile bank padding 可运行示例', en: 'EX06: Shared-Memory Tile Bank Padding Runnable Example' },
     prerequisites: ['M03', 'M04'],
+  },
+  EX07: {
+    href: { 'zh-CN': '/examples/streams-events-overlap/', en: '/en/examples/streams-events-overlap/' },
+    title: { 'zh-CN': 'EX07：流、事件与重叠', en: 'EX07: Streams, Events, and Overlap' },
+    prerequisites: ['M07', 'M08', 'M09'],
+  },
+  EX08: {
+    href: { 'zh-CN': '/examples/unified-memory-migration/', en: '/en/examples/unified-memory-migration/' },
+    title: { 'zh-CN': 'EX08：统一内存迁移', en: 'EX08: Unified Memory Migration' },
+    prerequisites: ['M10'],
+  },
+  EX09: {
+    href: { 'zh-CN': '/examples/graph-capture/', en: '/en/examples/graph-capture/' },
+    title: { 'zh-CN': 'EX09：CUDA 图捕获', en: 'EX09: CUDA Graph Capture' },
+    prerequisites: ['M14'],
   },
   EX16: {
     href: { 'zh-CN': '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
@@ -324,6 +369,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
     title: { 'zh-CN': 'VIS07：Stream 与 event dependency trace', en: 'VIS07: Stream and Event Dependency Traces' },
     prerequisites: [],
+    indexGroup: 'visuals',
+  },
+  VIS08: {
+    href: { 'zh-CN': '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
+    title: { 'zh-CN': 'VIS08：托管内存页面迁移', en: 'VIS08: Managed-Memory Page Migration' },
+    prerequisites: ['M01', 'M02', 'M10'],
     indexGroup: 'visuals',
   },
   VIS19: {

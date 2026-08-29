@@ -1,0 +1,255 @@
+---
+title: 'M14：CUDA 图与重复启动结构'
+description: 把 repeated CUDA work 建模为 DAG，用 explicit Graph API 或 stream capture 构造，instantiate executable graph，并保留 capture、lifetime、completion、update 与 evidence boundaries。
+pairId: m14
+counterpart: /en/memory/cuda-graphs/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - graph-model
+  - ordinary-launches
+  - explicit-graph-api
+  - stream-capture
+  - capture-boundaries
+  - instantiate-launch
+  - lifetimes-completion
+  - updates
+  - canonical-example
+  - representation
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M14
+prerequisites:
+  - M07
+  - M08
+relatedUnits:
+  - M11
+exampleIds:
+  - EX09
+canonicalExample: EX09
+canonicalRanges:
+  - graph-contract
+  - captured-replay
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide 13.3 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current graph structure, construction, capture, lifecycle, and update model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Graph Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__GRAPH.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current graph object, node, instantiation, launch, capture, update, and destruction interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cuda-graphs'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 graph and stream-capture contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Graph Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__GRAPH.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 graph management interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8.0 - CUDA Graphs'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cuda-graphs'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 graph and stream-capture contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Graph Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__GRAPH.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 graph management interfaces'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m14 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,graph-model,ordinary-launches,explicit-graph-api,stream-capture,capture-boundaries,instantiate-launch,lifetimes-completion,updates,canonical-example,representation,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M14 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: M11 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX09 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX09 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'graph-contract,captured-replay' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,12.9.1,11.8.0' }
+---
+
+import AdvancedMemoryRepresentation from '../../../components/AdvancedMemoryRepresentation.astro';
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/memory/cuda-graphs/" lang="en">Read the English counterpart</a>
+
+[CUDA 图（CUDA Graph，TERM-111）](/glossary/#term-111)把 operations 与 dependencies 独立于 execution 记录。每个[图节点（graph node，TERM-112）](/glossary/#term-112)是一项 operation，directed edges 是 dependencies；[流捕获（stream capture，TERM-113）](/glossary/#term-113)是一种 construction mechanism；[可执行图（executable graph，TERM-114）](/glossary/#term-114)是提交执行的 instantiated object。
+
+## 学完本单元，你应该能
+
+- 把 repeated workload 绘成由 operation nodes 与 dependency edges 构成的 directed acyclic graph。
+- 把 explicit Graph API 与 stream capture 保持为两种独立 graph-construction mechanisms。
+- 审查 capture prohibitions、invalidation、origin-stream ownership 与 cross-stream rejoin boundaries。
+- 按 `definition -> instantiate executable -> repeated launch` 推进，同时保留 external resource lifetimes 与 explicit completion。
+- 在不提出 performance claim 的前提下，把 update 分类为 permitted、restricted 或 requiring re-instantiation。
+
+## 先修关系
+
+先完成 [M07：用流取代全局顺序心智模型](/memory/stream-ordering/)，再完成 [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)。M07 提供 per-stream order 与 unordered-stream reasoning；M08 提供 captured event generations、stream wait edges 与 explicit completion observations。Graph 不会消除这些合同；它只是冻结 declared dependency structure，供之后 instantiate/launch。
+
+M11 是 related Learning Unit，但不是 prerequisite。本页不需要 CUDA-capable system，也不授予 Evidence Status。
+
+## Graph model：nodes、edges 与 DAG
+
+CUDA graph 是有向无环图（directed acyclic graph，DAG）。Nodes 表示 kernel、memory copy、memory set、host function、event record/wait、child graph 等 operations。Edge `A -> B` 表示 B 按该 edge 的 documented semantics 依赖 A。Acyclic 表示沿 directed dependencies 前进永远不能回到同一 node。
+
+Edges 约束 execution；source layout 与 node numbering 不约束。一个 node 的全部 dependencies 完成后，CUDA system 可以 schedule 它。两个 nodes 之间若没有 path，则 graph 不 ordering 它们。这表示 eligibility，不是它们 concurrent execution 的证据。
+
+Review 时记录每个 node 的 type、parameters、external resources、incoming/outgoing edges 与 completion consumer。Instantiation 前应拒绝 cycle、缺失的 producer-to-consumer edge，或让原本 independent work 意外 serializing 的 edge。
+
+## 以 ordinary repeated launches 作为 baseline
+
+先写 ordinary stream-based loop。每次 iteration 都由 host 再次提交 workload 的 copies、kernels、event edges 与 completion boundary。Stream order/event waits 定义该次 iteration 的 correctness；重复 source order 本身不会创建 reusable graph object。
+
+| Submission path | 如何定义 structure | Host 重复什么 |
+| --- | --- | --- |
+| ordinary stream launches | 每次 iteration 执行 enqueue calls、stream order 与 event dependencies | 每项 operation submission 与 required completion observation |
+| stream capture | 在 capture mode 中运行一次 stream-based authoring path，再 instantiate 导出的 DAG | executable graph 的 `cudaGraphLaunch` 与 selected completion observation |
+| explicit Graph API | 直接加入 typed nodes/dependency edges，再 instantiate 该 DAG | executable graph 的 `cudaGraphLaunch` 与 selected completion observation |
+
+三条 path 都需要同一 external-resource lifetime 与 output oracle。Graph construction 可以把 repeated setup 移出 per-iteration submission path，但这份 source-level comparison 不记录 launch-overhead reduction 或 end-to-end speedup。
+
+## Explicit Graph API：直接构造 DAG
+
+Explicit Graph API 创建 `cudaGraph_t`、加入 typed nodes，并在 node creation 时或通过 edge APIs 提供 dependencies。Program 保留 node handles，因而可在 API restrictions 内 inspect 或 update selected node parameters。当 application 拥有 graph structure 并能直接描述 node parameters 时，适合使用该机制。
+
+Graph definition 不是 graph execution。加入 kernel node 不会 launch kernel；加入 memory node 不会移动 bytes；valid DAG 也不能证明 external pointers 或 callback data 会存活到 future launch 完成。
+
+## Stream capture：从 stream-based work 导出 graph
+
+Stream capture 用 `cudaStreamBeginCapture()`/`cudaStreamEndCapture()` 包围现有 stream-based sequence。Stream 处于 capture mode 时，提交给它的 supported operations 会追加到 capture graph，而不会 enqueue for execution。Capture 成功结束后返回 `cudaGraph_t` template。
+
+Capture 是不同 construction mechanism，不是第二种 execution mode。它从 stream order 与 captured event dependencies 导出 nodes/edges。Explicit Graph API 与 capture 可以产生等价 DAG，但 authoring、error 与 ownership boundaries 不同。
+
+## Capture prohibitions、invalidation 与 rejoin
+
+开始 capture 的 stream 是 **origin stream**，并且必须在同一 stream 结束 capture。Captured event 可以通过 event wait 把 work fork 到另一个 stream。每个加入同一 capture graph 的 additional stream 都必须在 `cudaStreamEndCapture()` 前 join back to origin stream；否则 overall capture 失败。
+
+Active capture 期间，query/synchronize captured stream、captured event，或包含该 capture 的 broader device/context handle 都是 invalid。在 documented capture context 中，prohibited legacy-stream interaction、`cudaMemcpy()` 等 synchronous API、尝试 merge separate capture graphs，以及 unsupported capture operation 都不能隐藏在 captured library call 内。
+
+Invalid operation 会 invalidate associated capture graph。随后继续使用其 capturing streams/captured events 都是 invalid，直到 program 调用 `cudaStreamEndCapture()` 离开 capture mode。该 end call 会报告 error 并返回 null graph。因此 error handling 必须保留 origin stream，完成 failed capture boundary，丢弃 null result，并禁止 instantiation。
+
+## Definition、instantiation 与 repeated launch
+
+Graph work submission 有三个不同阶段：
+
+1. **Definition：** 使用 explicit API 或 stream capture 创建 graph template。
+2. **Instantiation：** 用 `cudaGraphInstantiate()` validate/snapshot template，得到 `cudaGraphExec_t` executable graph。
+3. **Execution：** 按 application contract 允许的次数，用 `cudaGraphLaunch(graphExec, stream)` 提交 executable。
+
+Instantiation 不是 launch；launch 对 host 异步。Repeated launch 复用 instantiated structure，不重新执行 capture，也不表示 previous launches 已完成。每个 API result 仍需 immediate error check；asynchronous work 仍需 declared completion observation。
+
+## Resource lifetimes 与 explicit completion
+
+Graph/executable handles 不会让 external resources 永久存活。Node 使用的 device allocations、host buffers、kernel/module state、event/semaphore objects、host-function callback data 与 pointer pointees，都必须按 selected node API 的 lifetime/accessibility contract 存活到每个可能使用它们的 launch 完成。Capture-only objects 也必须保持 valid，直到 capture 成功结束，或在 invalidation 后完成 unwind。
+
+把每次 `cudaGraphLaunch` 视为 submitted stream work。在 launch 后 record event，或在 intended host boundary synchronize containing stream。只有该 completion 后，host 才可消费 copied-back data、释放 launch 使用的 resources，或按 chosen teardown contract destroy executable。Destroy graph template/executable handle 不能替代 external resource use completion proof。
+
+使用 lifecycle ledger：
+
+| object | created/selected | last graph use | completion boundary | release action |
+| --- | --- | --- | --- | --- |
+| `cudaGraph_t` template | explicit construction 或 successful capture | instantiation 或 later update source | host API completion | 不再需要时 `cudaGraphDestroy` |
+| `cudaGraphExec_t` | successful instantiation | final graph launch | final launch 的 explicit stream/event completion | `cudaGraphExecDestroy` |
+| external storage/handles | allocation 或 creation | final relevant launch 中的 last node use | 覆盖该 node 的 completion | matching free/destroy API |
+
+## Update 有边界
+
+Executable graph 是 snapshot，不是 freely mutable workflow。Whole-graph `cudaGraphExecUpdate()` 受 topology identity、dependency ordering、node type、context 与 parameter restrictions 限制。Individual executable-node update APIs 只支持 documented node types 与 parameter changes。Updates 作用于 subsequent launches，不作用于 already-submitted launches。
+
+Apply 前先分类每个 requested change。Compatible parameter update 可以使用 documented update API；topology change、node-type change 或 rejected update 需要创建 new valid graph 并 re-instantiate。始终检查 returned update status；不得假设 attempted update 成功，也不得静默扩大其 contract。
+
+Reusable executable 或 successful update 都不是 performance result。Launch overhead、end-to-end time 与任何 concurrency claim 都需要 separate measurement。
+
+## Canonical Runnable Example：EX09
+
+EX09 是 M14 的 canonical standalone project。[在固定 source commit 中查看完整 EX09 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a/examples/ex09-graph-capture)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a.zip)。Project 是唯一 complete implementation；本 Learning Unit 不维护手写 complete code listing。
+
+第一个 canonical range 声明并验证固定 two-node DAG、single edge、topological order、deterministic input、pure-host replay reference 与 exact verification：
+
+<CanonicalCode exampleId="EX09" range="graph-contract" />
+
+第二个 canonical range 展示 stream creation、captured construction、instantiation、三次 repeated launch、explicit completion、exact result verification 与 teardown：
+
+<CanonicalCode exampleId="EX09" range="captured-replay" />
+
+Import order 是 page contract 的一部分：先 `graph-contract`，再 `captured-replay`。
+
+## Graph representation
+
+<AdvancedMemoryRepresentation kind="graph" locale="zh-CN" />
+
+该 representation 展示 nodes、dependency edges、capture boundaries、instantiation 与 repeated submissions。它是 deterministic browser explanation，不是 CUDA graph launch、scheduler trace 或 timing result。
+
+## 证据边界
+
+Static DAG 可以建立 intended dependencies。EX09 canonical ranges 在 project manifest 可解析后可以建立 source identity；两者都不执行 graph。本 Learning Unit 不报告 compilation、runtime、launch-overhead、elapsed-time、concurrency 或 speedup observation，因此所有 evidence arrays 保持为空。
+
+Future claim 必须绑定 exact EX09 source commit、Toolkit Lane、Environment Manifest、correctness oracle、graph construction mechanism、launch count、warm-up/completion boundaries、raw measurements 与 comparison path。使用 graph 本身不是 performance claim。
+
+## 离开前检查
+
+1. Nodes 与 directed edges 分别表示什么？为什么 CUDA graph 必须保持 acyclic？
+2. Ordinary launch loop 中 host 每次重复什么？Explicit Graph API 与 stream capture 又如何把该 DAG 移入 reusable executable？
+3. Origin stream 结束 capture 前，auxiliary captured streams 必须发生什么？Invalidating operation 后又必须怎样处理？
+4. 为什么 definition、instantiation、launch 与 completion 是四个不同 lifecycle boundaries？
+5. 哪些 requested graph changes 可能需要 re-instantiation？为什么 successful update 仍不证明 performance result？
+
+## 继续练习
+
+- 完成 [M14 练习（Exercise）](/memory/cuda-graphs/exercises/)，再查看独立的[参考解答](/memory/cuda-graphs/solutions/)。
+- 在[练习题库（Practice Bank）PB-R2-006](/practice/#pb-r2-006)审查 capture、replay、lifetime 与 update boundaries。
+- 复习 [TERM-111 CUDA Graph](/glossary/#term-111)、[TERM-112 graph node](/glossary/#term-112)、[TERM-113 stream capture](/glossary/#term-113)和 [TERM-114 executable graph](/glossary/#term-114)。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：CUDA Graphs](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html)定义 current DAG、construction、capture、instantiation、execution 与 update model。
+- [CUDA Runtime API v13.3.1：Graph Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__GRAPH.html)定义 current graph object、node、capture、executable、launch、update 与 destruction interfaces。
+- [CUDA C++ Programming Guide 12.9.1：CUDA Graphs](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#cuda-graphs)与 [CUDA Runtime API 12.9.1：Graph Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__GRAPH.html)保留 Toolkit 12.9.1 contracts。
+- [CUDA C Programming Guide 11.8.0：CUDA Graphs](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#cuda-graphs)与 [CUDA Runtime API 11.8.0：Graph Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__GRAPH.html)保留 Toolkit 11.8 contracts。
+
+六项 owner source 均访问于 **2026-08-29**，并严格按 frontmatter 记录的顺序排列：current v13.3、current v13.3.1、12.9.1 archive pair、11.8.0 archive pair。DAG ledger、lifecycle table、questions、练习与编排均为本站 CC-BY-4.0 原创内容；没有复制 owner example、figure 或 performance result。
+
+**事实核查日期：2026-08-29。**

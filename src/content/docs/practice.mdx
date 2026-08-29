@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 29 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 35 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-08-28'
+factCheckDate: '2026-08-29'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,6 +38,12 @@ structure:
   - entry-pb-r1-022
   - entry-pb-r1-023
   - entry-pb-r1-024
+  - entry-pb-r2-001
+  - entry-pb-r2-002
+  - entry-pb-r2-003
+  - entry-pb-r2-004
+  - entry-pb-r2-005
+  - entry-pb-r2-006
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -65,6 +71,12 @@ prerequisites:
   - M06
   - M07
   - M08
+  - M09
+  - M10
+  - M11
+  - M12
+  - M13
+  - M14
   - Q01
   - Q03
   - Q04
@@ -93,6 +105,12 @@ relatedUnits:
   - M06
   - M07
   - M08
+  - M09
+  - M10
+  - M11
+  - M12
+  - M13
+  - M14
   - Q01
   - Q03
   - Q04
@@ -107,19 +125,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,Q01,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,Q01,Q03,Q04,Q05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,Q01,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,Q01,Q03,Q04,Q05' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -138,13 +156,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面二十九个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面三十五个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方二十九道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方三十五道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -1338,6 +1356,258 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期（Source date）：** 2026-08-28。
 
+<span id="pb-r2-001" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-001：审查分块传输重叠声明
+
+- **ID 与双语发布对：** PB-R2-001；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Transfer-overlap evidence review；高级。
+- **直接先修条件：** [M09：Pinned memory 与传输重叠](/memory/pinned-memory-transfer-overlap/)。
+- **硬件门槛（Hardware gate）：** 静态审查无需硬件；后续 correctness run 要求 Native Linux 与 compute capability 7.5+，overlap observation 还要求 page-locked buffer、兼容的 asynchronous copy/compute capability 和 exact-run device timeline。
+- **相关学习单元与资源：** [M07](/memory/stream-ordering/)、[M08](/memory/event-dependencies-timing/)、[M09](/memory/pinned-memory-transfer-overlap/)、[Q05](/correctness/timing-asynchronous-gpu-work/)和 [EX07](/examples/streams-events-overlap/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一个 two-slot pipeline 用普通 `malloc` 得到 `h_in[2]` 与 `h_out[2]`，在两条 non-default stream 中提交 `cudaMemcpyAsync(H2D) -> kernel -> cudaMemcpyAsync(D2H)`。Host 在 enqueue 后立即重填同一 input slot，并在没有等待 D2H completion 时读取 output。Reviewer 看到 `asyncEngineCount > 0` 和两条 stream，就发布“42% transfer overlap、1.8x speedup”。修复 lifetime/dependency graph 和证据声明，不提供新的性能数值。
+
+**约束：**
+
+- 保留与 serialized baseline 相同的 logical input、kernel work、tail handling、output oracle 和 error checks；为 allocation 与 registration 两条 page-lock path 写出匹配 release action。
+- 每个 chunk 必须有 `host fill -> H2D -> kernel -> D2H -> output-ready` 顺序，并为 ring-slot overwrite/read/release 标出 completion edge。
+- 把 source eligibility、queried capability 与 observed timeline 分成三栏；不得从 API spelling、stream count、event formula 或 browser layout 推断 overlap、duration、bandwidth 或 speedup。
+
+**预期证据：** 一份 two-slot ownership/dependency ledger、一张 serialized/pipelined correctness-equivalence checklist，以及 capability-to-observation decision table；所有 runtime value 与 timeline observation fields 保持为空。
+
+**验收条件：**
+
+- Host ranges 改为由 `cudaMallocHost`/`cudaHostAlloc` 创建并以 `cudaFreeHost` 释放，或由 `cudaHostRegister` 注册、在 last async use 后 `cudaHostUnregister`，再由原 allocator 释放。
+- Host 只有在 input H2D completion 后才能重填该 slot，只有在 output D2H completion 后才能读取或复用 output；cleanup 等待覆盖所有 slot 的 final completion。
+- `asyncEngineCount` 与 graph eligibility 只允许结论 “eligible”、“unsupported”或“under-specified”；没有 exact-run timeline 时 overlap 为 unobserved。
+- 删除 42% 与 1.8x；即使 capability 不满足，serialized baseline 仍可独立通过 correctness。
+
+<details><summary>提示 1</summary>把每个 slot 当作有上一位 owner 和下一次 overwrite point 的资源，而不是只画三项 device work。</details>
+
+<details><summary>提示 2</summary>问 `asyncEngineCount` 回答的是“可能有什么资源”，还是“这次两个 interval 是否相交”。</details>
+
+**参考解答（Reviewed solution）：** 在 steady-state 前创建 bounded page-locked input/output slots。每个 stream 保持本 chunk 的 H2D、kernel 与 D2H same-stream order；在 D2H 后 record `output_ready[slot]`。Host 在重填或读取 slot 前等待该 slot 上一代的 completion，tail chunk 使用实际 byte count，所有 API/launch/completion result 与 output oracle 都通过后才进入 observation gate。Manifest 保存 exact page-lock path、device query/value、transfer directions 和 stream/event graph。此静态产物最多证明 graph 正确且配置可被分类；没有 device timeline 就写 “eligible but unobserved”，没有任何 performance claim。
+
+**有效替代方案：** 使用单条 serialized stream 和同一组 page-locked buffers 是合法 fallback；也可以使用三 slot ring，但每个新增 slot 必须拥有同样完整的 generation、completion 与 reuse ledger。
+
+**常见错误：** 把 pageable copy 写成 overlap contract；host enqueue 后立刻改 input；只等待 kernel 而漏掉 D2H；把 event timestamp 当 interval overlap；由 nonzero capability 推断 engine use；先报告 speedup 再补 correctness。
+
+**来源依据（Source basis）：** 本站原创的 [M09 chunk/capability contract](/memory/pinned-memory-transfer-overlap/)、[M07 partial order](/memory/stream-ordering/)、[M08 completion contract](/memory/event-dependencies-timing/)、[Q05 measurement boundary](/correctness/timing-asynchronous-gpu-work/)、[EX07](/examples/streams-events-overlap/)与 [SRC-CUDA-025](/sources-and-versions/#src-cuda-025)，以及 NVIDIA [CUDA Programming Guide v13.3 Asynchronous Execution](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html)和 [CUDA Runtime API v13.3.1 Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-002" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-002：修复无条件 page-migration 叙述
+
+- **ID 与双语发布对：** PB-R2-002；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Managed-memory evidence review；高级。
+- **直接先修条件：** [M10：Unified Memory 与 page migration](/memory/unified-memory-page-migration/)。
+- **硬件门槛（Hardware gate）：** 静态建模无需硬件；runtime migration claim 要求 Native Linux、支持 managed memory 的 CUDA GPU，以及记录适用 memory paradigm、capability attributes 与 topology 的 Environment Manifest。
+- **相关学习单元与资源：** [M01](/memory/address-spaces/)、[M02](/memory/coalescing-transactions/)、[M10](/memory/unified-memory-page-migration/)、[VIS08](/visuals/page-migration/)和 [EX08](/examples/unified-memory-migration/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一段程序用 `cudaMallocManaged` 分配数组，CPU 写 A/B pages，GPU 读 B/C 并写 C，随后 CPU 读 C。它调用一次 prefetch，但没有记录 destination semantics、capability attributes、kernel completion、page size、fault 或 residency data。Reviewer 根据 VIS08 的颜色宣称“每次 cross-processor first touch 都迁移一个 4 KiB page，prefetch 会把数据永久固定在 GPU 上”。把这段话改成 conditional access ledger 与诚实结论。
+
+**约束：**
+
+- 区分 accessibility、residency、migration、remote/coherent access 与 limited-support coarse movement；不能为未知 system model 选择唯一分支。
+- 保留 `CPU writes A/B -> order edge -> GPU reads B/C and writes C -> completion edge -> CPU reads C`，并在每次 access 前记录 prior known state 与 permitted behaviors。
+- Prefetch/advice 只能作为 ordered request/hint；不得发明 page size、migration count、migrated bytes、duration、bandwidth 或 placement history。
+
+**预期证据：** 一张按 access episode 展开的 conditional ledger，包含 capability-query schema、correctness synchronization、possible cost terms、blank runtime observations 和最窄 allowed claim。
+
+**验收条件：**
+
+- `cudaMallocManaged` 被描述为 ownership/access/lifetime contract，allocation 在所有 CPU/GPU users 完成后以 `cudaFree` 释放；stable pointer 不等于 stable physical locality。
+- Ledger 分别允许 software-coherent fault-and-migrate、hardware-coherent/direct remote access 与 limited coarse movement，且每个 “migration candidate” 都附带 premise。
+- Manifest 至少预留 concurrent managed access、pageable-memory access、host-page-table 与 direct-host-access attributes，以及 OS/kernel、driver、Toolkit、device/topology、access order 和 synchronization。
+- 删除 4 KiB universal page 与 permanent placement 结论；VIS08、source order 和 prefetch call 都不构成 migration observation。
+
+<details><summary>提示 1</summary>先问“这个 processor 能否合法访问”，再问“当时 backing 在哪里”，最后才问“系统可否通过 migration 服务”。</details>
+
+<details><summary>提示 2</summary>把 `cudaMemPrefetchAsync` 写成 stream-ordered request，而不是 residence lock。</details>
+
+**参考解答（Reviewed solution）：** 修订后的 ledger 从 unknown residency 开始。CPU 写 A/B 后建立进入 kernel 的 order；GPU 对 B/C 的 access 在 software-coherent model 下可能触发 migration，在 hardware-coherent/direct-access model 下可能远程服务，在 limited model 下 movement 可能位于 launch/synchronization boundary。GPU completion 后 CPU 读 C 也使用同样的 conditional branching。Prefetch 只把可能的 placement work 前移，并在消费前需要正确 stream/event order；advice 是 hint。没有 recorded attributes、fault/migration trace 或 range query 时，唯一诚实结论是 “managed access contract defined; migration behavior unobserved”。
+
+**有效替代方案：** 为 on-demand、advised 和 prefetched 三种 mode 保留同一 correctness oracle 与分别的 observation rows；也可以改用 M09 explicit-copy baseline，但必须明确这是不同 data-movement contract。
+
+**常见错误：** 把 one pointer 当作 one memory；把 accessibility 当 residency；假定所有 Linux GPU 都 fault-migrate；用 M02 的 32-byte segment 推导 page size；把 prefetch 当永久 pin；用 VIS08 transition count 充当 profiler output。
+
+**来源依据（Source basis）：** 本站原创的 [M10 conditional residency model](/memory/unified-memory-page-migration/)、[VIS08](/visuals/page-migration/)、[EX08](/examples/unified-memory-migration/)与 [SRC-CUDA-026](/sources-and-versions/#src-cuda-026)，以及 NVIDIA [CUDA Programming Guide v13.3 Unified Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html)和 [CUDA Runtime API v13.3.1 Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-003" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-003：修复跨 stream 分配生命周期与 pool 声明
+
+- **ID 与双语发布对：** PB-R2-003；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Allocation-lifetime correctness debugging；高级。
+- **直接先修条件：** [M11：Stream-ordered allocation 与 memory pool](/memory/stream-ordered-allocation-memory-pools/)。
+- **硬件门槛（Hardware gate）：** 静态 lifetime 审查无需硬件；后续 allocator run 要求 Native Linux CUDA system，并先检查成功的 `cudaDevAttrMemoryPoolsSupported != 0` observation。
+- **相关学习单元与资源：** [M07](/memory/stream-ordering/)、[M08](/memory/event-dependencies-timing/)、[M11](/memory/stream-ordered-allocation-memory-pools/)和 [M14](/memory/cuda-graphs/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** Host 在 `s_alloc` 中调用 `cudaMallocAsync(&p, n, s_alloc)`，紧接着在 `s_use_a` 与 `s_use_b` 提交两个访问 `p` 的 kernel，却没有 allocation-completion edge。它随后按 host submission order 在 `s_alloc` 调用 `cudaFreeAsync(p)`。Pool 开启全部 reuse attributes，并把 release threshold 设为最大值；测试要求下一次 allocation 必须返回同一 pointer，由此声称“没有 allocation overhead 且一定更快”。修复 lifetime graph、pool policy 与 acceptance。
+
+**约束：**
+
+- 先检查 memory-pool support query 的 API result 与 value；header 中存在 enum 不能替代 device observation。
+- 从 allocation operation completion 到每个 first use 建 edge，从每个 last use 到 free 建 edge；host call return/submission order 不能替代 cross-stream dependency。
+- 把 logical pointer lifetime、pool backing-resource retention、reuse permission、pointer identity 与 performance 分成独立 columns。
+
+**预期证据：** 一张含 allocation、two consumers、join-before-free、pool attributes 和 release policy 的 DAG，以及不使用 pointer equality 或 speedup 的 static acceptance checklist。
+
+**验收条件：**
+
+- `ready` event 在 `s_alloc` 中 allocation 后 record，两个 use streams wait；每条 use stream 的 last-use event 都进入 release stream 的 join，free 只在两项完成后执行。
+- Pointer 只有在 allocation operation 完成后且 free operation 执行前可访问；pool 保留 backing resource 不延长 stale pointer lifetime。
+- Follow-event、opportunistic 与 internal-dependency settings 被写成 allocator permissions；internal dependency 可能添加 ordering，不能视为 free concurrency。
+- Release threshold 不是 hard cap 或 exact retained-byte guarantee；删除 same-address、zero-overhead 与 faster acceptance。
+
+<details><summary>提示 1</summary>画两道 lifetime boundary：allocation completion 到 first use，以及所有 last uses 到 free。</details>
+
+<details><summary>提示 2</summary>Pool 可以保留 backing bytes，同时 logical allocation 已经死亡；这两件事并不冲突。</details>
+
+**参考解答（Reviewed solution）：** 在 support gate 通过后，`s_alloc` 提交 allocation 并 record `ready`。`s_use_a` 与 `s_use_b` 都 wait `ready` 后访问 `p`，各自在最后一次访问后 record `done_a`/`done_b`。Release stream 同时 wait 两代 done event，随后提交 `cudaFreeAsync`。Pool selection 单独记录 default/current 或 explicit path；reuse attributes 只描述 permitted relationships，release threshold 只描述后续 synchronization point 附近尝试释放 excess backing 的 policy。Acceptance 检查 DAG reachability、API returns 与 pointer-use interval，不检查下次 address。没有 allocation trace 或 timing records，因此没有 footprint、latency 或 speedup 结论。
+
+**有效替代方案：** 把 allocation、所有 uses 和 free 放在同一 stream 可由 same-stream order 给出最小合法 lifetime；也可在 allocation 后或 join 前使用明确 host/device synchronization，但它会改变 concurrency contract，必须记录。
+
+**常见错误：** 把 `cudaMallocAsync` return 当 completion；只让一个 consumer 进入 free；依赖 host enqueue order；认为 pool 缓存让 stale pointer 复活；要求 address equality；把最大 threshold 当 unlimited physical memory。
+
+**来源依据（Source basis）：** 本站原创的 [M11 lifetime/policy contract](/memory/stream-ordered-allocation-memory-pools/)、[M07](/memory/stream-ordering/)、[M08](/memory/event-dependencies-timing/)与 [SRC-CUDA-027](/sources-and-versions/#src-cuda-027)，以及 NVIDIA [CUDA Programming Guide v13.3 Stream-Ordered Memory Allocation](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html)和 [CUDA Runtime API v13.3.1 Memory Pools](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-004" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-004：修复 group participant 与 cooperative-launch 缺陷
+
+- **ID 与双语发布对：** PB-R2-004；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Cooperative-group correctness debugging；高级。
+- **直接先修条件：** [M12：Cooperative Groups 与可组合同步](/memory/cooperative-groups/)。
+- **硬件门槛（Hardware gate）：** 静态 participant 审查无需硬件；后续 block/tile run 使用 Native Linux CC 7.5+ baseline，grid sync 另要求 cooperative-launch capability、合法 resident grid 与 `cudaLaunchCooperativeKernel`。
+- **相关学习单元与资源：** [M05](/memory/synchronization-scopes/)、[M06](/memory/warp-divergence-reconvergence/)、[M12](/memory/cooperative-groups/)和 [M13](/memory/asynchronous-copy-pipelines/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一个 256-thread block 只让 `threadIdx.x < 128` 的 threads 调用 `cg::tiled_partition<32>(block)`；每个 tile 又只让 even ranks 调用 `cg::reduce(tile, value, op)`。同一 kernel 取得 `this_grid()` 并调用 `grid.sync()`，但 host 使用普通 `<<<grid, block>>>` launch，既不查询 cooperative support，也不验证 resident-grid limit。修复 group contracts；不得用“同一 warp 大概 lockstep”解释。
+
+**约束：**
+
+- 为每个 construction/collective 写出 handle、membership、scope、required participants 与 argument-agreement rule。
+- Parent partition construction、tile collective 与 grid collective 分开修复；dynamic active set 不能被命名成永久 warp。
+- Grid path 必须显式 query capability、计算 legal cooperative grid、使用 cooperative host launch，并让全部 grid members 参与；否则改用不需要 grid barrier 的方案。
+
+**预期证据：** 一张三行 group-contract ledger、修订后的 control-flow skeleton、cooperative-launch decision table，以及 empty runtime observations。
+
+**验收条件：**
+
+- 完整 block 在 divergence 前取得 `block` 并共同构造 tile；同一 tile 的全部 members 到达同一 reduce instance，只有 per-thread `value` 按 API 允许不同。
+- Branching 若只需要部分结果，发生在 collective 完成之后；任何 tile/block sync 的 participant set 与 accessible shared storage scope 对齐。
+- Grid sync 只在 checked nonzero cooperative capability、满足 occupancy-derived size limit 且由 `cudaLaunchCooperativeKernel` launch 的 separate path 中出现。
+- 当前 CUDA 13 baseline 不使用 archive-only multi-device Cooperative Groups API；静态修复不授予 compilation/runtime evidence。
+
+<details><summary>提示 1</summary>`tiled_partition` 本身就是 parent-group collective，不只是生成一个 local object 的 helper。</details>
+
+<details><summary>提示 2</summary>`this_grid()` 只命名 group；host cooperative launch 才让 grid-wide synchronization contract 成立。</details>
+
+**参考解答（Reviewed solution）：** 所有 256 threads 先取得 `block` 并执行 `tiled_partition<32>(block)`。每个 tile 的 32 members 都调用相同 `reduce(tile, value, cg::plus<int>())`；leader-only store 位于 collective 之后。若只需前四个 tiles，则仍可让全部 parent members 完成 partition，并让不用结果的 tiles 遵守其 own selected collective/control contract。Grid path 在 host 端检查 `cudaDevAttrCooperativeLaunch`，按 active blocks per SM 与 SM count 限制 grid，使用 `cudaLaunchCooperativeKernel`，并证明所有 grid threads 到达 sync。若任一 gate 不成立，删除 grid barrier，改成 kernel boundary 或 block-local algorithm。
+
+**有效替代方案：** 将 inter-block phase 拆成两个 kernels，以 kernel-completion boundary 代替 `grid.sync()`；这保持更宽 hardware coverage，但要重新声明 intermediate storage 与 launch/completion edges。
+
+**常见错误：** 在 branch 内构造 parent tile；只让 leaders 调 collective；把 same call text 当 participation；把 `coalesced_threads()` 当固定 32-lane warp；普通 launch 调 grid sync；从 archive multi-device example 推断 CUDA 13 support。
+
+**来源依据（Source basis）：** 本站原创的 [M12 group contract](/memory/cooperative-groups/)、[M05 scope model](/memory/synchronization-scopes/)、[M06 participant reasoning](/memory/warp-divergence-reconvergence/)与 [SRC-CUDA-028](/sources-and-versions/#src-cuda-028)，以及 NVIDIA [CUDA Programming Guide v13.3 Cooperative Groups](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html)和 [CUDA Runtime API v13.3.1 Execution Control](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-005" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-005：审查 staged async-copy participant 与证据
+
+- **ID 与双语发布对：** PB-R2-005；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Pipeline contract and evidence review；高级。
+- **直接先修条件：** [M13：Asynchronous copy 与 staged pipeline](/memory/asynchronous-copy-pipelines/)。
+- **硬件门槛（Hardware gate）：** 静态审查无需硬件；后续 API run 要求 Native Linux 与 CC 7.0+，hardware-accelerated global-to-shared path 要求 CC 8.0+、合法 alignment/size 和 trivially-copyable type。
+- **相关学习单元与资源：** [M03](/memory/shared-memory-tiling/)、[M05](/memory/synchronization-scopes/)、[M08](/memory/event-dependencies-timing/)、[M12](/memory/cooperative-groups/)和 [M13](/memory/asynchronous-copy-pipelines/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** 一个 two-stage shared pipeline 让 out-of-bounds threads 在第一轮前 `return`，其余 threads 在 divergent branches 中分别 `producer_commit()`，consumer 在没有 group synchronization 时读取其他 thread copy 的 shared values。代码对 offset 为 4 bytes 的 pointer 声明 `cuda::aligned_size_t<16>`，target 是 CC 7.5。Reviewer 仅凭 source 宣称 compiler 发出了 hardware asynchronous-copy instruction，copy 与 compute 已 overlap。修复 protocol 和 evidence table。
+
+**约束：**
+
+- 先保留正确的 synchronous `load/store -> barrier -> use -> barrier-before-reuse` fallback，再逐项替换 copy boundary。
+- 声明 unified/partitioned pipeline、stage count、producer/consumer sets、每个 thread 的 role、bounds-neutral path、early-exit/quit rule，以及 completion-before-use 和 all-reads-before-reuse edges。
+- 把 API availability、CC 8.0+ hardware-path eligibility、alignment/type proof、emitted artifact 与 runtime overlap 五栏分开。
+
+**预期证据：** 一份 prologue/steady-state/drain stage ledger、全 participant control-flow repair、alignment proof obligation 和无预填 observation 的 evidence matrix。
+
+**验收条件：**
+
+- Bounds-invalid participants 不绕过 shared collective sequence；它们按 selected overload 提交零 useful bytes/neutral state，或遵循 documented `pipeline.quit()` 后才退出。
+- Acquire、copy、commit、wait、peer-use synchronization、all-consumer completion 与 release/reuse 顺序完整；divergent commit 在正确 scope reconverge。
+- False `aligned_size_t<16>` assertion 被删除或通过 actual aligned ranges/byte-count proof 修复；CC 7.5 只满足适用 API gate，不满足 CC 8.0 accelerated-path gate。
+- Source review 最多证明 protocol 与 declared assumptions；instruction 需要 pinned build/artifact inspection，overlap/speedup 需要 exact-run runtime measurement。
+
+<details><summary>提示 1</summary>把 M03 的两个 barrier 分别映射到 “copy complete before use” 与 “all reads complete before stage reuse”。</details>
+
+<details><summary>提示 2</summary>Target capability、alignment annotation 和 source API name 都不是 disassembly 或 timeline。</details>
+
+**参考解答（Reviewed solution）：** 保留单 buffer synchronous fallback 作为 correctness oracle。Async path 为完整 participant sets 建立 shared pipeline；每个 logical batch 执行 acquire、合法 copy/neutral path、converged commit、wait、必要的 group sync、use、全部 consumer 完成后的 release。Prologue 填充、steady-state rotation 与 drain 都保持 batch-to-stage mapping，最后几批也完成 wait/use/release。Offset 4 不能声称 16-byte alignment；若无法证明实际 ranges、size multiple 与 trivially-copyable type，则使用 runtime-checked 或 synchronous fallback。CC 7.5 record 的 allowed claim 仅是 API path 可被讨论；hardware instruction 与 overlap 两栏保持 “not proved”。
+
+**有效替代方案：** 使用 partitioned producer/consumer roles 可以减少参与工作，但必须为每个 role set 写完整 collective sequence 与 cross-role visibility；或完全保留 synchronous tile path。
+
+**常见错误：** Invalid lane 直接 return；把 thread-local wait 当 block-wide peer visibility；漏掉 drain；divergent commit；伪造 alignment proof；把 CC 7.5 写成 CC 8.0；从 source 推断 instruction 或 overlap。
+
+**来源依据（Source basis）：** 本站原创的 [M13 stage/participant contract](/memory/asynchronous-copy-pipelines/)、[M03 synchronous baseline](/memory/shared-memory-tiling/)、[M05](/memory/synchronization-scopes/)、[M08 evidence boundary](/memory/event-dependencies-timing/)与 [SRC-CUDA-029](/sources-and-versions/#src-cuda-029)，以及 NVIDIA [CUDA Programming Guide v13.3 Asynchronous Data Copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html)和 [Pipelines](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
+<span id="pb-r2-006" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-006：审查 graph capture、replay、lifetime 与 update
+
+- **ID 与双语发布对：** PB-R2-006；位于 `practice-bank` Publication Pair。
+- **类型与难度：** CUDA Graph lifecycle evidence review；高级。
+- **直接先修条件：** [M14：CUDA Graphs 与 repeated launch structure](/memory/cuda-graphs/)。
+- **硬件门槛（Hardware gate）：** 静态 DAG/lifecycle 审查无需硬件；后续 replay run 要求 Native Linux、CC 7.5+ baseline、selected Runtime 的 graph support 与完整 Environment Manifest。
+- **相关学习单元与资源：** [M07](/memory/stream-ordering/)、[M08](/memory/event-dependencies-timing/)、[M11](/memory/stream-ordered-allocation-memory-pools/)、[M14](/memory/cuda-graphs/)和 [EX09](/examples/graph-capture/)。
+- **最后复核（Last reviewed）：** 2026-08-29。
+
+**题目：** Capture 从 `s0` 开始，经 captured event fork 到 `s1`，但 `s1` 没有 rejoin `s0`。Library 在 active capture 中同步 captured event，使 capture invalid。程序忽略 `cudaStreamEndCapture` error，尝试 instantiate null graph，提交三次 async launch 后立刻释放 host/device buffers，并假定 topology-changing update 已成功；Reviewer 由“三次 replay”宣布 launch overhead 降低。写出完整 repair 与 allowed claims。
+
+**约束：**
+
+- 先画 intended acyclic nodes/edges，再分别审查 explicit Graph API 与 stream capture；construction mechanism 不能与 execution 混合。
+- Capture ledger 必须包含 origin stream、fork/rejoin、prohibited operations、invalidation unwind、end-capture result 与 null-graph handling。
+- Definition、instantiation、launch、completion、external-resource lifetime、template/exec destruction 与 bounded update 分开；不得提供 performance 数值。
+
+**预期证据：** 一份 corrected DAG、capture state machine、graph/executable/external-resource lifecycle table、update decision matrix，以及 blank compilation/runtime/performance observations。
+
+**验收条件：**
+
+- `s1` 通过 captured event dependency 加入同一 capture，并在 `cudaStreamEndCapture(s0)` 前把 dependency rejoin origin；active capture 内删除 prohibited query/synchronize call。
+- 若 operation invalidates capture，程序仍在 origin 调 end capture 退出，检查 error/null graph，丢弃 capture，且绝不 instantiate/launch invalid result。
+- Successful graph 只有在 checked instantiation 后 replay；每次 launch 是 asynchronous stream work，final event/stream completion 保护 output consumption、resource release 与 teardown。
+- Update result 按 topology/node/context/parameter restrictions 检查；不兼容 change 创建新 graph 并重新 instantiate；三次 submission 不证明 overhead、concurrency 或 speedup。
+
+<details><summary>提示 1</summary>Capture failure 不是立即忘记 stream state；仍需通过 origin end-capture boundary 完成 unwind。</details>
+
+<details><summary>提示 2</summary>Graph handle、executable handle 与 node 指向的 external storage 有三条不同 lifetime。</details>
+
+**参考解答（Reviewed solution）：** 先定义 expected DAG，并选择 capture 作为 construction path。`s0` begin capture，record captured fork event；`s1` wait 后提交支持的 work，再 record rejoin event；`s0` wait rejoin 后 end capture。任何 prohibited operation 都让路径进入 invalidated state：在 `s0` end capture，检查 failure 与 null result，跳过 instantiate。Success path 检查 instantiate，随后按 contract replay；每次 launch 的 immediate error 与覆盖 final work 的 completion 分开观察。Host/device buffers、callbacks、events 与其他 pointees 至少活到最后相关 node 完成。Update 先分类，checked API 拒绝时重新定义并 instantiate。静态 review 没有执行 graph，因此唯一结论是 lifecycle repaired，performance unobserved。
+
+**有效替代方案：** 使用 explicit Graph API 直接创建同一 DAG，避免 capture-state restrictions；或在 topology 改变时 recapture 并重新 instantiate。两种方案仍需相同 external-resource 与 completion ledger。
+
+**常见错误：** Auxiliary stream 不 rejoin；capture 中 device/event synchronize；忽略 end-capture failure；instantiate null graph；把 instantiate 当 launch；async launch 后立即 free；假设 update 成功；由 replay count 推断 speedup。
+
+**来源依据（Source basis）：** 本站原创的 [M14 DAG/capture/lifecycle contract](/memory/cuda-graphs/)、[M07](/memory/stream-ordering/)、[M08](/memory/event-dependencies-timing/)、[EX09](/examples/graph-capture/)与 [SRC-CUDA-030](/sources-and-versions/#src-cuda-030)，以及 NVIDIA [CUDA Programming Guide v13.3 CUDA Graphs](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html)和 [CUDA Runtime API v13.3.1 Graph Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__GRAPH.html)。
+
+**来源日期（Source date）：** 2026-08-29。
+
 ## 复核记录
 
-既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-024，以及完整二十九个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-28** 同步复核。所有情景、题目、推导、代码修复和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。
+既有十七个条目保留各自 **2026-08-26** 的 item-level review record，PB-R1-013 至 PB-R1-016 保留 **2026-08-27** 的记录。PB-R1-017 至 PB-R1-024 保留 **2026-08-28** 的记录。PB-R2-001 至 PB-R2-006，以及完整三十五个条目的双语发布对、metadata projection、直接链接和索引集成在 **2026-08-29** 同步复核。所有情景、题目、推导、代码修复和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、timing 或 performance result，也没有执行 CUDA。LAB06 继续没有公开目标。

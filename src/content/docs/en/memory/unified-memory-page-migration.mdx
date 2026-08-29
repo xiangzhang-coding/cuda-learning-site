@@ -1,0 +1,254 @@
+---
+title: 'M10: Unified Memory and Page Migration'
+description: Model managed-memory accessibility, residency, possible page migration, and migration cost without assuming that every CUDA system fault-migrates data or that a browser model is runtime evidence.
+pairId: m10
+counterpart: /memory/unified-memory-page-migration/
+factCheckDate: '2026-08-29'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - managed-memory
+  - accessibility-residency
+  - access-sequence
+  - page-migration-cost
+  - prefetch-advice
+  - system-variation
+  - canonical-example
+  - visual-model
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: M10
+prerequisites:
+  - M01
+  - M02
+relatedUnits:
+  - M09
+  - VIS08
+exampleIds:
+  - EX08
+canonicalExample: EX08
+canonicalRanges:
+  - access-sequence
+  - managed-workload
+hardwareGate: 'None for static modeling; runtime migration claims require native Linux, a CUDA GPU with managed-memory support, and an Environment Manifest recording the applicable memory paradigm'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Unified and System Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current unified-memory paradigms, managed allocation, placement, and prefetch overview'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Programming Guide - Unified Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current paging, migration, hardware-coherency, direct-access, and performance-hint model'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current managed allocation, advice, prefetch, range-query, and release interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 13.3.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current unified-memory capability query interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#unified-memory-programming'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Toolkit 12.9.1 managed-memory, migration, and advice contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 managed-memory interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 12.9.1 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Toolkit 12.9.1 unified-memory capability queries'
+    accessDate: '2026-08-29'
+  - title: 'CUDA C Programming Guide 11.8 - Unified Memory Programming'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#unified-memory-programming'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 managed-memory, migration, and advice contract'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 managed-memory interfaces'
+    accessDate: '2026-08-29'
+  - title: 'CUDA Runtime API 11.8.0 - Device Management'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html'
+    version: 'CUDA Runtime API v11.8.0'
+    platform: 'Toolkit 11.8 unified-memory capability queries'
+    accessDate: '2026-08-29'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: m10 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-29' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,managed-memory,accessibility-residency,access-sequence,page-migration-cost,prefetch-advice,system-variation,canonical-example,visual-model,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: M10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M09,VIS08' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX08 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX08 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'access-sequence,managed-workload' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None for static modeling; runtime migration claims require native Linux, a CUDA GPU with managed-memory support, and an Environment Manifest recording the applicable memory paradigm' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/memory/unified-memory-page-migration/" lang="zh-CN">阅读中文对应页</a>
+
+Unified Memory lets managed memory be addressed by CPU and GPU code, but one pointer does not imply one physical memory, zero movement, or free concurrent sharing. Page migration is one possible way a system changes locality. Residency, accessibility, migration, remote access, and coherence must remain separate records whose behavior depends on the operating system, driver, device, and interconnect.
+
+## What you should be able to do
+
+- State the owner, lifetime, and access contract of a `cudaMallocManaged` allocation.
+- Distinguish legal accessibility from current or inferred residency.
+- Trace a page access sequence with conditional migration, remote-access, and no-migration branches.
+- Model the possible cost of faults and data movement without assigning an invented duration or migration count.
+- Treat `cudaMemAdvise`, prefetch, and VIS08 as guidance or models, not proof of runtime placement.
+
+## Prerequisites
+
+Complete [M01: Address Spaces, Ownership, Scope, and Lifetime](/en/memory/address-spaces/) and then [M02: Coalescing as Transaction Shaping](/en/memory/coalescing-transactions/). M01 supplies allocation ownership, valid accessors, last use, and matching release. M02 supplies the discipline of freezing an access set before reasoning about movement, while its 32-byte transaction model must not be confused with page-level placement.
+
+M10 is related to [M09: Pinned Memory and Transfer Overlap](/en/memory/pinned-memory-transfer-overlap/), but managed access is not an implicit version of M09's explicit-copy pipeline. M10 asks where touched data may be serviced and what movement could cost; it does not claim that migration or direct access is faster.
+
+## Managed memory is an allocation contract
+
+`cudaMallocManaged` creates an allocation managed by the Unified Memory system and released with `cudaFree` after every user completes. CPU and GPU code can use the managed pointer under the applicable system contract. The allocation still has one owner, a finite lifetime, data dependencies, and synchronization requirements.
+
+“Accessible from both processors” does not mean that CPU and GPU may race on the bytes, that both have equally local access, or that no transfer occurs. A kernel launch remains asynchronous, so the host establishes a completion boundary before reading GPU-produced values unless a documented concurrent-access and synchronization design says otherwise. Unified Memory removes some explicit copy bookkeeping; it does not remove correctness bookkeeping.
+
+## Accessibility is not residency
+
+Accessibility answers whether a processor may legally address a managed range. Residency describes where physical backing is local at a stated time. A stable virtual address can refer to pages resident in CPU memory, pages resident in GPU memory, or data reached through a coherent or remote mapping, depending on the system.
+
+On a software-coherent full-support system, an access to a page local to another processor may fault and trigger migration. On a hardware-coherent system, a processor may access remotely without moving the page. Limited-support systems can move managed data at coarser execution boundaries. These are conditional branches, not three stages every allocation traverses.
+
+A source pointer and an allocation API establish accessibility and ownership facts. They do not reveal the physical locality of every page during execution.
+
+## Trace an access sequence, not a universal migration story
+
+Start with symbolic pages and an unknown residency state. Consider this ordered workload:
+
+```text
+CPU writes pages A and B
+completion/order edge
+GPU reads B and C, then writes C
+GPU completion edge
+CPU reads C
+```
+
+For each access, record the accessor, touched pages, required synchronization, prior known state, and permitted system behaviors. Under a software-coherent fault-and-migrate model, the GPU access to B may migrate a host-local page and the later CPU read of C may migrate a device-local page back. Under hardware coherence or documented direct access, either access may be serviced without migration. Under a limited model, movement may happen at launch or synchronization rather than at each first GPU touch.
+
+The ledger therefore says “migration candidate” only when locality and capability premises support that branch. It never turns the browser's colored page or the source access order into a recorded migration.
+
+## Model page-migration cost conditionally
+
+When page migration occurs, its work can include fault detection and service, mapping or ownership updates, coherence actions, and moving the backing data. The transfer granularity can exceed the few bytes that triggered the access, so alternating CPU and GPU writes to the same pages can create repeated movement or thrashing on a fault-and-migrate system.
+
+Use a symbolic cost decomposition:
+
+```text
+access episode = useful memory access
+               + possible fault/coherence work
+               + possible data movement
+```
+
+Each “possible” term requires an Environment Manifest and runtime evidence before becoming an observation. Page size, migration granularity, remote-access policy, caching, and interconnect vary. M02's segment count predicts neither page faults nor migrated bytes.
+
+## Prefetch and advice are not placement proofs
+
+`cudaMemPrefetchAsync` requests that a range be prefetched toward a declared location using stream ordering. Put the consuming work after that operation in the same stream or connect it with a documented event edge. The call can move work earlier and may reduce demand faults on a suitable system, but it has a cost and does not promise that the range remains resident there forever.
+
+`cudaMemAdvise` communicates usage hints such as preferred location, read-mostly behavior, or expected access. Hints can help or hurt depending on the real pattern and platform. Neither advice nor prefetch replaces synchronization, output verification, or a measurement of actual faults, movement, or residency behavior.
+
+Keep on-demand, advised, and prefetched modes under one correctness oracle. Compare them only after recording the selected Toolkit API contract, destination semantics, capability attributes, and run evidence.
+
+## The applicable system model must be recorded
+
+Current owner documentation distinguishes full support for explicit managed allocations, full support for all allocations with software coherence, full support for all allocations with hardware coherence, and limited support. Native Linux is this site's only Supported Environment, but native Linux systems can still differ by kernel, driver, GPU, and interconnect.
+
+Record at least the selected device and the results for `cudaDevAttrConcurrentManagedAccess`, `cudaDevAttrPageableMemoryAccess`, and `cudaDevAttrPageableMemoryAccessUsesHostPageTables`. Record `cudaDevAttrDirectManagedMemAccessFromHost` when a host-direct-access claim depends on it. Add operating-system and kernel versions, driver, Toolkit Lane, CPU-GPU topology, allocation API, access sequence, and synchronization boundaries.
+
+Those facts select a permissible model. They do not supply a migration timeline or guarantee that a particular page moved.
+
+## Canonical Runnable Example: EX08
+
+EX08 is the canonical implementation for this unit. The `access-sequence` range declares the CPU/GPU order and correctness boundaries. The `managed-workload` range owns the managed allocation, optional advice/prefetch modes, kernel work, host verification, and release. It retains conditional wording for migration behavior across systems.
+
+[View the complete EX08 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f/examples/ex08-unified-memory-migration), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f.zip). The standalone project is the only canonical implementation; this page imports the two declared ranges in contract order.
+
+<CanonicalCode exampleId="EX08" range="access-sequence" />
+
+<CanonicalCode exampleId="EX08" range="managed-workload" />
+
+## Visual model: VIS08
+
+[VIS08: Page Migration](/en/visuals/page-migration/) applies one explicitly declared software-coherent branch to fixed, reviewed access-origin and page sequences and preserves every scenario in a textual fallback. It deliberately excludes hardware-coherent direct access, remote mapping, prefetch, advice, and other system branches rather than presenting them as observed alternatives. Its page colors are deterministic teaching state, not queried residency. Browser execution neither faults CUDA pages nor observes a migration.
+
+## Evidence boundary
+
+The access ledgers, symbolic costs, canonical excerpts, Visual Explainer, and Exercises are static. This Learning Unit's compilation, runtime, expected-observation, and recorded-observation axes remain empty. It reports no page-fault count, migrated byte count, residence history, duration, bandwidth, or speedup.
+
+## Retrieval check
+
+1. What does `cudaMallocManaged` establish about ownership, accessibility, lifetime, and release?
+2. Why can one stable pointer be accessible to CPU and GPU without proving where each page is resident?
+3. Which system branches can service a cross-processor access with migration, remote access, or coarser movement?
+4. What costs can a migration episode contain, and why does M02's 32-byte segment model not predict them?
+5. Why do prefetch, advice, and VIS08 fail to prove that a page actually migrated or remained resident?
+
+## Continue with practice
+
+- Complete the [M10 Exercises](/en/memory/unified-memory-page-migration/exercises/), then inspect the separate [reviewed solutions](/en/memory/unified-memory-page-migration/solutions/).
+- Review an unconditional migration claim in [Practice Bank PB-R2-002](/en/practice/#pb-r2-002).
+- Use [VIS08](/en/visuals/page-migration/) with [TERM-099: managed memory](/en/glossary/#term-099), [TERM-100: page migration](/en/glossary/#term-100), and [TERM-101: residency](/en/glossary/#term-101).
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Unified and System Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/understanding-memory.html) defines current paradigms, managed allocation, placement, and prefetch concepts.
+- [CUDA Programming Guide v13.3: Unified Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html) defines current paging, migration, hardware-coherence, direct-access, and performance-hint behavior.
+- [CUDA Runtime API v13.3.1: Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) supplies current managed allocation, advice, prefetch, range-query, and release interfaces; [Device Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html) supplies capability queries.
+- [CUDA C++ Programming Guide 12.9.1: Unified Memory Programming](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#unified-memory-programming), [Runtime Memory Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__MEMORY.html), and [Runtime Device Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__DEVICE.html) preserve the 12.9.1 contracts.
+- [CUDA C Programming Guide 11.8: Unified Memory Programming](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#unified-memory-programming), [Runtime Memory Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__MEMORY.html), and [Runtime Device Management](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-runtime-api/group__CUDART__DEVICE.html) preserve the 11.8 contracts.
+
+All ten owner sources were accessed on **2026-08-29**. The conditional residency ledger, symbolic cost model, Exercises, and instructional arrangement are original composition for this site. No owner-documentation example or figure is copied.
+
+**Fact checked: 2026-08-29.**

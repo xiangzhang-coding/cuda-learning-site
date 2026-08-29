@@ -18,6 +18,61 @@ const ignoredDirectories = new Set([
   'test-results',
 ]);
 
+const issue19UnitSlugs = [
+  'pinned-memory-transfer-overlap',
+  'unified-memory-page-migration',
+  'stream-ordered-allocation-memory-pools',
+  'cooperative-groups',
+  'asynchronous-copy-pipelines',
+  'cuda-graphs',
+] as const;
+
+const issue19ContentFiles = ['', 'en/'].flatMap((localePrefix) => [
+  ...issue19UnitSlugs.flatMap((slug) => [
+    `${localePrefix}memory/${slug}.mdx`,
+    `${localePrefix}memory/${slug}/exercises.md`,
+    `${localePrefix}memory/${slug}/solutions.md`,
+  ]),
+  `${localePrefix}examples/streams-events-overlap.mdx`,
+  `${localePrefix}examples/unified-memory-migration.mdx`,
+  `${localePrefix}examples/graph-capture.mdx`,
+  `${localePrefix}visuals/page-migration.mdx`,
+]);
+
+const issue19SoftwareFiles = [
+  'src/components/AdvancedMemoryRepresentation.astro',
+  'src/components/PageMigrationExplorer.astro',
+  'src/current-publication-manifest.json',
+  'src/styles/advanced-memory-visuals.css',
+  'src/visuals/page-migration-copy.ts',
+  'src/visuals/page-migration-model.ts',
+  'tests/e2e/page-migration-visual.spec.ts',
+  'tests/integration/page-migration-visual.test.ts',
+  'tests/integration/data-movement-managed-memory-pools-groups-pipelines-graphs-units.test.ts',
+  'tests/integration/ex07-project-boundary.test.ts',
+  'tests/integration/ex08-project-boundary.test.ts',
+  'tests/integration/ex09-project-boundary.test.ts',
+  'tests/unit/page-migration-model.test.ts',
+] as const;
+
+const issue19Projects = [
+  {
+    id: 'EX07',
+    root: 'examples/ex07-streams-events-overlap',
+    implementationFiles: ['include/streams_events_overlap_reference.hpp', 'src/streams_events_overlap.cu'],
+  },
+  {
+    id: 'EX08',
+    root: 'examples/ex08-unified-memory-migration',
+    implementationFiles: ['include/unified_memory_migration_reference.hpp', 'src/unified_memory_migration.cu'],
+  },
+  {
+    id: 'EX09',
+    root: 'examples/ex09-graph-capture',
+    implementationFiles: ['include/graph_capture_reference.hpp', 'src/graph_capture.cu'],
+  },
+] as const;
+
 describe('source, license, and privacy policy', () => {
   it('records file-level licenses and original provenance for public content', async () => {
     const contentFiles = (await walkFiles(path.join(projectRoot, 'src/content/docs'))).filter((file: string) =>
@@ -40,6 +95,60 @@ describe('source, license, and privacy policy', () => {
     );
   });
 
+  it('covers the exact issue #19 content, software, tests, and original project sources', async () => {
+    expect(issue19ContentFiles).toHaveLength(44);
+    expect(new Set(issue19ContentFiles).size).toBe(issue19ContentFiles.length);
+    for (const relativePath of issue19ContentFiles) {
+      const content = await readFile(path.join(projectRoot, 'src/content/docs', relativePath), 'utf8');
+      expect(content, relativePath).toMatch(/^license: CC-BY-4\.0$/m);
+      expect(content, relativePath).toMatch(/^provenance: original$/m);
+    }
+
+    for (const relativePath of issue19SoftwareFiles) {
+      const content = await readFile(path.join(projectRoot, relativePath), 'utf8');
+      if (relativePath.endsWith('.json')) {
+        expect(JSON.parse(content), relativePath).toMatchObject({
+          'SPDX-License-Identifier': 'Apache-2.0',
+        });
+      } else {
+        expect(content, relativePath).toContain('SPDX-License-Identifier: Apache-2.0');
+      }
+    }
+
+    for (const project of issue19Projects) {
+      const projectRootPath = path.join(projectRoot, project.root);
+      const sourceFiles = (await walkFiles(projectRootPath))
+        .map((file: string) => path.relative(projectRootPath, file).split(path.sep).join('/'))
+        .filter((file: string) => !file.startsWith('build/') && !file.startsWith('.quality/'))
+        .sort();
+      const expectedFiles = [
+        'Makefile',
+        'README.md',
+        'evidence/README.md',
+        ...project.implementationFiles,
+        'project.json',
+        'scripts/compile-check.sh',
+        'tests/host_reference_test.cpp',
+      ].sort();
+      expect(sourceFiles, project.id).toEqual(expectedFiles);
+
+      for (const relativePath of sourceFiles) {
+        const content = await readFile(path.join(projectRootPath, relativePath), 'utf8');
+        if (relativePath === 'project.json') {
+          const manifest = JSON.parse(content) as Record<string, unknown>;
+          expect(manifest, project.id).toMatchObject({
+            'SPDX-License-Identifier': 'Apache-2.0',
+            id: project.id,
+            license: 'Apache-2.0',
+            provenance: 'original',
+          });
+        } else {
+          expect(content, `${project.id} ${relativePath}`).toContain('SPDX-License-Identifier: Apache-2.0');
+        }
+      }
+    }
+  });
+
   it('keeps Visual Explainers original, owner-sourced, and explicitly non-evidentiary', async () => {
     for (const relativePath of [
       'visuals/kernel-journey.mdx',
@@ -50,6 +159,8 @@ describe('source, license, and privacy policy', () => {
       'en/visuals/warp-divergence.mdx',
       'visuals/stream-event-dependencies.mdx',
       'en/visuals/stream-event-dependencies.mdx',
+      'visuals/page-migration.mdx',
+      'en/visuals/page-migration.mdx',
     ]) {
       const content = await readFile(path.join(projectRoot, 'src/content/docs', relativePath), 'utf8');
       expect(content, relativePath).toMatch(/^resourceKind: visual-explainer$/m);
