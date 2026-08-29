@@ -228,7 +228,7 @@ EX10 是一个只构建、只检查的可运行示例（Runnable Example）。�
 
 ## 获取 canonical project
 
-[查看 build-source commit `904c6da03800ed3012baacb861494377c0fa01f2` 中的完整 EX10 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection)，或[下载暂时保留的 evidence-bundle source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip)。前者是 retained run 33275734951 编译的精确 source；后者不是同一 source coordinate，并会保持临时状态，直到本次 evidence-retention 变更有自己的 commit SHA。获取精确 build source 时应使用 tree link。`project.json` 是机器可读契约；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
+[查看 retained run `33275734951` 编译的精确 build source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection)，或[下载 evidence-bundle commit `72cf757de9e893479508c24e810fce5ae6bd5275` 的完整归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/72cf757de9e893479508c24e810fce5ae6bd5275.zip)。Bundle 包含 byte-identical build-contract inputs、最终 `project.json` 与六份 retained records。解压后进入 `examples/ex10-ptx-fatbinary-inspection/`；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
 
 ## 产物矩阵
 

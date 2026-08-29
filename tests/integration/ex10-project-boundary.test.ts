@@ -18,7 +18,7 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex10-ptx-fatbinary-inspection');
 const sourceCommit = '904c6da03800ed3012baacb861494377c0fa01f2';
-const evidenceBundleCommit = '8b4af3965147f2ead99e72a73f5fe2f92fa0114b';
+const evidenceBundleCommit = '72cf757de9e893479508c24e810fce5ae6bd5275';
 const rangeNames = [
   'artifact-kernel',
   'device-link-contract',

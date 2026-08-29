@@ -5,8 +5,8 @@
     "EX10": {
       "sourceCommit": "904c6da03800ed3012baacb861494377c0fa01f2",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection",
-      "evidenceBundleCommit": "8b4af3965147f2ead99e72a73f5fe2f92fa0114b",
-      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip"
+      "evidenceBundleCommit": "72cf757de9e893479508c24e810fce5ae6bd5275",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/72cf757de9e893479508c24e810fce5ae6bd5275.zip"
     }
   }
 }
