@@ -57,13 +57,13 @@ describe('R1 release review', () => {
         gpuCapabilityTiers: {
           baseline: {
             minimumComputeCapability: '7.5',
-            maximumProblemMemoryBytes: 8_589_934_592,
+            maximumProblemMemoryBytes: 8_000_000_000,
             requiredGpuCount: 1,
             additionalFeatureRequirements: [],
           },
           modernSingleGpu: {
             minimumComputeCapability: '8.0',
-            minimumDeviceMemoryBytes: 8_589_934_592,
+            minimumDeviceMemoryBytes: 8_000_000_000,
             requiredGpuCount: 1,
             additionalFeatureRequirements: [],
           },

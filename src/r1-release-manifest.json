@@ -62,13 +62,13 @@
     "gpuCapabilityTiers": {
       "baseline": {
         "minimumComputeCapability": "7.5",
-        "maximumProblemMemoryBytes": 8589934592,
+        "maximumProblemMemoryBytes": 8000000000,
         "requiredGpuCount": 1,
         "additionalFeatureRequirements": []
       },
       "modernSingleGpu": {
         "minimumComputeCapability": "8.0",
-        "minimumDeviceMemoryBytes": 8589934592,
+        "minimumDeviceMemoryBytes": 8000000000,
         "requiredGpuCount": 1,
         "additionalFeatureRequirements": []
       }
