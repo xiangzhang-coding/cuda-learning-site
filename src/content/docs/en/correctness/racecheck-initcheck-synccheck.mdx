@@ -1,0 +1,206 @@
+---
+title: 'Q04: Diagnose with racecheck, initcheck, and synccheck'
+description: Run memcheck first, then distinguish shared-memory hazards, uninitialized reads, and synchronization-primitive misuse while stating clean-run limits precisely.
+pairId: q04
+counterpart: /correctness/racecheck-initcheck-synccheck/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - workflow
+  - racecheck
+  - initcheck
+  - synccheck
+  - isolation
+  - coverage-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q04
+prerequisites:
+  - M05
+  - M06
+  - Q03
+relatedUnits:
+  - EX16
+  - LAB07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Compute Sanitizer - Compute Sanitizer User Guide'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html'
+    version: 'Compute Sanitizer v2026.2.1; last updated 2026-06-23'
+    platform: 'Current memcheck-first workflow and racecheck, initcheck, and synccheck contracts'
+    accessDate: '2026-08-28'
+  - title: 'Compute Sanitizer - Release Notes'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html'
+    version: 'Compute Sanitizer v2026.2.1; last updated 2026-06-23'
+    platform: 'Shared-memory initcheck addition, fixes, support, known limitations, and known issues'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 11.8 - Compute Sanitizer'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html'
+    version: 'Compute Sanitizer in CUDA Toolkit v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 tool-scope baseline'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,workflow,racecheck,initcheck,synccheck,isolation,coverage-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M05,M06,Q03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX16,LAB07' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/racecheck-initcheck-synccheck/" lang="zh-CN">阅读中文对应页</a>
+
+Compute Sanitizer assigns different defect classes to different detectors. Racecheck looks for data access hazards in shared memory. Initcheck's stable baseline is uninitialized device global memory reads. Synccheck reports synchronization primitive errors. These tools complement rather than replace one another, and each narrower check starts only after memcheck.
+
+## What you should be able to do
+
+- Organize a reviewable `memcheck -> racecheck -> initcheck -> synccheck` diagnosis.
+- Distinguish shared-memory WAW, WAR, and RAW hazards without calling racecheck a global-memory race proof.
+- Explain initcheck's default scope and why its current shared-memory extension is version-gated.
+- Recognize synccheck reports for divergent `__syncthreads()`, warp divergence, and invalid arguments while preserving detection limits.
+- Report one scenario per process and describe executed-path evidence without turning a clean run into a correctness proof.
+
+## Prerequisites
+
+Complete [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/), [M06: Divergence, Reconvergence, and Warp-Safe Reasoning](/en/memory/warp-divergence-reconvergence/), and [Q03: Diagnose Invalid Memory Accesses with Memcheck](/en/correctness/memcheck-invalid-memory-access/) first. M05 separates barriers, ordering, and visibility. M06 supplies participation-mask reasoning. Q03 supplies invalid-access, asynchronous-error, and memcheck-first discipline.
+
+This unit explains tool contracts without executing CUDA. EX16 and LAB07 are related follow-on resources; they do not retroactively supply runtime evidence to this page.
+
+## Fixed workflow: make accesses valid first
+
+Start each scenario with memcheck in a fresh target process. Only after fixing that scenario's invalid or misaligned accesses, API failures, and applicable leaks should a second fresh process run the focused tool:
+
+```text
+scenario A, process 1: compute-sanitizer --tool memcheck   <app> <args>
+scenario A, process 2: compute-sanitizer --tool racecheck <app> <args>
+scenario A, process 3: compute-sanitizer --tool initcheck <app> <args>
+scenario A, process 4: compute-sanitizer --tool synccheck <app> <args>
+```
+
+This sequence does not claim that every defect needs four final diagnoses. It first makes memory access valid, then interprets a narrower detector. An invalid pointer or out-of-bounds write can corrupt later state and obscure the cause of a hazard. Save the exact command, tool version, standard output and error, process exit status, input, and launch geometry for every invocation. Compiling with `-lineinfo` can improve source attribution, but it does not expand detection coverage.
+
+## Racecheck: three shared-memory hazards
+
+Racecheck is a runtime shared memory data access hazard detector. The current owner contract limits it to on-chip shared-memory accesses, so a clean racecheck report is **not** proof that global-memory data races are absent.
+
+It reports three canonical hazard classes:
+
+| hazard | unordered conflicting accesses | why order affects the result |
+| --- | --- | --- |
+| WAW, write-after-write | two threads write one shared location | which write supplies the final value is uncertain |
+| WAR, write-after-read | one thread reads, while another thread's write may occur before that read completes | the reader may lose the old value it was meant to observe |
+| RAW, read-after-write | one thread should write before another reads, but the reader may run too early | the reader may fetch before the producer write takes effect |
+
+The repair follows the algorithm. WAW often needs one writer or an atomic protocol. WAR and RAW often need documented ordering over the right participants. Do not insert `__syncthreads()` mechanically: if the whole block cannot legally reach it, the attempted repair creates a synchronization defect. A warp-local protocol still needs a valid participation mask.
+
+## Initcheck: global by default, shared as an extension
+
+Initcheck detects uninitialized reads. Its default invocation checks uninitialized device global memory, meaning bytes in a device allocation that have not been initialized by a device write or an applicable `cudaMemcpy` or `cudaMemset`. Initcheck is not an invalid-address detector, so memcheck still comes first.
+
+Current Compute Sanitizer also provides explicit address-space selection:
+
+```text
+--initcheck-address-space global   # default
+--initcheck-address-space shared   # shared only
+--initcheck-address-space all      # global and shared
+```
+
+Shared-memory initcheck support is a newer extension recorded in the 2025.4 release notes. Do not project it backward into CUDA 11.8 documentation or older tools. Current release notes also record fixes for shared-memory false positives. A report using this extension must preserve the exact Compute Sanitizer, Toolkit/compiler, and driver versions, option, and release-note review. Without `shared` or `all`, a default clean run says nothing about shared-memory initialization.
+
+## Synccheck: primitive misuse, not a complete synchronization prover
+
+Synccheck detects synchronization primitive errors and barrier misuse. Typical reports include:
+
+- divergent threads in a block when only a subset enters a conditional `__syncthreads()`;
+- divergent threads in a warp at a barrier that does not support that divergence;
+- invalid arguments to a primitive such as `__syncwarp(mask)`;
+- some misuse of supported Cooperative Groups, `cuda::barrier`, or architecture-specific operations.
+
+Its limitations are part of the conclusion. The current user guide says synccheck can catch a thread that reaches `__syncwarp()` without naming itself in the mask, but it does not catch every case in which a thread named by the mask fails to reach that operation. It does not prove that every required barrier exists, validate every higher-level producer-consumer ordering, or replace racecheck and numerical comparison. Release notes also list unsupported dynamic parallelism, version-specific false positives or negatives, and architecture requirements. Bind every report to its exact tool lane.
+
+## Isolated processes and comparable logs
+
+Use one scenario per process. Launch defect and corrected variants separately, and launch memcheck separately from the focused detector. This prevents context termination, sticky errors, or partial output from one defect being attributed to the next scenario.
+
+A minimal log ledger records:
+
+1. Scenario ID, source revision, build flags, launch parameters, and input.
+2. Compute Sanitizer and CUDA component versions.
+3. Exact command, process ID, exit status, and untrimmed raw report.
+4. A predeclared expected classification such as `racecheck WAW`, not fixed report prose.
+5. Independent defect/corrected results plus a CPU reference or invariant verdict.
+
+Report wording and counts can change with tool versions. Acceptance should center on the defect class, source location, corrected behavior, and process status rather than one permanent output string.
+
+## Coverage boundary of a clean run
+
+All four tools perform dynamic analysis. They observe only the paths, inputs, launches, and supported operations executed in that process. A clean run supports only this statement: under the recorded environment and executed paths, the tool reported no defect within its checked scope. It cannot establish that:
+
+- an unexecuted branch or unselected input is defect-free;
+- global-memory races outside racecheck's scope do not exist;
+- default initcheck covered shared memory;
+- synccheck proved the complete synchronization protocol;
+- numerical output satisfies a CPU reference, tolerance, or invariant.
+
+Therefore, `ERROR SUMMARY: 0 errors` is not clean-run proof of correctness. More tests, broader path coverage, other detectors, and independent verification add evidence, but they do not turn bounded dynamic checking into a proof.
+
+## Evidence boundary
+
+This page does not build EX16, run Compute Sanitizer, or observe a GPU. Compilation, runtime, expected-observation, and recorded-observation arrays remain empty. Illustrative commands are not logs, and an expected defect class is not an observed result.
+
+## Retrieval check
+
+1. Why must memcheck run in an isolated process before racecheck, initcheck, or synccheck?
+2. Which two shared-memory accesses form WAW, WAR, and RAW hazards?
+3. Why does a clean default initcheck run say nothing about shared-memory initialization?
+4. Why is divergent `__syncthreads()` in synccheck's scope while a missing higher-level protocol may not be?
+5. What is the strongest valid statement supported by one clean sanitizer report about its executed paths and tool scope?
+
+## Continue with practice
+
+- Complete the [Q04 Exercises](/en/correctness/racecheck-initcheck-synccheck/exercises/), then inspect the separate [reviewed solutions](/en/correctness/racecheck-initcheck-synccheck/solutions/).
+- Audit a claim that treats a clean report as proof in [Practice Bank PB-R1-023](/en/practice/#pb-r1-023).
+- Reuse the ledger later with related Runnable Example EX16 and Lab LAB07, but fill observation fields only from real records.
+
+## Sources and review
+
+- [Compute Sanitizer v2026.2.1 User Guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html) defines current tool scopes, WAW/WAR/RAW, the memcheck-first recommendation, initcheck address-space selection, synccheck classifications, and an explicit limitation.
+- [Compute Sanitizer v2026.2.1 Release Notes](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html) record the 2025.4 shared-memory initcheck addition, later fixes, support floor, known limitations, and known issues.
+- [CUDA Toolkit 11.8 Compute Sanitizer overview](https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html) preserves the archived Toolkit 11.8 four-tool baseline so current extensions are not projected backward.
+
+Context7 was used only as a retrieval cross-check. The factual authorities are the NVIDIA owner documentation and release notes above. All three owner sources were accessed on **2026-08-28**. The tool-scope matrix, workflow, coverage ledger, Exercises, and arrangement are original composition for this site; no owner-documentation example or report fixture is copied.
+
+**Fact checked: 2026-08-28.**

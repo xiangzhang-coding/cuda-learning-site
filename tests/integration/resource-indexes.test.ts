@@ -57,8 +57,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 3, practice: 25, visuals: 11, glossary: 86, sources: 36 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(161);
+    expect(counts).toEqual({ labs: 6, practice: 29, visuals: 11, glossary: 95, sources: 39 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(180);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -66,7 +66,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['LAB04', 'LAB05', 'LAB06', 'EX07', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['LAB06', 'EX07', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -76,7 +76,11 @@ describe('published resource indexes', () => {
       'VIS03', 'VIS07',
       'TERM-077', 'TERM-078', 'TERM-079', 'TERM-080', 'TERM-081',
       'TERM-082', 'TERM-083', 'TERM-084', 'TERM-085', 'TERM-086',
-      'SRC-CUDA-020', 'SRC-CUDA-021',
+      'LAB04', 'LAB05', 'LAB07',
+      'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
+      'TERM-087', 'TERM-088', 'TERM-089', 'TERM-090', 'TERM-091',
+      'TERM-092', 'TERM-093', 'TERM-094', 'TERM-095',
+      'SRC-CUDA-020', 'SRC-CUDA-021', 'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
     ]) {
       expect(RESOURCE_INDEX_RECORDS.find((record) => record.planningId === planningId)?.reviewedOn).toBe('2026-08-28');
     }

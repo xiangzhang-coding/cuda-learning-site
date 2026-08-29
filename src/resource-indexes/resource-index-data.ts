@@ -63,6 +63,9 @@ function sourceRecord(
 const lab01Destination = PUBLISHED_DESTINATIONS.LAB01;
 const lab02Destination = PUBLISHED_DESTINATIONS.LAB02;
 const lab03Destination = PUBLISHED_DESTINATIONS.LAB03;
+const lab04Destination = PUBLISHED_DESTINATIONS.LAB04;
+const lab05Destination = PUBLISHED_DESTINATIONS.LAB05;
+const lab07Destination = PUBLISHED_DESTINATIONS.LAB07;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
 const vis03Destination = PUBLISHED_DESTINATIONS.VIS03;
@@ -147,6 +150,78 @@ const labs: readonly ResourceIndexRecord[] = [
     },
     reviewedOn: '2026-08-26',
     keywords: localized('错误生命周期 索引修复 host comparison EX04', 'error lifecycle indexing repair host comparison EX04'),
+  },
+  {
+    planningId: 'LAB04',
+    group: 'labs',
+    title: lab04Destination.title,
+    href: lab04Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'intermediate',
+    prerequisites: lab04Destination.prerequisites,
+    relatedUnits: ['EX05'],
+    hardwareGate: localized(
+      '仅限原生 Linux；1 个 compute capability 7.5 或更新的 CUDA GPU；Nsight Compute CLI 与获准的性能计数器访问；问题 allocation 最多 3,068 bytes。',
+      'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Nsight Compute CLI and authorized performance-counter access; at most 3,068 bytes of problem allocation.',
+    ),
+    versionGate: localized(
+      'CUDA Toolkit Lane 11.8.0、12.9.2 或 13.3.1；C++17；匹配的 Nsight Compute 2022.3.0、2025.2.1 或 2026.2.1。',
+      'CUDA Toolkit Lane 11.8.0, 12.9.2, or 13.3.1; C++17; matching Nsight Compute 2022.3.0, 2025.2.1, or 2026.2.1.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-08-28',
+    keywords: localized('EX05 合并访问 Nsight Compute profiler 原始样本', 'EX05 coalescing Nsight Compute profiler raw samples'),
+  },
+  {
+    planningId: 'LAB05',
+    group: 'labs',
+    title: lab05Destination.title,
+    href: lab05Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'intermediate',
+    prerequisites: lab05Destination.prerequisites,
+    relatedUnits: ['EX06'],
+    hardwareGate: localized(
+      '仅限原生 Linux；1 个 compute capability 7.5 或更新的 CUDA GPU；Nsight Compute CLI 与获准的性能计数器访问；保守计算的全局加共享问题内存最多 8,576 bytes。',
+      'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Nsight Compute CLI and authorized performance-counter access; at most 8,576 bytes of conservative global-plus-shared problem memory.',
+    ),
+    versionGate: localized(
+      'CUDA Toolkit Lane 11.8.0、12.9.2 或 13.3.1；C++17；匹配的 Nsight Compute 2022.3.0、2025.2.1 或 2026.2.1。',
+      'CUDA Toolkit Lane 11.8.0, 12.9.2, or 13.3.1; C++17; matching Nsight Compute 2022.3.0, 2025.2.1, or 2026.2.1.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-08-28',
+    keywords: localized('EX06 shared memory bank conflict padding Nsight Compute', 'EX06 shared memory bank conflict padding Nsight Compute'),
+  },
+  {
+    planningId: 'LAB07',
+    group: 'labs',
+    title: lab07Destination.title,
+    href: lab07Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'intermediate',
+    prerequisites: lab07Destination.prerequisites,
+    relatedUnits: ['EX16'],
+    hardwareGate: localized(
+      '仅限原生 Linux；1 个 compute capability 7.5 或更新的 CUDA GPU；selected Toolkit Lane 必须提供全部四种 Compute Sanitizer tool；每个进程的问题内存最多 128 bytes。',
+      'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; the selected Toolkit Lane must provide Compute Sanitizer with all four required tools; at most 128 bytes of problem memory per process.',
+    ),
+    versionGate: localized(
+      'CUDA Toolkit Lane 11.8.0、12.9.2 或 13.3.1；C++17；Compute Sanitizer 2022.3、2025.2.1 或 2026.2.1。',
+      'CUDA Toolkit Lane 11.8.0, 12.9.2, or 13.3.1; C++17; Compute Sanitizer 2022.3, 2025.2.1, or 2026.2.1.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-08-28',
+    keywords: localized('EX16 memcheck racecheck initcheck synccheck 隔离日志', 'EX16 memcheck racecheck initcheck synccheck isolated logs'),
   },
 ];
 
@@ -494,6 +569,74 @@ const practice: readonly ResourceIndexRecord[] = [
     ),
     reviewedOn: '2026-08-28',
   },
+  {
+    planningId: 'PB-R1-021',
+    group: 'practice',
+    title: localized('设计独立 CPU reference、容差与不变量', 'Design an independent CPU reference, tolerances, and invariants'),
+    href: localized('/practice/#pb-r1-021', '/en/practice/#pb-r1-021'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['Q01'],
+    relatedUnits: ['F04', 'O04', 'Q01'],
+    hardwareGate: localized('无；只设计和审查静态 correctness oracle，不运行 CUDA。', 'None; design and review a static correctness oracle without running CUDA.'),
+    versionGate: localized(
+      'CUDA C++ Best Practices Guide 与 Floating Point and IEEE 754 的 current v13.3、11.8.0 和 12.9.1 owner documentation。',
+      'Current v13.3, 11.8.0, and 12.9.1 owner documentation for the CUDA C++ Best Practices Guide and Floating Point and IEEE 754.',
+    ),
+    reviewedOn: '2026-08-28',
+    keywords: localized('CPU reference absolute tolerance relative tolerance invariant correctness oracle', 'CPU reference absolute tolerance relative tolerance invariant correctness oracle'),
+  },
+  {
+    planningId: 'PB-R1-022',
+    group: 'practice',
+    title: localized('审查 lane-safe memcheck 计划', 'Audit a lane-safe memcheck plan'),
+    href: localized('/practice/#pb-r1-022', '/en/practice/#pb-r1-022'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['Q03'],
+    relatedUnits: ['F05', 'Q01', 'Q03', 'EX16', 'LAB07'],
+    hardwareGate: localized('无；只审查命令、覆盖范围与预期 report class，不运行 Compute Sanitizer。', 'None; review commands, coverage, and expected report classes without running Compute Sanitizer.'),
+    versionGate: localized(
+      'Compute Sanitizer 2026.2.1，以及 CUDA Toolkit 11.8.0 与 12.9.2 Lane 的 archive owner documentation。',
+      'Compute Sanitizer 2026.2.1 plus archive owner documentation for the CUDA Toolkit 11.8.0 and 12.9.2 Lanes.',
+    ),
+    reviewedOn: '2026-08-28',
+    keywords: localized('memcheck invalid memory access leak executed path clean report', 'memcheck invalid memory access leak executed path clean report'),
+  },
+  {
+    planningId: 'PB-R1-023',
+    group: 'practice',
+    title: localized('为四类缺陷选择正确的 Sanitizer', 'Select the right Sanitizer for four defect classes'),
+    href: localized('/practice/#pb-r1-023', '/en/practice/#pb-r1-023'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'intermediate',
+    prerequisites: ['Q04'],
+    relatedUnits: ['Q03', 'Q04', 'EX16', 'LAB07'],
+    hardwareGate: localized('无；只分类静态 defect scenarios，不运行 Compute Sanitizer。', 'None; classify static defect scenarios without running Compute Sanitizer.'),
+    versionGate: localized(
+      'Compute Sanitizer 2026.2.1 与 CUDA Toolkit 11.8.0 archive；selected Lane 的实际 tool version 必须另行记录。',
+      'Compute Sanitizer 2026.2.1 and the CUDA Toolkit 11.8.0 archive; the selected Lane\'s actual tool version must be recorded separately.',
+    ),
+    reviewedOn: '2026-08-28',
+    keywords: localized('memcheck racecheck initcheck synccheck tool selection clean report', 'memcheck racecheck initcheck synccheck tool selection clean report'),
+  },
+  {
+    planningId: 'PB-R1-024',
+    group: 'practice',
+    title: localized('修复一次异步 GPU 工作计时声明', 'Repair a one-shot asynchronous GPU timing claim'),
+    href: localized('/practice/#pb-r1-024', '/en/practice/#pb-r1-024'),
+    resourceType: 'evidence-review',
+    difficulty: 'intermediate',
+    prerequisites: ['Q05'],
+    relatedUnits: ['O03', 'M08', 'Q01', 'Q05', 'LAB04', 'LAB05'],
+    hardwareGate: localized('无；只审查 measurement plan、raw samples 与 claim boundary，不运行 benchmark。', 'None; review a measurement plan, raw samples, and claim boundaries without running a benchmark.'),
+    versionGate: localized(
+      'Best Practices Guide v13.3、Runtime API v13.3.1、11.8.0/12.9.1 archive，以及 selected Lane 的 Nsight Compute documentation。',
+      'Best Practices Guide v13.3, Runtime API v13.3.1, the 11.8.0/12.9.1 archives, and Nsight Compute documentation for the selected Lane.',
+    ),
+    reviewedOn: '2026-08-28',
+    keywords: localized('correctness warm-up synchronization CUDA events raw samples median Environment Manifest', 'correctness warm-up synchronization CUDA events raw samples median Environment Manifest'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -756,6 +899,15 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-084', 'event · 事件', 'kernel-vocabulary', ['M08', 'VIS07'], 'Runtime API v13.3.1；recorded generation、creation flags 与 completion state 都属于 event contract。', 'Runtime API v13.3.1; recorded generation, creation flags, and completion state all belong to the event contract.', '2026-08-28'),
   glossaryRecord('TERM-085', 'event dependency · 事件依赖', 'kernel-vocabulary', ['M07', 'M08', 'VIS07'], 'Record/wait semantics 按 Runtime API 13.3.1 及 11.8.0/12.9.1 archive 复核；dependency 不证明 overlap。', 'Record/wait semantics are reviewed in Runtime API 13.3.1 and the 11.8.0/12.9.1 archives; a dependency does not prove overlap.', '2026-08-28'),
   glossaryRecord('TERM-086', 'device-time measurement · 设备时间测量', 'kernel-vocabulary', ['O06', 'M08', 'VIS07'], 'Timing-enabled recorded events、完成边界与 Environment Manifest 缺一不可；browser pacing 不是 device time。', 'Timing-enabled recorded events, completion boundaries, and an Environment Manifest are all required; browser pacing is not device time.', '2026-08-28'),
+  glossaryRecord('TERM-087', 'absolute tolerance · 绝对容差', 'kernel-vocabulary', ['Q01'], '固定幅度 threshold 必须在查看 candidate result 前声明，并与 relative term 及 non-finite policy 分开记录。', 'A fixed-magnitude threshold must be declared before inspecting candidate results and recorded separately from the relative term and non-finite policy.', '2026-08-28'),
+  glossaryRecord('TERM-088', 'relative tolerance · 相对容差', 'kernel-vocabulary', ['Q01'], 'Relative term 必须绑定 declared reference scale，并与 absolute term 组合；不存在通用 threshold。', 'The relative term must use a declared reference scale and be combined with an absolute term; there is no universal threshold.', '2026-08-28'),
+  glossaryRecord('TERM-089', 'invariant · 不变量', 'kernel-vocabulary', ['Q01'], 'Invariant 必须独立于被比较实现的共同结构，且只能覆盖它实际检查的 property。', 'An invariant must be independent of structure shared by the compared implementations and covers only the property it checks.', '2026-08-28'),
+  glossaryRecord('TERM-090', 'memcheck · 内存检查工具', 'kernel-vocabulary', ['Q03', 'EX16', 'LAB07'], 'Tool scope 按 selected Lane 的 Compute Sanitizer version 复核；clean executed-path report 不是程序正确性证明。', 'Tool scope is reviewed for the selected Lane\'s Compute Sanitizer version; a clean executed-path report is not proof of program correctness.', '2026-08-28'),
+  glossaryRecord('TERM-091', 'racecheck · 数据访问危害检查工具', 'kernel-vocabulary', ['Q04', 'EX16', 'LAB07'], 'Stable baseline 检查 shared-memory data access hazard；不应改写成任意 global-memory race proof。', 'The stable baseline checks shared-memory data access hazards and must not be rewritten as proof against arbitrary global-memory races.', '2026-08-28'),
+  glossaryRecord('TERM-092', 'initcheck · 未初始化读取检查工具', 'kernel-vocabulary', ['Q04', 'EX16', 'LAB07'], 'Stable cross-Lane baseline 是 uninitialized device global-memory read；shared-memory extension 按版本隔离。', 'The stable cross-Lane baseline is uninitialized device-global-memory reads; the shared-memory extension is version-gated.', '2026-08-28'),
+  glossaryRecord('TERM-093', 'synccheck · 同步原语检查工具', 'kernel-vocabulary', ['Q04', 'EX16', 'LAB07'], 'Report class 与 coverage 按 selected Compute Sanitizer version 复核；clean run 只描述 executed path。', 'Report classes and coverage are reviewed for the selected Compute Sanitizer version; a clean run describes only the executed path.', '2026-08-28'),
+  glossaryRecord('TERM-094', 'warm-up · 预热', 'kernel-vocabulary', ['Q05', 'LAB04', 'LAB05'], 'Warm-up work 必须在 measurement plan 中声明并排除在 retained samples 外；次数不是跨 workload 的通用常量。', 'Warm-up work must be declared in the measurement plan and excluded from retained samples; its count is not a universal cross-workload constant.', '2026-08-28'),
+  glossaryRecord('TERM-095', 'measurement statistic · 测量统计量', 'evidence-vocabulary', ['Q05', 'LAB04', 'LAB05'], 'Statistic 与 spread 必须在采集前声明并与全部 raw retained samples 一起报告；单次值不构成 distribution summary。', 'The statistic and spread must be declared before collection and reported with every retained raw sample; one value is not a distribution summary.', '2026-08-28'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -1042,6 +1194,42 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'CUDA Programming Guide v13.3；Runtime API v13.3.1；11.8.0 与 12.9.1 archived stream/event owner documentation。',
       'CUDA Programming Guide v13.3; Runtime API v13.3.1; archived 11.8.0 and 12.9.1 stream and event owner documentation.',
+    ),
+    '2026-08-28',
+    '2026-08-28',
+  ),
+  sourceRecord(
+    'SRC-CUDA-022',
+    localized('Q01 correctness oracle 与数值比较', 'Q01 correctness oracles and numerical comparison'),
+    'cuda-version-record',
+    ['F04', 'O04', 'Q01'],
+    localized(
+      'CUDA C++ Best Practices Guide 与 Floating Point and IEEE 754 的 current v13.3、11.8.0 和 12.9.1 owner documentation。',
+      'Current v13.3, 11.8.0, and 12.9.1 owner documentation for the CUDA C++ Best Practices Guide and Floating Point and IEEE 754.',
+    ),
+    '2026-08-28',
+    '2026-08-28',
+  ),
+  sourceRecord(
+    'SRC-CUDA-023',
+    localized('Q03/Q04/EX16/LAB07 Compute Sanitizer', 'Q03/Q04/EX16/LAB07 Compute Sanitizer'),
+    'cuda-version-record',
+    ['Q03', 'Q04', 'EX16', 'LAB07'],
+    localized(
+      'Compute Sanitizer 2026.2.1；CUDA Toolkit 11.8.0 archive；12.9.1 documentation 与 12.9.2 Lane component coordinates。',
+      'Compute Sanitizer 2026.2.1; CUDA Toolkit 11.8.0 archive; 12.9.1 documentation and 12.9.2 Lane component coordinates.',
+    ),
+    '2026-08-28',
+    '2026-08-28',
+  ),
+  sourceRecord(
+    'SRC-CUDA-024',
+    localized('Q05/LAB04/LAB05 诚实计时与 profiling', 'Q05/LAB04/LAB05 honest timing and profiling'),
+    'cuda-version-record',
+    ['O03', 'M08', 'Q01', 'Q05', 'EX05', 'EX06', 'LAB04', 'LAB05'],
+    localized(
+      'Best Practices Guide v13.3、Runtime API v13.3.1、Programming Guide v13.3、12.2 release notes、11.8.0/12.9.1 archive，以及 Nsight Compute 2022.3.0、2025.2.1 和 2026.2.1。',
+      'Best Practices Guide v13.3, Runtime API v13.3.1, Programming Guide v13.3, the 12.2 release notes, the 11.8.0/12.9.1 archives, and Nsight Compute 2022.3.0, 2025.2.1, and 2026.2.1.',
     ),
     '2026-08-28',
     '2026-08-28',

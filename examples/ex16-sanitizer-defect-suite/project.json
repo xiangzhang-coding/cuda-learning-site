@@ -1,0 +1,219 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX16",
+  "title": "Compute Sanitizer defect suite",
+  "root": "examples/ex16-sanitizer-defect-suite",
+  "sourceCommit": "48367dfafe809bb15f0f7f6117eab37e88403391",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/48367dfafe809bb15f0f7f6117eab37e88403391/examples/ex16-sanitizer-defect-suite",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/48367dfafe809bb15f0f7f6117eab37e88403391.zip",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/cuda_error.hpp",
+      "include/sanitizer_suite_contract.hpp",
+      "src/memcheck_defect.cu",
+      "src/memcheck_corrected.cu",
+      "src/racecheck_defect.cu",
+      "src/racecheck_corrected.cu",
+      "src/initcheck_defect.cu",
+      "src/initcheck_corrected.cu",
+      "src/synccheck_defect.cu",
+      "src/synccheck_corrected.cu"
+    ],
+    "hostTestInputs": [
+      "include/sanitizer_suite_contract.hpp",
+      "tests/host_utility_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link",
+      "inspect"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/memcheck_defect.ii",
+      "build/memcheck_corrected.ii",
+      "build/racecheck_defect.ii",
+      "build/racecheck_corrected.ii",
+      "build/initcheck_defect.ii",
+      "build/initcheck_corrected.ii",
+      "build/synccheck_defect.ii",
+      "build/synccheck_corrected.ii",
+      "build/memcheck_defect.o",
+      "build/memcheck_corrected.o",
+      "build/racecheck_defect.o",
+      "build/racecheck_corrected.o",
+      "build/initcheck_defect.o",
+      "build/initcheck_corrected.o",
+      "build/synccheck_defect.o",
+      "build/synccheck_corrected.o",
+      "build/memcheck-defect",
+      "build/memcheck-corrected",
+      "build/racecheck-defect",
+      "build/racecheck-corrected",
+      "build/initcheck-defect",
+      "build/initcheck-corrected",
+      "build/synccheck-defect",
+      "build/synccheck-corrected"
+    ]
+  },
+  "correctness": {
+    "hostUtility": "tests/host_utility_test.cpp",
+    "hostUtilityScope": "scenario, command, and category metadata only; it cannot establish GPU correctness or sanitizer behavior",
+    "processBoundary": "one case per executable and one executable per process",
+    "scenarios": [
+      {
+        "id": "memcheck",
+        "tool": "memcheck",
+        "defectSource": "src/memcheck_defect.cu",
+        "correctedSource": "src/memcheck_corrected.cu",
+        "category": "global-memory-out-of-bounds",
+        "maximumProblemMemoryBytes": 128
+      },
+      {
+        "id": "racecheck",
+        "tool": "racecheck",
+        "defectSource": "src/racecheck_defect.cu",
+        "correctedSource": "src/racecheck_corrected.cu",
+        "category": "shared-memory-raw-hazard",
+        "maximumProblemMemoryBytes": 8
+      },
+      {
+        "id": "initcheck",
+        "tool": "initcheck",
+        "defectSource": "src/initcheck_defect.cu",
+        "correctedSource": "src/initcheck_corrected.cu",
+        "category": "uninitialized-global-memory-read",
+        "maximumProblemMemoryBytes": 128
+      },
+      {
+        "id": "synccheck",
+        "tool": "synccheck",
+        "defectSource": "src/synccheck_defect.cu",
+        "correctedSource": "src/synccheck_corrected.cu",
+        "category": "divergent-block-barrier",
+        "maximumProblemMemoryBytes": 128
+      }
+    ]
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "maximumProblemMemoryBytes": 128,
+    "target": [
+      "sm_75",
+      "compute_75"
+    ],
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "memcheck-defect": {
+      "file": "src/memcheck_defect.cu",
+      "startMarker": "// [ex16-memcheck-defect-start]",
+      "endMarker": "// [ex16-memcheck-defect-end]",
+      "language": "cpp"
+    },
+    "memcheck-corrected": {
+      "file": "src/memcheck_corrected.cu",
+      "startMarker": "// [ex16-memcheck-corrected-start]",
+      "endMarker": "// [ex16-memcheck-corrected-end]",
+      "language": "cpp"
+    },
+    "racecheck-defect": {
+      "file": "src/racecheck_defect.cu",
+      "startMarker": "// [ex16-racecheck-defect-start]",
+      "endMarker": "// [ex16-racecheck-defect-end]",
+      "language": "cpp"
+    },
+    "racecheck-corrected": {
+      "file": "src/racecheck_corrected.cu",
+      "startMarker": "// [ex16-racecheck-corrected-start]",
+      "endMarker": "// [ex16-racecheck-corrected-end]",
+      "language": "cpp"
+    },
+    "initcheck-defect": {
+      "file": "src/initcheck_defect.cu",
+      "startMarker": "// [ex16-initcheck-defect-start]",
+      "endMarker": "// [ex16-initcheck-defect-end]",
+      "language": "cpp"
+    },
+    "initcheck-corrected": {
+      "file": "src/initcheck_corrected.cu",
+      "startMarker": "// [ex16-initcheck-corrected-start]",
+      "endMarker": "// [ex16-initcheck-corrected-end]",
+      "language": "cpp"
+    },
+    "synccheck-defect": {
+      "file": "src/synccheck_defect.cu",
+      "startMarker": "// [ex16-synccheck-defect-start]",
+      "endMarker": "// [ex16-synccheck-defect-end]",
+      "language": "cpp"
+    },
+    "synccheck-corrected": {
+      "file": "src/synccheck_corrected.cu",
+      "startMarker": "// [ex16-synccheck-corrected-start]",
+      "endMarker": "// [ex16-synccheck-corrected-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "Memcheck should identify the defect executable's single global-memory out-of-bounds write, while the corrected executable should preserve the 32 intended writes without that bounds defect.",
+      "Racecheck should identify the defect executable's plain shared-memory read-after-write ordering hazard, while the corrected executable should preserve the produced value with a block barrier.",
+      "Initcheck should identify the defect executable's read from uninitialized device global memory, while the corrected executable should preserve the increment work after zero-initializing the input.",
+      "Synccheck should identify the defect executable's divergent conditional __syncthreads, while the corrected executable should preserve the phase copy with uniform block participation."
+    ],
+    "recordedObservations": []
+  }
+}

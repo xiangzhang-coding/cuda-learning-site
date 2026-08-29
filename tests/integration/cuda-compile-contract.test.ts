@@ -52,6 +52,9 @@ describe('CUDA compile evidence workflow', () => {
       'lane: ex06-cuda-11-8-cxx17',
       'lane: ex06-cuda-12-9-cxx17',
       'lane: ex06-cuda-13-3-cxx17',
+      'lane: ex16-cuda-11-8-cxx17',
+      'lane: ex16-cuda-12-9-cxx17',
+      'lane: ex16-cuda-13-3-cxx17',
     ]) {
       expect(workflow).toContain(coordinate);
     }
@@ -61,7 +64,8 @@ describe('CUDA compile evidence workflow', () => {
     const workflow = await readProjectFile('.github/workflows/cuda-compile.yml');
     const ex04Build = workflow.match(/^  ex04-build:\n[\s\S]*?(?=^  ex05-build:)/m)?.[0] ?? '';
     const ex05Build = workflow.match(/^  ex05-build:\n[\s\S]*?(?=^  ex06-build:)/m)?.[0] ?? '';
-    const ex06Build = workflow.match(/^  ex06-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
+    const ex06Build = workflow.match(/^  ex06-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
+    const ex16Build = workflow.match(/^  ex16-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
     expect(workflow).toContain('node scripts/check-artifacts.mjs');
@@ -80,12 +84,14 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('EX04_BUILD_RESULT: ${{ needs.ex04-build.result }}');
     expect(workflow).toContain('EX05_BUILD_RESULT: ${{ needs.ex05-build.result }}');
     expect(workflow).toContain('EX06_BUILD_RESULT: ${{ needs.ex06-build.result }}');
+    expect(workflow).toContain('EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}');
     expect(workflow).toContain(
-      'needs: [cuda-compile, ex03-build, ex04-build, ex05-build, ex06-build]',
+      'needs: [cuda-compile, ex03-build, ex04-build, ex05-build, ex06-build, ex16-build]',
     );
     expect(workflow).toContain('if [ "$EX04_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX05_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX06_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
 
@@ -141,6 +147,35 @@ describe('CUDA compile evidence workflow', () => {
       expect(buildScanOffset).toBeGreaterThan(-1);
       expect(buildUploadOffset).toBeGreaterThan(buildScanOffset);
     }
+
+    expect(ex16Build).not.toBe('');
+    expect([...ex16Build.matchAll(/^\s+- lane: (\S+)$/gm)].map((match) => match[1])).toEqual([
+      'ex16-cuda-11-8-cxx17',
+      'ex16-cuda-12-9-cxx17',
+      'ex16-cuda-13-3-cxx17',
+    ]);
+    for (const [lane, image] of [
+      ['ex16-cuda-11-8-cxx17', 'nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f'],
+      ['ex16-cuda-12-9-cxx17', 'nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5'],
+      ['ex16-cuda-13-3-cxx17', 'nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87'],
+    ]) {
+      expect(ex16Build).toContain(`- lane: ${lane}\n            image: ${image}`);
+    }
+    expect(ex16Build).toContain('docker run --platform linux/amd64 --rm --network none');
+    expect(ex16Build).not.toContain('--gpus');
+    expect(ex16Build).toContain(
+      '--workdir /workspace/examples/ex16-sanitizer-defect-suite',
+    );
+    expect(ex16Build).toContain('bash scripts/compile-check.sh c++17 ex16');
+    expect(ex16Build).toContain(
+      'node scripts/check-artifacts.mjs "artifacts/cuda-ex16/${{ matrix.lane }}"',
+    );
+    expect(ex16Build).toContain('path: artifacts/cuda-ex16/${{ matrix.lane }}');
+    expect(ex16Build).toContain('retention-days: 7');
+    const ex16ScanOffset = ex16Build.indexOf('node scripts/check-artifacts.mjs');
+    const ex16UploadOffset = ex16Build.indexOf('uses: actions/upload-artifact@');
+    expect(ex16ScanOffset).toBeGreaterThan(-1);
+    expect(ex16UploadOffset).toBeGreaterThan(ex16ScanOffset);
   });
 
   it('never executes the generated CUDA binary in the compile boundary', async () => {
@@ -151,6 +186,7 @@ describe('CUDA compile evidence workflow', () => {
       ex04LaneScript,
       ex05LaneScript,
       ex06LaneScript,
+      ex16LaneScript,
     ] = await Promise.all([
       readProjectFile('scripts/run-cuda-compile.mjs'),
       readProjectFile('examples/ex02-vector-addition/scripts/compile-check.sh'),
@@ -158,6 +194,7 @@ describe('CUDA compile evidence workflow', () => {
       readProjectFile('examples/ex04-error-handling-lifecycle/scripts/compile-check.sh'),
       readProjectFile('examples/ex05-coalesced-strided-access/scripts/compile-check.sh'),
       readProjectFile('examples/ex06-shared-memory-tile-bank-padding/scripts/compile-check.sh'),
+      readProjectFile('examples/ex16-sanitizer-defect-suite/scripts/compile-check.sh'),
     ]);
 
     expect(orchestrator).not.toMatch(/exec(?:File)?Sync\([^\n]*ex02-vector-addition/);
@@ -180,6 +217,32 @@ describe('CUDA compile evidence workflow', () => {
     expect(ex06LaneScript).not.toMatch(
       /(?:^|\s)(?:\.\/)?build\/ex06-shared-memory-tile-bank-padding(?:\s|$)/m,
     );
+    expect(ex16LaneScript).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/(?:memcheck|racecheck|initcheck|synccheck)-(?:defect|corrected)(?:\s|$)/m,
+    );
+    expect(ex16LaneScript).not.toMatch(/(?:^|\s)compute-sanitizer(?:\s|$)/m);
+    for (const target of ['preprocess', 'compile', 'link', 'inspect', 'host-test']) {
+      expect(ex16LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+    }
+  });
+
+  it('keeps ephemeral EX16 build-gate logs from granting compilation or runtime evidence', async () => {
+    const [workflow, manifestSource] = await Promise.all([
+      readProjectFile('.github/workflows/cuda-compile.yml'),
+      readProjectFile('examples/ex16-sanitizer-defect-suite/project.json'),
+    ]);
+    const ex16Build = workflow.match(/^  ex16-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
+    const manifest = JSON.parse(manifestSource) as {
+      evidence: { compilation: unknown[]; runtime: string };
+    };
+
+    expect(ex16Build).toContain('Compile EX16 without granting Evidence Status');
+    expect(ex16Build).not.toContain('compute-sanitizer');
+    expect(ex16Build).not.toContain('Compile-Checked');
+    expect(ex16Build).not.toContain('Runtime-Verified');
+    expect(ex16Build).not.toContain('examples/ex16-sanitizer-defect-suite/evidence/');
+    expect(manifest.evidence.compilation).toEqual([]);
+    expect(manifest.evidence.runtime).toBe('Pending Hardware Verification');
   });
 
   it('keeps ephemeral EX04 build logs from granting public compilation evidence', async () => {

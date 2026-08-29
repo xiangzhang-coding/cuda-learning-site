@@ -1,0 +1,241 @@
+---
+title: 'Q05：诚实计时异步 GPU 工作'
+description: 在 correctness gate 后排除 warm-up，显式等待 completion，区分 CUDA event device time 与 host wall-clock，并保留 raw samples、预声明统计和完整 Environment Manifest。
+pairId: q05
+counterpart: /en/correctness/timing-asynchronous-gpu-work/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - correctness-gate
+  - warm-up
+  - completion
+  - cuda-events
+  - host-timers
+  - samples-statistics
+  - environment-manifest
+  - claim-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q05
+prerequisites:
+  - M08
+  - Q01
+relatedUnits:
+  - LAB04
+  - LAB05
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Timing'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#timing'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-05-27'
+    platform: 'Current CPU-timer and CUDA-event timing guidance'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 13.3.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Current event creation, record, synchronize, and elapsed-time contracts'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Programming Guide - Lazy Loading'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/lazy-loading.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current lazy-loading history, controls, and measurement caveat'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide 11.8 - Timing'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#timing'
+    version: 'CUDA C++ Best Practices Guide v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 CPU/GPU timer guidance'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Runtime API 12.9.1 - Event Management'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v12.9.1; last updated 2025-06-04'
+    platform: 'Archived Toolkit 12.9.1 event timing contracts'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.2 - Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.2.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit Release Notes v12.2; last updated 2023-06-28'
+    platform: 'Archived Linux lazy-loading default change and component-version coordinates'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,correctness-gate,warm-up,completion,cuda-events,host-timers,samples-statistics,environment-manifest,claim-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M08,Q01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'LAB04,LAB05' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.2,12.9.1,13.3,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/timing-asynchronous-gpu-work/" lang="en">Read the English counterpart</a>
+
+诚实计时先定义预热（warm-up）并把它排除在 samples 外，使用显式同步（explicit synchronization）建立 completion boundary，用启用计时的事件（timing-enabled event）包围 device interval，保存每个原始重复样本（raw repeated sample），预先声明统计量（statistic），并附完整环境清单（Environment Manifest）。正确性必须先于计时；错误输出没有 speedup。
+
+## 学完本单元，你应该能
+
+- 在任何 timing loop 前执行并记录 correctness gate。
+- 把 warm-up 与 measured repetitions 分开，并解释 lazy loading 为什么使 first-use timing 特别危险。
+- 为 asynchronous GPU work 放置 explicit completion boundary。
+- 正确使用 timing-enabled start/stop events、`cudaEventRecord`、`cudaEventSynchronize` 与 `cudaEventElapsedTime`。
+- 区分 device event time 与 host wall-clock time，并发布 raw samples、predeclared median/spread 和完整 manifest，而不是一个孤立平均值。
+
+## 先修关系
+
+先完成 [M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)和 [Q01：CPU reference、容差与不变量](/correctness/cpu-references-tolerances-invariants/)。M08 提供 event capture、stream ordering 与 timing-enabled endpoint contracts；Q01 提供独立正确性标准。两项都必须在 performance claim 前生效。
+
+本页不运行 benchmark，也不规定一个适用于所有 workload 的固定 iteration count。它定义 measurement contract；LAB04 与 LAB05 后续会在该 contract 下记录真实结果。
+
+## Correctness gate 先于 timing
+
+Correctness 不是 performance report 的脚注，而是 timing 的 precondition。对 baseline 与 candidate 使用同一 logical input、shape、data type 与 result specification，并在收集 samples 前完成：
+
+1. 检查所有 CUDA API、launch-immediate 与 completion errors。
+2. 把 result 带到合法 host observation boundary。
+3. 使用 Q01 的 CPU reference、absolute/relative tolerance 或 invariant。
+4. 保存 pass/fail criteria 与 actual verdict。
+
+任一 candidate 错误时，结论是 correctness failure。不要计算、展示或暗示 speedup，也不要因为错误 kernel “更快”就保留它的 timing comparison。修复后必须重新通过 gate，再重新采样；旧的 wrong-result timings 不能混入新 record。
+
+## Warm-up 单独执行并排除
+
+Warm-up 必须在 sample collection 之前单独运行，而且 warm-up observations 要从 measured samples 中排除。它至少执行将被测的相同 code path、shape、libraries 和 stream dependencies，并在进入 timing loop 前等待 warm-up work 完成。
+
+First use 可能包含 context/runtime initialization、module 或 kernel lazy loading、PTX JIT、allocation、library handle/plan creation、autotuning 与 cache/clock transients。Current CUDA Programming Guide 明确警告 lazy loading 会把 module initialization 移入 measured window，并建议先 warm up 或 preload benchmarked kernel。
+
+但“一次 warm-up”不是 universal purification ritual。它不会触发未走到的 branch、未调用的 library path 或后来才出现的 shape，也不保证 cache、temperature 或 clocks 已固定。应在 observation 前声明 warm-up count 与排除规则，记录 `CUDA_MODULE_LOADING`/queried loading mode、preload actions 和 library setup。CUDA 11.7 首次引入 lazy loading；CUDA 12.2 release notes 记录 Linux default enablement，current guide 记录 CUDA 12.3 起所有平台 default enablement，所以 lane/version 必须进入 manifest。
+
+## Asynchronous submission 需要 completion boundary
+
+Kernel launch 和许多 `Async` APIs 会在 device work 完成前把控制权交还 host。测量 host submission duration 不能自动得到 GPU execution duration。每个 protocol 都要写清：
+
+```text
+what starts the interval
+-> exactly which submitted work is included
+-> what operation proves completion
+-> what timer is read afterward
+```
+
+Device event protocol 让 stop event capture intended stream prefix，并调用 `cudaEventSynchronize(stop)`。Host wall-clock protocol 则在 start 前排空会污染 interval 的 prior work，并在 end timestamp 前使用与 declared scope 相符的 `cudaDeviceSynchronize`、stream synchronization 或 event synchronization。选择 narrower boundary 时必须证明它覆盖全部 measured work；只等待一条 stream 不能代表 unrelated streams 已完成。
+
+## 用 timing-enabled CUDA events 测 device interval
+
+`start` 与 `stop` 必须是 timing-enabled events，也就是不要以 `cudaEventDisableTiming` 创建它们。一个 single-stream symbolic sample 是：
+
+```cpp
+cudaEventCreateWithFlags(&start, cudaEventDefault);
+cudaEventCreateWithFlags(&stop, cudaEventDefault);
+
+cudaEventRecord(start, measured_stream);
+launch_measured_work(measured_stream);
+cudaEventRecord(stop, measured_stream);
+cudaEventSynchronize(stop);
+cudaEventElapsedTime(&elapsed_ms, start, stop);
+```
+
+每个 API return 和 launch/completion error 都必须检查。`cudaEventRecord(start, stream)` 与 `cudaEventRecord(stop, stream)` 的 placement 定义 endpoints；elapsed value 是两项 device timestamps 之间的时间，不是 host wall-clock time。若 region 跨 streams，必须用 explicit dependencies 汇聚到 stop endpoint；不能让一个未连接的 stream 偷渡进“已完成”结论。
+
+Runtime API 还警告，non-NULL streams 中 asynchronous record points 之间可能插入其他 work，使 elapsed interval 比 intended region 更大。因此 report 必须记录 start/stop recording streams、order、included work 与 concurrent activity policy。改变 endpoints 就改变 metric。
+
+## Host wall-clock 测的是另一项 metric
+
+Host wall-clock timer 可以测 end-to-end latency，例如 host preparation、API submission、declared transfers 与 completion wait 的组合。它必须在适当同步之后 stop，否则常常只测到 enqueue latency。Start 前是否同步、timer 是否包含 allocation/copies、end 使用 device-wide 还是 stream-scoped wait，都属于 metric definition。
+
+Event device time 与 host wall-clock time 不能互换，也不能把其中一个 label 成另一个。若同时报告两者，应使用不同字段、不同 endpoints 和各自 raw samples，并解释两者 included work 的差异。
+
+## 保存 raw samples，预声明统计方法
+
+在观察任何 time values 前声明 sampling unit、repetition count、run order、warm-up exclusion、completion method 和 statistic。本站的 basic comparison contract 要求：
+
+- 按采集顺序保存全部 raw repeated samples，不只保存 aggregate；
+- 预先声明 median 为 primary statistic，并预先选择一个 spread，例如 interquartile range 或 min/max range；
+- baseline/candidate 使用相同 input 与 protocol，并记录执行顺序或 interleaving policy；
+- 不得静默删除异常样本（outlier）。若预先声明的机械规则标记某样本，raw value、标记原因、含/不含该样本的结果都必须保留；
+- 不在看完 data 后更换 statistic，只因为另一项看起来更快。
+
+Mean 可以作为补充，但不能替代 predeclared median 与 spread。没有 raw samples 就无法审查 transient、drift 或 transcription error。没有真实 run 就不能填任何 numerical duration、bandwidth、throughput 或 speedup；不得编造数字（fabricated numbers）。
+
+## Performance Environment Manifest
+
+完整 Environment Manifest 不能缩写成 GPU name 加 CUDA version。至少记录以下坐标，并把每个 placeholder 替换成观察值；unknown 必须写成 unknown，不能猜测：
+
+| group | required coordinates |
+| --- | --- |
+| hardware | **GPU identity**（model/UUID）、**compute capability** 与 query method、visible/used **GPU count**、device/host **memory** requirement、topology if relevant |
+| software | exact **driver** version、exact **CUDA Toolkit** X.Y.Z、relevant **component versions**（CUDA Runtime、libraries、timer/profiler）、**NVCC** version、**host compiler** name/version、**operating system** distribution/release/architecture/kernel |
+| source and build | source repository/commit、build type、C++ dialect、architecture target、optimization/debug flags、link mode、environment variables、unabridged **exact command** for build and run |
+| workload and input | program/variant identity、**workload** shape、data type、batch/dimensions/iterations、input generation and seed or dataset identity、allocation and memory footprint |
+| access conditions | device visibility、container/MIG/MPS state、profiler/counter **permissions**、background/concurrent load |
+| correctness | **correctness method**（CPU reference/tolerance/invariant）与 predeclared **correctness criteria**，并记录每个 timed variant 的 verdict |
+| clock-power state | persistence mode、application clocks or dynamic-clock policy、power limit/policy、thermal state before/after、cooldown policy；没有控制能力时记录 observed policy，不假装固定 |
+| timing protocol | timer and exact version、warm-up count/exclusion、start/stop **endpoints** and included work、recording stream(s)、explicit synchronization/completion boundary、repetition order/count、raw-sample artifact |
+| statistics | predeclared median、chosen spread、outlier policy、baseline/candidate pairing、interpretation boundary |
+| custody | **observation date**、observer、raw-log path/hash 与 machine/reference-environment status |
+
+这些字段让“same code”与“same experiment”保持区别。Compiler flags、lazy-loading mode、clocks/power、input 和 endpoints 任一变化都可能改变 measurement contract。
+
+## Speedup claim 的边界
+
+只有 baseline 与 candidate 都通过 correctness、使用相同 workload/input 和 declared metric、在可比较 manifest/protocol 下保留 repeated raw samples，才能从预声明统计量计算 speedup。报告必须同时给 baseline/candidate statistics 与 spread，而不只给 ratio。
+
+若 correctness 未通过、endpoint 不同、sample 被静默删除或 manifest 不完整，speedup 状态是 unsupported，不是 “approximately valid”。不要把 event time 当 whole-application latency，也不要把 host wall-clock 当 pure kernel duration。
+
+## 证据边界
+
+本页只给 symbolic protocol 和 field contract。它没有创建 event、运行 warm-up、同步 GPU 或收集 sample；没有 numerical result，也没有 fabricated number。Compilation、runtime、expected observations 与 recorded observations 保持为空。
+
+## 离开前检查
+
+1. 为什么 correctness 必须在 timing loop 前通过，而且 wrong result 不能获得 speedup？
+2. Warm-up 为什么要与 measured samples 分开，lazy loading 又留下什么 caveat？
+3. Timing-enabled start/stop events 的四个关键 API calls 与 completion boundary 是什么？
+4. CUDA event device time 与 synchronized host wall-clock time 分别包含什么？
+5. 一份可审查 comparison 为什么需要 raw repeated samples、predeclared median/spread 和完整 Environment Manifest？
+
+## 继续练习
+
+- 完成 [Q05 练习（Exercise）](/correctness/timing-asynchronous-gpu-work/exercises/)，再查看独立的[参考解答](/correctness/timing-asynchronous-gpu-work/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-024](/practice/#pb-r1-024)修复一份 asynchronous one-shot timing claim。
+- 把 contract 带入相关 [LAB04：观察 coalescing](/labs/observe-coalescing/)与 [LAB05：消除 shared-memory bank conflicts](/labs/remove-shared-memory-bank-conflicts/)，但不要预填结果。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3：Timing](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#timing)区分 CPU timers 与 CUDA events，并要求 asynchronous work completion。
+- [CUDA Runtime API v13.3.1：Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html)定义 timing flags、record、synchronize 与 elapsed-time contracts。
+- [CUDA Programming Guide v13.3：Lazy Loading](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/lazy-loading.html)提供 version history、loading-mode controls 与 performance-measurement caveat。
+- [CUDA C++ Best Practices Guide 11.8：Timing](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#timing)保留 Toolkit 11.8 timer guidance。
+- [CUDA Runtime API 12.9.1：Event Management](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-runtime-api/group__CUDART__EVENT.html)保留 Toolkit 12.9.1 event contract。
+- [CUDA Toolkit 12.2 Release Notes](https://docs.nvidia.com/cuda/archive/12.2.0/cuda-toolkit-release-notes/index.html)记录 Linux lazy-loading default change 与独立 component versions。
+
+Context7 只用于 retrieval cross-check；事实权威是以上 NVIDIA current/archive owner documentation 与 release notes。六项 owner source 均访问于 **2026-08-28**。Measurement protocol、statistics discipline、manifest extension、练习与原创编排均由本站完成；没有复制 owner documentation 的 benchmark result。
+
+**事实核查日期：2026-08-28。**

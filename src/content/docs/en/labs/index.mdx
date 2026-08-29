@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-08-26'
+factCheckDate: '2026-08-28'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-26' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-08-26, it contains three published Labs: LAB01, LAB02, and LAB03. Incomplete planned work does not appear, and there are no coming-soon destinations.
+This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-08-28, it contains six noncontiguously numbered published Labs: LAB01-LAB05 and LAB07. LAB06 has no public page or placeholder. Incomplete planned work does not appear, and there are no coming-soon destinations.
 
 ## Published Labs
 
@@ -34,8 +34,8 @@ This index lists only Labs that form complete Publication Pairs and already prov
 
 ## Sequence and direct lookup
 
-The current sequence lists [LAB01: Record and Interpret a CUDA Environment](/en/labs/record-cuda-environment/), [LAB02: Run and Verify Vector Addition](/en/labs/vector-addition/), and [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/). LAB01 requires O03 and O08 and uses EX01. LAB02 requires O03 and F01 and uses EX02. LAB03 requires F03 and F05 and uses [EX04 Error Handling Lifecycle](/en/examples/error-handling-lifecycle/). F08 is related to LAB03 but is not its prerequisite. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
+The current sequence lists [LAB01: Record and Interpret a CUDA Environment](/en/labs/record-cuda-environment/), [LAB02: Run and Verify Vector Addition](/en/labs/vector-addition/), [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/), [LAB04: Observe Coalescing](/en/labs/observe-coalescing/), [LAB05: Remove Shared-Memory Bank Conflicts](/en/labs/remove-shared-memory-bank-conflicts/), and [LAB07: Diagnose Four Sanitizer Failures](/en/labs/diagnose-four-sanitizer-failures/). LAB01 requires O03 and O08 and uses EX01. LAB02 requires O03 and F01 and uses EX02. LAB03 requires F03 and F05 and uses EX04. LAB04 requires M02 and Q05 and uses EX05. LAB05 requires M04 and Q05 and uses EX06. LAB07 requires Q03 and Q04 and uses the original Apache-2.0 EX16 project. F08 is related to LAB03 but is not its prerequisite. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
 
 ## Evidence boundary
 
-Compilation and runtime labels are copied directly from the linked Lab's controlled evidence fields. A site build, filter action, or browser test cannot upgrade CUDA evidence. LAB01 has an empty compilation axis with no Compile-Checked claim, and its runtime axis is Pending Hardware Verification. LAB02 retains Compile-Checked compilation while its runtime axis remains Pending Hardware Verification. LAB03 and its EX04 Runnable Example both have empty compilation evidence, so neither is Compile-Checked; both runtime axes are Pending Hardware Verification. A host-only test, learner-local build, or expected observation changes none of these statuses.
+Compilation and runtime labels are copied directly from the linked Lab's controlled evidence fields. A site build, filter action, or browser test cannot upgrade CUDA evidence. LAB01 has an empty compilation axis with no Compile-Checked claim, and its runtime axis is Pending Hardware Verification. LAB02 retains its existing status. LAB03 and its EX04 Runnable Example both have empty compilation evidence and Pending Hardware Verification runtime. New LAB04, LAB05, and LAB07 likewise have empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. LAB04/LAB05 publish no profiler result or timing, and LAB07 publishes no sanitizer report. A host-only test, learner-local build, expected observation, or tool manual changes none of these statuses.

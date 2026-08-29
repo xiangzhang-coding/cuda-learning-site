@@ -1,0 +1,206 @@
+---
+title: 'Q04：用 racecheck、initcheck 与 synccheck 定位缺陷'
+description: 在先运行 memcheck 的前提下，按工具作用域区分 shared-memory hazards、未初始化读取与 synchronization primitive misuse，并正确陈述 clean-run 边界。
+pairId: q04
+counterpart: /en/correctness/racecheck-initcheck-synccheck/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - workflow
+  - racecheck
+  - initcheck
+  - synccheck
+  - isolation
+  - coverage-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q04
+prerequisites:
+  - M05
+  - M06
+  - Q03
+relatedUnits:
+  - EX16
+  - LAB07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Compute Sanitizer - Compute Sanitizer User Guide'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html'
+    version: 'Compute Sanitizer v2026.2.1; last updated 2026-06-23'
+    platform: 'Current memcheck-first workflow and racecheck, initcheck, and synccheck contracts'
+    accessDate: '2026-08-28'
+  - title: 'Compute Sanitizer - Release Notes'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html'
+    version: 'Compute Sanitizer v2026.2.1; last updated 2026-06-23'
+    platform: 'Shared-memory initcheck addition, fixes, support, known limitations, and known issues'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 11.8 - Compute Sanitizer'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html'
+    version: 'Compute Sanitizer in CUDA Toolkit v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 tool-scope baseline'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,workflow,racecheck,initcheck,synccheck,isolation,coverage-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M05,M06,Q03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX16,LAB07' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/racecheck-initcheck-synccheck/" lang="en">Read the English counterpart</a>
+
+Compute Sanitizer 把不同缺陷分给不同 detector。Racecheck 检查共享内存中的数据访问危害（data access hazard）；initcheck 的稳定基线是未初始化设备全局内存（uninitialized device global memory）读取；synccheck 报告同步原语错误（synchronization primitive error）。这些工具互补但不互相替代，而且都应建立在先运行 memcheck 的结果上。
+
+## 学完本单元，你应该能
+
+- 按 `memcheck -> racecheck -> initcheck -> synccheck` 组织一次可复核诊断。
+- 区分 racecheck 的 shared-memory WAW、WAR 与 RAW hazard，不把它写成 global-memory race proof。
+- 说明 initcheck 默认检查什么，以及 current shared-memory extension 为什么必须按版本处理。
+- 识别 synccheck 对 divergent `__syncthreads()`、warp divergence 与 invalid arguments 的报告，同时保留其 detection limits。
+- 用 one scenario per process 的日志陈述 executed-path 结果，而不把 clean run 当成 correctness proof。
+
+## 先修关系
+
+先完成 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)、[M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)和 [Q03：用 memcheck 定位无效内存访问](/correctness/memcheck-invalid-memory-access/)。M05 提供 barrier、ordering 与 visibility 的区分；M06 提供 participation-mask reasoning；Q03 提供 invalid access、asynchronous error 与 memcheck-first discipline。
+
+本页解释 tool contracts，不执行 CUDA。EX16 与 LAB07 是后续相关资源，不会反向为本页生成 runtime evidence。
+
+## 固定工作流：先消除无效访问
+
+每个 scenario 先在一个全新 target process 中运行 memcheck。只有该 scenario 的 invalid/misaligned access、API failure 与适用 leak 问题被修复后，才在另一个全新 process 中运行目标工具：
+
+```text
+scenario A, process 1: compute-sanitizer --tool memcheck   <app> <args>
+scenario A, process 2: compute-sanitizer --tool racecheck <app> <args>
+scenario A, process 3: compute-sanitizer --tool initcheck <app> <args>
+scenario A, process 4: compute-sanitizer --tool synccheck <app> <args>
+```
+
+这不是说每个 defect 都需要四份分析结论，而是先让 memory access 合法，再解释 narrower detector。Invalid pointer 或越界写可能破坏后续状态，使 hazard report 失去清晰因果。每条命令都应保存 exact command、tool version、标准输出/错误、process exit status、输入和 launch geometry；使用 `-lineinfo` 可以改善 source attribution，但不会扩大 detection coverage。
+
+## Racecheck：shared memory 的三类 hazard
+
+Racecheck 是 runtime shared memory data access hazard detector。Current owner contract 只把它定义为 on-chip shared-memory access detector；因此一份 racecheck clean report **不是** global-memory data-race proof。
+
+它报告三类 canonical hazard：
+
+| hazard | unordered conflicting accesses | 为什么结果依赖顺序 |
+| --- | --- | --- |
+| WAW, write-after-write | 两个 thread 写同一 shared location | 最终保留哪个写入值不确定 |
+| WAR, write-after-read | 一个 thread 先读，另一个 thread 的写却在该读完成前发生 | Reader 可能看不到原本应读取的旧值 |
+| RAW, read-after-write | 一个 thread 应先写，另一个 thread 却可能过早读取 | Reader 可能在 producer write 生效前取值 |
+
+Repair 取决于 algorithm：WAW 常需要唯一 writer 或原子 protocol；WAR/RAW 常需要覆盖正确 participants 的 documented ordering。不能机械插入 `__syncthreads()`：若不是整个 block 都合法到达，它本身会制造 synchronization defect；warp-local protocol 也必须使用合法 participation mask。
+
+## Initcheck：默认 global，shared 是新扩展
+
+Initcheck 检测 uninitialized reads。默认 invocation 检查 uninitialized device global memory，也就是 device allocation 中尚未被 device write、适用 `cudaMemcpy` 或 `cudaMemset` 初始化的 bytes。它不是 invalid-address detector，所以仍须先运行 memcheck。
+
+Current Compute Sanitizer 还提供显式 address-space selection：
+
+```text
+--initcheck-address-space global   # default
+--initcheck-address-space shared   # shared only
+--initcheck-address-space all      # global and shared
+```
+
+Shared-memory initcheck support 是 2025.4 release notes 记录的新扩展，不应倒推到 CUDA 11.8 文档或旧工具。Current release notes 也记录过 shared-memory false-positive fixes。使用它时必须保存 exact Compute Sanitizer、Toolkit/compiler 与 driver versions、option 和 release-note review；若未显式选择 `shared` 或 `all`，default clean run 不能说明 shared memory 已初始化。
+
+## Synccheck：primitive misuse，不是完整同步证明器
+
+Synccheck 检测 synchronization primitive error 和 barrier misuse。典型报告包括：
+
+- 只有 block 中部分 threads 进入 conditional `__syncthreads()`，形成 divergent thread(s) in block；
+- 不支持 divergence 的 warp barrier 遇到 divergent thread(s) in warp；
+- `__syncwarp(mask)` 等 primitive 使用 invalid arguments；
+- 对 current tool 支持的 Cooperative Groups、`cuda::barrier` 或 architecture-specific operations 的部分 misuse。
+
+限制同样属于结论。Current user guide 明确指出，synccheck 可以发现“到达 `__syncwarp()` 的 thread 没把自己列入 mask”，却不会发现 mask 中某些 threads 根本没有到达该 operation。它也不证明 every required barrier exists，不验证任意 higher-level producer-consumer ordering，更不替代 racecheck 或 numerical comparison。Release notes 还列出 dynamic parallelism 等 unsupported cases、version-specific false positive/negative 与 architecture requirements；实际报告必须绑定 exact tool lane。
+
+## 隔离进程与可比较日志
+
+采用 one scenario per process，也就是每个进程只运行一个 focused scenario。Defect variant 与 corrected variant 分别启动；memcheck 与目标 detector 也分别启动。这样可以避免前一 defect 导致 context termination、sticky error 或 partial output 后，下一项结果仍被误归因。
+
+一份最小日志 ledger 包含：
+
+1. Scenario ID、source revision、build flags 与 launch/input parameters。
+2. Compute Sanitizer 和 CUDA component versions。
+3. Exact command、process ID、exit status 与未裁剪 raw report。
+4. 预先声明的 expected classification，例如 `racecheck WAW`，而不是固定 report wording。
+5. Defect/corrected 两份独立结果，以及 CPU reference 或 invariant verdict。
+
+Tool wording 和 report count 可能随版本变化。Acceptance 应围绕 defect class、source location、corrected behavior 与 process status，不应匹配一段永恒不变的输出文本。
+
+## Clean run 的覆盖边界
+
+所有四项工具都是 dynamic analysis。它们只观察该 process 中实际执行的 paths、inputs、launches 和 supported operations。一份 clean run 只能写成“在所记录环境与 executed paths 上，该工具没有报告其检查范围内的 defect”。它不能证明：
+
+- 未执行 branch 或未选择 input 没有缺陷；
+- racecheck 未覆盖的 global-memory races 不存在；
+- default initcheck 已覆盖 shared memory；
+- synccheck 已证明完整 synchronization protocol；
+- numerical result 符合 CPU reference、tolerance 或 invariants。
+
+因此 `ERROR SUMMARY: 0 errors` 不是 clean-run proof of correctness。增加 tests、扩大 input/path coverage、运行其他 detector 和独立验证可以增加 evidence，但不会把有限动态检查变成数学证明。
+
+## 证据边界
+
+本页没有构建 EX16，没有运行 Compute Sanitizer，也没有观察 GPU。Compilation、runtime、expected observations 与 recorded observations 保持为空；示意 commands 不是 log，预期 defect class 也不是 observed result。
+
+## 离开前检查
+
+1. 为什么 racecheck 前必须先在独立 process 中运行 memcheck？
+2. WAW、WAR 与 RAW 分别由哪两种 shared-memory access 组成？
+3. 为什么 default initcheck clean run 不能说明 shared memory 已初始化？
+4. Divergent `__syncthreads()` 为什么属于 synccheck 范围，而 missing higher-level protocol 不一定属于？
+5. 一份 clean sanitizer report 最多能对哪些 executed paths 与 tool scope 作出什么陈述？
+
+## 继续练习
+
+- 完成 [Q04 练习（Exercise）](/correctness/racecheck-initcheck-synccheck/exercises/)，再查看独立的[参考解答](/correctness/racecheck-initcheck-synccheck/solutions/)。
+- 在[练习题库（Practice Bank）PB-R1-023](/practice/#pb-r1-023)审查一份把 clean report 当 proof 的错误结论。
+- 后续可把同一 ledger 用于相关 Runnable Example EX16 与 Lab LAB07，但只有真实记录才能填入 observation fields。
+
+## 来源与复核
+
+- [Compute Sanitizer v2026.2.1 User Guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)定义 current tool scopes、WAW/WAR/RAW、memcheck-first recommendation、initcheck address-space option、synccheck classifications 与明确 limitation。
+- [Compute Sanitizer v2026.2.1 Release Notes](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html)记录 2025.4 shared-memory initcheck addition、后续 fixes、support floor、known limitations 与 known issues。
+- [CUDA Toolkit 11.8 Compute Sanitizer overview](https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html)保存 archived Toolkit 11.8 的四工具 baseline，防止把 current extension 倒推到旧 lane。
+
+Context7 只用于 retrieval cross-check；事实权威是以上 NVIDIA owner documentation 与 release notes。三项 owner source 均访问于 **2026-08-28**。Tool-scope matrix、workflow、coverage ledger、练习与原创编排均由本站完成；没有复制 owner documentation 的 example 或 report fixture。
+
+**事实核查日期：2026-08-28。**

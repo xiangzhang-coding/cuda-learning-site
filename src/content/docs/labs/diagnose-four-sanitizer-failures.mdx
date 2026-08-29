@@ -1,0 +1,446 @@
+---
+title: 'LAB07：诊断四类 Sanitizer 故障'
+description: '在原生 Linux 上用隔离进程运行 EX16 的四组 defect/corrected pair，分开保存 Compute Sanitizer 与 application 记录并按预先声明的报告类别验收。'
+pairId: lab07
+counterpart: /en/labs/diagnose-four-sanitizer-failures/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - manifest
+  - source-pairs
+  - build
+  - tool-gate
+  - report-classes
+  - correctness
+  - isolated-runs
+  - interpret
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB07
+prerequisites:
+  - Q03
+  - Q04
+relatedUnits:
+  - EX16
+exampleIds:
+  - EX16
+canonicalExample: EX16
+canonicalRanges:
+  - memcheck-defect
+  - memcheck-corrected
+  - racecheck-defect
+  - racecheck-corrected
+  - initcheck-defect
+  - initcheck-corrected
+  - synccheck-defect
+  - synccheck-corrected
+hardwareGate: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; the selected Toolkit Lane must provide Compute Sanitizer with all four required tools; at most 128 bytes of problem memory per process'
+estimatedMinutes: 120
+difficulty: intermediate
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 128
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, all eight EX16 binaries, a POSIX shell, and Compute Sanitizer'
+  - 'Allow Compute Sanitizer to launch and instrument one learner-owned application process at a time'
+  - 'Create and remove EX16 build files plus separate tool logs, application logs, and status files in a learner-owned evidence directory'
+  - 'No NVIDIA performance-counter permission or profiler privilege is required; this Lab does not authorize privilege escalation'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The memcheck defect should produce a report in the predeclared global-memory bounds class, while the corrected executable should pass exact host-reference correctness and produce no targeted memcheck report.
+    - The racecheck defect should produce a report in the predeclared shared-memory data-access-hazard class, while the corrected executable should pass exact host-reference correctness and produce no targeted racecheck report.
+    - The initcheck defect should produce a report in the predeclared uninitialized-device-global-memory class, while the corrected executable should pass exact host-reference correctness and produce no targeted initcheck report.
+    - The synccheck defect should produce a report in the predeclared synchronization-primitive-misuse class, while the corrected executable should pass exact host-reference correctness and produce no targeted synccheck report.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; Compute Sanitizer 2022.3; Compute Sanitizer API 11.8.86'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / 12.9.2 Lane; Compute Sanitizer 2025.2.1; API 12.9.79'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / 13.3.1 Lane; Compute Sanitizer 2026.2.1; API 13.3.75'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'Compute Sanitizer User Manual'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html'
+    version: 'NVIDIA Compute Sanitizer 2026.2.1'
+    platform: 'Linux CLI and CUDA-capable GPUs'
+    accessDate: '2026-08-28'
+  - title: 'Compute Sanitizer Release Notes'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html'
+    version: 'NVIDIA Compute Sanitizer 2026.2.1 with historical 2022.3 and 2025.2.1 entries'
+    platform: 'Linux support and tool release history'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,manifest,source-pairs,build,tool-gate,report-classes,correctness,isolated-runs,interpret,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q03,Q04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX16 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX16 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX16 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'memcheck-defect,memcheck-corrected,racecheck-defect,racecheck-corrected,initcheck-defect,initcheck-corrected,synccheck-defect,synccheck-corrected' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; the selected Toolkit Lane must provide Compute Sanitizer with all four required tools; at most 128 bytes of problem memory per process' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '120' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: intermediate }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '128' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'CUDA device; compiler, make, eight binaries, shell, and compute-sanitizer execution; one-process instrumentation; separate log/status writes; no performance counters' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '4 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,2022.3,2025.2.1,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/diagnose-four-sanitizer-failures/" lang="en">Read the English counterpart</a>
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+LAB07 是一个实验（Lab）。你在网站之外对 EX16 的四组 defect/corrected executable 做隔离检查；每次只让一个 Compute Sanitizer tool 观察一个 scenario，网站不执行 CUDA 或发布 sanitizer transcript。
+
+## 实验合同
+
+| 坐标 | 要求 |
+| --- | --- |
+| 难度与时间 | 中级（intermediate），约 120 分钟 |
+| 先修 | Q03、Q04 |
+| 受支持环境 | 仅原生 Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU |
+| Toolkit Lane | CUDA 11.8.0、12.9.2 或 13.3.1，C++17；使用该 Lane 提供的 `compute-sanitizer` |
+| 工作负载 | 每个 executable 独立进程；每进程 problem memory 最多 128 bytes |
+| 工具顺序 | memcheck 必须先运行，再依次运行 racecheck、initcheck、synccheck；每个 tool 只运行 matching pair |
+| 权限 | 执行编译工具、八个 binary、shell 与 Compute Sanitizer；允许 tool launch/instrument learner-owned child；写分离日志与状态；不要求 profiler performance counter |
+| 验收 | defect 出现预先声明的 targeted report class；corrected 通过 exact host reference 且没有该 targeted report |
+| 证据 | compilation 为空；runtime 为 Pending Hardware Verification；recorded observations 为空 |
+
+## 先修检查
+
+1. 完成 [Q03](/correctness/memcheck-invalid-memory-access/)，能说明 memcheck 的 executed-path scope，以及 clean report 为什么不是不存在其他缺陷的证明。
+2. 完成 [Q04](/correctness/racecheck-initcheck-synccheck/)，能分别界定 shared-memory hazard、uninitialized device global memory 与 synchronization primitive misuse。
+3. 确认可以执行 **one scenario per process**（每个进程一个 scenario），并能分开保存 tool/application logs and statuses。
+
+## 获取 canonical project
+
+[查看固定提交中的完整 EX16 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/48367dfafe809bb15f0f7f6117eab37e88403391/examples/ex16-sanitizer-defect-suite)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/48367dfafe809bb15f0f7f6117eab37e88403391.zip)。一种可复核的获取方式是：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout 48367dfafe809bb15f0f7f6117eab37e88403391
+cd examples/ex16-sanitizer-defect-suite
+```
+
+不要修改 defect、corrected、`-lineinfo` build、launch 或 deterministic host checks。修复必须来自 matching corrected source，不能靠 suppression、关闭检查或改打印文本。
+
+## 创建未填写的环境清单
+
+尖括号字段都必须由实际记录填写：
+
+```yaml
+subject: EX16 / LAB07
+source_commit:
+  48367dfafe809bb15f0f7f6117eab37e88403391
+observation_date_utc:
+  <fill>
+gpu_identity:
+  <fill after privacy review>
+compute_capability: <fill>
+compute_capability_query:
+  <fill exact command or API>
+gpu_count_used: <fill; must be 1>
+driver: <fill>
+toolkit_lane:
+  <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+cuda_toolkit: <fill exact version>
+compute_sanitizer_version:
+  exact_output: <fill>
+compute_sanitizer_help:
+  raw_path: <fill>
+  digest: <fill>
+nvcc: <fill exact version>
+host_compiler: <fill exact version>
+operating_system:
+  distribution: <fill native Linux distribution>
+  version: <fill>
+  architecture: <fill>
+workload:
+  <fill eight ordered tool/scenario processes>
+process_isolation:
+  scenario_per_process: <fill>
+  tool_per_invocation: <fill>
+memory:
+  per_process_bytes: <fill>
+  maximum_problem_memory_bytes: 128
+permissions:
+  - <fill device access>
+  - <fill executable and instrumentation access>
+  - <fill filesystem access; no counter access>
+exact_commands:
+  <fill every fully expanded argv in order>
+correctness_method:
+  <fill corrected executable exact host reference>
+correctness_criteria:
+  corrected_output: <fill>
+  api_and_application_status: <fill>
+  targeted_report_absence: <fill>
+measurement_method:
+  report-class review; no timing measurement
+measurement_details:
+  predeclared_classes: <fill>
+  channel_separation: <fill>
+  run_order: <fill>
+raw_logs:
+  build_version_help_paths: <fill>
+raw_sanitizer_logs:
+  one_tool_log_per_invocation: <fill>
+raw_application_logs:
+  stdout_stderr_per_invocation: <fill>
+exit_statuses:
+  application_status_paths: <fill>
+  tool_status_paths: <fill>
+criteria_result:
+  <fill only after execution>
+```
+
+## 复核八个 canonical source pair
+
+按运行合同顺序阅读每个 defect 及其 corrected counterpart；页面不手写 C++/CUDA：
+
+<CanonicalCode exampleId="EX16" range="memcheck-defect" />
+
+<CanonicalCode exampleId="EX16" range="memcheck-corrected" />
+
+<CanonicalCode exampleId="EX16" range="racecheck-defect" />
+
+<CanonicalCode exampleId="EX16" range="racecheck-corrected" />
+
+<CanonicalCode exampleId="EX16" range="initcheck-defect" />
+
+<CanonicalCode exampleId="EX16" range="initcheck-corrected" />
+
+<CanonicalCode exampleId="EX16" range="synccheck-defect" />
+
+<CanonicalCode exampleId="EX16" range="synccheck-corrected" />
+
+每个 defect 与 corrected 都是独立 executable。Corrected 保留 intended work，同时恢复 bounds、ordering、initialization 或 uniform barrier participation；这不授权预测 tool 的逐字输出。
+
+## 构建并保留原始记录
+
+```sh
+mkdir -p lab07-evidence
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/*-defect build/*-corrected
+```
+
+为每条命令保存 raw stdout/stderr 和 exit status；失败时记录 blocker 并停止。`make host-test` 只检查 host metadata/reference utility，不运行 GPU 或 sanitizer。本地 build 不会填充空 compilation evidence。
+
+## 工具门槛
+
+先精确采集 version/help，不从 Toolkit 名称推断工具能力：
+
+```sh
+compute-sanitizer --version \
+  >lab07-evidence/compute-sanitizer-version.stdout.log \
+  2>lab07-evidence/compute-sanitizer-version.stderr.log
+version_status=$?
+printf '%s\n' "$version_status" \
+  >lab07-evidence/compute-sanitizer-version.status
+
+compute-sanitizer --help \
+  >lab07-evidence/compute-sanitizer-help.stdout.log \
+  2>lab07-evidence/compute-sanitizer-help.stderr.log
+help_status=$?
+printf '%s\n' "$help_status" \
+  >lab07-evidence/compute-sanitizer-help.status
+```
+
+原始 version/help 两个 channel 与状态都必须保留。Owner release coordinate 是：11.8.0 Lane 对应 Compute Sanitizer 2022.3 与 API 11.8.86；12.9.2 Lane 对应 2025.2.1 与 API 12.9.79；13.3.1 Lane 对应 2026.2.1 与 API 13.3.75。实际 `compute-sanitizer --version` 填入 `compute_sanitizer_version`；若无法解析、与 Lane 不一致，或 help 没有列出 `--tool` 的 memcheck、racecheck、initcheck、synccheck 以及本 Lab 使用的 `--log-file`/`--target-processes`，记录 blocker 并停止。
+
+Compute Sanitizer 不使用 Nsight Compute performance counters；这里没有 profiler permission gate。Tool 必须能 instrument 当前用户拥有的 child process 并写 tool log。权限或注入失败是 blocker，不能用直接运行的 application output 代替 sanitizer record。
+
+## 预先声明报告类别
+
+在运行前冻结下面的 **predeclared report class**。类别是验收粒度，不是 exact diagnostic text、error count 或 address promise：
+
+| Tool | Defect targeted class | Corrected acceptance |
+| --- | --- | --- |
+| memcheck | device global-memory out-of-bounds access | exact 32-element host reference；没有 targeted bounds report |
+| racecheck | shared-memory read-after-write data access hazard | exact produced value；没有 targeted hazard report |
+| initcheck | uninitialized device global-memory read | exact initialized-output host reference；没有 targeted uninitialized-read report |
+| synccheck | divergent block synchronization primitive/barrier misuse | exact 16-element host reference；没有 targeted synchronization report |
+
+不要承诺 diagnostic 的逐字文本、报告条数、线程/块坐标、PC、source line 或地址。Tool version、driver、schedule 和终止边界都可能影响呈现。
+
+## 验证正确性
+
+在解释任何 sanitizer report 前，先把四个 corrected executable 各自作为独立进程直接运行：
+
+```sh
+for scenario in \
+  memcheck-corrected racecheck-corrected \
+  initcheck-corrected synccheck-corrected
+do
+  ./build/"$scenario" \
+    >"lab07-evidence/direct-${scenario}.stdout.log" \
+    2>"lab07-evidence/direct-${scenario}.stderr.log"
+  status=$?
+  printf '%s\n' "$status" \
+    >"lab07-evidence/direct-${scenario}.status"
+done
+```
+
+四个 corrected process 都必须通过源码内独立 host reference 的 exact comparison、全部必要 CUDA boundary 与零 application status。一个 `PASS` 字样不能替代原始 stdout/stderr、status 和逐项 criteria。任何解读之前，正确性必须先满足；不通过时 corrected 还不能作为修复证据。
+
+Defect process 不承诺零状态：故障可能让 completion 失败。原样记录 application status，不把 nonzero 自动当作 targeted report，也不把 zero 当作 clean tool run。
+
+## 运行隔离的 tool/scenario matrix
+
+Run memcheck first, before racecheck, initcheck, and synccheck。严格按下表顺序；每行都是新的 `compute-sanitizer` process，且只包含一个 matching scenario：
+
+| Order | Tool | Scenario |
+| ---: | --- | --- |
+| 1 | memcheck | memcheck-defect |
+| 2 | memcheck | memcheck-corrected |
+| 3 | racecheck | racecheck-defect |
+| 4 | racecheck | racecheck-corrected |
+| 5 | initcheck | initcheck-defect |
+| 6 | initcheck | initcheck-corrected |
+| 7 | synccheck | synccheck-defect |
+| 8 | synccheck | synccheck-corrected |
+
+对每行填写变量并单独执行下面模板。`--log-file` 保存 tool output；child shell 把 application stdout/stderr 与 application status 分开；外层保存 tool status：
+
+```sh
+tool='<fill matching tool>'
+scenario='<fill scenario>'
+binary="./build/${scenario}"
+prefix="lab07-evidence/${scenario}"
+
+compute-sanitizer --target-processes all --tool "$tool" \
+  --log-file "${prefix}.tool.log" -- \
+  sh -c '
+    binary=$1
+    stdout_path=$2
+    stderr_path=$3
+    status_path=$4
+    "$binary" >"$stdout_path" 2>"$stderr_path"
+    application_status=$?
+    printf "%s\n" "$application_status" >"$status_path"
+    exit "$application_status"
+  ' sh "$binary" "${prefix}.application.stdout.log" \
+  "${prefix}.application.stderr.log" \
+  "${prefix}.application.status"
+tool_status=$?
+printf '%s\n' "$tool_status" >"${prefix}.tool.status"
+```
+
+这套 wrapper 通过 `--target-processes all` 让 tool 跟踪唯一 child binary，同时保留 separate tool/application logs and statuses。先用一行 probe 确认当前版本确实按该 contract 分离 channel；否则记录 blocker。不要并行运行、合并多个 scenario、重用失败后的 process，或只保存终端截图。
+
+每一行都要增加一条 ledger record。原始文件是事实来源，每条 record 必须包含：
+
+1. Identity：`order`、`tool`、`scenario` 与 `predeclared_report_class`。
+2. 分开的 statuses：`application_status` 与 `tool_status`。
+3. 分开的 paths：`application_stdout`、`application_stderr` 与 `raw_sanitizer_log`。
+4. Reviewed verdicts：`targeted_class_observed` 与 `corrected_exact_result`。
+
+## 解读 defect/corrected 记录
+
+逐 pair 验收：defect log 必须包含预先声明类别中的 targeted report；matching corrected application 必须再次通过 exact host correctness，且 corrected tool log 没有该 targeted report。若 defect 没有 targeted class，记录未复现；若 corrected 仍有 targeted class，修复未通过。二者都不能靠退出状态单独决定，因为 tool 的 `--error-exitcode` policy 与 application status 是不同坐标。
+
+“Corrected 没有 targeted report”只约束这个 tool、版本、build、input、device 与 executed path。它不证明没有其他错误，也不允许把 racecheck、initcheck 或 synccheck 当作 memcheck。保留所有额外 report class 与 blocker，不为得到 clean 表格而过滤输出。
+
+本 Lab 不承诺 exact diagnostic text、error count、address、thread coordinate、source line、tool exit number 或 defect application exit number，也不记录 timing 或性能结果。
+
+## 预期观察，不是记录结果
+
+- memcheck defect **应当**落入预先声明的 global-memory bounds report class；corrected **应当**精确保留 32 个 intended writes，且没有该 targeted report。
+- racecheck defect **应当**落入 shared-memory data access hazard class；corrected **应当**精确保留 produced value，且没有该 targeted report。
+- initcheck defect **应当**落入 uninitialized device global-memory class；corrected **应当**精确保留 initialized increment result，且没有该 targeted report。
+- synccheck defect **应当**落入 synchronization primitive misuse class；corrected **应当**精确保留 phase-copy outputs，且没有该 targeted report。
+
+这些是预期观察，不是记录结果。本页没有预填或虚构任何运行输出或 sanitizer 输出；`recordedObservations` 仍为空。
+
+## 分开维护证据轴
+
+| 轴 | 当前状态 | 边界 |
+| --- | --- | --- |
+| Compilation | 空 | 本地 build 与 host utility 不自动成为 Compile-Checked record |
+| Runtime | Pending Hardware Verification | 没有维护者 Reference Environment sanitizer run |
+| Recorded observations | 空 | 真实 manifest、version/help、raw tool/application logs、分开 statuses 与 criteria result 才能进入待评估记录 |
+
+源码阅读、CanonicalCode、预期表和直接 corrected run 都不能代替 tool observation；一次 sanitizer run 也不会自动填充 compilation axis。
+
+## 清理与保留
+
+保存 manifest、version/help、全部 raw logs、statuses、ledger 与 criteria result 后再运行：
+
+```sh
+make clean BUILD_DIR=build
+```
+
+不要提交 binary、credential、私密 device identifier、core dump 或未经检查的大型 artifact。
+
+## 来源与复核
+
+Toolkit/component 坐标来自 [CUDA 11.8.0 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)、[CUDA 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html)与[CUDA 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)。[Compute Sanitizer User Manual](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)约束 CLI options、四个 tool scope 与 memcheck-first 建议；[Compute Sanitizer Release Notes](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html)固定 2022.3、2025.2.1、2026.2.1 历史和当前行为边界。
+
+Context7 `/websites/nvidia_cuda` 只用于检索交叉核对，不替代精确 NVIDIA owner docs/releases，也不构成 sanitizer evidence。
+
+**事实核查日期：2026-08-28。** Compilation 为空，runtime 为 Pending Hardware Verification。

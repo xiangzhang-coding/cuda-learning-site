@@ -279,7 +279,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes twenty-five complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes twenty-nine complete Practice Bank entries in $route', async (route) => {
     const document = await readRoute(route);
     const text = mainText(document);
     const entryIds = [
@@ -289,6 +289,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-009', 'PB-R1-010', 'PB-R1-011', 'PB-R1-012',
       'PB-R1-013', 'PB-R1-014', 'PB-R1-015', 'PB-R1-016',
       'PB-R1-017', 'PB-R1-018', 'PB-R1-019', 'PB-R1-020',
+      'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
     ];
     const entryHeadings = [...document.querySelectorAll('main h2')].filter((heading) =>
       entryIds.some((entryId) => heading.textContent?.includes(entryId)),
@@ -306,6 +307,10 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-018': 'memory/warp-divergence-reconvergence',
       'PB-R1-019': 'memory/stream-ordering',
       'PB-R1-020': 'memory/event-dependencies-timing',
+      'PB-R1-021': 'correctness/cpu-references-tolerances-invariants',
+      'PB-R1-022': 'correctness/memcheck-invalid-memory-access',
+      'PB-R1-023': 'correctness/racecheck-initcheck-synccheck',
+      'PB-R1-024': 'correctness/timing-asynchronous-gpu-work',
     };
 
     expect(entryHeadings).toHaveLength(entryIds.length);
@@ -330,11 +335,14 @@ describe('Exercises and Practice Bank contract', () => {
       expect(sectionText, `${route} ${entryId}`).toMatch(/Expected evidence|预期证据/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Acceptance criteria|验收条件/);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Hint 1|提示 1/);
-      expect(sectionText, `${route} ${entryId}`).toMatch(/Solution|解答/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Hint 2|提示 2/);
+      expect(sectionText, `${route} ${entryId}`).toMatch(/Solution|解答/i);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Source basis|来源依据/);
       const prerequisitePath = focusedPrerequisitePaths[entryId];
       const prerequisiteRoutePattern = prerequisitePath?.startsWith('memory/')
         ? /\/(?:en\/)?memory\//
+        : prerequisitePath?.startsWith('correctness/')
+          ? /\/(?:en\/)?correctness\//
         : /\/(?:en\/)?(?:start|foundations)\//;
       expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link.getAttribute('href') ?? ''))).toBe(true);
       if (prerequisitePath) {
@@ -342,6 +350,11 @@ describe('Exercises and Practice Bank contract', () => {
           sectionLinks.some((link) => link.getAttribute('href')?.includes(`/${prerequisitePath}/`)),
           `${route} ${entryId} prerequisite`,
         ).toBe(true);
+      }
+      if (/^PB-R1-02[1-4]$/.test(entryId)) {
+        expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
+        expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
+        expect(sectionText, `${route} ${entryId}`).toContain('2026-08-28');
       }
     }
 
@@ -353,6 +366,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08']) expect(text).toContain(unitId);
+    for (const unitId of ['Q01', 'Q03', 'Q04', 'Q05']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);

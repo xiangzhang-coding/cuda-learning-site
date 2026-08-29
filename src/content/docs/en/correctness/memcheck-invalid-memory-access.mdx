@@ -1,0 +1,236 @@
+---
+title: 'Q03: Memcheck and invalid memory access'
+description: Use a CUDA 11.8, 12.9, and current lane-safe Compute Sanitizer memcheck baseline while keeping precise access reports, leak boundaries, API checks, and executed-path coverage distinct.
+pairId: q03
+counterpart: /correctness/memcheck-invalid-memory-access/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - lane-baseline
+  - precise-accesses
+  - leak-checking
+  - api-errors
+  - coverage-boundary
+  - tool-order
+  - review-ledger
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q03
+prerequisites:
+  - F05
+  - Q01
+relatedUnits:
+  - Q04
+  - EX16
+  - LAB07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Compute Sanitizer - Memcheck Tool'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html#memcheck-tool'
+    version: 'Compute Sanitizer v2026.2.1; last updated 2026-06-23'
+    platform: 'Current memcheck commands, precise reports, leak checking, API reporting, and tool-order guidance'
+    accessDate: '2026-08-28'
+  - title: 'Compute Sanitizer Release Notes - Known Limitations'
+    url: 'https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html#known-limitations'
+    version: 'Compute Sanitizer v2026.2.1; last updated 2026-06-23'
+    platform: 'Current coverage limitations and historical behavior changes'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 11.8 - Compute Sanitizer Overview'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html'
+    version: 'CUDA Toolkit v11.8.0; last updated 2022-10-03'
+    platform: 'Toolkit 11.8 Compute Sanitizer availability and precise-access baseline'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 11.8 Release Notes - Component Versions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cuda-major-component-versions'
+    version: 'CUDA Toolkit v11.8.0; last updated 2022-10-06'
+    platform: 'Toolkit 11.8 component coordinate and sanitizer changelog route'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.9 Update 1 Documentation Index'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1; last updated 2025-06-05'
+    platform: 'Toolkit 12.9 archive and standalone Compute Sanitizer documentation route'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes - Major Components'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html#cuda-toolkit-major-components'
+    version: 'CUDA Toolkit 12.9 Update 1 release notes v12.9'
+    platform: 'Toolkit 12.9 component coordinate'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,lane-baseline,precise-accesses,leak-checking,api-errors,coverage-boundary,tool-order,review-ledger,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F05,Q01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q04,EX16,LAB07' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/memcheck-invalid-memory-access/" lang="zh-CN">阅读中文对应页</a>
+
+Compute Sanitizer memcheck is a runtime correctness checker for memory access errors and leaks in CUDA applications. It can precisely detect supported out-of-bounds access and misaligned access events, but only when the relevant instruction is reached on an executed path. Leak reporting has a separate enablement and lifecycle boundary. A clean report is useful evidence for one declared run; it is not proof that the program is correct on unexecuted paths or outside the tool's documented coverage.
+
+## What you should be able to do
+
+- Write a conservative memcheck command shared by the CUDA 11.8, 12.9, and current lanes.
+- Explain what makes supported out-of-bounds and misaligned access reports precise.
+- Enable full leak checking and identify CUDA context destruction as its observation boundary.
+- Keep Compute Sanitizer CUDA API reports supplemental to application return-code checks.
+- Design path coverage and run memcheck before racecheck, initcheck, or synccheck.
+
+## Prerequisites
+
+Complete [F05: CUDA Errors Are Often Asynchronous](/en/foundations/asynchronous-errors/) and [Q01: CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) first. F05 supplies launch-error and completion-error observation points. Q01 supplies the independent result oracle that remains necessary even when sanitizer reports are clean.
+
+This unit specifies commands and interpretation rules only. It does not execute Compute Sanitizer or claim a GPU observation.
+
+## A lane-safe baseline
+
+The Toolkit and Compute Sanitizer are versioned coordinates that must both be recorded. The archived CUDA 11.8 page preserves a short Compute Sanitizer overview. The CUDA 12.9 Update 1 archive links its tool entry to the separately maintained Compute Sanitizer manual rather than preserving a full 12.9-local copy. Therefore, do not label an unversioned current web page as a frozen 12.9 manual. Record the Toolkit lane, driver, and the output of `compute-sanitizer --version`, then consult that installed lane's `compute-sanitizer --help`.
+
+The conservative command intersection taught here is:
+
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  ./app [app_options]
+```
+
+Use explicit option values instead of relying on defaults. In particular, current releases added an `extended` API-report mode and changed the default; that change must not be projected backward into 11.8 or 12.9. This unit also omits current-only compile-time instrumentation. Optional source attribution can be improved by building the lane's target with line information, but line information changes report location quality, not whether an access is valid.
+
+## Precise invalid-access reports
+
+For supported global, local, shared, and global-atomic memory instructions, memcheck classifies out-of-bounds and misaligned accesses as precise memory access errors. “Precise” means the tool can uniquely identify the offending instruction and gather details such as access kind and size, address, program counter, and block/thread coordinates. Source file and line can be added when the binary contains line information.
+
+Do not extend that label to every report. Hardware exceptions are described separately as imprecise and may not identify one source instruction or thread. After a precise defect, fix the address calculation, allocation extent, alignment, or guard, then rerun the same case. A terminating access error can prevent later instructions from executing and hide downstream defects.
+
+This page intentionally gives no sample sanitizer transcript. Actual logs belong to a runtime evidence record, with the exact command and Environment Manifest.
+
+## Leak checking and context destruction
+
+Leak checking is not enabled by the basic access command. Request it explicitly:
+
+```sh
+compute-sanitizer \
+  --tool memcheck \
+  --report-api-errors explicit \
+  --leak-check full \
+  ./app [app_options]
+```
+
+Memcheck classifies tracked allocations that remain unfreed when their associated CUDA context is destroyed as memory leaks. The current owner manual names program exit, `cudaDeviceReset()`, and `cuCtxDestroy()` as destruction boundaries. Historical release notes state that an explicit `cudaDeviceReset()` call stopped being required for accurate reporting in the 2021.3 release, before the 11.8 lane.
+
+The portable rule is to let the scenario reach orderly process or context teardown and interpret the final leak summary only after that boundary. An allocation that is intentionally live midway through the process is not yet a leak. Conversely, ending the observation before teardown cannot establish a full leak result. Always pair allocation ownership with its documented release path; a clean leak report is not a substitute for lifecycle review.
+
+## API reports do not replace return checks
+
+With API reporting enabled, memcheck can add a message when an explicit CUDA Runtime or Driver API call returns a failure. The owner manual is equally explicit that these reports provide extra information and do not terminate or handle the condition for the application.
+
+Application code must still:
+
+1. Check each CUDA API return value.
+2. Check launch submission status at the intended point.
+3. Observe asynchronous execution failure at an explicit completion boundary.
+4. Stop or recover according to the program's error policy.
+
+A sanitizer transcript can help localize a failed API call. It cannot replace the branch that prevents the program from consuming invalid state.
+
+## Executed-path and coverage boundary
+
+Memcheck is dynamic analysis. It can report a memory operation only when the instrumented scenario executes the relevant path. Design a matrix over input sizes, empty and singleton inputs, non-multiple launch sizes, boundary indices, branch outcomes, allocation lifetimes, and any supported process configuration. Record filters, skipped launches, child-process policy, and early termination because each can reduce observed coverage.
+
+A clean report does not prove absence of invalid access on an unexecuted path. It also does not validate numerical output, detect arbitrary host memory errors outside CUDA API activity, or cover every CUDA feature in every release. Adjacent valid allocations can make some global overflows difficult to classify as outside an allocation; the documented `--padding` option can improve detection in applicable lanes at the cost of extra memory pressure, but it does not turn the tool into a proof system. Check lane-local documentation and known limitations before making a coverage claim.
+
+Pair every sanitizer run with Q01 output validation. “No reported access error” and “correct result” are independent observations.
+
+## Run memcheck before the other tools
+
+Run memcheck first, before racecheck, initcheck, or synccheck. NVIDIA's tool sections note that those later checkers do not perform memory access error checking. An invalid address can corrupt state, terminate a kernel, or make a later hazard report harder to interpret.
+
+The review sequence is:
+
+```text
+application return checks and Q01 oracle
+-> memcheck access run
+-> memcheck full leak run when lifecycle is in scope
+-> repair and rerun until the declared cases are clean
+-> racecheck -> initcheck -> synccheck as required by Q04
+```
+
+This is an investigation order, not a claim that one clean tool implies the next tool will be clean.
+
+## Memcheck review ledger
+
+For each scenario, record:
+
+1. Toolkit lane, driver, Compute Sanitizer version, platform, and build flags.
+2. Exact executable, arguments, sanitizer command, and environment.
+3. Inputs, launch geometry, branches expected to execute, and process/filter scope.
+4. API return checks and asynchronous completion boundary.
+5. Whether `--leak-check full` is enabled and how context teardown occurs.
+6. Raw report path, process exit status, Q01 correctness result, and unresolved limitations.
+
+Only this complete coordinate supports a bounded statement about the paths that were actually checked.
+
+## Evidence boundary
+
+All commands and report fields here are specifications. No command was run for this page, no output is quoted, and no GPU behavior was observed. Compilation and runtime evidence axes remain empty. EX16 and LAB07 may later supply executable defects and recorded logs, but those artifacts must carry their own evidence status and Environment Manifest.
+
+## Retrieval check
+
+1. Which supported invalid accesses can memcheck report precisely, and what does “precise” mean?
+2. Why must `--leak-check full` be paired with a completed context-destruction boundary?
+3. Why do Compute Sanitizer API reports not replace application return-code checks?
+4. Why can a clean report establish only a bounded claim about executed paths?
+5. Why should memcheck run before racecheck, initcheck, and synccheck?
+
+## Continue with practice
+
+- Complete the [Q03 Exercises](/en/correctness/memcheck-invalid-memory-access/exercises/), then inspect the separate [reviewed solutions](/en/correctness/memcheck-invalid-memory-access/solutions/).
+- Audit a lane-safe memcheck plan in [Practice Bank PB-R1-022](/en/practice/#pb-r1-022).
+- Continue to Q04 for racecheck, initcheck, and synccheck; EX16 and LAB07 provide the later runnable and guided-practice boundaries.
+
+## Sources and review
+
+- [Compute Sanitizer v2026.2.1: Memcheck Tool](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html#memcheck-tool) defines the current command, precise/imprecise distinction, leak enablement and destruction boundary, API-report responsibility, and memcheck-first guidance.
+- [Compute Sanitizer v2026.2.1: Known Limitations](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html#known-limitations) bounds current platform and feature coverage; the same release-notes page records historical changes such as removal of the explicit reset requirement and newer API-report modes.
+- [CUDA Toolkit 11.8: Compute Sanitizer Overview](https://docs.nvidia.com/cuda/archive/11.8.0/compute-sanitizer/index.html) preserves the archived 11.8 precise out-of-bounds/misaligned baseline, while [CUDA Toolkit 11.8 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cuda-major-component-versions) anchors the Toolkit component lane and owner changelog route.
+- [CUDA Toolkit 12.9 Update 1 Documentation Index](https://docs.nvidia.com/cuda/archive/12.9.1/index.html) shows that the archived Toolkit entry delegates Compute Sanitizer documentation to the standalone manual; [CUDA Toolkit 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html#cuda-toolkit-major-components) anchors the 12.9 component coordinate.
+
+The lane table, conservative command intersection, coverage ledger, Exercises, and arrangement are original composition. A current Context7 retrieval against `/websites/nvidia_cuda` was used only as a discovery cross-check; it did not supply the archived lane claims and is not treated as an owner source or citation.
+
+All six NVIDIA owner sources were accessed on **2026-08-28**.
+
+**Fact checked: 2026-08-28.**

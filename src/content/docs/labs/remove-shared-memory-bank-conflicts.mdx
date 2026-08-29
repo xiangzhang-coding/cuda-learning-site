@@ -1,0 +1,438 @@
+---
+title: 'LAB05：消除共享内存存储体冲突'
+description: '在原生 Linux 上精确验收 EX06 的 unpadded/padded 输出，再用具备版本、指标和权限门槛的 Nsight Compute 重复记录布局行为。'
+pairId: lab05
+counterpart: /en/labs/remove-shared-memory-bank-conflicts/
+factCheckDate: '2026-08-28'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - manifest
+  - source-review
+  - build
+  - correctness
+  - measurement-plan
+  - profiler-gate
+  - collect
+  - interpret
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB05
+prerequisites:
+  - M04
+  - Q05
+relatedUnits:
+  - EX06
+exampleIds:
+  - EX06
+canonicalExample: EX06
+canonicalRanges:
+  - shared-layouts
+  - tiled-kernels
+hardwareGate: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Nsight Compute CLI and authorized performance-counter access; at most 8,576 bytes of conservative global-plus-shared problem memory'
+estimatedMinutes: 90
+difficulty: intermediate
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8576
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, the EX06 binary, and Nsight Compute CLI ncu'
+  - 'Create and remove EX06 build files, profiler reports, and learner-owned evidence logs'
+  - 'Read NVIDIA GPU performance counters under an administrator-approved non-admin profiling policy; this Lab does not authorize privilege escalation'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The unpadded and padded variants should produce the same logical outputs and each pass exact comparison against the CPU reference before profiling begins.
+    - With source, build, logical work, launch geometry, profiler options, and device frozen, each layout should produce a labeled raw bank-conflict profiler record only when the selected metric is available and collection is permitted.
+    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared median and min/max spread summarize the fixed 10-attempt batch only when all 10 attempts qualify.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; Nsight Compute 2022.3.0.22'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / 12.9.2 Lane; Nsight Compute 2025.2.1.3'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / 13.3.1 Lane; Nsight Compute 2026.2.1.5'
+    platform: 'Linux x86-64 Toolkit Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute CLI 2022.3'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3.0'
+    platform: 'Linux CLI for the cuda-11.8 Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute CLI 2025.2'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2.1'
+    platform: 'Linux CLI for the cuda-12.9 Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute CLI 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Linux CLI for the cuda-13.3 Lane'
+    accessDate: '2026-08-28'
+  - title: 'Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute Profiling Guide 2026.2.1'
+    platform: 'GPU metrics, replay, overhead, permissions, and reproducibility'
+    accessDate: '2026-08-28'
+  - title: 'CUDA C++ Best Practices Guide - Shared Memory and Memory Banks'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA shared-memory layout and bank model'
+    accessDate: '2026-08-28'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab05 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-28' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,manifest,source-review,build,correctness,measurement-plan,profiler-gate,collect,interpret,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M04,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX06 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'shared-layouts,tiled-kernels' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Nsight Compute CLI and authorized performance-counter access; at most 8,576 bytes of conservative global-plus-shared problem memory' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '90' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: intermediate }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8576' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'CUDA device; compiler, make, binary, and ncu execution; build/report/log writes; administrator-approved performance-counter access' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,2022.3.0,2025.2.1,2026.2.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/remove-shared-memory-bank-conflicts/" lang="en">Read the English counterpart</a>
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+LAB05 是一个实验（Lab）。你在网站之外保持 EX06 的逻辑工作不变，只观察明确的 unpadded 与 padded shared-memory layout；网站不会运行 CUDA 或填入 profiler 结果。
+
+## 实验合同
+
+| 坐标 | 要求 |
+| --- | --- |
+| 难度与时间 | 中级（intermediate），约 90 分钟 |
+| 先修 | M04、Q05 |
+| 受支持环境 | 仅原生 Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU |
+| Toolkit Lane | CUDA 11.8.0、12.9.2 或 13.3.1，C++17 |
+| 工作负载 | 一个 32-thread block；32 x 32 input tile；两份 32-element output；global + 较大 shared layout 的保守上限 8,576 bytes |
+| 工具 | 与 Lane 对应的 Nsight Compute CLI（`ncu`），以及当前 GPU 实际提供的 shared-memory bank-conflict 相关指标 |
+| 权限 | 设备、binary 与 evidence directory 访问，以及管理员预先批准的 performance counter permission；本 Lab 不允许临时提权 |
+| 验收顺序 | unpadded/padded 相同 logical outputs 的 exact CPU-reference correctness，随后才允许 profiling 与解读 |
+| 证据 | compilation 为空；runtime 为 Pending Hardware Verification；recorded observations 为空 |
+
+## 先修检查
+
+1. 完成 [M04](/memory/bank-conflicts-layouts/)，能用 word index modulo bank count 分析存储体冲突（bank conflict），并区分 address model 与 profiler observation。
+2. 完成 [Q05](/correctness/timing-asynchronous-gpu-work/)，能定义 warm-up exclusion、重复样本、完成边界和预先声明的 statistic。
+3. 确认只有一张 GPU 参与，并能保存原始 stdout/stderr、每条命令的退出状态、profiler report 与完整环境清单（Environment Manifest）。
+
+## 获取 canonical project
+
+[查看固定提交中的完整 EX06 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/79473ddced9c4d284b88f2eab82d31f3034b97cc/examples/ex06-shared-memory-tile-bank-padding)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/79473ddced9c4d284b88f2eab82d31f3034b97cc.zip)。一种可复核的获取方式是：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout 79473ddced9c4d284b88f2eab82d31f3034b97cc
+cd examples/ex06-shared-memory-tile-bank-padding
+```
+
+不要改 source、template specialization、input、read column、barrier、output、build flags 或 launch geometry。只有 canonical padding `0`/`1` 可以不同。
+
+## 创建未填写的环境清单
+
+执行前填写所有尖括号字段；模板和 owner version 不能冒充实际观察：
+
+```yaml
+subject: EX06 / LAB05
+source_commit:
+  79473ddced9c4d284b88f2eab82d31f3034b97cc
+observation_date_utc:
+  <fill>
+gpu_identity:
+  <fill after privacy review>
+compute_capability: <fill>
+compute_capability_query:
+  <fill exact command or API>
+gpu_count_used: <fill; must be 1>
+driver: <fill>
+toolkit_lane:
+  <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+cuda_toolkit: <fill exact version>
+cuda_runtime: <fill exact component version or unknown>
+nsight_compute_version:
+  exact_output: <fill>
+nvcc: <fill exact version>
+host_compiler: <fill exact version>
+operating_system:
+  distribution: <fill native Linux distribution>
+  version: <fill>
+  architecture: <fill>
+  kernel: <fill>
+topology:
+  relevant_coordinates: <fill or not relevant with reason>
+source_repository:
+  acquisition_url: <fill>
+binary_sha256: <fill>
+build_contract:
+  build_type: <fill>
+  cxx_dialect: c++17
+  architecture_targets: <fill>
+  optimization_debug_flags: <fill>
+  link_mode: <fill>
+  environment_variables: <fill>
+workload:
+  layouts: [unpadded, padded]
+  lanes: 32
+  read_column: 5
+input_generation:
+  element_type_and_tile_dimensions: <fill>
+  formula: <fill>
+  seed_or_dataset: <fill or not applicable>
+launch_geometry:
+  grid_block_stream: <fill>
+  variant_order: <fill>
+memory:
+  device_and_host_requirements: <fill>
+  maximum_problem_memory_bytes: 8576
+permissions:
+  - <fill device and executable access>
+  - <fill filesystem access>
+  - <fill performance-counter policy>
+device_access_state:
+  visibility_container_mig_mps: <fill>
+concurrent_load:
+  background_and_concurrent_policy: <fill>
+clock_power_thermal:
+  persistence_and_clock_policy: <fill>
+  power_policy: <fill>
+  thermal_before_after: <fill>
+  cooldown_policy: <fill>
+exact_commands:
+  ordered_expanded_argv: <fill>
+correctness_method:
+  ex06_cpu_reference_exact_comparison: <fill>
+correctness_criteria:
+  same_outputs_and_all_lanes: <fill>
+  cuda_boundaries_and_statuses: <fill>
+measurement_method:
+  ncu_metrics_units_options: <fill>
+  repetition_order: <fill>
+measurement_details:
+  warm_up_and_completion: <fill>
+  included_work: <fill>
+  invalid_and_outlier_policy: <fill>
+statistics:
+  batch: fixed 10 attempts
+  summary: median and min/max spread
+  retention_policy: <fill>
+raw_logs:
+  stdout_stderr_paths: <fill>
+raw_measurements:
+  report_csv_paths: <fill>
+exit_statuses:
+  one_status_path_per_command: <fill>
+custody:
+  observer: <fill>
+  raw_log_path_or_hash: <fill>
+  machine_or_reference_status: <fill>
+criteria_result:
+  <fill only after execution>
+```
+
+## 复核 canonical source
+
+两个 physical shared layout 只来自 `shared-layouts` range：
+
+<CanonicalCode exampleId="EX06" range="shared-layouts" />
+
+Cooperative load、barrier 与读取相同逻辑 column 的两个 specialization 来自 `tiled-kernels` range：
+
+<CanonicalCode exampleId="EX06" range="tiled-kernels" />
+
+冻结 input tile、一个 warp、load order、read column 5、barrier、output values、verifier 与 launch。静态 32-bank/four-byte-word model 把 unpadded word 写作 `lane * 32 + 5`，把 padded word 写作 `lane * 33 + 5`；这是地址算术，不是实测 conflict counter、timing 或性能排序。
+
+## 构建并保留记录
+
+```sh
+mkdir -p lab05-evidence
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/ex06-shared-memory-tile-bank-padding
+```
+
+为每条命令保存分开的原始 stdout/stderr 与 exit status。失败即记录 blocker 并停止。本地成功 build 或 host-only bank model 不会把空 compilation axis 改成 Compile-Checked。
+
+## 验证正确性
+
+先在 profiler 外运行 canonical binary：
+
+```sh
+./build/ex06-shared-memory-tile-bank-padding \
+  >lab05-evidence/correctness.stdout.log \
+  2>lab05-evidence/correctness.stderr.log
+status=$?
+printf '%s\n' "$status" >lab05-evidence/correctness.status
+```
+
+Unpadded 与 padded 必须产生相同 logical outputs；两个 variant 的全部 32 个 lane output 都必须与独立 CPU reference 精确比较一致，CUDA boundary 成功，application status 为零。不能放宽 comparison 或只比较两份 GPU output 而跳过 reference。任何解读之前，正确性必须先满足；否则拒绝 timing、profiler 与“padding 有效”的运行结论。
+
+## 冻结测量计划
+
+第一次 profiler collection 前固定：
+
+1. 同一 source commit、binary SHA-256、Lane、device、input、logical work、variant order、build flags、launch geometry、`ncu` options 和 metric list；唯一 layout 变量是 padding。
+2. 额外直接运行完整 binary 一次作为 process-level warm-up，复核 exact outputs，并从统计中排除。它不等价于在每个新 profiler process 内完成 steady-state warm-up。
+3. 对相同 binary 恰好执行 10 次独立 measured profiler invocation，并按 acquisition order 保留每次 unpadded/padded 尝试。
+4. 预先声明每个 layout/metric 的汇总为该固定 10-attempt batch 的 median 与 min/max spread，并且只有 10 次尝试全部合格时才计算。只有 nonzero tool/application status、correctness failure、missing kernel 或 missing metric value 可标 invalid；原记录和原因仍须保留，数值很大或不利于结论不构成 invalid。任一次 invalid 时不发布 summary，而是记录 batch blocker；修复原因后必须在新 batch directory 中重做全部 10 次，禁止选择性补样本或覆盖旧记录。
+
+这就是 equal work/build/launch freeze。改变固定项后必须重启整个 batch，不能挑选或拼接样本。
+
+## 分析器门槛
+
+```sh
+ncu --version >lab05-evidence/ncu-version.stdout.log \
+  2>lab05-evidence/ncu-version.stderr.log
+ncu --help >lab05-evidence/ncu-help.stdout.log \
+  2>lab05-evidence/ncu-help.stderr.log
+ncu --devices 0 --query-metrics --query-metrics-mode all \
+  >lab05-evidence/ncu-query.stdout.log \
+  2>lab05-evidence/ncu-query.stderr.log
+```
+
+保留每条命令的 exit statuses。Owner release 坐标分别为 CUDA 11.8.0 / Nsight Compute 2022.3.0.22、CUDA 12.9.2 Lane / 2025.2.1.3、CUDA 13.3.1 Lane / 2026.2.1.5；manifest 必须记录实际 `ncu --version`。版本不对应、query 失败，或当前 GPU 没有可用于本 Lab 声明的 shared-memory bank-conflict metric 时，记录 blocker。不要从另一架构复制 metric name。
+
+再对完整 EX06 process 做一次选定 metric probe。若得到 `ERR_NVGPUCTRPERM`、其他 performance counter permission failure、unsupported/`n/a` metric 或 report-write error，停止并保留日志。管理员只能在 Lab 外配置合规 non-admin profiling；本实验不授权提权。Required metrics unavailable 时记录 blocker，不拿 host clock、event time 或静态 bank model 代替。
+
+## 重复采集
+
+```sh
+metric_csv='<fill exact queried metric names>'
+batch_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+batch_dir="lab05-evidence/batch-${batch_id}"
+if ! mkdir "$batch_dir"; then
+  printf 'batch directory already exists: %s\n' "$batch_dir" >&2
+  exit 1
+fi
+sample=1
+while [ "$sample" -le 10 ]; do
+  id=$(printf '%02d' "$sample")
+  ncu --devices 0 --metrics "$metric_csv" --page raw --csv \
+    ./build/ex06-shared-memory-tile-bank-padding \
+    >"${batch_dir}/profile-${id}.stdout.log" \
+    2>"${batch_dir}/profile-${id}.stderr.log"
+  status=$?
+  printf '%s\n' "$status" \
+    >"${batch_dir}/profile-${id}.status"
+  sample=$((sample + 1))
+done
+```
+
+用 application variant identity 与 report kernel specialization 建立 unpadded/padded 映射，并保留 replay 信息、原始 stdout/stderr、status 与 report。每个 raw value 都增加一条 `raw_measurements` ledger record，包含：
+
+1. Identity：`batch_id`、`sample_id`、`layout`、`metric_name` 与 `unit`。
+2. Measurement：`raw_value` 与 `binary_sha256`。
+3. Statuses：`ncu_status` 与 `correctness_status`。
+4. Review：`report_path` 与 `valid_or_blocker`。
+
+不得复用 `batch_id` 或覆盖 blocked batch；创建下一批前，先保留旧目录、blocker 与 custody record。
+
+## 解读记录
+
+Event timing 与 profiler measurement 不能互换。Timing-enabled event 由 `cudaEventRecord` 标记 device timeline，完成后 `cudaEventElapsedTime` 返回该 event interval；canonical EX06 没有 event instrumentation。Nsight Compute 会插入 measurement library，并可能 replay、serialize、控制 cache/clock 或多 pass 采集；它的 duration 或 counter 只属于这份 profiler contract。
+
+LAB05 不修改 binary 来添加 event，也不混合 event、wall-clock 与 profiler sample。新 event 实验必须重新声明 build、warm-up、同步边界与 statistic。
+
+只有固定 10 次尝试在相同 metric、unit、options 与 device 下全部合格时，才把每次路径附到 median 与 min/max spread；否则只报告 blocker，不给 summary。地址模型可以解释 bank mapping，但本 Lab 不预言 unpadded/padded 的 profiler ordering、duration、latency、throughput 或 speedup。若 required metric 缺失或结果不支持解释，结论就是 blocker 或不确定，而不是预测。
+
+## 预期观察，不是记录结果
+
+- Unpadded 与 padded **应当**产生相同 logical outputs，并分别对全部 32 个 lane 通过 CPU reference exact comparison。
+- Gate 通过后，每个 layout **应当**能关联自己的 raw bank-conflict profiler measurement、report 与 status；不承诺方向或数值。
+- Warm-up **应当**被排除，固定 10 次尝试都**应当**保留；只有整批合格时才报告预先声明的 median 与 min/max spread。
+
+这些是预期观察，不是记录结果。本页没有预填任何 GPU 数值、运行输出或 profiler 结果，`recordedObservations` 为空。
+
+## 分开维护证据轴
+
+| 轴 | 当前状态 | 边界 |
+| --- | --- | --- |
+| Compilation | 空 | 本地 build 不自动成为 Compile-Checked evidence |
+| Runtime | Pending Hardware Verification | 尚无 Reference Environment 复现 |
+| Recorded observations | 空 | 真实 manifest、raw logs、exit statuses、raw measurements 与 criteria result 才能进入待评估记录 |
+
+Static bank arithmetic、CanonicalCode、host test 与 profiler availability 都不会单独升级证据状态。
+
+## 清理与保留
+
+先保存 manifest、原始 stdout/stderr、exit statuses、`raw_measurements`、reports、blockers 与 criteria result，再运行：
+
+```sh
+make clean BUILD_DIR=build
+```
+
+不要提交 binary、credential、私密 device identifier 或未经检查的大型 profiler artifact。
+
+## 来源与复核
+
+Lane/component 坐标来自 [CUDA 11.8.0 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)、[CUDA 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html)和[CUDA 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)。CLI gate 依次受 [2022.3 CLI](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html)、[2025.2 CLI](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html)与[2026.2.1 CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)约束。[Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)约束 metric query、replay、overhead、permission 与 reproducibility；[CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-and-memory-banks)只提供 shared-memory bank model 与 padding rationale。
+
+Context7 `/websites/nvidia_cuda` 只用于检索交叉核对；精确 NVIDIA owner docs/releases 才是版本与接口坐标，Context7 不提供 evidence。
+
+**事实核查日期：2026-08-28。** Compilation 为空，runtime 为 Pending Hardware Verification。

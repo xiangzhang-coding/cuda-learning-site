@@ -6,10 +6,13 @@ import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/bro
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 test('all published routes load without browser errors', async ({ page }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(210_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
+  const routes = await discoverPublishedRoutes();
+  expect(routes).toHaveLength(218);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(109);
 
-  for (const route of await discoverPublishedRoutes()) {
+  for (const route of routes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
     await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
@@ -18,7 +21,7 @@ test('all published routes load without browser errors', async ({ page }) => {
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   for (const { zh, en } of [
     { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
@@ -57,14 +60,30 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/memory/event-dependencies-timing/', en: '/en/memory/event-dependencies-timing/' },
     { zh: '/memory/event-dependencies-timing/exercises/', en: '/en/memory/event-dependencies-timing/exercises/' },
     { zh: '/memory/event-dependencies-timing/solutions/', en: '/en/memory/event-dependencies-timing/solutions/' },
+    { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
+    { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
+    { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
+    { zh: '/correctness/memcheck-invalid-memory-access/', en: '/en/correctness/memcheck-invalid-memory-access/' },
+    { zh: '/correctness/memcheck-invalid-memory-access/exercises/', en: '/en/correctness/memcheck-invalid-memory-access/exercises/' },
+    { zh: '/correctness/memcheck-invalid-memory-access/solutions/', en: '/en/correctness/memcheck-invalid-memory-access/solutions/' },
+    { zh: '/correctness/racecheck-initcheck-synccheck/', en: '/en/correctness/racecheck-initcheck-synccheck/' },
+    { zh: '/correctness/racecheck-initcheck-synccheck/exercises/', en: '/en/correctness/racecheck-initcheck-synccheck/exercises/' },
+    { zh: '/correctness/racecheck-initcheck-synccheck/solutions/', en: '/en/correctness/racecheck-initcheck-synccheck/solutions/' },
+    { zh: '/correctness/timing-asynchronous-gpu-work/', en: '/en/correctness/timing-asynchronous-gpu-work/' },
+    { zh: '/correctness/timing-asynchronous-gpu-work/exercises/', en: '/en/correctness/timing-asynchronous-gpu-work/exercises/' },
+    { zh: '/correctness/timing-asynchronous-gpu-work/solutions/', en: '/en/correctness/timing-asynchronous-gpu-work/solutions/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
     { zh: '/examples/coalesced-strided-access/', en: '/en/examples/coalesced-strided-access/' },
     { zh: '/examples/shared-memory-tile-bank-padding/', en: '/en/examples/shared-memory-tile-bank-padding/' },
+    { zh: '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
     { zh: '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
+    { zh: '/labs/observe-coalescing/', en: '/en/labs/observe-coalescing/' },
+    { zh: '/labs/remove-shared-memory-bank-conflicts/', en: '/en/labs/remove-shared-memory-bank-conflicts/' },
+    { zh: '/labs/diagnose-four-sanitizer-failures/', en: '/en/labs/diagnose-four-sanitizer-failures/' },
     { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
@@ -91,7 +110,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   for (const scenario of [
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '环境清单', localePrefix: '/', expectedHrefs: ['/start/environment-manifest/', '/labs/record-cuda-environment/', '/practice/', '/glossary/'] },
@@ -107,6 +126,10 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'bank conflict 布局变换', localePrefix: '/', expectedHrefs: ['/memory/bank-conflicts-layouts/'] },
     { route: '/', button: /搜索/, query: '同步作用域 内存可见性', localePrefix: '/', expectedHrefs: ['/memory/synchronization-scopes/'] },
     { route: '/', button: /搜索/, query: 'Warp divergence 逻辑汇合', localePrefix: '/', expectedHrefs: ['/visuals/warp-divergence/', '/memory/warp-divergence-reconvergence/'] },
+    { route: '/', button: /搜索/, query: '可信的 CUDA 结果', localePrefix: '/', expectedHrefs: ['/correctness/cpu-references-tolerances-invariants/'] },
+    { route: '/', button: /搜索/, query: 'Q04 racecheck initcheck synccheck 定位缺陷', localePrefix: '/', expectedHrefs: ['/correctness/racecheck-initcheck-synccheck/'] },
+    { route: '/', button: /搜索/, query: 'LAB04 观察合并访问', localePrefix: '/', expectedHrefs: ['/labs/observe-coalescing/'] },
+    { route: '/', button: /搜索/, query: 'LAB07 诊断四类 Sanitizer 故障', localePrefix: '/', expectedHrefs: ['/labs/diagnose-four-sanitizer-failures/'] },
     { route: '/', button: /搜索/, query: '运行并验证向量加法', localePrefix: '/', expectedHrefs: ['/labs/vector-addition/'] },
     { route: '/', button: /搜索/, query: '可复现命令记录', localePrefix: '/', expectedHrefs: ['/start/linux-command-line/', '/glossary/'] },
     { route: '/', button: /搜索/, query: '基准环境候选配置', localePrefix: '/', expectedHrefs: ['/start/reference-environment-candidate/', '/labs/record-cuda-environment/'] },
@@ -125,6 +148,10 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'Shared-memory tiling', localePrefix: '/en/', expectedHrefs: ['/en/memory/shared-memory-tiling/'] },
     { route: '/en/', button: /Search/, query: 'Streams replace a global-order mental model', localePrefix: '/en/', expectedHrefs: ['/en/memory/stream-ordering/'] },
     { route: '/en/', button: /Search/, query: 'Stream and Event Dependency Traces', localePrefix: '/en/', expectedHrefs: ['/en/visuals/stream-event-dependencies/'] },
+    { route: '/en/', button: /Search/, query: 'Q03 Memcheck and invalid memory access', localePrefix: '/en/', expectedHrefs: ['/en/correctness/memcheck-invalid-memory-access/'] },
+    { route: '/en/', button: /Search/, query: 'Q05 Time asynchronous GPU work honestly', localePrefix: '/en/', expectedHrefs: ['/en/correctness/timing-asynchronous-gpu-work/'] },
+    { route: '/en/', button: /Search/, query: 'EX16 Compute Sanitizer Defect Suite Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/sanitizer-defect-suite/'] },
+    { route: '/en/', button: /Search/, query: 'LAB05 Remove Shared-Memory Bank Conflicts', localePrefix: '/en/', expectedHrefs: ['/en/labs/remove-shared-memory-bank-conflicts/'] },
     { route: '/en/', button: /Search/, query: 'Run and Verify Vector Addition', localePrefix: '/en/', expectedHrefs: ['/en/labs/vector-addition/'] },
     { route: '/en/', button: /Search/, query: 'arithmetic intensity occupancy', localePrefix: '/en/', expectedHrefs: ['/en/start/architecture-refresher/', '/en/start/architecture-refresher/exercises/', '/en/start/architecture-refresher/solutions/'] },
     { route: '/en/', button: /Search/, query: 'Environment Report Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/environment-report/'] },
@@ -148,6 +175,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
+  test.setTimeout(120_000);
   for (const route of [
     '/',
     '/en/',
@@ -221,6 +249,30 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/memory/event-dependencies-timing/exercises/',
     '/memory/event-dependencies-timing/solutions/',
     '/en/memory/event-dependencies-timing/solutions/',
+    '/correctness/cpu-references-tolerances-invariants/',
+    '/en/correctness/cpu-references-tolerances-invariants/',
+    '/correctness/cpu-references-tolerances-invariants/exercises/',
+    '/en/correctness/cpu-references-tolerances-invariants/exercises/',
+    '/correctness/cpu-references-tolerances-invariants/solutions/',
+    '/en/correctness/cpu-references-tolerances-invariants/solutions/',
+    '/correctness/memcheck-invalid-memory-access/',
+    '/en/correctness/memcheck-invalid-memory-access/',
+    '/correctness/memcheck-invalid-memory-access/exercises/',
+    '/en/correctness/memcheck-invalid-memory-access/exercises/',
+    '/correctness/memcheck-invalid-memory-access/solutions/',
+    '/en/correctness/memcheck-invalid-memory-access/solutions/',
+    '/correctness/racecheck-initcheck-synccheck/',
+    '/en/correctness/racecheck-initcheck-synccheck/',
+    '/correctness/racecheck-initcheck-synccheck/exercises/',
+    '/en/correctness/racecheck-initcheck-synccheck/exercises/',
+    '/correctness/racecheck-initcheck-synccheck/solutions/',
+    '/en/correctness/racecheck-initcheck-synccheck/solutions/',
+    '/correctness/timing-asynchronous-gpu-work/',
+    '/en/correctness/timing-asynchronous-gpu-work/',
+    '/correctness/timing-asynchronous-gpu-work/exercises/',
+    '/en/correctness/timing-asynchronous-gpu-work/exercises/',
+    '/correctness/timing-asynchronous-gpu-work/solutions/',
+    '/en/correctness/timing-asynchronous-gpu-work/solutions/',
     '/examples/vector-addition/',
     '/en/examples/vector-addition/',
     '/examples/multidimensional-indexing/',
@@ -231,12 +283,20 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/examples/coalesced-strided-access/',
     '/examples/shared-memory-tile-bank-padding/',
     '/en/examples/shared-memory-tile-bank-padding/',
+    '/examples/sanitizer-defect-suite/',
+    '/en/examples/sanitizer-defect-suite/',
     '/labs/',
     '/en/labs/',
     '/labs/vector-addition/',
     '/en/labs/vector-addition/',
     '/labs/break-and-repair-indexing/',
     '/en/labs/break-and-repair-indexing/',
+    '/labs/observe-coalescing/',
+    '/en/labs/observe-coalescing/',
+    '/labs/remove-shared-memory-bank-conflicts/',
+    '/en/labs/remove-shared-memory-bank-conflicts/',
+    '/labs/diagnose-four-sanitizer-failures/',
+    '/en/labs/diagnose-four-sanitizer-failures/',
     '/visuals/',
     '/en/visuals/',
     '/visuals/kernel-journey/',
