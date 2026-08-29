@@ -46,6 +46,10 @@ function selectVersion(output, pattern, label) {
   return line;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function parseOsRelease(content) {
   const fields = {};
   for (const line of content.split(/\r?\n/)) {
@@ -202,7 +206,7 @@ if (probe) {
   ), { quiet: true });
   hostCompilerPackage = selectVersion(
     packageOutput,
-    new RegExp(`^${probe.hostCompilerPackage}=`),
+    new RegExp(`^${escapeRegExp(probe.hostCompilerPackage)}=`),
     'host compiler package version',
   );
 }
