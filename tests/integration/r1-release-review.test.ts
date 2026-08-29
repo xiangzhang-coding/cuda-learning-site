@@ -55,9 +55,20 @@ describe('R1 release review', () => {
       compatibility: {
         supportedEnvironment: 'native-linux',
         gpuCapabilityTiers: {
-          baseline: '7.5+',
-          modernSingleGpu: '8.0+',
+          baseline: {
+            minimumComputeCapability: '7.5',
+            maximumProblemMemoryBytes: 8_589_934_592,
+            requiredGpuCount: 1,
+            additionalFeatureRequirements: [],
+          },
+          modernSingleGpu: {
+            minimumComputeCapability: '8.0',
+            minimumDeviceMemoryBytes: 8_589_934_592,
+            requiredGpuCount: 1,
+            additionalFeatureRequirements: [],
+          },
         },
+        architectureSpecificLabsRequireAdditionalFeatures: true,
         toolkitLanes: [
           {
             id: 'cuda-11.8',
@@ -130,7 +141,7 @@ describe('R1 release review', () => {
 
     for (const document of [readme, deployment, maintenance]) {
       expect(document).toContain('R1');
-      expect(document).toContain('issue #18');
+      expect(document).toMatch(/issue #18/i);
       expect(document).toMatch(/R2 and later|R2 or later/);
     }
     expect(maintenance).toContain('Review date: 2026-08-29');

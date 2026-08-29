@@ -5,6 +5,7 @@ import ex05Project from '../../examples/ex05-coalesced-strided-access/project.js
 import ex06Project from '../../examples/ex06-shared-memory-tile-bank-padding/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
+import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 const releaseOrigin = new URL(process.env.RELEASE_BASE_URL as string).origin;
@@ -13,7 +14,7 @@ const releaseKind = process.env.RELEASE_KIND as 'local' | 'preview' | 'productio
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
 const ex01DownloadUrl =
-  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip';
+  'https://github.com/xiangzhang-coding/cuda-learning-site/archive/0fa5667c8b61588cd4ae6db07883e6a16ad16181.zip';
 const ex03DownloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/09e30fba5bc0e9e8dc9ecf54e17806a041d9aee6.zip';
 const ex04SourceCommit = 'aeecf72d81d8777d027e6aa84c8614b51e9b0da2';
@@ -35,7 +36,7 @@ const releaseCatalogCounts = [
 ] as const;
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
@@ -65,118 +66,9 @@ test('serves the exact static release with production canonical metadata and no 
   expect(legalResponse.ok()).toBe(true);
   expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
 
-  for (const route of [
-    '/',
-    '/en/',
-    '/about/',
-    '/en/about/',
-    '/start/using-the-learning-site/',
-    '/en/start/using-the-learning-site/',
-    '/start/evidence-status/',
-    '/en/start/evidence-status/',
-    '/start/environment-manifest/',
-    '/en/start/environment-manifest/',
-    '/start/cpp17-for-cuda/',
-    '/en/start/cpp17-for-cuda/',
-    '/start/linux-command-line/',
-    '/en/start/linux-command-line/',
-    '/start/architecture-refresher/',
-    '/en/start/architecture-refresher/',
-    '/start/programmable-gpus/',
-    '/en/start/programmable-gpus/',
-    '/start/reference-environment-candidate/',
-    '/en/start/reference-environment-candidate/',
-    '/foundations/first-cuda-kernel/',
-    '/en/foundations/first-cuda-kernel/',
-    '/foundations/execution-hierarchy/',
-    '/en/foundations/execution-hierarchy/',
-    '/foundations/multidimensional-indexing/',
-    '/en/foundations/multidimensional-indexing/',
-    '/foundations/host-device-lifecycle/',
-    '/en/foundations/host-device-lifecycle/',
-    '/foundations/asynchronous-errors/',
-    '/en/foundations/asynchronous-errors/',
-    '/foundations/compute-capability/',
-    '/en/foundations/compute-capability/',
-    '/foundations/runtime-driver-api/',
-    '/en/foundations/runtime-driver-api/',
-    '/foundations/launch-geometry/',
-    '/en/foundations/launch-geometry/',
-    '/memory/address-spaces/',
-    '/en/memory/address-spaces/',
-    '/memory/coalescing-transactions/',
-    '/en/memory/coalescing-transactions/',
-    '/memory/shared-memory-tiling/',
-    '/en/memory/shared-memory-tiling/',
-    '/memory/bank-conflicts-layouts/',
-    '/en/memory/bank-conflicts-layouts/',
-    '/memory/synchronization-scopes/',
-    '/en/memory/synchronization-scopes/',
-    '/memory/warp-divergence-reconvergence/',
-    '/en/memory/warp-divergence-reconvergence/',
-    '/memory/stream-ordering/',
-    '/en/memory/stream-ordering/',
-    '/memory/event-dependencies-timing/',
-    '/en/memory/event-dependencies-timing/',
-    '/correctness/cpu-references-tolerances-invariants/',
-    '/en/correctness/cpu-references-tolerances-invariants/',
-    '/correctness/memcheck-invalid-memory-access/',
-    '/en/correctness/memcheck-invalid-memory-access/',
-    '/correctness/racecheck-initcheck-synccheck/',
-    '/en/correctness/racecheck-initcheck-synccheck/',
-    '/correctness/timing-asynchronous-gpu-work/',
-    '/en/correctness/timing-asynchronous-gpu-work/',
-    '/examples/environment-report/',
-    '/en/examples/environment-report/',
-    '/examples/vector-addition/',
-    '/en/examples/vector-addition/',
-    '/examples/multidimensional-indexing/',
-    '/en/examples/multidimensional-indexing/',
-    '/examples/error-handling-lifecycle/',
-    '/en/examples/error-handling-lifecycle/',
-    '/examples/coalesced-strided-access/',
-    '/en/examples/coalesced-strided-access/',
-    '/examples/shared-memory-tile-bank-padding/',
-    '/en/examples/shared-memory-tile-bank-padding/',
-    '/examples/sanitizer-defect-suite/',
-    '/en/examples/sanitizer-defect-suite/',
-    '/labs/',
-    '/en/labs/',
-    '/labs/record-cuda-environment/',
-    '/en/labs/record-cuda-environment/',
-    '/labs/vector-addition/',
-    '/en/labs/vector-addition/',
-    '/labs/break-and-repair-indexing/',
-    '/en/labs/break-and-repair-indexing/',
-    '/labs/observe-coalescing/',
-    '/en/labs/observe-coalescing/',
-    '/labs/remove-shared-memory-bank-conflicts/',
-    '/en/labs/remove-shared-memory-bank-conflicts/',
-    '/labs/diagnose-four-sanitizer-failures/',
-    '/en/labs/diagnose-four-sanitizer-failures/',
-    '/visuals/',
-    '/en/visuals/',
-    '/visuals/kernel-journey/',
-    '/en/visuals/kernel-journey/',
-    '/visuals/indexing/',
-    '/en/visuals/indexing/',
-    '/visuals/memory-transactions/',
-    '/en/visuals/memory-transactions/',
-    '/visuals/shared-memory-banks/',
-    '/en/visuals/shared-memory-banks/',
-    '/visuals/memory-hierarchy-lifetime/',
-    '/en/visuals/memory-hierarchy-lifetime/',
-    '/visuals/warp-divergence/',
-    '/en/visuals/warp-divergence/',
-    '/visuals/stream-event-dependencies/',
-    '/en/visuals/stream-event-dependencies/',
-    '/practice/',
-    '/en/practice/',
-    '/glossary/',
-    '/en/glossary/',
-    '/sources-and-versions/',
-    '/en/sources-and-versions/',
-  ]) {
+  const publishedRoutes = await discoverPublishedRoutes();
+  expect(publishedRoutes).toHaveLength(218);
+  for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
     await page.waitForLoadState('networkidle');

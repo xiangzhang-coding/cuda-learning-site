@@ -23,7 +23,7 @@ The production Learning Site is <https://cuda-learning-site.hmzhangxiang.workers
 
 The build command checks source/privacy boundaries, the exact lockfile and licenses, canonical imports, diagnostics, unit tests, static output, Wrangler's assets-only schema, built-output integration tests, and generated artifacts. The pinned Wrangler `4.125.0` is resolved from this repository rather than a mutable global or `latest` tag.
 
-`npm run deploy` invokes `wrangler deploy` for production. `npm run deploy:preview` invokes `wrangler versions upload`, which uploads a version without promoting it and exposes a public Preview URL because `preview_urls` is explicitly enabled. Internal links stay on the preview host, while canonical, hreflang, sitemap, and release metadata continue to identify the production `workers.dev` origin.
+`npm run deploy` invokes `wrangler deploy` for production. `npm run deploy:preview` invokes `wrangler versions upload`, which uploads a version without promoting it and exposes a public Preview URL because `preview_urls` is explicitly enabled. Both commands first reject tracked or untracked source changes and a stale or altered `dist/release.json`; production additionally requires the checked-out branch to be `main`. Internal links stay on the preview host, while canonical, hreflang, sitemap, and release metadata continue to identify the production `workers.dev` origin.
 
 ## Acceptance
 

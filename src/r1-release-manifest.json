@@ -60,9 +60,20 @@
   "compatibility": {
     "supportedEnvironment": "native-linux",
     "gpuCapabilityTiers": {
-      "baseline": "7.5+",
-      "modernSingleGpu": "8.0+"
+      "baseline": {
+        "minimumComputeCapability": "7.5",
+        "maximumProblemMemoryBytes": 8589934592,
+        "requiredGpuCount": 1,
+        "additionalFeatureRequirements": []
+      },
+      "modernSingleGpu": {
+        "minimumComputeCapability": "8.0",
+        "minimumDeviceMemoryBytes": 8589934592,
+        "requiredGpuCount": 1,
+        "additionalFeatureRequirements": []
+      }
     },
+    "architectureSpecificLabsRequireAdditionalFeatures": true,
     "toolkitLanes": [
       {
         "id": "cuda-11.8",

@@ -99,6 +99,75 @@ jobs:
           include-hidden-files: false
           retention-days: 7
 
+  ex01-build:
+    name: ${{ matrix.lane }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: ex01-cuda-11-8-cxx17-shared
+            cudart: shared
+            image: nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f
+          - lane: ex01-cuda-11-8-cxx17-static
+            cudart: static
+            image: nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f
+          - lane: ex01-cuda-12-9-cxx17-shared
+            cudart: shared
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: ex01-cuda-12-9-cxx17-static
+            cudart: static
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: ex01-cuda-13-3-cxx17-shared
+            cudart: shared
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+          - lane: ex01-cuda-13-3-cxx17-static
+            cudart: static
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+    steps:
+      - name: Check out canonical public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up exact Node.js for artifact scanning
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Record EX01 runner and container-tool coordinates
+        run: |
+          node -e "console.log(JSON.stringify({ImageOS:process.env.ImageOS,ImageVersion:process.env.ImageVersion,RUNNER_ARCH:process.env.RUNNER_ARCH},null,2))"
+          docker version --format '{{.Server.Version}}'
+          docker buildx version
+
+      - name: Compile EX01 without granting Evidence Status
+        run: |
+          mkdir -p "artifacts/cuda-ex01/${{ matrix.lane }}"
+          docker pull --platform linux/amd64 "${{ matrix.image }}"
+          docker run --platform linux/amd64 --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace/examples/ex01-environment-report \
+            "${{ matrix.image }}" \
+            bash scripts/compile-check.sh c++17 "${{ matrix.cudart }}" \
+            "/workspace/artifacts/cuda-ex01/${{ matrix.lane }}"
+
+      - name: Scan EX01 build logs
+        run: node scripts/check-artifacts.mjs "artifacts/cuda-ex01/${{ matrix.lane }}"
+
+      - name: Upload EX01 build-gate logs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuda-build-${{ matrix.lane }}
+          path: artifacts/cuda-ex01/${{ matrix.lane }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+
   ex03-build:
     name: ${{ matrix.lane }}
     runs-on: ubuntu-24.04
@@ -357,13 +426,14 @@ jobs:
   cuda-compile-gate:
     name: cuda-compile-gate
     if: ${{ always() }}
-    needs: [cuda-compile, ex03-build, ex04-build, ex05-build, ex06-build, ex16-build]
+    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex16-build]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Require every declared CUDA compile boundary
         env:
           CUDA_EVIDENCE_RESULT: ${{ needs.cuda-compile.result }}
+          EX01_BUILD_RESULT: ${{ needs.ex01-build.result }}
           EX03_BUILD_RESULT: ${{ needs.ex03-build.result }}
           EX04_BUILD_RESULT: ${{ needs.ex04-build.result }}
           EX05_BUILD_RESULT: ${{ needs.ex05-build.result }}
@@ -371,6 +441,7 @@ jobs:
           EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}
         run: |
           if [ "$CUDA_EVIDENCE_RESULT" != "success" ]; then exit 1; fi
+          if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX03_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX04_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX05_BUILD_RESULT" != "success" ]; then exit 1; fi

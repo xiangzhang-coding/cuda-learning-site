@@ -21,8 +21,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(manifest.scripts['quality:deployment']).toBe(
       'wrangler deploy --dry-run --outdir .quality/wrangler-dry-run',
     );
-    expect(manifest.scripts.deploy).toBe('wrangler deploy');
-    expect(manifest.scripts['deploy:preview']).toBe('wrangler versions upload');
+    expect(manifest.scripts.deploy).toBe('node scripts/check-release-source.mjs --require-main && wrangler deploy');
+    expect(manifest.scripts['deploy:preview']).toBe('node scripts/check-release-source.mjs && wrangler versions upload');
     expect(config).toEqual({
       $schema: './node_modules/wrangler/config-schema.json',
       name: 'cuda-learning-site',
@@ -36,6 +36,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     });
     expect(astroConfig).toContain("output: 'static'");
     expect(astroConfig).not.toMatch(/adapter|output:\s*['"]server['"]/);
+  });
+
+  it('rejects dirty, stale, or non-main production release inputs before upload', async () => {
+    const guard = await readFile(path.join(projectRoot, 'scripts/check-release-source.mjs'), 'utf8');
+
+    expect(guard).toContain("['status', '--porcelain=v1', '--untracked-files=all']");
+    expect(guard).toContain("['rev-parse', 'HEAD']");
+    expect(guard).toContain("['branch', '--show-current']");
+    expect(guard).toContain("release.sourceCommit !== head");
+    expect(guard).toContain("JSON.stringify(embeddedManifest) !== JSON.stringify(sourceManifest)");
+    expect(guard).toContain("requireMain && branch !== 'main'");
+    expect(guard).toContain('Release upload requires a clean tracked and untracked source tree.');
   });
 
   it('emits a source identity and complete project and bundled-interface notices without a Worker application', async () => {
@@ -90,6 +102,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('Build command: `npm run build:release`');
     expect(deployment).toContain('Production deploy command: `npm run deploy`');
     expect(deployment).toContain('Preview deploy command: `npm run deploy:preview`');
+    expect(deployment).toContain('reject tracked or untracked source changes');
+    expect(deployment).toContain('production additionally requires the checked-out branch to be `main`');
     expect(deployment).toContain('npm run test:release-smoke');
     expect(deployment).toContain('wrangler rollback');
     expect(deployment).toContain('No Worker application code or runtime binding');
