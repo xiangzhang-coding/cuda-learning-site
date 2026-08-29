@@ -37,6 +37,13 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: 'list',
+  webServer: releaseKind === 'local'
+    ? {
+        command: 'node scripts/serve-dist.mjs',
+        url: baseURL,
+        reuseExistingServer: true,
+      }
+    : undefined,
   use: {
     baseURL,
     screenshot: 'only-on-failure',

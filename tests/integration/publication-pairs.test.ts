@@ -1561,7 +1561,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'sources-and-versions',
-    factCheckDate: '2026-08-28',
+    factCheckDate: '2026-08-29',
     structure: 'scope,lookup-index,verified-interfaces,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',

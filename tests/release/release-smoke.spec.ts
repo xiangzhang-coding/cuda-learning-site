@@ -35,14 +35,30 @@ const releaseCatalogCounts = [
 ] as const;
 
 test('serves the exact static release with production canonical metadata and no browser errors', async ({ page, request }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
   await expect(releaseResponse.json()).resolves.toMatchObject({
+    schemaVersion: 2,
+    releaseId: 'R1',
+    reviewDate: '2026-08-29',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
+    scope: {
+      publicationPairs: 109,
+      sourceRoutes: 218,
+      practiceBankEntries: 29,
+      glossaryTerms: 95,
+      sourceRecords: 39,
+    },
+    evidence: {
+      compileChecked: ['EX02', 'LAB02'],
+      runtimeVerified: [],
+      referenceEnvironments: [],
+    },
+    knownLimitations: expect.arrayContaining(['R2 and later curriculum material is outside this release.']),
   });
 
   const legalResponse = await request.get('/legal/THIRD_PARTY_NOTICES.md');
@@ -56,8 +72,22 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/about/',
     '/start/using-the-learning-site/',
     '/en/start/using-the-learning-site/',
+    '/start/evidence-status/',
+    '/en/start/evidence-status/',
+    '/start/environment-manifest/',
+    '/en/start/environment-manifest/',
+    '/start/cpp17-for-cuda/',
+    '/en/start/cpp17-for-cuda/',
+    '/start/linux-command-line/',
+    '/en/start/linux-command-line/',
+    '/start/architecture-refresher/',
+    '/en/start/architecture-refresher/',
+    '/start/programmable-gpus/',
+    '/en/start/programmable-gpus/',
     '/start/reference-environment-candidate/',
     '/en/start/reference-environment-candidate/',
+    '/foundations/first-cuda-kernel/',
+    '/en/foundations/first-cuda-kernel/',
     '/foundations/execution-hierarchy/',
     '/en/foundations/execution-hierarchy/',
     '/foundations/multidimensional-indexing/',
@@ -124,6 +154,12 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/labs/remove-shared-memory-bank-conflicts/',
     '/labs/diagnose-four-sanitizer-failures/',
     '/en/labs/diagnose-four-sanitizer-failures/',
+    '/visuals/',
+    '/en/visuals/',
+    '/visuals/kernel-journey/',
+    '/en/visuals/kernel-journey/',
+    '/visuals/indexing/',
+    '/en/visuals/indexing/',
     '/visuals/memory-transactions/',
     '/en/visuals/memory-transactions/',
     '/visuals/shared-memory-banks/',
@@ -134,6 +170,12 @@ test('serves the exact static release with production canonical metadata and no 
     '/en/visuals/warp-divergence/',
     '/visuals/stream-event-dependencies/',
     '/en/visuals/stream-event-dependencies/',
+    '/practice/',
+    '/en/practice/',
+    '/glossary/',
+    '/en/glossary/',
+    '/sources-and-versions/',
+    '/en/sources-and-versions/',
   ]) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -603,7 +645,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     }
   }
 
-  const missing = await request.get('/api/r0-smoke-must-not-exist');
+  const missing = await request.get('/api/r1-smoke-must-not-exist');
   expect(missing.status()).toBe(404);
   expect(failures).toEqual([]);
 });

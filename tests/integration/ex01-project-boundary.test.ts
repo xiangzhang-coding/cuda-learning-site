@@ -45,10 +45,10 @@ describe('EX01 standalone project boundary', () => {
   it('builds and runs only the pure host-side contract test locally', async () => {
     const { stdout } = await execFileAsync('make', ['host-test'], {
       cwd: exampleRoot,
-      env: { ...process.env, BUILD_DIR: '.quality/host-test' },
     });
 
     expect(stdout).toContain('report-contract: pass');
+    expect(stdout).not.toMatch(/\bnvcc\b/);
   }, 15_000);
 
   it('queries environment facts without launching work, allocating device memory, or scraping tools', async () => {
