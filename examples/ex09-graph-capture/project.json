@@ -5,9 +5,9 @@
   "title": "CUDA Graph Capture",
   "purpose": "Capture a fixed two-kernel CUDA graph, replay it three times, and verify complete results for correctness without making performance claims.",
   "root": "examples/ex09-graph-capture",
-  "sourceCommit": "f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a/examples/ex09-graph-capture",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a.zip",
+  "sourceCommit": "fb0306db725ab960a61b50456c227545057de392",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb0306db725ab960a61b50456c227545057de392/examples/ex09-graph-capture",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb0306db725ab960a61b50456c227545057de392.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

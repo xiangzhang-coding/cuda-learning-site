@@ -17,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex08-unified-memory-migration');
-const sourceCommit = '818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f';
+const sourceCommit = 'fb0306db725ab960a61b50456c227545057de392';
 
 const lanes = [
   {
@@ -99,12 +99,24 @@ describe('EX08 standalone project boundary', () => {
     expect(cudaSources).toEqual(['src/unified_memory_migration.cu']);
   });
 
-  it('pins the temporary source commit to a tree containing EX08', async () => {
+  it('pins the source commit to the exact EX08 canonical build inputs', async () => {
     await expect(execFileAsync(
       'git',
       ['cat-file', '-e', `${sourceCommit}:examples/ex08-unified-memory-migration/project.json`],
       { cwd: projectRoot },
     )).resolves.toBeDefined();
+
+    for (const input of ['include/unified_memory_migration_reference.hpp', 'src/unified_memory_migration.cu']) {
+      const [{ stdout: pinned }, current] = await Promise.all([
+        execFileAsync(
+          'git',
+          ['show', `${sourceCommit}:examples/ex08-unified-memory-migration/${input}`],
+          { cwd: projectRoot },
+        ),
+        readFile(path.join(exampleRoot, input), 'utf8'),
+      ]);
+      expect(pinned, input).toBe(current);
+    }
   });
 
   it('pins three C++17 lanes, the phased model, and exact memory bounds', async () => {

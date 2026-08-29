@@ -5,9 +5,9 @@
   "title": "Streams, Events, and Overlap",
   "purpose": "Compare serial and chunked stream/event structures for the same transform while proving correctness only, never timing or overlap.",
   "root": "examples/ex07-streams-events-overlap",
-  "sourceCommit": "b065ba16066f12d4c98b3057a9ee8ba8b6a1b3cd",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/b065ba16066f12d4c98b3057a9ee8ba8b6a1b3cd/examples/ex07-streams-events-overlap",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/b065ba16066f12d4c98b3057a9ee8ba8b6a1b3cd.zip",
+  "sourceCommit": "fb0306db725ab960a61b50456c227545057de392",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb0306db725ab960a61b50456c227545057de392/examples/ex07-streams-events-overlap",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb0306db725ab960a61b50456c227545057de392.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

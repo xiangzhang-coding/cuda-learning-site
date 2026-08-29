@@ -17,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex07-streams-events-overlap');
-const sourceCommit = 'b065ba16066f12d4c98b3057a9ee8ba8b6a1b3cd';
+const sourceCommit = 'fb0306db725ab960a61b50456c227545057de392';
 
 const lanes = [
   {

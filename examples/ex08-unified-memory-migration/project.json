@@ -5,9 +5,9 @@
   "title": "Unified Memory Migration",
   "purpose": "Execute a phased managed-memory workload and report capabilities while correctness remains independent of migration observation.",
   "root": "examples/ex08-unified-memory-migration",
-  "sourceCommit": "818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f/examples/ex08-unified-memory-migration",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/818ccfb0ce5dc9d33dc7cd3d23d315046950dc4f.zip",
+  "sourceCommit": "fb0306db725ab960a61b50456c227545057de392",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb0306db725ab960a61b50456c227545057de392/examples/ex08-unified-memory-migration",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb0306db725ab960a61b50456c227545057de392.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

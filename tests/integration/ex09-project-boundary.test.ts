@@ -17,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex09-graph-capture');
-const sourceCommit = 'f7fa9ff595ef203f93d6291dc9c08e053a8e6e4a';
+const sourceCommit = 'fb0306db725ab960a61b50456c227545057de392';
 
 const lanes = [
   {
