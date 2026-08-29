@@ -126,7 +126,7 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'bank conflict 布局变换', localePrefix: '/', expectedHrefs: ['/memory/bank-conflicts-layouts/'] },
     { route: '/', button: /搜索/, query: '同步作用域 内存可见性', localePrefix: '/', expectedHrefs: ['/memory/synchronization-scopes/'] },
     { route: '/', button: /搜索/, query: 'Warp divergence 逻辑汇合', localePrefix: '/', expectedHrefs: ['/visuals/warp-divergence/', '/memory/warp-divergence-reconvergence/'] },
-    { route: '/', button: /搜索/, query: 'Q01 CPU 参考实现 容差 不变量', localePrefix: '/', expectedHrefs: ['/correctness/cpu-references-tolerances-invariants/'] },
+    { route: '/', button: /搜索/, query: '可信的 CUDA 结果', localePrefix: '/', expectedHrefs: ['/correctness/cpu-references-tolerances-invariants/'] },
     { route: '/', button: /搜索/, query: 'Q04 racecheck initcheck synccheck 定位缺陷', localePrefix: '/', expectedHrefs: ['/correctness/racecheck-initcheck-synccheck/'] },
     { route: '/', button: /搜索/, query: 'LAB04 观察合并访问', localePrefix: '/', expectedHrefs: ['/labs/observe-coalescing/'] },
     { route: '/', button: /搜索/, query: 'LAB07 诊断四类 Sanitizer 故障', localePrefix: '/', expectedHrefs: ['/labs/diagnose-four-sanitizer-failures/'] },
