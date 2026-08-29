@@ -123,7 +123,7 @@
     "expectedObservations": [
       "The serial and chunked paths should each report PASS only when all 4,099 outputs exactly match the pure host reference.",
       "The pure host contract should partition 4,099 elements into four 1,024-element chunks followed by one 3-element chunk without gaps or overlap.",
-      "deviceOverlap and asyncEngineCount should be reported only as device capabilities; the program should make no claim that copy, kernel, or stream work overlapped."
+      "asyncEngineCount and concurrentKernels should be reported only as device capabilities; the program should make no claim that copy, kernel, or stream work overlapped."
     ],
     "recordedObservations": []
   }

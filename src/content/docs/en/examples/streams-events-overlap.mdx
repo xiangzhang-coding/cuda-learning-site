@@ -39,7 +39,7 @@ evidence:
   expectedObservations:
     - The serial and chunked paths should each report PASS only when all 4,099 outputs exactly match the pure host reference.
     - The pure host contract should partition 4,099 elements into four 1,024-element chunks followed by one 3-element chunk without gaps or overlap.
-    - deviceOverlap and asyncEngineCount should be reported only as device capabilities; the program should make no claim that copy, kernel, or stream work overlapped.
+    - asyncEngineCount and concurrentKernels should be reported only as device capabilities; the program should make no claim that copy, kernel, or stream work overlapped.
   recordedObservations: []
 sources:
   - title: 'CUDA Programming Guide - Asynchronous Execution'
@@ -211,7 +211,7 @@ The serial path enqueues one H2D copy, one kernel, and one D2H copy in a named n
 
 Chunks alternate between two fixed device slots. Reusing a slot is safe because prior operations in that same stream precede later operations. Each launch is followed immediately by `cudaGetLastError`; a completion event is recorded after each stream's final D2H and synchronized before host verification. Events use `cudaEventDisableTiming`, and the source never calls an elapsed-time API.
 
-The host input and both returned outputs are allocated with `cudaMallocHost`. `deviceOverlap` and `asyncEngineCount` are printed as capability fields only. Page locking, multiple streams, asynchronous API names, and those capability values do not prove that a copy engine was used or that any intervals overlapped.
+The host input and both returned outputs are allocated with `cudaMallocHost`. `asyncEngineCount` and `concurrentKernels` are printed as capability fields only. Page locking, multiple streams, asynchronous API names, and those capability values do not prove that a copy engine was used or that any intervals overlapped.
 
 ## Host reference boundary
 
@@ -258,7 +258,7 @@ The page publishes no duration, bandwidth, throughput, speedup, copy-engine trac
 
 1. The serial and chunked paths should each report `PASS` only when all 4,099 outputs exactly match the pure host reference.
 2. The pure host contract should produce four 1,024-element chunks followed by one 3-element chunk, with no gap or intersecting logical ranges.
-3. `deviceOverlap` and `asyncEngineCount` should appear only as capabilities and should not be interpreted as evidence that submitted work overlapped.
+3. `asyncEngineCount` and `concurrentKernels` should appear only as capabilities and should not be interpreted as evidence that submitted work overlapped.
 
 These are acceptance criteria. None is a recorded GPU observation.
 

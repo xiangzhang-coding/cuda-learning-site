@@ -99,12 +99,24 @@ describe('EX07 standalone project boundary', () => {
     expect(cudaSources).toEqual(['src/streams_events_overlap.cu']);
   });
 
-  it('pins the temporary source commit to a tree containing EX07', async () => {
+  it('pins the source commit to the exact EX07 canonical build inputs', async () => {
     await expect(execFileAsync(
       'git',
       ['cat-file', '-e', `${sourceCommit}:examples/ex07-streams-events-overlap/project.json`],
       { cwd: projectRoot },
     )).resolves.toBeDefined();
+
+    for (const input of ['include/streams_events_overlap_reference.hpp', 'src/streams_events_overlap.cu']) {
+      const [{ stdout: pinned }, current] = await Promise.all([
+        execFileAsync(
+          'git',
+          ['show', `${sourceCommit}:examples/ex07-streams-events-overlap/${input}`],
+          { cwd: projectRoot },
+        ),
+        readFile(path.join(exampleRoot, input), 'utf8'),
+      ]);
+      expect(pinned, input).toBe(current);
+    }
   });
 
   it('pins three C++17 lanes, complete chunk bounds, and exact memory limits', async () => {
@@ -218,7 +230,8 @@ describe('EX07 standalone project boundary', () => {
       readFile(path.join(projectRoot, 'src/content/docs/examples/streams-events-overlap.mdx'), 'utf8'),
     ]);
 
-    expect(source).toContain('capability deviceOverlap=');
+    expect(source).toContain('capability asyncEngineCount=');
+    expect(source).toContain('concurrentKernels=');
     expect(source).toContain('asyncEngineCount=');
     expect(source).toContain('interpretation=capability-only');
     expect(source).toContain('cudaEventDisableTiming');

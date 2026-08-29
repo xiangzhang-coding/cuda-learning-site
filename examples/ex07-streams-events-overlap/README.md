@@ -36,7 +36,7 @@ On Native Linux with one CUDA GPU of compute capability 7.5 or newer, build and 
 ./build/ex07-streams-events-overlap
 ```
 
-The program reports `deviceOverlap` and `asyncEngineCount` explicitly as capability fields, followed by correctness for the serial and chunked paths. These fields do not report a timeline or establish that any operations ran concurrently. The program prints no duration, bandwidth, throughput, speedup, or observed-overlap statement.
+The program reports `asyncEngineCount` and `concurrentKernels` explicitly as capability fields, followed by correctness for the serial and chunked paths. These fields do not report a timeline or establish that any operations ran concurrently. The program prints no duration, bandwidth, throughput, speedup, or observed-overlap statement.
 
 ## Evidence Boundary
 

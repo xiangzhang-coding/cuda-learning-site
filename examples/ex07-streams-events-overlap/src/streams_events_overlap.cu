@@ -213,8 +213,8 @@ int main() {
   const bool chunked_passed = ex07::verify_exact(
       host_expected.data(), host_chunked, ex07::kElementCount).matches;
 
-  std::cout << "capability deviceOverlap=" << properties.deviceOverlap
-            << " asyncEngineCount=" << properties.asyncEngineCount
+  std::cout << "capability asyncEngineCount=" << properties.asyncEngineCount
+            << " concurrentKernels=" << properties.concurrentKernels
             << " interpretation=capability-only\n";
   std::cout << "path=serial result="
             << (serial_passed ? "PASS" : "FAIL") << '\n';
