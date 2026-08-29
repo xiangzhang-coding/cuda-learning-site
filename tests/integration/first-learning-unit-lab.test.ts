@@ -96,7 +96,7 @@ describe('LAB02 external verification contract', () => {
     expect(metadata(document, 'cuda:difficulty')).toBe('introductory');
     expect(metadata(document, 'cuda:toolkit-lanes')).toBe('cuda-11.8,cuda-12.9,cuda-13.3');
     expect(metadata(document, 'cuda:minimum-compute-capability')).toBe('7.5');
-    expect(Number(metadata(document, 'cuda:maximum-problem-memory-bytes'))).toBeLessThan(8 * 1024 ** 3);
+    expect(Number(metadata(document, 'cuda:maximum-problem-memory-bytes'))).toBeLessThan(8_000_000_000);
     expect(metadata(document, 'cuda:gpu-count')).toBe('1');
     expect(metadata(document, 'cuda:permissions')).toBeTruthy();
     expect(metadata(document, 'cuda:evidence-compilation')).toBe('Compile-Checked');
