@@ -4,9 +4,9 @@
   "id": "EX16",
   "title": "Compute Sanitizer defect suite",
   "root": "examples/ex16-sanitizer-defect-suite",
-  "sourceCommit": "0c1ac1b3125a92a35270ec2a498f009125b89597",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/0c1ac1b3125a92a35270ec2a498f009125b89597/examples/ex16-sanitizer-defect-suite",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/0c1ac1b3125a92a35270ec2a498f009125b89597.zip",
+  "sourceCommit": "48367dfafe809bb15f0f7f6117eab37e88403391",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/48367dfafe809bb15f0f7f6117eab37e88403391/examples/ex16-sanitizer-defect-suite",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/48367dfafe809bb15f0f7f6117eab37e88403391.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
