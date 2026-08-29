@@ -4,8 +4,8 @@
   "id": "EX01",
   "title": "Environment report",
   "root": "examples/ex01-environment-report",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/0fa5667c8b61588cd4ae6db07883e6a16ad16181/examples/ex01-environment-report",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/0fa5667c8b61588cd4ae6db07883e6a16ad16181.zip",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/4f8ad5fca74599eccf8429362cd2abd5e84983e2/examples/ex01-environment-report",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/4f8ad5fca74599eccf8429362cd2abd5e84983e2.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
