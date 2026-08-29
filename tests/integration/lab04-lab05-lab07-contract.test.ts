@@ -272,7 +272,7 @@ describe('LAB04, LAB05, and LAB07 bilingual Lab contracts', () => {
         expect(yamlScalar(metadata, 'minimumComputeCapability')).toBe('7.5');
         expect(yamlScalar(metadata, 'gpuCount')).toBe('1');
         expect(maximumProblemMemoryBytes).toBeGreaterThan(0);
-        expect(maximumProblemMemoryBytes).toBeLessThan(8 * 1024 ** 3);
+        expect(maximumProblemMemoryBytes).toBeLessThan(8_000_000_000);
         expect(yamlList(metadata, 'permissions').length).toBeGreaterThan(0);
         expect(hardwareGate).toMatch(/Native Linux only/i);
         expect(hardwareGate).toMatch(/(?:one|1) CUDA GPU/i);

@@ -101,7 +101,7 @@ describe('EX16 standalone sanitizer defect-suite boundary', () => {
       target: ['sm_75', 'compute_75'],
     });
     expect(example.compatibility.maximumProblemMemoryBytes).toBeGreaterThan(0);
-    expect(example.compatibility.maximumProblemMemoryBytes).toBeLessThanOrEqual(8 * 1024 ** 3);
+    expect(example.compatibility.maximumProblemMemoryBytes).toBeLessThanOrEqual(8_000_000_000);
     expect(example.compatibility.lanes.map((lane: {
       id: string;
       toolkit: string;

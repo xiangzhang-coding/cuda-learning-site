@@ -40,6 +40,12 @@ describe('CUDA compile evidence workflow', () => {
       'lane: cuda-13-3-cxx17',
       'lane: cuda-13-3-cxx20',
       'lane: cuda-13-3-cxx23-probe',
+      'lane: ex01-cuda-11-8-cxx17-shared',
+      'lane: ex01-cuda-11-8-cxx17-static',
+      'lane: ex01-cuda-12-9-cxx17-shared',
+      'lane: ex01-cuda-12-9-cxx17-static',
+      'lane: ex01-cuda-13-3-cxx17-shared',
+      'lane: ex01-cuda-13-3-cxx17-static',
       'lane: ex03-cuda-11-8-cxx17',
       'lane: ex03-cuda-12-9-cxx17',
       'lane: ex03-cuda-13-3-cxx17',
@@ -62,6 +68,7 @@ describe('CUDA compile evidence workflow', () => {
 
   it('records manifests, scans retained evidence, and gates all matrix jobs', async () => {
     const workflow = await readProjectFile('.github/workflows/cuda-compile.yml');
+    const ex01Build = workflow.match(/^  ex01-build:\n[\s\S]*?(?=^  ex03-build:)/m)?.[0] ?? '';
     const ex04Build = workflow.match(/^  ex04-build:\n[\s\S]*?(?=^  ex05-build:)/m)?.[0] ?? '';
     const ex05Build = workflow.match(/^  ex05-build:\n[\s\S]*?(?=^  ex06-build:)/m)?.[0] ?? '';
     const ex06Build = workflow.match(/^  ex06-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
@@ -80,20 +87,44 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toMatch(/^  cuda-compile-gate:/m);
     expect(workflow).toContain('if: ${{ always() }}');
     expect(workflow).toContain('CUDA_EVIDENCE_RESULT: ${{ needs.cuda-compile.result }}');
+    expect(workflow).toContain('EX01_BUILD_RESULT: ${{ needs.ex01-build.result }}');
     expect(workflow).toContain('EX03_BUILD_RESULT: ${{ needs.ex03-build.result }}');
     expect(workflow).toContain('EX04_BUILD_RESULT: ${{ needs.ex04-build.result }}');
     expect(workflow).toContain('EX05_BUILD_RESULT: ${{ needs.ex05-build.result }}');
     expect(workflow).toContain('EX06_BUILD_RESULT: ${{ needs.ex06-build.result }}');
     expect(workflow).toContain('EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}');
     expect(workflow).toContain(
-      'needs: [cuda-compile, ex03-build, ex04-build, ex05-build, ex06-build, ex16-build]',
+      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex16-build]',
     );
+    expect(workflow).toContain('if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX04_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX05_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX06_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
+
+    expect(ex01Build).not.toBe('');
+    expect([...ex01Build.matchAll(/^\s+- lane: (\S+)$/gm)].map((match) => match[1])).toEqual([
+      'ex01-cuda-11-8-cxx17-shared',
+      'ex01-cuda-11-8-cxx17-static',
+      'ex01-cuda-12-9-cxx17-shared',
+      'ex01-cuda-12-9-cxx17-static',
+      'ex01-cuda-13-3-cxx17-shared',
+      'ex01-cuda-13-3-cxx17-static',
+    ]);
+    expect(ex01Build.match(/^\s+cudart: shared$/gm)).toHaveLength(3);
+    expect(ex01Build.match(/^\s+cudart: static$/gm)).toHaveLength(3);
+    expect(ex01Build).toContain('Record EX01 runner and container-tool coordinates');
+    expect(ex01Build).toContain('ImageVersion');
+    expect(ex01Build).toContain("docker version --format '{{.Server.Version}}'");
+    expect(ex01Build).toContain('docker buildx version');
+    expect(ex01Build).toContain('Compile EX01 without granting Evidence Status');
+    expect(ex01Build).toContain('bash scripts/compile-check.sh c++17 "${{ matrix.cudart }}"');
+    expect(ex01Build).toContain('path: artifacts/cuda-ex01/${{ matrix.lane }}');
+    expect(ex01Build).toContain('retention-days: 7');
+    expect(ex01Build).not.toContain('Compile-Checked');
+    expect(ex01Build).not.toContain('Runtime-Verified');
 
     expect(ex04Build).not.toBe('');
     expect(ex04Build.match(/^\s+- lane: ex04-cuda-\d+-\d+-cxx17$/gm)).toHaveLength(3);
@@ -182,6 +213,7 @@ describe('CUDA compile evidence workflow', () => {
     const [
       orchestrator,
       laneScript,
+      ex01LaneScript,
       ex03LaneScript,
       ex04LaneScript,
       ex05LaneScript,
@@ -190,6 +222,7 @@ describe('CUDA compile evidence workflow', () => {
     ] = await Promise.all([
       readProjectFile('scripts/run-cuda-compile.mjs'),
       readProjectFile('examples/ex02-vector-addition/scripts/compile-check.sh'),
+      readProjectFile('examples/ex01-environment-report/scripts/compile-check.sh'),
       readProjectFile('examples/ex03-multidimensional-indexing/scripts/compile-check.sh'),
       readProjectFile('examples/ex04-error-handling-lifecycle/scripts/compile-check.sh'),
       readProjectFile('examples/ex05-coalesced-strided-access/scripts/compile-check.sh'),
@@ -203,6 +236,8 @@ describe('CUDA compile evidence workflow', () => {
     expect(orchestrator).toContain('-std=c\\+\\+23 flag is not supported with the configured host compiler');
     expect(laneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex02-vector-addition(?:\s|$)/m);
     expect(laneScript).toContain('make host-test');
+    expect(ex01LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex01-environment-report(?:\s|$)/m);
+    expect(ex01LaneScript).toContain('make host-test');
     expect(ex03LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex03-multidimensional-indexing(?:\s|$)/m);
     expect(ex03LaneScript).toContain('make host-test');
     expect(ex04LaneScript).not.toMatch(/(?:^|\s)(?:\.\/)?build\/ex04-error-handling-lifecycle(?:\s|$)/m);

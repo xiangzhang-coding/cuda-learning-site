@@ -8,7 +8,7 @@ Website source, configuration, styles, test tooling, and scripts are licensed un
 
 This scope includes:
 
-- `astro.config.mjs`, `src/content.config.ts`, `src/components/`, `src/resource-indexes/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
+- `astro.config.mjs`, `src/content.config.ts`, `src/r1-release-manifest.json`, `src/components/`, `src/resource-indexes/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
 - `scripts/` and `tests/`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration

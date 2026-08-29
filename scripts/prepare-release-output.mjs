@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFile } from 'node:child_process';
-import { copyFile, mkdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
@@ -10,8 +10,12 @@ const distRoot = path.join(projectRoot, 'dist');
 const legalRoot = path.join(distRoot, 'legal');
 const environmentCommit = process.env.WORKERS_CI_COMMIT_SHA || process.env.GITHUB_SHA;
 const sourceCommit = environmentCommit ?? (await execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot })).stdout.trim();
+const releaseManifest = JSON.parse(await readFile(path.join(projectRoot, 'src/r1-release-manifest.json'), 'utf8'));
 
 if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error(`Invalid release source commit: ${sourceCommit}`);
+if (releaseManifest.releaseId !== 'R1' || releaseManifest.schemaVersion !== 2) {
+  throw new Error('The source release manifest is not the reviewed R1 schema.');
+}
 
 await mkdir(legalRoot, { recursive: true });
 await Promise.all(
@@ -31,13 +35,7 @@ await Promise.all(
 await writeFile(
   path.join(distRoot, 'release.json'),
   `${JSON.stringify(
-    {
-      'SPDX-License-Identifier': 'Apache-2.0',
-      schemaVersion: 1,
-      sourceCommit,
-      artifactType: 'static-assets',
-      canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
-    },
+    { ...releaseManifest, sourceCommit },
     null,
     2,
   )}\n`,

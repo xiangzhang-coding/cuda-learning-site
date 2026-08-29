@@ -10,6 +10,12 @@ The strict graph includes `F05<-F04`, `F06<-[F02,O03]`, `F07<-[F04,F05]`, `F08<-
 
 Contributions use [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) and [Pull Requests](https://github.com/xiangzhang-coding/cuda-learning-site/pulls). Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
 
+## R1 release review
+
+R1 is the reviewed bilingual release of O01-O08, F01-F08, M01-M08, Q01, and Q03-Q05 plus the eligible resources listed above. `src/r1-release-manifest.json` is the source release contract; every static build copies it into `/release.json` and adds the exact 40-character source commit. The manifest records the reviewed scope, the native-Linux Toolkit Lane matrix, GPU Capability Tier gates, the evidence inventory, and known limitations. Build and smoke tests reject a release whose generated record drifts from that contract.
+
+R1 does not declare a Reference Environment or a Runtime-Verified subject. EX02 and LAB02 retain the only qualifying Compile-Checked evidence; every Runnable Example and Lab remains Pending Hardware Verification at runtime, while the other CUDA compile jobs are build gates rather than retained evidence. The R1 workflow checks EX01 with shared and static CUDART linkage in all three Toolkit Lanes but retains those short-lived logs only as build-gate evidence. No sanitizer, profiler, timing, overlap, speedup, or other performance observation is published. [Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) is the authoritative dynamic acceptance record: R1 is accepted only after that record names the exact `main` commit, successful GitHub checks, Cloudflare version and deployment IDs, verified Preview URL, and passing production smoke. This source file does not pre-certify those later results. R2 and later curriculum material is outside this release.
+
 ## Local verification
 
 Use Node.js 24.19.0 and npm 11.17.0.
@@ -43,7 +49,7 @@ The build is fully static. F02-F04 reuse standalone VIS01 and VIS02; M01, M02, M
 
 ## Deployment
 
-The repository-pinned Wrangler deploys reviewed static output from a clean `main` checkout to <https://cuda-learning-site.hmzhangxiang.workers.dev>. The configuration contains only a Static Assets directory and no Worker application or runtime binding. Separate version uploads provide noncanonical Preview URLs; production and preview acceptance use the remote Playwright smoke gate. Workers Builds behavior is reviewed but its account automation is disabled for R0 to avoid a second deployment authority. See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings, evidence boundaries, and rollback.
+The repository-pinned Wrangler deploys reviewed static output from a clean `main` checkout to <https://cuda-learning-site.hmzhangxiang.workers.dev>. The configuration contains only a Static Assets directory and no Worker application or runtime binding. Separate version uploads provide noncanonical Preview URLs; production and preview acceptance use the remote Playwright smoke gate. Workers Builds behavior is reviewed but its account automation is disabled for R1 to avoid a second deployment authority. See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings, evidence boundaries, and rollback.
 
 ## Licensing
 

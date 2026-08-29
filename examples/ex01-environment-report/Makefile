@@ -18,6 +18,7 @@ endif
 NVCC_FLAGS := --std=$(DIALECT) --compiler-bindir="$(HOST_CXX)" -Iinclude -DEX01_CUDART_LINKAGE='"$(CUDART)"'
 NVCC_LINK_FLAGS := --std=$(DIALECT) --compiler-bindir="$(HOST_CXX)" --cudart=$(CUDART)
 HOST_FLAGS := -std=$(DIALECT) -Wall -Wextra -Wpedantic -Iinclude
+BUILD_STAMP := $(BUILD_DIR)/.ready
 
 .PHONY: all build clean preprocess compile link host-test FORCE
 
@@ -25,17 +26,18 @@ all: build
 
 build: link
 
-$(BUILD_DIR):
+$(BUILD_STAMP):
 	mkdir -p $(BUILD_DIR)
+	touch $@
 
 preprocess: $(BUILD_DIR)/environment_report.ii
 
-$(BUILD_DIR)/environment_report.ii: FORCE src/environment_report.cu include/environment_report.hpp | $(BUILD_DIR)
+$(BUILD_DIR)/environment_report.ii: FORCE src/environment_report.cu include/environment_report.hpp | $(BUILD_STAMP)
 	$(NVCC) $(NVCC_FLAGS) -E src/environment_report.cu -o $@
 
 compile: $(BUILD_DIR)/environment_report.o
 
-$(BUILD_DIR)/environment_report.o: FORCE src/environment_report.cu include/environment_report.hpp | $(BUILD_DIR)
+$(BUILD_DIR)/environment_report.o: FORCE src/environment_report.cu include/environment_report.hpp | $(BUILD_STAMP)
 	$(NVCC) $(NVCC_FLAGS) --compile src/environment_report.cu -o $@
 
 link: $(BUILD_DIR)/ex01-environment-report
@@ -46,7 +48,7 @@ $(BUILD_DIR)/ex01-environment-report: $(BUILD_DIR)/environment_report.o
 host-test: $(BUILD_DIR)/report_contract_test
 	$(BUILD_DIR)/report_contract_test
 
-$(BUILD_DIR)/report_contract_test: FORCE tests/report_contract_test.cpp include/environment_report.hpp | $(BUILD_DIR)
+$(BUILD_DIR)/report_contract_test: FORCE tests/report_contract_test.cpp include/environment_report.hpp | $(BUILD_STAMP)
 	$(HOST_CXX) $(HOST_FLAGS) tests/report_contract_test.cpp -o $@
 
 FORCE:

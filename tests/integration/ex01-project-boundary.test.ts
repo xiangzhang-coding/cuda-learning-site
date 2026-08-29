@@ -35,9 +35,9 @@ describe('EX01 standalone project boundary', () => {
     expect(example.evidence.runtime).toBe('Pending Hardware Verification');
     expect(example.evidence.expectedObservations).toHaveLength(2);
     expect(example.evidence.recordedObservations).toEqual([]);
-    expect(example.sourceUrl).toContain('23382602978cf99da8e9cbfff275f5f8fb8e0f47');
+    expect(example.sourceUrl).toContain('0fa5667c8b61588cd4ae6db07883e6a16ad16181');
     expect(example.downloadUrl).toBe(
-      'https://github.com/xiangzhang-coding/cuda-learning-site/archive/23382602978cf99da8e9cbfff275f5f8fb8e0f47.zip',
+      'https://github.com/xiangzhang-coding/cuda-learning-site/archive/0fa5667c8b61588cd4ae6db07883e6a16ad16181.zip',
     );
     await expect(loadCompileEvidence(projectRoot, 'EX01')).resolves.toEqual([]);
   });
@@ -45,10 +45,10 @@ describe('EX01 standalone project boundary', () => {
   it('builds and runs only the pure host-side contract test locally', async () => {
     const { stdout } = await execFileAsync('make', ['host-test'], {
       cwd: exampleRoot,
-      env: { ...process.env, BUILD_DIR: '.quality/host-test' },
     });
 
     expect(stdout).toContain('report-contract: pass');
+    expect(stdout).not.toMatch(/\bnvcc\b/);
   }, 15_000);
 
   it('queries environment facts without launching work, allocating device memory, or scraping tools', async () => {
