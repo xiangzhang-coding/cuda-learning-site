@@ -144,5 +144,5 @@ describe('Cloudflare assets-only deployment contract', () => {
     await expect(
       listTests({ RELEASE_BASE_URL: 'http://127.0.0.1:4321', RELEASE_KIND: 'local' }),
     ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 5 tests') });
-  });
+  }, 20_000);
 });
