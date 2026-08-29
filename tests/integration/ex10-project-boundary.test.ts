@@ -4,6 +4,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
+import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -16,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex10-ptx-fatbinary-inspection');
-const sourceCommit = 'c7326c342c5673de7d17de08d4f56ab836648d5d';
+const sourceCommit = '16256cbeded889cb1a45f2461585317ed3fe0296';
 const rangeNames = [
   'artifact-kernel',
   'device-link-contract',
@@ -194,19 +195,90 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     expect(workflow).toContain('needs: [ex10-compile]');
   });
 
-  it('starts with no committed compilation records and Runtime-Not-Applicable', async () => {
+  it('retains five ordinary records and one separate probe with Runtime-Not-Applicable', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX10');
     const evidenceFiles = await readdir(path.join(exampleRoot, 'evidence'));
+    const records = await loadCompileEvidence(projectRoot, 'EX10');
 
     expect(example.evidence).toMatchObject({
-      compilation: [],
+      compilation: [
+        { status: 'Compile-Checked', record: 'evidence/cuda-11-8-cxx17.json' },
+        { status: 'Compile-Checked', record: 'evidence/cuda-12-9-cxx17.json' },
+        { status: 'Compile-Checked', record: 'evidence/cuda-12-9-cxx20.json' },
+        { status: 'Compile-Checked', record: 'evidence/cuda-13-3-cxx17.json' },
+        { status: 'Compile-Checked', record: 'evidence/cuda-13-3-cxx20.json' },
+      ],
+      dialectProbe: 'evidence/cuda-13-3-gcc14-cxx23-probe.json',
       runtime: 'Runtime-Not-Applicable',
       hostExecutableExecuted: false,
       gpuExecutableExecuted: false,
       recordedObservations: [],
     });
-    expect(evidenceFiles.sort()).toEqual(['README.md']);
-    await expect(loadCompileEvidence(projectRoot, 'EX10')).resolves.toEqual([]);
+    expect(evidenceFiles.sort()).toEqual([
+      'README.md',
+      'cuda-11-8-cxx17.json',
+      'cuda-12-9-cxx17.json',
+      'cuda-12-9-cxx20.json',
+      'cuda-13-3-cxx17.json',
+      'cuda-13-3-cxx20.json',
+      'cuda-13-3-gcc14-cxx23-probe.json',
+    ]);
+    expect(records).toHaveLength(6);
+    expect(records.filter(({ subject }: { subject: string }) => subject === 'EX10').map(
+      ({ toolchain }: { toolchain: { toolkit: string; dialect: string } }) =>
+        `${toolchain.toolkit}/${toolchain.dialect}`,
+    ).sort()).toEqual([
+      '11.8.0/c++17',
+      '12.9.2/c++17',
+      '12.9.2/c++20',
+      '13.3.1/c++17',
+      '13.3.1/c++20',
+    ]);
+    expect(records.find(({ claim }: { claim: string }) => claim === 'C++23-Dialect-Probe')).toMatchObject({
+      result: 'pass',
+      subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
+      sourceCommit,
+      buildContractSha256: '44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7',
+      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216',
+      toolchain: {
+        toolkit: '13.3.1',
+        hostCompiler: 'g++-14 (Ubuntu 14.2.0-4ubuntu2~24.04.1) 14.2.0',
+        nvcc: 'Cuda compilation tools, release 13.3, V13.3.73',
+        dialect: 'c++23',
+      },
+    });
+    expect(records.every(({ hostExecutableExecuted, gpuExecutableExecuted, runtimeEvidence }: {
+      hostExecutableExecuted: boolean;
+      gpuExecutableExecuted: boolean;
+      runtimeEvidence: string;
+    }) => !hostExecutableExecuted && !gpuExecutableExecuted && runtimeEvidence === 'Runtime-Not-Applicable')).toBe(true);
+    expect(records.flatMap(({ commands }: { commands: string[] }) => commands)).not.toContain(
+      expect.stringContaining('--allow-unsupported-compiler'),
+    );
+  });
+
+  it('renders EX10 retained rows while preserving the EX02 evidence table contract', async () => {
+    const [ex02Html, ex10Html] = await Promise.all([
+      readFile(path.join(projectRoot, 'dist/en/examples/vector-addition/index.html'), 'utf8'),
+      readFile(path.join(projectRoot, 'dist/en/examples/ptx-fatbinary-inspection/index.html'), 'utf8'),
+    ]);
+    const ex02 = parseHTML(ex02Html).document;
+    const ex10 = parseHTML(ex10Html).document;
+    const ex02Rows = [...ex02.querySelectorAll('[data-example-evidence="EX02"] tbody tr')];
+    const ex10Rows = [...ex10.querySelectorAll('[data-example-evidence="EX10"] tbody tr')];
+
+    expect(ex02Rows).toHaveLength(6);
+    expect(ex02Rows.slice(0, 5).every((row) => row.textContent.includes('EX02 build') &&
+      row.textContent.includes('Compile-Checked'))).toBe(true);
+    expect(ex02Rows[5].textContent).toContain('Separate C++23 probe');
+    expect(ex02Rows[5].textContent).toContain('Probe recorded: unsupported in this environment');
+
+    expect(ex10Rows).toHaveLength(6);
+    expect(ex10Rows.every((row) => row.getAttribute('data-result') === 'pass')).toBe(true);
+    expect(ex10Rows.slice(0, 5).every((row) => row.textContent.includes('EX10 build') &&
+      row.textContent.includes('Compile-Checked'))).toBe(true);
+    expect(ex10Rows[5].textContent).toContain('Separate C++23 probe');
+    expect(ex10Rows[5].textContent).toContain('Probe passed');
   });
 
   it('publishes an aligned bilingual artifact matrix with exact owner sources', async () => {

@@ -188,10 +188,14 @@ test('current publication, Runnable Example, and Lab route scope is exact', asyn
   );
 });
 
-test('EX10 is Runtime-Not-Applicable and excluded from pending-hardware publication evidence', async ({ page, request }) => {
+test('EX10 is Compile-Checked, Runtime-Not-Applicable, and excluded from pending-hardware evidence', async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of ['/examples/ptx-fatbinary-inspection/', '/en/examples/ptx-fatbinary-inspection/']) {
     await page.goto(route);
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
+      'content',
+      'Compile-Checked',
+    );
     await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
       'content',
       'Runtime-Not-Applicable',
@@ -203,6 +207,8 @@ test('EX10 is Runtime-Not-Applicable and excluded from pending-hardware publicat
   expect(response.ok()).toBe(true);
   const publication = await response.json();
   expect(publication.scope.runnableExamples).toContain('EX10');
+  expect(publication.evidence.compileChecked).toContain('EX10');
+  expect(publication.evidence.noCompileCheckedClaim).not.toContain('EX10');
   expect(publication.evidence.pendingHardwareVerification).not.toContain('EX10');
 });
 

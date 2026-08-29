@@ -1745,7 +1745,7 @@ const publicationPairs: readonly PublicationPair[] = [
     canonicalExample: 'EX10',
     canonicalRanges: 'artifact-kernel,device-link-contract,artifact-pipeline,cxx23-probe',
     hardwareGate: 'Build and inspection: x86-64 CPU runner with Docker; runtime: not applicable; no host or GPU executable execution',
-    evidenceCompilation: 'none',
+    evidenceCompilation: 'Compile-Checked',
     evidenceRuntime: 'Runtime-Not-Applicable',
     expectedObservations: '2 artifact expectations',
     recordedObservations: 'none',

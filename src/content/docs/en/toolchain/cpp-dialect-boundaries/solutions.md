@@ -58,7 +58,7 @@ head:
 
 ## Before review
 
-These answers solve the static matrix and probe audits in the [M19 Exercises](/en/toolchain/cpp-dialect-boundaries/exercises/). They do not execute EX10, produce a retained record, or update Evidence Status. C++23 remains a blocked/pending supported-GCC-14 probe with no Compile-Checked claim.
+These answers solve the static matrix and probe audits in the [M19 Exercises](/en/toolchain/cpp-dialect-boundaries/exercises/). They do not execute EX10, produce a retained record, or update M19 Evidence Status. The current retained GCC 14.2 C++23 probe is a narrow pass; ordinary EX10 C++23 support remains undeclared.
 
 ## Solution 1: Reconstruct the teaching matrix from versioned sources
 
@@ -68,11 +68,11 @@ The correct declaration matrix is:
 | --- | --- | --- | --- |
 | CUDA 11.8.0 | C++17 | not declared | the archived NVCC `--std` list ends at C++17 |
 | CUDA 12.9.2 | C++17, C++20 | not declared | the archived Linux guide and NVCC page provide the C++20 coordinate |
-| CUDA 13.3.1 | C++17, C++20 | separate `cxx23-probe`, blocked/pending | current Programming/Linux guides provide eligibility; the current NVCC-list mismatch and retained-record gate block a broad claim |
+| CUDA 13.3.1 | C++17, C++20 | separate `cxx23-probe`, retained narrow pass | current Programming/Linux guides provide eligibility; the retained exact record and current NVCC-list mismatch block a broad claim |
 
 The ordinary rows are declared inputs to the EX10 artifact pipeline, not observed M19 build results. The C++23 probe belongs only to the 13.3.1 candidate and does not enter the ordinary matrix. The current guide cannot project a newer dialect into archived 11.8.0/12.9.2, and archive ceilings cannot describe the current compiler.
 
-An empty frontmatter compilation array is therefore correct. The matrix tells a reviewer which combinations should be checked, not which combinations are already Compile-Checked.
+M19's empty frontmatter compilation array therefore remains correct: this static Learning Unit does not inherit EX10 status. EX10's five ordinary records separately establish the declared Lane/dialect combinations as Compile-Checked.
 
 ## Solution 2: Classify the documentation mismatch and R1 probe
 
@@ -87,7 +87,7 @@ The claim ledger is:
 
 The intersection rule is that a candidate host compiler must be inside the Linux guide's supported major range and meet the Programming Guide's minimum for the selected dialect. GCC 13.3 misses the C++23 GCC 14 minimum. A GCC 14 candidate still requires the actual probe; table eligibility alone is insufficient.
 
-The exact historical conclusion is: "Retained R1 evidence records the requested C++23 probe as unsupported for EX02 under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 13.3.0; it makes no claim about the unexecuted EX10 supported-GCC-14 probe." The record stays immutable, and C++23 compilation evidence remains empty.
+The exact historical conclusion is: "Retained R1 evidence records the requested C++23 probe as unsupported for EX02 under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 13.3.0; it neither contradicts nor broadens the separate retained EX10 GCC 14.2 narrow pass." The R1 record stays immutable, and ordinary C++23 compilation evidence remains empty.
 
 ## Solution 3: Design the C++23 retained-record publication gate
 
@@ -99,7 +99,7 @@ The qualifying checklist, in order, is:
 4. Establish that the `__cplusplus >= 202302L`, `if consteval`, and `static_assert` guards passed in the selected mode.
 5. Retain `cxx23_probe.o` identity/hash and the selected inspection output.
 6. State that neither host nor GPU executable ran, runtime is Runtime-Not-Applicable, and there is no correctness or performance observation.
-7. Link the record back to EX10/M19; only then may later integration review a narrow claim and source repin.
+7. Link the record back to EX10/M19 and confirm that the source pin and narrow publication claim agree.
 
 The decision table is:
 
@@ -108,11 +108,11 @@ The decision table is:
 | source, Dockerfile, or workflow row only | reject | blocked/pending; no Compile-Checked |
 | retained GCC 13.3 R1 `unsupported` record | preserve, never upgrade | exact historical unsupported only |
 | GCC 14 command success without diagnostics, guards, artifact, or retained identity | reject | incomplete probe; no Compile-Checked |
-| complete retained GCC 14 pass packet | eligible for later integration review | exact EX10/Toolkit/NVCC/GCC/platform/phase narrow claim only |
+| complete retained GCC 14 pass packet | publish retained narrow pass | exact EX10/Toolkit/NVCC/GCC/platform/phase claim only |
 
-After a complete future record exists, an admissible two-sentence template is: "At source commit `<sha>`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC `<build>`, and GCC 14 `<version>` on `<environment>`. Record `<identity>` establishes that narrow compile-only result; no host or GPU executable ran."
+The current admissible two-sentence statement is: "At source commit `16256cbeded889cb1a45f2461585317ed3fe0296`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 on Ubuntu 24.04.4 LTS. Run 33266515216 establishes that narrow `C++23-Dialect-Probe` result; no host or GPU executable ran."
 
-Today, `<sha>` and `<identity>` cannot be filled with a qualifying pass record, so the actual wording remains: "The EX10 CUDA 13.3.1 + supported GCC 14 C++23 probe is blocked/pending; no retained pass record and no C++23 Compile-Checked claim exist."
+This statement is not ordinary EX10 C++23 support and covers no other compiler, platform, source, runtime, or performance. The Compile-Checked status of the five ordinary C++17/C++20 records remains separate from this probe claim.
 
 ## Valid alternatives
 

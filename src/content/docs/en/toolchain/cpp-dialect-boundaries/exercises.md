@@ -72,7 +72,7 @@ In every answer, separate language-standard provenance, Toolkit/NVCC declaration
 
 **Expected evidence:** A three-row matrix, one declaration-versus-evidence explanation, and the owner-source role behind each row.
 
-**Acceptance criteria:** All three rows exactly match the specified dialects; 13.3.1 C++23 is marked blocked/pending probe; the matrix declaration is not called Compile-Checked; neither 11.8.0 nor 12.9.2 has a C++23 row.
+**Acceptance criteria:** All three rows exactly match the specified dialects; the five ordinary rows are Compile-Checked from retained run 33266515216; 13.3.1 C++23 is a separate retained narrow probe pass; neither 11.8.0 nor 12.9.2 has a C++23 row.
 
 <details><summary>Hint 1</summary>Write the ordinary rows first, then add a separate probe column. Do not infer archive behavior from the newest guide.</details>
 
@@ -86,7 +86,7 @@ In every answer, separate language-standard provenance, Toolkit/NVCC declaration
 
 **Expected evidence:** A four-row claim ledger, one supported-host intersection rule, and one exact sentence for the R1 historical conclusion.
 
-**Acceptance criteria:** Owner documentation and the observed record occupy separate layers; the GCC 13.3 result constrains only the exact historical combination; current C++23 eligibility still requires the supported-GCC-14 EX10 probe; C++23 Compile-Checked remains empty.
+**Acceptance criteria:** Owner documentation and observed records occupy separate layers; the GCC 13.3 result constrains only the exact historical combination; the GCC 14.2 probe pass constrains only the exact EX10/Toolkit/NVCC/GCC coordinate; ordinary C++23 Compile-Checked remains undeclared.
 
 <details><summary>Hint 1</summary>The Programming Guide dialect-specific minimum and the Linux guide broad supported range form an intersection, not a choice.</details>
 
@@ -94,15 +94,15 @@ In every answer, separate language-standard provenance, Toolkit/NVCC declaration
 
 ## Exercise 3: Design the C++23 retained-record publication gate
 
-**Goal:** A reviewer sees the EX10 `cxx23-probe` source, GCC 14 Dockerfile, and workflow row and wants to publish "CUDA 13.3.1 supports C++23" immediately. Repair the proposal and design a qualifying record packet that later integration can audit.
+**Goal:** A reviewer sees the EX10 `cxx23-probe` source, GCC 14 Dockerfile, workflow row, and retained pass and wants to publish the broad statement "CUDA 13.3.1 supports C++23." Repair the proposal and audit the exact scope of the qualifying record packet.
 
-**Constraints:** The gate must use the exact EX10 source commit, canonical range `cxx23-probe`, CUDA 13.3.1, exact NVCC build, and supported GCC 14. The packet must retain environment identity, command, complete diagnostics, exit status, language-guard outcome, object hash and inspection, and a no-execution statement. Do not use an unsupported-host bypass. Without a successful retained record, disclose blocked/pending and forbid C++23 Compile-Checked.
+**Constraints:** Use retained run 33266515216, source commit `16256cbeded889cb1a45f2461585317ed3fe0296`, canonical range `cxx23-probe`, CUDA 13.3.1, NVCC 13.3.73, and GCC 14.2.0. The packet must retain environment identity, command, complete diagnostics, exit status, language-guard outcome, object hash and inspection, and a no-execution statement. Do not use an unsupported-host bypass. The conclusion is only a narrow `C++23-Dialect-Probe` pass, never ordinary C++23 support.
 
 **Expected evidence:** An ordered gate checklist, a pass/reject decision table, and an admissible narrow claim template no longer than two sentences.
 
-**Acceptance criteria:** Source and workflow presence stay separate from actual result; the `__cplusplus >= 202302L` and `if consteval`/`static_assert` guards are checked; neither host nor GPU executable runs; a successful record supports only the exact EX10 + Toolkit 13.3.1 + GCC 14 combination; only later integration may update the claim.
+**Acceptance criteria:** Source and workflow presence stay separate from actual result; the `__cplusplus >= 202302L` and `if consteval`/`static_assert` guards are checked; neither host nor GPU executable runs; the successful record supports only the exact EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 combination; claims about another compiler, platform, runtime, or performance are rejected.
 
-<details><summary>Hint 1</summary>If there is no retained record URL or identity, there is no publishable pass observation.</details>
+<details><summary>Hint 1</summary>A retained record URL and identity permit an exact narrow pass, not a broader subject or matrix.</details>
 
 <details><summary>Hint 2</summary>Put the scope in the sentence: source, Toolkit, NVCC, GCC, platform, phase, and no-runtime boundary all matter.</details>
 

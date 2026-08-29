@@ -190,4 +190,33 @@ describe('EX10 compile evidence validation', () => {
   it('keeps all committed EX02 evidence valid after the EX10 generalization', async () => {
     await expect(loadCompileEvidence(projectRoot, 'EX02')).resolves.toHaveLength(6);
   });
+
+  it('loads the exact retained EX10 matrix and separate probe at the pinned source commit', async () => {
+    const [example, records] = await Promise.all([
+      loadCanonicalExample(projectRoot, 'EX10'),
+      loadCompileEvidence(projectRoot, 'EX10'),
+    ]);
+    const ordinary = records.filter(({ subject }) => subject === 'EX10');
+    const probes = records.filter(({ claim }) => claim === 'C++23-Dialect-Probe');
+
+    expect(example.sourceCommit).toBe('16256cbeded889cb1a45f2461585317ed3fe0296');
+    expect(example.evidence.compilation).toHaveLength(5);
+    expect(example.evidence.dialectProbe).toBe('evidence/cuda-13-3-gcc14-cxx23-probe.json');
+    expect(ordinary.map(({ toolchain }) => `${toolchain.toolkit}/${toolchain.dialect}`).sort()).toEqual([
+      '11.8.0/c++17',
+      '12.9.2/c++17',
+      '12.9.2/c++20',
+      '13.3.1/c++17',
+      '13.3.1/c++20',
+    ]);
+    expect(probes).toHaveLength(1);
+    expect(probes[0]).toMatchObject({
+      result: 'pass',
+      subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
+      sourceCommit: example.sourceCommit,
+      buildContractSha256: '44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7',
+      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216',
+    });
+    expect(records.flatMap(({ commands }) => commands).join('\n')).not.toContain('--allow-unsupported-compiler');
+  });
 });

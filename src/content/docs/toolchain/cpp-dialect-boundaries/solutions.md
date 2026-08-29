@@ -58,7 +58,7 @@ head:
 
 ## 复核前
 
-这些答案解答 [M19 练习（Exercise）](/toolchain/cpp-dialect-boundaries/exercises/)中的 static matrix 与 probe audits。它们不执行 EX10、不产生 retained record，也不更新 Evidence Status。当前 C++23 状态仍是 blocked/pending supported GCC 14 probe，且没有 Compile-Checked claim。
+这些答案解答 [M19 练习（Exercise）](/toolchain/cpp-dialect-boundaries/exercises/)中的 static matrix 与 probe audits。它们不执行 EX10、不产生 retained record，也不更新 M19 Evidence Status。当前 retained GCC 14.2 C++23 probe 是 narrow pass；ordinary EX10 C++23 support 仍未声明。
 
 ## 解答 1：从 versioned sources 重建教学矩阵
 
@@ -68,11 +68,11 @@ head:
 | --- | --- | --- | --- |
 | CUDA 11.8.0 | C++17 | 不声明 | Archived NVCC `--std` list 只到 C++17 |
 | CUDA 12.9.2 | C++17、C++20 | 不声明 | Archived Linux guide 与 NVCC page 提供 C++20 coordinate |
-| CUDA 13.3.1 | C++17、C++20 | Separate `cxx23-probe`，blocked/pending | Current Programming/Linux guides 提供 eligibility；current NVCC list mismatch 与 retained-record gate 阻止 broad claim |
+| CUDA 13.3.1 | C++17、C++20 | Separate `cxx23-probe`，retained narrow pass | Current Programming/Linux guides 提供 eligibility；retained exact record 与 current NVCC list mismatch 阻止 broad claim |
 
 Ordinary rows 属于 EX10 artifact pipeline 的声明输入；它们不是 M19 的 observed build results。C++23 probe 只属于 13.3.1 candidate，不加入 ordinary matrix。Current guide 不能向 archived 11.8.0/12.9.2 投射新 dialect，反过来 archive 的 ceiling 也不能描述 current compiler。
 
-因此 frontmatter compilation array 为空是正确的。Matrix 告诉 reviewer 应该检查哪些 combinations，不告诉 reviewer 哪些 combinations 已经 Compile-Checked。
+因此 M19 frontmatter compilation array 为空仍是正确的：该静态 Learning Unit 没有继承 EX10 status。EX10 的五项 ordinary records 已分别证明声明的 Lane/dialect combinations 为 Compile-Checked。
 
 ## 解答 2：分类 documentation mismatch 与 R1 probe
 
@@ -87,7 +87,7 @@ Claim ledger 如下：
 
 Intersection rule 是：candidate host compiler 必须同时位于 Linux guide 的 supported major range，并达到 Programming Guide 对 selected dialect 的 minimum。GCC 13.3 不满足 C++23 的 GCC 14 minimum；GCC 14 candidate 仍要 actual probe，不能只靠 table eligibility。
 
-精确 historical conclusion 应写成：“Retained R1 evidence records the requested C++23 probe as unsupported for EX02 under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 13.3.0; it makes no claim about the unexecuted EX10 supported-GCC-14 probe.” Record 保持 immutable，C++23 compilation evidence 继续为空。
+精确 historical conclusion 应写成：“Retained R1 evidence records the requested C++23 probe as unsupported for EX02 under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 13.3.0; it neither contradicts nor broadens the separate retained EX10 GCC 14.2 narrow pass.” R1 record 保持 immutable，ordinary C++23 compilation evidence 继续为空。
 
 ## 解答 3：设计 C++23 retained-record publication gate
 
@@ -99,7 +99,7 @@ Qualifying checklist 按顺序是：
 4. 证明 `__cplusplus >= 202302L`、`if consteval` 与 `static_assert` guard 在 selected mode 下通过。
 5. 保留 `cxx23_probe.o` identity/hash 与 selected inspection output。
 6. 明确 host/GPU executable 均未执行，runtime 为 Runtime-Not-Applicable，没有 correctness/performance observation。
-7. 把 record 链接回 EX10/M19；only then 由 later integration 审查 narrow claim 与 source repin。
+7. 把 record 链接回 EX10/M19，并确认 source pin 与 narrow publication claim 一致。
 
 Decision table 是：
 
@@ -108,11 +108,11 @@ Decision table 是：
 | 只有 source、Dockerfile 或 workflow row | Reject | blocked/pending；no Compile-Checked |
 | Retained GCC 13.3 R1 `unsupported` record | Preserve，不能升级 | exact historical unsupported only |
 | GCC 14 command success，但缺 diagnostics、guard、artifact 或 retained identity | Reject | incomplete probe；no Compile-Checked |
-| Complete retained GCC 14 pass packet | Eligible for later integration review | exact EX10/Toolkit/NVCC/GCC/platform/phase narrow claim only |
+| Complete retained GCC 14 pass packet | Publish retained narrow pass | exact EX10/Toolkit/NVCC/GCC/platform/phase claim only |
 
-在 future complete record 存在后，可接受的两句模板是：“At source commit `<sha>`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC `<build>`, and GCC 14 `<version>` on `<environment>`. Record `<identity>` establishes that narrow compile-only result; no host or GPU executable ran.”
+当前可接受的两句声明是：“At source commit `16256cbeded889cb1a45f2461585317ed3fe0296`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 on Ubuntu 24.04.4 LTS. Run 33266515216 establishes that narrow `C++23-Dialect-Probe` result; no host or GPU executable ran.”
 
-当前不能填入 `<sha>`/`<identity>` 并发布该句，因此实际 wording 仍是：“EX10 CUDA 13.3.1 + supported GCC 14 C++23 probe is blocked/pending; no retained pass record and no C++23 Compile-Checked claim exist.”
+这项声明不等于 ordinary EX10 C++23 support，也不覆盖其他 compiler、platform、source、runtime 或 performance。五项 ordinary C++17/C++20 records 的 Compile-Checked status 与这项 probe claim 分开记录。
 
 ## 有效替代方案
 

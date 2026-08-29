@@ -36,7 +36,7 @@ const currentVisuals = [
   'VIS09', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentNoCompileCheckedClaim = [
-  'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX16',
+  'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX16',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB07',
 ] as const;
 const currentPendingHardwareVerification = [
@@ -179,21 +179,21 @@ describe('R1 release review and current publication boundary', () => {
         sourceRecords: 50,
       },
       evidence: {
-        compileChecked: ['EX02', 'LAB02'],
+        compileChecked: ['EX02', 'EX10', 'LAB02'],
         noCompileCheckedClaim: currentNoCompileCheckedClaim,
         pendingHardwareVerification: currentPendingHardwareVerification,
         runtimeNotApplicable: ['EX10'],
         runtimeVerified: [],
         referenceEnvironments: [],
         performanceObservations: [],
-        retainedCompileRun: 32720214527,
+        retainedCompileRuns: [32720214527, 33266515216],
       },
       knownLimitations: [
         'Native Linux is the only Supported Environment; the website executes no CUDA.',
         'No current Reference Environment or Runtime-Verified subject is declared.',
-        'Only EX02 and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.',
+        'EX02, EX10, and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.',
         'EX10 is Runtime-Not-Applicable because its acceptance contract inspects artifacts without executing the final host artifact or any GPU executable.',
-        'EX10 artifact-pipeline checks and the separate CUDA 13.3/GCC 14 C++23 probe remain pending committed qualifying records and grant no Compile-Checked claim.',
+        'EX10 has five ordinary Compile-Checked records from run 33266515216; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
         'No measured overlap, migration, graph performance, timing, speedup, or other performance observation is published.',
         'LAB06 has no current public destination.',
         'This incremental publication record is not a completed R2 aggregate release review.',
@@ -260,7 +260,7 @@ describe('R1 release review and current publication boundary', () => {
     expect(readme).toContain('make -C examples/ex08-unified-memory-migration host-test');
     expect(readme).toContain('make -C examples/ex09-graph-capture host-test');
     expect(readme).toContain('Runtime-Not-Applicable');
-    expect(readme).toMatch(/EX10.*C\+\+23 probe.*pending/i);
+    expect(readme).toMatch(/EX10.*C\+\+23 probe.*(?:passed|pass)/i);
     expect(readme).toMatch(/no measured overlap, migration, or graph performance/i);
     expect(contentLicenses).toContain('VIS09');
     expect(contentLicenses).toContain('EX10');

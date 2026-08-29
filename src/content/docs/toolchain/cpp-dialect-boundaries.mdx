@@ -1,6 +1,6 @@
 ---
 title: 'M19：CUDA C++17、C++20 与 C++23 方言边界'
-description: 用精确 Toolkit、host compiler、NVCC option 与 retained probe record 建立 CUDA C++17/C++20 教学矩阵，并把 C++23 保持为受支持 GCC 14 组合上的窄范围待验证声明。
+description: 用精确 Toolkit、host compiler、NVCC option 与 retained probe record 建立 CUDA C++17/C++20 教学矩阵，并把 C++23 保持为受支持 GCC 14.2 组合上的 narrow retained probe pass。
 pairId: m19
 counterpart: /en/toolchain/cpp-dialect-boundaries/
 factCheckDate: '2026-08-29'
@@ -140,9 +140,9 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 - 区分 C++ standard provenance、CUDA language-support documentation、NVCC option reference、Linux host-compiler policy 与实际 build record。
 - 重建本站三条 Toolkit Lane 的明确教学矩阵：11.8.0 只声明 C++17；12.9.2 声明 C++17/C++20；13.3.1 的 ordinary EX10 build 声明 C++17/C++20。
-- 解释为什么 CUDA 13.3 current documentation 中出现 C++23 不等于本站已经拥有 C++23 Compile-Checked evidence。
+- 解释为什么 CUDA 13.3 current documentation 与 retained narrow probe pass 都不能变成 ordinary EX10 C++23 support。
 - 把旧的 CUDA 13.3.1 + GCC 13.3 unsupported probe 保持为 immutable R1 history，而不是覆盖或升级它。
-- 为 EX10 设计 CUDA 13.3.1 + supported GCC 14 的窄范围 C++23 probe publication gate，并在 retained record 缺失时明确写 blocked/pending。
+- 审查 EX10 在 CUDA 13.3.1 + supported GCC 14 下的 retained C++23 probe pass，并把声明限制在精确 recorded coordinate。
 
 ## 先修关系
 
@@ -176,7 +176,7 @@ WG21 documents 锚定语言版本本身，不声明任何 CUDA combination 已�
 | --- | --- | --- |
 | CUDA 11.8.0 | C++17 | 不声明 C++23 row |
 | CUDA 12.9.2 | C++17、C++20 | 不声明 C++23 row |
-| CUDA 13.3.1 | C++17、C++20 | 独立 `cxx23-probe`；当前 blocked/pending |
+| CUDA 13.3.1 | C++17、C++20 | 独立 `cxx23-probe`；retained narrow pass |
 
 “Ordinary build”表示 EX10 artifact pipeline 的常规 matrix row。“Probe”是一个隔离问题，只检查 exact source 是否以 requested C++23 mode 完成 compile/inspection contract。Probe 不会把 C++23 加进 11.8.0、12.9.2 或 13.3.1 ordinary rows，也不会把一个 source file 的结果推广到整个 standard library、全部 CUDA APIs 或其他 host compiler。
 
@@ -213,13 +213,13 @@ C++23 只进入 EX10 的 `cxx23-probe` range。该 range 先检查 `__cplusplus 
 
 ## Immutable R1 history：CUDA 13.3.1 + GCC 13.3
 
-[Retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json)记录了 CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 13.3.0 与 requested C++23 mode。Compiler diagnostic 明确说明 configured host compiler 不支持该 flag，并会忽略它；record result 是 `unsupported`，artifacts 为空。
+[Retained EX02 R1 probe record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition/evidence/cuda-13-3-cxx23-probe.json)记录了 CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 13.3.0 与 requested C++23 mode。Compiler diagnostic 明确说明 configured host compiler 不支持该 flag，并会忽略它；record result 是 `unsupported`，artifacts 为空。
 
 这项记录属于 immutable R1 history。不得删除、改写为 pass、替换 host compiler 字段，或因为 current guide 列出 C++23 而授予 EX02/EX10 C++23 Compile-Checked。它只建立一个窄结论：**CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 的该 probe 不支持 requested C++23 mode。**
 
 ## C++23 publication gate
 
-发布任何 narrow C++23 pass claim 前，必须先完成 **EX10 + CUDA 13.3.1 + supported GCC 14** probe，并保留可复核 record。至少记录：
+本站已在 [run 33266515216](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216) 完成并保留 **EX10 + CUDA 13.3.1 + supported GCC 14** probe。该 record 包含：
 
 1. Exact EX10 source commit 与 `cxx23-probe` range identity。
 2. Native Linux OS/container identity、Toolkit 13.3.1、NVCC build 与 exact GCC 14 version。
@@ -229,23 +229,23 @@ C++23 只进入 EX10 的 `cxx23-probe` range。该 range 先检查 `__cplusplus 
 
 Unsupported-host bypass 不能进入 qualifying command。Gate 的目的就是验证 owner-declared supported combination；绕过 host check 会改变问题，不能产生本页需要的证据。
 
-在 successful retained GCC 14 record 存在前，状态必须披露为 **blocked/pending probe**，C++23 没有 Compile-Checked claim。Source、workflow definition、Dockerfile、canonical range、static matrix 或本页构建成功都不替代 retained probe record。Later integration pass 可以在 actual evidence 落地后更新这项窄声明，但不能预先发布 pass。
+Retained record 绑定 source commit `16256cbeded889cb1a45f2461585317ed3fe0296`、CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0，并保留 SHA-256 为 `1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea` 的 `cxx23_probe.o`；结果是 **pass**。这只是一项 `C++23-Dialect-Probe`，不是 ordinary EX10 C++23 Compile-Checked，也不覆盖其他 compiler、Toolkit、platform、source、runtime 或 performance。
 
 ## Canonical Runnable Example：EX10
 
-EX10 是 M19 的 canonical probe project。[查看 placeholder source pin 下的 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 placeholder commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip)。Commit `c7326c342c5673de7d17de08d4f56ab836648d5d` 是 current integration placeholder，不是 C++23 pass evidence；later integration 可以在 retained evidence 存在后 repin。
+EX10 是 M19 的 canonical probe project。[查看 source commit `16256cbeded889cb1a45f2461585317ed3fe0296` 下的 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip)。该 source pin 与 retained run 的 source identity 一致。
 
 Canonical range 展示 dialect guard 与一个 C++23-only language feature，而不执行 kernel：
 
 <CanonicalCode exampleId="EX10" range="cxx23-probe" />
 
-这份 import 建立 local source/range identity，不表示 GCC 14 probe 已运行，也不授予 Compile-Checked。
+这份 import 建立 local source/range identity；GCC 14 probe pass 由 retained record 建立，而不是由 import 本身建立。
 
 ## 证据边界
 
-M19 的 hardware gate 是 none，因为 matrix review 与 compile-only probe 不需要 GPU。Unit evidence arrays 保持为空，因为本页没有运行 ordinary EX10 builds 或 GCC 14 C++23 probe。EX10 的 Runtime-Not-Applicable contract 也不能反向变成本 Learning Unit 的 compilation evidence。
+M19 的 hardware gate 是 none，因为 matrix review 与 compile-only probe 不需要 GPU。Unit evidence arrays 保持为空，因为 retained build/probe status 属于 EX10，不传播给本 Learning Unit。EX10 的 Runtime-Not-Applicable contract 同样不能反向变成 M19 的 compilation evidence。
 
-Documentation eligibility、workflow presence、successful site build 与 actual probe result 是四个不同事实。未来 narrow pass 必须只覆盖 retained record 中的 exact EX10 source、Toolkit 13.3.1、NVCC、GCC 14、platform、command 与 selected compilation phase；不得推广到其他 compiler、Toolkit、platform、source 或 runtime behavior。
+Documentation eligibility、workflow presence、successful site build 与 actual probe result 是四个不同事实。当前 narrow pass 只覆盖 retained record 中的 exact EX10 source、Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0、platform、command 与 selected compilation phase；不得推广到其他 compiler、Toolkit、platform、source 或 runtime behavior。
 
 ## 离开前检查
 
@@ -253,7 +253,7 @@ Documentation eligibility、workflow presence、successful site build 与 actual
 2. 三条 Toolkit Lane 的 ordinary EX10 dialect rows 分别是什么？C++23 为什么不在 ordinary matrix 中？
 3. Current Programming Guide/Linux guide 与 current NVCC `--std` reference 在 C++23 上留下了什么 documentation boundary？
 4. 为什么 R1 GCC 13.3 unsupported record 必须保留，而且不能证明 supported GCC 14 probe 的结果？
-5. 哪些字段必须出现在 successful EX10 GCC 14 record 中，才能发布 narrow C++23 pass claim？
+5. Retained EX10 GCC 14 record 支持哪项 narrow C++23 pass，又明确不支持哪些 broad claims？
 
 ## 继续练习
 
@@ -271,4 +271,4 @@ Documentation eligibility、workflow presence、successful site build 与 actual
 
 十项 owner/standards sources 均于 **2026-08-29** 访问。Matrix、claim ladder、questions、练习与编排均为本站 CC-BY-4.0 原创内容；没有复制 owner table、example、diagnostic output 或 standard prose。
 
-**事实核查日期：2026-08-29。** C++23 仍为 blocked/pending EX10 GCC 14 probe，没有 Compile-Checked claim。
+**事实核查日期：2026-08-29。** EX10 GCC 14 C++23 probe 已保留 narrow pass；ordinary EX10 C++23 support、runtime 与 performance claim 均未声明。

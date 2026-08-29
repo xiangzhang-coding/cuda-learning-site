@@ -72,7 +72,7 @@ head:
 
 **预期证据：** 一张三行 matrix、一段 declaration-versus-evidence 说明，以及每行对应的 owner-source role。
 
-**验收条件：** 三行与指定 dialect 完全一致；13.3.1 C++23 标为 blocked/pending probe；matrix declaration 不被描述为 Compile-Checked；11.8.0/12.9.2 没有 C++23 row。
+**验收条件：** 三行与指定 dialect 完全一致；五项 ordinary row 根据 retained run 33266515216 标为 Compile-Checked；13.3.1 C++23 标为独立 retained narrow probe pass；11.8.0/12.9.2 没有 C++23 row。
 
 <details><summary>提示 1</summary>先写 ordinary rows，再单独添加 probe column；不要从 newest guide 向 archive 反向推断。</details>
 
@@ -86,7 +86,7 @@ head:
 
 **预期证据：** 四行 claim ledger、一个 supported-host intersection rule，以及一句精确的 R1 historical conclusion。
 
-**验收条件：** Owner docs 与 observed record 分层；GCC 13.3 result 只约束 exact historical combination；current C++23 eligibility 仍需要 supported GCC 14 EX10 probe；C++23 Compile-Checked 仍为空。
+**验收条件：** Owner docs 与 observed records 分层；GCC 13.3 result 只约束 exact historical combination；GCC 14.2 probe pass 只约束 exact EX10/Toolkit/NVCC/GCC coordinate；ordinary C++23 Compile-Checked 仍未声明。
 
 <details><summary>提示 1</summary>Programming Guide 的 dialect-specific minimum 与 Linux guide 的 broad supported range 是 intersection，不是二选一。</details>
 
@@ -94,15 +94,15 @@ head:
 
 ## 练习 3：设计 C++23 retained-record publication gate
 
-**目标：** 一位 reviewer 看到了 EX10 `cxx23-probe` source、GCC 14 Dockerfile 与 workflow row，准备立即发布“CUDA 13.3.1 supports C++23”。修复这项 proposal，并设计 later integration 可以审查的 qualifying record packet。
+**目标：** 一位 reviewer 看到了 EX10 `cxx23-probe` source、GCC 14 Dockerfile、workflow row 与 retained pass，准备发布 broad “CUDA 13.3.1 supports C++23”。修复这项 proposal，并审查 qualifying record packet 的精确范围。
 
-**约束：** Gate 必须使用 exact EX10 source commit、canonical range `cxx23-probe`、CUDA 13.3.1、exact NVCC build 与 supported GCC 14。Packet 必须保留 environment identity、command、complete diagnostics、exit status、language guard outcome、object hash/inspection 与 no-execution statement。不得使用 unsupported-host bypass。没有 successful retained record 时必须写 blocked/pending，并禁止 C++23 Compile-Checked。
+**约束：** 以 retained run 33266515216、source commit `16256cbeded889cb1a45f2461585317ed3fe0296`、canonical range `cxx23-probe`、CUDA 13.3.1、NVCC 13.3.73 与 GCC 14.2.0 为准。Packet 必须保留 environment identity、command、complete diagnostics、exit status、language guard outcome、object hash/inspection 与 no-execution statement。不得使用 unsupported-host bypass；结论只能是 `C++23-Dialect-Probe` narrow pass，不能写 ordinary C++23 support。
 
 **预期证据：** Ordered gate checklist、pass/reject decision table，以及一段不超过两句的 admissible narrow claim template。
 
-**验收条件：** Source/workflow presence 与 actual result 分开；`__cplusplus >= 202302L`、`if consteval`/`static_assert` guard 被纳入检查；host/GPU executable 都不执行；successful record 只支持 exact EX10 + Toolkit 13.3.1 + GCC 14 combination；later integration 才能更新 claim。
+**验收条件：** Source/workflow presence 与 actual result 分开；`__cplusplus >= 202302L`、`if consteval`/`static_assert` guard 被纳入检查；host/GPU executable 都不执行；successful record 只支持 exact EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 combination；其他 compiler、platform、runtime 与 performance claim 均被拒绝。
 
-<details><summary>提示 1</summary>如果没有 retained record URL/identity，就没有可发布的 pass observation。</details>
+<details><summary>提示 1</summary>Retained record URL/identity 允许发布 exact narrow pass，但不能扩大 subject 或 matrix。</details>
 
 <details><summary>提示 2</summary>把 scope 写到句子里：source、Toolkit、NVCC、GCC、platform、phase 与 no-runtime boundary 缺一不可。</details>
 

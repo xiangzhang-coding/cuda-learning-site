@@ -40,7 +40,8 @@ toolkitLanes:
   - cuda-13.3
 minimumComputeCapability: '7.5'
 evidence:
-  compilation: []
+  compilation:
+    - Compile-Checked
   runtime:
     - Runtime-Not-Applicable
   expectedObservations:
@@ -175,7 +176,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:evidence-compilation'
-      content: none
+      content: Compile-Checked
   - tag: meta
     attrs:
       name: 'cuda:evidence-runtime'
@@ -199,6 +200,7 @@ head:
 ---
 
 import CanonicalCode from '../../../components/CanonicalCode.astro';
+import ExampleEvidence from '../../../components/ExampleEvidence.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/examples/ptx-fatbinary-inspection/" lang="en">Read the English counterpart</a>
 
@@ -216,7 +218,7 @@ EX10 是一个只构建、只检查的可运行示例（Runnable Example）。�
 
 ## 获取 canonical project
 
-[查看固定提交中的完整 EX10 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip)。解压后进入 `examples/ex10-ptx-fatbinary-inspection/`。`project.json` 是机器可读契约；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
+[查看固定提交中的完整 EX10 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip)。解压后进入 `examples/ex10-ptx-fatbinary-inspection/`。`project.json` 是机器可读契约；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
 
 ## 产物矩阵
 
@@ -267,11 +269,15 @@ CUDA 13.3 owner guide 在 2026-08-29 声明 Linux GCC 6.x-15.x 和 C++23；Ubunt
 
 <CanonicalCode exampleId="EX10" range="cxx23-probe" />
 
-临时 image 的 record 必须保存实际安装的 package version、GCC 14 version line、base image identity 和 derived image identity。这个结果只说明 probe object 是否可编译，不把 ordinary EX10 Lane 扩大为 C++23。任何路径都不使用 `--allow-unsupported-compiler`。
+保留的 probe record 保存了实际安装的 `g++-14=14.2.0-4ubuntu2~24.04.1`、GCC 14.2.0 version line、base image identity、derived image identity 与 object hash。任何路径都不使用 `--allow-unsupported-compiler`。
 
 ## 证据状态
 
-当前 `project.json` 的 compilation evidence 数组为空。Workflow matrix 会生成 sanitized record 和 inspection logs，但在下载、复核、提交 record 并把 `sourceCommit`、`sourceUrl`、`downloadUrl` 重钉到同一个 evidence commit 之前，本页不显示编译已检查（Compile-Checked）。失败、跳过或仅存在镜像都不能授予状态。
+五项 ordinary record 已授予编译已检查（Compile-Checked）：CUDA 11.8.0/C++17、12.9.2/C++17、12.9.2/C++20、13.3.1/C++17 和 13.3.1/C++20。它们全部来自 [run 33266515216](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216)，绑定 source commit `16256cbeded889cb1a45f2461585317ed3fe0296` 与 build-contract SHA-256 `44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7`。
+
+<ExampleEvidence exampleId="EX10" locale="zh-CN" />
+
+同一 run 下的 CUDA 13.3.1、NVCC 13.3.73、GCC 14.2.0 C++23 probe 已通过，但它严格是一项 `C++23-Dialect-Probe`。它不把 C++23 加入 ordinary EX10 matrix，也不声明其他 compiler、platform、source、runtime behavior 或 performance。失败、跳过或仅存在镜像仍不能授予状态。
 
 运行证据固定为无需运行验证（Runtime-Not-Applicable）。这里的验收条件是编译、hash 和 artifact inspection，不是 GPU 行为。
 
@@ -281,7 +287,7 @@ CUDA 13.3 owner guide 在 2026-08-29 声明 Linux GCC 6.x-15.x 和 C++23；Ubunt
 - 最终 host artifact 只作为 host-link 和 inspection 输入，绝不执行。
 - C++23 probe 只生成并检查 object file，也不执行 host 或 GPU code。
 - 页面不记录 latency、throughput、speedup、occupancy 或任何性能数字。
-- Compile-Checked 以后也不会替代 Runtime-Verified；对 EX10 而言 runtime 本来就不属于 acceptance criteria。
+- Compile-Checked 不会替代 Runtime-Verified；对 EX10 而言 runtime 本来就不属于 acceptance criteria。
 
 ## 来源与复核
 

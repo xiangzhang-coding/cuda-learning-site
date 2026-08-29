@@ -108,4 +108,4 @@ head:
 
 ## 下一步
 
-完成后查看独立的[参考解答](/toolchain/compiler-architecture-targets/solutions/)，再审查[练习题库（Practice Bank）PB-R2-009](/practice/#pb-r2-009)。使用 [TERM-060](/glossary/#term-060) 至 [TERM-063](/glossary/#term-063)标注 target/scope，并使用 [TERM-118](/glossary/#term-118) 至 [TERM-121](/glossary/#term-121)标注 PTX、cubin、fatbinary 与 SASS。对照 [VIS09](/visuals/artifact-pipeline/)与 related [EX10](/examples/ptx-fatbinary-inspection/)时，仍要保持 placeholder、plan 与 observed artifact 三者分离。
+完成后查看独立的[参考解答](/toolchain/compiler-architecture-targets/solutions/)，再审查[练习题库（Practice Bank）PB-R2-009](/practice/#pb-r2-009)。使用 [TERM-060](/glossary/#term-060) 至 [TERM-063](/glossary/#term-063)标注 target/scope，并使用 [TERM-118](/glossary/#term-118) 至 [TERM-121](/glossary/#term-121)标注 PTX、cubin、fatbinary 与 SASS。对照 [VIS09](/visuals/artifact-pipeline/)与 related [EX10](/examples/ptx-fatbinary-inspection/)时，仍要保持 declared plan、retained artifact record 与 runtime claim 三者分离。

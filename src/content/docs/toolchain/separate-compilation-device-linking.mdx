@@ -206,7 +206,7 @@ Separate compilation 中，不应在 shared header 里让 weak function 或 temp
 
 ## Canonical Runnable Example：EX10
 
-EX10 是 M18 的 canonical standalone project。[在固定 source commit 中查看完整 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip)。Project 是唯一 complete implementation；本 Learning Unit 不维护手写 complete code listing。
+EX10 是 M18 的 canonical standalone project。[在固定 source commit `16256cbeded889cb1a45f2461585317ed3fe0296` 中查看完整 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip)。Project 是唯一 complete implementation；本 Learning Unit 不维护手写 complete code listing。
 
 第一个 canonical range 展示 `caller.cu` 对另一个 translation unit 中 device definition 的 external reference：
 
@@ -236,7 +236,7 @@ Import order 是 page contract 的一部分：先 `device-link-contract`，再 `
 
 EX10 自己把 artifact-only acceptance 标为 Runtime-Not-Applicable，但该状态不会自动传播给 M18。无论 link object、final executable、symbol listing 或 hash file 是否存在，都不能据此声称 kernel launch、runtime correctness、occupancy、latency、throughput 或 speedup。
 
-Future compilation claim 必须绑定 exact EX10 commit、Toolkit Lane、host compiler、dialect、target clauses、RDC inputs、device-link command、host-link command、artifact identities 与 logs。Runtime 或 performance claim 还需要独立 execution、completion、correctness oracle 与 measurement record。
+EX10 retained compilation claim 绑定 exact commit、Toolkit Lane、host compiler、dialect、target clauses、RDC inputs、device-link command、host-link command、artifact identities 与 logs。任何 runtime 或 performance claim 仍需要独立 execution、completion、correctness oracle 与 measurement record。
 
 ## 离开前检查
 

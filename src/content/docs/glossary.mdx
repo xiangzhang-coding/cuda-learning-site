@@ -1171,7 +1171,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **定义：** C++ 方言（C++ dialect）是由 C++17、C++20 或 C++23 等标准坐标命名、并在 exact Toolkit、NVCC、host compiler、explicit option、source identity 和 checked phase 中请求的 language mode。
 - **避免使用：** Host compiler default、仅凭 WG21 document 得出的 CUDA support、documentation eligibility 的同义词、从一个 probe 推广的 universal language claim。
 - **相关资源：** [O04](/start/cpp17-for-cuda/)、[M19](/toolchain/cpp-dialect-boundaries/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
-- **版本说明：** Ordinary matrix 是 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20。C++23 只允许在 retained successful EX10 + Toolkit 13.3.1 + exact NVCC + supported GCC 14 probe 后形成同坐标窄声明；当前仍 blocked/pending，且 WG21 N4659/N4861/N4950/N4951 只提供标准 provenance。
+- **版本说明：** Ordinary matrix 是 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20。Run 33266515216 在 EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 坐标上保留 narrow C++23 probe pass；它不是 ordinary C++23 support，WG21 N4659/N4861/N4950/N4951 仍只提供标准 provenance。
 
 ## 维护规则
 

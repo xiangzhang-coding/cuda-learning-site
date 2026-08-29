@@ -4,9 +4,9 @@
   "id": "EX10",
   "title": "PTX and fatbinary inspection",
   "root": "examples/ex10-ptx-fatbinary-inspection",
-  "sourceCommit": "c7326c342c5673de7d17de08d4f56ab836648d5d",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip",
+  "sourceCommit": "16256cbeded889cb1a45f2461585317ed3fe0296",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
@@ -179,7 +179,29 @@
     }
   },
   "evidence": {
-    "compilation": [],
+    "compilation": [
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-11-8-cxx17.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-12-9-cxx17.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-12-9-cxx20.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-13-3-cxx17.json"
+      },
+      {
+        "status": "Compile-Checked",
+        "record": "evidence/cuda-13-3-cxx20.json"
+      }
+    ],
+    "dialectProbe": "evidence/cuda-13-3-gcc14-cxx23-probe.json",
     "runtime": "Runtime-Not-Applicable",
     "hostExecutableExecuted": false,
     "gpuExecutableExecuted": false,

@@ -102,6 +102,7 @@ const issue20SoftwareFiles = [
   'scripts/lib/canonical-examples.mjs',
   'scripts/run-ex10-compile.mjs',
   'src/components/ArtifactPipelineExplorer.astro',
+  'src/components/ExampleEvidence.astro',
   'src/current-publication-manifest.json',
   'src/resource-indexes/resource-index-data.ts',
   'src/resource-indexes/resource-index-model.ts',
@@ -139,6 +140,12 @@ const issue20Project = {
     'Makefile',
     'README.md',
     'evidence/README.md',
+    'evidence/cuda-11-8-cxx17.json',
+    'evidence/cuda-12-9-cxx17.json',
+    'evidence/cuda-12-9-cxx20.json',
+    'evidence/cuda-13-3-cxx17.json',
+    'evidence/cuda-13-3-cxx20.json',
+    'evidence/cuda-13-3-gcc14-cxx23-probe.json',
     'probes/cuda-13.3-gcc14.Dockerfile',
     'probes/cxx23.cu',
     'project.json',
@@ -270,6 +277,10 @@ describe('source, license, and privacy policy', () => {
           id: issue20Project.id,
           license: 'Apache-2.0',
           provenance: 'original',
+        });
+      } else if (relativePath.endsWith('.json')) {
+        expect(JSON.parse(content), `${issue20Project.id} ${relativePath}`).toMatchObject({
+          'SPDX-License-Identifier': 'Apache-2.0',
         });
       } else {
         expect(content, `${issue20Project.id} ${relativePath}`).toContain('SPDX-License-Identifier: Apache-2.0');

@@ -1807,30 +1807,30 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - **相关学习单元与资源：** [O04](/start/cpp17-for-cuda/)、[M15](/toolchain/nvcc-compilation-flow/)、[M19](/toolchain/cpp-dialect-boundaries/)、[EX02](/examples/vector-addition/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
 - **最后复核（Last reviewed）：** 2026-08-29。
 
-**题目：** Reviewer 看到 current CUDA 13.3 Programming Guide/Linux guide 列出 C++23，就把三条 Toolkit Lane 都标成 C++23 Compile-Checked。他依赖 host compiler default，用 GCC 13.3 加 `--allow-unsupported-compiler`，忽略“requested flag will be ignored” diagnostic，并准备删除 EX02 的 historical unsupported record；没有 retained EX10 object、hash 或 inspection output。修复 teaching matrix、documentation boundary 与 successful-probe publication gate。
+**题目：** Reviewer 看到 current CUDA 13.3 Programming Guide/Linux guide 列出 C++23，又看到 retained EX10 GCC 14.2 probe pass，就把三条 Toolkit Lane 都标成 C++23 Compile-Checked。他依赖 host compiler default，建议 GCC 13.3 加 `--allow-unsupported-compiler`，并准备删除 EX02 的 historical unsupported record。修复 teaching matrix、documentation boundary 与 retained-probe claim scope。
 
 **约束：**
 
 - 把 WG21 standard provenance、CUDA language-support page、Linux host-compiler policy、NVCC `--std` option reference 与 actual retained build record 分成五个事实；任何一个都不能替代其他项。
 - 每个 row 显式记录 Toolkit、NVCC、host compiler family/major、dialect option、source commit/range、checked phase、diagnostics、exit status 与 artifact identity；不依赖 default dialect 或 unsupported-host bypass。
-- 保留 CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 的 immutable `unsupported` history；在 exact supported GCC 14 success record 缺失时，C++23 必须写 blocked/pending。
+- 保留 CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0 的 immutable `unsupported` history；同时把 run 33266515216 的 GCC 14.2 result 写成 exact retained `C++23-Dialect-Probe` pass，而不是 ordinary C++23 support。
 
-**预期证据：** 一张三条 Lane 的 ordinary/probe matrix、一份 owner-documentation discrepancy ledger、immutable-history note，以及字段为空但 acceptance 完整的 EX10 GCC 14 successful-probe record template。
+**预期证据：** 一张三条 Lane 的 ordinary/probe matrix、一份 owner-documentation discrepancy ledger、immutable-history note，以及对 retained EX10 GCC 14.2 successful-probe record 的逐字段 scope audit。
 
 **验收条件：**
 
 - Ordinary rows 恢复为 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20；C++23 不进入 ordinary matrix。
 - Current Programming Guide 与 Linux guide 的 C++23 declaration 和 GCC 14 minimum 被保留，同时 current NVCC `--std` accepted-value list 只到 C++20 的边界也被保留；该差异既不证明 broad pass，也不证明 broad failure。
 - Historical GCC 13.3 record 仍只证明 exact CUDA 13.3.1/NVCC 13.3.73/GCC 13.3.0 probe 不支持 requested C++23；不得删除、改写或授予 EX10 status。
-- 只有 retained successful EX10 record 同时包含 exact source commit/`cxx23-probe` range、Native Linux/container、Toolkit 13.3.1、exact NVCC 与 supported GCC 14、exact command/full diagnostics/exit status、通过 `__cplusplus >= 202302L` 与 `if consteval`/`static_assert` guard、object hash、selected artifact inspection、无 executable execution 和 Runtime-Not-Applicable，才允许发布同坐标的窄范围 pass；当前仍为 blocked/pending。
+- Run 33266515216 的 retained EX10 record 包含 source commit `16256cbeded889cb1a45f2461585317ed3fe0296`/`cxx23-probe` range、Ubuntu 24.04.4 container、Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0、exact command、通过的 language guard、object hash/inspection、无 executable execution 和 Runtime-Not-Applicable，因此只允许发布同坐标的 narrow `C++23-Dialect-Probe` pass。
 
 <details><summary>提示 1</summary>“标准是什么”“owner 宣布支持什么”“这个 exact toolchain/source 是否通过”是三个不同问题。</details>
 
 <details><summary>提示 2</summary>成功 exit 不够；probe 必须证明 option 没被忽略，并留下可复核 artifact。</details>
 
-**参考解答（Reviewed solution）：** 修订后的 matrix 只保留三条 ordinary contract，并把 C++23 隔离到 EX10 `cxx23-probe`。Documentation ledger 同时记录 current guide/Linux policy 的 C++23 与 GCC 14 minimum，以及 current NVCC option page 只列到 C++20；不替 owner 消解差异。EX02 的 GCC 13.3 `unsupported` record 原样保留。New probe template 固定 Native Linux、Toolkit 13.3.1、exact NVCC、supported GCC 14、explicit `--std=c++23`、source commit/range、language guards、full diagnostics、exit status、object/hash 与 inspection result，并明确不执行 binary。因为 successful retained record 尚不存在，result 是“blocked/pending probe；no C++23 Compile-Checked claim”，而不是 pass。
+**参考解答（Reviewed solution）：** 修订后的 matrix 只保留三条 ordinary contract，并把 C++23 隔离到 EX10 `cxx23-probe`。五项 ordinary records 在 run 33266515216 中是 Compile-Checked；C++23 record 只在 source commit `16256cbeded889cb1a45f2461585317ed3fe0296`、Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0 与 Ubuntu 24.04.4 LTS 坐标上建立 narrow pass。Documentation ledger 继续保留 current NVCC option page 只列到 C++20 的边界，EX02 的 GCC 13.3 `unsupported` record 原样保留。没有 host/GPU executable 执行、ordinary C++23 support、其他 compiler/platform、runtime 或 performance claim。
 
-**有效替代方案：** 课程可以继续只发布 13.3.1 ordinary C++20 row，直到 GCC 14 record 完整；Clang 18+ 或 `nvc++` 24.3+ 只能形成另外一条同样窄、独立留存的 probe，不能替代本题要求的 GCC 14 gate。
+**有效替代方案：** 课程继续只把 C++20 放入 13.3.1 ordinary row；Clang 18+ 或 `nvc++` 24.3+ 只能形成另外一条同样窄、独立留存的 probe，不能由现有 GCC 14.2 record 推断。
 
 **常见错误：** 用 WG21 draft 证明 CUDA acceptance；把 documentation eligibility 当 compile evidence；依赖 host default；只看 exit code；使用 `--allow-unsupported-compiler`；删除 unsupported history；由 workflow/site build 推断 probe pass；把一个 source 的成功推广到全部 C++23 或 runtime。
 

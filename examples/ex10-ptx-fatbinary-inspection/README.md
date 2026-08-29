@@ -35,4 +35,4 @@ Do not run `build/ex10-ptx-fatbinary-inspection`. The final artifact exists only
 - CUDA 13.3.1: C++17 and C++20.
 - CUDA 13.3.1 C++23 probe: a separate ephemeral image based on the exact pinned 13.3.1 image installs Ubuntu's `g++-14` package and compiles only `probes/cxx23.cu` with `/usr/bin/g++-14`.
 
-The C++23 probe does not extend the ordinary EX10 lane claim. It never uses `--allow-unsupported-compiler`; its workflow record must include the exact installed package version, compiler version, base image identity, and derived image identity.
+Run 33266515216 retains five ordinary Compile-Checked records for the Lane/dialect rows above at source commit `16256cbeded889cb1a45f2461585317ed3fe0296`. The separate C++23 record passed under CUDA 13.3.1, NVCC 13.3.73, and GCC 14.2.0 as `C++23-Dialect-Probe` only. It does not extend the ordinary EX10 Lane claim, and no command uses `--allow-unsupported-compiler`.

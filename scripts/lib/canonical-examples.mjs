@@ -290,11 +290,30 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
   const example = await loadCanonicalExample(projectRoot, exampleId);
   const evidenceRoot = path.join(projectRoot, example.root, 'evidence');
   const files = (await readdir(evidenceRoot)).filter((file) => file.endsWith('.json')).sort();
+  const compilationEntries = example.evidence?.compilation ?? [];
+  const compilationFiles = compilationEntries.map(({ record }) => path.basename(record));
+  const probeFile = example.evidence?.dialectProbe
+    ? path.basename(example.evidence.dialectProbe)
+    : null;
+  const declaredFiles = [...compilationFiles, ...(probeFile ? [probeFile] : [])].sort();
+  if (!sameValues(files, declaredFiles)) {
+    throw new Error(`${exampleId} evidence files do not match its project manifest`);
+  }
+  if (compilationEntries.some(({ status }) => status !== 'Compile-Checked')) {
+    throw new Error(`${exampleId} compilation evidence has an invalid status`);
+  }
+
   const records = [];
   for (const file of files) {
     const record = JSON.parse(await readFile(path.join(evidenceRoot, file), 'utf8'));
     const errors = await validateCompileEvidenceRecord(projectRoot, exampleId, record);
     if (errors.length > 0) throw new Error(`${file}: ${errors.join('; ')}`);
+    if (compilationFiles.includes(file) && record.subject !== exampleId) {
+      throw new Error(`${file}: compilation evidence must describe ${exampleId}`);
+    }
+    if (file === probeFile && record.subject === exampleId) {
+      throw new Error(`${file}: dialect probe must remain separate from ordinary compilation evidence`);
+    }
     records.push(record);
   }
   if (records.length > 0) {
@@ -303,11 +322,25 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
     if (sourceCommits.size !== 1) throw new Error(`${exampleId} evidence records reference different source commits`);
     if (checks.size !== records.length) throw new Error(`${exampleId} evidence records duplicate a check`);
     const [sourceCommit] = sourceCommits;
+    if (example.sourceCommit && example.sourceCommit !== sourceCommit) {
+      throw new Error(`${exampleId} source commit does not match its evidence records`);
+    }
     if (!example.sourceUrl.includes(sourceCommit)) {
       throw new Error(`${exampleId} source URL does not resolve to its evidence commit`);
     }
     if (!example.downloadUrl?.includes(sourceCommit)) {
       throw new Error(`${exampleId} download URL does not resolve to its evidence commit`);
+    }
+
+    const ordinaryRecords = records.filter((record) => record.subject === exampleId);
+    const expectedCoordinates = example.compatibility.lanes.flatMap((lane) =>
+      lane.dialects.map((dialect) => `${lane.toolkit}\0${dialect}`),
+    ).sort();
+    const actualCoordinates = ordinaryRecords.map((record) =>
+      `${record.toolchain.toolkit}\0${record.toolchain.dialect}`,
+    ).sort();
+    if (compilationEntries.length > 0 && !sameValues(actualCoordinates, expectedCoordinates)) {
+      throw new Error(`${exampleId} compilation evidence does not match its declared Lane dialects`);
     }
   }
   return records;

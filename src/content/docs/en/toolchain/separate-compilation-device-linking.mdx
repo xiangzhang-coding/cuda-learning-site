@@ -206,7 +206,7 @@ Add this check to source review: list header-defined weak and template entities,
 
 ## Canonical Runnable Example: EX10
 
-EX10 is M18's canonical standalone project. [View the complete EX10 project at the pinned source commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip). The project is the only complete implementation; this Learning Unit keeps no hand-maintained complete code listing.
+EX10 is M18's canonical standalone project. [View the complete EX10 project at pinned source commit `16256cbeded889cb1a45f2461585317ed3fe0296`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip). The project is the only complete implementation; this Learning Unit keeps no hand-maintained complete code listing.
 
 The first canonical range shows `caller.cu` making an external reference to a device definition in another translation unit:
 
@@ -236,7 +236,7 @@ This page has hardware gate `none` because the Learning Unit performs static rea
 
 EX10 separately marks its artifact-only acceptance as Runtime-Not-Applicable, but that status does not propagate automatically to M18. The existence of a link object, final executable, symbol listing, or hash file cannot establish kernel launch, runtime correctness, occupancy, latency, throughput, or speedup.
 
-A future compilation claim must bind the exact EX10 commit, Toolkit Lane, host compiler, dialect, target clauses, RDC inputs, device-link command, host-link command, artifact identities, and logs. A runtime or performance claim additionally requires a separate execution, completion, correctness-oracle, and measurement record.
+EX10's retained compilation claim binds the exact commit, Toolkit Lane, host compiler, dialect, target clauses, RDC inputs, device-link command, host-link command, artifact identities, and logs. Any runtime or performance claim still requires a separate execution, completion, correctness-oracle, and measurement record.
 
 ## Retrieval check
 

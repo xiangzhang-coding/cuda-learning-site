@@ -1,0 +1,148 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "result": "pass",
+  "claim": "Compile-Checked",
+  "subject": "EX10",
+  "check": "ex10-cuda-13-3-cxx20",
+  "sourceCommit": "16256cbeded889cb1a45f2461585317ed3fe0296",
+  "buildContractSha256": "44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7",
+  "verificationDate": "2026-08-29",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216",
+  "runner": {
+    "operatingSystem": "Linux",
+    "architecture": "X64",
+    "imageOS": "ubuntu24",
+    "imageVersion": "20260823.283.1",
+    "dockerEngine": "28.0.4",
+    "dockerBuildx": "github.com/docker/buildx v0.36.1 1d8dde89b8aba914e05e45366770736fea1fd690"
+  },
+  "container": {
+    "declaredReference": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+    "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+    "expectedAmd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+    "actualAmd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+    "actualImageId": "sha256:de67990f458ce6af607fc5d329060d7e35c38e969df27b932921d53b093b202e",
+    "actualRepoDigests": [
+      "nvidia/cuda@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87"
+    ],
+    "operatingSystem": {
+      "id": "ubuntu",
+      "versionId": "24.04",
+      "prettyName": "Ubuntu 24.04.4 LTS"
+    }
+  },
+  "toolchain": {
+    "toolkit": "13.3.1",
+    "hostCompiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "nvcc": "Cuda compilation tools, release 13.3, V13.3.73",
+    "cuobjdump": "cuobjdump: NVIDIA (R) fat binary listing tool; Cuda compilation tools, release 13.3, V13.3.73",
+    "dialect": "c++20",
+    "target": [
+      "sm_75",
+      "compute_75"
+    ]
+  },
+  "commands": [
+    "make preprocess DIALECT=c++20 BUILD_DIR=build",
+    "make standalone-ptx DIALECT=c++20 BUILD_DIR=build",
+    "make cubin DIALECT=c++20 BUILD_DIR=build",
+    "make fatbin DIALECT=c++20 BUILD_DIR=build",
+    "make relocatable-compile DIALECT=c++20 BUILD_DIR=build",
+    "make device-link DIALECT=c++20 BUILD_DIR=build",
+    "make host-link DIALECT=c++20 BUILD_DIR=build",
+    "make inspect DIALECT=c++20 BUILD_DIR=build",
+    "make artifact-test DIALECT=c++20 BUILD_DIR=build"
+  ],
+  "artifacts": [
+    {
+      "path": "build/artifact_kernel.ii",
+      "bytes": 1451141,
+      "sha256": "39ab738d1c43388ffd9711fff6ec6cf8f443e5de04f8df1e92188e9541e94f77"
+    },
+    {
+      "path": "build/artifact_kernel.ptx",
+      "bytes": 1038,
+      "sha256": "a553907db28596ce68fdeb6a62bcb971bb82d1d83953cc4840b92475f238c70d"
+    },
+    {
+      "path": "build/artifact_kernel.cubin",
+      "bytes": 3240,
+      "sha256": "40876ed6758a8ef2ab7a5b0379b2559712455f0934979d41760285b55729ea98"
+    },
+    {
+      "path": "build/artifact_kernel.fatbin",
+      "bytes": 3776,
+      "sha256": "3dea2b579930945a0113805cbeaa739860bee281d665d3ddbc534aa2cf409330"
+    },
+    {
+      "path": "build/device_math.o",
+      "bytes": 5560,
+      "sha256": "1a2b16ce4badeaf80b8e65a93811e73b8b09e2cd73551892981e11299c2e60f8"
+    },
+    {
+      "path": "build/caller.o",
+      "bytes": 9136,
+      "sha256": "52846d9c2b34abbeee330381610b5fcd0de939fa2ee0afca3b938a8342817027"
+    },
+    {
+      "path": "build/device_link.o",
+      "bytes": 9568,
+      "sha256": "52b0c1c94ad072ac86299db9339850968c7fab97bc08e2205873a463133c02b5"
+    },
+    {
+      "path": "build/ex10-ptx-fatbinary-inspection",
+      "bytes": 1088744,
+      "sha256": "3a9d3b61256a413339dce928973dfa85219aba50c7fbeeb552cbafcaa65a2175"
+    },
+    {
+      "path": "build/artifact-sha256.txt",
+      "bytes": 679,
+      "sha256": "79c48f2843a56feb875c07322cd5633869baf6517c989dbe3d28ca2bca4a0da3"
+    },
+    {
+      "path": "build/cuobjdump-ptx-list.txt",
+      "bytes": 43,
+      "sha256": "498299bc209bb5a1ebc2fe621cfbe81d762805e08c3abd10de7e0e9d68804fe5"
+    },
+    {
+      "path": "build/cuobjdump-elf-list.txt",
+      "bytes": 59,
+      "sha256": "512ddc420297cd109a47c14dc1331aa71a45730cbe5e04502acb8b483bfad1a1"
+    },
+    {
+      "path": "build/cuobjdump-ptx.txt",
+      "bytes": 1052,
+      "sha256": "fec09cd28695b28cae8395855fd5af87f090aa61069e35794a0a20723e5b3fca"
+    },
+    {
+      "path": "build/cuobjdump-sass.txt",
+      "bytes": 3884,
+      "sha256": "196cc3ba885b81df7e29ef665a9943b8201de76d32399cf6142e629468bf02c0"
+    },
+    {
+      "path": "build/cuobjdump-elf.txt",
+      "bytes": 7719,
+      "sha256": "66b18d483214883edefd7f7116ca8c639fa0d2d0d03299992db440e929be7ac9"
+    },
+    {
+      "path": "build/cuobjdump-symbols.txt",
+      "bytes": 69,
+      "sha256": "81174e6797a93f4552e2638a5e71085edfeeebc90933e3608f5956ed643b8d00"
+    },
+    {
+      "path": "build/symbol-link-ledger.txt",
+      "bytes": 311790,
+      "sha256": "1bf687629f4b9b735de8aae5fcd80c388ae1847882f62ee69fc8689ec6f153f7"
+    },
+    {
+      "path": "build/artifact-test-report.txt",
+      "bytes": 193,
+      "sha256": "500ca8aa4dca75d25735885e66bbc7e5d548372456ea4b85cc7cf8e22880e9a8"
+    }
+  ],
+  "hostReferenceExecuted": false,
+  "hostExecutableExecuted": false,
+  "gpuExecutableExecuted": false,
+  "runtimeEvidence": "Runtime-Not-Applicable"
+}

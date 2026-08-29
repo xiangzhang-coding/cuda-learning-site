@@ -129,7 +129,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('five catalog groups total 234 records');
     expect(deployment).toContain('148 Publication Pairs and 296 source routes');
     expect(deployment).toContain('EX10 is Runtime-Not-Applicable');
-    expect(deployment).toMatch(/EX10.*artifact.*C\+\+23 probe.*pending/i);
+    expect(deployment).toMatch(/EX10.*Compile-Checked.*run 33266515216/i);
+    expect(deployment).toMatch(/C\+\+23 probe.*passed.*narrow/i);
     expect(deployment).toMatch(/R2 aggregate review.*pending/i);
     expect(deployment).toMatch(/issue #24/i);
     expect(deployment).toContain('npm run test:release-smoke');

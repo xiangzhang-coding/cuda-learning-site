@@ -1807,30 +1807,30 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - **Related Learning Units and resources:** [O04](/en/start/cpp17-for-cuda/), [M15](/en/toolchain/nvcc-compilation-flow/), [M19](/en/toolchain/cpp-dialect-boundaries/), [EX02](/en/examples/vector-addition/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
 - **Last reviewed:** 2026-08-29.
 
-**Prompt:** A reviewer sees C++23 in the current CUDA 13.3 Programming Guide and Linux guide and marks all three Toolkit Lanes C++23 Compile-Checked. They rely on the host compiler's default, use GCC 13.3 with `--allow-unsupported-compiler`, ignore a “requested flag will be ignored” diagnostic, and prepare to delete EX02's historical unsupported record. No retained EX10 object, hash, or inspection output exists. Repair the teaching matrix, documentation boundary, and successful-probe publication gate.
+**Prompt:** A reviewer sees C++23 in the current CUDA 13.3 Programming Guide and Linux guide, then sees the retained EX10 GCC 14.2 probe pass and marks all three Toolkit Lanes C++23 Compile-Checked. They rely on the host compiler's default, propose GCC 13.3 with `--allow-unsupported-compiler`, and prepare to delete EX02's historical unsupported record. Repair the teaching matrix, documentation boundary, and retained-probe claim scope.
 
 **Constraints:**
 
 - Separate WG21 standard provenance, the CUDA language-support page, Linux host-compiler policy, the NVCC `--std` option reference, and an actual retained build record into five facts. None substitutes for another.
 - Every row explicitly records Toolkit, NVCC, host compiler family and major, dialect option, source commit and range, checked phase, diagnostics, exit status, and artifact identity. Do not rely on a default dialect or unsupported-host bypass.
-- Preserve the immutable `unsupported` history for CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0. C++23 remains blocked/pending while an exact supported-GCC-14 success record is absent.
+- Preserve the immutable `unsupported` history for CUDA 13.3.1 + NVCC 13.3.73 + GCC 13.3.0. Separately state the GCC 14.2 result from run 33266515216 as an exact retained `C++23-Dialect-Probe` pass, not ordinary C++23 support.
 
-**Expected evidence:** A three-Lane ordinary/probe matrix, owner-documentation discrepancy ledger, immutable-history note, and an EX10 GCC 14 successful-probe record template with complete acceptance but blank result fields.
+**Expected evidence:** A three-Lane ordinary/probe matrix, owner-documentation discrepancy ledger, immutable-history note, and a field-by-field scope audit of the retained EX10 GCC 14.2 successful-probe record.
 
 **Acceptance criteria:**
 
 - Ordinary rows return to 11.8.0/C++17, 12.9.2/C++17+C++20, and 13.3.1/C++17+C++20. C++23 does not enter the ordinary matrix.
 - Preserve the current Programming Guide and Linux guide C++23 declaration and GCC 14 minimum while also preserving that the current NVCC `--std` accepted-value list stops at C++20. This discrepancy proves neither a broad pass nor broad failure.
 - The historical GCC 13.3 record still proves only that the exact CUDA 13.3.1/NVCC 13.3.73/GCC 13.3.0 probe does not support requested C++23. Do not delete or rewrite it or grant status to EX10.
-- A narrow pass at the recorded coordinate can be published only after a retained successful EX10 record includes the exact source commit and `cxx23-probe` range, native Linux or container, Toolkit 13.3.1, exact NVCC and supported GCC 14, exact command and full diagnostics and exit status, a passing `__cplusplus >= 202302L` plus `if consteval`/`static_assert` guard, object hash, selected artifact inspection, no executable execution, and Runtime-Not-Applicable. The current result remains blocked/pending.
+- The retained EX10 record from run 33266515216 includes source commit `16256cbeded889cb1a45f2461585317ed3fe0296` and the `cxx23-probe` range, an Ubuntu 24.04.4 container, Toolkit 13.3.1, NVCC 13.3.73, GCC 14.2.0, the exact command, a passing language guard, object hash and inspection, no executable execution, and Runtime-Not-Applicable. It therefore supports only the narrow recorded `C++23-Dialect-Probe` pass.
 
 <details><summary>Hint 1</summary>What the standard is, what the owner declares supported, and whether this exact toolchain and source passed are three different questions.</details>
 
 <details><summary>Hint 2</summary>A successful exit is insufficient. The probe proves that the option was not ignored and retains a reviewable artifact.</details>
 
-**Reviewed solution:** The repaired matrix retains only the three ordinary contracts and isolates C++23 in EX10's `cxx23-probe`. The documentation ledger records both C++23 and the GCC 14 minimum in the current guide and Linux policy and the current NVCC option page ending at C++20, without resolving the owner's discrepancy. EX02's GCC 13.3 `unsupported` record remains unchanged. The new probe template fixes native Linux, Toolkit 13.3.1, exact NVCC, supported GCC 14, explicit `--std=c++23`, source commit and range, language guards, full diagnostics, exit status, object and hash, and inspection result, and explicitly executes no binary. Because no successful retained record exists, the result is “blocked/pending probe; no C++23 Compile-Checked claim,” not a pass.
+**Reviewed solution:** The repaired matrix retains only the three ordinary contracts and isolates C++23 in EX10's `cxx23-probe`. The five ordinary records are Compile-Checked in run 33266515216; the C++23 record establishes a narrow pass only at source commit `16256cbeded889cb1a45f2461585317ed3fe0296`, Toolkit 13.3.1, NVCC 13.3.73, GCC 14.2.0, and Ubuntu 24.04.4 LTS. The documentation ledger still preserves that the current NVCC option page ends at C++20, and EX02's GCC 13.3 `unsupported` record remains unchanged. No host or GPU executable ran, and no ordinary C++23 support, other compiler or platform, runtime, or performance claim follows.
 
-**Valid alternative:** Continue publishing only the ordinary C++20 row for 13.3.1 until the GCC 14 record is complete. Clang 18+ or `nvc++` 24.3+ can form a different, equally narrow retained probe but cannot replace this exercise's GCC 14 gate.
+**Valid alternative:** Continue placing only C++20 in the ordinary 13.3.1 row. Clang 18+ or `nvc++` 24.3+ can form a different, equally narrow retained probe but cannot be inferred from the existing GCC 14.2 record.
 
 **Common errors:** Using a WG21 draft to prove CUDA acceptance; treating documentation eligibility as compile evidence; relying on the host default; checking only exit status; using `--allow-unsupported-compiler`; deleting unsupported history; inferring probe success from a workflow or site build; generalizing one source's result to all C++23 or runtime behavior.
 

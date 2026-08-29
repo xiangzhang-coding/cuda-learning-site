@@ -27,6 +27,7 @@ type PublicationContract = {
   exampleIds?: readonly string[];
   canonicalExample?: string;
   canonicalRanges?: readonly string[];
+  compilationEvidence?: 'none' | 'Compile-Checked';
   runtimeEvidence?: 'none' | 'Runtime-Not-Applicable';
   expectedObservations?: string;
 };
@@ -290,6 +291,8 @@ const unitContracts = [
       'NVCC 13.3.73',
       'GCC 13.3.0',
       'GCC 14',
+      'GCC 14.2.0',
+      '33266515216',
       '__cplusplus >= 202302L',
       'if consteval',
       'cxx23-probe',
@@ -347,6 +350,7 @@ const publicationContracts: readonly PublicationContract[] = [
     exampleIds: ['EX10'],
     canonicalExample: 'EX10',
     canonicalRanges: ['artifact-kernel', 'device-link-contract', 'artifact-pipeline', 'cxx23-probe'],
+    compilationEvidence: 'Compile-Checked',
     runtimeEvidence: 'Runtime-Not-Applicable',
     expectedObservations: '2 artifact expectations',
   },
@@ -498,7 +502,11 @@ describe('M15-M19, EX10, and VIS09 bilingual publication contracts', () => {
         expectText(source, contract.factTokens);
 
         if (contract.runtimeEvidence === 'Runtime-Not-Applicable') {
-          expect(metadataSource).toMatch(/evidence:\n  compilation: \[\]\n  runtime:\n    - Runtime-Not-Applicable/);
+          expect(metadataSource).toMatch(
+            contract.compilationEvidence === 'Compile-Checked'
+              ? /evidence:\n  compilation:\n    - Compile-Checked\n  runtime:\n    - Runtime-Not-Applicable/
+              : /evidence:\n  compilation: \[\]\n  runtime:\n    - Runtime-Not-Applicable/,
+          );
         } else {
           expect(metadataSource).toMatch(
             /evidence:\n  compilation: \[\]\n  runtime: \[\]\n  expectedObservations: \[\]\n  recordedObservations: \[\]/,
@@ -518,7 +526,7 @@ describe('M15-M19, EX10, and VIS09 bilingual publication contracts', () => {
         expect(metadata(document, 'cuda:prerequisites')).toBe(contract.prerequisites.join(',') || 'none');
         expect(metadata(document, 'cuda:related-units')).toBe(contract.relatedUnits.join(',') || 'none');
         expect(metadata(document, 'cuda:hardware-gate')).toBe(contract.hardwareGate);
-        expect(metadata(document, 'cuda:evidence-compilation')).toBe('none');
+        expect(metadata(document, 'cuda:evidence-compilation')).toBe(contract.compilationEvidence ?? 'none');
         expect(metadata(document, 'cuda:evidence-runtime')).toBe(contract.runtimeEvidence ?? 'none');
         expect(metadata(document, 'cuda:recorded-observations')).toBe('none');
         expect(metadata(document, 'cuda:source-count')).toBe(String(contract.sourceUrls.length));
@@ -639,7 +647,7 @@ describe('issue #20 semantic boundaries', () => {
       expect(source).toMatch(/^\| CUDA 13\.3\.1 \| C\+\+17(?:,|、)\s*C\+\+20 \|/m);
       expectText(source, [
         'cxx23-probe',
-        'blocked/pending',
+        'retained narrow pass',
         'GCC 14',
         'Toolkit 13.3.1',
         '__cplusplus >= 202302L',
@@ -648,7 +656,7 @@ describe('issue #20 semantic boundaries', () => {
       ]);
       expect(source).toMatch(/separate `cxx23-probe`|独立 `cxx23-probe`/i);
       expect(source).toMatch(/unsupported-host bypass|unsupported-host.*绕过|不受支持.*绕过/i);
-      expect(source).toMatch(/no C\+\+23 Compile-Checked claim|C\+\+23 (?:没有|无).*Compile-Checked claim/i);
+      expect(source).toMatch(/not ordinary EX10 C\+\+23 Compile-Checked|不是 ordinary EX10 C\+\+23 Compile-Checked/i);
     }
 
     for (const english of [false, true]) {

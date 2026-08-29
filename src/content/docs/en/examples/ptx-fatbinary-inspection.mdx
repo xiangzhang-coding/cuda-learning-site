@@ -40,7 +40,8 @@ toolkitLanes:
   - cuda-13.3
 minimumComputeCapability: '7.5'
 evidence:
-  compilation: []
+  compilation:
+    - Compile-Checked
   runtime:
     - Runtime-Not-Applicable
   expectedObservations:
@@ -175,7 +176,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:evidence-compilation'
-      content: none
+      content: Compile-Checked
   - tag: meta
     attrs:
       name: 'cuda:evidence-runtime'
@@ -199,6 +200,7 @@ head:
 ---
 
 import CanonicalCode from '../../../../components/CanonicalCode.astro';
+import ExampleEvidence from '../../../../components/ExampleEvidence.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/examples/ptx-fatbinary-inspection/" lang="zh-CN">阅读中文版本</a>
 
@@ -216,7 +218,7 @@ A second path deliberately crosses two CUDA translation units. `src/caller.cu` o
 
 ## Get the canonical project
 
-[View the complete EX10 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c7326c342c5673de7d17de08d4f56ab836648d5d/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c7326c342c5673de7d17de08d4f56ab836648d5d.zip). After extraction, enter `examples/ex10-ptx-fatbinary-inspection/`. `project.json` is the machine-readable contract; `README.md`, `Makefile`, and `scripts/` provide the standalone inspection procedure.
+[View the complete EX10 project at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip). After extraction, enter `examples/ex10-ptx-fatbinary-inspection/`. `project.json` is the machine-readable contract; `README.md`, `Makefile`, and `scripts/` provide the standalone inspection procedure.
 
 ## Artifact matrix
 
@@ -267,11 +269,15 @@ On 2026-08-29, the CUDA 13.3 owner guide declares Linux GCC 6.x-15.x and C++23 s
 
 <CanonicalCode exampleId="EX10" range="cxx23-probe" />
 
-The ephemeral-image record must preserve the installed package version, GCC 14 version line, base image identity, and derived image identity. This result is scoped only to the probe object and does not extend the ordinary EX10 Lane to C++23. No path uses `--allow-unsupported-compiler`.
+The retained probe record preserves the installed `g++-14=14.2.0-4ubuntu2~24.04.1` package, GCC 14.2.0 version line, base image identity, derived image identity, and object hash. No path uses `--allow-unsupported-compiler`.
 
 ## Evidence status
 
-The compilation evidence array in `project.json` is currently empty. The workflow matrix generates sanitized records and inspection logs, but this page grants no Compile-Checked status until those records are downloaded, reviewed, committed, and `sourceCommit`, `sourceUrl`, and `downloadUrl` are repinned to the same evidence commit. A failed or skipped job, or merely finding an image, grants no status.
+Five ordinary records are Compile-Checked: CUDA 11.8.0/C++17, 12.9.2/C++17, 12.9.2/C++20, 13.3.1/C++17, and 13.3.1/C++20. All five come from [run 33266515216](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216) and bind source commit `16256cbeded889cb1a45f2461585317ed3fe0296` and build-contract SHA-256 `44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7`.
+
+<ExampleEvidence exampleId="EX10" locale="en" />
+
+The CUDA 13.3.1, NVCC 13.3.73, GCC 14.2.0 C++23 probe from the same run passed, but it is strictly a `C++23-Dialect-Probe`. It does not add C++23 to the ordinary EX10 matrix or declare another compiler, platform, source, runtime behavior, or performance. A failed or skipped job, or merely finding an image, still grants no status.
 
 Runtime evidence is permanently Runtime-Not-Applicable. EX10's acceptance criteria are compilation, hashing, and artifact inspection, not GPU behavior.
 
@@ -281,7 +287,7 @@ Runtime evidence is permanently Runtime-Not-Applicable. EX10's acceptance criter
 - The final host artifact exists only as host-link and inspection input and is never executed.
 - The C++23 probe only produces and inspects an object file; it executes no host or GPU code.
 - The page records no latency, throughput, speedup, occupancy, or other performance number.
-- A later Compile-Checked record would not substitute for Runtime-Verified. Runtime is outside EX10's acceptance criteria.
+- Compile-Checked does not substitute for Runtime-Verified. Runtime is outside EX10's acceptance criteria.
 
 ## Sources and review
 

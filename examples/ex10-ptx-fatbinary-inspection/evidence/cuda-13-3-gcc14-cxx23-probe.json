@@ -1,0 +1,72 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "result": "pass",
+  "claim": "C++23-Dialect-Probe",
+  "subject": "EX10-CUDA-13.3-CXX23-GCC14-PROBE",
+  "check": "ex10-cuda-13-3-gcc14-cxx23-probe",
+  "sourceCommit": "16256cbeded889cb1a45f2461585317ed3fe0296",
+  "buildContractSha256": "44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7",
+  "verificationDate": "2026-08-29",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216",
+  "runner": {
+    "operatingSystem": "Linux",
+    "architecture": "X64",
+    "imageOS": "ubuntu24",
+    "imageVersion": "20260823.283.1",
+    "dockerEngine": "28.0.4",
+    "dockerBuildx": "github.com/docker/buildx v0.36.1 1d8dde89b8aba914e05e45366770736fea1fd690"
+  },
+  "container": {
+    "declaredReference": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+    "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+    "expectedAmd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+    "actualAmd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+    "actualImageId": "sha256:27a1ffcbff46931ef621335a4254b762f63051c6c16ed7db3db1bee62c7f929e",
+    "actualRepoDigests": [],
+    "operatingSystem": {
+      "id": "ubuntu",
+      "versionId": "24.04",
+      "prettyName": "Ubuntu 24.04.4 LTS"
+    },
+    "baseImage": {
+      "actualImageId": "sha256:de67990f458ce6af607fc5d329060d7e35c38e969df27b932921d53b093b202e",
+      "actualRepoDigests": [
+        "nvidia/cuda@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87"
+      ]
+    },
+    "derivedImage": {
+      "dockerfile": "probes/cuda-13.3-gcc14.Dockerfile",
+      "buildCommand": "docker build --platform linux/amd64 --file examples/ex10-ptx-fatbinary-inspection/probes/cuda-13.3-gcc14.Dockerfile --tag ex10-cuda-13-3-gcc14-cxx23-probe:local examples/ex10-ptx-fatbinary-inspection",
+      "tag": "ex10-cuda-13-3-gcc14-cxx23-probe:local",
+      "hostCompilerPackage": "g++-14=14.2.0-4ubuntu2~24.04.1"
+    }
+  },
+  "toolchain": {
+    "toolkit": "13.3.1",
+    "hostCompiler": "g++-14 (Ubuntu 14.2.0-4ubuntu2~24.04.1) 14.2.0",
+    "nvcc": "Cuda compilation tools, release 13.3, V13.3.73",
+    "cuobjdump": "cuobjdump: NVIDIA (R) fat binary listing tool; Cuda compilation tools, release 13.3, V13.3.73",
+    "dialect": "c++23",
+    "target": [
+      "sm_75",
+      "compute_75"
+    ]
+  },
+  "commands": [
+    "nvcc --compiler-bindir=/usr/bin/g++-14 --std=c++23 --generate-code=arch=compute_75,code=sm_75 --generate-code=arch=compute_75,code=compute_75 --compile probes/cxx23.cu -o build/cxx23_probe.o",
+    "cuobjdump --list-elf build/cxx23_probe.o",
+    "sha256sum build/cxx23_probe.o"
+  ],
+  "artifacts": [
+    {
+      "path": "build/cxx23_probe.o",
+      "bytes": 10176,
+      "sha256": "1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea"
+    }
+  ],
+  "hostReferenceExecuted": false,
+  "hostExecutableExecuted": false,
+  "gpuExecutableExecuted": false,
+  "runtimeEvidence": "Runtime-Not-Applicable"
+}

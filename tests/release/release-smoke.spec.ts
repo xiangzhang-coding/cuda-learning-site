@@ -104,17 +104,18 @@ test('serves the exact current publication while preserving R1 metadata and prod
       sourceRecords: 50,
     },
     evidence: {
-      compileChecked: ['EX02', 'LAB02'],
-      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX10']),
+      compileChecked: ['EX02', 'EX10', 'LAB02'],
+      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
       pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
       runtimeNotApplicable: ['EX10'],
       runtimeVerified: [],
       referenceEnvironments: [],
       performanceObservations: [],
+      retainedCompileRuns: [32720214527, 33266515216],
     },
     knownLimitations: expect.arrayContaining([
       'LAB06 has no current public destination.',
-      'EX10 artifact-pipeline checks and the separate CUDA 13.3/GCC 14 C++23 probe remain pending committed qualifying records and grant no Compile-Checked claim.',
+      'EX10 has five ordinary Compile-Checked records from run 33266515216; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
       'This incremental publication record is not a completed R2 aggregate release review.',
     ]),
   });
@@ -651,13 +652,20 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     expect(project.downloadUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${project.sourceCommit}.zip`,
     );
-    expect(project.evidence.compilation).toEqual([]);
+    if (project.id === 'EX10') {
+      expect(project.evidence.compilation).toHaveLength(5);
+    } else {
+      expect(project.evidence.compilation).toEqual([]);
+    }
     expect(project.evidence.recordedObservations).toEqual([]);
 
     await page.goto(route);
     await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
     await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
-    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
+      'content',
+      project.id === 'EX10' ? 'Compile-Checked' : 'none',
+    );
     await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
       'content',
       project.evidence.runtime,
@@ -676,8 +684,6 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
 
   const archives = new Map<string, Buffer>();
   for (const { project } of projectExamples) {
-    // EX10 stays link-only until retained evidence repins its canonical archive.
-    if (project.id === 'EX10') continue;
     let archive = archives.get(project.downloadUrl);
     if (!archive) {
       const response = await request.get(project.downloadUrl);
