@@ -72,7 +72,7 @@ head:
 
 **预期证据：** 一张三行 matrix、一段 declaration-versus-evidence 说明，以及每行对应的 owner-source role。
 
-**验收条件：** 三行与指定 dialect 完全一致；五项 ordinary row 根据 retained run 33271481405 标为 Compile-Checked；13.3.1 C++23 标为独立 retained narrow probe pass；11.8.0/12.9.2 没有 C++23 row。
+**验收条件：** 三行与指定 dialect 完全一致；五项 ordinary row 根据 retained run 33275734951 标为 Compile-Checked；13.3.1 C++23 标为独立 retained narrow probe pass；11.8.0/12.9.2 没有 C++23 row。
 
 <details><summary>提示 1</summary>先写 ordinary rows，再单独添加 probe column；不要从 newest guide 向 archive 反向推断。</details>
 
@@ -96,7 +96,7 @@ head:
 
 **目标：** 一位 reviewer 看到了 EX10 `cxx23-probe` source、GCC 14 Dockerfile、workflow row 与 retained pass，准备发布 broad “CUDA 13.3.1 supports C++23”。修复这项 proposal，并审查 qualifying record packet 的精确范围。
 
-**约束：** 以 retained run 33271481405、source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`、canonical range `cxx23-probe`、CUDA 13.3.1、NVCC 13.3.73 与 GCC 14.2.0 为准。Packet 必须保留 environment identity、command、complete diagnostics、exit status、language guard outcome、object hash/inspection 与 no-execution statement。不得使用 unsupported-host bypass；结论只能是 `C++23-Dialect-Probe` narrow pass，不能写 ordinary C++23 support。
+**约束：** 以 retained run 33275734951、source commit `904c6da03800ed3012baacb861494377c0fa01f2`、canonical range `cxx23-probe`、CUDA 13.3.1、NVCC 13.3.73 与 GCC 14.2.0 为准。Packet 必须保留 environment identity、command、complete diagnostics、exit status、language guard outcome、object hash/inspection 与 no-execution statement。不得使用 unsupported-host bypass；结论只能是 `C++23-Dialect-Probe` narrow pass，不能写 ordinary C++23 support。
 
 **预期证据：** Ordered gate checklist、pass/reject decision table，以及一段不超过两句的 admissible narrow claim template。
 

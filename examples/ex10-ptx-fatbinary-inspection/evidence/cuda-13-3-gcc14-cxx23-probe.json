@@ -5,10 +5,10 @@
   "claim": "C++23-Dialect-Probe",
   "subject": "EX10-CUDA-13.3-CXX23-GCC14-PROBE",
   "check": "ex10-cuda-13-3-gcc14-cxx23-probe",
-  "sourceCommit": "8b4af3965147f2ead99e72a73f5fe2f92fa0114b",
-  "buildContractSha256": "4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb",
+  "sourceCommit": "904c6da03800ed3012baacb861494377c0fa01f2",
+  "buildContractSha256": "9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7",
   "verificationDate": "2026-08-29",
-  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951",
   "runner": {
     "operatingSystem": "Linux",
     "architecture": "X64",
@@ -22,7 +22,7 @@
     "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
     "expectedAmd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
     "actualAmd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
-    "actualImageId": "sha256:2115558b2675a77faf9d5fcbac23fb8e4d28dd44900a69b9ef48d7b09d9e9f8d",
+    "actualImageId": "sha256:b34e1a16201070cd4648f9fc2a4cb6f18943e3e6cff8f8922d9caede218d146c",
     "actualRepoDigests": [],
     "operatingSystem": {
       "id": "ubuntu",
@@ -66,6 +66,27 @@
       "sha256": "1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea"
     }
   ],
+  "inspection": {
+    "inventories": {
+      "elf": [
+        {
+          "index": 1,
+          "file": "cxx23_probe.1.sm_75.cubin"
+        }
+      ]
+    },
+    "compilerOutput": [],
+    "artifactHash": {
+      "path": "build/cxx23_probe.o",
+      "sha256": "1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea"
+    },
+    "exitStatuses": {
+      "clean": 0,
+      "compile": 0,
+      "inspect": 0,
+      "artifact-hash": 0
+    }
+  },
   "hostReferenceExecuted": false,
   "hostExecutableExecuted": false,
   "gpuExecutableExecuted": false,

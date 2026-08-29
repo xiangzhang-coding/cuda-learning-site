@@ -2,7 +2,7 @@
 
 # EX10 Compile Evidence Records
 
-Run [33271481405](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405) produced the retained records for source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`. All six records bind build contract SHA-256 `4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb`.
+Run [33275734951](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951) produced the retained records for source commit `904c6da03800ed3012baacb861494377c0fa01f2`. All six records bind build contract SHA-256 `9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7`.
 
 The five ordinary `Compile-Checked` records are `cuda-11-8-cxx17.json`, `cuda-12-9-cxx17.json`, `cuda-12-9-cxx20.json`, `cuda-13-3-cxx17.json`, and `cuda-13-3-cxx20.json`. Together they cover every declared Lane/dialect row. Each record covers every declared stage and artifact, identifies the canonical build-contract hash, runner, digest-pinned `linux/amd64` image, actual image, and toolchain coordinates, and states that neither the final host artifact nor a GPU executable was executed. Its compact `inspection` field durably retains the complete PTX/ELF inventories, artifact-test facts, caller-undefined/device-link-defined symbol transition, and stage exit statuses; the artifact ledger retains paths, sizes, and hashes for the larger generated outputs.
 

@@ -355,11 +355,17 @@ describe('EX10 compile evidence validation', () => {
     await expect(loadCompileEvidence(projectRoot, 'EX02')).resolves.toHaveLength(6);
   });
 
-  it('declares the retained EX10 run and exact six-check matrix', async () => {
-    const example = await loadCanonicalExample(projectRoot, 'EX10');
-    expect(example.sourceCommit).toBe('8b4af3965147f2ead99e72a73f5fe2f92fa0114b');
+  it('loads the retained EX10 run, exact six-check matrix, and compact inspections', async () => {
+    const [example, records] = await Promise.all([
+      loadCanonicalExample(projectRoot, 'EX10'),
+      loadCompileEvidence(projectRoot, 'EX10'),
+    ]);
+    const ordinaryRecords = records.filter(({ subject }) => subject === 'EX10');
+    const probe = records.find(({ claim }) => claim === 'C++23-Dialect-Probe');
+
+    expect(example.sourceCommit).toBe('904c6da03800ed3012baacb861494377c0fa01f2');
     expect(example.evidence.retainedWorkflowRun).toBe(
-      'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
+      'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951',
     );
     expect(example.evidence.compilation).toHaveLength(5);
     expect(example.evidence.dialectProbe).toBe('evidence/cuda-13-3-gcc14-cxx23-probe.json');
@@ -376,5 +382,36 @@ describe('EX10 compile evidence validation', () => {
         kind: 'cxx23-probe',
       },
     ]);
+    expect(records).toHaveLength(6);
+    expect(ordinaryRecords).toHaveLength(5);
+    for (const record of ordinaryRecords) {
+      expect(record.buildContractSha256).toBe(
+        '9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7',
+      );
+      expect(record.inspection).toEqual(ordinaryInspection());
+    }
+    expect(probe).toMatchObject({
+      result: 'pass',
+      subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
+      sourceCommit: example.sourceCommit,
+      buildContractSha256: '9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7',
+      workflowRun: example.evidence.retainedWorkflowRun,
+      inspection: {
+        inventories: {
+          elf: [{ index: 1, file: 'cxx23_probe.1.sm_75.cubin' }],
+        },
+        compilerOutput: [],
+        artifactHash: {
+          path: 'build/cxx23_probe.o',
+          sha256: '1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea',
+        },
+        exitStatuses: {
+          clean: 0,
+          compile: 0,
+          inspect: 0,
+          'artifact-hash': 0,
+        },
+      },
+    });
   });
 });

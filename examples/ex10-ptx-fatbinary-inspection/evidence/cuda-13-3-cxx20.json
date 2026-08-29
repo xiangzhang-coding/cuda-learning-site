@@ -5,10 +5,10 @@
   "claim": "Compile-Checked",
   "subject": "EX10",
   "check": "ex10-cuda-13-3-cxx20",
-  "sourceCommit": "8b4af3965147f2ead99e72a73f5fe2f92fa0114b",
-  "buildContractSha256": "4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb",
+  "sourceCommit": "904c6da03800ed3012baacb861494377c0fa01f2",
+  "buildContractSha256": "9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7",
   "verificationDate": "2026-08-29",
-  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951",
   "runner": {
     "operatingSystem": "Linux",
     "architecture": "X64",
@@ -137,16 +137,76 @@
       "sha256": "81174e6797a93f4552e2638a5e71085edfeeebc90933e3608f5956ed643b8d00"
     },
     {
+      "path": "build/caller-symbols.txt",
+      "bytes": 443,
+      "sha256": "6b918c80c31b45a88ebd9e9f065106ab22d4836e02bd368add81b025fabebabb"
+    },
+    {
+      "path": "build/device-link-symbols.txt",
+      "bytes": 236,
+      "sha256": "610d081e0014d8e5a08c6a1ce7f4ad0440c51c7d8526b7799ee778556e1042c0"
+    },
+    {
       "path": "build/symbol-link-ledger.txt",
       "bytes": 311790,
       "sha256": "1bf687629f4b9b735de8aae5fcd80c388ae1847882f62ee69fc8689ec6f153f7"
     },
     {
       "path": "build/artifact-test-report.txt",
-      "bytes": 228,
-      "sha256": "44c7f2225fca1a83f2e52c5c84fd3fa584afef8d3174c47a40dee4d9f406d806"
+      "bytes": 301,
+      "sha256": "a24070d8abfc5884d4ecff2275407d9ec18ff4579a1c23d2f228d0bc5ca0dc20"
     }
   ],
+  "inspection": {
+    "inventories": {
+      "ptx": [
+        {
+          "index": 1,
+          "file": "artifact_kernel.1.sm_75.ptx"
+        }
+      ],
+      "elf": [
+        {
+          "index": 1,
+          "file": "artifact_kernel.1.sm_75.cubin"
+        }
+      ],
+      "linkedElf": [
+        {
+          "index": 1,
+          "file": "ex10-ptx-fatbinary-inspection.1.sm_75.cubin"
+        }
+      ]
+    },
+    "artifactTestReport": {
+      "artifact-test": "pass",
+      "target-native": "sm_75",
+      "target-virtual": "compute_75",
+      "same-fatbinary-native-and-ptx": "true",
+      "caller-ex10-device-scale": "undefined",
+      "device-link-ex10-device-scale": "defined",
+      "host-executable-executed": "false",
+      "gpu-executable-executed": "false",
+      "runtime-evidence": "Runtime-Not-Applicable",
+      "performance-measured": "false"
+    },
+    "symbols": {
+      "callerUndefined": "STT_FUNC STB_GLOBAL STV_DEFAULT U ex10_device_scale",
+      "deviceLinkDefined": "STT_FUNC STB_GLOBAL STV_DEFAULT ex10_device_scale"
+    },
+    "exitStatuses": {
+      "clean": 0,
+      "preprocess": 0,
+      "standalone-ptx": 0,
+      "cubin": 0,
+      "fatbin": 0,
+      "relocatable-compile": 0,
+      "device-link": 0,
+      "host-link": 0,
+      "inspect": 0,
+      "artifact-test": 0
+    }
+  },
   "hostReferenceExecuted": false,
   "hostExecutableExecuted": false,
   "gpuExecutableExecuted": false,

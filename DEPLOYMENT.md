@@ -37,7 +37,7 @@ The build command checks source/privacy boundaries, the exact lockfile and licen
 
 ## Acceptance
 
-Before accepting a production deployment, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. A web check grants no CUDA Evidence Status. EX02, EX10, and LAB02 retain Compile-Checked evidence; EX10's five ordinary records come from run 33271481405. EX01-EX09, EX16, and every current Lab remain Pending Hardware Verification; EX10 is Runtime-Not-Applicable because its acceptance contract executes neither the final host artifact nor a GPU executable. Its CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe passed narrowly as `C++23-Dialect-Probe`, not ordinary C++23 support. The current publication declares no Reference Environment, Runtime-Verified subject, or performance observation and records no measured overlap, migration, or graph performance.
+Before accepting a production deployment, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. A web check grants no CUDA Evidence Status. EX02, EX10, and LAB02 retain Compile-Checked evidence; EX10's five ordinary records come from run 33275734951. EX01-EX09, EX16, and every current Lab remain Pending Hardware Verification; EX10 is Runtime-Not-Applicable because its acceptance contract executes neither the final host artifact nor a GPU executable. Its CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe passed narrowly as `C++23-Dialect-Probe`, not ordinary C++23 support. The current publication declares no Reference Environment, Runtime-Verified subject, or performance observation and records no measured overlap, migration, or graph performance.
 
 Run the remote browser gate against the exact deployed source:
 

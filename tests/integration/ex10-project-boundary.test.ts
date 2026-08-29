@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   loadCanonicalExample,
+  loadCompileEvidence,
   readCanonicalRange,
   validateCanonicalExample,
 } from '../../scripts/lib/canonical-examples.mjs';
@@ -16,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex10-ptx-fatbinary-inspection');
-const sourceCommit = '8b4af3965147f2ead99e72a73f5fe2f92fa0114b';
+const sourceCommit = '904c6da03800ed3012baacb861494377c0fa01f2';
 const evidenceBundleCommit = '8b4af3965147f2ead99e72a73f5fe2f92fa0114b';
 const rangeNames = [
   'artifact-kernel',
@@ -255,14 +256,10 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
   it('reads five retained ordinary records and one separate probe without reclassifying runtime', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX10');
     const evidenceFiles = await readdir(path.join(exampleRoot, 'evidence'));
-    // A fresh CI run will make these records current against the changed build contract.
-    const records = await Promise.all(evidenceFiles
-      .filter((file) => file.endsWith('.json'))
-      .sort()
-      .map(async (file) => JSON.parse(await readFile(path.join(exampleRoot, 'evidence', file), 'utf8'))));
+    const records = await loadCompileEvidence(projectRoot, 'EX10');
 
     expect(example.evidence).toMatchObject({
-      retainedWorkflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
+      retainedWorkflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951',
       compilation: [
         { status: 'Compile-Checked', record: 'evidence/cuda-11-8-cxx17.json' },
         { status: 'Compile-Checked', record: 'evidence/cuda-12-9-cxx17.json' },
@@ -306,7 +303,7 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       result: 'pass',
       subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
       sourceCommit,
-      buildContractSha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+      buildContractSha256: '9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7',
       workflowRun: example.evidence.retainedWorkflowRun,
       toolchain: {
         toolkit: '13.3.1',

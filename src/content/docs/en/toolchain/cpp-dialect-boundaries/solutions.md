@@ -110,7 +110,7 @@ The decision table is:
 | GCC 14 command success without diagnostics, guards, artifact, or retained identity | reject | incomplete probe; no Compile-Checked |
 | complete retained GCC 14 pass packet | publish retained narrow pass | exact EX10/Toolkit/NVCC/GCC/platform/phase claim only |
 
-The current admissible two-sentence statement is: "At source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 on Ubuntu 24.04.4 LTS. Run 33271481405 establishes that narrow `C++23-Dialect-Probe` result; no host or GPU executable ran."
+The current admissible two-sentence statement is: "At source commit `904c6da03800ed3012baacb861494377c0fa01f2`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 on Ubuntu 24.04.4 LTS. Run 33275734951 establishes that narrow `C++23-Dialect-Probe` result; no host or GPU executable ran."
 
 This statement is not ordinary EX10 C++23 support and covers no other compiler, platform, source, runtime, or performance. The Compile-Checked status of the five ordinary C++17/C++20 records remains separate from this probe claim.
 

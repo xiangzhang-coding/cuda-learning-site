@@ -206,7 +206,7 @@ Separate compilation 中，不应在 shared header 里让 weak function 或 temp
 
 ## Canonical Runnable Example：EX10
 
-EX10 是 M18 的 canonical standalone project。[在固定 source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b` 中查看完整 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/8b4af3965147f2ead99e72a73f5fe2f92fa0114b/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip)。Project 是唯一 complete implementation；本 Learning Unit 不维护手写 complete code listing。
+EX10 是 M18 的 canonical standalone project。[在固定 build-source commit `904c6da03800ed3012baacb861494377c0fa01f2` 中查看完整 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection)，或[下载暂时保留的 evidence-bundle source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip)。前者是 retained run 33275734951 编译的 source；archive/download 坐标会保持临时状态，直到本次 evidence-retention 变更有自己的 commit SHA。Project 是唯一 complete implementation；本 Learning Unit 不维护手写 complete code listing。
 
 第一个 canonical range 展示 `caller.cu` 对另一个 translation unit 中 device definition 的 external reference：
 

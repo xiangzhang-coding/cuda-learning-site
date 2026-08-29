@@ -228,7 +228,7 @@ EX10 是一个只构建、只检查的可运行示例（Runnable Example）。�
 
 ## 获取 canonical project
 
-[查看固定提交中的完整 EX10 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/8b4af3965147f2ead99e72a73f5fe2f92fa0114b/examples/ex10-ptx-fatbinary-inspection)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip)。解压后进入 `examples/ex10-ptx-fatbinary-inspection/`。`project.json` 是机器可读契约；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
+[查看 build-source commit `904c6da03800ed3012baacb861494377c0fa01f2` 中的完整 EX10 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection)，或[下载暂时保留的 evidence-bundle source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip)。前者是 retained run 33275734951 编译的精确 source；后者不是同一 source coordinate，并会保持临时状态，直到本次 evidence-retention 变更有自己的 commit SHA。获取精确 build source 时应使用 tree link。`project.json` 是机器可读契约；`README.md`、`Makefile` 和 `scripts/` 给出独立检查方法。
 
 ## 产物矩阵
 
@@ -283,7 +283,7 @@ CUDA 13.3 owner guide 在 2026-08-29 声明 Linux GCC 6.x-15.x 和 C++23；Ubunt
 
 ## 证据状态
 
-五项 ordinary record 已授予编译已检查（Compile-Checked）：CUDA 11.8.0/C++17、12.9.2/C++17、12.9.2/C++20、13.3.1/C++17 和 13.3.1/C++20。它们全部来自 [run 33271481405](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405)，绑定 source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b` 与 build-contract SHA-256 `4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb`。
+五项 ordinary record 已授予编译已检查（Compile-Checked）：CUDA 11.8.0/C++17、12.9.2/C++17、12.9.2/C++20、13.3.1/C++17 和 13.3.1/C++20。它们全部来自 [run 33275734951](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951)，绑定 source commit `904c6da03800ed3012baacb861494377c0fa01f2` 与 build-contract SHA-256 `9b2df37e1ee6f7d6c51fea80d90f0bcff4a13d2dcd83fb2cf150a269f02a41f7`。
 
 <ExampleEvidence exampleId="EX10" locale="zh-CN" />
 

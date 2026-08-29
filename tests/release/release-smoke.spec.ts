@@ -121,11 +121,11 @@ test('serves the exact current publication while preserving R1 metadata and prod
       runtimeVerified: [],
       referenceEnvironments: [],
       performanceObservations: [],
-      retainedCompileRuns: [32720214527, 33271481405],
+      retainedCompileRuns: [32720214527, 33275734951],
     },
     knownLimitations: expect.arrayContaining([
       'LAB06 has no current public destination.',
-      'EX10 has five ordinary Compile-Checked records from run 33271481405; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
+      'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
       'This incremental publication record is not a completed R2 aggregate release review.',
     ]),
   });
