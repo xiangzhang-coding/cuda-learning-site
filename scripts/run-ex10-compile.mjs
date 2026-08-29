@@ -315,6 +315,11 @@ const record = {
 
 const recordErrors = await validateCompileEvidenceRecord(projectRoot, 'EX10', record);
 if (recordErrors.length > 0) {
+  console.error(JSON.stringify({
+    subject: record.subject,
+    container: record.container,
+    hostCompiler: record.toolchain.hostCompiler,
+  }, null, 2));
   throw new Error(`Generated EX10 evidence is invalid: ${recordErrors.join('; ')}`);
 }
 await writeFile(path.join(resultRoot, 'record.json'), `${JSON.stringify(record, null, 2)}\n`);
