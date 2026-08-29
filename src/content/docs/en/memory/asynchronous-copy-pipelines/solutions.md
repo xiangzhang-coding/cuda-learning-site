@@ -74,7 +74,7 @@ The drain is row 4: no future submission is needed, but `B` still requires wait,
 
 ## Solution 2: Repair participants, convergence, and completion
 
-```cpp
+```cpp wrap
 pipe.producer_acquire();
 if (load_valid) {
   cuda::memcpy_async(dst + threadIdx.x, src + input_index, sizeof(T), pipe);

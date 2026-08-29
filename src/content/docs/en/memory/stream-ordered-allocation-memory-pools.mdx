@@ -123,7 +123,7 @@ M11 changes the representation of allocation lifetime. It does not publish a can
 
 Before selecting this allocator, query the target device with `cudaDeviceGetAttribute` and `cudaDevAttrMemoryPoolsSupported`. A nonzero result admits the stream-ordered allocator path for that device. A zero result requires a different allocation strategy; the presence of declarations in installed headers is not a device-support observation.
 
-```cpp
+```cpp wrap
 int pools_supported = 0;
 cudaDeviceGetAttribute(
     &pools_supported,
@@ -152,7 +152,7 @@ The comparison changes where lifetime boundaries live, not the correctness rule:
 
 The usable interval is therefore bounded by stream execution, not merely by the lexical scope of `ptr`:
 
-```text
+```text wrap
 allocation operation completes -> permitted ordered uses -> free operation begins
 ```
 
@@ -162,7 +162,7 @@ Future work enqueued in the same stream after the allocation is ordered after it
 
 The smallest reviewable lifetime uses one stream:
 
-```text
+```text wrap
 stream_work: malloc_async(ptr) -> initialize(ptr) -> consume(ptr) -> free_async(ptr)
 ```
 
@@ -174,7 +174,7 @@ This graph proves a valid order if every use is shown. It does not prove that th
 
 When allocation, use, and free occupy different streams, an edge is needed at each lifetime boundary:
 
-```text
+```text wrap
 stream_allocate: malloc_async(ptr) -> record(ready)
                                            |
                                            v

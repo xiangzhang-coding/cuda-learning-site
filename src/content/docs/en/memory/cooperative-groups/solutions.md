@@ -63,7 +63,7 @@ These answers solve the [M12 Exercises](/en/memory/cooperative-groups/exercises/
 
 One reviewable interface is:
 
-```cpp
+```cpp wrap
 template <class Group>
 __device__ void publish_then_sync(const Group& group, int* shared_value, int value) {
   if (group.thread_rank() == 0) *shared_value = value;
@@ -80,7 +80,7 @@ The handle is `block`; membership is all threads in that block; the synchronizat
 
 Construct the tile before divergent control:
 
-```cpp
+```cpp wrap
 cg::thread_block block = cg::this_thread_block();
 auto tile = cg::tiled_partition<32>(block);
 int result = cg::reduce(tile, value, cg::plus<int>());

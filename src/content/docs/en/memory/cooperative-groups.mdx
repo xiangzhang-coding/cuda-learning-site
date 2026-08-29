@@ -135,7 +135,7 @@ Before calling a group operation, write four fields:
 
 Passing the handle into a helper exposes the contract at the function boundary:
 
-```cpp
+```cpp wrap
 template <class Group>
 __device__ void publish_then_sync(const Group& group, int* shared_value, int value) {
   if (group.thread_rank() == 0) *shared_value = value;
@@ -149,7 +149,7 @@ The caller must supply a group whose members can legally access `shared_value`, 
 
 `cooperative_groups::this_thread_block()` returns a `thread_block` handle containing all threads in the caller's block. Its `thread_rank()` and `num_threads()` describe membership. Its `sync()` is a block-group collective: all member threads must participate, all reach the point before any proceeds, and documented pre-sync memory accesses become visible to group members after the point.
 
-```cpp
+```cpp wrap
 namespace cg = cooperative_groups;
 cg::thread_block block = cg::this_thread_block();
 block.sync();
@@ -161,7 +161,7 @@ This block-wide handle is the baseline for M12 because launch geometry already d
 
 `cg::tiled_partition<32>(block)` partitions the parent block into fixed-size, one-dimensional row-major tiles and returns each caller's tile handle. The partition operation is itself collective over the parent group. Every member of `block` must participate; constructing the tile only in a branch reached by some block threads can deadlock or corrupt data.
 
-```cpp
+```cpp wrap
 cg::thread_block block = cg::this_thread_block();
 auto tile = cg::tiled_partition<32>(block); // reached by the complete parent block
 
@@ -179,7 +179,7 @@ Review tile size against the documented API constraints and parent size. After p
 
 For a tile reduction:
 
-```cpp
+```cpp wrap
 int tile_sum = cg::reduce(tile, value, cg::plus<int>());
 ```
 
@@ -204,7 +204,7 @@ The same-call-site appearance is insufficient if divergent control causes only p
 
 Treat the returned handle as a point-specific dynamic set:
 
-```text
+```text wrap
 branch path -> coalesced_threads() captures active members -> collective on that handle
 ```
 

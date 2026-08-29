@@ -64,7 +64,7 @@ These answers solve the [M11 Exercises](/en/memory/stream-ordered-allocation-mem
 
 The two ledgers keep the workload fixed while moving the allocation and release boundaries:
 
-```text
+```text wrap
 ordinary host: cudaMalloc(ptr) --------------------------------> cudaFree(ptr)
 ordinary work:                 initialize(ptr) -> consume(ptr) -> completion
 logical use:                   [===========================================]

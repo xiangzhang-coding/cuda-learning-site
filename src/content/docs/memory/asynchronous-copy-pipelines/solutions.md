@@ -74,7 +74,7 @@ Row 4 就是 drain：即使没有 future submission，`B` 仍需 wait、use 与 
 
 ## 解答 2：修复 participants、convergence 与 completion
 
-```cpp
+```cpp wrap
 pipe.producer_acquire();
 if (load_valid) {
   cuda::memcpy_async(dst + threadIdx.x, src + input_index, sizeof(T), pipe);

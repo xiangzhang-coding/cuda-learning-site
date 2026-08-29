@@ -123,7 +123,7 @@ M11 改变 allocation lifetime 的 representation。它不发布 canonical Runna
 
 选择该 allocator 前，用 `cudaDeviceGetAttribute` 与 `cudaDevAttrMemoryPoolsSupported` 查询 target device。Nonzero result 允许该 device 进入 stream-ordered allocator path；zero result 要求另一种 allocation strategy。Installed headers 中存在 declarations，不等于 device-support observation。
 
-```cpp
+```cpp wrap
 int pools_supported = 0;
 cudaDeviceGetAttribute(
     &pools_supported,
@@ -152,7 +152,7 @@ Ordinary path 使用不接收 caller-selected stream 的 `cudaMalloc` 与 `cudaF
 
 因此 usable interval 由 stream execution 限定，而不是只由 `ptr` 的 lexical scope 限定：
 
-```text
+```text wrap
 allocation operation completes -> permitted ordered uses -> free operation begins
 ```
 
@@ -162,7 +162,7 @@ allocation operation completes -> permitted ordered uses -> free operation begin
 
 最小的 reviewable lifetime 使用一个 stream：
 
-```text
+```text wrap
 stream_work: malloc_async(ptr) -> initialize(ptr) -> consume(ptr) -> free_async(ptr)
 ```
 
@@ -174,7 +174,7 @@ Per-stream order 让两次 uses 都位于 allocation completion 之后、executi
 
 Allocation、use 与 free 位于不同 streams 时，lifetime 两侧都需要 edge：
 
-```text
+```text wrap
 stream_allocate: malloc_async(ptr) -> record(ready)
                                            |
                                            v

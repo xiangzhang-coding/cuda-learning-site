@@ -63,7 +63,7 @@ head:
 
 一种 reviewable interface 是：
 
-```cpp
+```cpp wrap
 template <class Group>
 __device__ void publish_then_sync(const Group& group, int* shared_value, int value) {
   if (group.thread_rank() == 0) *shared_value = value;
@@ -80,7 +80,7 @@ Handle 是 `block`；membership 是该 block 全部 threads；synchronization/sh
 
 在 divergent control 前构造 tile：
 
-```cpp
+```cpp wrap
 cg::thread_block block = cg::this_thread_block();
 auto tile = cg::tiled_partition<32>(block);
 int result = cg::reduce(tile, value, cg::plus<int>());

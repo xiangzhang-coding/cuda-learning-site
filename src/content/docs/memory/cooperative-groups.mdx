@@ -135,7 +135,7 @@ M12 引入 explicit group contracts。它没有 canonical Runnable Example，不
 
 把 handle 传入 helper，可以在 function boundary 暴露 contract：
 
-```cpp
+```cpp wrap
 template <class Group>
 __device__ void publish_then_sync(const Group& group, int* shared_value, int value) {
   if (group.thread_rank() == 0) *shared_value = value;
@@ -149,7 +149,7 @@ Caller 必须提供 members 能合法访问 `shared_value` 的 group，每个 re
 
 `cooperative_groups::this_thread_block()` 返回包含 caller block 全部 threads 的 `thread_block` handle。`thread_rank()`/`num_threads()` 描述 membership。`sync()` 是 block-group collective：所有 member threads 必须参与；所有成员到达后任何成员才能继续；documented pre-sync memory accesses 在该点后对 group members visible。
 
-```cpp
+```cpp wrap
 namespace cg = cooperative_groups;
 cg::thread_block block = cg::this_thread_block();
 block.sync();
@@ -161,7 +161,7 @@ M12 以 block-wide handle 为 baseline，因为 launch geometry 已定义它的 
 
 `cg::tiled_partition<32>(block)` 把 parent block 分为 fixed-size、one-dimensional row-major tiles，并向每个 caller 返回其 tile handle。Partition operation 本身是 parent group collective；`block` 每个 member 都必须参与。只在部分 block threads 到达的 branch 中构造 tile，可能 deadlock 或 corrupt data。
 
-```cpp
+```cpp wrap
 cg::thread_block block = cg::this_thread_block();
 auto tile = cg::tiled_partition<32>(block); // reached by the complete parent block
 
@@ -179,7 +179,7 @@ tile.sync(); // all members of this tile participate
 
 Tile reduction 可以写为：
 
-```cpp
+```cpp wrap
 int tile_sum = cg::reduce(tile, value, cg::plus<int>());
 ```
 
@@ -204,7 +204,7 @@ int tile_sum = cg::reduce(tile, value, cg::plus<int>());
 
 把 returned handle 视为 point-specific dynamic set：
 
-```text
+```text wrap
 branch path -> coalesced_threads() captures active members -> collective on that handle
 ```
 

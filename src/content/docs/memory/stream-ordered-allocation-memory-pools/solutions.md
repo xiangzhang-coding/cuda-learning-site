@@ -64,7 +64,7 @@ head:
 
 两条 ledger 保持 workload 不变，只移动 allocation/release boundaries：
 
-```text
+```text wrap
 ordinary host: cudaMalloc(ptr) --------------------------------> cudaFree(ptr)
 ordinary work:                 initialize(ptr) -> consume(ptr) -> completion
 logical use:                   [===========================================]
