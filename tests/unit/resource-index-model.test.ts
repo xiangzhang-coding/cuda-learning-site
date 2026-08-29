@@ -11,6 +11,7 @@ import {
   type PublishedDestination,
   type ResourceIndexRecord,
 } from '../../src/resource-indexes/resource-index-model';
+import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const asOf = new Date('2026-08-29T12:00:00Z');
 
@@ -134,14 +135,18 @@ describe('resource index catalog', () => {
       'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
     ]);
 
+    for (const expected of TOOLCHAIN_CATALOG_RELATIONSHIPS) {
+      const record = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === expected.planningId);
+      expect(record, expected.planningId).toMatchObject({
+        group: expected.group,
+        prerequisites: expected.prerequisites,
+        relatedUnits: expected.relatedUnits,
+      });
+    }
+    expect(RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === 'SRC-WEB-001')?.versionGate.en)
+      .toBe('Astro 7.2.4; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })');
+
     const toolchainPractice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R2-0(?:0[7-9]|1[01])$/.test(planningId));
-    expect(toolchainPractice.map(({ planningId, prerequisites }) => [planningId, prerequisites])).toEqual([
-      ['PB-R2-007', ['M15']],
-      ['PB-R2-008', ['M16']],
-      ['PB-R2-009', ['M17']],
-      ['PB-R2-010', ['M18']],
-      ['PB-R2-011', ['M19']],
-    ]);
     for (const record of toolchainPractice) {
       expect(record.hardwareGate.en, record.planningId).toMatch(/^None;/);
       expect(record.versionGate.en, record.planningId).toContain('11.8.0');

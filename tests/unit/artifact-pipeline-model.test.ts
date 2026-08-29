@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ARTIFACT_PIPELINE_DEFAULT_LANE,
+  ARTIFACT_PIPELINE_DEFAULT_MODE,
   ARTIFACT_PIPELINE_DEFAULT_TARGET_PLAN_ID,
   ARTIFACT_PIPELINE_MODEL_CONTRACT,
+  ARTIFACT_PIPELINE_MODES,
   ARTIFACT_PIPELINE_REVIEWED_SELECTIONS,
   ARTIFACT_PIPELINE_STAGES,
   ARTIFACT_PIPELINE_TARGET_PLANS,
@@ -18,8 +20,9 @@ import {
 } from '../../src/visuals/artifact-pipeline-model';
 
 describe('VIS09 artifact-pipeline model', () => {
-  it('publishes only the seven F06-aligned reviewed lane and target-plan selections', () => {
+  it('publishes fourteen bounded lane, target-plan, and independent mode selections', () => {
     expect(ARTIFACT_PIPELINE_TOOLKIT_LANES).toEqual(['11.8.0', '12.9.2', '13.3.1']);
+    expect(ARTIFACT_PIPELINE_MODES).toEqual(['whole-program', 'separate-compilation-rdc']);
     expect(ARTIFACT_PIPELINE_TARGET_PLANS.map(({ id, virtualTarget, realTarget, targetScope }) => ({
       id,
       virtualTarget,
@@ -46,13 +49,20 @@ describe('VIS09 artifact-pipeline model', () => {
       },
     ]);
     expect(ARTIFACT_PIPELINE_REVIEWED_SELECTIONS).toEqual([
-      { lane: '11.8.0', targetPlanId: 'baseline-75' },
-      { lane: '12.9.2', targetPlanId: 'baseline-75' },
-      { lane: '12.9.2', targetPlanId: 'exact-90a' },
-      { lane: '12.9.2', targetPlanId: 'family-100f' },
-      { lane: '13.3.1', targetPlanId: 'baseline-75' },
-      { lane: '13.3.1', targetPlanId: 'exact-90a' },
-      { lane: '13.3.1', targetPlanId: 'family-100f' },
+      { lane: '11.8.0', targetPlanId: 'baseline-75', mode: 'whole-program' },
+      { lane: '11.8.0', targetPlanId: 'baseline-75', mode: 'separate-compilation-rdc' },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'whole-program' },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'separate-compilation-rdc' },
+      { lane: '12.9.2', targetPlanId: 'exact-90a', mode: 'whole-program' },
+      { lane: '12.9.2', targetPlanId: 'exact-90a', mode: 'separate-compilation-rdc' },
+      { lane: '12.9.2', targetPlanId: 'family-100f', mode: 'whole-program' },
+      { lane: '12.9.2', targetPlanId: 'family-100f', mode: 'separate-compilation-rdc' },
+      { lane: '13.3.1', targetPlanId: 'baseline-75', mode: 'whole-program' },
+      { lane: '13.3.1', targetPlanId: 'baseline-75', mode: 'separate-compilation-rdc' },
+      { lane: '13.3.1', targetPlanId: 'exact-90a', mode: 'whole-program' },
+      { lane: '13.3.1', targetPlanId: 'exact-90a', mode: 'separate-compilation-rdc' },
+      { lane: '13.3.1', targetPlanId: 'family-100f', mode: 'whole-program' },
+      { lane: '13.3.1', targetPlanId: 'family-100f', mode: 'separate-compilation-rdc' },
     ]);
     expect(getArtifactPipelineTargetPlans('11.8.0').map(({ id }) => id)).toEqual(['baseline-75']);
     expect(getArtifactPipelineTargetPlans('12.9.2').map(({ id }) => id)).toEqual([
@@ -71,10 +81,13 @@ describe('VIS09 artifact-pipeline model', () => {
   it('keeps the teaching model deterministic and evidence-neutral', () => {
     expect(ARTIFACT_PIPELINE_DEFAULT_LANE).toBe('11.8.0');
     expect(ARTIFACT_PIPELINE_DEFAULT_TARGET_PLAN_ID).toBe('baseline-75');
+    expect(ARTIFACT_PIPELINE_DEFAULT_MODE).toBe('whole-program');
     expect(ARTIFACT_PIPELINE_MODEL_CONTRACT).toMatchObject({
-      selectionBoundary: 'exact-reviewed-toolkit-lane-and-target-plan-only',
+      selectionBoundary: 'exact-reviewed-toolkit-lane-target-plan-and-mode-only',
       flowMeaning: 'documented-phase-model-not-observed-build',
       optionalDeviceLink: 'only-when-relocatable-device-code-requires-separate-linking',
+      compilationModes: ['whole-program', 'separate-compilation-rdc'],
+      targetModeRelationship: 'independent-explicit-selections',
       runtimeImageSelection: 'unknown',
       executesCompiler: false,
       executesCuda: false,
@@ -84,7 +97,7 @@ describe('VIS09 artifact-pipeline model', () => {
       runtimeEvidence: 'none',
       performanceEvidence: 'none',
       evidenceStatusEffect: 'none',
-      sourceFactIds: ['SRC-CUDA-016'],
+      sourceFactIds: ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033'],
     });
     expect(ARTIFACT_PIPELINE_STAGES).toEqual([
       { id: 'source-split', branch: 'host-and-device', optional: false },
@@ -97,12 +110,12 @@ describe('VIS09 artifact-pipeline model', () => {
     ]);
   });
 
-  it('derives stable host/device, PTX, cubin, fatbinary, object, optional link, and final-link frames', () => {
-    const result = deriveArtifactPipelineFrames('12.9.2', 'exact-90a');
+  it('skips rather than completes device link throughout whole-program traversal', () => {
+    const result = deriveArtifactPipelineFrames('12.9.2', 'exact-90a', 'whole-program');
     expect(result.accepted).toBe(true);
-    if (!result.accepted) throw new Error('Expected a reviewed lane/target selection.');
+    if (!result.accepted) throw new Error('Expected a reviewed whole-program selection.');
 
-    expect(result.frames).toHaveLength(8);
+    expect(result.frames).toHaveLength(7);
     expect(result.frames.map(({ stepIndex, currentStage, sequenceComplete }) => ({
       stepIndex,
       currentStage: currentStage?.id ?? null,
@@ -113,13 +126,13 @@ describe('VIS09 artifact-pipeline model', () => {
       { stepIndex: 2, currentStage: 'device-cubin', sequenceComplete: false },
       { stepIndex: 3, currentStage: 'fatbinary', sequenceComplete: false },
       { stepIndex: 4, currentStage: 'host-object', sequenceComplete: false },
-      { stepIndex: 5, currentStage: 'optional-device-link', sequenceComplete: false },
-      { stepIndex: 6, currentStage: 'final-link', sequenceComplete: false },
-      { stepIndex: 7, currentStage: null, sequenceComplete: true },
+      { stepIndex: 5, currentStage: 'final-link', sequenceComplete: false },
+      { stepIndex: 6, currentStage: null, sequenceComplete: true },
     ]);
 
     expect(result.frames[0]?.manifest).toEqual({
       source: 'kernel.cu',
+      pipelineMode: 'whole-program',
       virtualTarget: 'compute_90a',
       realTarget: 'sm_90a',
       ptxImage: 'compute_90a.ptx',
@@ -127,30 +140,65 @@ describe('VIS09 artifact-pipeline model', () => {
       cubinPayload: 'SASS',
       fatbinaryImages: ['sm_90a', 'compute_90a'],
       hostObject: 'host-object-with-embedded-fatbinary',
-      optionalDeviceLink: 'conditional-relocatable-device-code',
+      deviceLink: 'skipped-whole-program',
       finalArtifact: 'linked-executable-or-shared-library',
       runtimeImageSelection: 'unknown',
     });
-    expect(result.frames[3]?.stages.map(({ state }) => state)).toEqual([
+    expect(result.frames[5]?.stages.map(({ state }) => state)).toEqual([
       'complete',
       'complete',
       'complete',
+      'complete',
+      'complete',
+      'skipped',
       'current',
-      'pending',
-      'pending',
-      'pending',
     ]);
+    expect(result.frames.map((frame) =>
+      frame.stages.find(({ id }) => id === 'optional-device-link')?.state)).toEqual(
+      Array.from({ length: 7 }, () => 'skipped'),
+    );
+    expect(result.frames.at(-1)?.stages.map(({ state }) => state)).toEqual([
+      'complete',
+      'complete',
+      'complete',
+      'complete',
+      'complete',
+      'skipped',
+      'complete',
+    ]);
+  });
+
+  it('traverses and completes device link before final host link in RDC mode', () => {
+    const result = deriveArtifactPipelineFrames('12.9.2', 'exact-90a', 'separate-compilation-rdc');
+    expect(result.accepted).toBe(true);
+    if (!result.accepted) throw new Error('Expected a reviewed RDC selection.');
+
+    expect(result.frames).toHaveLength(8);
+    expect(result.frames[5]).toMatchObject({
+      mode: 'separate-compilation-rdc',
+      stepIndex: 5,
+      stageCount: 7,
+      currentStage: { id: 'optional-device-link' },
+      manifest: { deviceLink: 'active-separate-compilation-rdc' },
+    });
+    expect(result.frames[6]?.currentStage?.id).toBe('final-link');
+    expect(result.frames[6]?.stages.find(({ id }) => id === 'optional-device-link')?.state).toBe('complete');
     expect(result.frames.at(-1)?.stages.every(({ state }) => state === 'complete')).toBe(true);
   });
 
   it('steps, resets, and resets the target plan whenever the selected lane changes', () => {
     const initial = createArtifactPipelineState();
-    expect(initial).toEqual({ lane: '11.8.0', targetPlanId: 'baseline-75', stepIndex: 0 });
+    expect(initial).toEqual({
+      lane: '11.8.0',
+      targetPlanId: 'baseline-75',
+      mode: 'whole-program',
+      stepIndex: 0,
+    });
 
     const lane = reduceArtifactPipelineState(initial, { type: 'select-lane', lane: '12.9.2' });
     expect(lane).toEqual({
       accepted: true,
-      state: { lane: '12.9.2', targetPlanId: 'baseline-75', stepIndex: 0 },
+      state: { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: 0 },
     });
     if (!lane.accepted) throw new Error('Expected lane selection to succeed.');
 
@@ -160,16 +208,25 @@ describe('VIS09 artifact-pipeline model', () => {
     });
     expect(plan).toEqual({
       accepted: true,
-      state: { lane: '12.9.2', targetPlanId: 'family-100f', stepIndex: 0 },
+      state: { lane: '12.9.2', targetPlanId: 'family-100f', mode: 'whole-program', stepIndex: 0 },
     });
     if (!plan.accepted) throw new Error('Expected target-plan selection to succeed.');
 
     const stepped = reduceArtifactPipelineState(plan.state, { type: 'step' });
     expect(stepped).toEqual({
       accepted: true,
-      state: { lane: '12.9.2', targetPlanId: 'family-100f', stepIndex: 1 },
+      state: { lane: '12.9.2', targetPlanId: 'family-100f', mode: 'whole-program', stepIndex: 1 },
     });
     if (!stepped.accepted) throw new Error('Expected step to succeed.');
+
+    const changedPlan = reduceArtifactPipelineState(stepped.state, {
+      type: 'select-target-plan',
+      targetPlanId: 'baseline-75',
+    });
+    expect(changedPlan).toEqual({
+      accepted: true,
+      state: { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: 0 },
+    });
 
     const changedLane = reduceArtifactPipelineState(stepped.state, {
       type: 'select-lane',
@@ -177,18 +234,37 @@ describe('VIS09 artifact-pipeline model', () => {
     });
     expect(changedLane).toEqual({
       accepted: true,
-      state: { lane: '13.3.1', targetPlanId: 'baseline-75', stepIndex: 0 },
+      state: { lane: '13.3.1', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: 0 },
+    });
+
+    const mode = reduceArtifactPipelineState(stepped.state, {
+      type: 'select-mode',
+      mode: 'separate-compilation-rdc',
+    });
+    expect(mode).toEqual({
+      accepted: true,
+      state: {
+        lane: '12.9.2',
+        targetPlanId: 'family-100f',
+        mode: 'separate-compilation-rdc',
+        stepIndex: 0,
+      },
     });
 
     const reset = reduceArtifactPipelineState(stepped.state, { type: 'reset' });
     expect(reset).toEqual({
       accepted: true,
-      state: { lane: '12.9.2', targetPlanId: 'family-100f', stepIndex: 0 },
+      state: { lane: '12.9.2', targetPlanId: 'family-100f', mode: 'whole-program', stepIndex: 0 },
     });
   });
 
   it('fails closed for every malformed or unsupported action and preserves the state reference', () => {
-    const state: ArtifactPipelineState = { lane: '11.8.0', targetPlanId: 'baseline-75', stepIndex: 2 };
+    const state: ArtifactPipelineState = {
+      lane: '11.8.0',
+      targetPlanId: 'baseline-75',
+      mode: 'whole-program',
+      stepIndex: 2,
+    };
     for (const action of [
       null,
       7,
@@ -198,6 +274,8 @@ describe('VIS09 artifact-pipeline model', () => {
       { type: 'select-lane', lane: 7 },
       { type: 'select-target-plan' },
       { type: 'select-target-plan', targetPlanId: 7 },
+      { type: 'select-mode' },
+      { type: 'select-mode', mode: 7 },
       { type: 'unknown-action' },
     ]) {
       const result = reduceArtifactPipelineState(state, action);
@@ -223,7 +301,14 @@ describe('VIS09 artifact-pipeline model', () => {
     expect(unsupported).toEqual({ accepted: false, state, issue: 'unsupported-target-plan' });
     expect(unsupported.state).toBe(state);
 
-    const complete: ArtifactPipelineState = { ...state, stepIndex: ARTIFACT_PIPELINE_STAGES.length };
+    const unknownMode = reduceArtifactPipelineState(state, {
+      type: 'select-mode',
+      mode: 'suffix-selected-mode',
+    });
+    expect(unknownMode).toEqual({ accepted: false, state, issue: 'unknown-mode' });
+    expect(unknownMode.state).toBe(state);
+
+    const complete: ArtifactPipelineState = { ...state, stepIndex: ARTIFACT_PIPELINE_STAGES.length - 1 };
     const extraStep = reduceArtifactPipelineState(complete, { type: 'step' });
     expect(extraStep).toEqual({ accepted: false, state: complete, issue: 'sequence-complete' });
     expect(extraStep.state).toBe(complete);
@@ -231,12 +316,16 @@ describe('VIS09 artifact-pipeline model', () => {
 
   it('fails closed for invalid state without coercion or mutation', () => {
     const invalidStates = [
-      { lane: '12.8.0', targetPlanId: 'baseline-75', stepIndex: 0 },
-      { lane: '11.8.0', targetPlanId: 'exact-90a', stepIndex: 0 },
-      { lane: '12.9.2', targetPlanId: 'unknown', stepIndex: 0 },
-      { lane: '12.9.2', targetPlanId: 'baseline-75', stepIndex: -1 },
-      { lane: '12.9.2', targetPlanId: 'baseline-75', stepIndex: 1.5 },
-      { lane: '12.9.2', targetPlanId: 'baseline-75', stepIndex: 8 },
+      { lane: '12.8.0', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: 0 },
+      { lane: '11.8.0', targetPlanId: 'exact-90a', mode: 'whole-program', stepIndex: 0 },
+      { lane: '12.9.2', targetPlanId: 'unknown', mode: 'whole-program', stepIndex: 0 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', stepIndex: 0 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'unknown', stepIndex: 0 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 7, stepIndex: 0 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: -1 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: 1.5 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'whole-program', stepIndex: 7 },
+      { lane: '12.9.2', targetPlanId: 'baseline-75', mode: 'separate-compilation-rdc', stepIndex: 8 },
     ] as unknown as ArtifactPipelineState[];
 
     for (const state of invalidStates) {
@@ -246,17 +335,21 @@ describe('VIS09 artifact-pipeline model', () => {
       expect(update.state).toBe(state);
     }
 
-    expect(deriveArtifactPipelineFrames('11.8.0', 'exact-90a')).toEqual({
+    expect(deriveArtifactPipelineFrames('11.8.0', 'exact-90a', 'whole-program')).toEqual({
       accepted: false,
       issue: 'unsupported-target-plan',
     });
-    expect(deriveArtifactPipelineFrames('unknown', 'baseline-75')).toEqual({
+    expect(deriveArtifactPipelineFrames('unknown', 'baseline-75', 'whole-program')).toEqual({
       accepted: false,
       issue: 'unknown-lane',
     });
-    expect(deriveArtifactPipelineFrames('12.9.2', 'unknown')).toEqual({
+    expect(deriveArtifactPipelineFrames('12.9.2', 'unknown', 'whole-program')).toEqual({
       accepted: false,
       issue: 'unknown-target-plan',
+    });
+    expect(deriveArtifactPipelineFrames('12.9.2', 'baseline-75', 'suffix-selected-mode')).toEqual({
+      accepted: false,
+      issue: 'unknown-mode',
     });
 
     const first = deriveArtifactPipelineFrame(createArtifactPipelineState());

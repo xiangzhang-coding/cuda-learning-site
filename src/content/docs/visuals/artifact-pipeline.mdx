@@ -1,6 +1,6 @@
 ---
 title: 'NVCC 构建产物流水线'
-description: 通过精确 Toolkit Lane 与有界 target plan，追踪 CUDA source 的 host/device 分支、PTX、cubin/SASS、fatbinary、按需 device link 与最终链接产物。
+description: 通过精确 Toolkit Lane、有界 target plan 与显式 compilation mode，追踪 CUDA source 的 host/device 分支、PTX、cubin/SASS、fatbinary、conditional device link 与最终链接产物。
 pairId: vis09
 counterpart: /en/visuals/artifact-pipeline/
 factCheckDate: '2026-08-29'
@@ -96,17 +96,17 @@ VIS09 把 NVCC 的公开编译阶段组织成一条可审查的 artifact flow。
 
 ## 控件
 
-第一个原生 select 选择精确 Toolkit Lane：`11.8.0`、`12.9.2` 或 `13.3.1`。第二个原生 select 只显示该 Lane 中已复核的有界 target plan。`11.8.0` 只有 baseline `compute_75 -> sm_75 + compute_75 PTX`；`12.9.2` 与 `13.3.1` 还提供 `compute_90a` exact plan 和 `compute_100f` family plan。Visual 不接受自由文本 target，也不会把 nearby number 当成同一个 target。
+第一个原生 select 选择精确 Toolkit Lane：`11.8.0`、`12.9.2` 或 `13.3.1`。第二个原生 select 只显示该 Lane 中已复核的有界 target plan。`11.8.0` 只有 baseline `compute_75 -> sm_75 + compute_75 PTX`；`12.9.2` 与 `13.3.1` 还提供 `compute_90a` exact plan 和 `compute_100f` family plan。第三个原生 select 独立选择 **whole-program**（默认）或 **separate compilation / RDC**。Target 与 compilation mode 不互相推导；`a`/`f` suffix 只限定 feature scope，不表示 RDC。Visual 不接受自由文本 target 或 mode，也不会把 nearby number 当成同一个 target。
 
-**单步推进**每次完成一个固定 artifact stage。**重置 flow**恢复所选 lane/plan 的 step zero，并把焦点送回 Toolkit Lane select；完成最后一步时，disabled Step button 的焦点会修复到 Reset。更换 Lane 会把 target plan 重置为 baseline，更换 target plan 也会把 flow 重置。`role="status"` live region 说明每次 accepted transition 或 rejection。原生 select 与 button 提供键盘操作，不需要自定义 key map。
+**单步推进**每次完成一个 active artifact stage。Whole-program traversal 有六步，始终把 separate device link 标成 **已跳过**，并从 host object 直接前进到 final host link；RDC traversal 有七步，会先完成 device link，再进入 final host link。**重置 flow**恢复所选 lane/plan/mode 的 step zero，并把焦点送回 Toolkit Lane select；完成最后一步时，disabled Step button 的焦点会修复到 Reset。更换 Lane 会把 target plan 重置为 baseline；更换 Lane、target plan 或 mode 都会重置 traversal。`role="status"` live region 说明每次 accepted transition 或 rejection。三个原生 select 与 button 提供键盘操作，不需要自定义 key map。
 
-页面没有 autoplay、timer、storage、randomness、editable target、device query 或 persisted state。Reducer 接受 `unknown` action；malformed action、unknown Lane、unknown plan、Lane 不支持的 plan、invalid state 与 sequence 结束后的额外 step 都 fail closed，并保留上一 state object。
+页面没有 autoplay、timer、storage、randomness、editable target、device query 或 persisted state。Reducer 接受 `unknown` action；malformed action、unknown Lane、unknown plan、unknown/malformed mode、Lane 不支持的 plan、invalid state 与 sequence 结束后的额外 step 都 fail closed，并保留上一 state object。
 
 ## Artifact flow
 
 公开 NVCC trajectory 先为 device compilation 预处理 input，并产生 PTX intermediate code 和/或 cubin。VIS09 的每个 selected plan 都明确保留一份 virtual-target PTX image candidate，并为 paired real target 生成一份 native cubin/SASS image；随后把两者封装进 fatbinary。这里的 stage 是跨所选版本稳定的公开 phase model，不是从 `--dryrun` output 复制的内部命令序列。
 
-Host path 会再次预处理 input，把 CUDA-specific C++ extension 合成为 standard C++ 并嵌入 fatbinary，再由 host compiler 生成 host object。使用 whole-program compilation 时，不需要虚构单独的 device-link stage。只有 relocatable device code 需要跨 translation unit 解析 device symbol 时，才在最终 host link 前增加 separate device link，产生可交给 host linker 的 object。最终 host link 汇合 host object、按需的 device-link output 与所需 library，形成 executable 或 shared library。
+Host path 会再次预处理 input，把 CUDA-specific C++ extension 合成为 standard C++ 并嵌入 fatbinary，再由 host compiler 生成 host object。显式 whole-program mode 会保留 device-link node 供审查，但把它标成 **已跳过**：device code 在一个 compilation unit 内解析，不产生独立 device-link object。显式 separate compilation / RDC mode 才会遍历该 node，解析跨 translation unit 的 relocatable device symbol，并在最终 host link 前产生可交给 host linker 的 object。Whole-program final link 只汇合 host object 与所需 library；RDC final link 还消费 active device-link output。两条 branch 都可能形成 executable 或 shared library。
 
 Flow 到达 final linked artifact 仍不是 runtime event。Runtime 系统可能检查 embedded fatbinary 并为当前 GPU 寻找合适 image，但 VIS09 没有 selected GPU、loaded driver、device identity、launch 或 loader observation。因此 **runtime image selection 永远保持 `unknown`**；fatbinary 中存在 cubin 和 PTX 不能单独决定实际选择。
 
@@ -122,7 +122,7 @@ Compiler 接受 target name 只建立 compile-plan premise。PTX candidate 不�
 
 ## 静态回退
 
-服务器渲染全部七个 lane/plan 组合，而不只渲染初始 `11.8.0` baseline。每张 card 都包含 exact Lane、target scope、virtual/real pair、PTX 与 cubin/SASS image，以及 host/device split、PTX、cubin、fatbinary、host object、optional device link 和 final link 七个阶段。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 都保留这份完整 fallback；技术状态由文字与 border pattern 表达，不依赖颜色。
+服务器为全部七个 lane/plan 组合各渲染 whole-program 与 RDC 两条 branch，共十四张显式 lane/plan/mode card，而不只渲染初始 `11.8.0` baseline。每张 card 都包含 exact Lane、独立 mode、target scope、virtual/real pair、PTX 与 cubin/SASS image，以及 host/device split、PTX、cubin、fatbinary、host object、conditional device link 和 final link 七个 rendered stage。七张 whole-program card 把 device link 写成 **已跳过**并解释不产生 device-link object；七张 RDC card 把它写成 **已完成**并展示 active output。任何 target suffix 都不决定 branch。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 都保留这份完整 fallback；技术状态由文字与 border pattern 表达，不依赖颜色。
 
 Source HTML 中 native controls 与 live workbench 默认隐藏。Light-DOM custom element 只有在找到全部 required controls、status region 与 stage nodes，并成功推导 initial frame 后才显示它们。`data-pagefind-ignore` 只应用于可变 live workbench；永久 static fallback 仍可索引。Standalone visual 内没有 HTML `id`，也没有复制 NVIDIA figure、SVG 或 image。
 

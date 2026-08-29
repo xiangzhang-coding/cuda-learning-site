@@ -61,6 +61,7 @@
       "build/artifact-sha256.txt",
       "build/cuobjdump-ptx-list.txt",
       "build/cuobjdump-elf-list.txt",
+      "build/cuobjdump-linked-elf-list.txt",
       "build/cuobjdump-ptx.txt",
       "build/cuobjdump-sass.txt",
       "build/cuobjdump-elf.txt",
@@ -206,7 +207,7 @@
     "hostExecutableExecuted": false,
     "gpuExecutableExecuted": false,
     "expectedObservations": [
-      "Artifact tests should find both an sm_75 native image and compute_75 PTX without executing the final host artifact.",
+      "Artifact tests should find both an sm_75 native image and compute_75 PTX in the same standalone fatbinary without executing the final host artifact.",
       "The symbol/link ledger should show the cross-translation-unit device reference before device link and its linked definition afterward."
     ],
     "recordedObservations": []

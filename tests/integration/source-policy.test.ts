@@ -293,6 +293,38 @@ describe('source, license, and privacy policy', () => {
     expect((await scanFiles(projectRoot, scopedFiles)).violations).toEqual([]);
   });
 
+  it('pins the CUDA container source and Astro Markdown processor owner interfaces', async () => {
+    const containerCommit = 'https://gitlab.com/nvidia/container-images/cuda/-/commit/44b139413eb3dfcb3fc30d0868479deedce72255';
+    const markdownProcessorSources = [
+      'https://registry.npmjs.org/%40astrojs%2Fmarkdown-remark/7.2.4',
+      'https://github.com/withastro/astro/releases/tag/%40astrojs%2Fmarkdown-remark%407.2.4',
+      'https://github.com/withastro/astro/blob/%40astrojs%2Fmarkdown-remark%407.2.4/packages/markdown/remark/src/processor.ts',
+    ];
+    const [maintenance, ...publicPages] = await Promise.all([
+      readFile(path.join(projectRoot, 'MAINTENANCE_SOURCES.md'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/content/docs/sources-and-versions.mdx'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/content/docs/en/sources-and-versions.mdx'), 'utf8'),
+    ]);
+    const ex10Pages = await Promise.all([
+      readFile(path.join(projectRoot, 'src/content/docs/examples/ptx-fatbinary-inspection.mdx'), 'utf8'),
+      readFile(path.join(projectRoot, 'src/content/docs/en/examples/ptx-fatbinary-inspection.mdx'), 'utf8'),
+    ]);
+
+    expect(maintenance).toContain(containerCommit);
+    expect(maintenance).toContain('`@astrojs/markdown-remark` 7.2.4 `unified({ rehypePlugins })`');
+    for (const page of publicPages) {
+      expect(page).toContain(containerCommit);
+      expect(page).toContain('`markdown.processor: unified({ rehypePlugins })`');
+      for (const source of markdownProcessorSources) expect(page).toContain(source);
+    }
+    for (const page of ex10Pages) {
+      expect(page.split(containerCommit)).toHaveLength(3);
+      expect(page).toContain('title "CUDA 13.3.1"; committed 2026-07-28');
+    }
+    for (const source of markdownProcessorSources) expect(maintenance).toContain(source);
+    expect([maintenance, ...publicPages, ...ex10Pages].join('\n')).not.toMatch(/master\s+branch/);
+  });
+
   it('keeps Visual Explainers original, owner-sourced, and explicitly non-evidentiary', async () => {
     for (const relativePath of [
       'visuals/kernel-journey.mdx',

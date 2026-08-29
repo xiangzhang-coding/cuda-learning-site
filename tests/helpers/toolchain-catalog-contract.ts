@@ -1,0 +1,130 @@
+// SPDX-License-Identifier: Apache-2.0
+
+export const TOOLCHAIN_CATALOG_RELATIONSHIPS = [
+  {
+    planningId: 'PB-R2-007',
+    group: 'practice',
+    prerequisites: ['M15'],
+    relatedUnits: ['F04', 'O04', 'M15', 'M18', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'PB-R2-008',
+    group: 'practice',
+    prerequisites: ['M16'],
+    relatedUnits: ['M15', 'M16', 'M17', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'PB-R2-009',
+    group: 'practice',
+    prerequisites: ['M17'],
+    relatedUnits: ['F06', 'M16', 'M17', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'PB-R2-010',
+    group: 'practice',
+    prerequisites: ['M18'],
+    relatedUnits: ['M15', 'M16', 'M17', 'M18', 'EX10'],
+  },
+  {
+    planningId: 'PB-R2-011',
+    group: 'practice',
+    prerequisites: ['M19'],
+    relatedUnits: ['O04', 'M15', 'M19', 'EX02', 'EX10'],
+  },
+  {
+    planningId: 'TERM-115',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M15', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'TERM-116',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['O04', 'M15', 'M19', 'EX10'],
+  },
+  {
+    planningId: 'TERM-117',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M15', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'TERM-118',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M16', 'M17', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'TERM-119',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M16', 'M17', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'TERM-120',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M15', 'M16', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'TERM-121',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M16', 'M17', 'EX10'],
+  },
+  {
+    planningId: 'TERM-122',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M15', 'M18', 'EX10'],
+  },
+  {
+    planningId: 'TERM-123',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M18', 'EX10'],
+  },
+  {
+    planningId: 'TERM-124',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['M15', 'M18', 'EX10'],
+  },
+  {
+    planningId: 'TERM-125',
+    group: 'glossary',
+    prerequisites: [],
+    relatedUnits: ['O04', 'M19', 'EX10'],
+  },
+  {
+    planningId: 'SRC-CUDA-031',
+    group: 'sources',
+    prerequisites: [],
+    relatedUnits: ['F04', 'O04', 'M15', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'SRC-CUDA-032',
+    group: 'sources',
+    prerequisites: [],
+    relatedUnits: ['M15', 'M16', 'M17', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'SRC-CUDA-033',
+    group: 'sources',
+    prerequisites: [],
+    relatedUnits: ['F06', 'M16', 'M17', 'EX10', 'VIS09'],
+  },
+  {
+    planningId: 'SRC-CUDA-034',
+    group: 'sources',
+    prerequisites: [],
+    relatedUnits: ['M15', 'M16', 'M17', 'M18', 'EX10'],
+  },
+  {
+    planningId: 'SRC-CUDA-035',
+    group: 'sources',
+    prerequisites: [],
+    relatedUnits: ['O04', 'M15', 'M19', 'EX02', 'EX10'],
+  },
+] as const;

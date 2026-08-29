@@ -95,8 +95,10 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
         await expect(pipeline).toHaveAttribute('data-ready', 'true');
         await pipeline.locator('[data-artifact-lane]').selectOption('12.9.2');
         await pipeline.locator('[data-artifact-target-plan]').selectOption('exact-90a');
+        await pipeline.locator('[data-artifact-mode]').selectOption('separate-compilation-rdc');
         await pipeline.locator('[data-artifact-action="step"]').click();
         await expect(pipeline).toHaveAttribute('data-target-plan', 'exact-90a');
+        await expect(pipeline).toHaveAttribute('data-pipeline-mode', 'separate-compilation-rdc');
         await expect(pipeline).toHaveAttribute('data-step-index', '1');
       },
     },

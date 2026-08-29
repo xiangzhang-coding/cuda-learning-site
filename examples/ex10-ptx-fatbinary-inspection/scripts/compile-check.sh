@@ -35,6 +35,7 @@ if [[ "$kind" == "ex10" ]]; then
   cp "$build_dir"/artifact-sha256.txt \
     "$build_dir"/cuobjdump-ptx-list.txt \
     "$build_dir"/cuobjdump-elf-list.txt \
+    "$build_dir"/cuobjdump-linked-elf-list.txt \
     "$build_dir"/cuobjdump-ptx.txt \
     "$build_dir"/cuobjdump-sass.txt \
     "$build_dir"/cuobjdump-elf.txt \

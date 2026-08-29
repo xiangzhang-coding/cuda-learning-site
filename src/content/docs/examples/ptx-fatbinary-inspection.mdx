@@ -94,6 +94,16 @@ sources:
     version: 'CUDA Toolkit 13.3.1 current owner documentation'
     platform: 'Linux x86-64'
     accessDate: '2026-08-29'
+  - title: 'GNU Binary Utilities 2.38 - nm'
+    url: 'https://sourceware.org/binutils/docs-2.38/binutils/nm.html'
+    version: 'GNU Binutils 2.38'
+    platform: 'Ubuntu 22.04 x86-64 host-symbol inspection；actual tool version retained per evidence record'
+    accessDate: '2026-08-29'
+  - title: 'GNU Binary Utilities 2.42 - nm'
+    url: 'https://sourceware.org/binutils/docs-2.42/binutils/nm.html'
+    version: 'GNU Binutils 2.42'
+    platform: 'Ubuntu 24.04 x86-64 host-symbol inspection；actual tool version retained per evidence record'
+    accessDate: '2026-08-29'
   - title: 'CUDA 13.3 Linux host compiler and C++ dialect policy'
     url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
     version: 'CUDA Toolkit 13.3.1; GCC 6.x-15.x and C++23'
@@ -104,9 +114,9 @@ sources:
     version: 'g++-14 14.2.0-4ubuntu2~24.04.1 observed on 2026-08-29'
     platform: 'Ubuntu 24.04 amd64'
     accessDate: '2026-08-29'
-  - title: 'NVIDIA CUDA container image source'
-    url: 'https://gitlab.com/nvidia/container-images/cuda'
-    version: 'Owner repository master branch reviewed 2026-08-29'
+  - title: 'NVIDIA CUDA container image source: CUDA 13.3.1'
+    url: 'https://gitlab.com/nvidia/container-images/cuda/-/commit/44b139413eb3dfcb3fc30d0868479deedce72255'
+    version: 'Commit 44b139413eb3dfcb3fc30d0868479deedce72255; title "CUDA 13.3.1"; committed 2026-07-28'
     platform: 'OCI container definitions'
     accessDate: '2026-08-29'
   - title: 'NVIDIA CUDA 11.8.0 development image metadata'
@@ -192,11 +202,11 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:source-count'
-      content: '15'
+      content: '17'
   - tag: meta
     attrs:
       name: 'cuda:source-versions'
-      content: 'CUDA 11.8.0,CUDA 12.9.2,CUDA 13.3.1,PTX ISA 7.8/8.8/9.3,GCC 14'
+      content: 'CUDA 11.8.0,CUDA 12.9.2,CUDA 13.3.1,PTX ISA 7.8/8.8/9.3,GCC 14,GNU Binutils 2.38/2.42'
 ---
 
 import CanonicalCode from '../../../components/CanonicalCode.astro';
@@ -227,11 +237,11 @@ EX10 是一个只构建、只检查的可运行示例（Runnable Example）。�
 | preprocess | `artifact_kernel.ii` | 非空并进入 SHA-256 ledger |
 | standalone PTX | `artifact_kernel.ptx` | 检查 `.target sm_75` 并哈希 |
 | cubin | `artifact_kernel.cubin` | `cuobjdump` 输出 SASS、CUDA ELF 和 symbols，并哈希 cubin |
-| fatbin | `artifact_kernel.fatbin` | dump 内嵌 PTX，确认 `compute_75` 路径，并哈希 |
+| fatbin | `artifact_kernel.fatbin` | 从同一个 container 列出 PTX/ELF images，dump 内嵌 PTX，确认 `compute_75`/`sm_75` 路径，并哈希 |
 | relocatable compile | `device_math.o`、`caller.o` | 对两个 translation unit 分别执行 `-dc`；哈希并记录链接前 symbols |
 | device link | `device_link.o` | 显式 `--device-link`；哈希并记录链接后的 CUDA symbols |
 | host link | `ex10-ptx-fatbinary-inspection` | 使用 `--no-device-link`，只完成 host link；哈希且绝不执行 |
-| inspect | PTX/ELF lists、PTX/SASS/ELF dumps、symbol/link ledger | `cuobjdump`、`nm` 与 SHA-256 的静态证据 |
+| inspect | Same-fatbinary PTX/ELF lists、linked-artifact ELF list、PTX/SASS/ELF dumps、symbol/link ledger | version-recorded `cuobjdump`、GNU `nm` 与 SHA-256 的静态证据 |
 | artifact test | `artifact-test-report.txt` | 核对文件、目标、symbols、hash 和禁止执行边界 |
 
 ## 完整流水线
@@ -302,9 +312,11 @@ NVCC 的 11.8.0 与 12.9.2 archive pages 和当前 13.3 owner page 共同定义�
 - [CUDA 11.8.0 Binary Utilities archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-binary-utilities/index.html)
 - [CUDA 12.9.2 Binary Utilities archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-binary-utilities/index.html)
 - [CUDA 13.3 Binary Utilities current owner documentation](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html)
+- [GNU Binary Utilities 2.38：`nm`](https://sourceware.org/binutils/docs-2.38/binutils/nm.html)
+- [GNU Binary Utilities 2.42：`nm`](https://sourceware.org/binutils/docs-2.42/binutils/nm.html)
 - [CUDA 13.3 Linux host compiler policy](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy)
 - [Ubuntu Noble Updates `g++-14`](https://packages.ubuntu.com/noble-updates/g++-14)
-- [NVIDIA CUDA container image owner repository](https://gitlab.com/nvidia/container-images/cuda)
+- [NVIDIA CUDA container source commit "CUDA 13.3.1" (2026-07-28)](https://gitlab.com/nvidia/container-images/cuda/-/commit/44b139413eb3dfcb3fc30d0868479deedce72255)
 - [11.8.0 image tag API](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
 - [12.9.2 image tag API](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
 - [13.3.1 image tag API](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)

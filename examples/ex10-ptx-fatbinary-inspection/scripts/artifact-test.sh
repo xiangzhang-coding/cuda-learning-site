@@ -27,6 +27,7 @@ test -x "$final_artifact"
 grep -Eq '\.target[[:space:]]+sm_75' "$build_dir/artifact_kernel.ptx"
 grep -Eq 'sm_75' "$build_dir/cuobjdump-ptx-list.txt"
 grep -Eq 'sm_75' "$build_dir/cuobjdump-elf-list.txt"
+grep -Eq 'sm_75' "$build_dir/cuobjdump-linked-elf-list.txt"
 grep -Eq '(Fatbin ptx code:|\.target[[:space:]]+sm_75)' "$build_dir/cuobjdump-ptx.txt"
 grep -Eq 'artifact_kernel' "$build_dir/cuobjdump-sass.txt"
 grep -Eq '(EF_CUDA_SM75|\.text\.artifact_kernel)' "$build_dir/cuobjdump-elf.txt"
@@ -38,6 +39,7 @@ grep -Eq 'ex10_caller_kernel' "$build_dir/symbol-link-ledger.txt"
   printf '%s\n' 'artifact-test=pass'
   printf '%s\n' 'target-native=sm_75'
   printf '%s\n' 'target-virtual=compute_75'
+  printf '%s\n' 'same-fatbinary-native-and-ptx=true'
   printf '%s\n' 'host-executable-executed=false'
   printf '%s\n' 'gpu-executable-executed=false'
   printf '%s\n' 'runtime-evidence=Runtime-Not-Applicable'

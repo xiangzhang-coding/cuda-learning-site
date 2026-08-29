@@ -65,7 +65,10 @@ $(BUILD_DIR)/artifact-sha256.txt: $(PRIMARY_ARTIFACTS)
 $(BUILD_DIR)/cuobjdump-ptx-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin
 	cuobjdump --list-ptx $< > $@
 
-$(BUILD_DIR)/cuobjdump-elf-list.txt: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection
+$(BUILD_DIR)/cuobjdump-elf-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin
+	cuobjdump --list-elf $< > $@
+
+$(BUILD_DIR)/cuobjdump-linked-elf-list.txt: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection
 	cuobjdump --list-elf $< > $@
 
 $(BUILD_DIR)/cuobjdump-ptx.txt: $(BUILD_DIR)/artifact_kernel.fatbin
@@ -95,6 +98,7 @@ $(BUILD_DIR)/symbol-link-ledger.txt: $(RDC_OBJECTS) $(BUILD_DIR)/device_link.o $
 inspect: $(BUILD_DIR)/artifact-sha256.txt \
 	$(BUILD_DIR)/cuobjdump-ptx-list.txt \
 	$(BUILD_DIR)/cuobjdump-elf-list.txt \
+	$(BUILD_DIR)/cuobjdump-linked-elf-list.txt \
 	$(BUILD_DIR)/cuobjdump-ptx.txt \
 	$(BUILD_DIR)/cuobjdump-sass.txt \
 	$(BUILD_DIR)/cuobjdump-elf.txt \

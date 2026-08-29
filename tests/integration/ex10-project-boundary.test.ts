@@ -121,6 +121,8 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       'build/device_link.o',
       'build/ex10-ptx-fatbinary-inspection',
       'build/cuobjdump-ptx-list.txt',
+      'build/cuobjdump-elf-list.txt',
+      'build/cuobjdump-linked-elf-list.txt',
       'build/cuobjdump-sass.txt',
       'build/cuobjdump-elf.txt',
       'build/symbol-link-ledger.txt',
@@ -139,8 +141,11 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       expect(makefile).toContain(option);
     }
     expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-ptx-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin');
+    expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-elf-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin');
+    expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-linked-elf-list.txt: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection');
     expect(makefile).toContain('sha256sum $(PRIMARY_ARTIFACT_NAMES)');
     expect(artifactTest).toContain('sha256sum --check artifact-sha256.txt');
+    expect(artifactTest).toContain('same-fatbinary-native-and-ptx=true');
     expect(artifactTest).toContain('host-executable-executed=false');
     expect(artifactTest).toContain('runtime-evidence=Runtime-Not-Applicable');
     expect(`${compileScript}\n${artifactTest}`).not.toMatch(
@@ -296,9 +301,11 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-binary-utilities/index.html',
       'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-binary-utilities/index.html',
       'https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html',
+      'https://sourceware.org/binutils/docs-2.38/binutils/nm.html',
+      'https://sourceware.org/binutils/docs-2.42/binutils/nm.html',
       'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy',
       'https://packages.ubuntu.com/noble-updates/g++-14',
-      'https://gitlab.com/nvidia/container-images/cuda',
+      'https://gitlab.com/nvidia/container-images/cuda/-/commit/44b139413eb3dfcb3fc30d0868479deedce72255',
     ];
 
     for (const page of pages) {
@@ -313,7 +320,9 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       expect(page).toContain('`--gpus`');
       expect(page).toContain(`tree/${sourceCommit}/examples/ex10-ptx-fatbinary-inspection`);
       expect(page).toContain(`/archive/${sourceCommit}.zip`);
-      expect(page.match(/^  - title:/gm)).toHaveLength(15);
+      expect(page.match(/^  - title:/gm)).toHaveLength(17);
+      expect(page).toContain('title "CUDA 13.3.1"; committed 2026-07-28');
+      expect(page).not.toMatch(/master\s+branch/);
       for (const source of requiredSources) expect(page).toContain(source);
 
       const importedRanges = [...page.matchAll(/<CanonicalCode exampleId="EX10" range="([^"]+)" \/>/g)]

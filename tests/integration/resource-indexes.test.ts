@@ -11,6 +11,7 @@ import {
   INDEX_ROUTES,
   projectResourceIndex,
 } from '../../src/resource-indexes/resource-index-model';
+import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const asOf = new Date('2026-08-29T12:00:00Z');
@@ -22,6 +23,43 @@ async function readRoute(route: string) {
 
 function metadata(document: Document, name: string) {
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content');
+}
+
+function detailSection(source: string, planningId: string) {
+  const marker = `<span id="${planningId.toLowerCase()}"`;
+  const start = source.indexOf(marker);
+  if (start < 0) throw new Error(`Missing detail marker for ${planningId}`);
+  const next = source.indexOf('<span id="', start + marker.length);
+  return source.slice(start, next < 0 ? undefined : next);
+}
+
+function linkedPlanningIds(line = '') {
+  return [...line.matchAll(/\[([A-Z][A-Z0-9-]*\d+)(?:(?::|：)[^\]]*)?\]\(/g)].map((match) => match[1]);
+}
+
+function declaredRelationships(
+  source: string,
+  planningId: string,
+  group: 'practice' | 'glossary' | 'sources',
+  locale: (typeof INDEX_LOCALES)[number],
+) {
+  if (group === 'sources') {
+    const row = detailSection(source, planningId).split('\n')[0];
+    const related = locale === 'en' ? row.match(/Related IDs: ([^.]+)\./) : row.match(/相关 ID：([^。]+)。/);
+    return { prerequisites: [], relatedUnits: related?.[1].split(/,\s*|、/).map((id) => id.trim()) ?? [] };
+  }
+
+  const section = detailSection(source, planningId).split('\n');
+  const relatedLabel = group === 'practice'
+    ? (locale === 'en' ? '**Related Learning Units and resources:**' : '**相关学习单元与资源：**')
+    : (locale === 'en' ? '**Related resources:**' : '**相关资源：**');
+  const prerequisiteLabel = locale === 'en' ? '**Direct prerequisite:**' : '**直接先修条件：**';
+  return {
+    prerequisites: group === 'practice'
+      ? linkedPlanningIds(section.find((line) => line.includes(prerequisiteLabel)))
+      : [],
+    relatedUnits: linkedPlanningIds(section.find((line) => line.includes(relatedLabel))),
+  };
 }
 
 describe('published resource indexes', () => {
@@ -52,6 +90,31 @@ describe('published resource indexes', () => {
       }
     },
   );
+
+  it('matches the exact relationships declared by every bilingual toolchain detail entry', async () => {
+    for (const locale of INDEX_LOCALES) {
+      const localePrefix = locale === 'en' ? 'en/' : '';
+      const detailSources = {
+        practice: await readFile(path.join(projectRoot, 'src/content/docs', localePrefix, 'practice.mdx'), 'utf8'),
+        glossary: await readFile(path.join(projectRoot, 'src/content/docs', localePrefix, 'glossary.mdx'), 'utf8'),
+        sources: await readFile(path.join(projectRoot, 'src/content/docs', localePrefix, 'sources-and-versions.mdx'), 'utf8'),
+      };
+      for (const expected of TOOLCHAIN_CATALOG_RELATIONSHIPS) {
+        const declared = declaredRelationships(
+          detailSources[expected.group],
+          expected.planningId,
+          expected.group,
+          locale,
+        );
+        const catalog = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === expected.planningId);
+        expect(declared, `${locale} ${expected.planningId} detail`).toEqual({
+          prerequisites: expected.prerequisites,
+          relatedUnits: expected.relatedUnits,
+        });
+        expect(catalog, `${locale} ${expected.planningId} catalog`).toMatchObject(declared);
+      }
+    }
+  });
 
   it('publishes no planned placeholder and keeps exact eligible populations', async () => {
     const counts = Object.fromEntries(

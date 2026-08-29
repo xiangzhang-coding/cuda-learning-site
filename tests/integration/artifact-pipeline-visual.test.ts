@@ -23,13 +23,20 @@ function attributeValues(root: ParentNode, selector: string, attribute: string) 
 }
 
 const reviewedSelections = [
-  '11.8.0:baseline-75',
-  '12.9.2:baseline-75',
-  '12.9.2:exact-90a',
-  '12.9.2:family-100f',
-  '13.3.1:baseline-75',
-  '13.3.1:exact-90a',
-  '13.3.1:family-100f',
+  '11.8.0:baseline-75:whole-program',
+  '11.8.0:baseline-75:separate-compilation-rdc',
+  '12.9.2:baseline-75:whole-program',
+  '12.9.2:baseline-75:separate-compilation-rdc',
+  '12.9.2:exact-90a:whole-program',
+  '12.9.2:exact-90a:separate-compilation-rdc',
+  '12.9.2:family-100f:whole-program',
+  '12.9.2:family-100f:separate-compilation-rdc',
+  '13.3.1:baseline-75:whole-program',
+  '13.3.1:baseline-75:separate-compilation-rdc',
+  '13.3.1:exact-90a:whole-program',
+  '13.3.1:exact-90a:separate-compilation-rdc',
+  '13.3.1:family-100f:whole-program',
+  '13.3.1:family-100f:separate-compilation-rdc',
 ];
 
 const stageIds = [
@@ -74,15 +81,25 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
       expect(source).toMatch(/runtime image selection/i);
       expect(source).toMatch(/no autoplay|没有 autoplay/);
       expect(source).toMatch(/optional device link|按需 device link/i);
+      expect(source).toMatch(/whole-program/);
+      expect(source).toMatch(/separate compilation \/ RDC/i);
+      expect(source).toMatch(/suffix.*(does not select RDC|不表示 RDC|不决定 branch|chooses either branch)/i);
     }
 
     expect(model).toContain("runtimeImageSelection: 'unknown'");
     expect(model).toContain("compilationEvidence: 'none'");
     expect(model).toContain("runtimeEvidence: 'none'");
     expect(model).toContain("performanceEvidence: 'none'");
+    expect(model).toContain("targetModeRelationship: 'independent-explicit-selections'");
+    for (const sourceFactId of ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033']) {
+      expect(model).toContain(sourceFactId);
+    }
     expect(model).toContain('action: unknown');
     expect(model).not.toMatch(/\bnew Date\b|Date\.now|Math\.random|localStorage|sessionStorage|indexedDB|navigator\.|document\.|window\./);
     expect(typedCopy).toContain('Readonly<Record<ArtifactPipelineLocale, ArtifactPipelineCopy>>');
+    expect(typedCopy).toContain("'whole-program'");
+    expect(typedCopy).toContain("'separate-compilation-rdc'");
+    expect(typedCopy).toMatch(/skipped|已跳过/);
     for (const target of ['baseline-75', 'exact-90a', 'family-100f']) expect(typedCopy).toContain(target);
     for (const stage of stageIds) expect(typedCopy).toContain(stage);
 
@@ -90,6 +107,8 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(component).toContain('data-visual-id="VIS09"');
     expect(component).toContain('data-static-fallback');
     expect(component).toContain('data-live-workbench');
+    expect(component).toContain('data-artifact-mode');
+    expect(component).toContain('data-pipeline-mode');
     expect(component.match(/data-pagefind-ignore/g)).toHaveLength(1);
     expect(component).toContain('controls.hidden = false');
     expect(component).toContain('workbench.hidden = false');
@@ -101,6 +120,7 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(styles).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
     expect(styles).toMatch(/@media \(forced-colors: active\)/);
     expect(styles).toMatch(/@media print/);
+    expect(styles).toContain("[data-stage-state='skipped']");
     expect(styles).not.toMatch(/@keyframes|animation-name/);
   });
 
@@ -124,6 +144,7 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     if (!visual) throw new Error('Expected VIS09 custom element.');
 
     expect(visual.getAttribute('data-model-id')).toBe('reviewed-nvcc-artifact-flow');
+    expect(visual.getAttribute('data-pipeline-mode')).toBe('whole-program');
     expect(visual.getAttribute('data-runtime-image-selection')).toBe('unknown');
     expect(visual.getAttribute('data-evidence-status-effect')).toBe('none');
     expect(visual.querySelector('[data-conceptual-only]')).not.toBeNull();
@@ -136,6 +157,7 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(visual.querySelector('[role="status"][aria-live="polite"]')).not.toBeNull();
     expect(visual.querySelector('select[data-artifact-lane]')?.querySelectorAll('option')).toHaveLength(3);
     expect(visual.querySelector('select[data-artifact-target-plan]')?.querySelectorAll('option')).toHaveLength(1);
+    expect(visual.querySelector('select[data-artifact-mode]')?.querySelectorAll('option')).toHaveLength(2);
     expect(visual.querySelectorAll('button[data-artifact-action]')).toHaveLength(2);
     expect(visual.querySelector('[data-artifact-action="play"], input[type="range"]')).toBeNull();
 
@@ -143,17 +165,32 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
     expect(visual.querySelector('[id]')).toBeNull();
     expect(visual.querySelector('svg, img')).toBeNull();
     expect(visual.querySelector('[data-static-fallback]')).not.toBeNull();
-    expect(visual.querySelectorAll('[data-static-selection]')).toHaveLength(7);
-    expect(visual.querySelectorAll('[data-static-stage]')).toHaveLength(49);
+    expect(visual.querySelectorAll('[data-static-selection]')).toHaveLength(14);
+    expect(visual.querySelectorAll('[data-static-stage]')).toHaveLength(98);
     expect(attributeValues(visual, '[data-static-selection]', 'data-static-selection')).toEqual(reviewedSelections);
     for (const card of visual.querySelectorAll('[data-static-selection]')) {
       expect(card.querySelectorAll('[data-static-stage]')).toHaveLength(7);
       expect(card.getAttribute('data-runtime-image-selection')).toBe('unknown');
       expect(attributeValues(card, '[data-static-stage]', 'data-stage-id')).toEqual(stageIds);
     }
-    expect(visual.querySelectorAll('[data-static-target-plan="baseline-75"]')).toHaveLength(3);
-    expect(visual.querySelectorAll('[data-static-target-plan="exact-90a"]')).toHaveLength(2);
-    expect(visual.querySelectorAll('[data-static-target-plan="family-100f"]')).toHaveLength(2);
+    expect(visual.querySelectorAll('[data-static-target-plan="baseline-75"]')).toHaveLength(6);
+    expect(visual.querySelectorAll('[data-static-target-plan="exact-90a"]')).toHaveLength(4);
+    expect(visual.querySelectorAll('[data-static-target-plan="family-100f"]')).toHaveLength(4);
+    const wholeProgramCards = visual.querySelectorAll('[data-static-mode="whole-program"]');
+    const rdcCards = visual.querySelectorAll('[data-static-mode="separate-compilation-rdc"]');
+    expect(wholeProgramCards).toHaveLength(7);
+    expect(rdcCards).toHaveLength(7);
+    for (const card of wholeProgramCards) {
+      const deviceLink = card.querySelector('[data-stage-id="optional-device-link"]');
+      expect(deviceLink?.getAttribute('data-stage-state')).toBe('skipped');
+      expect(deviceLink?.textContent).toMatch(/skipped|已跳过/);
+      expect(deviceLink?.textContent).toMatch(/no device-link object|不产生 device-link object/);
+    }
+    for (const card of rdcCards) {
+      const deviceLink = card.querySelector('[data-stage-id="optional-device-link"]');
+      expect(deviceLink?.getAttribute('data-stage-state')).toBe('complete');
+      expect(deviceLink?.textContent).toMatch(/a_dlink/);
+    }
     expect(visual.textContent).toMatch(/compute_75/);
     expect(visual.textContent).toMatch(/compute_90a/);
     expect(visual.textContent).toMatch(/compute_100f/);
@@ -187,10 +224,12 @@ describe('VIS09 artifact-pipeline Visual Explainer', () => {
       ['[data-static-selection]', 'data-static-selection'],
       ['[data-static-selection]', 'data-static-lane'],
       ['[data-static-selection]', 'data-static-target-plan'],
+      ['[data-static-selection]', 'data-static-mode'],
       ['[data-static-stage]', 'data-static-stage'],
       ['[data-static-stage]', 'data-stage-id'],
       ['[data-static-stage]', 'data-branch'],
       ['[data-static-stage]', 'data-optional'],
+      ['[data-static-stage]', 'data-stage-state'],
       ['[data-static-selection]', 'data-runtime-image-selection'],
     ] as const;
     for (const [selector, attribute] of selectors) {

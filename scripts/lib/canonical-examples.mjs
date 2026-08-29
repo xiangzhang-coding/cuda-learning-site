@@ -247,10 +247,11 @@ export async function validateCompileEvidenceRecord(projectRoot, exampleId, reco
       errors.push('C++23 probe is not declared for the Lane');
     }
   }
-  if (!record?.toolchain?.hostCompiler || !record?.toolchain?.nvcc || !record?.toolchain?.cuobjdump) {
+  if (!record?.toolchain?.hostCompiler || !record?.toolchain?.nvcc || !record?.toolchain?.cuobjdump ||
+      (exampleId === 'EX10' && !record?.toolchain?.nm)) {
     errors.push('toolchain coordinates are incomplete');
   }
-  if ([record?.toolchain?.hostCompiler, record?.toolchain?.nvcc, record?.toolchain?.cuobjdump]
+  if ([record?.toolchain?.hostCompiler, record?.toolchain?.nvcc, record?.toolchain?.cuobjdump, record?.toolchain?.nm]
       .some((coordinate) => coordinate?.includes('\n'))) {
     errors.push('toolchain coordinates must be sanitized version lines');
   }

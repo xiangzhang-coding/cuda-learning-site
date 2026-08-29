@@ -9,8 +9,8 @@ import {
 } from '../visuals/artifact-pipeline-copy';
 import {
   ARTIFACT_PIPELINE_MODEL_CONTRACT,
+  ARTIFACT_PIPELINE_MODES,
   ARTIFACT_PIPELINE_REVIEWED_SELECTIONS,
-  ARTIFACT_PIPELINE_STAGES,
   ARTIFACT_PIPELINE_TOOLKIT_LANES,
   createArtifactPipelineState,
   deriveArtifactPipelineFrame,
@@ -32,9 +32,9 @@ if (!initialFrameResult.accepted) throw new Error('VIS09 initial model state mus
 const initialFrame = initialFrameResult.frame;
 const initialTargetPlans = getArtifactPipelineTargetPlans(initialState.lane);
 const staticSelections = ARTIFACT_PIPELINE_REVIEWED_SELECTIONS.map((selection) => {
-  const result = deriveArtifactPipelineFrames(selection.lane, selection.targetPlanId);
+  const result = deriveArtifactPipelineFrames(selection.lane, selection.targetPlanId, selection.mode);
   if (!result.accepted) {
-    throw new Error(`VIS09 static selection ${selection.lane}:${selection.targetPlanId} must be valid.`);
+    throw new Error(`VIS09 static selection ${selection.lane}:${selection.targetPlanId}:${selection.mode} must be valid.`);
   }
   const finalFrame = result.frames.at(-1);
   if (!finalFrame) throw new Error('VIS09 static selection must contain a final frame.');
@@ -45,6 +45,7 @@ function frameValues(frame: ArtifactPipelineFrame) {
   return {
     lane: frame.lane,
     plan: copy.targetPlans[frame.targetPlan.id].title,
+    mode: copy.modes[frame.mode].title,
     scope: copy.targetScopes[frame.targetPlan.targetScope],
     source: frame.manifest.source,
     virtual: frame.manifest.virtualTarget,
@@ -55,7 +56,10 @@ function frameValues(frame: ArtifactPipelineFrame) {
 }
 
 function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageId, field: 'description' | 'artifact') {
-  return formatArtifactPipelineCopy(copy.stages[stageId][field], frameValues(frame));
+  const template = stageId === 'optional-device-link' || stageId === 'final-link'
+    ? copy.modeStages[frame.mode][stageId][field]
+    : copy.stages[stageId][field];
+  return formatArtifactPipelineCopy(template, frameValues(frame));
 }
 ---
 
@@ -65,6 +69,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
   data-locale={locale}
   data-toolkit-lane={initialState.lane}
   data-target-plan={initialState.targetPlanId}
+  data-pipeline-mode={initialState.mode}
   data-step-index={initialState.stepIndex}
   data-current-stage={initialFrame.currentStage?.id}
   data-sequence-complete="false"
@@ -109,6 +114,14 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
             ))}
           </select>
         </label>
+        <label>
+          <span>{copy.modeLabel}</span>
+          <select data-artifact-mode aria-label={copy.modeLabel}>
+            {ARTIFACT_PIPELINE_MODES.map((mode) => (
+              <option value={mode} selected={mode === initialState.mode}>{copy.modes[mode].title}</option>
+            ))}
+          </select>
+        </label>
         <button type="button" data-artifact-action="step">{copy.step}</button>
         <button type="button" data-artifact-action="reset">{copy.reset}</button>
       </fieldset>
@@ -135,8 +148,8 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
           <span>{copy.selectionLabel}</span>
           <h3>{copy.workbenchHeading}</h3>
         </div>
-        <p data-selection-summary>{initialFrame.lane} · {copy.targetPlans[initialFrame.targetPlan.id].title}</p>
-        <p data-selection-description>{copy.targetPlans[initialFrame.targetPlan.id].description}</p>
+        <p data-selection-summary>{initialFrame.lane} · {copy.targetPlans[initialFrame.targetPlan.id].title} · {copy.modes[initialFrame.mode].title}</p>
+        <p data-selection-description>{copy.targetPlans[initialFrame.targetPlan.id].description} {copy.modes[initialFrame.mode].description}</p>
       </header>
 
       <section class="artifact-pipeline-target-contract">
@@ -145,6 +158,10 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
           <div>
             <dt>{copy.lane}</dt>
             <dd data-manifest-lane>{initialFrame.lane}</dd>
+          </div>
+          <div>
+            <dt>{copy.pipelineMode}</dt>
+            <dd data-manifest-mode>{copy.modes[initialFrame.mode].title}</dd>
           </div>
           <div>
             <dt>{copy.targetScope}</dt>
@@ -204,18 +221,23 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       <div class="artifact-pipeline-static-grid">
         {staticSelections.map((frame) => (
           <article
-            data-static-selection={`${frame.lane}:${frame.targetPlan.id}`}
+            data-static-selection={`${frame.lane}:${frame.targetPlan.id}:${frame.mode}`}
             data-static-lane={frame.lane}
             data-static-target-plan={frame.targetPlan.id}
+            data-static-mode={frame.mode}
             data-runtime-image-selection={frame.manifest.runtimeImageSelection}
           >
             <header>
               <p>{formatArtifactPipelineCopy(copy.staticCardKicker, frameValues(frame))}</p>
               <h4>{copy.targetPlans[frame.targetPlan.id].title}</h4>
-              <p>{copy.targetPlans[frame.targetPlan.id].description}</p>
+              <p>{copy.targetPlans[frame.targetPlan.id].description} {copy.modes[frame.mode].description}</p>
             </header>
 
             <dl class="artifact-pipeline-static-manifest">
+              <div>
+                <dt>{copy.pipelineMode}</dt>
+                <dd>{copy.modes[frame.mode].title}</dd>
+              </div>
               <div>
                 <dt>{copy.virtualTarget}</dt>
                 <dd><code>{frame.manifest.virtualTarget}</code></dd>
@@ -237,12 +259,13 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
             <section>
               <h5>{copy.staticFlowHeading}</h5>
               <ol class="artifact-pipeline-static-flow">
-                {ARTIFACT_PIPELINE_STAGES.map((stage, index) => (
+                {frame.stages.map((stage, index) => (
                   <li
-                    data-static-stage={`${frame.lane}:${frame.targetPlan.id}:${stage.id}`}
+                    data-static-stage={`${frame.lane}:${frame.targetPlan.id}:${frame.mode}:${stage.id}`}
                     data-stage-id={stage.id}
                     data-branch={stage.branch}
                     data-optional={String(stage.optional)}
+                    data-stage-state={stage.state}
                   >
                     <span class="artifact-pipeline-step-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
                     <span class="artifact-pipeline-branch">{copy.branchLabels[stage.branch]}</span>
@@ -250,6 +273,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
                     <p>{stageText(frame, stage.id, 'description')}</p>
                     <span class="artifact-pipeline-output-label">{copy.artifactOutput}</span>
                     <code>{stageText(frame, stage.id, 'artifact')}</code>
+                    <span class="artifact-pipeline-stage-state" data-static-stage-state-label>{copy.stageStates[stage.state]}</span>
                   </li>
                 ))}
               </ol>
@@ -293,16 +317,18 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
       const lane = this.querySelector<HTMLSelectElement>('[data-artifact-lane]');
       const targetPlan = this.querySelector<HTMLSelectElement>('[data-artifact-target-plan]');
+      const mode = this.querySelector<HTMLSelectElement>('[data-artifact-mode]');
       const step = this.querySelector<HTMLButtonElement>('[data-artifact-action="step"]');
       const reset = this.querySelector<HTMLButtonElement>('[data-artifact-action="reset"]');
       const status = this.querySelector<HTMLElement>('[data-artifact-status]');
       const stages = this.querySelectorAll<HTMLElement>('[data-live-stage]');
-      if (!controls || !workbench || !lane || !targetPlan || !step || !reset || !status) return;
+      if (!controls || !workbench || !lane || !targetPlan || !mode || !step || !reset || !status) return;
       if (stages.length !== ARTIFACT_PIPELINE_STAGES.length) return;
       const requiredLiveSelectors = [
         '[data-selection-summary]',
         '[data-selection-description]',
         '[data-manifest-lane]',
+        '[data-manifest-mode]',
         '[data-manifest-scope]',
         '[data-manifest-virtual]',
         '[data-manifest-real]',
@@ -355,6 +381,22 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
         this.announce(this.format(this.copy().statusTargetPlan, frame), false);
       });
 
+      mode.addEventListener('change', () => {
+        const update = reduceArtifactPipelineState(this.state, {
+          type: 'select-mode',
+          mode: mode.value,
+        });
+        if (!update.accepted) {
+          mode.value = this.state.mode;
+          this.announce(this.copy().issues[update.issue], true);
+          return;
+        }
+        this.state = update.state;
+        const frame = this.render();
+        if (!frame) return;
+        this.announce(this.format(this.copy().statusMode, frame), false);
+      });
+
       step.addEventListener('click', () => {
         const update = reduceArtifactPipelineState(this.state, { type: 'step' });
         if (!update.accepted) {
@@ -364,7 +406,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
         this.state = update.state;
         const frame = this.render();
         if (!frame) return;
-        const completedStage = ARTIFACT_PIPELINE_STAGES[frame.stepIndex - 1];
+        const completedStage = frame.stages.filter(({ state }) => state === 'complete').at(-1);
         if (!completedStage) {
           this.announce(this.copy().issues['invalid-state'], true);
           return;
@@ -406,6 +448,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       return {
         lane: frame.lane,
         plan: copy.targetPlans[frame.targetPlan.id].title,
+        mode: copy.modes[frame.mode].title,
         scope: copy.targetScopes[frame.targetPlan.targetScope],
         source: frame.manifest.source,
         virtual: frame.manifest.virtualTarget,
@@ -455,6 +498,7 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
 
       this.dataset.toolkitLane = frame.lane;
       this.dataset.targetPlan = frame.targetPlan.id;
+      this.dataset.pipelineMode = frame.mode;
       this.dataset.stepIndex = String(frame.stepIndex);
       this.dataset.currentStage = frame.currentStage?.id ?? 'complete';
       this.dataset.sequenceComplete = String(frame.sequenceComplete);
@@ -463,17 +507,20 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
 
       const lane = this.querySelector<HTMLSelectElement>('[data-artifact-lane]');
       const targetPlan = this.querySelector<HTMLSelectElement>('[data-artifact-target-plan]');
+      const mode = this.querySelector<HTMLSelectElement>('[data-artifact-mode]');
       const step = this.querySelector<HTMLButtonElement>('[data-artifact-action="step"]');
       const reset = this.querySelector<HTMLButtonElement>('[data-artifact-action="reset"]');
       const focused = this.ownerDocument.activeElement;
       if (lane) lane.value = frame.lane;
       if (targetPlan) targetPlan.value = frame.targetPlan.id;
+      if (mode) mode.value = frame.mode;
       if (step) step.disabled = frame.sequenceComplete;
       if (step && focused === step && step.disabled) reset?.focus();
 
-      this.setText('[data-selection-summary]', `${frame.lane} · ${copy.targetPlans[frame.targetPlan.id].title}`);
-      this.setText('[data-selection-description]', copy.targetPlans[frame.targetPlan.id].description);
+      this.setText('[data-selection-summary]', `${frame.lane} · ${copy.targetPlans[frame.targetPlan.id].title} · ${copy.modes[frame.mode].title}`);
+      this.setText('[data-selection-description]', `${copy.targetPlans[frame.targetPlan.id].description} ${copy.modes[frame.mode].description}`);
       this.setText('[data-manifest-lane]', frame.lane);
+      this.setText('[data-manifest-mode]', copy.modes[frame.mode].title);
       this.setText('[data-manifest-scope]', copy.targetScopes[frame.targetPlan.targetScope]);
       this.setText('[data-manifest-virtual]', frame.manifest.virtualTarget);
       this.setText('[data-manifest-real]', frame.manifest.realTarget);
@@ -501,7 +548,11 @@ function stageText(frame: ArtifactPipelineFrame, stageId: ArtifactPipelineStageI
       stageId: ArtifactPipelineStageId,
       field: 'description' | 'artifact',
     ) {
-      return this.format(this.copy().stages[stageId][field], frame);
+      const copy = this.copy();
+      const template = stageId === 'optional-device-link' || stageId === 'final-link'
+        ? copy.modeStages[frame.mode][stageId][field]
+        : copy.stages[stageId][field];
+      return this.format(template, frame);
     }
 
     private setText(selector: string, value: string) {

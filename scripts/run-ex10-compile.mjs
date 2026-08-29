@@ -80,10 +80,11 @@ async function describeArtifacts(exampleRoot, paths) {
 }
 
 async function assertOrdinaryArtifacts(resultRoot) {
-  const [report, ptxList, elfList, ptxDump, sassDump, ledger] = await Promise.all([
+  const [report, ptxList, elfList, linkedElfList, ptxDump, sassDump, ledger] = await Promise.all([
     readFile(path.join(resultRoot, 'artifact-test-report.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-ptx-list.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-elf-list.txt'), 'utf8'),
+    readFile(path.join(resultRoot, 'cuobjdump-linked-elf-list.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-ptx.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'cuobjdump-sass.txt'), 'utf8'),
     readFile(path.join(resultRoot, 'symbol-link-ledger.txt'), 'utf8'),
@@ -94,7 +95,7 @@ async function assertOrdinaryArtifacts(resultRoot) {
       !/runtime-evidence=Runtime-Not-Applicable/.test(report)) {
     throw new Error('EX10 artifact-test report does not preserve the execution boundary.');
   }
-  if (!/sm_75/.test(ptxList) || !/sm_75/.test(elfList) ||
+  if (!/sm_75/.test(ptxList) || !/sm_75/.test(elfList) || !/sm_75/.test(linkedElfList) ||
       !/\.target\s+sm_75/.test(ptxDump) || !/artifact_kernel/.test(sassDump)) {
     throw new Error('EX10 inspection outputs do not contain the declared sm_75 and compute_75 images.');
   }
@@ -219,6 +220,7 @@ const hostCompilerOutput = run(
 );
 const nvccOutput = run('docker', containerCommand(runtimeImage, 'nvcc', '--version'), { quiet: true });
 const cuobjdumpOutput = run('docker', containerCommand(runtimeImage, 'cuobjdump', '--version'), { quiet: true });
+const nmOutput = run('docker', containerCommand(runtimeImage, 'nm', '--version'), { quiet: true });
 const hostCompiler = selectVersion(
   hostCompilerOutput,
   /^g\+\+(?:-14)? /,
@@ -229,6 +231,7 @@ const cuobjdump = [
   selectVersion(cuobjdumpOutput, /^cuobjdump:/, 'cuobjdump identity'),
   selectVersion(cuobjdumpOutput, /^Cuda compilation tools,/, 'cuobjdump version'),
 ].join('; ');
+const nm = selectVersion(nmOutput, /^GNU nm /, 'GNU nm version');
 const dockerEngine = run('docker', ['version', '--format', '{{.Server.Version}}'], { quiet: true });
 const dockerBuildx = run('docker', ['buildx', 'version'], { quiet: true });
 
@@ -304,6 +307,7 @@ const record = {
     hostCompiler,
     nvcc,
     cuobjdump,
+    nm,
     dialect: args.dialect,
     target: example.compatibility.target,
   },

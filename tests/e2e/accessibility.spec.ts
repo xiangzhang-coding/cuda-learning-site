@@ -76,13 +76,17 @@ const releaseVisualStateScans = [
   },
   {
     theme: 'blueprint',
-    label: 'VIS09 exact-target pipeline state',
+    label: 'VIS09 RDC device-link pipeline state',
     route: '/en/visuals/artifact-pipeline/',
     prepare: async (page: Page) => {
       const pipeline = page.locator('cuda-artifact-pipeline[data-visual-id="VIS09"]');
       await pipeline.locator('[data-artifact-lane]').selectOption('12.9.2');
       await pipeline.locator('[data-artifact-target-plan]').selectOption('exact-90a');
-      await pipeline.locator('[data-artifact-action="step"]').click();
+      await pipeline.locator('[data-artifact-mode]').selectOption('separate-compilation-rdc');
+      for (let index = 0; index < 5; index += 1) {
+        await pipeline.locator('[data-artifact-action="step"]').click();
+      }
+      await expect(pipeline).toHaveAttribute('data-current-stage', 'optional-device-link');
     },
   },
 ] as const;

@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const ARTIFACT_PIPELINE_TOOLKIT_LANES = ['11.8.0', '12.9.2', '13.3.1'] as const;
+export const ARTIFACT_PIPELINE_MODES = ['whole-program', 'separate-compilation-rdc'] as const;
 export const ARTIFACT_PIPELINE_DEFAULT_LANE = '11.8.0';
 export const ARTIFACT_PIPELINE_DEFAULT_TARGET_PLAN_ID = 'baseline-75';
+export const ARTIFACT_PIPELINE_DEFAULT_MODE = 'whole-program';
 
 export const ARTIFACT_PIPELINE_STAGE_IDS = [
   'source-split',
@@ -15,11 +17,12 @@ export const ARTIFACT_PIPELINE_STAGE_IDS = [
 ] as const;
 
 export type ArtifactPipelineToolkitLane = (typeof ARTIFACT_PIPELINE_TOOLKIT_LANES)[number];
+export type ArtifactPipelineMode = (typeof ARTIFACT_PIPELINE_MODES)[number];
 export type ArtifactPipelineTargetPlanId = 'baseline-75' | 'exact-90a' | 'family-100f';
 export type ArtifactPipelineTargetScope = 'baseline' | 'exact-architecture' | 'same-family';
 export type ArtifactPipelineStageId = (typeof ARTIFACT_PIPELINE_STAGE_IDS)[number];
 export type ArtifactPipelineBranch = 'host-and-device' | 'device' | 'package' | 'host' | 'conditional' | 'link';
-export type ArtifactPipelineStageState = 'complete' | 'current' | 'pending';
+export type ArtifactPipelineStageState = 'complete' | 'current' | 'pending' | 'skipped';
 
 export type ArtifactPipelineTargetPlan = Readonly<{
   id: ArtifactPipelineTargetPlanId;
@@ -78,9 +81,11 @@ export const ARTIFACT_PIPELINE_STAGES = [
 
 export const ARTIFACT_PIPELINE_MODEL_CONTRACT = {
   modelId: 'reviewed-nvcc-artifact-flow',
-  selectionBoundary: 'exact-reviewed-toolkit-lane-and-target-plan-only',
+  selectionBoundary: 'exact-reviewed-toolkit-lane-target-plan-and-mode-only',
   flowMeaning: 'documented-phase-model-not-observed-build',
   optionalDeviceLink: 'only-when-relocatable-device-code-requires-separate-linking',
+  compilationModes: ARTIFACT_PIPELINE_MODES,
+  targetModeRelationship: 'independent-explicit-selections',
   runtimeImageSelection: 'unknown',
   executesCompiler: false,
   executesCuda: false,
@@ -90,23 +95,25 @@ export const ARTIFACT_PIPELINE_MODEL_CONTRACT = {
   runtimeEvidence: 'none',
   performanceEvidence: 'none',
   evidenceStatusEffect: 'none',
-  sourceFactIds: ['SRC-CUDA-016'],
+  sourceFactIds: ['SRC-CUDA-016', 'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033'],
 } as const;
 
 export type ArtifactPipelineReviewedSelection = Readonly<{
   lane: ArtifactPipelineToolkitLane;
   targetPlanId: ArtifactPipelineTargetPlanId;
+  mode: ArtifactPipelineMode;
 }>;
 
 export const ARTIFACT_PIPELINE_REVIEWED_SELECTIONS = ARTIFACT_PIPELINE_TOOLKIT_LANES.flatMap(
   (lane) => ARTIFACT_PIPELINE_TARGET_PLANS
     .filter((plan) => plan.toolkitLanes.some((candidate) => candidate === lane))
-    .map((plan) => ({ lane, targetPlanId: plan.id })),
+    .flatMap((plan) => ARTIFACT_PIPELINE_MODES.map((mode) => ({ lane, targetPlanId: plan.id, mode }))),
 ) satisfies readonly ArtifactPipelineReviewedSelection[];
 
 export type ArtifactPipelineState = Readonly<{
   lane: ArtifactPipelineToolkitLane;
   targetPlanId: ArtifactPipelineTargetPlanId;
+  mode: ArtifactPipelineMode;
   stepIndex: number;
 }>;
 
@@ -115,11 +122,13 @@ export type ArtifactPipelineIssue =
   | 'invalid-action'
   | 'unknown-lane'
   | 'unknown-target-plan'
+  | 'unknown-mode'
   | 'unsupported-target-plan'
   | 'sequence-complete';
 
 export type ArtifactPipelineManifest = Readonly<{
   source: 'kernel.cu';
+  pipelineMode: ArtifactPipelineMode;
   virtualTarget: string;
   realTarget: string;
   ptxImage: string;
@@ -127,7 +136,7 @@ export type ArtifactPipelineManifest = Readonly<{
   cubinPayload: 'SASS';
   fatbinaryImages: readonly [string, string];
   hostObject: 'host-object-with-embedded-fatbinary';
-  optionalDeviceLink: 'conditional-relocatable-device-code';
+  deviceLink: 'skipped-whole-program' | 'active-separate-compilation-rdc';
   finalArtifact: 'linked-executable-or-shared-library';
   runtimeImageSelection: 'unknown';
 }>;
@@ -142,6 +151,7 @@ export type ArtifactPipelineStageFrame = Readonly<{
 export type ArtifactPipelineFrame = Readonly<{
   lane: ArtifactPipelineToolkitLane;
   targetPlan: ArtifactPipelineTargetPlan;
+  mode: ArtifactPipelineMode;
   stepIndex: number;
   stageCount: number;
   sequenceComplete: boolean;
@@ -161,7 +171,7 @@ export type ArtifactPipelineFrameResult =
       accepted: false;
       issue: Extract<
         ArtifactPipelineIssue,
-        'invalid-state' | 'unknown-lane' | 'unknown-target-plan' | 'unsupported-target-plan'
+        'invalid-state' | 'unknown-lane' | 'unknown-target-plan' | 'unknown-mode' | 'unsupported-target-plan'
       >;
     }>;
 
@@ -169,12 +179,18 @@ export type ArtifactPipelineFramesResult =
   | Readonly<{ accepted: true; frames: readonly ArtifactPipelineFrame[] }>
   | Readonly<{
       accepted: false;
-      issue: Extract<ArtifactPipelineIssue, 'unknown-lane' | 'unknown-target-plan' | 'unsupported-target-plan'>;
+      issue: Extract<ArtifactPipelineIssue, 'unknown-lane' | 'unknown-target-plan' | 'unknown-mode' | 'unsupported-target-plan'>;
     }>;
 
 function parseToolkitLane(value: unknown): ArtifactPipelineToolkitLane | null {
   return typeof value === 'string' && ARTIFACT_PIPELINE_TOOLKIT_LANES.some((lane) => lane === value)
     ? value as ArtifactPipelineToolkitLane
+    : null;
+}
+
+function parseMode(value: unknown): ArtifactPipelineMode | null {
+  return typeof value === 'string' && ARTIFACT_PIPELINE_MODES.some((mode) => mode === value)
+    ? value as ArtifactPipelineMode
     : null;
 }
 
@@ -184,7 +200,7 @@ function findTargetPlan(value: unknown) {
     : undefined;
 }
 
-function validateSelection(laneValue: unknown, targetPlanValue: unknown) {
+function validateSelection(laneValue: unknown, targetPlanValue: unknown, modeValue: unknown) {
   const lane = parseToolkitLane(laneValue);
   if (!lane) return { accepted: false, issue: 'unknown-lane' } as const;
   const targetPlan = findTargetPlan(targetPlanValue);
@@ -192,24 +208,34 @@ function validateSelection(laneValue: unknown, targetPlanValue: unknown) {
   if (!targetPlan.toolkitLanes.some((candidate) => candidate === lane)) {
     return { accepted: false, issue: 'unsupported-target-plan' } as const;
   }
-  return { accepted: true, lane, targetPlan } as const;
+  const mode = parseMode(modeValue);
+  if (!mode) return { accepted: false, issue: 'unknown-mode' } as const;
+  return { accepted: true, lane, targetPlan, mode } as const;
+}
+
+function getActiveStages(mode: ArtifactPipelineMode): readonly ArtifactPipelineStage[] {
+  return mode === 'whole-program'
+    ? ARTIFACT_PIPELINE_STAGES.filter(({ id }) => id !== 'optional-device-link')
+    : ARTIFACT_PIPELINE_STAGES;
 }
 
 function validateState(state: ArtifactPipelineState) {
   if (!state || typeof state !== 'object') {
     return { accepted: false, issue: 'invalid-state' } as const;
   }
-  const selection = validateSelection(state.lane, state.targetPlanId);
+  const selection = validateSelection(state.lane, state.targetPlanId, state.mode);
   if (!selection.accepted) return selection;
-  if (!Number.isInteger(state.stepIndex) || state.stepIndex < 0 || state.stepIndex > ARTIFACT_PIPELINE_STAGES.length) {
+  const stageCount = getActiveStages(selection.mode).length;
+  if (!Number.isInteger(state.stepIndex) || state.stepIndex < 0 || state.stepIndex > stageCount) {
     return { accepted: false, issue: 'invalid-state' } as const;
   }
   return selection;
 }
 
-function buildManifest(targetPlan: ArtifactPipelineTargetPlan): ArtifactPipelineManifest {
+function buildManifest(targetPlan: ArtifactPipelineTargetPlan, mode: ArtifactPipelineMode): ArtifactPipelineManifest {
   return {
     source: 'kernel.cu',
+    pipelineMode: mode,
     virtualTarget: targetPlan.virtualTarget,
     realTarget: targetPlan.realTarget,
     ptxImage: `${targetPlan.virtualTarget}.ptx`,
@@ -217,7 +243,7 @@ function buildManifest(targetPlan: ArtifactPipelineTargetPlan): ArtifactPipeline
     cubinPayload: 'SASS',
     fatbinaryImages: [targetPlan.realTarget, targetPlan.virtualTarget],
     hostObject: 'host-object-with-embedded-fatbinary',
-    optionalDeviceLink: 'conditional-relocatable-device-code',
+    deviceLink: mode === 'whole-program' ? 'skipped-whole-program' : 'active-separate-compilation-rdc',
     finalArtifact: 'linked-executable-or-shared-library',
     runtimeImageSelection: ARTIFACT_PIPELINE_MODEL_CONTRACT.runtimeImageSelection,
   };
@@ -226,20 +252,30 @@ function buildManifest(targetPlan: ArtifactPipelineTargetPlan): ArtifactPipeline
 function buildFrame(
   lane: ArtifactPipelineToolkitLane,
   targetPlan: ArtifactPipelineTargetPlan,
+  mode: ArtifactPipelineMode,
   stepIndex: number,
 ): ArtifactPipelineFrame {
+  const activeStages = getActiveStages(mode);
   return {
     lane,
     targetPlan,
+    mode,
     stepIndex,
-    stageCount: ARTIFACT_PIPELINE_STAGES.length,
-    sequenceComplete: stepIndex === ARTIFACT_PIPELINE_STAGES.length,
-    currentStage: ARTIFACT_PIPELINE_STAGES[stepIndex] ?? null,
-    stages: ARTIFACT_PIPELINE_STAGES.map((stage, index) => ({
-      ...stage,
-      state: index < stepIndex ? 'complete' : index === stepIndex ? 'current' : 'pending',
-    })),
-    manifest: buildManifest(targetPlan),
+    stageCount: activeStages.length,
+    sequenceComplete: stepIndex === activeStages.length,
+    currentStage: activeStages[stepIndex] ?? null,
+    stages: ARTIFACT_PIPELINE_STAGES.map((stage) => {
+      const activeIndex = activeStages.findIndex(({ id }) => id === stage.id);
+      const state: ArtifactPipelineStageState = activeIndex === -1
+        ? 'skipped'
+        : activeIndex < stepIndex
+          ? 'complete'
+          : activeIndex === stepIndex
+            ? 'current'
+            : 'pending';
+      return { ...stage, state };
+    }),
+    manifest: buildManifest(targetPlan, mode),
     contract: ARTIFACT_PIPELINE_MODEL_CONTRACT,
   };
 }
@@ -255,6 +291,7 @@ export function createArtifactPipelineState(): ArtifactPipelineState {
   return {
     lane: ARTIFACT_PIPELINE_DEFAULT_LANE,
     targetPlanId: ARTIFACT_PIPELINE_DEFAULT_TARGET_PLAN_ID,
+    mode: ARTIFACT_PIPELINE_DEFAULT_MODE,
     stepIndex: 0,
   };
 }
@@ -264,21 +301,23 @@ export function deriveArtifactPipelineFrame(state: ArtifactPipelineState): Artif
   if (!validation.accepted) return validation;
   return {
     accepted: true,
-    frame: buildFrame(validation.lane, validation.targetPlan, state.stepIndex),
+    frame: buildFrame(validation.lane, validation.targetPlan, validation.mode, state.stepIndex),
   };
 }
 
 export function deriveArtifactPipelineFrames(
   laneValue: unknown,
   targetPlanValue: unknown,
+  modeValue: unknown,
 ): ArtifactPipelineFramesResult {
-  const selection = validateSelection(laneValue, targetPlanValue);
+  const selection = validateSelection(laneValue, targetPlanValue, modeValue);
   if (!selection.accepted) return selection;
+  const stageCount = getActiveStages(selection.mode).length;
   return {
     accepted: true,
     frames: Array.from(
-      { length: ARTIFACT_PIPELINE_STAGES.length + 1 },
-      (_, stepIndex) => buildFrame(selection.lane, selection.targetPlan, stepIndex),
+      { length: stageCount + 1 },
+      (_, stepIndex) => buildFrame(selection.lane, selection.targetPlan, selection.mode, stepIndex),
     ),
   };
 }
@@ -294,7 +333,7 @@ export function reduceArtifactPipelineState(
   }
 
   if (action.type === 'step') {
-    if (state.stepIndex === ARTIFACT_PIPELINE_STAGES.length) {
+    if (state.stepIndex === getActiveStages(validation.mode).length) {
       return { accepted: false, state, issue: 'sequence-complete' };
     }
     return { accepted: true, state: { ...state, stepIndex: state.stepIndex + 1 } };
@@ -315,6 +354,7 @@ export function reduceArtifactPipelineState(
       state: {
         lane,
         targetPlanId: ARTIFACT_PIPELINE_DEFAULT_TARGET_PLAN_ID,
+        mode: state.mode,
         stepIndex: 0,
       },
     };
@@ -324,11 +364,23 @@ export function reduceArtifactPipelineState(
     if (!('targetPlanId' in action) || typeof action.targetPlanId !== 'string') {
       return { accepted: false, state, issue: 'invalid-action' };
     }
-    const selection = validateSelection(state.lane, action.targetPlanId);
+    const selection = validateSelection(state.lane, action.targetPlanId, state.mode);
     if (!selection.accepted) return { accepted: false, state, issue: selection.issue };
     return {
       accepted: true,
       state: { ...state, targetPlanId: selection.targetPlan.id, stepIndex: 0 },
+    };
+  }
+
+  if (action.type === 'select-mode') {
+    if (!('mode' in action) || typeof action.mode !== 'string') {
+      return { accepted: false, state, issue: 'invalid-action' };
+    }
+    const mode = parseMode(action.mode);
+    if (!mode) return { accepted: false, state, issue: 'unknown-mode' };
+    return {
+      accepted: true,
+      state: { ...state, mode, stepIndex: 0 },
     };
   }
 

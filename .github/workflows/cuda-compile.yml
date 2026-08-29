@@ -579,7 +579,7 @@ jobs:
   cuda-compile-gate:
     name: cuda-compile-gate
     if: ${{ always() }}
-    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex16-build]
+    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex16-build]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -594,6 +594,7 @@ jobs:
           EX07_BUILD_RESULT: ${{ needs.ex07-build.result }}
           EX08_BUILD_RESULT: ${{ needs.ex08-build.result }}
           EX09_BUILD_RESULT: ${{ needs.ex09-build.result }}
+          EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}
           EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}
         run: |
           if [ "$CUDA_EVIDENCE_RESULT" != "success" ]; then exit 1; fi
@@ -605,6 +606,7 @@ jobs:
           if [ "$EX07_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX08_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX09_BUILD_RESULT" != "success" ]; then exit 1; fi
+          if [ "$EX10_COMPILE_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi
           echo "Compile evidence does not grant CUDA runtime evidence."
 

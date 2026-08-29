@@ -5,6 +5,7 @@ import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-inde
 import { INDEX_GROUPS, INDEX_LOCALES, INDEX_ROUTES } from '../../src/resource-indexes/resource-index-model';
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
 import { collectBrowserFailures } from '../helpers/browser-contract';
+import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const expectedCount = (group: (typeof INDEX_GROUPS)[number]) =>
   RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length;
@@ -132,6 +133,19 @@ test('both locales combine text, type, and related-resource filters without pers
   await expect(glossary.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'TERM-014');
   expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([]);
   expect(failures).toEqual([]);
+});
+
+test('toolchain catalog cards preserve every detail-declared relationship', async ({ page }) => {
+  for (const group of ['practice', 'glossary', 'sources'] as const) {
+    await page.goto(INDEX_ROUTES[group].en);
+    for (const expected of TOOLCHAIN_CATALOG_RELATIONSHIPS.filter((record) => record.group === group)) {
+      const card = page.locator(`[data-resource-id="${expected.planningId}"]`);
+      const prerequisites = card.getByText('Prerequisites', { exact: true }).locator('..').locator('dd a');
+      const relatedUnits = card.getByText('Related resources', { exact: true }).locator('..').locator('dd a');
+      expect(await prerequisites.allTextContents(), expected.planningId).toEqual(expected.prerequisites);
+      expect(await relatedUnits.allTextContents(), expected.planningId).toEqual(expected.relatedUnits);
+    }
+  }
 });
 
 test('filter controls and direct resource links support keyboard operation', async ({ page }, testInfo) => {

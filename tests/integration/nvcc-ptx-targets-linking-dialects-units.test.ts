@@ -319,7 +319,7 @@ const publicationContracts: readonly PublicationContract[] = [
     relatedUnits: ['M17', 'M18', 'M19', 'VIS09'],
     resourceKind: 'runnable-example',
     hardwareGate: 'Build and inspection: x86-64 CPU runner with Docker; runtime: not applicable; no host or GPU executable execution',
-    sourceVersions: 'CUDA 11.8.0,CUDA 12.9.2,CUDA 13.3.1,PTX ISA 7.8/8.8/9.3,GCC 14',
+    sourceVersions: 'CUDA 11.8.0,CUDA 12.9.2,CUDA 13.3.1,PTX ISA 7.8/8.8/9.3,GCC 14,GNU Binutils 2.38/2.42',
     sourceUrls: [
       'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html',
       'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html',
@@ -330,9 +330,11 @@ const publicationContracts: readonly PublicationContract[] = [
       'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-binary-utilities/index.html',
       'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-binary-utilities/index.html',
       'https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html',
+      'https://sourceware.org/binutils/docs-2.38/binutils/nm.html',
+      'https://sourceware.org/binutils/docs-2.42/binutils/nm.html',
       'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy',
       'https://packages.ubuntu.com/noble-updates/g++-14',
-      'https://gitlab.com/nvidia/container-images/cuda',
+      'https://gitlab.com/nvidia/container-images/cuda/-/commit/44b139413eb3dfcb3fc30d0868479deedce72255',
       'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04',
       'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04',
       'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04',
@@ -829,8 +831,12 @@ describe('VIS09 static evidence-neutral contract', () => {
 
       expect(visual).not.toBeNull();
       expect(visual?.querySelector('[data-static-fallback]')).not.toBeNull();
-      expect(visual?.querySelectorAll('[data-static-selection]')).toHaveLength(7);
-      expect(visual?.querySelectorAll('[data-static-stage]')).toHaveLength(49);
+      expect(visual?.querySelectorAll('[data-static-selection]')).toHaveLength(14);
+      expect(visual?.querySelectorAll('[data-static-stage]')).toHaveLength(98);
+      expect(visual?.querySelectorAll('[data-static-mode="whole-program"]')).toHaveLength(7);
+      expect(visual?.querySelectorAll('[data-static-mode="separate-compilation-rdc"]')).toHaveLength(7);
+      expect(visual?.querySelectorAll('[data-static-mode="whole-program"] [data-stage-id="optional-device-link"][data-stage-state="skipped"]')).toHaveLength(7);
+      expect(visual?.querySelectorAll('[data-static-mode="separate-compilation-rdc"] [data-stage-id="optional-device-link"][data-stage-state="complete"]')).toHaveLength(7);
       expect(visual?.querySelector('[data-visual-controls][hidden]')).not.toBeNull();
       expect(visual?.querySelector('[data-live-workbench][hidden]')).not.toBeNull();
       expect(visual?.getAttribute('data-runtime-image-selection')).toBe('unknown');

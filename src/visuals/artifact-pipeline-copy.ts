@@ -2,6 +2,7 @@
 import type {
   ArtifactPipelineBranch,
   ArtifactPipelineIssue,
+  ArtifactPipelineMode,
   ArtifactPipelineStageId,
   ArtifactPipelineStageState,
   ArtifactPipelineTargetPlanId,
@@ -20,8 +21,13 @@ type ArtifactPipelineCopy = Readonly<{
   controlsHeading: string;
   laneLabel: string;
   targetPlanLabel: string;
+  modeLabel: string;
   step: string;
   reset: string;
+  modes: Readonly<Record<ArtifactPipelineMode, Readonly<{
+    title: string;
+    description: string;
+  }>>>;
   targetPlans: Readonly<Record<ArtifactPipelineTargetPlanId, Readonly<{
     title: string;
     description: string;
@@ -33,6 +39,7 @@ type ArtifactPipelineCopy = Readonly<{
   selectionLabel: string;
   targetContractHeading: string;
   lane: string;
+  pipelineMode: string;
   targetScope: string;
   virtualTarget: string;
   realTarget: string;
@@ -45,6 +52,10 @@ type ArtifactPipelineCopy = Readonly<{
     description: string;
     artifact: string;
   }>>>;
+  modeStages: Readonly<Record<ArtifactPipelineMode, Readonly<Record<
+    Extract<ArtifactPipelineStageId, 'optional-device-link' | 'final-link'>,
+    Readonly<{ description: string; artifact: string }>
+  >>>>;
   runtimeSelection: string;
   runtimeSelectionUnknown: string;
   runtimeSelectionBoundary: string;
@@ -55,6 +66,7 @@ type ArtifactPipelineCopy = Readonly<{
   statusReady: string;
   statusLane: string;
   statusTargetPlan: string;
+  statusMode: string;
   statusStep: string;
   statusReset: string;
   sequenceComplete: string;
@@ -66,20 +78,32 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
   'zh-CN': {
     eyebrow: 'VIS09 · HOST/DEVICE BRANCHES · ARTIFACT PACKAGING',
     title: 'NVCC 构建产物流水线',
-    summary: '在精确 Toolkit Lane 与有界 target plan 中，逐步追踪 .cu source 如何形成 PTX、cubin/SASS、fatbinary、host object 与最终链接产物。',
+    summary: '在精确 Toolkit Lane、有界 target plan 与显式 compilation mode 中，逐步追踪 .cu source 如何形成 PTX、cubin/SASS、fatbinary、host object 与最终链接产物。',
     conceptualNotice: '这是基于公开 NVCC phase/trajectory 的确定性浏览器模型，不是一次 compiler trace。它不执行 nvcc、不检查生成文件，也不知道 runtime 最终选择 fatbinary 中的哪个 image。',
     modelHeading: '模型边界',
     modelBoundaries: [
       'Host 与 device path 是概念分支；模型不展开 Toolkit 可变的内部子命令。',
       'PTX image 与 native cubin/SASS 同时进入所选教学 fatbinary；这只是声明的 target plan。',
+      'Target plan 与 compilation mode 是独立的显式选择；a/f target suffix 不会选择 whole-program 或 RDC。',
       'Separate device link 只在 relocatable device code 跨 translation unit 时按需出现；whole-program path 不虚构该阶段。',
       '最终 linked artifact 仍不能证明 build 成功、driver compatibility、GPU execution、correctness 或 performance。',
     ],
     controlsHeading: 'Artifact flow 控制',
     laneLabel: '已复核 Toolkit Lane',
     targetPlanLabel: '有界 target plan',
+    modeLabel: 'Compilation / pipeline mode',
     step: '单步推进',
     reset: '重置 flow',
+    modes: {
+      'whole-program': {
+        title: 'Whole-program（跳过 device link）',
+        description: '默认 mode；device code 在一个 compilation unit 内解析，不产生独立 device-link object。',
+      },
+      'separate-compilation-rdc': {
+        title: 'Separate compilation / RDC（执行 device link）',
+        description: 'Relocatable device code 先经过独立 device link，再进入最终 host link。',
+      },
+    },
     targetPlans: {
       'baseline-75': {
         title: 'Baseline 7.5：sm_75 + compute_75 PTX',
@@ -111,11 +135,13 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
       complete: '已完成',
       current: '下一阶段',
       pending: '待处理',
+      skipped: '已跳过',
     },
     workbenchHeading: '当前 artifact build plan',
-    selectionLabel: 'Selected lane / target',
+    selectionLabel: 'Selected lane / target / mode',
     targetContractHeading: 'Target 与 image 清单',
     lane: 'Toolkit Lane',
+    pipelineMode: 'Compilation / pipeline mode',
     targetScope: 'Target scope',
     virtualTarget: 'Virtual target / PTX contract',
     realTarget: 'Real target / native code',
@@ -150,9 +176,9 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
         artifact: 'host object + embedded fatbinary',
       },
       'optional-device-link': {
-        label: '按需执行 separate device link',
-        description: '只有 relocatable device code 需要跨 translation unit 解析 device symbol 时才产生可交给 host linker 的 device-link object。',
-        artifact: 'a_dlink.o / a_dlink.obj（按需）',
+        label: 'Separate device-link boundary',
+        description: 'Compilation mode 明确决定这个 conditional boundary 是跳过还是执行。',
+        artifact: 'mode-dependent device-link output',
       },
       'final-link': {
         label: '执行最终 host link',
@@ -160,24 +186,48 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
         artifact: 'linked executable / shared library',
       },
     },
+    modeStages: {
+      'whole-program': {
+        'optional-device-link': {
+          description: 'Whole-program mode 跳过此阶段：device code 在一个 compilation unit 内解析，因此没有独立 device-link object 进入 host link。',
+          artifact: '已跳过 · 不产生 device-link object',
+        },
+        'final-link': {
+          description: 'Host object 与所需 library 直接汇合为最终 linked artifact；whole-program mode 没有独立 device-link output，这里也不运行产物。',
+          artifact: 'linked executable / shared library',
+        },
+      },
+      'separate-compilation-rdc': {
+        'optional-device-link': {
+          description: 'Separate compilation / RDC mode 在此解析跨 translation unit 的 device symbol，并产生可交给 host linker 的 device-link object。',
+          artifact: 'a_dlink.o / a_dlink.obj（active）',
+        },
+        'final-link': {
+          description: 'Host object、已生成的 device-link object 与所需 library 汇合为最终 linked artifact；这里不运行该产物。',
+          artifact: 'linked executable / shared library',
+        },
+      },
+    },
     runtimeSelection: 'Runtime image selection',
     runtimeSelectionUnknown: 'unknown',
     runtimeSelectionBoundary: '没有 selected GPU、loaded driver、device query 或 launch observation，因此不能从 fatbinary 内容推断 runtime 会选择 native cubin 还是 PTX path。',
-    staticHeading: '无脚本 reviewed lane / target plans',
-    staticIntro: '全部七个精确 lane/plan 组合、target scope、image 清单与七阶段 artifact flow 都由服务器渲染；禁用 JavaScript 与打印时不依赖 live workbench。',
-    staticCardKicker: '{lane} · {scope}',
+    staticHeading: '无脚本 reviewed lane / target / mode plans',
+    staticIntro: '全部十四个精确 lane/plan/mode 组合都由服务器渲染：每个 target plan 分别展示 whole-program 的 skipped device link 与 RDC 的 active device link；禁用 JavaScript 与打印时不依赖 live workbench。',
+    staticCardKicker: '{lane} · {scope} · {mode}',
     staticFlowHeading: '完整静态 artifact flow',
-    statusReady: '模型已就绪；尚未推进 artifact stage。',
-    statusLane: '已选择 Toolkit Lane {lane}；target plan 重置为 {plan}，flow 回到 step 0。',
-    statusTargetPlan: '已选择 {plan}；flow 回到 step 0。',
+    statusReady: '模型已在默认 whole-program mode 就绪；device-link stage 标记为已跳过，尚未推进 active artifact stage。',
+    statusLane: '已选择 Toolkit Lane {lane}；target plan 重置为 {plan}，{mode} flow 回到 step 0。',
+    statusTargetPlan: '已选择 {plan}；{mode} flow 回到 step 0。',
+    statusMode: '已选择 {mode}；flow 回到 step 0。',
     statusStep: 'Step {current}/{total}：已完成 {stage}；{next}',
     statusReset: 'Artifact flow 已重置；焦点返回 Toolkit Lane select。',
-    sequenceComplete: '全部 stage 完成；runtime image selection 仍为 unknown。',
+    sequenceComplete: 'Active traversal 已完成；mode-skipped stage 保持跳过，runtime image selection 仍为 unknown。',
     issues: {
       'invalid-state': '拒绝：model state 无效；上一状态保持不变。',
       'invalid-action': '拒绝：control action 无效；上一状态保持不变。',
       'unknown-lane': '拒绝：Toolkit Lane 未复核；上一状态保持不变。',
       'unknown-target-plan': '拒绝：target plan 未复核；上一状态保持不变。',
+      'unknown-mode': '拒绝：compilation mode 未复核；上一状态保持不变。',
       'unsupported-target-plan': '拒绝：所选 Toolkit Lane 不包含该 target plan；上一状态保持不变。',
       'sequence-complete': 'Artifact flow 已完成；请重置或选择另一个 reviewed plan。',
     },
@@ -186,20 +236,32 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
   en: {
     eyebrow: 'VIS09 · HOST/DEVICE BRANCHES · ARTIFACT PACKAGING',
     title: 'NVCC Artifact Pipeline',
-    summary: 'Within an exact Toolkit Lane and bounded target plan, trace how a .cu source can become PTX, cubin/SASS, a fatbinary, a host object, and a final linked artifact.',
+    summary: 'Within an exact Toolkit Lane, bounded target plan, and explicit compilation mode, trace how a .cu source can become PTX, cubin/SASS, a fatbinary, a host object, and a final linked artifact.',
     conceptualNotice: 'This is a deterministic browser model of the documented NVCC phases and trajectory, not a compiler trace. It runs no nvcc, inspects no generated file, and does not know which image a runtime would select from the fatbinary.',
     modelHeading: 'Model boundaries',
     modelBoundaries: [
       'The host and device paths are conceptual branches; the model does not expose Toolkit-variable internal commands.',
       'A PTX image and native cubin/SASS enter the selected teaching fatbinary together; this is only a declared target plan.',
+      'The target plan and compilation mode are independent explicit selections; an a/f target suffix does not select whole-program or RDC.',
       'A separate device link appears only when relocatable device code crosses translation units; the whole-program path does not invent that stage.',
       'A final linked artifact still proves no successful build, driver compatibility, GPU execution, correctness, or performance.',
     ],
     controlsHeading: 'Artifact flow controls',
     laneLabel: 'Reviewed Toolkit Lane',
     targetPlanLabel: 'Bounded target plan',
+    modeLabel: 'Compilation / pipeline mode',
     step: 'Step forward',
     reset: 'Reset flow',
+    modes: {
+      'whole-program': {
+        title: 'Whole-program (device link skipped)',
+        description: 'The default mode; device code resolves within one compilation unit, so no separate device-link object is produced.',
+      },
+      'separate-compilation-rdc': {
+        title: 'Separate compilation / RDC (device link active)',
+        description: 'Relocatable device code passes through a separate device link before the final host link.',
+      },
+    },
     targetPlans: {
       'baseline-75': {
         title: 'Baseline 7.5: sm_75 + compute_75 PTX',
@@ -231,11 +293,13 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
       complete: 'complete',
       current: 'next stage',
       pending: 'pending',
+      skipped: 'skipped',
     },
     workbenchHeading: 'Current artifact build plan',
-    selectionLabel: 'Selected lane / target',
+    selectionLabel: 'Selected lane / target / mode',
     targetContractHeading: 'Target and image manifest',
     lane: 'Toolkit Lane',
+    pipelineMode: 'Compilation / pipeline mode',
     targetScope: 'Target scope',
     virtualTarget: 'Virtual target / PTX contract',
     realTarget: 'Real target / native code',
@@ -270,9 +334,9 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
         artifact: 'host object + embedded fatbinary',
       },
       'optional-device-link': {
-        label: 'Run a separate device link when required',
-        description: 'Only relocatable device code that must resolve device symbols across translation units produces a device-link object for the host linker.',
-        artifact: 'a_dlink.o / a_dlink.obj (conditional)',
+        label: 'Separate device-link boundary',
+        description: 'The explicit compilation mode determines whether this conditional boundary is skipped or traversed.',
+        artifact: 'mode-dependent device-link output',
       },
       'final-link': {
         label: 'Perform the final host link',
@@ -280,24 +344,48 @@ export const ARTIFACT_PIPELINE_COPY: Readonly<Record<ArtifactPipelineLocale, Art
         artifact: 'linked executable / shared library',
       },
     },
+    modeStages: {
+      'whole-program': {
+        'optional-device-link': {
+          description: 'Whole-program mode skips this stage: device code resolves within one compilation unit, so no separate device-link object enters the host link.',
+          artifact: 'skipped · no device-link object',
+        },
+        'final-link': {
+          description: 'The host object and required libraries meet directly in the final linked artifact; whole-program mode has no separate device-link output, and this model does not run the artifact.',
+          artifact: 'linked executable / shared library',
+        },
+      },
+      'separate-compilation-rdc': {
+        'optional-device-link': {
+          description: 'Separate compilation / RDC resolves device symbols across translation units here and produces a device-link object for the host linker.',
+          artifact: 'a_dlink.o / a_dlink.obj (active)',
+        },
+        'final-link': {
+          description: 'The host object, completed device-link object, and required libraries meet in the final linked artifact; this model does not run it.',
+          artifact: 'linked executable / shared library',
+        },
+      },
+    },
     runtimeSelection: 'Runtime image selection',
     runtimeSelectionUnknown: 'unknown',
     runtimeSelectionBoundary: 'Without a selected GPU, loaded driver, device query, or launch observation, fatbinary contents cannot tell us whether a runtime would select the native cubin or a PTX path.',
-    staticHeading: 'No-script reviewed lane / target plans',
-    staticIntro: 'All seven exact lane/plan combinations, target scopes, image manifests, and seven-stage artifact flows are server-rendered; no JavaScript or live workbench is needed in print.',
-    staticCardKicker: '{lane} · {scope}',
+    staticHeading: 'No-script reviewed lane / target / mode plans',
+    staticIntro: 'All fourteen exact lane/plan/mode combinations are server-rendered: every target plan shows both the whole-program branch with a skipped device link and the RDC branch with an active device link; no JavaScript or live workbench is needed in print.',
+    staticCardKicker: '{lane} · {scope} · {mode}',
     staticFlowHeading: 'Complete static artifact flow',
-    statusReady: 'Model ready; no artifact stage has advanced.',
-    statusLane: 'Selected Toolkit Lane {lane}; target plan reset to {plan}, and the flow returned to step 0.',
-    statusTargetPlan: 'Selected {plan}; the flow returned to step 0.',
+    statusReady: 'Model ready in the default whole-program mode; the device-link stage is marked skipped, and no active artifact stage has advanced.',
+    statusLane: 'Selected Toolkit Lane {lane}; target plan reset to {plan}, and the {mode} flow returned to step 0.',
+    statusTargetPlan: 'Selected {plan}; the {mode} flow returned to step 0.',
+    statusMode: 'Selected {mode}; the flow returned to step 0.',
     statusStep: 'Step {current}/{total}: completed {stage}; {next}',
     statusReset: 'Artifact flow reset; focus returned to the Toolkit Lane select.',
-    sequenceComplete: 'All stages are complete; runtime image selection remains unknown.',
+    sequenceComplete: 'The active traversal is complete; any mode-skipped stage remains skipped, and runtime image selection remains unknown.',
     issues: {
       'invalid-state': 'Rejected: model state is invalid; the previous state is unchanged.',
       'invalid-action': 'Rejected: the control action is invalid; the previous state is unchanged.',
       'unknown-lane': 'Rejected: the Toolkit Lane is not reviewed; the previous state is unchanged.',
       'unknown-target-plan': 'Rejected: the target plan is not reviewed; the previous state is unchanged.',
+      'unknown-mode': 'Rejected: the compilation mode is not reviewed; the previous state is unchanged.',
       'unsupported-target-plan': 'Rejected: the selected Toolkit Lane does not contain that target plan; the previous state is unchanged.',
       'sequence-complete': 'The artifact flow is complete; reset or choose another reviewed plan.',
     },

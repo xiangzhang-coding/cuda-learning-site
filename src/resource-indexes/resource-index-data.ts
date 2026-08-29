@@ -767,7 +767,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['M15'],
-    relatedUnits: ['M15', 'EX10', 'VIS09'],
+    relatedUnits: ['F04', 'O04', 'M15', 'M18', 'EX10', 'VIS09'],
     hardwareGate: localized('无；只审查静态 phase 与 artifact 账本，不运行 compiler 或 CUDA。', 'None; review a static phase and artifact ledger without running a compiler or CUDA.'),
     versionGate: localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9，以及 Toolkit 13.3.1 下的 NVCC 13.3 phase/trajectory 合同。',
@@ -784,7 +784,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'mental-model',
     difficulty: 'advanced',
     prerequisites: ['M16'],
-    relatedUnits: ['M16', 'EX10', 'VIS09'],
+    relatedUnits: ['M15', 'M16', 'M17', 'EX10', 'VIS09'],
     hardwareGate: localized('无；只分类静态 artifact 记录，不编译或执行 CUDA。', 'None; classify static artifact records without compiling or executing CUDA.'),
     versionGate: localized(
       'Toolkit 11.8.0/PTX ISA 7.8、12.9.2/PTX ISA 8.8 与 13.3.1/PTX ISA 9.3；使用匹配 Lane 的 binary-inspection tools。',
@@ -801,7 +801,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'concepts-implementation',
     difficulty: 'advanced',
     prerequisites: ['M17'],
-    relatedUnits: ['M17', 'EX10', 'VIS09'],
+    relatedUnits: ['F06', 'M16', 'M17', 'EX10', 'VIS09'],
     hardwareGate: localized('无；只设计静态 target plan，不编译或执行 CUDA。', 'None; design a static target plan without compiling or executing CUDA.'),
     versionGate: localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9，以及 Toolkit 13.3.1 下的 NVCC 13.3 accepted targets；Programming Guide v13.3 feature scopes。',
@@ -818,7 +818,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'correctness-debugging',
     difficulty: 'advanced',
     prerequisites: ['M18'],
-    relatedUnits: ['M18', 'EX10', 'VIS09'],
+    relatedUnits: ['M15', 'M16', 'M17', 'M18', 'EX10'],
     hardwareGate: localized('无；只修复静态 symbol、device-link 与 host-link graph，不运行 compiler 或 CUDA。', 'None; repair a static symbol, device-link, and host-link graph without running a compiler or CUDA.'),
     versionGate: localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9，以及 Toolkit 13.3.1 下的 NVCC 13.3 separate-compilation/device-link 合同。',
@@ -835,7 +835,7 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['M19'],
-    relatedUnits: ['M19', 'EX10'],
+    relatedUnits: ['O04', 'M15', 'M19', 'EX02', 'EX10'],
     hardwareGate: localized('无；只审查静态 toolchain matrix 与 probe claim，不运行 compiler 或 CUDA。', 'None; review a static toolchain matrix and probe claim without running a compiler or CUDA.'),
     versionGate: localized(
       'Toolkit 11.8.0：C++17；12.9.2：C++17/C++20；13.3.1 ordinary build：C++17/C++20；C++23 仅限 separate GCC 14 probe。',
@@ -1166,21 +1166,21 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-112', 'graph node · 图节点', 'kernel-vocabulary', ['M14', 'EX09'], 'Node type、parameters、external resources 与 dependency edges 共同定义 operation；编号与 source layout 不创建 edge。', 'Node type, parameters, external resources, and dependency edges define the operation; numbering and source layout create no edge.', '2026-08-29'),
   glossaryRecord('TERM-113', 'stream capture · 流捕获', 'kernel-vocabulary', ['M14', 'EX09'], 'Capture 是 graph construction mechanism；origin stream、cross-stream rejoin、prohibited operations 与 invalidation unwind 都属于 contract。', 'Capture is a graph-construction mechanism; origin stream, cross-stream rejoin, prohibited operations, and invalidation unwind all belong to the contract.', '2026-08-29'),
   glossaryRecord('TERM-114', 'executable graph · 可执行图', 'kernel-vocabulary', ['M14', 'EX09'], 'Instantiated snapshot 可重复异步提交，但 external-resource lifetime、completion 与 bounded update/re-instantiation 仍需显式证明。', 'An instantiated snapshot may be submitted repeatedly and asynchronously, but external-resource lifetime, completion, and bounded update or re-instantiation remain explicit obligations.', '2026-08-29'),
-  glossaryRecord('TERM-115', 'NVCC · NVIDIA CUDA 编译器驱动', 'environment-vocabulary', ['M15', 'M16', 'M17', 'M18', 'M19', 'EX10', 'VIS09'], '按 NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9 与 Toolkit 13.3.1 下的 NVCC 13.3 分别复核。', 'Reviewed separately for NVCC 11.8.0, NVCC 12.9 in the Toolkit 12.9.2 archive, and NVCC 13.3 under Toolkit 13.3.1.', '2026-08-29'),
-  glossaryRecord('TERM-116', 'host compiler · 主机编译器', 'environment-vocabulary', ['M15', 'M19', 'EX10'], 'Host compiler support 与 exact major version 绑定 Toolkit 11.8.0、12.9.2 或 13.3.1 Lane。', 'Host-compiler support and the exact major version bind to the Toolkit 11.8.0, 12.9.2, or 13.3.1 Lane.', '2026-08-29'),
-  glossaryRecord('TERM-117', 'compilation phase · 编译阶段', 'environment-vocabulary', ['M15', 'M16', 'M18', 'M19', 'EX10', 'VIS09'], 'NVCC 11.8.0、Toolkit 12.9.2 下的 NVCC 12.9 与 Toolkit 13.3.1 下的 NVCC 13.3 只保证 documented stable phase；内部步骤不构成接口。', 'NVCC 11.8.0, NVCC 12.9 under Toolkit 12.9.2, and NVCC 13.3 under Toolkit 13.3.1 guarantee only documented stable phases; internal steps are not interfaces.', '2026-08-29'),
+  glossaryRecord('TERM-115', 'NVCC · NVIDIA CUDA 编译器驱动', 'environment-vocabulary', ['M15', 'EX10', 'VIS09'], '按 NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9 与 Toolkit 13.3.1 下的 NVCC 13.3 分别复核。', 'Reviewed separately for NVCC 11.8.0, NVCC 12.9 in the Toolkit 12.9.2 archive, and NVCC 13.3 under Toolkit 13.3.1.', '2026-08-29'),
+  glossaryRecord('TERM-116', 'host compiler · 主机编译器', 'environment-vocabulary', ['O04', 'M15', 'M19', 'EX10'], 'Host compiler support 与 exact major version 绑定 Toolkit 11.8.0、12.9.2 或 13.3.1 Lane。', 'Host-compiler support and the exact major version bind to the Toolkit 11.8.0, 12.9.2, or 13.3.1 Lane.', '2026-08-29'),
+  glossaryRecord('TERM-117', 'compilation phase · 编译阶段', 'environment-vocabulary', ['M15', 'EX10', 'VIS09'], 'NVCC 11.8.0、Toolkit 12.9.2 下的 NVCC 12.9 与 Toolkit 13.3.1 下的 NVCC 13.3 只保证 documented stable phase；内部步骤不构成接口。', 'NVCC 11.8.0, NVCC 12.9 under Toolkit 12.9.2, and NVCC 13.3 under Toolkit 13.3.1 guarantee only documented stable phases; internal steps are not interfaces.', '2026-08-29'),
   glossaryRecord('TERM-118', 'PTX · PTX 中间代码', 'kernel-vocabulary', ['M16', 'M17', 'EX10', 'VIS09'], 'Toolkit 11.8.0、12.9.2 与 13.3.1 分别对应 selected PTX ISA 7.8、8.8 与 9.3 坐标。', 'Toolkit 11.8.0, 12.9.2, and 13.3.1 use selected PTX ISA 7.8, 8.8, and 9.3 coordinates, respectively.', '2026-08-29'),
   glossaryRecord('TERM-119', 'cubin · cubin 二进制', 'kernel-vocabulary', ['M16', 'M17', 'EX10', 'VIS09'], 'Cubin 绑定 exact Toolkit compiler 与 real architecture target；11.8.0、12.9.2 与 13.3.1 Lane 必须分别检查。', 'A cubin binds to an exact Toolkit compiler and real architecture target; the 11.8.0, 12.9.2, and 13.3.1 Lanes require separate inspection.', '2026-08-29'),
-  glossaryRecord('TERM-120', 'fatbinary · 胖二进制', 'kernel-vocabulary', ['M15', 'M16', 'M17', 'EX10', 'VIS09'], '11.8.0、12.9.2 与 13.3.1 Lane 的 image inventory 必须由匹配工具检查；container 不证明 runtime selection。', 'Image inventories for the 11.8.0, 12.9.2, and 13.3.1 Lanes require matching tools; a container does not prove runtime selection.', '2026-08-29'),
-  glossaryRecord('TERM-121', 'SASS · SASS 机器代码', 'kernel-vocabulary', ['M16', 'M17', 'EX10', 'VIS09'], 'SASS 只能从 exact architecture binary 与匹配 11.8.0、12.9.2 或 13.3.1 inspection tool 坐标声明。', 'SASS may be claimed only from an exact architecture binary and matching 11.8.0, 12.9.2, or 13.3.1 inspection-tool coordinate.', '2026-08-29'),
-  glossaryRecord('TERM-122', 'relocatable device code · 可重定位设备代码', 'kernel-vocabulary', ['M18', 'EX10', 'VIS09'], 'RDC compile 与 compatibility rules 按 NVCC 11.8.0、Toolkit 12.9.2 下的 NVCC 12.9 和 Toolkit 13.3.1 下的 NVCC 13.3 分别复核。', 'RDC compilation and compatibility rules are reviewed separately for NVCC 11.8.0, NVCC 12.9 under Toolkit 12.9.2, and NVCC 13.3 under Toolkit 13.3.1.', '2026-08-29'),
-  glossaryRecord('TERM-123', 'device link · 设备链接', 'kernel-vocabulary', ['M18', 'EX10', 'VIS09'], '11.8.0、12.9.2 与 13.3.1 Toolkit Lane 都把 device link 与 final host link 分开；successful phase 仍不是 runtime evidence。', 'The 11.8.0, 12.9.2, and 13.3.1 Toolkit Lanes separate device link from the final host link; a successful phase is still not runtime evidence.', '2026-08-29'),
-  glossaryRecord('TERM-124', 'host link · 主机链接', 'kernel-vocabulary', ['M15', 'M18', 'EX10', 'VIS09'], '11.8.0、12.9.2 与 13.3.1 build graph 中的 final host link 必须记录 exact host toolchain 与 inputs。', 'The final host link in an 11.8.0, 12.9.2, or 13.3.1 build graph records the exact host toolchain and inputs.', '2026-08-29'),
-  glossaryRecord('TERM-125', 'C++ dialect · C++ 方言', 'environment-vocabulary', ['O04', 'M19', 'EX02', 'EX10'], '11.8.0 教学 gate 为 C++17；12.9.2 为 C++17/C++20；13.3.1 ordinary EX10 为 C++17/C++20，C++23 仅为 separate GCC 14 probe。', 'The 11.8.0 teaching gate is C++17; 12.9.2 is C++17/C++20; ordinary EX10 on 13.3.1 is C++17/C++20, with C++23 only as a separate GCC 14 probe.', '2026-08-29'),
+  glossaryRecord('TERM-120', 'fatbinary · 胖二进制', 'kernel-vocabulary', ['M15', 'M16', 'EX10', 'VIS09'], '11.8.0、12.9.2 与 13.3.1 Lane 的 image inventory 必须由匹配工具检查；container 不证明 runtime selection。', 'Image inventories for the 11.8.0, 12.9.2, and 13.3.1 Lanes require matching tools; a container does not prove runtime selection.', '2026-08-29'),
+  glossaryRecord('TERM-121', 'SASS · SASS 机器代码', 'kernel-vocabulary', ['M16', 'M17', 'EX10'], 'SASS 只能从 exact architecture binary 与匹配 11.8.0、12.9.2 或 13.3.1 inspection tool 坐标声明。', 'SASS may be claimed only from an exact architecture binary and matching 11.8.0, 12.9.2, or 13.3.1 inspection-tool coordinate.', '2026-08-29'),
+  glossaryRecord('TERM-122', 'relocatable device code · 可重定位设备代码', 'kernel-vocabulary', ['M15', 'M18', 'EX10'], 'RDC compile 与 compatibility rules 按 NVCC 11.8.0、Toolkit 12.9.2 下的 NVCC 12.9 和 Toolkit 13.3.1 下的 NVCC 13.3 分别复核。', 'RDC compilation and compatibility rules are reviewed separately for NVCC 11.8.0, NVCC 12.9 under Toolkit 12.9.2, and NVCC 13.3 under Toolkit 13.3.1.', '2026-08-29'),
+  glossaryRecord('TERM-123', 'device link · 设备链接', 'kernel-vocabulary', ['M18', 'EX10'], '11.8.0、12.9.2 与 13.3.1 Toolkit Lane 都把 device link 与 final host link 分开；successful phase 仍不是 runtime evidence。', 'The 11.8.0, 12.9.2, and 13.3.1 Toolkit Lanes separate device link from the final host link; a successful phase is still not runtime evidence.', '2026-08-29'),
+  glossaryRecord('TERM-124', 'host link · 主机链接', 'kernel-vocabulary', ['M15', 'M18', 'EX10'], '11.8.0、12.9.2 与 13.3.1 build graph 中的 final host link 必须记录 exact host toolchain 与 inputs。', 'The final host link in an 11.8.0, 12.9.2, or 13.3.1 build graph records the exact host toolchain and inputs.', '2026-08-29'),
+  glossaryRecord('TERM-125', 'C++ dialect · C++ 方言', 'environment-vocabulary', ['O04', 'M19', 'EX10'], '11.8.0 教学 gate 为 C++17；12.9.2 为 C++17/C++20；13.3.1 ordinary EX10 为 C++17/C++20，C++23 仅为 separate GCC 14 probe。', 'The 11.8.0 teaching gate is C++17; 12.9.2 is C++17/C++20; ordinary EX10 on 13.3.1 is C++17/C++20, with C++23 only as a separate GCC 14 probe.', '2026-08-29'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
-  sourceRecord('SRC-WEB-001', same('Astro'), 'publishing-interface', ['O01'], same('Astro 7.2.4'), '2026-08-25'),
+  sourceRecord('SRC-WEB-001', same('Astro'), 'publishing-interface', ['O01'], same('Astro 7.2.4; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })'), '2026-08-25'),
   sourceRecord('SRC-WEB-002', same('Starlight'), 'publishing-interface', ['O01'], same('Starlight 0.41.7'), '2026-08-25'),
   sourceRecord('SRC-WEB-003', same('Pagefind'), 'publishing-interface', ['O01'], same('Pagefind 1.5.2'), '2026-08-25'),
   sourceRecord(
@@ -1579,7 +1579,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-031',
     localized('M15 NVCC phases 与 compilation trajectory', 'M15 NVCC phases and compilation trajectory'),
     'cuda-version-record',
-    ['M15'],
+    ['F04', 'O04', 'M15', 'EX10', 'VIS09'],
     localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9，以及 Toolkit 13.3.1 下的 NVCC 13.3 stable phases 与 host/device trajectory。',
       'Stable phases and the host/device trajectory in NVCC 11.8.0, NVCC 12.9 in the Toolkit 12.9.2 archive, and NVCC 13.3 under Toolkit 13.3.1.',
@@ -1591,7 +1591,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-032',
     localized('M16/EX10/VIS09 PTX、cubin、fatbinary 与 binary inspection', 'M16/EX10/VIS09 PTX, cubins, fatbinaries, and binary inspection'),
     'cuda-version-record',
-    ['M16', 'EX10', 'VIS09'],
+    ['M15', 'M16', 'M17', 'EX10', 'VIS09'],
     localized(
       'Toolkit 11.8.0/PTX ISA 7.8、12.9.2/PTX ISA 8.8、13.3.1/PTX ISA 9.3，以及各 Lane 匹配的 cuobjdump/nvdisasm。',
       'Toolkit 11.8.0/PTX ISA 7.8, 12.9.2/PTX ISA 8.8, 13.3.1/PTX ISA 9.3, and cuobjdump/nvdisasm from each matching Lane.',
@@ -1603,7 +1603,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-033',
     localized('M17/VIS09 compiler targets 与 feature scopes', 'M17/VIS09 compiler targets and feature scopes'),
     'cuda-version-record',
-    ['M17', 'VIS09'],
+    ['F06', 'M16', 'M17', 'EX10', 'VIS09'],
     localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9、Toolkit 13.3.1 下的 NVCC 13.3，以及 Programming Guide v13.3 feature-set targets。',
       'NVCC 11.8.0, NVCC 12.9 in the Toolkit 12.9.2 archive, NVCC 13.3 under Toolkit 13.3.1, and Programming Guide v13.3 feature-set targets.',
@@ -1615,7 +1615,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-034',
     localized('M18/EX10 separate compilation 与 device linking', 'M18/EX10 separate compilation and device linking'),
     'cuda-version-record',
-    ['M18', 'EX10'],
+    ['M15', 'M16', 'M17', 'M18', 'EX10'],
     localized(
       'NVCC 11.8.0、Toolkit 12.9.2 archive 的 NVCC 12.9，以及 Toolkit 13.3.1 下的 NVCC 13.3 RDC、device-link 与 host-link contracts。',
       'RDC, device-link, and host-link contracts in NVCC 11.8.0, NVCC 12.9 in the Toolkit 12.9.2 archive, and NVCC 13.3 under Toolkit 13.3.1.',
@@ -1627,7 +1627,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-035',
     localized('M19/EX10 host compiler 与 C++ dialects', 'M19/EX10 host compilers and C++ dialects'),
     'cuda-version-record',
-    ['M19', 'EX10'],
+    ['O04', 'M15', 'M19', 'EX02', 'EX10'],
     localized(
       'Toolkit 11.8.0 C++17；12.9.2 C++17/C++20；13.3.1 ordinary C++17/C++20 与 separate supported-GCC-14 C++23 probe。',
       'Toolkit 11.8.0 C++17; 12.9.2 C++17/C++20; 13.3.1 ordinary C++17/C++20 plus a separate supported-GCC-14 C++23 probe.',
