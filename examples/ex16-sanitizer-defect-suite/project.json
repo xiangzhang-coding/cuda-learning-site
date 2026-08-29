@@ -12,6 +12,7 @@
   "build": {
     "standard": "c++17",
     "inputs": [
+      "include/cuda_error.hpp",
       "include/sanitizer_suite_contract.hpp",
       "src/memcheck_defect.cu",
       "src/memcheck_corrected.cu",

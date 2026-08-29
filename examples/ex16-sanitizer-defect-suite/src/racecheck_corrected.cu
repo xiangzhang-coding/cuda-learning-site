@@ -3,23 +3,14 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
-#include <string_view>
 
+#include "cuda_error.hpp"
 #include "sanitizer_suite_contract.hpp"
 
 // [ex16-racecheck-corrected-start]
 namespace {
 
 constexpr std::uint32_t kPublishedValue = 41U;
-
-bool cuda_ok(cudaError_t status, std::string_view operation) {
-  if (status == cudaSuccess) return true;
-  std::cerr << "operation=" << operation
-            << " status=" << cudaGetErrorName(status)
-            << " detail=\"" << cudaGetErrorString(status) << "\"\n";
-  return false;
-}
 
 __global__ void publish_then_read(std::uint32_t* output) {
   __shared__ std::uint32_t shared_value;

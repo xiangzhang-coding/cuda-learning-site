@@ -585,11 +585,22 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       .toEqual(canonicalRanges);
   }
 
-  for (const projectDownloadUrl of new Set(projectExamples.map(({ project }) => project.downloadUrl))) {
-    const response = await request.get(projectDownloadUrl);
+  for (const { project } of projectExamples) {
+    const response = await request.get(project.downloadUrl);
     expect(response.ok()).toBe(true);
     expect(response.headers()['content-type']).toMatch(/zip|octet-stream/);
-    expect((await response.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+    const archive = await response.body();
+    expect(archive.subarray(0, 2).toString('ascii')).toBe('PK');
+    for (const relativePath of new Set([
+      ...project.build.inputs,
+      ...project.build.hostTestInputs,
+      ...project.build.contractFiles,
+    ])) {
+      expect(
+        archive.includes(Buffer.from(`/${project.root}/${relativePath}`)),
+        `${project.id} archive contains ${relativePath}`,
+      ).toBe(true);
+    }
   }
 
   const missing = await request.get('/api/r0-smoke-must-not-exist');

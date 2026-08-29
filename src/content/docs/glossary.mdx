@@ -824,21 +824,21 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <span id="term-087" class="resource-target" aria-hidden="true"></span>
 
-### CPU reference · CPU 参考实现
+### absolute tolerance · 绝对容差
 
-- **定义：** 从问题的 input/output contract 独立实现的 host-side expected-result path，用于在 GPU completion 与 copy-back 后比较 numerical/discrete output；它应避免复用可能携带同一缺陷的 kernel indexing、synchronization 或 launch structure。
-- **避免使用：** 逐行复制到 CPU 的 kernel、自动 ground truth、GPU runtime evidence。
+- **定义：** 比较 finite floating-point values 前声明的固定幅度误差界；在接近零、relative term 单独使用过严时尤其重要。
+- **避免使用：** Universal epsilon、看到 mismatch 后才选择的 threshold、exact discrete check 的替代品。
 - **相关资源：** [Q01：CPU reference、容差与不变量](/correctness/cpu-references-tolerances-invariants/)。
-- **版本说明：** Q01 按 current v13.3 与 11.8.0/12.9.1 owner documentation 复核 reference-comparison guidance；host-only result 不授予 GPU runtime evidence。
+- **版本说明：** Q01 把它与单独论证的 relative tolerance 组合；NVIDIA current/archive guidance 不提供适用于所有算法的单一 absolute threshold。
 
 <span id="term-088" class="resource-target" aria-hidden="true"></span>
 
-### tolerance · 容差
+### relative tolerance · 相对容差
 
-- **定义：** 在查看 candidate result 前声明的 floating-point acceptance bound；Q01 对 finite value 使用 absolute term 与随 reference magnitude 缩放的 relative term，并把 non-finite policy 单独处理。
-- **避免使用：** Universal epsilon、看到 mismatch 后调大的 threshold、integer comparator。
+- **定义：** 按 declared reference magnitude 缩放、并在比较前声明的 floating-point error term；它与 absolute term 组合，使 acceptance 随 value scale 变化且不会在零附近失去定义。
+- **避免使用：** 只按 candidate 计算的 percentage、post-hoc threshold、non-finite-value policy 的替代品。
 - **相关资源：** [Q01](/correctness/cpu-references-tolerances-invariants/)。
-- **版本说明：** Threshold 必须按 data scale、precision、operation structure、error budget 与 domain requirement 解释；NVIDIA current/archive guidance 不提供一个适用于所有算法的数值。
+- **版本说明：** Scale、precision、operation structure、error budget 与 domain rationale 都属于 comparison contract；不存在通用 relative threshold。
 
 <span id="term-089" class="resource-target" aria-hidden="true"></span>
 

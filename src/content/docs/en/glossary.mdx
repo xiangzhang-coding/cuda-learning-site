@@ -824,21 +824,21 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 <span id="term-087" class="resource-target" aria-hidden="true"></span>
 
-### CPU reference · CPU 参考实现
+### absolute tolerance · 绝对容差
 
-- **Definition:** A host-side expected-result path implemented independently from the problem's input/output contract and used after GPU completion and copy-back to compare numerical or discrete output. It avoids reusing kernel indexing, synchronization, or launch structure that could carry the same defect.
-- **Avoid:** Kernel copied line for line onto the CPU, automatic ground truth, GPU runtime evidence.
+- **Definition:** A predeclared fixed-magnitude error bound used when comparing finite floating-point values, especially near zero where a relative term alone can be too strict.
+- **Avoid:** Universal epsilon, threshold selected after seeing a mismatch, replacement for exact discrete checks.
 - **Related resource:** [Q01: CPU references, tolerances, and invariants](/en/correctness/cpu-references-tolerances-invariants/).
-- **Version note:** Q01 reviews reference-comparison guidance in current v13.3 and the 11.8.0/12.9.1 owner documentation. A host-only result grants no GPU runtime evidence.
+- **Version note:** Q01 combines this term with a separately justified relative tolerance; NVIDIA current and archive guidance supplies no one absolute threshold for every algorithm.
 
 <span id="term-088" class="resource-target" aria-hidden="true"></span>
 
-### tolerance · 容差
+### relative tolerance · 相对容差
 
-- **Definition:** A floating-point acceptance bound declared before candidate results are inspected. Q01 combines an absolute term with a relative term scaled by reference magnitude for finite values and handles non-finite values under a separate policy.
-- **Avoid:** Universal epsilon, threshold enlarged after a mismatch, integer comparator.
+- **Definition:** A predeclared floating-point error term scaled by a declared reference magnitude, used with an absolute term so acceptance follows value scale without becoming undefined near zero.
+- **Avoid:** Percentage of the candidate alone, post-hoc threshold, replacement for a non-finite-value policy.
 - **Related resource:** [Q01](/en/correctness/cpu-references-tolerances-invariants/).
-- **Version note:** Thresholds require a rationale from data scale, precision, operation structure, an error budget, and domain requirements. NVIDIA current and archive guidance supplies no one value for every algorithm.
+- **Version note:** Its scale, precision, operation structure, error budget, and domain rationale belong to the comparison contract; there is no universal relative threshold.
 
 <span id="term-089" class="resource-target" aria-hidden="true"></span>
 

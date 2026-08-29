@@ -55,6 +55,17 @@ describe('resource index catalog', () => {
     });
   });
 
+  it('keeps one canonical Glossary entry per term in both locales', () => {
+    const glossary = RESOURCE_INDEX_RECORDS.filter(({ group }) => group === 'glossary');
+
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const canonicalTerms = glossary.map(({ title }) =>
+        title[locale].split('·')[0].trim().toLocaleLowerCase(locale),
+      );
+      expect(new Set(canonicalTerms).size, locale).toBe(canonicalTerms.length);
+    }
+  });
+
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {

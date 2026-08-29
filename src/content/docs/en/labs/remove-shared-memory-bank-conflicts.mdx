@@ -57,7 +57,7 @@ evidence:
   expectedObservations:
     - The unpadded and padded variants should produce the same logical outputs and each pass exact comparison against the CPU reference before profiling begins.
     - With source, build, logical work, launch geometry, profiler options, and device frozen, each layout should produce a labeled raw bank-conflict profiler record only when the selected metric is available and collection is permitted.
-    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared statistic summarizes only those retained samples.
+    - Repeated profiler samples should be retained without a predicted performance ordering between unpadded and padded; the predeclared median and min/max spread summarize only the qualifying samples while every attempt remains retained.
   recordedObservations: []
 sources:
   - title: 'CUDA Toolkit 11.8 Release Notes'
@@ -207,22 +207,33 @@ gpu_count_used: <fill; must be 1>
 driver: <fill>
 toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
 cuda_toolkit: <fill exact version>
+cuda_runtime: <fill exact component version or unknown>
 nsight_compute_version: <fill exact ncu --version output>
 nvcc: <fill exact version>
 host_compiler: <fill exact version>
-operating_system: <fill native Linux distribution, version, architecture>
+operating_system: <fill native Linux distribution, version, architecture, and kernel>
+topology: <fill relevant CPU/GPU/interconnect topology or not relevant with reason>
+source_repository: <fill acquisition URL or repository coordinate>
+binary_sha256: <fill>
+build_contract: <fill build type, c++17, architecture targets, optimization/debug flags, link mode, and relevant environment variables>
 workload: <fill unpadded, padded, 32 lanes, read column 5>
+input_generation: <fill element type, tile dimensions, input formula, and any seed/dataset identity>
 launch_geometry: <fill one block, 32 threads, stream, variant order>
-memory: <fill global/shared bytes; maximum_problem_memory_bytes 8576>
+memory: <fill device and host allocations/requirements, including global/shared bytes; maximum_problem_memory_bytes 8576>
 permissions: <fill device, executable, filesystem, performance-counter policy>
+device_access_state: <fill visibility, container, MIG, and MPS state>
+concurrent_load: <fill background and concurrent workload policy>
+clock_power_thermal: <fill persistence, clock policy, power policy, pre/post thermal state, and cooldown policy>
 exact_commands: <fill ordered, fully expanded argv>
 correctness_method: <fill EX06 CPU reference and exact comparison>
 correctness_criteria: <fill same logical outputs, all 32 lanes, CUDA boundaries, statuses>
-measurement_method: <fill ncu metric names, units, options, repetitions, statistic>
-measurement_details: <fill warm-up exclusion and invalid-sample policy>
+measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
+measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
+statistics: <fill predeclared median, min/max spread, and all-attempt retention policy>
 raw_logs: <fill raw stdout/stderr paths>
 raw_measurements: <fill report/CSV paths>
 exit_statuses: <fill one status path per command>
+custody: <fill observer, raw-log path or hash, and machine or Reference Environment status>
 criteria_result: <fill only after execution>
 ```
 
@@ -272,8 +283,8 @@ Before the first profiler collection:
 
 1. Freeze the same source commit, binary SHA-256, Lane, device, input, logical work, variant order, build flags, launch geometry, `ncu` options, and metric list. Padding is the only layout variable.
 2. Directly run the complete binary once more as a process-level warm-up, recheck exact outputs, and exclude it from all statistics. It is not equivalent to steady-state warm-up inside each new profiler process.
-3. Make 10 independent measured profiler invocations of the same binary and retain every unpadded/padded raw measurement.
-4. Predeclare the statistic for each layout/metric as the median of 10 qualifying samples. Only a nonzero tool/application status, correctness failure, missing kernel, or missing metric value marks a sample invalid; preserve the record and reason.
+3. Make independent measured profiler invocations of the same binary until 10 samples satisfy the predeclared validity rule. Retain every unpadded/padded attempt in acquisition order.
+4. Predeclare the summary for each layout/metric as the median and min/max spread of the 10 qualifying samples. Only a nonzero tool/application status, correctness failure, missing kernel, or missing metric value marks a sample invalid; preserve the record and reason. A large or inconvenient value is not an invalid sample.
 
 This is the equal work/build/launch freeze. Restart the complete batch after changing a frozen dimension; never select or join samples across contracts.
 
@@ -323,13 +334,13 @@ Event timing and a profiler measurement are not interchangeable. A timing-enable
 
 LAB05 does not modify the binary to add events and does not mix event, wall-clock, and profiler samples. A new event experiment must redeclare build, warm-up, synchronization boundary, and statistic.
 
-Compare the 10 raw samples only under the same metric, unit, options, and device, and attach their paths to the median. The address model can explain bank mapping, but this Lab predicts no profiler ordering, duration, latency, throughput, or speedup between unpadded and padded. A missing required metric or result that cannot support interpretation remains a blocker or uncertainty, not a prediction.
+Compare the 10 qualifying samples only under the same metric, unit, options, and device, and attach every attempt's path to the median and min/max spread. The address model can explain bank mapping, but this Lab predicts no profiler ordering, duration, latency, throughput, or speedup between unpadded and padded. A missing required metric or result that cannot support interpretation remains a blocker or uncertainty, not a prediction.
 
 ## Expected observations, not recorded results
 
 - Unpadded and padded should produce the same logical outputs and each exactly match the CPU reference for all 32 lanes.
 - After the gates pass, each layout should map to its raw bank-conflict profiler measurement, report, and status; no direction or value is promised.
-- The warm-up should be excluded, all 10 measured samples retained, and only the predeclared median used as summary.
+- The warm-up should be excluded, every attempt retained, and the predeclared median plus min/max spread used to summarize the 10 qualifying samples.
 
 These are expected observations, not recorded results. There is no prefilled numeric GPU result, runtime output, or profiler result on this page, and `recordedObservations` is empty.
 

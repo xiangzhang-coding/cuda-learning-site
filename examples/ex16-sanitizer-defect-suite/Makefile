@@ -32,12 +32,12 @@ $(BUILD_DIR):
 
 preprocess: $(PREPROCESSED)
 
-$(BUILD_DIR)/%.ii: src/%.cu include/sanitizer_suite_contract.hpp | $(BUILD_DIR)
+$(BUILD_DIR)/%.ii: src/%.cu include/cuda_error.hpp include/sanitizer_suite_contract.hpp | $(BUILD_DIR)
 	$(NVCC) $(NVCC_FLAGS) -E $< -o $@
 
 compile: $(OBJECTS)
 
-$(BUILD_DIR)/%.o: src/%.cu include/sanitizer_suite_contract.hpp | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: src/%.cu include/cuda_error.hpp include/sanitizer_suite_contract.hpp | $(BUILD_DIR)
 	$(NVCC) $(NVCC_FLAGS) --compile $< -o $@
 
 link: $(BINARIES)

@@ -5,23 +5,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
-#include <string_view>
 
+#include "cuda_error.hpp"
 #include "sanitizer_suite_contract.hpp"
 
 // [ex16-initcheck-defect-start]
 namespace {
 
 constexpr std::size_t kElementCount = 16U;
-
-bool cuda_ok(cudaError_t status, std::string_view operation) {
-  if (status == cudaSuccess) return true;
-  std::cerr << "operation=" << operation
-            << " status=" << cudaGetErrorName(status)
-            << " detail=\"" << cudaGetErrorString(status) << "\"\n";
-  return false;
-}
 
 __global__ void increment_values(
     const std::uint32_t* input,

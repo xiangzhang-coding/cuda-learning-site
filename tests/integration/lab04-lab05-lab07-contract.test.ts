@@ -192,6 +192,31 @@ function assertCompleteManifest(source: string, componentVersionPattern: RegExp)
   expect(source).toMatch(componentVersionPattern);
 }
 
+function assertCompletePerformanceManifest(source: string) {
+  const fieldPatterns = [
+    /cuda_runtime/i,
+    /source_repository/i,
+    /binary_sha256/i,
+    /build_contract/i,
+    /operating_system: <fill [^\n]*kernel>/i,
+    /topology/i,
+    /memory: <fill device and host/i,
+    /input_generation/i,
+    /device_access_state/i,
+    /concurrent_load/i,
+    /clock_power_thermal/i,
+    /statistics/i,
+    /custody/i,
+  ];
+
+  for (const pattern of fieldPatterns) expect(source, pattern.source).toMatch(pattern);
+  expect(source).toMatch(/median/i);
+  expect(source).toMatch(/min\/max spread/i);
+  expect(source).toMatch(/10 (?:qualifying|个合格).{0,80}(?:samples?|样本)/is);
+  expect(source).toMatch(/every attempt|每次尝试/i);
+  expect(source).toMatch(/no-silent-outlier|不构成 invalid/i);
+}
+
 function assertCorrectnessBeforeInterpretation(source: string) {
   const headings = [...body(source).matchAll(/^## (.+)$/gm)].map((match) => match[1]);
   const correctness = headings.findIndex((heading) =>
@@ -292,6 +317,7 @@ describe('LAB04, LAB05, and LAB07 bilingual Lab contracts', () => {
         expect(source).toMatch(/tool gate|profiler gate|工具门槛|分析器门槛/i);
         assertCorrectnessBeforeInterpretation(source);
         assertCompleteManifest(source, lab.componentVersionPattern);
+        if (lab.id !== 'LAB07') assertCompletePerformanceManifest(source);
         expect(source).toMatch(/raw_logs|raw stdout\/stderr|原始.{0,20}(?:stdout|stderr|日志)/is);
         expect(source).toMatch(/exit_statuses|exit statuses|退出状态/i);
         expect(source).toMatch(lab.rawRecordPattern);

@@ -57,7 +57,7 @@ evidence:
   expectedObservations:
     - The contiguous, misaligned, and strided scenarios should each pass exact comparison against the CPU reference before profiling begins.
     - With source, build, logical work, launch geometry, profiler options, and device frozen, each scenario should produce a labeled raw profiler record only when the selected metric is available and collection is permitted.
-    - Repeated profiler samples should be retained without a predicted ordering among contiguous, misaligned, and strided; the predeclared statistic summarizes only those retained samples.
+    - Repeated profiler samples should be retained without a predicted ordering among contiguous, misaligned, and strided; the predeclared median and min/max spread summarize only the qualifying samples while every attempt remains retained.
   recordedObservations: []
 sources:
   - title: 'CUDA Toolkit 11.8 Release Notes'
@@ -207,23 +207,34 @@ gpu_count_used: <fill; must be 1>
 driver: <fill>
 toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
 cuda_toolkit: <fill exact version>
+cuda_runtime: <fill exact component version or unknown>
 nsight_compute_version: <fill exact ncu --version output>
 nvcc: <fill exact version>
 host_compiler: <fill exact version>
-operating_system: <fill native Linux distribution, version, architecture>
+operating_system: <fill native Linux distribution, version, architecture, and kernel>
+topology: <fill relevant CPU/GPU/interconnect topology or not relevant with reason>
+source_repository: <fill acquisition URL or repository coordinate>
+binary_sha256: <fill>
+build_contract: <fill build type, c++17, architecture targets, optimization/debug flags, link mode, and relevant environment variables>
 workload:
   <fill contiguous, misaligned, strided and logical count 256>
+input_generation: <fill element type, input formula, dimensions, and any seed/dataset identity>
 launch_geometry: <fill grid, block, stream, scenario order>
-memory: <fill actual allocations; maximum_problem_memory_bytes 3068>
+memory: <fill device and host allocations/requirements; maximum_problem_memory_bytes 3068>
 permissions: <fill device, executable, filesystem, performance-counter policy>
+device_access_state: <fill visibility, container, MIG, and MPS state>
+concurrent_load: <fill background and concurrent workload policy>
+clock_power_thermal: <fill persistence, clock policy, power policy, pre/post thermal state, and cooldown policy>
 exact_commands: <fill ordered, fully expanded argv>
 correctness_method: <fill EX05 CPU reference and exact comparison>
 correctness_criteria: <fill all scenarios, all 256 outputs, CUDA boundaries, statuses>
-measurement_method: <fill ncu metric names, units, options, repetitions, statistic>
-measurement_details: <fill warm-up exclusion and invalid-sample policy>
+measurement_method: <fill ncu metric names, units, options, repetition order, median, and min/max spread>
+measurement_details: <fill warm-up exclusion, completion boundary, included work, invalid-sample policy, and no-silent-outlier policy>
+statistics: <fill predeclared median, min/max spread, and all-attempt retention policy>
 raw_logs: <fill raw stdout/stderr paths>
 raw_measurements: <fill report/CSV paths>
 exit_statuses: <fill one status path per command>
+custody: <fill observer, raw-log path or hash, and machine or Reference Environment status>
 criteria_result: <fill only after execution>
 ```
 
@@ -275,8 +286,8 @@ printf '%s\n' "$status" >lab04-evidence/correctness.status
 
 1. 固定 source commit、binary SHA-256、Lane、device、scenario order、logical work、build flags、launch geometry、`ncu` options 与 metric list。三种访问只保留 canonical `offset`/`stride` 差异。
 2. 再直接运行完整 binary 一次作为 process-level warm-up；检查正确性，但把该次运行明确排除在全部统计之外。它不能消除新 profiler process 的全部启动或 replay 影响，因此不得被描述为 steady-state event warm-up。
-3. 对同一未改动 binary 做 10 次独立、完整的 measured profiler invocation；保留每次原始值，不删除“看起来异常”的样本。
-4. 预先声明每个 scenario/metric 的汇总统计量为 10 个合格原始样本的 median。只有 nonzero tool/application status、正确性失败、缺少目标 kernel 或缺少 metric value 才可标记 invalid，并必须保留该记录和原因。
+3. 对同一未改动 binary 做独立、完整的 measured profiler invocation，直到 10 个样本满足预先声明的 validity rule；按 acquisition order 保留每次尝试，不删除“看起来异常”的样本。
+4. 预先声明每个 scenario/metric 的汇总为 10 个合格原始样本的 median 与 min/max spread。只有 nonzero tool/application status、正确性失败、缺少目标 kernel 或缺少 metric value 才可标记 invalid，并必须保留该记录和原因；数值很大或不利于结论不构成 invalid。
 
 这套冻结规则要求 equal work/build/launch；若中途改变任何固定项，废弃整个 batch 后重新开始，不能拼接前后样本。
 
@@ -330,13 +341,13 @@ CUDA event timing 与 profiler measurement 不是同一种记录。Timing-enable
 
 因此 LAB04 不新增 event-instrumented binary，也不把 profiler duration、host wall-clock 与 event time 合并。若另开 event 实验，必须重新声明 source/build、warm-up、完成边界与统计合同，不能冒用本 Lab 的 frozen binary 记录。
 
-对每个 metric 只陈述其 owner 定义允许的范围，比较同一 metric、unit 与 collection options 下的原始样本，并报告 median 与全部样本路径。本 Lab 不预言 contiguous、misaligned、strided 的 metric ordering、latency、bandwidth、throughput 或 speedup。若结果相同、波动或与静态模型不一致，保留事实并调查，不改写预期。
+对每个 metric 只陈述其 owner 定义允许的范围，比较同一 metric、unit 与 collection options 下的原始样本，并报告 median、min/max spread 与每次尝试的路径。本 Lab 不预言 contiguous、misaligned、strided 的 metric ordering、latency、bandwidth、throughput 或 speedup。若结果相同、波动或与静态模型不一致，保留事实并调查，不改写预期。
 
 ## 预期观察，不是记录结果
 
 - Contiguous、misaligned 与 strided **应当**先各自通过 256 个 output 的 CPU reference exact comparison。
 - 通过版本、metric-query 与权限门槛后，每个 scenario **应当**能与自己的 raw profiler record 和退出状态关联；这不承诺指标方向或差值。
-- Warm-up **应当**被排除，10 个 measured sample **应当**全部保留，并只用预先声明的 median 汇总。
+- Warm-up **应当**被排除，每次尝试都**应当**保留，并用预先声明的 median 与 min/max spread 汇总 10 个合格样本。
 
 这些都是预期观察，不是记录结果。本页没有预填任何 GPU 数值结果、运行输出或 profiler 结果；`recordedObservations` 仍为空。
 
