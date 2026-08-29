@@ -193,13 +193,18 @@ const containerCommand = (image, ...command) => [
 ];
 
 if (probe) {
-  hostCompilerPackage = run('docker', containerCommand(
+  const packageOutput = run('docker', containerCommand(
     runtimeImage,
     'dpkg-query',
     '--show',
     '--showformat=${Package}=${Version}',
     probe.hostCompilerPackage,
   ), { quiet: true });
+  hostCompilerPackage = selectVersion(
+    packageOutput,
+    new RegExp(`^${probe.hostCompilerPackage}=`),
+    'host compiler package version',
+  );
 }
 
 const osRelease = run('docker', containerCommand(runtimeImage, 'cat', '/etc/os-release'), { quiet: true });

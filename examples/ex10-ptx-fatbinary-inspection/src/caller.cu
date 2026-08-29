@@ -15,6 +15,6 @@ extern "C" __global__ void ex10_caller_kernel(
 }
 // [ex10-device-link-contract-end]
 
-int main() noexcept {
+int main() {
   return 0;
 }

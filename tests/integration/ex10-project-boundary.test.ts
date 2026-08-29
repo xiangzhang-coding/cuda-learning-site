@@ -137,6 +137,7 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
     ]) {
       expect(makefile).toContain(option);
     }
+    expect(makefile).toContain('$(BUILD_DIR)/cuobjdump-ptx-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin');
     expect(makefile).toContain('sha256sum $(PRIMARY_ARTIFACT_NAMES)');
     expect(artifactTest).toContain('sha256sum --check artifact-sha256.txt');
     expect(artifactTest).toContain('host-executable-executed=false');

@@ -62,7 +62,7 @@ $(BUILD_DIR)/ex10-ptx-fatbinary-inspection: $(RDC_OBJECTS) $(BUILD_DIR)/device_l
 $(BUILD_DIR)/artifact-sha256.txt: $(PRIMARY_ARTIFACTS)
 	cd $(BUILD_DIR) && sha256sum $(PRIMARY_ARTIFACT_NAMES) > artifact-sha256.txt
 
-$(BUILD_DIR)/cuobjdump-ptx-list.txt: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection
+$(BUILD_DIR)/cuobjdump-ptx-list.txt: $(BUILD_DIR)/artifact_kernel.fatbin
 	cuobjdump --list-ptx $< > $@
 
 $(BUILD_DIR)/cuobjdump-elf-list.txt: $(BUILD_DIR)/ex10-ptx-fatbinary-inspection
