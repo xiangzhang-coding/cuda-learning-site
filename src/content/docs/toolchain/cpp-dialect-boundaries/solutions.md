@@ -110,7 +110,7 @@ Decision table 是：
 | GCC 14 command success，但缺 diagnostics、guard、artifact 或 retained identity | Reject | incomplete probe；no Compile-Checked |
 | Complete retained GCC 14 pass packet | Publish retained narrow pass | exact EX10/Toolkit/NVCC/GCC/platform/phase claim only |
 
-当前可接受的两句声明是：“At source commit `16256cbeded889cb1a45f2461585317ed3fe0296`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 on Ubuntu 24.04.4 LTS. Run 33266515216 establishes that narrow `C++23-Dialect-Probe` result; no host or GPU executable ran.”
+当前可接受的两句声明是：“At source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`, EX10 range `cxx23-probe` compiled and produced the retained object under CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 on Ubuntu 24.04.4 LTS. Run 33271481405 establishes that narrow `C++23-Dialect-Probe` result; no host or GPU executable ran.”
 
 这项声明不等于 ordinary EX10 C++23 support，也不覆盖其他 compiler、platform、source、runtime 或 performance。五项 ordinary C++17/C++20 records 的 Compile-Checked status 与这项 probe claim 分开记录。
 

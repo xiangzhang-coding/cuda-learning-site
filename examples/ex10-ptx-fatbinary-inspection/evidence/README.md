@@ -2,7 +2,7 @@
 
 # EX10 Compile Evidence Records
 
-Run [33266515216](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216) produced the retained records for source commit `16256cbeded889cb1a45f2461585317ed3fe0296`. All six records bind build contract SHA-256 `44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7`.
+Run [33271481405](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405) produced the retained records for source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`. All six records bind build contract SHA-256 `4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb`.
 
 The five ordinary `Compile-Checked` records are `cuda-11-8-cxx17.json`, `cuda-12-9-cxx17.json`, `cuda-12-9-cxx20.json`, `cuda-13-3-cxx17.json`, and `cuda-13-3-cxx20.json`. Together they cover every declared Lane/dialect row. Each record covers every declared stage and artifact, identifies the canonical build-contract hash, runner, digest-pinned `linux/amd64` image, actual image, and toolchain coordinates, and states that neither the final host artifact nor a GPU executable was executed.
 

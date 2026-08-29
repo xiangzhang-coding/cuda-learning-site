@@ -17,7 +17,7 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex10-ptx-fatbinary-inspection');
-const sourceCommit = '16256cbeded889cb1a45f2461585317ed3fe0296';
+const sourceCommit = '8b4af3965147f2ead99e72a73f5fe2f92fa0114b';
 const rangeNames = [
   'artifact-kernel',
   'device-link-contract',
@@ -243,8 +243,8 @@ describe('EX10 PTX and fatbinary inspection boundary', () => {
       result: 'pass',
       subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
       sourceCommit,
-      buildContractSha256: '44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7',
-      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216',
+      buildContractSha256: '4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb',
+      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
       toolchain: {
         toolkit: '13.3.1',
         hostCompiler: 'g++-14 (Ubuntu 14.2.0-4ubuntu2~24.04.1) 14.2.0',

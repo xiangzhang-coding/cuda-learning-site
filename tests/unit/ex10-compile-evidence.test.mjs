@@ -201,7 +201,7 @@ describe('EX10 compile evidence validation', () => {
     const ordinary = records.filter(({ subject }) => subject === 'EX10');
     const probes = records.filter(({ claim }) => claim === 'C++23-Dialect-Probe');
 
-    expect(example.sourceCommit).toBe('16256cbeded889cb1a45f2461585317ed3fe0296');
+    expect(example.sourceCommit).toBe('8b4af3965147f2ead99e72a73f5fe2f92fa0114b');
     expect(example.evidence.compilation).toHaveLength(5);
     expect(example.evidence.dialectProbe).toBe('evidence/cuda-13-3-gcc14-cxx23-probe.json');
     expect(ordinary.map(({ toolchain }) => `${toolchain.toolkit}/${toolchain.dialect}`).sort()).toEqual([
@@ -216,8 +216,8 @@ describe('EX10 compile evidence validation', () => {
       result: 'pass',
       subject: 'EX10-CUDA-13.3-CXX23-GCC14-PROBE',
       sourceCommit: example.sourceCommit,
-      buildContractSha256: '44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7',
-      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216',
+      buildContractSha256: '4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb',
+      workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405',
     });
     expect(records.flatMap(({ commands }) => commands).join('\n')).not.toContain('--allow-unsupported-compiler');
   });

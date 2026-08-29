@@ -5,10 +5,10 @@
   "claim": "Compile-Checked",
   "subject": "EX10",
   "check": "ex10-cuda-13-3-cxx17",
-  "sourceCommit": "16256cbeded889cb1a45f2461585317ed3fe0296",
-  "buildContractSha256": "44ba3c47536e8287664ca0ddfced81e496e351dd703870a406094625de9a45f7",
+  "sourceCommit": "8b4af3965147f2ead99e72a73f5fe2f92fa0114b",
+  "buildContractSha256": "4f4a1399a3ec019bdc55ea723057259173553f85bac8ec8c30924dbe726f0cfb",
   "verificationDate": "2026-08-29",
-  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216",
+  "workflowRun": "https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405",
   "runner": {
     "operatingSystem": "Linux",
     "architecture": "X64",
@@ -37,6 +37,7 @@
     "hostCompiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
     "nvcc": "Cuda compilation tools, release 13.3, V13.3.73",
     "cuobjdump": "cuobjdump: NVIDIA (R) fat binary listing tool; Cuda compilation tools, release 13.3, V13.3.73",
+    "nm": "GNU nm (GNU Binutils for Ubuntu) 2.42",
     "dialect": "c++17",
     "target": [
       "sm_75",
@@ -107,6 +108,11 @@
     },
     {
       "path": "build/cuobjdump-elf-list.txt",
+      "bytes": 45,
+      "sha256": "1bc8e686cb0147a5598be64c03d13ed803d3c958b478fa7897d4a828edcb3877"
+    },
+    {
+      "path": "build/cuobjdump-linked-elf-list.txt",
       "bytes": 59,
       "sha256": "512ddc420297cd109a47c14dc1331aa71a45730cbe5e04502acb8b483bfad1a1"
     },
@@ -137,8 +143,8 @@
     },
     {
       "path": "build/artifact-test-report.txt",
-      "bytes": 193,
-      "sha256": "500ca8aa4dca75d25735885e66bbc7e5d548372456ea4b85cc7cf8e22880e9a8"
+      "bytes": 228,
+      "sha256": "44c7f2225fca1a83f2e52c5c84fd3fa584afef8d3174c47a40dee4d9f406d806"
     }
   ],
   "hostReferenceExecuted": false,

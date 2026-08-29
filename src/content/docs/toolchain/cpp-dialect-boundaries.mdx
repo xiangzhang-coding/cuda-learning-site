@@ -219,7 +219,7 @@ C++23 只进入 EX10 的 `cxx23-probe` range。该 range 先检查 `__cplusplus 
 
 ## C++23 publication gate
 
-本站已在 [run 33266515216](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216) 完成并保留 **EX10 + CUDA 13.3.1 + supported GCC 14** probe。该 record 包含：
+本站已在 [run 33271481405](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405) 完成并保留 **EX10 + CUDA 13.3.1 + supported GCC 14** probe。该 record 包含：
 
 1. Exact EX10 source commit 与 `cxx23-probe` range identity。
 2. Native Linux OS/container identity、Toolkit 13.3.1、NVCC build 与 exact GCC 14 version。
@@ -229,11 +229,11 @@ C++23 只进入 EX10 的 `cxx23-probe` range。该 range 先检查 `__cplusplus 
 
 Unsupported-host bypass 不能进入 qualifying command。Gate 的目的就是验证 owner-declared supported combination；绕过 host check 会改变问题，不能产生本页需要的证据。
 
-Retained record 绑定 source commit `16256cbeded889cb1a45f2461585317ed3fe0296`、CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0，并保留 SHA-256 为 `1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea` 的 `cxx23_probe.o`；结果是 **pass**。这只是一项 `C++23-Dialect-Probe`，不是 ordinary EX10 C++23 Compile-Checked，也不覆盖其他 compiler、Toolkit、platform、source、runtime 或 performance。
+Retained record 绑定 source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`、CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 14.2.0，并保留 SHA-256 为 `1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea` 的 `cxx23_probe.o`；结果是 **pass**。这只是一项 `C++23-Dialect-Probe`，不是 ordinary EX10 C++23 Compile-Checked，也不覆盖其他 compiler、Toolkit、platform、source、runtime 或 performance。
 
 ## Canonical Runnable Example：EX10
 
-EX10 是 M19 的 canonical probe project。[查看 source commit `16256cbeded889cb1a45f2461585317ed3fe0296` 下的 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip)。该 source pin 与 retained run 的 source identity 一致。
+EX10 是 M19 的 canonical probe project。[查看 source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b` 下的 EX10 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/8b4af3965147f2ead99e72a73f5fe2f92fa0114b/examples/ex10-ptx-fatbinary-inspection)，或[下载同一 commit 的 source archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip)。该 source pin 与 retained run 的 source identity 一致。
 
 Canonical range 展示 dialect guard 与一个 C++23-only language feature，而不执行 kernel：
 

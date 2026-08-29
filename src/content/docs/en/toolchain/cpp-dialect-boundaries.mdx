@@ -219,7 +219,7 @@ That record is immutable R1 history. Do not delete it, rewrite it as a pass, rep
 
 ## C++23 publication gate
 
-The site completed and retained an **EX10 + CUDA 13.3.1 + supported GCC 14** probe in [run 33266515216](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33266515216). Its record includes:
+The site completed and retained an **EX10 + CUDA 13.3.1 + supported GCC 14** probe in [run 33271481405](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33271481405). Its record includes:
 
 1. The exact EX10 source commit and `cxx23-probe` range identity.
 2. Native Linux OS/container identity, Toolkit 13.3.1, NVCC build, and exact GCC 14 version.
@@ -229,11 +229,11 @@ The site completed and retained an **EX10 + CUDA 13.3.1 + supported GCC 14** pro
 
 An unsupported-host bypass cannot appear in a qualifying command. The gate exists to test the owner-declared supported combination; bypassing the host check changes the question and cannot create the evidence required here.
 
-The retained record binds source commit `16256cbeded889cb1a45f2461585317ed3fe0296`, CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 and preserves `cxx23_probe.o` with SHA-256 `1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea`; its result is **pass**. This is only a `C++23-Dialect-Probe`, not ordinary EX10 C++23 Compile-Checked, and it covers no other compiler, Toolkit, platform, source, runtime, or performance.
+The retained record binds source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`, CUDA Toolkit 13.3.1, NVCC 13.3.73, and GCC 14.2.0 and preserves `cxx23_probe.o` with SHA-256 `1e9de5e6d26ac2a3206d1ee644cb2aa7286ed6b7dcd1e6a237118dc117d6ffea`; its result is **pass**. This is only a `C++23-Dialect-Probe`, not ordinary EX10 C++23 Compile-Checked, and it covers no other compiler, Toolkit, platform, source, runtime, or performance.
 
 ## Canonical Runnable Example: EX10
 
-EX10 is M19's canonical probe project. [View the EX10 project at source commit `16256cbeded889cb1a45f2461585317ed3fe0296`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip). This source pin matches the retained run's source identity.
+EX10 is M19's canonical probe project. [View the EX10 project at source commit `8b4af3965147f2ead99e72a73f5fe2f92fa0114b`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/8b4af3965147f2ead99e72a73f5fe2f92fa0114b/examples/ex10-ptx-fatbinary-inspection), or [download the source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip). This source pin matches the retained run's source identity.
 
 The canonical range shows the dialect guard and one C++23-only language feature without executing its kernel:
 

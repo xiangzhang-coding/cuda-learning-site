@@ -4,9 +4,9 @@
   "id": "EX10",
   "title": "PTX and fatbinary inspection",
   "root": "examples/ex10-ptx-fatbinary-inspection",
-  "sourceCommit": "16256cbeded889cb1a45f2461585317ed3fe0296",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/16256cbeded889cb1a45f2461585317ed3fe0296/examples/ex10-ptx-fatbinary-inspection",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/16256cbeded889cb1a45f2461585317ed3fe0296.zip",
+  "sourceCommit": "8b4af3965147f2ead99e72a73f5fe2f92fa0114b",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/8b4af3965147f2ead99e72a73f5fe2f92fa0114b/examples/ex10-ptx-fatbinary-inspection",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/8b4af3965147f2ead99e72a73f5fe2f92fa0114b.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
