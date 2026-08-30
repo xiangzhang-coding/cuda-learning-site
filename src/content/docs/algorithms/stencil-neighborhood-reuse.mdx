@@ -1,0 +1,207 @@
+---
+title: 'A06：Stencil 邻域、Halo 与 Cooperative Reuse'
+description: 从一维到二维 stencil，声明 radius 与 boundary policy，组织 center/halo cooperative loading，并用统一 barrier 和数据复用算术建立同步基线。
+pairId: a06
+counterpart: /en/algorithms/stencil-neighborhood-reuse/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - stencil-contract
+  - boundary-policies
+  - cooperative-loading
+  - two-dimensional-halos
+  - phases-and-barriers
+  - reuse-arithmetic
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A06
+prerequisites:
+  - M03
+  - M04
+  - M05
+relatedUnits:
+  - A07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current shared-memory tiling, synchronization, and stencil context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Asynchronous Data Copies'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current owner stencil-and-halo context; asynchronous mechanisms are outside the A06 baseline'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a06 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/stencil-neighborhood-reuse/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,stencil-contract,boundary-policies,cooperative-loading,two-dimensional-halos,phases-and-barriers,reuse-arithmetic,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M04,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A07 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/stencil-neighborhood-reuse/" lang="en">Read the English counterpart</a>
+
+[模板计算（stencil，TERM-143）](/glossary/#term-143)为每个 output coordinate读取一个固定形状的 input 邻域（neighborhood），再按声明的 operation 组合这些 values。相邻 outputs 的邻域大量重叠，因此它适合学习 center 与[光环区（halo，TERM-144）](/glossary/#term-144)的 cooperative loading、boundary policy、barrier participation 与 data-reuse arithmetic。
+
+## 学完本单元，你应该能
+
+- 用 radius 或显式 offsets 定义一维与二维 stencil 的 read set。
+- 区分 `valid`、`clamp`、`zero` 与 `periodic` boundary policies，并只选择一个声明的合同。
+- 计算 output tile 所需的 center、side halos 和 2D corner halos。
+- 组织 `load -> barrier -> compute -> reuse` synchronous phases，不让 edge thread early return 穿过 barrier。
+- 用 logical request count 与 staged unique-element count描述复用机会，而不写未测量的性能结论。
+- 把 A06 的邻域复用模型带入相关学习单元 [A07](/algorithms/convolution-reuse-layout/)。
+
+## 先修关系
+
+先完成 [M03：共享内存分块](/memory/shared-memory-tiling/)、[M04：Bank conflict 与布局变换](/memory/bank-conflicts-layouts/)和 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。M03 提供 cooperative shared tile；M04 要求检查 physical layout；M05 提供 block-wide rendezvous、visibility 与 uniform participation contract。
+
+先修项严格为 `M03, M04, M05`。A07 是 related downstream unit，不是 prerequisite。本页使用 synchronous load/barrier baseline，不导入可运行示例，也不要求 asynchronous-copy interface。
+
+## Stencil 合同：从 offsets 定义 read set
+
+一维 radius-`r` centered stencil 在 output index `i` 周围读取 offsets `-r..r`。若 weights 为 `w[-r..r]`，抽象结果是每个有效 offset 的 `w[k] * input_at(i + k)` 之和。`input_at` 的域外行为由 boundary policy 决定，不能留给 kernel 猜测。
+
+二维 stencil 使用 offset set，例如 square radius `r` 的 `(dy, dx)` 均位于 `[-r,r]`。也可以声明 cross-shaped 或 sparse offsets；“radius”只有与 shape 一起写出才完整。每个 output owner 只写一个 output coordinate，但读取多个 neighbors。
+
+Correctness contract 至少包含 input/output extents、offset set、weights、accumulation type/order、boundary policy 与 acceptance rule。Stencil shape 决定 logical reads；thread-block shape 只决定这些 reads 如何分工，不应反过来改变数学结果。
+
+## Boundary policies：四种 alternatives，不是四个同时成立的结果
+
+对 domain `[0,n)`，常见 policies 是：
+
+| policy | 域外 index 的含义 | output domain |
+| --- | --- | --- |
+| `valid` | 不读取；只产生完整邻域的 outputs | 缩小到所有 offsets 都合法的位置 |
+| `clamp` | 映射到最近的合法 endpoint | 通常保持原 output extent |
+| `zero` | 返回声明的 zero value | 通常保持原 output extent |
+| `periodic` | 用规范化 modulo wrap 回 domain | 通常保持原 output extent |
+
+这些是可选择的合同，不是可互换的 implementation details。CPU reference、shared loader 与 direct baseline 必须采用同一 policy。`periodic` 对负 index 的 modulo 需要明确规范化；`zero` 不能通过读取越界 memory 再希望得到 0；`valid` 也不允许 edge threads 因无 output 就跳过 block barrier。
+
+二维时 policy 应独立应用到两个 coordinates，或者显式声明 mixed policy。Corner sample 可能同时越过 y 与 x boundary；只修正一个 axis 会产生不完整合同。
+
+## Cooperative loading：center 与 halo 共同组成 staged region
+
+一维 output tile 有 `B` 个连续 outputs、radius 为 `r`、stride 为 1 时，完整 staged input region 有 `B + 2r` 个 positions。Center 对应 tile 内的主要 input span，左右各有 width `r` 的 halo。Threads 不必“一 thread 一 load”；可以对 staged linear index 使用 block-stride loop，直到 center 和 halo 全部定义。
+
+当 staged element count 大于 block thread count 时，一些 threads 承担多个 loads；较小时，一些 threads 没有 load。两种情况下，全体 participants 都要继续到 barrier。Loader 对每个 staged coordinate 应先应用声明的 boundary policy，再把定义好的 value 写入 shared memory。
+
+Cooperative assignment 的 proof obligation 是 coverage 和 uniqueness：每个 staged slot 至少被定义一次，baseline 最好恰好一次；每个 slot 的 value 对应正确 global coordinate 或明确 boundary value。Shared-memory physical stride 仍需按 M04 检查，但 layout optimization 不改变 stencil offsets。
+
+## 二维 halo：side strips 之外还有 corners
+
+一个 `T_y x T_x` output tile 和 square radius `r` 在 stride 1 下需要 `(T_y + 2r) x (T_x + 2r)` staged rectangle。它包含 center、top/bottom halo rows、left/right halo columns，以及四个 `r x r` corner regions。
+
+若只让“top、bottom、left、right” threads 载入 side strips，却没有覆盖 corners，corner-dependent outputs 会读取未定义 shared slots。更稳健的 baseline 是把整个 staged rectangle linearize，让 block threads stride over all positions；每个 position 再映射回 staged `(sy,sx)` 和 global `(gy,gx)`。
+
+对于 cross-shaped stencil，corner values 可能不在 mathematical read set 中。仍可加载完整 rectangle 以简化 baseline，也可只加载 sparse footprint；后者必须重新证明 coverage，不能从 square-stencil ledger 直接继承。
+
+## Phases 与 barriers：load、barrier、compute、reuse
+
+同步 baseline 有清晰的 phase order：
+
+1. **Load:** 全体 threads cooperative 定义 center 与 halo slots，边界值按已声明 policy 生成。
+2. **Barrier:** 全体 block participants 执行同一 `__syncthreads()`，发布 staged region。
+3. **Compute:** 只有拥有合法 output 的 threads 从 shared neighborhood 读取并计算。
+4. **Reuse/complete:** 一个 staged value 可被多个 output computations 读取；kernel 完成后 output 才进入 host verification。
+
+Data predicate 只控制 global input read、boundary-value generation 或 output compute。它不能控制 block rendezvous。典型修复是把 `if (output_invalid) return` 改成 `output_valid` boolean：所有 threads 先参加 cooperative load 和 barrier，再让 valid owners compute/store。
+
+若后续在同一 block 中复用 shared storage 载入下一 tile，还需要在 overwrite 前证明 readers 已完成，通常形成额外 barrier。A06 只建立 single-stage synchronous baseline；异步 pipeline 不是本单元的隐藏前提。
+
+## 数据复用算术：request reduction 不是 speedup
+
+一维 radius `r`、`B` 个 outputs 的 direct formulation 有 `B(2r+1)` 个 logical input requests。完整 shared stage 在 interior tile 可由 `B+2r` 个 unique positions 提供同一邻域。可以报告 request-count ratio `B(2r+1)/(B+2r)` 作为 reuse opportunity；它不是 cache miss、transaction 或 elapsed-time ratio。
+
+二维 square radius `r`、`T_y x T_x` outputs 的 direct logical request count 是 `T_y T_x (2r+1)^2`，完整 staged rectangle 是 `(T_y+2r)(T_x+2r)` positions。Boundary policy、stride、dilation、sparse shape 与 channel dimension 都会改变 arithmetic，必须在比较前固定。
+
+Shared staging 还引入 cooperative loads、barrier、address arithmetic 与 capacity cost。没有实际 environment 和 measurement record，不能从较小的 unique-position count 宣布更快。本页只建立 reuse budget 和 correctness phases。
+
+## 证据边界
+
+| expected reasoning | observed evidence |
+| --- | --- |
+| Radius 和 policy 决定邻域 values | 实际 CPU/GPU output comparison |
+| Linearized cooperative loop 覆盖 center、sides 与 corners | 实际 memory-check 或 retained trace |
+| Uniform barrier 发布完整 staged region | 指定 executable 的 runtime/sanitizer observation |
+| Logical requests 多于 staged unique positions | 指定环境中的 transactions、timing 或 throughput |
+
+本页没有 executable counterpart；compilation、runtime、expected observations 与 recorded observations arrays 都为空。Static tables 和 arithmetic 可以审查算法，但不能证明任何 CUDA source 已编译、已运行或获得性能改善。
+
+## 离开前检查
+
+1. Radius、offset shape 与 boundary policy 为什么必须共同定义 stencil read set？
+2. `valid`、`clamp`、`zero` 与 `periodic` 在 edge output 上分别改变什么？
+3. 为什么二维 square stencil 的 staged region 必须考虑四个 corner halos？
+4. 没有合法 output 的 edge thread 为什么仍不能在 load barrier 前 return？
+5. 为什么 `B(2r+1)` 与 `B+2r` 的差异只能称为 reuse opportunity？
+
+## 继续练习
+
+- 完成 [A06 练习（Exercises）](/algorithms/stencil-neighborhood-reuse/exercises/)，再查看独立的[复核解答](/algorithms/stencil-neighborhood-reuse/solutions/)。
+- 审查[练习题库（Practice Bank）PB-R2-018](/practice/#pb-r2-018)，要求每个答案同时声明 boundary policy、halo coverage 与 barrier participants。
+- 复习 [TERM-143 stencil](/glossary/#term-143)和 [TERM-144 halo](/glossary/#term-144)，再进入 [A07](/algorithms/convolution-reuse-layout/)。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 current shared-memory tiling、synchronization 与 stencil owner context，最后更新于 2026-05-27。
+- [CUDA Programming Guide v13.3：Asynchronous Data Copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html)提供 current owner stencil/halo context，最后更新于 2026-05-27；A06 不采用其 async mechanism 作为 baseline 或 prerequisite。
+- [CUDA C Programming Guide v11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html)用于核对 11.8 shared-memory 与 block-synchronization contract。
+- [CUDA C++ Programming Guide v12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)是 Toolkit 12.9.2 patch lane 的 owner-guide coordinate。
+
+四项 primary owner sources 均访问于 **2026-08-30**。本页只改写 owner contracts；boundary-policy table、phase ledger、复用算术与练习均为本站原创，没有复制 owner code、figure 或 table。Context7 `/websites/nvidia_cuda_cuda-programming-guide` 只用于 2026-08-30 交叉核对，owner URLs 仍是发布依据。
+
+**事实核查日期：2026-08-30。**

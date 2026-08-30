@@ -1,0 +1,207 @@
+---
+title: 'A06: Stencil Neighborhoods, Halos, and Cooperative Reuse'
+description: Develop one-dimensional and two-dimensional stencils by declaring radius and boundary policy, cooperatively loading center and halo regions, and establishing a synchronous baseline with uniform barriers and data-reuse arithmetic.
+pairId: a06
+counterpart: /algorithms/stencil-neighborhood-reuse/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - stencil-contract
+  - boundary-policies
+  - cooperative-loading
+  - two-dimensional-halos
+  - phases-and-barriers
+  - reuse-arithmetic
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A06
+prerequisites:
+  - M03
+  - M04
+  - M05
+relatedUnits:
+  - A07
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current shared-memory tiling, synchronization, and stencil context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Asynchronous Data Copies'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current owner stencil-and-halo context; asynchronous mechanisms are outside the A06 baseline'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a06 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/stencil-neighborhood-reuse/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,stencil-contract,boundary-policies,cooperative-loading,two-dimensional-halos,phases-and-barriers,reuse-arithmetic,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M04,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A07 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/stencil-neighborhood-reuse/" lang="zh-CN">阅读中文对应页</a>
+
+A [stencil (TERM-143)](/en/glossary/#term-143) reads a fixed-shaped input neighborhood for each output coordinate and combines those values with a declared operation. Adjacent outputs have heavily overlapping neighborhoods, making the pattern a useful vehicle for [halo (TERM-144)](/en/glossary/#term-144) and center loading, boundary policies, barrier participation, and data-reuse arithmetic.
+
+## What you should be able to do
+
+- Define the read set of a one-dimensional or two-dimensional stencil with a radius or explicit offsets.
+- Distinguish `valid`, `clamp`, `zero`, and `periodic` boundary policies and select exactly one declared contract.
+- Compute the center, side halos, and two-dimensional corner halos required by an output tile.
+- Organize synchronous `load -> barrier -> compute -> reuse` phases without an edge thread returning across a barrier.
+- Describe reuse opportunity with logical request counts and staged unique-element counts without writing an unmeasured performance conclusion.
+- Carry A06's neighborhood-reuse model into related Learning Unit [A07](/en/algorithms/convolution-reuse-layout/).
+
+## Prerequisites
+
+Complete [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/), [M04: Bank Conflicts and Layout Transforms](/en/memory/bank-conflicts-layouts/), and [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) first. M03 supplies a cooperative shared tile. M04 requires review of its physical layout. M05 supplies block-wide rendezvous, visibility, and uniform-participation contracts.
+
+The prerequisite set is exactly `M03, M04, M05`. A07 is a related downstream unit, not a prerequisite. This page uses a synchronous load/barrier baseline, imports no Runnable Example, and requires no asynchronous-copy interface.
+
+## Stencil contract: define the read set from offsets
+
+A centered one-dimensional radius-`r` stencil reads offsets `-r..r` around output index `i`. Given weights `w[-r..r]`, its abstract result sums `w[k] * input_at(i + k)` for each valid offset. The behavior of `input_at` outside the domain comes from the boundary policy; it cannot be left for a kernel to guess.
+
+A two-dimensional stencil uses an offset set. For example, a square radius `r` has `(dy, dx)` in `[-r,r]` on both axes. Cross-shaped and sparse offsets are also possible; a “radius” is complete only when its shape is named. Each output owner writes one output coordinate while reading multiple neighbors.
+
+The correctness contract includes at least input/output extents, the offset set, weights, accumulation type/order, boundary policy, and acceptance rule. Stencil shape defines logical reads. Thread-block shape controls how those reads are assigned and must not change the mathematical result.
+
+## Boundary policies: four alternatives, not four simultaneous results
+
+For domain `[0,n)`, common policies are:
+
+| policy | meaning of an out-of-domain index | output domain |
+| --- | --- | --- |
+| `valid` | do not read it; produce only outputs with a complete neighborhood | reduced to positions where every offset is legal |
+| `clamp` | map it to the nearest legal endpoint | commonly preserves the original output extent |
+| `zero` | return a declared zero value | commonly preserves the original output extent |
+| `periodic` | wrap it into the domain with normalized modulo | commonly preserves the original output extent |
+
+These are selectable contracts, not interchangeable implementation details. The CPU reference, shared loader, and direct baseline use the same policy. `periodic` must normalize modulo for a negative index. `zero` cannot read out-of-bounds memory and hope to receive zero. `valid` does not permit an edge thread with no output to skip a block barrier.
+
+In two dimensions, apply the policy independently to both coordinates or explicitly declare a mixed policy. A corner sample can exceed both y and x bounds; repairing only one axis leaves the contract incomplete.
+
+## Cooperative loading: center and halo form one staged region
+
+For a one-dimensional tile of `B` consecutive outputs, radius `r`, and stride 1, the complete staged input region has `B + 2r` positions. Its center is the main input span for the tile, with a width-`r` halo on each side. The assignment need not be one thread per load. Threads may stride over the staged linear index until both center and halos are defined.
+
+When staged elements outnumber block threads, some threads perform multiple loads. When there are fewer elements, some threads perform none. Every participant still proceeds to the barrier. For each staged coordinate, the loader applies the declared boundary policy before writing a defined value to shared memory.
+
+The cooperative assignment must prove coverage and uniqueness: every staged slot is defined at least once, and preferably exactly once in the baseline; every slot contains the value for the correct global coordinate or an explicit boundary value. M04 still governs physical shared-memory stride, but a layout optimization does not change stencil offsets.
+
+## Two-dimensional halos: corners exist beyond the side strips
+
+A `T_y x T_x` output tile with square radius `r` and stride 1 needs a `(T_y + 2r) x (T_x + 2r)` staged rectangle. That rectangle contains the center, top and bottom halo rows, left and right halo columns, and four `r x r` corner regions.
+
+If “top, bottom, left, and right” threads load only side strips without covering corners, corner-dependent outputs read undefined shared slots. A robust baseline linearizes the entire staged rectangle and lets block threads stride over all positions. Each position maps back to staged `(sy,sx)` and global `(gy,gx)` coordinates.
+
+For a cross-shaped stencil, corner values may not belong to the mathematical read set. Loading the full rectangle can simplify the baseline; loading only a sparse footprint is also possible but requires a new coverage proof rather than inheriting a square-stencil ledger.
+
+## Phases and barriers: load, barrier, compute, reuse
+
+The synchronous baseline has a clear phase order:
+
+1. **Load:** All threads cooperatively define center and halo slots, generating boundary values according to the declared policy.
+2. **Barrier:** Every block participant executes the same `__syncthreads()` and publishes the staged region.
+3. **Compute:** Only threads owning a legal output read a shared neighborhood and compute.
+4. **Reuse/complete:** Multiple output computations may read one staged value; output enters host verification only after kernel completion.
+
+A data predicate controls a global input read, boundary-value generation, or output compute. It does not control the block rendezvous. The standard repair changes `if (output_invalid) return` into an `output_valid` boolean: all threads first join cooperative load and the barrier, then valid owners compute and store.
+
+Reusing the same shared storage for a later tile in the same block also requires proving that readers finished before overwrite, commonly adding another barrier. A06 establishes only a single-stage synchronous baseline; an asynchronous pipeline is not a hidden prerequisite.
+
+## Data-reuse arithmetic: request reduction is not speedup
+
+For a one-dimensional radius `r` and `B` outputs, the direct formulation has `B(2r+1)` logical input requests. On an interior tile, a complete shared stage can supply the same neighborhoods from `B+2r` unique positions. The request-count ratio `B(2r+1)/(B+2r)` describes reuse opportunity; it is not a cache-miss, transaction, or elapsed-time ratio.
+
+For a two-dimensional square radius `r` and `T_y x T_x` outputs, the direct logical request count is `T_y T_x (2r+1)^2`, while the complete staged rectangle contains `(T_y+2r)(T_x+2r)` positions. Boundary policy, stride, dilation, sparse shape, and channel dimensions all change the arithmetic and must be fixed before a comparison.
+
+Shared staging also adds cooperative loads, a barrier, address arithmetic, and capacity cost. A lower unique-position count cannot establish faster execution without an actual environment and measurement record. This page establishes only the reuse budget and correctness phases.
+
+## Evidence boundary
+
+| expected reasoning | observed evidence |
+| --- | --- |
+| Radius and policy determine neighborhood values | An actual CPU/GPU output comparison |
+| A linearized cooperative loop covers center, sides, and corners | An actual memory-check or retained trace |
+| A uniform barrier publishes the complete staged region | A runtime or sanitizer observation for a named executable |
+| Logical requests outnumber staged unique positions | Transactions, timing, or throughput in a named environment |
+
+This page has no executable counterpart. Compilation, runtime, expected observations, and recorded observations are all empty. Static tables and arithmetic can review an algorithm but cannot prove that CUDA source compiled, ran, or improved performance.
+
+## Retrieval check
+
+1. Why must radius, offset shape, and boundary policy jointly define a stencil's read set?
+2. What does each of `valid`, `clamp`, `zero`, and `periodic` change at an edge output?
+3. Why must the staged region of a two-dimensional square stencil account for four corner halos?
+4. Why can an edge thread with no legal output still not return before the load barrier?
+5. Why is the difference between `B(2r+1)` and `B+2r` only a reuse opportunity?
+
+## Continue with practice
+
+- Complete the [A06 Exercises](/en/algorithms/stencil-neighborhood-reuse/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/stencil-neighborhood-reuse/solutions/).
+- Audit [Practice Bank PB-R2-018](/en/practice/#pb-r2-018), requiring every answer to state its boundary policy, halo coverage, and barrier participants.
+- Revisit [TERM-143 stencil](/en/glossary/#term-143) and [TERM-144 halo](/en/glossary/#term-144), then continue to [A07](/en/algorithms/convolution-reuse-layout/).
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies current shared-memory tiling, synchronization, and stencil owner context; it was last updated on 2026-05-27.
+- [CUDA Programming Guide v13.3: Asynchronous Data Copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html) supplies current owner stencil-and-halo context and was last updated on 2026-05-27. A06 does not use its asynchronous mechanism as a baseline or prerequisite.
+- [CUDA C Programming Guide v11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html) is used to review the 11.8 shared-memory and block-synchronization contracts.
+- [CUDA C++ Programming Guide v12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html) is the owner-guide coordinate for the Toolkit 12.9.2 patch lane.
+
+All four primary owner sources were accessed on **2026-08-30**. The page paraphrases owner contracts; its boundary-policy table, phase ledger, reuse arithmetic, and Exercises are original site work, with no owner code, figure, or table copied. Context7 `/websites/nvidia_cuda_cuda-programming-guide` was used only for cross-checking on 2026-08-30; the owner URLs remain publication authority.
+
+**Fact checked: 2026-08-30.**

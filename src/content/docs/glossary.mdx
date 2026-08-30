@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 139 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 146 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-08-30'
@@ -126,7 +126,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 用交互或动画显露空间、时间或架构行为的表示；可以在浏览器中建模 CUDA 概念，但不会执行 CUDA。
 - **避免使用：** 装饰、CUDA 演示。
-- **相关资源：** O01、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)、[VIS04](/visuals/memory-transactions/)、[VIS05](/visuals/shared-memory-banks/)、[VIS06](/visuals/memory-hierarchy-lifetime/)、[VIS19](/foundations/asynchronous-errors/#vis19)、[VIS20](/foundations/compute-capability/#vis20)、[VIS21](/foundations/runtime-driver-api/#vis21)、[VIS22](/foundations/launch-geometry/#vis22)。
+- **相关资源：** O01、[VIS01](/visuals/kernel-journey/)、[VIS02](/visuals/indexing/)、[VIS04](/visuals/memory-transactions/)、[VIS05](/visuals/shared-memory-banks/)、[VIS06](/visuals/memory-hierarchy-lifetime/)、[VIS11](/visuals/tiled-transpose/)、[VIS19](/foundations/asynchronous-errors/#vis19)、[VIS20](/foundations/compute-capability/#vis20)、[VIS21](/foundations/runtime-driver-api/#vis21)、[VIS22](/foundations/launch-geometry/#vis22)。
 - **版本说明：** 概念模型和特定硬件行为必须分开说明。
 
 <span id="term-010" class="resource-target" aria-hidden="true"></span>
@@ -1299,6 +1299,69 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)、[Q01](/correctness/cpu-references-tolerances-invariants/)和 [EX11](/examples/multi-stage-reduction/)。
 - **版本说明：** Claim 必须绑定 exact Toolkit/compiler/library/device scope；current CUDA v13.3、12.9.1/11.8.0 archives 与 CCCL v3.4.2 policy 只提供各自边界，任何 tolerance result 都不能升级该状态。
 
+<span id="term-140" class="resource-target" aria-hidden="true"></span>
+
+### matrix transpose · 矩阵转置
+
+- **定义：** 矩阵转置（matrix transpose）把 input coordinate `(row,col)` 映射到 output `(col,row)`；对 row-major rectangular matrix，`output[col*rows+row] = input[row*columns+col]`。
+- **避免使用：** In-place reshape、只交换显示标签、默认方阵、自动性能优化。
+- **相关资源：** [A05](/algorithms/matrix-transpose-layout/)、[EX14](/examples/tiled-transpose/)和 [VIS11](/visuals/tiled-transpose/)。
+- **版本说明：** Mapping 不绑定 Toolkit；CUDA v13.3 与 12.9.1/11.8.0 owner guides 负责 current/archive memory-layout context，实际 performance 需要独立证据。
+
+<span id="term-141" class="resource-target" aria-hidden="true"></span>
+
+### physical row stride · 物理行跨度
+
+- **定义：** 物理行跨度（physical row stride）是相邻 logical rows 起点在实际 storage 中相隔的 element 或 byte 数，可能大于 logical column count。
+- **避免使用：** Logical width、output leading dimension 的固定同义词、padding count 本身、row-major 语义保证。
+- **相关资源：** [M04](/memory/bank-conflicts-layouts/)、[A05](/algorithms/matrix-transpose-layout/)、[EX14](/examples/tiled-transpose/)和 [VIS11](/visuals/tiled-transpose/)。
+- **版本说明：** Shared-memory mapping 还绑定 element width、bank model 与 architecture；VIS11 只计算 declared physical slot，不观察 bank hardware。
+
+<span id="term-142" class="resource-target" aria-hidden="true"></span>
+
+### bank padding · 存储体填充
+
+- **定义：** 存储体填充（bank padding）在 physical shared layout 中加入不承载 logical value 的 slot，以改变 row stride 与特定 access pattern 的 bank mapping。
+- **避免使用：** 新的 logical matrix column、automatic conflict removal、universal `+1` rule、speedup guarantee。
+- **相关资源：** [M04](/memory/bank-conflicts-layouts/)、[A05](/algorithms/matrix-transpose-layout/)、[EX14](/examples/tiled-transpose/)和 [VIS11](/visuals/tiled-transpose/)。
+- **版本说明：** A05 使用 selected 32-bank/32-bit-word reasoning model；扩展到另一 type、instruction 或 architecture 前必须重核，实际 conflict/timing 需要 observation。
+
+<span id="term-143" class="resource-target" aria-hidden="true"></span>
+
+### stencil · 模板计算
+
+- **定义：** 模板计算（stencil）为每个 output coordinate 读取一个声明形状的相对 input-offset set，并按固定 operation 组合该 neighborhood。
+- **避免使用：** 任意 sliding window、只限 image filter、未声明 boundary policy 的邻域访问、convolution 的无条件同义词。
+- **相关资源：** [A06](/algorithms/stencil-neighborhood-reuse/)。
+- **版本说明：** Algorithm contract 不绑定 Toolkit；shared-memory 与 block synchronization 按 current CUDA v13.3 和 12.9.1/11.8.0 archives 解释。
+
+<span id="term-144" class="resource-target" aria-hidden="true"></span>
+
+### halo · 光环区
+
+- **定义：** 光环区（halo）是一个 output tile 的 center region 之外、为满足其 neighborhood read set 而额外 staged 的 input region；二维 square footprint 还包含 corners。
+- **避免使用：** Global boundary、padding 的必然同义词、只含四条 side strips、unused cache data。
+- **相关资源：** [A06](/algorithms/stencil-neighborhood-reuse/)和 [A07](/algorithms/convolution-reuse-layout/)。
+- **版本说明：** Extent 由 output tile、offset shape、stride、dilation 与 boundary policy 决定；CUDA v13.3 stencil context 不替代 application-level definition。
+
+<span id="term-145" class="resource-target" aria-hidden="true"></span>
+
+### convolution · 卷积
+
+- **定义：** 卷积（convolution）按 kernel/filter 的声明 orientation 对 shifted input neighborhoods 做加权组合；mathematical discrete convolution 会翻转 spatial filter。
+- **避免使用：** 默认不翻转的任意 deep-learning operation、所有 stencil、固定 NCHW layout、production-library performance guarantee。
+- **相关资源：** [A07](/algorithms/convolution-reuse-layout/)。
+- **版本说明：** A07 明确把 teaching path 定义为 cross-correlation；current cuDNN docs 只为 future pinned production comparison 提供 owner coordinate。
+
+<span id="term-146" class="resource-target" aria-hidden="true"></span>
+
+### cross-correlation · 互相关
+
+- **定义：** 互相关（cross-correlation）按 filter storage order 使用 spatial taps，不沿 axes 翻转；A07 的 direct teaching equation采用该 convention。
+- **避免使用：** Mathematical convolution 的完全同义词、自动相同输出、只由 API 名称隐含的 operation contract。
+- **相关资源：** [A07](/algorithms/convolution-reuse-layout/)。
+- **版本说明：** Tensor layout、stride、dilation、padding、data/compute type 与 component version 仍需单独声明；cuDNN Frontend v1.27.0 只是 future coordinate。
+
 ## 维护规则
 
-TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**，TERM-096 至 TERM-125 保留 **2026-08-29**。TERM-126 至 TERM-139，以及完整 139 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-08-30** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic 或 private material。TERM-126 至 TERM-139 没有编译 EX11-EX13 或执行 GPU code。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**，TERM-096 至 TERM-125 保留 **2026-08-29**。TERM-126 至 TERM-146，以及完整 146 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-08-30** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic 或 private material。TERM-126 至 TERM-146 没有执行 GPU code 或 cuDNN。对应的[英文页](/en/glossary/)同时完整发布。

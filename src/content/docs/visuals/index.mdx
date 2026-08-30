@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/visuals/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。十四项正式讲解中，VIS01、VIS02、VIS03 warp divergence、VIS04 内存请求 segment 分组、VIS05 shared-memory bank 映射、VIS06 memory hierarchy/ownership/lifetime、VIS07 stream/event dependency、VIS08 managed-memory page migration、[VIS09 NVCC 构建产物流水线](/visuals/artifact-pipeline/)与 [VIS10 Reduction tree 与非活动通道](/visuals/reduction-stages/)使用十个独立页面；VIS19-VIS22 嵌入各自学习单元（Learning Unit）。VIS08 的先修条件是 M01、M02 与 M10，相关资源是 M10 与 EX08；VIS09 的严格先修条件是 M15、M16 与 M17，相关资源是 EX10；VIS10 的严格先修条件是 A02，相关资源是 EX11 与 Q02。四张内嵌讲解卡片直接深链到页内锚点，导航不会为它们复制四个独立页面。未完成的规划条目不会显示。
+本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。十五项正式讲解中，VIS01-VIS11 使用十一个独立页面，包括 [VIS09 NVCC 构建产物流水线](/visuals/artifact-pipeline/)、[VIS10 Reduction tree 与非活动通道](/visuals/reduction-stages/)和 [VIS11 Tiled transpose](/visuals/tiled-transpose/)；VIS19-VIS22 嵌入各自学习单元（Learning Unit）。VIS11 的严格先修条件是 A05，相关资源是 EX14。四张内嵌讲解卡片直接深链到页内锚点，导航不会为它们复制四个独立页面。未完成的规划条目不会显示。
 
 ## 已发布可视化讲解
 
@@ -38,4 +38,4 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 证据边界
 
-VIS01-VIS10 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，提供静态或文字回退，并且不执行 CUDA。VIS08 的 residency rail 和 page transition 是 browser-only model，不是 fault、migration、residency、byte count 或 timing observation；VIS09 的 host/device branches、target plans 与 artifact flow 也是原创 browser-only model，不是 compiler execution、artifact inspection、runtime image selection 或 timing observation；VIS10 的八通道 reduction-stage ledger、inactive-lane states 和静态 stage diagram 回退同样是确定性教学模型，不是 CUDA execution、runtime trace、timing 或 performance observation。索引明确显示这一边界；十四项可视化讲解都没有 CUDA Evidence Status，也不会声明 Compile-Checked、Community-Observed 或 Runtime-Verified。复核日期：**2026-08-30**。
+VIS01-VIS11 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，提供静态或文字回退，并且不执行 CUDA。VIS11 的 logical/physical layouts、padding slots 与 static before/after boards 不是 bank、runtime、timing 或 performance observation。索引明确显示这一边界；十五项可视化讲解都没有 CUDA Evidence Status，也不会声明 Compile-Checked、Community-Observed 或 Runtime-Verified。复核日期：**2026-08-30**。

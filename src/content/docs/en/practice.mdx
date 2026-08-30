@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: Forty-five published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: Forty-eight published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-08-30'
@@ -54,6 +54,9 @@ structure:
   - entry-pb-r2-014
   - entry-pb-r2-015
   - entry-pb-r2-016
+  - entry-pb-r2-017
+  - entry-pb-r2-018
+  - entry-pb-r2-019
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -96,6 +99,9 @@ prerequisites:
   - A02
   - A03
   - A04
+  - A05
+  - A06
+  - A07
   - Q01
   - Q02
   - Q03
@@ -140,6 +146,9 @@ relatedUnits:
   - A02
   - A03
   - A04
+  - A05
+  - A06
+  - A07
   - Q01
   - Q02
   - Q03
@@ -159,15 +168,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,Q01,Q02,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,Q01,Q02,Q03,Q04,Q05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,Q01,Q02,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,Q01,Q02,Q03,Q04,Q05' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -186,13 +195,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the forty-five complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the forty-eight complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The forty-five complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The forty-eight complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -2068,6 +2077,135 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Source date:** 2026-08-30.
 
+<span id="pb-r2-017" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-017: Prove rectangular-transpose tile and padding contracts
+
+- **ID and Publication Pair:** PB-R2-017 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Transpose correctness debugging; advanced.
+- **Direct prerequisite:** [A05: Matrix Transpose, Coalescing, and Shared-Memory Layout](/en/algorithms/matrix-transpose-layout/).
+- **Hardware gate:** None; review static mapping, phase, bank, and evidence ledgers without compiling or running CUDA.
+- **Version gate:** CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; EX14 C++17 lanes for Toolkit 11.8.0, 12.9.2, and 13.3.1.
+- **Related Learning Units and resources:** [M02](/en/memory/coalescing-transactions/), [M03](/en/memory/shared-memory-tiling/), [M04](/en/memory/bank-conflicts-layouts/), [A05](/en/algorithms/matrix-transpose-layout/), [EX14](/en/examples/tiled-transpose/), and [VIS11](/en/visuals/tiled-transpose/).
+- **Last reviewed:** 2026-08-30.
+
+**Prompt:** A transpose review tests only a `32x32` square input, uses input columns as the output leading dimension, lets edge threads return before the barrier, and treats the padding column in `tile[32][33]` as a 33rd logical output column. It also claims from source layout that bank conflicts disappeared and the kernel is faster. Repair the complete correctness, layout, and evidence contract.
+
+**Constraints:**
+
+- For row-major `5x7` and `33x35` fixtures, state `output[col*rows+row] = input[row*columns+col]`, output shape, block/tile coordinates, and independent load/store guards.
+- For each phase, list the global input owner, shared write/read coordinates, barrier participants, and global output owner. An invalid data owner cannot exit the rendezvous.
+- Keep logical `32x32` separate from physical `32x33` in the selected 32-bank/32-bit-word model. Fill only expected bank formulas; measured fields remain blank.
+
+**Expected evidence:** Two rectangular mapping and edge tables, a `load -> all threads barrier -> transposed store` ledger, a logical/physical layout comparison, bank-index derivation, and an expected/observed claim matrix.
+
+**Acceptance criteria:**
+
+- Output extents are `7x5` and `35x33`, with exactly one owner per input and output index; any leading dimension that works only for squares is rejected.
+- The 256 threads of a partial `32x8` block jointly load through four y-loop iterations and uniformly reach the one barrier; every legal store reads a slot defined by a legal load.
+- Padding changes physical row stride from 32 to 33 and changes no logical coordinate, global allocation, or output value.
+- Source arithmetic supports only expected access and bank reasoning. Without a retained GPU record, it publishes no transaction, conflict counter, timing, bandwidth, or speedup.
+
+<details><summary>Hint 1</summary>Use inverse mapping `(out_row,out_col) -> (in_row=out_col,in_col=out_row)` to prove the rectangular bijection.</details>
+
+<details><summary>Hint 2</summary>Separate data predicates from the barrier participant set, then use `(lane*stride+column) mod 32`.</details>
+
+**Reviewed solution:** The repaired oracle allocates a `columns x rows` output for a `rows x columns` input and exact-compares the declared mapping. The kernel ledger has `32x8` threads issue guarded loads at offsets `0,8,16,24`, all threads reach an unconditional barrier, and exchanged block/thread coordinates then issue independent guarded stores. Inverse coordinates prove that every legal output reads a source slot satisfying input bounds. The logical tile remains `32x32`; the physical +1 slot changes only row stride. In the selected bank model, stride 32 maps a fixed column to one bank while stride 33 visits all banks, but that is neither an actual conflict observation nor speed evidence. EX14 remains Pending Hardware Verification.
+
+**Valid alternative:** A different conflict-avoiding swizzle or rectangular tile is valid if it re-declares physical mapping, capacity, guards, and the logical oracle. An unpadded correctness baseline is also a valid measurement comparator.
+
+**Common errors:** Testing only square matrices; mixing rows and columns in leading dimensions; exchanging only thread coordinates; returning early at an edge; treating padding as logical data; inferring a profiler counter or speedup from a bank formula.
+
+**Source basis:** The site's original [A05](/en/algorithms/matrix-transpose-layout/), [EX14](/en/examples/tiled-transpose/), [VIS11](/en/visuals/tiled-transpose/), and [SRC-CUDA-041](/en/sources-and-versions/#src-cuda-041), plus NVIDIA [CUDA Programming Guide v13.3 Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
+
+**Source date:** 2026-08-30.
+
+<span id="pb-r2-018" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-018: Repair a stencil boundary, halo, and barrier ledger
+
+- **ID and Publication Pair:** PB-R2-018 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Stencil correctness debugging; advanced.
+- **Direct prerequisite:** [A06: Stencil Neighborhoods, Halos, and Cooperative Reuse](/en/algorithms/stencil-neighborhood-reuse/).
+- **Hardware gate:** None; review static boundary, halo-coverage, and participant ledgers without running CUDA.
+- **Version gate:** CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 shared-memory, stencil-context, and synchronization owner guides.
+- **Related Learning Units and resources:** [M03](/en/memory/shared-memory-tiling/), [M04](/en/memory/bank-conflicts-layouts/), [M05](/en/memory/synchronization-scopes/), and [A06](/en/algorithms/stencil-neighborhood-reuse/).
+- **Last reviewed:** 2026-08-30.
+
+**Prompt:** A radius-1 square 2D stencil mixes clamp and zero policies at edges, loads the center and four side strips but misses corner halos, and returns threads without outputs before cooperative loading. Its report divides direct logical requests by staged slots and calls the ratio speedup. Rebuild a complete, reviewable baseline.
+
+**Constraints:**
+
+- Fix one boundary policy for the CPU oracle, global loader, and shared consumer. State the output domain and negative/out-of-range coordinate handling.
+- Derive the complete `8x10` staged rectangle for a `6x8` output tile, label center, side halos, and four corners, and prove coverage and uniqueness under block-stride assignment.
+- Every block participant reaches the barrier after its load loop. Keep reuse arithmetic separate from observed performance.
+
+**Expected evidence:** A boundary table, 80-slot owner map, corner coordinates, participant ledger, direct/staged request equations, and a blank runtime/performance record.
+
+**Acceptance criteria:**
+
+- The selected policy is the one mathematical contract and issues no out-of-bounds read; corner coordinates apply the policy on both axes.
+- Forty-eight center slots, 28 non-corner side-halo slots, and four corners cover 80 slots exactly once.
+- A thread without an output may still own a halo slot and reaches the barrier; the compute predicate does not enclose the rendezvous.
+- Direct `6*8*9=432` logical references versus 80 staged positions is only a reuse opportunity, not a transaction or speedup claim.
+
+<details><summary>Hint 1</summary>The rectangle corners are `(0,0)`, `(0,9)`, `(7,0)`, and `(7,9)`.</details>
+
+<details><summary>Hint 2</summary>Assign a writer to every staged linear index before mapping the coordinate to a global input or boundary value.</details>
+
+**Reviewed solution:** The repaired baseline selects symmetric zero policy: an out-of-domain coordinate produces 0 and issues no global read. A `6x8` output and radius 1 require an `8x10` staged rectangle; a block-stride loop partitions all 80 linear slots and naturally includes the corners. Every thread completes the loop and reaches the uniform barrier regardless of load count or output validity. Valid owners then read their 3x3 neighborhoods. The static ledger shows that 432 logical references can use 80 staged slots, but it contains no cache, transaction, barrier-cost, or environment observation, so performance remains `unrecorded`.
+
+**Valid alternative:** Clamp, periodic, or valid policy is acceptable with a fully recomputed output domain and reference. A cross-shaped stencil may omit corners after replacing the square-footprint proof.
+
+**Common errors:** Mixing boundary policies; omitting corner halos; returning a no-output thread early; duplicating or missing staged writers; treating a logical-request ratio as hardware traffic or elapsed-time ratio.
+
+**Source basis:** The site's original [A06](/en/algorithms/stencil-neighborhood-reuse/) and [SRC-CUDA-042](/en/sources-and-versions/#src-cuda-042), plus NVIDIA [CUDA Programming Guide v13.3 Asynchronous Data Copies stencil context](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html). The A06 baseline remains synchronous; the owner example is not source code for this site.
+
+**Source date:** 2026-08-30.
+
+<span id="pb-r2-019" class="resource-target" aria-hidden="true"></span>
+
+## PB-R2-019: Audit direct convolution and a production-library decision
+
+- **ID and Publication Pair:** PB-R2-019 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Convolution and library evidence review; advanced.
+- **Direct prerequisite:** [A07: Direct 2D Convolution, Neighborhood Reuse, and Layout Contracts](/en/algorithms/convolution-reuse-layout/).
+- **Hardware gate:** None; review static tensor, operation, reuse, and future-library gates without executing CUDA or cuDNN.
+- **Version gate:** CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; current cuDNN docs dated 2026-08-07 and the Frontend v1.27.0 future coordinate.
+- **Related Learning Units and resources:** [A06](/en/algorithms/stencil-neighborhood-reuse/), [M03](/en/memory/shared-memory-tiling/), and [A07](/en/algorithms/convolution-reuse-layout/).
+- **Last reviewed:** 2026-08-30.
+
+**Prompt:** A custom direct-convolution proposal states no NCHW strides, filter orientation, stride, dilation, padding, or accumulation policy and tests only a symmetric filter on square input. It treats one cuDNN heuristic candidate as a selected plan and claims both “the library is optimized” and “shared reuse” prove their respective path is faster. Repair its semantics, correctness, and production-decision packet.
+
+**Constraints:**
+
+- Declare dense addresses for `X[N,C,H,W]`, `F[K,C,R,S]`, and `Y[N,K,P,Q]`, use unflipped cross-correlation, and state the output-shape formula.
+- Include asymmetric-filter, rectangular-input, edge-padding, stride/dilation, and multi-channel fixtures, plus predeclared accumulation, tolerance, and non-finite policy.
+- Record future cuDNN component pin, graph validation/build, heuristic candidates, selected plan, workspace, correctness, and determinism separately. Run no comparison before L10.
+
+**Expected evidence:** A tensor/operation contract, asymmetric-filter oracle, staged-patch ledger, ordered production-gate table, failure taxonomy, and blank measurement template.
+
+**Acceptance criteria:**
+
+- CPU, custom, and future-library paths share shape, layout, cross-correlation, stride, dilation, padding, data/compute types, and numerical acceptance.
+- An asymmetric fixture distinguishes unflipped correlation from flipped mathematical convolution; every out-of-domain tap generates 0 without an out-of-bounds read.
+- Graph validation, build/support, candidate filtering, plan selection, and workspace allocation/lifetime are independent gates; a failure is not disguised as performance.
+- cuDNN Frontend v1.27.0 is only a future coordinate for cuDNN 9.24.0+. Without a pinned L10 matrix and retained measurement, there is no winner.
+
+<details><summary>Hint 1</summary>Use one asymmetric `2x2` filter to write separate correlation and flipped-convolution outputs.</details>
+
+<details><summary>Hint 2</summary>Give separate verdicts to “API accepts graph,” “candidate exists,” “workspace is available,” “numerics pass,” and “timing result.”</details>
+
+**Reviewed solution:** The repaired packet first fixes dense NCHW/KCRS/NKPQ addresses, the unflipped cross-correlation equation, output extents, and a zero-padding accessor, then gives CPU, custom, and future cuDNN paths the same semantics. The fixture matrix covers asymmetry, rectangular extents, edges, stride, dilation, and channels; the floating-point comparator fixes accumulation, `atol/rtol`, and non-finite policy before output. Only after later L10 pins the full component matrix can the production table enter graph validation/build, heuristics, selected plan, workspace, and repeated correctness/determinism. A07 executes no cuDNN, every plan/output/timing field is `unrecorded`, and neither path has a performance verdict.
+
+**Valid alternative:** A framework-managed cuDNN backend can be the production baseline if its component and algorithm selection can be recorded. An integer fixture may exact-compare but does not replace floating-point application acceptance.
+
+**Common errors:** Saying only “convolution” without a flip convention; testing only a symmetric filter; omitting tensor strides or output formulas; implementing zero padding as an out-of-bounds read; treating a candidate as a plan; treating library reputation or shared reuse as observed speedup.
+
+**Source basis:** The site's original [A07](/en/algorithms/convolution-reuse-layout/) and [SRC-CUDA-043](/en/sources-and-versions/#src-cuda-043), plus NVIDIA [cuDNN Convolutions](https://docs.nvidia.com/deeplearning/cudnn/latest/operations/Convolutions.html), [Developer Overview](https://docs.nvidia.com/deeplearning/cudnn/latest/developer/overview.html), and the [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0).
+
+**Source date:** 2026-08-30.
+
 ## Review record
 
-The existing seventeen entries retain their **2026-08-26** item-level review records, PB-R1-013 through PB-R1-016 retain **2026-08-27**, and PB-R1-017 through PB-R1-024 retain **2026-08-28**. PB-R2-001 through PB-R2-011 retain **2026-08-29**. PB-R2-012 through PB-R2-016 and the complete forty-five-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-08-30**. Every scenario, prompt, derivation, code repair, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, or performance result was copied, and no private material was used or copied. PB-R2-012 through PB-R2-016 compiled none of EX11-EX13 and executed no host or GPU executable; this page contains no CUDA execution. LAB06 remains without a public destination.
+The existing seventeen entries retain their **2026-08-26** item-level review records, PB-R1-013 through PB-R1-016 retain **2026-08-27**, and PB-R1-017 through PB-R1-024 retain **2026-08-28**. PB-R2-001 through PB-R2-011 retain **2026-08-29**. PB-R2-012 through PB-R2-019 and the complete forty-eight-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-08-30**. Every scenario, prompt, derivation, code repair, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, or performance result was copied, and no private material was used or copied. PB-R2-012 through PB-R2-019 execute no CUDA; PB-R2-017 through PB-R2-019 also execute neither EX14 nor cuDNN. LAB06 remains without a public destination, and Q11 plus LAB10 likewise remain unpublished.

@@ -11,8 +11,8 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 167,
-    "sourceRoutes": 334,
+    "publicationPairs": 178,
+    "sourceRoutes": 356,
     "learningUnits": [
       "O01",
       "O02",
@@ -53,13 +53,16 @@
       "A02",
       "A03",
       "A04",
+      "A05",
+      "A06",
+      "A07",
       "Q01",
       "Q02",
       "Q03",
       "Q04",
       "Q05"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX16"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX16"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB07"],
     "visualExplainers": [
       "VIS01",
@@ -72,14 +75,15 @@
       "VIS08",
       "VIS09",
       "VIS10",
+      "VIS11",
       "VIS19",
       "VIS20",
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 45,
-    "glossaryTerms": 139,
-    "sourceRecords": 56
+    "practiceBankEntries": 48,
+    "glossaryTerms": 146,
+    "sourceRecords": 59
   },
   "evidence": {
     "compileChecked": ["EX02", "EX10", "LAB02"],
@@ -95,6 +99,7 @@
       "EX11",
       "EX12",
       "EX13",
+      "EX14",
       "EX16",
       "LAB01",
       "LAB03",
@@ -115,6 +120,7 @@
       "EX11",
       "EX12",
       "EX13",
+      "EX14",
       "EX16",
       "LAB01",
       "LAB02",
@@ -135,10 +141,11 @@
     "EX02, EX10, and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.",
     "EX10 is Runtime-Not-Applicable because its acceptance contract inspects artifacts without executing the final host artifact or any GPU executable.",
     "EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.",
-    "EX11, EX12, and EX13 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.",
+    "EX11, EX12, EX13, and EX14 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.",
     "No measured overlap, migration, graph performance, algorithm performance, timing, speedup, or other performance observation is published.",
-    "EX14 and EX15 have no current public destination.",
+    "EX15 has no current public destination.",
     "LAB06 has no current public destination.",
+    "Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.",
     "This incremental publication record is not a completed R2 aggregate release review."
   ]
 }

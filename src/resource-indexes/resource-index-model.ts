@@ -268,6 +268,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'A04：私有化直方图（Privatized Histogram）', en: 'A04: Privatized Histogram' },
     prerequisites: ['M03', 'M05'],
   },
+  A05: {
+    href: { 'zh-CN': '/algorithms/matrix-transpose-layout/', en: '/en/algorithms/matrix-transpose-layout/' },
+    title: { 'zh-CN': 'A05：矩阵转置、合并访问与共享内存布局', en: 'A05: Matrix Transpose, Coalescing, and Shared-Memory Layout' },
+    prerequisites: ['M02', 'M03', 'M04'],
+  },
+  A06: {
+    href: { 'zh-CN': '/algorithms/stencil-neighborhood-reuse/', en: '/en/algorithms/stencil-neighborhood-reuse/' },
+    title: { 'zh-CN': 'A06：Stencil 邻域、Halo 与 Cooperative Reuse', en: 'A06: Stencil Neighborhoods, Halos, and Cooperative Reuse' },
+    prerequisites: ['M03', 'M04', 'M05'],
+  },
+  A07: {
+    href: { 'zh-CN': '/algorithms/convolution-reuse-layout/', en: '/en/algorithms/convolution-reuse-layout/' },
+    title: { 'zh-CN': 'A07：Direct 2D Convolution、邻域复用与布局合同', en: 'A07: Direct 2D Convolution, Neighborhood Reuse, and Layout Contracts' },
+    prerequisites: ['A06', 'M03'],
+  },
   Q01: {
     href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
@@ -357,6 +372,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/privatized-histogram/', en: '/en/examples/privatized-histogram/' },
     title: { 'zh-CN': 'EX13：私有化 Histogram 可运行示例', en: 'EX13: Privatized Histogram Runnable Example' },
     prerequisites: ['A04'],
+  },
+  EX14: {
+    href: { 'zh-CN': '/examples/tiled-transpose/', en: '/en/examples/tiled-transpose/' },
+    title: { 'zh-CN': 'EX14：分块矩阵转置可运行示例', en: 'EX14: Tiled Transpose Runnable Example' },
+    prerequisites: ['A05'],
   },
   EX16: {
     href: { 'zh-CN': '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
@@ -457,6 +477,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/reduction-stages/', en: '/en/visuals/reduction-stages/' },
     title: { 'zh-CN': 'Reduction tree 与非活动通道', en: 'Reduction Tree and Inactive Lanes' },
     prerequisites: ['A02'],
+    indexGroup: 'visuals',
+  },
+  VIS11: {
+    href: { 'zh-CN': '/visuals/tiled-transpose/', en: '/en/visuals/tiled-transpose/' },
+    title: { 'zh-CN': 'Tiled transpose：逻辑映射与物理 padding', en: 'Tiled Transpose: Logical Mapping and Physical Padding' },
+    prerequisites: ['A05'],
     indexGroup: 'visuals',
   },
   VIS19: {

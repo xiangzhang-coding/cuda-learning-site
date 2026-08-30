@@ -1,0 +1,220 @@
+---
+title: 'A05: Matrix Transpose, Coalescing, and Shared-Memory Layout'
+description: Start from a row-major transpose contract and derive global access directions, shared-memory tiles, uniform barriers, edge guards, and physical +1 padding that does not change the logical matrix.
+pairId: a05
+counterpart: /algorithms/matrix-transpose-layout/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - transpose-contract
+  - global-access
+  - shared-tile
+  - barrier-and-edges
+  - bank-padding
+  - canonical-example
+  - visual-explainer
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A05
+prerequisites:
+  - M02
+  - M03
+  - M04
+relatedUnits:
+  - VIS11
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current matrix-transpose, global-memory coalescing, shared-memory, barrier, and bank-layout guidance'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 coalescing, shared-memory, synchronization, and bank-conflict contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane coalescing, shared-memory, synchronization, and bank-layout contract'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a05 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/matrix-transpose-layout/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,transpose-contract,global-access,shared-tile,barrier-and-edges,bank-padding,canonical-example,visual-explainer,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M02,M03,M04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS11 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-transpose' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/matrix-transpose-layout/" lang="zh-CN">阅读中文对应页</a>
+
+A [matrix transpose (TERM-140)](/en/glossary/#term-140) moves input coordinate `(row, col)` to output coordinate `(col, row)`. It is a useful vehicle for learning layout transformations: the mathematical work is small, but row-major addresses, coalesced global access, shared-memory rearrangement, barriers, edge tiles, and bank mapping must all be correct together.
+
+## What you should be able to do
+
+- State the shape, address, and one-writer contract of a rectangular row-major transpose.
+- Judge the global reads and writes of a thread traversal separately for adjacent addresses.
+- Explain how a shared-memory tile converts a contiguous load direction into a contiguous store direction.
+- Prove that every block participant reaches `__syncthreads()` uniformly between edge guards.
+- Explain how physical `T x (T + 1)` tile padding changes bank mapping without changing the logical `T x T` matrix.
+- Separate layout-based expected observations, an actual EX14 execution record, and any timing claim.
+
+## Prerequisites
+
+Complete [M02: Coalescing as Transaction Shaping](/en/memory/coalescing-transactions/), [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/), and [M04: Bank Conflicts and Layout Transforms](/en/memory/bank-conflicts-layouts/) first. M02 supplies warp-request and contiguous-global-address reasoning. M03 supplies cooperative tile ownership and block-local phases. M04 supplies [physical row stride (TERM-141)](/en/glossary/#term-141) and bank-mapping reasoning.
+
+The prerequisite set is exactly `M02, M03, M04`. EX14 is the canonical Runnable Example and VIS11 is a related Visual Explainer; neither is an additional prerequisite. This page requires no CUDA-capable system and grants no Evidence Status.
+
+## Transpose contract: shape and addresses before kernels
+
+The input has `rows` rows and `cols` columns in row-major storage, so coordinate `(row, col)` has linear address `row * cols + col`. The transposed output has `cols` rows and `rows` columns, with this contract:
+
+`output[col * rows + row] = input[row * cols + col]`
+
+The valid domain is `0 <= row < rows` and `0 <= col < cols`. This mapping is a bijection from the input index set to the output index set: every input element is read once, and every output element has exactly one owner. A square matrix is only a special case. A rectangular fixture immediately exposes the error of using `cols` as the output leading dimension.
+
+The CPU reference applies the same shape and mapping to construct expected output. Because transpose copies values element by element, verification exact-compares every element and also checks that the output allocation contains `cols * rows` elements. Transpose changes coordinates and physical order, not values.
+
+## Global access: review reads and writes separately
+
+Suppose adjacent `threadIdx.x` values increase `col` along one input row. Their reads of `input[row * cols + col]` visit adjacent global addresses, which is the expected address pattern for [coalescing (TERM-073)](/en/glossary/#term-073). If those threads directly write `output[col * rows + row]`, however, their addresses differ by `rows`. A contiguous read does not automatically imply a contiguous write.
+
+Reversing the thread assignment can make output stores contiguous while making input reads strided. The useful question is not whether “transpose is coalesced,” but what `lane -> address` mapping each global phase has:
+
+| phase | fixed coordinate | coordinate changed by adjacent lanes | row-major address delta |
+| --- | --- | --- | ---: |
+| direct input read | `row` | `col` | `1` |
+| direct output write | output `col` | output `row` | `rows` |
+
+This table is expected access reasoning, not a transaction trace, bandwidth result, or speedup observation. Alignment, element size, the active-lane mask, edge guards, and the exact GPU still belong to an actual observation's environment.
+
+## Shared tile: rearrange ownership on chip
+
+A tiled transpose separates the global phases. First, a block's threads cooperatively load a logical `T x T` tile along input rows into shared memory. After a block barrier, they exchange tile coordinates and cooperatively store along output rows. Shared memory acts as layout-changing staging, so the global load and global store may each use a contiguous lane direction.
+
+The proof ledger for every value names four owners: its input global coordinate, shared write coordinate, shared read coordinate, and output global coordinate. The transposed block coordinate must also be exchanged. Swapping only `threadIdx.x` and `threadIdx.y` without swapping the tile's grid position writes the wrong region when a matrix contains multiple tiles.
+
+The shared tile does not alter the mathematical transpose contract. It changes only the path from input address to output address and the layout of intermediate physical storage.
+
+## Barriers and edge guards: predicate data, not rendezvous
+
+Rectangular dimensions are commonly not multiples of `T`. The load guard checks input `(row, col)`. The store guard uses exchanged output coordinates and checks that output row is below `cols` and output column is below `rows`. The predicates may describe the same value, but similar variable names do not make them interchangeable.
+
+The correct block phase is: every thread computes coordinates, valid threads load a shared slot, every block participant uniformly executes `__syncthreads()`, and valid output owners then read a transposed shared slot and store. An invalid edge thread may skip a load or store, but it cannot return before the barrier. Otherwise, some threads can wait for a participant that has exited, violating the barrier contract.
+
+The edge proof also confirms that a legal store never reads an unwritten shared slot. The direct method proves that every legal output coordinate's transposed source coordinate also satisfies the corresponding input guard instead of assuming that the entire partial tile was initialized.
+
+## Physical +1 padding: change bank stride, not the logical matrix
+
+In a simplified model with 32 banks and one bank word per `float`, a physical row stride of `T` can make a warp's column-wise shared-tile read repeatedly map to the same bank. Changing the allocation from `tile[T][T]` to `tile[T][T + 1]` advances each physical row by one additional bank position and changes the bank mapping of the transposed read.
+
+This [bank padding (TERM-142)](/en/glossary/#term-142) adds one unused slot to each physical shared row. Logical coordinates remain `0 <= tile_row, tile_col < T`; input and output matrix shapes, the transpose formula, global allocation, and numerical result do not change. The padding column is not a new logical matrix column, and the output leading dimension does not become `T + 1`.
+
+“The +1 changes the expected bank mapping for this access pattern” is static reasoning. Actual bank behavior, conflict counters, or elapsed time require an exact architecture, element width, access instruction, and measurement record. This page has no such observations.
+
+## Canonical Runnable Example: EX14
+
+EX14 is this unit's only canonical executable counterpart. The `cpu-reference` range first defines the rectangular row-major oracle. The `tiled-transpose` range then shows the shared tile, uniform barrier, independent edge guards, and physical `+1` padding. They are imported below in exactly that order; this page maintains no second CUDA/C++ implementation.
+
+[View the EX14 project at its pinned source coordinate](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex14-tiled-transpose), or [download the archive for the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). Project source and page imports must retain one pin before publication.
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+## Visual Explainer: VIS11
+
+[VIS11: Tiled Transpose Logical Mapping and Physical Padding](/en/visuals/tiled-transpose/) compares input/output coordinates, row-major indices, shared logical layout, physical row stride, and padding slots. It is a deterministic browser model. It does not execute CUDA or turn browser layout into a runtime trace or bank observation.
+
+Keep logical-tile and physical-padded-tile views separate while using VIS11. The former verifies the transpose mapping; the latter verifies address stride. Combining them incorrectly suggests that padding changes matrix shape.
+
+## Evidence boundary: expected is not observed
+
+| expected observation | observed evidence that requires an actual record |
+| --- | --- |
+| Adjacent lanes along an input row produce contiguous read addresses | A transaction or profiler record from a Reference Environment |
+| Tile rearrangement permits a contiguous output-store direction | An actual EX14 launch, output, and memory observation |
+| `T + 1` changes the simplified bank-index mapping | A bank-conflict observation for a named GPU, access width, and instruction |
+| Guards preserve the rectangular transpose bijection | Actual fixture output, error state, and retained log |
+
+Compilation, runtime, expected observations, and recorded observations are all empty for this page. The expected column above is reviewable reasoning, not recorded evidence. The page has not run EX14 and publishes no timing, bandwidth, throughput, or speedup claim.
+
+## Retrieval check
+
+1. Why must a row-major transpose use `output[col * rows + row]`, especially for a rectangular matrix?
+2. Why can one direct traversal make input reads contiguous while output writes advance by `rows`?
+3. How does a shared tile decouple the global load direction from the global store direction?
+4. Why must an edge-invalid thread still reach the block barrier, and what does each guard check?
+5. What does a physical `T x (T + 1)` allocation change, and what explicitly remains unchanged?
+
+## Continue with practice
+
+- Complete the [A05 Exercises](/en/algorithms/matrix-transpose-layout/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/matrix-transpose-layout/solutions/).
+- Audit [Practice Bank PB-R2-017](/en/practice/#pb-r2-017) with a rectangular fixture, phase ledger, and evidence boundary.
+- Compare EX14's two canonical ranges with [VIS11](/en/visuals/tiled-transpose/), but do not report source inspection or browser state as a runtime observation.
+- Revisit the canonical vocabulary in [TERM-140](/en/glossary/#term-140), [TERM-141](/en/glossary/#term-141), and [TERM-142](/en/glossary/#term-142).
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies current owner guidance for matrix transpose, coalescing, shared memory, barriers, and bank layout; it was last updated on 2026-05-27.
+- [CUDA C Programming Guide v11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html) is used to review the 11.8 lane's global/shared-memory and synchronization contracts.
+- [CUDA C++ Programming Guide v12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html) is the owner-guide coordinate used for the Toolkit 12.9.2 patch lane.
+
+All three primary owner sources were accessed on **2026-08-30**. The page paraphrases owner contracts; its transpose ledger, Exercises, and arrangement are original site work, with no owner code, figure, or table copied. Context7 `/websites/nvidia_cuda_cuda-programming-guide` was used only for cross-checking on 2026-08-30; the owner URLs above remain publication authority.
+
+**Fact checked: 2026-08-30.**

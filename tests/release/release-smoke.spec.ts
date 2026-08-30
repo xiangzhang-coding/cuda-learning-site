@@ -12,6 +12,7 @@ import ex10Project from '../../examples/ex10-ptx-fatbinary-inspection/project.js
 import ex11Project from '../../examples/ex11-multi-stage-reduction/project.json' with { type: 'json' };
 import ex12Project from '../../examples/ex12-inclusive-exclusive-scan/project.json' with { type: 'json' };
 import ex13Project from '../../examples/ex13-privatized-histogram/project.json' with { type: 'json' };
+import ex14Project from '../../examples/ex14-tiled-transpose/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
@@ -49,14 +50,15 @@ const projectExamples = [
   { route: '/en/examples/multi-stage-reduction/', project: ex11Project },
   { route: '/en/examples/inclusive-exclusive-scan/', project: ex12Project },
   { route: '/en/examples/privatized-histogram/', project: ex13Project },
+  { route: '/en/examples/tiled-transpose/', project: ex14Project },
   { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
 const currentCatalogCounts = [
   { route: '/en/labs/', count: 6 },
-  { route: '/en/practice/', count: 45 },
-  { route: '/en/visuals/', count: 14 },
-  { route: '/en/glossary/', count: 139 },
-  { route: '/en/sources-and-versions/', count: 56 },
+  { route: '/en/practice/', count: 48 },
+  { route: '/en/visuals/', count: 15 },
+  { route: '/en/glossary/', count: 146 },
+  { route: '/en/sources-and-versions/', count: 59 },
 ] as const;
 
 test('serves the exact current publication while preserving R1 metadata and production canonicals', async ({ page, request }) => {
@@ -97,34 +99,34 @@ test('serves the exact current publication while preserving R1 metadata and prod
     canonicalOrigin,
     releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
     scope: {
-      publicationPairs: 167,
-      sourceRoutes: 334,
+      publicationPairs: 178,
+      sourceRoutes: 356,
       learningUnits: [
         'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
         'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
         'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
         'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
         'M15', 'M16', 'M17', 'M18', 'M19',
-        'A01', 'A02', 'A03', 'A04',
+        'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07',
         'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
       ],
       runnableExamples: [
         'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
-        'EX11', 'EX12', 'EX13', 'EX16',
+        'EX11', 'EX12', 'EX13', 'EX14', 'EX16',
       ],
       labs: ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'],
       visualExplainers: [
         'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-        'VIS09', 'VIS10', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+        'VIS09', 'VIS10', 'VIS11', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
       ],
-      practiceBankEntries: 45,
-      glossaryTerms: 139,
-      sourceRecords: 56,
+      practiceBankEntries: 48,
+      glossaryTerms: 146,
+      sourceRecords: 59,
     },
     evidence: {
       compileChecked: ['EX02', 'EX10', 'LAB02'],
-      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13']),
-      pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13']),
+      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13', 'EX14']),
+      pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13', 'EX14']),
       runtimeNotApplicable: ['EX10'],
       runtimeVerified: [],
       referenceEnvironments: [],
@@ -133,8 +135,9 @@ test('serves the exact current publication while preserving R1 metadata and prod
     },
     knownLimitations: expect.arrayContaining([
       'LAB06 has no current public destination.',
-      'EX14 and EX15 have no current public destination.',
-      'EX11, EX12, and EX13 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.',
+      'EX15 has no current public destination.',
+      'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
+      'EX11, EX12, EX13, and EX14 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.',
       'No measured overlap, migration, graph performance, algorithm performance, timing, speedup, or other performance observation is published.',
       'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
       'This incremental publication record is not a completed R2 aggregate release review.',
@@ -146,7 +149,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
   expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(334);
+  expect(publishedRoutes).toHaveLength(356);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -155,8 +158,8 @@ test('serves the exact current publication while preserving R1 metadata and prod
   }
 
   await page.goto('/en/about/');
-  await expect(page.locator('main')).toContainText(/167 Publication Pairs/);
-  await expect(page.locator('main')).toContainText(/334 source routes/);
+  await expect(page.locator('main')).toContainText(/178 Publication Pairs/);
+  await expect(page.locator('main')).toContainText(/356 source routes/);
   const navigation = page.getByRole('navigation', { name: 'Main' });
   expect(
     await navigation.locator('a[href^="/en/examples/"]').evaluateAll((links) =>
@@ -175,11 +178,12 @@ test('serves the exact current publication while preserving R1 metadata and prod
     '/en/examples/sanitizer-defect-suite/',
     '/en/examples/shared-memory-tile-bank-padding/',
     '/en/examples/streams-events-overlap/',
+    '/en/examples/tiled-transpose/',
     '/en/examples/unified-memory-migration/',
     '/en/examples/vector-addition/',
   ]);
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(260);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(274);
   for (const { route, count } of currentCatalogCounts) {
     await page.goto(route);
     await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
@@ -420,6 +424,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/algorithms/privatized-histogram/'],
     },
     {
+      query: 'A05 Matrix Transpose Coalescing Shared-Memory Layout',
+      expectedHrefs: ['/en/algorithms/matrix-transpose-layout/'],
+    },
+    {
+      query: 'A06 Stencil Neighborhoods Halos Cooperative Reuse',
+      expectedHrefs: ['/en/algorithms/stencil-neighborhood-reuse/'],
+    },
+    {
+      query: 'A07 Direct 2D Convolution Layout Contracts',
+      expectedHrefs: ['/en/algorithms/convolution-reuse-layout/'],
+    },
+    {
       query: 'Q02 floating-point order determinism bitwise reproducibility',
       expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'],
     },
@@ -452,6 +468,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/examples/privatized-histogram/'],
     },
     {
+      query: 'EX14 Tiled Transpose Runnable Example',
+      expectedHrefs: ['/en/examples/tiled-transpose/'],
+    },
+    {
       query: 'VIS08 Managed-Memory Page Migration',
       expectedHrefs: ['/en/visuals/page-migration/'],
     },
@@ -462,6 +482,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'VIS10 Reduction Tree and Inactive Lanes',
       expectedHrefs: ['/en/visuals/reduction-stages/'],
+    },
+    {
+      query: 'VIS11 Tiled Transpose Logical Mapping Physical Padding',
+      expectedHrefs: ['/en/visuals/tiled-transpose/'],
     },
   ] as const) {
     await expectRankedSearchResult(page, {
@@ -510,6 +534,9 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
   await page.goto('/en/visuals/reduction-stages/');
+  await expect(page.locator('[data-visual-controls]')).toBeHidden();
+  await expect(page.locator('[data-static-fallback]')).toBeVisible();
+  await page.goto('/en/visuals/tiled-transpose/');
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
   for (const { route, controls } of [
@@ -574,6 +601,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/algorithms/inclusive-exclusive-scan/',
     '/algorithms/privatized-histogram/',
     '/en/algorithms/privatized-histogram/',
+    '/algorithms/matrix-transpose-layout/',
+    '/en/algorithms/matrix-transpose-layout/',
+    '/algorithms/stencil-neighborhood-reuse/',
+    '/en/algorithms/stencil-neighborhood-reuse/',
+    '/algorithms/convolution-reuse-layout/',
+    '/en/algorithms/convolution-reuse-layout/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
     '/correctness/floating-point-order-reproducibility/',
@@ -598,8 +631,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/examples/inclusive-exclusive-scan/',
     '/examples/privatized-histogram/',
     '/en/examples/privatized-histogram/',
+    '/examples/tiled-transpose/',
+    '/en/examples/tiled-transpose/',
     '/visuals/reduction-stages/',
     '/en/visuals/reduction-stages/',
+    '/visuals/tiled-transpose/',
+    '/en/visuals/tiled-transpose/',
     '/visuals/artifact-pipeline/',
     '/en/visuals/artifact-pipeline/',
     '/labs/break-and-repair-indexing/',
@@ -656,6 +693,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/page-migration/',
     '/en/visuals/artifact-pipeline/',
     '/en/visuals/reduction-stages/',
+    '/en/visuals/tiled-transpose/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
     ...Object.keys(embeddedFallbacks),

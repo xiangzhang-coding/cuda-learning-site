@@ -1,0 +1,605 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/transpose-tile-visual.css';
+import {
+  TRANSPOSE_TILE_COPY,
+  formatTransposeTileCopy,
+  type TransposeTileLocale,
+} from '../visuals/transpose-tile-copy';
+import {
+  TRANSPOSE_TILE_LAYOUTS,
+  TRANSPOSE_TILE_MODEL_CONTRACT,
+  TRANSPOSE_TILE_PADDINGS,
+  TRANSPOSE_TILE_SIZES,
+  createTransposeTileState,
+  deriveTransposeTileView,
+  type TransposeTileState,
+  type TransposeTileView,
+} from '../visuals/transpose-tile-model';
+
+interface Props {
+  locale: TransposeTileLocale;
+}
+
+const { locale } = Astro.props;
+const copy = TRANSPOSE_TILE_COPY[locale];
+const initialState = createTransposeTileState();
+
+function requireView(state: TransposeTileState, context: string): TransposeTileView {
+  const result = deriveTransposeTileView(state);
+  if (!result.accepted) throw new Error(`VIS11 ${context} must be a reviewed state.`);
+  return result.view;
+}
+
+const initialView = requireView(initialState, 'initial view');
+const staticSelections = TRANSPOSE_TILE_SIZES.flatMap((tileSize) =>
+  TRANSPOSE_TILE_PADDINGS.map((padding) => ({
+    tileSize,
+    padding,
+    layouts: TRANSPOSE_TILE_LAYOUTS.map((layout) => ({
+      layout,
+      view: requireView({ tileSize, layout, padding }, `static ${tileSize}:${layout}:${padding}`),
+    })),
+  })));
+
+const initialStatus = formatTransposeTileCopy(copy.statusReady, {
+  size: String(initialView.tileSize),
+  layout: copy.layouts[initialView.layout].label,
+  padding: String(initialView.padding),
+  stride: String(initialView.sharedRowStride),
+});
+---
+
+<cuda-transpose-tile-explorer
+  class="visual-explainer transpose-tile-visual not-content"
+  data-visual-id="VIS11"
+  data-locale={locale}
+  data-tile-size={initialView.tileSize}
+  data-layout={initialView.layout}
+  data-padding={initialView.padding}
+  data-shared-row-stride={initialView.sharedRowStride}
+  data-logical-cell-count={initialView.logicalCellCount}
+  data-evidence-status-effect={TRANSPOSE_TILE_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls transpose-tile-controls" data-visual-controls hidden>
+      <legend>{copy.controlsHeading}</legend>
+      <label>
+        <span>{copy.tileSizeLabel}</span>
+        <select data-transpose-tile-size aria-label={copy.tileSizeLabel}>
+          {TRANSPOSE_TILE_SIZES.map((tileSize) => (
+            <option value={tileSize} selected={tileSize === initialState.tileSize}>{tileSize} × {tileSize}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.layoutLabel}</span>
+        <select data-transpose-layout aria-label={copy.layoutLabel}>
+          {TRANSPOSE_TILE_LAYOUTS.map((layout) => (
+            <option value={layout} selected={layout === initialState.layout}>{copy.layouts[layout].label}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.paddingLabel}</span>
+        <select data-transpose-padding aria-label={copy.paddingLabel}>
+          {TRANSPOSE_TILE_PADDINGS.map((padding) => (
+            <option value={padding} selected={padding === initialState.padding}>{copy.paddingOptions[String(padding) as '0' | '1']}</option>
+          ))}
+        </select>
+      </label>
+      <button type="button" data-transpose-action="reset">{copy.reset}</button>
+      <p
+        class="transpose-tile-status"
+        data-transpose-status
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {initialStatus}
+      </p>
+    </fieldset>
+
+    <section
+      class="transpose-live-workbench"
+      data-live-workbench
+      data-pagefind-ignore
+      hidden
+      aria-label={copy.workbenchHeading}
+    >
+      <header class="transpose-live-header">
+        <div>
+          <span>{copy.currentSelection}</span>
+          <h3>{copy.workbenchHeading}</h3>
+        </div>
+        <p data-live-selection>{initialView.tileSize} × {initialView.tileSize} · {copy.layouts[initialView.layout].label} · padding {initialView.padding} · stride {initialView.sharedRowStride}</p>
+        <p data-live-layout-description>{copy.layouts[initialView.layout].description}</p>
+      </header>
+
+      <div class="transpose-logical-pair">
+        <section class="transpose-logical-panel" aria-label={copy.inputHeading}>
+          <header><h4>{copy.inputHeading}</h4><p>{copy.inputIntro}</p></header>
+          <ol class="transpose-cell-grid" data-live-input-grid style={`--tile-size: ${initialView.tileSize}`}>
+            {initialView.inputRowMajor.map((cell) => (
+              <li
+                data-live-logical-cell
+                data-perspective="input"
+                data-input-row={cell.inputRow}
+                data-input-col={cell.inputCol}
+                data-output-row={cell.outputRow}
+                data-output-col={cell.outputCol}
+                data-input-index={cell.inputIndex}
+                data-output-index={cell.outputIndex}
+              >
+                <strong>{copy.inputIndex}{cell.inputIndex}</strong>
+                <span>{copy.input} ({cell.inputRow},{cell.inputCol})</span>
+                <span>→ {copy.output} ({cell.outputRow},{cell.outputCol})</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section class="transpose-logical-panel" aria-label={copy.outputHeading}>
+          <header><h4>{copy.outputHeading}</h4><p>{copy.outputIntro}</p></header>
+          <ol class="transpose-cell-grid" data-live-output-grid style={`--tile-size: ${initialView.tileSize}`}>
+            {initialView.outputRowMajor.map((cell) => (
+              <li
+                data-live-logical-cell
+                data-perspective="output"
+                data-input-row={cell.inputRow}
+                data-input-col={cell.inputCol}
+                data-output-row={cell.outputRow}
+                data-output-col={cell.outputCol}
+                data-input-index={cell.inputIndex}
+                data-output-index={cell.outputIndex}
+              >
+                <strong>{copy.outputIndex}{cell.outputIndex}</strong>
+                <span>{copy.output} ({cell.outputRow},{cell.outputCol})</span>
+                <span>← {copy.input} ({cell.inputRow},{cell.inputCol})</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <section class="transpose-physical-panel" aria-label={copy.physicalHeading}>
+        <header><h4>{copy.physicalHeading}</h4><p>{copy.physicalIntro}</p></header>
+        <p class="transpose-padding-summary" data-live-padding-summary>{copy.noPaddingSlots}</p>
+        <div class="transpose-physical-rows" data-live-physical-rows>
+          {initialView.physicalRows.map((row) => (
+            <section class="transpose-physical-row" data-physical-row={row.row}>
+              <h5>{copy.row} {row.row}</h5>
+              <ol style={`--shared-stride: ${initialView.sharedRowStride}`}>
+                {row.slots.map((slot) => (
+                  <li
+                    data-live-physical-slot
+                    data-slot-kind={slot.kind}
+                    data-physical-row={slot.row}
+                    data-physical-col={slot.col}
+                    data-physical-slot-index={slot.slotIndex}
+                    data-input-row={slot.kind === 'data' ? slot.cell.inputRow : undefined}
+                    data-input-col={slot.kind === 'data' ? slot.cell.inputCol : undefined}
+                    data-output-row={slot.kind === 'data' ? slot.cell.outputRow : undefined}
+                    data-output-col={slot.kind === 'data' ? slot.cell.outputCol : undefined}
+                  >
+                    <strong>{copy.physicalSlot}{slot.slotIndex}</strong>
+                    {slot.kind === 'padding' ? (
+                      <><span>{copy.paddingSlot}</span><span>{copy.row} {slot.row}, {copy.column} {slot.col}</span></>
+                    ) : (
+                      <><span>{copy.dataSlot}: {copy.input} ({slot.cell.inputRow},{slot.cell.inputCol})</span><span>{copy.output} ({slot.cell.outputRow},{slot.cell.outputCol})</span></>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
+      </section>
+    </section>
+
+    <section class="visual-section transpose-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="transpose-static-selections">
+        {staticSelections.map(({ tileSize, padding, layouts }) => {
+          const inputView = layouts[0].view;
+          const outputView = layouts[1].view;
+          return (
+            <article
+              data-static-selection={`${tileSize}:${padding}`}
+              data-tile-size={tileSize}
+              data-padding={padding}
+              data-shared-row-stride={inputView.sharedRowStride}
+            >
+              <header>
+                <span>{tileSize} × {tileSize} / P{padding}</span>
+                <h4>{formatTransposeTileCopy(copy.staticSelection, {
+                  size: String(tileSize),
+                  padding: String(padding),
+                  stride: String(inputView.sharedRowStride),
+                })}</h4>
+              </header>
+
+              <div class="transpose-static-logical-pair">
+                <section data-static-input-layout aria-label={copy.inputHeading}>
+                  <header><h5>{copy.inputHeading}</h5><p>{copy.inputIntro}</p></header>
+                  <ol class="transpose-cell-grid" style={`--tile-size: ${tileSize}`}>
+                    {inputView.inputRowMajor.map((cell) => (
+                      <li
+                        data-static-input-cell
+                        data-input-row={cell.inputRow}
+                        data-input-col={cell.inputCol}
+                        data-output-row={cell.outputRow}
+                        data-output-col={cell.outputCol}
+                        data-input-index={cell.inputIndex}
+                        data-output-index={cell.outputIndex}
+                      >
+                        <strong>{copy.inputIndex}{cell.inputIndex}</strong>
+                        <span>{copy.input} ({cell.inputRow},{cell.inputCol})</span>
+                        <span>→ {copy.output} ({cell.outputRow},{cell.outputCol})</span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+
+                <section data-static-output-layout aria-label={copy.outputHeading}>
+                  <header><h5>{copy.outputHeading}</h5><p>{copy.outputIntro}</p></header>
+                  <ol class="transpose-cell-grid" style={`--tile-size: ${tileSize}`}>
+                    {outputView.outputRowMajor.map((cell) => (
+                      <li
+                        data-static-output-cell
+                        data-input-row={cell.inputRow}
+                        data-input-col={cell.inputCol}
+                        data-output-row={cell.outputRow}
+                        data-output-col={cell.outputCol}
+                        data-input-index={cell.inputIndex}
+                        data-output-index={cell.outputIndex}
+                      >
+                        <strong>{copy.outputIndex}{cell.outputIndex}</strong>
+                        <span>{copy.output} ({cell.outputRow},{cell.outputCol})</span>
+                        <span>← {copy.input} ({cell.inputRow},{cell.inputCol})</span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              </div>
+
+              <div class="transpose-static-physical-pair">
+                {layouts.map(({ layout, view }) => (
+                  <section
+                    data-static-physical-layout={`${tileSize}:${padding}:${layout}`}
+                    data-layout={layout}
+                    data-shared-row-stride={view.sharedRowStride}
+                    aria-label={formatTransposeTileCopy(copy.staticPhysical, {
+                      layout: copy.layouts[layout].label,
+                      stride: String(view.sharedRowStride),
+                    })}
+                  >
+                    <header>
+                      <h5>{formatTransposeTileCopy(copy.staticPhysical, {
+                        layout: copy.layouts[layout].label,
+                        stride: String(view.sharedRowStride),
+                      })}</h5>
+                      <p>{copy.layouts[layout].description}</p>
+                    </header>
+                    <p class="transpose-padding-summary">
+                      {padding === 0 ? copy.noPaddingSlots : copy.physicalIntro}
+                    </p>
+                    <div class="transpose-physical-rows">
+                      {view.physicalRows.map((row) => (
+                        <section class="transpose-physical-row" data-static-physical-row data-physical-row={row.row}>
+                          <h6>{copy.row} {row.row}</h6>
+                          <ol style={`--shared-stride: ${view.sharedRowStride}`}>
+                            {row.slots.map((slot) => (
+                              <li
+                                data-static-physical-slot
+                                data-slot-kind={slot.kind}
+                                data-physical-row={slot.row}
+                                data-physical-col={slot.col}
+                                data-physical-slot-index={slot.slotIndex}
+                                data-input-row={slot.kind === 'data' ? slot.cell.inputRow : undefined}
+                                data-input-col={slot.kind === 'data' ? slot.cell.inputCol : undefined}
+                                data-output-row={slot.kind === 'data' ? slot.cell.outputRow : undefined}
+                                data-output-col={slot.kind === 'data' ? slot.cell.outputCol : undefined}
+                              >
+                                <strong>{copy.physicalSlot}{slot.slotIndex}</strong>
+                                {slot.kind === 'padding' ? (
+                                  <><span>{copy.paddingSlot}</span><span>{copy.row} {slot.row}, {copy.column} {slot.col}</span></>
+                                ) : (
+                                  <><span>{copy.dataSlot}: {copy.input} ({slot.cell.inputRow},{slot.cell.inputCol})</span><span>{copy.output} ({slot.cell.outputRow},{slot.cell.outputCol})</span></>
+                                )}
+                              </li>
+                            ))}
+                          </ol>
+                        </section>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-transpose-tile-explorer>
+
+<script>
+  import {
+    TRANSPOSE_TILE_COPY,
+    formatTransposeTileCopy,
+  } from '../visuals/transpose-tile-copy';
+  import {
+    createTransposeTileState,
+    deriveTransposeTileView,
+    reduceTransposeTileState,
+    type TransposeTileCell,
+    type TransposeTilePhysicalSlot,
+    type TransposeTileState,
+    type TransposeTileView,
+  } from '../visuals/transpose-tile-model';
+
+  type ExplorerParts = Readonly<{
+    controls: HTMLFieldSetElement;
+    workbench: HTMLElement;
+    tileSize: HTMLSelectElement;
+    layout: HTMLSelectElement;
+    padding: HTMLSelectElement;
+    reset: HTMLButtonElement;
+    status: HTMLElement;
+    inputGrid: HTMLOListElement;
+    outputGrid: HTMLOListElement;
+    physicalRows: HTMLElement;
+    paddingSummary: HTMLElement;
+  }>;
+
+  class CudaTransposeTileExplorer extends HTMLElement {
+    private state: TransposeTileState = createTransposeTileState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const parts = this.parts();
+      if (!parts) return;
+      const initialView = this.render(parts);
+      if (!initialView) return;
+
+      parts.tileSize.addEventListener('change', () => {
+        const update = reduceTransposeTileState(this.state, {
+          type: 'select-tile-size',
+          tileSize: Number(parts.tileSize.value),
+        });
+        if (!update.accepted) {
+          this.syncControls(parts);
+          this.announce(parts, this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        const view = this.render(parts);
+        if (!view) return;
+        this.announce(parts, formatTransposeTileCopy(this.copy().statusTileSize, {
+          size: String(view.tileSize),
+          stride: String(view.sharedRowStride),
+        }));
+      });
+
+      parts.layout.addEventListener('change', () => {
+        const update = reduceTransposeTileState(this.state, {
+          type: 'select-layout',
+          layout: parts.layout.value,
+        });
+        if (!update.accepted) {
+          this.syncControls(parts);
+          this.announce(parts, this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        const view = this.render(parts);
+        if (!view) return;
+        this.announce(parts, formatTransposeTileCopy(this.copy().statusLayout, {
+          layout: this.copy().layouts[view.layout].label,
+        }));
+      });
+
+      parts.padding.addEventListener('change', () => {
+        const update = reduceTransposeTileState(this.state, {
+          type: 'select-padding',
+          padding: Number(parts.padding.value),
+        });
+        if (!update.accepted) {
+          this.syncControls(parts);
+          this.announce(parts, this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        const view = this.render(parts);
+        if (!view) return;
+        this.announce(parts, formatTransposeTileCopy(this.copy().statusPadding, {
+          padding: String(view.padding),
+          stride: String(view.sharedRowStride),
+        }));
+      });
+
+      parts.reset.addEventListener('click', () => {
+        const update = reduceTransposeTileState(this.state, { type: 'reset' });
+        if (!update.accepted) {
+          this.announce(parts, this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        if (!this.render(parts)) return;
+        this.announce(parts, this.copy().statusReset);
+        parts.tileSize.focus();
+      });
+
+      parts.controls.hidden = false;
+      parts.workbench.hidden = false;
+      this.dataset.ready = 'true';
+    }
+
+    private parts(): ExplorerParts | null {
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const tileSize = this.querySelector<HTMLSelectElement>('[data-transpose-tile-size]');
+      const layout = this.querySelector<HTMLSelectElement>('[data-transpose-layout]');
+      const padding = this.querySelector<HTMLSelectElement>('[data-transpose-padding]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-transpose-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-transpose-status]');
+      const inputGrid = this.querySelector<HTMLOListElement>('[data-live-input-grid]');
+      const outputGrid = this.querySelector<HTMLOListElement>('[data-live-output-grid]');
+      const physicalRows = this.querySelector<HTMLElement>('[data-live-physical-rows]');
+      const paddingSummary = this.querySelector<HTMLElement>('[data-live-padding-summary]');
+      if (
+        !controls || !workbench || !tileSize || !layout || !padding || !reset || !status
+        || !inputGrid || !outputGrid || !physicalRows || !paddingSummary
+      ) return null;
+      return {
+        controls,
+        workbench,
+        tileSize,
+        layout,
+        padding,
+        reset,
+        status,
+        inputGrid,
+        outputGrid,
+        physicalRows,
+        paddingSummary,
+      };
+    }
+
+    private copy() {
+      return TRANSPOSE_TILE_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private announce(parts: ExplorerParts, message: string) {
+      parts.status.textContent = message;
+    }
+
+    private syncControls(parts: ExplorerParts) {
+      parts.tileSize.value = String(this.state.tileSize);
+      parts.layout.value = this.state.layout;
+      parts.padding.value = String(this.state.padding);
+    }
+
+    private render(parts: ExplorerParts): TransposeTileView | undefined {
+      const result = deriveTransposeTileView(this.state);
+      if (!result.accepted) {
+        this.announce(parts, this.copy().issues[result.issue]);
+        return undefined;
+      }
+      const view = result.view;
+      const inputFragment = this.ownerDocument.createDocumentFragment();
+      const outputFragment = this.ownerDocument.createDocumentFragment();
+      const physicalFragment = this.ownerDocument.createDocumentFragment();
+      for (const cell of view.inputRowMajor) inputFragment.append(this.logicalCell(cell, 'input'));
+      for (const cell of view.outputRowMajor) outputFragment.append(this.logicalCell(cell, 'output'));
+      for (const row of view.physicalRows) {
+        const section = this.ownerDocument.createElement('section');
+        section.className = 'transpose-physical-row';
+        section.dataset.physicalRow = String(row.row);
+        const heading = this.ownerDocument.createElement('h5');
+        heading.textContent = `${this.copy().row} ${row.row}`;
+        const list = this.ownerDocument.createElement('ol');
+        list.style.setProperty('--shared-stride', String(view.sharedRowStride));
+        for (const slot of row.slots) list.append(this.physicalSlot(slot));
+        section.append(heading, list);
+        physicalFragment.append(section);
+      }
+
+      parts.inputGrid.replaceChildren(inputFragment);
+      parts.outputGrid.replaceChildren(outputFragment);
+      parts.physicalRows.replaceChildren(physicalFragment);
+      parts.inputGrid.style.setProperty('--tile-size', String(view.tileSize));
+      parts.outputGrid.style.setProperty('--tile-size', String(view.tileSize));
+      parts.paddingSummary.textContent = view.padding === 0
+        ? this.copy().noPaddingSlots
+        : this.copy().physicalIntro;
+      this.syncControls(parts);
+
+      this.dataset.tileSize = String(view.tileSize);
+      this.dataset.layout = view.layout;
+      this.dataset.padding = String(view.padding);
+      this.dataset.sharedRowStride = String(view.sharedRowStride);
+      this.dataset.logicalCellCount = String(view.logicalCellCount);
+      this.setText(
+        '[data-live-selection]',
+        `${view.tileSize} × ${view.tileSize} · ${this.copy().layouts[view.layout].label} · padding ${view.padding} · stride ${view.sharedRowStride}`,
+      );
+      this.setText('[data-live-layout-description]', this.copy().layouts[view.layout].description);
+      return view;
+    }
+
+    private logicalCell(cell: TransposeTileCell, perspective: 'input' | 'output') {
+      const item = this.ownerDocument.createElement('li');
+      item.dataset.liveLogicalCell = '';
+      item.dataset.perspective = perspective;
+      item.dataset.inputRow = String(cell.inputRow);
+      item.dataset.inputCol = String(cell.inputCol);
+      item.dataset.outputRow = String(cell.outputRow);
+      item.dataset.outputCol = String(cell.outputCol);
+      item.dataset.inputIndex = String(cell.inputIndex);
+      item.dataset.outputIndex = String(cell.outputIndex);
+      const index = this.ownerDocument.createElement('strong');
+      const coordinate = this.ownerDocument.createElement('span');
+      const mapping = this.ownerDocument.createElement('span');
+      if (perspective === 'input') {
+        index.textContent = `${this.copy().inputIndex}${cell.inputIndex}`;
+        coordinate.textContent = `${this.copy().input} (${cell.inputRow},${cell.inputCol})`;
+        mapping.textContent = `→ ${this.copy().output} (${cell.outputRow},${cell.outputCol})`;
+      } else {
+        index.textContent = `${this.copy().outputIndex}${cell.outputIndex}`;
+        coordinate.textContent = `${this.copy().output} (${cell.outputRow},${cell.outputCol})`;
+        mapping.textContent = `← ${this.copy().input} (${cell.inputRow},${cell.inputCol})`;
+      }
+      item.append(index, coordinate, mapping);
+      return item;
+    }
+
+    private physicalSlot(slot: TransposeTilePhysicalSlot) {
+      const item = this.ownerDocument.createElement('li');
+      item.dataset.livePhysicalSlot = '';
+      item.dataset.slotKind = slot.kind;
+      item.dataset.physicalRow = String(slot.row);
+      item.dataset.physicalCol = String(slot.col);
+      item.dataset.physicalSlotIndex = String(slot.slotIndex);
+      const index = this.ownerDocument.createElement('strong');
+      index.textContent = `${this.copy().physicalSlot}${slot.slotIndex}`;
+      const first = this.ownerDocument.createElement('span');
+      const second = this.ownerDocument.createElement('span');
+      if (slot.kind === 'padding') {
+        first.textContent = this.copy().paddingSlot;
+        second.textContent = `${this.copy().row} ${slot.row}, ${this.copy().column} ${slot.col}`;
+      } else {
+        item.dataset.inputRow = String(slot.cell.inputRow);
+        item.dataset.inputCol = String(slot.cell.inputCol);
+        item.dataset.outputRow = String(slot.cell.outputRow);
+        item.dataset.outputCol = String(slot.cell.outputCol);
+        first.textContent = `${this.copy().dataSlot}: ${this.copy().input} (${slot.cell.inputRow},${slot.cell.inputCol})`;
+        second.textContent = `${this.copy().output} (${slot.cell.outputRow},${slot.cell.outputCol})`;
+      }
+      item.append(index, first, second);
+      return item;
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-transpose-tile-explorer')) {
+    customElements.define('cuda-transpose-tile-explorer', CudaTransposeTileExplorer);
+  }
+</script>
