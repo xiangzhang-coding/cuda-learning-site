@@ -1905,7 +1905,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - **Direct prerequisite:** [A02: Multi-stage Reduction, Barriers, and Operation Order](/en/algorithms/multi-stage-reduction/).
 - **Hardware gate:** None. This reviews a reduction tree and phase ledger only; it neither compiles nor runs EX11 and executes no GPU.
 - **Version gate:** Block synchronization and floating-point order bind separately to the current CUDA Programming Guide v13.3, 12.9.1 owner-guide archives, or 11.8.0 archives. The CUB production comparison is pinned to CCCL v3.4.2 tagged source.
-- **Related Learning Units and resources:** [M03](/en/memory/shared-memory-tiling/), [M05](/en/memory/synchronization-scopes/), [M06](/en/memory/cooperative-groups/), [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), [EX11](/en/examples/multi-stage-reduction/), and [VIS10](/en/visuals/reduction-stages/).
+- **Related Learning Units and resources:** [M03](/en/memory/shared-memory-tiling/), [M05](/en/memory/synchronization-scopes/), [M06](/en/memory/warp-divergence-reconvergence/), [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), [EX11](/en/examples/multi-stage-reduction/), and [VIS10](/en/visuals/reduction-stages/).
 - **Last reviewed:** 2026-08-30.
 
 **Prompt:** A reduction kernel lets edge lanes return before writing identity, places `__syncthreads()` inside `if (tid < stride)`, attempts to make other blocks' partials visible with one block barrier, and requires a floating-point tree to match a CPU serial left fold bit for bit. Repair the block tree, inactive-lane participation, multi-kernel stages, and numerical claim.

@@ -1905,7 +1905,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - **直接先修条件：** [A02：多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)。
 - **硬件门槛（Hardware gate）：** 无；只审查 reduction tree 与 phase ledger，不编译或运行 EX11，也不执行 GPU。
 - **版本门槛（Version gate）：** Block synchronization 与 floating-point order 分别绑定 current CUDA Programming Guide v13.3、12.9.1 owner-guide archives 或 11.8.0 archives；CUB production comparison 固定为 CCCL v3.4.2 tagged source。
-- **相关学习单元与资源：** [M03](/memory/shared-memory-tiling/)、[M05](/memory/synchronization-scopes/)、[M06](/memory/cooperative-groups/)、[A02](/algorithms/multi-stage-reduction/)、[Q02](/correctness/floating-point-order-reproducibility/)、[EX11](/examples/multi-stage-reduction/)和 [VIS10](/visuals/reduction-stages/)。
+- **相关学习单元与资源：** [M03](/memory/shared-memory-tiling/)、[M05](/memory/synchronization-scopes/)、[M06](/memory/warp-divergence-reconvergence/)、[A02](/algorithms/multi-stage-reduction/)、[Q02](/correctness/floating-point-order-reproducibility/)、[EX11](/examples/multi-stage-reduction/)和 [VIS10](/visuals/reduction-stages/)。
 - **最后复核（Last reviewed）：** 2026-08-30。
 
 **题目：** 一个 reduction kernel 让 edge lanes 在写 identity 前 return，把 `__syncthreads()` 放进 `if (tid < stride)`，尝试用一次 block barrier 让其他 blocks 的 partials 可见，并要求 floating-point tree 与 CPU serial left fold 逐 bit 相同。修复 block tree、inactive-lane participation、multi-kernel stages 和 numerical claim。

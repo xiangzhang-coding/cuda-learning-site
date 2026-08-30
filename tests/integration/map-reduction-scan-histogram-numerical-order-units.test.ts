@@ -599,6 +599,8 @@ describe('production primitive positioning', () => {
       expect(source).not.toMatch(/M06[^\n]*Cooperative Groups/);
       expect(source).toContain('https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst');
     }
+    expect(practiceZh).not.toContain('[M06](/memory/cooperative-groups/)');
+    expect(practiceEn).not.toContain('[M06](/en/memory/cooperative-groups/)');
 
     const exactSourceSet = [q02Zh, q02En, practiceZh, practiceEn, sourcesZh, sourcesEn, maintenance].join('\n');
     expect(exactSourceSet).toContain(
