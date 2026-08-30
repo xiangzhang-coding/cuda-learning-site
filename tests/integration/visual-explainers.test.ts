@@ -23,6 +23,7 @@ const visualPairs = [
   { id: 'VIS07', tag: 'cuda-stream-event-dependencies', zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
   { id: 'VIS08', tag: 'cuda-page-migration', zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
   { id: 'VIS09', tag: 'cuda-artifact-pipeline', zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
+  { id: 'VIS12', tag: 'cuda-gemm-hierarchy-explorer', zh: '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
 ] as const;
 
 const embeddedVisuals = [

@@ -36,6 +36,7 @@ const representativeThemeRoutes = [
   '/en/visuals/page-migration/',
   '/en/visuals/artifact-pipeline/',
   '/en/visuals/reduction-stages/',
+  '/en/visuals/gemm-tiling-hierarchy/',
 ] as const;
 
 const releaseVisualStateScans = [
@@ -100,6 +101,18 @@ const releaseVisualStateScans = [
       await reduction.locator('[data-reduction-element-count]').selectOption('8');
       await reduction.locator('[data-reduction-action="step"]').click();
       await expect(reduction).toHaveAttribute('data-step-index', '1');
+    },
+  },
+  {
+    theme: 'blueprint',
+    label: 'VIS12 instruction hierarchy state',
+    route: '/en/visuals/gemm-tiling-hierarchy/',
+    prepare: async (page: Page) => {
+      const hierarchy = page.locator('[data-visual-id="VIS12"]');
+      await hierarchy.locator('[data-gemm-matrix-shape]').selectOption('256x128x64');
+      await hierarchy.locator('[data-gemm-tile-shape]').selectOption('128x64x16');
+      await hierarchy.locator('[data-gemm-hierarchy-level]').selectOption('instruction');
+      await expect(hierarchy).toHaveAttribute('data-hierarchy-level', 'instruction');
     },
   },
 ] as const;

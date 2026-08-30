@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-08-30'
+factCheckDate: '2026-08-31'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-30'
+      content: '2026-08-31'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -40,15 +40,15 @@ CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU
 
 The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable Examples, external Labs, Exercises, Visual Explainers, and a Glossary. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
 
-The Stable Curriculum completely publishes O01-O08, F01-F08, M01-M19, A01-A07, and Q01-Q05 in both languages, for 47 Learning Units. After A01-A04, the algorithms track adds [A05 Matrix Transpose](/en/algorithms/matrix-transpose-layout/), [A06 Stencil Neighborhoods and Halos](/en/algorithms/stencil-neighborhood-reuse/), and [A07 Direct 2D Convolution](/en/algorithms/convolution-reuse-layout/). O02-O08, F01-F08, M01-M19, A01-A07, and Q01-Q05 each have Exercises and separate reviewed solutions.
+The Stable Curriculum completely publishes O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q05 in both languages, for 49 Learning Units. New [A08 Tiled GEMM](/en/algorithms/tiled-gemm-correctness/) and [A09 Sorting, Selection, and Compaction](/en/algorithms/sorting-selection-compaction/) join the algorithm track. A01-A09 all have Exercises and separate solutions.
 
-R1 remains the latest completed aggregate release review. The A01-A04, Q02, EX11-EX13, and VIS10 material from [Issue #21](https://github.com/xiangzhang-coding/cuda-learning-site/issues/21) remains current. [Issue #22](https://github.com/xiangzhang-coding/cuda-learning-site/issues/22) now adds A05-A07, EX14, VIS11, and their supporting material. This does not complete R2; the aggregate R2 release review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+R1 remains the latest completed aggregate review. Issue #23 publishes A08/A09, EX15, VIS12, and supporting material, but the aggregate R2 review remains separately gated by [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
 
-The strict graph adds `A05<-[M02,M03,M04]`, `A06<-[M03,M04,M05]`, and `A07<-[A06,M03]` to the existing edges. The matching resource edges are `EX14<-A05` and `VIS11<-A05`. F08 remains related to LAB03 but is not a prerequisite. Q11 and LAB10 are unpublished and do not enter the graph.
+The strict graph adds `A08<-[A05,M03,M04,A02]`, `A09<-[A03,A04]`, `EX15<-A08`, and `VIS12<-A08`. Q13, L06, and LAB12 are unpublished; LAB12 waits for both prerequisites.
 
-The remaining public surface has exactly fifteen Runnable Examples, EX01-EX14 and [EX16](/en/examples/sanitizer-defect-suite/); EX15 has no public destination. [EX14 Tiled Transpose](/en/examples/tiled-transpose/) requires A05. The site has exactly six noncontiguous Labs, LAB01-LAB05 and LAB07; LAB06 remains absent, while Q11 and LAB10 also remain unpublished. Fifteen formal Visual Explainers comprise standalone VIS01-VIS11 plus embedded VIS19-VIS22; [VIS11 Tiled Transpose](/en/visuals/tiled-transpose/) requires A05. The current catalog has 6 Labs, 48 [Practice Bank](/en/practice/) entries, 15 Visual Explainers, 146 [Glossary](/en/glossary/) terms, and 59 [Sources and Version Record](/en/sources-and-versions/) entries, for 274 records total. Public source files form 178 Publication Pairs and 356 source routes.
+The public surface has 16 Runnable Examples (EX01-EX16), 6 noncontiguous Labs, 16 formal Visual Explainers (standalone VIS01-VIS12 plus embedded VIS19-VIS22), 50 [Practice Bank](/en/practice/) entries, 151 [Glossary](/en/glossary/) terms, and 61 [source records](/en/sources-and-versions/), for 284 catalog records. Public source files form 186 Publication Pairs and 372 source routes.
 
-M09-M19, A01-A07, and Q01-Q05 have empty compilation and runtime axes; static teaching, Exercises, source review, and Context7 cross-checks grant no CUDA Evidence Status. EX14 uses one original C++17 implementation across all three Toolkit Lanes, has empty compilation evidence, remains Pending Hardware Verification, and has no recorded observations. A host-reference pass establishes no GPU correctness. The site executes neither EX14 nor cuDNN and publishes no actual output, timing, speedup, or other performance number. All fifteen Visual Explainers are deterministic browser-only models with static or textual fallbacks and no CUDA Evidence Status; VIS11's static layouts are not bank, runtime, or performance observations.
+A01-A09 and Q01-Q05 have empty compilation and runtime axes. EX15 uses one original C++17 FP32 implementation across three Toolkit Lanes, has empty compilation evidence, and remains Pending Hardware Verification. A host-reference pass establishes no GPU correctness. The site executes no EX15, CUB, or Thrust and publishes no output, timing, speedup, or production winner. All 16 Visual Explainers are evidence-neutral browser models.
 
 ## Author
 
@@ -56,4 +56,4 @@ M09-M19, A01-A07, and Q01-Q05 have empty compilation and runtime axes; static te
 
 ## Feedback
 
-For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). Page facts were reviewed on **2026-08-30**.
+For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). Page facts were reviewed on **2026-08-31**.

@@ -1,0 +1,201 @@
+---
+title: 'A08：从正确 Naive GEMM 到 Shared-Memory Tiling'
+description: 先冻结 row-major GEMM 与数值验收合同，再从每输出一线程的 naive baseline 推导 partial-safe shared-memory tiling、统一 barrier 与独立 CPU reference。
+pairId: a08
+counterpart: /en/algorithms/tiled-gemm-correctness/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - gemm-contract
+  - naive-baseline
+  - shared-tiling
+  - partial-tiles-barriers
+  - numerical-checks
+  - canonical-example
+  - visual-explainer
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A08
+prerequisites:
+  - A05
+  - M03
+  - M04
+  - A02
+relatedUnits:
+  - VIS12
+exampleIds:
+  - EX15
+canonicalExample: EX15
+canonicalRanges:
+  - cpu-reference
+  - tiled-gemm
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current classic CUDA C++ shared-memory matrix-multiplication and verification guidance'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Programming Guide v13.3 - Intro to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, shared-memory, bounds, barrier, and launch-completion contracts'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Programming Guide v13.3 - Notes on Host/Device Computation Accuracy'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current floating-point order, FMA, and host/device comparison boundary'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Programming Guide 11.8 and 12.9 archives'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v11.8.0; cross-checked with the v12.9.1 archive'
+    platform: 'Stable shared-memory and synchronization contracts for selected Toolkit Lanes'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/tiled-gemm-correctness/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,gemm-contract,naive-baseline,shared-tiling,partial-tiles-barriers,numerical-checks,canonical-example,visual-explainer,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A05,M03,M04,A02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS12 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-gemm' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/tiled-gemm-correctness/" lang="en">Read the English counterpart</a>
+
+[通用矩阵乘法（general matrix multiplication，GEMM，TERM-147）](/glossary/#term-147)不是从 tile size 开始，而是从 shape、layout、标量、累加顺序与验收规则开始。A08 先建立一个明显正确的 naive GEMM，再把重复 global reads 改为 block-local [K tile（TERM-148）](/glossary/#term-148)复用；每一步都保留同一数学合同。
+
+## 学完本单元，你应该能
+
+- 为 row-major `A[M,K]`、`B[K,N]` 与 `C[M,N]` 写出完整 address contract。
+- 解释 naive GEMM 中一个 output owner 为什么执行 K 次乘加。
+- 推导 shared-memory tiling 的 load、barrier、compute、barrier、reuse phases。
+- 对 partial M、N、K tiles 分别写 guard，并证明所有 block threads 参加 barrier。
+- 用 independent double CPU reference、非有限值策略与绝对加相对容差检查 FP32 output。
+- 把教学 kernel、未来 cuBLAS/CUTLASS comparison 与实际 performance evidence 分开。
+
+## 先修关系
+
+严格先修项是 `A05, M03, M04, A02`。A05 提供二维 tile 与 layout reasoning；M03/M04 提供 shared-memory ownership 与 physical-layout 审查；A02 提供 reduction order。EX15 是 canonical Runnable Example，VIS12 是 related Visual Explainer，不增加先修边。
+
+## GEMM 合同先于 kernel
+
+本站冻结一个 row-major、非转置、FP32 教学子集：
+
+`C[row * N + col] = alpha * sum(A[row * K + p] * B[p * N + col]) + beta * C[row * N + col]`
+
+合法域是 `0 <= row < M`、`0 <= col < N`、`0 <= p < K`。A 的 leading dimension 是 K，B/C 的 leading dimensions 是 N。每个 `(row,col)` 只有一个 writer；K 只描述 reduction extent，不增加 output tile 数量。
+
+## Naive GEMM：先得到可解释 baseline
+
+Correct naive GEMM 让一个 thread 拥有一个 output coordinate，顺序读取 A 的一行和 B 的一列，累加 K 个 products，再写一次 C。它可能重复读取相同 A/B values，但 one-writer、bounds 和 arithmetic order 都清楚，因此适合作为 tiled implementation 的 correctness baseline，而不是性能结论。
+
+先用 `2x3x2` 手算 fixture 得到 `[22,28,49,64]`，再用 rectangular 与 nonzero-beta fixtures。Square-only、beta-zero-only 或 tile-aligned-only cases 都不能覆盖完整合同。
+
+## Shared-memory tiling：复用 K slices
+
+对 `TM x TN x TK` tile，一个 block 拥有一个 `TM x TN` output footprint。每次 K-loop cooperative load 一个 `TM x TK` A tile 和 `TK x TN` B tile，统一 barrier 后，每个 output owner 从 shared memory 累加 TK 个 products。第二个 barrier 保证任何 thread 重写 shared arrays 前，旧 slice 的 reads 已全部结束。
+
+这改变数据路径，不改变 GEMM equation。`threadblockCount = ceil(M/TM) * ceil(N/TN)`；每个 block 自己循环 `ceil(K/TK)` 个 slices，不能把 K slices 误算成额外 blocks。
+
+## Partial M/N/K tiles 与 barrier
+
+M/N guards 决定 output owner 和 final store。K-tail guards 决定 shared loads；out-of-bounds A/B slots 必须写 neutral zero，避免读取上一次 iteration 的值。Invalid output thread 仍可以负责合法 shared load，也必须到达两个 `__syncthreads()`。因此不能在 K-loop barrier 前 early return。
+
+EX15 的 portable baseline 固定 `16x16x16`，每个 block 256 threads，两块 shared arrays 共 2,048 bytes。普通 FP32 multiply-add、shared memory 与 block barriers 在声明的 CC 7.5 baseline 上可用；没有需要 gated variant 的教学理由，所以 architecture-specific variants 为空，单一路径同时是 portable fallback。
+
+## 数值检查：reference 与 tolerance 是合同
+
+CPU reference 使用 double 累加，并与 device FP32 accumulation 保持独立。每个 finite candidate 必须满足 `absolute_error <= atol + rtol * abs(reference)`；也就是验收阈值 `atol + rtol * abs(reference)`。NaN、infinity 与负 tolerance 被拒绝。Mismatch report 至少包含 linear index、row、column、reference、candidate、absolute error 与 allowed error。
+
+不同合法 operation order 或 FMA contraction 可能改变低位，因此 bitwise equality 不是这里的通用合同。Tolerance 必须在观察 CUDA output 前根据 bounded fixture 声明；它不能在失败后随意放宽。
+
+## Canonical Runnable Example：EX15
+
+EX15 只维护一份 canonical implementation。先导入 pure-host `cpu-reference`，再导入 `tiled-gemm`：
+
+[查看固定 EX15 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex15-tiled-gemm)，或[下载同一 revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip)。
+
+<CanonicalCode exampleId="EX15" range="cpu-reference" />
+
+<CanonicalCode exampleId="EX15" range="tiled-gemm" />
+
+## Visual Explainer：VIS12
+
+[VIS12：GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)依次呈现 matrix、tile、thread block、warp 与 instruction 五层。Instruction panel 只表示 source-level scalar multiply-accumulate slot，不声称 compiler emitted FMA/MMA/SASS，也不预测 scheduling、occupancy 或 performance。
+
+## Production boundary
+
+EX15 是 correctness 与 tiling mental model，不是 production replacement。后续 L06/L07/L09 才分别处理 cuBLAS、cuBLASLt 与 CUTLASS 的 exact version、layout、precision、workspace、heuristic 和 architecture contracts；LAB12 还依赖未发布的 Q13 与 L06，本 ticket 不发布它。
+
+## 证据边界
+
+A08 四个 evidence arrays 均为空。EX15 自己的 compilation axis 也为空、runtime 为 Pending Hardware Verification。Host test、source inspection、Context7 cross-check 与 VIS12 browser state 都不是 CUDA compilation/runtime evidence。没有 timing、throughput、utilization、speedup 或 production-library comparison result。
+
+## 离开前检查
+
+1. `A[M,K] * B[K,N]` 的三个 row-major leading dimensions 分别是什么？
+2. Correct naive GEMM 的 one-thread/one-output contract 为什么适合做 tiled baseline？
+3. 一个 output block 为什么循环 K slices，而不是为每个 K slice 增加 output block？
+4. Partial M、N 与 K 各自影响哪些 guards，为什么 zero-fill 不能替代 barrier？
+5. 第二个 `__syncthreads()` 防止哪种 shared-storage reuse hazard？
+6. 为什么 double CPU reference、finite policy 与 abs-plus-rel tolerance 必须在运行前声明？
+
+## 继续练习
+
+- 完成 [A08 Exercises](/algorithms/tiled-gemm-correctness/exercises/)后，再看[独立解答](/algorithms/tiled-gemm-correctness/solutions/)。
+- 审查 [PB-R2-020](/practice/#pb-r2-020)、[EX15](/examples/tiled-gemm/)与 [VIS12](/visuals/gemm-tiling-hierarchy/)。
+- 复习 [TERM-147](/glossary/#term-147)与 [TERM-148](/glossary/#term-148)。
+
+## 来源与复核
+
+CUDA C++ Best Practices Guide v13.3 提供 classic shared-memory `C=AB` owner context；CUDA Programming Guide v13.3 提供 block/shared-memory/barrier 与 floating-point contract；11.8.0/12.9.1 archives 用于复核所选 lanes。Context7 `/websites/nvidia_cuda_cuda-programming-guide` 于 2026-08-31 仅作交叉核对，发布依据仍是上列 exact owner URLs。本站没有复制 NVIDIA sample、code、figure、table 或 result。
+
+**事实核查与来源访问日期：2026-08-31。**

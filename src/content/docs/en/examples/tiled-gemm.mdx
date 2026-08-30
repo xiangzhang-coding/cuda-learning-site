@@ -1,0 +1,192 @@
+---
+title: 'EX15: Tiled GEMM Runnable Example'
+description: Verify row-major GEMM with a portable C++17 FP32 16x16x16 shared-memory baseline, a double CPU reference, and finite absolute-plus-relative tolerance.
+pairId: ex15
+counterpart: /examples/tiled-gemm/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - matrix-contract
+  - cpu-reference
+  - tiled-gemm
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX15
+prerequisites:
+  - A08
+exampleIds:
+  - EX15
+canonicalExample: EX15
+canonicalRanges:
+  - cpu-reference
+  - tiled-gemm
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 15,100-byte global-plus-shared problem bound and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'Each declared fixture should satisfy the finite atol + rtol * abs(reference) comparison against the independent double CPU reference.'
+    - 'The 33x31x35 fixture should exercise partial M, N, and K tiles while every thread reaches both block barriers in every K-tile iteration.'
+    - 'The portable FP32 baseline should preserve the declared alpha and beta contract without implying an architecture-specific instruction or performance result.'
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Classic shared-memory matrix multiplication and reference-comparison context'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Programming Guide v13.3 - Intro to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Bounds, shared memory, block synchronization, launch, and error-checking contracts'
+    accessDate: '2026-08-31'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-31'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-31'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA CUDA 11.8.0 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 registry metadata'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA CUDA 12.9.2 and 13.3.1 development image metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04 and 13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 registry metadata; both exact tags are declared below'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: ex15 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/examples/tiled-gemm/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,project,matrix-contract,cpu-reference,tiled-gemm,host-model,build,compatibility,evidence,expected-observations,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: runnable-example }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A08 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-gemm' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 15,100-byte global-plus-shared problem bound and under 8 GB' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,13.3' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/tiled-gemm/" lang="zh-CN">阅读中文对应页</a>
+
+EX15 is an independent, original C++17 CUDA Runnable Example. It implements row-major FP32 `C = alpha*A*B + beta*C` and checks output against an independent double CPU reference with finite absolute-plus-relative tolerance. The website executes no CUDA, and this page publishes no timing, throughput, utilization, speedup, or production-library comparison.
+
+## Purpose
+
+Complete A08 first. EX15 turns the naive-to-tiled mental model into a partial-safe project with three fixtures, one-block-per-output-tile ownership, zero-filled K tails, two uniform barriers, a guarded store, and deterministic mismatch reporting.
+
+## Get the canonical project
+
+[View the pinned EX15 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex15-tiled-gemm), or [download the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). The project directory is `examples/ex15-tiled-gemm/`; pages and canonical imports use the same immutable pin.
+
+## Matrix contract
+
+`A[M,K]`, `B[K,N]`, and `C[M,N]` are row-major. Every output owner evaluates `C[row * N + col] = alpha * sum(A[row * K + p] * B[p * N + col]) + beta * C[row * N + col]`. Fixtures are a hand-checkable `2x3x2`, all-partial/nonzero-beta `33x31x35`, and aligned `32x32x32`.
+
+## CPU reference
+
+<CanonicalCode exampleId="EX15" range="cpu-reference" />
+
+The reference accumulates in double after validating dimensions and counts, pointers, finite inputs, and finite scalars. The verifier uses `atol=1e-4` and `rtol=2e-5`, rejects non-finite candidate/reference values and negative tolerances, and reports the first mismatch.
+
+## Tiled GEMM
+
+<CanonicalCode exampleId="EX15" range="tiled-gemm" />
+
+One `16x16` thread block owns one `16x16` output tile. Each K slice guards and zero-fills partial A/B loads into two `float[16][16]` arrays, executes a barrier, 16 products, and a second barrier. The kernel has no return before a barrier, and the final C store is separately guarded.
+
+There is no architecture-specific variant. Ordinary FP32, shared memory, and block barriers satisfy the CC 7.5 baseline. The single path is the portable fallback in every lane; EX15 introduces no WMMA, Tensor Core, TF32, `cp.async`, or Toolkit-specific fork.
+
+## Host-model boundary
+
+`make host-test` compiles only the pure C++17 header and test. It checks the hand oracle, all three fixtures, a near-zero absolute term, magnitude-scaled relative term, out-of-tolerance mismatch, NaN/infinity, negative tolerances, and mismatch coordinates. Success prints `host-reference: pass` but establishes no CUDA compilation or execution.
+
+## Build contract
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+`scripts/compile-check.sh c++17 ex15 <result-dir>` runs clean and those stages, retaining logs, a cubin list, and a PTX dump without ever executing the CUDA binary. The artifact plan is native `sm_75` plus `compute_75` PTX.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Runtime gate | Compute capability 7.5 or newer |
+| Baseline tier | Maximum 15,100-byte global-plus-shared bound, under 8 GB |
+| Language | The same C++17 source in all three lanes |
+| Variants | None; the single FP32 path is the portable fallback |
+
+Declared lanes are CUDA 11.8.0 on Ubuntu 22.04 and CUDA 12.9.2 and 13.3.1 on Ubuntu 24.04. Exact digest-pinned images are in the project manifest. They are build targets, not build records.
+
+## Compilation and runtime evidence
+
+The compilation array is empty, so EX15 is not Compile-Checked. Runtime is Pending Hardware Verification and recorded observations are empty. A host pass or ephemeral CI build upgrades neither axis.
+
+## Expected observations, not runtime records
+
+1. Each declared fixture should satisfy the finite atol + rtol * abs(reference) comparison against the independent double CPU reference.
+2. The 33x31x35 fixture should exercise partial M, N, and K tiles while every thread reaches both block barriers in every K-tile iteration.
+3. The portable FP32 baseline should preserve the declared alpha and beta contract without implying an architecture-specific instruction or performance result.
+
+## Sources and review
+
+CUDA C++ Best Practices Guide v13.3 and CUDA Programming Guide v13.3 review classic matrix-multiplication, shared-memory, barrier, and verification contracts. NVCC owner documents and Docker tag APIs pin the three build coordinates. No NVIDIA source, sample, figure, table, or result is copied.
+
+**Fact checked and sources accessed: 2026-08-31.**

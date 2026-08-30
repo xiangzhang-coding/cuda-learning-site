@@ -77,6 +77,7 @@ const vis08Destination = PUBLISHED_DESTINATIONS.VIS08;
 const vis09Destination = PUBLISHED_DESTINATIONS.VIS09;
 const vis10Destination = PUBLISHED_DESTINATIONS.VIS10;
 const vis11Destination = PUBLISHED_DESTINATIONS.VIS11;
+const vis12Destination = PUBLISHED_DESTINATIONS.VIS12;
 const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
 const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
 const vis21Destination = PUBLISHED_DESTINATIONS.VIS21;
@@ -982,6 +983,40 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-08-30',
     keywords: localized('convolution cross-correlation NCHW stride dilation padding cuDNN graph plan workspace determinism', 'convolution cross-correlation NCHW stride dilation padding cuDNN graph plan workspace determinism'),
   },
+  {
+    planningId: 'PB-R2-020',
+    group: 'practice',
+    title: localized('证明 tiled GEMM 的 partial-tile 与数值合同', 'Prove tiled-GEMM partial-tile and numerical contracts'),
+    href: localized('/practice/#pb-r2-020', '/en/practice/#pb-r2-020'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['A08'],
+    relatedUnits: ['A02', 'A05', 'M03', 'M04', 'A08', 'EX15', 'VIS12'],
+    hardwareGate: localized('无；只审查静态 GEMM、tile、barrier、tolerance 与 evidence ledger，不运行 CUDA。', 'None; review static GEMM, tile, barrier, tolerance, and evidence ledgers without running CUDA.'),
+    versionGate: localized(
+      'CUDA Programming Guide/Best Practices Guide v13.3 与 11.8.0/12.9.1 archives；EX15 C++17 lanes 为 Toolkit 11.8.0、12.9.2、13.3.1。',
+      'CUDA Programming Guide and Best Practices Guide v13.3 plus the 11.8.0/12.9.1 archives; EX15 C++17 lanes use Toolkit 11.8.0, 12.9.2, and 13.3.1.',
+    ),
+    reviewedOn: '2026-08-31',
+    keywords: localized('GEMM naive tiled shared memory partial M N K barrier CPU reference tolerance evidence', 'GEMM naive tiled shared memory partial M N K barrier CPU reference tolerance evidence'),
+  },
+  {
+    planningId: 'PB-R2-021',
+    group: 'practice',
+    title: localized('组合 stable selection、compaction 与 bounded-key sorting', 'Compose stable selection, compaction, and bounded-key sorting'),
+    href: localized('/practice/#pb-r2-021', '/en/practice/#pb-r2-021'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['A09'],
+    relatedUnits: ['A03', 'A04', 'A09'],
+    hardwareGate: localized('无；只推导 flag、scan、histogram、rank、scatter 与 production decision，不运行 CUDA/CCCL。', 'None; derive flags, scans, histograms, ranks, scatter, and a production decision without running CUDA or CCCL.'),
+    versionGate: localized(
+      'CCCL v3.4.2 immutable release；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources。',
+      'CCCL v3.4.2 immutable release with exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources.',
+    ),
+    reviewedOn: '2026-08-31',
+    keywords: localized('sorting selection compaction flag exclusive scan histogram stable rank scatter CUB Thrust', 'sorting selection compaction flag exclusive scan histogram stable rank scatter CUB Thrust'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1154,6 +1189,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     ),
     reviewedOn: '2026-08-30',
     keywords: localized('tiled transpose logical layout physical stride padding before after row-major', 'tiled transpose logical layout physical stride padding before after row-major'),
+  },
+  {
+    planningId: 'VIS12',
+    group: 'visuals',
+    title: vis12Destination.title,
+    href: vis12Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis12Destination.prerequisites,
+    relatedUnits: ['EX15'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Programming Guide/Best Practices Guide v13.3 与 11.8.0/12.9.1 archives；层级模型不观察 emitted instruction 或 performance。',
+      'CUDA Programming Guide and Best Practices Guide v13.3 plus the 11.8.0/12.9.1 archives; the hierarchy model observes no emitted instruction or performance.',
+    ),
+    reviewedOn: '2026-08-31',
+    keywords: localized('GEMM matrix tile thread block warp instruction hierarchy ownership', 'GEMM matrix tile thread block warp instruction hierarchy ownership'),
   },
   {
     planningId: 'VIS19',
@@ -1368,6 +1419,11 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-144', 'halo · 光环区', 'kernel-vocabulary', ['A06', 'A07'], 'CUDA Programming Guide v13.3 stencil context；halo extent 由 output tile、offset footprint、stride 与 dilation 决定。', 'CUDA Programming Guide v13.3 stencil context; halo extent follows from the output tile, offset footprint, stride, and dilation.', '2026-08-30'),
   glossaryRecord('TERM-145', 'convolution · 卷积', 'kernel-vocabulary', ['A07'], 'A07 明确区分 mathematical filter flip 与 deep-learning API naming；current cuDNN docs 只负责 future production coordinate。', 'A07 explicitly separates the mathematical filter flip from deep-learning API naming; current cuDNN docs govern only the future production coordinate.', '2026-08-30'),
   glossaryRecord('TERM-146', 'cross-correlation · 互相关', 'kernel-vocabulary', ['A07'], 'A07 teaching equation 不翻转 spatial filter；cuDNN current operation semantics 需要在 pinned future component matrix 中复核。', 'The A07 teaching equation does not flip the spatial filter; current cuDNN operation semantics require review in a future pinned component matrix.', '2026-08-30'),
+  glossaryRecord('TERM-147', 'general matrix multiplication (GEMM) · 通用矩阵乘法', 'kernel-vocabulary', ['A08', 'EX15', 'VIS12'], 'Row-major M/N/K、alpha/beta、precision 与 acceptance contract 必须先于 tile/performance claim。', 'Row-major M/N/K, alpha/beta, precision, and acceptance contracts precede tile or performance claims.', '2026-08-31'),
+  glossaryRecord('TERM-148', 'K tile · K 维分块', 'kernel-vocabulary', ['M03', 'A08', 'EX15', 'VIS12'], 'K tile 是 reduction slice；一个 output block 循环 slices，不创建额外 output owners。', 'A K tile is a reduction slice; one output block loops over slices without creating extra output owners.', '2026-08-31'),
+  glossaryRecord('TERM-149', 'sorting · 排序', 'kernel-vocabulary', ['A09'], 'Sorting contract 声明 key projection、direction、stability、payload movement 与 equal-key policy。', 'A sorting contract declares key projection, direction, stability, payload movement, and equal-key policy.', '2026-08-31'),
+  glossaryRecord('TERM-150', 'selection · 选择', 'kernel-vocabulary', ['A09'], 'Selection 由 predicate、payload、output ownership 与 selected-count contract 定义。', 'Selection is defined by its predicate, payload, output ownership, and selected-count contract.', '2026-08-31'),
+  glossaryRecord('TERM-151', 'stream compaction · 流压缩', 'kernel-vocabulary', ['A03', 'A09'], 'Flag/exclusive-scan/scatter 可建立 contiguous positions；stability 依赖 original-order prefix rank。', 'Flag, exclusive scan, and scatter establish contiguous positions; stability depends on original-order prefix rank.', '2026-08-31'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -1392,35 +1448,35 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
+    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
     'SRC-WEB-007',
     localized('Docker Engine 与 Buildx', 'Docker Engine and Buildx'),
     'publishing-interface',
-    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14'],
+    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15'],
     localized('每条编译记录保存 runner 实际版本', 'Each compile record captures the runner-provided versions'),
   ),
   sourceRecord(
     'SRC-CUDA-001',
     localized('CUDA 11.8 Lane 来源', 'CUDA 11.8 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'LAB02'],
     localized('Toolkit 11.8.0；Ubuntu 22.04 x86-64；C++17', 'Toolkit 11.8.0; Ubuntu 22.04 x86-64; C++17'),
   ),
   sourceRecord(
     'SRC-CUDA-002',
     localized('CUDA 12.9 Lane 来源', 'CUDA 12.9 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'LAB02'],
     localized('Toolkit 12.9.2；Ubuntu 24.04 x86-64；C++17/C++20', 'Toolkit 12.9.2; Ubuntu 24.04 x86-64; C++17/C++20'),
   ),
   sourceRecord(
     'SRC-CUDA-003',
     localized('CUDA 13.3 Lane 来源', 'CUDA 13.3 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'LAB02'],
     localized('Toolkit 13.3.1；Ubuntu 24.04 x86-64；C++17/C++20 与 C++23 probe', 'Toolkit 13.3.1; Ubuntu 24.04 x86-64; C++17/C++20 plus a C++23 probe'),
   ),
   sourceRecord(
@@ -1469,7 +1525,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-010',
     localized('容器身份', 'Container identities'),
     'cuda-version-record',
-    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14'],
+    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15'],
     same('11.8.0-devel-ubuntu22.04; 12.9.2-devel-ubuntu24.04; 13.3.1-devel-ubuntu24.04'),
   ),
   sourceRecord(
@@ -1933,6 +1989,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-08-30',
     '2026-08-30',
+  ),
+  sourceRecord(
+    'SRC-CUDA-044',
+    localized('A08/EX15/VIS12 tiled GEMM 与 hierarchy', 'A08/EX15/VIS12 tiled GEMM and hierarchy'),
+    'cuda-version-record',
+    ['A02', 'A05', 'M03', 'M04', 'A08', 'EX15', 'VIS12'],
+    localized(
+      'CUDA Programming Guide/Best Practices Guide v13.3、11.8.0/12.9.1 archives，以及 EX15 Toolkit compiler/image coordinates 11.8.0/12.9.2/13.3.1。',
+      'CUDA Programming Guide and Best Practices Guide v13.3, the 11.8.0/12.9.1 archives, and EX15 Toolkit compiler/image coordinates 11.8.0/12.9.2/13.3.1.',
+    ),
+    '2026-08-31',
+    '2026-08-31',
+  ),
+  sourceRecord(
+    'SRC-CUDA-045',
+    localized('A09 sorting、selection、compaction 与 production primitives', 'A09 sorting, selection, compaction, and production primitives'),
+    'cuda-version-record',
+    ['A03', 'A04', 'A09'],
+    localized(
+      'CCCL v3.4.2 immutable release；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources；不包含 runtime/performance observation。',
+      'CCCL v3.4.2 immutable release with exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources; no runtime or performance observation.',
+    ),
+    '2026-08-31',
+    '2026-08-31',
   ),
 ];
 

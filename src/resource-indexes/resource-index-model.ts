@@ -283,6 +283,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'A07：Direct 2D Convolution、邻域复用与布局合同', en: 'A07: Direct 2D Convolution, Neighborhood Reuse, and Layout Contracts' },
     prerequisites: ['A06', 'M03'],
   },
+  A08: {
+    href: { 'zh-CN': '/algorithms/tiled-gemm-correctness/', en: '/en/algorithms/tiled-gemm-correctness/' },
+    title: { 'zh-CN': 'A08：从正确 Naive GEMM 到 Shared-Memory Tiling', en: 'A08: From Correct Naive GEMM to Shared-Memory Tiling' },
+    prerequisites: ['A05', 'M03', 'M04', 'A02'],
+  },
+  A09: {
+    href: { 'zh-CN': '/algorithms/sorting-selection-compaction/', en: '/en/algorithms/sorting-selection-compaction/' },
+    title: { 'zh-CN': 'A09：用 Scan、Histogram 与 Movement 组合排序、选择和压缩', en: 'A09: Compose Sorting, Selection, and Compaction from Scan, Histograms, and Movement' },
+    prerequisites: ['A03', 'A04'],
+  },
   Q01: {
     href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
@@ -377,6 +387,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/tiled-transpose/', en: '/en/examples/tiled-transpose/' },
     title: { 'zh-CN': 'EX14：分块矩阵转置可运行示例', en: 'EX14: Tiled Transpose Runnable Example' },
     prerequisites: ['A05'],
+  },
+  EX15: {
+    href: { 'zh-CN': '/examples/tiled-gemm/', en: '/en/examples/tiled-gemm/' },
+    title: { 'zh-CN': 'EX15：分块 GEMM 可运行示例', en: 'EX15: Tiled GEMM Runnable Example' },
+    prerequisites: ['A08'],
   },
   EX16: {
     href: { 'zh-CN': '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
@@ -483,6 +498,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/tiled-transpose/', en: '/en/visuals/tiled-transpose/' },
     title: { 'zh-CN': 'Tiled transpose：逻辑映射与物理 padding', en: 'Tiled Transpose: Logical Mapping and Physical Padding' },
     prerequisites: ['A05'],
+    indexGroup: 'visuals',
+  },
+  VIS12: {
+    href: { 'zh-CN': '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
+    title: { 'zh-CN': 'GEMM Tiling Hierarchy：从 Matrix 到 Instruction', en: 'GEMM Tiling Hierarchy: Matrix to Instruction' },
+    prerequisites: ['A08'],
     indexGroup: 'visuals',
   },
   VIS19: {

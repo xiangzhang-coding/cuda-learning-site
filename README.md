@@ -4,9 +4,9 @@
 
 CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU programming. Chinese pages live at the root and English counterparts under `/en/`.
 
-The current Stable Curriculum contains 47 Learning Units: O01-O08, F01-F08, M01-M19, A01-A07, and Q01-Q05. Exercises and reviewed solutions accompany O02-O08, F01-F08, M01-M19, A01-A07, and every Q unit. The current public surface also contains fifteen Runnable Examples, EX01-EX14 and EX16; six noncontiguous Labs, LAB01-LAB05 and LAB07; fifteen formal Visual Explainers, comprising standalone VIS01-VIS11 plus embedded VIS19-VIS22; 48 Practice Bank entries; 146 Glossary terms; 59 source/version records; and About. These files form exactly 178 bilingual Publication Pairs and 356 source routes. EX15 remains absent. LAB06, Q11, and LAB10 have no public destinations.
+The current Stable Curriculum contains 49 Learning Units: O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q05. Exercises and reviewed solutions accompany O02-O08, F01-F08, M01-M19, A01-A09, and every Q unit. The public surface also contains sixteen Runnable Examples, EX01-EX16; six noncontiguous Labs, LAB01-LAB05 and LAB07; sixteen formal Visual Explainers, standalone VIS01-VIS12 plus embedded VIS19-VIS22; 50 Practice Bank entries; 151 Glossary terms; 61 source/version records; and About. These files form exactly 186 bilingual Publication Pairs and 372 source routes. Q13, L06, and LAB12 have no public destinations.
 
-The strict graph adds `A05<-[M02,M03,M04]`, `A06<-[M03,M04,M05]`, `A07<-[A06,M03]`, `EX14<-A05`, and `VIS11<-A05` to the previously reviewed edges. F08 remains related to LAB03 but is not a LAB03 prerequisite. The validated current catalog contains 6 Labs, 48 Practice Bank entries, 15 Visual Explainers, 146 Glossary terms, and 59 source/version records, or 274 records total.
+The strict graph adds `A08<-[A05,M03,M04,A02]`, `A09<-[A03,A04]`, `EX15<-A08`, and `VIS12<-A08` to the previously reviewed edges. LAB12 remains unpublished until Q13 and L06 are published. The validated catalog contains 6 Labs, 50 Practice Bank entries, 16 Visual Explainers, 151 Glossary terms, and 61 source/version records, or 284 records total.
 
 Contributions use [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) and [Pull Requests](https://github.com/xiangzhang-coding/cuda-learning-site/pulls). Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change.
 
@@ -14,7 +14,7 @@ Contributions use [GitHub Issues](https://github.com/xiangzhang-coding/cuda-lear
 
 R1 remains the latest completed aggregate release review and an immutable historical subset of the growing Learning Site. `src/r1-release-manifest.json` is preserved as the reviewed R1 contract; every static build emits it as `/release.json` with the exact 40-character source commit. The current incremental publication is recorded separately in `src/current-publication-manifest.json` and emitted as `/publication.json` with the same commit. That record describes the exact current artifact surface but is not a completed R2 review. The R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
 
-R1 declares no Reference Environment or Runtime-Verified subject. EX02 and LAB02 retain the only qualifying Compile-Checked evidence from R1. The current publication additionally makes EX10 Compile-Checked from retained run 33275734951. Fourteen current Runnable Examples, EX01-EX09, EX11-EX14, and EX16, and all six current Labs remain Pending Hardware Verification at runtime. EX10 is Runtime-Not-Applicable. EX07-EX09 and EX11-EX14 retain empty compilation evidence and no Compile-Checked claim. The current publication declares no Reference Environment, Runtime-Verified subject, or performance observation. It publishes no measured transpose, stencil, convolution, library-comparison, timing, speedup, profiler, or runtime result. Host-only tests, source review, expected observations, static fallbacks, and browser models do not upgrade those evidence axes.
+R1 declares no Reference Environment or Runtime-Verified subject. EX02 and LAB02 retain the qualifying Compile-Checked evidence from R1, and EX10 retains its later Compile-Checked records. Fifteen Runnable Examples, EX01-EX09 and EX11-EX16, plus all six Labs remain Pending Hardware Verification. EX10 is Runtime-Not-Applicable. EX15 has empty compilation evidence and no Compile-Checked claim. The current publication declares no performance observation or measured GEMM, sorting, selection, compaction, library-comparison, timing, or speedup result.
 
 [Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the authoritative R1 dynamic acceptance record. It binds R1 to its accepted `main` commit, successful GitHub checks, Cloudflare version and deployment IDs, verified Preview URL, and production smoke result. The incremental publication record does not rewrite that history.
 
@@ -29,7 +29,7 @@ npm run build:release
 npm run test
 ```
 
-Host-only tests are available without CUDA for the fourteen current Runnable Examples whose runtime remains Pending Hardware Verification:
+Host-only tests are available without CUDA for the fifteen current Runnable Examples whose runtime remains Pending Hardware Verification:
 
 ```sh
 make -C examples/ex01-environment-report host-test
@@ -45,18 +45,19 @@ make -C examples/ex11-multi-stage-reduction host-test
 make -C examples/ex12-inclusive-exclusive-scan host-test
 make -C examples/ex13-privatized-histogram host-test
 make -C examples/ex14-tiled-transpose host-test
+make -C examples/ex15-tiled-gemm host-test
 make -C examples/ex16-sanitizer-defect-suite host-test
 ```
 
-EX07's host test checks deterministic chunk coverage and its CPU reference, EX08's checks the declared access sequence and CPU oracle, and EX09's checks the fixed DAG and replay oracle. EX11 checks its double CPU reference and tolerance contract, EX12 checks exact prefix recurrences and totals, EX13 checks exact bins and the sum-of-bins invariant, and EX14 checks rectangular transpose mapping and dimensions. They execute no CUDA, establish no GPU transpose, shared-memory, bank, or performance observation, and grant no Compile-Checked or runtime Evidence Status. Their project manifests retain empty compilation and recorded-observation arrays plus Pending Hardware Verification runtime.
+EX11 checks its double CPU reference and tolerance contract, EX12 checks exact prefix recurrences and totals, EX13 checks exact bins, EX14 checks rectangular transpose mapping, and EX15 checks its hand GEMM oracle, double reference, finite abs-plus-rel tolerance, and mismatch reporting. They execute no CUDA and grant no Compile-Checked or runtime Evidence Status.
 
 EX10 is different: its CUDA compile job generates preprocessing output, PTX, cubin, fatbinary, relocatable objects, a device-link object, and a final host-link artifact for inspection only. The final artifact is never executed, so runtime remains Runtime-Not-Applicable. Five ordinary Lane/dialect records from [run 33275734951](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/33275734951) are Compile-Checked at source commit `904c6da03800ed3012baacb861494377c0fa01f2`. The separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe passed only as a narrow `C++23-Dialect-Probe`; it does not declare ordinary EX10 C++23 support, another compiler or platform, runtime, or performance.
 
 The independent `CUDA Compile Evidence` workflow retains qualifying Compile-Checked evidence for EX02, EX10, and LAB02. Other CUDA matrix jobs remain build gates whose short-lived artifacts are not qualifying retained evidence. The retained EX10 C++23 probe is separate from its five ordinary Compile-Checked records. No CUDA binary, Compute Sanitizer tool, or profiler execution is inferred from a successful web, host-only, or compile-gate job.
 
-[Issue #22](https://github.com/xiangzhang-coding/cuda-learning-site/issues/22) reviewed exact current and archived CUDA owner documentation plus current cuDNN documentation and the cuDNN Frontend v1.27.0 owner release, recorded in `SRC-CUDA-041` through `SRC-CUDA-043`. Context7 output is discovery and cross-checking only, not a source or Evidence Status record. The refresh records no measured transpose, stencil, convolution, library comparison, timing, or speedup.
+[Issue #23](https://github.com/xiangzhang-coding/cuda-learning-site/issues/23) reviewed current and archived CUDA owner documentation plus the immutable CCCL v3.4.2 release, recorded in `SRC-CUDA-044` and `SRC-CUDA-045`. Context7 output is discovery and cross-checking only. The refresh records no measured GEMM, sorting, selection, compaction, library comparison, timing, or speedup.
 
-The build is fully static. All fifteen Visual Explainers use deterministic browser-only models, preserve static or textual fallbacks, execute no CUDA, and grant no CUDA Evidence Status. VIS11's logical/physical transpose layouts and static before/after fallback are deterministic teaching composition rather than bank, runtime, or performance observations. Theme selection is the only learner preference retained across browser sessions. The website has no server application, account, progress tracking, API, hosted GPU service, or in-browser CUDA execution.
+The build is fully static. All sixteen Visual Explainers use deterministic browser-only models, preserve static or textual fallbacks, execute no CUDA, and grant no CUDA Evidence Status. VIS12's hierarchy panels are not emitted-instruction, runtime, or performance observations. Theme selection is the only learner preference retained across browser sessions.
 
 ## Deployment
 

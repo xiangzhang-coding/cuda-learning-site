@@ -1,0 +1,313 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+.gemm-hierarchy-visual {
+  --gemm-line: color-mix(in srgb, var(--theme-accent) 38%, var(--sl-color-gray-5));
+  --gemm-panel: color-mix(in srgb, var(--theme-canvas) 94%, var(--theme-accent) 6%);
+  --gemm-selected: color-mix(in srgb, var(--theme-signal) 14%, var(--theme-canvas));
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.gemm-hierarchy-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(9rem, 1fr)) auto;
+  align-items: end;
+  margin: 0;
+}
+
+.gemm-hierarchy-controls legend {
+  padding-inline: 0.35rem;
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  font-weight: 800;
+}
+
+.gemm-hierarchy-controls label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-xs);
+}
+
+.gemm-hierarchy-controls select {
+  width: 100%;
+  min-width: 0;
+}
+
+.gemm-hierarchy-controls :focus-visible {
+  outline: 3px solid var(--theme-signal);
+  outline-offset: 2px;
+}
+
+.gemm-hierarchy-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-inline-start: 0.3rem solid var(--theme-signal);
+  background: var(--gemm-selected);
+  font-size: var(--sl-text-sm);
+}
+
+.gemm-live-workbench,
+.gemm-static-selections > article {
+  display: grid;
+  min-width: 0;
+  gap: 0.85rem;
+  padding: clamp(0.7rem, 2vw, 1rem);
+  border: 1px solid var(--gemm-line);
+  background: var(--gemm-panel);
+  overflow-wrap: anywhere;
+}
+
+.gemm-live-workbench {
+  border-width: 2px;
+  border-color: var(--theme-accent-strong);
+  background: var(--sl-color-bg);
+}
+
+.gemm-live-workbench > header,
+.gemm-static-selections > article > header {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  padding-block-end: 0.6rem;
+  border-block-end: 1px solid var(--gemm-line);
+}
+
+.gemm-live-workbench h3,
+.gemm-live-workbench p,
+.gemm-static-selections h4,
+.gemm-static-selections h5,
+.gemm-static-selections p,
+.gemm-static-selections dl {
+  margin: 0;
+}
+
+.gemm-live-workbench > header p,
+.gemm-static-selections > article > header p {
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+}
+
+.gemm-static-selections > article > header > span {
+  color: var(--theme-signal);
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.gemm-metrics {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.gemm-metrics > div {
+  min-width: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--gemm-line);
+  background: var(--gemm-panel);
+}
+
+.gemm-metrics dt {
+  color: var(--sl-color-gray-2);
+  font-size: 0.65rem;
+}
+
+.gemm-metrics dd {
+  margin: 0.2rem 0 0;
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-sm);
+  font-weight: 800;
+}
+
+.gemm-level-track {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gemm-level-track li {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+  padding: 0.5rem;
+  border: 1px dashed var(--gemm-line);
+  background: var(--sl-color-bg);
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+
+.gemm-level-track li[aria-current='true'] {
+  border: 3px solid var(--theme-signal);
+  background: var(--gemm-selected);
+}
+
+.gemm-level-track strong {
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+}
+
+.gemm-level-track span {
+  color: var(--sl-color-gray-2);
+}
+
+.gemm-live-panels,
+.gemm-static-panels,
+.gemm-static-selections {
+  display: grid;
+  min-width: 0;
+  gap: 0.7rem;
+}
+
+.gemm-static-panels {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+[data-live-hierarchy-panel],
+[data-static-hierarchy-panel] {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--gemm-line);
+  border-block-start: 0.3rem solid var(--theme-accent-strong);
+  background: var(--sl-color-bg);
+  overflow-wrap: anywhere;
+}
+
+[data-live-hierarchy-panel] h4,
+[data-static-hierarchy-panel] h5 {
+  margin: 0 0 0.5rem;
+  color: var(--theme-ink);
+}
+
+[data-live-hierarchy-panel] dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0;
+}
+
+[data-live-hierarchy-panel] dl > div,
+[data-static-hierarchy-panel] p {
+  min-width: 0;
+  margin: 0;
+  padding: 0.45rem;
+  border-inline-start: 0.2rem solid var(--gemm-line);
+  background: var(--gemm-panel);
+  font-size: var(--sl-text-sm);
+}
+
+[data-live-hierarchy-panel] dt {
+  color: var(--sl-color-gray-2);
+  font-size: 0.65rem;
+}
+
+[data-live-hierarchy-panel] dd {
+  margin: 0.15rem 0 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gemm-level-track li,
+  [data-live-hierarchy-panel] {
+    transition: border-color 120ms linear, background-color 120ms linear;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gemm-hierarchy-visual,
+  .gemm-hierarchy-visual * {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .gemm-hierarchy-status,
+  .gemm-live-workbench,
+  .gemm-metrics > div,
+  .gemm-level-track li,
+  .gemm-static-selections > article,
+  [data-live-hierarchy-panel],
+  [data-static-hierarchy-panel] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  .gemm-level-track li[aria-current='true'] {
+    border: 3px solid Highlight;
+  }
+}
+
+@media (max-width: 56rem) {
+  .gemm-hierarchy-controls,
+  .gemm-metrics,
+  .gemm-static-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gemm-hierarchy-controls button {
+    width: 100%;
+  }
+
+  .gemm-level-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 390px) {
+  .gemm-live-workbench,
+  .gemm-static-selections > article,
+  [data-live-hierarchy-panel],
+  [data-static-hierarchy-panel] {
+    padding: 0.5rem;
+  }
+
+  .gemm-level-track,
+  [data-live-hierarchy-panel] dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media print {
+  .gemm-hierarchy-controls,
+  .gemm-live-workbench {
+    display: none !important;
+  }
+
+  .gemm-static {
+    display: grid !important;
+  }
+
+  .gemm-static-selections > article,
+  [data-static-hierarchy-panel] {
+    border-color: #777;
+    background: #fff;
+    color: #222;
+    box-shadow: none;
+  }
+
+  .gemm-static-selections > article {
+    break-inside: avoid;
+    margin-block-end: 0.8rem;
+  }
+
+  .gemm-static-panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
