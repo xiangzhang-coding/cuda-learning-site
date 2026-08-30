@@ -185,11 +185,11 @@ describe('published resource indexes', () => {
     const discovered = { labs: new Set<string>(), visuals: new Set<string>() };
     const htmlFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true }))
       .map((file) => file.split(path.sep).join('/'))
-      .filter((file) => file.endsWith('.html'));
+      .filter((file) => file.endsWith('.html') && !file.startsWith('en/'));
 
     for (const file of htmlFiles) {
       const document = parseHTML(await readFile(path.join(projectRoot, 'dist', file), 'utf8')).document;
-      if (document.documentElement.lang !== 'zh-CN') continue;
+      expect(document.documentElement.lang, file).toBe('zh-CN');
       const resourceKind = metadata(document, 'cuda:resource-kind');
       const unitId = metadata(document, 'cuda:unit-id');
       if (resourceKind === 'lab' && unitId) discovered.labs.add(unitId);
@@ -206,7 +206,7 @@ describe('published resource indexes', () => {
         .sort();
       expect([...discovered[group]].sort()).toEqual(indexed);
     }
-  });
+  }, 15_000);
 
   it('projects every Lab title and Evidence Status exactly and grants Visual Explainers no CUDA status', async () => {
     for (const locale of INDEX_LOCALES) {

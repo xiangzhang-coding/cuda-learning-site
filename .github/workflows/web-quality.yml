@@ -259,7 +259,7 @@ jobs:
 
   artifact-policy:
     name: artifact-policy
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.static-and-integration.result == 'success' }}
     needs:
       - static-and-integration
       - e2e-chromium
