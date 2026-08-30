@@ -106,6 +106,8 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
       expect(page).toMatch(/DeviceRadixSort/);
       expect(page).toMatch(/DeviceSelect/);
       expect(page).toMatch(/Thrust/i);
+      expect(page).toMatch(/CCCL 3\.x.*Toolkit 12\.x.*13\.x/is);
+      expect(page).toMatch(/11\.8.*(?:bundled|旧版|2\.x)/is);
       expect(page).toMatch(/not.*production|不是.*production/i);
     }
   });

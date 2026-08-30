@@ -40,9 +40,6 @@ export type GemmHierarchyState = Readonly<{
 export type GemmHierarchyPanel = Readonly<{
   level: GemmHierarchyLevel;
   shape: GemmShape;
-  owner: string;
-  relation: string;
-  boundary: string;
 }>;
 
 export type GemmHierarchyView = Readonly<{
@@ -147,37 +144,22 @@ function buildView(state: GemmHierarchyState): GemmHierarchyView {
     {
       level: 'matrix',
       shape: cloneShape(matrix),
-      owner: 'problem',
-      relation: 'A[M,K] times B[K,N] produces C[M,N]',
-      boundary: 'Logical matrix contract; no launch or storage layout is implied.',
     },
     {
       level: 'tile',
       shape: cloneShape(tile),
-      owner: 'logical-partition',
-      relation: 'One output tile loops over every K slice.',
-      boundary: 'A tile is a logical work partition, not a measured hardware schedule.',
     },
     {
       level: 'threadblock',
       shape: cloneShape(threadblock),
-      owner: 'one-cuda-thread-block',
-      relation: 'The teaching mapping assigns one thread block to one output tile.',
-      boundary: 'Matching tile and thread-block shapes express ownership, not occupancy.',
     },
     {
       level: 'warp',
       shape: cloneShape(warp),
-      owner: 'modeled-warp-subtile',
-      relation: 'Warps partition the selected thread-block output footprint.',
-      boundary: 'The model does not predict warp scheduling or instruction issue.',
     },
     {
       level: 'instruction',
       shape: cloneShape(instruction),
-      owner: 'source-level-operation-slot',
-      relation: 'One scalar source-level multiply-accumulate contributes to one output.',
-      boundary: 'Compiler-emitted FMA, MMA, SASS, and execution are unknown.',
     },
   ];
   const selected = panels.find((panel) => panel.level === state.level);

@@ -249,6 +249,10 @@ describe('CUDA compile evidence workflow', () => {
       expect(buildScanOffset).toBeGreaterThan(-1);
       expect(buildUploadOffset).toBeGreaterThan(buildScanOffset);
     }
+    expect(ex15Build).toContain('fetch-depth: 0');
+    expect(ex15Build).toContain('Verify EX15 build inputs match the pinned source tree');
+    expect(ex15Build).toContain('git cat-file -e "${source_commit}^{commit}"');
+    expect(ex15Build).toContain('git diff --exit-code "$source_commit" -- "$file"');
 
     expect(ex16Build).not.toBe('');
     expect([...ex16Build.matchAll(/^\s+- lane: (\S+)$/gm)].map((match) => match[1])).toEqual([

@@ -109,6 +109,16 @@ describe('EX15 standalone tiled-GEMM boundary', () => {
     expect(range.code).not.toMatch(/\breturn\b/);
     expect(source).not.toMatch(/__CUDA_ARCH__|<mma\.h>|wmma::|cp\.async|cuda::pipeline|__half|tf32/i);
     expect(source).not.toMatch(/cudaEvent|chrono|clock_gettime|throughput|bandwidth|speedup/i);
+    for (const diagnostic of [
+      'mismatch fixture=',
+      ' index=',
+      ' row=',
+      ' column=',
+      ' reference=',
+      ' candidate=',
+      ' absolute_error=',
+      ' allowed_error=',
+    ]) expect(source).toContain(diagnostic);
   });
 
   it('runs the CUDA-free host reference and exercises finite abs-plus-rel tolerance failures', async () => {

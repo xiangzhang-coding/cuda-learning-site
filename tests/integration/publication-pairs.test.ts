@@ -1717,7 +1717,7 @@ const publicationPairs: readonly PublicationPair[] = [
     unitId: 'A09',
     prerequisites: 'A03,A04',
     hardwareGate: 'none',
-    sourceCount: '5',
+    sourceCount: '6',
     sourceVersions: 'CCCL-v3.4.2',
     zh: '/algorithms/sorting-selection-compaction/',
     en: '/en/algorithms/sorting-selection-compaction/',

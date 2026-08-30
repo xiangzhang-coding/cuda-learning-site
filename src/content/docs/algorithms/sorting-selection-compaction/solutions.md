@@ -70,7 +70,7 @@ Histogram counts 是 `[2,2,2]`，exclusive starts 是 `[0,2,4]`。每项 within-
 
 ## 解答 3：Production decision
 
-先冻结 stable key/value sort 与 stable predicate compaction。CUB path 检查 `DeviceRadixSort`/`DeviceSelect` 的 supported types、stability、temporary storage 与 stream；Thrust path 检查 iterator、execution policy、`stable_sort`/`copy_if` semantics；custom path 需要 API mismatch 或 correctness-qualified measured need，并承担版本、测试、调优与维护。没有 run，因此三个 performance cells 都是 `unrecorded`，不能排名。
+先冻结 stable key/value sort 与 stable predicate compaction。CCCL v3.4.2 path 只进入 12.9.2/13.3.1 rows；11.8 row 使用 Toolkit-bundled CUB/Thrust 或另行复核的 CCCL 2.x coordinate。随后分别检查 CUB types/stability/storage/stream、Thrust iterator/policy semantics 与 custom maintenance。没有 run，因此 performance cells 都是 `unrecorded`。
 
 ## 有效替代方案
 

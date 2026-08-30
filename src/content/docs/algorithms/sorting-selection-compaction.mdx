@@ -36,6 +36,11 @@ sources:
     version: 'CCCL v3.4.2; released 2026-08-05'
     platform: 'Selected owner release for CUB and Thrust production coordinates'
     accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 platform support'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; CCCL 3.x compatibility table'
+    platform: 'Exact owner compatibility boundary: latest-patch CUDA Toolkit 12.x and 13.x, excluding Toolkit 11.8'
+    accessDate: '2026-08-31'
   - title: 'CCCL v3.4.2 CUB DeviceRadixSort source'
     url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_radix_sort.cuh'
     version: 'CCCL v3.4.2'
@@ -86,7 +91,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:recorded-observations', content: none }
   - tag: meta
-    attrs: { name: 'cuda:source-count', content: '5' }
+    attrs: { name: 'cuda:source-count', content: '6' }
   - tag: meta
     attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2' }
 ---
@@ -134,7 +139,9 @@ Atomic counter 可给 concurrent writers 分配不同 slots；这可以支持 un
 
 ## Production choice：先读 exact owner contract
 
-CCCL v3.4.2 是本页选择的 immutable owner release。CUB `DeviceRadixSort` 提供 device-wide radix sort，CUB `DeviceSelect` 提供 `Flagged`、`If` 与 `Unique` production primitives；传统 device-wide form 需要查询/提供 temporary storage 并声明 stream。Thrust 提供更高层 `sort`、`stable_sort` 与 `copy_if` vocabulary，并通过 execution policy/iterator contract 选择 backend。
+CCCL v3.4.2 是本页选择的 immutable owner release。它的 tagged platform-support table 明确限定 CCCL 3.x 支持 CUDA Toolkit 12.x 与 13.x 的 latest patch releases，不支持本站的 Toolkit 11.8 lane。12.9.2/13.3.1 decision packet 可以评估 v3.4.2；11.8 path 必须使用该 Toolkit bundled 的旧版 CUB/Thrust，或另选并重新复核一个兼容的 CCCL 2.x coordinate，不能把 v3.4.2 直接投射到 11.8。
+
+CUB `DeviceRadixSort` 提供 device-wide radix sort，CUB `DeviceSelect` 提供 `Flagged`、`If` 与 `Unique` production primitives；传统 device-wide form 需要查询/提供 temporary storage 并声明 stream。Thrust 提供更高层 `sort`、`stable_sort` 与 `copy_if` vocabulary，并通过 execution policy/iterator contract 选择 backend。
 
 教育 composition 解释 flags、prefix ranks、bin offsets、movement、stability 与 ownership，但不是 production implementation。选择 production path 时至少比较 operation semantics、types/iterators、stability、temporary storage、stream/execution policy、maintenance、toolkit/CCCL version、correctness fixtures 和 measured workload。没有测量就不能宣布 custom、CUB 或 Thrust 更快。
 
@@ -161,6 +168,6 @@ LAB12 不属于 A09，但本 ticket 仍保持它未发布：它严格依赖 Q13 
 
 ## 来源与复核
 
-CCCL v3.4.2 release 及其 `device_radix_sort.cuh`、`device_select.cuh`、Thrust `sort.h`/`copy.h` 是 exact owner coordinates。本站只改写公开 API/algorithm contracts，没有复制 source、sample、figure、table 或 benchmark。
+CCCL v3.4.2 release、tagged README platform-support table 及其 `device_radix_sort.cuh`、`device_select.cuh`、Thrust `sort.h`/`copy.h` 是 exact owner coordinates。本站只改写公开 API/algorithm contracts，没有复制 source、sample、figure、table 或 benchmark。
 
 **事实核查与来源访问日期：2026-08-31。**

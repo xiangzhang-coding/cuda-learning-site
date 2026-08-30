@@ -2254,13 +2254,13 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - **类型与难度：** Concepts/implementation decision；高级。
 - **直接先修条件：** [A09：用 Scan、Histogram 与 Movement 组合排序、选择和压缩](/algorithms/sorting-selection-compaction/)。
 - **硬件门槛（Hardware gate）：** 无；只推导 flag、scan、histogram、rank、scatter 与 production decision，不运行 CUDA/CCCL。
-- **版本门槛（Version gate）：** CCCL v3.4.2 immutable release；CUB `DeviceRadixSort`/`DeviceSelect` 与 Thrust `sort`/`copy` exact owner sources。
+- **版本门槛（Version gate）：** CCCL v3.4.2 immutable release；CCCL 3.x 只覆盖 latest-patch Toolkit 12.x/13.x，不覆盖 11.8；CUB `DeviceRadixSort`/`DeviceSelect` 与 Thrust `sort`/`copy` exact owner sources。
 - **相关学习单元与资源：** [A03](/algorithms/inclusive-exclusive-scan/)、[A04](/algorithms/privatized-histogram/)与 [A09](/algorithms/sorting-selection-compaction/)。
 - **最后复核（Last reviewed）：** 2026-08-31。
 
 **题目：** 一个 proposal 对 even values 用 atomic append 并称为 stable compaction；对 keys `[2,0,1,2,1,0]` 只算 histogram/starts 就称已完成 stable sort；又因为 custom code 暴露更多 phases 就宣布它优于 CUB/Thrust。修复 composition 与 production decision。
 
-**约束：** Selection 使用 flags、exclusive positions 与 scatter；sorting 给出 counts、bin starts、stable within-bin ranks 与 destinations；atomic uniqueness/stability 分开；比较 CUB、Thrust、custom semantics、temporary storage、stream/policy、maintenance 与 measurement。
+**约束：** Selection 使用 flags、exclusive positions 与 scatter；sorting 给出 counts、bin starts、stable within-bin ranks 与 destinations；atomic uniqueness/stability 分开；CCCL v3.4.2 只进入 12.9.2/13.3.1 rows，11.8 使用 bundled libraries 或另行复核的 2.x coordinate；再比较 CUB、Thrust、custom semantics、storage、policy、maintenance 与 measurement。
 
 **预期证据：** Compaction table、六项 stable movement ledger、三路径 decision matrix、空 measurement cells 与 source/version pin。
 
@@ -2270,7 +2270,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <details><summary>提示 2</summary>先按 semantics 淘汰路径，再比较维护与 measurement，不按 abstraction level 排名。</details>
 
-**参考解答（Reviewed solution）：** Even flags 做 exclusive scan 后，selected positions 按 input order 唯一递增，scatter 产生 stable compacted output；atomic append 只能作为明确 unordered path。Keys fixture 的 counts `[2,2,2]` 与 starts `[0,2,4]` 还需要 ranks `[0,0,0,1,1,1]`，destinations 才成为 `[4,0,2,5,3,1]`。Decision matrix 固定 CCCL v3.4.2，分别核对 CUB temporary storage/stream、Thrust iterator/execution policy 与 custom maintenance responsibility；所有 timing cells 保持 `unrecorded`。
+**参考解答（Reviewed solution）：** Even flags 做 exclusive scan 后，selected positions 按 input order 唯一递增，scatter 产生 stable output；atomic append 只能作为 unordered path。Keys fixture 的 counts/starts 还需要 ranks 才得到 destinations `[4,0,2,5,3,1]`。Decision matrix 把 CCCL v3.4.2 限于 12.9.2/13.3.1；11.8 使用 bundled CUB/Thrust 或另行复核的 CCCL 2.x。所有 timing cells 保持 `unrecorded`。
 
 **有效替代方案：** 可以 compact indices、使用 comparison sort 或 framework-managed primitive，只要 predicate/key、stability、payload 与 component/backend contract 明确。
 

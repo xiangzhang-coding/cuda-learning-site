@@ -2254,13 +2254,13 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - **Type and difficulty:** Concepts and implementation decision; advanced.
 - **Direct prerequisite:** [A09: Compose Sorting, Selection, and Compaction from Scan, Histograms, and Movement](/en/algorithms/sorting-selection-compaction/).
 - **Hardware gate:** None; derive flags, scans, histograms, ranks, scatter, and a production decision without running CUDA or CCCL.
-- **Version gate:** CCCL v3.4.2 immutable release with exact CUB `DeviceRadixSort`/`DeviceSelect` and Thrust `sort`/`copy` owner sources.
+- **Version gate:** CCCL v3.4.2 immutable release; CCCL 3.x covers latest-patch Toolkit 12.x/13.x and excludes 11.8; exact CUB `DeviceRadixSort`/`DeviceSelect` and Thrust `sort`/`copy` owner sources.
 - **Related Learning Units and resources:** [A03](/en/algorithms/inclusive-exclusive-scan/), [A04](/en/algorithms/privatized-histogram/), and [A09](/en/algorithms/sorting-selection-compaction/).
 - **Last reviewed:** 2026-08-31.
 
 **Prompt:** A proposal atomically appends even values and calls the result stable compaction. For keys `[2,0,1,2,1,0]`, it computes only a histogram and starts before declaring stable sorting complete. It then ranks custom code above CUB and Thrust because custom code exposes more phases. Repair the composition and production decision.
 
-**Constraints:** Use flags, exclusive positions, and scatter for selection; give sorting counts, bin starts, stable within-bin ranks, and destinations; separate atomic uniqueness from stability; compare CUB, Thrust, and custom semantics, temporary storage, stream or policy, maintenance, and measurement.
+**Constraints:** Use flags, exclusive positions, and scatter for selection; give sorting counts, bin starts, stable within-bin ranks, and destinations; separate atomic uniqueness from stability; put CCCL v3.4.2 only in 12.9.2/13.3.1 rows and use bundled libraries or a separately reviewed 2.x coordinate for 11.8; then compare CUB, Thrust, and custom semantics, storage, policy, maintenance, and measurement.
 
 **Expected evidence:** A compaction table, six-item stable movement ledger, three-path decision matrix, blank measurement cells, and source/version pin.
 
@@ -2270,7 +2270,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <details><summary>Hint 2</summary>Eliminate paths by semantics before comparing maintenance and measurement; do not rank abstraction levels.</details>
 
-**Reviewed solution:** Exclusive-scanning even flags makes selected positions unique and increasing in input order, so scatter produces stable compaction; atomic append remains only an explicitly unordered path. The key fixture's counts `[2,2,2]` and starts `[0,2,4]` still need ranks `[0,0,0,1,1,1]` to produce destinations `[4,0,2,5,3,1]`. The decision matrix pins CCCL v3.4.2 and separately reviews CUB temporary storage/stream, Thrust iterator/execution policy, and custom maintenance responsibility. Every timing cell remains `unrecorded`.
+**Reviewed solution:** Exclusive-scanning even flags makes selected positions unique and increasing, so scatter produces stable compaction; atomic append remains unordered. The key fixture's counts and starts still need ranks to produce destinations `[4,0,2,5,3,1]`. The decision matrix limits CCCL v3.4.2 to 12.9.2/13.3.1; 11.8 uses bundled CUB/Thrust or a separately reviewed CCCL 2.x coordinate. Every timing cell remains `unrecorded`.
 
 **Valid alternative:** Compact indices, comparison sorting, or a framework-managed primitive is valid when predicate or key, stability, payload, and component/backend contracts are explicit.
 

@@ -1387,7 +1387,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **定义：** 排序（sorting）按声明的 key projection、direction、stability、equal-key 与 payload-movement contract 建立 output order。
 - **避免使用：** 只把 items 分 bins、任意 atomic scatter、所有 selection/compaction、自动最快的 custom kernel。
 - **相关资源：** [A09](/algorithms/sorting-selection-compaction/)。
-- **版本说明：** Production API coordinate 固定 CCCL v3.4.2；availability 不等于 measured suitability。
+- **版本说明：** Production API coordinate 固定 CCCL v3.4.2；CCCL 3.x 只支持 latest-patch Toolkit 12.x/13.x，不支持 11.8；availability 不等于 measured suitability。
 
 <span id="term-150" class="resource-target" aria-hidden="true"></span>
 
@@ -1396,7 +1396,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **定义：** 选择（selection）按 predicate 或 flags 产生满足条件的 values、indices 或 key/value payload，并声明 selected count 与 output ownership。
 - **避免使用：** 必然 stable compaction、sorting、未声明 equivalence 的 unique。
 - **相关资源：** [A09](/algorithms/sorting-selection-compaction/)。
-- **版本说明：** CUB `DeviceSelect` v3.4.2 的 `Flagged`、`If`、`Unique` 是不同 production contracts。
+- **版本说明：** CUB `DeviceSelect` v3.4.2 的 `Flagged`、`If`、`Unique` 是不同 production contracts；该 3.x coordinate 不覆盖 Toolkit 11.8。
 
 <span id="term-151" class="resource-target" aria-hidden="true"></span>
 
@@ -1405,7 +1405,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **定义：** 流压缩（stream compaction）把 selected items 写入 contiguous output positions；original-order exclusive prefix rank 可提供 stability。
 - **避免使用：** 任意 atomic append 都叫 stable、sorting、CUDA stream API operation。
 - **相关资源：** [A03](/algorithms/inclusive-exclusive-scan/)和 [A09](/algorithms/sorting-selection-compaction/)。
-- **版本说明：** Composition 是 algorithm contract；CUB/Thrust exact API 与 temporary-storage/policy contract 由 selected CCCL release 决定。
+- **版本说明：** Composition 是 algorithm contract；CUB/Thrust exact API 与 storage/policy/Toolkit compatibility 由 selected CCCL release 决定。
 
 ## 维护规则
 

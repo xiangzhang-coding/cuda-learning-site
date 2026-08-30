@@ -96,7 +96,7 @@ For every task, state operation semantics, ownership, movement, and evidence sep
 
 **Goal:** For stable ascending 32-bit key/value sorting and predicate compaction, compare CUB `DeviceRadixSort`/`DeviceSelect`, Thrust `stable_sort`/`copy_if`, and a custom composition.
 
-**Constraints:** Pin CCCL v3.4.2; record semantics, types, stability, temporary storage, stream or execution policy, correctness fixtures, maintenance, and a measurement plan; no measured data exists.
+**Constraints:** Pin CCCL v3.4.2 and state that it covers latest-patch Toolkit 12.x/13.x but not the 11.8 lane. Record semantics, types, stability, temporary storage, stream or execution policy, correctness fixtures, maintenance, and a measurement plan; no measured data exists.
 
 **Expected evidence:** A three-path decision matrix, rejection or selection conditions, and fields requiring future observations.
 

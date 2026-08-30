@@ -1011,8 +1011,8 @@ const practice: readonly ResourceIndexRecord[] = [
     relatedUnits: ['A03', 'A04', 'A09'],
     hardwareGate: localized('无；只推导 flag、scan、histogram、rank、scatter 与 production decision，不运行 CUDA/CCCL。', 'None; derive flags, scans, histograms, ranks, scatter, and a production decision without running CUDA or CCCL.'),
     versionGate: localized(
-      'CCCL v3.4.2 immutable release；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources。',
-      'CCCL v3.4.2 immutable release with exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources.',
+      'CCCL v3.4.2 immutable release；CCCL 3.x 仅支持 latest-patch Toolkit 12.x/13.x，不覆盖 11.8；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources。',
+      'CCCL v3.4.2 immutable release; CCCL 3.x supports latest-patch Toolkit 12.x/13.x and excludes 11.8; exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources.',
     ),
     reviewedOn: '2026-08-31',
     keywords: localized('sorting selection compaction flag exclusive scan histogram stable rank scatter CUB Thrust', 'sorting selection compaction flag exclusive scan histogram stable rank scatter CUB Thrust'),
@@ -1421,9 +1421,9 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-146', 'cross-correlation · 互相关', 'kernel-vocabulary', ['A07'], 'A07 teaching equation 不翻转 spatial filter；cuDNN current operation semantics 需要在 pinned future component matrix 中复核。', 'The A07 teaching equation does not flip the spatial filter; current cuDNN operation semantics require review in a future pinned component matrix.', '2026-08-30'),
   glossaryRecord('TERM-147', 'general matrix multiplication (GEMM) · 通用矩阵乘法', 'kernel-vocabulary', ['A08', 'EX15', 'VIS12'], 'Row-major M/N/K、alpha/beta、precision 与 acceptance contract 必须先于 tile/performance claim。', 'Row-major M/N/K, alpha/beta, precision, and acceptance contracts precede tile or performance claims.', '2026-08-31'),
   glossaryRecord('TERM-148', 'K tile · K 维分块', 'kernel-vocabulary', ['M03', 'A08', 'EX15', 'VIS12'], 'K tile 是 reduction slice；一个 output block 循环 slices，不创建额外 output owners。', 'A K tile is a reduction slice; one output block loops over slices without creating extra output owners.', '2026-08-31'),
-  glossaryRecord('TERM-149', 'sorting · 排序', 'kernel-vocabulary', ['A09'], 'Sorting contract 声明 key projection、direction、stability、payload movement 与 equal-key policy。', 'A sorting contract declares key projection, direction, stability, payload movement, and equal-key policy.', '2026-08-31'),
-  glossaryRecord('TERM-150', 'selection · 选择', 'kernel-vocabulary', ['A09'], 'Selection 由 predicate、payload、output ownership 与 selected-count contract 定义。', 'Selection is defined by its predicate, payload, output ownership, and selected-count contract.', '2026-08-31'),
-  glossaryRecord('TERM-151', 'stream compaction · 流压缩', 'kernel-vocabulary', ['A03', 'A09'], 'Flag/exclusive-scan/scatter 可建立 contiguous positions；stability 依赖 original-order prefix rank。', 'Flag, exclusive scan, and scatter establish contiguous positions; stability depends on original-order prefix rank.', '2026-08-31'),
+  glossaryRecord('TERM-149', 'sorting · 排序', 'kernel-vocabulary', ['A09'], 'CCCL v3.4.2/3.x 仅支持 latest-patch Toolkit 12.x/13.x，不覆盖 11.8；sorting contract 仍需声明 key、stability 与 movement。', 'CCCL v3.4.2/3.x supports latest-patch Toolkit 12.x/13.x and excludes 11.8; a sorting contract still declares keys, stability, and movement.', '2026-08-31'),
+  glossaryRecord('TERM-150', 'selection · 选择', 'kernel-vocabulary', ['A09'], 'Selection 由 predicate、payload、ownership 与 count 定义；CCCL v3.4.2 coordinate 不覆盖 11.8。', 'Selection is defined by predicate, payload, ownership, and count; the CCCL v3.4.2 coordinate excludes 11.8.', '2026-08-31'),
+  glossaryRecord('TERM-151', 'stream compaction · 流压缩', 'kernel-vocabulary', ['A03', 'A09'], 'Flag/scan/scatter 建立 contiguous positions；exact library storage、policy 与 Toolkit support 跟随 selected CCCL release。', 'Flag, scan, and scatter establish contiguous positions; exact library storage, policy, and Toolkit support follow the selected CCCL release.', '2026-08-31'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2008,8 +2008,8 @@ const sources: readonly ResourceIndexRecord[] = [
     'cuda-version-record',
     ['A03', 'A04', 'A09'],
     localized(
-      'CCCL v3.4.2 immutable release；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources；不包含 runtime/performance observation。',
-      'CCCL v3.4.2 immutable release with exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources; no runtime or performance observation.',
+      'CCCL v3.4.2 immutable release与 tagged platform-support table；CCCL 3.x 仅覆盖 latest-patch Toolkit 12.x/13.x，不覆盖 11.8；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources；不包含 runtime/performance observation。',
+      'CCCL v3.4.2 immutable release and tagged platform-support table; CCCL 3.x covers latest-patch Toolkit 12.x/13.x and excludes 11.8; exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources; no runtime or performance observation.',
     ),
     '2026-08-31',
     '2026-08-31',

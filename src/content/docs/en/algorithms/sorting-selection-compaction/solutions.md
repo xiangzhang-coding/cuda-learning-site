@@ -70,7 +70,7 @@ Histogram counts are `[2,2,2]`, and exclusive starts are `[0,2,4]`. Within-bin r
 
 ## Solution 3: Production decision
 
-First freeze stable key/value sort and stable predicate compaction. The CUB path checks `DeviceRadixSort` and `DeviceSelect` supported types, stability, temporary storage, and stream. The Thrust path checks iterators, execution policy, and `stable_sort`/`copy_if` semantics. Custom code needs an API mismatch or a correctness-qualified measured need, plus ownership of versions, tests, tuning, and maintenance. No run exists, so all three performance cells are `unrecorded` and cannot be ranked.
+First freeze stable key/value sort and stable predicate compaction. The CCCL v3.4.2 path enters only the 12.9.2 and 13.3.1 rows; the 11.8 row uses Toolkit-bundled CUB and Thrust or a separately reviewed CCCL 2.x coordinate. Then review CUB types, stability, storage, and stream; Thrust iterator and policy semantics; and custom maintenance. No run exists, so performance cells remain `unrecorded`.
 
 ## Valid alternatives
 

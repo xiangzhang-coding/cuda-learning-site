@@ -104,6 +104,18 @@ bool run_fixture(const ex15::Fixture& fixture) {
   const ex15::VerificationResult verification = ex15::verify_tolerance(
       expected.data(), expected.size(), c.data(), c.size(), fixture.shape.m, fixture.shape.n,
       ex15::kAbsoluteTolerance, ex15::kRelativeTolerance);
+  if (ok && verification.valid && !verification.matches) {
+    std::cerr << "mismatch fixture=" << fixture.id
+              << " index=" << verification.mismatch_index
+              << " row=" << verification.row
+              << " column=" << verification.column
+              << " reference=" << verification.reference
+              << " candidate=" << verification.candidate
+              << " absolute_error=" << verification.absolute_error
+              << " allowed_error=" << verification.allowed_error << '\n';
+  } else if (ok && !verification.valid) {
+    std::cerr << "verification-invalid fixture=" << fixture.id << '\n';
+  }
   if (device_c != nullptr) ok = cuda_ok(cudaFree(device_c)) && ok;
   if (device_b != nullptr) ok = cuda_ok(cudaFree(device_b)) && ok;
   if (device_a != nullptr) ok = cuda_ok(cudaFree(device_a)) && ok;

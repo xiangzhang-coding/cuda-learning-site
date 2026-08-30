@@ -96,7 +96,7 @@ head:
 
 **目标：** 为 32-bit key/value pairs 的 stable ascending sort 和 predicate compaction，比较 CUB `DeviceRadixSort`/`DeviceSelect`、Thrust `stable_sort`/`copy_if` 与 custom composition。
 
-**约束：** 固定 CCCL v3.4.2；记录 semantics、types、stability、temporary storage、stream/execution policy、correctness fixtures、maintenance 与 measurement plan；没有 measured data。
+**约束：** 固定 CCCL v3.4.2，并明确它只覆盖 latest-patch Toolkit 12.x/13.x、不能用于 11.8 lane；记录 semantics、types、stability、temporary storage、stream/execution policy、correctness fixtures、maintenance 与 measurement plan；没有 measured data。
 
 **预期证据：** 三路径 decision matrix、拒绝或选择条件、需要未来观测的字段。
 

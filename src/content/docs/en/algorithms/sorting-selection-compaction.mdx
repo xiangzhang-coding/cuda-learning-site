@@ -36,6 +36,11 @@ sources:
     version: 'CCCL v3.4.2; released 2026-08-05'
     platform: 'Selected owner release for CUB and Thrust production coordinates'
     accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 platform support'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; CCCL 3.x compatibility table'
+    platform: 'Exact owner compatibility boundary: latest-patch CUDA Toolkit 12.x and 13.x, excluding Toolkit 11.8'
+    accessDate: '2026-08-31'
   - title: 'CCCL v3.4.2 CUB DeviceRadixSort source'
     url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_radix_sort.cuh'
     version: 'CCCL v3.4.2'
@@ -86,7 +91,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:recorded-observations', content: none }
   - tag: meta
-    attrs: { name: 'cuda:source-count', content: '5' }
+    attrs: { name: 'cuda:source-count', content: '6' }
   - tag: meta
     attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2' }
 ---
@@ -134,7 +139,9 @@ An atomic counter can assign different slots to concurrent writers and therefore
 
 ## Production choice: begin with the exact owner contract
 
-CCCL v3.4.2 is this page's immutable selected owner release. CUB `DeviceRadixSort` supplies device-wide radix sort, and CUB `DeviceSelect` supplies `Flagged`, `If`, and `Unique` production primitives. The traditional device-wide form queries and receives temporary storage and names a stream. Thrust supplies higher-level `sort`, `stable_sort`, and `copy_if` vocabulary and chooses a backend through execution-policy and iterator contracts.
+CCCL v3.4.2 is this page's immutable selected owner release. Its tagged platform-support table limits CCCL 3.x to latest-patch CUDA Toolkit 12.x and 13.x and excludes the site's Toolkit 11.8 lane. A 12.9.2 or 13.3.1 decision packet may evaluate v3.4.2. The 11.8 path must use its Toolkit-bundled older CUB and Thrust or select and review a compatible CCCL 2.x coordinate; it cannot project v3.4.2 onto 11.8.
+
+CUB `DeviceRadixSort` supplies device-wide radix sort, and CUB `DeviceSelect` supplies `Flagged`, `If`, and `Unique` production primitives. The traditional device-wide form queries and receives temporary storage and names a stream. Thrust supplies higher-level `sort`, `stable_sort`, and `copy_if` vocabulary and chooses a backend through execution-policy and iterator contracts.
 
 The educational composition explains flags, prefix ranks, bin offsets, movement, stability, and ownership, but it is not a production implementation. A production decision compares operation semantics, types and iterators, stability, temporary storage, stream or execution policy, maintenance, Toolkit/CCCL version, correctness fixtures, and the measured workload. Without measurement, custom code, CUB, and Thrust cannot be ranked by speed.
 
@@ -161,6 +168,6 @@ LAB12 is unrelated to A09 but remains unpublished in this ticket: it strictly de
 
 ## Sources and review
 
-The CCCL v3.4.2 release and its `device_radix_sort.cuh`, `device_select.cuh`, and Thrust `sort.h` and `copy.h` files are exact owner coordinates. The site paraphrases public API and algorithm contracts and copies no source, sample, figure, table, or benchmark.
+The CCCL v3.4.2 release, tagged README platform-support table, `device_radix_sort.cuh`, `device_select.cuh`, and Thrust `sort.h` and `copy.h` files are exact owner coordinates. The site paraphrases public API and algorithm contracts and copies no source, sample, figure, table, or benchmark.
 
 **Fact checked and sources accessed: 2026-08-31.**

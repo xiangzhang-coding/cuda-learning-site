@@ -1387,7 +1387,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Definition:** Sorting establishes output order under declared key projection, direction, stability, equal-key, and payload-movement contracts.
 - **Avoid:** Merely placing items in bins, arbitrary atomic scatter, every selection or compaction, automatically fastest custom kernel.
 - **Related resources:** [A09](/en/algorithms/sorting-selection-compaction/).
-- **Version note:** The production API coordinate is CCCL v3.4.2. Availability does not establish measured suitability.
+- **Version note:** The production API coordinate is CCCL v3.4.2. CCCL 3.x supports latest-patch Toolkit 12.x/13.x and excludes 11.8. Availability does not establish measured suitability.
 
 <span id="term-150" class="resource-target" aria-hidden="true"></span>
 
@@ -1396,7 +1396,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Definition:** Selection uses a predicate or flags to emit matching values, indices, or key/value payloads while declaring selected count and output ownership.
 - **Avoid:** Necessarily stable compaction, sorting, unique without declared equivalence.
 - **Related resources:** [A09](/en/algorithms/sorting-selection-compaction/).
-- **Version note:** CUB `DeviceSelect` v3.4.2 `Flagged`, `If`, and `Unique` are distinct production contracts.
+- **Version note:** CUB `DeviceSelect` v3.4.2 `Flagged`, `If`, and `Unique` are distinct production contracts; that 3.x coordinate excludes Toolkit 11.8.
 
 <span id="term-151" class="resource-target" aria-hidden="true"></span>
 
@@ -1405,7 +1405,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Definition:** Stream compaction writes selected items to contiguous output positions. Original-order exclusive prefix rank can provide stability.
 - **Avoid:** Calling every atomic append stable, sorting, CUDA stream API operation.
 - **Related resources:** [A03](/en/algorithms/inclusive-exclusive-scan/) and [A09](/en/algorithms/sorting-selection-compaction/).
-- **Version note:** Composition is an algorithm contract. Exact CUB or Thrust APIs and temporary-storage or policy contracts follow the selected CCCL release.
+- **Version note:** Composition is an algorithm contract. Exact CUB or Thrust APIs and storage, policy, and Toolkit compatibility follow the selected CCCL release.
 
 ## Maintenance rule
 

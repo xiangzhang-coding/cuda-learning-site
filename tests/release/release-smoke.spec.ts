@@ -847,25 +847,39 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       expect(archive.subarray(0, 2).toString('ascii')).toBe('PK');
       archives.set(project.downloadUrl, archive);
     }
+    const entries = zipEntries(archive);
+    const findEntry = (relativePath: string) => {
+      const matches = entries.filter(({ name }) => name.endsWith(`/${project.root}/${relativePath}`));
+      expect(matches, `${project.id} archive contains one ${relativePath}`).toHaveLength(1);
+      return matches[0];
+    };
     for (const relativePath of new Set([
       ...project.build.inputs,
       ...project.build.hostTestInputs,
       ...project.build.contractFiles,
     ])) {
-      expect(
-        archive.includes(Buffer.from(`/${project.root}/${relativePath}`)),
-        `${project.id} archive contains ${relativePath}`,
-      ).toBe(true);
+      const local = await readFile(path.join(projectRoot, project.root, relativePath));
+      expect(findEntry(relativePath).content.equals(local), `${project.id} archive matches ${relativePath}`).toBe(true);
+    }
+
+    if (project.id === 'EX15') {
+      const archivedManifest = JSON.parse(findEntry('project.json').content.toString('utf8')) as {
+        sourceCommit: string;
+        sourceUrl: string;
+        downloadUrl: string;
+      };
+      expect(archivedManifest.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
+      expect(archivedManifest.sourceCommit).not.toBe('0'.repeat(40));
+      expect(archivedManifest.sourceUrl).toBe(
+        `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${archivedManifest.sourceCommit}/${project.root}`,
+      );
+      expect(archivedManifest.downloadUrl).toBe(
+        `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${archivedManifest.sourceCommit}.zip`,
+      );
     }
 
     if (project.id === 'EX10') {
       const ex10 = ex10PublishedProject;
-      const entries = zipEntries(archive);
-      const findEntry = (relativePath: string) => {
-        const matches = entries.filter(({ name }) => name.endsWith(`/${ex10.root}/${relativePath}`));
-        expect(matches, `EX10 archive contains one ${relativePath}`).toHaveLength(1);
-        return matches[0];
-      };
       const archivedManifest = JSON.parse(findEntry('project.json').content.toString('utf8'));
       expect(archivedManifest).toEqual(ex10Project);
       expect(archivedManifest).not.toHaveProperty('sourceCommit');
