@@ -1,0 +1,356 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/gemm-hierarchy-visual.css';
+import {
+  GEMM_HIERARCHY_COPY,
+  formatGemmHierarchyCopy,
+  type GemmHierarchyLocale,
+} from '../visuals/gemm-hierarchy-copy';
+import {
+  GEMM_HIERARCHY_LEVELS,
+  GEMM_HIERARCHY_MATRIX_SHAPES,
+  GEMM_HIERARCHY_MODEL_CONTRACT,
+  GEMM_HIERARCHY_TILE_SHAPES,
+  createGemmHierarchyState,
+  deriveGemmHierarchyView,
+  type GemmHierarchyState,
+  type GemmHierarchyView,
+} from '../visuals/gemm-hierarchy-model';
+
+interface Props {
+  locale: GemmHierarchyLocale;
+}
+
+const { locale } = Astro.props;
+const copy = GEMM_HIERARCHY_COPY[locale];
+const initialState = createGemmHierarchyState();
+
+function requireView(state: GemmHierarchyState, context: string): GemmHierarchyView {
+  const result = deriveGemmHierarchyView(state);
+  if (!result.accepted) throw new Error(`VIS12 ${context} must be a reviewed state.`);
+  return result.view;
+}
+
+const initialView = requireView(initialState, 'initial view');
+const staticSelections = GEMM_HIERARCHY_MATRIX_SHAPES.flatMap((matrixShape) =>
+  GEMM_HIERARCHY_TILE_SHAPES.map((tileShape) => ({
+    matrixShape,
+    tileShape,
+    view: requireView({ matrixShape, tileShape, level: 'matrix' }, `static ${matrixShape}:${tileShape}`),
+  })));
+const initialStatus = formatGemmHierarchyCopy(copy.statusReady, {
+  matrix: initialView.matrixShape,
+  tile: initialView.tileShape,
+  level: copy.levels[initialView.level].label,
+});
+---
+
+<cuda-gemm-hierarchy-explorer
+  class="visual-explainer gemm-hierarchy-visual not-content"
+  data-visual-id="VIS12"
+  data-locale={locale}
+  data-matrix-shape={initialView.matrixShape}
+  data-tile-shape={initialView.tileShape}
+  data-hierarchy-level={initialView.level}
+  data-output-tile-count={initialView.outputTileGrid.total}
+  data-k-slice-count={initialView.kSliceCount}
+  data-threadblock-count={initialView.threadblockCount}
+  data-warps-per-threadblock={initialView.warpsPerThreadblock}
+  data-evidence-status-effect={GEMM_HIERARCHY_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls gemm-hierarchy-controls" data-visual-controls hidden>
+      <legend>{copy.controlsHeading}</legend>
+      <label>
+        <span>{copy.matrixShapeLabel}</span>
+        <select data-gemm-matrix-shape aria-label={copy.matrixShapeLabel}>
+          {GEMM_HIERARCHY_MATRIX_SHAPES.map((shape) => (
+            <option value={shape} selected={shape === initialState.matrixShape}>{shape}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.tileShapeLabel}</span>
+        <select data-gemm-tile-shape aria-label={copy.tileShapeLabel}>
+          {GEMM_HIERARCHY_TILE_SHAPES.map((shape) => (
+            <option value={shape} selected={shape === initialState.tileShape}>{shape}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.levelLabel}</span>
+        <select data-gemm-hierarchy-level aria-label={copy.levelLabel}>
+          {GEMM_HIERARCHY_LEVELS.map((level) => (
+            <option value={level} selected={level === initialState.level}>{copy.levels[level].label}</option>
+          ))}
+        </select>
+      </label>
+      <button type="button" data-gemm-action="reset">{copy.reset}</button>
+      <p class="gemm-hierarchy-status" data-gemm-status role="status" aria-live="polite" aria-atomic="true">
+        {initialStatus}
+      </p>
+    </fieldset>
+
+    <section class="gemm-live-workbench" data-live-workbench data-pagefind-ignore hidden aria-label={copy.workbenchHeading}>
+      <header>
+        <h3>{copy.workbenchHeading}</h3>
+        <p data-live-selection>{formatGemmHierarchyCopy(copy.selection, {
+          matrix: initialView.matrixShape,
+          tile: initialView.tileShape,
+          level: copy.levels[initialView.level].label,
+        })}</p>
+      </header>
+      <dl class="gemm-metrics">
+        <div><dt>{copy.outputGrid}</dt><dd data-live-output-grid>{initialView.outputTileGrid.rows} × {initialView.outputTileGrid.columns}</dd></div>
+        <div><dt>{copy.kSlices}</dt><dd data-live-k-slices>{initialView.kSliceCount}</dd></div>
+        <div><dt>{copy.threadBlocks}</dt><dd data-live-threadblocks>{initialView.threadblockCount}</dd></div>
+        <div><dt>{copy.warpsPerBlock}</dt><dd data-live-warps>{initialView.warpsPerThreadblock}</dd></div>
+        <div><dt>{copy.operationSlots}</dt><dd data-live-operation-slots>{initialView.modeledOperationSlotsPerWarpKSlice}</dd></div>
+      </dl>
+      <ol class="gemm-level-track" data-live-hierarchy-track>
+        {initialView.panels.map((panel) => (
+          <li data-live-level={panel.level} aria-current={panel.level === initialView.level ? 'true' : undefined}>
+            <strong>{copy.levels[panel.level].label}</strong>
+            <span>{copy.levels[panel.level].role}</span>
+          </li>
+        ))}
+      </ol>
+      <div class="gemm-live-panels">
+        {initialView.panels.map((panel) => (
+          <section
+            data-live-hierarchy-panel
+            data-hierarchy-level={panel.level}
+            data-shape-m={panel.shape.m}
+            data-shape-n={panel.shape.n}
+            data-shape-k={panel.shape.k}
+            hidden={panel.level !== initialView.level}
+          >
+            <h4 data-live-panel-title>{copy.levels[panel.level].label}</h4>
+            <dl>
+              <div><dt>{copy.shape}</dt><dd data-live-shape>{panel.shape.m} × {panel.shape.n} × {panel.shape.k}</dd></div>
+              <div><dt>{copy.owner}</dt><dd data-live-owner>{copy.levels[panel.level].role}</dd></div>
+              <div><dt>{copy.relation}</dt><dd data-live-relation>{copy.levels[panel.level].description}</dd></div>
+              <div><dt>{copy.boundary}</dt><dd data-live-boundary>{copy.levels[panel.level].boundary}</dd></div>
+            </dl>
+          </section>
+        ))}
+      </div>
+    </section>
+
+    <section class="visual-section gemm-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="gemm-static-selections">
+        {staticSelections.map(({ matrixShape, tileShape, view }) => (
+          <article
+            data-static-selection={`${matrixShape}:${tileShape}`}
+            data-matrix-shape={matrixShape}
+            data-tile-shape={tileShape}
+            data-output-tile-count={view.outputTileGrid.total}
+            data-k-slice-count={view.kSliceCount}
+          >
+            <header>
+              <span>{matrixShape} / {tileShape}</span>
+              <h4>Matrix {matrixShape} · tile {tileShape}</h4>
+              <p>{copy.outputGrid}: {view.outputTileGrid.rows} × {view.outputTileGrid.columns}; {copy.kSlices}: {view.kSliceCount}; {copy.threadBlocks}: {view.threadblockCount}; {copy.warpsPerBlock}: {view.warpsPerThreadblock}.</p>
+            </header>
+            <div class="gemm-static-panels">
+              {view.panels.map((panel) => (
+                <section
+                  data-static-hierarchy-panel
+                  data-hierarchy-level={panel.level}
+                  data-shape-m={panel.shape.m}
+                  data-shape-n={panel.shape.n}
+                  data-shape-k={panel.shape.k}
+                >
+                  <h5>{copy.levels[panel.level].label}</h5>
+                  <p><strong>{copy.shape}:</strong> {panel.shape.m} × {panel.shape.n} × {panel.shape.k}</p>
+                  <p><strong>{copy.owner}:</strong> {copy.levels[panel.level].role}</p>
+                  <p><strong>{copy.relation}:</strong> {copy.levels[panel.level].description}</p>
+                  <p><strong>{copy.boundary}:</strong> {copy.levels[panel.level].boundary}</p>
+                </section>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-gemm-hierarchy-explorer>
+
+<script>
+  import {
+    GEMM_HIERARCHY_COPY,
+    formatGemmHierarchyCopy,
+  } from '../visuals/gemm-hierarchy-copy';
+  import {
+    createGemmHierarchyState,
+    deriveGemmHierarchyView,
+    reduceGemmHierarchyState,
+    type GemmHierarchyState,
+    type GemmHierarchyView,
+  } from '../visuals/gemm-hierarchy-model';
+
+  type Parts = Readonly<{
+    controls: HTMLFieldSetElement;
+    workbench: HTMLElement;
+    matrix: HTMLSelectElement;
+    tile: HTMLSelectElement;
+    level: HTMLSelectElement;
+    reset: HTMLButtonElement;
+    status: HTMLElement;
+  }>;
+
+  class CudaGemmHierarchyExplorer extends HTMLElement {
+    private state: GemmHierarchyState = createGemmHierarchyState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const parts = this.parts();
+      if (!parts) return;
+      const initialView = this.render(parts);
+      if (!initialView) return;
+
+      parts.matrix.addEventListener('change', () => {
+        const update = reduceGemmHierarchyState(this.state, {
+          type: 'select-matrix-shape', matrixShape: parts.matrix.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        const view = this.render(parts);
+        if (view) this.announce(parts, formatGemmHierarchyCopy(this.copy().statusMatrix, { matrix: view.matrixShape }));
+      });
+      parts.tile.addEventListener('change', () => {
+        const update = reduceGemmHierarchyState(this.state, {
+          type: 'select-tile-shape', tileShape: parts.tile.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        const view = this.render(parts);
+        if (view) this.announce(parts, formatGemmHierarchyCopy(this.copy().statusTile, { tile: view.tileShape }));
+      });
+      parts.level.addEventListener('change', () => {
+        const update = reduceGemmHierarchyState(this.state, {
+          type: 'select-level', level: parts.level.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        const view = this.render(parts);
+        if (view) this.announce(parts, formatGemmHierarchyCopy(this.copy().statusLevel, {
+          level: this.copy().levels[view.level].label,
+        }));
+      });
+      parts.reset.addEventListener('click', () => {
+        const update = reduceGemmHierarchyState(this.state, { type: 'reset' });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        if (!this.render(parts)) return;
+        this.announce(parts, this.copy().statusReset);
+        parts.matrix.focus();
+      });
+
+      parts.controls.hidden = false;
+      parts.workbench.hidden = false;
+      this.dataset.ready = 'true';
+    }
+
+    private parts(): Parts | null {
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const matrix = this.querySelector<HTMLSelectElement>('[data-gemm-matrix-shape]');
+      const tile = this.querySelector<HTMLSelectElement>('[data-gemm-tile-shape]');
+      const level = this.querySelector<HTMLSelectElement>('[data-gemm-hierarchy-level]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-gemm-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-gemm-status]');
+      if (!controls || !workbench || !matrix || !tile || !level || !reset || !status) return null;
+      return { controls, workbench, matrix, tile, level, reset, status };
+    }
+
+    private copy() {
+      return GEMM_HIERARCHY_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private reject(parts: Parts, issue: keyof ReturnType<CudaGemmHierarchyExplorer['copy']>['issues']) {
+      parts.matrix.value = this.state.matrixShape;
+      parts.tile.value = this.state.tileShape;
+      parts.level.value = this.state.level;
+      this.announce(parts, this.copy().issues[issue]);
+    }
+
+    private announce(parts: Parts, text: string) {
+      parts.status.textContent = text;
+    }
+
+    private render(parts: Parts): GemmHierarchyView | undefined {
+      const result = deriveGemmHierarchyView(this.state);
+      if (!result.accepted) {
+        this.announce(parts, this.copy().issues[result.issue]);
+        return undefined;
+      }
+      const view = result.view;
+      parts.matrix.value = view.matrixShape;
+      parts.tile.value = view.tileShape;
+      parts.level.value = view.level;
+      this.dataset.matrixShape = view.matrixShape;
+      this.dataset.tileShape = view.tileShape;
+      this.dataset.hierarchyLevel = view.level;
+      this.dataset.outputTileCount = String(view.outputTileGrid.total);
+      this.dataset.kSliceCount = String(view.kSliceCount);
+      this.dataset.threadblockCount = String(view.threadblockCount);
+      this.dataset.warpsPerThreadblock = String(view.warpsPerThreadblock);
+      this.setText('[data-live-selection]', formatGemmHierarchyCopy(this.copy().selection, {
+        matrix: view.matrixShape,
+        tile: view.tileShape,
+        level: this.copy().levels[view.level].label,
+      }));
+      this.setText('[data-live-output-grid]', `${view.outputTileGrid.rows} × ${view.outputTileGrid.columns}`);
+      this.setText('[data-live-k-slices]', String(view.kSliceCount));
+      this.setText('[data-live-threadblocks]', String(view.threadblockCount));
+      this.setText('[data-live-warps]', String(view.warpsPerThreadblock));
+      this.setText('[data-live-operation-slots]', String(view.modeledOperationSlotsPerWarpKSlice));
+
+      for (const marker of this.querySelectorAll<HTMLElement>('[data-live-level]')) {
+        if (marker.dataset.liveLevel === view.level) marker.setAttribute('aria-current', 'true');
+        else marker.removeAttribute('aria-current');
+      }
+      for (const panel of this.querySelectorAll<HTMLElement>('[data-live-hierarchy-panel]')) {
+        const modelPanel = view.panels.find(({ level }) => level === panel.dataset.hierarchyLevel);
+        if (!modelPanel) continue;
+        panel.hidden = modelPanel.level !== view.level;
+        panel.dataset.shapeM = String(modelPanel.shape.m);
+        panel.dataset.shapeN = String(modelPanel.shape.n);
+        panel.dataset.shapeK = String(modelPanel.shape.k);
+        this.setPanelText(panel, '[data-live-shape]', `${modelPanel.shape.m} × ${modelPanel.shape.n} × ${modelPanel.shape.k}`);
+        this.setPanelText(panel, '[data-live-owner]', this.copy().levels[modelPanel.level].role);
+        this.setPanelText(panel, '[data-live-relation]', this.copy().levels[modelPanel.level].description);
+        this.setPanelText(panel, '[data-live-boundary]', this.copy().levels[modelPanel.level].boundary);
+      }
+      return view;
+    }
+
+    private setText(selector: string, text: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = text;
+    }
+
+    private setPanelText(panel: HTMLElement, selector: string, text: string) {
+      const element = panel.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = text;
+    }
+  }
+
+  if (!customElements.get('cuda-gemm-hierarchy-explorer')) {
+    customElements.define('cuda-gemm-hierarchy-explorer', CudaGemmHierarchyExplorer);
+  }
+</script>

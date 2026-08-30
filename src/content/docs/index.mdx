@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-08-30'
+factCheckDate: '2026-08-31'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-30'
+      content: '2026-08-31'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）现已完整双语发布 O01-O08 导学、F01-F08 基础路线、M01-M14 内存路线、M15-M19 工具链路线、A01-A07 并行算法路线，以及 Q01-Q05 正确性与质量路线，共 47 个学习单元（Learning Unit）。R1 仍是最近一次已完成的聚合发布复核；[Issue #21](https://github.com/xiangzhang-coding/cuda-learning-site/issues/21) 的 A01-A04、Q02、EX11-EX13 与 VIS10 保留在当前发布中，[Issue #22](https://github.com/xiangzhang-coding/cuda-learning-site/issues/22) 本次加入 A05-A07、EX14、VIS11 及其配套学习材料。R2 聚合发布复核仍在 [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 中等待完成。
+稳定课程（Stable Curriculum）现已完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 与 Q01-Q05，共 49 个学习单元（Learning Unit）。Issue #23 加入 A08/A09、EX15、VIS12 及其配套材料；R1 仍是最近一次已完成的聚合发布复核，R2 聚合复核仍由 [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 单独设门。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -54,7 +54,7 @@ head:
 
 [M15 NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)同时依赖 F04 和 O04；[M16 PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)同时依赖 M15 和 F06；[M17 选择编译器架构目标](/toolchain/compiler-architecture-targets/)同时依赖 M16 和 F06；[M18 分离编译与设备链接](/toolchain/separate-compilation-device-linking/)同时依赖 M15 和 M16；[M19 CUDA C++17、C++20 与 C++23 方言边界](/toolchain/cpp-dialect-boundaries/)同时依赖 O04 和 M15。
 
-[A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；[A02 多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)同时依赖 M03、M05 和 M06；[A03 包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)同时依赖 A02 和 M05；[A04 私有化直方图](/algorithms/privatized-histogram/)同时依赖 M03 和 M05；[A05 矩阵转置、合并访问与共享内存布局](/algorithms/matrix-transpose-layout/)同时依赖 M02、M03 和 M04；[A06 Stencil 邻域、Halo 与 Cooperative Reuse](/algorithms/stencil-neighborhood-reuse/)同时依赖 M03、M04 和 M05；[A07 Direct 2D Convolution](/algorithms/convolution-reuse-layout/)同时依赖 A06 和 M03。
+[A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；[A02 多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)同时依赖 M03、M05 和 M06；[A03 包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)同时依赖 A02 和 M05；[A04 私有化直方图](/algorithms/privatized-histogram/)同时依赖 M03 和 M05；[A05 矩阵转置](/algorithms/matrix-transpose-layout/)依赖 M02/M03/M04；[A06 Stencil](/algorithms/stencil-neighborhood-reuse/)依赖 M03/M04/M05；[A07 Direct 2D Convolution](/algorithms/convolution-reuse-layout/)依赖 A06/M03；[A08 Tiled GEMM](/algorithms/tiled-gemm-correctness/)依赖 A05/M03/M04/A02；[A09 Sorting、Selection 与 Compaction](/algorithms/sorting-selection-compaction/)依赖 A03/A04。
 
 [Q01 CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)同时依赖 F04 和 O04；[Q02 浮点顺序、确定性与逐位可复现性](/correctness/floating-point-order-reproducibility/)同时依赖 Q01 和 A02；[Q03 用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)同时依赖 F05 和 Q01；[Q04 用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)同时依赖 M05、M06 和 Q03；[Q05 诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)同时依赖 M08 和 Q01。
 
@@ -64,19 +64,19 @@ M01-M14 也按顺序提供完整练习与独立解答：[M01 练习](/memory/add
 
 M15-M19 同样提供完整练习与独立解答：[M15 练习](/toolchain/nvcc-compilation-flow/exercises/)与[解答](/toolchain/nvcc-compilation-flow/solutions/)、[M16 练习](/toolchain/ptx-cubin-fatbinary/exercises/)与[解答](/toolchain/ptx-cubin-fatbinary/solutions/)、[M17 练习](/toolchain/compiler-architecture-targets/exercises/)与[解答](/toolchain/compiler-architecture-targets/solutions/)、[M18 练习](/toolchain/separate-compilation-device-linking/exercises/)与[解答](/toolchain/separate-compilation-device-linking/solutions/)、[M19 练习](/toolchain/cpp-dialect-boundaries/exercises/)与[解答](/toolchain/cpp-dialect-boundaries/solutions/)。
 
-A01-A07 同样提供完整练习与独立解答：[A01 练习](/algorithms/elementwise-map/exercises/)与[解答](/algorithms/elementwise-map/solutions/)、[A02 练习](/algorithms/multi-stage-reduction/exercises/)与[解答](/algorithms/multi-stage-reduction/solutions/)、[A03 练习](/algorithms/inclusive-exclusive-scan/exercises/)与[解答](/algorithms/inclusive-exclusive-scan/solutions/)、[A04 练习](/algorithms/privatized-histogram/exercises/)与[解答](/algorithms/privatized-histogram/solutions/)、[A05 练习](/algorithms/matrix-transpose-layout/exercises/)与[解答](/algorithms/matrix-transpose-layout/solutions/)、[A06 练习](/algorithms/stencil-neighborhood-reuse/exercises/)与[解答](/algorithms/stencil-neighborhood-reuse/solutions/)、[A07 练习](/algorithms/convolution-reuse-layout/exercises/)与[解答](/algorithms/convolution-reuse-layout/solutions/)。
+A01-A09 都提供完整练习与独立解答；新增 [A08 练习](/algorithms/tiled-gemm-correctness/exercises/)与[解答](/algorithms/tiled-gemm-correctness/solutions/)，以及 [A09 练习](/algorithms/sorting-selection-compaction/exercises/)与[解答](/algorithms/sorting-selection-compaction/solutions/)。
 
 O02-O08 也保留各自的练习与独立解答。
 
 Q01-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q02 练习](/correctness/floating-point-order-reproducibility/exercises/)与[解答](/correctness/floating-point-order-reproducibility/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)。
 
-[EX03 多维索引](/examples/multidimensional-indexing/)依赖 F03，并为 F03/F04 提供 canonical source；[EX04 错误处理生命周期](/examples/error-handling-lifecycle/)仅依赖 F05；[EX05 合并与跨步访问](/examples/coalesced-strided-access/)仅依赖 M02；[EX06 共享内存 tile bank padding](/examples/shared-memory-tile-bank-padding/)同时依赖 M03 和 M04；[EX07 Streams、Events 与 Overlap](/examples/streams-events-overlap/)同时依赖 M07、M08 和 M09；[EX08 统一内存迁移](/examples/unified-memory-migration/)仅依赖 M10；[EX09 CUDA Graph Capture](/examples/graph-capture/)仅依赖 M14；[EX10 PTX 与 Fatbinary 检查](/examples/ptx-fatbinary-inspection/)同时依赖 M15 和 M16；[EX11 多阶段归约](/examples/multi-stage-reduction/)同时依赖 A02 和 Q02；[EX12 Inclusive 与 Exclusive Scan](/examples/inclusive-exclusive-scan/)仅依赖 A03；[EX13 私有化 Histogram](/examples/privatized-histogram/)仅依赖 A04；[EX14 分块矩阵转置](/examples/tiled-transpose/)仅依赖 A05；[EX16 Compute Sanitizer 缺陷套件](/examples/sanitizer-defect-suite/)同时依赖 Q03 和 Q04。可运行示例（Runnable Example）严格是十五个 ID：EX01-EX14 与 EX16；EX15 没有公开页面或占位。
+当前有 16 个可运行示例（Runnable Example）：EX01-EX16。新增 [EX15 Tiled GEMM](/examples/tiled-gemm/)严格依赖 A08；EX14 仍依赖 A05，EX16 仍依赖 Q03/Q04。
 
-EX05-EX09 与 EX11-EX14 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通道（Toolkit Lane）使用一份原创 C++17 实现；EX16 是一个跨相同 Lanes 构建八个隔离 binary 的原创 Apache-2.0 C++17 project。EX05-EX09、EX11-EX14 与 EX16 的 compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空，只发布 expected observations。EX10 在 run 33275734951 中保留五项 ordinary Compile-Checked records；它的 artifact-pipeline acceptance 只生成和检查产物，不执行最终 host artifact 或 GPU executable，因此 runtime 为 Runtime-Not-Applicable。独立 CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe 是 narrow pass，不声明 ordinary C++23 support、其他 compiler/platform、runtime 或 performance。Host-only utility 不能建立 GPU correctness、overlap、migration、graph replay、scan、histogram、reduction 或 transpose runtime behavior。本站没有运行 EX03-EX14/EX16 CUDA binary、Compute Sanitizer 或 profiler，也不发布实际 sanitizer report、输出、计时、speedup 或其他性能数字。
+EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane 使用同一原创 C++17 implementation；compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。Host-only utility 不建立 GPU correctness，本站没有运行 EX15，也不发布实际 output、timing、speedup 或其他 performance number。
 
-六个非连续实验严格是 LAB01-LAB05 与 LAB07；LAB06 继续缺席，因为所需的 timeline-profiler 先修单元尚未公开；Q11 与 LAB10 同样不发布，LAB10 必须等待 Q11 的 evidence-based optimization prerequisite。LAB01 同时依赖 O03 和 O08，并使用 EX01；LAB02 依赖 O03 和 F01，并使用 EX02；[LAB03 破坏并修复索引](/labs/break-and-repair-indexing/)同时依赖 F03 和 F05，并使用 EX04；[LAB04 观察合并访问](/labs/observe-coalescing/)同时依赖 M02 和 Q05，并使用 EX05；[LAB05 消除共享内存存储体冲突](/labs/remove-shared-memory-bank-conflicts/)同时依赖 M04 和 Q05，并使用 EX06；[LAB07 诊断四类 Sanitizer 故障](/labs/diagnose-four-sanitizer-failures/)同时依赖 Q03 和 Q04，并使用 EX16。F08 与 LAB03 相关，但不是 LAB03 的先修条件。
+六个非连续实验仍是 LAB01-LAB05 与 LAB07。LAB12 不发布：它严格等待尚未发布的 Q13 profiling prerequisite 与 L06 cuBLAS prerequisite。
 
-正式的可视化讲解（Visual Explainer）共十五项：十一个独立页面 [VIS01 kernel 路径](/visuals/kernel-journey/)、[VIS02 索引](/visuals/indexing/)、[VIS03 warp divergence](/visuals/warp-divergence/)、[VIS04 内存请求 segment 分组](/visuals/memory-transactions/)、[VIS05 shared-memory bank 映射](/visuals/shared-memory-banks/)、[VIS06 memory hierarchy、ownership 与 lifetime](/visuals/memory-hierarchy-lifetime/)、[VIS07 stream/event dependency](/visuals/stream-event-dependencies/)、[VIS08 托管内存页面迁移](/visuals/page-migration/)、[VIS09 NVCC 构建产物流水线](/visuals/artifact-pipeline/)、[VIS10 Reduction tree 与非活动通道](/visuals/reduction-stages/)与 [VIS11 Tiled transpose](/visuals/tiled-transpose/)，以及分别嵌入 F05-F08 的 [VIS19 错误暴露时间线](/foundations/asynchronous-errors/#vis19)、[VIS20 计算能力合同筛选器](/foundations/compute-capability/#vis20)、[VIS21 Runtime/Driver API 边界](/foundations/runtime-driver-api/#vis21)与 [VIS22 线程块形状约束探索器](/foundations/launch-geometry/#vis22)。VIS08 同时依赖 M01、M02 和 M10；VIS09 同时依赖 M15、M16 和 M17；VIS10 仅依赖 A02；VIS11 仅依赖 A05。十五项讲解都使用确定性的 browser-only model，提供静态或文字回退，不执行 CUDA，也没有 CUDA Evidence Status；VIS11 的 static before/after layouts 不是 bank、runtime 或性能观察。F04 的原创静态生命周期表仍不是 Visual Explainer 或证据来源。当前 catalog 为 6 个 Lab、48 个 Practice Bank 条目、15 项 Visual Explainer、146 个 Glossary 词条和 59 条 source record，共 274 条记录；公开源文件形成 178 个双语发布对（Publication Pair），即 356 条 source route。
+正式 Visual Explainer 共 16 项：独立 VIS01-VIS12 与内嵌 VIS19-VIS22。新增 [VIS12 GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)依赖 A08、关联 EX15，并保留 20 个静态 hierarchy panels。全部讲解都是 evidence-neutral browser models。当前 catalog 为 6 个 Lab、50 个 Practice Bank 条目、16 项 Visual Explainer、151 个 Glossary 词条和 61 条 source record，共 284 条记录；公开源文件形成 186 个双语发布对，即 372 条 source route。
 
 ## 边界先说清
 
@@ -295,6 +295,16 @@ EX05-EX09 与 EX11-EX14 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通�
     <strong>Direct 2D Convolution 与布局合同</strong>
     <small>用教学 kernel 理解 reuse，并把 production comparison 留给 pinned cuDNN path。</small>
   </a>
+  <a className="route-card" href="/algorithms/tiled-gemm-correctness/">
+    <span>A08 · TILED GEMM</span>
+    <strong>从正确 Naive GEMM 到 Shared-Memory Tiling</strong>
+    <small>冻结 row-major oracle、partial M/N/K guards、barriers 与数值验收。</small>
+  </a>
+  <a className="route-card" href="/algorithms/sorting-selection-compaction/">
+    <span>A09 · SORT / SELECT / COMPACT</span>
+    <strong>组合排序、选择和压缩</strong>
+    <small>从 flag、scan、histogram 与 movement 推导 vocabulary，再选择 production primitive。</small>
+  </a>
   <a className="route-card" href="/correctness/cpu-references-tolerances-invariants/">
     <span>Q01 · CORRECTNESS ORACLE</span>
     <strong>CPU 参考实现、容差与不变量</strong>
@@ -389,6 +399,11 @@ EX05-EX09 与 EX11-EX14 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通�
     <span>EX14 · TILED TRANSPOSE</span>
     <strong>分块矩阵转置可运行示例</strong>
     <small>用矩形 fixtures、CPU oracle 与 32x33 shared layout 验证 correctness。</small>
+  </a>
+  <a className="route-card" href="/examples/tiled-gemm/">
+    <span>EX15 · TILED GEMM</span>
+    <strong>分块 GEMM 可运行示例</strong>
+    <small>用 double CPU reference 与 finite abs-plus-rel tolerance 验证 portable FP32 baseline。</small>
   </a>
   <a className="route-card" href="/examples/sanitizer-defect-suite/">
     <span>EX16 · SANITIZER DEFECT SUITE</span>
@@ -490,20 +505,25 @@ EX05-EX09 与 EX11-EX14 各自在 11.8.0、12.9.2 和 13.3.1 三条工具包通�
     <strong>Tiled transpose：逻辑映射与物理 padding</strong>
     <small>对照 before/after coordinates、physical stride 与无逻辑值的 padding slots。</small>
   </a>
+  <a className="route-card" href="/visuals/gemm-tiling-hierarchy/">
+    <span>VIS12 · GEMM HIERARCHY</span>
+    <strong>GEMM Tiling Hierarchy：从 Matrix 到 Instruction</strong>
+    <small>核对 matrix、tile、thread block、warp 与 source-level instruction slot。</small>
+  </a>
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 48 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
+    <small>用 50 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 146 个中英文规范术语。</small>
+    <small>核对本站使用的 151 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 59 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 61 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

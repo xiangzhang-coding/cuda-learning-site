@@ -1,0 +1,129 @@
+---
+title: 'GEMM Tiling Hierarchy: Matrix to Instruction'
+description: Use deterministic matrix and tile fixtures to separate matrix, tile, thread block, warp, and source-level instruction-slot levels while retaining complete static hierarchy panels.
+pairId: vis12
+counterpart: /visuals/gemm-tiling-hierarchy/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - gemm-shapes
+  - hierarchy-levels
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS12
+prerequisites:
+  - A08
+relatedUnits:
+  - EX15
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Intro to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current grid, thread-block, warp, shared-memory, and synchronization vocabulary'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current classic matrix/tile/thread-block ownership context'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Archived execution hierarchy and shared-memory stability review'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Programming Guide 11.8.0 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v11.8.0'
+    platform: 'Archived execution hierarchy and shared-memory stability review'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/visuals/gemm-tiling-hierarchy/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,gemm-shapes,hierarchy-levels,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A08 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import GemmHierarchyExplorer from '../../../../components/GemmHierarchyExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/gemm-tiling-hierarchy/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+After A08, use VIS12 to narrow `A[M,K] × B[K,N] -> C[M,N]` from the complete matrix through a logical tile, CUDA thread-block owner, modeled warp subtile, and source-level scalar operation slot. The related Runnable Example is EX15.
+
+<GemmHierarchyExplorer locale="en" />
+
+## Controls
+
+Three native selects choose matrix shape `128x128x32` or `256x128x64`, tile shape `64x64x16` or `128x64x16`, and one of five hierarchy levels. Reset restores the first matrix, first tile, and matrix level, then returns focus to the matrix select. Status uses a polite live region.
+
+Controls and the live workbench carry `hidden` in source HTML. The custom element reveals them only after finding every required part and deriving the initial model. The page has no autoplay, timer, randomness, storage, range input, canvas, or SVG.
+
+## GEMM shapes
+
+Shape notation is `M x N x K`. Matrix means the complete `A[M,K]`, `B[K,N]`, and `C[M,N]` contract. Tile means a `TM x TN` output footprint and `TK` reduction slice. The output grid is `ceil(M/TM) x ceil(N/TN)`. One thread block owns one output tile and loops through `ceil(K/TK)` slices, so block count is not multiplied by K-slice count.
+
+Both tile shapes use a modeled `32x32x16` warp subtile. `64x64x16` displays four warps per block, while `128x64x16` displays eight. This is a bounded teaching partition, not a launch recommendation or observed schedule.
+
+## Five hierarchy levels
+
+1. **Matrix:** the complete problem and three logical matrices.
+2. **Tile:** an output partition and K-slice loop.
+3. **Thread block:** the CUDA owner in this teaching mapping; its shape matches the tile but its semantics differ.
+4. **Warp:** a modeled subtile within the thread-block footprint, without an issue-order prediction.
+5. **Instruction:** a `1x1x1` source-level scalar multiply-accumulate slot, not a claim about compiler-emitted FMA, MMA, WMMA, or SASS.
+
+The hierarchy explains ownership and nesting, not occupancy, register allocation, Tensor Core eligibility, pipelines, latency, throughput, or speedup. Architecture-specific instruction hierarchies belong to the later version-gated L09 unit.
+
+## Static fallback
+
+Outside the interactive area, the server permanently renders all four matrix/tile selections, each with five purpose-built hierarchy panels, for 20 panels total. Every panel states shape, owner, relationship, and boundary. All panels remain with JavaScript disabled, at a 390-pixel viewport, under reduced motion, in forced colors, and in print. Selected state uses `aria-current`, text, and a thick border rather than color alone.
+
+## Evidence boundary
+
+VIS12 compiles and executes no CUDA, queries no device, reads no compiler artifact or profiler, and observes no emitted instruction. Compilation, runtime, expected-observation, and recorded-observation arrays are empty. It grants no Compile-Checked, Community-Observed, or Runtime-Verified status.
+
+## Sources
+
+CUDA Programming Guide v13.3 supplies stable thread-block, warp, and shared-memory vocabulary. Best Practices Guide v13.3 supplies classic shared-memory matrix-multiplication context. The 12.9.1 and 11.8.0 archives support stability review. All four owner coordinates were accessed on **2026-08-31**. No NVIDIA code, sample, figure, table, layout, or performance result is copied; the model, copy, panels, and interaction are original.

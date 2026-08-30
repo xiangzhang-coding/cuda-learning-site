@@ -1,0 +1,201 @@
+---
+title: 'A08: From Correct Naive GEMM to Shared-Memory Tiling'
+description: Freeze a row-major GEMM and numerical-acceptance contract, then derive partial-safe shared-memory tiling, uniform barriers, and an independent CPU reference from a one-output-per-thread naive baseline.
+pairId: a08
+counterpart: /algorithms/tiled-gemm-correctness/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - gemm-contract
+  - naive-baseline
+  - shared-tiling
+  - partial-tiles-barriers
+  - numerical-checks
+  - canonical-example
+  - visual-explainer
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A08
+prerequisites:
+  - A05
+  - M03
+  - M04
+  - A02
+relatedUnits:
+  - VIS12
+exampleIds:
+  - EX15
+canonicalExample: EX15
+canonicalRanges:
+  - cpu-reference
+  - tiled-gemm
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current classic CUDA C++ shared-memory matrix-multiplication and verification guidance'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Programming Guide v13.3 - Intro to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, shared-memory, bounds, barrier, and launch-completion contracts'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Programming Guide v13.3 - Notes on Host/Device Computation Accuracy'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current floating-point order, FMA, and host/device comparison boundary'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Programming Guide 11.8 and 12.9 archives'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v11.8.0; cross-checked with the v12.9.1 archive'
+    platform: 'Stable shared-memory and synchronization contracts for selected Toolkit Lanes'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/tiled-gemm-correctness/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,gemm-contract,naive-baseline,shared-tiling,partial-tiles-barriers,numerical-checks,canonical-example,visual-explainer,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A05,M03,M04,A02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS12 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-gemm' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/tiled-gemm-correctness/" lang="zh-CN">阅读中文对应页</a>
+
+[General matrix multiplication (GEMM, TERM-147)](/en/glossary/#term-147) starts with shape, layout, scalars, accumulation order, and acceptance rules rather than a tile size. A08 first establishes an obviously correct naive GEMM, then changes repeated global reads into block-local [K-tile reuse (TERM-148)](/en/glossary/#term-148). Every step preserves one mathematical contract.
+
+## What you should be able to do
+
+- State the complete address contract for row-major `A[M,K]`, `B[K,N]`, and `C[M,N]`.
+- Explain why one output owner performs K multiply-adds in a naive GEMM.
+- Derive the load, barrier, compute, barrier, and reuse phases of shared-memory tiling.
+- Write separate guards for partial M, N, and K tiles while proving full block participation at barriers.
+- Check FP32 output against an independent double CPU reference with a non-finite policy and absolute-plus-relative tolerance.
+- Separate a teaching kernel, future cuBLAS/CUTLASS comparison, and actual performance evidence.
+
+## Prerequisites
+
+The exact prerequisites are `A05, M03, M04, A02`. A05 supplies two-dimensional tile and layout reasoning. M03 and M04 supply shared-memory ownership and physical-layout review. A02 supplies reduction order. EX15 is the canonical Runnable Example and VIS12 is a related Visual Explainer; neither adds a prerequisite edge.
+
+## GEMM contract before kernels
+
+The site freezes a row-major, non-transposed FP32 teaching subset:
+
+`C[row * N + col] = alpha * sum(A[row * K + p] * B[p * N + col]) + beta * C[row * N + col]`
+
+The valid domain is `0 <= row < M`, `0 <= col < N`, and `0 <= p < K`. A has leading dimension K; B and C have leading dimension N. Every `(row,col)` has one writer. K is the reduction extent and does not add output tiles.
+
+## Naive GEMM: establish an explainable baseline
+
+A correct naive GEMM assigns one thread to one output coordinate, walks one row of A and one column of B, accumulates K products in order, and stores C once. It may reread the same A/B values, but its ownership, bounds, and arithmetic order are explicit. That makes it a correctness baseline for the tiled implementation, not a performance conclusion.
+
+Start with the hand-computable `2x3x2` fixture whose result is `[22,28,49,64]`, then add rectangular and nonzero-beta fixtures. Square-only, beta-zero-only, and tile-aligned-only cases do not cover the full contract.
+
+## Shared-memory tiling: reuse K slices
+
+For a `TM x TN x TK` tile, one block owns one `TM x TN` output footprint. Each K-loop iteration cooperatively loads a `TM x TK` A tile and a `TK x TN` B tile. After a uniform barrier, every output owner accumulates TK products from shared memory. A second barrier ensures every old-slice read completes before any thread overwrites the shared arrays.
+
+This changes the data path, not the GEMM equation. `threadblockCount = ceil(M/TM) * ceil(N/TN)`. Each block loops through `ceil(K/TK)` slices; K slices are not extra output blocks.
+
+## Partial M/N/K tiles and barriers
+
+M/N guards choose output owners and final stores. K-tail guards choose shared loads; out-of-bounds A/B slots receive neutral zero so that no iteration reads an old shared value. A thread without a valid output may still own a valid shared load, and every block thread must reach both `__syncthreads()` calls. It cannot return before a K-loop barrier.
+
+EX15 freezes a portable `16x16x16` baseline with 256 threads and two shared arrays totaling 2,048 bytes. Ordinary FP32 multiply-add, shared memory, and block barriers are available at the declared CC 7.5 baseline. No gated variant is justified for this teaching contract, so the architecture-specific variant list is empty and the single path is also the portable fallback.
+
+## Numerical checks: reference and tolerance are contracts
+
+The CPU reference accumulates in double and remains independent from device FP32 accumulation. Every finite candidate must satisfy `absolute_error <= atol + rtol * abs(reference)`, with the acceptance threshold `atol + rtol * abs(reference)`. NaN, infinity, and negative tolerances are rejected. A mismatch report names at least the linear index, row, column, reference, candidate, absolute error, and allowed error.
+
+Different valid operation orders or FMA contraction can change low bits, so bitwise equality is not a general contract here. Tolerance is declared from bounded fixtures before CUDA output is observed; it is not widened after a failure.
+
+## Canonical Runnable Example: EX15
+
+EX15 maintains one canonical implementation. The pure-host `cpu-reference` precedes `tiled-gemm`:
+
+[View the pinned EX15 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm), or [download the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip).
+
+<CanonicalCode exampleId="EX15" range="cpu-reference" />
+
+<CanonicalCode exampleId="EX15" range="tiled-gemm" />
+
+## Visual Explainer: VIS12
+
+[VIS12: GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/) presents matrix, tile, thread block, warp, and instruction levels in order. Its instruction panel means a source-level scalar multiply-accumulate slot. It claims no compiler-emitted FMA, MMA, or SASS and predicts no scheduling, occupancy, or performance.
+
+## Production boundary
+
+EX15 is a correctness and tiling mental model, not a production replacement. Later L06, L07, and L09 own exact-version cuBLAS, cuBLASLt, and CUTLASS layout, precision, workspace, heuristic, and architecture contracts. LAB12 additionally depends on unpublished Q13 and L06, so this ticket does not publish it.
+
+## Evidence boundary
+
+All four A08 evidence arrays are empty. EX15 also has empty compilation evidence and Pending Hardware Verification runtime. A host test, source inspection, Context7 cross-check, or VIS12 browser state is not CUDA compilation or runtime evidence. No timing, throughput, utilization, speedup, or production-library comparison result is published.
+
+## Retrieval check
+
+1. What are the three row-major leading dimensions for `A[M,K] * B[K,N]`?
+2. Why is a correct naive GEMM a useful baseline for a tiled GEMM?
+3. Why does one output block loop over K slices instead of creating an output block per slice?
+4. Which guards belong to partial M, N, and K, and why does zero-fill not replace a barrier?
+5. Which shared-storage reuse hazard does the second `__syncthreads()` prevent?
+6. Why must the double CPU reference, finite policy, and abs-plus-rel tolerance be declared before execution?
+
+## Continue with practice
+
+- Complete the [A08 Exercises](/en/algorithms/tiled-gemm-correctness/exercises/), then inspect the [separate solutions](/en/algorithms/tiled-gemm-correctness/solutions/).
+- Audit [PB-R2-020](/en/practice/#pb-r2-020), [EX15](/en/examples/tiled-gemm/), and [VIS12](/en/visuals/gemm-tiling-hierarchy/).
+- Revisit [TERM-147](/en/glossary/#term-147) and [TERM-148](/en/glossary/#term-148).
+
+## Sources and review
+
+CUDA C++ Best Practices Guide v13.3 supplies the classic shared-memory `C=AB` owner context. CUDA Programming Guide v13.3 supplies block/shared-memory/barrier and floating-point contracts. The 11.8.0 and 12.9.1 archives review the selected lanes. Context7 `/websites/nvidia_cuda_cuda-programming-guide` was used only as a cross-check on 2026-08-31; the exact owner URLs above remain publication authority. No NVIDIA sample, code, figure, table, or result is copied.
+
+**Fact checked and sources accessed: 2026-08-31.**

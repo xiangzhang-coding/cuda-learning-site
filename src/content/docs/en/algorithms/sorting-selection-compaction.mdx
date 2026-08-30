@@ -1,0 +1,173 @@
+---
+title: 'A09: Compose Sorting, Selection, and Compaction from Scan, Histograms, and Movement'
+description: Derive selection, stream compaction, and bounded-key sorting vocabulary from flags, exclusive scan, histograms, atomic ownership, and scatter before making a CUB or Thrust production decision.
+pairId: a09
+counterpart: /algorithms/sorting-selection-compaction/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - algorithm-contracts
+  - compaction-from-scan
+  - selection-from-flags
+  - sorting-from-histogram-scan-movement
+  - atomics-boundary
+  - production-choice
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A09
+prerequisites:
+  - A03
+  - A04
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; released 2026-08-05'
+    platform: 'Selected owner release for CUB and Thrust production coordinates'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 platform support'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; CCCL 3.x compatibility table'
+    platform: 'Exact owner compatibility boundary: latest-patch CUDA Toolkit 12.x and 13.x, excluding Toolkit 11.8'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 CUB DeviceRadixSort source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_radix_sort.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for device-wide radix-sort production primitives'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 CUB DeviceSelect source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_select.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for Flagged, If, and Unique device-wide selection primitives'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 Thrust sort interface source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/sort.h'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner interface source for high-level Thrust sorting vocabulary'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 Thrust copy interface source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/copy.h'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner interface source for copy_if selection and compaction vocabulary'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/sorting-selection-compaction/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,algorithm-contracts,compaction-from-scan,selection-from-flags,sorting-from-histogram-scan-movement,atomics-boundary,production-choice,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A03,A04' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/sorting-selection-compaction/" lang="zh-CN">阅读中文对应页</a>
+
+A09 does not publish an “educational sort kernel.” It derives three contracts from known primitives: [selection (TERM-150)](/en/glossary/#term-150) decides which items remain, [stream compaction (TERM-151)](/en/glossary/#term-151) writes them to a contiguous output, and [sorting (TERM-149)](/en/glossary/#term-149) establishes key order. Once the composition is understood, a production decision starts from CUB and Thrust contracts.
+
+## What you should be able to do
+
+- Write stable selection as `flag -> exclusive scan -> scatter`.
+- Derive the compacted count from the last scan position and flag.
+- Describe bounded-key stable ordering with a histogram, exclusive scan, within-bin ranks, and scatter.
+- Explain why atomic slot allocation can guarantee unique destinations without guaranteeing stability or low contention.
+- Write a decision packet across CUB `DeviceRadixSort`, CUB `DeviceSelect`, Thrust algorithms, and custom code.
+- Separate an algorithm contract, library availability, correctness evidence, and measured performance.
+
+## Prerequisites
+
+The exact prerequisites are `A03, A04`. A03 supplies inclusive/exclusive scan, block totals, and offset propagation. A04 supplies histogram bins, atomics, privatization, and merge. A09 uses that vocabulary without making the CCCL API a prerequisite.
+
+## Keep the three contracts separate
+
+Selection emits values or indices that satisfy a predicate. Compaction additionally requires contiguous output positions `0..count-1`; with original-order prefix ranks it is stable compaction. Sorting declares key projection, direction, stability, key/value movement, equal-key policy, and output ownership. One implementation can combine these actions, but their acceptance criteria remain distinct.
+
+## Derive compaction positions from scan
+
+Compute a zero-or-one `flag[i]` for every input. An exclusive scan over flags gives `position[i]`. If `flag[i] == 1`, scatter the item to `output[position[i]]`. The final `count = position[n-1] + flag[n-1]`; an empty input needs a separate contract.
+
+Because an exclusive prefix counts selected items strictly before the current item, selected positions are unique, contiguous, and increasing in input order. The central composition is **flag -> exclusive scan -> scatter**. Scan establishes destination ownership, while scatter performs movement; neither stage is optional.
+
+## Selection is a predicate and payload contract
+
+A predicate may inspect a value, key, stencil mask, or external flags. The payload may be a value, index, or key/value pair. In-place versus out-of-place behavior, aliasing, output capacity, selected-count type, stream, and order must be declared. `unique` additionally needs equivalence and adjacent-versus-global semantics; a similar name does not make it arbitrary predicate selection.
+
+## Understand bounded-key sorting from histogram, scan, and movement
+
+For a finite key domain, one counting or radix pass has four conceptual steps: histogram to count each bin; exclusive scan over counts to obtain bin starts; a within-bin rank for each item; and scatter of key/payload to `bin_start + rank`. When digit passes repeat, every pass needs stable rank and movement if it is to preserve prior-digit order.
+
+Histogram plus scan supplies bucket boundaries, not a unique stable rank for every item in one bucket. A per-item prefix, stable partition primitive, or another declared algorithm must fill that gap. An atomic increment can assign unique slots, but arrival order is not input order, so it does not establish stable sorting.
+
+## Atomics: correct ownership and contention are different claims
+
+An atomic counter can assign different slots to concurrent writers and therefore support unordered compaction. It does not preserve original selected-item order and supplies no timing fact. A hot counter, key distribution, privatization, merge, and architecture affect contention behavior; a shared source-level target establishes only a hypothesis.
+
+## Production choice: begin with the exact owner contract
+
+CCCL v3.4.2 is this page's immutable selected owner release. Its tagged platform-support table limits CCCL 3.x to latest-patch CUDA Toolkit 12.x and 13.x and excludes the site's Toolkit 11.8 lane. A 12.9.2 or 13.3.1 decision packet may evaluate v3.4.2. The 11.8 path must use its Toolkit-bundled older CUB and Thrust or select and review a compatible CCCL 2.x coordinate; it cannot project v3.4.2 onto 11.8.
+
+CUB `DeviceRadixSort` supplies device-wide radix sort, and CUB `DeviceSelect` supplies `Flagged`, `If`, and `Unique` production primitives. The traditional device-wide form queries and receives temporary storage and names a stream. Thrust supplies higher-level `sort`, `stable_sort`, and `copy_if` vocabulary and chooses a backend through execution-policy and iterator contracts.
+
+The educational composition explains flags, prefix ranks, bin offsets, movement, stability, and ownership, but it is not a production implementation. A production decision compares operation semantics, types and iterators, stability, temporary storage, stream or execution policy, maintenance, Toolkit/CCCL version, correctness fixtures, and the measured workload. Without measurement, custom code, CUB, and Thrust cannot be ranked by speed.
+
+## Evidence boundary
+
+All four A09 evidence arrays are empty. The page compiles and executes no CUB, Thrust, or custom kernel and contains no measured timing, throughput, temporary-storage footprint, contention counter, or speedup. Context7 `/nvidia/cccl` was used only for discovery and cross-checking on 2026-08-31. The exact v3.4.2 release and source URLs are the publication coordinates.
+
+LAB12 is unrelated to A09 but remains unpublished in this ticket: it strictly depends on Q13 and L06, neither of which has a public destination.
+
+## Retrieval check
+
+1. Why does an exclusive scan of flags produce unique, contiguous, stable positions?
+2. Why is the compacted count the last exclusive position plus the last flag?
+3. Which per-item quantity is still missing after a histogram and bin-start scan for stable sorting?
+4. Which ownership can atomic increment establish, and which order can it not establish?
+5. How do the predicate or equivalence contracts of `DeviceSelect::Flagged`, `DeviceSelect::If`, and `Unique` differ?
+6. Why are algorithm composition, production API availability, and a performance conclusion three independent layers?
+
+## Continue with practice
+
+- Complete the [A09 Exercises](/en/algorithms/sorting-selection-compaction/exercises/), then inspect the [separate solutions](/en/algorithms/sorting-selection-compaction/solutions/).
+- Audit [PB-R2-021](/en/practice/#pb-r2-021) and revisit [A03](/en/algorithms/inclusive-exclusive-scan/) and [A04](/en/algorithms/privatized-histogram/).
+- Revisit [TERM-149](/en/glossary/#term-149), [TERM-150](/en/glossary/#term-150), and [TERM-151](/en/glossary/#term-151).
+
+## Sources and review
+
+The CCCL v3.4.2 release, tagged README platform-support table, `device_radix_sort.cuh`, `device_select.cuh`, and Thrust `sort.h` and `copy.h` files are exact owner coordinates. The site paraphrases public API and algorithm contracts and copies no source, sample, figure, table, or benchmark.
+
+**Fact checked and sources accessed: 2026-08-31.**

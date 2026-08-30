@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred forty-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred fifty-one published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-30'
+factCheckDate: '2026-08-31'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-30'
+      content: '2026-08-31'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1362,6 +1362,51 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [A07](/en/algorithms/convolution-reuse-layout/).
 - **Version note:** Tensor layout, stride, dilation, padding, data and compute types, and component version remain explicit. cuDNN Frontend v1.27.0 is only a future coordinate.
 
+<span id="term-147" class="resource-target" aria-hidden="true"></span>
+
+### general matrix multiplication (GEMM) · 通用矩阵乘法
+
+- **Definition:** General matrix multiplication (GEMM) computes a matrix product and optional existing-output contribution under declared layout, shape, transpose, scalar, and precision contracts.
+- **Avoid:** Only square `C=AB`, fixed row-major, any tiled kernel, production performance guarantee.
+- **Related resources:** [A08](/en/algorithms/tiled-gemm-correctness/), [EX15](/en/examples/tiled-gemm/), and [VIS12](/en/visuals/gemm-tiling-hierarchy/).
+- **Version note:** A08 and EX15 freeze a row-major non-transposed FP32 subset. Later cuBLAS and CUTLASS units must restate exact component and architecture contracts.
+
+<span id="term-148" class="resource-target" aria-hidden="true"></span>
+
+### K tile · K 维分块
+
+- **Definition:** A K tile is one finite slice of the GEMM reduction extent, combined in sequence with other slices by the same output owner or block.
+- **Avoid:** New output-ownership dimension, extra C writer, observed hardware instruction tile.
+- **Related resources:** [M03](/en/memory/shared-memory-tiling/), [A08](/en/algorithms/tiled-gemm-correctness/), [EX15](/en/examples/tiled-gemm/), and [VIS12](/en/visuals/gemm-tiling-hierarchy/).
+- **Version note:** A logical slice does not bind WMMA, MMA, or Tensor Core behavior. Architecture-specific shapes belong to version-gated units.
+
+<span id="term-149" class="resource-target" aria-hidden="true"></span>
+
+### sorting · 排序
+
+- **Definition:** Sorting establishes output order under declared key projection, direction, stability, equal-key, and payload-movement contracts.
+- **Avoid:** Merely placing items in bins, arbitrary atomic scatter, every selection or compaction, automatically fastest custom kernel.
+- **Related resources:** [A09](/en/algorithms/sorting-selection-compaction/).
+- **Version note:** The production API coordinate is CCCL v3.4.2. CCCL 3.x supports latest-patch Toolkit 12.x/13.x and excludes 11.8. Availability does not establish measured suitability.
+
+<span id="term-150" class="resource-target" aria-hidden="true"></span>
+
+### selection · 选择
+
+- **Definition:** Selection uses a predicate or flags to emit matching values, indices, or key/value payloads while declaring selected count and output ownership.
+- **Avoid:** Necessarily stable compaction, sorting, unique without declared equivalence.
+- **Related resources:** [A09](/en/algorithms/sorting-selection-compaction/).
+- **Version note:** CUB `DeviceSelect` v3.4.2 `Flagged`, `If`, and `Unique` are distinct production contracts; that 3.x coordinate excludes Toolkit 11.8.
+
+<span id="term-151" class="resource-target" aria-hidden="true"></span>
+
+### stream compaction · 流压缩
+
+- **Definition:** Stream compaction writes selected items to contiguous output positions. Original-order exclusive prefix rank can provide stability.
+- **Avoid:** Calling every atomic append stable, sorting, CUDA stream API operation.
+- **Related resources:** [A03](/en/algorithms/inclusive-exclusive-scan/) and [A09](/en/algorithms/sorting-selection-compaction/).
+- **Version note:** Composition is an algorithm contract. Exact CUB or Thrust APIs and storage, policy, and Toolkit compatibility follow the selected CCCL release.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, TERM-077 through TERM-095 retain **2026-08-28**, and TERM-096 through TERM-125 retain **2026-08-29**. TERM-126 through TERM-146 and the complete 146-term Publication Pair, metadata projections, direct links, and static definitions were reviewed together on **2026-08-30**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, or private material. TERM-126 through TERM-146 execute no GPU code or cuDNN. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-146 retain their item-level review records from 2026-08-26 through 2026-08-30. TERM-147 through TERM-151 and the complete 151-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-08-31**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. The new terms execute no GPU code, EX15, CUB, or Thrust. The [Chinese counterpart](/glossary/) is complete at the same time.

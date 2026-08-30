@@ -1,0 +1,173 @@
+---
+title: 'A09：用 Scan、Histogram 与 Movement 组合排序、选择和压缩'
+description: 从 flag、exclusive scan、histogram、atomic ownership 与 scatter 推导 selection、stream compaction 和 bounded-key sorting vocabulary，再进入 CUB/Thrust production decision。
+pairId: a09
+counterpart: /en/algorithms/sorting-selection-compaction/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - algorithm-contracts
+  - compaction-from-scan
+  - selection-from-flags
+  - sorting-from-histogram-scan-movement
+  - atomics-boundary
+  - production-choice
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A09
+prerequisites:
+  - A03
+  - A04
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; released 2026-08-05'
+    platform: 'Selected owner release for CUB and Thrust production coordinates'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 platform support'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; CCCL 3.x compatibility table'
+    platform: 'Exact owner compatibility boundary: latest-patch CUDA Toolkit 12.x and 13.x, excluding Toolkit 11.8'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 CUB DeviceRadixSort source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_radix_sort.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for device-wide radix-sort production primitives'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 CUB DeviceSelect source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_select.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for Flagged, If, and Unique device-wide selection primitives'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 Thrust sort interface source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/sort.h'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner interface source for high-level Thrust sorting vocabulary'
+    accessDate: '2026-08-31'
+  - title: 'CCCL v3.4.2 Thrust copy interface source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/copy.h'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner interface source for copy_if selection and compaction vocabulary'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/sorting-selection-compaction/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,algorithm-contracts,compaction-from-scan,selection-from-flags,sorting-from-histogram-scan-movement,atomics-boundary,production-choice,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A03,A04' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/sorting-selection-compaction/" lang="en">Read the English counterpart</a>
+
+A09 不发布一个“教学 sort kernel”。它从已知 primitives 推导三个算法合同：[选择（selection，TERM-150）](/glossary/#term-150)决定保留哪些 items，[流压缩（stream compaction，TERM-151）](/glossary/#term-151)把保留项写成 contiguous output，[排序（sorting，TERM-149）](/glossary/#term-149)按 key 建立 order。理解 composition 后，production 选择从 CUB/Thrust contracts 开始。
+
+## 学完本单元，你应该能
+
+- 把 stable selection 写成 `flag -> exclusive scan -> scatter`。
+- 从最后一个 scan position 与 flag 推导 compacted count。
+- 用 histogram、exclusive scan、within-bin rank 与 scatter 描述 bounded-key stable ordering。
+- 解释 atomic slot allocation 为什么可保证 unique destination，却不自动保证 stability 或低 contention。
+- 在 CUB `DeviceRadixSort`、CUB `DeviceSelect`、Thrust algorithms 与 custom code 之间写 decision packet。
+- 把 algorithm contract、library availability、correctness evidence 与 measured performance 分开。
+
+## 先修关系
+
+严格先修项只有 `A03, A04`。A03 提供 inclusive/exclusive scan、block totals 与 offset propagation；A04 提供 histogram bins、atomics、privatization 与 merge。A09 使用这些 vocabulary，不把 CCCL API 变成 prerequisite。
+
+## 三个合同先分开
+
+Selection 输出满足 predicate 的 values 或 indices。Compaction 还要求 output positions `0..count-1` 连续；若使用 original-order prefix rank，它是 stable compaction。Sorting 要声明 key projection、ascending/descending、stability、key/value movement、equal-key policy 与 output ownership。一个实现可能组合这些动作，但三类 acceptance criteria 不能混写。
+
+## 从 scan 得到 compaction positions
+
+对每个 input `i` 计算 `flag[i]` 为 0 或 1。对 flags 做 exclusive scan 得到 `position[i]`。若 `flag[i] == 1`，把 item scatter 到 `output[position[i]]`。最终 `count = position[n-1] + flag[n-1]`；空输入要有独立合同。
+
+因为 exclusive prefix 只计数当前 item 之前的 selected items，selected positions 唯一、连续，并按 input order 增加。这里的核心 composition 是 **flag -> exclusive scan -> scatter**。Scan 解决 destination ownership，scatter 负责 movement；两者都不能省略。
+
+## Selection 是 predicate 与 payload contract
+
+Predicate 可以检查 value、key、stencil mask 或外部 flags。Payload 可以是 value、index 或 key/value pair。In-place/out-of-place、aliasing、output capacity、selected-count type 与 stream/order 都必须先声明。`unique` 又需要 equivalence 与相邻/全局语义，不能仅因为名字相近就等同于 arbitrary predicate selection。
+
+## 从 histogram、scan 与 movement 理解 bounded-key sorting
+
+对有限 key domain，一个 counting/radix pass 可分成四步：histogram 得到每个 bin 的 count；对 counts 做 exclusive scan 得到 bin starts；为每个 item 计算 within-bin rank；scatter key/payload 到 `bin_start + rank`。重复 digit passes 时，每一 pass 若要保持 prior-digit order，就必须有 stable rank/movement contract。
+
+Histogram + scan 只给 bucket boundaries，不给同一 bucket 内每个 item 的唯一 stable rank。这个缺口可以由 per-item prefix、stable partition primitive 或另一个明确算法填补。把 atomic increment 当 rank 可以产生 unique slots，但 arrival order 不等于 input order，所以不能自动声称 stable sort。
+
+## Atomics：正确 ownership 与 contention 是两件事
+
+Atomic counter 可给 concurrent writers 分配不同 slots；这可以支持 unordered compaction。它没有保证 selected items 的 original order，也没有给出 timing。Hot counter、key distribution、privatization、merge 与 architecture 决定 contention behavior；source-level shared target 只建立 hypothesis。
+
+## Production choice：先读 exact owner contract
+
+CCCL v3.4.2 是本页选择的 immutable owner release。它的 tagged platform-support table 明确限定 CCCL 3.x 支持 CUDA Toolkit 12.x 与 13.x 的 latest patch releases，不支持本站的 Toolkit 11.8 lane。12.9.2/13.3.1 decision packet 可以评估 v3.4.2；11.8 path 必须使用该 Toolkit bundled 的旧版 CUB/Thrust，或另选并重新复核一个兼容的 CCCL 2.x coordinate，不能把 v3.4.2 直接投射到 11.8。
+
+CUB `DeviceRadixSort` 提供 device-wide radix sort，CUB `DeviceSelect` 提供 `Flagged`、`If` 与 `Unique` production primitives；传统 device-wide form 需要查询/提供 temporary storage 并声明 stream。Thrust 提供更高层 `sort`、`stable_sort` 与 `copy_if` vocabulary，并通过 execution policy/iterator contract 选择 backend。
+
+教育 composition 解释 flags、prefix ranks、bin offsets、movement、stability 与 ownership，但不是 production implementation。选择 production path 时至少比较 operation semantics、types/iterators、stability、temporary storage、stream/execution policy、maintenance、toolkit/CCCL version、correctness fixtures 和 measured workload。没有测量就不能宣布 custom、CUB 或 Thrust 更快。
+
+## 证据边界
+
+A09 四个 evidence arrays 均为空。它不编译或运行 CUB/Thrust/custom kernel，也没有 measured timing、throughput、temporary-storage footprint、contention counter 或 speedup。Context7 `/nvidia/cccl` 只用于 2026-08-31 discovery/cross-check；exact v3.4.2 release 与 source URLs 才是发布坐标。
+
+LAB12 不属于 A09，但本 ticket 仍保持它未发布：它严格依赖 Q13 与 L06，而两者都没有 public destination。
+
+## 离开前检查
+
+1. Exclusive scan of flags 为什么同时给出 unique、contiguous 与 stable positions？
+2. Compacted count 为什么是最后一个 exclusive position 加最后一个 flag？
+3. Histogram 与 bin-start scan 之后，stable sorting 还缺哪个 per-item quantity？
+4. Atomic increment 可以建立哪种 ownership，又不能建立哪种 order？
+5. `DeviceSelect::Flagged`、`DeviceSelect::If` 与 `Unique` 的 predicate/equivalence contracts 有何不同？
+6. 为什么 algorithm composition、production API availability 与 performance conclusion 是三个独立层次？
+
+## 继续练习
+
+- 完成 [A09 Exercises](/algorithms/sorting-selection-compaction/exercises/)后，再看[独立解答](/algorithms/sorting-selection-compaction/solutions/)。
+- 审查 [PB-R2-021](/practice/#pb-r2-021)并复习 [A03](/algorithms/inclusive-exclusive-scan/)与 [A04](/algorithms/privatized-histogram/)。
+- 复习 [TERM-149](/glossary/#term-149)、[TERM-150](/glossary/#term-150)和 [TERM-151](/glossary/#term-151)。
+
+## 来源与复核
+
+CCCL v3.4.2 release、tagged README platform-support table 及其 `device_radix_sort.cuh`、`device_select.cuh`、Thrust `sort.h`/`copy.h` 是 exact owner coordinates。本站只改写公开 API/algorithm contracts，没有复制 source、sample、figure、table 或 benchmark。
+
+**事实核查与来源访问日期：2026-08-31。**

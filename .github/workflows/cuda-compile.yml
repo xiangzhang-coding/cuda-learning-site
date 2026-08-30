@@ -729,6 +729,67 @@ jobs:
           include-hidden-files: false
           retention-days: 7
 
+  ex15-build:
+    name: ${{ matrix.lane }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: ex15-cuda-11-8-cxx17
+            image: nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f
+          - lane: ex15-cuda-12-9-cxx17
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: ex15-cuda-13-3-cxx17
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+    steps:
+      - name: Check out canonical public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up exact Node.js for artifact scanning
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Verify EX15 build inputs match the pinned source tree
+        run: |
+          source_commit="$(node -p "require('./examples/ex15-tiled-gemm/project.json').sourceCommit")"
+          git cat-file -e "${source_commit}^{commit}"
+          mapfile -t contract_files < <(node -e "const p=require('./examples/ex15-tiled-gemm/project.json'); for (const f of new Set([...p.build.inputs,...p.build.hostTestInputs,...p.build.contractFiles])) console.log(p.root+'/'+f)")
+          for file in "${contract_files[@]}"; do
+            git diff --exit-code "$source_commit" -- "$file"
+          done
+
+      - name: Compile EX15 without granting Evidence Status
+        run: |
+          mkdir -p "artifacts/cuda-ex15/${{ matrix.lane }}"
+          docker pull --platform linux/amd64 "${{ matrix.image }}"
+          docker run --platform linux/amd64 --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace/examples/ex15-tiled-gemm \
+            "${{ matrix.image }}" \
+            bash scripts/compile-check.sh c++17 ex15 \
+            "/workspace/artifacts/cuda-ex15/${{ matrix.lane }}"
+
+      - name: Scan EX15 build logs
+        run: node scripts/check-artifacts.mjs "artifacts/cuda-ex15/${{ matrix.lane }}"
+
+      - name: Upload EX15 build-gate logs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuda-build-${{ matrix.lane }}
+          path: artifacts/cuda-ex15/${{ matrix.lane }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+
   ex16-build:
     name: ${{ matrix.lane }}
     runs-on: ubuntu-24.04
@@ -783,7 +844,7 @@ jobs:
   cuda-compile-gate:
     name: cuda-compile-gate
     if: ${{ always() }}
-    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex16-build]
+    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -803,6 +864,7 @@ jobs:
           EX12_BUILD_RESULT: ${{ needs.ex12-build.result }}
           EX13_BUILD_RESULT: ${{ needs.ex13-build.result }}
           EX14_BUILD_RESULT: ${{ needs.ex14-build.result }}
+          EX15_BUILD_RESULT: ${{ needs.ex15-build.result }}
           EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}
         run: |
           if [ "$CUDA_EVIDENCE_RESULT" != "success" ]; then exit 1; fi
@@ -819,6 +881,7 @@ jobs:
           if [ "$EX12_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX13_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX14_BUILD_RESULT" != "success" ]; then exit 1; fi
+          if [ "$EX15_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi
           echo "Compile evidence does not grant CUDA runtime evidence."
 

@@ -3,7 +3,7 @@ title: Visual Explainer Index
 description: Find every completely published Visual Explainer by concept, related Learning Unit, and version boundary.
 pairId: visuals-index
 counterpart: /visuals/
-factCheckDate: '2026-08-30'
+factCheckDate: '2026-08-31'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/visuals/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. Of the fifteen formal explainers, VIS01-VIS11 use eleven standalone pages, including [VIS09 NVCC Artifact Pipeline](/en/visuals/artifact-pipeline/), [VIS10 Reduction Tree and Inactive Lanes](/en/visuals/reduction-stages/), and [VIS11 Tiled Transpose](/en/visuals/tiled-transpose/). VIS11 strictly requires A05 and relates to EX14. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors, and navigation does not duplicate them as four standalone pages. Incomplete planned work does not appear.
+This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. Of the sixteen formal explainers, VIS01-VIS12 use twelve standalone pages, including [VIS11 Tiled Transpose](/en/visuals/tiled-transpose/) and [VIS12 GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/). VIS12 strictly requires A08 and relates to EX15. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors without duplicate pages.
 
 ## Published Visual Explainers
 
@@ -38,4 +38,4 @@ A planning ID is a stable discussion label. It neither generates nor promises a 
 
 ## Evidence boundary
 
-VIS01-VIS11 and VIS19-VIS22 run deterministic teaching models only in the browser, provide static or textual fallbacks, and execute no CUDA. VIS11's logical and physical layouts, padding slots, and static before/after boards are not bank, runtime, timing, or performance observations. The index states that boundary: none of the fifteen Visual Explainers has CUDA Evidence Status or a Compile-Checked, Community-Observed, or Runtime-Verified claim. Reviewed: **2026-08-30**.
+VIS01-VIS12 and VIS19-VIS22 run deterministic teaching models only in the browser, provide static or textual fallbacks, and execute no CUDA. VIS12's matrix, tile, thread-block, warp, and instruction panels are not emitted-instruction, runtime, timing, or performance observations. None of the sixteen Visual Explainers has CUDA Evidence Status. Reviewed: **2026-08-31**.

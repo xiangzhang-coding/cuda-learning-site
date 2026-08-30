@@ -1,0 +1,129 @@
+---
+title: 'GEMM Tiling Hierarchy：从 Matrix 到 Instruction'
+description: 用确定性 matrix/tile fixtures 分开呈现 matrix、tile、thread block、warp 与 source-level instruction slot，并保留完整静态层级 panels。
+pairId: vis12
+counterpart: /en/visuals/gemm-tiling-hierarchy/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - gemm-shapes
+  - hierarchy-levels
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS12
+prerequisites:
+  - A08
+relatedUnits:
+  - EX15
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Intro to CUDA C++'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current grid, thread-block, warp, shared-memory, and synchronization vocabulary'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current classic matrix/tile/thread-block ownership context'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1'
+    platform: 'Archived execution hierarchy and shared-memory stability review'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Programming Guide 11.8.0 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v11.8.0'
+    platform: 'Archived execution hierarchy and shared-memory stability review'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/visuals/gemm-tiling-hierarchy/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,gemm-shapes,hierarchy-levels,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A08 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import GemmHierarchyExplorer from '../../../components/GemmHierarchyExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/gemm-tiling-hierarchy/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+完成 A08 后，用 VIS12 把 `A[M,K] × B[K,N] -> C[M,N]` 从完整 matrix 逐层缩小到 logical tile、CUDA thread block owner、modeled warp subtile 与 source-level scalar operation slot。Related Runnable Example 是 EX15。
+
+<GemmHierarchyExplorer locale="zh-CN" />
+
+## 控件
+
+三个原生 select 选择 matrix shape `128x128x32`/`256x128x64`、tile shape `64x64x16`/`128x64x16`和五个 hierarchy levels。重置恢复第一个 matrix、tile 与 matrix level，并把焦点返回 matrix select。Status 使用 polite live region。
+
+Controls 与 live workbench 在 source HTML 中带 `hidden`；custom element 只有找到完整 parts 且初始 model 推导成功后才显示。页面没有 autoplay、timer、randomness、storage、range input、canvas 或 SVG。
+
+## GEMM shapes
+
+Shape notation 固定为 `M x N x K`。Matrix 表示完整 `A[M,K]`、`B[K,N]`、`C[M,N]` contract。Tile 表示 `TM x TN` output footprint 与 `TK` reduction slice。Output tile grid 是 `ceil(M/TM) x ceil(N/TN)`；一个 thread block 拥有一个 output tile，并自己循环 `ceil(K/TK)` slices，因此 block count 不乘 K-slice count。
+
+两个 tile shapes 都使用 modeled `32x32x16` warp subtile。`64x64x16` 显示 4 warps/block，`128x64x16` 显示 8 warps/block。这是 bounded teaching partition，不是 launch recommendation 或 observed scheduling。
+
+## 五层 hierarchy
+
+1. **Matrix**：完整问题与三张 logical matrices。
+2. **Tile**：output partition 与 K-slice loop。
+3. **Thread block**：本教学 mapping 中的 CUDA owner；shape 与 tile 相同但语义不同。
+4. **Warp**：thread-block footprint 内的 modeled subtile，不预测 issue order。
+5. **Instruction**：`1x1x1` source-level scalar multiply-accumulate slot；不声称 compiler emitted FMA、MMA、WMMA 或 SASS。
+
+因此 hierarchy 解释 ownership 与 nesting，不解释 occupancy、register allocation、Tensor Core eligibility、pipeline、latency、throughput 或 speedup。Architecture-specific instruction hierarchy 留给后续 version-gated L09。
+
+## 静态回退
+
+交互区之外永久 server-render 四种 matrix/tile selections，每种都有五个 purpose-built hierarchy panels，共 20 panels。每个 panel 明确写 shape、owner、relationship 与 boundary。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 时，全部 panels 保留；selected state 还使用 `aria-current`、文字与粗边框，而不只依赖颜色。
+
+## 证据边界
+
+VIS12 不编译或执行 CUDA、不查询 device、不读取 compiler artifact/profiler，也不观察 emitted instruction。Compilation、runtime、expected-observation 与 recorded-observation arrays 全为空，不授予 Compile-Checked、Community-Observed 或 Runtime-Verified。
+
+## 来源
+
+CUDA Programming Guide v13.3 提供 stable thread-block/warp/shared-memory vocabulary，Best Practices Guide v13.3 提供 classic shared-memory matrix-multiplication context；12.9.1 与 11.8.0 archives 用于稳定性复核。四个 owner coordinates 均于 **2026-08-31** 访问。本站没有复制 NVIDIA code、sample、figure、table、layout 或 performance result；model、copy、panels 与 interaction 均为原创。
