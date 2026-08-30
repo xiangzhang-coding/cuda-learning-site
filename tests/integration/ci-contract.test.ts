@@ -91,9 +91,11 @@ describe('GitHub Actions quality contract', () => {
   });
 
   it('runs the full accessibility scan without competing browser workers', async () => {
-    const manifest = JSON.parse(await readProjectFile('package.json')) as {
-      scripts: Record<string, string>;
-    };
+    const [manifestSource, workflow] = await Promise.all([
+      readProjectFile('package.json'),
+      readProjectFile('.github/workflows/web-quality.yml'),
+    ]);
+    const manifest = JSON.parse(manifestSource) as { scripts: Record<string, string> };
 
     expect(manifest.scripts['test:e2e']).toBe(
       'playwright test --grep-invert @accessibility && npm run test:e2e:accessibility',
@@ -103,6 +105,9 @@ describe('GitHub Actions quality contract', () => {
     );
     expect(manifest.scripts['test:e2e:cross-browser']).toBe(
       'playwright test --project=firefox --project=webkit --project=mobile-safari --grep-invert "@accessibility|@visual" --workers=1',
+    );
+    expect(workflow).toMatch(
+      /accessibility-automated:[\s\S]*?runs-on: ubuntu-24\.04\s+timeout-minutes: 30/,
     );
   });
 

@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred twenty-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred thirty-nine published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-29'
+factCheckDate: '2026-08-30'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-29'
+      content: '2026-08-30'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1173,6 +1173,132 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [O04](/en/start/cpp17-for-cuda/), [M19](/en/toolchain/cpp-dialect-boundaries/), and [EX10](/en/examples/ptx-fatbinary-inspection/).
 - **Version note:** The ordinary matrix is 11.8.0/C++17, 12.9.2/C++17+C++20, and 13.3.1/C++17+C++20. Run 33275734951 retains a narrow C++23 probe pass at the EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 coordinate. It is not ordinary C++23 support, while WG21 N4659/N4861/N4950/N4951 still supply standard provenance only.
 
+<span id="term-126" class="resource-target" aria-hidden="true"></span>
+
+### elementwise map · 逐元素映射
+
+- **Definition:** An elementwise map independently applies one transform to every element in a logical domain and declares that position's read set, write set, and unique output owner.
+- **Avoid:** Synonym for vector addition, implicitly alias-safe in-place update, operation that automatically needs a barrier or atomic, kernel with observed high bandwidth.
+- **Related resources:** [A01](/en/algorithms/elementwise-map/), [F03](/en/foundations/multidimensional-indexing/), [F04](/en/foundations/host-device-lifecycle/), and [EX02](/en/examples/vector-addition/).
+- **Version note:** The mathematical map contract is not Toolkit-specific. CUDA indexing and memory paths are reviewed separately against current v13.3 and Runtime 13.3.1, the 12.9.1 owner guide, and the 11.8.0 archive; a static ownership proof grants no runtime or performance evidence.
+
+<span id="term-127" class="resource-target" aria-hidden="true"></span>
+
+### reduction · 归约
+
+- **Definition:** A reduction uses a declared binary operation, identity, and operation order to combine an input set into progressively fewer partial values until one final result remains.
+- **Avoid:** Sum only, synonym for scan, atomic accumulator without an order contract, operation naturally bit-identical to a serial fold.
+- **Related resources:** [A02](/en/algorithms/multi-stage-reduction/), [A03](/en/algorithms/inclusive-exclusive-scan/), [Q02](/en/correctness/floating-point-order-reproducibility/), and [EX11](/en/examples/multi-stage-reduction/).
+- **Version note:** Block, barrier, and floating-point boundaries are reviewed in current v13.3 and the 12.9.1/11.8.0 archives. CCCL v3.4.2 `DeviceReduce` is a named production baseline, not a guarantee for every custom reduction.
+
+<span id="term-128" class="resource-target" aria-hidden="true"></span>
+
+### reduction tree · 归约树
+
+- **Definition:** A reduction tree is a dependency graph with inputs as leaves, combine operations as internal nodes, and the result as root. Its edges fix pairings and floating-point operation order.
+- **Avoid:** Scheduler timeline, synonym for a serial left fold, shape that automatically provides determinism, hardware execution-time chart.
+- **Related resources:** [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), [VIS10](/en/visuals/reduction-stages/), and [EX11](/en/examples/multi-stage-reduction/).
+- **Version note:** A tree is algorithm structure. Current v13.3 and the 12.9.1/11.8.0 owner coordinates govern barrier and order facts, while an actual compiler, launch, or library policy may select another tree; VIS10 executes no CUDA.
+
+<span id="term-129" class="resource-target" aria-hidden="true"></span>
+
+### inactive lane · 非活动通道
+
+- **Definition:** An inactive lane performs no combine or update in one algorithm stage but still follows legal control flow to a later collective or barrier when that operation requires its participation.
+- **Avoid:** Exited thread, permanently disabled hardware lane, thread needing no synchronization, one uniform role for every divergence case.
+- **Related resources:** [A02](/en/algorithms/multi-stage-reduction/), [M05](/en/memory/synchronization-scopes/), and [VIS10](/en/visuals/reduction-stages/).
+- **Version note:** The role binds to a specific stage and participant group. Current v13.3 and the 12.9.1/11.8.0 block-barrier contracts do not permit data inactivity to prove that early exit is safe.
+
+<span id="term-130" class="resource-target" aria-hidden="true"></span>
+
+### scan · 扫描
+
+- **Definition:** A scan produces one prefix result at every position of ordered inputs using a declared associative operation and identity, rather than returning only one final aggregate.
+- **Avoid:** Reduction, sort, cumulative sum only, operation that may reorder inputs freely.
+- **Related resources:** [A03](/en/algorithms/inclusive-exclusive-scan/), [A02](/en/algorithms/multi-stage-reduction/), and [EX12](/en/examples/inclusive-exclusive-scan/).
+- **Version note:** Blelloch CMU-CS-90-190 supplies all-prefix-sums history only. Current CUDA v13.3, the 12.9.1/11.8.0 archives, and CCCL v3.4.2 `DeviceScan` separately supply current, archive, and production coordinates.
+
+<span id="term-131" class="resource-target" aria-hidden="true"></span>
+
+### inclusive scan · 包含式扫描
+
+- **Definition:** An inclusive scan includes the current input `x[i]` in the prefix at output position `i`, so the result covers the ordered range from `x[0]` through `x[i]`.
+- **Avoid:** Exclusive scan, reduction producing only a total, running total that omits identity or operator type, prefix that may exchange operands.
+- **Related resources:** [A03](/en/algorithms/inclusive-exclusive-scan/) and [EX12](/en/examples/inclusive-exclusive-scan/).
+- **Version note:** The semantic definition is stable across Toolkits. CUDA cooperation and barrier context is reviewed against current v13.3 and the 12.9.1/11.8.0 archives; the CCCL v3.4.2 `DeviceScan` contract binds only to that product and version.
+
+<span id="term-132" class="resource-target" aria-hidden="true"></span>
+
+### exclusive scan · 排除式扫描
+
+- **Definition:** An exclusive scan excludes current input `x[i]` at output position `i` and combines only earlier ordered inputs, so position 0 is the identity.
+- **Avoid:** Inclusive scan, shift without an identity, right-shifted inclusive output without an edge and type proof, block sum.
+- **Related resources:** [A03](/en/algorithms/inclusive-exclusive-scan/) and [EX12](/en/examples/inclusive-exclusive-scan/).
+- **Version note:** The semantic definition is stable across Toolkits. Current v13.3, the 12.9.1/11.8.0 owner coordinates, and CCCL v3.4.2 are recorded separately, and library source is not EX12 execution evidence.
+
+<span id="term-133" class="resource-target" aria-hidden="true"></span>
+
+### histogram · 直方图
+
+- **Definition:** A histogram maps every valid sample to one bin through a declared `bin_of` and range policy and requires each bin counter to equal the exact number of assigned samples.
+- **Avoid:** Bar chart itself, reduction computing one aggregate, bucketization without bounds, integer count whose error is assumed tolerable.
+- **Related resources:** [A04](/en/algorithms/privatized-histogram/) and [EX13](/en/examples/privatized-histogram/).
+- **Version note:** The exact-count contract is not Toolkit-specific. Atomic and shared implementations are reviewed against current v13.3 and the 12.9.1/11.8.0 archives; CCCL v3.4.2 `DeviceHistogram` is the named production baseline.
+
+<span id="term-134" class="resource-target" aria-hidden="true"></span>
+
+### atomic contention · 原子争用
+
+- **Definition:** Atomic contention occurs when concurrent atomic read-modify-write operations compete for the same or conflicting destinations, making progress or serialization cost depend on the address distribution. It is separate from atomic correctness.
+- **Avoid:** Data race, lost update, claim that all atomics fully serialize, slowdown declared without an actual record.
+- **Related resources:** [A04](/en/algorithms/privatized-histogram/), [M05](/en/memory/synchronization-scopes/), and [EX13](/en/examples/privatized-histogram/).
+- **Version note:** Atomic operation and scope support bind to the selected current v13.3 or archive contract. Contention cost also binds to architecture, type, address pattern, and input distribution and must be measured rather than inferred from source.
+
+<span id="term-135" class="resource-target" aria-hidden="true"></span>
+
+### privatization · 私有化
+
+- **Definition:** Privatization creates independent instances of intermediate state for smaller participant groups so updates accumulate within a narrower sharing scope before an explicit merge into a wider destination.
+- **Avoid:** Necessarily private per thread, automatically race-free, removal of every atomic, no merge required, speedup guarantee.
+- **Related resources:** [A04](/en/algorithms/privatized-histogram/), [M03](/en/memory/shared-memory-tiling/), and [EX13](/en/examples/privatized-histogram/).
+- **Version note:** A04's baseline is a per-block shared histogram reviewed against current v13.3 and the 12.9.1/11.8.0 barrier and atomic contracts. A CCCL v3.4.2 comparison does not prove a custom variant faster.
+
+<span id="term-136" class="resource-target" aria-hidden="true"></span>
+
+### floating-point nonassociativity · 浮点非结合性
+
+- **Definition:** Floating-point nonassociativity is the possibility that finite-precision rounding makes `(a + b) + c` and `a + (b + c)` produce different representations even when every operation follows the declared rounding mode.
+- **Avoid:** Data race, failure of associativity for real-number addition, arbitrary nondeterminism, correctness mismatch that may always be ignored.
+- **Related resources:** [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), and [EX11](/en/examples/multi-stage-reduction/).
+- **Version note:** The numerical principle spans Toolkits. Exact compiler flags, precision, and operation graphs are interpreted through current CUDA v13.3, the 12.9.1 and 11.8.0 owner documents, and the exact environment ledger.
+
+<span id="term-137" class="resource-target" aria-hidden="true"></span>
+
+### fused multiply-add (FMA) · 融合乘加（FMA）
+
+- **Definition:** Fused multiply-add (FMA) evaluates `rn(a * b + c)` without first rounding the exact product to the target precision, so the complete multiply-add has one rounding.
+- **Avoid:** `rn(rn(a*b)+c)`, shorthand for two separate operations, guarantee of identical bits, automatic synonym for compiler contraction.
+- **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/) and [EX11](/en/examples/multi-stage-reduction/).
+- **Version note:** FMA and accuracy facts are reviewed separately in current v13.3 and the 12.9.1/11.8.0 archives. Implicit contraction also binds to exact `--fmad` and `--use_fast_math` defaults, target, and explicit intrinsics.
+
+<span id="term-138" class="resource-target" aria-hidden="true"></span>
+
+### determinism · 确定性
+
+- **Definition:** Determinism means that repeated executions under explicitly fixed inputs, build, device, algorithm and launch policy, and run scope produce the same output under a declared equality predicate.
+- **Avoid:** Correctness, reproducibility across every environment, fixed random seed, fixed tree automatically yielding identical bits across GPUs.
+- **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/), [A02](/en/algorithms/multi-stage-reduction/), and [EX11](/en/examples/multi-stage-reduction/).
+- **Version note:** Current CUDA v13.3 deterministic-result guidance and CCCL v3.4.2 CUB determinism levels are recorded separately. The latter is a product-, version-, and scope-specific guarantee that cannot be projected onto a custom kernel.
+
+<span id="term-139" class="resource-target" aria-hidden="true"></span>
+
+### bitwise reproducibility · 逐位可复现性
+
+- **Definition:** Bitwise reproducibility requires compared floating-point representations to be identical within a named comparison scope and preserves enough records to reconstruct the build, environment, input, and equality predicate.
+- **Avoid:** Tolerance pass, fixed reduction order alone, proof of mathematical correctness, “reproducible” without an environment scope.
+- **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/), [Q01](/en/correctness/cpu-references-tolerances-invariants/), and [EX11](/en/examples/multi-stage-reduction/).
+- **Version note:** The claim binds to an exact Toolkit, compiler, library, and device scope. Current CUDA v13.3, the 12.9.1/11.8.0 archives, and CCCL v3.4.2 policy supply only their own boundaries; no tolerance result upgrades this status.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, and TERM-077 through TERM-095 retain **2026-08-28**. TERM-096 through TERM-125 and the complete 125-term Publication Pair, metadata projections, direct links, and index integration were reviewed together on **2026-08-29**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases owner documentation without copying source prose, tables, figures, examples, artifacts, or diagnostics. TERM-115 through TERM-125 ran no NVCC and executed no GPU code. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, TERM-077 through TERM-095 retain **2026-08-28**, and TERM-096 through TERM-125 retain **2026-08-29**. TERM-126 through TERM-139 and the complete 139-term Publication Pair, metadata projections, direct links, and static definitions were reviewed together on **2026-08-30**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, or private material. TERM-126 through TERM-139 compiled none of EX11-EX13 and executed no GPU code. The [Chinese counterpart](/glossary/) is complete at the same time.

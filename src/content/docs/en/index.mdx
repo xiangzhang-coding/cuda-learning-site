@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-08-29'
+factCheckDate: '2026-08-30'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-29'
+      content: '2026-08-30'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-The Stable Curriculum now completely publishes the O01-O08 orientation, the F01-F08 foundation track, the M01-M14 memory track, the M15-M19 toolchain track, and the noncontiguous Q01/Q03-Q05 correctness-and-quality track in both languages, for 39 Learning Units. R1 remains the latest completed aggregate release review. The M09-M14, EX07-EX09, and VIS08 material scoped by [Issue #19](https://github.com/xiangzhang-coding/cuda-learning-site/issues/19) remains in the current publication, and the current incremental manifest now adds M15-M19, EX10, VIS09, and their supporting learning material. The aggregate R2 release review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+The Stable Curriculum now completely publishes the O01-O08 orientation, the F01-F08 foundation track, the M01-M14 memory track, the M15-M19 toolchain track, the A01-A04 algorithms track, and the Q01-Q05 correctness-and-quality track in both languages, for 44 Learning Units. R1 remains the latest completed aggregate release review. The M09-M14, EX07-EX09, and VIS08 material scoped by [Issue #19](https://github.com/xiangzhang-coding/cuda-learning-site/issues/19), along with the existing M15-M19, EX10, and VIS09 material, remains in the current publication. [Issue #21](https://github.com/xiangzhang-coding/cuda-learning-site/issues/21) now adds A01-A04, Q02, EX11-EX13, VIS10, and their supporting learning material. The aggregate R2 release review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
@@ -54,7 +54,9 @@ The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 
 
 [M15 NVCC Host/Device Compilation Flow](/en/toolchain/nvcc-compilation-flow/) requires F04 and O04; [M16 PTX, cubin, SASS, and fatbinary](/en/toolchain/ptx-cubin-fatbinary/) requires M15 and F06; [M17 Select Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/) requires M16 and F06; [M18 Separate Compilation and Device Linking](/en/toolchain/separate-compilation-device-linking/) requires M15 and M16; and [M19 CUDA C++17, C++20, and C++23 Dialect Boundaries](/en/toolchain/cpp-dialect-boundaries/) requires O04 and M15.
 
-[Q01 CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) requires F04 and O04; [Q03 Memcheck and Invalid Memory Access](/en/correctness/memcheck-invalid-memory-access/) requires F05 and Q01; [Q04 Diagnose with Racecheck, Initcheck, and Synccheck](/en/correctness/racecheck-initcheck-synccheck/) requires M05, M06, and Q03; and [Q05 Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) requires M08 and Q01. Q02 has no public page or navigation placeholder.
+[A01 Elementwise Map and One Owner per Element](/en/algorithms/elementwise-map/) requires F03, F04, and M02; [A02 Multi-Stage Reduction, Barriers, and Operation Order](/en/algorithms/multi-stage-reduction/) requires M03, M05, and M06; [A03 Inclusive and Exclusive Scan](/en/algorithms/inclusive-exclusive-scan/) requires A02 and M05; and [A04 Privatized Histogram](/en/algorithms/privatized-histogram/) requires M03 and M05.
+
+[Q01 CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) requires F04 and O04; [Q02 Floating-point Order, Determinism, and Bitwise Reproducibility](/en/correctness/floating-point-order-reproducibility/) requires Q01 and A02; [Q03 Memcheck and Invalid Memory Access](/en/correctness/memcheck-invalid-memory-access/) requires F05 and Q01; [Q04 Diagnose with Racecheck, Initcheck, and Synccheck](/en/correctness/racecheck-initcheck-synccheck/) requires M05, M06, and Q03; and [Q05 Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) requires M08 and Q01.
 
 F01-F08 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/), [F05 Exercises](/en/foundations/asynchronous-errors/exercises/) and [solutions](/en/foundations/asynchronous-errors/solutions/), [F06 Exercises](/en/foundations/compute-capability/exercises/) and [solutions](/en/foundations/compute-capability/solutions/), [F07 Exercises](/en/foundations/runtime-driver-api/exercises/) and [solutions](/en/foundations/runtime-driver-api/solutions/), and [F08 Exercises](/en/foundations/launch-geometry/exercises/) and [solutions](/en/foundations/launch-geometry/solutions/).
 
@@ -62,17 +64,19 @@ M01-M14 also publish complete Exercises and separate reviewed solutions in order
 
 M15-M19 likewise publish complete Exercises and separate reviewed solutions: [M15 Exercises](/en/toolchain/nvcc-compilation-flow/exercises/) and [solutions](/en/toolchain/nvcc-compilation-flow/solutions/), [M16 Exercises](/en/toolchain/ptx-cubin-fatbinary/exercises/) and [solutions](/en/toolchain/ptx-cubin-fatbinary/solutions/), [M17 Exercises](/en/toolchain/compiler-architecture-targets/exercises/) and [solutions](/en/toolchain/compiler-architecture-targets/solutions/), [M18 Exercises](/en/toolchain/separate-compilation-device-linking/exercises/) and [solutions](/en/toolchain/separate-compilation-device-linking/solutions/), and [M19 Exercises](/en/toolchain/cpp-dialect-boundaries/exercises/) and [solutions](/en/toolchain/cpp-dialect-boundaries/solutions/).
 
+A01-A04 likewise publish complete Exercises and separate reviewed solutions: [A01 Exercises](/en/algorithms/elementwise-map/exercises/) and [solutions](/en/algorithms/elementwise-map/solutions/), [A02 Exercises](/en/algorithms/multi-stage-reduction/exercises/) and [solutions](/en/algorithms/multi-stage-reduction/solutions/), [A03 Exercises](/en/algorithms/inclusive-exclusive-scan/exercises/) and [solutions](/en/algorithms/inclusive-exclusive-scan/solutions/), and [A04 Exercises](/en/algorithms/privatized-histogram/exercises/) and [solutions](/en/algorithms/privatized-histogram/solutions/).
+
 O02-O08 retain their own Exercises and separate solutions.
 
-Q01/Q03-Q05 also publish complete Exercises and separate reviewed solutions: [Q01 Exercises](/en/correctness/cpu-references-tolerances-invariants/exercises/) and [solutions](/en/correctness/cpu-references-tolerances-invariants/solutions/), [Q03 Exercises](/en/correctness/memcheck-invalid-memory-access/exercises/) and [solutions](/en/correctness/memcheck-invalid-memory-access/solutions/), [Q04 Exercises](/en/correctness/racecheck-initcheck-synccheck/exercises/) and [solutions](/en/correctness/racecheck-initcheck-synccheck/solutions/), and [Q05 Exercises](/en/correctness/timing-asynchronous-gpu-work/exercises/) and [solutions](/en/correctness/timing-asynchronous-gpu-work/solutions/).
+Q01-Q05 also publish complete Exercises and separate reviewed solutions: [Q01 Exercises](/en/correctness/cpu-references-tolerances-invariants/exercises/) and [solutions](/en/correctness/cpu-references-tolerances-invariants/solutions/), [Q02 Exercises](/en/correctness/floating-point-order-reproducibility/exercises/) and [solutions](/en/correctness/floating-point-order-reproducibility/solutions/), [Q03 Exercises](/en/correctness/memcheck-invalid-memory-access/exercises/) and [solutions](/en/correctness/memcheck-invalid-memory-access/solutions/), [Q04 Exercises](/en/correctness/racecheck-initcheck-synccheck/exercises/) and [solutions](/en/correctness/racecheck-initcheck-synccheck/solutions/), and [Q05 Exercises](/en/correctness/timing-asynchronous-gpu-work/exercises/) and [solutions](/en/correctness/timing-asynchronous-gpu-work/solutions/).
 
-[EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04; [EX04 Error Handling Lifecycle](/en/examples/error-handling-lifecycle/) depends only on F05; [EX05 Coalesced and Strided Access](/en/examples/coalesced-strided-access/) depends only on M02; [EX06 Shared-Memory Tile Bank Padding](/en/examples/shared-memory-tile-bank-padding/) requires M03 and M04; [EX07 Streams, Events, and Overlap](/en/examples/streams-events-overlap/) requires M07, M08, and M09; [EX08 Unified Memory Migration](/en/examples/unified-memory-migration/) depends only on M10; [EX09 CUDA Graph Capture](/en/examples/graph-capture/) depends only on M14; [EX10 PTX and Fatbinary Inspection](/en/examples/ptx-fatbinary-inspection/) requires M15 and M16; and [EX16 Compute Sanitizer Defect Suite](/en/examples/sanitizer-defect-suite/) requires Q03 and Q04. The Runnable Example set is exactly eleven noncontiguous IDs, EX01-EX10 and EX16; EX11-EX15 have no public pages or placeholders.
+[EX03 Multidimensional Indexing](/en/examples/multidimensional-indexing/) depends on F03 and supplies canonical source to F03/F04; [EX04 Error Handling Lifecycle](/en/examples/error-handling-lifecycle/) depends only on F05; [EX05 Coalesced and Strided Access](/en/examples/coalesced-strided-access/) depends only on M02; [EX06 Shared-Memory Tile Bank Padding](/en/examples/shared-memory-tile-bank-padding/) requires M03 and M04; [EX07 Streams, Events, and Overlap](/en/examples/streams-events-overlap/) requires M07, M08, and M09; [EX08 Unified Memory Migration](/en/examples/unified-memory-migration/) depends only on M10; [EX09 CUDA Graph Capture](/en/examples/graph-capture/) depends only on M14; [EX10 PTX and Fatbinary Inspection](/en/examples/ptx-fatbinary-inspection/) requires M15 and M16; [EX11 Multi-Stage Reduction](/en/examples/multi-stage-reduction/) requires A02 and Q02; [EX12 Inclusive and Exclusive Scan](/en/examples/inclusive-exclusive-scan/) depends only on A03; [EX13 Privatized Histogram](/en/examples/privatized-histogram/) depends only on A04; and [EX16 Compute Sanitizer Defect Suite](/en/examples/sanitizer-defect-suite/) requires Q03 and Q04. The Runnable Example set is exactly fourteen IDs, EX01-EX13 and EX16; EX14 and EX15 have no public pages or placeholders.
 
-EX05-EX09 each use one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1; EX16 is one original Apache-2.0 C++17 project that builds eight isolated binaries across the same Lanes. EX05-EX09 and EX16 have empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. EX10 retains five ordinary Compile-Checked records from run 33275734951. Its artifact-pipeline acceptance generates and inspects artifacts but executes neither the final host artifact nor a GPU executable, so runtime is Runtime-Not-Applicable. Its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe is a narrow pass and declares no ordinary C++23 support, other compiler or platform, runtime, or performance. A host-only utility cannot establish GPU correctness, overlap, migration, graph replay, or sanitizer behavior. The site ran no EX03-EX10/EX16 CUDA binary, Compute Sanitizer tool, or profiler and publishes no sanitizer report, actual output, timing, speedup, or other performance number for them.
+EX05-EX09 and EX11-EX13 each use one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1; EX16 is one original Apache-2.0 C++17 project that builds eight isolated binaries across the same Lanes. EX05-EX09, EX11-EX13, and EX16 have empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. EX10 retains five ordinary Compile-Checked records from run 33275734951. Its artifact-pipeline acceptance generates and inspects artifacts but executes neither the final host artifact nor a GPU executable, so runtime is Runtime-Not-Applicable. Its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe is a narrow pass and declares no ordinary C++23 support, other compiler or platform, runtime, or performance. A host-only utility cannot establish GPU correctness, overlap, migration, graph replay, scan, histogram, or reduction runtime behavior. The site ran no EX03-EX13/EX16 CUDA binary, Compute Sanitizer tool, or profiler and publishes no sanitizer report, actual output, timing, speedup, or other performance number for them.
 
 The six noncontiguous Labs are exactly LAB01-LAB05 and LAB07. LAB06 remains absent because its required timeline-profiler prerequisite is not public. LAB01 requires O03 and O08 and uses EX01; LAB02 requires O03 and F01 and uses EX02; [LAB03 Break and Repair Indexing](/en/labs/break-and-repair-indexing/) requires F03 and F05 and uses EX04; [LAB04 Observe Coalescing](/en/labs/observe-coalescing/) requires M02 and Q05 and uses EX05; [LAB05 Remove Shared-Memory Bank Conflicts](/en/labs/remove-shared-memory-bank-conflicts/) requires M04 and Q05 and uses EX06; and [LAB07 Diagnose Four Sanitizer Failures](/en/labs/diagnose-four-sanitizer-failures/) requires Q03 and Q04 and uses EX16. F08 is related to LAB03 but is not a LAB03 prerequisite.
 
-The site has thirteen formal Visual Explainers: nine standalone pages, [VIS01 Kernel Journey](/en/visuals/kernel-journey/), [VIS02 Indexing](/en/visuals/indexing/), [VIS03 Warp Divergence](/en/visuals/warp-divergence/), [VIS04 Memory-request Segment Grouping](/en/visuals/memory-transactions/), [VIS05 Shared-memory Bank Mapping](/en/visuals/shared-memory-banks/), [VIS06 Memory Hierarchy, Ownership, and Lifetime](/en/visuals/memory-hierarchy-lifetime/), [VIS07 Stream and Event Dependencies](/en/visuals/stream-event-dependencies/), [VIS08 Managed-Memory Page Migration](/en/visuals/page-migration/), and [VIS09 NVCC Artifact Pipeline](/en/visuals/artifact-pipeline/), plus [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22), embedded in F05-F08 respectively. VIS08 requires M01, M02, and M10; VIS09 requires M15, M16, and M17. All thirteen use deterministic browser-only models, provide static or textual fallbacks, execute no CUDA, and have no CUDA Evidence Status. F04's original static lifecycle table remains neither a Visual Explainer nor an evidence source. The current catalog contains 6 Labs, 40 Practice Bank entries, 13 Visual Explainers, 125 Glossary terms, and 50 source records, for 234 records total. Public source files form 148 Publication Pairs, or 296 source routes.
+The site has fourteen formal Visual Explainers: ten standalone pages, [VIS01 Kernel Journey](/en/visuals/kernel-journey/), [VIS02 Indexing](/en/visuals/indexing/), [VIS03 Warp Divergence](/en/visuals/warp-divergence/), [VIS04 Memory-request Segment Grouping](/en/visuals/memory-transactions/), [VIS05 Shared-memory Bank Mapping](/en/visuals/shared-memory-banks/), [VIS06 Memory Hierarchy, Ownership, and Lifetime](/en/visuals/memory-hierarchy-lifetime/), [VIS07 Stream and Event Dependencies](/en/visuals/stream-event-dependencies/), [VIS08 Managed-Memory Page Migration](/en/visuals/page-migration/), [VIS09 NVCC Artifact Pipeline](/en/visuals/artifact-pipeline/), and [VIS10 Reduction Tree and Inactive Lanes](/en/visuals/reduction-stages/), plus [VIS19 Error-Surfacing Timeline](/en/foundations/asynchronous-errors/#vis19), [VIS20 Compute-Capability Contract Filter](/en/foundations/compute-capability/#vis20), [VIS21 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/#vis21), and [VIS22 Block-Shape Constraint Explorer](/en/foundations/launch-geometry/#vis22), embedded in F05-F08 respectively. VIS08 requires M01, M02, and M10; VIS09 requires M15, M16, and M17; VIS10 depends only on A02. All fourteen use deterministic browser-only models, provide static or textual fallbacks, execute no CUDA, and have no CUDA Evidence Status. VIS10's static stage diagram is a deterministic fallback, not a runtime or performance observation. F04's original static lifecycle table remains neither a Visual Explainer nor an evidence source. The current catalog contains 6 Labs, 45 Practice Bank entries, 14 Visual Explainers, 139 Glossary terms, and 56 source records, for 260 records total. Public source files form 167 Publication Pairs, or 334 source routes.
 
 ## Boundaries first
 
@@ -256,10 +260,35 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>CUDA C++17, C++20, and C++23 Dialect Boundaries</strong>
     <small>Bind Toolkit, host compiler, dialect option, and retained probe into one coordinate.</small>
   </a>
+  <a className="route-card" href="/en/algorithms/elementwise-map/">
+    <span>A01 · ELEMENTWISE MAP</span>
+    <strong>Elementwise Map and One Owner per Element</strong>
+    <small>Build the map contract from exclusive writes, a scalable grid, and a memory-traffic ledger.</small>
+  </a>
+  <a className="route-card" href="/en/algorithms/multi-stage-reduction/">
+    <span>A02 · REDUCTION TREE</span>
+    <strong>Multi-Stage Reduction, Barriers, and Operation Order</strong>
+    <small>Prove inactive lanes, block barriers, and cross-kernel partial stages.</small>
+  </a>
+  <a className="route-card" href="/en/algorithms/inclusive-exclusive-scan/">
+    <span>A03 · PREFIX SCAN</span>
+    <strong>Inclusive and Exclusive Scan</strong>
+    <small>Transform a sequential prefix dependency into block scans, offsets, and propagation stages.</small>
+  </a>
+  <a className="route-card" href="/en/algorithms/privatized-histogram/">
+    <span>A04 · HISTOGRAM</span>
+    <strong>Privatized Histogram</strong>
+    <small>Separate atomic correctness, contention, shared privatization, and merge.</small>
+  </a>
   <a className="route-card" href="/en/correctness/cpu-references-tolerances-invariants/">
     <span>Q01 · CORRECTNESS ORACLE</span>
     <strong>CPU References, Tolerances, and Invariants</strong>
     <small>Establish an independent oracle and acceptance criteria before measuring or optimizing.</small>
+  </a>
+  <a className="route-card" href="/en/correctness/floating-point-order-reproducibility/">
+    <span>Q02 · NUMERICAL ORDER</span>
+    <strong>Floating-point Order, Determinism, and Bitwise Reproducibility</strong>
+    <small>Declare tolerance, determinism, and bitwise reproducibility contracts independently.</small>
   </a>
   <a className="route-card" href="/en/correctness/memcheck-invalid-memory-access/">
     <span>Q03 · MEMCHECK</span>
@@ -325,6 +354,21 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <span>EX10 · ARTIFACT INSPECTION</span>
     <strong>PTX and Fatbinary Inspection Runnable Example</strong>
     <small>Generate and inspect the complete artifact pipeline without executing a final host or GPU executable.</small>
+  </a>
+  <a className="route-card" href="/en/examples/multi-stage-reduction/">
+    <span>EX11 · MULTI-STAGE REDUCTION</span>
+    <strong>Multi-Stage Reduction Runnable Example</strong>
+    <small>Verify with a double CPU reference and absolute-plus-relative tolerance without performance data.</small>
+  </a>
+  <a className="route-card" href="/en/examples/inclusive-exclusive-scan/">
+    <span>EX12 · INCLUSIVE / EXCLUSIVE SCAN</span>
+    <strong>Inclusive and Exclusive Scan Runnable Example</strong>
+    <small>Verify exact prefixes with independent CPU references, recurrences, and last-total invariants.</small>
+  </a>
+  <a className="route-card" href="/en/examples/privatized-histogram/">
+    <span>EX13 · PRIVATIZED HISTOGRAM</span>
+    <strong>Privatized Histogram Runnable Example</strong>
+    <small>Verify two paths with three fixtures, an independent CPU reference, and a sum-of-bins invariant.</small>
   </a>
   <a className="route-card" href="/en/examples/sanitizer-defect-suite/">
     <span>EX16 · SANITIZER DEFECT SUITE</span>
@@ -416,20 +460,25 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>NVCC Artifact Pipeline</strong>
     <small>Inspect host/device branches, target plans, and optional device linking without inventing build observations.</small>
   </a>
+  <a className="route-card" href="/en/visuals/reduction-stages/">
+    <span>VIS10 · REDUCTION STAGES</span>
+    <strong>Reduction Tree and Inactive Lanes</strong>
+    <small>Compare a deterministic eight-lane stage ledger; its static diagram fallback is not runtime or performance evidence.</small>
+  </a>
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, architecture, kernel, memory, toolchain, and correctness models through 40 original problems.</small>
+    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 45 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 125-term canonical bilingual vocabulary.</small>
+    <small>Check the 139-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 50 interface and owner-source records with their review dates.</small>
+    <small>Inspect 56 interface and owner-source records with their review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

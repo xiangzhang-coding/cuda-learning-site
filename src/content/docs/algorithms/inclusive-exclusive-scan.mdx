@@ -1,0 +1,220 @@
+---
+title: 'A03：包含式与排除式扫描（Inclusive and Exclusive Scan）'
+description: 从顺序前缀依赖推导 staged block scan，再用 block sums、block offsets 与 offset propagation 组成多 block 扫描。
+pairId: a03
+counterpart: /en/algorithms/inclusive-exclusive-scan/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - scan-contract
+  - inclusive-exclusive
+  - dependency-transformation
+  - block-scan
+  - multi-block-scan
+  - canonical-example
+  - production-baseline
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A03
+prerequisites:
+  - A02
+  - M05
+relatedUnits:
+  - EX12
+exampleIds:
+  - EX12
+canonicalExample: EX12
+canonicalRanges:
+  - multi-block-scan
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C Programming Guide 11.8 - Warp Shuffle Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#warp-shuffle-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 scan-stage and thread-cooperation contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9 - Inclusive Scan and Exclusive Scan'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#inclusive-scan-and-exclusive-scan'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane collective scan context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide 13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, shared-memory, and barrier contract'
+    accessDate: '2026-08-30'
+  - title: 'CCCL CUB DeviceScan device-wide source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for the CUB device-wide DeviceScan production primitive'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,scan-contract,inclusive-exclusive,dependency-transformation,block-scan,multi-block-scan,canonical-example,production-baseline,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: multi-block-scan }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,CCCL 3.4.2' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/inclusive-exclusive-scan/" lang="en">Read the English counterpart</a>
+
+扫描（scan）为每个位置生成一个前缀结果，而不是只生成一个最终归约值。本单元先定义包含式扫描（inclusive scan）、排除式扫描（exclusive scan）与单位元（identity），再把顺序依赖（sequential dependency）改写成带阶段（stage）和屏障（barrier）的并行树，最后通过块总和（block sum）、块偏移（block offset）与偏移传播（offset propagation）扩展到多 thread block。
+
+## 学完本单元，你应该能
+
+- 写出 inclusive scan 与 exclusive scan 的逐位置合同，并说明 identity 出现在哪里。
+- 把一条串行 recurrence 转换成读取前一 stage 快照的 parallel tree。
+- 证明 block scan 中每个 stage 的 shared-memory 可见性与 barrier participation。
+- 用 block sums、block offsets 和 offset propagation 解释 device-wide scan。
+- 区分教学用手写实现、CUB `DeviceScan` production baseline 与尚未取得的性能证据。
+
+## 先修关系
+
+先完成 [A02：多阶段归约](/algorithms/multi-stage-reduction/)和 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。A02 提供 associative operation、tree stage 与跨 block partial result 的心智模型；M05 提供 shared memory、`__syncthreads()` 和 kernel boundary 的可见性合同。
+
+先修项严格为 `A02` 与 `M05`。CUB 和 CCCL 在本页只是 production comparison，不是 prerequisite；理解 DeviceScan API 也不能替代对 block sums 与 offsets 的推导。
+
+## Scan 合同
+
+给定输入 `x[0..n-1]`、结合运算 `op` 和 identity `e`，scan 必须保留输入顺序。对非交换但结合的运算，`x[0] op x[1]` 不能交换成 `x[1] op x[0]`。空输入产生空输出；边界与 accumulator type 也必须由实现声明。
+
+顺序定义可以写成：
+
+```text
+inclusive[0] = x[0]
+inclusive[i] = inclusive[i - 1] op x[i]
+
+exclusive[0] = e
+exclusive[i] = exclusive[i - 1] op x[i - 1]
+```
+
+这两条 recurrence 是语义 oracle，不是并行执行计划。
+
+## Inclusive、exclusive 与 identity
+
+Inclusive scan 包含（includes）current input `x[i]`：位置 `i` 的结果覆盖 `x[0]` 到 `x[i]`。Exclusive scan 不包含（excludes）current input `x[i]`：位置 `i` 只覆盖更早的元素，因此第一个输出必须是 identity `e`。
+
+对 addition，`e = 0`。若 `x = [3, 1, 4, 2]`，则：
+
+```text
+inclusive = [3, 4, 8, 10]
+exclusive = [0, 3, 4, 8]
+```
+
+在同一 `op` 与 identity 合同下，`inclusive[i] = exclusive[i] op x[i]`。这个关系适合做 invariant 检查，但不能忽略溢出、浮点 operation order 或自定义运算的类型合同。
+
+## 把顺序 dependency 转换成并行 stages
+
+Sequential dependency 让位置 `i` 等待 `i - 1`。Parallel tree 将这条链转换为若干 stage：距离依次为 `1, 2, 4, ...`，每个 stage 只读取前一 stage 的稳定快照，并把更长前缀写到下一快照。距离达到或超过 logical block length 后，每个位置拥有自己的完整 block prefix。
+
+1. **Stage 0：** 每个 lane 拥有一个 input value。
+2. **Stage k：** 若 predecessor 存在，lane `i` 组合 `prior[i - 2^(k-1)]` 与 `prior[i]`。
+3. **Barrier：** current snapshot 完成前，没有 lane 可以开始 next stage。
+
+`__syncthreads()` 是 block barrier，不会把同一数组的无序 read/write 自动变成 snapshot。教学实现可以 ping-pong 两个 shared buffers；其他 in-place 方案必须单独证明它的读写顺序。每个 stage 的 barrier 必须由所有 participating threads 到达，edge lane 不能提前 return。
+
+## Block scan
+
+一个 block 先把合法 input 放入 shared state，把越界 slot 设为 identity，再执行 staged scan。Inclusive output 可直接来自最终前缀；exclusive output 可以右移 inclusive prefix 并把 lane 0 设为 identity，或由等价且已证明的 exclusive construction 产生。
+
+每个 block 还输出一个 block sum，也就是该 block 合法元素按原顺序合并后的 total。提取位置取决于实现证明：canonical EX12 把越界 slots 写成 identity，再对全部 `blockDim.x` slots 完成 full-width inclusive scan，因此 partial block 的最后一个 physical lane 正好保存合法 slice total；没有这项 identity-padding/full-width proof 的实现必须改读 logical last valid element 或证明另一条等价路径。这个 block sum 是下一层 scan 的输入，不是当前 block 的全局 offset。
+
+## Multi-block scan：sum、offset、propagation
+
+Device-wide baseline 分三步：
+
+1. 每个 block 生成 local scan outputs 和一个 block partial sum。
+2. 对 block sums 按 block 顺序执行 scan，得到 block offsets；exclusive offset 的第一个值是 identity。
+3. Offset propagation kernel 把所属 block 的 offset 加回（add）或用 `op` 合并到每个 local prefix。
+
+例如 block totals 为 `[10, 7, 5]`，addition 的 exclusive block offsets 是 `[0, 10, 17]`。第三个 block 的每个 local prefix 都要加 17。Kernel launch boundary 让第一步的 sums 对第二步可见，也让 offsets 在 propagation 前完成；普通 block barrier 不能跨越整个 grid 完成这项工作。
+
+这套分解还给出验证点：local recurrence 正确、block sum 等于对应 slice total、offset recurrence 正确、传播后全局 recurrence 仍成立。任何一步漏掉 partial block、identity 或原始顺序，最终结果都会偏离 scan 合同。
+
+## Canonical Runnable Example：EX12
+
+EX12 的 `multi-block-scan` range 是本单元唯一 canonical import。它展示 local block scan、block sums、offset scan 与 propagation 的完整 C++17 路径；standalone project 仍是 canonical implementation，本页不重写或复制其源码。
+
+[查看 EX12 standalone project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex12-inclusive-exclusive-scan)，或[下载同一 source revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip)。两条链接与 project metadata 使用同一固定提交。
+
+<CanonicalCode exampleId="EX12" range="multi-block-scan" />
+
+## Production baseline：CUB DeviceScan
+
+CCCL v3.4.2 的 CUB `DeviceScan` 是 device-wide inclusive/exclusive scan 的 production baseline 和 comparison point。实际应用应先评估它的 API、temporary storage、stream、type 与 operation contract，而不是默认维护一份教学 kernel。
+
+手写（hand-written）教学实现用于学习和理解 dependency transformation、barriers、block sums 与 offsets；它不是因为“更底层”就更适合生产。`DeviceScan` 不是本单元的先修项，也不会改变 `A02,M05` 这组 prerequisite。
+
+## 证据边界
+
+本页的 compilation、runtime、expected observations 与 recorded observations 均为空。公式、stage table 与 CPU oracle 可以证明语义关系，却没有执行 EX12，也没有观察任何 GPU timing、bandwidth、throughput 或 speedup。
+
+在 Reference Environment 运行前，只能声明要比较的变量，例如 block size、input distribution、operator、temporary storage 与 timing boundary。不能从并行 stage 数量、较少的理论 dependency depth 或 `DeviceScan` 的存在推断实测加速。
+
+## 离开前检查
+
+1. Inclusive scan 与 exclusive scan 在位置 `i` 是否包含 current input，identity 放在哪里？
+2. 为什么 sequential dependency 必须改写为读取 prior-stage snapshot 的 parallel tree？
+3. Block sum 与 block offset 有什么区别，partial block 如何产生正确的 sum？
+4. 为什么 offset propagation 需要 kernel boundary，而不能只依靠 `__syncthreads()`？
+
+## 继续练习
+
+- 完成 [A03 练习（Exercises）](/algorithms/inclusive-exclusive-scan/exercises/)，再查看独立的[参考解答](/algorithms/inclusive-exclusive-scan/solutions/)。
+- 对一组非二次幂长度输入手算 local prefixes、block sums 与 offsets。
+- 把 EX12 的 integer invariant 与本页 recurrence 对齐；在获得记录前不要写性能结论。
+
+## 来源与复核
+
+- [CUDA C Programming Guide v11.8.0：Warp Shuffle Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#warp-shuffle-functions)提供 11.8 lane 的 thread cooperation 与 scan-stage 背景。
+- [CUDA C++ Programming Guide v12.9.1：Inclusive Scan and Exclusive Scan](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#inclusive-scan-and-exclusive-scan)是 Toolkit 12.9.2 patch lane 使用的 owner guide coordinate。
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 current thread-block、shared-memory 与 barrier 合同。
+- [CCCL v3.4.2 `cub/device/device_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh)是 CUB device-wide `DeviceScan` 的 exact owner source。
+
+四项 primary owner sources 均访问于 **2026-08-30**。定义、stage transformation、multi-block proof、练习与编排均为本站独立原创；没有复制 private material、owner example 或 figure。
+
+**事实核查日期：2026-08-30。**

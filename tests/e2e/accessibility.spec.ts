@@ -35,6 +35,7 @@ const representativeThemeRoutes = [
   '/en/visuals/stream-event-dependencies/',
   '/en/visuals/page-migration/',
   '/en/visuals/artifact-pipeline/',
+  '/en/visuals/reduction-stages/',
 ] as const;
 
 const releaseVisualStateScans = [
@@ -89,6 +90,18 @@ const releaseVisualStateScans = [
       await expect(pipeline).toHaveAttribute('data-current-stage', 'optional-device-link');
     },
   },
+  {
+    theme: 'profiler-dark',
+    label: 'VIS10 stride-halving reduction state',
+    route: '/en/visuals/reduction-stages/',
+    prepare: async (page: Page) => {
+      const reduction = page.locator('[data-visual-id="VIS10"]');
+      await reduction.locator('[data-reduction-variant]').selectOption('stride-halving');
+      await reduction.locator('[data-reduction-element-count]').selectOption('8');
+      await reduction.locator('[data-reduction-action="step"]').click();
+      await expect(reduction).toHaveAttribute('data-step-index', '1');
+    },
+  },
 ] as const;
 
 async function setTheme(page: Page, theme: (typeof THEME_IDS)[number]) {
@@ -107,18 +120,22 @@ async function expectNoAxeViolations(page: Page, label: string) {
   ).toEqual([]);
 }
 
-test('@accessibility axe detects no tagged violations across every published route; this is not a conformance claim', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
-  test.setTimeout(420_000);
+for (const locale of ['zh-CN', 'en'] as const) {
+  test(`@accessibility axe detects no tagged violations across every ${locale} route; this is not a conformance claim`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
+    test.setTimeout(420_000);
 
-  const theme = 'silicon-light';
-  await setTheme(page, theme);
-  for (const route of await discoverPublishedRoutes()) {
-    await page.goto(route);
-    await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
-    await expectNoAxeViolations(page, `${theme}: ${route}`);
-  }
-});
+    const theme = 'silicon-light';
+    const routes = (await discoverPublishedRoutes()).filter((route) =>
+      locale === 'en' ? route.startsWith('/en/') : !route.startsWith('/en/'));
+    await setTheme(page, theme);
+    for (const route of routes) {
+      await page.goto(route);
+      await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+      await expectNoAxeViolations(page, `${theme}: ${route}`);
+    }
+  });
+}
 
 test('@accessibility representative pages and visual states have no tagged violations across themes', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');

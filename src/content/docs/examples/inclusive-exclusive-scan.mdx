@@ -1,0 +1,235 @@
+---
+title: 'EX12：Inclusive 与 Exclusive Scan 可运行示例'
+description: 用 C++17 多 block CUDA scan 生成 4,099 个精确 uint32 prefix，并通过独立 CPU reference、recurrence 与 last-total invariant 验证结果。
+pairId: ex12
+counterpart: /en/examples/inclusive-exclusive-scan/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - cpu-reference
+  - multi-block-scan
+  - invariants
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX12
+prerequisites:
+  - A03
+exampleIds:
+  - EX12
+canonicalExample: EX12
+canonicalRanges:
+  - cpu-reference
+  - multi-block-scan
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 49,324 bytes of declared device allocation and under 8 GB'
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 49324
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, the host test, and the EX12 CUDA binary'
+  - 'Create and remove files in the EX12 build directory and a learner-owned evidence directory'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The inclusive and exclusive device arrays should each report PASS only when all 4,099 uint32 outputs exactly match their independent CPU references.
+    - The exact recurrence checks should hold for every adjacent inclusive and exclusive prefix, including the identity at exclusive index zero.
+    - The last-total checks should report 16,390 for the deterministic input through both inclusive[last] and exclusive[last] + input[last], including the guarded three-element final block.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current shared-memory and block-synchronization contracts'
+    accessDate: '2026-08-30'
+  - title: 'CCCL CUB DeviceScan device-wide source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for the CUB device-wide DeviceScan production primitive'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: ex12 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,multi-block-scan,invariants,build,compatibility,evidence,expected-observations,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: runnable-example }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A03 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,multi-block-scan' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 49,324 bytes of declared device allocation and under 8 GB' }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '49324' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device; compiler, make, host-test, and CUDA-binary execution; EX12 build/evidence-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3,13.3.1,CCCL 3.4.2' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/inclusive-exclusive-scan/" lang="en">Read the English counterpart</a>
+
+EX12 是独立、原创的 Inclusive 与 Exclusive Scan 可运行示例（Runnable Example）。同一份 C++17 项目扫描 4,099 个有界 `std::uint32_t` input，并用独立 CPU reference、精确 recurrence 和 last-total invariant 检查两个 output。页面不发布 timing 或 performance result。
+
+## 用途
+
+先完成 [A03：Inclusive 与 Exclusive Scan](/algorithms/inclusive-exclusive-scan/)。EX12 把 A03 的 block-local prefix、block sum、跨 block offset 与 exclusive identity 落到一个可独立构建的项目中。它用于验证算法结构和精确正确性，不替代生产 primitive。
+
+## 获取 canonical project
+
+[在固定提交中查看 EX12 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex12-inclusive-exclusive-scan)，或[下载同一 source revision 的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip)。解压后进入 `examples/ex12-inclusive-exclusive-scan/`。
+
+`project.json` 声明两个 build input、两个 canonical range、三条精确 Toolkit Lane、49,324-byte memory bound 和空 evidence record。实现、测试与页面文字均为原创；软件文件使用 Apache-2.0，本页使用 CC-BY-4.0。
+
+## CPU reference
+
+Deterministic input 重复 1 到 7。Public host contract 最多接受 4,099 个 value，并在写 output 前拒绝大于 7 的 value。因此任一 prefix 不超过 28,693，可以在 `std::uint32_t` 中精确表示。
+
+Inclusive 与 exclusive CPU reference 各自执行独立 serial accumulation；exclusive reference 不读取也不派生自 inclusive output：
+
+<CanonicalCode exampleId="EX12" range="cpu-reference" />
+
+## Multi-block scan
+
+第一阶段启动 17 个 256-thread block。每个 thread 把有效 input 或 identity 0 写进 shared memory；即使最后一个 block 只有三个有效 element，所有 thread 仍无条件到达每个 `__syncthreads()`。每个 block 产生 local inclusive prefix 与一个 block sum。
+
+第二阶段用一个有界 256-thread block 扫描 17 个 block sum。第三阶段把前一个 block 的 scanned sum 作为 offset 加到当前 block 的 local prefix。最后一个 kernel 使用 `exclusive[i] = inclusive[i] - input[i]` 派生 exclusive output：
+
+<CanonicalCode exampleId="EX12" range="multi-block-scan" />
+
+Guard 只保护 memory access，不保护 barrier。没有 thread 在 block-wide barrier 前 return；partial block 的无效 lane 以 0 参与相同 stage。
+
+## 精确 invariant
+
+Host test 和 CUDA binary 都要求完整数组 exact match。除此之外，它们还检查：`inclusive[0] = input[0]`、`inclusive[i] = inclusive[i-1] + input[i]`、`exclusive[0] = 0`、`exclusive[i] = exclusive[i-1] + input[i-1]`，以及 `inclusive[i] = exclusive[i] + input[i]`。
+
+完整 deterministic input 的独立 total 是 16,390。Last-total invariant 同时要求 `inclusive[last] == 16390` 与 `exclusive[last] + input[last] == 16390`。这覆盖 4,096 之后的三个 element，避免只验证完整 block。
+
+## 构建合同
+
+在项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+CUDA stages 生成 `build/inclusive_exclusive_scan.ii`、`build/inclusive_exclusive_scan.o` 与 `build/ex12-inclusive-exclusive-scan`。Inspection 检查 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。Host-test 只需 host C++17 compiler，并在全部 exact check 通过后打印 `host-reference: pass`。
+
+`scripts/compile-check.sh c++17 ex12 <result-dir>` 按顺序执行 clean、preprocess、compile、link、inspect 与 host-test，保留 log 和 inspection artifact，但不执行 CUDA binary。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅 Native Linux |
+| GPU 能力层级 | Baseline GPU Capability Tier |
+| Runtime gate | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| Problem bound | 49,324 bytes：三个 4,099-element array + 两个 17-element block array |
+| Compiler target | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| Language contract | 三条 Toolkit Lane 共用同一份原创 C++17 source |
+
+精确 Lanes 为 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2，以及 Ubuntu 24.04 x86-64 上的 CUDA 13.3.1。Digest-pinned image 是 build target，不是 compilation record。
+
+## 编译与运行证据
+
+EX12 的 compilation array 为空，因此 **EX12 不是 Compile-Checked**。Runtime 仍为 **Pending Hardware Verification**，recorded observations 为空。Learning Site 尚未在 Reference Environment 中运行该 CUDA binary。
+
+页面没有 measured timing、bandwidth、throughput 或 speedup。Host test 只能建立 CPU reference 与 invariant 行为，不能建立 CUDA compilation 或 GPU execution evidence。
+
+## 预期观察，不是运行记录
+
+1. Inclusive 与 exclusive device array 都应只在全部 4,099 个 `uint32` output 精确匹配各自独立 CPU reference 时报告 `PASS`。
+2. 每个相邻 inclusive 与 exclusive prefix 都应满足精确 recurrence，并保留 exclusive index 0 的 identity。
+3. Deterministic input 的两条 last-total identity 都应得到 16,390，并覆盖 guarded three-element final block。
+
+这些是验收条件，不是已记录的 GPU observation。
+
+## 来源与复核
+
+Programming Guide 提供 shared-memory 与 block synchronization contract；CUB `DeviceScan` 是 production baseline，而 EX12 的手写实现用于学习 multi-stage dependency。NVCC 文档与 image tag metadata 对应三条声明 Lane。
+
+- [CUDA Programming Guide v13.3 - Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)
+- [CCCL v3.4.2 CUB DeviceScan owner source](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-30。**

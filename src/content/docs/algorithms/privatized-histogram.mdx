@@ -1,0 +1,206 @@
+---
+title: 'A04：私有化直方图（Privatized Histogram）'
+description: 分离 histogram atomic correctness 与 contention，再证明 shared privatization 的 zero、barrier、update、barrier、merge 阶段。
+pairId: a04
+counterpart: /en/algorithms/privatized-histogram/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - histogram-contract
+  - global-atomics
+  - contention
+  - privatization
+  - merge
+  - canonical-example
+  - production-baseline
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A04
+prerequisites:
+  - M03
+  - M05
+relatedUnits:
+  - EX13
+exampleIds:
+  - EX13
+canonicalExample: EX13
+canonicalRanges:
+  - histogram-kernels
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C Programming Guide 11.8 - Atomic Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#atomic-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 atomic read-modify-write and shared-memory contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9 - Atomic Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#atomic-functions'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane atomic and synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide 13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current atomics, shared-memory, barrier, and histogram context'
+    accessDate: '2026-08-30'
+  - title: 'CCCL CUB DeviceHistogram device-wide source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_histogram.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for the CUB device-wide DeviceHistogram production primitive'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,histogram-contract,global-atomics,contention,privatization,merge,canonical-example,production-baseline,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX13 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX13 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX13 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: histogram-kernels }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,CCCL 3.4.2' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/privatized-histogram/" lang="en">Read the English counterpart</a>
+
+直方图（histogram）把每个合法 sample 映射到一个箱（bin）并增加对应计数。直接全局原子更新（global atomic update）可用 `atomicAdd` 实现；原子正确性（atomic correctness）、争用（contention）、私有化（privatization）、共享内存（shared memory）与合并（merge）是不同问题：atomic 决定并发更新是否正确，privatization 改变更新位置，而性能结论仍需要观测。
+
+## 学完本单元，你应该能
+
+- 写出 histogram 的 exact-count、range、overflow 与 sum-of-bins contracts。
+- 解释 global `atomicAdd` 如何防止 lost update，以及为什么正确性不消除 contention。
+- 根据 input distribution 识别 same hot bin 上的竞争，而不伪造性能结论。
+- 证明 shared privatization 的 `zero -> barrier -> update -> barrier -> merge` phase order。
+- 区分教学用手写 kernel、CUB `DeviceHistogram` production baseline 与 runtime evidence。
+
+## 先修关系
+
+先完成 [M03：共享内存分块](/memory/shared-memory-tiling/)和 [M05：同步作用域与内存可见性](/memory/synchronization-scopes/)。M03 提供 per-block shared ownership、cooperative initialization 与 bounds-safe participation；M05 提供 atomic scope、`__syncthreads()` visibility 与 kernel boundary。
+
+先修项严格为 `M03` 与 `M05`。CUB `DeviceHistogram` 是 production comparison，不是 prerequisite；本单元也不要求先学习任何 library unit。
+
+## Histogram 合同
+
+令 `bin_of(x)` 把一个合法 sample 映射到 `[0, bin_count)`。输出必须满足：
+
+```text
+histogram[b] = count of valid samples x for which bin_of(x) == b
+sum(histogram[0..bin_count-1]) = valid sample count
+```
+
+合同还要声明 lower/upper bound 是 inclusive 还是 exclusive、越界 sample 是丢弃、clamp 还是报错，以及 counter type 在最大输入规模下是否溢出。对于整数 bins，CPU reference 应逐 sample 计算 exact counts；容差不适用于整数计数错误。
+
+Input ownership 与 output ownership 不对称：每个 sample 可以由一个 thread 唯一读取，但许多 threads 可能更新同一个 output bin。因此普通 `histogram[b] += 1` 是 read-modify-write race。
+
+## Global atomics：先保证 correctness
+
+最直接的 baseline 是先把 global bins 清零，再让每个合法 sample 执行 `atomicAdd(&global_bins[b], 1)`。Atomic read-modify-write 防止 lost update，因此 atomic correctness 解决的是多个 threads 同时增加同一 counter 时的精确计数。
+
+这个结论有边界：bin index 必须合法，初始化必须在 kernel 读取前完成，counter 不能溢出，host 必须等待 kernel 完成后再验证。`atomicAdd` 不会修复错误的 `bin_of`、漏掉的 samples 或错误的 memory lifetime。
+
+## Contention：正确但可能竞争
+
+若许多 samples 映射到 same hot bin，它们的 atomic updates 会在同一 address 上 contention，并可能 serialize。较均匀的 distribution 会产生不同的 address pattern。两种输入都可得到完全正确的 histogram；atomic correctness 与 contention cost 必须分别讨论。
+
+从 distribution 或 atomic count 可以提出测量假设，不能直接写 speedup。Hardware、counter type、bin count、block shape、input ordering 与 architecture 都可能影响 observation，因此本页不声称某个 variant 更快。
+
+## Shared privatization：zero、barrier、update、barrier
+
+Block-private shared histogram 把大部分 sample updates 指向该 block 自己的 bins。Minimum correctness sequence 是：
+
+1. **Zero:** threads 以 stride 清零所有 shared bins；`bin_count` 可以大于 `blockDim.x`。
+2. **Barrier:** initialization barrier `__syncthreads()`，确保任何 update 前所有 bins 已定义为 0。
+3. **Update:** 每个 thread 处理自己的合法 samples，并对 shared bin 执行 `atomicAdd`；shared 仍然需要 atomic，因为 block 内 threads 可能命中同一 bin。
+4. **Barrier:** update barrier `__syncthreads()`，确保 merge 不会读取尚未完成的 shared updates。
+5. **Merge:** threads 以 stride 把 private counts 合并到 global histogram。
+
+所有 participating threads 都要到达两个 barriers。Bounds-invalid thread 可以跳过 sample update，却不能在 initialization barrier 或 update barrier 前 return。Privatization 是 per-block，不是 per-thread；不同 blocks 拥有不同 shared histogram instances。
+
+## Merge：把 private counts 合到 global bins
+
+多个 blocks 最终写同一 global bins，所以 merge 通常仍要 `atomicAdd(&global_bins[b], shared_bins[b])`。只处理非零 private bins 可以是一个 implementation choice，但必须保持 exact counts，并避免把 zero-test 当作跨 thread synchronization。
+
+Merge 后的 proof obligation 是：对每个 bin，global value 等于所有 block-private values 的和；再对所有 bins 求和，应等于 valid sample count。Kernel completion 后再和 CPU reference 做 exact comparison。Shared privatization 改变了更新分层，不会自动授予 speedup evidence。
+
+## Canonical Runnable Example：EX13
+
+EX13 的 `histogram-kernels` range 是本单元唯一 canonical import。它并列展示 global-atomic 与 block-private shared variants，使 correctness contracts 可以在同一 input fixtures 上比较；standalone project 是唯一 canonical implementation，本页不复制其源码。
+
+[查看 EX13 standalone project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex13-privatized-histogram)，或[下载同一 source revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip)。两条链接与 project metadata 使用同一固定提交。
+
+<CanonicalCode exampleId="EX13" range="histogram-kernels" />
+
+## Production baseline：CUB DeviceHistogram
+
+CCCL v3.4.2 的 CUB `DeviceHistogram` 是 device-wide histogram 的 production baseline 和 comparison point。生产代码应先检查 `HistogramEven` 或 `HistogramRange` 的 level boundaries、sample layout、counter、temporary storage 与 stream contracts，而不是默认维护教学 kernel。
+
+手写（hand-written）教学 kernel 用于学习和理解 atomic correctness、contention、shared privatization 与 merge。它不因为展示更多内部 phase 就成为更好的 production default；`DeviceHistogram` 也不进入 `M03,M05` prerequisite list。
+
+## 证据边界
+
+本页的 compilation、runtime、expected observations 与 recorded observations 均为空。Exact CPU counts、sum-of-bins invariant 与 phase proof 可以发现 correctness defect，但没有执行 EX13，也没有观察 throughput、bandwidth、timing 或 speedup。
+
+未来比较 global-atomic 与 privatized variants 时，必须固定 input、bin contract、counter type、launch configuration、warm-up policy、timing boundary 与 Environment Manifest，并先证明 outputs exact-match。没有这些记录，不能把“较少 global atomic opportunities”写成已观察的加速。
+
+## 离开前检查
+
+1. 为什么 `atomicAdd` 能保证 histogram correctness，却不能消除 same hot bin 的 contention？
+2. Shared privatization 为什么仍需要 shared atomic updates？
+3. Zero 与 update 后各自的 barrier 保护哪一条 read/write relation？
+4. 为什么 merge 回 global bins 通常仍需要 atomic operation，如何验证最终 exact counts？
+
+## 继续练习
+
+- 完成 [A04 练习（Exercises）](/algorithms/privatized-histogram/exercises/)，再查看独立的[参考解答](/algorithms/privatized-histogram/solutions/)。
+- 对 uniform、skewed 与 boundary fixtures 分别写出 CPU exact counts 和 contention hypothesis。
+- 审查 EX13 `histogram-kernels` 的两个 barriers 与 merge；在有记录前不要声称性能提升。
+
+## 来源与复核
+
+- [CUDA C Programming Guide v11.8.0：Atomic Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#atomic-functions)提供 11.8 lane 的 atomic read-modify-write 与 memory-scope contract。
+- [CUDA C++ Programming Guide v12.9.1：Atomic Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#atomic-functions)是 Toolkit 12.9.2 patch lane 使用的 owner guide coordinate。
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 current atomics、shared memory、barrier 与 histogram context。
+- [CCCL v3.4.2 `cub/device/device_histogram.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_histogram.cuh)是 CUB device-wide `DeviceHistogram` 的 exact owner source。
+
+四项 primary owner sources 均访问于 **2026-08-30**。Histogram contracts、phase proof、fixtures、练习与编排均为本站独立原创；没有复制 private material、owner example 或 figure。
+
+**事实核查日期：2026-08-30。**

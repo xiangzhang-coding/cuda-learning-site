@@ -1,0 +1,218 @@
+---
+title: 'A01: Elementwise Map and One Owner per Element'
+description: Design a scalable elementwise CUDA kernel from its map contract, exclusive writes, and global-memory traffic while separating expected reasoning from performance evidence.
+pairId: a01
+counterpart: /algorithms/elementwise-map/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - map-contract
+  - ownership
+  - memory-movement
+  - scalable-grid
+  - canonical-example
+  - production-baseline
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A01
+prerequisites:
+  - F03
+  - F04
+  - M02
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - kernel
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-hierarchy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current CUDA C++ thread indexing, global-memory load, and store model'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Runtime API v13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1'
+    platform: 'Current allocation and host-device copy ownership'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 - Kernels'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#kernels'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 kernel and one-dimensional indexing contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Kernels'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#kernels'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for Toolkit 12.9'
+    platform: 'Toolkit 12.9 kernel and thread-ownership contract'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a01 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/elementwise-map/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,map-contract,ownership,memory-movement,scalable-grid,canonical-example,production-baseline,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F03,F04,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: kernel }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/elementwise-map/" lang="zh-CN">阅读中文对应页</a>
+
+An elementwise map applies the same transform independently to every logical element. This Learning Unit derives disjoint writes, a scalable grid, and a separate memory movement ledger from one ownership contract: each output element has one owner thread. The `load -> map/transform -> store` path describes the algorithm; it is not a measured performance result.
+
+## What you should be able to do
+
+- State `output[i] = f(input[i])` as a map contract with a domain, index, and bounds.
+- Assign every output element to one owner thread and prove that writes cannot conflict across threads.
+- Account separately for global-memory loads and stores and for host-to-device and device-to-host transfers.
+- Cover every positive input length with a rounded-up grid and a bounds guard.
+- Distinguish expected reasoning derived from source from runtime observations and performance evidence.
+
+## Prerequisites
+
+Complete [F03: Multidimensional Indexing](/en/foundations/multidimensional-indexing/), [F04: Host-Device Lifecycle and Explicit Data Movement](/en/foundations/host-device-lifecycle/), and [M02: Coalescing as Transaction Shaping](/en/memory/coalescing-transactions/) first. F03 supplies the global index. F04 supplies allocation, H2D/D2H copies, and the completion boundary. M02 lets you review addresses from neighboring threads without turning consecutive addresses into an unsupported performance claim.
+
+This page requires no CUDA-capable system, so its `hardwareGate` is `none`. Prerequisites supply reasoning vocabulary; they do not automatically grant this page an Evidence Status.
+
+## Map contract: one transform over an index set
+
+For a one-dimensional output of length `n`, the minimum contract is:
+
+```text
+domain: i is an integer in [0, n)
+value:  output[i] = transform(input[i])
+read set for i:  input[i]
+write set for i: output[i]
+```
+
+A binary map merely extends the read set to `left[i]` and `right[i]`. The transform may add, scale, or evaluate a predicate, but the ownership proof does not depend on that arithmetic. If `input` and `output` alias, an additional proof must show that an in-place write cannot replace a value another thread still needs. “It looks elementwise” is not an alias contract.
+
+## Ownership: exactly one writer per output
+
+Define `owner(i)` as the thread whose global index equals `i`. Every valid `i` needs all three properties:
+
+1. **Coverage:** some launched thread has global index `i`.
+2. **Uniqueness:** the launch's global-index mapping does not map two threads to `i`.
+3. **Isolation:** `owner(i)` writes only `output[i]`, while `owner(j)` writes only `output[j]`.
+
+The write sets are disjoint whenever `i != j`. A map kernel therefore needs neither a barrier nor an atomic for these output writes. This conclusion does not say when the host may read the result; completion remains part of F04's host/device lifecycle contract.
+
+## Memory movement: account beyond arithmetic
+
+At kernel-semantic level, a binary float map requests two global-memory loads, one transform, and one global-memory store for each valid element. This value count is not a hardware transaction count and is not observed bandwidth.
+
+The application-level ledger separately includes:
+
+```text
+host input --H2D copy--> device global memory
+device loads --map/transform--> device store
+device global memory --D2H copy--> host output
+```
+
+An invocation may omit H2D when inputs already reside on the device. It may defer D2H while a later kernel consumes the result. Those are lifecycle choices and do not change the mathematical map contract. Conversely, counting only element arithmetic omits data movement and cannot explain end-to-end performance.
+
+## Scalable grid: cover data and guard extra threads
+
+The one-dimensional baseline is:
+
+```text
+i = blockIdx.x * blockDim.x + threadIdx.x
+if i < n:
+  output[i] = transform(input[i])
+```
+
+The host chooses the block count with ceiling division so the launch covers at least `n` indices. The last block may contain extra threads; the bounds guard prevents them from issuing a global load or store. A grid-stride loop can cover work beyond a convenient single-launch geometry, but every iteration must preserve unique ownership and valid bounds.
+
+Scalable means the ownership rule is not tied to a fixed `n`. It does not mean larger inputs must run faster. Block size, occupancy, cache behavior, and transfer overlap require their own environment and measurement contracts.
+
+## Canonical Runnable Example: EX02
+
+Runnable Example EX02's `kernel` range is this page's only canonical executable counterpart. It implements a binary elementwise map: each valid thread loads two global-memory elements, adds them, and stores one output element.
+
+[View the complete EX02 project at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition), or [download the source archive from that commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip). The page imports only the declared canonical range and neither copies nor rewrites the implementation.
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+## Production baseline: preserve the simple contract
+
+In production, elementwise work may be handled by framework fusion, an iterator library, or a specialized kernel. Preserve the same value and ownership contract, and treat the established production path as the comparison baseline. A hand-written teaching kernel exists to learn and understand indexing, bounds, and the memory path, not to replace a maintained production implementation by default.
+
+Before comparing alternatives, verify identical inputs, outputs, precision, alias policy, and transfer boundaries. Shorter source, fewer launches, or consecutive addresses are reasons to measure, not observed performance.
+
+## Evidence boundary: expected reasoning is not observed performance
+
+| Expected reasoning reviewable from the contract | Observation that requires a run record |
+| --- | --- |
+| Every valid output has one owner | Whether the kernel completed correctly under a specific Environment Manifest |
+| Every valid element requests the declared loads and store | Actual transactions, cache behavior, bandwidth, and duration |
+| A rounded-up grid plus guard covers a partial block | Actual launch configuration, error state, and output comparison |
+
+This page has no compilation evidence, runtime evidence, expected observations, or recorded observations. Any future performance claim must record exact source, Toolkit Lane, GPU, problem shape, transfer scope, correctness result, and measurement method. Reasoning can identify what is worth measuring; it cannot masquerade as an observed speedup.
+
+## Retrieval check
+
+1. Why does `output[i] = f(input[i])` still need an explicit ownership contract?
+2. What different questions are answered by kernel global-memory loads/stores and H2D/D2H movement?
+3. Why must a rounded-up grid be paired with a bounds guard?
+4. Why can consecutive element addresses not prove observed performance by themselves?
+
+## Continue with practice
+
+- Complete the [A01 Exercises](/en/algorithms/elementwise-map/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/elementwise-map/solutions/).
+- Write a memory-movement ledger with symbolic `n` and `sizeof(T)` rather than unobserved timing or bandwidth.
+- Treat only EX02's `kernel` range as canonical implementation; the exercise diagrams and pseudocode are reasoning tools.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Thread Hierarchy](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-hierarchy) supplies the current indexing, global-memory load/store, and thread-hierarchy coordinate.
+- [CUDA Runtime API v13.3.1: Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html) supplies the allocation and host-device copy owner coordinate.
+- [CUDA C Programming Guide 11.8: Kernels](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#kernels) preserves the kernel contract for the 11.8 lane.
+- [CUDA C++ Programming Guide 12.9.1: Kernels](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#kernels) preserves the kernel contract for the 12.9 lane.
+
+All four owner sources were accessed on **2026-08-30**. The ownership proof, memory ledger, pseudocode, Exercises, and arrangement are original. No private reference material was used or copied, and no owner prose, code, table, or figure is reproduced.
+
+**Fact checked: 2026-08-30.**

@@ -21,6 +21,9 @@ const issue19PracticeIds = [
 const toolchainPracticeIds = [
   'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
 ] as const;
+const issue21PracticeIds = [
+  'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
+] as const;
 const releaseGlossaryIds = [
   'TERM-066',
   'TERM-067',
@@ -63,6 +66,10 @@ const toolchainGlossaryIds = [
   'TERM-115', 'TERM-116', 'TERM-117', 'TERM-118', 'TERM-119', 'TERM-120',
   'TERM-121', 'TERM-122', 'TERM-123', 'TERM-124', 'TERM-125',
 ] as const;
+const issue21GlossaryIds = [
+  'TERM-126', 'TERM-127', 'TERM-128', 'TERM-129', 'TERM-130', 'TERM-131', 'TERM-132',
+  'TERM-133', 'TERM-134', 'TERM-135', 'TERM-136', 'TERM-137', 'TERM-138', 'TERM-139',
+] as const;
 const releaseSourceIds = [
   'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
   'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
@@ -73,6 +80,9 @@ const issue19SourceIds = [
 ] as const;
 const toolchainSourceIds = [
   'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
+] as const;
+const issue21SourceIds = [
+  'SRC-HIST-003', 'SRC-CUDA-036', 'SRC-CUDA-037', 'SRC-CUDA-038', 'SRC-CUDA-039', 'SRC-CUDA-040',
 ] as const;
 const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
 const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09'] as const;
@@ -95,12 +105,18 @@ const toolchainIds = new Set<string>([
   ...toolchainSourceIds,
   'VIS09',
 ]);
+const issue21Ids = new Set<string>([
+  ...issue21PracticeIds,
+  ...issue21GlossaryIds,
+  ...issue21SourceIds,
+  'VIS10',
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
   labs: 'LAB07',
-  practice: 'PB-R2-011',
-  visuals: 'VIS09',
-  glossary: 'TERM-125',
-  sources: 'SRC-CUDA-035',
+  practice: 'PB-R2-016',
+  visuals: 'VIS10',
+  glossary: 'TERM-139',
+  sources: 'SRC-CUDA-040',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -186,11 +202,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(6);
-  expect(counts.practice).toBe(40);
-  expect(counts.visuals).toBe(13);
-  expect(counts.glossary).toBe(125);
-  expect(counts.sources).toBe(50);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(234);
+  expect(counts.practice).toBe(45);
+  expect(counts.visuals).toBe(14);
+  expect(counts.glossary).toBe(139);
+  expect(counts.sources).toBe(56);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(260);
 
   const expectedIds = [
     ...releaseLabIds,
@@ -198,12 +214,16 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...releasePracticeIds,
     ...issue19PracticeIds,
     ...toolchainPracticeIds,
+    ...issue21PracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
+    ...issue21GlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
+    ...issue21SourceIds,
+    'VIS10',
   ];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
@@ -219,6 +239,10 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   for (const record of records.filter(({ planningId }) => toolchainIds.has(planningId))) {
     expect(record.reviewedOn, record.planningId).toBe('2026-08-29');
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-29');
+  }
+  for (const record of records.filter(({ planningId }) => issue21Ids.has(planningId))) {
+    expect(record.reviewedOn, record.planningId).toBe('2026-08-30');
+    if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-30');
   }
 
   for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {

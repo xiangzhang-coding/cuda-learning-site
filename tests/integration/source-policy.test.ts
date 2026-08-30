@@ -163,7 +163,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles.length).toBeGreaterThanOrEqual(38);
+    expect(contentFiles).toHaveLength(334);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');
@@ -339,6 +339,8 @@ describe('source, license, and privacy policy', () => {
       'en/visuals/page-migration.mdx',
       'visuals/artifact-pipeline.mdx',
       'en/visuals/artifact-pipeline.mdx',
+      'visuals/reduction-stages.mdx',
+      'en/visuals/reduction-stages.mdx',
     ]) {
       const content = await readFile(path.join(projectRoot, 'src/content/docs', relativePath), 'utf8');
       expect(content, relativePath).toMatch(/^resourceKind: visual-explainer$/m);

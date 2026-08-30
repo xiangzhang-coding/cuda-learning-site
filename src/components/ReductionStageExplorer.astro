@@ -1,0 +1,425 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/algorithm-visuals.css';
+import {
+  REDUCTION_STAGE_COPY,
+  formatReductionStageCopy,
+  type ReductionStageLocale,
+} from '../visuals/reduction-stage-copy';
+import {
+  REDUCTION_STAGE_ELEMENT_COUNTS,
+  REDUCTION_STAGE_FRAME_COUNT,
+  REDUCTION_STAGE_MODEL_CONTRACT,
+  REDUCTION_STAGE_VARIANTS,
+  createReductionStageState,
+  deriveReductionStageFrame,
+  deriveReductionStageFrames,
+  type ReductionStageFrame,
+  type ReductionStageLane,
+} from '../visuals/reduction-stage-model';
+
+interface Props {
+  locale: ReductionStageLocale;
+}
+
+const { locale } = Astro.props;
+const copy = REDUCTION_STAGE_COPY[locale];
+const initialState = createReductionStageState();
+const initialResult = deriveReductionStageFrame(initialState);
+if (!initialResult.accepted) throw new Error('VIS10 initial reduction state must be valid.');
+const initialFrame = initialResult.frame;
+
+const staticSelections = REDUCTION_STAGE_VARIANTS.flatMap((variant) =>
+  REDUCTION_STAGE_ELEMENT_COUNTS.map((elementCount) => {
+    const result = deriveReductionStageFrames(variant, elementCount);
+    if (!result.accepted) throw new Error(`VIS10 static selection ${variant}:${elementCount} must be valid.`);
+    const finalFrame = result.frames.at(-1);
+    const finalLane = finalFrame?.lanes.find(({ state }) => state === 'active');
+    if (!finalFrame || !finalLane) throw new Error('VIS10 static selection must have a final sum.');
+    return { variant, elementCount, frames: result.frames, finalSum: finalLane.value };
+  }),
+);
+
+function laneStateText(lane: ReductionStageLane) {
+  return lane.state === 'active' ? copy.activeLane : copy.inactiveLane;
+}
+
+function laneValueText(lane: ReductionStageLane) {
+  return lane.state === 'active' ? `${copy.value} ${lane.value}` : copy.neutralZero;
+}
+
+function activeLaneCount(frame: ReductionStageFrame) {
+  return frame.lanes.filter(({ state }) => state === 'active').length;
+}
+
+const initialStatus = formatReductionStageCopy(copy.statusReady, {
+  variant: copy.variants[initialState.variant].label,
+  count: String(initialState.elementCount),
+});
+---
+
+<cuda-reduction-stage-explorer
+  class="visual-explainer reduction-stage-visual not-content"
+  data-visual-id="VIS10"
+  data-locale={locale}
+  data-variant={initialState.variant}
+  data-element-count={initialState.elementCount}
+  data-step-index={initialState.stepIndex}
+  data-sequence-complete="false"
+  data-evidence-status-effect={REDUCTION_STAGE_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls reduction-stage-controls" data-visual-controls hidden>
+      <legend>{copy.controlsHeading}</legend>
+      <label>
+        <span>{copy.variantLabel}</span>
+        <select data-reduction-variant aria-label={copy.variantLabel}>
+          {REDUCTION_STAGE_VARIANTS.map((variant) => (
+            <option value={variant} selected={variant === initialState.variant}>{copy.variants[variant].label}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.elementCountLabel}</span>
+        <select data-reduction-element-count aria-label={copy.elementCountLabel}>
+          {REDUCTION_STAGE_ELEMENT_COUNTS.map((elementCount) => (
+            <option value={elementCount} selected={elementCount === initialState.elementCount}>{elementCount}</option>
+          ))}
+        </select>
+      </label>
+      <button type="button" data-reduction-action="step">{copy.step}</button>
+      <button type="button" data-reduction-action="reset">{copy.reset}</button>
+      <p
+        class="reduction-stage-status"
+        data-reduction-status
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {initialStatus}
+      </p>
+    </fieldset>
+
+    <section
+      class="reduction-live-workbench"
+      data-live-workbench
+      data-pagefind-ignore
+      hidden
+      aria-label={copy.workbenchHeading}
+    >
+      <header class="reduction-live-header">
+        <div>
+          <span>{copy.selectionLabel}</span>
+          <h3>{copy.workbenchHeading}</h3>
+        </div>
+        <p data-live-selection>
+          {copy.variants[initialState.variant].label} · {initialState.elementCount}
+        </p>
+        <p data-live-variant-description>{copy.variants[initialState.variant].description}</p>
+      </header>
+
+      <ol class="reduction-stage-track" aria-label={copy.stage}>
+        {copy.stageLabels.map((label, stepIndex) => (
+          <li
+            data-live-stage-marker
+            data-step-index={stepIndex}
+            data-stage-state={stepIndex === 0 ? 'current' : 'pending'}
+            aria-current={stepIndex === 0 ? 'step' : undefined}
+          >
+            <span>{copy.stage} {stepIndex + 1}</span>
+            <strong>{label}</strong>
+          </li>
+        ))}
+      </ol>
+
+      <section class="reduction-current-stage" aria-label={copy.stageLabels[0]}>
+        <header>
+          <span data-live-stage-counter>{copy.stage} 1/{REDUCTION_STAGE_FRAME_COUNT}</span>
+          <h4 data-live-stage-label>{copy.stageLabels[0]}</h4>
+          <p data-live-stage-description>{copy.stageDescriptions[0]}</p>
+        </header>
+        <p class="reduction-active-count">
+          {copy.activeCount}: <strong data-live-active-count>{activeLaneCount(initialFrame)}</strong>
+        </p>
+        <ol class="reduction-lane-ledger" data-live-lanes>
+          {initialFrame.lanes.map((lane) => (
+            <li
+              data-live-lane
+              data-lane-index={lane.lane}
+              data-lane-state={lane.state}
+              data-lane-value={lane.value}
+            >
+              <strong data-lane-position>{copy.lane} {lane.lane}</strong>
+              <span data-lane-state-label>{laneStateText(lane)}</span>
+              <span data-lane-value-label>{laneValueText(lane)}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </section>
+
+    <section class="visual-section reduction-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="reduction-static-grid">
+        {staticSelections.map(({ variant, elementCount, frames, finalSum }) => (
+          <article
+            data-static-selection={`${variant}:${elementCount}`}
+            data-variant={variant}
+            data-element-count={elementCount}
+            data-final-sum={finalSum}
+          >
+            <header>
+              <p data-static-variant-label>{copy.variants[variant].label}</p>
+              <h4>{formatReductionStageCopy(copy.staticSelection, {
+                variant: copy.variants[variant].label,
+                count: String(elementCount),
+                sum: String(finalSum),
+              })}</h4>
+              <p>{copy.variants[variant].description}</p>
+            </header>
+            <div class="reduction-static-stages">
+              {frames.map((frame) => (
+                <section
+                  data-static-stage={`${variant}:${elementCount}:${frame.stepIndex}`}
+                  data-step-index={frame.stepIndex}
+                  data-sequence-complete={String(frame.sequenceComplete)}
+                  aria-label={`${copy.stage} ${frame.stepIndex + 1}: ${copy.stageLabels[frame.stepIndex]}`}
+                >
+                  <header>
+                    <span>{copy.stage} {frame.stepIndex + 1}/{REDUCTION_STAGE_FRAME_COUNT}</span>
+                    <h5>{copy.stageLabels[frame.stepIndex]}</h5>
+                    <p>{copy.stageDescriptions[frame.stepIndex]}</p>
+                  </header>
+                  <ol class="reduction-lane-ledger">
+                    {frame.lanes.map((lane) => (
+                      <li
+                        data-static-lane={`${variant}:${elementCount}:${frame.stepIndex}:${lane.lane}`}
+                        data-lane-index={lane.lane}
+                        data-lane-state={lane.state}
+                        data-lane-value={lane.value}
+                      >
+                        <strong>{copy.lane} {lane.lane}</strong>
+                        <span>{laneStateText(lane)}</span>
+                        <span>{laneValueText(lane)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-reduction-stage-explorer>
+
+<script>
+  import {
+    REDUCTION_STAGE_COPY,
+    formatReductionStageCopy,
+  } from '../visuals/reduction-stage-copy';
+  import {
+    REDUCTION_STAGE_FRAME_COUNT,
+    REDUCTION_STAGE_LANE_COUNT,
+    createReductionStageState,
+    deriveReductionStageFrame,
+    reduceReductionStageState,
+    type ReductionStageFrame,
+    type ReductionStageState,
+  } from '../visuals/reduction-stage-model';
+
+  class CudaReductionStageExplorer extends HTMLElement {
+    private state: ReductionStageState = createReductionStageState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const variant = this.querySelector<HTMLSelectElement>('[data-reduction-variant]');
+      const elementCount = this.querySelector<HTMLSelectElement>('[data-reduction-element-count]');
+      const step = this.querySelector<HTMLButtonElement>('[data-reduction-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reduction-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-reduction-status]');
+      const lanes = this.querySelectorAll<HTMLElement>('[data-live-lane]');
+      const stages = this.querySelectorAll<HTMLElement>('[data-live-stage-marker]');
+      if (!controls || !workbench || !variant || !elementCount || !step || !reset || !status) return;
+      if (lanes.length !== REDUCTION_STAGE_LANE_COUNT || stages.length !== REDUCTION_STAGE_FRAME_COUNT) return;
+      if (!this.render()) return;
+
+      variant.addEventListener('change', () => {
+        const update = reduceReductionStageState(this.state, {
+          type: 'select-variant',
+          variant: variant.value,
+        });
+        if (!update.accepted) {
+          variant.value = this.state.variant;
+          this.announce(this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        if (!this.render()) return;
+        this.announce(formatReductionStageCopy(this.copy().statusVariant, {
+          variant: this.copy().variants[this.state.variant].label,
+        }));
+      });
+
+      elementCount.addEventListener('change', () => {
+        const update = reduceReductionStageState(this.state, {
+          type: 'select-element-count',
+          elementCount: Number(elementCount.value),
+        });
+        if (!update.accepted) {
+          elementCount.value = String(this.state.elementCount);
+          this.announce(this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        if (!this.render()) return;
+        this.announce(formatReductionStageCopy(this.copy().statusElementCount, {
+          count: String(this.state.elementCount),
+        }));
+      });
+
+      step.addEventListener('click', () => {
+        const update = reduceReductionStageState(this.state, { type: 'step' });
+        if (!update.accepted) {
+          this.announce(this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        const frame = this.render();
+        if (!frame) return;
+        const active = frame.lanes.filter(({ state }) => state === 'active');
+        this.announce(formatReductionStageCopy(
+          frame.sequenceComplete ? this.copy().statusComplete : this.copy().statusStep,
+          {
+            stage: String(frame.stepIndex + 1),
+            active: String(active.length),
+            sum: String(active[0]?.value ?? 0),
+          },
+        ));
+      });
+
+      reset.addEventListener('click', () => {
+        const update = reduceReductionStageState(this.state, { type: 'reset' });
+        if (!update.accepted) {
+          this.announce(this.copy().issues[update.issue]);
+          return;
+        }
+        this.state = update.state;
+        if (!this.render()) return;
+        this.announce(this.copy().statusReset);
+        variant.focus();
+      });
+
+      controls.hidden = false;
+      workbench.hidden = false;
+      this.dataset.ready = 'true';
+    }
+
+    private copy() {
+      return REDUCTION_STAGE_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private announce(message: string) {
+      this.setText('[data-reduction-status]', message);
+    }
+
+    private render(): ReductionStageFrame | undefined {
+      const result = deriveReductionStageFrame(this.state);
+      if (!result.accepted) {
+        this.announce(this.copy().issues[result.issue]);
+        return undefined;
+      }
+      const frame = result.frame;
+      const copy = this.copy();
+      const variant = this.querySelector<HTMLSelectElement>('[data-reduction-variant]');
+      const elementCount = this.querySelector<HTMLSelectElement>('[data-reduction-element-count]');
+      const step = this.querySelector<HTMLButtonElement>('[data-reduction-action="step"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reduction-action="reset"]');
+      const focused = this.ownerDocument.activeElement;
+
+      this.dataset.variant = frame.variant;
+      this.dataset.elementCount = String(frame.elementCount);
+      this.dataset.stepIndex = String(frame.stepIndex);
+      this.dataset.sequenceComplete = String(frame.sequenceComplete);
+      if (variant) variant.value = frame.variant;
+      if (elementCount) elementCount.value = String(frame.elementCount);
+      if (step) step.disabled = frame.sequenceComplete;
+      if (step && focused === step && step.disabled) reset?.focus();
+
+      this.setText(
+        '[data-live-selection]',
+        `${copy.variants[frame.variant].label} · ${frame.elementCount}`,
+      );
+      this.setText('[data-live-variant-description]', copy.variants[frame.variant].description);
+      this.setText('[data-live-stage-counter]', `${copy.stage} ${frame.stepIndex + 1}/${REDUCTION_STAGE_FRAME_COUNT}`);
+      this.setText('[data-live-stage-label]', copy.stageLabels[frame.stepIndex] ?? '');
+      this.setText('[data-live-stage-description]', copy.stageDescriptions[frame.stepIndex] ?? '');
+      this.setText(
+        '[data-live-active-count]',
+        String(frame.lanes.filter(({ state }) => state === 'active').length),
+      );
+
+      this.querySelectorAll<HTMLElement>('[data-live-stage-marker]').forEach((stage, stepIndex) => {
+        const stageState = stepIndex < frame.stepIndex
+          ? 'complete'
+          : stepIndex === frame.stepIndex
+            ? 'current'
+            : 'pending';
+        stage.dataset.stageState = stageState;
+        if (stageState === 'current') stage.setAttribute('aria-current', 'step');
+        else stage.removeAttribute('aria-current');
+      });
+
+      const laneElements = this.querySelectorAll<HTMLElement>('[data-live-lane]');
+      for (const lane of frame.lanes) {
+        const element = laneElements[lane.lane];
+        if (!element) return undefined;
+        element.dataset.laneIndex = String(lane.lane);
+        element.dataset.laneState = lane.state;
+        element.dataset.laneValue = String(lane.value);
+        this.setTextWithin(element, '[data-lane-position]', `${copy.lane} ${lane.lane}`);
+        this.setTextWithin(
+          element,
+          '[data-lane-state-label]',
+          lane.state === 'active' ? copy.activeLane : copy.inactiveLane,
+        );
+        this.setTextWithin(
+          element,
+          '[data-lane-value-label]',
+          lane.state === 'active' ? `${copy.value} ${lane.value}` : copy.neutralZero,
+        );
+      }
+
+      return frame;
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+
+    private setTextWithin(root: ParentNode, selector: string, value: string) {
+      const element = root.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-reduction-stage-explorer')) {
+    customElements.define('cuda-reduction-stage-explorer', CudaReductionStageExplorer);
+  }
+</script>

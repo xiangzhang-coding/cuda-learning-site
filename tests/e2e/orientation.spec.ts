@@ -6,11 +6,11 @@ import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/bro
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 test('all published routes load without browser errors', async ({ page }) => {
-  test.setTimeout(330_000);
+  test.setTimeout(380_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(296);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(148);
+  expect(routes).toHaveLength(334);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(167);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -71,9 +71,24 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/toolchain/compiler-architecture-targets/', en: '/en/toolchain/compiler-architecture-targets/' },
     { zh: '/toolchain/separate-compilation-device-linking/', en: '/en/toolchain/separate-compilation-device-linking/' },
     { zh: '/toolchain/cpp-dialect-boundaries/', en: '/en/toolchain/cpp-dialect-boundaries/' },
+    { zh: '/algorithms/elementwise-map/', en: '/en/algorithms/elementwise-map/' },
+    { zh: '/algorithms/elementwise-map/exercises/', en: '/en/algorithms/elementwise-map/exercises/' },
+    { zh: '/algorithms/elementwise-map/solutions/', en: '/en/algorithms/elementwise-map/solutions/' },
+    { zh: '/algorithms/multi-stage-reduction/', en: '/en/algorithms/multi-stage-reduction/' },
+    { zh: '/algorithms/multi-stage-reduction/exercises/', en: '/en/algorithms/multi-stage-reduction/exercises/' },
+    { zh: '/algorithms/multi-stage-reduction/solutions/', en: '/en/algorithms/multi-stage-reduction/solutions/' },
+    { zh: '/algorithms/inclusive-exclusive-scan/', en: '/en/algorithms/inclusive-exclusive-scan/' },
+    { zh: '/algorithms/inclusive-exclusive-scan/exercises/', en: '/en/algorithms/inclusive-exclusive-scan/exercises/' },
+    { zh: '/algorithms/inclusive-exclusive-scan/solutions/', en: '/en/algorithms/inclusive-exclusive-scan/solutions/' },
+    { zh: '/algorithms/privatized-histogram/', en: '/en/algorithms/privatized-histogram/' },
+    { zh: '/algorithms/privatized-histogram/exercises/', en: '/en/algorithms/privatized-histogram/exercises/' },
+    { zh: '/algorithms/privatized-histogram/solutions/', en: '/en/algorithms/privatized-histogram/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
+    { zh: '/correctness/floating-point-order-reproducibility/', en: '/en/correctness/floating-point-order-reproducibility/' },
+    { zh: '/correctness/floating-point-order-reproducibility/exercises/', en: '/en/correctness/floating-point-order-reproducibility/exercises/' },
+    { zh: '/correctness/floating-point-order-reproducibility/solutions/', en: '/en/correctness/floating-point-order-reproducibility/solutions/' },
     { zh: '/correctness/memcheck-invalid-memory-access/', en: '/en/correctness/memcheck-invalid-memory-access/' },
     { zh: '/correctness/memcheck-invalid-memory-access/exercises/', en: '/en/correctness/memcheck-invalid-memory-access/exercises/' },
     { zh: '/correctness/memcheck-invalid-memory-access/solutions/', en: '/en/correctness/memcheck-invalid-memory-access/solutions/' },
@@ -92,6 +107,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/examples/unified-memory-migration/', en: '/en/examples/unified-memory-migration/' },
     { zh: '/examples/graph-capture/', en: '/en/examples/graph-capture/' },
     { zh: '/examples/ptx-fatbinary-inspection/', en: '/en/examples/ptx-fatbinary-inspection/' },
+    { zh: '/examples/multi-stage-reduction/', en: '/en/examples/multi-stage-reduction/' },
+    { zh: '/examples/inclusive-exclusive-scan/', en: '/en/examples/inclusive-exclusive-scan/' },
+    { zh: '/examples/privatized-histogram/', en: '/en/examples/privatized-histogram/' },
     { zh: '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
@@ -109,6 +127,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/visuals/stream-event-dependencies/', en: '/en/visuals/stream-event-dependencies/' },
     { zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
     { zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
+    { zh: '/visuals/reduction-stages/', en: '/en/visuals/reduction-stages/' },
     { zh: '/practice/', en: '/en/practice/' },
     { zh: '/glossary/', en: '/en/glossary/' },
     { zh: '/sources-and-versions/', en: '/en/sources-and-versions/' },
@@ -127,7 +146,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(210_000);
   for (const scenario of [
     { route: '/', button: /搜索/, query: 'page-residency rail', localePrefix: '/', expectedHrefs: ['/visuals/page-migration/'] },
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
@@ -159,6 +178,15 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'M15 NVCC 主机 设备编译流程', localePrefix: '/', expectedHrefs: ['/toolchain/nvcc-compilation-flow/'] },
     { route: '/', button: /搜索/, query: 'M17 选择编译器架构目标', localePrefix: '/', expectedHrefs: ['/toolchain/compiler-architecture-targets/'] },
     { route: '/', button: /搜索/, query: 'M19 CUDA C++17 C++20 C++23 方言边界', localePrefix: '/', expectedHrefs: ['/toolchain/cpp-dialect-boundaries/'] },
+    { route: '/', button: /搜索/, query: 'A01 逐元素映射 一元素一所有者', localePrefix: '/', expectedHrefs: ['/algorithms/elementwise-map/'] },
+    { route: '/', button: /搜索/, query: 'A02 屏障 __syncthreads inactive lane', localePrefix: '/', expectedHrefs: ['/algorithms/multi-stage-reduction/'] },
+    { route: '/', button: /搜索/, query: 'A03 包含式 排除式 扫描', localePrefix: '/', expectedHrefs: ['/algorithms/inclusive-exclusive-scan/'] },
+    { route: '/', button: /搜索/, query: 'A04 Privatized Histogram', localePrefix: '/', expectedHrefs: ['/algorithms/privatized-histogram/'] },
+    { route: '/', button: /搜索/, query: 'Q02 浮点顺序 确定性 逐位可复现性', localePrefix: '/', expectedHrefs: ['/correctness/floating-point-order-reproducibility/'] },
+    { route: '/', button: /搜索/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/', expectedHrefs: ['/examples/multi-stage-reduction/'] },
+    { route: '/', button: /搜索/, query: 'EX12 Inclusive Exclusive Scan 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/inclusive-exclusive-scan/'] },
+    { route: '/', button: /搜索/, query: 'EX13 私有化 Histogram 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/privatized-histogram/'] },
+    { route: '/', button: /搜索/, query: 'VIS10 Reduction tree 非活动通道', localePrefix: '/', expectedHrefs: ['/visuals/reduction-stages/'] },
     { route: '/', button: /搜索/, query: 'NVCC 构建产物流水线', localePrefix: '/', expectedHrefs: ['/visuals/artifact-pipeline/'] },
     { route: '/en/', button: /Search/, query: 'Publication Pair', localePrefix: '/en/', expectedHrefs: ['/en/start/using-the-learning-site/', '/en/practice/', '/en/glossary/'] },
     { route: '/en/', button: /Search/, query: 'Recording Evidence Honestly', localePrefix: '/en/', expectedHrefs: ['/en/start/evidence-status/'] },
@@ -190,6 +218,15 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'M16 PTX Cubins SASS Fatbinaries', localePrefix: '/en/', expectedHrefs: ['/en/toolchain/ptx-cubin-fatbinary/'] },
     { route: '/en/', button: /Search/, query: 'target contract spans compile and device link', localePrefix: '/en/', expectedHrefs: ['/en/toolchain/separate-compilation-device-linking/'] },
     { route: '/en/', button: /Search/, query: 'EX10 PTX and Fatbinary Inspection Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/ptx-fatbinary-inspection/'] },
+    { route: '/en/', button: /Search/, query: 'A01 Elementwise Map One Owner per Element', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/elementwise-map/'] },
+    { route: '/en/', button: /Search/, query: 'A02 Multi-Stage Reduction Barriers Operation Order', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/multi-stage-reduction/'] },
+    { route: '/en/', button: /Search/, query: 'A03 dependency transformation block sums offset propagation', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/inclusive-exclusive-scan/'] },
+    { route: '/en/', button: /Search/, query: 'A04 Privatized Histogram', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/privatized-histogram/'] },
+    { route: '/en/', button: /Search/, query: 'Q02 floating-point order determinism bitwise reproducibility', localePrefix: '/en/', expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'] },
+    { route: '/en/', button: /Search/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/multi-stage-reduction/'] },
+    { route: '/en/', button: /Search/, query: 'EX12 Inclusive and Exclusive Scan Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/inclusive-exclusive-scan/'] },
+    { route: '/en/', button: /Search/, query: 'EX13 Privatized Histogram Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/privatized-histogram/'] },
+    { route: '/en/', button: /Search/, query: 'VIS10 Reduction Tree and Inactive Lanes', localePrefix: '/en/', expectedHrefs: ['/en/visuals/reduction-stages/'] },
   ]) {
     await expectRankedSearchResult(page, scenario);
   }
@@ -305,12 +342,42 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/toolchain/separate-compilation-device-linking/',
     '/toolchain/cpp-dialect-boundaries/',
     '/en/toolchain/cpp-dialect-boundaries/',
+    '/algorithms/elementwise-map/',
+    '/en/algorithms/elementwise-map/',
+    '/algorithms/elementwise-map/exercises/',
+    '/en/algorithms/elementwise-map/exercises/',
+    '/algorithms/elementwise-map/solutions/',
+    '/en/algorithms/elementwise-map/solutions/',
+    '/algorithms/multi-stage-reduction/',
+    '/en/algorithms/multi-stage-reduction/',
+    '/algorithms/multi-stage-reduction/exercises/',
+    '/en/algorithms/multi-stage-reduction/exercises/',
+    '/algorithms/multi-stage-reduction/solutions/',
+    '/en/algorithms/multi-stage-reduction/solutions/',
+    '/algorithms/inclusive-exclusive-scan/',
+    '/en/algorithms/inclusive-exclusive-scan/',
+    '/algorithms/inclusive-exclusive-scan/exercises/',
+    '/en/algorithms/inclusive-exclusive-scan/exercises/',
+    '/algorithms/inclusive-exclusive-scan/solutions/',
+    '/en/algorithms/inclusive-exclusive-scan/solutions/',
+    '/algorithms/privatized-histogram/',
+    '/en/algorithms/privatized-histogram/',
+    '/algorithms/privatized-histogram/exercises/',
+    '/en/algorithms/privatized-histogram/exercises/',
+    '/algorithms/privatized-histogram/solutions/',
+    '/en/algorithms/privatized-histogram/solutions/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
     '/correctness/cpu-references-tolerances-invariants/exercises/',
     '/en/correctness/cpu-references-tolerances-invariants/exercises/',
     '/correctness/cpu-references-tolerances-invariants/solutions/',
     '/en/correctness/cpu-references-tolerances-invariants/solutions/',
+    '/correctness/floating-point-order-reproducibility/',
+    '/en/correctness/floating-point-order-reproducibility/',
+    '/correctness/floating-point-order-reproducibility/exercises/',
+    '/en/correctness/floating-point-order-reproducibility/exercises/',
+    '/correctness/floating-point-order-reproducibility/solutions/',
+    '/en/correctness/floating-point-order-reproducibility/solutions/',
     '/correctness/memcheck-invalid-memory-access/',
     '/en/correctness/memcheck-invalid-memory-access/',
     '/correctness/memcheck-invalid-memory-access/exercises/',
@@ -347,6 +414,12 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/examples/graph-capture/',
     '/examples/ptx-fatbinary-inspection/',
     '/en/examples/ptx-fatbinary-inspection/',
+    '/examples/multi-stage-reduction/',
+    '/en/examples/multi-stage-reduction/',
+    '/examples/inclusive-exclusive-scan/',
+    '/en/examples/inclusive-exclusive-scan/',
+    '/examples/privatized-histogram/',
+    '/en/examples/privatized-histogram/',
     '/examples/sanitizer-defect-suite/',
     '/en/examples/sanitizer-defect-suite/',
     '/labs/',
@@ -381,6 +454,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/visuals/page-migration/',
     '/visuals/artifact-pipeline/',
     '/en/visuals/artifact-pipeline/',
+    '/visuals/reduction-stages/',
+    '/en/visuals/reduction-stages/',
     '/practice/',
     '/en/practice/',
     '/glossary/',

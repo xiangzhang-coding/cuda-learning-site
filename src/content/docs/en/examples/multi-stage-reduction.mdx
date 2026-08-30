@@ -1,0 +1,233 @@
+---
+title: 'EX11: Multi-Stage Reduction Runnable Example'
+description: Reduce 4,099 deterministic float values through a shared-memory tree and verify the result with a double CPU reference plus absolute-and-relative tolerance, without publishing performance data.
+pairId: ex11
+counterpart: /examples/multi-stage-reduction/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - cpu-reference
+  - multi-stage-reduction
+  - host-reference
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX11
+prerequisites:
+  - A02
+  - Q02
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - cpu-reference
+  - multi-stage-reduction
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 16,468 bytes of declared device allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The GPU result should report PASS only when the combined absolute-and-relative comparator accepts it against the double CPU reference.
+    - The declared 4,099-element workload should reduce through stage sizes 4,099, 9, and 1, with three valid elements in the final block of the first stage.
+    - Every bounds-invalid load should contribute zero while every thread still reaches each block-wide barrier before the next reduction step.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, shared-memory, and block-synchronization contracts'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex11
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-30'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,cpu-reference,multi-stage-reduction,host-reference,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX11
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: 'A02,Q02'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX11
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX11
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'cpu-reference,multi-stage-reduction'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 16,468 bytes of declared device allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '4'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3,13.3.1'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/multi-stage-reduction/" lang="zh-CN">阅读中文版本</a>
+
+EX11 is a standalone, original Multi-Stage Reduction Runnable Example. The C++17 project reduces 4,099 deterministic `float` values to one value and judges correctness with a high-precision `double` CPU reference, an explicit reduction order, and a declared tolerance contract. It contains no timer and publishes no performance conclusion.
+
+## Purpose
+
+Complete [A02 Multi-Stage Reduction](/en/algorithms/multi-stage-reduction/) and [Q02 Floating-Point Order and Reproducibility](/en/correctness/floating-point-order-reproducibility/) first. A02 establishes the reduction tree, inactive lanes, barriers, and kernel boundaries. Q02 explains why floating-point addition order can change low-order bits and why tolerance does not imply bitwise reproducibility.
+
+EX11 places those contracts in one minimal standalone project. A shared-memory kernel produces one partial sum per block, and the host launches more stages until one value remains. The only verdict is whether the GPU sum passes the CPU reference comparator.
+
+## Canonical project
+
+[View the complete EX11 project at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction), or [download the source archive for the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip). The canonical implementation is under `examples/ex11-multi-stage-reduction/`.
+
+`project.json` declares two build inputs, two canonical ranges, three exact Toolkit Lanes, a memory bound, and empty evidence records. Software files use Apache-2.0; this instructional page uses CC-BY-4.0.
+
+## CPU reference and tolerance
+
+The pure C++17 header defines the 4,099-element workload, a 256-thread block, at most 512 inputs per block, deterministic `float` generation, and a CPU reference accumulated in `double` in input order:
+
+<CanonicalCode exampleId="EX11" range="cpu-reference" />
+
+The GPU tree order differs from the serial CPU order, so the comparator does not require bitwise equality. It checks `absolute_error <= absolute_tolerance + relative_tolerance * abs(cpu_reference)`. The absolute term protects a reference near zero; the relative term scales the allowance with reference magnitude. This rule is a predeclared acceptance contract, not a threshold adjusted after seeing a result.
+
+The same range defines the stage-size helper. Every nonterminal stage must produce a positive output count strictly smaller than its input count.
+
+## Multi-stage shared-memory reduction
+
+Each thread initializes its contribution to zero and independently guards two global loads. A bounds-invalid lane still writes its shared slot and reaches every `__syncthreads()` unconditionally with the rest of the block:
+
+<CanonicalCode exampleId="EX11" range="multi-stage-reduction" />
+
+Only the lower lanes add a partner at each tree step, but the barrier is outside that conditional branch. One kernel can reduce only within blocks. The next launch's kernel boundary makes the prior stage's global partial sums available to the next stage.
+
+| Stage | Input count | Output count | Valid inputs in last block |
+| ---: | ---: | ---: | ---: |
+| 0 | 4,099 | 9 | 3 |
+| 1 | 9 | 1 | 9 |
+
+The first eight blocks therefore cover 512 values each, while the final partial block loads only indices 4,096 through 4,098. The host loop repeats stages until the count is one, then copies back only the final `float`.
+
+## Host reference boundary
+
+`make host-test` includes no CUDA header. It independently reconstructs deterministic input and checks stage sizes `4,099 -> 9 -> 1`, complete nonoverlapping block coverage, the three-element partial-block invariant, agreement between the `double` reference and a wider accumulation, and near-zero, scale-aware, and rejection cases for the absolute-plus-relative comparator.
+
+The host test also constructs a pure CPU model with the same staged float order. Passing establishes arithmetic, stage-shape, and oracle behavior only. It cannot establish that the CUDA source compiled, a GPU barrier executed, or a device result satisfied the comparator.
+
+## Build contract
+
+From the project directory on Native Linux, run:
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+The CUDA stages create `build/multi_stage_reduction.ii`, `build/multi_stage_reduction.o`, and `build/ex11-multi-stage-reduction`. Inspection checks a native `sm_75` cubin and PTX generated from `compute_75`. Host-test needs only a host C++17 compiler and ends with `host-reference: pass`.
+
+`scripts/compile-check.sh c++17 ex11 <result-dir>` runs clean, preprocess, compile, link, inspect, and host-test, retaining logs and inspection artifacts while never executing the GPU binary.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Runtime gate | One CUDA GPU with compute capability 7.5 or newer |
+| Baseline GPU Capability Tier | Maximum device allocation is 16,468 bytes, below 8 GB |
+| Compiler target | Native `sm_75` cubin plus PTX generated from `compute_75` |
+| Language contract | The same original C++17 source in all three Toolkit Lanes |
+
+The Lanes are CUDA 11.8.0 on Ubuntu 22.04 x86-64, CUDA 12.9.2 on Ubuntu 24.04 x86-64, and CUDA 13.3.1 on Ubuntu 24.04 x86-64. Their digest-pinned images are build targets, not compilation records.
+
+## Compilation and runtime evidence
+
+EX11's compilation array is empty, so EX11 has no Compile-Checked status. Runtime is **Pending Hardware Verification**, and recorded observations are empty. The Learning Site has not executed this binary in a Reference Environment.
+
+This page publishes no duration, bandwidth, throughput, speedup, or other performance number. Source structure, a host-test pass, and the expected stage shape are not GPU runtime observations.
+
+## Expected observations, not runtime records
+
+1. The GPU result should report `PASS` only when the absolute-plus-relative comparator accepts it against the `double` CPU reference.
+2. The 4,099-element workload should converge through stage sizes `4,099 -> 9 -> 1`, with exactly three valid inputs in the final block of the first stage.
+3. Bounds-invalid loads should contribute zero while every thread in the block still reaches every block-wide barrier before the next step.
+
+These are acceptance criteria. None is a recorded GPU observation.
+
+## Sources and review
+
+The current Programming Guide supplies the thread-block, shared-memory, and block-synchronization contracts. Three NVCC documents cover the exact Toolkit Lanes. They establish interfaces and build coordinates, not an EX11 compilation or runtime result.
+
+- [CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+
+**Fact-check and all-source access date: 2026-08-30.**

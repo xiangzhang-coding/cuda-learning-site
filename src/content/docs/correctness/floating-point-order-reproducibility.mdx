@@ -1,0 +1,258 @@
+---
+title: 'Q02：浮点顺序、确定性与逐位可复现性'
+description: 区分浮点非结合性、归约顺序、FMA 与编译器选项造成的数值差异，并分别声明 problem-specific tolerance、determinism 和 bitwise reproducibility contract。
+pairId: q02
+counterpart: /en/correctness/floating-point-order-reproducibility/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - nonassociativity
+  - reduction-order
+  - fma
+  - compiler-flags
+  - tolerance
+  - determinism
+  - bitwise-reproducibility
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q02
+prerequisites:
+  - Q01
+  - A02
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - cpu-reference
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Notes on Host/Device Computation Accuracy'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current associativity, FMA, compiler-option, host/device accuracy, and deterministic-result guidance'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v13.3; last updated 2026-06-25'
+    platform: 'Current nonassociativity, one-rounding FMA, reduction-order, and CPU/GPU comparison guidance'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9 - Mathematical Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#mathematical-functions'
+    version: 'CUDA C++ Programming Guide v12.9; Toolkit 12.9 Update 1 archive'
+    platform: 'Archived Toolkit 12.9 mathematical-function and floating-point behavior'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 12.9 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v12.9; Toolkit 12.9 Update 1 archive; last updated 2025-05-31'
+    platform: 'Archived Toolkit 12.9 associativity, FMA, and reduction-order guidance'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 11.8 - Mathematical Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#mathematical-functions'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 mathematical-function and floating-point behavior'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 11.8 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 associativity, FMA, and reduction-order guidance'
+    accessDate: '2026-08-30'
+  - title: 'CCCL v3.4.2 - DeviceReduce Determinism Contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Pinned DeviceReduce run-to-run and GPU-to-GPU determinism guarantee scopes'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,nonassociativity,reduction-order,fma,compiler-flags,tolerance,determinism,bitwise-reproducibility,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q01,A02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: cpu-reference }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '3.4.2,11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/floating-point-order-reproducibility/" lang="en">Read the English counterpart</a>
+
+同一组实数的数学和只有一个值，但有限精度程序还选择了括号、归约树（reduction tree）、中间精度、FMA、编译器选项与执行环境。Q02 把这些选择写进 contract，并把“数值上可接受”“执行顺序具有 determinism”和“bitwise reproducibility”当作三项不同结论。任一结论都不能由另一个结论自动推出。
+
+## 学完本单元，你应该能
+
+- 用每步 rounding 解释为什么 `(a + b) + c` 与 `a + (b + c)` 可能不同。
+- 把 CUDA reduction order 与串行 CPU reference 的顺序差异定位到具体归约树。
+- 区分 FMA 的一次 rounding 与分离乘加的两次 rounding。
+- 记录会改变浮点语义的 compiler flags 与完整 environment ledger。
+- 分别设计 problem-specific abs+rel tolerance、determinism 与 bitwise reproducibility 的验收规则。
+
+## 先修关系
+
+先完成 [Q01：CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)和 [A02：多阶段归约](/algorithms/multi-stage-reduction/)。Q01 提供独立 CPU reference 与 scale-aware comparison；A02 提供 stage、partial、tree shape 与 kernel boundary。Q02 不把串行 reference 的 operation order 偷换成所有并行实现都必须逐 bit 模仿的顺序。
+
+本 Learning Unit 只建立 static numerical contracts。它不编译 EX11，不运行 GPU，也不产生任何 observed bit pattern。
+
+## 浮点加法为什么非结合
+
+实数加法满足结合律；固定格式的浮点加法通常不满足。若 `rn(x)` 表示把 exact intermediate 舍入到目标格式，则两条执行路径是：
+
+```text
+rn(rn(a + b) + c)
+rn(a + rn(b + c))
+```
+
+第一次 addition 丢掉的信息不同，第二次 addition 无法恢复它。因此 `(a + b) + c` 与 `a + (b + c)` 即使每个基本 operation 都符合所选 rounding mode，也可能得到不同 bits。这就是非结合性（nonassociativity），不是 race 的同义词。
+
+一个 binary32 hand case 是 `a = 1e20f`、`b = -1e20f`、`c = 3.14f`。先算 `a + b` 会得到零，再加 `c` 会保留 `c`；先算 `b + c` 时，`c` 小于该 magnitude 附近的 spacing，会在 rounding 中消失，随后加 `a` 得到零。两条路径都实现了同一个 real-number expression，却实现了不同的 floating-point operation sequence。
+
+## Reduction order 是算法的一部分
+
+串行 CPU reference 常用 left fold：先合并 `x[0]` 与 `x[1]`，再依次加入后续元素。Parallel reduction 则在每个 stage 合并 disjoint pairs，形成 partials，再由下一层继续合并。只要 operator 非结合，tree shape 就属于 numerical algorithm，而不只是调度细节。
+
+改变 block size、每个 thread 处理的元素数、block partial 的排列、multi-stage partition 或 library policy，都可能改变 reduction order。基于 floating-point atomics 的聚合还可能让 contribution order 随 scheduling 改变。固定一棵树可以消除其中一类变化，但不会让它自动等于 CPU serial order，也不会证明结果更接近 exact sum。
+
+审查 mismatch 时先画出两条树，并逐层标出 operand pairs、precision 与 rounding。不要从“相同 inputs”直接跳到“应有相同 bits”。
+
+## FMA：一次 rounding，不是两条指令的缩写
+
+Fused multiply-add 计算 `rn(a * b + c)`；exact product 不先写回目标 precision。FMA 只进行一次 rounding。分离的 multiply 与 add 计算 `rn(rn(a * b) + c)`，共有两次 rounding。少一次 rounding 通常提高 accuracy，尤其在 cancellation 附近，但它也可能改变最后的 bit pattern。
+
+因此 CPU path 使用 separate multiply/add、device path 使用 FMA 时，差异不自动表示其中一边错误。反过来，也不能因为 FMA 通常更准确就忽略 application contract。要复现指定 expression semantics，应显式声明是否允许 contraction，或者使用契约所需的 explicit FMA/rounding intrinsics。
+
+FMA 不会自行改变一棵 pure-addition reduction tree；它影响的是可 contraction 的 multiply-add，例如 dot product 或 reduction 前的 affine transform。必须分别记录 tree order 与 contraction policy。
+
+## Compiler flags 与 environment ledger
+
+编译器选项必须逐项记录，因为它们可能改变 operation sequence、rounding 与 math-function implementation。对 `nvcc` 而言：
+
+- `--fmad=true` 允许把适合的 floating-point multiply/add contraction 为 FMA；`--fmad=false` 禁止这类隐式 contraction，但不会把显式 FMA 调用改写成分离 operations。
+- `--use_fast_math` 不只是“打开 FMA”。它蕴含 `--ftz=true`、`--prec-div=false`、`--prec-sqrt=false` 与 `--fmad=true`，并可把部分 functions 映射到较快、accuracy contract 不同的 intrinsics。
+- 省略 flag 也不是省略事实；应记录 effective defaults、target architecture 和任何显式 intrinsics。
+
+每项 numerical claim 至少附以下 compiler/environment ledger：
+
+| 字段 | 必须记录的内容 |
+| --- | --- |
+| Program | source revision、algorithm variant、EX11 range 与 reduction tree |
+| Inputs | data type、size、exact input bytes 与 logical order |
+| Compilation | Toolkit 与 `nvcc` version、host compiler/version、完整 flags、target architecture |
+| Device | GPU、compute capability、driver 与影响 arithmetic 的 device mode |
+| Runtime | OS、relevant environment variables、library/version、selected algorithm or policy |
+| Launch | grid/block shape、stage partition、stream/atomic strategy |
+| Claim | comparison scope、equality predicate、tolerance rationale 与 non-finite policy |
+
+只写“CUDA 13”或“fast math off”不足以重建 contract。一次 rebuild、换 GPU 或改 launch geometry 都可能跨出原 claim 的 scope。
+
+## Problem-specific absolute-plus-relative tolerance
+
+当 specification 允许 approximate result 时，对 finite GPU candidate `g` 与独立 CPU reference `r` 使用 Q01 的 reference-anchored rule：
+
+```text
+error  = abs(g - r)
+limit  = atol + rtol * abs(r)
+accept = error <= limit
+```
+
+`atol` 与 `rtol` 必须在查看 candidate 前，根据 output scale、precision、reduction length/tree、conditioning、cancellation、documented function bounds 与 downstream error budget 逐问题选择。Near zero 依靠 absolute term；随 magnitude 增长的 allowance 来自 relative term。NaN、infinity 与 signed zero 走单独声明的 policy。
+
+Tolerance acceptance 不构成 bitwise reproducibility，也不证明 repeated runs 相同。它只说明这个 candidate/reference pair 满足已声明的 numerical acceptance rule。一个 nondeterministic reduction 的每次结果都可能 pass tolerance；一个 bitwise-stable result 也可能稳定地超出 tolerance。
+
+## Determinism contract
+
+Determinism contract 回答的是：在什么固定条件和 scope 内，algorithm choice、operation order 与允许的 scheduling variation 是否受控，以及 repeated executions 用什么 equality predicate 判为“相同”。至少声明 same-input、same-build、same-device、launch geometry、library policy 和 run-to-run scope；若跨 GPU，则另立 gpu-to-gpu scope。
+
+Current CUDA v13.3 把 deterministic result 定义为：在相同 inputs 与明确指定的条件下，每次得到相同 bit-wise numerical outputs；这个定义本身包含 run-to-run bitwise predicate。Reduction-order determinism 不自动保证跨 environment 的 bitwise reproducibility。比如“每次选择同一 reduction tree”约束了 operation order，却没有承诺换 compiler、Toolkit 或 architecture 后产生相同 bits。若某个 library 的 pinned documentation 明确把特定 determinism level 定义为 bitwise-identical output，那是该 product/version/scope 的额外保证，不能推广到任意 kernel。
+
+Unordered floating-point atomic contributions、runtime algorithm selection 或可变 partition 都可能破坏 run-to-run determinism。固定 random seed 也不能固定这些次序。反过来，deterministic execution 仍可能计算错误结果；它必须另外通过 Q01 的 correctness oracle。
+
+## Bitwise reproducibility contract
+
+Bitwise reproducibility 要求比较对象的 floating-point representations 完全相同，而不是仅仅 `abs(error)` 较小。Contract 必须明确比较 scope：同一 executable 的 repeated runs、同一 build 在同型号设备间，还是由指定 Toolkit lanes 重建后跨 architecture。Scope 越宽，需要固定和验证的 ledger 字段越多。
+
+对于允许的 values，还要声明 `+0` 与 `-0` 是否按 bits 区分、NaN payload 是否在 domain 内、output padding/serialization 是否参与 comparison。逐 bit 相同也不证明 mathematical correctness：错误程序可以稳定地产生同一错误 bits。因此完整报告分别给出：
+
+1. Q01 numerical correctness verdict；
+2. deterministic-order/run-scope verdict；
+3. bitwise comparison verdict 与精确 scope。
+
+任何 tolerance pass 都不得标注为 bitwise reproducibility。若 requirements 只需要 numerical acceptance，就诚实地停在该层，不升级 claim。
+
+## Canonical EX11：CPU reference 的顺序边界
+
+EX11 的 `cpu-reference` range 是清晰的 serial reference。它按 logical input order 累加，适合提供 Q01 comparison target；它不会伪装成 GPU multi-stage tree 的逐步模型。若两边顺序不同，应使用预先论证的 problem-specific tolerance，除非项目另行固定相同 operation graph 并验证所声明的 bitwise scope。
+
+<CanonicalCode exampleId="EX11" range="cpu-reference" />
+
+[查看完整 EX11 canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction)，或[下载同一 source revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip)。完整 project 是唯一 canonical executable source；本页只渲染 `cpu-reference` range，不维护第二份实现。
+
+阅读 [EX11：多阶段归约可运行示例](/examples/multi-stage-reduction/)时，把 reference precision/order、GPU tree、compiler flags 与 launch geometry 放进同一 ledger，再分别作三种 verdict。
+
+## 证据边界
+
+本页、Exercises、hand calculations 与 canonical source excerpt 都是 static review artifacts。它们不构成 Compile-Checked 或 Runtime-Verified evidence；没有 GPU execution、recorded output bits、error distribution 或跨环境 comparison。Unit、Exercise 与 Solution 的 compilation/runtime/expected/recorded evidence arrays 全部为空。
+
+未来 Lab 若要提出 determinism 或 bitwise claim，必须保存 Environment Manifest、compiler/environment ledger、exact inputs、raw outputs 与 repeated/cross-scope comparison。Numerical tolerance 仍单独给出，不能替代这些 artifacts。
+
+## 离开前检查
+
+1. 为什么 `(a + b) + c` 与 `a + (b + c)` 在 binary floating point 中可能不同？
+2. 哪些 reduction design choices 会改变 reduction order？
+3. FMA 的一次 rounding 与分离 multiply/add 的两次 rounding 有什么区别？
+4. 为什么 tolerance pass 与 determinism 都不能自动升级为 bitwise reproducibility？
+5. 一项可复核的 compiler/environment ledger 至少要固定哪些条件？
+
+## 继续练习
+
+- 完成 [Q02 练习（Exercise）](/correctness/floating-point-order-reproducibility/exercises/)，再查看独立的[参考解答](/correctness/floating-point-order-reproducibility/solutions/)。
+- 回到 [A02](/algorithms/multi-stage-reduction/)画出 EX11 的 stage tree，再与 `cpu-reference` 的 left fold 对照。
+- 在提出任何 reproducibility claim 前，先写 comparison scope 和 equality predicate，再决定要保存哪些 bits 与 ledger fields。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Notes on Host/Device Computation Accuracy](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy)提供 current associativity、FMA、compiler flags、host/device accuracy 与 deterministic-result guidance。
+- [Floating Point and IEEE 754 v13.3：Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy)给出 nonassociativity、one-rounding FMA 与 serial/parallel operation order 的 owner explanation。
+- [CUDA C++ Programming Guide 12.9：Mathematical Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#mathematical-functions)和 [Floating Point and IEEE 754 12.9](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy)保留 Toolkit 12.9 Update 1 archive coordinate。
+- [CUDA C++ Programming Guide 11.8：Mathematical Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#mathematical-functions)和 [Floating Point and IEEE 754 11.8](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy)保留 Toolkit 11.8.0 archive coordinate。
+- [CCCL v3.4.2 `DeviceReduce` determinism contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh)是 pinned owner source，用于核对 product-specific determinism/reproducibility scopes；其保证不得外推到 custom kernel。
+
+本站仅依据以上 public owner sources 独立编写本单元。Context7 只用于交叉检查 current CUDA page 的检索与 section discovery，不是 factual source，也不进入 source coordinates；未采用非公开材料。
+
+七项 owner sources 均访问于 **2026-08-30**。
+
+**事实核查日期：2026-08-30。**

@@ -9,6 +9,9 @@ import ex07Project from '../../examples/ex07-streams-events-overlap/project.json
 import ex08Project from '../../examples/ex08-unified-memory-migration/project.json' with { type: 'json' };
 import ex09Project from '../../examples/ex09-graph-capture/project.json' with { type: 'json' };
 import ex10Project from '../../examples/ex10-ptx-fatbinary-inspection/project.json' with { type: 'json' };
+import ex11Project from '../../examples/ex11-multi-stage-reduction/project.json' with { type: 'json' };
+import ex12Project from '../../examples/ex12-inclusive-exclusive-scan/project.json' with { type: 'json' };
+import ex13Project from '../../examples/ex13-privatized-histogram/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
@@ -43,18 +46,21 @@ const projectExamples = [
   { route: '/en/examples/unified-memory-migration/', project: ex08Project },
   { route: '/en/examples/graph-capture/', project: ex09Project },
   { route: '/en/examples/ptx-fatbinary-inspection/', project: ex10PublishedProject },
+  { route: '/en/examples/multi-stage-reduction/', project: ex11Project },
+  { route: '/en/examples/inclusive-exclusive-scan/', project: ex12Project },
+  { route: '/en/examples/privatized-histogram/', project: ex13Project },
   { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
 const currentCatalogCounts = [
   { route: '/en/labs/', count: 6 },
-  { route: '/en/practice/', count: 40 },
-  { route: '/en/visuals/', count: 13 },
-  { route: '/en/glossary/', count: 125 },
-  { route: '/en/sources-and-versions/', count: 50 },
+  { route: '/en/practice/', count: 45 },
+  { route: '/en/visuals/', count: 14 },
+  { route: '/en/glossary/', count: 139 },
+  { route: '/en/sources-and-versions/', count: 56 },
 ] as const;
 
 test('serves the exact current publication while preserving R1 metadata and production canonicals', async ({ page, request }) => {
-  test.setTimeout(300_000);
+  test.setTimeout(360_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
@@ -85,38 +91,40 @@ test('serves the exact current publication while preserving R1 metadata and prod
   await expect(publicationResponse.json()).resolves.toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-08-29',
+    reviewDate: '2026-08-30',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
     releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
     scope: {
-      publicationPairs: 148,
-      sourceRoutes: 296,
+      publicationPairs: 167,
+      sourceRoutes: 334,
       learningUnits: [
         'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
         'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
         'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
         'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
         'M15', 'M16', 'M17', 'M18', 'M19',
-        'Q01', 'Q03', 'Q04', 'Q05',
+        'A01', 'A02', 'A03', 'A04',
+        'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
       ],
       runnableExamples: [
-        'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX16',
+        'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
+        'EX11', 'EX12', 'EX13', 'EX16',
       ],
       labs: ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'],
       visualExplainers: [
         'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-        'VIS09', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+        'VIS09', 'VIS10', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
       ],
-      practiceBankEntries: 40,
-      glossaryTerms: 125,
-      sourceRecords: 50,
+      practiceBankEntries: 45,
+      glossaryTerms: 139,
+      sourceRecords: 56,
     },
     evidence: {
       compileChecked: ['EX02', 'EX10', 'LAB02'],
-      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
-      pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09']),
+      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13']),
+      pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13']),
       runtimeNotApplicable: ['EX10'],
       runtimeVerified: [],
       referenceEnvironments: [],
@@ -125,6 +133,9 @@ test('serves the exact current publication while preserving R1 metadata and prod
     },
     knownLimitations: expect.arrayContaining([
       'LAB06 has no current public destination.',
+      'EX14 and EX15 have no current public destination.',
+      'EX11, EX12, and EX13 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.',
+      'No measured overlap, migration, graph performance, algorithm performance, timing, speedup, or other performance observation is published.',
       'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
       'This incremental publication record is not a completed R2 aggregate release review.',
     ]),
@@ -135,7 +146,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
   expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(296);
+  expect(publishedRoutes).toHaveLength(334);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -144,8 +155,8 @@ test('serves the exact current publication while preserving R1 metadata and prod
   }
 
   await page.goto('/en/about/');
-  await expect(page.locator('main')).toContainText(/148 Publication Pairs/);
-  await expect(page.locator('main')).toContainText(/296 source routes/);
+  await expect(page.locator('main')).toContainText(/167 Publication Pairs/);
+  await expect(page.locator('main')).toContainText(/334 source routes/);
   const navigation = page.getByRole('navigation', { name: 'Main' });
   expect(
     await navigation.locator('a[href^="/en/examples/"]').evaluateAll((links) =>
@@ -156,7 +167,10 @@ test('serves the exact current publication while preserving R1 metadata and prod
     '/en/examples/environment-report/',
     '/en/examples/error-handling-lifecycle/',
     '/en/examples/graph-capture/',
+    '/en/examples/inclusive-exclusive-scan/',
+    '/en/examples/multi-stage-reduction/',
     '/en/examples/multidimensional-indexing/',
+    '/en/examples/privatized-histogram/',
     '/en/examples/ptx-fatbinary-inspection/',
     '/en/examples/sanitizer-defect-suite/',
     '/en/examples/shared-memory-tile-bank-padding/',
@@ -165,7 +179,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
     '/en/examples/vector-addition/',
   ]);
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(234);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(260);
   for (const { route, count } of currentCatalogCounts) {
     await page.goto(route);
     await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
@@ -189,7 +203,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
 });
 
 test('supports direct locale navigation, keyboard flow, and relevant bilingual search', async ({ page }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(210_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/start/using-the-learning-site/');
   await page.keyboard.press('Tab');
@@ -390,6 +404,26 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/toolchain/cpp-dialect-boundaries/'],
     },
     {
+      query: 'A01 Elementwise Map One Owner per Element',
+      expectedHrefs: ['/en/algorithms/elementwise-map/'],
+    },
+    {
+      query: 'A02 Multi-Stage Reduction Barriers Operation Order',
+      expectedHrefs: ['/en/algorithms/multi-stage-reduction/'],
+    },
+    {
+      query: 'A03 Inclusive and Exclusive Scan',
+      expectedHrefs: ['/en/algorithms/inclusive-exclusive-scan/'],
+    },
+    {
+      query: 'A04 Privatized Histogram',
+      expectedHrefs: ['/en/algorithms/privatized-histogram/'],
+    },
+    {
+      query: 'Q02 floating-point order determinism bitwise reproducibility',
+      expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'],
+    },
+    {
       query: 'EX07 Streams Events and Overlap Runnable Example',
       expectedHrefs: ['/en/examples/streams-events-overlap/'],
     },
@@ -406,12 +440,28 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/examples/ptx-fatbinary-inspection/'],
     },
     {
+      query: 'EX11 Multi-Stage Reduction Runnable Example',
+      expectedHrefs: ['/en/examples/multi-stage-reduction/'],
+    },
+    {
+      query: 'EX12 Inclusive and Exclusive Scan Runnable Example',
+      expectedHrefs: ['/en/examples/inclusive-exclusive-scan/'],
+    },
+    {
+      query: 'EX13 Privatized Histogram Runnable Example',
+      expectedHrefs: ['/en/examples/privatized-histogram/'],
+    },
+    {
       query: 'VIS08 Managed-Memory Page Migration',
       expectedHrefs: ['/en/visuals/page-migration/'],
     },
     {
       query: 'VIS09 NVCC Artifact Pipeline',
       expectedHrefs: ['/en/visuals/artifact-pipeline/'],
+    },
+    {
+      query: 'VIS10 Reduction Tree and Inactive Lanes',
+      expectedHrefs: ['/en/visuals/reduction-stages/'],
     },
   ] as const) {
     await expectRankedSearchResult(page, {
@@ -459,6 +509,9 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
   await page.goto('/en/visuals/artifact-pipeline/');
   await expect(page.locator('[data-visual-controls]')).toBeHidden();
   await expect(page.locator('[data-static-fallback]')).toBeVisible();
+  await page.goto('/en/visuals/reduction-stages/');
+  await expect(page.locator('[data-visual-controls]')).toBeHidden();
+  await expect(page.locator('[data-static-fallback]')).toBeVisible();
   for (const { route, controls } of [
     { route: '/en/foundations/asynchronous-errors/', controls: '[data-timeline-controls]' },
     { route: '/en/foundations/launch-geometry/', controls: '[data-block-shape-controls]' },
@@ -471,7 +524,7 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
 });
 
 test('keeps mobile pages and no-script teaching fallbacks complete', async ({ browser, page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of [
@@ -513,8 +566,18 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/toolchain/separate-compilation-device-linking/',
     '/toolchain/cpp-dialect-boundaries/',
     '/en/toolchain/cpp-dialect-boundaries/',
+    '/algorithms/elementwise-map/',
+    '/en/algorithms/elementwise-map/',
+    '/algorithms/multi-stage-reduction/',
+    '/en/algorithms/multi-stage-reduction/',
+    '/algorithms/inclusive-exclusive-scan/',
+    '/en/algorithms/inclusive-exclusive-scan/',
+    '/algorithms/privatized-histogram/',
+    '/en/algorithms/privatized-histogram/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
+    '/correctness/floating-point-order-reproducibility/',
+    '/en/correctness/floating-point-order-reproducibility/',
     '/correctness/memcheck-invalid-memory-access/',
     '/en/correctness/memcheck-invalid-memory-access/',
     '/correctness/racecheck-initcheck-synccheck/',
@@ -529,6 +592,14 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/examples/sanitizer-defect-suite/',
     '/examples/ptx-fatbinary-inspection/',
     '/en/examples/ptx-fatbinary-inspection/',
+    '/examples/multi-stage-reduction/',
+    '/en/examples/multi-stage-reduction/',
+    '/examples/inclusive-exclusive-scan/',
+    '/en/examples/inclusive-exclusive-scan/',
+    '/examples/privatized-histogram/',
+    '/en/examples/privatized-histogram/',
+    '/visuals/reduction-stages/',
+    '/en/visuals/reduction-stages/',
     '/visuals/artifact-pipeline/',
     '/en/visuals/artifact-pipeline/',
     '/labs/break-and-repair-indexing/',
@@ -584,6 +655,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/stream-event-dependencies/',
     '/en/visuals/page-migration/',
     '/en/visuals/artifact-pipeline/',
+    '/en/visuals/reduction-stages/',
     '/foundations/multidimensional-indexing/',
     '/en/foundations/multidimensional-indexing/',
     ...Object.keys(embeddedFallbacks),

@@ -1,0 +1,258 @@
+---
+title: 'Q02: Floating-point order, determinism, and bitwise reproducibility'
+description: Separate differences caused by floating-point nonassociativity, reduction order, FMA, and compiler flags, then declare problem-specific tolerance, determinism, and bitwise reproducibility contracts independently.
+pairId: q02
+counterpart: /correctness/floating-point-order-reproducibility/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - nonassociativity
+  - reduction-order
+  - fma
+  - compiler-flags
+  - tolerance
+  - determinism
+  - bitwise-reproducibility
+  - canonical-example
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q02
+prerequisites:
+  - Q01
+  - A02
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - cpu-reference
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Notes on Host/Device Computation Accuracy'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current associativity, FMA, compiler-option, host/device accuracy, and deterministic-result guidance'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v13.3; last updated 2026-06-25'
+    platform: 'Current nonassociativity, one-rounding FMA, reduction-order, and CPU/GPU comparison guidance'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9 - Mathematical Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#mathematical-functions'
+    version: 'CUDA C++ Programming Guide v12.9; Toolkit 12.9 Update 1 archive'
+    platform: 'Archived Toolkit 12.9 mathematical-function and floating-point behavior'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 12.9 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v12.9; Toolkit 12.9 Update 1 archive; last updated 2025-05-31'
+    platform: 'Archived Toolkit 12.9 associativity, FMA, and reduction-order guidance'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 11.8 - Mathematical Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#mathematical-functions'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 mathematical-function and floating-point behavior'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 11.8 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 associativity, FMA, and reduction-order guidance'
+    accessDate: '2026-08-30'
+  - title: 'CCCL v3.4.2 - DeviceReduce Determinism Contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Pinned DeviceReduce run-to-run and GPU-to-GPU determinism guarantee scopes'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q02 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,nonassociativity,reduction-order,fma,compiler-flags,tolerance,determinism,bitwise-reproducibility,canonical-example,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q01,A02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: cpu-reference }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '3.4.2,11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/floating-point-order-reproducibility/" lang="zh-CN">阅读中文对应页</a>
+
+A mathematical sum over the same real numbers has one value, but a finite-precision program also chooses parentheses, a reduction tree, intermediate precision, FMA use, compiler flags, and an execution environment. Q02 places those choices inside the contract and treats "numerically acceptable," "deterministic operation order," and "bitwise reproducibility" as three separate conclusions. None follows automatically from another.
+
+## What you should be able to do
+
+- Explain through per-operation rounding why `(a + b) + c` can differ from `a + (b + c)`.
+- Locate the order difference between a CUDA reduction and a serial CPU reference in their concrete trees.
+- Distinguish the one rounding of FMA from the two roundings of separate multiply and add operations.
+- Record compiler flags and a complete environment ledger when they can change floating-point semantics.
+- Design separate acceptance rules for a problem-specific abs+rel tolerance, determinism, and bitwise reproducibility.
+
+## Prerequisites
+
+Complete [Q01: CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) and [A02: Multi-stage Reduction](/en/algorithms/multi-stage-reduction/) first. Q01 supplies the independent CPU reference and scale-aware comparison. A02 supplies stages, partials, tree shape, and kernel boundaries. Q02 does not silently turn the serial reference's operation order into a demand that every parallel implementation imitate it bit for bit.
+
+This Learning Unit establishes static numerical contracts. It does not compile EX11, execute a GPU, or produce an observed bit pattern.
+
+## Why floating-point addition is nonassociative
+
+Real-number addition is associative; fixed-format floating-point addition generally is not. If `rn(x)` means rounding an exact intermediate to the target format, the two paths are:
+
+```text
+rn(rn(a + b) + c)
+rn(a + rn(b + c))
+```
+
+Each first addition discards different information, and the second addition cannot recover it. Consequently, `(a + b) + c` and `a + (b + c)` may produce different bits even when every basic operation conforms to the selected rounding mode. This is nonassociativity, not another name for a race.
+
+One binary32 hand case uses `a = 1e20f`, `b = -1e20f`, and `c = 3.14f`. Adding `a + b` first produces zero, after which adding `c` preserves `c`. When `b + c` is evaluated first, `c` is below the spacing near that magnitude and disappears during rounding; adding `a` then produces zero. Both paths implement the same real-number expression through different floating-point operation sequences.
+
+## Reduction order is part of the algorithm
+
+A serial CPU reference commonly uses a left fold: combine `x[0]` with `x[1]`, then add each remaining element in order. A parallel reduction combines disjoint pairs at each stage to form partials that later stages combine. When the operator is nonassociative, tree shape is part of the numerical algorithm rather than a mere scheduling detail.
+
+Changing block size, elements handled per thread, the ordering of block partials, multi-stage partitioning, or a library policy can change reduction order. Aggregation through floating-point atomics can also let contribution order vary with scheduling. Fixing a tree removes one source of variation, but it neither makes that tree the CPU serial order nor proves that its result is closer to the exact sum.
+
+When investigating a mismatch, draw both trees and annotate every level with operand pairs, precision, and rounding. Do not jump from "same inputs" to "same bits."
+
+## FMA: one rounding, not shorthand for two instructions
+
+Fused multiply-add evaluates `rn(a * b + c)` without first storing the exact product at the target precision. FMA applies one rounding. Separate multiply and add evaluate `rn(rn(a * b) + c)`, which applies two roundings. Removing one rounding usually improves accuracy, especially near cancellation, but it can also change the final bit pattern.
+
+If a CPU path uses separate multiply/add while a device path uses FMA, a difference does not automatically make either result wrong. Conversely, FMA's usual accuracy advantage does not override the application contract. To reproduce specified expression semantics, explicitly declare whether contraction is allowed or use the explicit FMA and rounding intrinsics required by the contract.
+
+FMA does not by itself change a pure-addition reduction tree. It affects contractible multiply-add expressions such as a dot product or an affine transform before reduction. Record tree order and contraction policy separately.
+
+## Compiler flags and the environment ledger
+
+Compiler flags must be recorded individually because they can change the operation sequence, rounding, and mathematical-function implementation. For `nvcc`:
+
+- `--fmad=true` permits suitable floating-point multiply/add expressions to contract into FMA. `--fmad=false` prevents that implicit contraction, but does not rewrite an explicit FMA call into separate operations.
+- `--use_fast_math` does more than "turn on FMA." It implies `--ftz=true`, `--prec-div=false`, `--prec-sqrt=false`, and `--fmad=true`, and it can map some functions to faster intrinsics with different accuracy contracts.
+- Omitting a flag does not omit the fact. Record effective defaults, target architecture, and every explicit intrinsic.
+
+Attach at least this compiler/environment ledger to every numerical claim:
+
+| Field | Required record |
+| --- | --- |
+| Program | source revision, algorithm variant, EX11 range, and reduction tree |
+| Inputs | data type, size, exact input bytes, and logical order |
+| Compilation | Toolkit and `nvcc` version, host compiler/version, complete flags, and target architecture |
+| Device | GPU, compute capability, driver, and any device mode affecting arithmetic |
+| Runtime | OS, relevant environment variables, library/version, and selected algorithm or policy |
+| Launch | grid/block shape, stage partition, and stream or atomic strategy |
+| Claim | comparison scope, equality predicate, tolerance rationale, and non-finite policy |
+
+"CUDA 13" or "fast math off" is not enough to reconstruct the contract. A rebuild, a different GPU, or changed launch geometry can move outside the original claim's scope.
+
+## Problem-specific absolute-plus-relative tolerance
+
+When the specification permits an approximate result, apply Q01's reference-anchored rule to a finite GPU candidate `g` and independent CPU reference `r`:
+
+```text
+error  = abs(g - r)
+limit  = atol + rtol * abs(r)
+accept = error <= limit
+```
+
+Choose `atol` and `rtol` before inspecting the candidate, separately for the problem, based on output scale, precision, reduction length and tree, conditioning, cancellation, documented function bounds, and the downstream error budget. The absolute term protects values near zero; the relative term provides an allowance that grows with magnitude. NaN, infinity, and signed zero use a separately declared policy.
+
+Tolerance acceptance does not establish bitwise reproducibility and does not prove that repeated runs agree. It says only that this candidate/reference pair satisfies the declared numerical acceptance rule. Every result of a nondeterministic reduction might pass tolerance; a bitwise-stable result might also remain outside tolerance.
+
+## Determinism contract
+
+A determinism contract answers which conditions and scope are fixed, whether algorithm choice, operation order, and permitted scheduling variation are controlled, and which equality predicate determines "same" over repeated executions. Declare at least same input, same build, same device, launch geometry, library policy, and run-to-run scope. A cross-GPU claim needs a separate gpu-to-gpu scope.
+
+Current CUDA v13.3 defines a deterministic result as the same bit-wise numerical output on every run with the same inputs under specified conditions; that definition includes a run-to-run bitwise predicate. Reduction-order determinism does not by itself guarantee cross-environment bitwise reproducibility. "Always select the same reduction tree," for example, constrains operation order without promising the same bits after a compiler, Toolkit, or architecture change. If pinned library documentation explicitly defines a particular determinism level as bitwise-identical output, that is an extra guarantee for that product, version, and scope; it cannot be generalized to an arbitrary kernel.
+
+Unordered floating-point atomic contributions, runtime algorithm selection, or variable partitioning can break run-to-run determinism. A fixed random seed does not fix those orders. Conversely, deterministic execution can compute the wrong result consistently, so it must still pass Q01's correctness oracle.
+
+## Bitwise reproducibility contract
+
+Bitwise reproducibility requires identical floating-point representations, not merely a small `abs(error)`. The contract must name its comparison scope: repeated runs of one executable, one build across devices of the same type, or rebuilds with named Toolkit lanes across architectures. A wider scope requires more ledger fields to be fixed and verified.
+
+For permitted values, also state whether `+0` and `-0` differ by bits, whether NaN payloads belong to the domain, and whether output padding or serialization participates in comparison. Bitwise identity still does not prove mathematical correctness: a broken program can reproduce the same wrong bits. A complete report therefore gives separate verdicts for:
+
+1. Q01 numerical correctness;
+2. deterministic order and run scope;
+3. bitwise comparison and its exact scope.
+
+Never label a tolerance pass as bitwise reproducibility. If requirements stop at numerical acceptance, report that narrower contract honestly rather than upgrading the claim.
+
+## Canonical EX11: the CPU reference order boundary
+
+EX11's `cpu-reference` range is a clear serial reference. It accumulates in logical input order and supplies a Q01 comparison target; it does not pretend to model the GPU multi-stage tree step by step. When the two orders differ, use a pre-justified problem-specific tolerance unless the project separately fixes the same operation graph and verifies the declared bitwise scope.
+
+<CanonicalCode exampleId="EX11" range="cpu-reference" />
+
+[View the complete EX11 canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction), or [download the same source revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip). The complete project is the sole canonical executable source. This page renders only the `cpu-reference` range and maintains no second implementation.
+
+When reading [EX11: Multi-stage Reduction](/en/examples/multi-stage-reduction/), place reference precision and order, the GPU tree, compiler flags, and launch geometry in one ledger, then issue the three verdicts separately.
+
+## Evidence boundary
+
+This page, its Exercises, hand calculations, and the canonical source excerpt are static review artifacts. They are not Compile-Checked or Runtime-Verified evidence. There is no GPU execution, recorded output bit pattern, error distribution, or cross-environment comparison. Compilation, runtime, expected-observation, and recorded-observation arrays are empty for the Unit, Exercises, and Solutions.
+
+A future Lab making a determinism or bitwise claim must preserve an Environment Manifest, compiler/environment ledger, exact inputs, raw outputs, and repeated or cross-scope comparisons. Numerical tolerance remains a separate result and cannot replace those artifacts.
+
+## Retrieval check
+
+1. Why can `(a + b) + c` differ from `a + (b + c)` in binary floating point?
+2. Which reduction design choices can change reduction order?
+3. How does FMA's one rounding differ from the two roundings of separate multiply and add?
+4. Why can neither a tolerance pass nor determinism be upgraded automatically to bitwise reproducibility?
+5. Which conditions must a reviewable compiler/environment ledger fix?
+
+## Continue with practice
+
+- Complete the [Q02 Exercises](/en/correctness/floating-point-order-reproducibility/exercises/), then inspect the separate [reviewed solutions](/en/correctness/floating-point-order-reproducibility/solutions/).
+- Return to [A02](/en/algorithms/multi-stage-reduction/) to draw EX11's stage tree beside the `cpu-reference` left fold.
+- Before making any reproducibility claim, write its comparison scope and equality predicate, then decide which bits and ledger fields must be retained.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Notes on Host/Device Computation Accuracy](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy) supplies current guidance on associativity, FMA, compiler flags, host/device accuracy, and deterministic results.
+- [Floating Point and IEEE 754 v13.3: Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy) gives the owner explanation of nonassociativity, one-rounding FMA, and serial versus parallel operation order.
+- [CUDA C++ Programming Guide 12.9: Mathematical Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#mathematical-functions) and [Floating Point and IEEE 754 12.9](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy) preserve the Toolkit 12.9 Update 1 archive coordinates.
+- [CUDA C++ Programming Guide 11.8: Mathematical Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#mathematical-functions) and [Floating Point and IEEE 754 11.8](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy) preserve the Toolkit 11.8.0 archive coordinates.
+- The [CCCL v3.4.2 `DeviceReduce` determinism contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh) is the pinned owner source for product-specific determinism and reproducibility scopes; its guarantees cannot be projected onto a custom kernel.
+
+This Learning Unit was independently authored only from those public owner sources. Context7 was used only to cross-check discovery and section locations on the current CUDA page; it is not a factual source or source coordinate. No non-public material was used.
+
+All seven owner sources were accessed on **2026-08-30**.
+
+**Fact checked: 2026-08-30.**
