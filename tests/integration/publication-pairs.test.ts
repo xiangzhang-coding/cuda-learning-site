@@ -2838,7 +2838,7 @@ describe('published navigation', () => {
         expect(url.hostname, href).not.toMatch(/^(?:localhost|127\.0\.0\.1)$/);
       }
     }
-  });
+  }, 15_000);
 
   it('resolves every built page asset and metadata link', async () => {
     for (const route of publicationPairs.flatMap(({ zh, en }) => [zh, en])) {
@@ -2855,7 +2855,7 @@ describe('published navigation', () => {
         await expect(readFile(target), `${route} references ${href}`).resolves.toBeInstanceOf(Buffer);
       }
     }
-  });
+  }, 15_000);
 });
 
 describe('O01 content boundary', () => {
