@@ -1,0 +1,222 @@
+---
+title: 'A03: Inclusive and Exclusive Scan'
+description: Derive a staged block scan from the sequential prefix dependency, then compose block sums, block offsets, and offset propagation into a multi-block scan.
+pairId: a03
+counterpart: /algorithms/inclusive-exclusive-scan/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - scan-contract
+  - inclusive-exclusive
+  - dependency-transformation
+  - block-scan
+  - multi-block-scan
+  - canonical-example
+  - production-baseline
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A03
+prerequisites:
+  - A02
+  - M05
+relatedUnits:
+  - EX12
+exampleIds:
+  - EX12
+canonicalExample: EX12
+canonicalRanges:
+  - multi-block-scan
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C Programming Guide 11.8 - Warp Shuffle Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#warp-shuffle-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 scan-stage and thread-cooperation contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9 - Inclusive Scan and Exclusive Scan'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#inclusive-scan-and-exclusive-scan'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane collective scan context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide 13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, shared-memory, and barrier contract'
+    accessDate: '2026-08-30'
+  - title: 'CCCL CUB DeviceScan device-wide source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for the CUB device-wide DeviceScan production primitive'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a03 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,scan-contract,inclusive-exclusive,dependency-transformation,block-scan,multi-block-scan,canonical-example,production-baseline,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX12 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: multi-block-scan }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,CCCL 3.4.2' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/inclusive-exclusive-scan/" lang="zh-CN">阅读中文对应页</a>
+
+A scan produces a prefix result at every position rather than only one final reduction. This unit defines inclusive scan, exclusive scan, and the identity; transforms a sequential dependency into a parallel tree of stages and barriers; then extends that block result across multiple thread blocks.
+
+## What you should be able to do
+
+- State the per-position contracts for inclusive scan and exclusive scan, including the identity position.
+- Transform a serial recurrence into a parallel tree that reads a prior-stage snapshot.
+- Prove shared-memory visibility and barrier participation at every block-scan stage.
+- Explain a device-wide scan using block sums, block offsets, and offset propagation.
+- Separate a hand-written teaching implementation, the CUB `DeviceScan` production baseline, and performance evidence not yet obtained.
+
+## Prerequisites
+
+Complete [A02: Multi-stage Reduction](/en/algorithms/multi-stage-reduction/) and [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) first. A02 supplies associative operations, tree stages, and cross-block partial results. M05 supplies the visibility contracts for shared memory, `__syncthreads()`, and kernel boundaries.
+
+The prerequisite list is exactly `A02` and `M05`. CUB and CCCL are a production comparison here, not a prerequisite. Knowing the DeviceScan API does not replace deriving block sums and offsets.
+
+## Scan contract
+
+Given input `x[0..n-1]`, an associative operation `op`, and identity `e`, scan preserves input order. For a noncommutative but associative operation, `x[0] op x[1]` cannot be exchanged for `x[1] op x[0]`. An empty input has an empty output, and an implementation must also declare bounds and accumulator types.
+
+The sequential specification is:
+
+```text
+inclusive[0] = x[0]
+inclusive[i] = inclusive[i - 1] op x[i]
+
+exclusive[0] = e
+exclusive[i] = exclusive[i - 1] op x[i - 1]
+```
+
+These recurrences are semantic oracles, not parallel execution plans.
+
+## Inclusive, exclusive, and identity
+
+An inclusive scan includes the current input `x[i]`: output position `i` covers `x[0]` through `x[i]`. An exclusive scan excludes the current input `x[i]`: position `i` covers only earlier elements, so its first output is the identity `e`.
+
+For addition, `e = 0`. If `x = [3, 1, 4, 2]`, then:
+
+```text
+inclusive = [3, 4, 8, 10]
+exclusive = [0, 3, 4, 8]
+```
+
+Under the same `op` and identity contract, `inclusive[i] = exclusive[i] op x[i]`. That relation is a useful invariant, but it does not erase overflow, floating-point operation order, or a custom operator's type contract.
+
+## Transforming the sequential dependency into stages
+
+The sequential dependency makes position `i` wait for `i - 1`. A parallel tree replaces that chain with stages at distances `1, 2, 4, ...`. Each stage reads a stable snapshot from the prior stage and writes longer prefixes into the next snapshot. Once the distance reaches the logical block length, every position owns its complete block prefix.
+
+```text
+stage 0: each lane owns one input value
+stage k: lane i combines prior[i - 2^(k-1)] with prior[i] when that predecessor exists
+barrier: no lane starts the next stage before the current snapshot is complete
+```
+
+`__syncthreads()` is a block barrier; it does not turn unordered reads and writes to one array into a snapshot. A teaching implementation can ping-pong between two shared buffers. Any in-place alternative needs a separate read/write proof. Every participating thread must reach each stage barrier, including edge lanes that must not return early.
+
+## Block scan
+
+A block places valid inputs in shared state, fills out-of-range slots with the identity, and performs the staged scan. Inclusive output can come directly from the final prefixes. Exclusive output can shift those inclusive prefixes right and place the identity in lane 0, or use another equivalently proven exclusive construction.
+
+Each block also emits one block sum: all valid elements in that block combined in original order. The last physical lane need not be the last valid element, so a partial block must select its total using the logical count. This block sum is input to the next scan level, not yet the block's global offset.
+
+## Multi-block scan: sums, offsets, propagation
+
+The device-wide baseline has three steps:
+
+1. Each block produces local scan outputs and one block partial sum.
+2. Scan the block sums in block order to obtain block offsets; the first exclusive offset is the identity.
+3. An offset propagation kernel applies the owning block's offset to every local prefix with `op` (addition for a prefix sum).
+
+For block totals `[10, 7, 5]`, the exclusive block offsets for addition are `[0, 10, 17]`. Every local prefix in the third block receives 17. A kernel launch boundary makes first-step sums visible to the second step and completes offsets before propagation. An ordinary block barrier cannot synchronize that entire grid.
+
+This decomposition also creates verification points: the local recurrence, each block sum against its input slice, the offset recurrence, and the final global recurrence. Omitting partial-block handling, identity, or original order at any step violates the scan contract.
+
+## Canonical Runnable Example: EX12
+
+EX12's `multi-block-scan` range is this unit's only canonical import. It shows the complete C++17 path through local block scan, block sums, offset scan, and propagation. The standalone project remains the canonical implementation; this page neither rewrites nor copies its source.
+
+[View the EX12 standalone project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex12-inclusive-exclusive-scan), or [download the archive at the same source coordinate](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). The all-zero commit is an explicit placeholder until publication pinning is complete, not a published commit.
+
+<CanonicalCode exampleId="EX12" range="multi-block-scan" />
+
+## Production baseline: CUB DeviceScan
+
+CUB `DeviceScan` in CCCL v3.4.2 is the production baseline and comparison point for device-wide inclusive and exclusive scan. An application should first evaluate its API, temporary storage, stream, type, and operation contracts rather than assume it should maintain a teaching kernel.
+
+Hand-written teaching kernels exist to learn and understand dependency transformation, barriers, block sums, and offsets. Being lower-level does not make them a better production default. `DeviceScan` is not a prerequisite and does not change the exact `A02,M05` prerequisite list.
+
+## Evidence boundary
+
+Compilation, runtime, expected observations, and recorded observations are all empty for this page. Formulas, stage tables, and a CPU oracle can establish semantic relations, but they have not executed EX12 or observed GPU timing, bandwidth, throughput, or speedup.
+
+Before a Reference Environment run, one may only declare comparison variables such as block size, input distribution, operator, temporary storage, and timing boundary. Parallel stage count, lower theoretical dependency depth, or the presence of `DeviceScan` does not establish measured acceleration.
+
+## Retrieval check
+
+1. At position `i`, which input does inclusive scan include that exclusive scan excludes, and where is the identity placed?
+2. Why must a sequential dependency be transformed into a parallel tree that reads prior-stage snapshots?
+3. How does a block sum differ from a block offset, and how does a partial block produce the right sum?
+4. Why does offset propagation need a kernel boundary rather than only `__syncthreads()`?
+
+## Continue with practice
+
+- Complete the [A03 Exercises](/en/algorithms/inclusive-exclusive-scan/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/inclusive-exclusive-scan/solutions/).
+- Work out local prefixes, block sums, and offsets by hand for a non-power-of-two input length.
+- Align EX12's integer invariant with the recurrence here, and make no performance claim before evidence is recorded.
+
+## Sources and review
+
+- [CUDA C Programming Guide v11.8.0: Warp Shuffle Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#warp-shuffle-functions) supplies the 11.8 lane's thread-cooperation and scan-stage context.
+- [CUDA C++ Programming Guide v12.9.1: Inclusive Scan and Exclusive Scan](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#inclusive-scan-and-exclusive-scan) is the owner-guide coordinate used for the Toolkit 12.9.2 patch lane.
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies the current thread-block, shared-memory, and barrier contracts.
+- [CCCL v3.4.2 `cub/device/device_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh) is the exact owner source for the device-wide CUB `DeviceScan` primitive.
+
+All four primary owner sources were accessed on **2026-08-30**. The definitions, stage transformation, multi-block proof, Exercises, and arrangement are independently authored for this site. No private material, owner example, or figure is copied.
+
+**Fact checked: 2026-08-30.**

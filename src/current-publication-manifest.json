@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-08-29",
+  "reviewDate": "2026-08-30",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,8 +11,8 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 148,
-    "sourceRoutes": 296,
+    "publicationPairs": 167,
+    "sourceRoutes": 334,
     "learningUnits": [
       "O01",
       "O02",
@@ -49,12 +49,17 @@
       "M17",
       "M18",
       "M19",
+      "A01",
+      "A02",
+      "A03",
+      "A04",
       "Q01",
+      "Q02",
       "Q03",
       "Q04",
       "Q05"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX16"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX16"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB07"],
     "visualExplainers": [
       "VIS01",
@@ -66,14 +71,15 @@
       "VIS07",
       "VIS08",
       "VIS09",
+      "VIS10",
       "VIS19",
       "VIS20",
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 40,
-    "glossaryTerms": 125,
-    "sourceRecords": 50
+    "practiceBankEntries": 45,
+    "glossaryTerms": 139,
+    "sourceRecords": 56
   },
   "evidence": {
     "compileChecked": ["EX02", "EX10", "LAB02"],
@@ -86,6 +92,9 @@
       "EX07",
       "EX08",
       "EX09",
+      "EX11",
+      "EX12",
+      "EX13",
       "EX16",
       "LAB01",
       "LAB03",
@@ -103,6 +112,9 @@
       "EX07",
       "EX08",
       "EX09",
+      "EX11",
+      "EX12",
+      "EX13",
       "EX16",
       "LAB01",
       "LAB02",
@@ -123,7 +135,9 @@
     "EX02, EX10, and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.",
     "EX10 is Runtime-Not-Applicable because its acceptance contract inspects artifacts without executing the final host artifact or any GPU executable.",
     "EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.",
-    "No measured overlap, migration, graph performance, timing, speedup, or other performance observation is published.",
+    "EX11, EX12, and EX13 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.",
+    "No measured overlap, migration, graph performance, algorithm performance, timing, speedup, or other performance observation is published.",
+    "EX14 and EX15 have no current public destination.",
     "LAB06 has no current public destination.",
     "This incremental publication record is not a completed R2 aggregate release review."
   ]

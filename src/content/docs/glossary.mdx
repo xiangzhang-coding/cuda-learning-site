@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 125 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 139 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-29'
+factCheckDate: '2026-08-30'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-29'
+      content: '2026-08-30'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1173,6 +1173,132 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [O04](/start/cpp17-for-cuda/)、[M19](/toolchain/cpp-dialect-boundaries/)和 [EX10](/examples/ptx-fatbinary-inspection/)。
 - **版本说明：** Ordinary matrix 是 11.8.0/C++17、12.9.2/C++17+C++20、13.3.1/C++17+C++20。Run 33275734951 在 EX10 + Toolkit 13.3.1 + NVCC 13.3.73 + GCC 14.2.0 坐标上保留 narrow C++23 probe pass；它不是 ordinary C++23 support，WG21 N4659/N4861/N4950/N4951 仍只提供标准 provenance。
 
+<span id="term-126" class="resource-target" aria-hidden="true"></span>
+
+### elementwise map · 逐元素映射
+
+- **定义：** 逐元素映射（elementwise map）把同一个 transform 独立应用到 logical domain 的每个 element，并为该位置声明 read set、write set 与唯一 output owner。
+- **避免使用：** Vector addition 的同义词、默认 alias-safe 的 in-place update、自动需要 barrier/atomic、已观测到高 bandwidth 的 kernel。
+- **相关资源：** [A01](/algorithms/elementwise-map/)、[F03](/foundations/multidimensional-indexing/)、[F04](/foundations/host-device-lifecycle/)和 [EX02](/examples/vector-addition/)。
+- **版本说明：** 数学 map contract 不绑定 Toolkit；CUDA indexing/memory path 分别按 current v13.3/Runtime 13.3.1、12.9.1 owner guide 与 11.8.0 archive 复核，静态 ownership proof 不授予 runtime 或 performance evidence。
+
+<span id="term-127" class="resource-target" aria-hidden="true"></span>
+
+### reduction · 归约
+
+- **定义：** 归约（reduction）按声明的 binary operation、identity 与 operation order，把一个 input set 组合成逐步减少的 partial values，直到得到最终 result。
+- **避免使用：** 只指求和、scan 的同义词、无 order contract 的 atomic accumulator、天然逐 bit 等于 serial fold。
+- **相关资源：** [A02](/algorithms/multi-stage-reduction/)、[A03](/algorithms/inclusive-exclusive-scan/)、[Q02](/correctness/floating-point-order-reproducibility/)和 [EX11](/examples/multi-stage-reduction/)。
+- **版本说明：** Block/barrier 与 floating-point boundaries 分别在 current v13.3、12.9.1/11.8.0 archives 中核对；CCCL v3.4.2 `DeviceReduce` 是具名 production baseline，不是任意 custom reduction 的保证。
+
+<span id="term-128" class="resource-target" aria-hidden="true"></span>
+
+### reduction tree · 归约树
+
+- **定义：** 归约树（reduction tree）是以 inputs 为 leaves、以 combine operations 为 internal nodes、以 result 为 root 的 dependency graph；tree edges 固定 pairing 与 floating-point operation order。
+- **避免使用：** Scheduler timeline、serial left fold 的别名、自动满足 determinism 的 shape、硬件执行时间图。
+- **相关资源：** [A02](/algorithms/multi-stage-reduction/)、[Q02](/correctness/floating-point-order-reproducibility/)、[VIS10](/visuals/reduction-stages/)和 [EX11](/examples/multi-stage-reduction/)。
+- **版本说明：** Tree 是算法结构；current v13.3 与 12.9.1/11.8.0 owner coordinates 负责 barrier/order facts，实际 compiler、launch 与 library policy 仍可能选择不同 tree，VIS10 不执行 CUDA。
+
+<span id="term-129" class="resource-target" aria-hidden="true"></span>
+
+### inactive lane · 非活动通道
+
+- **定义：** 非活动通道（inactive lane）是在某个 algorithm stage 不执行 combine 或 update、但若后续 collective/barrier 要求它参与就仍须沿合法 control flow 到达该点的 lane。
+- **避免使用：** 已退出 thread、永久禁用的 hardware lane、无需 synchronization 的 thread、所有 divergence 中的统一角色。
+- **相关资源：** [A02](/algorithms/multi-stage-reduction/)、[M05](/memory/synchronization-scopes/)和 [VIS10](/visuals/reduction-stages/)。
+- **版本说明：** 角色绑定具体 stage 与 participant group；current v13.3 及 12.9.1/11.8.0 block-barrier contracts 都不允许用 data inactivity 推导提前退出安全。
+
+<span id="term-130" class="resource-target" aria-hidden="true"></span>
+
+### scan · 扫描
+
+- **定义：** 扫描（scan）对 ordered inputs 的每个位置产生一个 prefix result，使用声明的 associative operation 与 identity，而不是只返回一个最终 aggregate。
+- **避免使用：** Reduction、sort、只限 addition 的 cumulative sum、任意可交换 input order 的 operation。
+- **相关资源：** [A03](/algorithms/inclusive-exclusive-scan/)、[A02](/algorithms/multi-stage-reduction/)和 [EX12](/examples/inclusive-exclusive-scan/)。
+- **版本说明：** Blelloch CMU-CS-90-190 只提供 all-prefix-sums history；current CUDA v13.3、12.9.1/11.8.0 archives 与 CCCL v3.4.2 `DeviceScan` 分别负责 current/archive/production coordinates。
+
+<span id="term-131" class="resource-target" aria-hidden="true"></span>
+
+### inclusive scan · 包含式扫描
+
+- **定义：** 包含式扫描（inclusive scan）在 output position `i` 的 prefix 中包含 current input `x[i]`，因此结果覆盖 ordered range `x[0]` through `x[i]`。
+- **避免使用：** Exclusive scan、只输出 total 的 reduction、忽略 identity/operator type 的 running total、允许交换 operands 的 prefix。
+- **相关资源：** [A03](/algorithms/inclusive-exclusive-scan/)和 [EX12](/examples/inclusive-exclusive-scan/)。
+- **版本说明：** Semantic definition 跨 Toolkit 稳定；CUDA cooperation/barrier context 按 current v13.3、12.9.1/11.8.0 archives 核对，CCCL v3.4.2 `DeviceScan` contract 只绑定该 product/version。
+
+<span id="term-132" class="resource-target" aria-hidden="true"></span>
+
+### exclusive scan · 排除式扫描
+
+- **定义：** 排除式扫描（exclusive scan）在 output position `i` 排除 current input `x[i]`，只组合更早的 ordered inputs，因此 position 0 是 identity。
+- **避免使用：** Inclusive scan、无 identity 的 shift、把 inclusive output 右移却不证明 edge/type contract、block sum。
+- **相关资源：** [A03](/algorithms/inclusive-exclusive-scan/)和 [EX12](/examples/inclusive-exclusive-scan/)。
+- **版本说明：** Semantic definition 跨 Toolkit 稳定；current v13.3、12.9.1/11.8.0 owner coordinates 与 CCCL v3.4.2 分开记录，library source 不构成 EX12 execution evidence。
+
+<span id="term-133" class="resource-target" aria-hidden="true"></span>
+
+### histogram · 直方图
+
+- **定义：** 直方图（histogram）用声明的 `bin_of` 与 range policy 把每个 valid sample 映射到一个 bin，并要求每个 bin 的 counter 等于 exact assigned-sample count。
+- **避免使用：** 可视化柱状图本身、只计算一个 aggregate 的 reduction、未声明 bounds 的 bucketization、默认可容忍整数计数误差。
+- **相关资源：** [A04](/algorithms/privatized-histogram/)和 [EX13](/examples/privatized-histogram/)。
+- **版本说明：** Exact-count contract 不绑定 Toolkit；atomic/shared implementation 分别按 current v13.3 与 12.9.1/11.8.0 archives 核对，CCCL v3.4.2 `DeviceHistogram` 是具名 production baseline。
+
+<span id="term-134" class="resource-target" aria-hidden="true"></span>
+
+### atomic contention · 原子争用
+
+- **定义：** 原子争用（atomic contention）是多个 concurrent atomic read-modify-write operations 竞争同一或相冲突 destination，导致 progress/serialization cost 与 address distribution 相关的情况；它与 atomic correctness 分开。
+- **避免使用：** Data race、lost update、所有 atomics 必然完全串行、没有实际记录就声明的 slowdown。
+- **相关资源：** [A04](/algorithms/privatized-histogram/)、[M05](/memory/synchronization-scopes/)和 [EX13](/examples/privatized-histogram/)。
+- **版本说明：** Atomic operation/scope support 绑定 selected current v13.3 或 archive contract；contention cost 还绑定 architecture、type、address pattern 与 input distribution，必须测量而不能从 source 推断。
+
+<span id="term-135" class="resource-target" aria-hidden="true"></span>
+
+### privatization · 私有化
+
+- **定义：** 私有化（privatization）为较小 participant group 建立 intermediate state 的独立实例，让 updates 先在较窄 sharing scope 内累积，再通过明确 merge 合并到 wider destination。
+- **避免使用：** 必然 per-thread private、自动 race-free、消除所有 atomics、无需 merge、speedup guarantee。
+- **相关资源：** [A04](/algorithms/privatized-histogram/)、[M03](/memory/shared-memory-tiling/)和 [EX13](/examples/privatized-histogram/)。
+- **版本说明：** A04 的 baseline 是 per-block shared histogram，并按 current v13.3 与 12.9.1/11.8.0 barrier/atomic contracts 复核；CCCL v3.4.2 comparison 不证明 custom variant 更快。
+
+<span id="term-136" class="resource-target" aria-hidden="true"></span>
+
+### floating-point nonassociativity · 浮点非结合性
+
+- **定义：** 浮点非结合性（floating-point nonassociativity）是有限精度 rounding 使 `(a + b) + c` 与 `a + (b + c)` 可能产生不同 representation，即使每个 operation 都符合声明的 rounding mode。
+- **避免使用：** Data race、数学实数加法不满足结合律、任意 nondeterminism、自动可忽略的 correctness mismatch。
+- **相关资源：** [A02](/algorithms/multi-stage-reduction/)、[Q02](/correctness/floating-point-order-reproducibility/)和 [EX11](/examples/multi-stage-reduction/)。
+- **版本说明：** Numerical principle 跨 Toolkit 存在；具体 compiler flags、precision 与 operation graph 按 current CUDA v13.3、12.9.1 与 11.8.0 owner documents 和 exact environment ledger 解释。
+
+<span id="term-137" class="resource-target" aria-hidden="true"></span>
+
+### fused multiply-add (FMA) · 融合乘加（FMA）
+
+- **定义：** 融合乘加（fused multiply-add, FMA）计算 `rn(a * b + c)`，不先把 exact product 舍入到 target precision，因此整个 multiply-add 只有一次 rounding。
+- **避免使用：** `rn(rn(a*b)+c)`、两条独立 operations 的缩写、保证相同 bits、自动等于 compiler contraction。
+- **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)和 [EX11](/examples/multi-stage-reduction/)。
+- **版本说明：** FMA/accuracy facts 在 current v13.3 与 12.9.1/11.8.0 archives 分开核对；implicit contraction 还绑定 exact `--fmad`/`--use_fast_math` defaults、target 与 explicit intrinsics。
+
+<span id="term-138" class="resource-target" aria-hidden="true"></span>
+
+### determinism · 确定性
+
+- **定义：** 确定性（determinism）是在明确固定的 inputs、build、device、algorithm/launch policy 与 run scope 内，repeated executions 按声明的 equality predicate 得到相同 output。
+- **避免使用：** Correctness、所有环境的 reproducibility、固定 random seed、固定 tree 即自动跨 GPU 相同 bits。
+- **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)、[A02](/algorithms/multi-stage-reduction/)和 [EX11](/examples/multi-stage-reduction/)。
+- **版本说明：** Current CUDA v13.3 的 deterministic-result guidance 与 CCCL v3.4.2 CUB determinism levels 分开记录；后者是 product/version/scope-specific guarantee，不能外推到 custom kernel。
+
+<span id="term-139" class="resource-target" aria-hidden="true"></span>
+
+### bitwise reproducibility · 逐位可复现性
+
+- **定义：** 逐位可复现性（bitwise reproducibility）要求在具名 comparison scope 内，比较对象的 floating-point representations 完全相同，并保存足以重建 build、environment、input 与 equality predicate 的记录。
+- **避免使用：** Tolerance pass、只固定 reduction order、数学正确性的证明、未声明环境范围的“reproducible”。
+- **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)、[Q01](/correctness/cpu-references-tolerances-invariants/)和 [EX11](/examples/multi-stage-reduction/)。
+- **版本说明：** Claim 必须绑定 exact Toolkit/compiler/library/device scope；current CUDA v13.3、12.9.1/11.8.0 archives 与 CCCL v3.4.2 policy 只提供各自边界，任何 tolerance result 都不能升级该状态。
+
 ## 维护规则
 
-TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**。TERM-096 至 TERM-125，以及完整 125 项 Publication Pair、metadata projection、直接链接和索引接入在 **2026-08-29** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 owner documentation，不复制 source prose、table、figure、example、artifact 或 diagnostic。TERM-115 至 TERM-125 没有运行 NVCC 或执行 GPU code。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-065 保留各自在 **2026-08-26** 的逐项复核记录，TERM-066 至 TERM-076 保留 **2026-08-27**，TERM-077 至 TERM-095 保留 **2026-08-28**，TERM-096 至 TERM-125 保留 **2026-08-29**。TERM-126 至 TERM-139，以及完整 139 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-08-30** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic 或 private material。TERM-126 至 TERM-139 没有编译 EX11-EX13 或执行 GPU code。对应的[英文页](/en/glossary/)同时完整发布。

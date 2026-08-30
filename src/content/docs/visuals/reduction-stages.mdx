@@ -1,0 +1,128 @@
+---
+title: 'Reduction tree 与非活动通道'
+description: 用固定八通道账本比较两种 reduction tree，并为每个非活动通道（inactive lane）显式保留中性值零。
+pairId: vis10
+counterpart: /en/visuals/reduction-stages/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - stage-model
+  - inactive-lanes
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS10
+prerequisites:
+  - A02
+relatedUnits:
+  - EX11
+  - Q02
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Cooperative Groups Reduce'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html#reduce'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current group reduction, collective participation, and synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide - Thread Block Synchronization'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block cooperation and synchronization boundary'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Cooperative Groups Reduce'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#reduce'
+    version: 'CUDA C++ Programming Guide archive for CUDA Toolkit 12.9.1'
+    platform: 'Archived group reduction and collective participation contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 11.8.0 - Cooperative Groups Reduce'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#collectives-cg-reduce'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived Cooperative Groups reduction contract at the stability boundary'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis10 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,stage-model,inactive-lanes,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A02 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX11,Q02' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import ReductionStageExplorer from '../../../components/ReductionStageExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/reduction-stages/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+完成先修 [A02](/algorithms/multi-stage-reduction/) 后，用 VIS10 检查 reduction tree 中每轮留下哪些部分和。非活动通道（inactive lane）表示该 ledger 位置在当前轮不产生更新，不表示浏览器观察到某条 GPU instruction。这个 **deterministic** Visual Explainer 让学习者切换 **algorithm variant**，逐个检查 **reduction stage** 和每个 **inactive lane**。相关实践是 [EX11](/examples/multi-stage-reduction/)，数值顺序边界见 [Q02](/correctness/floating-point-order-reproducibility/)。
+
+<ReductionStageExplorer locale="zh-CN" />
+
+## 控件
+
+第一个原生 select 在 `adjacent-pairs` 与 `stride-halving` 之间选择。第二个原生 select 只接受 `5`、`6` 或 `8` 个输入元素；固定输入前缀来自 `[3, 1, 4, 1, 5, 9, 2, 6]`。**下一阶段**每次前进一轮，**重置**保留当前选择并回到输入阶段。更换任一 select 都会清除 traversal state。
+
+按钮使用原生 Enter 与 Space 行为。最后一步禁用仍持有焦点的 Step button 时，焦点移到 Reset；Reset 后焦点返回 algorithm-variant select。状态区使用 polite live announcement。页面没有 autoplay、timer、randomness、storage 或 persisted state。
+
+## Stage 模型
+
+四个 frame 分别是输入、第一次合并、第二次合并与最终和。`adjacent-pairs` 每轮把相邻部分和写入组内最低编号 lane；如果尾部没有伙伴，该值继续进入下一轮。`stride-halving` 依次合并距离为 `4`、`2`、`1` 的位置。两条路径对同一整数前缀得到相同最终和，但中间活动位置不同。
+
+这两个 schedule 是本站原创、有界的整数依赖图，不是 NVIDIA algorithm、kernel source、warp schedule 或性能建议的复刻。它们帮助读取 tree shape；真实实现仍要独立处理 block scope、阶段间同步、任意长度、多 block partial sums 和数值操作顺序。
+
+## Inactive lane
+
+每个 stage 总是渲染 lane `0` 到 `7`。活动 lane 显示当前整数部分和；inactive lane 显示**中性值 0**。这里的零只是 visual ledger 的显式 neutral placeholder，不是额外输入、padding load、thread return value 或已执行加法。后续 stage 只读取模型标为 active 的 predecessor。
+
+因此不能从 inactive 数量推断 branch efficiency、occupancy、instruction count、latency、bandwidth 或 speedup。Browser layout 也不表示一个 warp 的实际时间顺序。
+
+## 静态回退
+
+交互区之外永久保留六种 selection：两种 variant 分别配合 `5`、`6` 与 `8` 个元素。每种 selection 包含四个 stage，每个 stage 包含八个显式 lane，共 24 个 stage ledger 和 192 个 lane cell。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 都保留完整内容；inactive 状态同时使用文字和 dashed border，不只依赖颜色。
+
+原始 HTML 中 controls 与 live workbench 使用 `hidden`。Light-DOM custom element 只有找到完整的原生控件、状态区、四个 stage marker 和八个 live lane，并成功推导初始 frame 后才显示它们。静态回退不依赖 enhancement。
+
+## 证据边界
+
+VIS10 不编译或运行 CUDA、不加载 kernel、不查询 GPU、不读取 profiler，也不生成 timing 或 performance observation。整数加法和 stage transition 是 declared browser-model output，不是 build、runtime、correctness 或 performance evidence。
+
+因此 compilation、runtime、expected-observation 与 recorded-observation metadata 均为空。页面不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified** Evidence Status。
+
+## 来源
+
+Current NVIDIA owner pages 的 [Cooperative Groups reduce](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html#reduce) 与 [thread-block synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization)用于限定 group reduction、collective participation 和 block cooperation 术语；两页均标为 CUDA Programming Guide v13.3，2026-05-27 更新。
+
+稳定性对照使用 Toolkit [12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#reduce) 与 [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#collectives-cg-reduce)中的 Cooperative Groups reduction contract。四个 owner coordinate 均于 **2026-08-30** 访问。本站没有复制 NVIDIA code、table、figure 或 performance result；两种 schedule、固定 fixture、ledger、交互与双语解释均为原创 CC-BY-4.0 内容。

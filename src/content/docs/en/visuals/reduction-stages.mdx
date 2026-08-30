@@ -1,0 +1,128 @@
+---
+title: 'Reduction Tree and Inactive Lanes'
+description: Compare two reduction trees in a fixed eight-lane ledger that explicitly preserves neutral zero for every inactive lane.
+pairId: vis10
+counterpart: /visuals/reduction-stages/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - stage-model
+  - inactive-lanes
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS10
+prerequisites:
+  - A02
+relatedUnits:
+  - EX11
+  - Q02
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide - Cooperative Groups Reduce'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html#reduce'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current group reduction, collective participation, and synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide - Thread Block Synchronization'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block cooperation and synchronization boundary'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Cooperative Groups Reduce'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#reduce'
+    version: 'CUDA C++ Programming Guide archive for CUDA Toolkit 12.9.1'
+    platform: 'Archived group reduction and collective participation contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 11.8.0 - Cooperative Groups Reduce'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#collectives-cg-reduce'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived Cooperative Groups reduction contract at the stability boundary'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis10 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,stage-model,inactive-lanes,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A02 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX11,Q02' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import ReductionStageExplorer from '../../../../components/ReductionStageExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/reduction-stages/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+After prerequisite [A02](/en/algorithms/multi-stage-reduction/), use VIS10 to inspect which partial sums remain after each round of a reduction tree. An **inactive lane** means that the ledger position emits no update in the current round; it does not mean the browser observed a GPU instruction. This **deterministic** Visual Explainer lets a learner switch the **algorithm variant** and inspect every **reduction stage** and **inactive lane**. Related practice is [EX11](/en/examples/multi-stage-reduction/), and numerical-order boundaries are covered by [Q02](/en/correctness/floating-point-order-reproducibility/).
+
+<ReductionStageExplorer locale="en" />
+
+## Controls
+
+The first native select chooses `adjacent-pairs` or `stride-halving`. The second native select accepts only `5`, `6`, or `8` input elements; each selection uses a prefix of the fixed values `[3, 1, 4, 1, 5, 9, 2, 6]`. **Next stage** advances exactly one round. **Reset** preserves the current selection and returns to the input stage. Changing either select clears traversal state.
+
+Buttons retain their native Enter and Space behavior. When the final step disables a focused Step button, focus moves to Reset; after Reset, focus returns to the algorithm-variant select. A polite live region announces state changes. There is no autoplay, timer, randomness, storage, or persisted state.
+
+## Stage model
+
+The four frames are input, first combine, second combine, and final sum. `adjacent-pairs` writes each adjacent partial sum to the lowest-numbered lane in its group; an unmatched tail value carries forward. `stride-halving` combines positions at distances `4`, `2`, and `1`. Both paths produce the same final sum for one integer prefix while exposing different intermediate active positions.
+
+These schedules are original bounded integer dependency graphs, not copies of an NVIDIA algorithm, kernel source, warp schedule, or performance recommendation. They help a learner read tree shape. A real implementation must separately handle block scope, synchronization between phases, arbitrary lengths, multi-block partial sums, and numerical operation order.
+
+## Inactive lanes
+
+Every stage always renders lanes `0` through `7`. An active lane shows its current integer partial sum. Every inactive lane says **neutral value 0**. That zero is an explicit visual-ledger placeholder, not an extra input, padding load, thread return value, or executed addition. A later model stage reads only predecessors marked active.
+
+The inactive-lane count therefore cannot establish branch efficiency, occupancy, instruction count, latency, bandwidth, or speedup. Browser layout also does not represent a warp's timing order.
+
+## Static fallback
+
+Outside the workbench, the page permanently retains six selections: both variants with `5`, `6`, and `8` elements. Each selection contains four stages and every stage contains eight explicit lanes, for 24 stage ledgers and 192 lane cells. The complete content remains available with JavaScript disabled, at a 390-pixel viewport, with reduced motion, in forced colors, and in print. Inactive state uses text and a dashed border rather than color alone.
+
+In source HTML, the controls and live workbench carry `hidden`. The light-DOM custom element reveals them only after it finds all native controls, the status region, four stage markers, and eight live lanes and successfully derives the initial frame. The static fallback does not depend on enhancement.
+
+## Evidence boundary
+
+VIS10 compiles and executes no CUDA, loads no kernel, queries no GPU, reads no profiler, and generates no timing or performance observation. Integer additions and stage transitions are declared browser-model output, not build, runtime, correctness, or performance evidence.
+
+Compilation, runtime, expected-observation, and recorded-observation metadata are therefore empty. The page grants no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** Evidence Status.
+
+## Sources
+
+The current NVIDIA owner pages for [Cooperative Groups reduce](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cooperative-groups.html#reduce) and [thread-block synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization) bound the group-reduction, collective-participation, and block-cooperation terminology. Both pages identify CUDA Programming Guide v13.3 and report a 2026-05-27 update.
+
+The stability comparison uses the Cooperative Groups reduction contracts in the Toolkit [12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#reduce) and [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#collectives-cg-reduce). All four owner coordinates were accessed on **2026-08-30**. No NVIDIA code, table, figure, or performance result is copied. Both schedules, the fixed fixture, ledger, interaction, and bilingual explanations are original CC-BY-4.0 material.

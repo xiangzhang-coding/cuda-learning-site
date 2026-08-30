@@ -359,7 +359,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes forty complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes forty-five complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -379,6 +379,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
       'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
       'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
+      'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R[012]-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -411,6 +412,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-009': 'toolchain/compiler-architecture-targets',
       'PB-R2-010': 'toolchain/separate-compilation-device-linking',
       'PB-R2-011': 'toolchain/cpp-dialect-boundaries',
+      'PB-R2-012': 'algorithms/elementwise-map',
+      'PB-R2-013': 'algorithms/multi-stage-reduction',
+      'PB-R2-014': 'algorithms/inclusive-exclusive-scan',
+      'PB-R2-015': 'algorithms/privatized-histogram',
+      'PB-R2-016': 'correctness/floating-point-order-reproducibility',
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -432,6 +438,8 @@ describe('Exercises and Practice Bank contract', () => {
       const prerequisitePath = focusedPrerequisitePaths[entryId];
       const prerequisiteRoutePattern = prerequisitePath?.startsWith('memory/')
         ? /\/(?:en\/)?memory\//
+        : prerequisitePath?.startsWith('algorithms/')
+          ? /\/(?:en\/)?algorithms\//
         : prerequisitePath?.startsWith('correctness/')
           ? /\/(?:en\/)?correctness\//
           : prerequisitePath?.startsWith('toolchain/')
@@ -444,10 +452,15 @@ describe('Exercises and Practice Bank contract', () => {
           `${route} ${entryId} prerequisite`,
         ).toBe(true);
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1[01])$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1[0-6])$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        expect(sectionText, `${route} ${entryId}`).toContain(entryId.startsWith('PB-R2') ? '2026-08-29' : '2026-08-28');
+        const sourceDate = /^PB-R2-01[2-6]$/.test(entryId)
+          ? '2026-08-30'
+          : entryId.startsWith('PB-R2')
+            ? '2026-08-29'
+            : '2026-08-28';
+        expect(sectionText, `${route} ${entryId}`).toContain(sourceDate);
       }
     }
 
@@ -459,7 +472,8 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
-    for (const unitId of ['Q01', 'Q03', 'Q04', 'Q05']) expect(text).toContain(unitId);
+    for (const unitId of ['A01', 'A02', 'A03', 'A04']) expect(text).toContain(unitId);
+    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);

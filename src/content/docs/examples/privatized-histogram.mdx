@@ -1,0 +1,246 @@
+---
+title: 'EX13：私有化 Histogram 可运行示例'
+description: 通过三个确定性 fixture、独立 CPU reference 和 sum-of-bins invariant，精确验证 global-bin 与 block-private 共享内存两条 16-bin histogram 路径。
+pairId: ex13
+counterpart: /en/examples/privatized-histogram/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - fixture-contract
+  - cpu-reference
+  - histogram-kernels
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX13
+prerequisites:
+  - A04
+exampleIds:
+  - EX13
+canonicalExample: EX13
+canonicalRanges:
+  - cpu-reference
+  - histogram-kernels
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 1,228-byte global-plus-shared problem bound and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - For uniform, skewed, and boundary, the global-bin kernel should exactly match the independent 16-bin CPU reference.
+    - For the same three fixtures, the block-private shared-memory kernel should exactly match the independent 16-bin CPU reference.
+    - For both CUDA variants and every fixture, the sum of all 16 output bins should equal the 259-element input count.
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Programming Guide v13.3 - Atomic Functions'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#atomic-functions'
+    version: 'CUDA C++ Programming Guide v13.3'
+    platform: 'Atomic functions, shared memory, and block synchronization'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex13
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-30'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,fixture-contract,cpu-reference,histogram-kernels,host-model,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX13
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: A04
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX13
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX13
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'cpu-reference,histogram-kernels'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 1,228-byte global-plus-shared problem bound and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/privatized-histogram/" lang="en">Read the English counterpart</a>
+
+EX13 是一个独立、原创的 C++17 CUDA 可运行示例（Runnable Example）。它为 `uniform`、`skewed` 和 `boundary` 三个 fixture 计算 16-bin histogram，并让 global-bin 和 block-private 两条 CUDA 路径与同一份 CPU reference 做 exact comparison。网站不执行 CUDA；本页没有 contention observation、timing 或 performance 结果。
+
+## 用途
+
+先完成 A04。EX13 把 A04 的 atomic update、block privatization、barrier 和 merge 结构落实为一个可独立构建的项目，但这里只验证 correctness。源码结构本身不能证明 contention 行为，也不能推出任何性能结论。
+
+## 获取 canonical project
+
+[查看 EX13 的临时 source 坐标](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex13-privatized-histogram)，或[查看同一临时坐标的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip)。这两个 URL 中的四十个零是待后续替换的 sourceCommit 占位坐标。项目目录是 `examples/ex13-privatized-histogram/`。
+
+`project.json` 声明两段 canonical range、三个固定 fixture、16 个 bin、259 个输入、128-thread block、1,228-byte 保守内存上界、三条 Toolkit Lane 和空 compilation axis。项目源码与页面文字均为原创；软件文件使用 Apache-2.0。
+
+## Fixture 合同
+
+`uniform` 按 `index % 16` 生成输入，因此 bin 0 到 2 各有 17 个值，其余 bin 各有 16 个。`skewed` 的 literal expected counts 是 bin 0 为 17、bin 7 为 226、bin 8 为 16，其余为零。`boundary` 只使用两个合法边界值：bin 0 为 130，bin 15 为 129。
+
+259 个输入配合 128-thread block 形成两个完整 block 和一个只有三个 active thread 的 partial block。两条 kernel 都用 `index < value_count` 保护输入更新；这个 guard 不包围任何 block barrier。
+
+## CPU reference
+
+纯 C++17 header 生成三个 fixture，在临时的 16-bin array 中计算 reference，拒绝越界 bin，并提供逐 bin exact comparison 与 sum-of-bins invariant：
+
+<CanonicalCode exampleId="EX13" range="cpu-reference" />
+
+Reference 只有在输入 count 恰好为 259、指针有效且每个 value 位于 `[0, 15]` 时才更新 caller output。每个合法 fixture 都必须满足 `sum_of_bins(histogram) == 259`。
+
+## Histogram kernels
+
+CUDA source 定义并 launch `global_histogram_kernel` 与 `privatized_histogram_kernel`：
+
+<CanonicalCode exampleId="EX13" range="histogram-kernels" />
+
+第一条路径对独立的 global output bins 使用 `atomicAdd`。第二条路径为每个 block 声明 16 个 shared-memory private bins，依次经过 unconditional zero、update 和 merge barrier，再把 block-local counts 原子合并到另一份 global output。这个结构说明更新位置和同步顺序，不构成 contention 或 performance observation。
+
+## Host model 边界
+
+`make host-test` 只编译 `tests/host_reference_test.cpp` 和 pure C++17 header。它把三个 CPU reference 结果分别与手写 literal histogram 精确比较，检查每个 sum-of-bins invariant，拒绝未知 fixture 与越界 bin，并验证 deterministic mismatch location。成功时打印 `host-reference: pass`。
+
+Host test 不包含 CUDA header，不 launch kernel，也不能验证 shared memory、barrier、atomic update、merge 或 GPU execution。通过它不会产生 CUDA compilation 或 runtime Evidence Status。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+前四步需要所选 CUDA Toolkit；host-test 只需要 host C++17 compiler。CUDA stages 生成 `build/privatized_histogram.ii`、`build/privatized_histogram.o` 和 `build/ex13-privatized-histogram`。Inspect 检查 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。
+
+`scripts/compile-check.sh c++17 ex13 <result-dir>` 执行 clean、preprocess、compile、link、inspect 和 host-test，并保留日志与 inspection artifacts。它绝不执行 CUDA binary，因此不会产生 GPU observation。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 1,228-byte 保守 global-plus-shared 上界，低于 8 GB |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Toolkit Lane 共用同一份原创 C++17 source |
+
+三条 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0，以及 Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 和 CUDA 13.3.1。固定 digest image 是 future build target，不是 compilation record。
+
+## 编译与运行证据
+
+EX13 的 compilation array 为空，因此 **EX13 不是 Compile-Checked**。Runtime 是 **Pending Hardware Verification**，recorded observations 为空。Host test 的通过结果不会填充任何 CUDA evidence axis。
+
+本页不声明 GPU output、atomic 或 barrier behavior 已被观察，也不声明 contention、timing、throughput、speedup 或 profiler 结果。未来 runtime record 必须来自声明的 Reference Environment，附完整 Environment Manifest，并保留三个 fixture、两条 kernel 和全部 exact acceptance criteria。
+
+## 预期观察，不是运行记录
+
+1. 对 `uniform`、`skewed` 和 `boundary`，global-bin kernel 应逐 bin 精确匹配独立的 16-bin CPU reference。
+2. 对同样三个 fixture，block-private shared-memory kernel 应逐 bin 精确匹配独立的 16-bin CPU reference。
+3. 对两条 CUDA 路径和每个 fixture，16 个 output bin 的总和都应等于 259 个输入。
+
+这些是尚未由 Learning Site 观察的 correctness acceptance criteria，不包含 contention 或 performance 判断。
+
+## 来源与复核
+
+CUDA C++ Programming Guide 用于核对 atomic functions、shared memory 与 block synchronization 语义。三条 NVCC 文档和三个 Docker Hub tag API 对应项目声明的 Toolkit Lanes 与 digest-pinned image metadata；它们都不是 EX13 build 或 runtime evidence。
+
+- [CUDA C++ Programming Guide v13.3 - Atomic Functions](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#atomic-functions)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**事实核查与全部来源访问日期：2026-08-30。**

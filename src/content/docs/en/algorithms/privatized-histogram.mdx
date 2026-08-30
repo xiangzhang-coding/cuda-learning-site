@@ -1,0 +1,206 @@
+---
+title: 'A04: Privatized Histogram'
+description: Separate histogram atomic correctness from contention, then prove the zero, barrier, update, barrier, and merge phases of shared privatization.
+pairId: a04
+counterpart: /algorithms/privatized-histogram/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - histogram-contract
+  - global-atomics
+  - contention
+  - privatization
+  - merge
+  - canonical-example
+  - production-baseline
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A04
+prerequisites:
+  - M03
+  - M05
+relatedUnits:
+  - EX13
+exampleIds:
+  - EX13
+canonicalExample: EX13
+canonicalRanges:
+  - histogram-kernels
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C Programming Guide 11.8 - Atomic Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#atomic-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 atomic read-modify-write and shared-memory contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9 - Atomic Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#atomic-functions'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane atomic and synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide 13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current atomics, shared-memory, barrier, and histogram context'
+    accessDate: '2026-08-30'
+  - title: 'CCCL CUB DeviceHistogram device-wide source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_histogram.cuh'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact owner source for the CUB device-wide DeviceHistogram production primitive'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a04 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,histogram-contract,global-atomics,contention,privatization,merge,canonical-example,production-baseline,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX13 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX13 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX13 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: histogram-kernels }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,CCCL 3.4.2' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/privatized-histogram/" lang="zh-CN">阅读中文对应页</a>
+
+A histogram maps each valid sample to a bin and increments that bin's count. Direct global `atomicAdd`, contention, privatization, shared memory, and merge are separate concerns: atomics determine whether concurrent updates are correct, privatization changes where updates happen, and performance conclusions still require observations.
+
+## What you should be able to do
+
+- State exact-count, range, overflow, and sum-of-bins contracts for a histogram.
+- Explain how global `atomicAdd` prevents lost updates and why correctness does not remove contention.
+- Identify competition at the same hot bin from an input distribution without fabricating a performance result.
+- Prove the `zero -> barrier -> update -> barrier -> merge` phase order of shared privatization.
+- Separate a hand-written teaching kernel, the CUB `DeviceHistogram` production baseline, and runtime evidence.
+
+## Prerequisites
+
+Complete [M03: Shared-memory Tiling](/en/memory/shared-memory-tiling/) and [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/) first. M03 supplies per-block shared ownership, cooperative initialization, and bounds-safe participation. M05 supplies atomic scopes, `__syncthreads()` visibility, and kernel boundaries.
+
+The prerequisite list is exactly `M03` and `M05`. CUB `DeviceHistogram` is a production comparison, not a prerequisite, and this unit requires no prior library unit.
+
+## Histogram contract
+
+Let `bin_of(x)` map one valid sample into `[0, bin_count)`. Output must satisfy:
+
+```text
+histogram[b] = count of valid samples x for which bin_of(x) == b
+sum(histogram[0..bin_count-1]) = valid sample count
+```
+
+The contract also states whether lower and upper bounds are inclusive or exclusive, whether an out-of-range sample is discarded, clamped, or rejected, and whether the counter type can overflow at the maximum input size. For integer bins, a CPU reference should compute exact counts sample by sample. Tolerance does not excuse an integer count mismatch.
+
+Input and output ownership are asymmetric. One thread can uniquely read each sample, while many threads may update the same output bin. A plain `histogram[b] += 1` is therefore a read-modify-write race.
+
+## Global atomics: establish correctness first
+
+The direct baseline first zeros global bins and then runs `atomicAdd(&global_bins[b], 1)` for each valid sample. An atomic read-modify-write prevents a lost update, so atomic correctness supplies exact counting when multiple threads increment the same counter.
+
+That conclusion has boundaries: the bin index must be valid, initialization must complete before the kernel reads bins, counters must not overflow, and the host must wait for kernel completion before verification. `atomicAdd` does not repair a wrong `bin_of`, omitted samples, or an invalid memory lifetime.
+
+## Contention: correct updates can still compete
+
+When many samples map to the same hot bin, their atomic updates contend at one address and may serialize. A more uniform distribution produces a different address pattern. Both inputs can produce exactly correct histograms; atomic correctness and contention cost must be discussed separately.
+
+Distribution and atomic counts can motivate a measurement hypothesis, not a speedup claim. Hardware, counter type, bin count, block shape, input ordering, and architecture can all affect an observation, so this page does not claim either variant is faster.
+
+## Shared privatization: zero, barrier, update, barrier
+
+A block-private shared histogram directs most sample updates to bins owned by that block. Its minimum correctness sequence is:
+
+1. **Zero:** threads clear all shared bins with a stride; `bin_count` may exceed `blockDim.x`.
+2. **Barrier:** an initialization barrier, `__syncthreads()`, ensures every bin is zero before any update.
+3. **Update:** each thread handles its valid samples and uses `atomicAdd` on a shared bin; shared memory still needs atomics because block threads can hit one bin.
+4. **Barrier:** an update barrier, `__syncthreads()`, ensures merge cannot read an unfinished shared update.
+5. **Merge:** threads stride over private counts and combine them into the global histogram.
+
+All participating threads reach both barriers. A bounds-invalid thread may skip its sample update, but it cannot return before the initialization or update barrier. Privatization is per block, not per thread; different blocks own distinct shared histogram instances.
+
+## Merge: combine private counts into global bins
+
+Multiple blocks ultimately write the same global bins, so merge commonly still requires `atomicAdd(&global_bins[b], shared_bins[b])`. Processing only nonzero private bins is an implementation choice, but it must retain exact counts and must not treat a zero test as cross-thread synchronization.
+
+The post-merge proof obligation is that each global bin equals the sum of that bin's block-private values. Summing all bins must then equal the valid sample count. Compare exact values against a CPU reference only after kernel completion. Shared privatization changes the update hierarchy; it does not automatically grant speedup evidence.
+
+## Canonical Runnable Example: EX13
+
+EX13's `histogram-kernels` range is this unit's only canonical import. It places global-atomic and block-private shared variants side by side so their correctness contracts can be compared on the same input fixtures. The standalone project is the only canonical implementation; this page does not copy its source.
+
+[View the EX13 standalone project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex13-privatized-histogram), or [download the archive at the same source coordinate](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). The all-zero commit is an explicit placeholder until publication pinning is complete, not a published commit.
+
+<CanonicalCode exampleId="EX13" range="histogram-kernels" />
+
+## Production baseline: CUB DeviceHistogram
+
+CUB `DeviceHistogram` in CCCL v3.4.2 is the production baseline and comparison point for a device-wide histogram. Production code should first inspect the level-boundary, sample-layout, counter, temporary-storage, and stream contracts of `HistogramEven` or `HistogramRange` rather than assume it should maintain a teaching kernel.
+
+Hand-written teaching kernels exist to learn and understand atomic correctness, contention, shared privatization, and merge. Exposing more internal phases does not make one a better production default. `DeviceHistogram` also does not enter the exact `M03,M05` prerequisite list.
+
+## Evidence boundary
+
+Compilation, runtime, expected observations, and recorded observations are all empty for this page. Exact CPU counts, the sum-of-bins invariant, and a phase proof can reveal correctness defects, but they have not executed EX13 or observed throughput, bandwidth, timing, or speedup.
+
+A future comparison of global-atomic and privatized variants must fix the input, bin contract, counter type, launch configuration, warm-up policy, timing boundary, and Environment Manifest, and first prove exact output matches. Without those records, fewer opportunities for global atomics cannot be reported as observed acceleration.
+
+## Retrieval check
+
+1. Why can `atomicAdd` provide histogram correctness without removing contention at the same hot bin?
+2. Why does shared privatization still require atomic updates in shared memory?
+3. Which read/write relation is protected by the barrier after zeroing and by the barrier after updates?
+4. Why does the merge into global bins commonly remain atomic, and how are final exact counts verified?
+
+## Continue with practice
+
+- Complete the [A04 Exercises](/en/algorithms/privatized-histogram/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/privatized-histogram/solutions/).
+- Write CPU exact counts and a contention hypothesis for uniform, skewed, and boundary fixtures.
+- Review both barriers and the merge in EX13 `histogram-kernels`; claim no performance improvement before records exist.
+
+## Sources and review
+
+- [CUDA C Programming Guide v11.8.0: Atomic Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#atomic-functions) supplies the 11.8 lane's atomic read-modify-write and memory-scope contract.
+- [CUDA C++ Programming Guide v12.9.1: Atomic Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#atomic-functions) is the owner-guide coordinate used for the Toolkit 12.9.2 patch lane.
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies current atomics, shared-memory, barrier, and histogram context.
+- [CCCL v3.4.2 `cub/device/device_histogram.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_histogram.cuh) is the exact owner source for the device-wide CUB `DeviceHistogram` primitive.
+
+All four primary owner sources were accessed on **2026-08-30**. The histogram contracts, phase proof, fixtures, Exercises, and arrangement are independently authored for this site. No private material, owner example, or figure is copied.
+
+**Fact checked: 2026-08-30.**

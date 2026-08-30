@@ -1,0 +1,218 @@
+---
+title: 'A01：逐元素映射与一元素一所有者'
+description: 从 map contract、独占写入和 global-memory traffic 出发，设计可扩展的逐元素 CUDA kernel，并把预期推理与实际性能证据分开。
+pairId: a01
+counterpart: /en/algorithms/elementwise-map/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - map-contract
+  - ownership
+  - memory-movement
+  - scalable-grid
+  - canonical-example
+  - production-baseline
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A01
+prerequisites:
+  - F03
+  - F04
+  - M02
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - kernel
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-hierarchy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    platform: 'Current CUDA C++ thread indexing, global-memory load, and store model'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Runtime API v13.3.1 - Memory Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html'
+    version: 'CUDA Runtime API v13.3.1'
+    platform: 'Current allocation and host-device copy ownership'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 - Kernels'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#kernels'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 kernel and one-dimensional indexing contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Kernels'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#kernels'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for Toolkit 12.9'
+    platform: 'Toolkit 12.9 kernel and thread-ownership contract'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a01 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/elementwise-map/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,map-contract,ownership,memory-movement,scalable-grid,canonical-example,production-baseline,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F03,F04,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: kernel }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/elementwise-map/" lang="en">Read the English counterpart</a>
+
+逐元素映射（elementwise map）把同一个变换独立应用到每个逻辑元素。本学习单元（Learning Unit）用“每个 element 由一个 thread 负责”的所有权（ownership）合同，推导无冲突写入、可扩展 grid 和独立的内存移动（memory movement）账本。这里的 `load -> map/transform -> store` 是算法路径，不是性能测量结果。
+
+## 学完本单元，你应该能
+
+- 把 `output[i] = f(input[i])` 写成包含 domain、index 和 bounds 的 map contract。
+- 为每个 output element 指定唯一 owner thread，并证明不存在跨 thread 写冲突。
+- 把 global memory 的 load/store 与 host-to-device、device-to-host 数据传输分别记账。
+- 用 rounded-up grid 和 bounds guard 覆盖任意正长度输入。
+- 区分从代码可推导的 expected reasoning、实际运行观察与 performance evidence。
+
+## 先修关系
+
+先完成 [F03：多维索引](/foundations/multidimensional-indexing/)、[F04：Host-Device 生命周期与显式数据移动](/foundations/host-device-lifecycle/)和 [M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)。F03 提供 global index；F04 提供 allocation、H2D/D2H copy 和 completion boundary；M02 让你审查相邻 threads 的 addresses，但不能仅凭连续地址宣布性能结果。
+
+本页不要求 CUDA-capable system，`hardwareGate` 因而是 `none`。先修项只提供推理语言；它们不让本页自动获得任何证据状态（Evidence Status）。
+
+## Map 合同：索引集合上的同一变换
+
+对长度 `n` 的一维输出，最小合同是：
+
+```text
+domain: i is an integer in [0, n)
+value:  output[i] = transform(input[i])
+read set for i:  input[i]
+write set for i: output[i]
+```
+
+二元 map 只把 read set 扩展为 `left[i]` 和 `right[i]`。变换可以是加法、缩放或 predicate，但 ownership proof 不依赖具体算术。若 `input` 与 `output` alias，必须另外证明原地更新不会让一个 thread 读取另一个 thread 已覆盖的值；“看起来是逐元素”不能替代 alias contract。
+
+## Ownership：每个输出恰好一个写者
+
+定义 `owner(i)` 为 global index 等于 `i` 的 thread。对所有合法 `i`，需要同时满足：
+
+1. **覆盖：** 存在一个 launched thread，其 global index 是 `i`。
+2. **唯一：** global index 映射在这个 launch 中不会把两个 threads 映到同一个 `i`。
+3. **隔离：** `owner(i)` 只写 `output[i]`，而 `owner(j)` 只写 `output[j]`。
+
+因此 `i != j` 时两个 write sets 不相交。这个结论消除了 map kernel 内部为 output 写入设置 barrier 或 atomic 的需要。它不说明 host 何时能读取结果；completion 仍由 F04 的 host/device lifecycle contract 负责。
+
+## Memory movement：算术之外单独记账
+
+一个二元 float map 每个合法元素在 kernel 语义层面有两个 global memory loads、一次 transform 和一个 global memory store。这个计数只描述请求的值，不等于硬件 transaction 数，也不等于观测到的 bandwidth。
+
+应用级账本还要单独列出：
+
+```text
+host input --H2D copy--> device global memory
+device loads --map/transform--> device store
+device global memory --D2H copy--> host output
+```
+
+若输入已常驻 device，某次调用可能没有 H2D；若下游 kernel 继续消费结果，可能暂时没有 D2H。这些是 lifecycle 选择，不会改变 map 的数学合同。反过来，只统计 element arithmetic 会漏掉数据移动成本，也不能解释端到端 performance。
+
+## Scalable grid：覆盖数据，guard 多余 threads
+
+一维 baseline 使用：
+
+```text
+i = blockIdx.x * blockDim.x + threadIdx.x
+if i < n:
+  output[i] = transform(input[i])
+```
+
+Host 以 ceiling division 选择 block count，使 launch 至少覆盖 `n` 个 indices。最后一个 block 可以包含 extra threads；bounds guard 让它们不执行 global load 或 store。对超过单次 launch 方便覆盖范围的工作，也可使用 grid-stride loop，但每个 iteration 仍必须保持唯一 owner 和合法 bounds。
+
+Scalable 表示同一 ownership rule 不依赖固定 `n`，不是“输入越大就一定更快”。Block size、occupancy、cache 和 transfer overlap 都需要独立环境与测量合同。
+
+## Canonical Runnable Example：EX02
+
+可运行示例（Runnable Example）EX02 的 `kernel` range 是本页唯一 canonical executable counterpart。它实现二元 elementwise map：每个合法 thread load 两个 global-memory elements、执行加法并 store 一个 output element。
+
+[查看固定提交中的完整 EX02 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip)。下面只导入声明的 canonical range，不复制或改写 implementation。
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+## Production baseline：先保留简单合同
+
+在 production 中，elementwise work 可能由 framework fusion、iterator library 或专用 kernel 承担。选择前先保留同一 value/ownership contract，并以现有 production path 作为 comparison baseline。手写 teaching kernel 的价值是学习和理解 index、bounds 与 memory path，不是默认取代已维护的 production implementation。
+
+比较方案时先验证相同 inputs、outputs、precision、alias policy 与 transfer boundary，再测量。源码更短、launch 更少或访问连续都只是待检验的理由，不是 observed performance。
+
+## 证据边界：expected reasoning 不等于 observed performance
+
+| 可从合同复核的 expected reasoning | 必须由运行记录给出的 observation |
+| --- | --- |
+| 每个合法 output 有唯一 owner | 实际 kernel 是否在某个 Environment Manifest 上正确完成 |
+| 每个合法 element 请求声明的 loads 和 store | 实际 transaction、cache、bandwidth 与 duration |
+| rounded-up grid 加 guard 覆盖 partial block | 实际 launch configuration、错误状态与输出比较 |
+
+本页没有 compilation evidence、runtime evidence、expected observations 或 recorded observations。任何未来性能结论都必须记录 exact source、Toolkit Lane、GPU、problem shape、transfer scope、correctness result 和 measurement method。推理可以提出“值得测什么”，不能伪装成已经观察到的加速。
+
+## 离开前检查
+
+1. 为什么 `output[i] = f(input[i])` 仍需要显式 ownership contract？
+2. Kernel 的 global-memory load/store 与 H2D/D2H 数据移动分别回答什么问题？
+3. Rounded-up grid 为什么必须配合 bounds guard？
+4. 为什么连续 element addresses 不能单独证明 observed performance？
+
+## 继续练习
+
+- 完成 [A01 练习（Exercise）](/algorithms/elementwise-map/exercises/)，再查看独立的[复核解答](/algorithms/elementwise-map/solutions/)。
+- 用符号量 `n` 和 `sizeof(T)` 写 memory-movement ledger，不填未经观察的 timing 或 bandwidth。
+- 回到 EX02 时只把 `kernel` range 当 canonical implementation；练习中的 diagrams 和 pseudocode 是推理工具。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Thread Hierarchy](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-hierarchy)提供 current indexing、global-memory load/store 与 thread hierarchy coordinate。
+- [CUDA Runtime API v13.3.1：Memory Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html)提供 allocation 与 host-device copy owner coordinate。
+- [CUDA C Programming Guide 11.8：Kernels](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#kernels)保留 11.8 lane 的 kernel contract。
+- [CUDA C++ Programming Guide 12.9.1：Kernels](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#kernels)保留 12.9 lane 的 kernel contract。
+
+四项 owner sources 均访问于 **2026-08-30**。本页的 ownership proof、memory ledger、pseudocode、练习与编排均为原创；没有使用或复制私有参考资料，也没有复制 owner prose、code、table 或 figure。
+
+**事实核查日期：2026-08-30。**

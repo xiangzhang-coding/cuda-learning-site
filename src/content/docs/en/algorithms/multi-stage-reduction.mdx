@@ -1,0 +1,271 @@
+---
+title: 'A02: Multi-Stage Reduction, Barriers, and Operation Order'
+description: Express reduction as an intra-block reduction tree and cross-kernel partial stages, prove inactive-lane and barrier contracts, and use CUB DeviceReduce as the production baseline.
+pairId: a02
+counterpart: /algorithms/multi-stage-reduction/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - reduction-contract
+  - tree-shape
+  - inactive-lanes
+  - barriers
+  - multi-stage
+  - operation-order
+  - canonical-example
+  - production-baseline
+  - visual-explainer
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A02
+prerequisites:
+  - M03
+  - M05
+  - M06
+relatedUnits:
+  - VIS10
+  - Q02
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - multi-stage-reduction
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Thread Block Synchronization'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    platform: 'Current block-wide barrier and shared-memory coordination contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Floating-Point Computation'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-computation'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    platform: 'Current floating-point computation and implementation-choice context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Floating-Point Associativity'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    platform: 'Current operation-order and rounding coordinate for reduction trees'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 - Synchronization Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#synchronization-functions'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 block synchronization semantics'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 11.8 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v11.8.0'
+    platform: 'Toolkit 11.8 operation-order and rounding semantics'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Synchronization Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#synchronization-functions'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for Toolkit 12.9'
+    platform: 'Toolkit 12.9 block synchronization semantics'
+    accessDate: '2026-08-30'
+  - title: 'Floating Point and IEEE 754 12.9 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v12.9; Toolkit 12.9 Update 1 archive'
+    platform: 'Toolkit 12.9 operation-order and rounding semantics'
+    accessDate: '2026-08-30'
+  - title: 'CCCL v3.4.2 - CUB Device-Wide Primitives Source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/device_wide.rst'
+    version: 'CCCL v3.4.2'
+    platform: 'CUB DeviceReduce production primitive owner source'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a02 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/multi-stage-reduction/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,reduction-contract,tree-shape,inactive-lanes,barriers,multi-stage,operation-order,canonical-example,production-baseline,visual-explainer,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M03,M05,M06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'VIS10,Q02' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: multi-stage-reduction }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9,13.3,CCCL 3.4.2' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/multi-stage-reduction/" lang="zh-CN">阅读中文对应页</a>
+
+A multi-stage reduction combines many values into fewer partial values until one result remains. This Learning Unit separates an intra-block reduction tree from the cross-kernel stage sequence, then proves the contracts for every inactive lane, barrier, `__syncthreads()`, kernel boundary, and operation order. Each stage halves the active set, so fewer lanes participate in the combine while every block participant still follows the barrier contract.
+
+## What you should be able to do
+
+- Declare a reduction operation, identity, input domain, and result contract.
+- Draw each stage's active and inactive lanes and partial ownership.
+- Prove the happens-before phase from a shared-memory write, through a barrier, to the next read.
+- Continue per-block partials through multiple kernel launches without assuming a global barrier inside an ordinary grid.
+- Explain why a parallel tree order can produce a different floating-point result from a serial sequential order.
+- Start production work from a CUB `DeviceReduce` baseline and use a hand-written teaching kernel to learn the mechanism.
+
+## Prerequisites
+
+Complete [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/), [M05: Synchronization Scopes and Memory Visibility](/en/memory/synchronization-scopes/), and [M06: Cooperative Groups](/en/memory/cooperative-groups/) first. M03 supplies shared storage and block participation. M05 distinguishes rendezvous, ordering, and visibility. M06 supplies explicit group vocabulary. The prerequisite set is exactly `M03, M05, M06`.
+
+CUB is not a prerequisite. It appears later as the production comparison baseline, not as an interface that must be learned before the reduction tree. This page requires no CUDA-capable system and grants no Evidence Status.
+
+## Reduction contract: define combine before assigning threads
+
+Let the input be `x[0..n)`, the binary operation be `combine(a, b)`, and the identity be `e`. The abstract contract combines every valid input in the declared operation order. Padding uses `e`, with `combine(x, e) = x`.
+
+The integer-sum teaching case can use zero as identity. General parallel regrouping expects mathematical associativity. Finite-precision floating-point addition is not strictly associative, so correctness cannot mean only an exact match to one serial bit pattern. Declare the tree order, reference policy, and acceptance tolerance; related Learning Unit [Q02](/en/correctness/floating-point-order-reproducibility/) develops that contract.
+
+## Tree shape: shrink the active set at each stage
+
+An eight-lane teaching reduction tree can be represented as:
+
+```text
+stage 0: lanes 0..7 own [x0 x1 x2 x3 x4 x5 x6 x7]
+stage 1: lanes 0..3 own [x0+x4, x1+x5, x2+x6, x3+x7]
+stage 2: lanes 0..1 own [(x0+x4)+(x2+x6), (x1+x5)+(x3+x7)]
+stage 3: lane 0 owns the block partial
+```
+
+Every stage roughly halves the logical partial count. The tree edges define operation order; another pairing of the same leaves is a different algorithm variant. This diagram expresses dependencies and makes no claim about the scheduler's timing order.
+
+## Inactive lanes: no combine does not mean no participation
+
+As stride shrinks, a lane with `threadIdx.x >= stride` is an inactive lane for that stage's combine. Inactive does not mean exiting the kernel. If a later block barrier remains, that lane must follow uniform control flow to the barrier. In an edge block, a lane with no valid input first writes identity to its shared slot and likewise cannot return before the initial barrier.
+
+Separate the roles at every stage:
+
+| lane role | combine action | participation action |
+| --- | --- | --- |
+| active | read two declared partials, write one partial | reach the stage barrier |
+| inactive | perform no combine | still reach the same stage barrier |
+
+This separation prevents a data predicate from being mistaken for a synchronization predicate.
+
+## Barriers: write, barrier, then read
+
+The block-local invariant is that active lanes first write this stage's shared partial, all participating threads reach the `__syncthreads()` barrier, and only then may the next stage read those slots. The phase is `write -> barrier -> read`; the barrier cannot be enclosed by `if (tid < stride)`.
+
+```text
+initial guarded load or identity write
+all lanes: barrier
+for each stride:
+  active lanes: read declared pair and write partial
+  all lanes: barrier
+```
+
+This baseline may retain a final barrier that a more specialized proof could remove, in exchange for a uniform and reviewable phase shape. Removing one requires a new proof for the final consumer, storage reuse, and participating group. “Inactive lanes do no work” is not that proof.
+
+## Multi-stage: connect grid-wide partials at a kernel boundary
+
+Ordinary thread blocks may be scheduled independently. A block-local `__syncthreads()` cannot establish a grid-wide rendezvous in an ordinary kernel. Every block in the first kernel stores one partial to global memory. The host launches the next kernel in the same stream and that kernel consumes the partial array. A separate kernel boundary plus stream order ensures the next launch waits before reading the global partials from the previous stage.
+
+```text
+input array
+  -> kernel stage 0 -> global partial array P0
+  -> kernel stage 1 -> smaller global partial array P1
+  -> ...
+  -> final scalar
+```
+
+The kernel boundary is the global stage boundary across the grid, while a block barrier is only a shared-memory phase boundary inside one block. They are not interchangeable. Every launch still guards its final partial block and inserts identity for invalid slots.
+
+## Operation order: a parallel tree is not a serial fold
+
+A serial left fold has order `(((x0 + x1) + x2) + x3)`. One tree order is `(x0 + x1) + (x2 + x3)`. Real-number addition gives the same mathematical result, but every floating-point combine rounds, so the parallel tree order can differ from the serial sequential order.
+
+That fact does not permit unexplained mismatches. Record the type, compiler options, tree shape, block/grid shape, identity, reference accumulation, and tolerance. Determinism, acceptable numerical variation, and bitwise reproducibility are separate requirements. This page establishes the operation-order dependency; Q02 defines the complete contract.
+
+## Canonical Runnable Example: EX11
+
+Runnable Example EX11's `multi-stage-reduction` range is this page's only canonical executable counterpart. It contains guarded loading, shared partial stages, unconditional block barriers, and a repeated kernel-launch structure. The page does not copy that implementation.
+
+[View the complete EX11 project at its commit placeholder](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex11-multi-stage-reduction), or [download the source archive for that same placeholder commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). The forty zeros explicitly mark a sourceCommit placeholder that must be replaced before release. The project's metadata is the canonical source coordinate; this page imports only its declared range.
+
+<CanonicalCode exampleId="EX11" range="multi-stage-reduction" />
+
+## Production baseline: use CUB DeviceReduce first
+
+For production work, treat CUB `DeviceReduce` as the production baseline and comparison point before deciding to maintain a custom kernel. It provides a broadly maintained device-wide reduction primitive. The caller remains responsible for the operation, type, temporary storage, stream, input/output lifetime, and numerical acceptance contract.
+
+The hand-written teaching reduction exists to learn and understand tree ownership, inactive lanes, barriers, kernel stages, and operation order. It is not a prerequisite, does not copy an implementation from the CUB source, and does not beat the production baseline merely by being closer to the hardware. Only observed evidence under fixed correctness parity, an Environment Manifest, and a measurement method can support replacement.
+
+## Visual Explainer: VIS10
+
+[VIS10: Reduction Stages](/en/visuals/reduction-stages/) represents lanes, partials, stage transitions, and inactive-lane sets as a deterministic browser model. It helps review an algorithm variant and barrier placement, but it does not execute CUDA, simulate scheduling, or produce measured performance.
+
+Select the tree variant first, then answer three questions at every stage: who reads, who writes, and who must reach the barrier. Both the Visual Explainer's static fallback and its interactive state are expected-reasoning aids only.
+
+## Evidence boundary: separate reasoning from observation
+
+| expected reasoning | observed performance or runtime evidence |
+| --- | --- |
+| Active and inactive ownership at each stage | Actual output and error state in a Reference Environment |
+| The `write -> barrier -> read` phase proof | A real sanitizer, trace, or other tool observation |
+| Kernel stages progressively reduce partial count | Actual launch count, duration, traffic, or throughput |
+| Tree operation order differs from a serial fold | A numerical difference observed with recorded inputs and configuration |
+
+All four evidence arrays on this page are empty. Source review, diagrams, and host-side reasoning cannot prove that EX11 compiled or ran, and cannot prove that a custom reduction is faster than CUB.
+
+## Retrieval check
+
+1. Why might an inactive lane that performs no combine still have to reach `__syncthreads()`?
+2. What does `write -> barrier -> read` protect between adjacent reduction stages?
+3. Why can an ordinary block barrier not replace a multi-stage kernel boundary?
+4. Why can parallel tree order differ from serial sequential order?
+5. Why should production start from CUB `DeviceReduce` before evaluating a hand-written kernel?
+
+## Continue with practice
+
+- Complete the [A02 Exercises](/en/algorithms/multi-stage-reduction/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/multi-stage-reduction/solutions/).
+- Use [VIS10](/en/visuals/reduction-stages/) to review a stage diagram, but do not record browser state as a CUDA observation.
+- Continue to [Q02](/en/correctness/floating-point-order-reproducibility/) when defining floating-point acceptance, determinism, or reproducibility.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Thread Block Synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization) supplies the current block-barrier coordinate.
+- [CUDA Programming Guide v13.3: Floating-Point Computation](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-computation) and its [Associativity coordinate](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity) supply current operation-order context.
+- [CUDA C Programming Guide 11.8: Synchronization Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#synchronization-functions) and [11.8 Operations and Accuracy](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy) preserve the 11.8 contracts.
+- [CUDA C++ Programming Guide 12.9.1: Synchronization Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#synchronization-functions) and [12.9 Operations and Accuracy](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy) preserve the 12.9 contracts.
+- The [CCCL v3.4.2 owner source for CUB device-wide primitives](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/device_wide.rst) locates the production `DeviceReduce` primitive only; no implementation is copied here.
+
+All eight owner-source coordinates were accessed on **2026-08-30**. The tree diagrams, phase ledger, pseudocode, Exercises, and explanations are original. No private reference material was used or copied, and no owner prose, code, table, figure, or benchmark is reproduced.
+
+**Fact checked: 2026-08-30.**

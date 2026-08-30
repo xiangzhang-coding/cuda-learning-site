@@ -1,0 +1,128 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX13",
+  "title": "Privatized Histogram",
+  "purpose": "Compare global-bin atomics with block-private shared-memory bins while verifying exact 16-bin counts for three deterministic fixtures.",
+  "root": "examples/ex13-privatized-histogram",
+  "sourceCommit": "0000000000000000000000000000000000000000",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex13-privatized-histogram",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/privatized_histogram_reference.hpp",
+      "src/privatized_histogram.cu"
+    ],
+    "hostTestInputs": [
+      "include/privatized_histogram_reference.hpp",
+      "tests/host_reference_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link",
+      "inspect"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/privatized_histogram.ii",
+      "build/privatized_histogram.o",
+      "build/ex13-privatized-histogram"
+    ]
+  },
+  "correctness": {
+    "cpuReference": "include/privatized_histogram_reference.hpp",
+    "binCount": 16,
+    "elementCount": 259,
+    "threadsPerBlock": 128,
+    "fixtures": [
+      "uniform",
+      "skewed",
+      "boundary"
+    ],
+    "comparison": "Exact equality for every bin in both CUDA outputs against the CPU reference",
+    "invariant": "The sum of all 16 bins equals the 259-element fixture size"
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "maximumProblemMemoryBytes": 1228,
+    "target": [
+      "sm_75",
+      "compute_75"
+    ],
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "cpu-reference": {
+      "file": "include/privatized_histogram_reference.hpp",
+      "startMarker": "// [ex13-cpu-reference-start]",
+      "endMarker": "// [ex13-cpu-reference-end]",
+      "language": "cpp"
+    },
+    "histogram-kernels": {
+      "file": "src/privatized_histogram.cu",
+      "startMarker": "// [ex13-histogram-kernels-start]",
+      "endMarker": "// [ex13-histogram-kernels-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "For uniform, skewed, and boundary, the global-bin kernel should exactly match the independent 16-bin CPU reference.",
+      "For the same three fixtures, the block-private shared-memory kernel should exactly match the independent 16-bin CPU reference.",
+      "For both CUDA variants and every fixture, the sum of all 16 output bins should equal the 259-element input count."
+    ],
+    "recordedObservations": []
+  }
+}

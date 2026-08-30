@@ -67,6 +67,15 @@ describe('CUDA compile evidence workflow', () => {
       'lane: ex09-cuda-11-8-cxx17',
       'lane: ex09-cuda-12-9-cxx17',
       'lane: ex09-cuda-13-3-cxx17',
+      'lane: ex11-cuda-11-8-cxx17',
+      'lane: ex11-cuda-12-9-cxx17',
+      'lane: ex11-cuda-13-3-cxx17',
+      'lane: ex12-cuda-11-8-cxx17',
+      'lane: ex12-cuda-12-9-cxx17',
+      'lane: ex12-cuda-13-3-cxx17',
+      'lane: ex13-cuda-11-8-cxx17',
+      'lane: ex13-cuda-12-9-cxx17',
+      'lane: ex13-cuda-13-3-cxx17',
       'lane: ex16-cuda-11-8-cxx17',
       'lane: ex16-cuda-12-9-cxx17',
       'lane: ex16-cuda-13-3-cxx17',
@@ -83,7 +92,10 @@ describe('CUDA compile evidence workflow', () => {
     const ex06Build = workflow.match(/^  ex06-build:\n[\s\S]*?(?=^  ex07-build:)/m)?.[0] ?? '';
     const ex07Build = workflow.match(/^  ex07-build:\n[\s\S]*?(?=^  ex08-build:)/m)?.[0] ?? '';
     const ex08Build = workflow.match(/^  ex08-build:\n[\s\S]*?(?=^  ex09-build:)/m)?.[0] ?? '';
-    const ex09Build = workflow.match(/^  ex09-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
+    const ex09Build = workflow.match(/^  ex09-build:\n[\s\S]*?(?=^  ex11-build:)/m)?.[0] ?? '';
+    const ex11Build = workflow.match(/^  ex11-build:\n[\s\S]*?(?=^  ex12-build:)/m)?.[0] ?? '';
+    const ex12Build = workflow.match(/^  ex12-build:\n[\s\S]*?(?=^  ex13-build:)/m)?.[0] ?? '';
+    const ex13Build = workflow.match(/^  ex13-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
     const ex16Build = workflow.match(/^  ex16-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
@@ -107,9 +119,12 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('EX07_BUILD_RESULT: ${{ needs.ex07-build.result }}');
     expect(workflow).toContain('EX08_BUILD_RESULT: ${{ needs.ex08-build.result }}');
     expect(workflow).toContain('EX09_BUILD_RESULT: ${{ needs.ex09-build.result }}');
+    expect(workflow).toContain('EX11_BUILD_RESULT: ${{ needs.ex11-build.result }}');
+    expect(workflow).toContain('EX12_BUILD_RESULT: ${{ needs.ex12-build.result }}');
+    expect(workflow).toContain('EX13_BUILD_RESULT: ${{ needs.ex13-build.result }}');
     expect(workflow).toContain('EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}');
     expect(workflow).toContain(
-      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex16-build]',
+      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex16-build]',
     );
     expect(workflow).toContain('EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}');
     expect(workflow).toContain('if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi');
@@ -119,6 +134,9 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('if [ "$EX07_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX08_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX09_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX11_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX12_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX13_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
@@ -165,16 +183,25 @@ describe('CUDA compile evidence workflow', () => {
     expect(scanOffset).toBeGreaterThan(-1);
     expect(uploadOffset).toBeGreaterThan(scanOffset);
 
+    expect([...workflow.matchAll(/^  (ex(?:11|12|13)-build):$/gm)].map((match) => match[1]))
+      .toEqual(['ex11-build', 'ex12-build', 'ex13-build']);
+
     for (const [exampleId, build, root] of [
       ['ex05', ex05Build, 'coalesced-strided-access'],
       ['ex06', ex06Build, 'shared-memory-tile-bank-padding'],
       ['ex07', ex07Build, 'streams-events-overlap'],
       ['ex08', ex08Build, 'unified-memory-migration'],
       ['ex09', ex09Build, 'graph-capture'],
+      ['ex11', ex11Build, 'multi-stage-reduction'],
+      ['ex12', ex12Build, 'inclusive-exclusive-scan'],
+      ['ex13', ex13Build, 'privatized-histogram'],
     ] as const) {
       expect(build).not.toBe('');
-      expect(build.match(new RegExp(`^\\s+- lane: ${exampleId}-cuda-\\d+-\\d+-cxx17$`, 'gm')))
-        .toHaveLength(3);
+      expect([...build.matchAll(/^\s+- lane: (\S+)$/gm)].map((match) => match[1])).toEqual([
+        `${exampleId}-cuda-11-8-cxx17`,
+        `${exampleId}-cuda-12-9-cxx17`,
+        `${exampleId}-cuda-13-3-cxx17`,
+      ]);
       for (const [laneSuffix, image] of [
         ['cuda-11-8-cxx17', 'nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f'],
         ['cuda-12-9-cxx17', 'nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5'],
@@ -193,7 +220,12 @@ describe('CUDA compile evidence workflow', () => {
       );
       expect(build).toContain(`--workdir /workspace/examples/${exampleId}-${root}`);
       expect(build).toContain(`bash scripts/compile-check.sh c++17 ${exampleId}`);
-      expect(build).toContain(`path: artifacts/cuda-${exampleId}/\${{ matrix.lane }}`);
+      const artifactPath = `artifacts/cuda-${exampleId}/\${{ matrix.lane }}`;
+      expect(build).toContain(`node scripts/check-artifacts.mjs "${artifactPath}"`);
+      expect(build).toContain(`path: ${artifactPath}`);
+      expect(build).not.toMatch(
+        new RegExp(`(?:^|\\s)(?:\\.\\/)?build/${exampleId}-${root}(?:\\s|$)`, 'm'),
+      );
       expect(build).not.toContain(`/examples/${exampleId}-${root}/evidence`);
       expect(build).not.toContain('Compile-Checked');
       expect(build).not.toContain('Runtime-Verified');
@@ -246,6 +278,9 @@ describe('CUDA compile evidence workflow', () => {
       ex07LaneScript,
       ex08LaneScript,
       ex09LaneScript,
+      ex11LaneScript,
+      ex12LaneScript,
+      ex13LaneScript,
       ex16LaneScript,
     ] = await Promise.all([
       readProjectFile('scripts/run-cuda-compile.mjs'),
@@ -258,6 +293,9 @@ describe('CUDA compile evidence workflow', () => {
       readProjectFile('examples/ex07-streams-events-overlap/scripts/compile-check.sh'),
       readProjectFile('examples/ex08-unified-memory-migration/scripts/compile-check.sh'),
       readProjectFile('examples/ex09-graph-capture/scripts/compile-check.sh'),
+      readProjectFile('examples/ex11-multi-stage-reduction/scripts/compile-check.sh'),
+      readProjectFile('examples/ex12-inclusive-exclusive-scan/scripts/compile-check.sh'),
+      readProjectFile('examples/ex13-privatized-histogram/scripts/compile-check.sh'),
       readProjectFile('examples/ex16-sanitizer-defect-suite/scripts/compile-check.sh'),
     ]);
 
@@ -279,6 +317,9 @@ describe('CUDA compile evidence workflow', () => {
       expect(ex07LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
       expect(ex08LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
       expect(ex09LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+      expect(ex11LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+      expect(ex12LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
+      expect(ex13LaneScript).toContain(`make ${target} DIALECT="$dialect" BUILD_DIR=build`);
     }
     expect(ex05LaneScript).not.toMatch(
       /(?:^|\s)(?:\.\/)?build\/ex05-coalesced-strided-access(?:\s|$)/m,
@@ -294,6 +335,15 @@ describe('CUDA compile evidence workflow', () => {
     );
     expect(ex09LaneScript).not.toMatch(
       /(?:^|\s)(?:\.\/)?build\/ex09-graph-capture(?:\s|$)/m,
+    );
+    expect(ex11LaneScript).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/ex11-multi-stage-reduction(?:\s|$)/m,
+    );
+    expect(ex12LaneScript).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/ex12-inclusive-exclusive-scan(?:\s|$)/m,
+    );
+    expect(ex13LaneScript).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/ex13-privatized-histogram(?:\s|$)/m,
     );
     expect(ex16LaneScript).not.toMatch(
       /(?:^|\s)(?:\.\/)?build\/(?:memcheck|racecheck|initcheck|synccheck)-(?:defect|corrected)(?:\s|$)/m,

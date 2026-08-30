@@ -1,0 +1,233 @@
+---
+title: 'EX11：多阶段归约可运行示例'
+description: 用共享内存树把 4,099 个确定性 float 分阶段归约为一个值，并以 double CPU reference 和绝对加相对 tolerance 验证结果，不发布性能数据。
+pairId: ex11
+counterpart: /en/examples/multi-stage-reduction/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - cpu-reference
+  - multi-stage-reduction
+  - host-reference
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX11
+prerequisites:
+  - A02
+  - Q02
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - cpu-reference
+  - multi-stage-reduction
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 16,468 bytes of declared device allocation and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The GPU result should report PASS only when the combined absolute-and-relative comparator accepts it against the double CPU reference.
+    - The declared 4,099-element workload should reduce through stage sizes 4,099, 9, and 1, with three valid elements in the final block of the first stage.
+    - Every bounds-invalid load should contribute zero while every thread still reaches each block-wide barrier before the next reduction step.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current thread-block, shared-memory, and block-synchronization contracts'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex11
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-30'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,cpu-reference,multi-stage-reduction,host-reference,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX11
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: 'A02,Q02'
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX11
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX11
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'cpu-reference,multi-stage-reduction'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with at most 16,468 bytes of declared device allocation and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '4'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3,13.3.1'
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/multi-stage-reduction/" lang="en">Read the English counterpart</a>
+
+EX11 是独立、原创的多阶段归约（Multi-Stage Reduction）可运行示例（Runnable Example）。项目以 C++17 实现，把 4,099 个确定性 `float` 归约为一个值，并以高精度 `double` CPU reference、明确的 reduction order 和 tolerance 合同判断正确性。项目没有 timer，也不发布性能结论。
+
+## 用途
+
+先完成 [A02 多阶段归约](/algorithms/multi-stage-reduction/)与 [Q02 浮点顺序和可复现性](/correctness/floating-point-order-reproducibility/)。A02 给出 reduction tree、inactive lane、barrier 与 kernel boundary；Q02 解释浮点加法顺序为什么会影响末位，以及 tolerance 为什么不等于 bitwise reproducibility。
+
+EX11 把这两个合同放进一个最小 standalone project：shared-memory kernel 每次生成 block partial sum，host 重复 launch，直到只剩一个值。唯一 verdict 是 GPU sum 是否通过 CPU reference comparator。
+
+## 获取 canonical project
+
+[在固定提交占位坐标中查看完整 EX11 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex11-multi-stage-reduction)，或[下载同一占位提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip)。后续 pin commit 会替换这个 40-zero 坐标；当前 canonical implementation 位于 `examples/ex11-multi-stage-reduction/`。
+
+`project.json` 声明两个 build input、两个 canonical range、三条精确 Toolkit Lane、memory bound 与空 evidence record。软件文件使用 Apache-2.0；本教学页面使用 CC-BY-4.0。
+
+## CPU reference 与 tolerance
+
+纯 C++17 header 定义 4,099-element workload、256-thread block、每个 block 最多 512 个 input、确定性 `float` 生成器，以及按 input order 在 `double` 中累加的 CPU reference：
+
+<CanonicalCode exampleId="EX11" range="cpu-reference" />
+
+GPU tree order 与串行 CPU order 不同，因此 comparator 不要求 bitwise equality。它检查 `absolute_error <= absolute_tolerance + relative_tolerance * abs(cpu_reference)`。Absolute term 保护接近零的 reference；relative term 让允许误差随 reference magnitude 缩放。这个规则是预先声明的 acceptance contract，不是运行后根据结果调整的阈值。
+
+同一 range 还定义 stage-size helper。对非终止 stage，output count 必须大于零并严格小于 input count。
+
+## 多阶段 shared-memory reduction
+
+每个 thread 先把 contribution 设为零，再分别 guard 两个 global load。Bounds-invalid lane 仍写 shared slot，并与其他 thread 一起无条件到达每个 `__syncthreads()`：
+
+<CanonicalCode exampleId="EX11" range="multi-stage-reduction" />
+
+树的每一步只有 lower lanes 执行加法，但 barrier 不放在条件分支中。一次 kernel 只能在 block 内归约；下一次 launch 的 kernel boundary 才把前一 stage 的 global partial sums 交给下一 stage。
+
+| Stage | Input count | Output count | 最后一个 block 的有效 input |
+| ---: | ---: | ---: | ---: |
+| 0 | 4,099 | 9 | 3 |
+| 1 | 9 | 1 | 9 |
+
+因此第一 stage 的前八个 block 各覆盖 512 个值，最后 partial block 只加载 index 4,096 至 4,098。Host loop 重复 stage，直到 count 为 1，然后只复制最终 `float`。
+
+## Host reference 边界
+
+`make host-test` 不包含 CUDA header。它独立重建 deterministic input，检查 stage sizes `4,099 -> 9 -> 1`、完整且不重叠的 block coverage、三元素 partial-block invariant、`double` reference 对更宽 accumulation 的一致性，以及 abs+rel comparator 的 near-zero、scale-aware 和 rejection cases。
+
+Host test 还用同样的 staged float order 构造纯 CPU model。通过只能建立 arithmetic、stage-shape 与 oracle behavior；它不能证明 CUDA source 已编译、GPU barrier 已执行或 device result 已满足 comparator。
+
+## 构建合同
+
+在原生 Linux 的项目目录中运行：
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+CUDA stages 生成 `build/multi_stage_reduction.ii`、`build/multi_stage_reduction.o` 与 `build/ex11-multi-stage-reduction`。Inspection 检查 native `sm_75` cubin 和从 `compute_75` 生成的 PTX。Host-test 只需要 host C++17 compiler，并以 `host-reference: pass` 结束。
+
+`scripts/compile-check.sh c++17 ex11 <result-dir>` 执行 clean、preprocess、compile、link、inspect 与 host-test，保留 logs 和 inspection artifacts，但绝不运行 GPU binary。
+
+## 兼容性
+
+| 坐标 | 声明 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 仅原生 Linux |
+| 运行门槛 | 一张 compute capability 7.5 或更新的 CUDA GPU |
+| 基础 GPU 能力层级（Baseline GPU Capability Tier） | 最大 device allocation 为 16,468 bytes，低于 8 GB |
+| 编译目标 | native `sm_75` cubin + 从 `compute_75` 生成的 PTX |
+| 语言合同 | 三条 Toolkit Lane 共用同一份原创 C++17 source |
+
+三条 Lane 是 Ubuntu 22.04 x86-64 上的 CUDA 11.8.0、Ubuntu 24.04 x86-64 上的 CUDA 12.9.2 和 CUDA 13.3.1。Digest-pinned image 是 build target，不是 compilation record。
+
+## 编译与运行证据
+
+EX11 的 compilation array 为空，因此 EX11 没有 Compile-Checked 状态。Runtime 为 **Pending Hardware Verification**，recorded observations 为空。Learning Site 尚未在 Reference Environment 中执行这个 binary。
+
+本页不发布 duration、bandwidth、throughput、speedup 或其他 performance number。Source structure、host-test pass 和预期 stage shape 都不是 GPU runtime observation。
+
+## 预期观察，不是运行记录
+
+1. GPU result 应只在 abs+rel comparator 接受它相对于 `double` CPU reference 的误差时报告 `PASS`。
+2. 4,099-element workload 应按 `4,099 -> 9 -> 1` 的 stage sizes 收敛，第一 stage 的最后一个 block 恰有三个有效 input。
+3. Bounds-invalid load 应贡献零，同时 block 中每个 thread 仍应在下一步前到达每个 block-wide barrier。
+
+这些是验收条件，不是已记录的 GPU observation。
+
+## 来源与复核
+
+Current Programming Guide 提供 thread block、shared memory 与 block synchronization contract；三份 NVCC 文档覆盖精确 Toolkit Lane。它们建立接口与 build 坐标，不建立 EX11 的 compilation 或 runtime 结果。
+
+- [CUDA Programming Guide v13.3 - Writing CUDA SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+
+**事实核查与全部来源访问日期：2026-08-30。**

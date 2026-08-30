@@ -1,0 +1,246 @@
+---
+title: 'EX13: Privatized Histogram Runnable Example'
+description: Exactly verify global-bin and block-private shared-memory 16-bin histogram paths through three deterministic fixtures, an independent CPU reference, and a sum-of-bins invariant.
+pairId: ex13
+counterpart: /examples/privatized-histogram/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - fixture-contract
+  - cpu-reference
+  - histogram-kernels
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX13
+prerequisites:
+  - A04
+exampleIds:
+  - EX13
+canonicalExample: EX13
+canonicalRanges:
+  - cpu-reference
+  - histogram-kernels
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 1,228-byte global-plus-shared problem bound and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - For uniform, skewed, and boundary, the global-bin kernel should exactly match the independent 16-bin CPU reference.
+    - For the same three fixtures, the block-private shared-memory kernel should exactly match the independent 16-bin CPU reference.
+    - For both CUDA variants and every fixture, the sum of all 16 output bins should equal the 259-element input count.
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Programming Guide v13.3 - Atomic Functions'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#atomic-functions'
+    version: 'CUDA C++ Programming Guide v13.3'
+    platform: 'Atomic functions, shared memory, and block synchronization'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex13
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-30'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,fixture-contract,cpu-reference,histogram-kernels,host-model,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX13
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: A04
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX13
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX13
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'cpu-reference,histogram-kernels'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 1,228-byte global-plus-shared problem bound and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/privatized-histogram/" lang="zh-CN">阅读中文版本</a>
+
+EX13 is a standalone, original C++17 CUDA Runnable Example. It computes a 16-bin histogram for the `uniform`, `skewed`, and `boundary` fixtures, then compares the global-bin and block-private CUDA paths exactly with the same CPU reference. The website does not execute CUDA. This page publishes no contention observation, timing, or performance result.
+
+## Purpose
+
+Complete A04 first. EX13 turns A04's atomic-update, block-privatization, barrier, and merge structure into a project that can be built independently, but it verifies correctness only. Source structure alone cannot establish contention behavior or support a performance conclusion.
+
+## Canonical project
+
+[View EX13 at its temporary source coordinate](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex13-privatized-histogram), or [view the source archive at the same temporary coordinate](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). The forty zeros in these URLs are a sourceCommit placeholder for a later pin. The project directory is `examples/ex13-privatized-histogram/`.
+
+`project.json` declares two canonical ranges, three fixed fixtures, 16 bins, 259 inputs, a 128-thread block, a conservative 1,228-byte memory bound, three Toolkit Lanes, and an empty compilation axis. The project source and page prose are original; software files use Apache-2.0.
+
+## Fixture contract
+
+`uniform` generates `index % 16`, so bins 0 through 2 contain 17 values each and the remaining bins contain 16 each. The literal expected counts for `skewed` are 17 in bin 0, 226 in bin 7, 16 in bin 8, and zero elsewhere. `boundary` uses only the two legal endpoint values, placing 130 values in bin 0 and 129 in bin 15.
+
+With 259 inputs and a 128-thread block, the grid has two full blocks followed by a partial block with three active threads. Both kernels guard input updates with `index < value_count`; the guard never encloses a block barrier.
+
+## CPU reference
+
+The pure C++17 header generates all three fixtures, computes the reference in a temporary 16-bin array, rejects out-of-range bins, and supplies both per-bin exact comparison and the sum-of-bins invariant:
+
+<CanonicalCode exampleId="EX13" range="cpu-reference" />
+
+The reference updates the caller's output only when the input count is exactly 259, the pointers are valid, and every value lies in `[0, 15]`. Every valid fixture must satisfy `sum_of_bins(histogram) == 259`.
+
+## Histogram kernels
+
+The CUDA source defines and launches `global_histogram_kernel` and `privatized_histogram_kernel`:
+
+<CanonicalCode exampleId="EX13" range="histogram-kernels" />
+
+The first path applies `atomicAdd` to a separate global output. The second gives each block 16 shared-memory private bins, passes through unconditional zero, update, and merge barriers in that order, then atomically merges block-local counts into another global output. This structure states update placement and synchronization order. It is not a contention or performance observation.
+
+## Host model boundary
+
+`make host-test` compiles only `tests/host_reference_test.cpp` and the pure C++17 header. It compares the three CPU-reference results with hand-written literal histograms, checks every sum-of-bins invariant, rejects an unknown fixture and an out-of-range bin, and verifies deterministic mismatch location. It prints `host-reference: pass` on success.
+
+The host test includes no CUDA header and launches no kernel. It cannot establish shared-memory, barrier, atomic-update, merge, or GPU-execution behavior. Passing it grants no CUDA compilation or runtime Evidence Status.
+
+## Build contract
+
+From the project directory on Native Linux, run:
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+The first four stages require the selected CUDA Toolkit; host-test needs only a host C++17 compiler. CUDA stages create `build/privatized_histogram.ii`, `build/privatized_histogram.o`, and `build/ex13-privatized-histogram`. Inspection checks a native `sm_75` cubin and PTX generated from `compute_75`.
+
+`scripts/compile-check.sh c++17 ex13 <result-dir>` performs clean, preprocess, compile, link, inspect, and host-test while retaining logs and inspection artifacts. It never executes the CUDA binary, so it supplies no GPU observation.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Runtime gate | One CUDA GPU with compute capability 7.5 or newer |
+| Baseline GPU Capability Tier | Conservative 1,228-byte global-plus-shared bound, below 8 GB |
+| Compiler target | Native `sm_75` cubin plus PTX generated from `compute_75` |
+| Language contract | The same original C++17 source in all three Toolkit Lanes |
+
+The Lanes are CUDA 11.8.0 on Ubuntu 22.04 x86-64, plus CUDA 12.9.2 and CUDA 13.3.1 on Ubuntu 24.04 x86-64. Their digest-pinned images are future build targets, not compilation records.
+
+## Compilation and runtime evidence
+
+EX13's compilation array is empty, so **EX13 is not Compile-Checked**. Runtime is **Pending Hardware Verification**, and recorded observations are empty. A passing host test populates no CUDA evidence axis.
+
+This page does not claim observed GPU output, atomic behavior, barrier behavior, contention, timing, throughput, speedup, or profiler results. A future runtime record must come from a declared Reference Environment, include a complete Environment Manifest, and preserve all three fixtures, both kernels, and every exact acceptance criterion.
+
+## Expected observations, not runtime records
+
+1. For `uniform`, `skewed`, and `boundary`, the global-bin kernel should match the independent 16-bin CPU reference exactly, bin by bin.
+2. For the same three fixtures, the block-private shared-memory kernel should match the independent 16-bin CPU reference exactly, bin by bin.
+3. For both CUDA paths and every fixture, the sum of all 16 output bins should equal the 259 input values.
+
+These are correctness acceptance criteria that the Learning Site has not observed. They contain no contention or performance judgment.
+
+## Sources and review
+
+The CUDA C++ Programming Guide anchors the semantics of atomic functions, shared memory, and block synchronization. Three NVCC documents and three Docker Hub tag APIs correspond to the declared Toolkit Lanes and digest-pinned image metadata. None is EX13 build or runtime evidence.
+
+- [CUDA C++ Programming Guide v13.3 - Atomic Functions](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#atomic-functions)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**Fact-check and all-source access date: 2026-08-30.**

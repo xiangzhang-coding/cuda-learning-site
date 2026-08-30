@@ -248,10 +248,35 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'M19：CUDA C++17、C++20 与 C++23 方言边界', en: 'M19: CUDA C++17, C++20, and C++23 Dialect Boundaries' },
     prerequisites: ['O04', 'M15'],
   },
+  A01: {
+    href: { 'zh-CN': '/algorithms/elementwise-map/', en: '/en/algorithms/elementwise-map/' },
+    title: { 'zh-CN': 'A01：逐元素映射与一元素一所有者', en: 'A01: Elementwise Map and One Owner per Element' },
+    prerequisites: ['F03', 'F04', 'M02'],
+  },
+  A02: {
+    href: { 'zh-CN': '/algorithms/multi-stage-reduction/', en: '/en/algorithms/multi-stage-reduction/' },
+    title: { 'zh-CN': 'A02：多阶段归约、屏障与运算顺序', en: 'A02: Multi-Stage Reduction, Barriers, and Operation Order' },
+    prerequisites: ['M03', 'M05', 'M06'],
+  },
+  A03: {
+    href: { 'zh-CN': '/algorithms/inclusive-exclusive-scan/', en: '/en/algorithms/inclusive-exclusive-scan/' },
+    title: { 'zh-CN': 'A03：包含式与排除式扫描（Inclusive and Exclusive Scan）', en: 'A03: Inclusive and Exclusive Scan' },
+    prerequisites: ['A02', 'M05'],
+  },
+  A04: {
+    href: { 'zh-CN': '/algorithms/privatized-histogram/', en: '/en/algorithms/privatized-histogram/' },
+    title: { 'zh-CN': 'A04：私有化直方图（Privatized Histogram）', en: 'A04: Privatized Histogram' },
+    prerequisites: ['M03', 'M05'],
+  },
   Q01: {
     href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
     prerequisites: ['F04', 'O04'],
+  },
+  Q02: {
+    href: { 'zh-CN': '/correctness/floating-point-order-reproducibility/', en: '/en/correctness/floating-point-order-reproducibility/' },
+    title: { 'zh-CN': 'Q02：浮点顺序、确定性与逐位可复现性', en: 'Q02: Floating-point order, determinism, and bitwise reproducibility' },
+    prerequisites: ['Q01', 'A02'],
   },
   Q03: {
     href: { 'zh-CN': '/correctness/memcheck-invalid-memory-access/', en: '/en/correctness/memcheck-invalid-memory-access/' },
@@ -317,6 +342,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/ptx-fatbinary-inspection/', en: '/en/examples/ptx-fatbinary-inspection/' },
     title: { 'zh-CN': 'EX10：PTX 与 Fatbinary 检查可运行示例', en: 'EX10: PTX and Fatbinary Inspection Runnable Example' },
     prerequisites: ['M15', 'M16'],
+  },
+  EX11: {
+    href: { 'zh-CN': '/examples/multi-stage-reduction/', en: '/en/examples/multi-stage-reduction/' },
+    title: { 'zh-CN': 'EX11：多阶段归约可运行示例', en: 'EX11: Multi-Stage Reduction Runnable Example' },
+    prerequisites: ['A02', 'Q02'],
+  },
+  EX12: {
+    href: { 'zh-CN': '/examples/inclusive-exclusive-scan/', en: '/en/examples/inclusive-exclusive-scan/' },
+    title: { 'zh-CN': 'EX12：Inclusive 与 Exclusive Scan 可运行示例', en: 'EX12: Inclusive and Exclusive Scan Runnable Example' },
+    prerequisites: ['A03'],
+  },
+  EX13: {
+    href: { 'zh-CN': '/examples/privatized-histogram/', en: '/en/examples/privatized-histogram/' },
+    title: { 'zh-CN': 'EX13：私有化 Histogram 可运行示例', en: 'EX13: Privatized Histogram Runnable Example' },
+    prerequisites: ['A04'],
   },
   EX16: {
     href: { 'zh-CN': '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
@@ -411,6 +451,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
     title: { 'zh-CN': 'NVCC 构建产物流水线', en: 'NVCC Artifact Pipeline' },
     prerequisites: ['M15', 'M16', 'M17'],
+    indexGroup: 'visuals',
+  },
+  VIS10: {
+    href: { 'zh-CN': '/visuals/reduction-stages/', en: '/en/visuals/reduction-stages/' },
+    title: { 'zh-CN': 'Reduction tree 与非活动通道', en: 'Reduction Tree and Inactive Lanes' },
+    prerequisites: ['A02'],
     indexGroup: 'visuals',
   },
   VIS19: {
