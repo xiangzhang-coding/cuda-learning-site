@@ -34,15 +34,17 @@ export async function expectRankedSearchResult(page: Page, scenario: SearchScena
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog', { name: scenario.button });
   await dialog.getByRole('textbox', { name: scenario.button }).fill(scenario.query);
-  const links = dialog.locator('a[href]');
-  await expect(links.first(), scenario.query).toBeVisible({ timeout: 15_000 });
+  const resultLinks = dialog.locator(
+    '.pagefind-ui__result > .pagefind-ui__result-inner > .pagefind-ui__result-title > a[href]',
+  );
+  await expect(resultLinks.first(), scenario.query).toBeVisible({ timeout: 15_000 });
   await expect.poll(async () => {
-    const hrefs = await links.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
+    const hrefs = await resultLinks.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
     const topPaths = hrefs.slice(0, 5).map((href) => new URL(href, page.url()).pathname);
     return scenario.expectedHrefs.some((href) => topPaths.includes(href));
   }, { message: scenario.query, timeout: 15_000 }).toBe(true);
 
-  const hrefs = await links.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
+  const hrefs = await resultLinks.evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''));
 
   if (scenario.localePrefix) {
     expect(
