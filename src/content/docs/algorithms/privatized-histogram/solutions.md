@@ -77,17 +77,11 @@ final = 1
 
 ## 解答 2：证明 privatized phase order
 
-```cpp
-for (int b = threadIdx.x; b < bin_count; b += blockDim.x) shared_bins[b] = 0;
-__syncthreads();
-
-if (sample_valid) atomicAdd(&shared_bins[bin_of(sample)], 1);
-__syncthreads();
-
-for (int b = threadIdx.x; b < bin_count; b += blockDim.x) {
-  atomicAdd(&global_bins[b], shared_bins[b]);
-}
-```
+1. **Zero：** 每个 thread 从 `threadIdx.x` 开始按 `blockDim.x` stride，把所负责的 `shared_bins[b]` 设为 0。
+2. **First barrier：** 所有 block participants 到达 `__syncthreads()`。
+3. **Update：** 只有 `sample_valid` 的 thread 对 `shared_bins[bin_of(sample)]` 执行 `atomicAdd(..., 1)`。
+4. **Second barrier：** 所有 block participants 再次到达 `__syncthreads()`。
+5. **Merge：** 每个 thread 按相同 bin stride，把 `shared_bins[b]` 通过 `atomicAdd` 合入 `global_bins[b]`。
 
 Lane coverage 分别是 `0,4,8`、`1,5,9`、`2,6`、`3,7`。First barrier 建立 all zero writes happen-before any update；second barrier 建立 all shared updates happen-before any merge read。Sample-invalid thread 只跳过中间 atomic，仍参加两个 barriers。
 

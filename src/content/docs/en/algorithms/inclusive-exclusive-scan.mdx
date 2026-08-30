@@ -151,11 +151,9 @@ Under the same `op` and identity contract, `inclusive[i] = exclusive[i] op x[i]`
 
 The sequential dependency makes position `i` wait for `i - 1`. A parallel tree replaces that chain with stages at distances `1, 2, 4, ...`. Each stage reads a stable snapshot from the prior stage and writes longer prefixes into the next snapshot. Once the distance reaches the logical block length, every position owns its complete block prefix.
 
-```text
-stage 0: each lane owns one input value
-stage k: lane i combines prior[i - 2^(k-1)] with prior[i] when that predecessor exists
-barrier: no lane starts the next stage before the current snapshot is complete
-```
+1. **Stage 0:** Each lane owns one input value.
+2. **Stage k:** Lane `i` combines `prior[i - 2^(k-1)]` with `prior[i]` when that predecessor exists.
+3. **Barrier:** No lane starts the next stage before the current snapshot is complete.
 
 `__syncthreads()` is a block barrier; it does not turn unordered reads and writes to one array into a snapshot. A teaching implementation can ping-pong between two shared buffers. Any in-place alternative needs a separate read/write proof. Every participating thread must reach each stage barrier, including edge lanes that must not return early.
 
@@ -181,7 +179,7 @@ This decomposition also creates verification points: the local recurrence, each 
 
 EX12's `multi-block-scan` range is this unit's only canonical import. It shows the complete C++17 path through local block scan, block sums, offset scan, and propagation. The standalone project remains the canonical implementation; this page neither rewrites nor copies its source.
 
-[View the EX12 standalone project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex12-inclusive-exclusive-scan), or [download the archive at the same source coordinate](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip). The all-zero commit is an explicit placeholder until publication pinning is complete, not a published commit.
+[View the EX12 standalone project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex12-inclusive-exclusive-scan), or [download the archive for the same source revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip). Both links use the same pinned commit as the project metadata.
 
 <CanonicalCode exampleId="EX12" range="multi-block-scan" />
 

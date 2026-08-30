@@ -35,6 +35,7 @@ const representativeThemeRoutes = [
   '/en/visuals/stream-event-dependencies/',
   '/en/visuals/page-migration/',
   '/en/visuals/artifact-pipeline/',
+  '/en/visuals/reduction-stages/',
 ] as const;
 
 const releaseVisualStateScans = [
@@ -87,6 +88,18 @@ const releaseVisualStateScans = [
         await pipeline.locator('[data-artifact-action="step"]').click();
       }
       await expect(pipeline).toHaveAttribute('data-current-stage', 'optional-device-link');
+    },
+  },
+  {
+    theme: 'profiler-dark',
+    label: 'VIS10 stride-halving reduction state',
+    route: '/en/visuals/reduction-stages/',
+    prepare: async (page: Page) => {
+      const reduction = page.locator('[data-visual-id="VIS10"]');
+      await reduction.locator('[data-reduction-variant]').selectOption('stride-halving');
+      await reduction.locator('[data-reduction-element-count]').selectOption('8');
+      await reduction.locator('[data-reduction-action="step"]').click();
+      await expect(reduction).toHaveAttribute('data-step-index', '1');
     },
   },
 ] as const;

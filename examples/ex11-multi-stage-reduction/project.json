@@ -5,9 +5,9 @@
   "title": "Multi-Stage Reduction",
   "purpose": "Reduce 4,099 deterministic float values through guarded shared-memory stages and verify the final sum against a high-precision CPU reference without timing the work.",
   "root": "examples/ex11-multi-stage-reduction",
-  "sourceCommit": "0000000000000000000000000000000000000000",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex11-multi-stage-reduction",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip",
+  "sourceCommit": "81d43aa7568514e37ef190da59c845b8072b7011",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

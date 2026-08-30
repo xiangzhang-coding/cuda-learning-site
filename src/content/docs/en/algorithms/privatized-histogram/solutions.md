@@ -77,17 +77,11 @@ Two `atomicAdd` operations can linearize only as `T0 then T1` or `T1 then T0`. I
 
 ## Solution 2: Prove the privatized phase order
 
-```cpp
-for (int b = threadIdx.x; b < bin_count; b += blockDim.x) shared_bins[b] = 0;
-__syncthreads();
-
-if (sample_valid) atomicAdd(&shared_bins[bin_of(sample)], 1);
-__syncthreads();
-
-for (int b = threadIdx.x; b < bin_count; b += blockDim.x) {
-  atomicAdd(&global_bins[b], shared_bins[b]);
-}
-```
+1. **Zero:** Each thread starts at `threadIdx.x` and advances by `blockDim.x`, setting every owned `shared_bins[b]` to 0.
+2. **First barrier:** All block participants reach `__syncthreads()`.
+3. **Update:** Only a thread with `sample_valid` applies `atomicAdd(..., 1)` to `shared_bins[bin_of(sample)]`.
+4. **Second barrier:** All block participants reach `__syncthreads()` again.
+5. **Merge:** Each thread uses the same bin stride and applies `atomicAdd` from `shared_bins[b]` into `global_bins[b]`.
 
 Lane coverage is `0,4,8`, `1,5,9`, `2,6`, and `3,7`. The first barrier establishes that all zero writes happen before any update. The second establishes that all shared updates happen before any merge read. A sample-invalid thread skips only the middle atomic and still participates in both barriers.
 

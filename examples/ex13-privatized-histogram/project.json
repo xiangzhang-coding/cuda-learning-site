@@ -5,9 +5,9 @@
   "title": "Privatized Histogram",
   "purpose": "Compare global-bin atomics with block-private shared-memory bins while verifying exact 16-bin counts for three deterministic fixtures.",
   "root": "examples/ex13-privatized-histogram",
-  "sourceCommit": "0000000000000000000000000000000000000000",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex13-privatized-histogram",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip",
+  "sourceCommit": "81d43aa7568514e37ef190da59c845b8072b7011",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex13-privatized-histogram",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
