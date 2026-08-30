@@ -147,7 +147,7 @@ This table is expected access reasoning, not a transaction trace, bandwidth resu
 
 A tiled transpose separates the global phases. First, a block's threads cooperatively load a logical `T x T` tile along input rows into shared memory. After a block barrier, they exchange tile coordinates and cooperatively store along output rows. Shared memory acts as layout-changing staging, so the global load and global store may each use a contiguous lane direction.
 
-The proof ledger for every value names four owners: its input global coordinate, shared write coordinate, shared read coordinate, and output global coordinate. The transposed block coordinate must also be exchanged. Swapping only `threadIdx.x` and `threadIdx.y` without swapping the tile's grid position writes the wrong region when a matrix contains multiple tiles.
+The proof ledger for every value names four owners: its input global coordinate, shared write coordinate, shared read coordinate, and output global coordinate. The transposed block coordinate must also be exchanged. Swapping only tile-local row and column without swapping the tile's grid position writes the wrong region when a matrix contains multiple tiles. EX14 derives those local coordinates from a one-dimensional thread ID rather than depending on a particular two-dimensional block shape.
 
 The shared tile does not alter the mathematical transpose contract. It changes only the path from input address to output address and the layout of intermediate physical storage.
 

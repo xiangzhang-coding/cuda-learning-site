@@ -2102,7 +2102,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 **验收条件：**
 
 - Output extents 分别是 `7x5` 与 `35x33`，每个 input/output index 恰好一个 owner；任何只在 square case 成立的 leading dimension 都被拒绝。
-- Partial blocks 的 256 个 `32x8` threads 按四次 y-loop 共同完成 loads，并统一到达唯一 barrier；每个合法 store 的 source slot 已由合法 load 定义。
+- Partial blocks 的 256 个一维 threads 分别拥有 `threadIdx.x + k*blockDim.x` 的四个 local slots，并统一到达唯一 barrier；每个合法 store 的 source slot 已由合法 load 定义。
 - Padding 只把 physical row stride 从 32 改为 33，不改变 logical coordinates、global allocation 或 output values。
 - Source arithmetic 只支持 expected access/bank reasoning；没有 retained GPU record 时，不发布 transaction、conflict counter、timing、bandwidth 或 speedup。
 
@@ -2110,7 +2110,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <details><summary>提示 2</summary>把 data predicate 和 barrier participant set 分成两列，再使用 `(lane*stride+column) mod 32`。</details>
 
-**参考解答（Reviewed solution）：** 修订后的 oracle 对输入 `rows x columns` 分配 `columns x rows` output，并按精确 mapping 逐元素比较。Kernel ledger 先让 `32x8` threads 以 `offset=0,8,16,24` 进行 guarded loads，所有 threads 无条件 barrier，再交换 block/thread coordinates 进行独立 guarded stores。合法 output 的 inverse coordinate 满足原 input bounds，因此不读取未定义 edge slot。Logical tile 始终为 `32x32`；physical `+1` slot 只改变 row stride。在 selected bank model 中 stride 32 的固定列映射同一 bank，stride 33 遍历 banks，但这不是实际 conflict 或 speed observation。EX14 仍为 Pending Hardware Verification。
+**参考解答（Reviewed solution）：** 修订后的 oracle 对输入 `rows x columns` 分配 `columns x rows` output，并按精确 mapping 逐元素比较。Kernel ledger 让 256 个一维 threads 各自以 `threadIdx.x + k*blockDim.x` 拥有四个 guarded load slots，所有 threads 无条件 barrier，再独立线性化 output-local coordinate 并读取交换后的 shared coordinate。合法 output 的 inverse coordinate 满足原 input bounds，因此不读取未定义 edge slot。Logical tile 始终为 `32x32`；physical `+1` slot 只改变 row stride。在 selected bank model 中 stride 32 的固定列映射同一 bank，stride 33 遍历 banks，但这不是实际 conflict 或 speed observation。EX14 仍为 Pending Hardware Verification。
 
 **有效替代方案：** 可以采用另一种 conflict-avoiding swizzle 或 rectangular tile，只要重新声明 physical mapping、capacity、guards 与 logical oracle；也可以保留 unpadded correctness baseline 作为 measurement 对照。
 
@@ -2181,7 +2181,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 - 声明 `X[N,C,H,W]`、`F[K,C,R,S]`、`Y[N,K,P,Q]` dense addresses，采用不翻转 filter 的 cross-correlation，并写出 output-shape formula。
 - 至少加入 asymmetric filter、rectangular input、edge padding、stride/dilation、multi-channel fixtures，以及预先声明的 accumulation/tolerance/non-finite policy。
-- Future cuDNN path 分别记录 component pin、graph validation/build、heuristics candidates、selected plan、workspace 与 correctness/determinism；L10 之前不执行 comparison。
+- Future cuDNN path 分别记录 component pin、graph validation/build、heuristics candidates、selected plan、workspace 与 correctness/determinism；尚未发布的后续 cuDNN library 单元之前不执行 comparison。
 
 **预期证据：** Tensor/operation contract、asymmetric-filter oracle、staged-patch ledger、ordered production gate table、failure taxonomy 与空白 measurement template。
 
@@ -2190,13 +2190,13 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - CPU/custom/future-library paths 使用同一 shape、layout、cross-correlation、stride、dilation、padding、data/compute type 与 numerical acceptance contract。
 - Asymmetric fixture 明确区分 unflipped correlation 与 flipped mathematical convolution；每个域外 tap 生成 0 而不越界读取。
 - Graph validation、build/support、candidate filtering、plan selection 与 workspace allocation/lifetime 是独立 gates；failure 不被伪装成 performance result。
-- cuDNN Frontend v1.27.0 只作为 cuDNN 9.24.0+ future coordinate；没有 pinned L10 matrix 和 retained measurement 时，不宣布任何 winner。
+- cuDNN Frontend v1.27.0 只作为 cuDNN 9.24.0+ future coordinate；没有后续 cuDNN library 单元的 pinned matrix 和 retained measurement 时，不宣布任何 winner。
 
 <details><summary>提示 1</summary>先用一个 `2x2` asymmetric filter 写出 correlation 与 flipped convolution 的两个 outputs。</details>
 
 <details><summary>提示 2</summary>把“API 接受 graph”“有候选 plan”“workspace 可用”“数值通过”“速度如何”拆成五个 verdict。</details>
 
-**参考解答（Reviewed solution）：** 修订 packet 先固定 dense NCHW/KCRS/NKPQ addresses、unflipped cross-correlation equation、output extents 与 zero-padding accessor，再让 CPU/custom/future cuDNN paths共享 exact semantics。Fixture matrix 覆盖 asymmetry、rectangular extent、edges、stride、dilation 和 channels；floating-point comparator 在 output 前固定 accumulation、`atol/rtol` 与 non-finite policy。Production table 只有在 later L10 pin 完整 component matrix 后才进入 graph validation/build、heuristics、selected plan、workspace 和 repeated correctness/determinism。当前 A07 不执行 cuDNN，所有 plan/output/timing fields 是 `unrecorded`，两边都没有 performance verdict。
+**参考解答（Reviewed solution）：** 修订 packet 先固定 dense NCHW/KCRS/NKPQ addresses、unflipped cross-correlation equation、output extents 与 zero-padding accessor，再让 CPU/custom/future cuDNN paths共享 exact semantics。Fixture matrix 覆盖 asymmetry、rectangular extent、edges、stride、dilation 和 channels；floating-point comparator 在 output 前固定 accumulation、`atol/rtol` 与 non-finite policy。Production table 只有在尚未发布的后续 cuDNN library 单元固定完整 component matrix 后才进入 graph validation/build、heuristics、selected plan、workspace 和 repeated correctness/determinism。当前 A07 不执行 cuDNN，所有 plan/output/timing fields 是 `unrecorded`，两边都没有 performance verdict。
 
 **有效替代方案：** Production baseline 可以来自 framework-managed cuDNN backend，只要 component/algorithm selection 可记录；integer fixture 可以 exact compare，但不能替代 floating-point application acceptance。
 

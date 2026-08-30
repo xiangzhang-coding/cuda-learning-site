@@ -147,7 +147,7 @@ CPU reference 应按同一个 shape 和 mapping 构造 expected output。对于�
 
 Tiled transpose 把 global phases分开。第一阶段让一个 block 的 threads 沿 input rows cooperative load 一个 logical `T x T` tile 到 shared memory；第二阶段在 block barrier 之后交换 tile coordinates，再沿 output rows cooperative store。Shared memory 充当 layout-changing staging area，因此 global load 与 global store 都可以各自采用连续的 lane direction。
 
-每个 value 的 proof ledger 应包含四个 owners：input global coordinate、shared write coordinate、shared read coordinate、output global coordinate。Transpose 后的 block coordinate 也要交换；只交换 `threadIdx.x` 与 `threadIdx.y` 而不交换 tile 在 grid 中的位置，会在多 tile matrix 上写错区域。
+每个 value 的 proof ledger 应包含四个 owners：input global coordinate、shared write coordinate、shared read coordinate、output global coordinate。Transpose 后的 block coordinate 也要交换；只交换 tile-local row/column 而不交换 tile 在 grid 中的位置，会在多 tile matrix 上写错区域。EX14 使用一维 thread ID 线性推导这些 local coordinates，不依赖特定二维 block shape。
 
 Shared tile 不改变 transpose 数学合同。它只改变数据从 input address 到 output address 的路径，以及中间 physical storage 的 layout。
 

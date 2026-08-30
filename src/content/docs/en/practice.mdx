@@ -2102,7 +2102,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 **Acceptance criteria:**
 
 - Output extents are `7x5` and `35x33`, with exactly one owner per input and output index; any leading dimension that works only for squares is rejected.
-- The 256 threads of a partial `32x8` block jointly load through four y-loop iterations and uniformly reach the one barrier; every legal store reads a slot defined by a legal load.
+- The 256 one-dimensional threads of a partial block each own four local slots at `threadIdx.x + k*blockDim.x` and uniformly reach the one barrier; every legal store reads a slot defined by a legal load.
 - Padding changes physical row stride from 32 to 33 and changes no logical coordinate, global allocation, or output value.
 - Source arithmetic supports only expected access and bank reasoning. Without a retained GPU record, it publishes no transaction, conflict counter, timing, bandwidth, or speedup.
 
@@ -2110,7 +2110,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <details><summary>Hint 2</summary>Separate data predicates from the barrier participant set, then use `(lane*stride+column) mod 32`.</details>
 
-**Reviewed solution:** The repaired oracle allocates a `columns x rows` output for a `rows x columns` input and exact-compares the declared mapping. The kernel ledger has `32x8` threads issue guarded loads at offsets `0,8,16,24`, all threads reach an unconditional barrier, and exchanged block/thread coordinates then issue independent guarded stores. Inverse coordinates prove that every legal output reads a source slot satisfying input bounds. The logical tile remains `32x32`; the physical +1 slot changes only row stride. In the selected bank model, stride 32 maps a fixed column to one bank while stride 33 visits all banks, but that is neither an actual conflict observation nor speed evidence. EX14 remains Pending Hardware Verification.
+**Reviewed solution:** The repaired oracle allocates a `columns x rows` output for a `rows x columns` input and exact-compares the declared mapping. The kernel ledger gives each of 256 one-dimensional threads four guarded load slots at `threadIdx.x + k*blockDim.x`, all threads reach an unconditional barrier, and the store phase independently linearizes output-local coordinates before reading the exchanged shared coordinate. Inverse coordinates prove that every legal output reads a source slot satisfying input bounds. The logical tile remains `32x32`; the physical +1 slot changes only row stride. In the selected bank model, stride 32 maps a fixed column to one bank while stride 33 visits all banks, but that is neither an actual conflict observation nor speed evidence. EX14 remains Pending Hardware Verification.
 
 **Valid alternative:** A different conflict-avoiding swizzle or rectangular tile is valid if it re-declares physical mapping, capacity, guards, and the logical oracle. An unpadded correctness baseline is also a valid measurement comparator.
 
@@ -2181,7 +2181,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 - Declare dense addresses for `X[N,C,H,W]`, `F[K,C,R,S]`, and `Y[N,K,P,Q]`, use unflipped cross-correlation, and state the output-shape formula.
 - Include asymmetric-filter, rectangular-input, edge-padding, stride/dilation, and multi-channel fixtures, plus predeclared accumulation, tolerance, and non-finite policy.
-- Record future cuDNN component pin, graph validation/build, heuristic candidates, selected plan, workspace, correctness, and determinism separately. Run no comparison before L10.
+- Record future cuDNN component pin, graph validation/build, heuristic candidates, selected plan, workspace, correctness, and determinism separately. Run no comparison before a later, unpublished cuDNN library unit.
 
 **Expected evidence:** A tensor/operation contract, asymmetric-filter oracle, staged-patch ledger, ordered production-gate table, failure taxonomy, and blank measurement template.
 
@@ -2190,13 +2190,13 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - CPU, custom, and future-library paths share shape, layout, cross-correlation, stride, dilation, padding, data/compute types, and numerical acceptance.
 - An asymmetric fixture distinguishes unflipped correlation from flipped mathematical convolution; every out-of-domain tap generates 0 without an out-of-bounds read.
 - Graph validation, build/support, candidate filtering, plan selection, and workspace allocation/lifetime are independent gates; a failure is not disguised as performance.
-- cuDNN Frontend v1.27.0 is only a future coordinate for cuDNN 9.24.0+. Without a pinned L10 matrix and retained measurement, there is no winner.
+- cuDNN Frontend v1.27.0 is only a future coordinate for cuDNN 9.24.0+. Without a pinned matrix from a later cuDNN library unit and a retained measurement, there is no winner.
 
 <details><summary>Hint 1</summary>Use one asymmetric `2x2` filter to write separate correlation and flipped-convolution outputs.</details>
 
 <details><summary>Hint 2</summary>Give separate verdicts to “API accepts graph,” “candidate exists,” “workspace is available,” “numerics pass,” and “timing result.”</details>
 
-**Reviewed solution:** The repaired packet first fixes dense NCHW/KCRS/NKPQ addresses, the unflipped cross-correlation equation, output extents, and a zero-padding accessor, then gives CPU, custom, and future cuDNN paths the same semantics. The fixture matrix covers asymmetry, rectangular extents, edges, stride, dilation, and channels; the floating-point comparator fixes accumulation, `atol/rtol`, and non-finite policy before output. Only after later L10 pins the full component matrix can the production table enter graph validation/build, heuristics, selected plan, workspace, and repeated correctness/determinism. A07 executes no cuDNN, every plan/output/timing field is `unrecorded`, and neither path has a performance verdict.
+**Reviewed solution:** The repaired packet first fixes dense NCHW/KCRS/NKPQ addresses, the unflipped cross-correlation equation, output extents, and a zero-padding accessor, then gives CPU, custom, and future cuDNN paths the same semantics. The fixture matrix covers asymmetry, rectangular extents, edges, stride, dilation, and channels; the floating-point comparator fixes accumulation, `atol/rtol`, and non-finite policy before output. Only after a later, unpublished cuDNN library unit pins the full component matrix can the production table enter graph validation/build, heuristics, selected plan, workspace, and repeated correctness/determinism. A07 executes no cuDNN, every plan/output/timing field is `unrecorded`, and neither path has a performance verdict.
 
 **Valid alternative:** A framework-managed cuDNN backend can be the production baseline if its component and algorithm selection can be recorded. An integer fixture may exact-compare but does not replace floating-point application acceptance.
 

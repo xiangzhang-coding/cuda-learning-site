@@ -17,7 +17,6 @@ import {
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex14-tiled-transpose');
-const initialSourceCommit = '0'.repeat(40);
 const rangeNames = ['cpu-reference', 'tiled-transpose'] as const;
 
 const lanes = [
@@ -69,6 +68,7 @@ async function listProjectFiles() {
   return entries
     .filter((entry) => entry.isFile())
     .map((entry) => portable(path.relative(exampleRoot, path.join(entry.parentPath, entry.name))))
+    .filter((relativePath) => !relativePath.startsWith('build/'))
     .sort();
 }
 
@@ -112,11 +112,9 @@ function executableLines(script: string) {
 }
 
 describe('EX14 standalone tiled-transpose boundary', () => {
-  it('declares exactly the standalone original C++17 project and initial publication coordinates', async () => {
+  it('declares exactly the standalone original C++17 project and pinned publication coordinates', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX14');
     const sourceCommit = example.sourceCommit as string;
-    const isInitialCoordinate = sourceCommit === initialSourceCommit;
-    const isPinnedCoordinate = /^[0-9a-f]{40}$/.test(sourceCommit) && !isInitialCoordinate;
 
     expect(await validateCanonicalExample(projectRoot, 'EX14')).toEqual([]);
     expect(example).toMatchObject({
@@ -128,13 +126,17 @@ describe('EX14 standalone tiled-transpose boundary', () => {
       license: 'Apache-2.0',
       provenance: 'original',
     });
-    expect(isInitialCoordinate || isPinnedCoordinate).toBe(true);
+    expect(sourceCommit).toMatch(/^[0-9a-f]{40}$/);
+    expect(sourceCommit).not.toBe('0'.repeat(40));
     expect(example.sourceUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${sourceCommit}/examples/ex14-tiled-transpose`,
     );
     expect(example.downloadUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${sourceCommit}.zip`,
     );
+    const readme = await readFile(path.join(exampleRoot, 'README.md'), 'utf8');
+    expect(readme).not.toContain('40-zero');
+    expect(readme).toContain('pinned to the immutable publication commit');
     expect(await listProjectFiles()).toEqual([
       'Makefile',
       'README.md',
@@ -145,14 +147,9 @@ describe('EX14 standalone tiled-transpose boundary', () => {
       'src/tiled_transpose.cu',
       'tests/host_reference_test.cpp',
     ]);
-
-    if (isInitialCoordinate) {
-      const manifest = await readFile(path.join(exampleRoot, 'project.json'), 'utf8');
-      expect(manifest.match(new RegExp(initialSourceCommit, 'g'))).toHaveLength(3);
-    }
   });
 
-  it('pins the exact build, matrix, Baseline tier, and three EX13 image contracts', async () => {
+  it('pins the exact build, matrix, Baseline tier, and three EX14 image contracts', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX14');
 
     expect(example.build).toEqual({
@@ -180,8 +177,9 @@ describe('EX14 standalone tiled-transpose boundary', () => {
     expect(example.correctness).toMatchObject({
       cpuReference: 'include/tiled_transpose_reference.hpp',
       logicalTile: [32, 32],
-      blockDimensions: [32, 8],
-      blockRows: 8,
+      blockDimensions: [256, 1],
+      threadsPerBlock: 256,
+      cooperativeIterations: 4,
       sharedTile: [32, 33],
       sharedBytesPerBlock: 4224,
       mapping: 'output[col * rows + row] = input[row * columns + col]',
@@ -227,17 +225,20 @@ describe('EX14 standalone tiled-transpose boundary', () => {
     expect(ranges.every(({ code }) => code.trim() !== '')).toBe(true);
   });
 
-  it('implements guarded 32x8 tile loops, padded storage, exact mapping, and one unconditional barrier', async () => {
+  it('implements guarded linear tile ownership, padded storage, exact mapping, and one unconditional barrier', async () => {
     const source = await readFile(path.join(exampleRoot, 'src/tiled_transpose.cu'), 'utf8');
     const kernel = kernelBody(source, 'tiled_transpose');
     const barrierOffset = kernel.indexOf('__syncthreads');
     const inputOffset = kernel.indexOf('input[input_row * columns + input_column]');
     const outputOffset = kernel.indexOf('output[output_row * rows + output_column]');
 
-    expect(source).toMatch(/constexpr\s+unsigned\s+int\s+TILE_DIM\s*=\s*32U?\s*;/);
-    expect(source).toMatch(/constexpr\s+unsigned\s+int\s+BLOCK_ROWS\s*=\s*8U?\s*;/);
+    expect(source).toMatch(/constexpr\s+unsigned\s+int\s+kTileExtent\s*=\s*32U?\s*;/);
+    expect(source).toMatch(/constexpr\s+unsigned\s+int\s+kThreadsPerBlock\s*=\s*256U?\s*;/);
+    expect(source).toMatch(/kTileElementCount\s*=\s*kTileExtent\s*\*\s*kTileExtent/);
     expect(kernel).toMatch(/__shared__\s+float\s+tile\s*\[\s*32\s*]\s*\[\s*33\s*]\s*;/);
-    expect(kernel.match(/offset\s*\+=\s*BLOCK_ROWS/g)).toHaveLength(2);
+    expect(kernel.match(/local_index\s*\+=\s*blockDim\.x/g)).toHaveLength(2);
+    expect(kernel).toMatch(/local_row\s*=\s*local_index\s*\/\s*kTileExtent/);
+    expect(kernel).toMatch(/local_column\s*=\s*local_index\s*%\s*kTileExtent/);
     expect(kernel).toMatch(
       /if\s*\(\s*input_row\s*<\s*rows\s*&&\s*input_column\s*<\s*columns\s*\)[\s\S]{0,180}input\s*\[\s*input_row\s*\*\s*columns\s*\+\s*input_column\s*]/,
     );
@@ -245,8 +246,9 @@ describe('EX14 standalone tiled-transpose boundary', () => {
       /if\s*\(\s*output_row\s*<\s*columns\s*&&\s*output_column\s*<\s*rows\s*\)[\s\S]{0,180}output\s*\[\s*output_row\s*\*\s*rows\s*\+\s*output_column\s*]/,
     );
     expect(kernel).toMatch(
-      /output\s*\[\s*output_row\s*\*\s*rows\s*\+\s*output_column\s*]\s*=\s*tile\s*\[\s*threadIdx\.x\s*]\s*\[\s*threadIdx\.y\s*\+\s*offset\s*]/,
+      /output\s*\[\s*output_row\s*\*\s*rows\s*\+\s*output_column\s*]\s*=\s*tile\s*\[\s*output_local_column\s*]\s*\[\s*output_local_row\s*]/,
     );
+    expect(kernel).not.toMatch(/threadIdx\.y|blockDim\.y/);
     expect(kernel.match(/\b__syncthreads\s*\(\s*\)\s*;/g)).toHaveLength(1);
     expect(inputOffset).toBeGreaterThanOrEqual(0);
     expect(barrierOffset).toBeGreaterThan(inputOffset);
@@ -302,8 +304,11 @@ describe('EX14 standalone tiled-transpose boundary', () => {
       expect(source).toContain(call);
     }
     expect(source).toContain('for (const ex14::Fixture& fixture : ex14::kFixtures)');
-    expect(source.match(/std::cout/g)).toHaveLength(1);
-    expect(source).toContain('"correctness=" << (all_match ? "PASS" : "FAIL")');
+    expect(source.match(/std::cout/g)).toHaveLength(2);
+    expect(source).toContain('"fixture=" << fixture.id');
+    expect(source).toContain('" output=" << fixture.input_shape.columns');
+    expect(source).toContain('" correctness=" << (fixture_matches ? "PASS" : "FAIL")');
+    expect(source).toContain('"result=" << (all_match ? "PASS" : "FAIL")');
 
     const buildRoot = await mkdtemp(path.join(tmpdir(), 'ex14-host-'));
     try {
@@ -382,10 +387,8 @@ describe('EX14 standalone tiled-transpose boundary', () => {
         [...page.matchAll(/<CanonicalCode exampleId="EX14" range="([^"]+)" \/>/g)]
           .map((match) => match[1]),
       ).toEqual(rangeNames);
-      expect(page).toMatch(/(?:No NVIDIA owner source|没有复制 NVIDIA owner source)/);
-      if (sourceCommit === initialSourceCommit) {
-        expect(page.match(new RegExp(initialSourceCommit, 'g'))).toHaveLength(2);
-      }
+      expect(page).toMatch(/(?:copies no NVIDIA owner source|没有复制 NVIDIA owner source)/i);
+      expect(page).not.toContain('0'.repeat(40));
 
       const expectedCounterpart = index === 0
         ? 'href="/en/examples/tiled-transpose/"'

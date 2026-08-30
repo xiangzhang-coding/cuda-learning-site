@@ -176,7 +176,7 @@ Future work includes at least these gates:
 
 The [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0) was published on 2026-08-06 and is recommended by that release for cuDNN 9.24.0 and later. It is only a current future-comparison coordinate, not an A07 dependency, compatibility proof, or execution record.
 
-Later L10 will pin the production component matrix. Current A07 does not teach cuDNN API programming and does not build, validate, or execute a cuDNN graph. This checklist defines future comparison responsibilities only; no evidence here supports claiming that a hand-written kernel beats a cuDNN plan.
+A later, unpublished cuDNN library unit will pin the production component matrix. Current A07 does not teach cuDNN API programming and does not build, validate, or execute a cuDNN graph. This checklist defines future comparison responsibilities only; no evidence here supports claiming that a hand-written kernel beats a cuDNN plan.
 
 ## Evidence boundary
 
@@ -201,7 +201,7 @@ Compilation, runtime, expected observations, and recorded observations are all e
 
 - Complete the [A07 Exercises](/en/algorithms/convolution-reuse-layout/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/convolution-reuse-layout/solutions/).
 - Audit [Practice Bank PB-R2-019](/en/practice/#pb-r2-019), requiring a tensor contract, asymmetric-filter oracle, reuse ledger, and production decision gates.
-- Revisit [TERM-145 convolution](/en/glossary/#term-145) and [TERM-146 cross-correlation](/en/glossary/#term-146), while keeping L10 as later production scope that this page does not execute.
+- Revisit [TERM-145 convolution](/en/glossary/#term-145) and [TERM-146 cross-correlation](/en/glossary/#term-146), while leaving the component pin and execution to a later, unpublished cuDNN library unit.
 
 ## Sources and review
 

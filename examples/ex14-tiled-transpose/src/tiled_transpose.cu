@@ -11,8 +11,9 @@
 namespace {
 
 // [ex14-tiled-transpose-start]
-constexpr unsigned int TILE_DIM = 32U;
-constexpr unsigned int BLOCK_ROWS = 8U;
+constexpr unsigned int kTileExtent = 32U;
+constexpr unsigned int kThreadsPerBlock = 256U;
+constexpr unsigned int kTileElementCount = kTileExtent * kTileExtent;
 
 __global__ void tiled_transpose(
     const float* input,
@@ -21,31 +22,41 @@ __global__ void tiled_transpose(
     std::size_t columns) {
   __shared__ float tile[32][33];
 
-  const std::size_t input_column =
-      static_cast<std::size_t>(blockIdx.x) * TILE_DIM + threadIdx.x;
-  const std::size_t input_row_base =
-      static_cast<std::size_t>(blockIdx.y) * TILE_DIM + threadIdx.y;
+  const std::size_t input_tile_row =
+      static_cast<std::size_t>(blockIdx.y) * kTileExtent;
+  const std::size_t input_tile_column =
+      static_cast<std::size_t>(blockIdx.x) * kTileExtent;
 
-  for (unsigned int offset = 0U; offset < TILE_DIM; offset += BLOCK_ROWS) {
-    const std::size_t input_row = input_row_base + offset;
+  for (unsigned int local_index = threadIdx.x;
+       local_index < kTileElementCount;
+       local_index += blockDim.x) {
+    const unsigned int local_row = local_index / kTileExtent;
+    const unsigned int local_column = local_index % kTileExtent;
+    const std::size_t input_row = input_tile_row + local_row;
+    const std::size_t input_column = input_tile_column + local_column;
     if (input_row < rows && input_column < columns) {
-      tile[threadIdx.y + offset][threadIdx.x] =
+      tile[local_row][local_column] =
           input[input_row * columns + input_column];
     }
   }
 
   __syncthreads();
 
-  const std::size_t output_column =
-      static_cast<std::size_t>(blockIdx.y) * TILE_DIM + threadIdx.x;
-  const std::size_t output_row_base =
-      static_cast<std::size_t>(blockIdx.x) * TILE_DIM + threadIdx.y;
+  const std::size_t output_tile_row =
+      static_cast<std::size_t>(blockIdx.x) * kTileExtent;
+  const std::size_t output_tile_column =
+      static_cast<std::size_t>(blockIdx.y) * kTileExtent;
 
-  for (unsigned int offset = 0U; offset < TILE_DIM; offset += BLOCK_ROWS) {
-    const std::size_t output_row = output_row_base + offset;
+  for (unsigned int local_index = threadIdx.x;
+       local_index < kTileElementCount;
+       local_index += blockDim.x) {
+    const unsigned int output_local_row = local_index / kTileExtent;
+    const unsigned int output_local_column = local_index % kTileExtent;
+    const std::size_t output_row = output_tile_row + output_local_row;
+    const std::size_t output_column = output_tile_column + output_local_column;
     if (output_row < columns && output_column < rows) {
       output[output_row * rows + output_column] =
-          tile[threadIdx.x][threadIdx.y + offset];
+          tile[output_local_column][output_local_row];
     }
   }
 }
@@ -95,12 +106,12 @@ bool run_fixture(const ex14::Fixture& fixture) {
   }
 
   if (ok) {
-    const dim3 block(TILE_DIM, BLOCK_ROWS);
+    const dim3 block(kThreadsPerBlock);
     const dim3 grid(
         static_cast<unsigned int>(
-            (fixture.input_shape.columns + TILE_DIM - 1U) / TILE_DIM),
+            (fixture.input_shape.columns + kTileExtent - 1U) / kTileExtent),
         static_cast<unsigned int>(
-            (fixture.input_shape.rows + TILE_DIM - 1U) / TILE_DIM));
+            (fixture.input_shape.rows + kTileExtent - 1U) / kTileExtent));
     tiled_transpose<<<grid, block>>>(
         device_input,
         device_output,
@@ -136,9 +147,16 @@ int main() {
   bool all_match = true;
   for (const ex14::Fixture& fixture : ex14::kFixtures) {
     const bool fixture_matches = run_fixture(fixture);
+    std::cout << "fixture=" << fixture.id
+              << " input=" << fixture.input_shape.rows << 'x'
+              << fixture.input_shape.columns
+              << " output=" << fixture.input_shape.columns << 'x'
+              << fixture.input_shape.rows
+              << " correctness=" << (fixture_matches ? "PASS" : "FAIL")
+              << '\n';
     all_match = fixture_matches && all_match;
   }
 
-  std::cout << "correctness=" << (all_match ? "PASS" : "FAIL") << '\n';
+  std::cout << "result=" << (all_match ? "PASS" : "FAIL") << '\n';
   return all_match ? EXIT_SUCCESS : EXIT_FAILURE;
 }

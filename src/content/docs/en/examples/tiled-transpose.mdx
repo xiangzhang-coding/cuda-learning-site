@@ -159,7 +159,7 @@ Complete A05 first. EX14 turns rectangular-transpose shape, row-major mapping, e
 
 [View EX14 at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/6993495d0bf1f62901eee151b2bf138c78d3c22f/examples/ex14-tiled-transpose), or [download the source archive for the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/6993495d0bf1f62901eee151b2bf138c78d3c22f.zip). The project directory is `examples/ex14-tiled-transpose/`; `project.json`, page links, and canonical imports use the same immutable publication commit.
 
-`project.json` declares two canonical ranges, three fixtures, a 32 x 32 logical tile, a 32 x 8 block, a 32 x 33 shared layout, a conservative 20,608-byte memory bound, three C++17 Toolkit Lanes, and an empty compilation axis. The project source and page prose are original; software files use Apache-2.0. No NVIDIA owner source, sample, figure, or result is copied.
+`project.json` declares two canonical ranges, three fixtures, a 32 x 32 logical tile, a one-dimensional 256-thread block, four cooperative slot assignments per thread, a 32 x 33 shared layout, a conservative 20,608-byte memory bound, three C++17 Toolkit Lanes, and an empty compilation axis. The project source and page prose are original; software files use Apache-2.0. This linear ownership design copies no NVIDIA owner source, sample, figure, or result.
 
 ## Matrix contract
 
@@ -181,13 +181,13 @@ Before writing output, the reference rejects zero or overflowing dimensions, nul
 
 ## Tiled transpose
 
-The CUDA source declares a 32 x 32 logical tile, `BLOCK_ROWS=8`, and `__shared__ float tile[32][33]`:
+The CUDA source declares a 32 x 32 logical tile, a one-dimensional 256-thread ownership loop, and `__shared__ float tile[32][33]`:
 
 <CanonicalCode exampleId="EX14" range="tiled-transpose" />
 
-Each 32 x 8 block covers 32 local rows by looping the thread's y coordinate in increments of eight. The load guard checks both input row and column. Every thread then reaches the only `__syncthreads()` unconditionally. The store guard independently checks the transposed output extents. The kernel has no return before the barrier.
+Each 256-thread block maps `threadIdx.x + k * blockDim.x` to local row and column, so every thread cooperatively defines four slots. The store phase independently linearizes output-local coordinates and reads the exchanged shared coordinate. The load guard checks both input row and column. Every thread then reaches the only `__syncthreads()` unconditionally. The store guard independently checks the transposed output extents. The kernel has no return before the barrier.
 
-The 33rd shared column is physical storage padding only. It is not a logical matrix column, does not change output shape, and creates no output value. This project does not observe or quantify its bank behavior on a GPU.
+The 33rd shared column is physical storage padding only. It is not a logical matrix column, does not change output shape, and creates no output value. This project does not observe or quantify its bank behavior on a GPU. The CUDA main reports each fixture ID, input shape, transposed output shape, and correctness `PASS` or `FAIL`, followed by one aggregate result; it emits no timing or performance field.
 
 ## Host model boundary
 

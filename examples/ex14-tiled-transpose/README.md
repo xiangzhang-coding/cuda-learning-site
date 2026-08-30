@@ -2,7 +2,7 @@
 
 # EX14: Tiled Transpose
 
-EX14 is an original, standalone C++17 CUDA Runnable Example. It transposes row-major `float` matrices out of place with a 32 x 32 logical tile, eight thread rows, and a padded `float[32][33]` shared array. The project verifies correctness only. It publishes no speedup, global-memory transaction count, bank-conflict observation, timing, or profiler result.
+EX14 is an original, standalone C++17 CUDA Runnable Example. It transposes row-major `float` matrices out of place with a 32 x 32 logical tile, a one-dimensional 256-thread ownership loop, and a padded `float[32][33]` shared array. The project verifies correctness only. It publishes no speedup, global-memory transaction count, bank-conflict observation, timing, or profiler result.
 
 ## Matrix Contract
 
@@ -18,11 +18,11 @@ The pure C++17 reference rejects zero or overflowing dimensions, null pointers, 
 
 ## CUDA Structure
 
-Each block has dimensions `32 x 8`. Its threads cover one logical 32 x 32 tile by looping the local row in increments of `BLOCK_ROWS=8`. Edge loads and stores are guarded independently, so rectangular matrices and dimensions that are not multiples of 32 remain within their declared arrays.
+Each block has 256 one-dimensional threads. A thread owns local linear slots `threadIdx.x + k * blockDim.x`, derives `(local_row, local_column)` by division and remainder, and covers four slots of the logical 32 x 32 tile. The store phase linearizes output-local coordinates independently and reads the exchanged shared coordinate. Edge loads and stores have separate guards, so rectangular matrices and dimensions that are not multiples of 32 remain within their declared arrays.
 
 The kernel stages valid values in `__shared__ float tile[32][33]`. The extra column belongs only to the physical shared-memory layout; it does not add a logical matrix column or affect output dimensions or values. Every thread reaches one unconditional `__syncthreads()` after the load loop. There is no return before that barrier.
 
-The CUDA executable runs all three fixtures. For each fixture it allocates input and output arrays, copies the input, launches the kernel, checks launch and completion status, copies the output back, and compares it exactly with the CPU reference. Its output is only a final correctness `PASS` or `FAIL`; it contains no measurement path.
+The CUDA executable runs all three fixtures. For each fixture it allocates input and output arrays, copies the input, launches the kernel, checks launch and completion status, copies the output back, and compares it exactly with the CPU reference. It reports the fixture ID, input shape, transposed output shape, and correctness `PASS` or `FAIL`, followed by one aggregate result. It contains no measurement path.
 
 ## Build Contract
 
@@ -48,4 +48,4 @@ The Supported Environment is Native Linux. Runtime requires one CUDA GPU with co
 
 Compilation evidence and recorded observations are empty. Runtime remains Pending Hardware Verification. A passing host test proves only the pure-host fixture generation, dimension and size validation, row-major mapping, exact comparison, and mismatch-reporting contracts. It is not CUDA compilation evidence and does not establish CUDA execution, shared-memory behavior, barrier behavior, edge-guard behavior on a GPU, or any performance property.
 
-The initial canonical source coordinate in `project.json` uses the required 40-zero development value. The caller will replace it with the immutable publication commit after the first commit.
+The canonical source coordinate in `project.json` is pinned to the immutable publication commit used by both bilingual pages and every canonical import.

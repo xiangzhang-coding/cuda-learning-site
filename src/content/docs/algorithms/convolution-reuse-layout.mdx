@@ -176,7 +176,7 @@ Hand-written direct kernel 只用于学习 layout、neighborhood reuse 与 corre
 
 [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0)发布于 2026-08-06，并被该 release 推荐用于 cuDNN 9.24.0 及以后版本。它只是当前 future-comparison coordinate，不是 A07 dependency、兼容性证明或 execution record。
 
-后续 L10 会固定 production component matrix。当前 A07 不教授 cuDNN API 编程，也不构建、验证或执行 cuDNN graph。这里的 checklist 只定义未来 comparison responsibilities；没有依据声称 hand-written kernel 胜过 cuDNN plan。
+尚未发布的后续 cuDNN library 单元会固定 production component matrix。当前 A07 不教授 cuDNN API 编程，也不构建、验证或执行 cuDNN graph。这里的 checklist 只定义未来 comparison responsibilities；没有依据声称 hand-written kernel 胜过 cuDNN plan。
 
 ## 证据边界
 
@@ -201,7 +201,7 @@ Hand-written direct kernel 只用于学习 layout、neighborhood reuse 与 corre
 
 - 完成 [A07 练习（Exercises）](/algorithms/convolution-reuse-layout/exercises/)，再查看独立的[复核解答](/algorithms/convolution-reuse-layout/solutions/)。
 - 审查[练习题库（Practice Bank）PB-R2-019](/practice/#pb-r2-019)，要求同时提交 tensor contract、asymmetric-filter oracle、reuse ledger 与 production decision gates。
-- 复习 [TERM-145 convolution](/glossary/#term-145)和 [TERM-146 cross-correlation](/glossary/#term-146)，并保持 L10 为尚未在本页执行的后续 production scope。
+- 复习 [TERM-145 convolution](/glossary/#term-145)和 [TERM-146 cross-correlation](/glossary/#term-146)，并把 component pin 与 execution 留给尚未发布的后续 cuDNN library 单元。
 
 ## 来源与复核
 

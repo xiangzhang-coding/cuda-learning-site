@@ -82,7 +82,7 @@ head:
 
 Ordered packet 先固定 `cuDNN library + cuDNN Frontend + Toolkit + driver + GPU + build` component matrix，再固定 NCHW/KCRS/NKPQ shapes、strides、types、cross-correlation、padding、stride 与 dilation。随后依次记录 graph validation、operation-graph build、heuristics candidates、filters、selected execution plan、workspace bytes/alignment/allocation/lifetime、CPU-oracle/tolerance verdict、same-scope determinism policy，最后才留下 measurement template。
 
-每个失败有独立分类：descriptor/validation failure、build/support failure、no eligible plan、workspace budget/lifetime failure、numerical mismatch 与 determinism failure都不能改写成 kernel timing。cuDNN Frontend v1.27.0 只作为 cuDNN 9.24.0+ 的 future coordinate；later L10 才固定 production matrix。当前所有 build、plan、workspace、output、timing 与 speedup cells 都是 `unrecorded`，所以不存在 hand-written winner。
+每个失败有独立分类：descriptor/validation failure、build/support failure、no eligible plan、workspace budget/lifetime failure、numerical mismatch 与 determinism failure都不能改写成 kernel timing。cuDNN Frontend v1.27.0 只作为 cuDNN 9.24.0+ 的 future coordinate；尚未发布的后续 cuDNN library 单元才固定 production matrix。当前所有 build、plan、workspace、output、timing 与 speedup cells 都是 `unrecorded`，所以不存在 hand-written winner。
 
 ## 有效替代方案
 
@@ -98,6 +98,6 @@ Ordered packet 先固定 `cuDNN library + cuDNN Frontend + Toolkit + driver + GP
 - 忘记 stride 2 会改变相邻 output origin，或把 54 logical taps 当作 54 unique staged values。
 - 因 thread 没有 output 就让它跳过 cooperative load 或 barrier。
 - 把 heuristics candidate 当 selected plan，把 workspace query 当 allocation/lifetime proof。
-- 在 L10 component matrix、correctness parity 和 measurement record 之前宣布 custom kernel 或 cuDNN 获胜。
+- 在后续 cuDNN library 单元固定 component matrix、correctness parity 和 measurement record 之前宣布 custom kernel 或 cuDNN 获胜。
 
 复核日期：**2026-08-30**。四个 evidence arrays 保持为空。

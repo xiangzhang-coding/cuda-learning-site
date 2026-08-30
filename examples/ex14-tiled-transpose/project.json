@@ -50,10 +50,11 @@
       32
     ],
     "blockDimensions": [
-      32,
-      8
+      256,
+      1
     ],
-    "blockRows": 8,
+    "threadsPerBlock": 256,
+    "cooperativeIterations": 4,
     "sharedTile": [
       32,
       33

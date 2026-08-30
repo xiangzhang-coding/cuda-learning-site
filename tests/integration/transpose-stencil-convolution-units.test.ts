@@ -118,7 +118,7 @@ describe('A05-A07 transpose, stencil, and convolution publication', () => {
       expect(source).toContain('cuDNN 9.24.0');
       expect(source).toMatch(/graph validation/i);
       expect(source).toMatch(/workspace/i);
-      expect(source).toMatch(/Later L10|后续 L10/);
+      expect(source).toMatch(/later, unpublished cuDNN library unit|尚未发布的后续 cuDNN library 单元/i);
       expect(source).toMatch(/does not build, validate, or execute|不构建、验证或执行/);
     }
   });
