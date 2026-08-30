@@ -16,6 +16,7 @@ import {
 
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
+const sourceCommit = '81d43aa7568514e37ef190da59c845b8072b7011';
 
 const projects = [
   {
@@ -226,6 +227,9 @@ describe.each(projects)('$id standalone project boundary', ({ id, root, stem }) 
       schemaVersion: 1,
       id,
       root,
+      sourceCommit,
+      sourceUrl: `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${sourceCommit}/${root}`,
+      downloadUrl: `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${sourceCommit}.zip`,
       license: 'Apache-2.0',
       provenance: 'original',
     });
@@ -249,6 +253,24 @@ describe.each(projects)('$id standalone project boundary', ({ id, root, stem }) 
       ],
     });
     expect(await listProjectFiles(exampleRoot)).toEqual(expectedProjectFiles(stem));
+  });
+
+  it('keeps every required build input byte-identical to the pinned publication commit', async () => {
+    const example = await loadCanonicalExample(projectRoot, id);
+    await execFileAsync('git', ['cat-file', '-e', `${sourceCommit}:${root}/project.json`], { cwd: projectRoot });
+
+    const pinnedFiles = new Set([
+      ...example.build.inputs,
+      ...example.build.hostTestInputs,
+      ...example.build.contractFiles,
+    ]);
+    for (const relativePath of pinnedFiles) {
+      const [{ stdout: pinned }, current] = await Promise.all([
+        execFileAsync('git', ['show', `${sourceCommit}:${root}/${relativePath}`], { cwd: projectRoot }),
+        readFile(path.join(exampleRoot, relativePath), 'utf8'),
+      ]);
+      expect(current, `${id}:${relativePath}`).toBe(pinned);
+    }
   });
 
   it('pins the Native Linux Baseline tier and exactly three C++17 Toolkit Lanes', async () => {

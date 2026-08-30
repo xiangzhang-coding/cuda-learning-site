@@ -40,7 +40,7 @@ evidence:
 sources:
   - title: 'CUDA Programming Guide - Notes on Host/Device Computation Accuracy'
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
-    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
     platform: 'Current associativity, FMA, compiler-option, host/device accuracy, and deterministic-result guidance'
     accessDate: '2026-08-30'
   - title: 'Floating Point and IEEE 754 - Operations and Accuracy'
@@ -68,10 +68,10 @@ sources:
     version: 'Floating Point and IEEE 754 v11.8.0; last updated 2022-10-03'
     platform: 'Archived Toolkit 11.8 associativity, FMA, and reduction-order guidance'
     accessDate: '2026-08-30'
-  - title: 'CCCL CUB - Determinism'
-    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/determinism.rst'
+  - title: 'CCCL v3.4.2 - DeviceReduce Determinism Contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
     version: 'CCCL v3.4.2'
-    platform: 'Pinned CUB determinism and reproducibility guarantee scopes'
+    platform: 'Pinned DeviceReduce run-to-run and GPU-to-GPU determinism guarantee scopes'
     accessDate: '2026-08-30'
 head:
   - tag: meta
@@ -249,7 +249,7 @@ EX11 的 `cpu-reference` range 是清晰的 serial reference。它按 logical in
 - [Floating Point and IEEE 754 v13.3：Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy)给出 nonassociativity、one-rounding FMA 与 serial/parallel operation order 的 owner explanation。
 - [CUDA C++ Programming Guide 12.9：Mathematical Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#mathematical-functions)和 [Floating Point and IEEE 754 12.9](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy)保留 Toolkit 12.9 Update 1 archive coordinate。
 - [CUDA C++ Programming Guide 11.8：Mathematical Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#mathematical-functions)和 [Floating Point and IEEE 754 11.8](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy)保留 Toolkit 11.8.0 archive coordinate。
-- [CCCL v3.4.2 CUB Determinism](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/determinism.rst)是 pinned owner source，用于核对 product-specific determinism/reproducibility scopes；其保证不得外推到 custom kernel。
+- [CCCL v3.4.2 `DeviceReduce` determinism contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh)是 pinned owner source，用于核对 product-specific determinism/reproducibility scopes；其保证不得外推到 custom kernel。
 
 本站仅依据以上 public owner sources 独立编写本单元。Context7 只用于交叉检查 current CUDA page 的检索与 section discovery，不是 factual source，也不进入 source coordinates；未采用非公开材料。
 

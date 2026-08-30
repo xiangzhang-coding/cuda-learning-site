@@ -40,7 +40,7 @@ evidence:
 sources:
   - title: 'CUDA Programming Guide - Notes on Host/Device Computation Accuracy'
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
-    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
     platform: 'Current associativity, FMA, compiler-option, host/device accuracy, and deterministic-result guidance'
     accessDate: '2026-08-30'
   - title: 'Floating Point and IEEE 754 - Operations and Accuracy'
@@ -68,10 +68,10 @@ sources:
     version: 'Floating Point and IEEE 754 v11.8.0; last updated 2022-10-03'
     platform: 'Archived Toolkit 11.8 associativity, FMA, and reduction-order guidance'
     accessDate: '2026-08-30'
-  - title: 'CCCL CUB - Determinism'
-    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/determinism.rst'
+  - title: 'CCCL v3.4.2 - DeviceReduce Determinism Contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
     version: 'CCCL v3.4.2'
-    platform: 'Pinned CUB determinism and reproducibility guarantee scopes'
+    platform: 'Pinned DeviceReduce run-to-run and GPU-to-GPU determinism guarantee scopes'
     accessDate: '2026-08-30'
 head:
   - tag: meta
@@ -249,7 +249,7 @@ A future Lab making a determinism or bitwise claim must preserve an Environment 
 - [Floating Point and IEEE 754 v13.3: Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy) gives the owner explanation of nonassociativity, one-rounding FMA, and serial versus parallel operation order.
 - [CUDA C++ Programming Guide 12.9: Mathematical Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#mathematical-functions) and [Floating Point and IEEE 754 12.9](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy) preserve the Toolkit 12.9 Update 1 archive coordinates.
 - [CUDA C++ Programming Guide 11.8: Mathematical Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#mathematical-functions) and [Floating Point and IEEE 754 11.8](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy) preserve the Toolkit 11.8.0 archive coordinates.
-- [CCCL v3.4.2 CUB Determinism](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/determinism.rst) is the pinned owner source for product-specific determinism and reproducibility scopes; its guarantees cannot be projected onto a custom kernel.
+- The [CCCL v3.4.2 `DeviceReduce` determinism contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh) is the pinned owner source for product-specific determinism and reproducibility scopes; its guarantees cannot be projected onto a custom kernel.
 
 This Learning Unit was independently authored only from those public owner sources. Context7 was used only to cross-check discovery and section locations on the current CUDA page; it is not a factual source or source coordinate. No non-public material was used.
 

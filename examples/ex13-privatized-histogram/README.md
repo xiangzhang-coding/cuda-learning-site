@@ -44,4 +44,4 @@ The Supported Environment is Native Linux. Runtime requires one CUDA GPU with co
 
 Compilation evidence and recorded observations are empty. Runtime remains Pending Hardware Verification. A passing host test proves only the pure-host fixture, reference, exact-comparison, and invariant contracts. It does not establish CUDA execution, barrier behavior, atomic behavior, contention, or performance.
 
-The forty-zero source commit and its URLs are temporary publication coordinates that must be replaced by a later pin.
+The canonical source coordinate in `project.json` is pinned to the immutable publication commit.

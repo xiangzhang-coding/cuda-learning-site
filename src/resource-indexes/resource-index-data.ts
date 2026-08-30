@@ -1475,8 +1475,8 @@ const sources: readonly ResourceIndexRecord[] = [
     'historical-record',
     ['A03'],
     localized(
-      'Hillis 与 Steele《Data Parallel Algorithms》1986；Blelloch《Prefix Sums and Their Applications》CMU-CS-90-190，1990。',
-      'Hillis and Steele, Data Parallel Algorithms, 1986; Blelloch, Prefix Sums and Their Applications, CMU-CS-90-190, 1990.',
+      'Blelloch《Prefix Sums and Their Applications》CMU-CS-90-190，1990。',
+      'Blelloch, Prefix Sums and Their Applications, CMU-CS-90-190, 1990.',
     ),
     '2026-08-30',
     '2026-08-30',

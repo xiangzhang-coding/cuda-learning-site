@@ -574,6 +574,38 @@ describe('production primitive positioning', () => {
       }
     }
   });
+
+  it('pins the reviewed CCCL coordinates and the exact M06 prerequisite route', async () => {
+    const [a01Zh, a01En, a02Zh, a02En, q02Zh, q02En, practiceZh, practiceEn, sourcesZh, sourcesEn, maintenance] =
+      await Promise.all([
+        readSource('algorithms/elementwise-map.mdx'),
+        readSource('algorithms/elementwise-map.mdx', true),
+        readSource('algorithms/multi-stage-reduction.mdx'),
+        readSource('algorithms/multi-stage-reduction.mdx', true),
+        readSource('correctness/floating-point-order-reproducibility.mdx'),
+        readSource('correctness/floating-point-order-reproducibility.mdx', true),
+        readSource('practice.mdx'),
+        readSource('practice.mdx', true),
+        readSource('sources-and-versions.mdx'),
+        readSource('sources-and-versions.mdx', true),
+        readFile(path.join(projectRoot, 'MAINTENANCE_SOURCES.md'), 'utf8'),
+      ]);
+
+    for (const source of [a01Zh, a01En, a02Zh, a02En, q02Zh, q02En]) {
+      expect(source).not.toContain('last updated 2026-08-27');
+    }
+    for (const source of [a02Zh, a02En]) {
+      expect(source).toContain('/memory/warp-divergence-reconvergence/');
+      expect(source).not.toMatch(/M06[^\n]*Cooperative Groups/);
+      expect(source).toContain('https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst');
+    }
+
+    const exactSourceSet = [q02Zh, q02En, practiceZh, practiceEn, sourcesZh, sourcesEn, maintenance].join('\n');
+    expect(exactSourceSet).toContain(
+      'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh',
+    );
+    expect(exactSourceSet).not.toMatch(/docs\/cub\/(?:device_wide|determinism)\.rst/);
+  });
 });
 
 describe('EX11-EX13 and VIS10 page evidence boundaries', () => {

@@ -112,7 +112,7 @@ block 2: [6,13] + 21      -> [27,34]
 - 在一个 shared array 上边读边写，并误以为单个末尾 barrier 能恢复 prior-stage snapshot。
 - 让 edge lane 跳过 stage barrier。
 - 把 block sum 当成 block offset，或把当前 block 的 sum 包含进 exclusive offset。
-- 用 physical last lane 读取 partial block total，而不检查 logical last element。
+- 未证明 identity padding 与 full-width scan 就读取 physical last lane；canonical EX12 具备这项证明，其他实现应读取 logical last valid element 或证明等价路径。
 - 从 stage depth、kernel 数量或 production primitive 推断未观察的 speedup。
 
 复核日期：**2026-08-30**。Compilation 与 runtime evidence axes 保持为空。

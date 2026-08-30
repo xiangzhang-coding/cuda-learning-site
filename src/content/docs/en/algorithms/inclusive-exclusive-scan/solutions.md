@@ -112,7 +112,7 @@ Concatenation gives `[3,4,6,10,15,17,18,21,27,34]`. The third block has logical 
 - Reading and writing one shared array in a stage and assuming one trailing barrier recreates a prior-stage snapshot.
 - Letting an edge lane skip a stage barrier.
 - Confusing a block sum with a block offset, or including the current block's sum in an exclusive offset.
-- Reading a partial-block total from the physical last lane rather than the logical last element.
+- Reading the physical last lane without proving identity padding and a full-width scan. Canonical EX12 has that proof; another implementation must read the logical last valid element or prove an equivalent path.
 - Inferring unobserved speedup from stage depth, kernel count, or a production primitive.
 
 Reviewed on **2026-08-30**. Compilation and runtime evidence axes remain empty.

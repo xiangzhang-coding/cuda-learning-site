@@ -1951,7 +1951,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - **相关学习单元与资源：** [A02](/algorithms/multi-stage-reduction/)、[M05](/memory/synchronization-scopes/)、[A03](/algorithms/inclusive-exclusive-scan/)和 [EX12](/examples/inclusive-exclusive-scan/)。
 - **最后复核（Last reviewed）：** 2026-08-30。
 
-**题目：** 一个所谓 parallel scan 让 lane `i` 同时读取正在原地更新的 `output[i - 1]`，把 inclusive 与 exclusive recurrence 混用，以最后一个 physical lane 作为 partial block sum，并把 inclusive block totals 直接当作 block offsets；最后试图在一个普通 kernel 中用 `__syncthreads()` 完成全 grid propagation。重建正确依赖图。
+**题目：** 一个所谓 parallel scan 让 lane `i` 同时读取正在原地更新的 `output[i - 1]`，把 inclusive 与 exclusive recurrence 混用，在没有说明 identity padding 或 full-width scan 的情况下以最后一个 physical lane 作为 partial block sum，并把 inclusive block totals 直接当作 block offsets；最后试图在一个普通 kernel 中用 `__syncthreads()` 完成全 grid propagation。重建正确依赖图。
 
 **约束：**
 
@@ -1965,18 +1965,18 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 - 对 `x = [3,1,4,2]` 与 addition identity 0，inclusive 是 `[3,4,8,10]`，exclusive 是 `[0,3,4,8]`；每个一般化公式保持原 input order。
 - Distances `1,2,4,...` 的每个 stage 只读 prior snapshot；所有 participating lanes 到达 barrier，edge lane 用 identity 而不 early return。
-- Block sum 取该 block 最后一个合法 prefix；对 totals `[10,7,5]`，exclusive block offsets 是 `[0,10,17]`，不能把 `[10,17,22]` 当 offsets。
+- Block sum 等于该 block 的合法 slice total；canonical EX12 的 identity-padded full-width scan 可从 physical last lane 取得它，其他实现要读取 logical last valid prefix 或给出等价证明。对 totals `[10,7,5]`，exclusive block offsets 是 `[0,10,17]`，不能把 `[10,17,22]` 当 offsets。
 - Local scan、block-sum scan 与 offset propagation 由完成的 kernel stages 连接；公式与 CCCL source 不构成 EX12 runtime、timing 或 speedup evidence。
 
 <details><summary>提示 1</summary>先写顺序 inclusive/exclusive recurrence，再问每个 parallel stage 需要哪个“上一时刻”的 snapshot。</details>
 
 <details><summary>提示 2</summary>Block sum 回答“本 block 总量是多少”，block offset 回答“此前 blocks 总量是多少”；先对 sums 做 exclusive scan。</details>
 
-**参考解答（Reviewed solution）：** 修订设计先将合法 input 或 identity 写入 shared snapshot，随后以距离 1、2、4 逐 stage 从 prior buffer 读并向 next buffer 写，每轮由 uniform block barrier 分隔。每个 block 保存 local prefixes，并从最后一个合法位置产生 block sum。第二个 stage 按 block order 对 sums 做 exclusive scan，第三个 kernel 把 owning block offset 用 `op` 合入每个 local prefix。Kernel boundaries 提供 grid-wide completion。Inclusive/exclusive relations、partial-block totals 与 final recurrence 可静态检查；当前没有 EX12 execution 或 performance observation。
+**参考解答（Reviewed solution）：** 修订设计先将合法 input 或 identity 写入 shared snapshot，随后以距离 1、2、4 逐 stage 从 prior buffer 读并向 next buffer 写，每轮由 uniform block barrier 分隔。每个 block 保存 local prefixes；canonical EX12 对 identity-padded full-width snapshot 完成 scan，因此从 physical last lane 产生合法 slice 的 block sum，另一种实现也可读取 logical last valid prefix。第二个 stage 按 block order 对 sums 做 exclusive scan，第三个 kernel 把 owning block offset 用 `op` 合入每个 local prefix。Kernel boundaries 提供 grid-wide completion。Inclusive/exclusive relations、partial-block totals 与 final recurrence 可静态检查；当前没有 EX12 execution 或 performance observation。
 
 **有效替代方案：** 可以递归使用同一 scan primitive 处理 block sums，或在 production 中采用 CCCL v3.4.2 CUB `DeviceScan`；两者都必须保留 original order、identity、temporary-storage/stream lifetime 和独立证据边界。
 
-**常见错误：** Concurrently 读写同一 snapshot；交换非交换 operands；exclusive lane 0 不写 identity；取最后一个 physical lane 的 invalid value；把 block sum 当 block offset；用 block barrier 同步 grid；由较少 dependency depth 推断 speedup。
+**常见错误：** Concurrently 读写同一 snapshot；交换非交换 operands；exclusive lane 0 不写 identity；在没有 identity-padding/full-width proof 时盲读 physical last lane；把 block sum 当 block offset；用 block barrier 同步 grid；由较少 dependency depth 推断 speedup。
 
 **来源依据（Source basis）：** 本站原创的 [A03 dependency/offset contract](/algorithms/inclusive-exclusive-scan/)、[A02 stage model](/algorithms/multi-stage-reduction/)与 [SRC-HIST-003](/sources-and-versions/#src-hist-003)/[SRC-CUDA-038](/sources-and-versions/#src-cuda-038)，以及 Blelloch 原始历史资料 [Prefix Sums and Their Applications](https://www.cs.cmu.edu/afs/cs.cmu.edu/project/scandal/public/papers/CMU-CS-90-190.html)与 CCCL v3.4.2 tagged [`device_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh)。Blelloch 只用于 history，不作为 current CUDA interface authority。
 
@@ -2064,7 +2064,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **常见错误：** 把 nonassociativity 当 race；假设 parallel tree 等于 serial fold；把 FMA 当两次 rounding；忽略 compiler defaults；事后调 epsilon；把 tolerance pass 当 determinism；把同设备重复结果外推为跨 architecture reproducibility；把 CCCL policy套到任意 kernel。
 
-**来源依据（Source basis）：** 本站原创的 [Q02 order/FMA/reproducibility contract](/correctness/floating-point-order-reproducibility/)、[Q01 comparator contract](/correctness/cpu-references-tolerances-invariants/)、[A02 tree-order model](/algorithms/multi-stage-reduction/)与 [SRC-CUDA-040](/sources-and-versions/#src-cuda-040)，以及 NVIDIA [Floating Point and IEEE 754 v13.3 Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy)和 CCCL v3.4.2 tagged [CUB Determinism](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/determinism.rst)。
+**来源依据（Source basis）：** 本站原创的 [Q02 order/FMA/reproducibility contract](/correctness/floating-point-order-reproducibility/)、[Q01 comparator contract](/correctness/cpu-references-tolerances-invariants/)、[A02 tree-order model](/algorithms/multi-stage-reduction/)与 [SRC-CUDA-040](/sources-and-versions/#src-cuda-040)，以及 NVIDIA [Floating Point and IEEE 754 v13.3 Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy)和 CCCL v3.4.2 tagged [`DeviceReduce` determinism contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh)。
 
 **来源日期（Source date）：** 2026-08-30。
 

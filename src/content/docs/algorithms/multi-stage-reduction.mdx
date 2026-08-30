@@ -45,17 +45,17 @@ evidence:
 sources:
   - title: 'CUDA Programming Guide v13.3 - Thread Block Synchronization'
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization'
-    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
     platform: 'Current block-wide barrier and shared-memory coordination contract'
     accessDate: '2026-08-30'
   - title: 'CUDA Programming Guide v13.3 - Floating-Point Computation'
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-computation'
-    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
     platform: 'Current floating-point computation and implementation-choice context'
     accessDate: '2026-08-30'
   - title: 'CUDA Programming Guide v13.3 - Floating-Point Associativity'
     url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity'
-    version: 'CUDA Programming Guide v13.3; last updated 2026-08-27'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
     platform: 'Current operation-order and rounding coordinate for reduction trees'
     accessDate: '2026-08-30'
   - title: 'CUDA C Programming Guide 11.8 - Synchronization Functions'
@@ -79,7 +79,7 @@ sources:
     platform: 'Toolkit 12.9 operation-order and rounding semantics'
     accessDate: '2026-08-30'
   - title: 'CCCL v3.4.2 - CUB Device-Wide Primitives Source'
-    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/device_wide.rst'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst'
     version: 'CCCL v3.4.2'
     platform: 'CUB DeviceReduce production primitive owner source'
     accessDate: '2026-08-30'
@@ -143,7 +143,7 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 ## 先修关系
 
-先完成 [M03：共享内存分块](/memory/shared-memory-tiling/)、[M05：同步作用域与内存可见性](/memory/synchronization-scopes/)和 [M06：Cooperative Groups](/memory/cooperative-groups/)。M03 提供 shared storage 与 block participation；M05 区分 rendezvous、ordering 和 visibility；M06 提供显式 group vocabulary。三项先修严格就是 `M03, M05, M06`。
+先完成 [M03：共享内存分块](/memory/shared-memory-tiling/)、[M05：同步作用域与内存可见性](/memory/synchronization-scopes/)和 [M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)。M03 提供 shared storage 与 block participation；M05 区分 rendezvous、ordering 和 visibility；M06 提供 active/inactive lanes、divergence 与 explicit warp-safe reasoning。三项先修严格就是 `M03, M05, M06`。
 
 CUB 不在 prerequisites 中。它是后文的 production comparison baseline，不是理解 reduction tree 前必须掌握的接口。本页不需要 CUDA-capable system，也不授予 Evidence Status。
 
@@ -264,7 +264,7 @@ Production 开发先把 CUB `DeviceReduce` 作为生产基线和 comparison poin
 - [CUDA Programming Guide v13.3：Floating-Point Computation](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-computation)与其 [Associativity coordinate](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity)提供 current operation-order context。
 - [CUDA C Programming Guide 11.8：Synchronization Functions](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#synchronization-functions)与 [11.8 Operations and Accuracy](https://docs.nvidia.com/cuda/archive/11.8.0/floating-point/index.html#operations-and-accuracy)保留 11.8 contracts。
 - [CUDA C++ Programming Guide 12.9.1：Synchronization Functions](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#synchronization-functions)与 [12.9 Operations and Accuracy](https://docs.nvidia.com/cuda/archive/12.9.1/floating-point/index.html#operations-and-accuracy)保留 12.9 contracts。
-- [CCCL v3.4.2 owner source：CUB device-wide primitives](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/device_wide.rst)只用于定位 `DeviceReduce` production primitive；本页没有复制实现。
+- [CCCL v3.4.2 owner source：CUB device-wide primitives](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst)只用于定位 `DeviceReduce` production primitive；本页没有复制实现。
 
 八项 owner source coordinates 均访问于 **2026-08-30**。本页的 tree diagrams、phase ledger、pseudocode、练习和解释均为原创；没有使用或复制私有参考资料，也没有复制 owner prose、code、table、figure 或 benchmark。
 

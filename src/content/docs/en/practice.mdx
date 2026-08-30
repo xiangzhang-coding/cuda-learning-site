@@ -1951,7 +1951,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - **Related Learning Units and resources:** [A02](/en/algorithms/multi-stage-reduction/), [M05](/en/memory/synchronization-scopes/), [A03](/en/algorithms/inclusive-exclusive-scan/), and [EX12](/en/examples/inclusive-exclusive-scan/).
 - **Last reviewed:** 2026-08-30.
 
-**Prompt:** A purported parallel scan makes lane `i` read `output[i - 1]` while that array is being updated in place, mixes inclusive and exclusive recurrences, uses the last physical lane as a partial block sum, and treats inclusive block totals as block offsets. It then tries to complete whole-grid propagation in one ordinary kernel with `__syncthreads()`. Rebuild the correct dependency graph.
+**Prompt:** A purported parallel scan makes lane `i` read `output[i - 1]` while that array is being updated in place, mixes inclusive and exclusive recurrences, uses the last physical lane as a partial block sum without stating an identity-padding or full-width-scan proof, and treats inclusive block totals as block offsets. It then tries to complete whole-grid propagation in one ordinary kernel with `__syncthreads()`. Rebuild the correct dependency graph.
 
 **Constraints:**
 
@@ -1965,18 +1965,18 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 - For `x = [3,1,4,2]` with addition identity 0, inclusive is `[3,4,8,10]` and exclusive is `[0,3,4,8]`. Every generalized formula preserves original input order.
 - Each stage at distance `1,2,4,...` reads only the prior snapshot. All participating lanes reach the barrier, and an edge lane supplies identity instead of returning early.
-- The block sum is the prefix at the block's last valid position. For totals `[10,7,5]`, exclusive block offsets are `[0,10,17]`; `[10,17,22]` is not used as the offsets.
+- The block sum equals the valid slice total. Canonical EX12's identity-padded full-width scan may take it from the physical last lane; another implementation reads the logical last valid prefix or proves an equivalent path. For totals `[10,7,5]`, exclusive block offsets are `[0,10,17]`; `[10,17,22]` is not used as the offsets.
 - Completed kernel stages connect local scan, block-sum scan, and offset propagation. Formulas and CCCL source provide no EX12 runtime, timing, or speedup evidence.
 
 <details><summary>Hint 1</summary>Write the sequential inclusive and exclusive recurrences first, then ask which prior-time snapshot every parallel stage requires.</details>
 
 <details><summary>Hint 2</summary>A block sum answers how much this block contains; a block offset answers how much all earlier blocks contain. Exclusive-scan the sums first.</details>
 
-**Reviewed solution:** The repaired design first stores each valid input or identity in a shared snapshot, then processes distances 1, 2, and 4 by reading the prior buffer and writing the next buffer, with a uniform block barrier between rounds. Every block retains local prefixes and derives its block sum from the last valid position. A second stage exclusive-scans the sums in block order, and a third kernel combines the owning block offset into each local prefix with `op`. Kernel boundaries supply grid-wide completion. Inclusive and exclusive relations, partial-block totals, and the final recurrence are statically reviewable; there is no EX12 execution or performance observation.
+**Reviewed solution:** The repaired design first stores each valid input or identity in a shared snapshot, then processes distances 1, 2, and 4 by reading the prior buffer and writing the next buffer, with a uniform block barrier between rounds. Every block retains local prefixes. Canonical EX12 scans its identity-padded full-width snapshot, so the physical last lane produces the valid slice's block sum; another implementation may read the logical last valid prefix. A second stage exclusive-scans the sums in block order, and a third kernel combines the owning block offset into each local prefix with `op`. Kernel boundaries supply grid-wide completion. Inclusive and exclusive relations, partial-block totals, and the final recurrence are statically reviewable; there is no EX12 execution or performance observation.
 
 **Valid alternative:** Recursively use the same scan primitive for block sums, or adopt CCCL v3.4.2 CUB `DeviceScan` in production. Both retain original order, identity, temporary-storage and stream lifetimes, and an independent evidence boundary.
 
-**Common errors:** Concurrent reads and writes of one snapshot; exchanging noncommutative operands; omitting identity at exclusive lane 0; taking an invalid last physical lane; treating a block sum as a block offset; using a block barrier for a grid; inferring speedup from lower dependency depth.
+**Common errors:** Concurrent reads and writes of one snapshot; exchanging noncommutative operands; omitting identity at exclusive lane 0; reading the physical last lane without an identity-padding/full-width proof; treating a block sum as a block offset; using a block barrier for a grid; inferring speedup from lower dependency depth.
 
 **Source basis:** The site's original [A03 dependency and offset contract](/en/algorithms/inclusive-exclusive-scan/), [A02 stage model](/en/algorithms/multi-stage-reduction/), and [SRC-HIST-003](/en/sources-and-versions/#src-hist-003)/[SRC-CUDA-038](/en/sources-and-versions/#src-cuda-038), plus Blelloch's original historical source [Prefix Sums and Their Applications](https://www.cs.cmu.edu/afs/cs.cmu.edu/project/scandal/public/papers/CMU-CS-90-190.html) and CCCL v3.4.2 tagged [`device_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh). Blelloch is used for history only, not as current CUDA interface authority.
 
@@ -2064,7 +2064,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Common errors:** Calling nonassociativity a race; assuming a parallel tree equals a serial fold; treating FMA as two roundings; ignoring compiler defaults; tuning epsilon afterward; treating tolerance acceptance as determinism; projecting one-device repetition across architectures; applying a CCCL policy to any kernel.
 
-**Source basis:** The site's original [Q02 order, FMA, and reproducibility contract](/en/correctness/floating-point-order-reproducibility/), [Q01 comparator contract](/en/correctness/cpu-references-tolerances-invariants/), [A02 tree-order model](/en/algorithms/multi-stage-reduction/), and [SRC-CUDA-040](/en/sources-and-versions/#src-cuda-040), plus NVIDIA's [Floating Point and IEEE 754 v13.3 Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy) and CCCL v3.4.2 tagged [CUB Determinism](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/determinism.rst).
+**Source basis:** The site's original [Q02 order, FMA, and reproducibility contract](/en/correctness/floating-point-order-reproducibility/), [Q01 comparator contract](/en/correctness/cpu-references-tolerances-invariants/), [A02 tree-order model](/en/algorithms/multi-stage-reduction/), and [SRC-CUDA-040](/en/sources-and-versions/#src-cuda-040), plus NVIDIA's [Floating Point and IEEE 754 v13.3 Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy) and CCCL v3.4.2 tagged [`DeviceReduce` determinism contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh).
 
 **Source date:** 2026-08-30.
 

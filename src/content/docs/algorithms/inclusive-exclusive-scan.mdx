@@ -161,7 +161,7 @@ Sequential dependency 让位置 `i` 等待 `i - 1`。Parallel tree 将这条链�
 
 一个 block 先把合法 input 放入 shared state，把越界 slot 设为 identity，再执行 staged scan。Inclusive output 可直接来自最终前缀；exclusive output 可以右移 inclusive prefix 并把 lane 0 设为 identity，或由等价且已证明的 exclusive construction 产生。
 
-每个 block 还输出一个 block sum，也就是该 block 合法元素按原顺序合并后的 total。最后一个 physical lane 不一定对应最后一个合法元素，所以 partial block 必须按 logical count 选择 total。这个 block sum 是下一层 scan 的输入，不是当前 block 的全局 offset。
+每个 block 还输出一个 block sum，也就是该 block 合法元素按原顺序合并后的 total。提取位置取决于实现证明：canonical EX12 把越界 slots 写成 identity，再对全部 `blockDim.x` slots 完成 full-width inclusive scan，因此 partial block 的最后一个 physical lane 正好保存合法 slice total；没有这项 identity-padding/full-width proof 的实现必须改读 logical last valid element 或证明另一条等价路径。这个 block sum 是下一层 scan 的输入，不是当前 block 的全局 offset。
 
 ## Multi-block scan：sum、offset、propagation
 

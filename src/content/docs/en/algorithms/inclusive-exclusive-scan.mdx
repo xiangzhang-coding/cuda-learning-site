@@ -161,7 +161,7 @@ The sequential dependency makes position `i` wait for `i - 1`. A parallel tree r
 
 A block places valid inputs in shared state, fills out-of-range slots with the identity, and performs the staged scan. Inclusive output can come directly from the final prefixes. Exclusive output can shift those inclusive prefixes right and place the identity in lane 0, or use another equivalently proven exclusive construction.
 
-Each block also emits one block sum: all valid elements in that block combined in original order. The last physical lane need not be the last valid element, so a partial block must select its total using the logical count. This block sum is input to the next scan level, not yet the block's global offset.
+Each block also emits one block sum: all valid elements in that block combined in original order. The extraction point depends on the implementation proof. Canonical EX12 writes identity into out-of-range slots and completes a full-width inclusive scan over all `blockDim.x` slots, so the final physical lane holds the valid slice total even for a partial block. An implementation without that identity-padding and full-width proof must read the logical last valid element or prove an equivalent path. This block sum is input to the next scan level, not yet the block's global offset.
 
 ## Multi-block scan: sums, offsets, propagation
 
