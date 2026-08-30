@@ -75,6 +75,9 @@ describe('GitHub Actions quality contract', () => {
     expect(workflow).toContain('retention-days: 7');
     expect(workflow).toContain('ImageVersion');
     expect(workflow).toContain('RUNNER_ARCH');
+    expect(workflow).toMatch(
+      /artifact-policy:\s+name: artifact-policy\s+if: \$\{\{ !cancelled\(\) && needs\.static-and-integration\.result == 'success' \}\}/,
+    );
     expect(workflow).toContain('Web quality does not grant CUDA evidence status');
   });
 
