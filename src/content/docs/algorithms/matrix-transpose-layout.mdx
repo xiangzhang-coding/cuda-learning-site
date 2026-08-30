@@ -171,7 +171,7 @@ Edge proof 还要确认未写入的 shared slots 不会被合法 store 读取。
 
 EX14 是本单元唯一 canonical executable counterpart。`cpu-reference` range 先定义 rectangular row-major oracle，`tiled-transpose` range 再展示 shared tile、统一 barrier、独立 edge guards 与 physical `+1` padding。下面严格按该顺序导入；本页不维护第二份 CUDA/C++ implementation。
 
-[在固定 source coordinate 查看 EX14 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/0000000000000000000000000000000000000000/examples/ex14-tiled-transpose)，或[下载同一 revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/0000000000000000000000000000000000000000.zip)。Project source 与页面 import 应在发布前保持同一 pin。
+[在固定 source coordinate 查看 EX14 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/6993495d0bf1f62901eee151b2bf138c78d3c22f/examples/ex14-tiled-transpose)，或[下载同一 revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/6993495d0bf1f62901eee151b2bf138c78d3c22f.zip)。Project source 与页面 import 使用同一 immutable pin。
 
 <CanonicalCode exampleId="EX14" range="cpu-reference" />
 
