@@ -5,9 +5,9 @@
   "title": "Tiled GEMM",
   "purpose": "Verify a portable row-major FP32 shared-memory tiled GEMM against an independent double CPU reference without publishing performance measurements.",
   "root": "examples/ex15-tiled-gemm",
-  "sourceCommit": "f644d2f595a07b81dce72d5194467bef8f12f4c0",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/f644d2f595a07b81dce72d5194467bef8f12f4c0/examples/ex15-tiled-gemm",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/f644d2f595a07b81dce72d5194467bef8f12f4c0.zip",
+  "sourceCommit": "d03ff3b27294f77b5f5a0a3b594bebf20a89cf70",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {

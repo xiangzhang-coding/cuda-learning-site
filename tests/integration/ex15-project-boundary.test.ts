@@ -41,8 +41,42 @@ describe('EX15 standalone tiled-GEMM boundary', () => {
       license: 'Apache-2.0',
       provenance: 'original',
     });
-    expect(example.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
-    expect(example.sourceCommit).not.toBe('0'.repeat(40));
+    const sourceCommit = example.sourceCommit as string;
+    expect(sourceCommit).toMatch(/^[0-9a-f]{40}$/);
+    expect(sourceCommit).not.toBe('0'.repeat(40));
+    expect(example.sourceUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${sourceCommit}/examples/ex15-tiled-gemm`,
+    );
+    expect(example.downloadUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${sourceCommit}.zip`,
+    );
+    const { stdout: archivedManifestSource } = await execFileAsync('git', [
+      'show', `${sourceCommit}:examples/ex15-tiled-gemm/project.json`,
+    ], { cwd: projectRoot });
+    const archivedManifest = JSON.parse(archivedManifestSource) as {
+      sourceCommit: string;
+      sourceUrl: string;
+      downloadUrl: string;
+    };
+    expect(archivedManifest.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
+    expect(archivedManifest.sourceCommit).not.toBe('0'.repeat(40));
+    expect(archivedManifest.sourceUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${archivedManifest.sourceCommit}/examples/ex15-tiled-gemm`,
+    );
+    expect(archivedManifest.downloadUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${archivedManifest.sourceCommit}.zip`,
+    );
+    for (const relativePath of new Set([
+      ...(example.build.inputs as string[]),
+      ...(example.build.hostTestInputs as string[]),
+      ...(example.build.contractFiles as string[]),
+    ])) {
+      const [canonical, embedded] = await Promise.all([
+        execFileAsync('git', ['show', `${sourceCommit}:examples/ex15-tiled-gemm/${relativePath}`], { cwd: projectRoot }),
+        execFileAsync('git', ['show', `${archivedManifest.sourceCommit}:examples/ex15-tiled-gemm/${relativePath}`], { cwd: projectRoot }),
+      ]);
+      expect(canonical.stdout, relativePath).toBe(embedded.stdout);
+    }
     expect(await listProjectFiles()).toEqual([
       'Makefile',
       'README.md',

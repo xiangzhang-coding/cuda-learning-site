@@ -876,6 +876,24 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       expect(archivedManifest.downloadUrl).toBe(
         `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${archivedManifest.sourceCommit}.zip`,
       );
+      const identityResponse = await request.get(archivedManifest.downloadUrl);
+      expect(identityResponse.ok()).toBe(true);
+      const identityEntries = zipEntries(await identityResponse.body());
+      const findIdentityEntry = (relativePath: string) => {
+        const matches = identityEntries.filter(({ name }) => name.endsWith(`/${project.root}/${relativePath}`));
+        expect(matches, `EX15 embedded source contains one ${relativePath}`).toHaveLength(1);
+        return matches[0];
+      };
+      for (const relativePath of new Set([
+        ...project.build.inputs,
+        ...project.build.hostTestInputs,
+        ...project.build.contractFiles,
+      ])) {
+        expect(
+          findIdentityEntry(relativePath).content.equals(findEntry(relativePath).content),
+          `EX15 embedded source reproduces ${relativePath}`,
+        ).toBe(true);
+      }
     }
 
     if (project.id === 'EX10') {
