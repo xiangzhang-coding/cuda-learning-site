@@ -1,0 +1,159 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX14",
+  "title": "Tiled Transpose",
+  "purpose": "Verify an out-of-place row-major tiled transpose exactly for rectangular and partial-tile matrices without publishing performance measurements.",
+  "root": "examples/ex14-tiled-transpose",
+  "sourceCommit": "981939cc705faf721ac06d1b70f2c5c4a8111e92",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/tiled_transpose_reference.hpp",
+      "src/tiled_transpose.cu"
+    ],
+    "hostTestInputs": [
+      "include/tiled_transpose_reference.hpp",
+      "tests/host_reference_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link",
+      "inspect"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/tiled_transpose.ii",
+      "build/tiled_transpose.o",
+      "build/ex14-tiled-transpose"
+    ]
+  },
+  "correctness": {
+    "cpuReference": "include/tiled_transpose_reference.hpp",
+    "logicalTile": [
+      32,
+      32
+    ],
+    "blockDimensions": [
+      256,
+      1
+    ],
+    "threadsPerBlock": 256,
+    "cooperativeIterations": 4,
+    "sharedTile": [
+      32,
+      33
+    ],
+    "sharedBytesPerBlock": 4224,
+    "fixtures": [
+      {
+        "id": "5x7",
+        "rows": 5,
+        "columns": 7,
+        "outputRows": 7,
+        "outputColumns": 5
+      },
+      {
+        "id": "33x35",
+        "rows": 33,
+        "columns": 35,
+        "outputRows": 35,
+        "outputColumns": 33
+      },
+      {
+        "id": "64x32",
+        "rows": 64,
+        "columns": 32,
+        "outputRows": 32,
+        "outputColumns": 64
+      }
+    ],
+    "mapping": "output[col * rows + row] = input[row * columns + col]",
+    "comparison": "Exact float equality for every output element because transpose performs no arithmetic",
+    "paddingContract": "The 33rd shared-memory column is storage-only and does not change logical dimensions or values"
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "maximumProblemMemoryBytes": 20608,
+    "target": [
+      "sm_75",
+      "compute_75"
+    ],
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "cpu-reference": {
+      "file": "include/tiled_transpose_reference.hpp",
+      "startMarker": "// [ex14-cpu-reference-start]",
+      "endMarker": "// [ex14-cpu-reference-end]",
+      "language": "cpp"
+    },
+    "tiled-transpose": {
+      "file": "src/tiled_transpose.cu",
+      "startMarker": "// [ex14-tiled-transpose-start]",
+      "endMarker": "// [ex14-tiled-transpose-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "For 5x7, 33x35, and 64x32, the CUDA output should exactly match the independent CPU transpose reference at every element.",
+      "Each fixture should report an output shape of input columns by input rows and satisfy output[col * rows + row] = input[row * columns + col] for every valid coordinate.",
+      "The extra shared-memory padding column should remain storage-only: it should add no logical matrix column, alter no output value, and produce no output outside guarded dimensions."
+    ],
+    "recordedObservations": []
+  }
+}

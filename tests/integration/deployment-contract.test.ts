@@ -92,7 +92,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication).toMatchObject({
       publicationId: 'current',
       releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
-      scope: { publicationPairs: 167, sourceRoutes: 334 },
+      scope: { publicationPairs: 178, sourceRoutes: 356 },
     });
     expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
     expect(builtFiles).not.toContain('_worker.js');
@@ -125,19 +125,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('reject tracked or untracked source changes');
     expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
     expect(deployment).toContain('dist/publication.json');
-    expect(deployment).toContain('44 Learning Units');
-    expect(deployment).toContain('fourteen Runnable Examples EX01-EX13/EX16');
-    expect(deployment).toContain('fourteen Visual Explainers');
-    expect(deployment).toContain('45 Practice Bank entries, 139 Glossary terms, and 56 source records');
-    expect(deployment).toContain('five catalog groups total 260 records');
-    expect(deployment).toContain('167 Publication Pairs and 334 source routes');
-    expect(deployment).toContain('EX14 and EX15 remain absent');
-    expect(deployment).toContain('no LAB06 destination');
+    expect(deployment).toContain('47 Learning Units');
+    expect(deployment).toContain('fifteen Runnable Examples EX01-EX14/EX16');
+    expect(deployment).toContain('fifteen Visual Explainers');
+    expect(deployment).toContain('48 Practice Bank entries, 146 Glossary terms, and 59 source records');
+    expect(deployment).toContain('five catalog groups total 274 records');
+    expect(deployment).toContain('178 Publication Pairs and 356 source routes');
+    expect(deployment).toContain('EX15 remains absent');
+    expect(deployment).toContain('no LAB06, Q11, or LAB10 destination');
     expect(deployment).toContain('EX10 is Runtime-Not-Applicable');
     expect(deployment).toMatch(/EX10.*Compile-Checked.*run 33275734951/i);
-    expect(deployment).toMatch(/C\+\+23 probe.*passed.*narrow/i);
-    expect(deployment).toMatch(/EX11-EX13.*Pending Hardware Verification/i);
-    expect(deployment).toMatch(/no measured .*reduction, scan, histogram, or contention performance/i);
+    expect(deployment).toMatch(/EX11-EX14.*Pending Hardware Verification/i);
+    expect(deployment).toMatch(/no measured transpose, stencil, convolution, library-comparison, timing, or speedup result/i);
     expect(deployment).toMatch(/R2 aggregate review.*pending/i);
     expect(deployment).toMatch(/issue #24/i);
     expect(deployment).toContain('npm run test:release-smoke');

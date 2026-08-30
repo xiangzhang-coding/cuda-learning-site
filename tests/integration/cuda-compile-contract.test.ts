@@ -76,6 +76,9 @@ describe('CUDA compile evidence workflow', () => {
       'lane: ex13-cuda-11-8-cxx17',
       'lane: ex13-cuda-12-9-cxx17',
       'lane: ex13-cuda-13-3-cxx17',
+      'lane: ex14-cuda-11-8-cxx17',
+      'lane: ex14-cuda-12-9-cxx17',
+      'lane: ex14-cuda-13-3-cxx17',
       'lane: ex16-cuda-11-8-cxx17',
       'lane: ex16-cuda-12-9-cxx17',
       'lane: ex16-cuda-13-3-cxx17',
@@ -95,7 +98,8 @@ describe('CUDA compile evidence workflow', () => {
     const ex09Build = workflow.match(/^  ex09-build:\n[\s\S]*?(?=^  ex11-build:)/m)?.[0] ?? '';
     const ex11Build = workflow.match(/^  ex11-build:\n[\s\S]*?(?=^  ex12-build:)/m)?.[0] ?? '';
     const ex12Build = workflow.match(/^  ex12-build:\n[\s\S]*?(?=^  ex13-build:)/m)?.[0] ?? '';
-    const ex13Build = workflow.match(/^  ex13-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
+    const ex13Build = workflow.match(/^  ex13-build:\n[\s\S]*?(?=^  ex14-build:)/m)?.[0] ?? '';
+    const ex14Build = workflow.match(/^  ex14-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
     const ex16Build = workflow.match(/^  ex16-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
@@ -122,9 +126,10 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('EX11_BUILD_RESULT: ${{ needs.ex11-build.result }}');
     expect(workflow).toContain('EX12_BUILD_RESULT: ${{ needs.ex12-build.result }}');
     expect(workflow).toContain('EX13_BUILD_RESULT: ${{ needs.ex13-build.result }}');
+    expect(workflow).toContain('EX14_BUILD_RESULT: ${{ needs.ex14-build.result }}');
     expect(workflow).toContain('EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}');
     expect(workflow).toContain(
-      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex16-build]',
+      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex16-build]',
     );
     expect(workflow).toContain('EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}');
     expect(workflow).toContain('if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi');
@@ -137,6 +142,7 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('if [ "$EX11_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX12_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX13_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX14_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
@@ -183,8 +189,8 @@ describe('CUDA compile evidence workflow', () => {
     expect(scanOffset).toBeGreaterThan(-1);
     expect(uploadOffset).toBeGreaterThan(scanOffset);
 
-    expect([...workflow.matchAll(/^  (ex(?:11|12|13)-build):$/gm)].map((match) => match[1]))
-      .toEqual(['ex11-build', 'ex12-build', 'ex13-build']);
+    expect([...workflow.matchAll(/^  (ex(?:11|12|13|14)-build):$/gm)].map((match) => match[1]))
+      .toEqual(['ex11-build', 'ex12-build', 'ex13-build', 'ex14-build']);
 
     for (const [exampleId, build, root] of [
       ['ex05', ex05Build, 'coalesced-strided-access'],
@@ -195,6 +201,7 @@ describe('CUDA compile evidence workflow', () => {
       ['ex11', ex11Build, 'multi-stage-reduction'],
       ['ex12', ex12Build, 'inclusive-exclusive-scan'],
       ['ex13', ex13Build, 'privatized-histogram'],
+      ['ex14', ex14Build, 'tiled-transpose'],
     ] as const) {
       expect(build).not.toBe('');
       expect([...build.matchAll(/^\s+- lane: (\S+)$/gm)].map((match) => match[1])).toEqual([

@@ -1,0 +1,260 @@
+---
+title: 'EX14: Tiled Transpose Runnable Example'
+description: Exactly verify an out-of-place row-major transpose with three rectangular fixtures, a pure C++17 CPU reference, and a guarded 32 x 32 shared-memory tile.
+pairId: ex14
+counterpart: /examples/tiled-transpose/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - matrix-contract
+  - cpu-reference
+  - tiled-transpose
+  - host-model
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX14
+prerequisites:
+  - A05
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 20,608-byte global-plus-shared problem bound and under 8 GB'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'For 5x7, 33x35, and 64x32, the CUDA output should exactly match the independent CPU transpose reference at every element.'
+    - 'Each fixture should report an output shape of input columns by input rows and satisfy output[col * rows + row] = input[row * columns + col] for every valid coordinate.'
+    - 'The extra shared-memory padding column should remain storage-only: it should add no logical matrix column, alter no output value, and produce no output outside guarded dimensions.'
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Example Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Out-of-place transpose, shared-memory staging, block synchronization, and adjacent padding discussion'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Linux x86-64'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 11.8.0 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04'
+    version: '11.8.0-devel-ubuntu22.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 12.9.2 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04'
+    version: '12.9.2-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+  - title: 'NVIDIA CUDA 13.3.1 development image tag API metadata'
+    url: 'https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04'
+    version: '13.3.1-devel-ubuntu24.04'
+    platform: 'linux/amd64 and linux/arm64 registry metadata'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs:
+      name: 'cuda:pair-id'
+      content: ex14
+  - tag: meta
+    attrs:
+      name: 'cuda:fact-check-date'
+      content: '2026-08-30'
+  - tag: meta
+    attrs:
+      name: 'cuda:license'
+      content: CC-BY-4.0
+  - tag: meta
+    attrs:
+      name: 'cuda:structure'
+      content: 'purpose,project,matrix-contract,cpu-reference,tiled-transpose,host-model,build,compatibility,evidence,expected-observations,sources'
+  - tag: meta
+    attrs:
+      name: 'cuda:resource-kind'
+      content: runnable-example
+  - tag: meta
+    attrs:
+      name: 'cuda:unit-id'
+      content: EX14
+  - tag: meta
+    attrs:
+      name: 'cuda:prerequisites'
+      content: A05
+  - tag: meta
+    attrs:
+      name: 'cuda:example-ids'
+      content: EX14
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-example'
+      content: EX14
+  - tag: meta
+    attrs:
+      name: 'cuda:canonical-ranges'
+      content: 'cpu-reference,tiled-transpose'
+  - tag: meta
+    attrs:
+      name: 'cuda:hardware-gate'
+      content: 'Build: x86-64 CPU with a host C++17 compiler for host-test and the selected CUDA Toolkit for CUDA build stages; runtime: Native Linux, one CUDA GPU with compute capability 7.5 or newer, with a conservative 20,608-byte global-plus-shared problem bound and under 8 GB'
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-compilation'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:evidence-runtime'
+      content: 'Pending Hardware Verification'
+  - tag: meta
+    attrs:
+      name: 'cuda:expected-observations'
+      content: '3 declared expectations'
+  - tag: meta
+    attrs:
+      name: 'cuda:recorded-observations'
+      content: none
+  - tag: meta
+    attrs:
+      name: 'cuda:source-count'
+      content: '7'
+  - tag: meta
+    attrs:
+      name: 'cuda:source-versions'
+      content: '11.8.0,12.9.2,13.3.1,13.3'
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/tiled-transpose/" lang="zh-CN">阅读中文版本</a>
+
+EX14 is a standalone, original C++17 CUDA Runnable Example. It transposes three row-major `float` matrices into separate outputs, then compares each CUDA result exactly with a pure C++17 CPU reference. The website does not execute CUDA. This page publishes no speedup, global-memory transaction count, bank-conflict observation, timing, or profiler result.
+
+## Purpose
+
+Complete A05 first. EX14 turns rectangular-transpose shape, row-major mapping, edge-guard, shared-tile, and barrier contracts into a project that can be built independently. It establishes correctness acceptance criteria only. Source layout is not evidence of GPU behavior or performance.
+
+## Canonical project
+
+[View EX14 at its pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose), or [download the source archive for the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip). The project directory is `examples/ex14-tiled-transpose/`; `project.json`, page links, and canonical imports use the same immutable publication commit.
+
+`project.json` declares two canonical ranges, three fixtures, a 32 x 32 logical tile, a one-dimensional 256-thread block, four cooperative slot assignments per thread, a 32 x 33 shared layout, a conservative 20,608-byte memory bound, three C++17 Toolkit Lanes, and an empty compilation axis. The project source and page prose are original; software files use Apache-2.0. This linear ownership design copies no NVIDIA owner source, sample, figure, or result.
+
+## Matrix contract
+
+The input shape is `rows x columns`, and the output shape must be `columns x rows`. Both use row-major flattening. Every valid `(row, col)` coordinate must satisfy:
+
+```text
+output[col * rows + row] = input[row * columns + col]
+```
+
+The deterministic fixtures are `5x7`, `33x35`, and `64x32`. The first two leave one or both axes in a partial tile; the third is a tile-aligned rectangular shape. Fixture values are positive integers represented exactly by `float`. Transpose performs no arithmetic, so CPU and CUDA outputs use exact float equality.
+
+## CPU reference
+
+The pure C++17 header declares the fixtures, shape validation, row-major reference, and deterministic mismatch report:
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+Before writing output, the reference rejects zero or overflowing dimensions, null pointers, incorrect input or output sizes, an incorrect output shape, and an in-place request. The verifier checks the complete output shape and reports the first mismatch's linear index, output row and column, expected value, and actual value.
+
+## Tiled transpose
+
+The CUDA source declares a 32 x 32 logical tile, a one-dimensional 256-thread ownership loop, and `__shared__ float tile[32][33]`:
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+Each 256-thread block maps `threadIdx.x + k * blockDim.x` to local row and column, so every thread cooperatively defines four slots. The store phase independently linearizes output-local coordinates and reads the exchanged shared coordinate. The load guard checks both input row and column. Every thread then reaches the only `__syncthreads()` unconditionally. The store guard independently checks the transposed output extents. The kernel has no return before the barrier.
+
+The 33rd shared column is physical storage padding only. It is not a logical matrix column, does not change output shape, and creates no output value. This project does not observe or quantify its bank behavior on a GPU. The CUDA main reports each fixture ID, input shape, transposed output shape, and correctness `PASS` or `FAIL`, followed by one aggregate result; it emits no timing or performance field.
+
+## Host model boundary
+
+`make host-test` compiles only `tests/host_reference_test.cpp` and the pure C++17 header. It checks all three output dimensions and every mapping, verifies exact equality and mismatch coordinates, and covers the non-writing rejection boundaries for an unknown fixture, zero or overflowing dimensions, null pointers, incorrect sizes, an incorrect output shape, and an in-place request. It prints `host-reference: pass` on success.
+
+The host test includes no CUDA header or syntax and launches no kernel. It cannot establish CUDA compilation, device allocation or copies, shared-memory access, barrier participation, GPU edge guards, or GPU execution. Passing it grants no CUDA compilation or runtime Evidence Status.
+
+## Build contract
+
+From the project directory on Native Linux, run:
+
+```sh
+make preprocess DIALECT=c++17
+make compile DIALECT=c++17
+make link DIALECT=c++17
+make inspect DIALECT=c++17
+make host-test DIALECT=c++17
+```
+
+The first four stages require the selected CUDA Toolkit; host-test needs only a host C++17 compiler. CUDA stages create `build/tiled_transpose.ii`, `build/tiled_transpose.o`, and `build/ex14-tiled-transpose`. Inspection checks a native `sm_75` cubin and PTX generated from `compute_75`.
+
+`scripts/compile-check.sh c++17 ex14 <result-dir>` performs clean, preprocess, compile, link, inspect, and host-test while retaining logs and inspection artifacts. It never executes the CUDA binary, so it supplies no GPU observation.
+
+## Compatibility
+
+| Coordinate | Declaration |
+| --- | --- |
+| Supported Environment | Native Linux only |
+| Runtime gate | One CUDA GPU with compute capability 7.5 or newer |
+| Baseline GPU Capability Tier | Conservative 20,608-byte global-plus-shared bound, below 8 GB |
+| Compiler target | Native `sm_75` cubin plus PTX generated from `compute_75` |
+| Language contract | The same original C++17 source in all three Toolkit Lanes |
+
+The complete Lane coordinates are:
+
+| Lane | Toolkit / OS | Declared image | Manifest digest | linux/amd64 digest |
+| --- | --- | --- | --- | --- |
+| `cuda-11.8` | 11.8.0 / Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` | `sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` | `sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb` |
+| `cuda-12.9` | 12.9.2 / Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` | `sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` | `sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048` |
+| `cuda-13.3` | 13.3.1 / Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` | `sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` | `sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e` |
+
+These digest-pinned images are future build targets, not compilation records. All three Lanes use the same implementation; there is no Toolkit-specific source fork.
+
+## Compilation and runtime evidence
+
+EX14's compilation array is empty, so **EX14 is not Compile-Checked**. Runtime is **Pending Hardware Verification**, and recorded observations are empty. A passing host test populates no CUDA evidence axis.
+
+This page does not claim observed GPU output, shared-memory behavior, barrier behavior, or edge guards. It also makes no speedup, transaction-count, bank-conflict-result, timing, or profiler claim. A future runtime record must come from a declared Reference Environment, include a complete Environment Manifest, and preserve all three fixtures, output shapes, and exact acceptance criteria.
+
+## Expected observations, not runtime records
+
+1. For `5x7`, `33x35`, and `64x32`, the CUDA output should match the independent CPU transpose reference exactly at every element.
+2. Each fixture's output shape should be input columns x input rows, and every valid coordinate should satisfy `output[col * rows + row] = input[row * columns + col]`.
+3. The extra shared-memory padding column should affect storage extent only: it should add no logical matrix column, alter no output value, and produce no output outside guarded dimensions.
+
+These are correctness, dimension, and padding-neutral acceptance criteria that the Learning Site has not observed. They contain no measured performance conclusion.
+
+## Sources and review
+
+The current NVIDIA CUDA Programming Guide v13.3 shared-memory matrix-transpose section anchors transpose, shared-staging, and synchronization facts. This project copies none of its source, samples, or figures. Three NVCC owner documents and three Docker Hub tag APIs correspond to the project's exact Toolkit and image coordinates. None is EX14 build or runtime evidence.
+
+- [CUDA Programming Guide v13.3 - Matrix Transpose Example Using Shared Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory)
+- [CUDA 11.8.0 Compiler Driver - Supported Phases](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)
+- [CUDA 12.9.2 Compiler Driver](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)
+- [CUDA 13.3.1 Compiler Driver](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- [NVIDIA CUDA 11.8.0 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/11.8.0-devel-ubuntu22.04)
+- [NVIDIA CUDA 12.9.2 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/12.9.2-devel-ubuntu24.04)
+- [NVIDIA CUDA 13.3.1 development image tag API metadata](https://hub.docker.com/v2/repositories/nvidia/cuda/tags/13.3.1-devel-ubuntu24.04)
+
+**Fact-check and all-source access date: 2026-08-30.**

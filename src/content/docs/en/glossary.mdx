@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: One hundred thirty-nine published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred forty-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-08-30'
@@ -126,7 +126,7 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** An interactive or animated representation that exposes spatial, temporal, or architectural behavior. It may model CUDA concepts in the browser but never executes CUDA.
 - **Avoid:** Decoration, CUDA demo.
-- **Related resources:** O01, [VIS01](/en/visuals/kernel-journey/), [VIS02](/en/visuals/indexing/), [VIS04](/en/visuals/memory-transactions/), [VIS05](/en/visuals/shared-memory-banks/), [VIS06](/en/visuals/memory-hierarchy-lifetime/), [VIS19](/en/foundations/asynchronous-errors/#vis19), [VIS20](/en/foundations/compute-capability/#vis20), [VIS21](/en/foundations/runtime-driver-api/#vis21), and [VIS22](/en/foundations/launch-geometry/#vis22).
+- **Related resources:** O01, [VIS01](/en/visuals/kernel-journey/), [VIS02](/en/visuals/indexing/), [VIS04](/en/visuals/memory-transactions/), [VIS05](/en/visuals/shared-memory-banks/), [VIS06](/en/visuals/memory-hierarchy-lifetime/), [VIS11](/en/visuals/tiled-transpose/), [VIS19](/en/foundations/asynchronous-errors/#vis19), [VIS20](/en/foundations/compute-capability/#vis20), [VIS21](/en/foundations/runtime-driver-api/#vis21), and [VIS22](/en/foundations/launch-geometry/#vis22).
 - **Version note:** Conceptual models must be separated from hardware-specific behavior.
 
 <span id="term-010" class="resource-target" aria-hidden="true"></span>
@@ -1299,6 +1299,69 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/), [Q01](/en/correctness/cpu-references-tolerances-invariants/), and [EX11](/en/examples/multi-stage-reduction/).
 - **Version note:** The claim binds to an exact Toolkit, compiler, library, and device scope. Current CUDA v13.3, the 12.9.1/11.8.0 archives, and CCCL v3.4.2 policy supply only their own boundaries; no tolerance result upgrades this status.
 
+<span id="term-140" class="resource-target" aria-hidden="true"></span>
+
+### matrix transpose · 矩阵转置
+
+- **Definition:** A matrix transpose maps input coordinate `(row,col)` to output `(col,row)`. For a row-major rectangular matrix, `output[col*rows+row] = input[row*columns+col]`.
+- **Avoid:** In-place reshape, swapping display labels only, assuming a square matrix, automatic performance optimization.
+- **Related resources:** [A05](/en/algorithms/matrix-transpose-layout/), [EX14](/en/examples/tiled-transpose/), and [VIS11](/en/visuals/tiled-transpose/).
+- **Version note:** The mapping is Toolkit-independent. CUDA v13.3 and the 12.9.1/11.8.0 owner guides govern current and archived memory-layout context; actual performance needs separate evidence.
+
+<span id="term-141" class="resource-target" aria-hidden="true"></span>
+
+### physical row stride · 物理行跨度
+
+- **Definition:** Physical row stride is the element or byte distance between the starts of adjacent logical rows in actual storage. It may exceed the logical column count.
+- **Avoid:** Logical width, a fixed synonym for output leading dimension, padding count itself, guarantee of row-major semantics.
+- **Related resources:** [M04](/en/memory/bank-conflicts-layouts/), [A05](/en/algorithms/matrix-transpose-layout/), [EX14](/en/examples/tiled-transpose/), and [VIS11](/en/visuals/tiled-transpose/).
+- **Version note:** Shared-memory mapping also binds to element width, the bank model, and architecture. VIS11 computes declared physical slots and observes no bank hardware.
+
+<span id="term-142" class="resource-target" aria-hidden="true"></span>
+
+### bank padding · 存储体填充
+
+- **Definition:** Bank padding inserts a physical shared-layout slot that carries no logical value, changing row stride and the bank mapping of a selected access pattern.
+- **Avoid:** A new logical matrix column, automatic conflict removal, a universal `+1` rule, speedup guarantee.
+- **Related resources:** [M04](/en/memory/bank-conflicts-layouts/), [A05](/en/algorithms/matrix-transpose-layout/), [EX14](/en/examples/tiled-transpose/), and [VIS11](/en/visuals/tiled-transpose/).
+- **Version note:** A05 uses a selected 32-bank, 32-bit-word reasoning model. Recheck another type, instruction, or architecture; actual conflicts and timing require observation.
+
+<span id="term-143" class="resource-target" aria-hidden="true"></span>
+
+### stencil · 模板计算
+
+- **Definition:** A stencil reads a declared shape of relative input offsets for each output coordinate and combines that neighborhood with a fixed operation.
+- **Avoid:** Any sliding window, image filters only, neighborhood access without a boundary policy, unconditional synonym for convolution.
+- **Related resources:** [A06](/en/algorithms/stencil-neighborhood-reuse/).
+- **Version note:** The algorithm contract is Toolkit-independent. Shared memory and block synchronization follow current CUDA v13.3 and the 12.9.1/11.8.0 archives.
+
+<span id="term-144" class="resource-target" aria-hidden="true"></span>
+
+### halo · 光环区
+
+- **Definition:** A halo is input staged outside an output tile's center region to satisfy its neighborhood read set. A two-dimensional square footprint also has corners.
+- **Avoid:** Global boundary, necessary synonym for padding, only four side strips, unused cache data.
+- **Related resources:** [A06](/en/algorithms/stencil-neighborhood-reuse/) and [A07](/en/algorithms/convolution-reuse-layout/).
+- **Version note:** Extent follows from output tile, offset shape, stride, dilation, and boundary policy. CUDA v13.3 stencil context does not replace the application definition.
+
+<span id="term-145" class="resource-target" aria-hidden="true"></span>
+
+### convolution · 卷积
+
+- **Definition:** Convolution combines shifted input neighborhoods with a kernel or filter in a declared orientation. Mathematical discrete convolution flips the spatial filter.
+- **Avoid:** Any unflipped deep-learning operation by default, every stencil, fixed NCHW layout, production-library performance guarantee.
+- **Related resources:** [A07](/en/algorithms/convolution-reuse-layout/).
+- **Version note:** A07 explicitly defines its teaching path as cross-correlation. Current cuDNN documentation supplies only an owner coordinate for a future pinned production comparison.
+
+<span id="term-146" class="resource-target" aria-hidden="true"></span>
+
+### cross-correlation · 互相关
+
+- **Definition:** Cross-correlation uses spatial filter taps in storage order without flipping the axes. A07's direct teaching equation uses this convention.
+- **Avoid:** Exact synonym for mathematical convolution, automatically identical output, an operation contract implied only by an API name.
+- **Related resources:** [A07](/en/algorithms/convolution-reuse-layout/).
+- **Version note:** Tensor layout, stride, dilation, padding, data and compute types, and component version remain explicit. cuDNN Frontend v1.27.0 is only a future coordinate.
+
 ## Maintenance rule
 
-TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, TERM-077 through TERM-095 retain **2026-08-28**, and TERM-096 through TERM-125 retain **2026-08-29**. TERM-126 through TERM-139 and the complete 139-term Publication Pair, metadata projections, direct links, and static definitions were reviewed together on **2026-08-30**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, or private material. TERM-126 through TERM-139 compiled none of EX11-EX13 and executed no GPU code. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-065 retain their **2026-08-26** item-level review records, TERM-066 through TERM-076 retain **2026-08-27**, TERM-077 through TERM-095 retain **2026-08-28**, and TERM-096 through TERM-125 retain **2026-08-29**. TERM-126 through TERM-146 and the complete 146-term Publication Pair, metadata projections, direct links, and static definitions were reviewed together on **2026-08-30**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and their composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, or private material. TERM-126 through TERM-146 execute no GPU code or cuDNN. The [Chinese counterpart](/glossary/) is complete at the same time.

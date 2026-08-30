@@ -163,7 +163,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(334);
+    expect(contentFiles).toHaveLength(356);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');

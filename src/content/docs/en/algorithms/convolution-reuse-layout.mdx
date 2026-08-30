@@ -1,0 +1,215 @@
+---
+title: 'A07: Direct 2D Convolution, Neighborhood Reuse, and Layout Contracts'
+description: Use small direct 2D convolution as a learning vehicle for A06 neighborhood reuse while defining tensor/layout, filter, stride, dilation, padding, cross-correlation, reference, and production-comparison contracts.
+pairId: a07
+counterpart: /algorithms/convolution-reuse-layout/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - tensor-layout-contract
+  - convolution-vs-correlation
+  - direct-neighborhood-reuse
+  - reference-and-tolerance
+  - production-comparison
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A07
+prerequisites:
+  - A06
+  - M03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current shared-memory, synchronization, and layout guidance for the direct teaching path'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'cuDNN - Convolutions'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/latest/operations/Convolutions.html'
+    version: 'cuDNN current documentation; last updated 2026-08-07'
+    platform: 'Current convolution semantics and API operation contract for future production comparison'
+    accessDate: '2026-08-30'
+  - title: 'cuDNN - Developer Overview'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/latest/developer/overview.html'
+    version: 'cuDNN current documentation; last updated 2026-08-07'
+    platform: 'Current graph, engine configuration, execution-plan, workspace, and determinism context'
+    accessDate: '2026-08-30'
+  - title: 'cuDNN Frontend v1.27.0 release'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0'
+    version: 'cuDNN Frontend v1.27.0; published 2026-08-06'
+    platform: 'Future comparison coordinate recommended for cuDNN 9.24.0 and later; not an A07 dependency or execution record'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a07 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/convolution-reuse-layout/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,tensor-layout-contract,convolution-vs-correlation,direct-neighborhood-reuse,reference-and-tolerance,production-comparison,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A06,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,cuDNN current 2026-08-07,cuDNN Frontend 1.27.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/convolution-reuse-layout/" lang="zh-CN">阅读中文对应页</a>
+
+This unit uses small direct 2D [convolution (TERM-145)](/en/glossary/#term-145) as a learning vehicle for neighborhood algorithms. It reuses A06's halo, cooperative-load, and uniform-barrier reasoning while adding tensor layout, filter layout, stride, dilation, padding, channel reduction, and floating-point acceptance contracts. The teaching equation actually uses the [cross-correlation (TERM-146)](/en/glossary/#term-146) convention common in deep-learning interfaces and explicitly distinguishes it from mathematical convolution.
+
+## What you should be able to do
+
+- Fully declare input, filter, and output tensor shapes, physical NCHW layout, and linear addresses.
+- Derive output extents and every output's input-coordinate set from stride, dilation, and padding.
+- Distinguish the filter flip of mathematical convolution from this page's cross-correlation convention.
+- Extend A06 center/halo staging to a small multi-channel direct 2D operation.
+- Give a CPU reference the same semantics, accumulation policy, absolute/relative tolerance, and edge fixtures.
+- List graph validation/build, heuristics, plan, workspace, correctness, and determinism gates for a future cuDNN Frontend/API comparison without presuming a hand-written kernel wins.
+
+## Prerequisites
+
+Complete [A06: Stencil Neighborhoods, Halos, and Cooperative Reuse](/en/algorithms/stencil-neighborhood-reuse/) and [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/) first. A06 supplies neighborhood footprints, boundary policy, corner halos, and the `load -> barrier -> compute` proof. M03 supplies shared-tile ownership and capacity reasoning.
+
+The prerequisite set is exactly `A06, M03`. A production library, future component matrix, and any executable are not prerequisites. This page imports or creates no Runnable Example and carries no unpublished related ID.
+
+## Tensor and layout contract
+
+The teaching contract uses dense row-major NCHW tensors: input `X` has shape `[N,C,H,W]`, filter `F` has shape `[K,C,R,S]`, and output `Y` has shape `[N,K,P,Q]`. The final dimension is contiguous, so linear indices are:
+
+- `X[n,c,h,w] -> (((n*C + c)*H + h)*W + w)`
+- `F[k,c,fy,fx] -> (((k*C + c)*R + fy)*S + fx)`
+- `Y[n,k,oy,ox] -> (((n*K + k)*P + oy)*Q + ox)`
+
+Stride `(u_h,u_w)` is the movement of adjacent output origins in input coordinates. Dilation `(d_h,d_w)` is the input spacing between adjacent filter taps. Zero padding `(p_h,p_w)` defines a virtual width of zeros on each side of each spatial axis. This page uses symmetric zero padding and does not store padding slots in the input allocation.
+
+For positive stride/dilation and nonnegative padding, output extents are `P = floor((H + 2p_h - d_h(R-1) - 1) / u_h) + 1` and `Q = floor((W + 2p_w - d_w(S-1) - 1) / u_w) + 1`. The contract first confirms that the numerators produce legal positive output extents; a kernel cannot infer shape from launch geometry.
+
+A layout name is not a complete contract. Also state element type, accumulation type, filter/output channel meanings, whether tensor strides really are dense NCHW, and whether buffers may alias. Changing to NHWC or a non-contiguous view changes the linear formulas, coalescing reasoning, and library descriptors together.
+
+## Mathematical convolution and teaching cross-correlation
+
+This page uses cross-correlation:
+
+`Y[n,k,oy,ox] = sum over c,fy,fx of X_or_zero[n,c,oy*u_h + fy*d_h - p_h,ox*u_w + fx*d_w - p_w] * F[k,c,fy,fx]`
+
+`X_or_zero` returns 0 for an out-of-domain spatial coordinate and performs no out-of-bounds read. Filter coordinates `fy,fx` are used in storage order without flipping. This choice matches common naming in many deep-learning convolution APIs, but the teaching contract still states it explicitly.
+
+Mathematical discrete convolution flips the filter along both spatial axes, for example by using `F[k,c,R-1-fy,S-1-fx]`. A symmetric filter can make both operations produce the same result, so correctness fixtures include an asymmetric filter. A page cannot say only “convolution” and omit the flip convention, and CPU and GPU paths cannot silently choose different conventions.
+
+Every output is a reduction over `C*R*S` terms. Even with correct coordinate semantics, a different accumulation order can produce floating-point variation. That belongs in the reference/tolerance contract and cannot be hidden as a terminology difference.
+
+## Direct neighborhood reuse: extend A06
+
+For a `T_y x T_x` output tile, `R x S` filter, stride `(u_h,u_w)`, and dilation `(d_h,d_w)`, each input channel needs a dense bounding patch with extents:
+
+- height: `(T_y - 1)u_h + (R - 1)d_h + 1`
+- width: `(T_x - 1)u_w + (S - 1)d_w + 1`
+
+Padding changes only the patch origin and which positions generate 0; it does not change this bounding-box arithmetic. Dilation can leave holes in the mathematical footprint. A simple teaching baseline may stage the complete box, while a sparse loader needs a separate coverage proof.
+
+The synchronous direct path keeps A06's phases: block threads cooperatively load one input-channel patch or load channels in stages, all participants reach the barrier, valid output owners accumulate over filter taps and channels, and the block establishes any required reuse boundary before overwriting storage for another channel or tile. An edge thread with no legal output may still own a halo load and cannot return before the barrier.
+
+Adjacent outputs reuse overlapping input positions, and multiple outputs also reuse the same filter values. Reuse arithmetic compares only logical references with staged positions. Shared capacity, occupancy, extra address work, barriers, cache behavior, and the channel loop affect actual behavior, so this page derives no performance claim from reuse counts.
+
+## CPU reference, fixtures, and tolerance responsibilities
+
+The CPU reference shares exactly the same NCHW/filter layouts, cross-correlation convention, output-shape formula, stride, dilation, zero padding, element conversion, and accumulation contract as the teaching path. A reference is not merely a similar-looking nested loop; it is the oracle for every output coordinate.
+
+Fixtures include at least an all-zero input, impulse input, all-one input and filter, asymmetric filter, rectangular shape, edge padding, stride greater than 1, dilation greater than 1, and channel count greater than 1. Each fixture validates output shape before every output value and any guard or sentinel region.
+
+An integer teaching case can use exact comparison. A floating-point case declares reference accumulation type/order, absolute tolerance, relative tolerance, NaN/Inf policy, and failure report before execution. A common rule is `abs(actual-expected) <= atol + rtol*abs(expected)`, but `atol` and `rtol` must fit the problem scale rather than act as site-wide constants. Bitwise equality, determinism, and a numerically acceptable result are separate requirements.
+
+## Production comparison: a future pinned cuDNN Frontend/API workflow
+
+A hand-written direct kernel exists only to learn layout, neighborhood reuse, and correctness contracts. Production comparison should move to a pinned cuDNN Frontend/API workflow rather than assume the teaching kernel is faster or a better default.
+
+Future work includes at least these gates:
+
+1. **Component pin:** Fix the complete matrix of cuDNN library, cuDNN Frontend, CUDA Toolkit, driver, GPU, and build environment.
+2. **Semantic parity:** Construct the graph with identical tensor/filter layouts, dimensions, stride, dilation, padding, data/compute types, and cross-correlation convention.
+3. **Graph validation/build:** Record graph validation and build as separate outcomes; a descriptor mistake is not kernel performance.
+4. **Heuristics/plan selection:** Record the heuristics mode, candidate engine configurations, filters, and selected execution plan without projecting one automatic choice as universally best.
+5. **Workspace:** Query and record plan workspace bytes, alignment, allocation/lifetime, and stream ordering, with an explicit fallback policy for failure or an exceeded budget.
+6. **Correctness/determinism:** Pass the same CPU oracle and tolerance before measurement; separately state determinism scope, repetition policy, and allowed numerical variation.
+
+The [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0) was published on 2026-08-06 and is recommended by that release for cuDNN 9.24.0 and later. It is only a current future-comparison coordinate, not an A07 dependency, compatibility proof, or execution record.
+
+A later, unpublished cuDNN library unit will pin the production component matrix. Current A07 does not teach cuDNN API programming and does not build, validate, or execute a cuDNN graph. This checklist defines future comparison responsibilities only; no evidence here supports claiming that a hand-written kernel beats a cuDNN plan.
+
+## Evidence boundary
+
+| expected reasoning | observed evidence |
+| --- | --- |
+| Shape formulas and coordinate equations determine the output domain | Actual CPU/GPU output and error state |
+| An A06 patch extent covers direct receptive fields | An actual memory check, trace, or source execution |
+| An asymmetric filter distinguishes correlation from flipped convolution | Retained output for a named fixture |
+| A cuDNN workflow requires graph, plan, and workspace contracts | A build/execution record for a pinned component matrix |
+
+Compilation, runtime, expected observations, and recorded observations are all empty for this page. It has no CUDA executable and does not execute cuDNN. Equations, source review, and a future checklist are not timing, throughput, speedup, plan-availability, or determinism evidence.
+
+## Retrieval check
+
+1. How are linear addresses calculated for dense NCHW input, KCRS filter, and NKPQ output?
+2. What part of a receptive field does each of stride, dilation, and padding change: origin movement, tap spacing, or out-of-domain values?
+3. Why does this page not flip the filter under its cross-correlation convention, and how would mathematical convolution differ?
+4. How do output-tile, filter, stride, and dilation dimensions determine the staged input bounding patch?
+5. Why must a future cuDNN comparison fix graph semantics, plan/workspace, correctness, and determinism before discussing measurement?
+
+## Continue with practice
+
+- Complete the [A07 Exercises](/en/algorithms/convolution-reuse-layout/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/convolution-reuse-layout/solutions/).
+- Audit [Practice Bank PB-R2-019](/en/practice/#pb-r2-019), requiring a tensor contract, asymmetric-filter oracle, reuse ledger, and production decision gates.
+- Revisit [TERM-145 convolution](/en/glossary/#term-145) and [TERM-146 cross-correlation](/en/glossary/#term-146), while leaving the component pin and execution to a later, unpublished cuDNN library unit.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies current shared-memory, synchronization, and layout owner guidance for the direct teaching path; it was last updated on 2026-05-27.
+- [CUDA C Programming Guide v11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html) and [CUDA C++ Programming Guide v12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html) cover the stable contracts for the 11.8 lane and Toolkit 12.9.2 patch lane.
+- [Current cuDNN Convolutions](https://docs.nvidia.com/deeplearning/cudnn/latest/operations/Convolutions.html) and the [Developer Overview](https://docs.nvidia.com/deeplearning/cudnn/latest/developer/overview.html) supply semantics, graph, plan, workspace, and determinism owner context for future production comparison; both were last updated on 2026-08-07.
+- The [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0), published on 2026-08-06, is only the current future-comparison coordinate for cuDNN 9.24.0 and later.
+
+All six primary owner sources were accessed on **2026-08-30**. The page paraphrases owner contracts; its tensor equations, fixtures, reuse ledger, Exercises, and production checklist are original site work, with no owner code, figure, or table copied. Context7 `/websites/nvidia_cuda_cuda-programming-guide` and `/websites/nvidia_deeplearning_cudnn` were used only for cross-checking on 2026-08-30; the owner URLs remain publication authority.
+
+**Fact checked: 2026-08-30.**

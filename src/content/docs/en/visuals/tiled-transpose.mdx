@@ -1,0 +1,134 @@
+---
+title: 'Tiled Transpose: Logical Mapping and Physical Padding'
+description: Inspect transpose input/output row-major mapping, shared logical layout, physical stride, and explicit padding slots in a deterministic square tile.
+pairId: vis11
+counterpart: /visuals/tiled-transpose/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - transpose-mapping
+  - logical-physical-layout
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS11
+prerequisites:
+  - A05
+relatedUnits:
+  - EX14
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Coalesced Global Memory Access'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#coalesced-global-memory-access'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current Writing SIMT Kernels coalescing and global-memory transpose context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Shared Memory Access Patterns'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current Writing SIMT Kernels shared-memory bank and access-pattern context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current Writing SIMT Kernels tiled-transpose and padding context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Device Memory Accesses'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#device-memory-accesses'
+    version: 'CUDA C++ Programming Guide archive for CUDA Toolkit 12.9.1'
+    platform: 'Archived coalescing, shared-memory, bank, and transpose stability context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 11.8.0 - Device Memory Accesses'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived coalescing, shared-memory, bank, and transpose stability context'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis11 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,transpose-mapping,logical-physical-layout,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A05 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import TransposeTileExplorer from '../../../../components/TransposeTileExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/tiled-transpose/" lang="zh-CN">阅读中文版本</a>
+
+## Learning purpose
+
+After prerequisite Learning Unit **A05**, use VIS11 to inspect tiled transpose by separating its mathematical mapping from its physical shared-memory layout. The related Runnable Example is **EX14**. This Visual Explainer handles one `4 × 4` or `8 × 8` square tile and makes every input cell's source coordinate, destination coordinate, row-major index, and physical shared slot directly checkable.
+
+<TransposeTileExplorer locale="en" />
+
+## Controls
+
+Three native selects choose reviewed tile size `4` or `8`, logical layout `input-row-major` or `output-row-major`, and physical shared-row padding `0` or `1`. **Reset** restores `4 / input-row-major / 0` and returns focus to the tile-size select. The native selects and button retain their keyboard behavior, and a polite live region announces each state change.
+
+Both controls and the live workbench carry `hidden` in source HTML. The light-DOM custom element reveals them only after finding every control, status region, input/output grid, and physical-row container and successfully deriving the initial model. The page has no autoplay, timer, randomness, browser storage, range input, or persisted state.
+
+## Transpose mapping
+
+For tile size `N`, input cell `(row, col)` has row-major `inputIndex = row × N + col`. Transpose maps it to output `(col, row)`, so `outputIndex = col × N + row`. The input grid is always ordered by increasing `inputIndex`; the output grid is always ordered by increasing `outputIndex`. They show before/after coordinates for the same `N²` logical values rather than two numeric computations.
+
+For example, when `N = 4`, input `(1, 2)` has `inputIndex` `6` and maps to output `(2, 1)` with `outputIndex` `9`. The model applies the same formula to every logical cell and queries no device, warp, transaction, or bank.
+
+## Logical layout and physical padding
+
+`input-row-major` places a logical cell at shared `(row, col)`. `output-row-major` places that same cell at shared `(col, row)`. These choices rearrange data slots in physical shared storage while preserving the logical `input(row, col) -> output(col, row)` mapping.
+
+Physical row stride is explicitly `tileSize + padding`, and slot index is `sharedRow × stride + sharedCol`. With padding `1`, every row ends with a physical slot labeled “padding slot, no logical value.” It has no input/output coordinate, does not enter the transpose, and changes no output index. With padding `0`, the page explicitly states that no padding slots exist.
+
+Layout and padding here are address arithmetic only. They observe no shared-memory bank mapping, bank conflict, global-memory coalescing, synchronization, latency, bandwidth, or speedup. A real kernel must separately prove bounds, cooperative loading, barrier participation, global access patterns, and correctness.
+
+## Static fallback
+
+Outside the interactive area, the server permanently renders four tile-size/padding selections: `4/0`, `4/1`, `8/0`, and `8/1`. Every selection has a purpose-built input-before grid, output-after grid, and both `input-row-major` and `output-row-major` physical shared rows. The static markup is not a duplicate of the hidden live DOM.
+
+Together, the four selections contain 160 input logical cells, 160 output logical cells, 48 physical rows, and 344 physical slots. Twenty-four padding slots each carry a slot index, row, column, and “no logical value” text. Static content remains with JavaScript disabled, at a 390-pixel viewport, under reduced motion, in forced colors, and in print. Coordinates, indices, arrows, border styles, and text carry meaning without color alone.
+
+## Evidence boundary
+
+VIS11 compiles and executes no CUDA, loads no kernel, queries no GPU, reads no profiler, and generates no measured timing, transaction, bank-conflict, or performance observation. Browser-model mappings, strides, and slot indices are declared arithmetic. This browser model provides no execution or speed evidence and is not CUDA correctness evidence.
+
+Compilation, runtime, expected-observation, and recorded-observation arrays are therefore all empty. The page grants no **Compile-Checked**, **Community-Observed**, or **Runtime-Verified** Evidence Status.
+
+## Sources
+
+The current owner source is the Writing SIMT Kernels chapter in CUDA Programming Guide v13.3. [Coalesced Global Memory Access](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#coalesced-global-memory-access) bounds global-access and coalescing terminology; [Shared Memory Access Patterns](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns) bounds shared-memory bank and conflict terminology; and [Matrix Transpose Using Shared Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory) supplies the owner context for tiled transpose and padding. All three coordinates identify v13.3 and a 2026-05-27 update.
+
+The stability comparison uses Device Memory Accesses, shared-memory, and bank-conflict material in the [12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#device-memory-accesses) and [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses). All five owner coordinates were accessed on **2026-08-30**. No NVIDIA code, figure, table, sample layout, or performance result is copied. The model, coordinate labels, static board, interaction, and bilingual explanations are original CC-BY-4.0 content.

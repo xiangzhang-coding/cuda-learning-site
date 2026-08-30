@@ -20,13 +20,13 @@ const currentLearningUnits = [
   'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
   'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
   'M15', 'M16', 'M17', 'M18', 'M19',
-  'A01', 'A02', 'A03', 'A04',
+  'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07',
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
 ] as const;
 const r1Examples = ['EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX16'] as const;
 const currentExamples = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
-  'EX11', 'EX12', 'EX13', 'EX16',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX16',
 ] as const;
 const expectedLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
 const r1Visuals = [
@@ -35,16 +35,16 @@ const r1Visuals = [
 ] as const;
 const currentVisuals = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-  'VIS09', 'VIS10', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+  'VIS09', 'VIS10', 'VIS11', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX16',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX16',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB07',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX16',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX16',
   ...expectedLabs,
 ] as const;
 
@@ -172,15 +172,15 @@ describe('R1 release review and current publication boundary', () => {
       canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
       releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
       scope: {
-        publicationPairs: 167,
-        sourceRoutes: 334,
+        publicationPairs: 178,
+        sourceRoutes: 356,
         learningUnits: currentLearningUnits,
         runnableExamples: currentExamples,
         labs: expectedLabs,
         visualExplainers: currentVisuals,
-        practiceBankEntries: 45,
-        glossaryTerms: 139,
-        sourceRecords: 56,
+        practiceBankEntries: 48,
+        glossaryTerms: 146,
+        sourceRecords: 59,
       },
       evidence: {
         compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -198,10 +198,11 @@ describe('R1 release review and current publication boundary', () => {
         'EX02, EX10, and LAB02 have retained Compile-Checked evidence; all other current Runnable Examples and Labs have no Compile-Checked claim.',
         'EX10 is Runtime-Not-Applicable because its acceptance contract inspects artifacts without executing the final host artifact or any GPU executable.',
         'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
-        'EX11, EX12, and EX13 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.',
+        'EX11, EX12, EX13, and EX14 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.',
         'No measured overlap, migration, graph performance, algorithm performance, timing, speedup, or other performance observation is published.',
-        'EX14 and EX15 have no current public destination.',
+        'EX15 has no current public destination.',
         'LAB06 has no current public destination.',
+        'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
         'This incremental publication record is not a completed R2 aggregate release review.',
       ],
     });
@@ -216,7 +217,7 @@ describe('R1 release review and current publication boundary', () => {
     expectExactMembers(destinationIds(/^EX\d{2}$/), currentExamples);
     expectExactMembers(destinationIds(/^LAB\d{2}$/), expectedLabs);
     expectExactMembers(destinationIds(/^VIS\d{2}$/), currentVisuals);
-    for (const absentId of ['EX14', 'EX15', 'LAB06']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(absentId);
+    for (const absentId of ['EX15', 'LAB06', 'Q11', 'LAB10']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(absentId);
 
     const recordsByGroup = Object.groupBy(RESOURCE_INDEX_RECORDS, ({ group }) => group);
     expect(recordsByGroup.labs?.map(({ planningId }) => planningId)).toEqual(expectedLabs);
@@ -224,7 +225,7 @@ describe('R1 release review and current publication boundary', () => {
     expect(recordsByGroup.visuals?.map(({ planningId }) => planningId)).toEqual(currentVisuals);
     expect(recordsByGroup.glossary).toHaveLength(currentManifest.scope.glossaryTerms);
     expect(recordsByGroup.sources).toHaveLength(currentManifest.scope.sourceRecords);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(260);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(274);
 
     expect(publishedRoutes).toHaveLength(currentManifest.scope.sourceRoutes);
     expect(new Set(publishedRoutes).size).toBe(currentManifest.scope.sourceRoutes);
@@ -251,37 +252,33 @@ describe('R1 release review and current publication boundary', () => {
       expect(document).not.toMatch(/\bR2 (?:is|was) (?:now )?complete(?:d)?\b/i);
     }
     for (const document of [readme, deployment, maintenance, contentLicenses]) {
-      expect(document).toMatch(/167 (?:bilingual )?Publication Pairs/i);
-      expect(document).toContain('334 source routes');
+      expect(document).toMatch(/178 (?:bilingual )?Publication Pairs/i);
+      expect(document).toContain('356 source routes');
     }
     expect(maintenance).toContain('Review date: 2026-08-30');
-    expect(maintenance).toMatch(/issue #19/i);
-    expect(maintenance).toMatch(/issue #21/i);
+    expect(maintenance).toMatch(/issue #22/i);
     expect(maintenance).toContain('Context7');
     expect(maintenance).toContain('`/websites/nvidia_cuda_cuda-programming-guide` on 2026-08-30');
     expect(maintenance).toContain('exact owner');
     for (const sourceId of [
       'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
-      'SRC-HIST-003', 'SRC-CUDA-036', 'SRC-CUDA-037', 'SRC-CUDA-038', 'SRC-CUDA-039', 'SRC-CUDA-040',
+      'SRC-CUDA-041', 'SRC-CUDA-042', 'SRC-CUDA-043',
     ]) {
       expect(maintenance).toContain(sourceId);
     }
     expect(readme).toContain('make -C examples/ex07-streams-events-overlap host-test');
     expect(readme).toContain('make -C examples/ex08-unified-memory-migration host-test');
     expect(readme).toContain('make -C examples/ex09-graph-capture host-test');
+    expect(readme).toContain('make -C examples/ex14-tiled-transpose host-test');
     expect(readme).toContain('Runtime-Not-Applicable');
     expect(readme).toMatch(/EX10.*C\+\+23 probe.*(?:passed|pass)/i);
-    expect(readme).toMatch(/no measured .*reduction, scan, histogram, or contention performance/i);
-    expect(readme).toContain('SRC-HIST-003');
-    expect(readme).toMatch(/`SRC-CUDA-036` through `SRC-CUDA-040`/);
-    expect(contentLicenses).toContain('VIS09');
-    expect(contentLicenses).toContain('VIS10');
-    expect(contentLicenses).toContain('EX10');
-    expect(contentLicenses).toContain('EX11-EX13');
-    expect(contentLicenses).toContain('PB-R2-012 through PB-R2-016');
-    expect(contentLicenses).toContain('TERM-126 through TERM-139');
-    expect(contentLicenses).toContain('SRC-HIST-003');
-    expect(contentLicenses).toMatch(/`SRC-CUDA-036` through `SRC-CUDA-040`/);
+    expect(readme).toMatch(/no measured transpose, stencil, convolution, library-comparison/i);
+    expect(readme).toMatch(/`SRC-CUDA-041` through `SRC-CUDA-043`/);
+    expect(contentLicenses).toContain('VIS11');
+    expect(contentLicenses).toContain('EX14');
+    expect(contentLicenses).toContain('PB-R2-017 through PB-R2-019');
+    expect(contentLicenses).toContain('TERM-140 through TERM-146');
+    expect(contentLicenses).toMatch(/`SRC-CUDA-041` through `SRC-CUDA-043`/);
     expect(contentLicenses).toContain('src/current-publication-manifest.json');
   });
 });

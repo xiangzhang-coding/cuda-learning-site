@@ -76,6 +76,7 @@ const vis07Destination = PUBLISHED_DESTINATIONS.VIS07;
 const vis08Destination = PUBLISHED_DESTINATIONS.VIS08;
 const vis09Destination = PUBLISHED_DESTINATIONS.VIS09;
 const vis10Destination = PUBLISHED_DESTINATIONS.VIS10;
+const vis11Destination = PUBLISHED_DESTINATIONS.VIS11;
 const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
 const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
 const vis21Destination = PUBLISHED_DESTINATIONS.VIS21;
@@ -930,6 +931,57 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-08-30',
     keywords: localized('operation order nonassociativity FMA tolerance determinism bitwise reproducibility', 'operation order nonassociativity FMA tolerance determinism bitwise reproducibility'),
   },
+  {
+    planningId: 'PB-R2-017',
+    group: 'practice',
+    title: localized('证明矩形转置的 tile 与 padding 合同', 'Prove rectangular-transpose tile and padding contracts'),
+    href: localized('/practice/#pb-r2-017', '/en/practice/#pb-r2-017'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['A05'],
+    relatedUnits: ['M02', 'M03', 'M04', 'A05', 'EX14', 'VIS11'],
+    hardwareGate: localized('无；只审查静态 mapping、phase、bank 与 evidence 账本，不编译或运行 CUDA。', 'None; review static mapping, phase, bank, and evidence ledgers without compiling or running CUDA.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 owner guides；EX14 的 Toolkit 11.8.0、12.9.2、13.3.1 C++17 lanes。',
+      'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; EX14 C++17 lanes for Toolkit 11.8.0, 12.9.2, and 13.3.1.',
+    ),
+    reviewedOn: '2026-08-30',
+    keywords: localized('matrix transpose row-major tile edge guard barrier physical stride bank padding evidence', 'matrix transpose row-major tile edge guard barrier physical stride bank padding evidence'),
+  },
+  {
+    planningId: 'PB-R2-018',
+    group: 'practice',
+    title: localized('修复 stencil boundary、halo 与 barrier ledger', 'Repair a stencil boundary, halo, and barrier ledger'),
+    href: localized('/practice/#pb-r2-018', '/en/practice/#pb-r2-018'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['A06'],
+    relatedUnits: ['M03', 'M04', 'M05', 'A06'],
+    hardwareGate: localized('无；只审查静态 boundary、halo coverage 与 participant ledger，不运行 CUDA。', 'None; review static boundary, halo-coverage, and participant ledgers without running CUDA.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 shared-memory、stencil-context 和 synchronization owner guides。',
+      'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 shared-memory, stencil-context, and synchronization owner guides.',
+    ),
+    reviewedOn: '2026-08-30',
+    keywords: localized('stencil neighborhood radius boundary halo corner cooperative load barrier reuse', 'stencil neighborhood radius boundary halo corner cooperative load barrier reuse'),
+  },
+  {
+    planningId: 'PB-R2-019',
+    group: 'practice',
+    title: localized('审查 direct convolution 与 production-library 决策', 'Audit direct convolution and a production-library decision'),
+    href: localized('/practice/#pb-r2-019', '/en/practice/#pb-r2-019'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['A07'],
+    relatedUnits: ['A06', 'M03', 'A07'],
+    hardwareGate: localized('无；只审查静态 tensor、operation、reuse 与 future-library gates，不执行 CUDA 或 cuDNN。', 'None; review static tensor, operation, reuse, and future-library gates without executing CUDA or cuDNN.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 owner guides；cuDNN current docs（2026-08-07）与 Frontend v1.27.0 future coordinate。',
+      'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; current cuDNN docs dated 2026-08-07 and the Frontend v1.27.0 future coordinate.',
+    ),
+    reviewedOn: '2026-08-30',
+    keywords: localized('convolution cross-correlation NCHW stride dilation padding cuDNN graph plan workspace determinism', 'convolution cross-correlation NCHW stride dilation padding cuDNN graph plan workspace determinism'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1088,6 +1140,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     keywords: localized('reduction tree stage inactive lane neutral value barrier algorithm variant', 'reduction tree stage inactive lane neutral value barrier algorithm variant'),
   },
   {
+    planningId: 'VIS11',
+    group: 'visuals',
+    title: vis11Destination.title,
+    href: vis11Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis11Destination.prerequisites,
+    relatedUnits: ['EX14'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 owner guides；确定性 logical/physical layout model 不是 CUDA execution、bank observation 或 performance evidence。',
+      'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; the deterministic logical/physical layout model is not CUDA execution, a bank observation, or performance evidence.',
+    ),
+    reviewedOn: '2026-08-30',
+    keywords: localized('tiled transpose logical layout physical stride padding before after row-major', 'tiled transpose logical layout physical stride padding before after row-major'),
+  },
+  {
     planningId: 'VIS19',
     group: 'visuals',
     title: vis19Destination.title,
@@ -1162,7 +1230,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-006', 'Lab · 实验', 'resource-vocabulary', ['O01', 'LAB02'], '每个 Lab 单独声明环境要求。', 'Each Lab declares its environment requirements.'),
   glossaryRecord('TERM-007', 'Exercise · 练习', 'resource-vocabulary', ['O01'], '资源类型本身不受版本约束。', 'The resource type is version-independent.'),
   glossaryRecord('TERM-008', 'Practice Bank · 练习题库', 'resource-vocabulary', ['O01'], '具体条目按需声明版本边界。', 'Individual entries declare version boundaries as needed.'),
-  glossaryRecord('TERM-009', 'Visual Explainer · 可视化讲解', 'resource-vocabulary', ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS19', 'VIS20', 'VIS21', 'VIS22'], '概念模型与硬件行为必须分开。', 'Conceptual models remain separate from hardware behavior.'),
+  glossaryRecord('TERM-009', 'Visual Explainer · 可视化讲解', 'resource-vocabulary', ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS19', 'VIS20', 'VIS21', 'VIS22'], '概念模型与硬件行为必须分开。', 'Conceptual models remain separate from hardware behavior.'),
   glossaryRecord('TERM-010', 'Glossary · 术语表', 'resource-vocabulary', ['O01'], '随课程复核，不暗示接口兼容性。', 'Reviewed with the curriculum without implying interface compatibility.'),
   glossaryRecord('TERM-011', 'Evidence Status · 证据状态', 'evidence-vocabulary', ['O02'], '状态绑定对象、环境、标准和日期。', 'Status is scoped to a subject, environment, criteria, and date.'),
   glossaryRecord('TERM-012', 'Compile-Checked · 编译已检查', 'evidence-vocabulary', ['O02', 'O03'], '每项声明绑定精确 Toolkit Lane。', 'Every claim binds to an exact Toolkit Lane.'),
@@ -1293,6 +1361,13 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-137', 'fused multiply-add (FMA) · 融合乘加（FMA）', 'kernel-vocabulary', ['Q02', 'EX11'], 'Floating Point and IEEE 754 v11.8.0、v12.9（12.9.1 archive）与 v13.3，以及 Toolkit 11.8.0、12.9.2、13.3.1 compiler-option coordinates。', 'Floating Point and IEEE 754 v11.8.0, v12.9 (12.9.1 archive), and v13.3, plus Toolkit 11.8.0, 12.9.2, and 13.3.1 compiler-option coordinates.', '2026-08-30'),
   glossaryRecord('TERM-138', 'determinism · 确定性', 'evidence-vocabulary', ['Q02', 'EX11'], 'CUDA Programming Guide v13.3 与 CCCL v3.4.2 CUB determinism scope；相同输入下的 repeatability 不自动扩展到不同 11.8.0、12.9.2、13.3.1 environment。', 'CUDA Programming Guide v13.3 and the CCCL v3.4.2 CUB determinism scope; repeatability for identical inputs does not automatically extend across 11.8.0, 12.9.2, and 13.3.1 environments.', '2026-08-30'),
   glossaryRecord('TERM-139', 'bitwise reproducibility · 逐位可复现性', 'evidence-vocabulary', ['Q02', 'EX11'], 'CUDA v13.3 与 CCCL v3.4.2 product-specific contract；跨 Toolkit 11.8.0、12.9.2、13.3.1 的逐位声明需要单独 evidence scope。', 'CUDA v13.3 and CCCL v3.4.2 product-specific contracts; a bitwise claim across Toolkit 11.8.0, 12.9.2, and 13.3.1 requires a separate evidence scope.', '2026-08-30'),
+  glossaryRecord('TERM-140', 'matrix transpose · 矩阵转置', 'kernel-vocabulary', ['A05', 'EX14', 'VIS11'], 'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 owner guides；row-major shape/mapping contract 与 observed performance 分开。', 'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; the row-major shape and mapping contract remains separate from observed performance.', '2026-08-30'),
+  glossaryRecord('TERM-141', 'physical row stride · 物理行跨度', 'kernel-vocabulary', ['M04', 'A05', 'EX14', 'VIS11'], 'Shared-memory physical address arithmetic 绑定 element width、allocation 与 selected owner contract；不改变 logical extent。', 'Shared-memory physical-address arithmetic binds to element width, allocation, and the selected owner contract; it does not change logical extent.', '2026-08-30'),
+  glossaryRecord('TERM-142', 'bank padding · 存储体填充', 'kernel-vocabulary', ['M04', 'A05', 'EX14', 'VIS11'], 'Current v13.3 与 11.8.0/12.9.1 shared-memory owner guides；+1 storage slot 改变 physical stride，不保证 speedup。', 'Current v13.3 and 11.8.0/12.9.1 shared-memory owner guides; a +1 storage slot changes physical stride and provides no speedup guarantee.', '2026-08-30'),
+  glossaryRecord('TERM-143', 'stencil · 模板计算', 'kernel-vocabulary', ['A06'], 'CUDA Programming Guide v13.3 stencil/halo context 与 11.8.0/12.9.1 shared-memory/synchronization contracts；boundary policy 是算法合同。', 'CUDA Programming Guide v13.3 stencil/halo context and the 11.8.0/12.9.1 shared-memory and synchronization contracts; boundary policy is an algorithm contract.', '2026-08-30'),
+  glossaryRecord('TERM-144', 'halo · 光环区', 'kernel-vocabulary', ['A06', 'A07'], 'CUDA Programming Guide v13.3 stencil context；halo extent 由 output tile、offset footprint、stride 与 dilation 决定。', 'CUDA Programming Guide v13.3 stencil context; halo extent follows from the output tile, offset footprint, stride, and dilation.', '2026-08-30'),
+  glossaryRecord('TERM-145', 'convolution · 卷积', 'kernel-vocabulary', ['A07'], 'A07 明确区分 mathematical filter flip 与 deep-learning API naming；current cuDNN docs 只负责 future production coordinate。', 'A07 explicitly separates the mathematical filter flip from deep-learning API naming; current cuDNN docs govern only the future production coordinate.', '2026-08-30'),
+  glossaryRecord('TERM-146', 'cross-correlation · 互相关', 'kernel-vocabulary', ['A07'], 'A07 teaching equation 不翻转 spatial filter；cuDNN current operation semantics 需要在 pinned future component matrix 中复核。', 'The A07 teaching equation does not flip the spatial filter; current cuDNN operation semantics require review in a future pinned component matrix.', '2026-08-30'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -1317,35 +1392,35 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
+    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
     'SRC-WEB-007',
     localized('Docker Engine 与 Buildx', 'Docker Engine and Buildx'),
     'publishing-interface',
-    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13'],
+    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14'],
     localized('每条编译记录保存 runner 实际版本', 'Each compile record captures the runner-provided versions'),
   ),
   sourceRecord(
     'SRC-CUDA-001',
     localized('CUDA 11.8 Lane 来源', 'CUDA 11.8 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'LAB02'],
     localized('Toolkit 11.8.0；Ubuntu 22.04 x86-64；C++17', 'Toolkit 11.8.0; Ubuntu 22.04 x86-64; C++17'),
   ),
   sourceRecord(
     'SRC-CUDA-002',
     localized('CUDA 12.9 Lane 来源', 'CUDA 12.9 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'LAB02'],
     localized('Toolkit 12.9.2；Ubuntu 24.04 x86-64；C++17/C++20', 'Toolkit 12.9.2; Ubuntu 24.04 x86-64; C++17/C++20'),
   ),
   sourceRecord(
     'SRC-CUDA-003',
     localized('CUDA 13.3 Lane 来源', 'CUDA 13.3 Lane sources'),
     'cuda-version-record',
-    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'LAB02'],
+    ['O03', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'LAB02'],
     localized('Toolkit 13.3.1；Ubuntu 24.04 x86-64；C++17/C++20 与 C++23 probe', 'Toolkit 13.3.1; Ubuntu 24.04 x86-64; C++17/C++20 plus a C++23 probe'),
   ),
   sourceRecord(
@@ -1394,7 +1469,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-CUDA-010',
     localized('容器身份', 'Container identities'),
     'cuda-version-record',
-    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13'],
+    ['EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14'],
     same('11.8.0-devel-ubuntu22.04; 12.9.2-devel-ubuntu24.04; 13.3.1-devel-ubuntu24.04'),
   ),
   sourceRecord(
@@ -1819,6 +1894,42 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'Floating Point and IEEE 754 v11.8.0、v12.9（12.9.1 archive）与 v13.3；Toolkit compiler 11.8.0/12.9.2/13.3.1；CCCL v3.4.2 CUB determinism source。',
       'Floating Point and IEEE 754 v11.8.0, v12.9 (12.9.1 archive), and v13.3; Toolkit compilers 11.8.0/12.9.2/13.3.1; CCCL v3.4.2 CUB determinism source.',
+    ),
+    '2026-08-30',
+    '2026-08-30',
+  ),
+  sourceRecord(
+    'SRC-CUDA-041',
+    localized('A05/EX14/VIS11 矩阵转置、tile 与 physical padding', 'A05/EX14/VIS11 matrix transpose, tiles, and physical padding'),
+    'cuda-version-record',
+    ['M02', 'M03', 'M04', 'A05', 'EX14', 'VIS11'],
+    localized(
+      'CUDA Programming Guide v13.3 matrix-transpose/coalescing/shared-memory owner guidance、11.8.0/12.9.1 archives，以及 EX14 Toolkit compiler/image coordinates 11.8.0/12.9.2/13.3.1。',
+      'CUDA Programming Guide v13.3 matrix-transpose, coalescing, and shared-memory owner guidance; the 11.8.0/12.9.1 archives; and EX14 Toolkit compiler/image coordinates 11.8.0/12.9.2/13.3.1.',
+    ),
+    '2026-08-30',
+    '2026-08-30',
+  ),
+  sourceRecord(
+    'SRC-CUDA-042',
+    localized('A06 stencil、boundary policy 与 halo reuse', 'A06 stencils, boundary policies, and halo reuse'),
+    'cuda-version-record',
+    ['M03', 'M04', 'M05', 'A06'],
+    localized(
+      'CUDA Programming Guide v13.3 Writing SIMT Kernels 与 Asynchronous Data Copies 的 stencil/halo context，以及 11.8.0/12.9.1 shared-memory/synchronization archives；A06 baseline 保持 synchronous。',
+      'CUDA Programming Guide v13.3 Writing SIMT Kernels and Asynchronous Data Copies stencil/halo context, plus the 11.8.0/12.9.1 shared-memory and synchronization archives; the A06 baseline remains synchronous.',
+    ),
+    '2026-08-30',
+    '2026-08-30',
+  ),
+  sourceRecord(
+    'SRC-CUDA-043',
+    localized('A07 direct convolution 与 future cuDNN comparison', 'A07 direct convolution and future cuDNN comparison'),
+    'cuda-version-record',
+    ['A06', 'M03', 'A07'],
+    localized(
+      'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 owner guides；cuDNN Convolutions/Developer Overview（2026-08-07）；cuDNN Frontend v1.27.0，recommended for cuDNN 9.24.0+，仅作 future coordinate。',
+      'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; cuDNN Convolutions and Developer Overview dated 2026-08-07; cuDNN Frontend v1.27.0, recommended for cuDNN 9.24.0+, only as a future coordinate.',
     ),
     '2026-08-30',
     '2026-08-30',

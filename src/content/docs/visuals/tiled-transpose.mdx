@@ -1,0 +1,134 @@
+---
+title: 'Tiled transpose：逻辑映射与物理 padding'
+description: 用确定性方形 tile 分开检查 transpose 的 input/output row-major 映射、shared logical layout、physical stride 与显式 padding 槽。
+pairId: vis11
+counterpart: /en/visuals/tiled-transpose/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - transpose-mapping
+  - logical-physical-layout
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS11
+prerequisites:
+  - A05
+relatedUnits:
+  - EX14
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Coalesced Global Memory Access'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#coalesced-global-memory-access'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current Writing SIMT Kernels coalescing and global-memory transpose context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Shared Memory Access Patterns'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current Writing SIMT Kernels shared-memory bank and access-pattern context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current Writing SIMT Kernels tiled-transpose and padding context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 - Device Memory Accesses'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#device-memory-accesses'
+    version: 'CUDA C++ Programming Guide archive for CUDA Toolkit 12.9.1'
+    platform: 'Archived coalescing, shared-memory, bank, and transpose stability context'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 11.8.0 - Device Memory Accesses'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses'
+    version: 'CUDA C++ Programming Guide v11.8.0; last updated 2022-11-09'
+    platform: 'Archived coalescing, shared-memory, bank, and transpose stability context'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis11 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,transpose-mapping,logical-physical-layout,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A05 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.1,11.8.0' }
+---
+
+import TransposeTileExplorer from '../../../components/TransposeTileExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/tiled-transpose/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+完成先修学习单元 **A05** 后，用 VIS11 把 tiled transpose 的数学映射与 shared-memory 物理布局拆开检查。相关 Runnable Example 是 **EX14**。这个 Visual Explainer 只处理一个 `4 × 4` 或 `8 × 8` 方形 tile；它让每个 input cell 的来源坐标、destination 坐标、row-major index 和 physical shared slot 都可直接核对。
+
+<TransposeTileExplorer locale="zh-CN" />
+
+## 控件
+
+三个原生 select 分别选择 reviewed tile size `4` 或 `8`、logical layout `input-row-major` 或 `output-row-major`，以及每个 physical shared row 的 padding `0` 或 `1`。**重置**恢复 `4 / input-row-major / 0`，并把焦点返回 tile-size select。原生 select 与 button 自带键盘行为；状态区使用 polite live announcement。
+
+控件和 live workbench 在 source HTML 中均带 `hidden`。Light-DOM custom element 只有在找到完整控件、状态区、input/output grid 与 physical-row 容器，并成功推导初始 model 后才显示它们。页面没有 autoplay、timer、randomness、browser storage、range input 或 persisted state。
+
+## Transpose 映射
+
+对 tile size `N`，input cell `(row, col)` 的 row-major index 是 `inputIndex = row × N + col`。Transpose 把它映射到 output `(col, row)`，所以 `outputIndex = col × N + row`。Input grid 始终按 `inputIndex` 递增，output grid 始终按 `outputIndex` 递增；两者显示的是同一组 `N²` 个逻辑值的 before/after 坐标，而不是两份数值计算。
+
+例如 `N = 4` 时，input `(1, 2)` 的 `inputIndex` 是 `6`，映射到 output `(2, 1)`，`outputIndex` 是 `9`。模型对全部 logical cell 使用同一公式，不查询 device、warp、transaction 或 bank。
+
+## Logical layout 与 physical padding
+
+`input-row-major` 把 logical cell 放在 shared `(row, col)`；`output-row-major` 把同一 cell 放在 shared `(col, row)`。这两个选择改变 physical shared 中的数据槽排列，但都保留 `input(row, col) -> output(col, row)` 的逻辑映射。
+
+Physical row stride 明确为 `tileSize + padding`，slot index 为 `sharedRow × stride + sharedCol`。Padding 为 `1` 时，每一行末尾增加一个明确写作“Padding 槽，无逻辑值”的 physical slot；它没有 input/output coordinate，不参与 transpose，也不改变 output index。Padding 为 `0` 时页面明确写出没有 padding slot。
+
+这里的 layout 与 padding 只是地址算术。它们没有观察 shared-memory bank mapping、bank conflict、global-memory coalescing、同步、latency、bandwidth 或 speedup。任何真实 kernel 仍需独立证明 bounds、cooperative load、barrier participation、global access pattern 与 correctness。
+
+## 静态回退
+
+交互区之外永久 server-render 四种 tile-size/padding selection：`4/0`、`4/1`、`8/0` 与 `8/1`。每种 selection 都有 purpose-built input before grid、output after grid，以及 `input-row-major` 和 `output-row-major` 两套 physical rows；静态 markup 不是 hidden live DOM 的复制品。
+
+四个 selection 共包含 160 个 input logical cell、160 个 output logical cell、48 条 physical row、344 个 physical slot，其中 24 个是带 slot index、row、column 与“无逻辑值”文字的 padding slot。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 时，静态内容仍保留。坐标、index、箭头、边框样式与文字共同承载含义，不只依赖颜色。
+
+## 证据边界
+
+VIS11 不编译或执行 CUDA、不加载 kernel、不查询 GPU、不读取 profiler，也不生成 measured timing、transaction、bank-conflict 或 performance observation。Browser model 的映射、stride 与 slot index 是 declared arithmetic，不是 CUDA execution、correctness 或 speed evidence。
+
+因此 compilation、runtime、expected-observation 与 recorded-observation arrays 全部为空。页面不会授予 **Compile-Checked**、**Community-Observed** 或 **Runtime-Verified** Evidence Status。
+
+## 来源
+
+Current owner source 是 CUDA Programming Guide v13.3 的 Writing SIMT Kernels 章节：其中 [Coalesced Global Memory Access](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#coalesced-global-memory-access)限定 global access/coalescing 术语，[Shared Memory Access Patterns](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns)限定 shared-memory bank 与 conflict 术语，[Matrix Transpose Using Shared Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory)提供 tiled transpose 与 padding 的 owner context。三处均按 v13.3、2026-05-27 更新记录。
+
+稳定性对照使用 [12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html#device-memory-accesses)与 [11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html#device-memory-accesses)中的 Device Memory Accesses、shared memory 与 bank-conflict material。五个 owner coordinate 均于 **2026-08-30** 访问。本站没有复制 NVIDIA code、figure、table、sample layout 或 performance result；模型、坐标文字、静态 board、交互与双语解释均为原创 CC-BY-4.0 内容。

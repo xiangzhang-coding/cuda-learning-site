@@ -24,14 +24,14 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(260);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(274);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 6, practice: 45, visuals: 14, glossary: 139, sources: 56 });
-    for (const absentId of ['LAB06', 'EX14', 'EX15']) {
+    ).toEqual({ labs: 6, practice: 48, visuals: 15, glossary: 146, sources: 59 });
+    for (const absentId of ['LAB06', 'EX15', 'Q11', 'LAB10']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -56,7 +56,7 @@ describe('resource index catalog', () => {
     });
 
     expect(Object.fromEntries(
-      ['A01', 'A02', 'A03', 'A04', 'Q02', 'EX11', 'EX12', 'EX13'].map((planningId) => [
+      ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'Q02', 'EX11', 'EX12', 'EX13', 'EX14'].map((planningId) => [
         planningId,
         {
           href: PUBLISHED_DESTINATIONS[planningId].href.en,
@@ -68,10 +68,14 @@ describe('resource index catalog', () => {
       A02: { href: '/en/algorithms/multi-stage-reduction/', prerequisites: ['M03', 'M05', 'M06'] },
       A03: { href: '/en/algorithms/inclusive-exclusive-scan/', prerequisites: ['A02', 'M05'] },
       A04: { href: '/en/algorithms/privatized-histogram/', prerequisites: ['M03', 'M05'] },
+      A05: { href: '/en/algorithms/matrix-transpose-layout/', prerequisites: ['M02', 'M03', 'M04'] },
+      A06: { href: '/en/algorithms/stencil-neighborhood-reuse/', prerequisites: ['M03', 'M04', 'M05'] },
+      A07: { href: '/en/algorithms/convolution-reuse-layout/', prerequisites: ['A06', 'M03'] },
       Q02: { href: '/en/correctness/floating-point-order-reproducibility/', prerequisites: ['Q01', 'A02'] },
       EX11: { href: '/en/examples/multi-stage-reduction/', prerequisites: ['A02', 'Q02'] },
       EX12: { href: '/en/examples/inclusive-exclusive-scan/', prerequisites: ['A03'] },
       EX13: { href: '/en/examples/privatized-histogram/', prerequisites: ['A04'] },
+      EX14: { href: '/en/examples/tiled-transpose/', prerequisites: ['A05'] },
     });
 
     expect(Object.fromEntries(
@@ -146,14 +150,16 @@ describe('resource index catalog', () => {
       'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
       'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
+      'PB-R2-017', 'PB-R2-018', 'PB-R2-019',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-2]\d|3[0-9]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
-      Array.from({ length: 44 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-3]\d|4[0-6]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 51 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
     );
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3\d|40)$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3\d|4[0-3])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
       'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
       'SRC-CUDA-036', 'SRC-CUDA-037', 'SRC-CUDA-038', 'SRC-CUDA-039', 'SRC-CUDA-040',
+      'SRC-CUDA-041', 'SRC-CUDA-042', 'SRC-CUDA-043',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
@@ -301,6 +307,7 @@ describe('resource index catalog', () => {
       'VIS08',
       'VIS09',
       'VIS10',
+      'VIS11',
       'VIS19',
       'VIS20',
       'VIS21',
@@ -362,6 +369,12 @@ describe('resource index catalog', () => {
         href: '/en/visuals/reduction-stages/',
         counterpart: '/visuals/reduction-stages/',
         prerequisites: [['A02', '/en/algorithms/multi-stage-reduction/']],
+      },
+      {
+        planningId: 'VIS11',
+        href: '/en/visuals/tiled-transpose/',
+        counterpart: '/visuals/tiled-transpose/',
+        prerequisites: [['A05', '/en/algorithms/matrix-transpose-layout/']],
       },
       {
         planningId: 'VIS19',
@@ -428,7 +441,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(164);
+    expect(projected).toHaveLength(171);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

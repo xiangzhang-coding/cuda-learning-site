@@ -24,6 +24,7 @@ const toolchainPracticeIds = [
 const issue21PracticeIds = [
   'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
 ] as const;
+const issue22PracticeIds = ['PB-R2-017', 'PB-R2-018', 'PB-R2-019'] as const;
 const releaseGlossaryIds = [
   'TERM-066',
   'TERM-067',
@@ -70,6 +71,9 @@ const issue21GlossaryIds = [
   'TERM-126', 'TERM-127', 'TERM-128', 'TERM-129', 'TERM-130', 'TERM-131', 'TERM-132',
   'TERM-133', 'TERM-134', 'TERM-135', 'TERM-136', 'TERM-137', 'TERM-138', 'TERM-139',
 ] as const;
+const issue22GlossaryIds = [
+  'TERM-140', 'TERM-141', 'TERM-142', 'TERM-143', 'TERM-144', 'TERM-145', 'TERM-146',
+] as const;
 const releaseSourceIds = [
   'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
   'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
@@ -84,6 +88,7 @@ const toolchainSourceIds = [
 const issue21SourceIds = [
   'SRC-HIST-003', 'SRC-CUDA-036', 'SRC-CUDA-037', 'SRC-CUDA-038', 'SRC-CUDA-039', 'SRC-CUDA-040',
 ] as const;
+const issue22SourceIds = ['SRC-CUDA-041', 'SRC-CUDA-042', 'SRC-CUDA-043'] as const;
 const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
 const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09'] as const;
 const issue17Ids = new Set<string>([
@@ -111,12 +116,18 @@ const issue21Ids = new Set<string>([
   ...issue21SourceIds,
   'VIS10',
 ]);
+const issue22Ids = new Set<string>([
+  ...issue22PracticeIds,
+  ...issue22GlossaryIds,
+  ...issue22SourceIds,
+  'VIS11',
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
   labs: 'LAB07',
-  practice: 'PB-R2-016',
-  visuals: 'VIS10',
-  glossary: 'TERM-139',
-  sources: 'SRC-CUDA-040',
+  practice: 'PB-R2-019',
+  visuals: 'VIS11',
+  glossary: 'TERM-146',
+  sources: 'SRC-CUDA-043',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -202,11 +213,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(6);
-  expect(counts.practice).toBe(45);
-  expect(counts.visuals).toBe(14);
-  expect(counts.glossary).toBe(139);
-  expect(counts.sources).toBe(56);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(260);
+  expect(counts.practice).toBe(48);
+  expect(counts.visuals).toBe(15);
+  expect(counts.glossary).toBe(146);
+  expect(counts.sources).toBe(59);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(274);
 
   const expectedIds = [
     ...releaseLabIds,
@@ -215,15 +226,19 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue19PracticeIds,
     ...toolchainPracticeIds,
     ...issue21PracticeIds,
+    ...issue22PracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
     ...issue21GlossaryIds,
+    ...issue22GlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
     ...issue21SourceIds,
+    ...issue22SourceIds,
     'VIS10',
+    'VIS11',
   ];
   const records = expectedIds.map((planningId) => {
     const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
@@ -241,6 +256,10 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-29');
   }
   for (const record of records.filter(({ planningId }) => issue21Ids.has(planningId))) {
+    expect(record.reviewedOn, record.planningId).toBe('2026-08-30');
+    if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-30');
+  }
+  for (const record of records.filter(({ planningId }) => issue22Ids.has(planningId))) {
     expect(record.reviewedOn, record.planningId).toBe('2026-08-30');
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-30');
   }

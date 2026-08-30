@@ -1,0 +1,220 @@
+---
+title: 'A05：矩阵转置、合并访问与共享内存布局'
+description: 从 row-major 转置合同出发，推导 global access 方向、shared-memory tile、统一 barrier、edge guards 与不改变逻辑矩阵的 +1 physical padding。
+pairId: a05
+counterpart: /en/algorithms/matrix-transpose-layout/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - transpose-contract
+  - global-access
+  - shared-tile
+  - barrier-and-edges
+  - bank-padding
+  - canonical-example
+  - visual-explainer
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A05
+prerequisites:
+  - M02
+  - M03
+  - M04
+relatedUnits:
+  - VIS11
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current matrix-transpose, global-memory coalescing, shared-memory, barrier, and bank-layout guidance'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 coalescing, shared-memory, synchronization, and bank-conflict contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane coalescing, shared-memory, synchronization, and bank-layout contract'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a05 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/matrix-transpose-layout/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,transpose-contract,global-access,shared-tile,barrier-and-edges,bank-padding,canonical-example,visual-explainer,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M02,M03,M04' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS11 }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-transpose' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/matrix-transpose-layout/" lang="en">Read the English counterpart</a>
+
+[矩阵转置（matrix transpose，TERM-140）](/glossary/#term-140)把输入中的 `(row, col)` 移到输出中的 `(col, row)`。它是学习布局变换的合适载体：数学工作很少，但 row-major address、全局内存合并访问（coalesced global access）、共享内存（shared memory）重排、屏障（barrier）、边缘 tile 与 bank mapping 必须同时正确。
+
+## 学完本单元，你应该能
+
+- 写出 rectangular row-major transpose 的 shape、address 与 one-writer contract。
+- 分别判断一个 thread traversal 的 global reads 和 writes 是否沿连续地址前进。
+- 解释 shared-memory tile 如何把连续 load 方向转换为连续 store 方向。
+- 证明所有 block participants 在 edge guards 之间统一到达 `__syncthreads()`。
+- 说明 `T x (T + 1)` physical tile padding 如何改变 bank mapping，却不改变 `T x T` logical matrix。
+- 区分 layout-based expected observations、EX14 的实际执行记录与任何 timing claim。
+
+## 先修关系
+
+先完成 [M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)、[M03：共享内存分块](/memory/shared-memory-tiling/)和 [M04：Bank conflict 与布局变换](/memory/bank-conflicts-layouts/)。M02 提供 warp request 与连续 global addresses 的推理；M03 提供 cooperative tile ownership 和 block-local phase；M04 提供[物理行跨度（physical row stride，TERM-141）](/glossary/#term-141)与 bank mapping。
+
+先修项严格为 `M02, M03, M04`。EX14 是 canonical Runnable Example，VIS11 是 related Visual Explainer；两者都不是额外 prerequisite。本页不要求 CUDA-capable system，也不授予 Evidence Status。
+
+## Transpose 合同：shape 与地址先于 kernel
+
+输入有 `rows` 行、`cols` 列，采用 row-major storage，因此元素 `(row, col)` 的 linear address 是 `row * cols + col`。转置输出有 `cols` 行、`rows` 列，合同是：
+
+`output[col * rows + row] = input[row * cols + col]`
+
+合法域为 `0 <= row < rows` 且 `0 <= col < cols`。这个 mapping 是 input index set 到 output index set 的双射：每个 input element 恰好被读取一次，每个 output element 恰好有一个 owner。方阵只是一种特例；若把 output leading dimension 错写成 `cols`，rectangular fixture 会立即暴露错误。
+
+CPU reference 应按同一个 shape 和 mapping 构造 expected output。对于逐元素复制，验证应 exact compare 每个 element，并额外检查 output allocation 是 `cols * rows` 个元素。Transpose 不改变值，只改变 coordinate 与 physical order。
+
+## Global access：分别审查 read 和 write
+
+若相邻 `threadIdx.x` 对应同一 input row 上连续增加的 `col`，它们读取 `input[row * cols + col]` 时访问相邻 global addresses。这是[合并访问（coalescing，TERM-073）](/glossary/#term-073)的预期 address pattern。可是同一 threads 直接写 `output[col * rows + row]` 时，地址步长是 `rows`；连续 read 并不自动意味着连续 write。
+
+反过来安排 threads 可以让 output stores 连续，却会使 input reads 跨步。关键问题不是“transpose 是否 coalesced”，而是对每个 global phase 分别写出 `lane -> address`：
+
+| phase | 固定 coordinate | 相邻 lane 改变的 coordinate | row-major address delta |
+| --- | --- | --- | ---: |
+| direct input read | `row` | `col` | `1` |
+| direct output write | output `col` | output `row` | `rows` |
+
+这张表给出 expected access reasoning，不是 transaction trace、bandwidth 或 speedup observation。Alignment、element size、active-lane mask、edge guards 和具体 GPU 仍属于实际 observation 的环境。
+
+## Shared tile：在片上重排 ownership
+
+Tiled transpose 把 global phases分开。第一阶段让一个 block 的 threads 沿 input rows cooperative load 一个 logical `T x T` tile 到 shared memory；第二阶段在 block barrier 之后交换 tile coordinates，再沿 output rows cooperative store。Shared memory 充当 layout-changing staging area，因此 global load 与 global store 都可以各自采用连续的 lane direction。
+
+每个 value 的 proof ledger 应包含四个 owners：input global coordinate、shared write coordinate、shared read coordinate、output global coordinate。Transpose 后的 block coordinate 也要交换；只交换 tile-local row/column 而不交换 tile 在 grid 中的位置，会在多 tile matrix 上写错区域。EX14 使用一维 thread ID 线性推导这些 local coordinates，不依赖特定二维 block shape。
+
+Shared tile 不改变 transpose 数学合同。它只改变数据从 input address 到 output address 的路径，以及中间 physical storage 的 layout。
+
+## Barrier 与 edge guards：predicate 数据，不 predicate rendezvous
+
+Rectangular dimensions 通常不是 `T` 的整数倍。Load guard 检查 input `(row, col)`；store guard 使用交换后的 output coordinates，检查 output row 小于 `cols`、output column 小于 `rows`。两个 predicates 可能对应同一个 value，却不能因为变量名相似而混用。
+
+正确的 block phase 是：每个 thread 计算 coordinates，合法 threads load shared slot，所有 block participants 统一执行 `__syncthreads()`，合法 output owners 再读取 transposed shared slot并 store。Invalid edge thread 可以跳过 load 或 store，但不能在 barrier 前 early return。否则某些 threads 等待一个已退出的 participant，barrier contract 被破坏。
+
+Edge proof 还要确认未写入的 shared slots 不会被合法 store 读取。最直接的方法是证明每个合法 output coordinate 的 transposed source coordinate 同时满足对应 input guard，而不是假设整个 partial tile 已初始化。
+
+## +1 physical padding：改变 bank stride，不改变 logical matrix
+
+在简化的 32 banks、每个 `float` 占一个 bank word 的模型中，physical row stride 为 `T` 时，warp 沿 shared tile 的一列读取可能反复映射到相同 bank。把 allocation 从 `tile[T][T]` 改为 `tile[T][T + 1]`，会让下一 physical row 多跨一个 bank position，改变转置读取的 bank mapping。
+
+这个[存储体填充（bank padding，TERM-142）](/glossary/#term-142)只增加每个 physical shared row 的一个 unused slot。Logical coordinates 仍是 `0 <= tile_row, tile_col < T`；input/output matrix shape、transpose formula、global allocation 和 numerical result都不变。代码不能把 padding column 当作一个新的 logical matrix column，也不能把 output leading dimension 改成 `T + 1`。
+
+“+1 可改变特定 access pattern 的 expected bank mapping”是静态推理。实际 bank behavior、conflict counters 或 elapsed time 需要精确 architecture、element width、access instruction 与测量记录；本页没有这些观察。
+
+## Canonical Runnable Example：EX14
+
+EX14 是本单元唯一 canonical executable counterpart。`cpu-reference` range 先定义 rectangular row-major oracle，`tiled-transpose` range 再展示 shared tile、统一 barrier、独立 edge guards 与 physical `+1` padding。下面严格按该顺序导入；本页不维护第二份 CUDA/C++ implementation。
+
+[在固定 source coordinate 查看 EX14 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose)，或[下载同一 revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip)。Project source 与页面 import 使用同一 immutable pin。
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+## Visual Explainer：VIS11
+
+[VIS11：Tiled transpose 的逻辑映射与物理 padding](/visuals/tiled-transpose/)用于对照 input/output coordinates、row-major indices、shared logical layout、physical row stride 与 padding slots。它是 deterministic browser model，不执行 CUDA，也不把 browser layout 变成 runtime trace 或 bank observation。
+
+使用 VIS11 时应同时保留 logical tile 和 physical padded tile 两层视图。前者验证 transpose mapping，后者验证 address stride；把两层合并会误以为 padding 改了矩阵 shape。
+
+## 证据边界：expected 不等于 observed
+
+| expected observation | 需要实际记录后才能成立的 observed evidence |
+| --- | --- |
+| 相邻 lanes 沿 input row 产生连续 read addresses | 某个 Reference Environment 的 transaction 或 profiler record |
+| tile 重排可让 output store direction 连续 | EX14 实际 launch、output 与 memory observation |
+| `T + 1` 改变简化 bank-index mapping | 指定 GPU、access width 与 instruction 下的 bank-conflict observation |
+| guards 保留 rectangular transpose 双射 | 实际 fixture output、error state 与 retained log |
+
+本页 compilation、runtime、expected observations 与 recorded observations 四个 arrays 全为空。上面的 expected column 是可复核推理，不是已记录 evidence。页面没有运行 EX14，也没有发布 timing、bandwidth、throughput 或 speedup claim。
+
+## 离开前检查
+
+1. 为什么 row-major transpose 必须使用 `output[col * rows + row]`，尤其对 rectangular matrix？
+2. 同一 direct traversal 为什么可能让 input reads 连续、却让 output writes 以 `rows` 为步长？
+3. Shared tile 如何把 global load direction 与 global store direction 解耦？
+4. Edge-invalid thread 为什么仍必须到达 block barrier，两个 guards 分别检查什么？
+5. `T x (T + 1)` physical allocation 改变了什么，又明确没有改变什么？
+
+## 继续练习
+
+- 完成 [A05 练习（Exercises）](/algorithms/matrix-transpose-layout/exercises/)，再查看独立的[复核解答](/algorithms/matrix-transpose-layout/solutions/)。
+- 审查[练习题库（Practice Bank）PB-R2-017](/practice/#pb-r2-017)，用 rectangular fixture、phase ledger 与 evidence boundary 复核 transpose。
+- 对照 EX14 的两个 canonical ranges 与 [VIS11](/visuals/tiled-transpose/)，但不要把 source inspection 或 browser state 写成运行观察。
+- 复习 [TERM-140](/glossary/#term-140)、[TERM-141](/glossary/#term-141)和 [TERM-142](/glossary/#term-142)的规范词汇。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 current matrix-transpose、coalescing、shared-memory、barrier 与 bank-layout owner guidance，最后更新于 2026-05-27。
+- [CUDA C Programming Guide v11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html)用于核对 11.8 lane 的 global/shared memory 与 synchronization contract。
+- [CUDA C++ Programming Guide v12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)是 Toolkit 12.9.2 patch lane 使用的 owner-guide coordinate。
+
+三项 primary owner sources 均访问于 **2026-08-30**。页面只改写 owner contracts；transpose ledger、练习与编排均为本站原创，没有复制 owner code、figure 或 table。Context7 的 `/websites/nvidia_cuda_cuda-programming-guide` 只在 2026-08-30 用于交叉核对，发布依据仍是上列 owner URLs。
+
+**事实核查日期：2026-08-30。**

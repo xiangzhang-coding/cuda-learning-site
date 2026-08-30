@@ -359,7 +359,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes forty-five complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes forty-eight complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -380,6 +380,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-001', 'PB-R2-002', 'PB-R2-003', 'PB-R2-004', 'PB-R2-005', 'PB-R2-006',
       'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
+      'PB-R2-017', 'PB-R2-018', 'PB-R2-019',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R[012]-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -417,6 +418,9 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-014': 'algorithms/inclusive-exclusive-scan',
       'PB-R2-015': 'algorithms/privatized-histogram',
       'PB-R2-016': 'correctness/floating-point-order-reproducibility',
+      'PB-R2-017': 'algorithms/matrix-transpose-layout',
+      'PB-R2-018': 'algorithms/stencil-neighborhood-reuse',
+      'PB-R2-019': 'algorithms/convolution-reuse-layout',
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);

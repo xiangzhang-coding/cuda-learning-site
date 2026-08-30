@@ -2,7 +2,7 @@
 
 # Cloudflare Deployment
 
-The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R1 remains the latest completed aggregate release review and its reviewed artifact is an immutable historical subset. The current source tree builds 167 Publication Pairs and 334 source routes, recorded by `src/current-publication-manifest.json` without calling that incremental publication a completed R2 review. Production may claim that current surface only after the exact `main` commit passes the acceptance steps below. The R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R1 remains the latest completed aggregate release review and its reviewed artifact is an immutable historical subset. The current source tree builds 178 Publication Pairs and 356 source routes, recorded by `src/current-publication-manifest.json` without calling that incremental publication a completed R2 review. Production may claim that current surface only after the exact `main` commit passes the acceptance steps below. The R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
 
 Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R1, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
 
@@ -17,7 +17,7 @@ Repository-pinned Wrangler from a clean `main` checkout is the only deployment a
 
 The first record remains the reviewed R1 subset; the second describes the current artifact surface. Neither record upgrades CUDA Evidence Status. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
 
-The current scope is 44 Learning Units O01-O08/F01-F08/M01-M19/A01-A04/Q01-Q05, fourteen Runnable Examples EX01-EX13/EX16, six Labs, fourteen Visual Explainers, 45 Practice Bank entries, 139 Glossary terms, and 56 source records. The five catalog groups total 260 records; the bilingual pages total 167 Publication Pairs and 334 source routes. EX14 and EX15 remain absent, and the Lab scope remains LAB01-LAB05/LAB07 with no LAB06 destination.
+The current scope is 47 Learning Units O01-O08/F01-F08/M01-M19/A01-A07/Q01-Q05, fifteen Runnable Examples EX01-EX14/EX16, six Labs, fifteen Visual Explainers, 48 Practice Bank entries, 146 Glossary terms, and 59 source records. The five catalog groups total 274 records; the bilingual pages total 178 Publication Pairs and 356 source routes. EX15 remains absent, and the Lab scope remains LAB01-LAB05/LAB07 with no LAB06, Q11, or LAB10 destination.
 
 ## Release Settings
 
@@ -37,7 +37,7 @@ The build command checks source/privacy boundaries, the exact lockfile and licen
 
 ## Acceptance
 
-Before accepting a production deployment, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. A web check grants no CUDA Evidence Status. EX02, EX10, and LAB02 retain Compile-Checked evidence; EX10's five ordinary records come from run 33275734951. EX01-EX09, EX11-EX13, EX16, and every current Lab remain Pending Hardware Verification; EX11-EX13 have empty compilation evidence and no Compile-Checked claim. EX10 is Runtime-Not-Applicable because its acceptance contract executes neither the final host artifact nor a GPU executable. Its CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23 probe passed narrowly as `C++23-Dialect-Probe`, not ordinary C++23 support. The current publication declares no Reference Environment, Runtime-Verified subject, or performance observation and records no measured overlap, migration, graph, reduction, scan, histogram, or contention performance.
+Before accepting a production deployment, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. A web check grants no CUDA Evidence Status. EX02, EX10, and LAB02 retain Compile-Checked evidence; EX10's five ordinary records come from run 33275734951. EX01-EX09, EX11-EX14, EX16, and every current Lab remain Pending Hardware Verification; EX11-EX14 have empty compilation evidence and no Compile-Checked claim. EX10 is Runtime-Not-Applicable because its acceptance contract executes neither the final host artifact nor a GPU executable. The current publication declares no Reference Environment, Runtime-Verified subject, or performance observation and records no measured transpose, stencil, convolution, library-comparison, timing, or speedup result.
 
 Run the remote browser gate against the exact deployed source:
 
@@ -57,7 +57,7 @@ gh workflow run release-smoke.yml --ref main \
   -f source_commit="<40-character-main-commit>"
 ```
 
-For a Preview URL, use that public version or branch URL as `RELEASE_BASE_URL` and set `RELEASE_KIND="preview"`. The gate separately checks that `/release.json` remains the R1 contract and `/publication.json` matches the current 167 Publication Pairs and 334 source routes. It also checks both locales, current navigation and search, all current routes and catalog counts, themes and persistence, keyboard flow, reduced motion, mobile reflow, print and no-script Visual Explainer fallbacks including VIS08-VIS10, Runnable Example source/download links including EX07-EX13, retained archive contents for every pinned project including EX10-EX13, EX10's Compile-Checked and Runtime-Not-Applicable boundaries, EX11-EX13's empty compilation and Pending Hardware Verification boundaries, legal notices, 404 behavior, canonical metadata, and browser/network errors.
+For a Preview URL, use that public version or branch URL as `RELEASE_BASE_URL` and set `RELEASE_KIND="preview"`. The gate separately checks that `/release.json` remains the R1 contract and `/publication.json` matches the current 178 Publication Pairs and 356 source routes. It also checks both locales, current navigation and search, all current routes and catalog counts, themes and persistence, keyboard flow, reduced motion, mobile reflow, print and no-script Visual Explainer fallbacks including VIS08-VIS11, Runnable Example source/download links including EX07-EX14, retained archive contents for every pinned project including EX10-EX14, EX10's Compile-Checked and Runtime-Not-Applicable boundaries, EX11-EX14's empty compilation and Pending Hardware Verification boundaries, legal notices, 404 behavior, canonical metadata, and browser/network errors.
 
 [Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. Record current incremental publication evidence without rewriting that accepted history. Issue #24 tracks the pending R2 aggregate review; a successful incremental deployment or smoke run does not by itself complete R2.
 

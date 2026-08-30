@@ -1,0 +1,215 @@
+---
+title: 'A07：Direct 2D Convolution、邻域复用与布局合同'
+description: 把小型 direct 2D convolution 作为 A06 邻域复用的学习载体，明确 tensor/layout、filter、stride、dilation、padding、cross-correlation、reference 与 production comparison 合同。
+pairId: a07
+counterpart: /en/algorithms/convolution-reuse-layout/
+factCheckDate: '2026-08-30'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - tensor-layout-contract
+  - convolution-vs-correlation
+  - direct-neighborhood-reuse
+  - reference-and-tolerance
+  - production-comparison
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A07
+prerequisites:
+  - A06
+  - M03
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current shared-memory, synchronization, and layout guidance for the direct teaching path'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C Programming Guide 11.8 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html'
+    version: 'CUDA C Programming Guide v11.8.0'
+    platform: 'Toolkit 11.8 shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'CUDA C++ Programming Guide 12.9.1 archive'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html'
+    version: 'CUDA C++ Programming Guide v12.9.1; owner guide for the Toolkit 12.9.2 patch lane'
+    platform: 'Toolkit 12.9.2 patch-lane shared-memory and block-synchronization contract'
+    accessDate: '2026-08-30'
+  - title: 'cuDNN - Convolutions'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/latest/operations/Convolutions.html'
+    version: 'cuDNN current documentation; last updated 2026-08-07'
+    platform: 'Current convolution semantics and API operation contract for future production comparison'
+    accessDate: '2026-08-30'
+  - title: 'cuDNN - Developer Overview'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/latest/developer/overview.html'
+    version: 'cuDNN current documentation; last updated 2026-08-07'
+    platform: 'Current graph, engine configuration, execution-plan, workspace, and determinism context'
+    accessDate: '2026-08-30'
+  - title: 'cuDNN Frontend v1.27.0 release'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0'
+    version: 'cuDNN Frontend v1.27.0; published 2026-08-06'
+    platform: 'Future comparison coordinate recommended for cuDNN 9.24.0 and later; not an A07 dependency or execution record'
+    accessDate: '2026-08-30'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a07 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/convolution-reuse-layout/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-30' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,tensor-layout-contract,convolution-vs-correlation,direct-neighborhood-reuse,reference-and-tolerance,production-comparison,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A06,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,cuDNN current 2026-08-07,cuDNN Frontend 1.27.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/convolution-reuse-layout/" lang="en">Read the English counterpart</a>
+
+本单元把小型 direct 2D [卷积（convolution，TERM-145）](/glossary/#term-145)作为邻域算法的学习载体。它复用 A06 的 halo、cooperative load 和统一 barrier 推理，同时加入 tensor layout、filter layout、stride、dilation、padding、channel reduction 与 floating-point acceptance contracts。教学公式实际采用深度学习接口常见的[互相关（cross-correlation，TERM-146）](/glossary/#term-146)约定，并明确说明它与数学 convolution 的区别。
+
+## 学完本单元，你应该能
+
+- 完整声明 input、filter 与 output tensor shapes、NCHW physical layout 和 linear address。
+- 从 stride、dilation 与 padding 推导 output extents 和每个 output 的 input coordinate set。
+- 区分 mathematical convolution 的 filter flip 与本页采用的 cross-correlation convention。
+- 把 A06 的 center/halo staging 扩展到一个小型 multi-channel direct 2D operation。
+- 为 CPU reference 声明相同 semantics、accumulation policy、absolute/relative tolerance 与 edge fixtures。
+- 为未来 cuDNN Frontend/API comparison 列出 graph validation/build、heuristics、plan、workspace、correctness 与 determinism gates，而不预判 hand-written kernel 获胜。
+
+## 先修关系
+
+先完成 [A06：Stencil 邻域、Halo 与 Cooperative Reuse](/algorithms/stencil-neighborhood-reuse/)和 [M03：共享内存分块](/memory/shared-memory-tiling/)。A06 提供 neighborhood footprint、boundary policy、corner halo 与 `load -> barrier -> compute` proof；M03 提供 shared tile ownership 与 capacity reasoning。
+
+先修项严格为 `A06, M03`。Production library、未来 component matrix 与任何 executable 都不在 prerequisites 中。本页不导入或创建 Runnable Example，也没有 unpublished related ID。
+
+## Tensor 与 layout 合同
+
+教学合同使用 dense row-major NCHW tensors：input `X` shape 为 `[N,C,H,W]`，filter `F` shape 为 `[K,C,R,S]`，output `Y` shape 为 `[N,K,P,Q]`。最后一个 dimension 连续，因此 linear indices 是：
+
+- `X[n,c,h,w] -> (((n*C + c)*H + h)*W + w)`
+- `F[k,c,fy,fx] -> (((k*C + c)*R + fy)*S + fx)`
+- `Y[n,k,oy,ox] -> (((n*K + k)*P + oy)*Q + ox)`
+
+Stride `(u_h,u_w)` 表示相邻 output origins 在 input coordinates 上移动多少；dilation `(d_h,d_w)` 表示相邻 filter taps 的 input spacing；zero padding `(p_h,p_w)` 定义每个 spatial axis 两侧的虚拟零宽度。本页使用对称 zero padding，不把 padding slots 存入 input allocation。
+
+对 positive stride/dilation 和 nonnegative padding，output extents 是 `P = floor((H + 2p_h - d_h(R-1) - 1) / u_h) + 1` 与 `Q = floor((W + 2p_w - d_w(S-1) - 1) / u_w) + 1`。合同必须先确认 numerator 对应合法 positive output extent；kernel 不能用 launch geometry 猜 shape。
+
+Layout 名称不足以完成合同。还要声明 element type、accumulation type、filter/output channel meanings、tensor strides 是否真的是 dense NCHW，以及 buffers 是否 alias。若改为 NHWC 或 non-contiguous view，linear formulas、coalescing reasoning 与 library descriptors 都必须一起改变。
+
+## Mathematical convolution 与 teaching cross-correlation
+
+本页采用 cross-correlation：
+
+`Y[n,k,oy,ox] = sum over c,fy,fx of X_or_zero[n,c,oy*u_h + fy*d_h - p_h,ox*u_w + fx*d_w - p_w] * F[k,c,fy,fx]`
+
+`X_or_zero` 对域外 spatial coordinate 返回 0，不执行越界 read。Filter coordinates `fy,fx` 按存储顺序使用，不翻转。这个 choice 与许多 deep-learning convolution APIs 的常见命名一致，但必须在本站教学合同中明说。
+
+Mathematical discrete convolution 会沿 spatial axes 翻转 filter，例如使用 `F[k,c,R-1-fy,S-1-fx]`。对于 symmetric filter 两者可能得到同样结果，所以 correctness fixtures 必须包含 asymmetric filter。不能只写“convolution”而省略 flip convention，也不能让 CPU 与 GPU paths 各用一种 convention。
+
+每个 output 是跨 `C*R*S` terms 的 reduction。即使 coordinate semantics 正确，不同 accumulation order 仍可能产生 floating-point variation；这属于 reference/tolerance contract，不允许用术语差异掩盖。
+
+## Direct neighborhood reuse：从 A06 扩展
+
+一个 `T_y x T_x` output tile、filter `R x S`、stride `(u_h,u_w)`、dilation `(d_h,d_w)`，每个 input channel 所需 dense bounding patch extents 是：
+
+- height: `(T_y - 1)u_h + (R - 1)d_h + 1`
+- width: `(T_x - 1)u_w + (S - 1)d_w + 1`
+
+Padding 只改变 patch origin 与哪些 positions 生成 0，不改变这个 bounding-box arithmetic。Dilation 可能让 mathematical footprint 在 box 内有 holes；简单教学 baseline 可以 stage 完整 box，sparse loader 则需要独立 coverage proof。
+
+Synchronous direct path 沿用 A06 phases：block threads cooperative load 一个 input-channel patch或按 channel 分阶段 load，所有 participants 到达 barrier，valid output owners 对 filter taps 与 channels accumulate，再在覆盖下一 channel/tile 前建立所需 reuse boundary。没有合法 output 的 edge thread 仍可承担 halo load，不能在 barrier 前 return。
+
+相邻 outputs 复用 overlapping input positions，同一 filter values 也被多个 outputs 使用。Reuse arithmetic 只能比较 logical references 与 staged positions。Shared capacity、occupancy、extra address work、barriers、cache behavior 和 channel loop 都会影响实际结果，因此本页不从 reuse count 推导 performance claim。
+
+## CPU reference、fixtures 与 tolerance responsibilities
+
+CPU reference 必须与 teaching path共享同一 NCHW/filter layouts、cross-correlation convention、output-shape formula、stride、dilation、zero padding、element conversion 和 accumulation contract。Reference 不是“看起来类似”的 nested loop；它是每个 output coordinate 的 oracle。
+
+至少使用以下 fixtures：全零 input、impulse input、全一 input 与 filter、asymmetric filter、rectangular shape、edge padding、stride 大于 1、dilation 大于 1，以及 channel count 大于 1。每个 fixture 先验证 output shape，再验证每个 output value和任何 guard/sentinel region。
+
+Integer teaching case可以 exact compare。Floating-point case 应在运行前声明 reference accumulation type/order、absolute tolerance、relative tolerance、NaN/Inf policy 与 failure report。常见 rule 是 `abs(actual-expected) <= atol + rtol*abs(expected)`，但 `atol` 和 `rtol` 必须按 problem scale 选择，不是本站统一常数。Bitwise equality、determinism 与 numerically acceptable result是不同要求。
+
+## Production comparison：未来 pinned cuDNN Frontend/API workflow
+
+Hand-written direct kernel 只用于学习 layout、neighborhood reuse 与 correctness contracts。Production comparison 应转向 pinned cuDNN Frontend/API workflow，而不是假设 teaching kernel 更快或更适合作为默认实现。
+
+未来工作至少包含以下 gates：
+
+1. **Component pin:** 固定 cuDNN library、cuDNN Frontend、CUDA Toolkit、driver、GPU 与 build environment 的完整 matrix。
+2. **Semantic parity:** 用相同 tensor/filter layouts、dimensions、stride、dilation、padding、data/compute types 与 cross-correlation convention 构造 graph。
+3. **Graph validation/build:** 分别记录 graph validation 与 build 是否成功；descriptor mistake 不能被归类为 kernel performance。
+4. **Heuristics/plan selection:** 记录 heuristics mode、候选 engine configurations、过滤条件和最终 execution plan，不把一个自动选择结果外推为普遍最优。
+5. **Workspace:** 查询并记录 plan workspace bytes、alignment、allocation/lifetime 与 stream ordering，失败或超预算时采用明确 fallback policy。
+6. **Correctness/determinism:** 在任何 measurement 前通过同一 CPU oracle 与 tolerance；单独声明 determinism scope、重复运行 policy 与允许的 numerical variation。
+
+[cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0)发布于 2026-08-06，并被该 release 推荐用于 cuDNN 9.24.0 及以后版本。它只是当前 future-comparison coordinate，不是 A07 dependency、兼容性证明或 execution record。
+
+尚未发布的后续 cuDNN library 单元会固定 production component matrix。当前 A07 不教授 cuDNN API 编程，也不构建、验证或执行 cuDNN graph。这里的 checklist 只定义未来 comparison responsibilities；没有依据声称 hand-written kernel 胜过 cuDNN plan。
+
+## 证据边界
+
+| expected reasoning | observed evidence |
+| --- | --- |
+| Shape formula 与 coordinate equation 决定 output domain | 实际 CPU/GPU output 与 error state |
+| A06 patch extent 覆盖 direct receptive fields | 实际 memory-check、trace 或 source execution |
+| Asymmetric filter 区分 correlation 与 flipped convolution | 具名 fixture 的 retained output |
+| cuDNN workflow 需要 graph、plan 和 workspace contracts | Pinned component matrix 的 build/execution record |
+
+本页 compilation、runtime、expected observations 与 recorded observations 四个 arrays 全为空。它没有 CUDA executable，也没有执行 cuDNN。Equations、source review 与 future checklist 不构成 timing、throughput、speedup、plan availability 或 determinism evidence。
+
+## 离开前检查
+
+1. Dense NCHW input、KCRS filter 与 NKPQ output 的 linear addresses分别如何计算？
+2. Stride、dilation 与 padding 分别改变 receptive-field origin、tap spacing 和域外 value 的哪一部分？
+3. 本页采用 cross-correlation 时为什么不翻转 filter，mathematical convolution 会怎样不同？
+4. 一个 output tile 的 staged input bounding patch 如何从 tile、filter、stride 与 dilation 推导？
+5. Future cuDNN comparison 为什么必须先固定 graph semantics、plan/workspace、correctness 与 determinism，再讨论 measurement？
+
+## 继续练习
+
+- 完成 [A07 练习（Exercises）](/algorithms/convolution-reuse-layout/exercises/)，再查看独立的[复核解答](/algorithms/convolution-reuse-layout/solutions/)。
+- 审查[练习题库（Practice Bank）PB-R2-019](/practice/#pb-r2-019)，要求同时提交 tensor contract、asymmetric-filter oracle、reuse ledger 与 production decision gates。
+- 复习 [TERM-145 convolution](/glossary/#term-145)和 [TERM-146 cross-correlation](/glossary/#term-146)，并把 component pin 与 execution 留给尚未发布的后续 cuDNN library 单元。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 direct teaching path 的 current shared-memory、synchronization 与 layout owner guidance，最后更新于 2026-05-27。
+- [CUDA C Programming Guide v11.8.0 archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-programming-guide/index.html)与 [CUDA C++ Programming Guide v12.9.1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-c-programming-guide/index.html)分别用于 11.8 lane 与 Toolkit 12.9.2 patch lane 的 stable contracts。
+- [cuDNN current Convolutions](https://docs.nvidia.com/deeplearning/cudnn/latest/operations/Convolutions.html)与 [Developer Overview](https://docs.nvidia.com/deeplearning/cudnn/latest/developer/overview.html)提供 future production comparison 的 semantics、graph、plan、workspace 与 determinism owner context；两页最后更新于 2026-08-07。
+- [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0)发布于 2026-08-06，只作为 cuDNN 9.24.0 及以后版本的 current future-comparison coordinate。
+
+六项 primary owner sources 均访问于 **2026-08-30**。本页只改写 owner contracts；tensor equations、fixtures、reuse ledger、练习与 production checklist 均为本站原创，没有复制 owner code、figure 或 table。Context7 `/websites/nvidia_cuda_cuda-programming-guide` 与 `/websites/nvidia_deeplearning_cudnn` 只用于 2026-08-30 交叉核对，owner URLs 仍是发布依据。
+
+**事实核查日期：2026-08-30。**
