@@ -5,9 +5,9 @@
   "title": "Tiled Transpose",
   "purpose": "Verify an out-of-place row-major tiled transpose exactly for rectangular and partial-tile matrices without publishing performance measurements.",
   "root": "examples/ex14-tiled-transpose",
-  "sourceCommit": "6993495d0bf1f62901eee151b2bf138c78d3c22f",
-  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/6993495d0bf1f62901eee151b2bf138c78d3c22f/examples/ex14-tiled-transpose",
-  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/6993495d0bf1f62901eee151b2bf138c78d3c22f.zip",
+  "sourceCommit": "981939cc705faf721ac06d1b70f2c5c4a8111e92",
+  "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose",
+  "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip",
   "license": "Apache-2.0",
   "provenance": "original",
   "build": {
