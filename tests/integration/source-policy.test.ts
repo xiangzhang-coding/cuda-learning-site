@@ -290,7 +290,7 @@ describe('source, license, and privacy policy', () => {
     await expect(readFile(path.join(projectRoot, 'CONTENT_LICENSES.md'), 'utf8')).resolves.toContain(
       'No adapted content or assets',
     );
-    expect((await scanFiles(projectRoot, scopedFiles)).violations).toEqual([]);
+    expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);
   });
 
   it('pins the CUDA container source and Astro Markdown processor owner interfaces', async () => {
@@ -357,7 +357,7 @@ describe('source, license, and privacy policy', () => {
     const sourceResult = await scanDirectory(projectRoot, { ignoredNames: ignoredDirectories });
     const builtResult = await scanDirectory(path.join(projectRoot, 'dist'));
 
-    expect(sourceResult.violations).toEqual([]);
-    expect(builtResult.violations).toEqual([]);
+    expect(sourceResult.violations.map(({ rule }) => rule)).toEqual([]);
+    expect(builtResult.violations.map(({ rule }) => rule)).toEqual([]);
   });
 });

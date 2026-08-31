@@ -34,6 +34,7 @@ export default defineConfig({
   testDir: './tests/release',
   fullyParallel: false,
   forbidOnly: true,
+  maxFailures: 1,
   retries: 0,
   workers: 1,
   reporter: 'list',

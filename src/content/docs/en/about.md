@@ -42,7 +42,7 @@ The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable E
 
 The Stable Curriculum completely publishes O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q05 in both languages, for 49 Learning Units. New [A08 Tiled GEMM](/en/algorithms/tiled-gemm-correctness/) and [A09 Sorting, Selection, and Compaction](/en/algorithms/sorting-selection-compaction/) join the algorithm track. A01-A09 all have Exercises and separate solutions.
 
-R1 remains the latest completed aggregate review. Issue #23 publishes A08/A09, EX15, VIS12, and supporting material, but the aggregate R2 review remains separately gated by [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+R2 is the latest completed aggregate review. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) retains the dynamic acceptance record for protected `main`, Preview, production, and remote smoke. R3 and later material is outside R2.
 
 The strict graph adds `A08<-[A05,M03,M04,A02]`, `A09<-[A03,A04]`, `EX15<-A08`, and `VIS12<-A08`. Q13, L06, and LAB12 are unpublished; LAB12 waits for both prerequisites.
 

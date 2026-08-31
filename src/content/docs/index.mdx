@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）现已完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 与 Q01-Q05，共 49 个学习单元（Learning Unit）。Issue #23 加入 A08/A09、EX15、VIS12 及其配套材料；R1 仍是最近一次已完成的聚合发布复核，R2 聚合复核仍由 [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 单独设门。
+稳定课程（Stable Curriculum）现已完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 与 Q01-Q05，共 49 个学习单元（Learning Unit）。R2 是最近一次已完成的聚合发布复核；[issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 记录最终 CI、Preview、生产发布与 smoke 坐标。R3 及后续内容不属于 R2。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 

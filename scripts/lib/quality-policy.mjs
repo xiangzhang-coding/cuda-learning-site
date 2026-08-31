@@ -90,6 +90,20 @@ function normalized(relativePath) {
   return relativePath.split(path.sep).join('/').replace(/^\.\//, '');
 }
 
+function isPngBuffer(buffer) {
+  return buffer.subarray(0, 8).toString('hex') === '89504e470d0a1a0a';
+}
+
+function isZipBuffer(buffer) {
+  if (buffer.length < 4) return false;
+  const signature = buffer.readUInt32LE(0);
+  return signature === 0x04034b50 || signature === 0x06054b50 || signature === 0x08074b50;
+}
+
+function safeDiagnosticPath(relativePath) {
+  return contentViolations(relativePath).length > 0 ? '<redacted-path>' : relativePath;
+}
+
 function sameRecord(left = {}, right = {}) {
   const sort = (record) => Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)));
   return JSON.stringify(sort(left)) === JSON.stringify(sort(right));
@@ -182,6 +196,7 @@ export function zipEntries(buffer) {
   if (entryCount > 10_000) throw new Error('ZIP archive exceeds 10,000 entry scan boundary');
 
   const entries = [];
+  const names = new Set();
   let offset = centralOffset;
   let totalUncompressed = 0;
   for (let index = 0; index < entryCount; index += 1) {
@@ -199,29 +214,34 @@ export function zipEntries(buffer) {
     const nameEnd = offset + 46 + nameLength;
     if (nameEnd > buffer.length) throw new Error('invalid ZIP entry name length');
     const name = buffer.subarray(offset + 46, nameEnd).toString('utf8');
+    if (/[\u0000-\u001f\u007f]/.test(name)) throw new Error('ZIP entry name contains control characters');
+    if (name.includes('\\')) throw new Error('ZIP entry name uses an unsupported path separator');
+    if (name.startsWith('/') || name.split('/').includes('..')) throw new Error('ZIP entry path is unsafe');
+    if (names.has(name)) throw new Error('ZIP archive contains duplicate entry names');
+    names.add(name);
 
-    if (flags & 1) throw new Error(`${name}: encrypted ZIP entries are unsupported`);
+    if (flags & 1) throw new Error('encrypted ZIP entries are unsupported');
     if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff || localOffset === 0xffffffff) {
-      throw new Error(`${name}: ZIP64 entries are unsupported`);
+      throw new Error('ZIP64 entries are unsupported');
     }
-    if (uncompressedSize > 50 * 1024 * 1024) throw new Error(`${name}: entry exceeds 50 MiB scan boundary`);
+    if (uncompressedSize > 50 * 1024 * 1024) throw new Error('ZIP entry exceeds 50 MiB scan boundary');
     totalUncompressed += uncompressedSize;
     if (totalUncompressed > 200 * 1024 * 1024) throw new Error('ZIP archive exceeds 200 MiB uncompressed scan boundary');
     if (localOffset + 30 > buffer.length || buffer.readUInt32LE(localOffset) !== localSignature) {
-      throw new Error(`${name}: invalid local file header`);
+      throw new Error('invalid local file header');
     }
 
     const localNameLength = buffer.readUInt16LE(localOffset + 26);
     const localExtraLength = buffer.readUInt16LE(localOffset + 28);
     const dataStart = localOffset + 30 + localNameLength + localExtraLength;
     const dataEnd = dataStart + compressedSize;
-    if (dataEnd > buffer.length) throw new Error(`${name}: compressed data exceeds archive boundary`);
+    if (dataEnd > buffer.length) throw new Error('compressed data exceeds archive boundary');
     const compressed = buffer.subarray(dataStart, dataEnd);
     let content;
     if (method === 0) content = Buffer.from(compressed);
     else if (method === 8) content = inflateRawSync(compressed, { maxOutputLength: 50 * 1024 * 1024 + 1 });
-    else throw new Error(`${name}: compression method ${method} is unsupported`);
-    if (content.length !== uncompressedSize) throw new Error(`${name}: uncompressed size does not match central directory`);
+    else throw new Error(`ZIP compression method ${method} is unsupported`);
+    if (content.length !== uncompressedSize) throw new Error('ZIP entry size does not match central directory');
 
     entries.push({ name, content });
     offset = nameEnd + extraLength + commentLength;
@@ -239,18 +259,17 @@ function zipViolations(buffer, relativePath, depth = 0) {
     }
     for (const entry of entries) {
       const normalizedEntry = normalized(entry.name);
-      if (normalizedEntry.startsWith('/') || normalizedEntry.split('/').includes('..')) {
-        violations.push({ path: `${relativePath}!/${normalizedEntry}`, rule: 'unsafe ZIP entry path' });
-        continue;
+      for (const violation of contentViolations(entry.name)) {
+        violations.push({ path: `${relativePath}!/${normalizedEntry}`, rule: violation.rule });
       }
       if (entry.name.endsWith('/')) continue;
       for (const violation of contentViolations(entry.content.toString('utf8'))) {
         violations.push({ path: `${relativePath}!/${normalizedEntry}`, ...violation });
       }
-      if (path.extname(entry.name).toLowerCase() === '.png') {
+      if (path.extname(entry.name).toLowerCase() === '.png' || isPngBuffer(entry.content)) {
         violations.push(...pngMetadataViolations(entry.content, `${relativePath}!/${normalizedEntry}`));
       }
-      if (path.extname(entry.name).toLowerCase() === '.zip') {
+      if (path.extname(entry.name).toLowerCase() === '.zip' || isZipBuffer(entry.content)) {
         violations.push(...zipViolations(entry.content, `${relativePath}!/${normalizedEntry}`, depth + 1));
       }
     }
@@ -260,25 +279,52 @@ function zipViolations(buffer, relativePath, depth = 0) {
   return violations;
 }
 
+export function scanZipArchive(buffer, relativePath = 'archive.zip') {
+  const safePath = safeDiagnosticPath(relativePath);
+  return zipViolations(buffer, safePath).map(({ path: file, rule }) => {
+    const entryBoundary = file.indexOf('!/');
+    return {
+      path: entryBoundary < 0 ? file : `${file.slice(0, entryBoundary + 2)}<redacted-entry>`,
+      rule,
+    };
+  });
+}
+
+export function scanArtifactBuffer(buffer, relativePath) {
+  const safePath = safeDiagnosticPath(relativePath);
+  const violations = contentViolations(buffer.toString('utf8')).map(({ rule }) => ({
+    path: safePath,
+    rule,
+  }));
+  const extension = path.extname(relativePath).toLowerCase();
+  if (extension === '.png' || isPngBuffer(buffer)) violations.push(...pngMetadataViolations(buffer, safePath));
+  if (extension === '.zip' || isZipBuffer(buffer)) violations.push(...scanZipArchive(buffer, safePath));
+  return violations;
+}
+
 export async function scanFiles(root, files) {
   const relativePaths = files.map((file) => path.relative(root, file));
-  const violations = pathViolations(relativePaths);
+  const violations = pathViolations(relativePaths).map((violation) => ({
+    ...violation,
+    path: safeDiagnosticPath(violation.path),
+  }));
+  for (const relativePath of relativePaths) {
+    for (const { rule } of contentViolations(relativePath)) violations.push({ path: '<redacted-path>', rule });
+  }
 
   for (const file of files) {
     const relativePath = normalized(path.relative(root, file));
+    const diagnosticPath = safeDiagnosticPath(relativePath);
     const metadata = await lstat(file);
     if (metadata.isSymbolicLink()) {
-      violations.push({ path: relativePath, rule: 'symbolic links are not accepted in retained artifacts' });
+      violations.push({ path: diagnosticPath, rule: 'symbolic links are not accepted in retained artifacts' });
       continue;
     }
     if (metadata.size > 50 * 1024 * 1024) {
-      violations.push({ path: relativePath, rule: 'artifact file exceeds 50 MiB scan boundary' });
+      violations.push({ path: diagnosticPath, rule: 'artifact file exceeds 50 MiB scan boundary' });
       continue;
     }
-    const buffer = await readFile(file);
-    for (const violation of contentViolations(buffer.toString('utf8'))) violations.push({ path: relativePath, ...violation });
-    if (path.extname(file).toLowerCase() === '.png') violations.push(...pngMetadataViolations(buffer, relativePath));
-    if (path.extname(file).toLowerCase() === '.zip') violations.push(...zipViolations(buffer, relativePath));
+    violations.push(...scanArtifactBuffer(await readFile(file), diagnosticPath));
   }
 
   return { filesScanned: files.length, violations };

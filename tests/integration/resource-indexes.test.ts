@@ -116,6 +116,67 @@ describe('published resource indexes', () => {
     }
   });
 
+  it('keeps all fifty bilingual Practice Bank entries complete and nonduplicative', async () => {
+    const practiceIds = RESOURCE_INDEX_RECORDS
+      .filter(({ group }) => group === 'practice')
+      .map(({ planningId }) => planningId);
+    expect(practiceIds).toHaveLength(50);
+
+    const localeContracts = [
+      {
+        locale: 'zh-CN',
+        source: await readFile(path.join(projectRoot, 'src/content/docs/practice.mdx'), 'utf8'),
+        prerequisite: /- \*\*(?:直接先修条件|先修条件)：\*\*[^\n]*\]\(\//,
+        hardwareGate: /- \*\*硬件门槛（Hardware gate）：\*\*[^\n]+/,
+        reviewDate: /- \*\*最后复核（Last reviewed）：\*\* \d{4}-\d{2}-\d{2}。/,
+        expectedEvidence: /\*\*预期证据：\*\*[^\n]+/,
+        acceptanceCriteria: /\*\*验收条件：\*\*/,
+        hint: /<details><summary>提示 [^<]+<\/summary>/g,
+        solution: /\*\*(?:解答|参考解答（Reviewed solution）)：\*\*[^\n]+/,
+        sourceBasis: /\*\*来源依据（Source basis）：\*\*[^\n]+/,
+        prompt: /\*\*题目：\*\*\s*([^\n]+)/,
+      },
+      {
+        locale: 'en',
+        source: await readFile(path.join(projectRoot, 'src/content/docs/en/practice.mdx'), 'utf8'),
+        prerequisite: /- \*\*(?:Direct prerequisite|Prerequisite):\*\*[^\n]*\]\(\/en\//,
+        hardwareGate: /- \*\*Hardware gate:\*\*[^\n]+/,
+        reviewDate: /- \*\*Last reviewed:\*\* \d{4}-\d{2}-\d{2}\./,
+        expectedEvidence: /\*\*Expected evidence:\*\*[^\n]+/,
+        acceptanceCriteria: /\*\*Acceptance criteria:\*\*/,
+        hint: /<details><summary>Hint [^<]+<\/summary>/g,
+        solution: /\*\*(?:Solution|Reviewed solution):\*\*[^\n]+/,
+        sourceBasis: /\*\*Source basis:\*\*[^\n]+/,
+        prompt: /\*\*Prompt:\*\*\s*([^\n]+)/,
+      },
+    ] as const;
+
+    for (const contract of localeContracts) {
+      const sourceIds = [...contract.source.matchAll(/<span id="(pb-[^"]+)"/g)]
+        .map((match) => match[1].toUpperCase());
+      expect(sourceIds, contract.locale).toEqual(practiceIds);
+      const prompts = new Set<string>();
+
+      for (const planningId of practiceIds) {
+        const section = detailSection(contract.source, planningId);
+        expect(section, `${contract.locale} ${planningId} Publication Pair`).toMatch(/ID.*Publication Pair|ID.*双语发布对/);
+        expect(section, `${contract.locale} ${planningId} prerequisite`).toMatch(contract.prerequisite);
+        expect(section, `${contract.locale} ${planningId} hardware gate`).toMatch(contract.hardwareGate);
+        expect(section, `${contract.locale} ${planningId} review date`).toMatch(contract.reviewDate);
+        expect(section, `${contract.locale} ${planningId} expected evidence`).toMatch(contract.expectedEvidence);
+        expect(section, `${contract.locale} ${planningId} acceptance criteria`).toMatch(contract.acceptanceCriteria);
+        expect(section.match(contract.hint), `${contract.locale} ${planningId} layered hints`).toHaveLength(2);
+        expect(section, `${contract.locale} ${planningId} solution`).toMatch(contract.solution);
+        expect(section, `${contract.locale} ${planningId} source basis`).toMatch(contract.sourceBasis);
+        const prompt = section.match(contract.prompt)?.[1].trim();
+        expect(prompt, `${contract.locale} ${planningId} prompt`).toBeTruthy();
+        expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
+        prompts.add(prompt ?? '');
+      }
+      expect(prompts.size).toBe(50);
+    }
+  });
+
   it('publishes no planned placeholder and keeps exact eligible populations', async () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),

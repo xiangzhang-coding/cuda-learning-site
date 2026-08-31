@@ -46,6 +46,15 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("['branch', '--show-current']");
     expect(guard).toContain("'src/current-publication-manifest.json'");
     expect(guard).toContain("'dist/publication.json'");
+    expect(guard).toContain("scanDirectory(path.join(projectRoot, 'dist'))");
+    expect(guard).toContain('Built release output failed artifact policy');
+    expect(guard).toContain('artifactScan.filesScanned');
+    expect(guard.indexOf('artifactScan.violations.length')).toBeLessThan(
+      guard.indexOf("const sourceManifest = parseManifest(sourceManifestText"),
+    );
+    expect(guard).toContain("new Set(artifactScan.violations.map(({ rule }) => rule))");
+    expect(guard).toContain('Built ${label} is not valid JSON.');
+    expect(guard).toContain("console.error(error instanceof ReleaseSourceError ? error.message : 'Release source check failed before upload.')");
     expect(guard).toContain('releaseSourceCommit !== head');
     expect(guard).toContain('publicationSourceCommit !== head');
     expect(guard).toContain('JSON.stringify(embeddedReleaseManifest) !== JSON.stringify(sourceManifest)');
@@ -60,7 +69,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     const [release, publication, sourceManifest, currentSourceManifest] = await Promise.all([
       readFile(path.join(projectRoot, 'dist/release.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8').then(JSON.parse),
-      readFile(path.join(projectRoot, 'src/r1-release-manifest.json'), 'utf8').then(JSON.parse),
+      readFile(path.join(projectRoot, 'src/r2-release-manifest.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8').then(JSON.parse),
     ]);
     const builtFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true })).map((file) =>
@@ -88,10 +97,10 @@ describe('Cloudflare assets-only deployment contract', () => {
       sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/),
     });
     expect(publication.sourceCommit).toBe(release.sourceCommit);
-    expect(release.releaseId).toBe('R1');
+    expect(release.releaseId).toBe('R2');
     expect(publication).toMatchObject({
       publicationId: 'current',
-      releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
+      releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
       scope: { publicationPairs: 186, sourceRoutes: 372 },
     });
     expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
@@ -117,7 +126,7 @@ describe('Cloudflare assets-only deployment contract', () => {
 
     expect(deployment).toContain('Cloudflare Workers Builds');
     expect(deployment).toContain('only deployment authority');
-    expect(deployment).toContain('Workers Builds: reviewed, disabled for R1');
+    expect(deployment).toContain('Workers Builds: reviewed, disabled for R2');
     expect(deployment).toContain('Source branch: clean, protected `main`');
     expect(deployment).toContain('Build command: `npm run build:release`');
     expect(deployment).toContain('Production deploy command: `npm run deploy`');
@@ -136,7 +145,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/EX10.*Runtime-Not-Applicable/i);
     expect(deployment).toMatch(/EX11-EX15.*empty compilation evidence/i);
     expect(deployment).toMatch(/No Reference Environment.*performance observation/i);
-    expect(deployment).toMatch(/R2 aggregate review.*pending/i);
+    expect(deployment).toMatch(/R2.*latest completed aggregate review/i);
+    expect(deployment).toMatch(/R3 and later/i);
     expect(deployment).toMatch(/issue #24/i);
     expect(deployment).toContain('npm run test:release-smoke');
     expect(deployment).toContain('wrangler rollback');

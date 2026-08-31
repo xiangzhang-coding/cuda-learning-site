@@ -2,9 +2,9 @@
 
 # Cloudflare Deployment
 
-The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R1 remains the latest completed aggregate review and its artifact is an immutable historical subset. The current source tree builds 186 Publication Pairs and 372 source routes, recorded by `src/current-publication-manifest.json` without calling this a completed R2 review. The R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R2 is the latest completed aggregate review. Its 186 Publication Pairs and 372 source routes are recorded by `src/r2-release-manifest.json`; `src/current-publication-manifest.json` matches that surface at the release boundary and records R3 as pending. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) remains the dynamic R2 acceptance record. R3 and later material is outside this release.
 
-Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R1, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
+Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R2, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
 
 ## Static Architecture
 
@@ -12,10 +12,10 @@ Repository-pinned Wrangler from a clean `main` checkout is the only deployment a
 
 `npm run quality:deployment` runs Wrangler's dry-run parser against the built output and must report no bindings. Every build emits two source-bound records:
 
-- `dist/release.json` copies the immutable reviewed R1 contract from `src/r1-release-manifest.json` and adds the checked-out Git commit.
-- `dist/publication.json` copies the exact current incremental scope from `src/current-publication-manifest.json` and adds the same commit.
+- `dist/release.json` copies the reviewed R2 contract from `src/r2-release-manifest.json` and adds the checked-out Git commit.
+- `dist/publication.json` copies the exact rolling publication scope from `src/current-publication-manifest.json` and adds the same commit.
 
-The first record remains the reviewed R1 subset; the second describes the current artifact surface. Neither record upgrades CUDA Evidence Status. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
+The first record is the immutable R2 release contract; the second describes the current artifact surface and can advance independently after R2. Neither record upgrades CUDA Evidence Status. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
 
 The current scope is 49 Learning Units O01-O08/F01-F08/M01-M19/A01-A09/Q01-Q05, sixteen Runnable Examples EX01-EX16, six Labs, sixteen Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, and 61 source records. The five catalog groups total 284 records; bilingual pages total 186 Publication Pairs and 372 source routes. LAB12 remains absent until Q13 and L06 are published.
 
@@ -26,7 +26,7 @@ The current scope is 49 Learning Units O01-O08/F01-F08/M01-M19/A01-A09/Q01-Q05, 
 - Build command: `npm run build:release`
 - Production deploy command: `npm run deploy`
 - Preview deploy command: `npm run deploy:preview`
-- Workers Builds: reviewed, disabled for R1
+- Workers Builds: reviewed, disabled for R2
 - Current deployment authority: repository-pinned Wrangler
 - Node.js: `24.19.0` from `.node-version`
 - npm: `11.17.0` from `packageManager` and the package engine contract
@@ -57,9 +57,9 @@ gh workflow run release-smoke.yml --ref main \
   -f source_commit="<40-character-main-commit>"
 ```
 
-For a Preview URL, set `RELEASE_BASE_URL` and `RELEASE_KIND="preview"`. The gate checks that `/release.json` remains the R1 contract and `/publication.json` matches 186 Publication Pairs and 372 source routes. It covers both locales, navigation/search, catalog counts, VIS08-VIS12 accessibility and fallbacks, EX07-EX15 source/download links, EX11-EX15 evidence boundaries, legal notices, canonical metadata, and browser/network errors.
+For a Preview URL, set `RELEASE_BASE_URL` and `RELEASE_KIND="preview"`. The gate checks that `/release.json` is the R2 contract and `/publication.json` matches 186 Publication Pairs and 372 source routes. It covers both locales, navigation/search, catalog counts, VIS08-VIS12 accessibility and fallbacks, EX07-EX15 source/download links, complete downloaded-archive leak scans, EX11-EX15 evidence boundaries, legal notices, canonical metadata, and browser/network errors.
 
-[Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. Record current incremental publication evidence without rewriting that accepted history. Issue #24 tracks the pending R2 aggregate review; a successful incremental deployment or smoke run does not by itself complete R2.
+[Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records the final protected-`main` checks, exact Preview and production identities, artifact hashes, and both remote smoke results for R2. Source files deliberately do not pre-certify those dynamic coordinates. R3 and later work requires its own review.
 
 ## Rollback
 

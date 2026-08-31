@@ -63,7 +63,7 @@ const sourceScan = await scanFiles(projectRoot, trackedFiles.map((relativePath) 
 violations.push(...sourceScan.violations);
 
 if (violations.length > 0) {
-  for (const violation of violations) console.error(`- ${violation.path}: ${violation.rule}`);
+  for (const violation of violations) console.error(`- ${violation.rule}`);
   process.exitCode = 1;
 } else {
   console.log(`Source policy passed for ${trackedFiles.length} tracked files.`);
