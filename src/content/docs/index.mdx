@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）现已完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 与 Q01-Q05，共 49 个学习单元（Learning Unit）。R2 是最近一次已完成的聚合发布复核；[issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 记录最终 CI、Preview、生产发布与 smoke 坐标。R3 及后续内容不属于 R2。
+稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #25](https://github.com/xiangzhang-coding/cuda-learning-site/issues/25) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 与 Q01-Q08，共 52 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；[issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 记录其最终 CI、Preview、生产发布与 smoke 坐标。当前增量发布不改写 R2，R3 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -56,7 +56,7 @@ head:
 
 [A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；[A02 多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)同时依赖 M03、M05 和 M06；[A03 包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)同时依赖 A02 和 M05；[A04 私有化直方图](/algorithms/privatized-histogram/)同时依赖 M03 和 M05；[A05 矩阵转置](/algorithms/matrix-transpose-layout/)依赖 M02/M03/M04；[A06 Stencil](/algorithms/stencil-neighborhood-reuse/)依赖 M03/M04/M05；[A07 Direct 2D Convolution](/algorithms/convolution-reuse-layout/)依赖 A06/M03；[A08 Tiled GEMM](/algorithms/tiled-gemm-correctness/)依赖 A05/M03/M04/A02；[A09 Sorting、Selection 与 Compaction](/algorithms/sorting-selection-compaction/)依赖 A03/A04。
 
-[Q01 CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)同时依赖 F04 和 O04；[Q02 浮点顺序、确定性与逐位可复现性](/correctness/floating-point-order-reproducibility/)同时依赖 Q01 和 A02；[Q03 用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)同时依赖 F05 和 Q01；[Q04 用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)同时依赖 M05、M06 和 Q03；[Q05 诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)同时依赖 M08 和 Q01。
+[Q01 CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)同时依赖 F04 和 O04；[Q02 浮点顺序、确定性与逐位可复现性](/correctness/floating-point-order-reproducibility/)同时依赖 Q01 和 A02；[Q03 用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)同时依赖 F05 和 Q01；[Q04 用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)同时依赖 M05、M06 和 Q03；[Q05 诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)同时依赖 M08 和 Q01；[Q06 把 APOD 作为优化循环](/correctness/apod-optimization-loop/)仅依赖 Q05；[Q07 先用 Nsight Systems 阅读应用时间线](/correctness/timeline-first-nsight-systems/)同时依赖 M07、M09 和 Q05；[Q08 用 Nsight Compute 回答一个选定内核问题](/correctness/kernel-first-nsight-compute/)同时依赖 Q07、M02 和 M03。
 
 F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
 
@@ -70,13 +70,19 @@ O02-O08 也保留各自的练习与独立解答。
 
 Q01-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q02 练习](/correctness/floating-point-order-reproducibility/exercises/)与[解答](/correctness/floating-point-order-reproducibility/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)。
 
+Q06-Q08 也提供完整练习与独立解答：[Q06 练习](/correctness/apod-optimization-loop/exercises/)与[解答](/correctness/apod-optimization-loop/solutions/)、[Q07 练习](/correctness/timeline-first-nsight-systems/exercises/)与[解答](/correctness/timeline-first-nsight-systems/solutions/)、[Q08 练习](/correctness/kernel-first-nsight-compute/exercises/)与[解答](/correctness/kernel-first-nsight-compute/solutions/)。
+
 当前有 16 个可运行示例（Runnable Example）：EX01-EX16。新增 [EX15 Tiled GEMM](/examples/tiled-gemm/)严格依赖 A08；EX14 仍依赖 A05，EX16 仍依赖 Q03/Q04。
 
 EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane 使用同一原创 C++17 implementation；compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。Host-only utility 不建立 GPU correctness，本站没有运行 EX15，也不发布实际 output、timing、speedup 或其他 performance number。
 
-六个非连续实验仍是 LAB01-LAB05 与 LAB07。LAB12 不发布：它严格等待尚未发布的 Q13 profiling prerequisite 与 L06 cuBLAS prerequisite。
+当前 8 个实验是 LAB01-LAB08。[LAB06 构建重叠流水线](/labs/build-overlapped-pipeline/)严格依赖 M09 和 Q07；[LAB08 先分析完整应用，再分析一个内核](/labs/profile-full-application-before-kernel/)严格依赖 Q07 和 Q08。未来的 Q11 与 LAB10 仍未发布，LAB10 等待 Q11 提供 evidence-based optimization prerequisite；Q13、L06 与 LAB12 也仍未发布，LAB12 等待 Q13 profiling 与 L06 cuBLAS 两项 prerequisite。
 
-正式 Visual Explainer 共 16 项：独立 VIS01-VIS12 与内嵌 VIS19-VIS22。新增 [VIS12 GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)依赖 A08、关联 EX15，并保留 20 个静态 hierarchy panels。全部讲解都是 evidence-neutral browser models。当前 catalog 为 6 个 Lab、50 个 Practice Bank 条目、16 项 Visual Explainer、151 个 Glossary 词条和 61 条 source record，共 284 条记录；公开源文件形成 186 个双语发布对，即 372 条 source route。
+正式 Visual Explainer 共 17 项：独立 VIS01-VIS12 与 VIS14，加上内嵌 VIS19-VIS22。[VIS12 GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)依赖 A08、关联 EX15，并保留 20 个静态 hierarchy panels；[VIS14 Nsight Systems versus Nsight Compute](/visuals/nsight-systems-versus-nsight-compute/)严格依赖 Q07 和 Q08。全部讲解都是 evidence-neutral browser models。
+
+Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 compilation evidence 为空、runtime 为 Pending Hardware Verification、recorded observations 为空。本次增量没有 runtime、profiler、timeline、metric、bottleneck 或 speedup observation。
+
+当前 catalog 为 8 个 Lab、53 个 Practice Bank 条目、17 项 Visual Explainer、159 个 Glossary 词条和 65 条 source record，共 302 条记录；当前滚动公开源文件形成 198 个 Publication Pairs，即 396 条 source routes。这些当前数字独立于不可变的 R2 186/372 快照，R3 聚合复核仍待完成。
 
 ## 边界先说清
 
@@ -330,6 +336,21 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
     <strong>诚实计时异步 GPU 工作</strong>
     <small>排除 warm-up，显式等待完成，并保留原始样本与完整 manifest。</small>
   </a>
+  <a className="route-card" href="/correctness/apod-optimization-loop/">
+    <span>Q06 · APOD LOOP</span>
+    <strong>把 APOD 作为优化循环</strong>
+    <small>从正确性合格的已记录基线出发，用可证伪假设和受控变更完成循环。</small>
+  </a>
+  <a className="route-card" href="/correctness/timeline-first-nsight-systems/">
+    <span>Q07 · TIMELINE FIRST</span>
+    <strong>先用 Nsight Systems 阅读应用时间线</strong>
+    <small>先定位 CPU、API、copy、kernel、stream 与 dependency，再选择 kernel 问题。</small>
+  </a>
+  <a className="route-card" href="/correctness/kernel-first-nsight-compute/">
+    <span>Q08 · KERNEL QUESTION</span>
+    <strong>用 Nsight Compute 回答一个选定内核问题</strong>
+    <small>选定 kernel 与问题后，只收集所需 section 或 metric，并保留 replay 边界。</small>
+  </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>环境报告可运行示例</strong>
@@ -435,10 +456,20 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
     <strong>消除共享内存存储体冲突</strong>
     <small>先证明 padded 与 unpadded 输出一致，再解释 profiler 记录。</small>
   </a>
+  <a className="route-card" href="/labs/build-overlapped-pipeline/">
+    <span>LAB06 · OVERLAP PIPELINE</span>
+    <strong>构建重叠流水线</strong>
+    <small>先验收 EX07 与采集门槛，再把短时间线分类为重叠、串行或无法判定。</small>
+  </a>
   <a className="route-card" href="/labs/diagnose-four-sanitizer-failures/">
     <span>LAB07 · SANITIZER DIAGNOSIS</span>
     <strong>诊断四类 Sanitizer 故障</strong>
     <small>用隔离进程保存 EX16 的工具日志、应用日志和正确性结果。</small>
+  </a>
+  <a className="route-card" href="/labs/profile-full-application-before-kernel/">
+    <span>LAB08 · APPLICATION TO KERNEL</span>
+    <strong>先分析完整应用，再分析一个内核</strong>
+    <small>用分开的 Systems 与 Compute 执行建立可复核决策链，不预填观察。</small>
   </a>
   <a className="route-card" href="/labs/">
     <span>LAB INDEX · LOOKUP</span>
@@ -510,20 +541,25 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
     <strong>GEMM Tiling Hierarchy：从 Matrix 到 Instruction</strong>
     <small>核对 matrix、tile、thread block、warp 与 source-level instruction slot。</small>
   </a>
+  <a className="route-card" href="/visuals/nsight-systems-versus-nsight-compute/">
+    <span>VIS14 · PROFILER DECISION</span>
+    <strong>从症状选择下一份 profiler 证据</strong>
+    <small>先看应用时间线；只有选定 kernel 与问题后才进入 Nsight Compute。</small>
+  </a>
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 50 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
+    <small>用 53 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 151 个中英文规范术语。</small>
+    <small>核对本站使用的 159 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 61 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 65 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

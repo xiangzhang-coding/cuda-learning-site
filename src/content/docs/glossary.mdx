@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 151 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 159 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-08-31'
@@ -1407,6 +1407,78 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [A03](/algorithms/inclusive-exclusive-scan/)和 [A09](/algorithms/sorting-selection-compaction/)。
 - **版本说明：** Composition 是 algorithm contract；CUB/Thrust exact API 与 storage/policy/Toolkit compatibility 由 selected CCCL release 决定。
 
+<span id="term-152" class="resource-target" aria-hidden="true"></span>
+
+### APOD · 评估、并行化、优化、部署
+
+- **定义：** 评估、并行化、优化、部署（Assess, Parallelize, Optimize, Deploy，APOD）是围绕 correctness-qualified recorded baseline 重复执行的 evidence cycle：评估真实 workload，提出可证伪 hypothesis，以一项受控变更进行并行化或优化，并只在 correctness、performance、regression 与 operational gates 通过后部署。
+- **避免使用：** 一次性 tuning checklist、跳过 correctness 的 optimization、profiler ranking、自动 speedup guarantee。
+- **相关资源：** [Q05](/correctness/timing-asynchronous-gpu-work/)和 [Q06](/correctness/apod-optimization-loop/)。
+- **版本说明：** APOD 表述按 current CUDA C++ Best Practices Guide v13.3 与 archived v11.8.0 复核；每轮仍绑定自己的 baseline、hypothesis、controlled change 与 deploy gate，静态流程本身不证明 improvement。
+
+<span id="term-153" class="resource-target" aria-hidden="true"></span>
+
+### Nsight Systems · 系统级性能分析器
+
+- **定义：** 系统级性能分析器（Nsight Systems）在一次 instrumented execution 中采集并关联 CPU threads、CUDA APIs、copies、kernels、streams 与 dependencies 的 application timeline，用于先定位 application-level symptom，再决定是否需要 kernel-level evidence。
+- **避免使用：** 只分析一个 kernel 的工具、自动 bottleneck detector、unmodified execution 的完整真相、从 Toolkit label 推导出的固定 profiler version。
+- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[LAB06](/labs/build-overlapped-pipeline/)、[LAB08](/labs/profile-full-application-before-kernel/)和 [VIS14](/visuals/nsight-systems-versus-nsight-compute/)。
+- **版本说明：** Current owner coordinates 是 User Guide v2026.4 与 release v2026.4.1；selected Toolkit Lanes 使用 2022.4.2.1、2025.1.3.140、2026.1.3.425。实际 `nsys --version`、help、collection method、CUPTI diagnostics 与 manifest 才约束一份 timeline；timeline 不自动证明 cause 或 bottleneck。
+
+<span id="term-154" class="resource-target" aria-hidden="true"></span>
+
+### Nsight Compute · Kernel 性能分析器
+
+- **定义：** Kernel 性能分析器（Nsight Compute）针对 separate instrumented run 中与代表性 timeline 选择规则对应的 kernel occurrence，收集回答一个预先声明问题所需的 sections、rules 或 metrics，并把结果保存在 `.ncu-rep` 中。
+- **避免使用：** Application profiling 的第一步、先收集全部 metrics 再解释、Systems report 中同一 physical kernel instance、自动 bottleneck 或 speedup proof。
+- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)、[LAB08](/labs/profile-full-application-before-kernel/)和 [VIS14](/visuals/nsight-systems-versus-nsight-compute/)。
+- **版本说明：** Current coordinate 是 Nsight Compute 2026.2.1；selected Toolkit Lanes 使用 2022.3.0.22、2025.2.1.3、2026.2.1.5。实际 `ncu --version`、target GPU、permission、availability query、filter 与 replay contract 决定可解释范围；版本坐标不授予 metric availability 或 observation。
+
+<span id="term-155" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Profiling Tools Interface (CUPTI) · CUDA 性能分析工具接口
+
+- **定义：** CUDA 性能分析工具接口（CUDA Profiling Tools Interface，CUPTI）是一组 CUDA profiling 与 tracing interfaces，可供工具或应用订阅 callbacks，并采集带 correlation 的 activity 或适用的 performance data；它位于部分 Nsight observation 的采集边界内。
+- **避免使用：** `nsys` 或 `ncu` 的同义词、独立 GUI profiler、跨版本不变的 ABI/feature set、没有 overhead 或 dropped records 的透明观察层。
+- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)、[LAB06](/labs/build-overlapped-pipeline/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
+- **版本说明：** Current coordinate 是 CUPTI 2026.2.1；selected Lane coordinates 是 11.8.87、12.9.79、13.3.75。Compatibility、subscriber、activity/counter scope、buffering、overhead 与 dropped-record diagnostics 必须按 exact environment 记录；使用 CUPTI 不证明 trace 完整或性能结论。
+
+<span id="term-156" class="resource-target" aria-hidden="true"></span>
+
+### profiler metric · 性能分析指标
+
+- **定义：** 性能分析指标（profiler metric）是 profiler 按特定工具和设备合同报告或派生的命名量；可解释记录必须保留 exact name、unit、definition、scope、aggregation/denominator、availability 与 collection method。
+- **避免使用：** 任意 hardware fact、必然等同于 raw counter、跨 GPU/version 可直接比较的同名值、单个高数值就是 bottleneck。
+- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
+- **版本说明：** Current Nsight Compute 2026.2.1 与 selected Lane components 2022.3.0.22、2025.2.1.3、2026.2.1.5 的 names、definitions 与 availability 必须分开核对，并以 exact target GPU 上保留的 query/report 为准；metric catalog 本身不是 observation 或 conclusion。
+
+<span id="term-157" class="resource-target" aria-hidden="true"></span>
+
+### replay · 重放
+
+- **定义：** 在 profiler 语境中，重放（replay）是为了跨一个或多个 collection passes 获取所需数据而重复 kernel、application 或 range 的采集机制；replay mode 决定重复边界和 state-validity contract。
+- **避免使用：** CUDA Graph replay、普通 application rerun、同一个未受扰动的 representative launch、zero-overhead collection。
+- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
+- **版本说明：** Replay mode 按 current Nsight Compute 2026.2.1 与 selected Lane components 2022.3.0.22、2025.2.1.3、2026.2.1.5 分别核对。必须记录 mode、pass count、save/restore 或 matching constraints、overhead 与差异；replay 可能扰动 cache/timing、序列化 work，或产生另一次 execution。
+
+<span id="term-158" class="resource-target" aria-hidden="true"></span>
+
+### profiler report · 性能分析报告
+
+- **定义：** 性能分析报告（profiler report）是 profiler 生成的 primary observation artifact，例如 `.nsys-rep` 或 `.ncu-rep`；只有与 exact producer version、command/method、workload、correctness verdict、Environment Manifest、logs、hash 和 interpretation contract 一起保管时才可审查。
+- **避免使用：** 把 screenshot、stats table 或 export 当作完整 report、脱离 manifest 的结论、仅因文件存在就视为 Runtime-Verified、可由任意 tool version 无损解释的通用格式。
+- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)、[LAB06](/labs/build-overlapped-pipeline/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
+- **版本说明：** `.nsys-rep` 绑定实际 Nsight Systems version，包括 current 2026.4/2026.4.1 或 selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；`.ncu-rep` 绑定 actual 2026.2.1 或 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5。Derivative、redaction 与 reader-version 差异需记录；report existence 不支持未声明的结论。
+
+<span id="term-159" class="resource-target" aria-hidden="true"></span>
+
+### command-line interface (CLI) · 命令行接口
+
+- **定义：** 命令行接口（command-line interface，CLI）是通过 executable 与 ordered argument vector 调用工具并返回 stdout、stderr 和 exit status 的文本接口；可复现 profiler command 还保留 executable path、expanded arguments、environment、working directory、version 与相关 help output。
+- **避免使用：** Shell 本身、与 GUI workflow 自动等价、owner example command 的本机 observation、用 `nvcc --version` 代替 `nsys`/`ncu` version。
+- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)、[LAB06](/labs/build-overlapped-pipeline/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
+- **版本说明：** `nsys` syntax 绑定 actual current 2026.4/2026.4.1 或 selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；`ncu` syntax 绑定 actual 2026.2.1 或 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5。先保存实际 `--version` 与 subcommand help，再解释 command；文档中的 symbolic shape 不是执行记录。
+
 ## 维护规则
 
-TERM-001 至 TERM-146 保留各自 2026-08-26 至 2026-08-30 的逐项复核记录。TERM-147 至 TERM-151，以及完整 151 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-08-31** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条没有执行 GPU code、EX15、CUB 或 Thrust。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-146 保留各自 2026-08-26 至 2026-08-30 的逐项复核记录，TERM-147 至 TERM-151 保留各自在 2026-08-31 的逐项复核记录。TERM-152 至 TERM-159，以及完整 159 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-08-31** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。TERM-152 至 TERM-159 只是静态定义：未运行 application、GPU、`nsys` 或 `ncu`，未查询 performance counter，未生成或解析 profiler report，且不声明 timeline、metric、replay、timing、bottleneck、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

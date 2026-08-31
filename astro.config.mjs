@@ -38,6 +38,9 @@ export default defineConfig({
       },
       prerender: true,
       pagefind: true,
+      expressiveCode: {
+        defaultProps: { wrap: true },
+      },
       disable404Route: true,
       customCss: ['./src/styles/site.css'],
       components: {
@@ -129,6 +132,9 @@ export default defineConfig({
             { slug: 'correctness/memcheck-invalid-memory-access' },
             { slug: 'correctness/racecheck-initcheck-synccheck' },
             { slug: 'correctness/timing-asynchronous-gpu-work' },
+            { slug: 'correctness/apod-optimization-loop' },
+            { slug: 'correctness/timeline-first-nsight-systems' },
+            { slug: 'correctness/kernel-first-nsight-compute' },
           ],
         },
         {
@@ -163,7 +169,9 @@ export default defineConfig({
             { slug: 'labs/break-and-repair-indexing' },
             { slug: 'labs/observe-coalescing' },
             { slug: 'labs/remove-shared-memory-bank-conflicts' },
+            { slug: 'labs/build-overlapped-pipeline' },
             { slug: 'labs/diagnose-four-sanitizer-failures' },
+            { slug: 'labs/profile-full-application-before-kernel' },
           ],
         },
         {
@@ -183,6 +191,7 @@ export default defineConfig({
             { slug: 'visuals/reduction-stages' },
             { slug: 'visuals/tiled-transpose' },
             { slug: 'visuals/gemm-tiling-hierarchy' },
+            { slug: 'visuals/nsight-systems-versus-nsight-compute' },
           ],
         },
         { slug: 'practice' },

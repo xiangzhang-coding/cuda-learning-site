@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/visuals/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. Of the sixteen formal explainers, VIS01-VIS12 use twelve standalone pages, including [VIS11 Tiled Transpose](/en/visuals/tiled-transpose/) and [VIS12 GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/). VIS12 strictly requires A08 and relates to EX15. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors without duplicate pages.
+This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. As of 2026-08-31, it contains seventeen formal explainers: VIS01-VIS12 plus VIS14 use thirteen standalone pages, including [VIS11 Tiled Transpose](/en/visuals/tiled-transpose/), [VIS12 GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/), and [VIS14 Nsight Systems versus Nsight Compute](/en/visuals/nsight-systems-versus-nsight-compute/). VIS13 remains unpublished and does not appear. VIS12 strictly requires A08 and relates to EX15; VIS14 requires exactly Q07 and Q08. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors without duplicate pages.
 
 ## Published Visual Explainers
 
@@ -38,4 +38,4 @@ A planning ID is a stable discussion label. It neither generates nor promises a 
 
 ## Evidence boundary
 
-VIS01-VIS12 and VIS19-VIS22 run deterministic teaching models only in the browser, provide static or textual fallbacks, and execute no CUDA. VIS12's matrix, tile, thread-block, warp, and instruction panels are not emitted-instruction, runtime, timing, or performance observations. None of the sixteen Visual Explainers has CUDA Evidence Status. Reviewed: **2026-08-31**.
+VIS01-VIS12, VIS14, and VIS19-VIS22 run deterministic teaching models only in the browser, retain static or textual fallbacks, and execute no CUDA. VIS14's complete six-leaf decision tree is its permanent static fallback. It launches neither `nsys` nor `ncu`, opens or parses no profiler report, queries no GPU, CUPTI activity, metric, or performance counter, and has empty compilation, runtime, expected-observation, and recorded-observation arrays. VIS12's matrix, tile, thread-block, warp, and instruction panels are not emitted-instruction, runtime, timing, or performance observations. Interaction, static fallback, and tool documentation remain evidence-neutral; none of the seventeen Visual Explainers has CUDA Evidence Status. Reviewed: **2026-08-31**.

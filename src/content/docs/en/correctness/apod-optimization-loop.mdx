@@ -1,0 +1,218 @@
+---
+title: 'Q06: Use APOD as an optimization loop'
+description: Complete one APOD cycle around a correctness-qualified recorded baseline, realistic workload, falsifiable hypothesis, controlled change, comparable before/after evidence, and deployment regression gate.
+pairId: q06
+counterpart: /correctness/apod-optimization-loop/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - baseline
+  - assess
+  - parallelize
+  - optimize
+  - deploy
+  - hypothesis-ledger
+  - before-after-evidence
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q06
+prerequisites:
+  - Q05
+relatedUnits:
+  - Q07
+  - Q08
+  - LAB08
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Assess, Parallelize, Optimize, Deploy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-05-27'
+    platform: 'Current APOD design-cycle guidance'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Best Practices Guide - Application Profiling'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#application-profiling'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-05-27'
+    platform: 'Current realistic-workload profiling and hotspot guidance'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Best Practices Guide 11.8 - Assess, Parallelize, Optimize, Deploy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 APOD design-cycle guidance'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,baseline,assess,parallelize,optimize,deploy,hypothesis-ledger,before-after-evidence,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q05 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q07,Q08,LAB08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/apod-optimization-loop/" lang="zh-CN">阅读中文对应页</a>
+
+APOD makes Assess, Parallelize, Optimize, and Deploy a repeatable cycle. This site tightens the cycle's entry contract to a correctness-qualified recorded baseline and requires a realistic workload, an explicit falsifiable hypothesis, one controlled change, comparable before/after evidence, and a deployment/regression gate. Without those conditions, an “optimization” is only an untested edit.
+
+## What you should be able to do
+
+- Decide whether a baseline passed its correctness gate and retained a reviewable record under the Q05 contract.
+- Use a realistic workload during Assess to define the user-relevant metric, constraints, and candidate hotspot.
+- Write a falsifiable hypothesis for Parallelize or Optimize and isolate one controlled change.
+- Keep workload, metric, measurement protocol, and Environment Manifest comparable before and after.
+- Enter Deploy only after correctness, performance, regression, and operational gates pass, with a rollback path retained.
+
+## Prerequisites
+
+Complete [Q05: Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) first. Q05 defines correctness-first timing, warm-up exclusion, completion boundaries, raw samples, predeclared statistics, and the Environment Manifest. Q06 does not relax those conditions; it uses them as the measurement contract for every APOD pass.
+
+This unit executes no CUDA, creates no profile, and supplies no observation. It defines how to plan and review a cycle. A real baseline and candidate evidence must come from later controlled runs.
+
+## Begin with a correctness-qualified recorded baseline
+
+A baseline is neither an impression that the old version is usually fast enough nor an aggregate detached from context. It is a comparison anchor that was run, passed predeclared correctness criteria, and can be traced to raw artifacts. Before entering Assess, retain at least:
+
+- workload identity, input distribution, shape, data type, concurrency, and included work representative of the target use case;
+- a named user-facing metric, start and stop endpoints, and completion boundary;
+- Q05 warm-up, raw repeated samples, predeclared statistic and spread, and outlier policy;
+- an Environment Manifest for source and build, hardware, software, clock and power state, permissions, and observation custody;
+- the correctness method, criteria, actual verdict, and corresponding log;
+- a path or hash for the baseline profile or timing artifact, not a retold conclusion.
+
+Without an actual verdict, raw artifact, or manifest, call the record a “baseline plan” or “baseline missing,” not a recorded baseline. Compare the candidate against the same qualified baseline. If the baseline contract changes, establish a new baseline first.
+
+## Assess: Decide what deserves a change
+
+Assess describes the user problem before locating where time is spent. The current Best Practices Guide requires a realistic profiling workload because an unrealistic shape, input, or call mix can direct attention to the wrong function. The Assess record includes:
+
+- why the workload represents deployment traffic or the target research case, plus what it excludes;
+- the user-visible metric, correctness requirements, resource limits, and deployment constraints;
+- the observed hotspot or bottleneck artifact in the baseline and its selection rule;
+- whether the selected scope can be parallelized and whether data movement and integration cost belong inside the metric;
+- whether current evidence locates where time is spent or can already motivate a question about why.
+
+A profiler ranking is not causal proof. Assess produces a candidate with an evidence pointer and a question to test, not a list saying that the slowest function must be rewritten. If the symptom is still application-level sequencing, hand it to Q07. Enter Q08 kernel evidence only after selecting a kernel and question.
+
+## Parallelize: Expose parallelism without enlarging the experiment
+
+Parallelize chooses the smallest reviewable path for the selected scope, such as an existing parallel library that matches the semantics, a compiler expression, or a local refactor that exposes data parallelism. The choice states data ownership, transfers, ordering, error handling, and CPU fallback. “Use the GPU” is not itself a hypothesis.
+
+Before editing, write a falsifiable sentence: if the named change is applied while the other comparison coordinates remain fixed, then the predeclared metric should move in the named direction because the specified mechanism changes; correctness failure, absence of the mechanism artifact, or failure to meet the predeclared decision rule falsifies the hypothesis or leaves it unresolved.
+
+Change one independent variable per pass. If refactoring, algorithm, compiler flags, workload, and measurement endpoints change together, before/after evidence cannot attribute an outcome to the claimed mechanism. List necessary supporting edits inside the controlled change scope rather than hiding them as extra optimizations.
+
+## Optimize: One change, one comparison
+
+Optimize iterates on an existing parallel implementation while preserving the same hypothesis discipline: ask a question from evidence, then choose one change directly related to that question. Do not stack familiar techniques first and invent a story from the result afterward.
+
+Every candidate passes the correctness gate again and collects before/after evidence with the same realistic workload, metric, endpoints, warm-up, sampling, statistics, and compatible manifest as the baseline. Preserve the source diff, build and run commands, raw samples, profiler artifact, and decision log. Classify the result only as keep, revert, or inconclusive. An inconclusive result requires repair of the evidence contract or a new hypothesis; it cannot be presented as an improvement.
+
+Q07 timeline evidence addresses application-level gaps, launches, copies, and overlap. Q08 kernel evidence answers only a declared kernel question. A tool serves the hypothesis; it is not a reason to dump metrics.
+
+## Deploy: Put the improvement through regression gates
+
+Deploy does not merge the fastest isolated sample into production. It puts a candidate that passed comparison into a release contract:
+
+| gate | required decision evidence | if it fails |
+| --- | --- | --- |
+| correctness | the same criteria as baseline or explicitly approved new criteria, actual verdict, and error checks | reject candidate |
+| performance | comparable before/after raw evidence and the predeclared decision rule | revert or mark inconclusive |
+| regression | representative workload set, interface compatibility, resource bounds, and non-target-path checks | rework; do not deploy |
+| operational | build and package compatibility, observability, fallback, and rollback owner | do not enter rollout |
+
+After all gates pass, use a reversible rollout, link the release to its evidence artifacts, and monitor both metric and correctness signals. A new workload or post-deployment regression begins another Assess pass. Old evidence does not automatically prove an outcome in a new environment.
+
+## Hypothesis ledger
+
+A hypothesis ledger makes each APOD pass reviewable before results are visible. Each row describes only one candidate:
+
+| field | record before observation |
+| --- | --- |
+| baseline pointer | correctness verdict, manifest, raw timing or profile artifact |
+| realistic workload | identity, representativeness rationale, scope, and exclusions |
+| problem and mechanism | observed symptom, selected scope, and proposed causal explanation |
+| falsifiable hypothesis | named change, predicted direction, mechanism, and falsifier |
+| controlled change | independent variable and necessary supporting edits |
+| held constant | input, metric, endpoints, build policy, sampling, and environment coordinates |
+| required evidence | correctness log, before/after raw data, diff, commands, and profile artifact |
+| decision rule | predeclared conditions for keep, revert, inconclusive, or deploy-gate entry |
+| disposition | filled after observation; left empty on this page |
+
+The ledger does not replace artifacts or turn a prediction into an expected observation. It prevents rewriting the hypothesis, scope, or success rule after seeing results.
+
+## Before/after evidence contract
+
+Comparability requires more than finding a time value in two files:
+
+| coordinate | before/after requirement |
+| --- | --- |
+| correctness | both pass applicable predeclared criteria; a failed value cannot enter a speedup claim |
+| workload | same logical input, shape, data type, request mix, and included work |
+| metric | same named metric, endpoints, completion boundary, and units |
+| measurement | same warm-up, run-order policy, repetitions, raw custody, statistic, and spread |
+| environment | comparable manifests; any unavoidable difference is recorded and explained |
+| code scope | baseline commit, candidate commit, and single controlled diff are identifiable |
+| artifacts | raw logs, correctness output, commands, and profiler reports are traceable |
+| interpretation | use the predeclared rule; silently delete no sample and publish more than a ratio |
+
+If any required coordinate is incomparable, the conclusion is inconclusive or a new baseline is needed. Repeating a measurement cannot repair the wrong workload or replace correctness.
+
+## Evidence boundary
+
+This page supplies a process, ledger, and review contract only. It compiles or executes no code; collects no baseline, timeline, kernel metric, duration, or regression observation; and claims no optimization succeeded. The frontmatter compilation, runtime, expected-observation, and recorded-observation arrays remain empty. Any later record needs an Environment Manifest and actual artifacts.
+
+## Retrieval check
+
+1. Why must APOD begin with a correctness-qualified recorded baseline rather than an impression or isolated aggregate?
+2. Why must Assess use a realistic workload and separate a hotspot artifact from a causal hypothesis?
+3. How does an explicit falsifiable hypothesis name a mechanism, one controlled change, predicted direction, and falsifier?
+4. Which coordinates must make before/after evidence comparable, and when is a new baseline required?
+5. Which risks do the correctness, performance, regression, and operational gates block before Deploy?
+
+## Continue with practice
+
+- Complete the [Q06 Exercises](/en/correctness/apod-optimization-loop/exercises/), then inspect the separate [reviewed solutions](/en/correctness/apod-optimization-loop/solutions/).
+- Audit an optimization proposal that lacks a hypothesis and comparable evidence in [Practice Bank PB-R3-001](/en/practice/#pb-r3-001).
+- Use [Q07: Timeline-first Nsight Systems](/en/correctness/timeline-first-nsight-systems/) to locate an application-level symptom, then let [Q08: Kernel-first Nsight Compute](/en/correctness/kernel-first-nsight-compute/) answer a predeclared question about the selected kernel.
+- Connect the APOD ledger to a Systems-to-Compute decision trail in [LAB08: Profile a Full Application Before a Kernel](/en/labs/profile-full-application-before-kernel/) without prefilling an observation.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3: Assess, Parallelize, Optimize, Deploy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy) defines the cycle and its four stages and emphasizes incremental testing and deployment.
+- [CUDA C++ Best Practices Guide v13.3: Application Profiling](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#application-profiling) identifies profiling as the way to locate hotspots and explicitly requires a realistic workload.
+- [CUDA C++ Best Practices Guide v11.8: Assess, Parallelize, Optimize, Deploy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy) cross-checks the enduring APOD cycle in the archived Toolkit 11.8 guide.
+
+Context7 was used only as a retrieval cross-check; factual authority rests with the current and archived NVIDIA owner documentation above. All three owner sources were accessed on **2026-08-31**. The correctness-qualified baseline, hypothesis ledger, controlled-change rule, before/after evidence contract, deployment gates, Exercises, and arrangement are original to this site; no owner-documentation performance result is copied.
+
+**Fact checked: 2026-08-31.**

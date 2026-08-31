@@ -37,6 +37,7 @@ const representativeThemeRoutes = [
   '/en/visuals/artifact-pipeline/',
   '/en/visuals/reduction-stages/',
   '/en/visuals/gemm-tiling-hierarchy/',
+  '/en/visuals/nsight-systems-versus-nsight-compute/',
 ] as const;
 
 const releaseVisualStateScans = [
@@ -113,6 +114,17 @@ const releaseVisualStateScans = [
       await hierarchy.locator('[data-gemm-tile-shape]').selectOption('128x64x16');
       await hierarchy.locator('[data-gemm-hierarchy-level]').selectOption('instruction');
       await expect(hierarchy).toHaveAttribute('data-hierarchy-level', 'instruction');
+    },
+  },
+  {
+    theme: 'profiler-dark',
+    label: 'VIS14 selected-kernel profiler decision state',
+    route: '/en/visuals/nsight-systems-versus-nsight-compute/',
+    prepare: async (page: Page) => {
+      const decision = page.locator('cuda-profiler-decision-explorer[data-visual-id="VIS14"]');
+      await decision.locator('[data-profiler-symptom]').selectOption('selected-kernel-memory-question');
+      await expect(decision).toHaveAttribute('data-recommended-tool', 'nsight-compute');
+      await expect(decision.locator('[data-tool-card="nsight-compute"]')).toHaveAttribute('aria-current', 'true');
     },
   },
 ] as const;

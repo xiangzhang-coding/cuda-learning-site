@@ -1,0 +1,282 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+.profiler-decision-visual {
+  --profiler-line: color-mix(in srgb, var(--theme-accent) 38%, var(--sl-color-gray-5));
+  --profiler-panel: color-mix(in srgb, var(--theme-canvas) 94%, var(--theme-accent) 6%);
+  --profiler-selected: color-mix(in srgb, var(--theme-signal) 14%, var(--theme-canvas));
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.profiler-decision-controls {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) auto;
+  align-items: end;
+  margin: 0;
+}
+
+.profiler-decision-controls legend {
+  padding-inline: 0.35rem;
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  font-weight: 800;
+}
+
+.profiler-decision-controls label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-xs);
+}
+
+.profiler-decision-controls select {
+  width: 100%;
+  min-width: 0;
+}
+
+.profiler-decision-controls :focus-visible {
+  outline: 3px solid var(--theme-signal);
+  outline-offset: 2px;
+}
+
+.profiler-decision-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-inline-start: 0.3rem solid var(--theme-signal);
+  background: var(--profiler-selected);
+  font-size: var(--sl-text-sm);
+}
+
+.profiler-live-workbench,
+.profiler-decision-tree,
+.profiler-static-branches > section {
+  display: grid;
+  min-width: 0;
+  gap: 0.8rem;
+  padding: clamp(0.7rem, 2vw, 1rem);
+  border: 1px solid var(--profiler-line);
+  background: var(--profiler-panel);
+  overflow-wrap: anywhere;
+}
+
+.profiler-live-workbench {
+  border-width: 2px;
+  border-color: var(--theme-accent-strong);
+  background: var(--sl-color-bg);
+}
+
+.profiler-live-workbench header,
+.profiler-live-workbench h3,
+.profiler-live-workbench h4,
+.profiler-live-workbench p,
+.profiler-static h4,
+.profiler-static p,
+.profiler-static ol {
+  margin: 0;
+}
+
+.profiler-live-workbench > header {
+  padding-block-end: 0.6rem;
+  border-block-end: 1px solid var(--profiler-line);
+}
+
+.profiler-decision-summary,
+.profiler-decision-rationale {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.profiler-decision-summary > div,
+.profiler-decision-rationale > div {
+  min-width: 0;
+  padding: 0.65rem;
+  border-inline-start: 0.25rem solid var(--profiler-line);
+  background: var(--profiler-panel);
+}
+
+.profiler-decision-summary dt,
+.profiler-decision-rationale dt {
+  color: var(--sl-color-gray-2);
+  font-size: 0.68rem;
+}
+
+.profiler-decision-summary dd,
+.profiler-decision-rationale dd {
+  margin: 0.2rem 0 0;
+}
+
+.profiler-decision-summary dd {
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-weight: 800;
+}
+
+.profiler-tool-pair,
+.profiler-static-branches {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.profiler-tool-pair article {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  border: 1px dashed var(--profiler-line);
+  background: var(--sl-color-bg);
+  overflow-wrap: anywhere;
+}
+
+.profiler-tool-pair article[aria-current='true'] {
+  border: 3px solid var(--theme-signal);
+  background: var(--profiler-selected);
+}
+
+[data-recommendation-marker] {
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.profiler-tree-start,
+.profiler-tree-gate {
+  padding: 0.7rem;
+  border: 2px solid var(--theme-accent-strong);
+  background: var(--sl-color-bg);
+  text-align: center;
+}
+
+.profiler-tree-gate {
+  border-style: dashed;
+}
+
+.profiler-static-branches > section:first-child {
+  border-block-start: 0.35rem solid var(--theme-accent-strong);
+}
+
+.profiler-static-branches > section:last-child {
+  border-block-start: 0.35rem double var(--theme-signal);
+}
+
+.profiler-static-branches ol {
+  display: grid;
+  gap: 0.55rem;
+  padding-inline-start: 1.4rem;
+}
+
+[data-static-decision-leaf] {
+  padding: 0.65rem;
+  border: 1px solid var(--profiler-line);
+  background: var(--sl-color-bg);
+  overflow-wrap: anywhere;
+}
+
+[data-static-decision-leaf] strong,
+[data-static-decision-leaf] span {
+  display: block;
+}
+
+[data-static-decision-leaf] span {
+  margin-block-start: 0.3rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .profiler-tool-pair article,
+  [data-static-decision-leaf] {
+    transition: border-color 120ms linear, background-color 120ms linear;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profiler-decision-visual,
+  .profiler-decision-visual * {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .profiler-decision-status,
+  .profiler-live-workbench,
+  .profiler-tool-pair article,
+  .profiler-decision-tree,
+  .profiler-tree-start,
+  .profiler-tree-gate,
+  .profiler-static-branches > section,
+  [data-static-decision-leaf] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  .profiler-tool-pair article[aria-current='true'] {
+    border: 3px solid Highlight;
+  }
+}
+
+@media (max-width: 56rem) {
+  .profiler-decision-controls,
+  .profiler-decision-summary,
+  .profiler-decision-rationale,
+  .profiler-tool-pair,
+  .profiler-static-branches {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profiler-decision-controls button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .profiler-live-workbench,
+  .profiler-decision-tree,
+  .profiler-static-branches > section,
+  .profiler-tool-pair article,
+  [data-static-decision-leaf] {
+    padding: 0.5rem;
+  }
+}
+
+@media print {
+  .profiler-decision-controls,
+  .profiler-live-workbench {
+    display: none !important;
+  }
+
+  .profiler-static {
+    display: grid !important;
+  }
+
+  .profiler-decision-tree,
+  .profiler-static-branches > section,
+  [data-static-decision-leaf] {
+    border-color: #777;
+    background: #fff;
+    color: #222;
+    box-shadow: none;
+  }
+
+  .profiler-static-branches > section,
+  [data-static-decision-leaf] {
+    break-inside: avoid;
+  }
+}

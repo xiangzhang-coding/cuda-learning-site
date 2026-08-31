@@ -227,6 +227,12 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/toolchain/separate-compilation-device-linking/exercises/',
     '/toolchain/cpp-dialect-boundaries/exercises/',
     '/en/toolchain/cpp-dialect-boundaries/exercises/',
+    '/correctness/apod-optimization-loop/exercises/',
+    '/en/correctness/apod-optimization-loop/exercises/',
+    '/correctness/timeline-first-nsight-systems/exercises/',
+    '/en/correctness/timeline-first-nsight-systems/exercises/',
+    '/correctness/kernel-first-nsight-compute/exercises/',
+    '/en/correctness/kernel-first-nsight-compute/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -242,7 +248,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(text).toMatch(/Goal|目标/);
     expect(text).toMatch(/Constraints|约束/);
     expect(text).toMatch(/Expected evidence|预期证据/);
-    expect(text).toMatch(/Acceptance criteria|验收条件/);
+    expect(text).toMatch(/Acceptance criteria|验收(?:条件|标准)/);
     expect(text).toMatch(/Hint 1|提示 1/);
     expect(text).toMatch(/Hint 2|提示 2/);
     expect(text).not.toMatch(/解答 1|Solution 1/);
@@ -307,6 +313,12 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/toolchain/separate-compilation-device-linking/solutions/',
     '/toolchain/cpp-dialect-boundaries/solutions/',
     '/en/toolchain/cpp-dialect-boundaries/solutions/',
+    '/correctness/apod-optimization-loop/solutions/',
+    '/en/correctness/apod-optimization-loop/solutions/',
+    '/correctness/timeline-first-nsight-systems/solutions/',
+    '/en/correctness/timeline-first-nsight-systems/solutions/',
+    '/correctness/kernel-first-nsight-compute/solutions/',
+    '/en/correctness/kernel-first-nsight-compute/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -359,7 +371,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes fifty complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes fifty-three complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -381,9 +393,10 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
+      'PB-R3-001', 'PB-R3-002', 'PB-R3-003',
     ];
     const entrySections = [...source.matchAll(
-      /^## (PB-R[012]-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
+      /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
     )].map(([, id, content]) => ({ id, content }));
     const focusedPrerequisitePaths: Readonly<Record<string, string>> = {
       'PB-R1-009': 'foundations/asynchronous-errors',
@@ -423,6 +436,31 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-019': 'algorithms/convolution-reuse-layout',
       'PB-R2-020': 'algorithms/tiled-gemm-correctness',
       'PB-R2-021': 'algorithms/sorting-selection-compaction',
+      'PB-R3-001': 'correctness/apod-optimization-loop',
+      'PB-R3-002': 'correctness/timeline-first-nsight-systems',
+      'PB-R3-003': 'correctness/kernel-first-nsight-compute',
+    };
+    const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
+      'PB-R3-001': [
+        'correctness/timing-asynchronous-gpu-work',
+        'correctness/apod-optimization-loop',
+      ],
+      'PB-R3-002': [
+        'memory/stream-ordering',
+        'memory/pinned-memory-transfer-overlap',
+        'correctness/timing-asynchronous-gpu-work',
+        'correctness/timeline-first-nsight-systems',
+        'labs/build-overlapped-pipeline',
+        'visuals/nsight-systems-versus-nsight-compute',
+      ],
+      'PB-R3-003': [
+        'memory/coalescing-transactions',
+        'memory/shared-memory-tiling',
+        'correctness/timeline-first-nsight-systems',
+        'correctness/kernel-first-nsight-compute',
+        'labs/profile-full-application-before-kernel',
+        'visuals/nsight-systems-versus-nsight-compute',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -431,6 +469,8 @@ describe('Exercises and Practice Bank contract', () => {
       expect(section.id, route).toBe(entryId);
       const sectionText = section.content.replace(/\s+/g, ' ');
       const sectionLinks = [...section.content.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]);
+      const relatedLine = /^- \*\*(?:相关学习单元与资源：|Related Learning Units and resources:)\*\* ([^\n]+)/m.exec(section.content)?.[1] ?? '';
+      const relatedLinks = [...relatedLine.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]);
 
       expect(sectionText, `${route} ${entryId}`).toMatch(/prerequisite|先修/i);
       expect(sectionText, `${route} ${entryId}`).toMatch(/Hardware gate|硬件门槛/);
@@ -458,10 +498,22 @@ describe('Exercises and Practice Bank contract', () => {
           `${route} ${entryId} prerequisite`,
         ).toBe(true);
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$/.test(entryId)) {
+      const relatedPaths = focusedRelatedPaths[entryId];
+      if (relatedPaths) {
+        expect(relatedLinks, `${route} ${entryId} related links`).toHaveLength(relatedPaths.length);
+        for (const relatedPath of relatedPaths) {
+          expect(
+            relatedLinks.some((link) => link.includes(`/${relatedPath}/`)),
+            `${route} ${entryId} relation ${relatedPath}`,
+          ).toBe(true);
+        }
+      }
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-00[1-3]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R2-02[01]$/.test(entryId)
+        const sourceDate = entryId.startsWith('PB-R3')
+          ? '2026-08-31'
+          : /^PB-R2-02[01]$/.test(entryId)
           ? '2026-08-31'
           : /^PB-R2-01[2-9]$/.test(entryId)
           ? '2026-08-30'
@@ -481,7 +533,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['A01', 'A02', 'A03', 'A04']) expect(text).toContain(unitId);
-    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05']) expect(text).toContain(unitId);
+    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
@@ -506,6 +558,9 @@ describe('Exercises and Practice Bank contract', () => {
       expect(builtHtml, slug).toContain(slug);
     }
     for (const slug of ['nvcc-compilation-flow', 'ptx-cubin-fatbinary', 'compiler-architecture-targets', 'separate-compilation-device-linking', 'cpp-dialect-boundaries']) {
+      expect(builtHtml, slug).toContain(slug);
+    }
+    for (const slug of ['apod-optimization-loop', 'timeline-first-nsight-systems', 'kernel-first-nsight-compute']) {
       expect(builtHtml, slug).toContain(slug);
     }
   });

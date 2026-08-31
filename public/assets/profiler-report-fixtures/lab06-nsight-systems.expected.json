@@ -1,0 +1,79 @@
+{
+  "SPDX-License-Identifier": "CC-BY-4.0",
+  "schemaVersion": 1,
+  "fixtureId": "LAB06-NSYS-EXPECTED",
+  "labId": "LAB06",
+  "exampleId": "EX07",
+  "sourceCommit": "fb0306db725ab960a61b50456c227545057de392",
+  "provenance": "original",
+  "fixtureType": "expected-only-profiler-report-plan",
+  "captureStatus": "pending-hardware-verification",
+  "tool": {
+    "name": "Nsight Systems",
+    "cli": "nsys",
+    "reportExtension": ".nsys-rep",
+    "selectedVersions": ["2022.4.2.1", "2025.1.3.140", "2026.1.3.425"]
+  },
+  "captureCommand": "nsys profile --trace=cuda --output=lab06-timeline ./build/ex07-streams-events-overlap",
+  "workload": {
+    "paths": ["serial", "chunked"],
+    "elementType": "std::uint32_t",
+    "elementCount": 4099,
+    "chunkElements": 1024,
+    "chunkCount": 5,
+    "streamCount": 2,
+    "maximumDeviceMemoryBytes": 49176
+  },
+  "correctnessGate": {
+    "method": "exact comparison against the independent EX07 host reference",
+    "requiredResult": "all 4099 outputs pass for both paths before collection"
+  },
+  "environmentManifest": {
+    "gpuIdentity": "unfilled",
+    "computeCapability": "unfilled",
+    "gpuCountUsed": "unfilled",
+    "driver": "unfilled",
+    "toolkitLane": "unfilled",
+    "cudaToolkit": "unfilled",
+    "cuptiVersion": "unfilled",
+    "profilerVersion": "unfilled",
+    "nvcc": "unfilled",
+    "hostCompiler": "unfilled",
+    "operatingSystem": "unfilled",
+    "sourceRepository": "unfilled",
+    "binarySha256": "unfilled",
+    "buildContract": "unfilled",
+    "workload": "unfilled",
+    "permissions": "unfilled",
+    "deviceAccessState": "unfilled",
+    "concurrentLoad": "unfilled",
+    "clockPowerThermal": "unfilled",
+    "exactCommands": "unfilled",
+    "correctnessMethod": "unfilled",
+    "correctnessCriteria": "unfilled",
+    "measurementMethod": "unfilled",
+    "rawLogs": "unfilled",
+    "rawReports": "unfilled",
+    "exitStatuses": "unfilled",
+    "custody": "unfilled",
+    "criteriaResult": "unfilled"
+  },
+  "method": {
+    "question": "Does the frozen chunked path exhibit overlap, serialization, or an inconclusive short trace?",
+    "traceDomains": ["CUDA API", "kernels", "copies", "streams", "events"],
+    "reportCustody": ["raw report", "export", "stdout", "stderr", "exit status", "SHA-256"]
+  },
+  "sanitization": {
+    "status": "passed",
+    "reviewDate": "2026-08-31",
+    "removedCoordinates": ["host identity", "user identity", "absolute paths", "device identifiers", "network identifiers", "environment values"],
+    "transformations": ["This original project-authored expected-only plan contains no profiler capture and therefore required no value replacement."]
+  },
+  "expectedObservations": [
+    "Both paths should pass exact correctness before collection.",
+    "A qualifying report should retain CUDA API, copy, kernel, stream, and event intervals.",
+    "The learner should classify the exact trace as overlap, serialization, or inconclusive without using capability fields as observations."
+  ],
+  "recordedObservations": [],
+  "claimBoundary": "This expected-only fixture contains no recorded timeline, timing, bottleneck, throughput, or speedup observation."
+}

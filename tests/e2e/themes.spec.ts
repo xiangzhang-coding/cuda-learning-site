@@ -19,6 +19,15 @@ const issue20Routes = [
   '/en/visuals/artifact-pipeline/',
 ] as const;
 
+const issue25Routes = [
+  '/en/correctness/apod-optimization-loop/',
+  '/en/correctness/timeline-first-nsight-systems/',
+  '/en/correctness/kernel-first-nsight-compute/',
+  '/en/labs/build-overlapped-pipeline/',
+  '/en/labs/profile-full-application-before-kernel/',
+  '/en/visuals/nsight-systems-versus-nsight-compute/',
+] as const;
+
 const themeReflowRoutes = [
   '/en/start/using-the-learning-site/',
   '/en/memory/pinned-memory-transfer-overlap/',
@@ -32,6 +41,7 @@ const themeReflowRoutes = [
   '/en/examples/graph-capture/',
   '/en/visuals/page-migration/',
   ...issue20Routes,
+  ...issue25Routes,
 ] as const;
 
 async function persistTheme(page: Page, theme: LearningTheme) {
@@ -96,7 +106,7 @@ test('theme control supports keyboard selection with a visible focus indicator',
 
 test('all themes reflow recent publication pages at the CSS viewport equivalent of 200% zoom', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'The pinned Chromium project owns the 200% reflow probe.');
-  test.setTimeout(120_000);
+  test.setTimeout(150_000);
   await page.setViewportSize({ width: 640, height: 720 });
 
   for (const theme of THEME_IDS) {
@@ -129,6 +139,34 @@ test('issue-20 pages reflow on mobile and retain teaching content in print', asy
     await expect(page.getByRole('main')).toBeVisible();
     await expect(page.locator('.locale-pair')).toBeHidden();
     if (route.endsWith('/visuals/artifact-pipeline/')) {
+      await expect(page.locator('[data-static-fallback]')).toBeVisible();
+    } else {
+      await expect(page.locator('main :is(.canonical-code, table)').first()).toBeVisible();
+    }
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+      `${route}: print`,
+    ).toBe(true);
+    await page.emulateMedia({ media: 'screen' });
+  }
+});
+
+test('issue-25 pages reflow on mobile and retain teaching content in print', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const route of issue25Routes) {
+    await page.goto(route);
+    await expect(page.getByRole('main')).toBeVisible();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+      `${route}: mobile`,
+    ).toBe(true);
+
+    if (testInfo.project.name !== 'chromium') continue;
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByRole('main')).toBeVisible();
+    await expect(page.locator('.locale-pair')).toBeHidden();
+    if (route.endsWith('/visuals/nsight-systems-versus-nsight-compute/')) {
       await expect(page.locator('[data-static-fallback]')).toBeVisible();
     } else {
       await expect(page.locator('main :is(.canonical-code, table)').first()).toBeVisible();

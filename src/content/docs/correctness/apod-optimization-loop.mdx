@@ -1,0 +1,218 @@
+---
+title: 'Q06：把 APOD 作为优化循环'
+description: 围绕正确性合格的已记录基线，以真实工作负载、可证伪假设、单项受控变更、前后可比证据和部署回归门完成一次 APOD 循环。
+pairId: q06
+counterpart: /en/correctness/apod-optimization-loop/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - baseline
+  - assess
+  - parallelize
+  - optimize
+  - deploy
+  - hypothesis-ledger
+  - before-after-evidence
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q06
+prerequisites:
+  - Q05
+relatedUnits:
+  - Q07
+  - Q08
+  - LAB08
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide - Assess, Parallelize, Optimize, Deploy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-05-27'
+    platform: 'Current APOD design-cycle guidance'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Best Practices Guide - Application Profiling'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#application-profiling'
+    version: 'CUDA C++ Best Practices Guide v13.3; last updated 2026-05-27'
+    platform: 'Current realistic-workload profiling and hotspot guidance'
+    accessDate: '2026-08-31'
+  - title: 'CUDA C++ Best Practices Guide 11.8 - Assess, Parallelize, Optimize, Deploy'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v11.8.0; last updated 2022-10-03'
+    platform: 'Archived Toolkit 11.8 APOD design-cycle guidance'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,baseline,assess,parallelize,optimize,deploy,hypothesis-ledger,before-after-evidence,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q05 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q07,Q08,LAB08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/apod-optimization-loop/" lang="en">Read the English counterpart</a>
+
+APOD 把评估（Assess）、并行化（Parallelize）、优化（Optimize）和部署（Deploy）组成一个可重复循环。本站把循环入口收紧为正确性合格的已记录基线（correctness-qualified recorded baseline），并要求真实工作负载（realistic workload）、显式可证伪假设（explicit falsifiable hypothesis）、单项受控变更（one controlled change）、前后可比证据（before/after comparable evidence）以及部署/回归门（deployment/regression gate）。没有这些条件，“优化”只是未经检验的改动。
+
+## 学完本单元，你应该能
+
+- 判断一份 baseline 是否已经通过 correctness gate，并按 Q05 contract 留下可复核记录。
+- 在 Assess 阶段用 realistic workload 定义用户关心的 metric、约束和候选 hotspot。
+- 为 Parallelize 或 Optimize 写出可被结果推翻的 hypothesis，并隔离一项 controlled change。
+- 让 before/after 使用相同 workload、metric、measurement protocol 和可比较的 Environment Manifest。
+- 只在 correctness、performance、regression 与 operational gates 都满足时进入 Deploy，并保留回滚路径。
+
+## 先修关系
+
+先完成 [Q05：诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)。Q05 定义 correctness-first timing、warm-up exclusion、completion boundary、raw samples、预声明统计和 Environment Manifest；Q06 不会放宽这些条件，而是把它们作为每一轮 APOD 的 measurement contract。
+
+本单元不执行 CUDA、不生成 profile，也不提供任何 observation。它定义如何规划和审查一次循环；真正的 baseline 与 candidate evidence 必须来自后续受控运行。
+
+## 从正确性合格的已记录 baseline 开始
+
+Baseline 不是“旧版本通常够快”的印象，也不是一个脱离上下文的 aggregate。它是一个已经运行、已经通过预声明 correctness criteria、并且可以由原始 artifact 追溯的 comparison anchor。进入 Assess 前，记录至少包括：
+
+- 代表目标使用情形的 workload identity、input distribution、shape、data type、concurrency 和 included work；
+- 明确命名的 user-facing metric、start/stop endpoints 与 completion boundary；
+- Q05 规定的 warm-up、raw repeated samples、预声明 statistic/spread 和 outlier policy；
+- source/build、硬件、软件、clock-power、权限与 observation custody 的 Environment Manifest；
+- correctness method、criteria、实际 verdict 和对应 log；
+- baseline profile 或 timing artifact 的路径或 hash，而不是转述出来的结论。
+
+缺少实际 verdict、raw artifact 或 manifest 时，只能说“baseline plan”或“baseline missing”，不能说“recorded baseline”。Candidate 必须对同一份合格 baseline 比较；若 baseline contract 改变，应先建立新的 baseline。
+
+## Assess：先决定什么值得改变
+
+Assess 先描述用户问题，再找耗时位置。Current Best Practices Guide 要求 profiling 使用 realistic workload，因为不真实的 shape、input 或调用组合可能把注意力引向错误函数。Assess record 应包含：
+
+- workload 为什么代表部署流量或目标研究情形，以及它没有覆盖什么；
+- 用户可感知的 metric、正确性要求、资源限制和 deployment constraints；
+- baseline 中被观察到的 hotspot 或 bottleneck artifact，以及 selection rule；
+- 候选范围能否并行化、data movement 和 integration cost 是否属于 metric；
+- 当前证据只能定位“在哪里花时间”，还是已经足以提出“为什么花时间”的问题。
+
+Profiler 排名不是因果证明。Assess 的输出是一个有 evidence pointer 的候选和一个待检验问题，不是一张“最慢函数必须改写”的清单。若症状仍是 application-level sequencing，应把问题交给 Q07；只有选定 kernel 与问题后才进入 Q08 的 kernel evidence。
+
+## Parallelize：暴露并行性而不扩大实验
+
+Parallelize 为选中的 scope 选择最小可审查路径，例如匹配语义的现有并行库、编译器表达方式，或暴露数据并行性的局部重构。选择必须说明 data ownership、transfers、ordering、error handling 和 CPU fallback；“使用 GPU”本身不是 hypothesis。
+
+在改动前写一句可证伪陈述：如果实施指定 change，并让其他 comparison coordinates 保持不变，那么预声明 metric 应按指定方向变化，因为被点名的 mechanism 会改变；若 correctness 失败、mechanism artifact 不出现，或 metric 未达到预声明 decision rule，则 hypothesis 被推翻或保持未决。
+
+一次循环只改变一个独立变量。若重构、algorithm、compiler flags、workload 与 measurement endpoints 同时变化，before/after 无法把结果归因给所声明的 mechanism。必要的辅助编辑应列为 change scope 的一部分，而不是隐藏成额外 optimization。
+
+## Optimize：一项变更，一次比较
+
+Optimize 在已有 parallel implementation 上迭代，但仍遵守同一 hypothesis discipline：先从 evidence 提问，再选择与该问题直接相关的一项 change。不要先堆叠常见技巧，再从结果反推故事。
+
+每个 candidate 都重新通过 correctness gate，并按与 baseline 相同的 realistic workload、metric、endpoints、warm-up、sampling、statistics 和兼容 manifest 采集 before/after evidence。保存 source diff、build/run commands、raw samples、profiler artifact 和 decision log。结果只能分类为 keep、revert 或 inconclusive；inconclusive 需要修复 evidence contract 或提出下一项 hypothesis，不能包装成 improvement。
+
+Q07 的 timeline evidence 用于 application-level gaps、launches、copies 和 overlap 问题；Q08 的 kernel evidence 只回答已经声明的 kernel question。工具服务于 hypothesis，不应成为 metric dumping 的理由。
+
+## Deploy：让改进通过回归门
+
+Deploy 不是把最快的一次 sample 合并到生产。它把已经通过 comparison 的 candidate 放进 release contract：
+
+| gate | 必须保存的判定依据 | 未通过时 |
+| --- | --- | --- |
+| correctness | 与 baseline 相同或明确批准的新 criteria、实际 verdict、error checks | reject candidate |
+| performance | comparable before/after raw evidence 与预声明 decision rule | revert 或标为 inconclusive |
+| regression | 代表性 workload 集、接口兼容性、资源边界和非目标路径 checks | rework，不部署 |
+| operational | build/package compatibility、observability、fallback、rollback owner | 不进入 rollout |
+
+通过 gate 后仍应采用可回滚 rollout，关联 release 与 evidence artifact，并监视 metric 和 correctness signals。部署后的新 workload 或 regression 会启动下一轮 Assess；旧 evidence 不自动证明新环境中的结果。
+
+## Hypothesis ledger
+
+假设账本（hypothesis ledger）让每轮 APOD 在看结果前可审查。每行只对应一个 candidate：
+
+| field | 观察前记录 |
+| --- | --- |
+| baseline pointer | correctness verdict、manifest、raw timing/profile artifact |
+| realistic workload | identity、代表性理由、scope 与 exclusions |
+| problem and mechanism | observed symptom、selected scope、proposed causal explanation |
+| falsifiable hypothesis | named change、predicted direction、mechanism、falsifier |
+| controlled change | independent variable 与必要辅助编辑 |
+| held constant | input、metric、endpoints、build policy、sampling、environment coordinates |
+| required evidence | correctness log、before/after raw data、diff、commands、profile artifact |
+| decision rule | keep、revert、inconclusive 或 deploy-gate entry 的预声明条件 |
+| disposition | observation 后填写；本页保持空白 |
+
+Ledger 不替代 artifacts，也不能把 prediction 变成 expected observation。它的作用是防止看完结果后重写 hypothesis、scope 或 success rule。
+
+## Before/after evidence contract
+
+可比较性比“两个文件里都有时间值”更严格：
+
+| coordinate | before 与 after 的要求 |
+| --- | --- |
+| correctness | 两者都通过适用的预声明 criteria；失败值不得进入 speedup claim |
+| workload | logical input、shape、data type、request mix 和 included work 相同 |
+| metric | 同名 metric、相同 endpoints、completion boundary 和 units |
+| measurement | 相同 warm-up、run order policy、repetitions、raw custody、statistic 与 spread |
+| environment | manifest 可比较；任何不可保持的差异都显式记录并解释 |
+| code scope | baseline commit、candidate commit 与单项 controlled diff 可定位 |
+| artifacts | raw logs、correctness output、commands 和 profiler reports 可追溯 |
+| interpretation | 使用预声明 rule；不静默删 sample，不只发布 ratio |
+
+若任一必要 coordinate 不可比较，结论是 inconclusive 或需要新 baseline。重复 measurement 不能修复错误 workload，也不能替代 correctness。
+
+## 证据边界
+
+本页只提供流程、ledger 和 review contract。它没有编译或执行代码，没有采集 baseline、timeline、kernel metric、duration 或 regression observation，也没有声称任何 optimization 有效。Frontmatter 中 compilation、runtime、expected observations 与 recorded observations 数组均为空；任何后续记录都必须带 Environment Manifest 和实际 artifacts。
+
+## 离开前检查
+
+1. 为什么 APOD 必须从 correctness-qualified recorded baseline 而不是印象或单个 aggregate 开始？
+2. Assess 为什么必须使用 realistic workload，并把 hotspot artifact 与 causal hypothesis 分开？
+3. 一条 explicit falsifiable hypothesis 如何命名 mechanism、one controlled change、predicted direction 和 falsifier？
+4. 哪些 coordinates 必须让 before/after evidence comparable，何时必须建立新 baseline？
+5. Deploy 前 correctness、performance、regression 与 operational gates 分别阻止什么风险？
+
+## 继续练习
+
+- 完成 [Q06 练习（Exercises）](/correctness/apod-optimization-loop/exercises/)，再查看独立的[参考解答](/correctness/apod-optimization-loop/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-001](/practice/#pb-r3-001)审查一份缺少 hypothesis 与 comparable evidence 的 optimization proposal。
+- 用 [Q07：Timeline-first Nsight Systems](/correctness/timeline-first-nsight-systems/)定位 application-level symptom，再让 [Q08：Kernel-first Nsight Compute](/correctness/kernel-first-nsight-compute/)回答选定 kernel 的预声明问题。
+- 在 [LAB08：先 profile 完整 application，再 profile kernel](/labs/profile-full-application-before-kernel/)中把 APOD ledger 连接到 Systems-to-Compute decision trail；不要预填 observation。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3：Assess, Parallelize, Optimize, Deploy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy)定义循环及其四个阶段，并强调增量测试与部署。
+- [CUDA C++ Best Practices Guide v13.3：Application Profiling](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#application-profiling)要求从 profile 识别 hotspot，并明确要求 workload 具有现实代表性。
+- [CUDA C++ Best Practices Guide v11.8：Assess, Parallelize, Optimize, Deploy](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy)用于核对 archived Toolkit 11.8 中 APOD cycle 的持续表述。
+
+Context7 只用于 retrieval cross-check；事实权威是以上 NVIDIA current/archive owner documentation。三项 owner source 均访问于 **2026-08-31**。Correctness-qualified baseline、hypothesis ledger、controlled-change rule、before/after evidence contract、deployment gates、Exercises 与编排均为本站原创；没有复制 owner documentation 的 performance result。
+
+**Fact checked: 2026-08-31.**

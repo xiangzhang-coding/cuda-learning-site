@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanDirectory, scanFiles, walkFiles } from '../../scripts/lib/quality-policy.mjs';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
@@ -157,13 +158,26 @@ const issue20Project = {
   ],
 } as const;
 
+const profilerSoftwareFiles = [
+  'scripts/lib/profiler-report-fixture-policy.mjs',
+  'src/components/ProfilerDecisionExplorer.astro',
+  'src/styles/profiler-decision-visual.css',
+  'src/visuals/profiler-decision-copy.ts',
+  'src/visuals/profiler-decision-model.ts',
+] as const;
+
+const profilerFixtureFiles = [
+  'lab06-nsight-systems.expected.json',
+  'lab08-nsight-compute.expected.json',
+] as const;
+
 describe('source, license, and privacy policy', () => {
   it('records file-level licenses and original provenance for public content', async () => {
     const contentFiles = (await walkFiles(path.join(projectRoot, 'src/content/docs'))).filter((file: string) =>
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(372);
+    expect(contentFiles).toHaveLength(396);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');
@@ -293,6 +307,69 @@ describe('source, license, and privacy policy', () => {
     expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);
   });
 
+  it('keeps profiler software and expected-only fixtures original, licensed, sanitized, and private-data-free', async () => {
+    const scopedFiles: string[] = [];
+
+    for (const relativePath of profilerSoftwareFiles) {
+      const file = path.join(projectRoot, relativePath);
+      const content = await readFile(file, 'utf8');
+      scopedFiles.push(file);
+      expect(content, relativePath).toContain('SPDX-License-Identifier: Apache-2.0');
+    }
+
+    for (const fixtureName of profilerFixtureFiles) {
+      const relativePath = `public/assets/profiler-report-fixtures/${fixtureName}`;
+      const fixtureFile = path.join(projectRoot, relativePath);
+      const sidecarFile = `${fixtureFile}.license.json`;
+      const [fixtureSource, sidecarSource] = await Promise.all([
+        readFile(fixtureFile, 'utf8'),
+        readFile(sidecarFile, 'utf8'),
+      ]);
+      const fixture = JSON.parse(fixtureSource);
+      const sidecar = JSON.parse(sidecarSource);
+      scopedFiles.push(fixtureFile, sidecarFile);
+
+      expect(validateProfilerReportFixture(fixture), relativePath).toEqual({ valid: true, errors: [] });
+      expect(fixture, relativePath).toMatchObject({
+        'SPDX-License-Identifier': 'CC-BY-4.0',
+        provenance: 'original',
+        fixtureType: 'expected-only-profiler-report-plan',
+        captureStatus: 'pending-hardware-verification',
+        sanitization: {
+          status: 'passed',
+          reviewDate: '2026-08-31',
+          removedCoordinates: expect.arrayContaining([
+            'host identity',
+            'user identity',
+            'absolute paths',
+            'device identifiers',
+            'network identifiers',
+            'environment values',
+          ]),
+        },
+        recordedObservations: [],
+      });
+      expect(Object.values(fixture.environmentManifest), relativePath).toEqual(
+        Array(Object.keys(fixture.environmentManifest).length).fill('unfilled'),
+      );
+      expect(new Set(Object.values(fixture.environmentManifest)), relativePath).toEqual(new Set(['unfilled']));
+      expect(fixture.expectedObservations, relativePath).not.toHaveLength(0);
+      expect(fixture.claimBoundary, relativePath).toMatch(/no recorded/i);
+      expect(sidecar, `${relativePath}.license.json`).toEqual({
+        license: 'CC-BY-4.0',
+        provenance: 'original',
+        attribution: 'CUDA Learning Site, Xiang Zhang, 2026',
+      });
+    }
+
+    const contentLicenses = await readFile(path.join(projectRoot, 'CONTENT_LICENSES.md'), 'utf8');
+    expect(contentLicenses).toMatch(/profiler fixture policy is original Apache-2\.0 tooling/i);
+    expect(contentLicenses).toMatch(/two sanitized expected-only JSON fixtures are original CC BY 4\.0/i);
+    expect(contentLicenses).toMatch(/Component and pure-model implementations.*styles.*original Apache-2\.0 software/is);
+    expect(contentLicenses).toMatch(/not `nsys` or `ncu` captures.*no runtime, timeline, metric, bottleneck, or speedup result/is);
+    expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);
+  });
+
   it('pins the CUDA container source and Astro Markdown processor owner interfaces', async () => {
     const containerCommit = 'https://gitlab.com/nvidia/container-images/cuda/-/commit/44b139413eb3dfcb3fc30d0868479deedce72255';
     const markdownProcessorSources = [
@@ -356,8 +433,7 @@ describe('source, license, and privacy policy', () => {
   it('keeps forbidden private paths and phrases out of source and built output', async () => {
     const sourceResult = await scanDirectory(projectRoot, { ignoredNames: ignoredDirectories });
     const builtResult = await scanDirectory(path.join(projectRoot, 'dist'));
-
-    expect(sourceResult.violations.map(({ rule }) => rule)).toEqual([]);
+    expect(sourceResult.violations).toEqual([]);
     expect(builtResult.violations.map(({ rule }) => rule)).toEqual([]);
   });
 });
