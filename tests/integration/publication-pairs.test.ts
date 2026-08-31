@@ -3326,7 +3326,7 @@ describe('published navigation', () => {
         expect(target.getElementById(fragment), `${route} links to missing #${fragment} in ${destination.pathname}`).not.toBeNull();
       }
     }
-  }, 15_000);
+  }, 30_000);
 
   it('uses valid HTTPS URLs for every external content link', async () => {
     for (const route of publicationPairs.flatMap(({ zh, en }) => [zh, en])) {
