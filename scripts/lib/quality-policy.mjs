@@ -200,28 +200,28 @@ export function zipEntries(buffer) {
     if (nameEnd > buffer.length) throw new Error('invalid ZIP entry name length');
     const name = buffer.subarray(offset + 46, nameEnd).toString('utf8');
 
-    if (flags & 1) throw new Error(`${name}: encrypted ZIP entries are unsupported`);
+    if (flags & 1) throw new Error('encrypted ZIP entries are unsupported');
     if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff || localOffset === 0xffffffff) {
-      throw new Error(`${name}: ZIP64 entries are unsupported`);
+      throw new Error('ZIP64 entries are unsupported');
     }
-    if (uncompressedSize > 50 * 1024 * 1024) throw new Error(`${name}: entry exceeds 50 MiB scan boundary`);
+    if (uncompressedSize > 50 * 1024 * 1024) throw new Error('ZIP entry exceeds 50 MiB scan boundary');
     totalUncompressed += uncompressedSize;
     if (totalUncompressed > 200 * 1024 * 1024) throw new Error('ZIP archive exceeds 200 MiB uncompressed scan boundary');
     if (localOffset + 30 > buffer.length || buffer.readUInt32LE(localOffset) !== localSignature) {
-      throw new Error(`${name}: invalid local file header`);
+      throw new Error('invalid local file header');
     }
 
     const localNameLength = buffer.readUInt16LE(localOffset + 26);
     const localExtraLength = buffer.readUInt16LE(localOffset + 28);
     const dataStart = localOffset + 30 + localNameLength + localExtraLength;
     const dataEnd = dataStart + compressedSize;
-    if (dataEnd > buffer.length) throw new Error(`${name}: compressed data exceeds archive boundary`);
+    if (dataEnd > buffer.length) throw new Error('compressed data exceeds archive boundary');
     const compressed = buffer.subarray(dataStart, dataEnd);
     let content;
     if (method === 0) content = Buffer.from(compressed);
     else if (method === 8) content = inflateRawSync(compressed, { maxOutputLength: 50 * 1024 * 1024 + 1 });
-    else throw new Error(`${name}: compression method ${method} is unsupported`);
-    if (content.length !== uncompressedSize) throw new Error(`${name}: uncompressed size does not match central directory`);
+    else throw new Error(`ZIP compression method ${method} is unsupported`);
+    if (content.length !== uncompressedSize) throw new Error('ZIP entry size does not match central directory');
 
     entries.push({ name, content });
     offset = nameEnd + extraLength + commentLength;
@@ -261,7 +261,13 @@ function zipViolations(buffer, relativePath, depth = 0) {
 }
 
 export function scanZipArchive(buffer, relativePath = 'archive.zip') {
-  return zipViolations(buffer, relativePath).map(({ path: file, rule }) => ({ path: file, rule }));
+  return zipViolations(buffer, relativePath).map(({ path: file, rule }) => {
+    const entryBoundary = file.indexOf('!/');
+    return {
+      path: entryBoundary < 0 ? file : `${file.slice(0, entryBoundary + 2)}<redacted-entry>`,
+      rule,
+    };
+  });
 }
 
 export function scanArtifactBuffer(buffer, relativePath) {

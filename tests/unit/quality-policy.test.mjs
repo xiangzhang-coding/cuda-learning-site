@@ -166,8 +166,8 @@ describe('quality policy primitives', () => {
     const result = await scanDirectory(root);
     expect(result.violations).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ path: 'trace.zip!/trace.txt', rule: 'private host path' }),
-        expect.objectContaining({ path: 'nested.zip!/inner.zip!/trace.txt', rule: 'private host path' }),
+        expect.objectContaining({ path: 'trace.zip!/<redacted-entry>', rule: 'private host path' }),
+        expect.objectContaining({ path: 'nested.zip!/<redacted-entry>', rule: 'private host path' }),
       ]),
     );
   });
@@ -178,9 +178,20 @@ describe('quality policy primitives', () => {
 
     expect(scanZipArchive(clean, 'download.zip')).toEqual([]);
     expect(scanZipArchive(privateTrace, 'download.zip')).toContainEqual({
-      path: 'download.zip!/trace.txt',
+      path: 'download.zip!/<redacted-entry>',
       rule: 'private host path',
     });
+    const encrypted = createZip([{
+      name: [['/Users', 'person'].join('/'), ['ghp', 'abcdefghijklmnopqrstuvwxyz123456'].join('_')].join('/'),
+    }]);
+    const centralOffset = encrypted.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]));
+    encrypted.writeUInt16LE(1, centralOffset + 8);
+    const encryptedViolations = scanZipArchive(encrypted, 'encrypted.zip');
+    expect(encryptedViolations).toEqual([
+      { path: 'encrypted.zip', rule: 'ZIP archive inspection failed: encrypted ZIP entries are unsupported' },
+    ]);
+    expect(JSON.stringify(encryptedViolations)).not.toContain('/Users');
+    expect(JSON.stringify(encryptedViolations)).not.toContain('ghp_');
     expect(scanArtifactBuffer(Buffer.from(['Bearer', 'abcdefghijklmnopqrstuv'].join(' ')), 'response.html')).toEqual([
       { path: 'response.html', rule: 'bearer credential' },
     ]);
@@ -200,7 +211,7 @@ describe('quality policy primitives', () => {
     const result = await scanDirectory(root);
     expect(result.violations).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ path: expect.stringContaining('paths.zip!/research'), rule: expect.stringContaining('forbidden path') }),
+        expect.objectContaining({ path: 'paths.zip!/<redacted-entry>', rule: expect.stringContaining('forbidden path') }),
         expect.objectContaining({ path: 'broken.zip', rule: expect.stringContaining('inspection failed') }),
       ]),
     );
