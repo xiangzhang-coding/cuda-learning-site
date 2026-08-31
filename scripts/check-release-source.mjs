@@ -4,6 +4,8 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
+import { scanDirectory } from './lib/quality-policy.mjs';
+
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '..');
 const argumentsSet = new Set(process.argv.slice(2));
@@ -19,6 +21,7 @@ const [
   currentSourceManifestText,
   releaseText,
   publicationText,
+  artifactScan,
 ] = await Promise.all([
   execFileAsync('git', ['status', '--porcelain=v1', '--untracked-files=all'], { cwd: projectRoot }),
   execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot }),
@@ -27,6 +30,7 @@ const [
   readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8'),
   readFile(path.join(projectRoot, 'dist/release.json'), 'utf8'),
   readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8'),
+  scanDirectory(path.join(projectRoot, 'dist')),
 ]);
 
 const status = statusResult.stdout.trim();
@@ -41,6 +45,10 @@ const { sourceCommit: publicationSourceCommit, ...embeddedPublicationManifest } 
 
 if (status) throw new Error('Release upload requires a clean tracked and untracked source tree.');
 if (requireMain && branch !== 'main') throw new Error(`Production release requires main, not ${branch || 'detached HEAD'}.`);
+if (artifactScan.violations.length > 0) {
+  const details = artifactScan.violations.map(({ path: file, rule }) => `${file}: ${rule}`).join('\n');
+  throw new Error(`Built release output failed artifact policy:\n${details}`);
+}
 if (releaseSourceCommit !== head) {
   throw new Error(`Built release source ${releaseSourceCommit ?? 'missing'} does not match HEAD ${head}.`);
 }
@@ -54,4 +62,6 @@ if (JSON.stringify(embeddedPublicationManifest) !== JSON.stringify(currentSource
   throw new Error('Built publication metadata does not match the current source manifest.');
 }
 
-console.log(`Release and publication source passed for ${branch || 'detached HEAD'} at ${head}.`);
+console.log(
+  `Release and publication source passed for ${branch || 'detached HEAD'} at ${head}; scanned ${artifactScan.filesScanned} output files.`,
+);

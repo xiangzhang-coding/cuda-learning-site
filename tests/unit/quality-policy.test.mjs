@@ -7,6 +7,7 @@ import {
   contentViolations,
   pathViolations,
   reviewLockfile,
+  scanArtifactBuffer,
   scanDirectory,
   scanZipArchive,
   walkFiles,
@@ -181,6 +182,8 @@ describe('quality policy primitives', () => {
       rule: 'private host path',
       match: ['/Users', 'person', 'trace'].join('/'),
     });
+    expect(scanArtifactBuffer(Buffer.from(['Bearer', 'abcdefghijklmnopqrstuv'].join(' ')), 'response.html'))
+      .toContainEqual(expect.objectContaining({ path: 'response.html', rule: 'bearer credential' }));
   });
 
   it('rejects forbidden ZIP paths and malformed ZIP files', async () => {

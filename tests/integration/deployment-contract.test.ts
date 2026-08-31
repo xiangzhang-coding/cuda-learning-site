@@ -46,6 +46,9 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("['branch', '--show-current']");
     expect(guard).toContain("'src/current-publication-manifest.json'");
     expect(guard).toContain("'dist/publication.json'");
+    expect(guard).toContain("scanDirectory(path.join(projectRoot, 'dist'))");
+    expect(guard).toContain('Built release output failed artifact policy');
+    expect(guard).toContain('artifactScan.filesScanned');
     expect(guard).toContain('releaseSourceCommit !== head');
     expect(guard).toContain('publicationSourceCommit !== head');
     expect(guard).toContain('JSON.stringify(embeddedReleaseManifest) !== JSON.stringify(sourceManifest)');

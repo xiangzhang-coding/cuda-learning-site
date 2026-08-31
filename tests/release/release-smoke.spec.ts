@@ -17,7 +17,7 @@ import ex15Project from '../../examples/ex15-tiled-gemm/project.json' with { typ
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
-import { scanZipArchive, zipEntries } from '../../scripts/lib/quality-policy.mjs';
+import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
@@ -56,16 +56,38 @@ const projectExamples = [
   { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
 const currentCatalogCounts = [
-  { route: '/en/labs/', count: 6 },
-  { route: '/en/practice/', count: 50 },
-  { route: '/en/visuals/', count: 16 },
-  { route: '/en/glossary/', count: 151 },
-  { route: '/en/sources-and-versions/', count: 61 },
+  { suffix: 'labs/', count: 6 },
+  { suffix: 'practice/', count: 50 },
+  { suffix: 'visuals/', count: 16 },
+  { suffix: 'glossary/', count: 151 },
+  { suffix: 'sources-and-versions/', count: 61 },
 ] as const;
+const exampleRouteSlugs = [
+  'coalesced-strided-access',
+  'environment-report',
+  'error-handling-lifecycle',
+  'graph-capture',
+  'inclusive-exclusive-scan',
+  'multi-stage-reduction',
+  'multidimensional-indexing',
+  'privatized-histogram',
+  'ptx-fatbinary-inspection',
+  'sanitizer-defect-suite',
+  'shared-memory-tile-bank-padding',
+  'streams-events-overlap',
+  'tiled-gemm',
+  'tiled-transpose',
+  'unified-memory-migration',
+  'vector-addition',
+] as const;
+
+function localizedRoutes(suffix: string) {
+  return [`/${suffix}`, `/en/${suffix}`];
+}
 
 function expectCleanArchive(archive: Buffer, label: string) {
   expect(archive.subarray(0, 2).toString('ascii'), `${label} is a ZIP archive`).toBe('PK');
-  expect(scanZipArchive(archive, label), `${label} passes the complete artifact policy`).toEqual([]);
+  expect(scanArtifactBuffer(archive, label), `${label} passes the complete artifact policy`).toEqual([]);
 }
 
 test('serves the exact R2 release and current publication with production canonicals', async ({ page, request }) => {
@@ -73,7 +95,9 @@ test('serves the exact R2 release and current publication with production canoni
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
-  await expect(releaseResponse.json()).resolves.toMatchObject({
+  const releaseBody = await releaseResponse.body();
+  expect(scanArtifactBuffer(releaseBody, 'release.json')).toEqual([]);
+  expect(JSON.parse(releaseBody.toString('utf8'))).toMatchObject({
     schemaVersion: 3,
     releaseId: 'R2',
     reviewDate: '2026-08-31',
@@ -114,7 +138,9 @@ test('serves the exact R2 release and current publication with production canoni
 
   const publicationResponse = await request.get('/publication.json');
   expect(publicationResponse.ok()).toBe(true);
-  await expect(publicationResponse.json()).resolves.toMatchObject({
+  const publicationBody = await publicationResponse.body();
+  expect(scanArtifactBuffer(publicationBody, 'publication.json')).toEqual([]);
+  expect(JSON.parse(publicationBody.toString('utf8'))).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
     reviewDate: '2026-08-31',
@@ -170,61 +196,54 @@ test('serves the exact R2 release and current publication with production canoni
 
   const legalResponse = await request.get('/legal/THIRD_PARTY_NOTICES.md');
   expect(legalResponse.ok()).toBe(true);
-  expect(await legalResponse.text()).toContain('`wrangler` | 4.125.0');
+  const legalBody = await legalResponse.body();
+  expect(scanArtifactBuffer(legalBody, 'legal/THIRD_PARTY_NOTICES.md')).toEqual([]);
+  expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
   expect(publishedRoutes).toHaveLength(372);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
+    expect(scanArtifactBuffer(await response!.body(), `${route}index.html`), route).toEqual([]);
     await page.waitForLoadState('networkidle');
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${canonicalOrigin}${route}`);
   }
 
-  await page.goto('/en/about/');
-  await expect(page.locator('main')).toContainText(/186 Publication Pairs/);
-  await expect(page.locator('main')).toContainText(/372 source routes/);
-  const navigation = page.getByRole('navigation', { name: 'Main' });
-  expect(
-    await navigation.locator('a[href^="/en/examples/"]').evaluateAll((links) =>
-      [...new Set(links.map((link) => new URL(link.getAttribute('href') ?? '', location.origin).pathname))].sort(),
-    ),
-  ).toEqual([
-    '/en/examples/coalesced-strided-access/',
-    '/en/examples/environment-report/',
-    '/en/examples/error-handling-lifecycle/',
-    '/en/examples/graph-capture/',
-    '/en/examples/inclusive-exclusive-scan/',
-    '/en/examples/multi-stage-reduction/',
-    '/en/examples/multidimensional-indexing/',
-    '/en/examples/privatized-histogram/',
-    '/en/examples/ptx-fatbinary-inspection/',
-    '/en/examples/sanitizer-defect-suite/',
-    '/en/examples/shared-memory-tile-bank-padding/',
-    '/en/examples/streams-events-overlap/',
-    '/en/examples/tiled-gemm/',
-    '/en/examples/tiled-transpose/',
-    '/en/examples/unified-memory-migration/',
-    '/en/examples/vector-addition/',
-  ]);
-
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(284);
-  for (const { route, count } of currentCatalogCounts) {
-    await page.goto(route);
-    await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
+  for (const prefix of ['', '/en']) {
+    await page.goto(`${prefix}/about/`);
+    await expect(page.locator('main')).toContainText(/186.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/372.*source routes/);
+    const examplePrefix = `${prefix}/examples/`;
+    const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
+    expect(
+      await navigation.locator(`a[href^="${examplePrefix}"]`).evaluateAll((links) =>
+        [...new Set(links.map((link) => new URL(link.getAttribute('href') ?? '', location.origin).pathname))].sort(),
+      ),
+    ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  await page.goto('/en/labs/');
-  const labCards = page.locator('[data-resource-card]');
-  await expect(labCards).toHaveCount(6);
-  expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
-    'LAB01',
-    'LAB02',
-    'LAB03',
-    'LAB04',
-    'LAB05',
-    'LAB07',
-  ]);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(284);
+  for (const { suffix, count } of currentCatalogCounts) {
+    for (const route of localizedRoutes(suffix)) {
+      await page.goto(route);
+      await expect(page.locator('[data-resource-card]'), route).toHaveCount(count);
+    }
+  }
+
+  for (const route of localizedRoutes('labs/')) {
+    await page.goto(route);
+    const labCards = page.locator('[data-resource-card]');
+    await expect(labCards).toHaveCount(6);
+    expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
+      'LAB01',
+      'LAB02',
+      'LAB03',
+      'LAB04',
+      'LAB05',
+      'LAB07',
+    ]);
+  }
 
   if (releaseKind === 'production') expect(releaseOrigin).toBe(canonicalOrigin);
   else expect(releaseOrigin).not.toBe(canonicalOrigin);
@@ -244,6 +263,14 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
   await page.goto('/en/start/using-the-learning-site/');
   await page.locator('[data-locale-counterpart]').click();
   await expect(page).toHaveURL(/\/start\/using-the-learning-site\/$/);
+  await page.waitForLoadState('networkidle');
+  const chineseGlossaryLink = page.getByRole('link', { name: '术语表', exact: true }).first();
+  await expect(chineseGlossaryLink).toBeVisible();
+  await chineseGlossaryLink.click();
+  await expect(page).toHaveURL(/\/glossary\/$/);
+  await page.goto('/start/using-the-learning-site/');
+  await page.locator('[data-locale-counterpart]').click();
+  await expect(page).toHaveURL(/\/en\/start\/using-the-learning-site\/$/);
   await page.waitForLoadState('networkidle');
 
   await expectRankedSearchResult(page, {
@@ -549,47 +576,48 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
 test('persists all three themes and preserves reduced-motion and print fallbacks', async ({ page }) => {
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/en/start/using-the-learning-site/');
-  const picker = page.getByRole('banner').getByRole('combobox', { name: 'Select visual theme' });
-
-  for (const theme of ['silicon-light', 'profiler-dark', 'blueprint']) {
-    await picker.selectOption(theme);
-    await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
-  }
-  await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-learning-theme', 'blueprint');
-  expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
-  await page.goto('/en/');
-  expect(
-    await page.locator('.route-card').first().evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration)),
-  ).toBeLessThanOrEqual(0.00001);
-
-  await page.goto('/en/visuals/kernel-journey/');
-  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' });
-  await expect(page.locator('[data-visual-controls]')).toBeHidden();
-  await expect(page.locator('[data-static-fallback]')).toBeVisible();
-  await page.goto('/en/visuals/page-migration/');
-  await expect(page.locator('[data-visual-controls]')).toBeHidden();
-  await expect(page.locator('[data-static-fallback]')).toBeVisible();
-  await page.goto('/en/visuals/artifact-pipeline/');
-  await expect(page.locator('[data-visual-controls]')).toBeHidden();
-  await expect(page.locator('[data-static-fallback]')).toBeVisible();
-  await page.goto('/en/visuals/reduction-stages/');
-  await expect(page.locator('[data-visual-controls]')).toBeHidden();
-  await expect(page.locator('[data-static-fallback]')).toBeVisible();
-  await page.goto('/en/visuals/tiled-transpose/');
-  await expect(page.locator('[data-visual-controls]')).toBeHidden();
-  await expect(page.locator('[data-static-fallback]')).toBeVisible();
-  await page.goto('/en/visuals/gemm-tiling-hierarchy/');
-  await expect(page.locator('[data-visual-controls]')).toBeHidden();
-  await expect(page.locator('[data-static-fallback]')).toBeVisible();
-  for (const { route, controls } of [
-    { route: '/en/foundations/asynchronous-errors/', controls: '[data-timeline-controls]' },
-    { route: '/en/foundations/launch-geometry/', controls: '[data-block-shape-controls]' },
-  ]) {
+  for (const route of localizedRoutes('start/using-the-learning-site/')) {
     await page.goto(route);
-    await expect(page.locator(controls)).toBeHidden();
-    await expect(page.locator('[data-static-fallback]')).toBeVisible();
+    const picker = page.getByRole('banner').locator('[data-theme-picker]');
+    for (const theme of ['silicon-light', 'profiler-dark', 'blueprint']) {
+      await picker.selectOption(theme);
+      await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+    }
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-learning-theme', 'blueprint');
+  }
+  expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+  for (const route of ['/', '/en/']) {
+    await page.goto(route);
+    expect(
+      await page.locator('.route-card').first().evaluate((element) => Number.parseFloat(getComputedStyle(element).transitionDuration)),
+    ).toBeLessThanOrEqual(0.00001);
+  }
+
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' });
+  for (const suffix of [
+    'visuals/kernel-journey/',
+    'visuals/page-migration/',
+    'visuals/artifact-pipeline/',
+    'visuals/reduction-stages/',
+    'visuals/tiled-transpose/',
+    'visuals/gemm-tiling-hierarchy/',
+  ]) {
+    for (const route of localizedRoutes(suffix)) {
+      await page.goto(route);
+      await expect(page.locator('[data-visual-controls]')).toBeHidden();
+      await expect(page.locator('[data-static-fallback]')).toBeVisible();
+    }
+  }
+  for (const { suffix, controls } of [
+    { suffix: 'foundations/asynchronous-errors/', controls: '[data-timeline-controls]' },
+    { suffix: 'foundations/launch-geometry/', controls: '[data-block-shape-controls]' },
+  ]) {
+    for (const route of localizedRoutes(suffix)) {
+      await page.goto(route);
+      await expect(page.locator(controls)).toBeHidden();
+      await expect(page.locator('[data-static-fallback]')).toBeVisible();
+    }
   }
   expect(failures).toEqual([]);
 });
@@ -713,20 +741,40 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
   });
   const staticPage = await staticContext.newPage();
   const embeddedFallbacks: Record<string, { controls: string; evidence: string; visualId: string }> = {
+    '/foundations/asynchronous-errors/': {
+      controls: '[data-timeline-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS19',
+    },
     '/en/foundations/asynchronous-errors/': {
       controls: '[data-timeline-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS19',
+    },
+    '/foundations/compute-capability/': {
+      controls: '[data-capability-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS20',
     },
     '/en/foundations/compute-capability/': {
       controls: '[data-capability-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS20',
     },
+    '/foundations/runtime-driver-api/': {
+      controls: '[data-api-boundary-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS21',
+    },
     '/en/foundations/runtime-driver-api/': {
       controls: '[data-api-boundary-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS21',
+    },
+    '/foundations/launch-geometry/': {
+      controls: '[data-block-shape-controls]',
+      evidence: '[data-no-evidence]',
+      visualId: 'VIS22',
     },
     '/en/foundations/launch-geometry/': {
       controls: '[data-block-shape-controls]',
@@ -735,25 +783,25 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     },
   };
   for (const route of [
-    '/visuals/kernel-journey/',
-    '/en/visuals/indexing/',
-    '/en/visuals/memory-transactions/',
-    '/en/visuals/shared-memory-banks/',
-    '/en/visuals/memory-hierarchy-lifetime/',
-    '/en/visuals/warp-divergence/',
-    '/en/visuals/stream-event-dependencies/',
-    '/en/visuals/page-migration/',
-    '/en/visuals/artifact-pipeline/',
-    '/en/visuals/reduction-stages/',
-    '/en/visuals/tiled-transpose/',
-    '/en/visuals/gemm-tiling-hierarchy/',
-    '/foundations/multidimensional-indexing/',
-    '/en/foundations/multidimensional-indexing/',
+    ...[
+      'visuals/kernel-journey/',
+      'visuals/indexing/',
+      'visuals/memory-transactions/',
+      'visuals/shared-memory-banks/',
+      'visuals/memory-hierarchy-lifetime/',
+      'visuals/warp-divergence/',
+      'visuals/stream-event-dependencies/',
+      'visuals/page-migration/',
+      'visuals/artifact-pipeline/',
+      'visuals/reduction-stages/',
+      'visuals/tiled-transpose/',
+      'visuals/gemm-tiling-hierarchy/',
+      'foundations/multidimensional-indexing/',
+    ].flatMap(localizedRoutes),
     ...Object.keys(embeddedFallbacks),
-    '/start/reference-environment-candidate/',
-    '/en/start/reference-environment-candidate/',
-    '/practice/',
-    '/en/glossary/',
+    ...localizedRoutes('start/reference-environment-candidate/'),
+    ...localizedRoutes('practice/'),
+    ...localizedRoutes('glossary/'),
   ]) {
     const response = await staticPage.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -783,31 +831,33 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
 test('serves immutable canonical downloads, preserves evidence boundaries, and returns a real 404', async ({ page, request }) => {
   test.setTimeout(120_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
-  await page.goto('/en/examples/vector-addition/');
-  await expect(page.locator(`a[href="${downloadUrl}"]`)).toBeVisible();
+  const expectBilingualLinks = async (suffix: string, urls: readonly string[]) => {
+    for (const route of localizedRoutes(suffix)) {
+      await page.goto(route);
+      for (const url of urls) await expect(page.locator(`a[href="${url}"]`), `${route} -> ${url}`).toBeVisible();
+    }
+  };
+
+  await expectBilingualLinks('examples/vector-addition/', [downloadUrl]);
 
   const download = await request.get(downloadUrl);
   expect(download.ok()).toBe(true);
   expect(download.headers()['content-type']).toMatch(/zip|octet-stream/);
   expectCleanArchive(await download.body(), 'EX02-download.zip');
 
-  await page.goto('/en/examples/environment-report/');
-  await expect(page.locator(`a[href="${ex01DownloadUrl}"]`)).toBeVisible();
+  await expectBilingualLinks('examples/environment-report/', [ex01DownloadUrl]);
   const ex01Download = await request.get(ex01DownloadUrl);
   expect(ex01Download.ok()).toBe(true);
   expect(ex01Download.headers()['content-type']).toMatch(/zip|octet-stream/);
   expectCleanArchive(await ex01Download.body(), 'EX01-download.zip');
 
-  await page.goto('/en/examples/multidimensional-indexing/');
-  await expect(page.locator(`a[href="${ex03DownloadUrl}"]`)).toBeVisible();
+  await expectBilingualLinks('examples/multidimensional-indexing/', [ex03DownloadUrl]);
   const ex03Download = await request.get(ex03DownloadUrl);
   expect(ex03Download.ok()).toBe(true);
   expect(ex03Download.headers()['content-type']).toMatch(/zip|octet-stream/);
   expectCleanArchive(await ex03Download.body(), 'EX03-download.zip');
 
-  await page.goto('/en/examples/error-handling-lifecycle/');
-  await expect(page.locator(`a[href="${ex04SourceUrl}"]`)).toBeVisible();
-  await expect(page.locator(`a[href="${ex04DownloadUrl}"]`)).toBeVisible();
+  await expectBilingualLinks('examples/error-handling-lifecycle/', [ex04SourceUrl, ex04DownloadUrl]);
   const ex04Download = await request.get(ex04DownloadUrl);
   expect(ex04Download.ok()).toBe(true);
   expect(ex04Download.headers()['content-type']).toMatch(/zip|octet-stream/);
@@ -835,27 +885,29 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     }
     expect(project.evidence.recordedObservations).toEqual([]);
 
-    await page.goto(route);
-    await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
-    await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
-    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
-      'content',
-      project.id === 'EX10' ? 'Compile-Checked' : 'none',
-    );
-    await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
-      'content',
-      project.evidence.runtime,
-    );
-    await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute(
-      'content',
-      `${project.evidence.expectedObservations.length} ${project.id === 'EX10' ? 'artifact expectations' : 'declared expectations'}`,
-    );
-    await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
     const canonicalRanges = Object.keys(project.ranges);
-    const canonicalCode = page.locator(`[data-canonical-example="${project.id}"]`);
-    await expect(canonicalCode).toHaveCount(canonicalRanges.length);
-    expect(await canonicalCode.evaluateAll((figures) => figures.map((figure) => figure.getAttribute('data-canonical-range'))))
-      .toEqual(canonicalRanges);
+    for (const publicationRoute of localizedRoutes(route.slice('/en/'.length))) {
+      await page.goto(publicationRoute);
+      await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
+      await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
+      await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
+        'content',
+        project.id === 'EX10' ? 'Compile-Checked' : 'none',
+      );
+      await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute(
+        'content',
+        project.evidence.runtime,
+      );
+      await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute(
+        'content',
+        `${project.evidence.expectedObservations.length} ${project.id === 'EX10' ? 'artifact expectations' : 'declared expectations'}`,
+      );
+      await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+      const canonicalCode = page.locator(`[data-canonical-example="${project.id}"]`);
+      await expect(canonicalCode).toHaveCount(canonicalRanges.length);
+      expect(await canonicalCode.evaluateAll((figures) => figures.map((figure) => figure.getAttribute('data-canonical-range'))))
+        .toEqual(canonicalRanges);
+    }
   }
 
   const archives = new Map<string, Buffer>();

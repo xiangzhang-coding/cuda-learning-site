@@ -264,6 +264,17 @@ export function scanZipArchive(buffer, relativePath = 'archive.zip') {
   return zipViolations(buffer, relativePath);
 }
 
+export function scanArtifactBuffer(buffer, relativePath) {
+  const violations = contentViolations(buffer.toString('utf8')).map((violation) => ({
+    path: relativePath,
+    ...violation,
+  }));
+  const extension = path.extname(relativePath).toLowerCase();
+  if (extension === '.png') violations.push(...pngMetadataViolations(buffer, relativePath));
+  if (extension === '.zip') violations.push(...scanZipArchive(buffer, relativePath));
+  return violations;
+}
+
 export async function scanFiles(root, files) {
   const relativePaths = files.map((file) => path.relative(root, file));
   const violations = pathViolations(relativePaths);
@@ -279,10 +290,7 @@ export async function scanFiles(root, files) {
       violations.push({ path: relativePath, rule: 'artifact file exceeds 50 MiB scan boundary' });
       continue;
     }
-    const buffer = await readFile(file);
-    for (const violation of contentViolations(buffer.toString('utf8'))) violations.push({ path: relativePath, ...violation });
-    if (path.extname(file).toLowerCase() === '.png') violations.push(...pngMetadataViolations(buffer, relativePath));
-    if (path.extname(file).toLowerCase() === '.zip') violations.push(...scanZipArchive(buffer, relativePath));
+    violations.push(...scanArtifactBuffer(await readFile(file), relativePath));
   }
 
   return { filesScanned: files.length, violations };
