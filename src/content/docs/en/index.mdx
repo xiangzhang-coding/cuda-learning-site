@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-The Stable Curriculum now completely publishes O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q05 in both languages, for 49 Learning Units. Issue #23 adds A08/A09, EX15, VIS12, and supporting material. R1 remains the latest completed aggregate review, while R2 remains separately gated by [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+The Stable Curriculum now completely publishes O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q05 in both languages, for 49 Learning Units. R2 is the latest completed aggregate review; [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records the final CI, Preview, production, and smoke coordinates. R3 and later material is outside R2.
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 

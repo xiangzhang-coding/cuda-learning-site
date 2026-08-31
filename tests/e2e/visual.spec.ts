@@ -47,7 +47,7 @@ test('@visual selected home layouts produce reviewable screenshots', async ({ pa
 
 test('@visual selected Visual Explainer states produce reviewable screenshots', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Selected visual evidence is owned by pinned Chromium.');
-  test.setTimeout(90_000);
+  test.setTimeout(180_000);
 
   for (const visual of [
     {
@@ -100,6 +100,48 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
         await expect(pipeline).toHaveAttribute('data-target-plan', 'exact-90a');
         await expect(pipeline).toHaveAttribute('data-pipeline-mode', 'separate-compilation-rdc');
         await expect(pipeline).toHaveAttribute('data-step-index', '1');
+      },
+    },
+    {
+      id: 'vis10',
+      routes: { zh: '/visuals/reduction-stages/', en: '/en/visuals/reduction-stages/' },
+      prepare: async () => {
+        const reduction = page.locator('[data-visual-id="VIS10"]');
+        await expect(reduction).toHaveAttribute('data-ready', 'true');
+        await reduction.locator('[data-reduction-element-count]').selectOption('6');
+        await reduction.locator('[data-reduction-variant]').selectOption('stride-halving');
+        await reduction.locator('[data-reduction-action="step"]').click();
+        await expect(reduction).toHaveAttribute('data-element-count', '6');
+        await expect(reduction).toHaveAttribute('data-variant', 'stride-halving');
+        await expect(reduction).toHaveAttribute('data-step-index', '1');
+      },
+    },
+    {
+      id: 'vis11',
+      routes: { zh: '/visuals/tiled-transpose/', en: '/en/visuals/tiled-transpose/' },
+      prepare: async () => {
+        const transpose = page.locator('[data-visual-id="VIS11"]');
+        await expect(transpose).toHaveAttribute('data-ready', 'true');
+        await transpose.locator('[data-transpose-tile-size]').selectOption('8');
+        await transpose.locator('[data-transpose-layout]').selectOption('output-row-major');
+        await transpose.locator('[data-transpose-padding]').selectOption('1');
+        await expect(transpose).toHaveAttribute('data-tile-size', '8');
+        await expect(transpose).toHaveAttribute('data-layout', 'output-row-major');
+        await expect(transpose).toHaveAttribute('data-padding', '1');
+      },
+    },
+    {
+      id: 'vis12',
+      routes: { zh: '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
+      prepare: async () => {
+        const hierarchy = page.locator('[data-visual-id="VIS12"]');
+        await expect(hierarchy).toHaveAttribute('data-ready', 'true');
+        await hierarchy.locator('[data-gemm-matrix-shape]').selectOption('256x128x64');
+        await hierarchy.locator('[data-gemm-tile-shape]').selectOption('128x64x16');
+        await hierarchy.locator('[data-gemm-hierarchy-level]').selectOption('instruction');
+        await expect(hierarchy).toHaveAttribute('data-matrix-shape', '256x128x64');
+        await expect(hierarchy).toHaveAttribute('data-tile-shape', '128x64x16');
+        await expect(hierarchy).toHaveAttribute('data-hierarchy-level', 'instruction');
       },
     },
   ]) {

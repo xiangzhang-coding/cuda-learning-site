@@ -42,7 +42,7 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 稳定课程已完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 和 Q01-Q05，共 49 个学习单元（Learning Unit）。新增 [A08 Tiled GEMM](/algorithms/tiled-gemm-correctness/)与 [A09 Sorting、Selection、Compaction](/algorithms/sorting-selection-compaction/)；A01-A09 都有 Exercises 与独立 solutions。
 
-R1 仍是最近一次已完成的聚合发布复核；Issue #23 发布 A08/A09、EX15、VIS12 与配套材料，但 R2 聚合复核仍由 [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 单独设门。
+R2 是最近一次已完成的聚合发布复核；[issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 保存受保护 `main`、Preview、生产发布和远端 smoke 的动态验收记录。R3 及后续内容不属于 R2。
 
 严格图新增 `A08<-[A05,M03,M04,A02]`、`A09<-[A03,A04]`、`EX15<-A08` 与 `VIS12<-A08`。Q13、L06 与 LAB12 未发布；LAB12 必须等待前两项先修。
 

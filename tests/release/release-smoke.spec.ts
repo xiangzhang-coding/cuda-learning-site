@@ -17,7 +17,7 @@ import ex15Project from '../../examples/ex15-tiled-gemm/project.json' with { typ
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
-import { zipEntries } from '../../scripts/lib/quality-policy.mjs';
+import { scanZipArchive, zipEntries } from '../../scripts/lib/quality-policy.mjs';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
@@ -63,31 +63,53 @@ const currentCatalogCounts = [
   { route: '/en/sources-and-versions/', count: 61 },
 ] as const;
 
-test('serves the exact current publication while preserving R1 metadata and production canonicals', async ({ page, request }) => {
+function expectCleanArchive(archive: Buffer, label: string) {
+  expect(archive.subarray(0, 2).toString('ascii'), `${label} is a ZIP archive`).toBe('PK');
+  expect(scanZipArchive(archive, label), `${label} passes the complete artifact policy`).toEqual([]);
+}
+
+test('serves the exact R2 release and current publication with production canonicals', async ({ page, request }) => {
   test.setTimeout(360_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
   await expect(releaseResponse.json()).resolves.toMatchObject({
-    schemaVersion: 2,
-    releaseId: 'R1',
-    reviewDate: '2026-08-29',
+    schemaVersion: 3,
+    releaseId: 'R2',
+    reviewDate: '2026-08-31',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
     scope: {
-      publicationPairs: 109,
-      sourceRoutes: 218,
-      practiceBankEntries: 29,
-      glossaryTerms: 95,
-      sourceRecords: 39,
+      publicationPairs: 186,
+      sourceRoutes: 372,
+      practiceBankEntries: 50,
+      glossaryTerms: 151,
+      sourceRecords: 61,
+    },
+    compatibility: {
+      supportedEnvironment: 'native-linux',
+      toolkitLanes: [
+        { id: 'cuda-11.8', toolkit: '11.8.0', dialects: ['c++17'] },
+        { id: 'cuda-12.9', toolkit: '12.9.2', dialects: ['c++17', 'c++20'] },
+        { id: 'cuda-13.3', toolkit: '13.3.1', dialects: ['c++17', 'c++20'] },
+      ],
+      dialectProbes: expect.arrayContaining([
+        expect.objectContaining({ id: 'R1-GCC13-CXX23', result: 'unsupported', grantsOrdinaryDialectSupport: false }),
+        expect.objectContaining({ id: 'EX10-GCC14-CXX23', result: 'passed', grantsOrdinaryDialectSupport: false }),
+      ]),
     },
     evidence: {
-      compileChecked: ['EX02', 'LAB02'],
+      compileChecked: ['EX02', 'EX10', 'LAB02'],
+      runtimeNotApplicable: ['EX10'],
       runtimeVerified: [],
       referenceEnvironments: [],
+      performanceObservations: [],
     },
-    knownLimitations: expect.arrayContaining(['R2 and later curriculum material is outside this release.']),
+    knownLimitations: expect.arrayContaining([
+      'No Reference Environment or Runtime-Verified R2 subject is declared.',
+      'R3 and later curriculum material is outside this release.',
+    ]),
   });
 
   const publicationResponse = await request.get('/publication.json');
@@ -99,7 +121,7 @@ test('serves the exact current publication while preserving R1 metadata and prod
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    releaseReview: { latestCompleted: 'R1', next: 'R2', status: 'pending' },
+    releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
     scope: {
       publicationPairs: 186,
       sourceRoutes: 372,
@@ -139,10 +161,10 @@ test('serves the exact current publication while preserving R1 metadata and prod
       'LAB06 has no current public destination.',
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
       'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
-      'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification with no recorded runtime or performance observation.',
-      'No measured overlap, migration, graph performance, algorithm performance, timing, speedup, or other performance observation is published.',
-      'EX10 has five ordinary Compile-Checked records from run 33275734951; its separate CUDA 13.3.1/NVCC 13.3.73/GCC 14.2.0 C++23-Dialect-Probe passed narrowly and does not declare ordinary C++23 support, runtime, or performance.',
-      'This incremental publication record is not a completed R2 aggregate release review.',
+      'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
+      'R2 records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
+      'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
+      'R3 and later curriculum material is outside this release.',
     ]),
   });
 
@@ -767,21 +789,21 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
   const download = await request.get(downloadUrl);
   expect(download.ok()).toBe(true);
   expect(download.headers()['content-type']).toMatch(/zip|octet-stream/);
-  expect((await download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+  expectCleanArchive(await download.body(), 'EX02-download.zip');
 
   await page.goto('/en/examples/environment-report/');
   await expect(page.locator(`a[href="${ex01DownloadUrl}"]`)).toBeVisible();
   const ex01Download = await request.get(ex01DownloadUrl);
   expect(ex01Download.ok()).toBe(true);
   expect(ex01Download.headers()['content-type']).toMatch(/zip|octet-stream/);
-  expect((await ex01Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+  expectCleanArchive(await ex01Download.body(), 'EX01-download.zip');
 
   await page.goto('/en/examples/multidimensional-indexing/');
   await expect(page.locator(`a[href="${ex03DownloadUrl}"]`)).toBeVisible();
   const ex03Download = await request.get(ex03DownloadUrl);
   expect(ex03Download.ok()).toBe(true);
   expect(ex03Download.headers()['content-type']).toMatch(/zip|octet-stream/);
-  expect((await ex03Download.body()).subarray(0, 2).toString('ascii')).toBe('PK');
+  expectCleanArchive(await ex03Download.body(), 'EX03-download.zip');
 
   await page.goto('/en/examples/error-handling-lifecycle/');
   await expect(page.locator(`a[href="${ex04SourceUrl}"]`)).toBeVisible();
@@ -790,7 +812,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
   expect(ex04Download.ok()).toBe(true);
   expect(ex04Download.headers()['content-type']).toMatch(/zip|octet-stream/);
   const ex04Archive = await ex04Download.body();
-  expect(ex04Archive.subarray(0, 2).toString('ascii')).toBe('PK');
+  expectCleanArchive(ex04Archive, 'EX04-download.zip');
   expect(
     ex04Archive.includes(Buffer.from('/examples/ex04-error-handling-lifecycle/src/error_handling_lifecycle.cu')),
   ).toBe(true);
@@ -844,7 +866,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       expect(response.ok()).toBe(true);
       expect(response.headers()['content-type']).toMatch(/zip|octet-stream/);
       archive = await response.body();
-      expect(archive.subarray(0, 2).toString('ascii')).toBe('PK');
+      expectCleanArchive(archive, `${project.id}-download.zip`);
       archives.set(project.downloadUrl, archive);
     }
     const entries = zipEntries(archive);
@@ -878,7 +900,9 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       );
       const identityResponse = await request.get(archivedManifest.downloadUrl);
       expect(identityResponse.ok()).toBe(true);
-      const identityEntries = zipEntries(await identityResponse.body());
+      const identityArchive = await identityResponse.body();
+      expectCleanArchive(identityArchive, 'EX15-identity-download.zip');
+      const identityEntries = zipEntries(identityArchive);
       const findIdentityEntry = (relativePath: string) => {
         const matches = identityEntries.filter(({ name }) => name.endsWith(`/${project.root}/${relativePath}`));
         expect(matches, `EX15 embedded source contains one ${relativePath}`).toHaveLength(1);

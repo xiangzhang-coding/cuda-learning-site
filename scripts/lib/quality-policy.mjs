@@ -260,6 +260,10 @@ function zipViolations(buffer, relativePath, depth = 0) {
   return violations;
 }
 
+export function scanZipArchive(buffer, relativePath = 'archive.zip') {
+  return zipViolations(buffer, relativePath);
+}
+
 export async function scanFiles(root, files) {
   const relativePaths = files.map((file) => path.relative(root, file));
   const violations = pathViolations(relativePaths);
@@ -278,7 +282,7 @@ export async function scanFiles(root, files) {
     const buffer = await readFile(file);
     for (const violation of contentViolations(buffer.toString('utf8'))) violations.push({ path: relativePath, ...violation });
     if (path.extname(file).toLowerCase() === '.png') violations.push(...pngMetadataViolations(buffer, relativePath));
-    if (path.extname(file).toLowerCase() === '.zip') violations.push(...zipViolations(buffer, relativePath));
+    if (path.extname(file).toLowerCase() === '.zip') violations.push(...scanZipArchive(buffer, relativePath));
   }
 
   return { filesScanned: files.length, violations };

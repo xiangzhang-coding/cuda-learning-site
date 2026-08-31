@@ -8,7 +8,7 @@ Website source, configuration, styles, test tooling, and scripts are licensed un
 
 This scope includes:
 
-- `astro.config.mjs`, `src/content.config.ts`, `src/r1-release-manifest.json`, `src/current-publication-manifest.json`, `src/components/`, `src/resource-indexes/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
+- `astro.config.mjs`, `src/content.config.ts`, `src/r1-release-manifest.json`, `src/r2-release-manifest.json`, `src/current-publication-manifest.json`, `src/components/`, `src/resource-indexes/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
 - `scripts/` and `tests/`, including generation and validation of both `release.json` and `publication.json`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
@@ -22,7 +22,7 @@ Original instructional prose in `src/content/docs/` and original visual teaching
 
 Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page or repository.
 
-The license scope follows `src/current-publication-manifest.json`. R1 remains the latest completed aggregate release review and its immutable historical scope remains in `src/r1-release-manifest.json`; the R2 aggregate review remains pending in [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24).
+The license scope follows `src/r2-release-manifest.json` and the matching R2 boundary in `src/current-publication-manifest.json`. R2 is the latest completed aggregate release review; immutable R1 history remains in `src/r1-release-manifest.json`. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records dynamic R2 acceptance. R3 and later material is outside this license review scope until published.
 
 ## Adaptations
 

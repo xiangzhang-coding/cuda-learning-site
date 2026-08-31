@@ -2,7 +2,7 @@
 
 # Dependency Review
 
-- Review date: 2026-08-29
+- Review date: 2026-08-31
 - Runtime: Node.js 24.19.0, npm 11.17.0
 - Lock format: npm lockfile version 3
 - Reviewed lock package records: 698, including optional platform packages
@@ -42,7 +42,7 @@ Only these exact lock entries declare install scripts:
 - `wrangler/node_modules/esbuild@0.28.1`
 - `wrangler/node_modules/fsevents@2.3.3`
 
-The committed `.npmrc`, local Wrangler release flow, and GitHub Actions set `ignore-scripts=true`, so these lifecycle scripts are reviewed but not executed during installation. Any future Workers Builds configuration must preserve that install boundary before it can replace the R1 authority. `workerd` and both esbuild records would otherwise select or validate platform binaries; both fsevents records are optional macOS file watchers. Any version or install-script set change requires a new source, license, and script review before the lockfile can pass.
+The committed `.npmrc`, local Wrangler release flow, and GitHub Actions set `ignore-scripts=true`, so these lifecycle scripts are reviewed but not executed during installation. Any future Workers Builds configuration must preserve that install boundary before it can replace the R2 authority. `workerd` and both esbuild records would otherwise select or validate platform binaries; both fsevents records are optional macOS file watchers. Any version or install-script set change requires a new source, license, and script review before the lockfile can pass.
 
 ## Packaged assets and binaries
 

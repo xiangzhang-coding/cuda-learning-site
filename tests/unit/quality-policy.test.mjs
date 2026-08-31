@@ -8,6 +8,7 @@ import {
   pathViolations,
   reviewLockfile,
   scanDirectory,
+  scanZipArchive,
   walkFiles,
 } from '../../scripts/lib/quality-policy.mjs';
 
@@ -168,6 +169,18 @@ describe('quality policy primitives', () => {
         expect.objectContaining({ path: 'nested.zip!/inner.zip!/trace.txt', rule: 'private host path' }),
       ]),
     );
+  });
+
+  it('applies the artifact policy directly to downloaded ZIP buffers', () => {
+    const clean = createZip([{ name: 'public/readme.txt', data: 'public content' }]);
+    const privateTrace = createZip([{ name: 'trace.txt', data: ['/Users', 'person', 'trace'].join('/') }]);
+
+    expect(scanZipArchive(clean, 'download.zip')).toEqual([]);
+    expect(scanZipArchive(privateTrace, 'download.zip')).toContainEqual({
+      path: 'download.zip!/trace.txt',
+      rule: 'private host path',
+      match: ['/Users', 'person', 'trace'].join('/'),
+    });
   });
 
   it('rejects forbidden ZIP paths and malformed ZIP files', async () => {

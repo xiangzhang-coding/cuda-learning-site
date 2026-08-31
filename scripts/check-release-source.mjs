@@ -23,7 +23,7 @@ const [
   execFileAsync('git', ['status', '--porcelain=v1', '--untracked-files=all'], { cwd: projectRoot }),
   execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot }),
   execFileAsync('git', ['branch', '--show-current'], { cwd: projectRoot }),
-  readFile(path.join(projectRoot, 'src/r1-release-manifest.json'), 'utf8'),
+  readFile(path.join(projectRoot, 'src/r2-release-manifest.json'), 'utf8'),
   readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8'),
   readFile(path.join(projectRoot, 'dist/release.json'), 'utf8'),
   readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8'),
