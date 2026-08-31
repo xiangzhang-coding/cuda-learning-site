@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-The Stable Curriculum now completely publishes O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q05 in both languages, for 49 Learning Units. R2 is the latest completed aggregate review; [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records the final CI, Preview, production, and smoke coordinates. R3 and later material is outside R2.
+After [issue #25](https://github.com/xiangzhang-coding/cuda-learning-site/issues/25), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A09, and Q01-Q08 in both languages, for 52 Learning Units. The completed R2 aggregate review is an immutable snapshot fixed at 186 Publication Pairs and 372 source routes; [issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records its final CI, Preview, production, and smoke coordinates. The current incremental publication does not rewrite R2, and the R3 aggregate review remains pending.
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
@@ -56,7 +56,7 @@ The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 
 
 [A01 Elementwise Map](/en/algorithms/elementwise-map/) through [A07 Direct 2D Convolution](/en/algorithms/convolution-reuse-layout/) retain their edges. [A08 Tiled GEMM](/en/algorithms/tiled-gemm-correctness/) requires A05, M03, M04, and A02. [A09 Sorting, Selection, and Compaction](/en/algorithms/sorting-selection-compaction/) requires A03 and A04.
 
-[Q01 CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) requires F04 and O04; [Q02 Floating-point Order, Determinism, and Bitwise Reproducibility](/en/correctness/floating-point-order-reproducibility/) requires Q01 and A02; [Q03 Memcheck and Invalid Memory Access](/en/correctness/memcheck-invalid-memory-access/) requires F05 and Q01; [Q04 Diagnose with Racecheck, Initcheck, and Synccheck](/en/correctness/racecheck-initcheck-synccheck/) requires M05, M06, and Q03; and [Q05 Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) requires M08 and Q01.
+[Q01 CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/) requires F04 and O04; [Q02 Floating-point Order, Determinism, and Bitwise Reproducibility](/en/correctness/floating-point-order-reproducibility/) requires Q01 and A02; [Q03 Memcheck and Invalid Memory Access](/en/correctness/memcheck-invalid-memory-access/) requires F05 and Q01; [Q04 Diagnose with Racecheck, Initcheck, and Synccheck](/en/correctness/racecheck-initcheck-synccheck/) requires M05, M06, and Q03; [Q05 Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) requires M08 and Q01; [Q06 Use APOD as an Optimization Loop](/en/correctness/apod-optimization-loop/) depends only on Q05; [Q07 Read the Application Timeline First with Nsight Systems](/en/correctness/timeline-first-nsight-systems/) requires M07, M09, and Q05; and [Q08 Ask One Selected Kernel Question with Nsight Compute](/en/correctness/kernel-first-nsight-compute/) requires Q07, M02, and M03.
 
 F01-F08 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/), [F05 Exercises](/en/foundations/asynchronous-errors/exercises/) and [solutions](/en/foundations/asynchronous-errors/solutions/), [F06 Exercises](/en/foundations/compute-capability/exercises/) and [solutions](/en/foundations/compute-capability/solutions/), [F07 Exercises](/en/foundations/runtime-driver-api/exercises/) and [solutions](/en/foundations/runtime-driver-api/solutions/), and [F08 Exercises](/en/foundations/launch-geometry/exercises/) and [solutions](/en/foundations/launch-geometry/solutions/).
 
@@ -70,13 +70,19 @@ O02-O08 retain their own Exercises and separate solutions.
 
 Q01-Q05 also publish complete Exercises and separate reviewed solutions: [Q01 Exercises](/en/correctness/cpu-references-tolerances-invariants/exercises/) and [solutions](/en/correctness/cpu-references-tolerances-invariants/solutions/), [Q02 Exercises](/en/correctness/floating-point-order-reproducibility/exercises/) and [solutions](/en/correctness/floating-point-order-reproducibility/solutions/), [Q03 Exercises](/en/correctness/memcheck-invalid-memory-access/exercises/) and [solutions](/en/correctness/memcheck-invalid-memory-access/solutions/), [Q04 Exercises](/en/correctness/racecheck-initcheck-synccheck/exercises/) and [solutions](/en/correctness/racecheck-initcheck-synccheck/solutions/), and [Q05 Exercises](/en/correctness/timing-asynchronous-gpu-work/exercises/) and [solutions](/en/correctness/timing-asynchronous-gpu-work/solutions/).
 
+Q06-Q08 also publish complete Exercises and separate reviewed solutions: [Q06 Exercises](/en/correctness/apod-optimization-loop/exercises/) and [solutions](/en/correctness/apod-optimization-loop/solutions/), [Q07 Exercises](/en/correctness/timeline-first-nsight-systems/exercises/) and [solutions](/en/correctness/timeline-first-nsight-systems/solutions/), and [Q08 Exercises](/en/correctness/kernel-first-nsight-compute/exercises/) and [solutions](/en/correctness/kernel-first-nsight-compute/solutions/).
+
 The site has 16 Runnable Examples, EX01-EX16. New [EX15 Tiled GEMM](/en/examples/tiled-gemm/) strictly requires A08; EX14 still requires A05 and EX16 still requires Q03/Q04.
 
 Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1. It has empty compilation evidence, Pending Hardware Verification runtime, and empty recorded observations. A host utility establishes no GPU correctness. The site has not run EX15 and publishes no output, timing, speedup, or other performance number.
 
-The six noncontiguous Labs remain LAB01-LAB05 and LAB07. LAB12 is unpublished because it strictly waits for the unpublished Q13 profiling prerequisite and L06 cuBLAS prerequisite.
+The current 8 Labs are LAB01-LAB08. [LAB06 Build an Overlapped Pipeline](/en/labs/build-overlapped-pipeline/) strictly requires M09 and Q07; [LAB08 Profile the Full Application Before One Kernel](/en/labs/profile-full-application-before-kernel/) strictly requires Q07 and Q08. Future Q11 and LAB10 remain unpublished, with LAB10 waiting for Q11 to supply its evidence-based optimization prerequisite. Q13, L06, and LAB12 also remain unpublished, with LAB12 waiting for both the Q13 profiling and L06 cuBLAS prerequisites.
 
-The site has 16 formal Visual Explainers: standalone VIS01-VIS12 and embedded VIS19-VIS22. New [VIS12 GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/) requires A08, relates to EX15, and retains 20 static hierarchy panels. Every explainer is an evidence-neutral browser model. The catalog contains 6 Labs, 50 Practice Bank entries, 16 Visual Explainers, 151 Glossary terms, and 61 source records, for 284 records total. Public source files form 186 Publication Pairs, or 372 source routes.
+The site has 17 formal Visual Explainers: standalone VIS01-VIS12 and VIS14, plus embedded VIS19-VIS22. [VIS12 GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/) requires A08, relates to EX15, and retains 20 static hierarchy panels. [VIS14 Nsight Systems versus Nsight Compute](/en/visuals/nsight-systems-versus-nsight-compute/) strictly requires Q07 and Q08. Every explainer is an evidence-neutral browser model.
+
+Q06-Q08 and VIS14 have empty compilation and runtime axes. LAB06 and LAB08 have empty compilation evidence, Pending Hardware Verification runtime, and empty recorded observations. This increment publishes no runtime, profiler, timeline, metric, bottleneck, or speedup observation.
+
+The current catalog contains 8 Labs, 53 Practice Bank entries, 17 Visual Explainers, 159 Glossary terms, and 65 source records, for 302 records total. Current rolling public source files form 198 Publication Pairs, or 396 source routes. Those current figures are distinct from the immutable R2 186/372 snapshot, and the R3 aggregate review remains pending.
 
 ## Boundaries first
 
@@ -330,6 +336,21 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Time Asynchronous GPU Work Honestly</strong>
     <small>Exclude warm-up, wait explicitly, and retain raw samples with a complete manifest.</small>
   </a>
+  <a className="route-card" href="/en/correctness/apod-optimization-loop/">
+    <span>Q06 · APOD LOOP</span>
+    <strong>Use APOD as an Optimization Loop</strong>
+    <small>Start from a correctness-qualified recorded baseline, then use a falsifiable hypothesis and one controlled change.</small>
+  </a>
+  <a className="route-card" href="/en/correctness/timeline-first-nsight-systems/">
+    <span>Q07 · TIMELINE FIRST</span>
+    <strong>Read the Application Timeline First with Nsight Systems</strong>
+    <small>Locate CPU, API, copy, kernel, stream, and dependency activity before selecting a kernel question.</small>
+  </a>
+  <a className="route-card" href="/en/correctness/kernel-first-nsight-compute/">
+    <span>Q08 · KERNEL QUESTION</span>
+    <strong>Ask One Selected Kernel Question with Nsight Compute</strong>
+    <small>Select the kernel and question first, then collect only required sections or metrics and retain replay boundaries.</small>
+  </a>
   <a className="route-card" href="/en/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>Environment Report Runnable Example</strong>
@@ -435,10 +456,20 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Remove Shared-Memory Bank Conflicts</strong>
     <small>Prove padded and unpadded outputs agree before interpreting profiler records.</small>
   </a>
+  <a className="route-card" href="/en/labs/build-overlapped-pipeline/">
+    <span>LAB06 · OVERLAP PIPELINE</span>
+    <strong>Build an Overlapped Pipeline</strong>
+    <small>Accept EX07 and the collection gates first, then classify the short trace as overlap, serialization, or inconclusive.</small>
+  </a>
   <a className="route-card" href="/en/labs/diagnose-four-sanitizer-failures/">
     <span>LAB07 · SANITIZER DIAGNOSIS</span>
     <strong>Diagnose Four Sanitizer Failures</strong>
     <small>Preserve EX16 tool logs, application logs, and correctness results from isolated processes.</small>
+  </a>
+  <a className="route-card" href="/en/labs/profile-full-application-before-kernel/">
+    <span>LAB08 · APPLICATION TO KERNEL</span>
+    <strong>Profile the Full Application Before One Kernel</strong>
+    <small>Build a reviewable decision trail from separate Systems and Compute executions without prefilled observations.</small>
   </a>
   <a className="route-card" href="/en/labs/">
     <span>LAB INDEX · LOOKUP</span>
@@ -510,20 +541,25 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>GEMM Tiling Hierarchy: Matrix to Instruction</strong>
     <small>Audit matrix, tile, thread block, warp, and source-level instruction slots.</small>
   </a>
+  <a className="route-card" href="/en/visuals/nsight-systems-versus-nsight-compute/">
+    <span>VIS14 · PROFILER DECISION</span>
+    <strong>Choose the Next Profiler Evidence from the Symptom</strong>
+    <small>Use the application timeline first; move to Nsight Compute only after selecting a kernel and question.</small>
+  </a>
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 50 original problems.</small>
+    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 53 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 151-term canonical bilingual vocabulary.</small>
+    <small>Check the 159-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 61 interface and owner-source records with their review dates.</small>
+    <small>Inspect 65 interface and owner-source records with their review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

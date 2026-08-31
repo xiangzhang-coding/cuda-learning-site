@@ -144,6 +144,21 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
         await expect(hierarchy).toHaveAttribute('data-hierarchy-level', 'instruction');
       },
     },
+    {
+      id: 'vis14',
+      routes: {
+        zh: '/visuals/nsight-systems-versus-nsight-compute/',
+        en: '/en/visuals/nsight-systems-versus-nsight-compute/',
+      },
+      prepare: async () => {
+        const decision = page.locator('cuda-profiler-decision-explorer[data-visual-id="VIS14"]');
+        await expect(decision).toHaveAttribute('data-ready', 'true');
+        await decision.locator('[data-profiler-symptom]').selectOption('selected-kernel-memory-question');
+        await expect(decision).toHaveAttribute('data-recommended-tool', 'nsight-compute');
+        await expect(decision).toHaveAttribute('data-analysis-scope', 'selected-kernel');
+        await expect(decision.locator('[data-tool-card="nsight-compute"]')).toHaveAttribute('aria-current', 'true');
+      },
+    },
   ]) {
     for (const locale of ['zh', 'en'] as const) {
       for (const theme of THEME_IDS) {

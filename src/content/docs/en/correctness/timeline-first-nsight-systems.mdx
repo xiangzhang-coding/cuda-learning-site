@@ -1,0 +1,257 @@
+---
+title: 'Q07: Read the Application Timeline First with Nsight Systems'
+description: Start with a representative, correct application timeline; distinguish CPU gaps, CUDA API and launch overhead, copies, kernels, streams, dependencies, and overlap before selecting one kernel question.
+pairId: q07
+counterpart: /correctness/timeline-first-nsight-systems/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - timeline-first
+  - tool-version-gate
+  - collection-contract
+  - cpu-gaps
+  - launch-overhead
+  - copies-overlap
+  - report-custody
+  - handoff-to-nsight-compute
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q07
+prerequisites:
+  - M07
+  - M09
+  - Q05
+relatedUnits:
+  - Q06
+  - Q08
+  - EX07
+  - LAB06
+  - LAB08
+  - VIS14
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Systems User Guide'
+    url: 'https://docs.nvidia.com/nsight-systems/UserGuide/index.html'
+    version: 'NVIDIA Nsight Systems v2026.4'
+    platform: 'Current Linux CLI, CUDA trace, report, stats, and export behavior'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Systems Release Notes'
+    url: 'https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights'
+    version: 'NVIDIA Nsight Systems 2026.4.1; last updated 2026-07-28'
+    platform: 'Current changes, deprecations, support boundaries, and trace limitations'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI 2026.2.1 / CUDA 13.3 documentation'
+    platform: 'CUDA activity collection, correlation, buffering, overhead, and dropped-record boundaries'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; bundled Nsight Systems 2022.4.2.1'
+    platform: 'Toolkit Lane component coordinate'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9.1; bundled Nsight Systems 2025.1.3.140'
+    platform: 'Toolkit Lane component coordinate'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3; bundled Nsight Systems 2026.1.3.425'
+    platform: 'Toolkit Lane component coordinate'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,timeline-first,tool-version-gate,collection-contract,cpu-gaps,launch-overhead,copies-overlap,report-custody,handoff-to-nsight-compute,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M09,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q06,Q08,EX07,LAB06,LAB08,VIS14' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,2022.4.2.1,2025.1.3.140,2026.1.3.425,2026.2.1,2026.4,2026.4.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/timeline-first-nsight-systems/" lang="zh-CN">阅读中文对应页</a>
+
+Nsight Systems answers the application-level question first: where host and device time appears across CPU threads, CUDA APIs, copies, kernels, streams, and dependencies. Use Nsight Systems before Nsight Compute and before kernel metrics. The timeline is useful only when it comes from a representative workload that passed correctness and when its Environment Manifest, collection method, and report custody remain attached.
+
+## What you should be able to do
+
+- Define a representative and correct collection workload before opening a profiler.
+- Gate every command and interpretation on the observed `nsys --version`, not on a guessed Toolkit component.
+- Read CPU gaps, CUDA API activity, launch overhead, copies, kernels, stream placement, dependencies, and observed overlap without inventing causality.
+- Preserve the original `.nsys-rep`, commands, logs, stats, exports, manifest, and interpretation as a reviewable evidence chain.
+- Select one exact kernel instance and write one kernel-level question before handing work to Nsight Compute.
+
+## Prerequisites
+
+Complete [M07: Streams Replace a Global-Order Mental Model](/en/memory/stream-ordering/), [M09: Pinned Memory and Transfer Overlap](/en/memory/pinned-memory-transfer-overlap/), and [Q05: Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) first. M07 supplies per-stream order and explicit dependencies. M09 separates overlap eligibility from observed overlap. Q05 supplies correctness, representative timing, and Environment Manifest discipline.
+
+[Q06: Apply the APOD Optimization Loop](/en/correctness/apod-optimization-loop/) is related context, not an additional prerequisite. Q07 applies its measurement discipline to application-wide profiling. This page defines a static review contract; it does not run `nsys` or publish a timeline.
+
+## Start with the application timeline
+
+Kernel metrics cannot tell you whether the application is waiting on the CPU, submitting too little work, serializing through dependencies, moving data at the wrong time, or selecting the wrong kernel. Start with a representative application timeline and ask where the application interval is spent before narrowing the scope.
+
+The profiled workload must preserve the real control path, input shape, data type, stream graph, transfer pattern, and synchronization behavior relevant to the claim. A tiny convenience input that removes the steady-state path is not representative. Baseline and candidate must first pass the same predeclared correctness criteria. Record warm-up, capture range, repetitions, and completion boundaries under Q05 rather than treating profiler launch as a correctness check.
+
+The timeline is an observation from an instrumented execution, not the unmodified application. It can establish that an event appeared in a captured interval and how traced rows aligned. It cannot, by itself, establish why the event occurred or how an unprofiled run behaved.
+
+## Gate on the actual tool version
+
+CUDA Toolkit and Nsight Systems have independent component versions. The selected Toolkit release notes provide these Lane coordinates, but the installed executable remains the authority for the run:
+
+| Toolkit Lane | selected bundled Nsight Systems coordinate | collection gate |
+| --- | --- | --- |
+| `cuda-11.8` / CUDA Toolkit 11.8.0 | `2022.4.2.1` | preserve actual `nsys --version` output |
+| `cuda-12.9` / CUDA Toolkit 12.9.2 | `2025.1.3.140` | preserve actual `nsys --version` output |
+| `cuda-13.3` / CUDA Toolkit 13.3.1 | `2026.1.3.425` | preserve actual `nsys --version` output |
+
+Run and retain:
+
+```bash
+nsys --version
+nsys profile --help
+nsys stats --help
+nsys export --help
+```
+
+Do not infer the profiler version from `nvcc --version`, a driver version, a container tag, or the current v2026.4 User Guide. A system package, container layer, or standalone installation can differ from the Toolkit coordinate. If the observed CLI does not support the planned options or report, stop and revise the method for that version; do not silently substitute current syntax.
+
+## Define the collection contract before `nsys profile`
+
+Write the method before looking at a timeline. At minimum, retain these fields:
+
+| contract group | required declaration |
+| --- | --- |
+| question | application interval and symptom being investigated; no kernel bottleneck assumed |
+| workload | exact executable and arguments, input identity and shape, source/build identity, representative-path rationale |
+| correctness | method, criteria, baseline/candidate verdict, completion boundary, error checks |
+| run policy | warm-up and exclusion, repetition/order, capture range, process/child-process scope, concurrent-load policy |
+| trace policy | requested domains such as CUDA, NVTX, and OS runtime; CPU sampling or scheduling choice; option changes from defaults |
+| environment | complete Q05 Environment Manifest, permissions, clocks/power policy, container/MIG/MPS state, tool path and version |
+| custody | report base, stdout/stderr, exit status, observation date, observer, hashes, and derived-artifact paths |
+
+A symbolic current-style collection command is:
+
+```bash
+nsys profile \
+  --trace=cuda,nvtx,osrt \
+  --output=<report-base> \
+  <application> [arguments]
+```
+
+Verify every option against the captured help for the observed CLI. Choose capture boundaries that include the representative phase without allowing startup or shutdown to dominate accidentally. Add NVTX ranges when the application already has meaningful phase boundaries; labels aid correlation but do not prove correctness or causality.
+
+Nsight Systems uses CUPTI for applicable CUDA tracing. CUPTI activity records and correlation make host API and device activity visible after collection, but buffering, delivery, tracing overhead, and dropped records remain part of the measurement boundary. Preserve profiler diagnostics, check for incomplete or dropped data, and describe the report as a CUPTI-instrumented observation. No timeline conclusion is supportable without the Environment Manifest and collection method.
+
+## Read CPU gaps before blaming the GPU
+
+A CPU gap is an interval in which the traced host path does not submit the expected device work. Locate it relative to the application phase, CPU thread, CUDA API row, synchronization calls, and the next device activity. Then ask whether available scheduling and runtime traces distinguish host computation, blocking, descheduling, lock contention, I/O, or an untraced region.
+
+Blank space is not a diagnosis. Missing CPU trace domains, capture boundaries, filtering, or dropped records can also produce an apparent gap. A long host interval aligned with no kernel launch supports a localization question; it does not prove that the operating system, framework, or a particular source line caused the delay. Record the visible interval and the additional evidence needed.
+
+## Separate CUDA API time from launch overhead
+
+The CUDA API row records traced host-side calls; the GPU row records device activity. Keep at least these intervals distinct:
+
+| interval | timeline endpoints | bounded interpretation |
+| --- | --- | --- |
+| API duration | CPU-side API entry to exit | traced host time inside that call |
+| submission gap | API exit to corresponding device activity | may include queueing, dependencies, scheduling, or instrumentation |
+| device duration | kernel start to end on the GPU row | observed duration in this profiled run |
+| application latency | declared host start through completion | broader metric defined by Q05 endpoints |
+
+“Launch overhead” is otherwise ambiguous. State whether it means CPU API duration, a sequence of repeated short launch calls, or the gap from submission to device start. Synchronization, stream dependencies, prior queued work, lazy initialization, and resource contention can change those intervals. The timeline localizes them; it does not authorize subtracting one row from another and naming the remainder a single cause.
+
+## Read copies, kernels, dependencies, and overlap together
+
+Inspect copy direction, copy kind, kernel intervals, stream or queue identity, CUDA events and synchronization, and explicit dependency edges as one ledger. Copies and kernels overlap only when their observed intervals intersect in the captured execution; eligibility from APIs or hardware properties is not observed overlap. Conversely, separate visual lanes do not imply concurrency if dependencies serialize their timestamps.
+
+Use M09's conditions and the [EX07 Streams, Events, and Overlap Runnable Example](/en/examples/streams-events-overlap/) to explain what the program intended. Use the timeline to check what this run displayed. Distinguish host-to-device, device-to-host, and device-to-device activity; identify the exact streams; follow events or waits; and state the phase and interval where overlap did or did not appear. Do not generalize one interval to every iteration or claim that pinned memory, an engine count, or multiple streams caused the observation without another controlled comparison.
+
+## Preserve report custody and derivations
+
+Treat the generated `.nsys-rep` as the primary profiler artifact. Make it immutable in the evidence bundle and retain its hash beside the exact profile command, observed version, help/options used, application stdout/stderr, profiler stdout/stderr, exit status, source/build identity, correctness verdict, method, and Environment Manifest.
+
+Run summaries and exports against a copy or a custody-controlled report:
+
+```bash
+nsys stats <report>.nsys-rep
+nsys export --type sqlite --output <report>.sqlite <report>.nsys-rep
+```
+
+Verify syntax and available formats for the observed version. Record each `stats` or `export` command, tool version, output log, file hash, and relationship to the source report. A stats table aggregates events and can erase ordering; an export is a derived representation and can omit information unsupported by that schema. Neither replaces the `.nsys-rep`. Never overwrite the only report, silently regenerate an export with another version, or detach a screenshot or table from its report and manifest.
+
+## Hand one selected kernel and one question to Nsight Compute
+
+Remain in Nsight Systems while the question is application-wide or the kernel is not selected. Handoff begins only after a correct, representative timeline has selected one exact kernel instance and the learner has written one specific kernel-level question.
+
+The selection record should bind the `.nsys-rep` hash and application phase to the process, CUDA context, stream, kernel name, launch occurrence or correlation identity, and observed start interval needed to distinguish that instance. The question might ask whether that selected kernel is limited by a named memory-access behavior, instruction issue behavior, or occupancy constraint. “Collect all metrics” is not a question.
+
+Continue with [Q08: Investigate One Selected Kernel with Nsight Compute](/en/correctness/kernel-first-nsight-compute/) only after this gate. Nsight Compute collection is a separate instrumented execution and may replay work, so its result is not literally the same launch observed in the Systems report. Preserve the selection rule and workload controls needed to reproduce the target, then collect only the sections or metrics required by the declared question. [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/) makes this decision boundary explicit.
+
+## Evidence boundary
+
+This Learning Unit runs no application, invokes no profiler, reads no `.nsys-rep`, and records no CPU gap, API duration, launch overhead, copy/kernel overlap, bottleneck, timing, or speedup. It provides symbolic commands and review contracts only. Compilation, runtime, expected-observation, and recorded-observation arrays remain empty.
+
+A future timeline conclusion requires a representative correct run, observed CLI version, complete Environment Manifest, declared collection method, profiler diagnostics, and report custody. Without those records, the honest state is “no supported timeline conclusion,” not an estimated result. CUPTI-backed profiler evidence remains evidence from an instrumented execution.
+
+## Retrieval check
+
+1. Why should Nsight Systems and an application timeline come before Nsight Compute or kernel metrics?
+2. Which workload, correctness, version, manifest, and collection-method fields must exist before interpreting a timeline?
+3. How do CPU gaps, CUDA API duration, submission gaps, device duration, and application latency differ?
+4. What proves copy/kernel overlap in one captured run, and what does not prove its cause or generality?
+5. Which report-custody fields and exact kernel-instance-plus-question gate make a Systems-to-Compute handoff reviewable?
+
+## Continue with practice
+
+- Complete the [Q07 Exercises](/en/correctness/timeline-first-nsight-systems/exercises/), then inspect the separate [reviewed solutions](/en/correctness/timeline-first-nsight-systems/solutions/).
+- Classify a profiler decision record in [Practice Bank PB-R3-002](/en/practice/#pb-r3-002).
+- Apply the collection contract to [LAB06: Build an Overlapped Pipeline](/en/labs/build-overlapped-pipeline/) without prefilling an overlap result.
+- Carry the timeline-first gate into [LAB08: Profile the Full Application Before One Kernel](/en/labs/profile-full-application-before-kernel/) and use [VIS14: Nsight Systems versus Nsight Compute](/en/visuals/nsight-systems-versus-nsight-compute/) to choose the next evidence source.
+
+## Sources and review
+
+- [NVIDIA Nsight Systems User Guide v2026.4](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) defines the current `nsys` CLI, CUDA trace, `.nsys-rep`, stats, and export workflow.
+- [NVIDIA Nsight Systems 2026.4.1 Release Notes](https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights), last updated 2026-07-28, define current changes, deprecations, support boundaries, and trace limitations.
+- [CUPTI 2026.2.1 Usage](https://docs.nvidia.com/cupti/main/main.html) defines applicable CUDA activity, correlation, buffering, overhead, and dropped-record boundaries beneath profiler observations.
+- [CUDA Toolkit 11.8 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html) provide the selected bundled Nsight Systems coordinate `2022.4.2.1`.
+- [CUDA Toolkit 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html) provide the selected bundled Nsight Systems coordinate `2025.1.3.140`.
+- [CUDA Toolkit 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) provide the selected bundled Nsight Systems coordinate `2026.1.3.425`.
+
+Context7 `/websites/nvidia_nsight-systems` and `/websites/nvidia_cuda` were the only retrieval interfaces used. The exact NVIDIA owner pages above are the factual authorities. All six coordinates were accessed on **2026-08-31**. The collection contract, interpretation ledger, report-custody model, Exercises, and arrangement are original composition; no NVIDIA report, screenshot, timeline, table, benchmark result, or conclusion is copied.
+
+**Fact checked: 2026-08-31.**

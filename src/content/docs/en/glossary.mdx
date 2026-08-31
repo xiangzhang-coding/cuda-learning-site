@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: One hundred fifty-one published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred fifty-nine published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-08-31'
@@ -1407,6 +1407,78 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [A03](/en/algorithms/inclusive-exclusive-scan/) and [A09](/en/algorithms/sorting-selection-compaction/).
 - **Version note:** Composition is an algorithm contract. Exact CUB or Thrust APIs and storage, policy, and Toolkit compatibility follow the selected CCCL release.
 
+<span id="term-152" class="resource-target" aria-hidden="true"></span>
+
+### APOD · 评估、并行化、优化、部署
+
+- **Definition:** Assess, Parallelize, Optimize, Deploy (APOD) is a repeated evidence cycle around a correctness-qualified recorded baseline: assess a realistic workload, state a falsifiable hypothesis, apply one controlled change while parallelizing or optimizing, and deploy only after correctness, performance, regression, and operational gates pass.
+- **Avoid:** One-time tuning checklist, optimization that skips correctness, profiler ranking, automatic speedup guarantee.
+- **Related resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/) and [Q06](/en/correctness/apod-optimization-loop/).
+- **Version note:** APOD wording was reviewed against the current CUDA C++ Best Practices Guide v13.3 and archived v11.8.0. Each pass still binds its own baseline, hypothesis, controlled change, and deploy gate; the static process does not prove an improvement.
+
+<span id="term-153" class="resource-target" aria-hidden="true"></span>
+
+### Nsight Systems · 系统级性能分析器
+
+- **Definition:** Nsight Systems is a system-wide profiler that collects and correlates an application timeline across CPU threads, CUDA APIs, copies, kernels, streams, and dependencies in one instrumented execution. It first localizes an application-level symptom before deciding whether kernel-level evidence is needed.
+- **Avoid:** Single-kernel-only tool, automatic bottleneck detector, complete truth about an unmodified execution, profiler version inferred from a Toolkit label.
+- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [LAB06](/en/labs/build-overlapped-pipeline/), [LAB08](/en/labs/profile-full-application-before-kernel/), and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/).
+- **Version note:** Current owner coordinates are User Guide v2026.4 and release v2026.4.1; selected Toolkit Lanes use 2022.4.2.1, 2025.1.3.140, and 2026.1.3.425. The actual `nsys --version`, help, collection method, CUPTI diagnostics, and manifest bound a timeline; a timeline does not automatically prove a cause or bottleneck.
+
+<span id="term-154" class="resource-target" aria-hidden="true"></span>
+
+### Nsight Compute · Kernel 性能分析器
+
+- **Definition:** Nsight Compute is a kernel profiler that collects the sections, rules, or metrics needed to answer one predeclared question about a kernel occurrence corresponding to a representative timeline's selection rule in a separate instrumented run. It stores the result in an `.ncu-rep`.
+- **Avoid:** First step in application profiling, collect-all-metrics-first interpretation, same physical kernel instance as the Systems report, automatic bottleneck or speedup proof.
+- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB08](/en/labs/profile-full-application-before-kernel/), and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/).
+- **Version note:** The current coordinate is Nsight Compute 2026.2.1; selected Toolkit Lanes use 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5. The actual `ncu --version`, target GPU, permission, availability query, filter, and replay contract determine interpretive scope; a version coordinate grants neither metric availability nor an observation.
+
+<span id="term-155" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Profiling Tools Interface (CUPTI) · CUDA 性能分析工具接口
+
+- **Definition:** The CUDA Profiling Tools Interface (CUPTI) is a set of CUDA profiling and tracing interfaces through which tools or applications can subscribe to callbacks and collect correlated activity or applicable performance data. It lies inside the collection boundary of some Nsight observations.
+- **Avoid:** Synonym for `nsys` or `ncu`, standalone GUI profiler, version-invariant ABI or feature set, transparent observation layer with no overhead or dropped records.
+- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB06](/en/labs/build-overlapped-pipeline/), and [LAB08](/en/labs/profile-full-application-before-kernel/).
+- **Version note:** The current coordinate is CUPTI 2026.2.1; selected Lane coordinates are 11.8.87, 12.9.79, and 13.3.75. Compatibility, subscriber, activity or counter scope, buffering, overhead, and dropped-record diagnostics require exact-environment records; using CUPTI proves neither trace completeness nor a performance conclusion.
+
+<span id="term-156" class="resource-target" aria-hidden="true"></span>
+
+### profiler metric · 性能分析指标
+
+- **Definition:** A profiler metric is a named quantity reported or derived by a profiler under a specific tool and device contract. An interpretable record retains its exact name, unit, definition, scope, aggregation or denominator, availability, and collection method.
+- **Avoid:** Arbitrary hardware fact, necessarily a raw counter, same-named value directly comparable across GPUs or versions, one high value as the bottleneck.
+- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/) and [LAB08](/en/labs/profile-full-application-before-kernel/).
+- **Version note:** Names, definitions, and availability in current Nsight Compute 2026.2.1 and selected Lane components 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5 require separate review, governed by the retained query and report from the exact target GPU. A metric catalog is not itself an observation or conclusion.
+
+<span id="term-157" class="resource-target" aria-hidden="true"></span>
+
+### replay · 重放
+
+- **Definition:** In profiling, replay is a collection mechanism that repeats a kernel, application, or range to obtain required data across one or more collection passes. The replay mode defines the repeated boundary and state-validity contract.
+- **Avoid:** CUDA Graph replay, ordinary application rerun, the same untouched representative launch, zero-overhead collection.
+- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/) and [LAB08](/en/labs/profile-full-application-before-kernel/).
+- **Version note:** Review replay modes separately for current Nsight Compute 2026.2.1 and selected Lane components 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5. Record mode, pass count, save/restore or matching constraints, overhead, and differences; replay can perturb cache or timing, serialize work, or create another execution.
+
+<span id="term-158" class="resource-target" aria-hidden="true"></span>
+
+### profiler report · 性能分析报告
+
+- **Definition:** A profiler report is a profiler-generated primary observation artifact, such as an `.nsys-rep` or `.ncu-rep`. It becomes reviewable only when kept with the exact producer version, command or method, workload, correctness verdict, Environment Manifest, logs, hash, and interpretation contract.
+- **Avoid:** Screenshot, stats table, or export treated as the complete report, conclusion detached from a manifest, Runtime-Verified merely because a file exists, universal format losslessly interpreted by any tool version.
+- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB06](/en/labs/build-overlapped-pipeline/), and [LAB08](/en/labs/profile-full-application-before-kernel/).
+- **Version note:** An `.nsys-rep` binds to the actual Nsight Systems version, including current 2026.4/2026.4.1 or selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425. An `.ncu-rep` binds to actual 2026.2.1 or selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5. Record derivative, redaction, and reader-version differences; report existence does not support an undeclared conclusion.
+
+<span id="term-159" class="resource-target" aria-hidden="true"></span>
+
+### command-line interface (CLI) · 命令行接口
+
+- **Definition:** A command-line interface (CLI) is a textual interface that invokes a tool through an executable and ordered argument vector and returns stdout, stderr, and an exit status. A reproducible profiler command also retains the executable path, expanded arguments, environment, working directory, version, and relevant help output.
+- **Avoid:** Shell itself, automatically equivalent to a GUI workflow, owner example command as a local observation, `nvcc --version` substituted for the `nsys` or `ncu` version.
+- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB06](/en/labs/build-overlapped-pipeline/), and [LAB08](/en/labs/profile-full-application-before-kernel/).
+- **Version note:** `nsys` syntax binds to actual current 2026.4/2026.4.1 or selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425; `ncu` syntax binds to actual 2026.2.1 or selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5. Preserve actual `--version` and subcommand help before interpreting a command; a symbolic shape in documentation is not an execution record.
+
 ## Maintenance rule
 
-TERM-001 through TERM-146 retain their item-level review records from 2026-08-26 through 2026-08-30. TERM-147 through TERM-151 and the complete 151-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-08-31**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. The new terms execute no GPU code, EX15, CUB, or Thrust. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-146 retain their item-level review records from 2026-08-26 through 2026-08-30, and TERM-147 through TERM-151 retain their 2026-08-31 item-level review records. TERM-152 through TERM-159 and the complete 159-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-08-31**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. TERM-152 through TERM-159 are static definitions only: no application, GPU, `nsys`, or `ncu` was run; no performance counter was queried; no profiler report was generated or parsed; and no timeline, metric, replay, timing, bottleneck, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.

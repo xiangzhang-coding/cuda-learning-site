@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/visuals/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。十六项正式讲解中，VIS01-VIS12 使用十二个独立页面，包括 [VIS11 Tiled transpose](/visuals/tiled-transpose/)与 [VIS12 GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)；VIS19-VIS22 嵌入各自学习单元。VIS12 严格依赖 A08，相关资源是 EX15。四张内嵌讲解卡片直接深链到页内锚点，导航不会复制页面。
+本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。截至 2026-08-31，共有十七项正式讲解：VIS01-VIS12 与 VIS14 使用十三个独立页面，包括 [VIS11 Tiled transpose](/visuals/tiled-transpose/)、[VIS12 GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)与 [VIS14 Nsight Systems versus Nsight Compute](/visuals/nsight-systems-versus-nsight-compute/)；VIS13 仍未发布，因此不显示。VIS12 严格依赖 A08，相关资源是 EX15；VIS14 的先修严格为 Q07 与 Q08。VIS19-VIS22 嵌入各自学习单元，四张卡片直接深链到页内锚点，导航不会复制页面。
 
 ## 已发布可视化讲解
 
@@ -38,4 +38,4 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 证据边界
 
-VIS01-VIS12 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，提供静态或文字回退，并且不执行 CUDA。VIS12 的 matrix/tile/thread-block/warp/instruction panels 不是 emitted instruction、runtime、timing 或 performance observation。十六项讲解都没有 CUDA Evidence Status。复核日期：**2026-08-31**。
+VIS01-VIS12、VIS14 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，保留静态或文字回退，并且不执行 CUDA。VIS14 的完整六叶决策树是永久静态回退；它不启动 `nsys` 或 `ncu`，不打开或解析 profiler report，不查询 GPU、CUPTI activity、metric 或 performance counter，而且 compilation、runtime、expected-observation 与 recorded-observation arrays 全为空。VIS12 的 matrix/tile/thread-block/warp/instruction panels 不是 emitted instruction、runtime、timing 或 performance observation。交互、静态回退与工具文档均保持 evidence-neutral；十七项讲解都没有 CUDA Evidence Status。复核日期：**2026-08-31**。

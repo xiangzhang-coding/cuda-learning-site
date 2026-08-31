@@ -1,0 +1,257 @@
+---
+title: 'Q07：先用 Nsight Systems 阅读应用时间线'
+description: 从代表性且正确的 application timeline 开始，在选择一个 kernel question 前区分 CPU gaps、CUDA API/launch overhead、copies、kernels、streams、dependencies 与 overlap。
+pairId: q07
+counterpart: /en/correctness/timeline-first-nsight-systems/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - timeline-first
+  - tool-version-gate
+  - collection-contract
+  - cpu-gaps
+  - launch-overhead
+  - copies-overlap
+  - report-custody
+  - handoff-to-nsight-compute
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q07
+prerequisites:
+  - M07
+  - M09
+  - Q05
+relatedUnits:
+  - Q06
+  - Q08
+  - EX07
+  - LAB06
+  - LAB08
+  - VIS14
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Systems User Guide'
+    url: 'https://docs.nvidia.com/nsight-systems/UserGuide/index.html'
+    version: 'NVIDIA Nsight Systems v2026.4'
+    platform: 'Current Linux CLI, CUDA trace, report, stats, and export behavior'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Systems Release Notes'
+    url: 'https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights'
+    version: 'NVIDIA Nsight Systems 2026.4.1; last updated 2026-07-28'
+    platform: 'Current changes, deprecations, support boundaries, and trace limitations'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI 2026.2.1 / CUDA 13.3 documentation'
+    platform: 'CUDA activity collection, correlation, buffering, overhead, and dropped-record boundaries'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; bundled Nsight Systems 2022.4.2.1'
+    platform: 'Toolkit Lane component coordinate'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9.1; bundled Nsight Systems 2025.1.3.140'
+    platform: 'Toolkit Lane component coordinate'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3; bundled Nsight Systems 2026.1.3.425'
+    platform: 'Toolkit Lane component coordinate'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q07 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,timeline-first,tool-version-gate,collection-contract,cpu-gaps,launch-overhead,copies-overlap,report-custody,handoff-to-nsight-compute,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M07,M09,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q06,Q08,EX07,LAB06,LAB08,VIS14' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,2022.4.2.1,2025.1.3.140,2026.1.3.425,2026.2.1,2026.4,2026.4.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/timeline-first-nsight-systems/" lang="en">Read the English counterpart</a>
+
+Nsight Systems 先回答 application-level question：主机与设备时间出现在 CPU threads、CUDA APIs、内存复制（copies）、核函数（kernels）、流（streams）和依赖关系（dependencies）的什么位置。应先用 Nsight Systems，再用 Nsight Compute，也就是 use Nsight Systems before kernel metrics：先看应用时间线（application timeline），再收集核函数指标。Timeline 只有来自代表性工作负载（representative workload）、已通过正确性闸门（correctness gate），并且仍附带环境清单（Environment Manifest）、采集方法（collection method）与报告保管记录（report custody）时才可解释。
+
+## 学完本单元，你应该能
+
+- 在打开 profiler 前定义 representative and correct collection workload。
+- 让每条 command 与 interpretation 受实际观察到的 `nsys --version` 约束，而不是猜测 Toolkit component。
+- 阅读 CPU 空隙（CPU gap）、CUDA API activity、启动开销（launch overhead）、copies、kernels、stream placement、dependencies 与已观察重叠（observed overlap），但不虚构因果关系。
+- 保存原始 `.nsys-rep`、commands、logs、stats、exports、manifest 与 interpretation，形成可审查证据链（reviewable evidence chain）。
+- 在交给 Nsight Compute 前选定一个精确核函数实例（exact kernel instance），并写出一个 kernel-level question。
+
+## 先修关系
+
+先完成 [M07：Streams 取代全局顺序心智模型](/memory/stream-ordering/)、[M09：Pinned Memory 与 Transfer Overlap](/memory/pinned-memory-transfer-overlap/)和 [Q05：诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)。M07 提供 per-stream order 与 explicit dependencies；M09 区分 overlap eligibility 与 observed overlap；Q05 提供 correctness、representative timing 与 Environment Manifest discipline。
+
+[Q06：应用 APOD 优化循环](/correctness/apod-optimization-loop/)是 related context，不是新增 prerequisite。Q07 把它的 measurement discipline 用于 application-wide profiling。本页只定义静态 review contract，不运行 `nsys`，也不发布 timeline。
+
+## 先看 application timeline
+
+Kernel metrics 无法告诉你 application 是否在等待 CPU、是否提交了过少工作、是否被 dependencies 串行化、是否在错误时间搬运数据，或一开始是否选错了 kernel。先查看 representative application timeline，询问 declared application interval 的时间去了哪里，再缩小 scope。
+
+被 profile 的 workload 必须保留与 claim 有关的真实 control path、input shape、data type、stream graph、transfer pattern 与 synchronization behavior。若一个 convenience input 小到移除了 steady-state path，它就不具代表性。Baseline 与 candidate 必须先在相同 predeclared correctness criteria 下通过。Warm-up、capture range、repetitions 与 completion boundaries 按 Q05 记录；启动 profiler 不能替代 correctness check。
+
+Timeline 是插桩执行（instrumented execution）的 observation，不是 unmodified application。它能说明某个 event 出现在 captured interval 中，以及 traced rows 如何对齐；仅凭它不能说明 event 为什么发生，也不能证明 unprofiled run 如何执行。
+
+## 先通过 tool/version gate
+
+CUDA Toolkit 与 Nsight Systems 使用独立 component versions。所选 Toolkit release notes 给出以下 Lane coordinates，但 run 的权威坐标仍是 installed executable：
+
+| Toolkit Lane | selected bundled Nsight Systems coordinate | collection gate |
+| --- | --- | --- |
+| `cuda-11.8` / CUDA Toolkit 11.8.0 | `2022.4.2.1` | 保存实际 `nsys --version` output |
+| `cuda-12.9` / CUDA Toolkit 12.9.2 | `2025.1.3.140` | 保存实际 `nsys --version` output |
+| `cuda-13.3` / CUDA Toolkit 13.3.1 | `2026.1.3.425` | 保存实际 `nsys --version` output |
+
+运行并保留：
+
+```bash
+nsys --version
+nsys profile --help
+nsys stats --help
+nsys export --help
+```
+
+不要从 `nvcc --version`、driver version、container tag 或 current v2026.4 User Guide 推导 profiler version。System package、container layer 或 standalone installation 都可能不同于 Toolkit coordinate。若 observed CLI 不支持计划中的 options 或 report，应停止并针对该 version 修改 method，不能静默套用 current syntax。
+
+## 在 `nsys profile` 前定义 collection contract
+
+先写方法，再看 timeline。至少保留以下 fields：
+
+| contract group | required declaration |
+| --- | --- |
+| question | 要调查的 application interval 与 symptom；不得预设 kernel bottleneck |
+| workload | exact executable/arguments、input identity/shape、source/build identity、representative-path rationale |
+| correctness | method、criteria、baseline/candidate verdict、completion boundary、error checks |
+| run policy | warm-up/exclusion、repetition/order、capture range、process/child-process scope、concurrent-load policy |
+| trace policy | CUDA、NVTX、OS runtime 等 requested domains；CPU sampling/scheduling choice；相对 defaults 的 option changes |
+| environment | 完整 Q05 Environment Manifest、permissions、clocks/power policy、container/MIG/MPS state、tool path/version |
+| custody | report base、stdout/stderr、exit status、observation date、observer、hashes、derived-artifact paths |
+
+一个 symbolic current-style collection command 是：
+
+```bash
+nsys profile \
+  --trace=cuda,nvtx,osrt \
+  --output=<report-base> \
+  <application> [arguments]
+```
+
+每个 option 都要对照已保存的 observed CLI help。Capture boundaries 应覆盖 representative phase，又不能无意中让 startup/shutdown 支配结果。若 application 已有有意义的 phase boundaries，可以加入 NVTX ranges；labels 有助于关联（correlation），但不证明 correctness 或 causality。
+
+Nsight Systems 对适用的 CUDA tracing 使用 CUDA Profiling Tools Interface（CUPTI）。CUPTI activity records 与 correlation 让 host API 和 device activity 在 collection 后可见，但缓冲（buffering）、交付（delivery）、tracing overhead 与丢失记录（dropped records）仍属于 measurement boundary。保存 profiler diagnostics，检查 incomplete/dropped data，并把 report 描述为 CUPTI-instrumented observation。没有 Environment Manifest 和 collection method，不得给出 timeline conclusion。
+
+## 先看 CPU gaps，再责怪 GPU
+
+CPU gap 是 traced host path 没有提交预期 device work 的 interval。先把它定位到 application phase、CPU thread、CUDA API row、synchronization calls 与 next device activity，再询问可用 scheduling/runtime traces 能否区分 host computation、blocking、descheduling、lock contention、I/O 或 untraced region。
+
+Blank space 不是 diagnosis。CPU trace domains 缺失、capture boundaries、filtering 或 dropped records 也会制造 apparent gap。若一个 long host interval 与 no kernel launch 对齐，它支持 localization question；但不证明 operating system、framework 或某行 source code 导致了 delay。应记录 visible interval 和仍需补充的 evidence。
+
+## 区分 CUDA API time 与 launch overhead
+
+CUDA API row 记录 traced host-side calls；GPU row 记录 device activity。至少区分以下 intervals：
+
+| interval | timeline endpoints | bounded interpretation |
+| --- | --- | --- |
+| API duration | CPU-side API entry 到 exit | 该 call 内已 trace 的 host time |
+| submission gap | API exit 到对应 device activity | 可能包含 queueing、dependencies、scheduling 或 instrumentation |
+| device duration | GPU row 上 kernel start 到 end | 本次 profiled run 中观察到的 duration |
+| application latency | declared host start 到 completion | 由 Q05 endpoints 定义的 broader metric |
+
+否则“launch overhead”含义不清。必须说明它指 CPU API duration、一串 repeated short launch calls，还是 submission 到 device start 的 gap。Synchronization、stream dependencies、prior queued work、lazy initialization 与 resource contention 都可能改变这些 intervals。Timeline 用于定位它们；不能把两个 rows 相减后，把 remainder 命名为单一 cause。
+
+## 把 copies、kernels、dependencies 与 overlap 一起读
+
+把 copy direction/kind、kernel intervals、stream/queue identity、CUDA events/synchronization 与 explicit dependency edges 作为一份 ledger 阅读。只有 copies 与 kernels 的 observed intervals 在 captured execution 中相交时，才能说本次 run 出现 overlap；APIs 或 hardware properties 给出的 eligibility 不是 observed overlap。反过来，若 dependencies 让 timestamps 串行，即使使用不同 visual lanes 也不代表 concurrency。
+
+用 M09 conditions 和 [EX07 Streams、Events 与 Overlap 可运行示例](/examples/streams-events-overlap/)解释 program intent，用 timeline 检查本次 run 显示了什么。区分 host-to-device、device-to-host 与 device-to-device activity，确认 exact streams，跟踪 events/waits，并声明 overlap 出现或未出现的 phase/interval。没有额外 controlled comparison，不要从一个 interval 推广到所有 iterations，也不要声称 pinned memory、engine count 或 multiple streams 导致了 observation。
+
+## 保存 report custody 与 derivations
+
+把生成的 `.nsys-rep` 当作 primary profiler artifact。在 evidence bundle 中保持 immutable，并在 hash 旁保存 exact profile command、observed version、所用 help/options、application stdout/stderr、profiler stdout/stderr、exit status、source/build identity、correctness verdict、method 与 Environment Manifest。
+
+在 copy 或 custody-controlled report 上运行 summaries 与 exports：
+
+```bash
+nsys stats <report>.nsys-rep
+nsys export --type sqlite --output <report>.sqlite <report>.nsys-rep
+```
+
+根据 observed version 验证 syntax 与 available formats。记录每条 `stats`/`export` command、tool version、output log、file hash 及其与 source report 的关系。Stats table 会聚合 events 并可能丢失 ordering；export 是 derived representation，也可能省略 schema 不支持的信息。两者都不能替代 `.nsys-rep`。不得覆盖唯一 report，不得静默用另一 version 重新生成 export，也不得让 screenshot/table 脱离 report 与 manifest。
+
+## 向 Nsight Compute 交付一个 kernel 与一个 question
+
+只要 question 仍是 application-wide，或 kernel 尚未选定，就留在 Nsight Systems。只有 correct representative timeline 已选出 one exact kernel instance，而且学习者已写出 one specific kernel-level question，handoff 才开始。
+
+Selection record 应把 `.nsys-rep` hash 和 application phase 绑定到 process、CUDA context、stream、kernel name、launch occurrence 或 correlation identity，以及区分该 instance 所需的 observed start interval。Question 可以询问 selected kernel 是否受某个 named memory-access behavior、instruction issue behavior 或 occupancy constraint 限制。“Collect all metrics”不是 question。
+
+只有通过该 gate 后才继续 [Q08：用 Nsight Compute 调查一个已选 kernel](/correctness/kernel-first-nsight-compute/)。Nsight Compute collection 是 separate instrumented execution，而且可能 replay work，所以它的 result 并不是 Systems report 中同一次 launch。必须保留复现 target 所需的 selection rule 与 workload controls，再只收集 declared question 所需的 sections 或 metrics。[VIS14](/visuals/nsight-systems-versus-nsight-compute/)把这条 decision boundary 明确画出。
+
+## 证据边界
+
+本学习单元（Learning Unit）不运行 application，不调用 profiler，不读取 `.nsys-rep`，也不记录 CPU gap、API duration、launch overhead、copy/kernel overlap、bottleneck、timing 或 speedup。它只提供 symbolic commands 与 review contracts。Compilation、runtime、expected-observation 与 recorded-observation arrays 保持为空。
+
+未来的 timeline conclusion 必须附 representative correct run、observed CLI version、完整 Environment Manifest、declared collection method、profiler diagnostics 与 report custody。缺少这些 records 时，诚实状态是“no supported timeline conclusion”，而不是 estimated result。CUPTI-backed profiler evidence 始终是 instrumented execution 的 evidence。
+
+## 离开前检查
+
+1. 为什么 Nsight Systems 与 application timeline 必须先于 Nsight Compute 或 kernel metrics？
+2. 解释 timeline 前必须有哪些 workload、correctness、version、manifest 与 collection-method fields？
+3. CPU gaps、CUDA API duration、submission gaps、device duration 与 application latency 有何区别？
+4. 什么能证明一次 captured run 中出现 copy/kernel overlap，什么又不能证明它的 cause 或 generality？
+5. 哪些 report-custody fields 与 exact-kernel-instance-plus-question gate 能让 Systems-to-Compute handoff 可审查？
+
+## 继续练习
+
+- 完成 [Q07 练习（Exercises）](/correctness/timeline-first-nsight-systems/exercises/)，再查看独立的[参考解答](/correctness/timeline-first-nsight-systems/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-002](/practice/#pb-r3-002)中分类一份 profiler decision record。
+- 把 collection contract 用于 [LAB06：构建重叠流水线](/labs/build-overlapped-pipeline/)，但不要预填 overlap result。
+- 把 timeline-first gate 带入 [LAB08：先 profile 完整应用，再看一个 kernel](/labs/profile-full-application-before-kernel/)，并用 [VIS14：Nsight Systems 与 Nsight Compute](/visuals/nsight-systems-versus-nsight-compute/)选择下一 evidence source。
+
+## 来源与复核
+
+- [NVIDIA Nsight Systems User Guide v2026.4](https://docs.nvidia.com/nsight-systems/UserGuide/index.html)定义 current `nsys` CLI、CUDA trace、`.nsys-rep`、stats 与 export workflow。
+- [NVIDIA Nsight Systems 2026.4.1 Release Notes](https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights)最后更新于 2026-07-28，定义 current changes、deprecations、support boundaries 与 trace limitations。
+- [CUPTI 2026.2.1 Usage](https://docs.nvidia.com/cupti/main/main.html)定义 profiler observations 下适用的 CUDA activity、correlation、buffering、overhead 与 dropped-record boundaries。
+- [CUDA Toolkit 11.8 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)给出 selected bundled Nsight Systems coordinate `2022.4.2.1`。
+- [CUDA Toolkit 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html)给出 selected bundled Nsight Systems coordinate `2025.1.3.140`。
+- [CUDA Toolkit 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)给出 selected bundled Nsight Systems coordinate `2026.1.3.425`。
+
+Context7 `/websites/nvidia_nsight-systems` 与 `/websites/nvidia_cuda` 是唯一 retrieval interfaces；以上 NVIDIA owner pages 是 factual authorities。六项 coordinates 均访问于 **2026-08-31**。Collection contract、interpretation ledger、report-custody model、练习与编排均为本站原创；没有复制 NVIDIA report、screenshot、timeline、table、benchmark result 或 conclusion。
+
+**Fact checked: 2026-08-31.**

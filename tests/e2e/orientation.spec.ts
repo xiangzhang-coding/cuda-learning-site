@@ -6,11 +6,11 @@ import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/bro
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
 
 test('all published routes load without browser errors', async ({ page }) => {
-  test.setTimeout(380_000);
+  test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(372);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(186);
+  expect(routes).toHaveLength(396);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(198);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -21,7 +21,7 @@ test('all published routes load without browser errors', async ({ page }) => {
 });
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
-  test.setTimeout(180_000);
+  test.setTimeout(210_000);
   for (const { zh, en } of [
     { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
@@ -98,6 +98,15 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/correctness/timing-asynchronous-gpu-work/', en: '/en/correctness/timing-asynchronous-gpu-work/' },
     { zh: '/correctness/timing-asynchronous-gpu-work/exercises/', en: '/en/correctness/timing-asynchronous-gpu-work/exercises/' },
     { zh: '/correctness/timing-asynchronous-gpu-work/solutions/', en: '/en/correctness/timing-asynchronous-gpu-work/solutions/' },
+    { zh: '/correctness/apod-optimization-loop/', en: '/en/correctness/apod-optimization-loop/' },
+    { zh: '/correctness/apod-optimization-loop/exercises/', en: '/en/correctness/apod-optimization-loop/exercises/' },
+    { zh: '/correctness/apod-optimization-loop/solutions/', en: '/en/correctness/apod-optimization-loop/solutions/' },
+    { zh: '/correctness/timeline-first-nsight-systems/', en: '/en/correctness/timeline-first-nsight-systems/' },
+    { zh: '/correctness/timeline-first-nsight-systems/exercises/', en: '/en/correctness/timeline-first-nsight-systems/exercises/' },
+    { zh: '/correctness/timeline-first-nsight-systems/solutions/', en: '/en/correctness/timeline-first-nsight-systems/solutions/' },
+    { zh: '/correctness/kernel-first-nsight-compute/', en: '/en/correctness/kernel-first-nsight-compute/' },
+    { zh: '/correctness/kernel-first-nsight-compute/exercises/', en: '/en/correctness/kernel-first-nsight-compute/exercises/' },
+    { zh: '/correctness/kernel-first-nsight-compute/solutions/', en: '/en/correctness/kernel-first-nsight-compute/solutions/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
@@ -116,7 +125,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
     { zh: '/labs/observe-coalescing/', en: '/en/labs/observe-coalescing/' },
     { zh: '/labs/remove-shared-memory-bank-conflicts/', en: '/en/labs/remove-shared-memory-bank-conflicts/' },
+    { zh: '/labs/build-overlapped-pipeline/', en: '/en/labs/build-overlapped-pipeline/' },
     { zh: '/labs/diagnose-four-sanitizer-failures/', en: '/en/labs/diagnose-four-sanitizer-failures/' },
+    { zh: '/labs/profile-full-application-before-kernel/', en: '/en/labs/profile-full-application-before-kernel/' },
     { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
@@ -128,6 +139,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
     { zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
     { zh: '/visuals/reduction-stages/', en: '/en/visuals/reduction-stages/' },
+    { zh: '/visuals/nsight-systems-versus-nsight-compute/', en: '/en/visuals/nsight-systems-versus-nsight-compute/' },
     { zh: '/practice/', en: '/en/practice/' },
     { zh: '/glossary/', en: '/en/glossary/' },
     { zh: '/sources-and-versions/', en: '/en/sources-and-versions/' },
@@ -146,7 +158,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
-  test.setTimeout(210_000);
+  test.setTimeout(270_000);
   for (const scenario of [
     { route: '/', button: /搜索/, query: 'page-residency rail', localePrefix: '/', expectedHrefs: ['/visuals/page-migration/'] },
     { route: '/', button: /搜索/, query: '双语发布对', localePrefix: '/', expectedHrefs: ['/start/using-the-learning-site/', '/practice/', '/glossary/'] },
@@ -183,6 +195,18 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'A03 包含式 排除式 扫描', localePrefix: '/', expectedHrefs: ['/algorithms/inclusive-exclusive-scan/'] },
     { route: '/', button: /搜索/, query: 'A04 Privatized Histogram', localePrefix: '/', expectedHrefs: ['/algorithms/privatized-histogram/'] },
     { route: '/', button: /搜索/, query: 'Q02 浮点顺序 确定性 逐位可复现性', localePrefix: '/', expectedHrefs: ['/correctness/floating-point-order-reproducibility/'] },
+    { route: '/', button: /搜索/, query: 'Q06 把 APOD 作为优化循环', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/'] },
+    { route: '/', button: /搜索/, query: 'Q06 练习', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/exercises/'] },
+    { route: '/', button: /搜索/, query: 'Q06 参考解答', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/solutions/'] },
+    { route: '/', button: /搜索/, query: 'Q07 先用 Nsight Systems 阅读应用时间线', localePrefix: '/', expectedHrefs: ['/correctness/timeline-first-nsight-systems/'] },
+    { route: '/', button: /搜索/, query: 'Q07 练习 建立可审查的 timeline-first 调查', localePrefix: '/', expectedHrefs: ['/correctness/timeline-first-nsight-systems/exercises/'] },
+    { route: '/', button: /搜索/, query: 'Q07 参考解答 建立可审查的 timeline-first 调查', localePrefix: '/', expectedHrefs: ['/correctness/timeline-first-nsight-systems/solutions/'] },
+    { route: '/', button: /搜索/, query: 'Q08 开始于一个 selected-kernel question', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/'] },
+    { route: '/', button: /搜索/, query: 'Q08 练习 设计有边界的 selected-kernel profile', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/exercises/'] },
+    { route: '/', button: /搜索/, query: 'Q08 参考解答 设计有边界的 selected-kernel profile', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/solutions/'] },
+    { route: '/', button: /搜索/, query: 'LAB06 构建重叠流水线', localePrefix: '/', expectedHrefs: ['/labs/build-overlapped-pipeline/'] },
+    { route: '/', button: /搜索/, query: 'LAB08 先分析完整应用 再分析一个内核', localePrefix: '/', expectedHrefs: ['/labs/profile-full-application-before-kernel/'] },
+    { route: '/', button: /搜索/, query: 'Nsight Systems versus Nsight Compute 从症状选择下一份证据', localePrefix: '/', expectedHrefs: ['/visuals/nsight-systems-versus-nsight-compute/'] },
     { route: '/', button: /搜索/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/', expectedHrefs: ['/examples/multi-stage-reduction/'] },
     { route: '/', button: /搜索/, query: 'EX12 Inclusive Exclusive Scan 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/inclusive-exclusive-scan/'] },
     { route: '/', button: /搜索/, query: 'EX13 私有化 Histogram 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/privatized-histogram/'] },
@@ -223,6 +247,18 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'A03 dependency transformation block sums offset propagation', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/inclusive-exclusive-scan/'] },
     { route: '/en/', button: /Search/, query: 'A04 Privatized Histogram', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/privatized-histogram/'] },
     { route: '/en/', button: /Search/, query: 'Q02 floating-point order determinism bitwise reproducibility', localePrefix: '/en/', expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'] },
+    { route: '/en/', button: /Search/, query: 'Q06 Use APOD as an optimization loop', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/'] },
+    { route: '/en/', button: /Search/, query: 'Q06 Exercises Design one falsifiable APOD pass', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/exercises/'] },
+    { route: '/en/', button: /Search/, query: 'Q06 Reviewed Solutions Design one falsifiable APOD pass', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/solutions/'] },
+    { route: '/en/', button: /Search/, query: 'Q07 Read the Application Timeline First with Nsight Systems', localePrefix: '/en/', expectedHrefs: ['/en/correctness/timeline-first-nsight-systems/'] },
+    { route: '/en/', button: /Search/, query: 'Q07 Exercises Build a Reviewable Timeline-First Investigation', localePrefix: '/en/', expectedHrefs: ['/en/correctness/timeline-first-nsight-systems/exercises/'] },
+    { route: '/en/', button: /Search/, query: 'Q07 Reviewed Solutions Build a Reviewable Timeline-First Investigation', localePrefix: '/en/', expectedHrefs: ['/en/correctness/timeline-first-nsight-systems/solutions/'] },
+    { route: '/en/', button: /Search/, query: 'Q08 Ask one selected kernel question with Nsight Compute', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/'] },
+    { route: '/en/', button: /Search/, query: 'Q08 Exercises Design a bounded selected-kernel profile', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/exercises/'] },
+    { route: '/en/', button: /Search/, query: 'Q08 Reviewed Solutions Design a bounded selected-kernel profile', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/solutions/'] },
+    { route: '/en/', button: /Search/, query: 'LAB06 Build an Overlapped Pipeline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-overlapped-pipeline/'] },
+    { route: '/en/', button: /Search/, query: 'LAB08 Profile the Full Application Before One Kernel', localePrefix: '/en/', expectedHrefs: ['/en/labs/profile-full-application-before-kernel/'] },
+    { route: '/en/', button: /Search/, query: 'Nsight Systems versus Nsight Compute Choose the Next Evidence from the Symptom', localePrefix: '/en/', expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'] },
     { route: '/en/', button: /Search/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/multi-stage-reduction/'] },
     { route: '/en/', button: /Search/, query: 'EX12 Inclusive and Exclusive Scan Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/inclusive-exclusive-scan/'] },
     { route: '/en/', button: /Search/, query: 'EX13 Privatized Histogram Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/privatized-histogram/'] },
@@ -246,7 +282,7 @@ test('keyboard focus is visible from the first tab stop', async ({ page }, testI
 });
 
 test('navigation remains usable without horizontal overflow', async ({ page }, testInfo) => {
-  test.setTimeout(180_000);
+  test.setTimeout(210_000);
   for (const route of [
     '/',
     '/en/',
@@ -396,6 +432,24 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/correctness/timing-asynchronous-gpu-work/exercises/',
     '/correctness/timing-asynchronous-gpu-work/solutions/',
     '/en/correctness/timing-asynchronous-gpu-work/solutions/',
+    '/correctness/apod-optimization-loop/',
+    '/en/correctness/apod-optimization-loop/',
+    '/correctness/apod-optimization-loop/exercises/',
+    '/en/correctness/apod-optimization-loop/exercises/',
+    '/correctness/apod-optimization-loop/solutions/',
+    '/en/correctness/apod-optimization-loop/solutions/',
+    '/correctness/timeline-first-nsight-systems/',
+    '/en/correctness/timeline-first-nsight-systems/',
+    '/correctness/timeline-first-nsight-systems/exercises/',
+    '/en/correctness/timeline-first-nsight-systems/exercises/',
+    '/correctness/timeline-first-nsight-systems/solutions/',
+    '/en/correctness/timeline-first-nsight-systems/solutions/',
+    '/correctness/kernel-first-nsight-compute/',
+    '/en/correctness/kernel-first-nsight-compute/',
+    '/correctness/kernel-first-nsight-compute/exercises/',
+    '/en/correctness/kernel-first-nsight-compute/exercises/',
+    '/correctness/kernel-first-nsight-compute/solutions/',
+    '/en/correctness/kernel-first-nsight-compute/solutions/',
     '/examples/vector-addition/',
     '/en/examples/vector-addition/',
     '/examples/multidimensional-indexing/',
@@ -432,8 +486,12 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/labs/observe-coalescing/',
     '/labs/remove-shared-memory-bank-conflicts/',
     '/en/labs/remove-shared-memory-bank-conflicts/',
+    '/labs/build-overlapped-pipeline/',
+    '/en/labs/build-overlapped-pipeline/',
     '/labs/diagnose-four-sanitizer-failures/',
     '/en/labs/diagnose-four-sanitizer-failures/',
+    '/labs/profile-full-application-before-kernel/',
+    '/en/labs/profile-full-application-before-kernel/',
     '/visuals/',
     '/en/visuals/',
     '/visuals/kernel-journey/',
@@ -456,6 +514,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/visuals/artifact-pipeline/',
     '/visuals/reduction-stages/',
     '/en/visuals/reduction-stages/',
+    '/visuals/nsight-systems-versus-nsight-compute/',
+    '/en/visuals/nsight-systems-versus-nsight-compute/',
     '/practice/',
     '/en/practice/',
     '/glossary/',

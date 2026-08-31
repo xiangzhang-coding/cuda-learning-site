@@ -1,0 +1,251 @@
+---
+title: 'Q08：用 Nsight Compute 回答一个选定内核问题'
+description: 从代表性 Nsight Systems timeline 选定一个精确 kernel instance，预先声明一个问题，查询可用 section/metric，约束 replay，并保管可审查的 .ncu-rep。
+pairId: q08
+counterpart: /en/correctness/kernel-first-nsight-compute/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - kernel-question
+  - tool-version-permission-gate
+  - replay-boundary
+  - metric-selection
+  - metric-interpretation
+  - coalescing-shared-memory
+  - report-custody
+  - systems-to-compute-decision
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q08
+prerequisites:
+  - Q07
+  - M02
+  - M03
+relatedUnits:
+  - Q06
+  - EX07
+  - LAB08
+  - VIS14
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric model, replay, collection overhead, permissions, and reproducibility guidance'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current kernel filters, section and metric queries, collection controls, and report export'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Release update declaring CUDA Toolkit 13.3 support'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI 2025.2 archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2'
+    platform: 'Archived CLI behavior for interpreting retained 2025.2 commands and reports'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI 2022.3 archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3'
+    platform: 'Archived CLI behavior for interpreting retained 2022.3 commands and reports'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI 2026.2.1 / CUDA 13.3 documentation'
+    platform: 'Current profiling compatibility, activity, correlation, buffering, and subscriber boundaries'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/correctness/kernel-first-nsight-compute/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,kernel-question,tool-version-permission-gate,replay-boundary,metric-selection,metric-interpretation,coalescing-shared-memory,report-custody,systems-to-compute-decision,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q07,M02,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q06,EX07,LAB08,VIS14' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2022.3,2025.2,2026.2.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/kernel-first-nsight-compute/" lang="en">Read the English counterpart</a>
+
+Nsight Compute 不是这条路径的第一个 profiler。只有代表性时间线（representative timeline）已经选定一个精确内核实例（exact kernel instance），并把它记成 **selected kernel instance**，同时写出一个**具体的预先声明问题（specific predeclared question）**后，才使用 Nsight Compute。随后在精确 GPU 与工具版本上查询可用性，只收集回答该问题所需的节或指标（sections or metrics），并把生成的 `.ncu-rep` 连同 interpretation contract 一起保留。先做 metric dump、再编一个解释，会把证据路径倒置。
+
+## 学完本单元，你应该能
+
+- 把 representative application timeline 里的一个 exact kernel selection 带入可审查、独立的 Nsight Compute run。
+- 在选择 section 或 metric 前写出一个 kernel-level question。
+- 用 exact tool version、target GPU、performance-counter permission 和 queried availability 建立 collection gate。
+- 记录重放（replay）行为，并解释 profiling 为什么会扰动（perturb）或序列化（serialize）执行，或者来自另一次 execution。
+- 只在 exact name、unit、definition、scope、denominator、filter 与 report custody 齐全时解释数值。
+
+## 先修关系
+
+按顺序完成 [Q07：从 Nsight Systems timeline 选择 kernel evidence](/correctness/timeline-first-nsight-systems/)、[M02：把 coalescing 理解为 transaction shaping](/memory/coalescing-transactions/)和 [M03：共享内存分块（shared-memory tiling）](/memory/shared-memory-tiling/)。Q07 提供 representative timeline 与 exact kernel instance；M02 提供 expected global-memory request model；M03 提供 expected shared-memory staging、synchronization 与 reuse model。
+
+先修集合严格是 `Q07, M02, M03`。本学习单元（Learning Unit）教授 static decision/evidence contract，因此没有 hardware gate。真实 Nsight Compute collection 仍须在 LAB08 中记录 compatible GPU、software stack 与 permission。
+
+## 从一个 selected-kernel question 开始
+
+只写“profile 那个慢 kernel”不是有效 handoff。打开 metric list 前，先冻结 selection ledger 与一个可证伪问题：
+
+| field | predeclared content |
+| --- | --- |
+| Systems selection | source `.nsys-rep` identity/hash、process、kernel name、可用时的 context/stream、launch occurrence、time range、workload 与 input |
+| kernel question | one mechanism、one symptom，以及 answer 能改变的 one decision |
+| Compute mapping | exact name basis、regex/exact match、launch skip/count、target process、workload 与 NVTX/range filter（如使用） |
+| equivalence rule | representative run 与 profile run 必须一致和允许不同的 fields |
+| exit rule | 支持 hypothesis、拒绝 hypothesis 或返回 Nsight Systems 的结果 |
+
+可用模板是：“对 `[fixed workload]` 下 `[kernel]` 的这个 selected occurrence，`[一个 M02/M03 mechanism]` 是否解释 `[一个 observed symptom]`，并由 `[queried section or metrics]` 检验？”问题决定 evidence need；available metric catalog 不能替你选择问题。
+
+## 用 tool version、permission 与 availability 建 gate
+
+记录 `ncu --version` 的精确输出、GPU identity/compute capability、driver、CUDA Toolkit、target application revision 与完整 command。Nsight Compute 2026.2.1 release notes 声明支持 CUDA Toolkit 13.3，但这个 release coordinate 不证明每个 GPU 都有全部 counter/section。Archived 2025.2 与 2022.3 CLI guides 用于解释旧 command/report，不能授予 current availability。
+
+设计 collection 前，在 exact target GPU 与 installed tool 上执行 owner-supported query，并保留输出：
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+记录性能计数器访问权限（performance-counter access）。若 collection 返回 `ERR_NVGPUCTRPERM` 等 permission denial，应停止并保留 error、execution context 与 policy owner。不要绕过 host security policy，不要用 guessed value 代替，也不要把 unavailable counter 写成 zero。Permission 是 observation boundary，不是 setup 脚注。
+
+## Replay 会改变 observation boundary
+
+Hardware counter 可能需要多个 collection passes。Kernel replay 可以保存并恢复相关 memory，再重复执行一次 kernel launch；application replay 会重新启动整个 application，因此依赖足够 deterministic 的 execution；range replay 与 application-range replay 又会改变 repeated boundary。应记录 exact replay mode、工具报告的 pass count 与 save/restore 或 matching constraints，不能假定全部数值来自一次未受影响的 launch。
+
+Profiler instrumentation 与 replay 可能扰动 cache/timing state、增加 overhead，并把 representative run 中 concurrent 的 work 序列化。Application replay 的 pass 属于另一次 execution；kernel replay 则重新执行 observed launch。减少 metrics 可以减少 requested passes，但不能证明 zero perturbation。
+
+选中 kernel 的 `.nsys-rep` 与检查 kernel 的 `.ncu-rep` 来自两次独立 profiler runs，绝不是同一个 physical kernel instance。Decision trail 必须说明 Compute run 中 corresponding occurrence 为什么仍有代表性；不能声称 Nsight Compute 给已经记录完的 Systems event 补上了 counters。
+
+## 只选择足够回答问题的 metrics
+
+从 declared question 与 exact query output 出发。若某个 relevant section 的 documented rules 匹配问题，就选择一个 section；若少量 individual values 足够，就明确列出短 `--metrics` list。只收集需要的 sections 或 metrics。宽泛 metric dump 会扩大 replay/review surface，并诱导 post-hoc explanation。
+
+一个 illustrative collection shape 是：
+
+```bash
+ncu --kernel-name regex:^transform_kernel$ \
+  --launch-skip <predeclared-matching-launches> \
+  --launch-count 1 \
+  --section <queried-section> \
+  --export q08-selected-kernel \
+  ./application <fixed-workload-arguments>
+```
+
+这些 names/placeholders 不能盲目复制。应根据 Q07 selection 和 current `--list-sections`/`--query-metrics` result 替换它们，保存 exact command、name basis、regex、skip/count semantics、target process 与 actual output path。还要验证 collection 确实命中 intended corresponding launch；只有 `--launch-count 1` 并不能识别它。
+
+## 把 name、unit、definition 与 scope 一起解释
+
+Metric names 与 availability 会随 GPU 和 Nsight Compute version 变化。即使熟悉的 base name，也可能具有不同 suffix、unit、aggregation 或 collection support。每个 retained value 都要保存：
+
+| interpretation field | required record |
+| --- | --- |
+| identity | 从本 report 与 query output 复制的 exact metric/rule name |
+| semantics | tool-version-specific definition；raw、derived、ratio、percentage、rate 或 throughput |
+| unit/denominator | bytes、sectors、transactions、cycles、requests、instructions、percent、per second、per cycle 或其他 exact reported unit |
+| scope | selected occurrence、device、SM、warp、instruction class、memory space 与 documented aggregation rule |
+| collection | section/metric option、pass/replay、permission state 与 availability query |
+| claim | 被回答的 narrow question，以及仍与该值兼容的 alternatives |
+
+不要比较 unit 不同的 values，也不要静默地让 percentage 除以 count。High utilization、stall share、transaction count 或 ratio 不会自动成为 bottleneck。先把 definition/denominator 连接到 selected kernel 与 hypothesis；若 decision 需要 causality 或 performance impact，再寻找受控 before/after evidence。
+
+## 提出有边界的 coalescing 与 shared-memory 问题
+
+对于合并访问（coalescing）问题，先用 [M02](/memory/coalescing-transactions/)预计算 active lanes、requested byte addresses、access width、alignment 与 expected naturally aligned segment coverage，再只选择 definition 能检验该预期的 current global-memory evidence。Observed counter 是 profiled run 的 hardware evidence；M02 static segment set 不是 counter prediction，两者任何一个都不能单独证明 speedup。
+
+对于共享内存（shared memory）问题，先用 [M03](/memory/shared-memory-tiling/)说明 staged values、participating threads、load/use/reuse barriers 与 expected reuse，再选择一个 queried shared-memory section 或 short metric set；它的 documented scope 必须对应问题里的 traffic、transactions、conflicts 或 stalls。不要从一个大数值直接推断 source line 或 repair。
+
+比较 baseline/candidate 时，要在 matching workload、correctness、filter、version、permission、replay 与 metric-definition contract 下收集 separate reports。任一 coordinate 改变都应直接报告，不要把两个 reports 描述成 controlled twins。
+
+## 保管 `.ncu-rep`
+
+Report 是主要观察工件（primary observation artifact），不是看一眼就丢弃的 screenshot。保留 original `.ncu-rep`，并同时保留：
+
+- source `.nsys-rep` path/hash 与 selected-instance ledger；
+- predeclared question 与 decision rule；
+- exact `ncu` version、GPU、driver、Toolkit、permission result、replay mode 与 full command；
+- kernel name basis、filters、matching occurrence、process、workload、input 与 correctness verdict；
+- section/metric query output、exact names、definitions、units 与 interpretation notes；
+- profiler stdout/stderr、observation date、observer、immutable path、size 与 cryptographic hash。
+
+Review 后不要覆盖 source report。若公开发布需要脱敏，保留 private original，并记录 sanitized derivative 与 source hash 的关系。缺少 command、filter、version、replay、permission、definitions 与 custody 的 `.ncu-rep` 不能支持 reproducible interpretation。
+
+## 保存 Systems-to-Compute decision
+
+[Q06：执行 APOD optimization loop](/correctness/apod-optimization-loop/)命名 hypothesis 与 decision；Q07 从 application timeline 选出 exact kernel instance；Q08 把 selection 和 one question 映射成 minimal Compute collection。[EX07：Streams、events 与 transfer overlap](/examples/streams-events-overlap/)可以提供 fixed workload；[LAB08：先 profile full application，再 profile kernel](/labs/profile-full-application-before-kernel/)执行 guided external run；[VIS14：Nsight Systems versus Nsight Compute](/visuals/nsight-systems-versus-nsight-compute/)让 symptom-to-tool gate 保持可见。
+
+用一份 decision record 连接 two report hashes、workload coordinates、selected occurrence、mapping filter、question、chosen evidence、separate-run disclosure 与 next action。若 corresponding kernel 无法可靠选择、workload 已分叉，或者问题仍是 application latency、overlap、launch gap 或 dependency，就返回 Nsight Systems，不要继续添加 Compute metrics。
+
+## 证据边界
+
+本页不运行 `nsys` 或 `ncu`，不查询 GPU/performance counter，也不创建 `.ncu-rep`；没有发布 metric value、bottleneck、duration、throughput 或 speedup。Commands 只是 symbolic protocol shapes。Compilation、runtime、expected-observation 与 recorded-observation arrays 保持为空，不授予任何 Evidence Status。
+
+## 离开前检查
+
+1. Q07 的哪些 fields 识别 selected kernel，为什么 Compute launch 只是 separate run 中的 corresponding occurrence？
+2. 为什么 kernel question 必须在选择 section/metric 前具体且预先声明？
+3. Collection 前必须具备哪些 version、GPU、permission、section 与 metric availability records？
+4. Replay 如何扰动或序列化 work，或者让 collection 变成另一次 execution？
+5. 哪些 names、units、definitions、filters、replay facts 与 `.ncu-rep` custody fields 让 interpretation 可审查？
+
+## 继续练习
+
+- 完成 [Q08 练习（Exercises）](/correctness/kernel-first-nsight-compute/exercises/)，再查看独立的[参考解答（reviewed solutions）](/correctness/kernel-first-nsight-compute/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-003](/practice/#pb-r3-003)修复一条 unbounded profiler claim。
+- 在 [LAB08](/labs/profile-full-application-before-kernel/)应用 decision trail；下一份 evidence source 不清楚时，返回 [VIS14](/visuals/nsight-systems-versus-nsight-compute/)复查。
+
+## 来源与复核
+
+- Current [NVIDIA Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)为 2026.2.1 定义 metric、replay、overhead、permission 与 reproducibility boundaries。
+- Current [NVIDIA Nsight Compute CLI 2026.2.1 guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)定义 kernel filters、queries、section/metric collection 与 report export。
+- [Nsight Compute 2026.2.1 release notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1)记录 CUDA Toolkit 13.3 support。
+- Archived [Nsight Compute CLI 2025.2 guide](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html)保留 retained reports 对应的 older command behavior。
+- Archived [Nsight Compute CLI 2022.3 guide](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html)提供第二个用于识别 version drift 的 historical coordinate。
+- Current [CUPTI Usage guide](https://docs.nvidia.com/cupti/main/main.html)提供 2026.2.1 / CUDA 13.3 coordinate 的 profiling compatibility 与 activity/correlation boundaries。
+
+Context7 `/websites/nvidia_nsight-compute_nsightcompute` 是唯一使用的 retrieval service。以上六项 NVIDIA owner pages 是事实权威，均访问于 **2026-08-31**。本站没有复制 owner prose、command output、screenshot、report、table、figure、metric value 或 benchmark result。Decision ledger、interpretation contract、Exercises、solutions 与 composition 是采用 CC BY 4.0 的本站原创内容。
+
+**Fact checked: 2026-08-31.**

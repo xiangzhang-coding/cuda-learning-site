@@ -1,0 +1,667 @@
+---
+title: 'LAB08：先分析完整应用，再分析一个内核'
+description: '在原生 Linux 上先验收完整 EX07，再用分开的 Nsight Systems 与 Nsight Compute 执行建立从 application timeline 到一个 selected kernel question 的可复核证据链。'
+pairId: lab08
+counterpart: /en/labs/profile-full-application-before-kernel/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - manifest
+  - source-review
+  - build
+  - correctness
+  - systems-plan
+  - systems-gate
+  - systems-collect
+  - kernel-selection
+  - compute-plan
+  - compute-gate
+  - compute-collect
+  - decision-trail
+  - report-fixture
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB08
+prerequisites:
+  - Q07
+  - Q08
+relatedUnits:
+  - EX07
+  - LAB06
+  - VIS14
+exampleIds:
+  - EX07
+canonicalExample: EX07
+canonicalRanges:
+  - chunk-contract
+  - stream-pipeline
+hardwareGate: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Lane-matched Nsight Systems nsys and Nsight Compute ncu with compatible CUPTI; administrator-approved non-admin performance-counter access; at most 49,176 bytes of device memory; no sudo or privilege escalation'
+estimatedMinutes: 150
+difficulty: intermediate
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 49176
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device'
+  - 'Execute NVCC, the host C++ compiler, make, the EX07 binary, Nsight Systems CLI nsys, and Nsight Compute CLI ncu'
+  - 'Create, hash, inspect, sanitize, retain, and remove learner-owned build files, logs, exports, .nsys-rep reports, and .ncu-rep reports'
+  - 'Use CUDA tracing and read NVIDIA GPU performance counters only under an administrator-approved non-admin policy; this Lab authorizes no sudo, privilege escalation, or security-policy bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - The serial and chunked paths should each pass exact comparison for all 4,099 outputs before either profiler runs.
+    - A representative full-application Nsight Systems collection should preserve enough CUDA activity to select one exact transform_kernel instance without asserting a timeline or timing result in advance.
+    - The selected kernel instance should be bound to one specific question and to a corresponding occurrence in a separate Nsight Compute execution, never claimed as the same physical launch.
+    - Actual version, help, CUPTI compatibility, section or metric query, and non-admin performance-counter gates should either qualify collection or produce a retained blocker.
+    - A qualifying minimal Nsight Compute collection should retain one selected section or short metric list together with replay, perturbation, permission, report hash, and custody records.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; Nsight Systems 2022.4.2.1; Nsight Compute 2022.3.0.22; CUPTI 11.8.87'
+    platform: 'Linux x86-64 Toolkit Lane component coordinates'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / EX07 12.9.2 Lane; Nsight Systems 2025.1.3.140; Nsight Compute 2025.2.1.3; CUPTI 12.9.79'
+    platform: 'Linux x86-64 Toolkit Lane component coordinates'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / EX07 13.3.1 Lane; Nsight Systems 2026.1.3.425; Nsight Compute 2026.2.1.5; CUPTI 13.3.75'
+    platform: 'Linux x86-64 Toolkit Lane component coordinates'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Systems User Guide'
+    url: 'https://docs.nvidia.com/nsight-systems/UserGuide/index.html'
+    version: 'NVIDIA Nsight Systems v2026.4'
+    platform: 'Current Linux CLI, CUDA trace, report, stats, export, and timeline behavior'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Systems Release Notes'
+    url: 'https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights'
+    version: 'NVIDIA Nsight Systems 2026.4.1; last updated 2026-07-28'
+    platform: 'Current changes, deprecations, support boundaries, and trace limitations'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric model, replay, collection overhead, permissions, and reproducibility guidance'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current kernel filters, section and metric queries, collection controls, and report export'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current release support and compatibility boundaries'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI 2025.2 archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2'
+    platform: 'Archived CLI behavior for the cuda-12.9 Lane'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI 2022.3 archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3'
+    platform: 'Archived CLI behavior for the cuda-11.8 Lane'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'Current CUPTI documentation; pinned Lane components 11.8.87, 12.9.79, and 13.3.75'
+    platform: 'Profiling compatibility, activity, correlation, buffering, overhead, and subscriber boundaries'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/labs/profile-full-application-before-kernel/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,manifest,source-review,build,correctness,systems-plan,systems-gate,systems-collect,kernel-selection,compute-plan,compute-gate,compute-collect,decision-trail,report-fixture,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q07,Q08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX07,LAB06,VIS14' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX07 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX07 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'chunk-contract,stream-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Lane-matched Nsight Systems nsys and Nsight Compute ncu with compatible CUPTI; administrator-approved non-admin performance-counter access; at most 49,176 bytes of device memory; no sudo or privilege escalation' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '150' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: intermediate }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '49176' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device; compiler, make, binary, nsys, and ncu execution; build/report/log writes; CUDA trace access; administrator-approved non-admin performance-counter access; no sudo or privilege escalation' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '5 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '11' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3,13.3.1,2022.4.2.1,2025.1.3.140,2026.1.3.425,2022.3.0.22,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75,2026.4,2026.4.1,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/profile-full-application-before-kernel/" lang="en">Read the English counterpart</a>
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+LAB08 是一个实验（Lab）。本双语发布对（Publication Pair）要求你在网站之外、仅在原生 Linux（Native Linux）上运行 canonical EX07 可运行示例（Runnable Example）：正确性（correctness）首先通过，随后用分开的 Nsight Systems 与 Nsight Compute 执行建立环境清单（Environment Manifest）和决策链。页面本身不运行 CUDA；它只声明预期观察与证据状态（Evidence Status），当前 runtime 仍是待硬件验证（Pending Hardware Verification）。
+
+## 实验合同
+
+| 坐标 | 要求 |
+| --- | --- |
+| 难度与时间 | 中级（intermediate），约 150 分钟 |
+| 先修 | 严格为 Q07、Q08 |
+| 受支持环境（Supported Environment） | 仅 Native Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU |
+| 工具包通道（Toolkit Lane） | `cuda-11.8`、`cuda-12.9` 或 `cuda-13.3`；同一 Lane 的 `nsys`、`ncu` 与兼容 CUPTI |
+| 固定工作负载 | EX07 的 4,099 个 `std::uint32_t` 元素、serial 路径、五个 chunk 与两个 chunk streams；最大 device memory 为 49,176 bytes |
+| 权限 | device、compiler、binary、report/log directory 与 CUDA trace 访问；管理员预先批准的 non-admin performance-counter access；禁止 `sudo`、临时提权和策略绕过 |
+| 执行顺序 | unprofiled exact correctness，分开的 Systems collection 与 instance selection，随后才是最小 Compute collection |
+| 证据 | compilation 为空；runtime 为 Pending Hardware Verification；recorded observations 为空 |
+
+Nsight Systems 回答 application-level 定位问题；Nsight Compute 只回答已经选定的一个 kernel-level 问题。两份报告来自不同 instrumented executions，不能写成同一次 launch 的联合测量。
+
+## 先修检查
+
+1. 完成 [Q07：先用 Nsight Systems 阅读 application timeline](/correctness/timeline-first-nsight-systems/)，能够用 `.nsys-rep`、process、context、stream、correlation 或 launch occurrence 选中一个 exact kernel instance。
+2. 完成 [Q08：用 Nsight Compute 询问一个 selected-kernel question](/correctness/kernel-first-nsight-compute/)，能够在 collection 前固定 question、filter、section/metric、replay、permission 与 custody。
+3. 确认恰好一张 GPU 对进程可见，管理员已经批准非管理员 performance counters，且你有 learner-owned evidence directory。没有授权时停止；本实验绝不把 `sudo ncu` 当作修复。
+4. [EX07](/examples/streams-events-overlap/)提供 fixed workload；[LAB06](/labs/build-overlapped-pipeline/)与 [VIS14](/visuals/nsight-systems-versus-nsight-compute/)是相关资源，不增加先修项。
+
+## 获取 canonical project
+
+[查看固定提交中的完整 EX07 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb0306db725ab960a61b50456c227545057de392/examples/ex07-streams-events-overlap)，或[下载同一提交的源码归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb0306db725ab960a61b50456c227545057de392.zip)。一种可复核的获取方式是：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout fb0306db725ab960a61b50456c227545057de392
+cd examples/ex07-streams-events-overlap
+```
+
+固定 source commit、canonical build inputs、C++17、architecture targets、4,099-element input、chunk partition、stream/event graph、launch order、verifier 与 binary。任何 source、build flag、input、stream、event、launch 或 profiler-injected application argument 变化都建立新实验，不能继承 LAB08 的 decision trail。
+
+## 创建未填写的环境清单
+
+执行前把下面模板保存到 learner-owned evidence directory。固定字段来自 EX07 合同；每个 `<fill ...>` 都必须由本次实际观察填写。Owner release coordinate、模板文字或另一个机器的输出不能代替实际值。
+
+```yaml
+subject: EX07 / LAB08
+source_repository:
+  source_commit: fb0306db725ab960a61b50456c227545057de392
+  tree_url: https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb0306db725ab960a61b50456c227545057de392/examples/ex07-streams-events-overlap
+  archive_url: https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb0306db725ab960a61b50456c227545057de392.zip
+  acquisition_method: <fill exact command or archive method>
+  checkout_and_worktree_state: <fill; exact commit and unmodified required>
+observation_date_utc: <fill>
+observer: <fill>
+supported_environment:
+  family: Native Linux
+  distribution: <fill>
+  version: <fill>
+  architecture: <fill>
+  kernel: <fill>
+gpu:
+  gpu_identity: <fill after privacy review>
+  selected_device_ordinal: <fill; exactly one device>
+  compute_capability: <fill; must be 7.5 or newer>
+  compute_capability_query: <fill exact command or API>
+  gpu_count_visible: <fill>
+  gpu_count_used: <fill; must be 1>
+driver: <fill exact version>
+toolkit:
+  toolkit_lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+  cuda_toolkit_actual: <fill exact version>
+  cuda_runtime: <fill exact component version or unknown with reason>
+  nvcc: <fill exact version output>
+  host_compiler: <fill exact version output>
+profiling_stack:
+  nsight_systems:
+    expected_lane_coordinate: <fill from Lane table>
+    executable_path: <fill>
+    actual_version_output: <fill exact nsys --version output>
+    version_log: <fill path and SHA-256>
+    profile_help_log: <fill path and SHA-256>
+    stats_help_log: <fill path and SHA-256>
+  nsight_compute:
+    expected_lane_coordinate: <fill from Lane table>
+    executable_path: <fill>
+    actual_version_output: <fill exact ncu --version output>
+    version_log: <fill path and SHA-256>
+    help_log: <fill path and SHA-256>
+    section_query_log: <fill path and SHA-256>
+    metric_query_log: <fill path and SHA-256>
+  cupti:
+    expected_lane_coordinate: <fill from Lane table>
+    actual_version: <fill>
+    observation_method: <fill exact API, package, header, or library query>
+    library_path_and_sha256: <fill>
+    compatibility_result: <fill pass or blocker against this Toolkit and both profilers>
+permissions:
+  cuda_device_and_executable_access: <fill>
+  filesystem_access: <fill learner-owned paths>
+  cuda_trace_access: <fill>
+  performance_counters:
+    administrator_policy_owner: <fill>
+    non_admin_approval_record: <fill>
+    actual_access_result: <fill pass or exact denial>
+  privilege_escalation: prohibited; no sudo or policy bypass
+device_access_state:
+  cuda_visible_devices: <fill>
+  container_vm_mig_mps_state: <fill>
+topology:
+  relevant_cpu_numa_pcie_coordinates: <fill or not relevant with reason>
+concurrent_load:
+  background_processes_and_exclusion_policy: <fill>
+clock_power_thermal:
+  persistence_and_clock_policy: <fill>
+  power_policy: <fill>
+  thermal_state_before_after: <fill>
+build_contract:
+  cxx_dialect: c++17
+  build_type: <fill>
+  architecture_targets: <fill; canonical sm_75 and compute_75 expected>
+  optimization_debug_flags: <fill>
+  link_mode: <fill>
+  environment_variables: <fill>
+  ordered_expanded_argv: <fill>
+binary_sha256: <fill build/ex07-streams-events-overlap>
+input_generation:
+  element_type: std::uint32_t
+  element_count: 4099
+  formula: input[index] = 19 + 5 * index
+  dataset_or_seed: deterministic; no external dataset
+workload:
+  paths: [serial, chunked]
+  element_count: 4099
+  transform: output[index] = input[index] * 3 + 7
+  chunk_elements: 1024
+  chunk_count: 5
+  last_chunk_elements: 3
+  chunk_stream_count: 2
+launch_geometry:
+  block_threads: 128
+  serial_and_chunk_launch_order: <fill from source review; confirm at run>
+memory:
+  device_and_host_requirements: <fill actual allocations>
+  maximum_device_memory_bytes: 49176
+  page_locked_host_memory_bytes: 49188
+correctness_method:
+  oracle: independent EX07 host reference exact comparison
+  unprofiled_command: <fill>
+  profiler_run_checks: <fill>
+correctness_criteria:
+  serial_all_4099_outputs_exact: <fill pass or fail>
+  chunked_all_4099_outputs_exact: <fill pass or fail>
+  cuda_boundaries_and_application_status: <fill>
+measurement_method:
+  systems_then_compute: separate instrumented executions
+  same_physical_launch_claim: prohibited
+  timing_or_speedup_statistic: not applicable
+systems_method:
+  application_question: <fill without assuming a kernel bottleneck>
+  representative_path_rationale: <fill>
+  trace_domains_and_sampling: <fill>
+  capture_boundary: <fill>
+  exact_command: <fill expanded argv>
+  inspection_method: <fill UI, stats, or custody-controlled export>
+systems_report:
+  path: <fill .nsys-rep>
+  sha256: <fill>
+  profiler_stdout_stderr: <fill paths and hashes>
+  exit_status: <fill>
+  diagnostics_and_dropped_data: <fill>
+selected_kernel_instance:
+  source_report_sha256: <fill same .nsys-rep hash>
+  application_phase: <fill serial or exact chunked phase>
+  process: <fill>
+  cuda_context: <fill or unavailable with reason>
+  stream: <fill or unavailable with reason>
+  kernel_name: <fill exact reported name identifying transform_kernel>
+  launch_occurrence: <fill>
+  correlation_identity: <fill or unavailable with reason>
+  observed_interval_identity: <fill; selection coordinate, not a timing conclusion>
+  selection_reason: <fill>
+selected_kernel_question:
+  exact_question: <fill one specific mechanism, symptom, and decision>
+  section_or_metric_evidence_needed: <fill after current-GPU query>
+  support_reject_return_rule: <fill before ncu collection>
+compute_method:
+  corresponding_occurrence_rule: <fill; never same-run equivalence>
+  kernel_name_basis_and_filter: <fill from actual help>
+  launch_skip: <fill>
+  launch_count: 1
+  selected_section: <fill one queried section or not used>
+  selected_metrics: <fill short queried list or not used>
+  minimality_rationale: <fill>
+  exact_command: <fill expanded argv>
+  replay:
+    requested_mode: <fill from actual help and plan>
+    actual_mode: <fill from report or logs>
+    pass_or_replay_count: <fill if reported>
+    save_restore_and_matching_behavior: <fill>
+    perturbation_or_serialization_boundary: <fill>
+compute_report:
+  path: <fill .ncu-rep>
+  sha256: <fill>
+  profiler_stdout_stderr: <fill paths and hashes>
+  exit_status: <fill>
+  collected_kernel_identity: <fill>
+  permission_result: <fill>
+  section_metric_names_units: <fill exact report values or blocker>
+decision_trail:
+  systems_report_to_selection: <fill>
+  selection_to_question: <fill>
+  question_to_query_and_collection: <fill>
+  correspondence_not_identity: <fill explicit statement>
+  supported_next_action: <fill or insufficient evidence>
+raw_logs:
+  command_stdout_stderr_paths: <fill>
+  query_and_help_paths: <fill>
+exit_statuses:
+  one_status_record_per_command: <fill>
+hashes:
+  algorithm: SHA-256
+  binary_report_log_manifest_ledger: <fill path>
+custody:
+  private_original_directory: <fill immutable learner-controlled path>
+  observer_and_transfer_history: <fill>
+  derived_exports_and_parent_hashes: <fill>
+  retention_and_access_policy: <fill>
+sanitization:
+  public_derivative_planned: <fill yes or no>
+  reviewer_and_date: <fill>
+  removed_coordinates: <fill host, user, paths, device, network, or none>
+  transformations: <fill>
+  original_to_derivative_hash_mapping: <fill>
+criteria_result:
+  correctness_gate: <fill>
+  systems_gate: <fill>
+  kernel_selection_gate: <fill>
+  compute_gate: <fill>
+  evidence_status_candidate: <fill only after complete review>
+```
+
+清单必须伴随原始 logs、每条 command 的 exit status 与 hash ledger。不要把 release-note version 复制到 `actual_version_output`，也不要在缺失字段填入推测值。
+
+## 复核 canonical source
+
+`chunk-contract` range 固定 4,099 个元素、1,024-element chunks、两个 chunk streams、deterministic input/reference 与 exact verifier：
+
+<CanonicalCode exampleId="EX07" range="chunk-contract" />
+
+`stream-pipeline` range 固定同一个 `transform_kernel`、serial H2D-kernel-D2H 序列、timing-disabled event edge 与两个 chunk streams：
+
+<CanonicalCode exampleId="EX07" range="stream-pipeline" />
+
+Source contract 预期一个 serial `transform_kernel` launch，随后五个 chunk launches；最后一个 chunk 只有 3 个元素。这是静态 source review，不是已记录 timeline。`asyncEngineCount` 与 `concurrentKernels` 仍只是 capability fields，不能证明 overlap。CanonicalCode 是唯一 source display；本页不维护第二份 CUDA code fence。
+
+## 构建并保留记录
+
+在 EX07 project directory 中执行 canonical C++17 build：
+
+```sh
+mkdir -p lab08-evidence/build lab08-evidence/systems lab08-evidence/compute
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/ex07-streams-events-overlap
+```
+
+为每条命令保存独立 raw stdout/stderr 与 exit status，并把 expanded argv、compiler outputs 与 binary SHA-256 写入 manifest。任一步失败就记录 blocker 并停止依赖步骤。本地 build 和 host-only test 不会把空 compilation axis 改成编译已检查（Compile-Checked）。
+
+## 首先验证正确性
+
+任何 profiler 之前，直接运行未 instrument 的 binary：
+
+```sh
+./build/ex07-streams-events-overlap \
+  >lab08-evidence/correctness.stdout.log \
+  2>lab08-evidence/correctness.stderr.log
+status=$?
+printf '%s\n' "$status" >lab08-evidence/correctness.status
+```
+
+只有 serial 与 chunked 路径各自对全部 4,099 个 output 通过 independent host reference exact comparison、所有 CUDA boundaries 成功且 process status 为零，才允许继续。不能用 tolerance、抽样元素或只看 `PASS` 字样替代 source-defined exact verifier。正确性先于 profiling 与任何解释；失败时不生成 Systems-to-Compute conclusion。
+
+## 冻结 Systems collection plan
+
+第一次 `nsys profile` 前写下以下计划：
+
+1. Application question 只问 fixed EX07 control path 中 CUDA APIs、copies、streams、events 与 `transform_kernel` instances 出现在哪里；不预设 overlap、duration 或 bottleneck。
+2. Representative 在本 Lab 中只表示 exact pinned binary 完整运行 serial 与 chunked paths、4,099-element workload 和正常 completion。它不代表 production size 或一般性能。
+3. 冻结 source commit、binary hash、device、Lane、environment、trace domains、sampling policy、capture boundary、concurrent-load policy、output base 与 exact command。Systems run 自身仍须再次通过 application correctness checks。
+4. 计划只生成一份 primary `.nsys-rep` 并从中选择一个 exact `transform_kernel` instance；需要重跑时建立新 run directory，不能覆盖旧 report。
+
+本阶段的交付物是 selection evidence，不是 timing summary。Timeline 可以定位 instance，但 LAB08 不要求从它发布 overlap、latency 或 speedup statement。
+
+## 通过 Systems 版本与 CUPTI 门槛
+
+三个 Lane 的 owner coordinates 固定如下；它们不是本机 observation：
+
+| Toolkit Lane | EX07 Toolkit | Nsight Systems | Nsight Compute | CUPTI |
+| --- | --- | --- | --- | --- |
+| `cuda-11.8` | `11.8.0` | `2022.4.2.1` | `2022.3.0.22` | `11.8.87` |
+| `cuda-12.9` | `12.9.2` | `2025.1.3.140` | `2025.2.1.3` | `12.9.79` |
+| `cuda-13.3` | `13.3.1` | `2026.1.3.425` | `2026.2.1.5` | `13.3.75` |
+
+先保留实际 CLI 与 help output：
+
+```sh
+nsys --version >lab08-evidence/systems/nsys-version.stdout.log \
+  2>lab08-evidence/systems/nsys-version.stderr.log
+nsys profile --help >lab08-evidence/systems/nsys-profile-help.stdout.log \
+  2>lab08-evidence/systems/nsys-profile-help.stderr.log
+nsys stats --help >lab08-evidence/systems/nsys-stats-help.stdout.log \
+  2>lab08-evidence/systems/nsys-stats-help.stderr.log
+```
+
+分别保存三个 exit statuses 和 log hashes。Manifest 的 Systems version 只能来自实际 `nsys --version`。确认 actual executable、Toolkit、driver 与 actual CUPTI library 对应所选 Lane，并记录 CUPTI version 的准确 observation method 与 library hash。Version mismatch、unsupported help option、CUPTI incompatibility、trace permission failure 或 report-write failure 都是 blocker；不要切换到另一个 Lane 的 syntax 后保持原 manifest。
+
+## 采集完整 application 的 Systems report
+
+在全新目录中，用 captured help 验证下列 option 后执行。`--sample=none` 避免把 CPU sampling permission 引入这个 CUDA-only selection contract：
+
+```sh
+systems_base=lab08-evidence/systems/lab08-ex07-systems
+test ! -e "${systems_base}.nsys-rep" || exit 1
+nsys profile --trace=cuda --sample=none --output="$systems_base" \
+  ./build/ex07-streams-events-overlap \
+  >lab08-evidence/systems/profile.stdout.log \
+  2>lab08-evidence/systems/profile.stderr.log
+status=$?
+printf '%s\n' "$status" >lab08-evidence/systems/profile.status
+if [ "$status" -ne 0 ] || [ ! -f "${systems_base}.nsys-rep" ]; then
+  printf 'profile failed or exact .nsys-rep is missing\n' >&2
+  exit 1
+fi
+sha256sum "${systems_base}.nsys-rep" \
+  >lab08-evidence/systems/lab08-ex07-systems.sha256
+nsys stats "${systems_base}.nsys-rep" \
+  >lab08-evidence/systems/stats.stdout.log \
+  2>lab08-evidence/systems/stats.stderr.log
+stats_status=$?
+printf '%s\n' "$stats_status" >lab08-evidence/systems/stats.status
+```
+
+若 actual help 不支持某个 option，先停止并在 plan 中声明该 Lane 的 owner-supported equivalent；不要静默改命令。只有 profiler 与 application status 为零、两条 correctness paths 再次通过、report 存在且 diagnostics 没有使 selection 不完整时，才能进入 instance selection。`.nsys-rep` 是 primary artifact；stats 或 export 只是带 parent hash 的 derivative。
+
+## 选择一个 exact kernel instance
+
+Source review 只预测六个 matching launches，不能替代 report selection。在 `.nsys-rep` timeline 或 custody-controlled export 中选择恰好一个 reported `transform_kernel` instance，并填写 process、CUDA context、stream、serial/chunked phase、matching-launch ordinal、correlation identity 与 report interval identity。字段不可用时写明 unavailable 与原因，不要猜测。
+
+Selected kernel instance record 必须紧邻它的 specific question、section/metric evidence need 与 decision rule。LAB08 使用这个 bounded question：**对于 frozen EX07 workload 中与该 selected `transform_kernel` 对应的 occurrence，当前 GPU 查询得到的 global-memory request/sector evidence 是否与它的 contiguous `std::uint32_t` load/store access model 一致到足以支持或拒绝下一步 controlled experiment？**
+
+把 question 中的 exact phase、occurrence 与 evidence name 填入 manifest。若 Systems report 无法可靠地区分 occurrence，或问题仍是 application latency、copy/kernel overlap、launch gap 或 dependency，就返回 Systems plan；不能用更多 kernel metrics 掩盖 selection failure。
+
+## 冻结 Compute collection plan
+
+先运行一份 separate `nsys` execution，再运行一份 separate `ncu` / Nsight Compute execution。后者只能重现一个**对应 occurrence**；它永远不是 Systems report 中同一个 physical launch。
+
+在任何 counter collection 前冻结：
+
+1. 保持 source commit、binary SHA-256、device、4,099-element input、serial/chunked order、environment 与 correctness criteria；只允许 profiler 和它公开声明的 instrumentation/replay 不同。
+2. 从 actual section/metric query 中选择一个与 bounded question 对应的 section，或更短的 explicit metric list，二选一。禁止 `--set full`、broad section sweep 或 post-hoc metric dump。
+3. 用 actual kernel-name basis、filter、matching launch skip 与 `--launch-count 1` 映射 occurrence。先写 support、reject、insufficient 与 return-to-Systems rule。
+4. 声明 replay mode；收集后记录 actual passes、save/restore、cache/clock controls、serialization 与 perturbation。不得比较 `.nsys-rep` duration 和 `.ncu-rep` duration 来声称同一次运行加速或变慢。
+
+## 通过 Compute query 与权限门槛
+
+用同一 selected GPU 和 Lane 保存 actual version、help 与 query outputs：
+
+```sh
+ncu --version >lab08-evidence/compute/ncu-version.stdout.log \
+  2>lab08-evidence/compute/ncu-version.stderr.log
+ncu --help >lab08-evidence/compute/ncu-help.stdout.log \
+  2>lab08-evidence/compute/ncu-help.stderr.log
+ncu --list-sections >lab08-evidence/compute/ncu-sections.stdout.log \
+  2>lab08-evidence/compute/ncu-sections.stderr.log
+ncu --devices 0 --query-metrics --query-metrics-mode all \
+  >lab08-evidence/compute/ncu-metrics.stdout.log \
+  2>lab08-evidence/compute/ncu-metrics.stderr.log
+```
+
+保存每条 command 的 exit status 与 SHA-256。实际 `ncu --version` 决定使用 current 2026.2 CLI 还是 archived 2025.2/2022.3 contract；captured `ncu --help` 决定 exact filter、launch 与 replay syntax。Section 必须出现在本次 list 中，metric 必须来自这张 GPU 的 query；不能借用另一 GPU、Lane 或文档 example 的名字。
+
+在管理员已经批准的 non-admin policy 下执行 planned minimal collection。出现 `ERR_NVGPUCTRPERM`、其他 performance-counter access denial、unsupported/`n/a` evidence、CUPTI mismatch 或 report-write error 时，保存原始 error 并停止。管理员可在 Lab 外修复 policy；本实验不授权 `sudo`、setuid workaround 或容器逃逸。
+
+## 采集一个最小 Compute report
+
+下面是 section path 的 command shape；所有 placeholder 都必须来自 selection ledger 与 actual help/query。若 question 只需较短 metrics list，只把 `--section` clause 替换为一个 explicit `--metrics` clause，不要执行两份 exploratory dump。
+
+```sh
+kernel_filter='<fill exact filter matching transform_kernel>'
+launch_skip='<fill matching-launch skip count>'
+section_name='<fill exact queried section>'
+compute_base=lab08-evidence/compute/lab08-selected-kernel
+test ! -e "${compute_base}.ncu-rep" || exit 1
+ncu --devices 0 \
+  --kernel-name "$kernel_filter" \
+  --launch-skip "$launch_skip" \
+  --launch-count 1 \
+  --replay-mode kernel \
+  --section "$section_name" \
+  --export "$compute_base" \
+  ./build/ex07-streams-events-overlap \
+  >lab08-evidence/compute/profile.stdout.log \
+  2>lab08-evidence/compute/profile.stderr.log
+status=$?
+printf '%s\n' "$status" >lab08-evidence/compute/profile.status
+if [ "$status" -ne 0 ] || [ ! -f "${compute_base}.ncu-rep" ]; then
+  printf 'profile failed or exact .ncu-rep is missing\n' >&2
+  exit 1
+fi
+sha256sum "${compute_base}.ncu-rep" \
+  >lab08-evidence/compute/lab08-selected-kernel.sha256
+```
+
+只有 actual help 确认这些 options 后才能运行；若 Lane 使用不同 owner-supported syntax，先更新 exact command record。验收时确认 application correctness、恰好一个 intended corresponding kernel occurrence、requested section/metrics、permission result 与 report hash。记录 actual replay mode/pass count 和可能的 serialization、cache、clock、save/restore perturbation；不要把 profiled execution 描述成未修改 application。
+
+## 保留 Systems-to-Compute decision trail
+
+| Edge | 必需记录 | Stop rule |
+| --- | --- | --- |
+| Systems report -> selection | `.nsys-rep` SHA-256、phase、process、context、stream、name、occurrence/correlation | 不能唯一定位就返回 Systems |
+| Selection -> question | 一个 mechanism、一个 symptom、一个可改变的 decision | “profile slow kernel” 不合格 |
+| Question -> query | actual `ncu` version/help、section list、metric query、definitions 与 units | unavailable 就记录 blocker |
+| Query -> Compute report | exact filter、skip/count、一个 section 或 short metric list、permission、replay | 目标不唯一或 permission denied 就停止 |
+| Reports -> interpretation | 两个 report hashes、对应规则、不同执行声明、remaining alternatives | 不允许 same-run equivalence |
+
+Decision 可以是继续 controlled baseline/candidate experiment、拒绝当前 hypothesis、证据不足或返回 Nsight Systems。单份 `.ncu-rep` 中的高 percentage、stall share、throughput 或 duration 不能自动命名 bottleneck；本 Lab 也不从 selection workflow 推导 speedup。
+
+## 使用 expected-only report fixture
+
+[LAB08 Nsight Compute expected-only report plan](/assets/profiler-report-fixtures/lab08-nsight-compute.expected.json)是本站原创、已消毒（sanitized）的 project-authored **expected-only plan**。它不是 profiler output，不是 `.ncu-rep` 或 `.nsys-rep`，不包含 counter、timeline、timing 或运行 observation，也不构成 compilation/runtime evidence。
+
+Fixture 只显示预期字段、frozen EX07 coordinates 与 pending capture status。它的 sanitization 记录说明没有 capture values 可替换；不能把 fixture 改名为 report、填写预测数字或提交它来升级 Evidence Status。真实报告必须通过本页的 manifest、hash、custody 与 private-original-to-sanitized-derivative chain 单独建立。
+
+## 预期观察，不是已记录结果
+
+- Serial 与 chunked paths **应当**在任何 profiler 前各自对全部 4,099 outputs 通过 exact host-reference comparison。
+- Qualifying Systems collection **应当**保留足以选择一个 exact reported `transform_kernel` instance 的 CUDA activity；这不预填 timeline shape、duration 或 overlap。
+- Selection ledger **应当**把一个 instance、一个 specific question 与 separate Compute execution 中的 corresponding occurrence 连接起来，而不是声称 same physical launch。
+- Actual version/help、CUPTI、section/metric query 与 non-admin counter gates **应当**产生 pass 或 retained blocker，不能产生 guessed substitute。
+- Qualifying minimal Compute collection **应当**只保留 question 所需的 section/metrics，并附 replay、perturbation、permission、hash 与 custody。
+
+以上都是预期观察，不是已记录结果。`recordedObservations` 仍为空；本页没有 profiler report、timeline、metric、timing、bottleneck 或 speedup conclusion。
+
+## 分开维护证据轴
+
+| 轴 | 当前状态 | 边界 |
+| --- | --- | --- |
+| Compilation | 空 | 本地 build log 不自动成为 Compile-Checked record |
+| Runtime | Pending Hardware Verification | 尚无 maintainer-controlled 参考环境（Reference Environment）qualifying run |
+| Recorded observations | 空 | Expected-only fixture、source review、help/query output 与 symbolic commands 都不是 recorded result |
+
+只有完整 manifest、correctness verdict、两个 primary reports、raw logs、exit statuses、actual versions、CUPTI compatibility、permission result、replay record、hash custody、sanitization mapping 与 criteria result 才能进入后续 evidence review。即使 learner run 完成，页面 metadata 也不会自动升级。
+
+## 清理与保留
+
+先把 manifest、binary hash、raw stdout/stderr、exit statuses、help/query outputs、`.nsys-rep`、`.ncu-rep`、derived exports、decision trail、blockers 与 sanitization ledger 保存到 learner-controlled immutable directory，再执行：
+
+```sh
+make clean BUILD_DIR=build
+```
+
+不要删除 primary reports 后只保留 screenshot 或 summary。不要公开 credential、用户名、host/device identifier、absolute private path、network coordinate 或未经检查的大型 report；若发布 sanitized derivative，保留 private original hash 与 transformation record。
+
+## 来源与复核
+
+- [CUDA Toolkit 11.8 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)提供 11.8.0 Lane 的 selected Systems、Compute 与 CUPTI coordinates。
+- [CUDA Toolkit 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html)提供 12.9 Lane 的 component coordinates；EX07 build Lane 保持 12.9.2。
+- [CUDA Toolkit 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)提供 13.3 Lane coordinates；EX07 build Lane 保持 13.3.1。
+- [NVIDIA Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html)定义 current CLI、CUDA trace、`.nsys-rep`、stats、export 与 timeline workflow。
+- [NVIDIA Nsight Systems Release Notes](https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights)定义 current changes、deprecations、support 与 trace limitations。
+- [NVIDIA Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)约束 metrics、replay、overhead、permission 与 reproducibility。
+- [NVIDIA Nsight Compute CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)定义 current filters、queries、sections/metrics 与 report export。
+- [NVIDIA Nsight Compute 2026.2.1 Release Notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1)定义 current release support boundary。
+- [NVIDIA Nsight Compute CLI 2025.2 archive](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html)用于解释 cuda-12.9 Lane retained commands。
+- [NVIDIA Nsight Compute CLI 2022.3 archive](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html)用于解释 cuda-11.8 Lane retained commands。
+- [CUDA Profiling Tools Interface Usage](https://docs.nvidia.com/cupti/main/main.html)约束 CUPTI compatibility、activity/correlation、buffering、overhead 与 subscriber boundaries。
+
+Context7 `/websites/nvidia_cuda` 是本页唯一使用的检索接口；没有使用一般 web retrieval。上面的 NVIDIA owner pages 才是 precise factual coordinates，全部访问于 **2026-08-31**。本页的 manifest、plans、decision trail、fixture explanation 与编排均为 CC BY 4.0 原创内容；没有复制 NVIDIA report、timeline、metric value、screenshot、table、figure 或 benchmark conclusion。
+
+**事实核查日期：2026-08-31。** Compilation 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。

@@ -1,0 +1,142 @@
+---
+title: 'Nsight Systems versus Nsight Compute：从症状选择下一份证据'
+description: 用确定性的 symptom-to-evidence tree 先选择 application timeline；只有选定 kernel 与问题后，才进入 kernel-level investigation。
+pairId: vis14
+counterpart: /en/visuals/nsight-systems-versus-nsight-compute/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - decision-rule
+  - tool-boundaries
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS14
+prerequisites:
+  - Q07
+  - Q08
+relatedUnits:
+  - Q06
+  - LAB06
+  - LAB08
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Systems User Guide'
+    url: 'https://docs.nvidia.com/nsight-systems/UserGuide/index.html'
+    version: 'NVIDIA Nsight Systems v2026.4'
+    platform: 'Current Linux CLI, CUDA trace, report, stats, and export behavior'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Systems Release Notes'
+    url: 'https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights'
+    version: 'NVIDIA Nsight Systems 2026.4.1; last updated 2026-07-28'
+    platform: 'Current changes, deprecations, architecture support, and trace limitations'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Metric availability, collection overhead, replay, permissions, and reproducibility'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Kernel filtering, section and metric selection, report import and export'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI 2026.2.1 / CUDA 13.3 documentation'
+    platform: 'CUDA activity records, compatibility, correlation, buffering, and subscriber boundaries'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis14 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/visuals/nsight-systems-versus-nsight-compute/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,decision-rule,tool-boundaries,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS14 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q07,Q08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q06,LAB06,LAB08' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2026.4,2026.4.1,2026.2.1,13.3' }
+---
+
+import ProfilerDecisionExplorer from '../../../components/ProfilerDecisionExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/nsight-systems-versus-nsight-compute/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+完成 Q07 与 Q08 后，用 VIS14 把一个可观察症状转换为下一种证据来源。Bounded rule 是 timeline first：application latency、CPU/launch gaps、copy/compute overlap、依赖不清楚，以及尚未选定 kernel，都先进入 Nsight Systems。只有代表性 timeline 已选定一个精确 kernel instance，而且学习者写出了一个 kernel-level question 时，Nsight Compute 才成为下一步。
+
+<ProfilerDecisionExplorer locale="zh-CN" />
+
+## 控件
+
+一个原生 select 提供六个 reviewed symptoms；方向键、typeahead 与平台原生 select 行为支持键盘和移动端。重置恢复端到端症状，并把焦点返回 select。简短 polite live region 宣布变化，变化中的 workbench 本身不是 live region。
+
+Controls 与 live workbench 在 source HTML 中保留 `hidden`。Custom element 只有找到全部 parts 且成功推导初始 view 后才显示它们。页面没有 autoplay、timer、randomness、browser storage、network request、report parser、GPU query 或 profiler process。
+
+## 确定性决策规则
+
+规则只问一个问题：**代表性 application timeline 是否已经选定一个精确 kernel instance，而且当前问题是否属于 kernel level？**
+
+- **否**：先收集或检查 Nsight Systems application timeline。
+- **是**：下一步使用 Nsight Compute；在收集前声明 kernel filter、question、section/metric set、replay behavior、tool version 与 counter permission。
+
+Recommendation 由 symptom 推导。模型没有独立 tool selector，因此不能把“尚未选定 kernel”与 Nsight Compute 配对，也不能靠点击偏爱的产品绕过 timeline gate。
+
+## 工具边界
+
+Nsight Systems 在 application timeline 中关联 CPU threads、CUDA API activity、kernels、copies、streams、dependencies、gaps 与 overlap。`.nsys-rep` 和 owner-supported export 可以定位工作并选出下一问题，但本身不会证明详细 kernel bottleneck。
+
+Nsight Compute 分析 selected kernels，并把 sections 或 individual metrics 收集到 `.ncu-rep`。Metric 名称与 availability 随 GPU/tool version 变化；collection 可能需要 multi-pass 或 replay，可能扰动或序列化工作，并需要 reviewed performance-counter policy。应先查询 availability，只收集回答 declared question 所需的证据；metric dump 不是诊断。
+
+两个工具在适用 trace/counter 路径上都使用包括 CUPTI 在内的 CUDA profiling infrastructure，但 reports 来自两次独立 instrumented executions。任何一个都不应被描述成未修改的 application run；kernel report 也不能替代选中它的代表性 application timeline。
+
+## 静态回退
+
+Server 永久渲染 gate 与全部六个 leaves：四个 Nsight Systems leaves，两个 Nsight Compute leaves。每个 leaf 都保留稳定的 symptom、tool、scope、artifact、decision gate 与 next gate data。文字、heading、solid/double border 与 branch order 承担区分，不只依赖颜色。禁用 JavaScript、390-pixel viewport、reduced motion、forced colors 与 print 时，完整 tree 仍然可见。
+
+## 证据边界
+
+VIS14 不启动 `nsys` 或 `ncu`，不打开 profiler report，不查询 GPU、CUPTI activity、metric 或 performance counter，也不发布 timeline、timing、bottleneck、throughput 或 speedup observation。Compilation、runtime、expected-observation 与 recorded-observation arrays 全为空，不授予 Compile-Checked、Community-Observed 或 Runtime-Verified Evidence Status。
+
+## 来源
+
+[Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) 与 [2026.4.1 release notes](https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights) 确立 current timeline、CLI、report/export、overhead 与 support boundaries。[Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) 与 [CLI guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) 确立 current kernel filtering、metric/section selection、replay、permission 与 report behavior。[CUPTI Usage guide](https://docs.nvidia.com/cupti/main/main.html) 提供 current compatibility 与 activity/correlation boundaries。
+
+Context7 `/websites/nvidia_nsight-systems` 与 `/websites/nvidia_nsight-compute_nsightcompute` 只用于 retrieval cross-check；上面的 NVIDIA owner pages 才是事实来源。五个 coordinates 均于 **2026-08-31** 访问。本站没有复制 NVIDIA screenshot、report、code、figure、table、decision tree 或 layout；model、copy 与 composition 均为原创。
+
+**Fact checked: 2026-08-31.**

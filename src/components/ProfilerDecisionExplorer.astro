@@ -1,0 +1,270 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/profiler-decision-visual.css';
+import {
+  PROFILER_DECISION_COPY,
+  type ProfilerDecisionLocale,
+} from '../visuals/profiler-decision-copy';
+import {
+  PROFILER_DECISION_MODEL_CONTRACT,
+  PROFILER_DECISION_SYMPTOMS,
+  PROFILER_DECISION_TOOLS,
+  createProfilerDecisionState,
+  deriveProfilerDecisionView,
+  type ProfilerDecisionState,
+  type ProfilerDecisionView,
+} from '../visuals/profiler-decision-model';
+
+interface Props {
+  locale: ProfilerDecisionLocale;
+}
+
+const { locale } = Astro.props;
+const copy = PROFILER_DECISION_COPY[locale];
+const initialState = createProfilerDecisionState();
+
+function requireView(state: ProfilerDecisionState, context: string): ProfilerDecisionView {
+  const result = deriveProfilerDecisionView(state);
+  if (!result.accepted) throw new Error(`VIS14 ${context} must be a reviewed state.`);
+  return result.view;
+}
+
+const initialView = requireView(initialState, 'initial view');
+const staticViews = PROFILER_DECISION_SYMPTOMS.map((symptomId) =>
+  requireView({ symptomId }, `static ${symptomId}`));
+---
+
+<cuda-profiler-decision-explorer
+  class="visual-explainer profiler-decision-visual not-content"
+  data-visual-id="VIS14"
+  data-locale={locale}
+  data-symptom-id={initialView.symptomId}
+  data-recommended-tool={initialView.recommendedTool}
+  data-analysis-scope={initialView.analysisScope}
+  data-artifact-kind={initialView.artifactKind}
+  data-decision-gate={initialView.decisionGate}
+  data-next-gate={initialView.nextGate}
+  data-evidence-status-effect={PROFILER_DECISION_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls profiler-decision-controls" data-visual-controls hidden>
+      <legend>{copy.controlsHeading}</legend>
+      <label>
+        <span>{copy.symptomLabel}</span>
+        <select data-profiler-symptom aria-label={copy.symptomLabel}>
+          {PROFILER_DECISION_SYMPTOMS.map((symptomId) => (
+            <option value={symptomId} selected={symptomId === initialState.symptomId}>
+              {copy.symptoms[symptomId].label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button type="button" data-profiler-action="reset">{copy.reset}</button>
+      <p class="profiler-decision-status" data-profiler-status role="status" aria-live="polite" aria-atomic="true">
+        {copy.statusReady}
+      </p>
+    </fieldset>
+
+    <section class="profiler-live-workbench" data-live-workbench data-pagefind-ignore hidden aria-label={copy.workbenchHeading}>
+      <header>
+        <h3>{copy.workbenchHeading}</h3>
+        <p><strong>{copy.selectedSymptom}:</strong> <span data-live-symptom>{copy.symptoms[initialView.symptomId].label}</span></p>
+      </header>
+      <dl class="profiler-decision-summary">
+        <div><dt>{copy.recommendedTool}</dt><dd data-live-tool>{copy.tools[initialView.recommendedTool].label}</dd></div>
+        <div><dt>{copy.scope}</dt><dd data-live-scope>{copy.tools[initialView.recommendedTool].scope}</dd></div>
+        <div><dt>{copy.artifact}</dt><dd data-live-artifact>{copy.tools[initialView.recommendedTool].artifact}</dd></div>
+      </dl>
+      <div class="profiler-tool-pair">
+        {PROFILER_DECISION_TOOLS.map((tool) => (
+          <article data-tool-card={tool} aria-current={tool === initialView.recommendedTool ? 'true' : undefined}>
+            <span data-recommendation-marker hidden={tool !== initialView.recommendedTool}>{copy.recommended}</span>
+            <h4>{copy.tools[tool].label}</h4>
+            <p>{copy.tools[tool].use}</p>
+            <p><strong>{copy.boundary}:</strong> {copy.tools[tool].boundary}</p>
+          </article>
+        ))}
+      </div>
+      <dl class="profiler-decision-rationale">
+        <div><dt>{copy.why}</dt><dd data-live-why>{copy.symptoms[initialView.symptomId].why}</dd></div>
+        <div><dt>{copy.inspect}</dt><dd data-live-inspect>{copy.symptoms[initialView.symptomId].inspect}</dd></div>
+        <div><dt>{copy.next}</dt><dd data-live-next>{copy.nextGates[initialView.nextGate]}</dd></div>
+      </dl>
+    </section>
+
+    <section class="visual-section profiler-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <div class="profiler-decision-tree">
+        <p class="profiler-tree-start">{copy.treeStart}</p>
+        <p class="profiler-tree-gate">{copy.gateQuestion}</p>
+        <div class="profiler-static-branches">
+          <section>
+            <h4>{copy.systemsBranch}</h4>
+            <ol>
+              {staticViews.filter(({ recommendedTool }) => recommendedTool === 'nsight-systems').map((view) => (
+                <li
+                  data-static-decision-leaf
+                  data-symptom-id={view.symptomId}
+                  data-recommended-tool={view.recommendedTool}
+                  data-analysis-scope={view.analysisScope}
+                  data-artifact-kind={view.artifactKind}
+                  data-decision-gate={view.decisionGate}
+                  data-next-gate={view.nextGate}
+                >
+                  <strong>{copy.symptoms[view.symptomId].label}</strong>
+                  <span>{copy.symptoms[view.symptomId].why}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+          <section>
+            <h4>{copy.computeBranch}</h4>
+            <ol>
+              {staticViews.filter(({ recommendedTool }) => recommendedTool === 'nsight-compute').map((view) => (
+                <li
+                  data-static-decision-leaf
+                  data-symptom-id={view.symptomId}
+                  data-recommended-tool={view.recommendedTool}
+                  data-analysis-scope={view.analysisScope}
+                  data-artifact-kind={view.artifactKind}
+                  data-decision-gate={view.decisionGate}
+                  data-next-gate={view.nextGate}
+                >
+                  <strong>{copy.symptoms[view.symptomId].label}</strong>
+                  <span>{copy.symptoms[view.symptomId].why}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-profiler-decision-explorer>
+
+<script>
+  import { PROFILER_DECISION_COPY } from '../visuals/profiler-decision-copy';
+  import {
+    createProfilerDecisionState,
+    deriveProfilerDecisionView,
+    reduceProfilerDecisionState,
+    type ProfilerDecisionState,
+    type ProfilerDecisionView,
+  } from '../visuals/profiler-decision-model';
+
+  type Parts = Readonly<{
+    controls: HTMLFieldSetElement;
+    workbench: HTMLElement;
+    symptom: HTMLSelectElement;
+    reset: HTMLButtonElement;
+    status: HTMLElement;
+  }>;
+
+  class CudaProfilerDecisionExplorer extends HTMLElement {
+    private state: ProfilerDecisionState = createProfilerDecisionState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const parts = this.parts();
+      if (!parts) return;
+      if (!this.render(parts)) return;
+
+      parts.symptom.addEventListener('change', () => {
+        const update = reduceProfilerDecisionState(this.state, {
+          type: 'select-symptom', symptomId: parts.symptom.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        if (this.render(parts)) this.announce(parts, this.copy().statusSelected);
+      });
+      parts.reset.addEventListener('click', () => {
+        const update = reduceProfilerDecisionState(this.state, { type: 'reset' });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        if (!this.render(parts)) return;
+        this.announce(parts, this.copy().statusReset);
+        parts.symptom.focus();
+      });
+
+      parts.controls.hidden = false;
+      parts.workbench.hidden = false;
+      this.dataset.ready = 'true';
+    }
+
+    private parts(): Parts | null {
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const symptom = this.querySelector<HTMLSelectElement>('[data-profiler-symptom]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-profiler-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-profiler-status]');
+      if (!controls || !workbench || !symptom || !reset || !status) return null;
+      return { controls, workbench, symptom, reset, status };
+    }
+
+    private copy() {
+      return PROFILER_DECISION_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private reject(parts: Parts, issue: keyof ReturnType<CudaProfilerDecisionExplorer['copy']>['issues']) {
+      parts.symptom.value = this.state.symptomId;
+      this.announce(parts, this.copy().issues[issue]);
+    }
+
+    private announce(parts: Parts, text: string) {
+      parts.status.textContent = text;
+    }
+
+    private render(parts: Parts): ProfilerDecisionView | undefined {
+      const result = deriveProfilerDecisionView(this.state);
+      if (!result.accepted) {
+        this.announce(parts, this.copy().issues[result.issue]);
+        return undefined;
+      }
+      const view = result.view;
+      const copy = this.copy();
+      parts.symptom.value = view.symptomId;
+      this.dataset.symptomId = view.symptomId;
+      this.dataset.recommendedTool = view.recommendedTool;
+      this.dataset.analysisScope = view.analysisScope;
+      this.dataset.artifactKind = view.artifactKind;
+      this.dataset.decisionGate = view.decisionGate;
+      this.dataset.nextGate = view.nextGate;
+      this.setText('[data-live-symptom]', copy.symptoms[view.symptomId].label);
+      this.setText('[data-live-tool]', copy.tools[view.recommendedTool].label);
+      this.setText('[data-live-scope]', copy.tools[view.recommendedTool].scope);
+      this.setText('[data-live-artifact]', copy.tools[view.recommendedTool].artifact);
+      this.setText('[data-live-why]', copy.symptoms[view.symptomId].why);
+      this.setText('[data-live-inspect]', copy.symptoms[view.symptomId].inspect);
+      this.setText('[data-live-next]', copy.nextGates[view.nextGate]);
+      for (const card of this.querySelectorAll<HTMLElement>('[data-tool-card]')) {
+        const recommended = card.dataset.toolCard === view.recommendedTool;
+        if (recommended) card.setAttribute('aria-current', 'true');
+        else card.removeAttribute('aria-current');
+        const marker = card.querySelector<HTMLElement>('[data-recommendation-marker]');
+        if (marker) marker.hidden = !recommended;
+      }
+      return view;
+    }
+
+    private setText(selector: string, text: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = text;
+    }
+  }
+
+  if (!customElements.get('cuda-profiler-decision-explorer')) {
+    customElements.define('cuda-profiler-decision-explorer', CudaProfilerDecisionExplorer);
+  }
+</script>

@@ -24,14 +24,14 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(284);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(302);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 6, practice: 50, visuals: 16, glossary: 151, sources: 61 });
-    for (const absentId of ['LAB06', 'Q11', 'LAB10', 'Q13', 'L06', 'LAB12']) {
+    ).toEqual({ labs: 8, practice: 53, visuals: 17, glossary: 159, sources: 65 });
+    for (const absentId of ['Q11', 'LAB10', 'Q13', 'L06', 'LAB12']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -53,6 +53,23 @@ describe('resource index catalog', () => {
       LAB04: { href: '/en/labs/observe-coalescing/', prerequisites: ['M02', 'Q05'] },
       LAB05: { href: '/en/labs/remove-shared-memory-bank-conflicts/', prerequisites: ['M04', 'Q05'] },
       LAB07: { href: '/en/labs/diagnose-four-sanitizer-failures/', prerequisites: ['Q03', 'Q04'] },
+    });
+
+    expect(Object.fromEntries(
+      ['Q06', 'Q07', 'Q08', 'LAB06', 'LAB08', 'VIS14'].map((planningId) => [
+        planningId,
+        {
+          href: PUBLISHED_DESTINATIONS[planningId].href.en,
+          prerequisites: PUBLISHED_DESTINATIONS[planningId].prerequisites,
+        },
+      ]),
+    )).toEqual({
+      Q06: { href: '/en/correctness/apod-optimization-loop/', prerequisites: ['Q05'] },
+      Q07: { href: '/en/correctness/timeline-first-nsight-systems/', prerequisites: ['M07', 'M09', 'Q05'] },
+      Q08: { href: '/en/correctness/kernel-first-nsight-compute/', prerequisites: ['Q07', 'M02', 'M03'] },
+      LAB06: { href: '/en/labs/build-overlapped-pipeline/', prerequisites: ['M09', 'Q07'] },
+      LAB08: { href: '/en/labs/profile-full-application-before-kernel/', prerequisites: ['Q07', 'Q08'] },
+      VIS14: { href: '/en/visuals/nsight-systems-versus-nsight-compute/', prerequisites: ['Q07', 'Q08'] },
     });
 
     expect(Object.fromEntries(
@@ -155,14 +172,23 @@ describe('resource index catalog', () => {
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
     ]);
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-00[1-3]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'PB-R3-001', 'PB-R3-002', 'PB-R3-003',
+    ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
+    );
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-15[2-9]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 8 }, (_, index) => `TERM-${152 + index}`),
     );
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3\d|4[0-5])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
       'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
       'SRC-CUDA-036', 'SRC-CUDA-037', 'SRC-CUDA-038', 'SRC-CUDA-039', 'SRC-CUDA-040',
       'SRC-CUDA-041', 'SRC-CUDA-042', 'SRC-CUDA-043', 'SRC-CUDA-044', 'SRC-CUDA-045',
+    ]);
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-04[6-9]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
@@ -298,6 +324,42 @@ describe('resource index catalog', () => {
       expect(releaseLab?.versionGate).toContain('CUDA Toolkit Lane 11.8.0, 12.9.2, or 13.3.1');
     }
 
+    for (const expected of [
+      {
+        planningId: 'LAB06',
+        href: '/en/labs/build-overlapped-pipeline/',
+        counterpart: '/labs/build-overlapped-pipeline/',
+        prerequisites: ['M09', 'Q07'],
+        relatedUnits: ['EX07', 'LAB08', 'VIS14'],
+        profilerGate: 'Nsight Systems 2022.4.2.1/2025.1.3.140/2026.1.3.425',
+      },
+      {
+        planningId: 'LAB08',
+        href: '/en/labs/profile-full-application-before-kernel/',
+        counterpart: '/labs/profile-full-application-before-kernel/',
+        prerequisites: ['Q07', 'Q08'],
+        relatedUnits: ['EX07', 'LAB06', 'VIS14'],
+        profilerGate: 'Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5',
+      },
+    ] as const) {
+      const currentLab = labs.find(({ planningId }) => planningId === expected.planningId);
+      expect(currentLab).toMatchObject({
+        planningId: expected.planningId,
+        href: expected.href,
+        counterpart: expected.counterpart,
+        difficulty: 'intermediate',
+        evidence: {
+          compilation: [],
+          runtime: ['Pending Hardware Verification'],
+        },
+        reviewedOn: '2026-08-31',
+      });
+      expect(currentLab?.prerequisites.map(({ id }) => id)).toEqual(expected.prerequisites);
+      expect(currentLab?.relatedUnits.map(({ id }) => id)).toEqual(expected.relatedUnits);
+      expect(currentLab?.hardwareGate).toContain('49,176 bytes');
+      expect(currentLab?.versionGate).toContain(expected.profilerGate);
+    }
+
     const visuals = projectResourceIndex(RESOURCE_INDEX_RECORDS, 'visuals', 'en', { asOf });
     expect(visuals.map(({ planningId }) => planningId)).toEqual([
       'VIS01',
@@ -312,6 +374,7 @@ describe('resource index catalog', () => {
       'VIS10',
       'VIS11',
       'VIS12',
+      'VIS14',
       'VIS19',
       'VIS20',
       'VIS21',
@@ -387,6 +450,15 @@ describe('resource index catalog', () => {
         prerequisites: [['A08', '/en/algorithms/tiled-gemm-correctness/']],
       },
       {
+        planningId: 'VIS14',
+        href: '/en/visuals/nsight-systems-versus-nsight-compute/',
+        counterpart: '/visuals/nsight-systems-versus-nsight-compute/',
+        prerequisites: [
+          ['Q07', '/en/correctness/timeline-first-nsight-systems/'],
+          ['Q08', '/en/correctness/kernel-first-nsight-compute/'],
+        ],
+      },
+      {
         planningId: 'VIS19',
         href: '/en/foundations/asynchronous-errors/#vis19',
         counterpart: '/foundations/asynchronous-errors/#vis19',
@@ -451,7 +523,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(176);
+    expect(projected).toHaveLength(184);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

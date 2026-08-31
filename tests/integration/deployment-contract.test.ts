@@ -97,12 +97,62 @@ describe('Cloudflare assets-only deployment contract', () => {
       sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/),
     });
     expect(publication.sourceCommit).toBe(release.sourceCommit);
-    expect(release.releaseId).toBe('R2');
+    expect(release).toMatchObject({
+      releaseId: 'R2',
+      scope: {
+        publicationPairs: 186,
+        sourceRoutes: 372,
+        practiceBankEntries: 50,
+        glossaryTerms: 151,
+        sourceRecords: 61,
+      },
+    });
+    expect(release.scope.learningUnits).toHaveLength(49);
+    expect(release.scope.labs).toHaveLength(6);
+    expect(release.scope.visualExplainers).toHaveLength(16);
+    expect(
+      release.scope.labs.length +
+      release.scope.practiceBankEntries +
+      release.scope.visualExplainers.length +
+      release.scope.glossaryTerms +
+      release.scope.sourceRecords,
+    ).toBe(284);
     expect(publication).toMatchObject({
       publicationId: 'current',
       releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
-      scope: { publicationPairs: 186, sourceRoutes: 372 },
+      scope: {
+        publicationPairs: 198,
+        sourceRoutes: 396,
+        practiceBankEntries: 53,
+        glossaryTerms: 159,
+        sourceRecords: 65,
+      },
+      evidence: {
+        noCompileCheckedClaim: expect.arrayContaining(['LAB06', 'LAB08']),
+        pendingHardwareVerification: expect.arrayContaining(['LAB06', 'LAB08']),
+        runtimeVerified: [],
+        referenceEnvironments: [],
+        performanceObservations: [],
+      },
     });
+    expect(publication.scope.learningUnits).toHaveLength(52);
+    expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['Q06', 'Q07', 'Q08']));
+    expect(publication.scope.labs).toHaveLength(8);
+    expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08']));
+    expect(publication.scope.visualExplainers).toHaveLength(17);
+    expect(publication.scope.visualExplainers).toContain('VIS14');
+    expect(
+      publication.scope.labs.length +
+      publication.scope.practiceBankEntries +
+      publication.scope.visualExplainers.length +
+      publication.scope.glossaryTerms +
+      publication.scope.sourceRecords,
+    ).toBe(302);
+    expect(publication.knownLimitations).toEqual(expect.arrayContaining([
+      'Q06-Q08, LAB06, LAB08, and VIS14 are an incremental R3 publication; the aggregate R3 release review remains pending.',
+      'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
+    ]));
+    expect(publication.knownLimitations).not.toContain('LAB06 has no current public destination.');
     expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
     expect(builtFiles).not.toContain('_worker.js');
     expect(builtFiles.some((file) => /(?:^|\/)server(?:\/|$)/.test(file))).toBe(false);
@@ -135,19 +185,29 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
     expect(deployment).toContain('dist/publication.json');
     expect(deployment).toContain('49 Learning Units');
+    expect(deployment).toContain('6 Labs');
+    expect(deployment).toContain('16 Visual Explainers');
+    expect(deployment).toContain('50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records');
+    expect(deployment).toContain('186 Publication Pairs, and 372 source routes');
+    expect(deployment).toContain('52 Learning Units');
     expect(deployment).toContain('sixteen Runnable Examples EX01-EX16');
-    expect(deployment).toContain('sixteen Visual Explainers');
-    expect(deployment).toContain('50 Practice Bank entries, 151 Glossary terms, and 61 source records');
-    expect(deployment).toContain('five catalog groups total 284 records');
-    expect(deployment).toContain('186 Publication Pairs and 372 source routes');
-    expect(deployment).toContain('LAB12 remains absent until Q13 and L06 are published');
+    expect(deployment).toContain('eight Labs LAB01-LAB08');
+    expect(deployment).toContain('seventeen Visual Explainers');
+    expect(deployment).toContain('53 Practice Bank entries, 159 Glossary terms, and 65 source records');
+    expect(deployment).toContain('five catalog groups total 302 records');
+    expect(deployment).toContain('198 Publication Pairs and 396 source routes');
+    expect(deployment).toContain('Q01-Q08');
+    expect(deployment).toContain('LAB06 and LAB08 specifically have empty compilation and recorded-observation arrays');
+    expect(deployment).toContain('VIS14');
+    expect(deployment).toMatch(/LAB12 waits for Q13 and L06/i);
     expect(deployment).toContain('EX10 is Runtime-Not-Applicable');
     expect(deployment).toMatch(/EX10.*Runtime-Not-Applicable/i);
     expect(deployment).toMatch(/EX11-EX15.*empty compilation evidence/i);
     expect(deployment).toMatch(/No Reference Environment.*performance observation/i);
     expect(deployment).toMatch(/R2.*latest completed aggregate review/i);
-    expect(deployment).toMatch(/R3 and later/i);
+    expect(deployment).toMatch(/R3 aggregate review remains pending/i);
     expect(deployment).toMatch(/issue #24/i);
+    expect(deployment).toMatch(/issue #25/i);
     expect(deployment).toContain('npm run test:release-smoke');
     expect(deployment).toContain('wrangler rollback');
     expect(deployment).toContain('No Worker application code or runtime binding');

@@ -1,0 +1,251 @@
+---
+title: 'Q08: Ask one selected kernel question with Nsight Compute'
+description: Start from one kernel instance selected in a representative Nsight Systems timeline, predeclare one question, query available sections or metrics, bound replay, and retain a reviewable .ncu-rep.
+pairId: q08
+counterpart: /correctness/kernel-first-nsight-compute/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - kernel-question
+  - tool-version-permission-gate
+  - replay-boundary
+  - metric-selection
+  - metric-interpretation
+  - coalescing-shared-memory
+  - report-custody
+  - systems-to-compute-decision
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q08
+prerequisites:
+  - Q07
+  - M02
+  - M03
+relatedUnits:
+  - Q06
+  - EX07
+  - LAB08
+  - VIS14
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric model, replay, collection overhead, permissions, and reproducibility guidance'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current kernel filters, section and metric queries, collection controls, and report export'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Release update declaring CUDA Toolkit 13.3 support'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI 2025.2 archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2'
+    platform: 'Archived CLI behavior for interpreting retained 2025.2 commands and reports'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Compute CLI 2022.3 archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3'
+    platform: 'Archived CLI behavior for interpreting retained 2022.3 commands and reports'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI 2026.2.1 / CUDA 13.3 documentation'
+    platform: 'Current profiling compatibility, activity, correlation, buffering, and subscriber boundaries'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/correctness/kernel-first-nsight-compute/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,kernel-question,tool-version-permission-gate,replay-boundary,metric-selection,metric-interpretation,coalescing-shared-memory,report-custody,systems-to-compute-decision,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q07,M02,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q06,EX07,LAB08,VIS14' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2022.3,2025.2,2026.2.1,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/kernel-first-nsight-compute/" lang="zh-CN">阅读中文对应页</a>
+
+Nsight Compute is not the first profiler in this path. Use it only after a representative Nsight Systems timeline has selected one exact **selected kernel instance** and you have written a **specific predeclared question** about that kernel. Then query availability on the exact GPU and tool version, collect only the sections or metrics needed for that question, and retain the resulting `.ncu-rep` with its interpretation contract. Dumping metrics first and inventing a story afterward reverses the evidence path.
+
+## What you should be able to do
+
+- Carry one exact kernel selection from a representative application timeline into a reviewable, separate Nsight Compute run.
+- State one kernel-level question before choosing a section or metric.
+- Gate collection on exact tool version, target GPU, performance-counter permission, and queried section or metric availability.
+- Record replay behavior and explain why profiling can perturb or serialize execution, or collect from a different execution.
+- Interpret values only with their exact names, units, definitions, scopes, denominators, filters, and report custody.
+
+## Prerequisites
+
+Complete [Q07: Select Kernel Evidence from an Nsight Systems Timeline](/en/correctness/timeline-first-nsight-systems/), [M02: Coalescing as Transaction Shaping](/en/memory/coalescing-transactions/), and [M03: Shared-memory Tiling](/en/memory/shared-memory-tiling/) in that order. Q07 supplies the representative timeline and exact kernel instance. M02 supplies an expected global-memory request model. M03 supplies the expected shared-memory staging, synchronization, and reuse model.
+
+The prerequisite list is exactly `Q07, M02, M03`. This Learning Unit has no hardware gate because it teaches a static decision and evidence contract. A real Nsight Compute collection still needs a compatible GPU, software stack, and permission record in LAB08.
+
+## Begin with one selected-kernel question
+
+The handoff is invalid if it says only “profile the slow kernel.” Before opening a metric list, freeze a selection ledger and one falsifiable question:
+
+| field | predeclared content |
+| --- | --- |
+| Systems selection | source `.nsys-rep` identity or hash, process, kernel name, context or stream when available, launch occurrence, time range, workload, and input |
+| kernel question | one mechanism, one symptom, and one decision the answer can change |
+| Compute mapping | exact name basis and regex or exact match, launch skip/count, target process, workload, and any NVTX or range filter |
+| equivalence rule | fields that must match the representative run and fields allowed to differ |
+| exit rule | result that supports the hypothesis, rejects it, or sends the investigation back to Nsight Systems |
+
+A useful template is: “For this selected occurrence of `[kernel]` under `[fixed workload]`, does `[one M02 or M03 mechanism]` explain `[one observed symptom]`, as tested by `[queried section or metrics]`?” The question fixes the evidence need. The available metric catalog does not choose the question.
+
+## Gate on tool version, permission, and availability
+
+Record the exact output of `ncu --version`, GPU identity and compute capability, driver and CUDA Toolkit, target application revision, and full command. Nsight Compute 2026.2.1 release notes declare CUDA Toolkit 13.3 support, but that release coordinate does not prove that every counter or section exists on every GPU. The archived 2025.2 and 2022.3 CLI guides help interpret old retained commands; they do not grant current availability.
+
+Run the owner-supported queries on the exact target GPU and installed tool before designing the collection, and retain their output:
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Record whether performance-counter access is allowed. If collection reports a permission denial such as `ERR_NVGPUCTRPERM`, stop and retain the error, execution context, and policy owner. Do not bypass host security policy, substitute guessed values, or describe unavailable counters as zero. Permission is part of the observation boundary, not a setup footnote.
+
+## Replay changes the observation boundary
+
+Hardware counters may require more than one collection pass. Kernel replay can save and restore relevant memory and execute a kernel launch repeatedly. Application replay relaunches the application and therefore depends on sufficiently deterministic execution. Range replay and application-range replay move the repeated boundary again. Record the exact replay mode, pass count when reported, and any save/restore or matching constraints rather than assuming one untouched launch produced every value.
+
+Profiler instrumentation and replay can perturb cache or timing state, add overhead, and serialize work that was concurrent in the representative run. Under application replay, a pass is a different execution; under kernel replay, the observed launch is re-executed. Collecting fewer metrics can reduce requested passes, but it cannot prove zero perturbation.
+
+The `.nsys-rep` that selected the kernel and the `.ncu-rep` that examines it are reports from separate profiler runs. They are never the same physical kernel instance. The decision trail must show why a corresponding occurrence in the Compute run is representative; it must not claim that Nsight Compute attached new counters to the already-recorded Systems event.
+
+## Select the minimum sufficient metrics
+
+Start from the declared question and the exact query output. Prefer one relevant section when its documented rules match the question, or an explicit short `--metrics` list when individual values are sufficient. Collect only the needed sections or metrics. A broad metric dump increases replay and review surface while encouraging post-hoc explanations.
+
+An illustrative collection shape is:
+
+```bash
+ncu --kernel-name regex:^transform_kernel$ \
+  --launch-skip <predeclared-matching-launches> \
+  --launch-count 1 \
+  --section <queried-section> \
+  --export q08-selected-kernel \
+  ./application <fixed-workload-arguments>
+```
+
+The names and placeholders are not a command to copy blindly. Replace them from the Q07 selection and the current `--list-sections` or `--query-metrics` result. Preserve the exact command, name basis, regex, skip/count semantics, target process, and actual output path. Verify that exactly the intended corresponding launch was collected; `--launch-count 1` alone does not identify it.
+
+## Interpret names, units, definitions, and scope together
+
+Metric names and availability vary by GPU and Nsight Compute version. Even a familiar base name can expose different suffixes, units, aggregation, or collection support. For every retained value, save:
+
+| interpretation field | required record |
+| --- | --- |
+| identity | exact metric or rule name copied from this report and query output |
+| semantics | tool-version-specific definition and whether the value is raw, derived, ratio, percentage, rate, or throughput |
+| unit and denominator | bytes, sectors, transactions, cycles, requests, instructions, percent, per second, per cycle, or another exact reported unit |
+| scope | selected kernel occurrence, device, SM, warp, instruction class, memory space, and aggregation rule as documented |
+| collection | section or metric option, pass/replay information, permission state, and availability query |
+| claim | the narrow question answered and alternatives still compatible with the value |
+
+Do not compare values with unlike units or silently divide a percentage by a count. A high utilization, stall share, transaction count, or ratio is not automatically the bottleneck. First connect its definition and denominator to the selected kernel and hypothesis; then seek a controlled before/after result if the decision requires causality or performance impact.
+
+## Ask bounded coalescing and shared-memory questions
+
+For a coalescing question, use [M02](/en/memory/coalescing-transactions/) to precompute the active lanes, requested byte addresses, access width, alignment, and expected naturally aligned segment coverage. Then select only currently available global-memory evidence whose definition can test that expectation. An observed counter is hardware evidence from the profiled run; M02's static segment set is not a counter prediction, and neither one alone proves a speedup.
+
+For a shared-memory question, use [M03](/en/memory/shared-memory-tiling/) to state which values are staged, which threads participate, where the load/use/reuse barriers occur, and what reuse is expected. Then choose a queried shared-memory section or short metric set whose documented scope addresses traffic, transactions, conflicts, or stalls relevant to that exact question. Do not infer the source line or repair from one large number.
+
+When comparing a baseline and candidate, collect separate reports under matching workload, correctness, filter, version, permission, replay, and metric-definition contracts. If any coordinate changes, report the difference instead of presenting the reports as controlled twins.
+
+## Keep custody of the `.ncu-rep`
+
+The report is a primary observation artifact, not a screenshot to paraphrase and discard. Retain the original `.ncu-rep` plus:
+
+- source `.nsys-rep` path or hash and the selected-instance ledger;
+- predeclared question and decision rule;
+- exact `ncu` version, GPU, driver, Toolkit, permission result, replay mode, and full command;
+- kernel name basis, filters, matching occurrence, process, workload, input, and correctness verdict;
+- section and metric query output, exact names, definitions, units, and interpretation notes;
+- profiler stdout/stderr, observation date, observer, immutable path, size, and cryptographic hash.
+
+Do not overwrite the source report after review. If publication requires redaction, retain the private original and record how a sanitized derivative relates to its hash. A `.ncu-rep` without its command, filter, version, replay, permission, definitions, and custody cannot support a reproducible interpretation.
+
+## Preserve the Systems-to-Compute decision
+
+[Q06: Run an APOD Optimization Loop](/en/correctness/apod-optimization-loop/) names the hypothesis and decision. Q07 selects the exact kernel instance from the application timeline. Q08 maps that selection and one question into a minimal Compute collection. [EX07: Streams, Events, and Transfer Overlap](/en/examples/streams-events-overlap/) can supply the fixed workload. [LAB08: Profile a Full Application Before a Kernel](/en/labs/profile-full-application-before-kernel/) performs the guided external run, while [VIS14: Nsight Systems versus Nsight Compute](/en/visuals/nsight-systems-versus-nsight-compute/) keeps the symptom-to-tool gate visible.
+
+Keep one decision record linking the two report hashes, workload coordinates, selected occurrence, mapping filter, question, chosen evidence, separate-run disclosure, and next action. If the corresponding kernel cannot be selected reliably, the workload diverges, or the question is still about application latency, overlap, launch gaps, or dependencies, return to Nsight Systems instead of adding Compute metrics.
+
+## Evidence boundary
+
+This page runs neither `nsys` nor `ncu`, queries no GPU or performance counter, and creates no `.ncu-rep`. It reports no metric value, bottleneck, duration, throughput, or speedup. The commands are symbolic protocol shapes. Compilation, runtime, expected-observation, and recorded-observation arrays remain empty, and no Evidence Status is granted.
+
+## Retrieval check
+
+1. Which Q07 fields identify the selected kernel, and why is the Compute launch only a corresponding occurrence in a separate run?
+2. Why must the kernel question be specific and predeclared before section or metric selection?
+3. Which version, GPU, permission, section, and metric availability records must exist before collection?
+4. How can replay perturb or serialize work, or turn collection into a different execution?
+5. Which names, units, definitions, filters, replay facts, and `.ncu-rep` custody fields make an interpretation reviewable?
+
+## Continue with practice
+
+- Complete the [Q08 Exercises](/en/correctness/kernel-first-nsight-compute/exercises/), then inspect the separate [reviewed solutions](/en/correctness/kernel-first-nsight-compute/solutions/).
+- Repair an unbounded profiler claim in [Practice Bank PB-R3-003](/en/practice/#pb-r3-003).
+- Apply the decision trail in [LAB08](/en/labs/profile-full-application-before-kernel/) and revisit [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/) whenever the next evidence source is unclear.
+
+## Sources and review
+
+- The current [NVIDIA Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) defines metric, replay, overhead, permission, and reproducibility boundaries for 2026.2.1.
+- The current [NVIDIA Nsight Compute CLI 2026.2.1 guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) defines kernel filters, queries, section or metric collection, and report export.
+- The [Nsight Compute 2026.2.1 release notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1) record CUDA Toolkit 13.3 support.
+- The archived [Nsight Compute CLI 2025.2 guide](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html) preserves older command behavior for retained reports.
+- The archived [Nsight Compute CLI 2022.3 guide](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html) provides a second historical coordinate for version drift.
+- The current [CUPTI Usage guide](https://docs.nvidia.com/cupti/main/main.html) supplies profiling compatibility and activity/correlation boundaries for the 2026.2.1 / CUDA 13.3 coordinate.
+
+Context7 `/websites/nvidia_nsight-compute_nsightcompute` was the only retrieval service used. The six NVIDIA owner pages above are the factual authorities and were accessed on **2026-08-31**. No owner prose, command output, screenshot, report, table, figure, metric value, or benchmark result is copied. The decision ledger, interpretation contract, Exercises, solutions, and composition are original site material licensed CC BY 4.0.
+
+**Fact checked: 2026-08-31.**

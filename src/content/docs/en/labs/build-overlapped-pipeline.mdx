@@ -1,0 +1,555 @@
+---
+title: 'LAB06: Build an Overlapped Pipeline'
+description: 'Accept frozen EX07 on native Linux first, then collect an Nsight Systems timeline behind capability, version, method, and custody gates and classify overlap, serialization, or an inconclusive short trace only after the run.'
+pairId: lab06
+counterpart: /labs/build-overlapped-pipeline/
+factCheckDate: '2026-08-31'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - manifest
+  - source-review
+  - build
+  - correctness
+  - capability-gate
+  - timeline-plan
+  - tool-gate
+  - collect
+  - interpret
+  - report-fixture
+  - observations
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB06
+prerequisites:
+  - M09
+  - Q07
+relatedUnits:
+  - EX07
+  - LAB08
+  - VIS14
+exampleIds:
+  - EX07
+canonicalExample: EX07
+canonicalRanges:
+  - chunk-contract
+  - stream-pipeline
+hardwareGate: 'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; EX07 page-locked host memory; compatible asynchronous copy/compute capability for overlap observation; Lane-matched Nsight Systems CLI; at most 49,176 bytes of device memory'
+estimatedMinutes: 120
+difficulty: intermediate
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 49176
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device and query its copy/compute capabilities'
+  - 'Execute NVCC, the host C++ compiler, make, the EX07 binary, Nsight Systems CLI nsys, and local hashing tools'
+  - 'Create and remove EX07 build files plus learner-owned trace reports, exports, logs, status files, hashes, and sanitized sharing copies'
+  - 'Use only existing non-admin CUDA, CUPTI, and profiling access; this Lab authorizes no sudo or other privilege escalation'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'The serial and chunked paths should each pass exact comparison of all 4,099 outputs against the independent host reference before any profiler collection.'
+    - 'The fixed chunk contract should cover four 1,024-element chunks and one 3-element tail across two streams without gaps, overlap in logical ownership, or out-of-bounds access.'
+    - 'The actual nsys version, applicable profile/stats/export help, CUPTI coordinate or query method, and profiler diagnostics should be retained as observations rather than inferred from a Toolkit label.'
+    - 'A qualifying report should retain CUDA API, copy, kernel, stream, and event records together with the original .nsys-rep, derived stats/export artifacts, raw logs, statuses, and hashes.'
+    - 'The exact short trace should be classified only after collection as observed overlap, observed serialization, or inconclusive; this workload does not guarantee visible overlap.'
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Systems User Guide'
+    url: 'https://docs.nvidia.com/nsight-systems/UserGuide/index.html'
+    version: 'NVIDIA Nsight Systems v2026.4'
+    platform: 'Current Linux CLI, CUDA trace, report, stats, and export behavior'
+    accessDate: '2026-08-31'
+  - title: 'NVIDIA Nsight Systems Release Notes'
+    url: 'https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights'
+    version: 'NVIDIA Nsight Systems 2026.4.1; last updated 2026-07-28'
+    platform: 'Current changes, deprecations, support boundaries, and trace limitations'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI 2026.2.1 / CUDA 13.3 documentation'
+    platform: 'CUDA activity collection, correlation, buffering, overhead, and dropped-record boundaries'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; CUPTI 11.8.87; bundled Nsight Systems 2022.4.2.1'
+    platform: 'Linux x86-64 Toolkit Lane component coordinates'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / 12.9.2 Lane; CUPTI 12.9.79; bundled Nsight Systems 2025.1.3.140'
+    platform: 'Linux x86-64 Toolkit Lane component coordinates'
+    accessDate: '2026-08-31'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / 13.3.1 Lane; CUPTI 13.3.75; bundled Nsight Systems 2026.1.3.425'
+    platform: 'Linux x86-64 Toolkit Lane component coordinates'
+    accessDate: '2026-08-31'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab06 }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,manifest,source-review,build,correctness,capability-gate,timeline-plan,tool-gate,collect,interpret,report-fixture,observations,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M09,Q07' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX07,LAB08,VIS14' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX07 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX07 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'chunk-contract,stream-pipeline' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CC 7.5+ GPU; page-locked host memory; compatible asynchronous copy/compute; Lane-matched nsys; at most 49,176 device bytes' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '120' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: intermediate }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '49176' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device and capability queries; compiler, make, EX07, nsys, and hash execution; learner-owned trace/artifact writes; no privilege escalation' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '5 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,13.3,11.8.87,12.9.79,13.3.75,2022.4.2.1,2025.1.3.140,2026.1.3.425,2026.2.1,2026.4,2026.4.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/build-overlapped-pipeline/" lang="zh-CN">阅读中文对应页</a>
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+LAB06 is a Lab. Outside the Learning Site, you build and run canonical EX07, prove both paths correct first, and then collect an application timeline with Nsight Systems. Page-locked host memory, two streams, and device capabilities establish only eligibility for transfer overlap. Only a qualifying timeline from the exact run can support an overlap, serialization, or inconclusive classification. This page declares expected observations only and prefills no recorded observations.
+
+## Lab contract
+
+| Coordinate | Requirement |
+| --- | --- |
+| Difficulty and time | Intermediate, about 120 minutes |
+| Prerequisites | M09 and Q07 |
+| Supported Environment | Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer |
+| Toolkit Lane | CUDA 11.8.0, 12.9.2, or 13.3.1; C++17; Lane-matched `nsys` confirmed by actual output |
+| Frozen workload | 4,099 `std::uint32_t` elements; 1,024 elements per chunk, 5 chunks total, a 3-element tail, and 2 chunk streams |
+| Memory boundary | 49,188 bytes of page-locked host memory; at most 49,176 bytes of device memory |
+| Hardware eligibility | Page locking succeeds and the selected device and path report compatible asynchronous copy/compute capability |
+| Permissions | Existing non-admin CUDA, CUPTI, and profiling access plus a learner-owned trace directory; no `sudo` or privilege escalation is authorized |
+| Acceptance order | Uninstrumented exact correctness first, followed by the capability gate, tool gate, timeline collection, and bounded interpretation |
+| Evidence | Compilation is empty; runtime Evidence Status is Pending Hardware Verification; recorded observations are empty |
+
+EX07 is short. Even when every eligibility gate passes, copy and kernel intervals can be too short, serialize, or remain indistinguishable in this report. This Lab guarantees no overlap and does not turn failure to see overlap into a source defect automatically.
+
+## Prerequisite check
+
+1. Complete [M09: Pinned Memory and Transfer Overlap](/en/memory/pinned-memory-transfer-overlap/) and distinguish source-level eligibility, queried capability, and observed execution.
+2. Complete [Q07: Read the Application Timeline First with Nsight Systems](/en/correctness/timeline-first-nsight-systems/) and preserve the `.nsys-rep`, collection method, Environment Manifest, and report custody while treating stats and exports as derived artifacts.
+3. Confirm exactly one GPU is visible to the process, at least 49,176 device bytes are available, and 49,188 bytes of page-locked host memory can be created.
+4. Confirm that `nsys`, the compilers, `make`, `sha256sum`, and a learner-controlled evidence directory are available. On missing tracing permission, record a blocker rather than elevating privileges.
+
+## Obtain the canonical project
+
+[View the complete EX07 source tree at the pinned commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb0306db725ab960a61b50456c227545057de392/examples/ex07-streams-events-overlap), or [download the complete source archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb0306db725ab960a61b50456c227545057de392.zip). One reviewable acquisition path is:
+
+```bash
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout fb0306db725ab960a61b50456c227545057de392
+cd examples/ex07-streams-events-overlap
+```
+
+The frozen source commit is `fb0306db725ab960a61b50456c227545057de392`. Do not add iterations, enlarge the input, or change the chunk size, stream count, event edges, kernel, build flags, or capture labels to manufacture overlap. Any such change is a new experiment and cannot inherit LAB06's workload or fixture contract.
+
+## Create the unfilled Environment Manifest
+
+Copy this template before the first execution. Every angle-bracketed value must come from an actual query, file, or run. A selected Lane reference is a planning coordinate, not an observation. The frozen workload values in the template are not profiler results either.
+
+```yaml
+subject: EX07 / LAB06
+source_commit: fb0306db725ab960a61b50456c227545057de392
+observation_date_utc: <fill>
+gpu:
+  identity: <fill after privacy review>
+  compute_capability: <fill; must be 7.5 or newer>
+  compute_capability_query: <fill exact command or API>
+  count_used: <fill; must be 1>
+  driver: <fill exact version>
+  topology: <fill relevant coordinates or not relevant with reason>
+toolkit_lane:
+  id: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+  cuda_toolkit: <fill exact installed version>
+  cuda_runtime: <fill exact component version or unknown>
+  release_notes_url: <fill selected owner coordinate>
+selected_lane_component_references:
+  cupti: <fill 11.8.87 | 12.9.79 | 13.3.75>
+  nsight_systems: <fill 2022.4.2.1 | 2025.1.3.140 | 2026.1.3.425>
+observed_cupti:
+  version_or_loaded_library_identity: <fill or unknown>
+  query_method: <fill package, library, or profiler diagnostic method>
+  raw_record_path_and_sha256: <fill>
+observed_nsys:
+  executable_path: <fill>
+  version_command: nsys --version
+  exact_version_output_path_and_sha256: <fill>
+  profile_help_path_and_sha256: <fill>
+  stats_help_path_and_sha256: <fill>
+  export_help_path_and_sha256: <fill>
+  applicable_profile_options: <fill observed --trace/--output behavior>
+  applicable_report_extension: <fill; must produce .nsys-rep for this method>
+  applicable_stats_syntax: <fill>
+  applicable_export_type_and_syntax: <fill>
+compilers:
+  nvcc: <fill exact version>
+  host_compiler: <fill exact version>
+operating_system:
+  distribution: <fill native Linux distribution>
+  version: <fill>
+  architecture: <fill>
+  kernel: <fill>
+source_repository:
+  acquisition_url: <fill tree or archive URL>
+  acquisition_method: <fill>
+binary:
+  path: build/ex07-streams-events-overlap
+  sha256: <fill>
+build_contract:
+  cxx_dialect: c++17
+  architecture_targets: [sm_75, compute_75]
+  ordered_commands_and_status_paths: <fill>
+  optimization_debug_link_flags: <fill from retained build records>
+  environment_variables: <fill>
+workload:
+  element_type: std::uint32_t
+  element_count: 4099
+  transform: output[index] = input[index] * 3 + 7
+  paths: [serial, chunked]
+  chunk_elements: 1024
+  chunk_count: 5
+  last_chunk_elements: 3
+  chunk_stream_count: 2
+  launch_geometry: <fill observed/declaration review; block size is 128>
+memory:
+  page_locked_host_bytes: 49188
+  maximum_device_memory_bytes: 49176
+  allocation_and_release_statuses: <fill>
+capability_gate:
+  exact_query_or_application_record: <fill>
+  async_engine_count: <fill actual value>
+  concurrent_kernels: <fill actual value; capability-only>
+  compatible_async_copy_compute_decision: <fill pass or blocker with reason>
+permissions:
+  cuda_device_and_execution: <fill>
+  cupti_and_profiler_trace: <fill existing non-admin policy>
+  learner_owned_trace_directory: <fill>
+  privilege_escalation: prohibited
+device_access_state:
+  visibility_container_mig_mps: <fill>
+concurrent_load:
+  background_and_concurrent_policy: <fill>
+clock_power_thermal:
+  persistence_and_clock_policy: <fill>
+  power_policy: <fill>
+  thermal_before_after: <fill>
+  cooldown_policy: <fill>
+exact_commands:
+  ordered_expanded_argv_and_command_log: <fill>
+correctness:
+  method: exact comparison against independent EX07 host reference
+  serial_all_4099: <fill pass or fail>
+  chunked_all_4099: <fill pass or fail>
+  cuda_boundaries_and_exit_status: <fill>
+method:
+  question: Does the frozen chunked path exhibit overlap, serialization, or an inconclusive short trace?
+  correctness_preflight_and_exclusion: <fill>
+  capture_scope_and_completion: <fill>
+  trace_domains: <fill observed support; requested cuda>
+  repetitions_and_retry_policy: <fill>
+  overlap_serialization_inconclusive_rules: <fill predeclared rules>
+  cupti_overhead_buffering_dropped_record_review: <fill>
+report:
+  base: <fill unique learner-owned path>
+  primary_nsys_rep_path: <fill>
+  profile_stdout_stderr_status_paths: <fill>
+  stats_stdout_stderr_status_paths: <fill>
+  export_path_type_and_status_paths: <fill>
+  raw_diagnostic_paths: <fill>
+  original_report_sha256_before_after_derivations: <fill>
+  derived_artifact_sha256_paths: <fill>
+custody:
+  observer: <fill>
+  observation_owner_and_date: <fill>
+  original_report_immutable_location: <fill>
+  command_log_manifest_method_relationship: <fill>
+  machine_or_reference_environment_status: <fill>
+  transfer_or_copy_history: <fill>
+sanitization:
+  sharing_status: <fill private | reviewed sanitized copy | not shared>
+  reviewer_and_review_date: <fill>
+  coordinates_reviewed: <fill identities, paths, devices, networks, environment>
+  transformations_and_redactions: <fill>
+  sanitized_artifact_paths_and_sha256: <fill>
+  raw_private_artifact_location: <fill>
+interpretation:
+  classification: <fill overlap | serialization | inconclusive only after review>
+  interval_and_stream_coordinates: <fill>
+  limitations: <fill>
+criteria_result: <fill only after execution and review>
+```
+
+## Review canonical source
+
+The `chunk-contract` range freezes 4,099 elements, 1,024 elements per chunk, 2 chunk streams, overflow-safe byte and chunk calculations, deterministic input and reference functions, and an exact verifier:
+
+<CanonicalCode exampleId="EX07" range="chunk-contract" />
+
+The `stream-pipeline` range freezes the H2D, same transform kernel, D2H, stream placement, wait edge from serial completion, and terminal events for the serial and chunked paths:
+
+<CanonicalCode exampleId="EX07" range="stream-pipeline" />
+
+Chunk offset and count pairs are `(0, 1024)`, `(1024, 1024)`, `(2048, 1024)`, `(3072, 1024)`, and `(4096, 3)`. Each chunk selects a slot and stream by index modulo 2; order in each stream protects slot reuse. Outside the imported ranges, the complete source allocates three 16,396-byte host buffers with `cudaMallocHost`, totaling 49,188 bytes. Serial input/output allocations plus two sets of chunk input/output slots use at most 49,176 device bytes.
+
+These source facts establish only the intended graph and correctness oracle. Timing-disabled events, `asyncEngineCount`, `concurrentKernels`, page locking, `cudaMemcpyAsync`, and multiple streams record no execution interval and prove no overlap.
+
+## Build and retain records
+
+Create a non-reusable learner-owned directory in one Bash session, then execute EX07's C++17 build contract:
+
+```bash
+mkdir -p lab06-evidence
+session_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+session_dir="lab06-evidence/session-${session_id}"
+if ! mkdir "$session_dir"; then
+  printf 'session directory already exists: %s\n' "$session_dir" >&2
+  exit 1
+fi
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/ex07-streams-events-overlap \
+  >"${session_dir}/binary.sha256"
+```
+
+Retain the expanded command, raw stdout/stderr, and exit status separately for every build command. On any nonzero status, mark the session as blocked and stop dependent stages. The host test checks the pure chunk and reference contract, but executes no CUDA and cannot observe page locking, a copy engine, a timeline, or overlap. A local build does not populate the empty compilation evidence either.
+
+## Verify correctness first
+
+Run the frozen binary without profiler instrumentation first:
+
+```bash
+./build/ex07-streams-events-overlap \
+  >"${session_dir}/correctness.stdout.log" \
+  2>"${session_dir}/correctness.stderr.log"
+correctness_status=$?
+printf '%s\n' "$correctness_status" \
+  >"${session_dir}/correctness.status"
+```
+
+Continue only if application status is zero, both serial and chunked lines report `PASS`, every CUDA check succeeds, and source review confirms that both verdicts come from exact comparison of all 4,099 outputs against the independent host reference. Do not substitute a tolerance, subset, one `PASS` line, or the host test for this gate.
+
+This uninstrumented run is a correctness preflight, not a profiler result. It is a separate process and cannot be described as removing initialization or tracing overhead from the later `nsys` process. On correctness failure, stop and reject every timeline, timing, bottleneck, and speedup conclusion.
+
+## Pass the capability gate
+
+Preserve EX07's exact `asyncEngineCount` and `concurrentKernels` output with the binary hash, selected device, and status. `asyncEngineCount` participates in the compatible asynchronous copy/compute gate. `concurrentKernels` is a separate capability and cannot substitute for copy/compute eligibility. Both values describe what could happen, not a timestamped observation.
+
+Before collection, confirm exactly one visible GPU, compute capability 7.5 or newer, successful 49,176-byte device allocation, successful 49,188-byte page-locked host allocation, successful stream/event/CUDA checks, and compatible asynchronous copy/compute capability for the selected device and path. If any item is absent, retain the passing correctness record and blocker, but do not call the workload overlap-eligible or switch silently to another GPU.
+
+Passing this gate still guarantees no overlap. Short copies or kernels, transfer direction, dependencies, resource availability, runtime scheduling, and profiler overhead can make the exact trace serialize or remain inconclusive.
+
+## Freeze the timeline plan
+
+Write the one question before the first capture: **Does the frozen chunked path exhibit overlap, serialization, or an inconclusive short trace?** Do not presume the answer or use “faster” as this Lab's question.
+
+1. Freeze the source commit, binary SHA-256, Lane, device, 4,099-element input, five-chunk partition, two streams, build flags, full-process scope, and `--trace=cuda`.
+2. Exclude the correctness preflight from the profiler observation. Capture exactly one complete invocation of unchanged EX07; do not loop, batch, sleep, add NVTX, or enlarge the workload.
+3. Define the capture boundary as process start through checked completion and cleanup. The serial path completes first, and chunk streams begin after their event waits; interpretation must separate those phases.
+4. Predeclare classification: `overlap` requires intersecting observed copy and kernel intervals in a complete, correlated chunked phase; `serialization` requires a complete trace whose relevant intervals do not intersect; dropped or incomplete records, ambiguous stream or phase correlation, or intervals too short to resolve make the result `inconclusive`.
+5. Never replace a tool or application failure selectively. After a fix, start in a new session directory and retain the old report, logs, statuses, and blocker.
+
+The symbolic CLI command aligned with the expected-only fixture is:
+
+```bash
+nsys profile --trace=cuda --output=lab06-timeline ./build/ex07-streams-events-overlap
+```
+
+The actual command must place its output base inside the unique `session_dir`. This plan has no repetition statistic, timing baseline, or speedup calculation. The short workload has no guaranteed overlap.
+
+## Pass the tool and version gate
+
+The Toolkit and profiler have independent component versions. These are selected release-note references. The installed executable, applicable help, and profiler diagnostics govern the actual run:
+
+| Toolkit Lane | CUPTI reference | Nsight Systems reference | Actual gate |
+| --- | --- | --- | --- |
+| CUDA 11.8.0 | `11.8.87` | `2022.4.2.1` | preserve actual `nsys --version` and applicable help/options |
+| CUDA 12.9.2 | `12.9.79` | `2025.1.3.140` | preserve actual `nsys --version` and applicable help/options |
+| CUDA 13.3.1 | `13.3.75` | `2026.1.3.425` | preserve actual `nsys --version` and applicable help/options |
+
+Run and retain stdout, stderr, each exit status, and SHA-256:
+
+```bash
+nsys --version
+nsys profile --help
+nsys stats --help
+nsys export --help
+```
+
+The actual `nsys --version` output and actual help support for `profile`, `--trace`, `--output`, `.nsys-rep`, `stats`, and export types/options are observations. Do not infer installed behavior from `nvcc --version`, a Toolkit tag, the planning table, or the current v2026.4 guide. Record the actual package, library, or profiler-diagnostic query method for CUPTI as well. If it cannot be confirmed, write `unknown` instead of presenting the selected release coordinate as an observation of the loaded component.
+
+Stop collection or interpretation when the version does not correspond to the selected Lane, help lacks the planned command/report/export, CUDA tracing cannot initialize, or diagnostics report a permission, buffering, dropped-record, or incomplete-data blocker. An administrator may repair policy outside the Lab. LAB06 permits no privilege escalation.
+
+## Collect and keep the original report
+
+Confirm that `session_dir` still names this unique session and that target paths do not exist. Use no force-overwrite option:
+
+```bash
+report_base="${session_dir}/lab06-timeline"
+report="${report_base}.nsys-rep"
+stats_db="${report_base}.sqlite"
+export_db="${session_dir}/lab06-timeline-export.sqlite"
+for path in "$report" "$stats_db" "$export_db"; do
+  if [ -e "$path" ]; then
+    printf 'refusing to overwrite: %s\n' "$path" >&2
+    exit 1
+  fi
+done
+
+nsys profile --trace=cuda --output="$report_base" \
+  ./build/ex07-streams-events-overlap \
+  >"${session_dir}/profile.stdout.log" \
+  2>"${session_dir}/profile.stderr.log"
+profile_status=$?
+printf '%s\n' "$profile_status" >"${session_dir}/profile.status"
+if [ "$profile_status" -ne 0 ] || [ ! -f "$report" ]; then
+  printf 'profile failed or exact .nsys-rep is missing\n' >&2
+  exit 1
+fi
+
+sha256sum "$report" >"${session_dir}/report.sha256"
+chmod a-w "$report"
+
+nsys stats "$report" \
+  >"${session_dir}/stats.stdout.log" \
+  2>"${session_dir}/stats.stderr.log"
+stats_status=$?
+printf '%s\n' "$stats_status" >"${session_dir}/stats.status"
+if [ -f "$stats_db" ]; then
+  sha256sum "$stats_db" >"${session_dir}/stats-db.sha256"
+fi
+
+nsys export --type sqlite --output "$export_db" "$report" \
+  >"${session_dir}/export.stdout.log" \
+  2>"${session_dir}/export.stderr.log"
+export_status=$?
+printf '%s\n' "$export_status" >"${session_dir}/export.status"
+
+sha256sum -c "${session_dir}/report.sha256" \
+  >"${session_dir}/report-hash-check.stdout.log" \
+  2>"${session_dir}/report-hash-check.stderr.log"
+hash_check_status=$?
+printf '%s\n' "$hash_check_status" \
+  >"${session_dir}/report-hash-check.status"
+if [ -f "$export_db" ]; then
+  sha256sum "$export_db" >"${session_dir}/export.sha256"
+fi
+```
+
+Execute these exact forms only when the observed help supports them. Save the expanded `profile`, `stats`, and `export` commands separately in `commands.log`; shell history alone is insufficient. A nonzero `stats` or `export` status, missing export, changed report hash, or application correctness failure is a blocker. Do not classify a timeline from partial derived output.
+
+The artifact ledger must include at least `manifest.yaml`, `method.md`, `commands.log`, correctness logs/status, version/help logs/statuses/hashes, `profile.stdout.log`, `profile.stderr.log`, `profile.status`, the primary `.nsys-rep`, its hash, raw stats logs/status, any same-base SQLite database and hash created by stats, the independently named SQLite export and raw logs/status/hash, hash-check records, `interpretation.md`, and `sanitization.yaml`. Stats and exports are derivations, not replacements for the original `.nsys-rep`.
+
+The no-overwrite policy applies to successful, failed, and blocked runs. Never reuse a session ID, delete an inconvenient trace, or silently replace an old report with a new capture.
+
+## Interpret the exact trace
+
+Check application status, profiler diagnostics, dropped or incomplete records, the report hash, and stream/phase correlation first. In the chunked phase, place H2D and D2H direction, kernel intervals, stream identity, event waits and records, and dependency edges in one ledger. The serial phase is a correctness-preserving baseline path, not an overlap candidate executing alongside the chunked path.
+
+Record overlap only when two observed intervals actually intersect, and include the report hash, process/context, streams, operation directions or names, and interval coordinates. Record serialization only when a complete qualifying trace clearly shows that relevant intervals do not intersect. If intervals are too short, rows are missing, correlation is ambiguous, or tracing quality is insufficient, record inconclusive. Blank timeline space cannot be forced into a serialization result.
+
+The `.nsys-rep` is the primary artifact. `nsys stats` can aggregate away ordering, and the SQLite export is a version- and schema-dependent representation. They support lookup and cross-checking but do not independently prove overlap. CUPTI tracing is an instrumented execution bounded by buffering, delivery, overhead, and dropped records.
+
+Even observed overlap in this run does not prove that pinned memory, two streams, or engine count caused it, and it supports no throughput, bottleneck, or speedup inference. A serialized run cannot be generalized to every compatible GPU. For kernel-specific investigation, use the gates in [LAB08](/en/labs/profile-full-application-before-kernel/) and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/) to select one exact kernel and question. Do not append an Nsight Compute collection to LAB06.
+
+## Expected-only report fixture
+
+The [LAB06 Nsight Systems expected fixture](/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json) is an **original project-authored sanitized expected-only plan**. It records the frozen workload, symbolic capture command, unfilled manifest coordinates, method question, expected artifact types, and claim boundary.
+
+It is not profiler output. It contains no `.nsys-rep`, timeline rows, timestamps, durations, or hardware values, and it is not runtime evidence. Its `recordedObservations` is empty and its `captureStatus` is pending hardware verification. The fixture's sanitization record can say passed because this original plan never contained capture values, not because a real report was replaced or reviewed.
+
+Use the fixture only as a field and acceptance-plan reference. A real raw report remains under private custody. Before sharing, create a separate copy, review host, user, device, network, absolute-path, and environment coordinates, record every sanitization transformation and sanitized-copy hash, and never alter or overwrite the original report.
+
+## Expected observations, not recorded results
+
+- The serial and chunked paths should each pass exact host-reference comparison for all 4,099 outputs before collection.
+- The frozen partition should produce four 1,024-element chunks and one 3-element tail while preserving complete logical ownership across two streams.
+- Actual `nsys --version`, applicable help/options, the CUPTI query method, and profiler diagnostics should remain attached to the report instead of being inferred from the Lane table.
+- A qualifying capture should create a learner-owned `.nsys-rep` and retain its export, stats, raw stdout/stderr, statuses, and hashes while preserving every derived artifact's relationship to the source report.
+- The exact short trace should be classified only as observed overlap, observed serialization, or inconclusive. The short workload promises none of those outcomes.
+
+These are expected observations, not recorded results. This page publishes no recorded timeline, timing, bottleneck, or speedup conclusion; `recordedObservations` remains empty.
+
+## Keep evidence axes separate
+
+| Axis | Current status | Boundary |
+| --- | --- | --- |
+| Compilation | Empty | Local build and host-test logs do not automatically become a Compile-Checked record |
+| Runtime | Pending Hardware Verification | No qualifying execution record exists from a maintainer Reference Environment |
+| Recorded observations | Empty | The fixture, source review, planning coordinates, and symbolic commands are not observations |
+
+Only a real Environment Manifest, correctness verdict, actual tool and CUPTI records, original report, raw logs/statuses/hashes, method, custody, sanitization record, and criterion-by-criterion result can enter an evidence bundle for assessment. A learner-owned report does not automatically grant Community-Observed or Runtime-Verified status.
+
+## Clean up and retain
+
+First confirm that the artifact ledger is complete, the primary report hash is unchanged across derivations, the private raw location is recoverable, and every blocker remains in its original session directory. Then remove build artifacts only:
+
+```bash
+make clean BUILD_DIR=build
+```
+
+Do not delete `session_dir`, overwrite the `.nsys-rep`, export, status, or hash, or submit a binary, credential, unreviewed device or host identity, absolute private path, or large raw trace. When sharing a sanitized copy, retain the original private artifact, transformation ledger, and both hashes.
+
+## Sources and review
+
+- The [NVIDIA Nsight Systems User Guide v2026.4](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) defines the current Linux `nsys profile` command shape, CUDA trace, `.nsys-rep`, stats, and export workflow.
+- The [NVIDIA Nsight Systems 2026.4.1 Release Notes](https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights) define current changes, deprecations, support boundaries, and trace limitations.
+- [CUPTI 2026.2.1 Usage](https://docs.nvidia.com/cupti/main/main.html) defines activity and correlation, buffering, delivery, overhead, and dropped-record boundaries. It does not replace actual loaded-component or profiler diagnostics.
+- The [CUDA Toolkit 11.8 Release Notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html) provide selected component coordinates CUPTI `11.8.87` and Nsight Systems `2022.4.2.1`.
+- The [CUDA Toolkit 12.9 Update 1 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html) provide selected cuda-12.9 Lane coordinates CUPTI `12.9.79` and Nsight Systems `2025.1.3.140`.
+- The [CUDA Toolkit 13.3 Update 1 Release Notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) provide selected cuda-13.3 Lane coordinates CUPTI `13.3.75` and Nsight Systems `2026.1.3.425`.
+
+Context7 `/websites/nvidia_nsight-systems` and `/websites/nvidia_cuda` were the only retrieval interfaces used. The exact NVIDIA owner pages above are the factual authorities. All six source coordinates were reviewed on **2026-08-31**, and frontmatter and body preserve the same order. This Lab contract, manifest, method, artifact ledger, fixture, and arrangement are original CUDA Learning Site composition under CC BY 4.0. No NVIDIA sample, report, screenshot, timeline, table, runtime output, or performance conclusion is copied.
+
+**Fact checked: 2026-08-31.** Compilation is empty, runtime is Pending Hardware Verification, and recorded observations are empty.

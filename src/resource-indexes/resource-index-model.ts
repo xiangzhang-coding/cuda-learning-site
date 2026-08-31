@@ -318,6 +318,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'Q05：诚实计时异步 GPU 工作', en: 'Q05: Time asynchronous GPU work honestly' },
     prerequisites: ['M08', 'Q01'],
   },
+  Q06: {
+    href: { 'zh-CN': '/correctness/apod-optimization-loop/', en: '/en/correctness/apod-optimization-loop/' },
+    title: { 'zh-CN': 'Q06：把 APOD 作为优化循环', en: 'Q06: Use APOD as an optimization loop' },
+    prerequisites: ['Q05'],
+  },
+  Q07: {
+    href: { 'zh-CN': '/correctness/timeline-first-nsight-systems/', en: '/en/correctness/timeline-first-nsight-systems/' },
+    title: { 'zh-CN': 'Q07：先用 Nsight Systems 阅读应用时间线', en: 'Q07: Read the Application Timeline First with Nsight Systems' },
+    prerequisites: ['M07', 'M09', 'Q05'],
+  },
+  Q08: {
+    href: { 'zh-CN': '/correctness/kernel-first-nsight-compute/', en: '/en/correctness/kernel-first-nsight-compute/' },
+    title: { 'zh-CN': 'Q08：用 Nsight Compute 回答一个选定内核问题', en: 'Q08: Ask one selected kernel question with Nsight Compute' },
+    prerequisites: ['Q07', 'M02', 'M03'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -428,10 +443,22 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     prerequisites: ['M04', 'Q05'],
     indexGroup: 'labs',
   },
+  LAB06: {
+    href: { 'zh-CN': '/labs/build-overlapped-pipeline/', en: '/en/labs/build-overlapped-pipeline/' },
+    title: { 'zh-CN': 'LAB06：构建重叠流水线', en: 'LAB06: Build an Overlapped Pipeline' },
+    prerequisites: ['M09', 'Q07'],
+    indexGroup: 'labs',
+  },
   LAB07: {
     href: { 'zh-CN': '/labs/diagnose-four-sanitizer-failures/', en: '/en/labs/diagnose-four-sanitizer-failures/' },
     title: { 'zh-CN': 'LAB07：诊断四类 Sanitizer 故障', en: 'LAB07: Diagnose Four Sanitizer Failures' },
     prerequisites: ['Q03', 'Q04'],
+    indexGroup: 'labs',
+  },
+  LAB08: {
+    href: { 'zh-CN': '/labs/profile-full-application-before-kernel/', en: '/en/labs/profile-full-application-before-kernel/' },
+    title: { 'zh-CN': 'LAB08：先分析完整应用，再分析一个内核', en: 'LAB08: Profile the Full Application Before One Kernel' },
+    prerequisites: ['Q07', 'Q08'],
     indexGroup: 'labs',
   },
   VIS01: {
@@ -504,6 +531,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
     title: { 'zh-CN': 'GEMM Tiling Hierarchy：从 Matrix 到 Instruction', en: 'GEMM Tiling Hierarchy: Matrix to Instruction' },
     prerequisites: ['A08'],
+    indexGroup: 'visuals',
+  },
+  VIS14: {
+    href: { 'zh-CN': '/visuals/nsight-systems-versus-nsight-compute/', en: '/en/visuals/nsight-systems-versus-nsight-compute/' },
+    title: { 'zh-CN': 'Nsight Systems versus Nsight Compute：从症状选择下一份证据', en: 'Nsight Systems versus Nsight Compute: Choose the Next Evidence from the Symptom' },
+    prerequisites: ['Q07', 'Q08'],
     indexGroup: 'visuals',
   },
   VIS19: {

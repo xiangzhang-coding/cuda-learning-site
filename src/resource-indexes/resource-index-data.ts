@@ -65,7 +65,9 @@ const lab02Destination = PUBLISHED_DESTINATIONS.LAB02;
 const lab03Destination = PUBLISHED_DESTINATIONS.LAB03;
 const lab04Destination = PUBLISHED_DESTINATIONS.LAB04;
 const lab05Destination = PUBLISHED_DESTINATIONS.LAB05;
+const lab06Destination = PUBLISHED_DESTINATIONS.LAB06;
 const lab07Destination = PUBLISHED_DESTINATIONS.LAB07;
+const lab08Destination = PUBLISHED_DESTINATIONS.LAB08;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
 const vis03Destination = PUBLISHED_DESTINATIONS.VIS03;
@@ -78,6 +80,7 @@ const vis09Destination = PUBLISHED_DESTINATIONS.VIS09;
 const vis10Destination = PUBLISHED_DESTINATIONS.VIS10;
 const vis11Destination = PUBLISHED_DESTINATIONS.VIS11;
 const vis12Destination = PUBLISHED_DESTINATIONS.VIS12;
+const vis14Destination = PUBLISHED_DESTINATIONS.VIS14;
 const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
 const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
 const vis21Destination = PUBLISHED_DESTINATIONS.VIS21;
@@ -205,6 +208,30 @@ const labs: readonly ResourceIndexRecord[] = [
     keywords: localized('EX06 shared memory bank conflict padding Nsight Compute', 'EX06 shared memory bank conflict padding Nsight Compute'),
   },
   {
+    planningId: 'LAB06',
+    group: 'labs',
+    title: lab06Destination.title,
+    href: lab06Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'intermediate',
+    prerequisites: lab06Destination.prerequisites,
+    relatedUnits: ['EX07', 'LAB08', 'VIS14'],
+    hardwareGate: localized(
+      '仅限原生 Linux；1 个 compute capability 7.5 或更新的 CUDA GPU；page-locked host memory、兼容的 asynchronous copy/compute capability 与匹配 Lane 的 Nsight Systems；device memory 最多 49,176 bytes。',
+      'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; page-locked host memory, compatible asynchronous copy/compute capability, and Lane-matched Nsight Systems; at most 49,176 bytes of device memory.',
+    ),
+    versionGate: localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1；Nsight Systems 2022.4.2.1/2025.1.3.140/2026.1.3.425；实际 nsys 与 CUPTI version 必须记录。',
+      'Toolkit 11.8.0/12.9.2/13.3.1; Nsight Systems 2022.4.2.1/2025.1.3.140/2026.1.3.425; actual nsys and CUPTI versions must be recorded.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-08-31',
+    keywords: localized('EX07 Nsight Systems timeline overlap serialization report manifest', 'EX07 Nsight Systems timeline overlap serialization report manifest'),
+  },
+  {
     planningId: 'LAB07',
     group: 'labs',
     title: lab07Destination.title,
@@ -227,6 +254,30 @@ const labs: readonly ResourceIndexRecord[] = [
     },
     reviewedOn: '2026-08-28',
     keywords: localized('EX16 memcheck racecheck initcheck synccheck 隔离日志', 'EX16 memcheck racecheck initcheck synccheck isolated logs'),
+  },
+  {
+    planningId: 'LAB08',
+    group: 'labs',
+    title: lab08Destination.title,
+    href: lab08Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'intermediate',
+    prerequisites: lab08Destination.prerequisites,
+    relatedUnits: ['EX07', 'LAB06', 'VIS14'],
+    hardwareGate: localized(
+      '仅限原生 Linux；1 个 compute capability 7.5 或更新的 CUDA GPU；匹配 Lane 的 Nsight Systems/Nsight Compute、兼容 CUPTI 与经管理员批准的非管理员 performance-counter access；device memory 最多 49,176 bytes。',
+      'Native Linux only; one CUDA GPU with compute capability 7.5 or newer; Lane-matched Nsight Systems and Nsight Compute, compatible CUPTI, and administrator-approved non-admin performance-counter access; at most 49,176 bytes of device memory.',
+    ),
+    versionGate: localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1；Nsight Systems 2022.4.2.1/2025.1.3.140/2026.1.3.425；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；记录实际 CLI/CUPTI versions。',
+      'Toolkit 11.8.0/12.9.2/13.3.1; Nsight Systems 2022.4.2.1/2025.1.3.140/2026.1.3.425; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; record actual CLI and CUPTI versions.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-08-31',
+    keywords: localized('EX07 Systems Compute decision trail selected kernel metric replay report', 'EX07 Systems Compute decision trail selected kernel metric replay report'),
   },
 ];
 
@@ -1017,6 +1068,48 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-08-31',
     keywords: localized('sorting selection compaction flag exclusive scan histogram stable rank scatter CUB Thrust', 'sorting selection compaction flag exclusive scan histogram stable rank scatter CUB Thrust'),
   },
+  {
+    planningId: 'PB-R3-001',
+    group: 'practice',
+    title: localized('修复缺少基线与假设的 APOD 记录', 'Repair an APOD record with no baseline or hypothesis'),
+    href: localized('/practice/#pb-r3-001', '/en/practice/#pb-r3-001'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q06'],
+    relatedUnits: ['Q05', 'Q06'],
+    hardwareGate: localized('无；只修复静态 APOD evidence ledger，不运行或测量 CUDA。', 'None; repair a static APOD evidence ledger without running or measuring CUDA.'),
+    versionGate: localized('CUDA C++ Best Practices Guide v13.3 APOD 与 11.8 archive。', 'CUDA C++ Best Practices Guide v13.3 APOD and the 11.8 archive.'),
+    reviewedOn: '2026-08-31',
+    keywords: localized('APOD baseline hypothesis controlled change deployment regression evidence', 'APOD baseline hypothesis controlled change deployment regression evidence'),
+  },
+  {
+    planningId: 'PB-R3-002',
+    group: 'practice',
+    title: localized('从应用症状选择 timeline-first 证据', 'Choose timeline-first evidence from application symptoms'),
+    href: localized('/practice/#pb-r3-002', '/en/practice/#pb-r3-002'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q07'],
+    relatedUnits: ['M07', 'M09', 'Q05', 'Q07', 'LAB06', 'VIS14'],
+    hardwareGate: localized('无；只审查静态 symptom、timeline 与 report-custody plan。', 'None; review a static symptom, timeline, and report-custody plan.'),
+    versionGate: localized('Nsight Systems 2026.4/2026.4.1 与 selected Lane 2022.4.2.1、2025.1.3.140、2026.1.3.425。', 'Nsight Systems 2026.4/2026.4.1 and selected Lane versions 2022.4.2.1, 2025.1.3.140, and 2026.1.3.425.'),
+    reviewedOn: '2026-08-31',
+    keywords: localized('Nsight Systems timeline CPU gap launch copies overlap CUPTI report', 'Nsight Systems timeline CPU gap launch copies overlap CUPTI report'),
+  },
+  {
+    planningId: 'PB-R3-003',
+    group: 'practice',
+    title: localized('为 selected kernel 设计最小 metric/replay plan', 'Design a minimal metric and replay plan for a selected kernel'),
+    href: localized('/practice/#pb-r3-003', '/en/practice/#pb-r3-003'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q08'],
+    relatedUnits: ['M02', 'M03', 'Q07', 'Q08', 'LAB08', 'VIS14'],
+    hardwareGate: localized('无；只审查静态 kernel/question/metric plan；真实 collection 需要获准的 performance counters。', 'None; review a static kernel, question, and metric plan; real collection requires authorized performance counters.'),
+    versionGate: localized('Nsight Compute 2026.2.1 与 selected Lane 2022.3.0.22、2025.2.1.3、2026.2.1.5。', 'Nsight Compute 2026.2.1 and selected Lane versions 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5.'),
+    reviewedOn: '2026-08-31',
+    keywords: localized('Nsight Compute selected kernel question section metric replay permission report', 'Nsight Compute selected kernel question section metric replay permission report'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1205,6 +1298,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     ),
     reviewedOn: '2026-08-31',
     keywords: localized('GEMM matrix tile thread block warp instruction hierarchy ownership', 'GEMM matrix tile thread block warp instruction hierarchy ownership'),
+  },
+  {
+    planningId: 'VIS14',
+    group: 'visuals',
+    title: vis14Destination.title,
+    href: vis14Destination.href,
+    resourceType: 'evidence-review',
+    prerequisites: vis14Destination.prerequisites,
+    relatedUnits: ['Q06', 'LAB06', 'LAB08'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'Nsight Systems 2026.4/2026.4.1、Nsight Compute 2026.2.1 与 CUPTI 2026.2.1；browser decision model 不启动 profiler 或解析 report。',
+      'Nsight Systems 2026.4/2026.4.1, Nsight Compute 2026.2.1, and CUPTI 2026.2.1; the browser decision model launches no profiler and parses no report.',
+    ),
+    reviewedOn: '2026-08-31',
+    keywords: localized('symptom Nsight Systems Nsight Compute timeline kernel question decision tree', 'symptom Nsight Systems Nsight Compute timeline kernel question decision tree'),
   },
   {
     planningId: 'VIS19',
@@ -1424,6 +1533,14 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-149', 'sorting · 排序', 'kernel-vocabulary', ['A09'], 'CCCL v3.4.2/3.x 仅支持 latest-patch Toolkit 12.x/13.x，不覆盖 11.8；sorting contract 仍需声明 key、stability 与 movement。', 'CCCL v3.4.2/3.x supports latest-patch Toolkit 12.x/13.x and excludes 11.8; a sorting contract still declares keys, stability, and movement.', '2026-08-31'),
   glossaryRecord('TERM-150', 'selection · 选择', 'kernel-vocabulary', ['A09'], 'Selection 由 predicate、payload、ownership 与 count 定义；CCCL v3.4.2 coordinate 不覆盖 11.8。', 'Selection is defined by predicate, payload, ownership, and count; the CCCL v3.4.2 coordinate excludes 11.8.', '2026-08-31'),
   glossaryRecord('TERM-151', 'stream compaction · 流压缩', 'kernel-vocabulary', ['A03', 'A09'], 'Flag/scan/scatter 建立 contiguous positions；exact library storage、policy 与 Toolkit support 跟随 selected CCCL release。', 'Flag, scan, and scatter establish contiguous positions; exact library storage, policy, and Toolkit support follow the selected CCCL release.', '2026-08-31'),
+  glossaryRecord('TERM-152', 'APOD · 评估、并行化、优化、部署', 'evidence-vocabulary', ['Q05', 'Q06'], 'Best Practices Guide v13.3/11.8 APOD；每轮绑定 correctness-qualified baseline、hypothesis、controlled change 与 deploy gate。', 'Best Practices Guide v13.3/11.8 APOD; every pass binds a correctness-qualified baseline, hypothesis, controlled change, and deploy gate.', '2026-08-31'),
+  glossaryRecord('TERM-153', 'Nsight Systems · 系统级性能分析器', 'environment-vocabulary', ['Q07', 'LAB06', 'LAB08', 'VIS14'], 'Current 2026.4/2026.4.1 与 selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；timeline 不是自动 bottleneck proof。', 'Current 2026.4/2026.4.1 and selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425; a timeline is not automatic bottleneck proof.', '2026-08-31'),
+  glossaryRecord('TERM-154', 'Nsight Compute · Kernel 性能分析器', 'environment-vocabulary', ['Q08', 'LAB08', 'VIS14'], 'Current 2026.2.1 与 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5；selected kernel/question 先于 metrics。', 'Current 2026.2.1 and selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5; a selected kernel and question precede metrics.', '2026-08-31'),
+  glossaryRecord('TERM-155', 'CUDA Profiling Tools Interface (CUPTI) · CUDA 性能分析工具接口', 'environment-vocabulary', ['Q07', 'Q08', 'LAB06', 'LAB08'], 'CUPTI 2026.2.1 与 Lane 11.8.87/12.9.79/13.3.75；兼容性、subscriber 与 activity/counter scope 必须按 exact environment 记录。', 'CUPTI 2026.2.1 and Lane coordinates 11.8.87/12.9.79/13.3.75; compatibility, subscriber, and activity/counter scope require exact-environment records.', '2026-08-31'),
+  glossaryRecord('TERM-156', 'profiler metric · 性能分析指标', 'evidence-vocabulary', ['Q08', 'LAB08'], 'Metric name、unit、definition 与 availability 绑定 exact GPU/tool；metric list 不是结论。', 'Metric names, units, definitions, and availability bind to the exact GPU and tool; a metric list is not a conclusion.', '2026-08-31'),
+  glossaryRecord('TERM-157', 'replay · 重放', 'evidence-vocabulary', ['Q08', 'LAB08'], 'Nsight Compute collection 可能用 kernel/application/range replay 与多 passes；记录 mode、overhead、state validity 和差异。', 'Nsight Compute collection can use kernel, application, or range replay and multiple passes; record mode, overhead, state validity, and differences.', '2026-08-31'),
+  glossaryRecord('TERM-158', 'profiler report · 性能分析报告', 'evidence-vocabulary', ['Q07', 'Q08', 'LAB06', 'LAB08'], '`.nsys-rep`/`.ncu-rep` 需要 exact tool version、method、hash、manifest 与 sanitization；存在文件不等于支持结论。', 'A `.nsys-rep` or `.ncu-rep` requires exact tool version, method, hash, manifest, and sanitization; file existence does not support a conclusion.', '2026-08-31'),
+  glossaryRecord('TERM-159', 'command-line interface (CLI) · 命令行接口', 'environment-vocabulary', ['Q07', 'Q08', 'LAB06', 'LAB08'], '记录实际 `nsys`/`ncu` version、help、expanded argv、stdout/stderr 与 exit status；owner example command 不是本机 observation。', 'Record actual `nsys`/`ncu` version, help, expanded argv, stdout/stderr, and exit status; an owner example command is not a local observation.', '2026-08-31'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -1448,7 +1565,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
+    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
@@ -2011,6 +2128,42 @@ const sources: readonly ResourceIndexRecord[] = [
       'CCCL v3.4.2 immutable release与 tagged platform-support table；CCCL 3.x 仅覆盖 latest-patch Toolkit 12.x/13.x，不覆盖 11.8；CUB DeviceRadixSort/DeviceSelect 与 Thrust sort/copy exact owner sources；不包含 runtime/performance observation。',
       'CCCL v3.4.2 immutable release and tagged platform-support table; CCCL 3.x covers latest-patch Toolkit 12.x/13.x and excludes 11.8; exact CUB DeviceRadixSort/DeviceSelect and Thrust sort/copy owner sources; no runtime or performance observation.',
     ),
+    '2026-08-31',
+    '2026-08-31',
+  ),
+  sourceRecord(
+    'SRC-CUDA-046',
+    localized('Q06 APOD 与 before/after evidence contract', 'Q06 APOD and before/after evidence contract'),
+    'cuda-version-record',
+    ['Q05', 'Q06'],
+    localized('CUDA C++ Best Practices Guide v13.3 APOD/Application Profiling 与 11.8 archive；无 observed performance claim。', 'CUDA C++ Best Practices Guide v13.3 APOD and Application Profiling plus the 11.8 archive; no observed performance claim.'),
+    '2026-08-31',
+    '2026-08-31',
+  ),
+  sourceRecord(
+    'SRC-CUDA-047',
+    localized('Q07/LAB06 Nsight Systems timeline 与 report contract', 'Q07/LAB06 Nsight Systems timeline and report contract'),
+    'cuda-version-record',
+    ['M07', 'M09', 'Q05', 'Q07', 'LAB06', 'LAB08', 'VIS14'],
+    localized('Nsight Systems 2026.4/2026.4.1；Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；CUPTI 11.8.87/12.9.79/13.3.75。', 'Nsight Systems 2026.4/2026.4.1; Lane versions 2022.4.2.1/2025.1.3.140/2026.1.3.425; CUPTI 11.8.87/12.9.79/13.3.75.'),
+    '2026-08-31',
+    '2026-08-31',
+  ),
+  sourceRecord(
+    'SRC-CUDA-048',
+    localized('Q08/LAB08 Nsight Compute metric、replay 与 report contract', 'Q08/LAB08 Nsight Compute metric, replay, and report contract'),
+    'cuda-version-record',
+    ['M02', 'M03', 'Q07', 'Q08', 'LAB08', 'VIS14'],
+    localized('Nsight Compute 2026.2.1；Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5；exact GPU metric availability 与 permission gate。', 'Nsight Compute 2026.2.1; Lane versions 2022.3.0.22/2025.2.1.3/2026.2.1.5; exact-GPU metric availability and permission gates.'),
+    '2026-08-31',
+    '2026-08-31',
+  ),
+  sourceRecord(
+    'SRC-CUDA-049',
+    localized('VIS14/CUPTI profiler 选择与 component boundary', 'VIS14/CUPTI profiler selection and component boundary'),
+    'cuda-version-record',
+    ['Q06', 'Q07', 'Q08', 'LAB06', 'LAB08', 'VIS14'],
+    localized('Nsight Systems 2026.4.1、Nsight Compute/CUPTI 2026.2.1；browser decision tree 不是完整 feature crosswalk 或 runtime evidence。', 'Nsight Systems 2026.4.1 and Nsight Compute/CUPTI 2026.2.1; the browser decision tree is not a complete feature crosswalk or runtime evidence.'),
     '2026-08-31',
     '2026-08-31',
   ),

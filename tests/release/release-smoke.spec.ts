@@ -17,6 +17,7 @@ import ex15Project from '../../examples/ex15-tiled-gemm/project.json' with { typ
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
+import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 import { discoverPublishedRoutes } from '../helpers/publication-routes';
@@ -55,12 +56,46 @@ const projectExamples = [
   { suffix: 'examples/tiled-gemm/', project: ex15Project },
   { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
+const r2LearningUnits = [
+  'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
+  'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
+  'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
+  'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
+  'M15', 'M16', 'M17', 'M18', 'M19',
+  'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09',
+  'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
+] as const;
+const currentLearningUnits = [...r2LearningUnits, 'Q06', 'Q07', 'Q08'] as const;
+const runnableExampleIds = [
+  'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
+] as const;
+const r2Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
+const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08'] as const;
+const r2VisualExplainers = [
+  'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
+  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+] as const;
+const currentVisualExplainers = [
+  'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
+  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+] as const;
+const currentNoCompileCheckedClaim = [
+  'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08',
+] as const;
+const currentPendingHardwareVerification = [
+  'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
+  ...currentLabs,
+] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 6 },
-  { suffix: 'practice/', count: 50 },
-  { suffix: 'visuals/', count: 16 },
-  { suffix: 'glossary/', count: 151 },
-  { suffix: 'sources-and-versions/', count: 61 },
+  { suffix: 'labs/', count: 8 },
+  { suffix: 'practice/', count: 53 },
+  { suffix: 'visuals/', count: 17 },
+  { suffix: 'glossary/', count: 159 },
+  { suffix: 'sources-and-versions/', count: 65 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -97,20 +132,14 @@ test('serves the exact R2 release and current publication with production canoni
   expect(releaseResponse.ok()).toBe(true);
   const releaseBody = await releaseResponse.body();
   expect(scanArtifactBuffer(releaseBody, 'release.json')).toEqual([]);
-  expect(JSON.parse(releaseBody.toString('utf8'))).toMatchObject({
+  const release = JSON.parse(releaseBody.toString('utf8'));
+  expect(release).toMatchObject({
     schemaVersion: 3,
     releaseId: 'R2',
     reviewDate: '2026-08-31',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    scope: {
-      publicationPairs: 186,
-      sourceRoutes: 372,
-      practiceBankEntries: 50,
-      glossaryTerms: 151,
-      sourceRecords: 61,
-    },
     compatibility: {
       supportedEnvironment: 'native-linux',
       toolkitLanes: [
@@ -135,12 +164,31 @@ test('serves the exact R2 release and current publication with production canoni
       'R3 and later curriculum material is outside this release.',
     ]),
   });
+  expect(release.scope).toEqual({
+    publicationPairs: 186,
+    sourceRoutes: 372,
+    learningUnits: r2LearningUnits,
+    runnableExamples: runnableExampleIds,
+    labs: r2Labs,
+    visualExplainers: r2VisualExplainers,
+    practiceBankEntries: 50,
+    glossaryTerms: 151,
+    sourceRecords: 61,
+  });
+  expect(
+    release.scope.labs.length +
+    release.scope.practiceBankEntries +
+    release.scope.visualExplainers.length +
+    release.scope.glossaryTerms +
+    release.scope.sourceRecords,
+  ).toBe(284);
 
   const publicationResponse = await request.get('/publication.json');
   expect(publicationResponse.ok()).toBe(true);
   const publicationBody = await publicationResponse.body();
   expect(scanArtifactBuffer(publicationBody, 'publication.json')).toEqual([]);
-  expect(JSON.parse(publicationBody.toString('utf8'))).toMatchObject({
+  const publication = JSON.parse(publicationBody.toString('utf8'));
+  expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
     reviewDate: '2026-08-31',
@@ -148,51 +196,59 @@ test('serves the exact R2 release and current publication with production canoni
     artifactType: 'static-assets',
     canonicalOrigin,
     releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
-    scope: {
-      publicationPairs: 186,
-      sourceRoutes: 372,
-      learningUnits: [
-        'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
-        'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
-        'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
-        'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
-        'M15', 'M16', 'M17', 'M18', 'M19',
-        'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09',
-        'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
-      ],
-      runnableExamples: [
-        'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
-        'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
-      ],
-      labs: ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'],
-      visualExplainers: [
-        'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-        'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
-      ],
-      practiceBankEntries: 50,
-      glossaryTerms: 151,
-      sourceRecords: 61,
-    },
-    evidence: {
-      compileChecked: ['EX02', 'EX10', 'LAB02'],
-      noCompileCheckedClaim: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15']),
-      pendingHardwareVerification: expect.arrayContaining(['EX07', 'EX08', 'EX09', 'EX11', 'EX12', 'EX13', 'EX14', 'EX15']),
-      runtimeNotApplicable: ['EX10'],
-      runtimeVerified: [],
-      referenceEnvironments: [],
-      performanceObservations: [],
-      retainedCompileRuns: [32720214527, 33275734951],
-    },
     knownLimitations: expect.arrayContaining([
-      'LAB06 has no current public destination.',
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
       'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
-      'R2 records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
+      'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'R3 and later curriculum material is outside this release.',
+      'Q06-Q08, LAB06, LAB08, and VIS14 are an incremental R3 publication; the aggregate R3 release review remains pending.',
+      'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]),
   });
+  expect(publication.scope).toEqual({
+    publicationPairs: 198,
+    sourceRoutes: 396,
+    learningUnits: currentLearningUnits,
+    runnableExamples: runnableExampleIds,
+    labs: currentLabs,
+    visualExplainers: currentVisualExplainers,
+    practiceBankEntries: 53,
+    glossaryTerms: 159,
+    sourceRecords: 65,
+  });
+  expect(publication.evidence).toEqual({
+    compileChecked: ['EX02', 'EX10', 'LAB02'],
+    noCompileCheckedClaim: currentNoCompileCheckedClaim,
+    pendingHardwareVerification: currentPendingHardwareVerification,
+    runtimeNotApplicable: ['EX10'],
+    runtimeVerified: [],
+    referenceEnvironments: [],
+    performanceObservations: [],
+    retainedCompileRuns: [32720214527, 33275734951],
+  });
+  expect(publication.knownLimitations).not.toContain('LAB06 has no current public destination.');
+
+  for (const fixtureName of [
+    'lab06-nsight-systems.expected.json',
+    'lab08-nsight-compute.expected.json',
+  ]) {
+    const fixtureResponse = await request.get(`/assets/profiler-report-fixtures/${fixtureName}`);
+    expect(fixtureResponse.ok(), fixtureName).toBe(true);
+    const fixtureBody = await fixtureResponse.body();
+    expect(scanArtifactBuffer(fixtureBody, fixtureName)).toEqual([]);
+    const fixture = JSON.parse(fixtureBody.toString('utf8'));
+    expect(validateProfilerReportFixture(fixture), fixtureName).toEqual({ valid: true, errors: [] });
+    expect(fixture).toMatchObject({
+      'SPDX-License-Identifier': 'CC-BY-4.0',
+      provenance: 'original',
+      fixtureType: 'expected-only-profiler-report-plan',
+      captureStatus: 'pending-hardware-verification',
+      sanitization: { status: 'passed', reviewDate: '2026-08-31' },
+      recordedObservations: [],
+    });
+    expect(new Set(Object.values(fixture.environmentManifest))).toEqual(new Set(['unfilled']));
+  }
 
   const legalResponse = await request.get('/legal/THIRD_PARTY_NOTICES.md');
   expect(legalResponse.ok()).toBe(true);
@@ -201,7 +257,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(372);
+  expect(publishedRoutes).toHaveLength(396);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -212,8 +268,8 @@ test('serves the exact R2 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/186.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/372.*source routes/);
+    await expect(page.locator('main')).toContainText(/198.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/396.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -223,7 +279,7 @@ test('serves the exact R2 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(284);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(302);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -234,14 +290,16 @@ test('serves the exact R2 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(6);
+    await expect(labCards).toHaveCount(8);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
       'LAB03',
       'LAB04',
       'LAB05',
+      'LAB06',
       'LAB07',
+      'LAB08',
     ]);
   }
 
@@ -372,6 +430,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/correctness/timing-asynchronous-gpu-work/'],
     },
     {
+      query: 'Q06 Use APOD as an Optimization Loop',
+      expectedHrefs: ['/en/correctness/apod-optimization-loop/'],
+    },
+    {
+      query: 'Q07 Read the Application Timeline First with Nsight Systems',
+      expectedHrefs: ['/en/correctness/timeline-first-nsight-systems/'],
+    },
+    {
+      query: 'Q08 Ask one selected kernel question with Nsight Compute',
+      expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/'],
+    },
+    {
       query: 'EX16 Compute Sanitizer Defect Suite Runnable Example',
       expectedHrefs: ['/en/examples/sanitizer-defect-suite/'],
     },
@@ -384,8 +454,16 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/labs/remove-shared-memory-bank-conflicts/'],
     },
     {
+      query: 'LAB06 Build an Overlapped Pipeline',
+      expectedHrefs: ['/en/labs/build-overlapped-pipeline/'],
+    },
+    {
       query: 'LAB07 Diagnose Four Sanitizer Failures',
       expectedHrefs: ['/en/labs/diagnose-four-sanitizer-failures/'],
+    },
+    {
+      query: 'LAB08 Profile the Full Application Before One Kernel',
+      expectedHrefs: ['/en/labs/profile-full-application-before-kernel/'],
     },
     {
       query: 'Memory-request Segment Grouping',
@@ -555,6 +633,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       query: 'VIS12 GEMM Tiling Hierarchy Matrix Instruction',
       expectedHrefs: ['/en/visuals/gemm-tiling-hierarchy/'],
     },
+    {
+      query: 'VIS14 Nsight Systems versus Nsight Compute',
+      expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'],
+    },
   ] as const) {
     await expectRankedSearchResult(page, {
       route: '/en/',
@@ -602,6 +684,7 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
     'visuals/reduction-stages/',
     'visuals/tiled-transpose/',
     'visuals/gemm-tiling-hierarchy/',
+    'visuals/nsight-systems-versus-nsight-compute/',
   ]) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -693,6 +776,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/correctness/racecheck-initcheck-synccheck/',
     '/correctness/timing-asynchronous-gpu-work/',
     '/en/correctness/timing-asynchronous-gpu-work/',
+    '/correctness/apod-optimization-loop/',
+    '/en/correctness/apod-optimization-loop/',
+    '/correctness/timeline-first-nsight-systems/',
+    '/en/correctness/timeline-first-nsight-systems/',
+    '/correctness/kernel-first-nsight-compute/',
+    '/en/correctness/kernel-first-nsight-compute/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
@@ -717,6 +806,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/tiled-transpose/',
     '/visuals/gemm-tiling-hierarchy/',
     '/en/visuals/gemm-tiling-hierarchy/',
+    '/visuals/nsight-systems-versus-nsight-compute/',
+    '/en/visuals/nsight-systems-versus-nsight-compute/',
     '/visuals/artifact-pipeline/',
     '/en/visuals/artifact-pipeline/',
     '/labs/break-and-repair-indexing/',
@@ -725,8 +816,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/labs/observe-coalescing/',
     '/labs/remove-shared-memory-bank-conflicts/',
     '/en/labs/remove-shared-memory-bank-conflicts/',
+    '/labs/build-overlapped-pipeline/',
+    '/en/labs/build-overlapped-pipeline/',
     '/labs/diagnose-four-sanitizer-failures/',
     '/en/labs/diagnose-four-sanitizer-failures/',
+    '/labs/profile-full-application-before-kernel/',
+    '/en/labs/profile-full-application-before-kernel/',
   ]) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
@@ -783,6 +878,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
       'visuals/reduction-stages/',
       'visuals/tiled-transpose/',
       'visuals/gemm-tiling-hierarchy/',
+      'visuals/nsight-systems-versus-nsight-compute/',
       'foundations/multidimensional-indexing/',
     ].flatMap(localizedRoutes),
     ...Object.keys(embeddedFallbacks),

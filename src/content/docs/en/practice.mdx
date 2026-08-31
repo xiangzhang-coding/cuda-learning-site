@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: Fifty published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 53 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-08-31'
@@ -59,6 +59,9 @@ structure:
   - entry-pb-r2-019
   - entry-pb-r2-020
   - entry-pb-r2-021
+  - entry-pb-r3-001
+  - entry-pb-r3-002
+  - entry-pb-r3-003
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -111,6 +114,9 @@ prerequisites:
   - Q03
   - Q04
   - Q05
+  - Q06
+  - Q07
+  - Q08
 relatedUnits:
   - O02
   - O03
@@ -160,6 +166,12 @@ relatedUnits:
   - Q03
   - Q04
   - Q05
+  - Q06
+  - Q07
+  - Q08
+  - LAB06
+  - LAB08
+  - VIS14
 hardwareGate: none
 evidence:
   compilation: []
@@ -174,15 +186,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,Q01,Q02,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,Q01,Q02,Q03,Q04,Q05' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,LAB06,LAB08,VIS14' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -201,13 +213,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the fifty complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 53 complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The fifty complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 53 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -2280,6 +2292,141 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Source date:** 2026-08-31.
 
+<span id="pb-r3-001" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-001: Repair an APOD record with no baseline or hypothesis
+
+- **ID and Publication Pair:** PB-R3-001 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [Q06: Use APOD as an Optimization Loop](/en/correctness/apod-optimization-loop/).
+- **Hardware gate:** None; repair a static APOD evidence ledger without running or measuring CUDA.
+- **Version gate:** CUDA C++ Best Practices Guide v13.3 APOD and the 11.8 archive.
+- **Related Learning Units and resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/) and [Q06](/en/correctness/apod-optimization-loop/).
+- **Last reviewed:** 2026-08-31.
+
+**Prompt:** An optimization proposal has no correctness-qualified recorded baseline. It says only that one path “looks slow” and plans to change both buffer lifetime and compiler flags. It names no representative workload, metric endpoints, Environment Manifest, falsifiable hypothesis, or before/after comparability rule, yet intends to deploy if the next result is “better.” Repair it as one reviewable APOD pass.
+
+**Goal:** Establish baseline qualification, one controlled change, an explicit falsifiable hypothesis, a comparable-evidence contract, and deployment/regression gates while leaving every observation and disposition field empty.
+
+**Constraints:**
+
+- Mark the baseline `baseline missing` until an actual correctness verdict, raw artifact, and complete manifest exist. Declare workload representativeness and exclusions, the metric, endpoints, and completion boundary.
+- Select either the buffer-lifetime change or compiler-flag change, not both. The hypothesis names its mechanism, predicted direction, and falsifier; the other change moves to a future pass.
+- List held-constant workload, input, correctness criteria, metric, measurement protocol, build policy, and environment coordinates. Fill in no timing, speedup, keep, deploy, or regression observation.
+
+**Expected evidence:** A repaired APOD ledger containing a baseline-missing inventory, one hypothesis row, a confounder and held-constant table, before/after artifact schema, predeclared decision rule, and deploy gate.
+
+**Acceptance criteria:**
+
+- The proposal no longer calls an impression, screenshot, or unexecuted template a recorded baseline. A missing baseline gate stops the pass before Assess.
+- The hypothesis isolates one independent variable and can be falsified or left inconclusive by correctness failure, absent mechanism evidence, an unmet comparison rule, or incomparable coordinates.
+- The candidate must pass the same correctness contract again, and before/after records must share workload, metric endpoints, measurement policy, and comparable manifests.
+- Disposition remains `pending observation`. Without actual comparable evidence and regression and operational records, no performance conclusion or Deploy entry is permitted.
+
+<details><summary>Hint 1</summary>Ask whether a traceable baseline really exists before asking what should change.</details>
+
+<details><summary>Hint 2</summary>Put the two proposed edits in separate passes so only one mechanism carries the falsifiable explanation.</details>
+
+**Reviewed solution:** The repaired record marks the available material `baseline missing` and leaves fields for workload rationale, correctness verdict, the Q05 protocol, manifest, and artifact pointers. The first pass retains only the buffer-lifetime change and holds compiler flags fixed. Its hypothesis template says that if the change removes the named repeated-movement mechanism while all other comparison coordinates remain fixed, the predeclared end-to-end metric should move in the named direction; correctness failure, an unchanged mechanism artifact, an unmet decision rule, or incomparable evidence rejects it or leaves it inconclusive. The before/after schema, source diff, commands, raw evidence, and deployment gates define fields without results. The only current verdict is “APOD record repaired; observation pending.”
+
+**Valid alternative:** Isolate the compiler-flag change first, provided buffer lifetime and every other coordinate remain fixed and the mechanism and falsifier are rewritten for that change. Two changes cannot share one attribution.
+
+**Common errors:** Calling an unqualified old run a baseline; inferring cause from a hotspot ranking; changing multiple variables; comparing performance before correctness; putting a prediction in an observation field; relabeling inconclusive as improvement; entering Deploy without a rollback owner.
+
+**Source basis:** The site's original [Q06 APOD contract](/en/correctness/apod-optimization-loop/) and [Q05 measurement contract](/en/correctness/timing-asynchronous-gpu-work/), plus NVIDIA's [CUDA C++ Best Practices Guide v13.3 APOD](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy), [Application Profiling](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#application-profiling), and [11.8 APOD archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy).
+
+**Source date:** 2026-08-31.
+
+<span id="pb-r3-002" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-002: Choose timeline-first evidence from application symptoms
+
+- **ID and Publication Pair:** PB-R3-002 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [Q07: Read the Application Timeline First with Nsight Systems](/en/correctness/timeline-first-nsight-systems/).
+- **Hardware gate:** None; review a static symptom, timeline, and report-custody plan.
+- **Version gate:** Nsight Systems 2026.4/2026.4.1 and selected Lane versions 2022.4.2.1, 2025.1.3.140, and 2026.1.3.425.
+- **Related Learning Units and resources:** [M07](/en/memory/stream-ordering/), [M09](/en/memory/pinned-memory-transfer-overlap/), [Q05](/en/correctness/timing-asynchronous-gpu-work/), [Q07](/en/correctness/timeline-first-nsight-systems/), [LAB06](/en/labs/build-overlapped-pipeline/), and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/).
+- **Last reviewed:** 2026-08-31.
+
+**Prompt:** An incident note says only that “batches pause between submissions and copies do not overlap kernels,” then labels a selected kernel the bottleneck and asks to collect every Nsight Compute metric immediately. The record has no representative workload, correctness verdict, `nsys --version`, collection method, timeline, profiler diagnostics, or `.nsys-rep` custody. Repair the symptom diagnosis as a timeline-first decision record.
+
+**Goal:** Route the application-level symptom to Nsight Systems first, design a reviewable collection and custody plan, and permit kernel evidence only after an exact kernel instance and specific question exist.
+
+**Constraints:**
+
+- Before collection, fix the workload, input, representative-path rationale, Q05 correctness and completion contract, capture scope, trace domains, Environment Manifest, and observed CLI and help gates.
+- Keep CPU gap, CUDA API duration, submission gap, copies, kernels, streams, dependencies, and overlap as separate fields awaiting observation. Blank space, multiple streams, and overlap eligibility are not diagnoses.
+- Treat the original `.nsys-rep` as the primary artifact. Stats and exports retain the source hash, exact command, tool version, and derivative hash. Prefill no interval, cause, bottleneck, timing, or overlap result.
+
+**Expected evidence:** A symptom-to-tool decision table, pre-observation collection contract, timeline interval and dependency ledger, report-custody inventory, and Systems-to-Compute handoff gate.
+
+**Acceptance criteria:**
+
+- The question still concerns application pauses, submission, copies, and dependencies, so Nsight Systems comes first. VIS14 helps choose an evidence source but supplies no observation.
+- Selected Lane component numbers are planning coordinates only. Saved `nsys --version` and help output govern the actual command and interpretation.
+- Future overlap wording is permitted only after named copy and kernel intervals intersect in the same retained report, and it does not automatically establish cause, generality, or performance effect.
+- LAB06 inherits collection and correctness gates, not a prefilled result. Without a complete method, diagnostics, manifest, and report custody, there is no timeline conclusion or Q08 handoff.
+
+<details><summary>Hint 1</summary>Locate the symptom within an application interval first. Kernel metrics cannot reconstruct a timeline that does not exist.</details>
+
+<details><summary>Hint 2</summary>Separate “what is visible,” “why it might happen,” and “which evidence comes next.” The latter two columns cannot impersonate the first.</details>
+
+**Reviewed solution:** The repaired record preserves the incident note as an unverified symptom and selects Q07 and Nsight Systems as the first evidence source. Its collection template fixes a representative correct workload, capture and completion boundaries, requested trace domains, actual CLI/version/help, the CUPTI instrumentation boundary, diagnostics, and immutable report custody; every interval cell remains `pending observation`. The interpretation ledger separates host gap, API duration, submission, copy and kernel placement, stream and dependency, and overlap, rejecting causal inferences from blank space or eligibility. Only a future report that stably identifies process, phase, context or stream, kernel occurrence, and one kernel-level question may enter Q08. No Compute metric is currently requested.
+
+**Valid alternative:** Review an existing retained Systems report without recollection if it satisfies the same representative-workload, correctness, version, method, and custody gates. A detached screenshot or summary table is not a substitute.
+
+**Common errors:** Guessing `nsys` version from the Toolkit; sending an application symptom directly to Nsight Compute; naming blank space a CPU cause; treating separate lanes as concurrency; treating overlap eligibility as an observation; replacing `.nsys-rep` with a screenshot; choosing every metric before handoff.
+
+**Source basis:** The site's original [Q07 timeline-first contract](/en/correctness/timeline-first-nsight-systems/), [LAB06 collection boundary](/en/labs/build-overlapped-pipeline/), and [VIS14 decision model](/en/visuals/nsight-systems-versus-nsight-compute/), plus NVIDIA's [Nsight Systems User Guide v2026.4](https://docs.nvidia.com/nsight-systems/UserGuide/index.html), [2026.4.1 Release Notes](https://docs.nvidia.com/nsight-systems/ReleaseNotes/index.html#nsight-systems-2026-4-1-highlights), and [CUPTI Usage](https://docs.nvidia.com/cupti/main/main.html).
+
+**Source date:** 2026-08-31.
+
+<span id="pb-r3-003" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-003: Design a minimal metric and replay plan for a selected kernel
+
+- **ID and Publication Pair:** PB-R3-003 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [Q08: Ask One Selected Kernel Question with Nsight Compute](/en/correctness/kernel-first-nsight-compute/).
+- **Hardware gate:** None; review a static kernel, question, and metric plan; real collection requires authorized performance counters.
+- **Version gate:** Nsight Compute 2026.2.1 and selected Lane versions 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5.
+- **Related Learning Units and resources:** [M02](/en/memory/coalescing-transactions/), [M03](/en/memory/shared-memory-tiling/), [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB08](/en/labs/profile-full-application-before-kernel/), and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/).
+- **Last reviewed:** 2026-08-31.
+
+**Prompt:** A Q07 handoff names only a repeated `normalize_rows` kernel family and application phase, with no exact occurrence or reproducible filter. The next plan requests every Nsight Compute section, records permission denial as zero, assumes all counters come from one untouched launch, and intends to call any “large” value the bottleneck and repair direction. Repair it as a minimal selected-kernel metric and replay plan.
+
+**Goal:** Complete exact-kernel selection and one predeclared mechanism question before bounding collection and interpretation with target-specific availability, permission, minimal evidence, replay disclosure, and `.ncu-rep` custody.
+
+**Constraints:**
+
+- The selection ledger links the source `.nsys-rep` identity, process, phase, context or stream when available, full kernel name, matching occurrence, workload and input, and separate-run equivalence rule. Return to Q07 if mapping cannot be made stable.
+- On the exact target, retain `ncu --version`, GPU, driver and Toolkit, `--list-sections`, `--query-metrics`, and the performance-counter permission result. A denial or unavailable item stops the plan and never becomes zero.
+- Select one queried section or a short metric list that directly answers one M02 or M03 question. Retain each exact name, definition, unit, denominator, and scope. Replay mode and pass information and every value remain pending observation.
+
+**Expected evidence:** A selected-instance identity card, question-to-evidence map, version, permission, and availability gate, symbolic minimal command, replay and perturbation disclosure, two-report custody ledger, and bounded-claim template.
+
+**Acceptance criteria:**
+
+- Metric selection follows the exact occurrence, specific question, and decision rule. A name-only match or `--launch-count 1` cannot establish selection by itself.
+- Every requested section or metric serves the same declared mechanism. The plan contains no all-sections dump and compares no values with different definitions or units.
+- The `.nsys-rep` and future `.ncu-rep` are separate profiler executions. Replay may re-execute, perturb, or serialize work and is not described as attaching counters to the old Systems event.
+- There is currently no availability, permission, pass count, metric value, bottleneck, duration, throughput, or speedup verdict. LAB08 collects only after the gates are actually complete.
+
+<details><summary>Hint 1</summary>Write which occurrence, which mechanism, and which decision the answer changes before opening the metric catalog.</details>
+
+<details><summary>Hint 2</summary>Collecting less can narrow replay surface, but it cannot prove that replay or profiler perturbation is absent.</details>
+
+**Reviewed solution:** The repaired plan first requires the `normalize_rows` source-report hash, process and phase, context or stream, named matching occurrence, and fixed workload, then labels the Compute target a corresponding occurrence. It predeclares only one M02 global-memory request-shape question. Until actual query output exists, section name, metric name, availability, and value remain blank. The gate order is exact tool and GPU coordinates, permission, query availability, filter match, one minimal section or short list, declared replay mode, and immutable export and custody. A denial, ambiguous match, or divergent workload stops the plan or returns it to Systems. A future report can answer only the narrow question; a causal performance conclusion still requires a separate correctness-qualified controlled comparison.
+
+**Valid alternative:** Ask one M03 shared-memory staging or reuse question and select its minimum queried evidence instead. Do not merge global and shared mechanisms into one unbounded question.
+
+**Common errors:** Dumping metrics before writing the question; selecting an instance by kernel name alone; guessing availability; recording permission denial as zero; hiding replay; mixing units or definitions; calling a “large” value the bottleneck; discarding original reports or omitting hashes, commands, and filters.
+
+**Source basis:** The site's original [Q08 selected-kernel contract](/en/correctness/kernel-first-nsight-compute/), [LAB08 decision trail](/en/labs/profile-full-application-before-kernel/), and [VIS14 tool gate](/en/visuals/nsight-systems-versus-nsight-compute/), plus NVIDIA's [Nsight Compute Profiling Guide 2026.2.1](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html), [Nsight Compute CLI 2026.2.1](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html), [2025.2 CLI archive](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html), and [2022.3 CLI archive](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html).
+
+**Source date:** 2026-08-31.
+
 ## Review record
 
-Existing entries retain their item-level records from 2026-08-26 through 2026-08-30. PB-R2-020, PB-R2-021, and the complete fifty-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-08-31**. Every scenario, prompt, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The new entries execute no CUDA, EX15, CUB, or Thrust. LAB12 remains unpublished until both Q13 and L06 have public destinations.
+Existing entries retain their item-level records from 2026-08-26 through 2026-08-30. PB-R2-020, PB-R2-021, PB-R3-001 through PB-R3-003, and the complete 53-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-08-31**. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The new PB-R3 entries execute no CUDA, Nsight Systems, Nsight Compute, LAB06, or LAB08 and publish no runtime, metric value, numerical performance, or speedup claim. LAB12 remains unpublished until both Q13 and L06 have public destinations.

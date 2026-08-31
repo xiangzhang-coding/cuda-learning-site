@@ -76,6 +76,10 @@ const issue22GlossaryIds = [
   'TERM-140', 'TERM-141', 'TERM-142', 'TERM-143', 'TERM-144', 'TERM-145', 'TERM-146',
 ] as const;
 const issue23GlossaryIds = ['TERM-147', 'TERM-148', 'TERM-149', 'TERM-150', 'TERM-151'] as const;
+const currentGlossaryIds = [
+  'TERM-152', 'TERM-153', 'TERM-154', 'TERM-155',
+  'TERM-156', 'TERM-157', 'TERM-158', 'TERM-159',
+] as const;
 const releaseSourceIds = [
   'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
   'SRC-CUDA-022', 'SRC-CUDA-023', 'SRC-CUDA-024',
@@ -92,8 +96,12 @@ const issue21SourceIds = [
 ] as const;
 const issue22SourceIds = ['SRC-CUDA-041', 'SRC-CUDA-042', 'SRC-CUDA-043'] as const;
 const issue23SourceIds = ['SRC-CUDA-044', 'SRC-CUDA-045'] as const;
+const currentSourceIds = ['SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049'] as const;
 const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
+const currentLabIds = ['LAB06', 'LAB08'] as const;
 const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09'] as const;
+const currentVisualIds = ['VIS14'] as const;
+const currentPracticeIds = ['PB-R3-001', 'PB-R3-002', 'PB-R3-003'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -131,12 +139,19 @@ const issue23Ids = new Set<string>([
   ...issue23SourceIds,
   'VIS12',
 ]);
+const currentCatalogIds = new Set<string>([
+  ...currentLabIds,
+  ...currentPracticeIds,
+  ...currentVisualIds,
+  ...currentGlossaryIds,
+  ...currentSourceIds,
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
-  labs: 'LAB07',
-  practice: 'PB-R2-021',
-  visuals: 'VIS12',
-  glossary: 'TERM-151',
-  sources: 'SRC-CUDA-045',
+  labs: 'LAB08',
+  practice: 'PB-R3-003',
+  visuals: 'VIS14',
+  glossary: 'TERM-159',
+  sources: 'SRC-CUDA-049',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -221,34 +236,39 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
-  expect(counts.labs).toBe(6);
-  expect(counts.practice).toBe(50);
-  expect(counts.visuals).toBe(16);
-  expect(counts.glossary).toBe(151);
-  expect(counts.sources).toBe(61);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(284);
+  expect(counts.labs).toBe(8);
+  expect(counts.practice).toBe(53);
+  expect(counts.visuals).toBe(17);
+  expect(counts.glossary).toBe(159);
+  expect(counts.sources).toBe(65);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(302);
 
   const expectedIds = [
     ...releaseLabIds,
+    ...currentLabIds,
     ...releaseVisualIds,
+    ...currentVisualIds,
     ...releasePracticeIds,
     ...issue19PracticeIds,
     ...toolchainPracticeIds,
     ...issue21PracticeIds,
     ...issue22PracticeIds,
     ...issue23PracticeIds,
+    ...currentPracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
     ...issue21GlossaryIds,
     ...issue22GlossaryIds,
     ...issue23GlossaryIds,
+    ...currentGlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
     ...issue21SourceIds,
     ...issue22SourceIds,
     ...issue23SourceIds,
+    ...currentSourceIds,
     'VIS10',
     'VIS11',
     'VIS12',
@@ -280,6 +300,10 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     expect(record.reviewedOn, record.planningId).toBe('2026-08-31');
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
   }
+  for (const record of records.filter(({ planningId }) => currentCatalogIds.has(planningId))) {
+    expect(record.reviewedOn, record.planningId).toBe('2026-08-31');
+    if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
+  }
 
   for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {
     const groupRecords = records.filter((record) => record.group === group);
@@ -292,16 +316,27 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     const terminalId = terminalResourceIds[group];
     if (terminalId) {
       await expect(index.locator(`[data-resource-id="${terminalId}"]`)).toHaveCount(1);
+      await index.locator('[data-resource-query]').fill(terminalId);
+      await expect(index.locator(`[data-resource-id="${terminalId}"]:visible`)).toHaveCount(1);
+      await index.locator('[data-resource-query]').fill('');
     }
     if (group === 'labs') {
-      await expect(index.locator('[data-resource-id="LAB06"]')).toHaveCount(0);
-      await expect(index.locator('h3 a', { hasText: /^LAB06\b/ })).toHaveCount(0);
+      for (const futureId of ['LAB10', 'LAB12']) {
+        await expect(index.locator(`[data-resource-id="${futureId}"]`)).toHaveCount(0);
+        await expect(index.locator('h3 a', { hasText: new RegExp(`^${futureId}\\b`) })).toHaveCount(0);
+      }
     }
 
     for (const record of groupRecords) {
       const card = index.locator(`[data-resource-id="${record.planningId}"]`);
       await expect(card, record.planningId).toHaveCount(1);
       await expect(card.locator('h3 a')).toHaveAttribute('href', record.href.en);
+      if (currentCatalogIds.has(record.planningId)) {
+        await expect(card.getByText('Hardware gate', { exact: true }).locator('..').locator('dd'))
+          .toHaveText(record.hardwareGate.en);
+        await expect(card.getByText('Version gate', { exact: true }).locator('..').locator('dd'))
+          .toHaveText(record.versionGate.en);
+      }
     }
 
     for (const record of groupRecords) {
