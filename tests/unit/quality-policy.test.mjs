@@ -138,8 +138,12 @@ describe('quality policy primitives', () => {
     await expect(scanDirectory(root)).resolves.toEqual({ filesScanned: 2, violations: [] });
 
     await writeFile(path.join(root, 'nested', 'leak.txt'), ['Private', 'Maintainer', 'Material'].join(' '));
+    const credentialName = ['ghp', 'abcdefghijklmnopqrstuvwxyz123456'].join('_');
+    await writeFile(path.join(root, credentialName), 'safe content');
     const result = await scanDirectory(root);
     expect(result.violations).toContainEqual(expect.objectContaining({ rule: 'private governance phrase' }));
+    expect(result.violations).toContainEqual({ path: '<redacted-path>', rule: 'GitHub token' });
+    expect(JSON.stringify(result.violations)).not.toContain(credentialName);
   });
 
   it('rejects symbolic links and files beyond the artifact scan boundary', async () => {

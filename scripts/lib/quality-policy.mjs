@@ -100,6 +100,10 @@ function isZipBuffer(buffer) {
   return signature === 0x04034b50 || signature === 0x06054b50 || signature === 0x08074b50;
 }
 
+function safeDiagnosticPath(relativePath) {
+  return contentViolations(relativePath).length > 0 ? '<redacted-path>' : relativePath;
+}
+
 function sameRecord(left = {}, right = {}) {
   const sort = (record) => Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)));
   return JSON.stringify(sort(left)) === JSON.stringify(sort(right));
@@ -276,7 +280,8 @@ function zipViolations(buffer, relativePath, depth = 0) {
 }
 
 export function scanZipArchive(buffer, relativePath = 'archive.zip') {
-  return zipViolations(buffer, relativePath).map(({ path: file, rule }) => {
+  const safePath = safeDiagnosticPath(relativePath);
+  return zipViolations(buffer, safePath).map(({ path: file, rule }) => {
     const entryBoundary = file.indexOf('!/');
     return {
       path: entryBoundary < 0 ? file : `${file.slice(0, entryBoundary + 2)}<redacted-entry>`,
@@ -286,32 +291,40 @@ export function scanZipArchive(buffer, relativePath = 'archive.zip') {
 }
 
 export function scanArtifactBuffer(buffer, relativePath) {
+  const safePath = safeDiagnosticPath(relativePath);
   const violations = contentViolations(buffer.toString('utf8')).map(({ rule }) => ({
-    path: relativePath,
+    path: safePath,
     rule,
   }));
   const extension = path.extname(relativePath).toLowerCase();
-  if (extension === '.png' || isPngBuffer(buffer)) violations.push(...pngMetadataViolations(buffer, relativePath));
-  if (extension === '.zip' || isZipBuffer(buffer)) violations.push(...scanZipArchive(buffer, relativePath));
+  if (extension === '.png' || isPngBuffer(buffer)) violations.push(...pngMetadataViolations(buffer, safePath));
+  if (extension === '.zip' || isZipBuffer(buffer)) violations.push(...scanZipArchive(buffer, safePath));
   return violations;
 }
 
 export async function scanFiles(root, files) {
   const relativePaths = files.map((file) => path.relative(root, file));
-  const violations = pathViolations(relativePaths);
+  const violations = pathViolations(relativePaths).map((violation) => ({
+    ...violation,
+    path: safeDiagnosticPath(violation.path),
+  }));
+  for (const relativePath of relativePaths) {
+    for (const { rule } of contentViolations(relativePath)) violations.push({ path: '<redacted-path>', rule });
+  }
 
   for (const file of files) {
     const relativePath = normalized(path.relative(root, file));
+    const diagnosticPath = safeDiagnosticPath(relativePath);
     const metadata = await lstat(file);
     if (metadata.isSymbolicLink()) {
-      violations.push({ path: relativePath, rule: 'symbolic links are not accepted in retained artifacts' });
+      violations.push({ path: diagnosticPath, rule: 'symbolic links are not accepted in retained artifacts' });
       continue;
     }
     if (metadata.size > 50 * 1024 * 1024) {
-      violations.push({ path: relativePath, rule: 'artifact file exceeds 50 MiB scan boundary' });
+      violations.push({ path: diagnosticPath, rule: 'artifact file exceeds 50 MiB scan boundary' });
       continue;
     }
-    violations.push(...scanArtifactBuffer(await readFile(file), relativePath));
+    violations.push(...scanArtifactBuffer(await readFile(file), diagnosticPath));
   }
 
   return { filesScanned: files.length, violations };
