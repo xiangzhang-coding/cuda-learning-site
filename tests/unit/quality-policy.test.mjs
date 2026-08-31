@@ -162,12 +162,14 @@ describe('quality policy primitives', () => {
     const privateTrace = createZip([{ name: 'trace.txt', data: ['/Users', 'person', 'trace'].join('/') }]);
     await writeFile(path.join(root, 'trace.zip'), privateTrace);
     await writeFile(path.join(root, 'nested.zip'), createZip([{ name: 'inner.zip', data: privateTrace }]));
+    await writeFile(path.join(root, 'trace-wrapper.zip'), createZip([{ name: 'resources/sha256', data: privateTrace }]));
 
     const result = await scanDirectory(root);
     expect(result.violations).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ path: 'trace.zip!/<redacted-entry>', rule: 'private host path' }),
         expect.objectContaining({ path: 'nested.zip!/<redacted-entry>', rule: 'private host path' }),
+        expect.objectContaining({ path: 'trace-wrapper.zip!/<redacted-entry>', rule: 'private host path' }),
       ]),
     );
   });
@@ -182,7 +184,7 @@ describe('quality policy primitives', () => {
       rule: 'private host path',
     });
     const encrypted = createZip([{
-      name: [['/Users', 'person'].join('/'), ['ghp', 'abcdefghijklmnopqrstuvwxyz123456'].join('_')].join('/'),
+      name: ['resources', ['ghp', 'abcdefghijklmnopqrstuvwxyz123456'].join('_')].join('/'),
     }]);
     const centralOffset = encrypted.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]));
     encrypted.writeUInt16LE(1, centralOffset + 8);
@@ -190,8 +192,21 @@ describe('quality policy primitives', () => {
     expect(encryptedViolations).toEqual([
       { path: 'encrypted.zip', rule: 'ZIP archive inspection failed: encrypted ZIP entries are unsupported' },
     ]);
-    expect(JSON.stringify(encryptedViolations)).not.toContain('/Users');
     expect(JSON.stringify(encryptedViolations)).not.toContain('ghp_');
+    const credentialName = createZip([{
+      name: ['resources', ['ghp', 'abcdefghijklmnopqrstuvwxyz123456'].join('_')].join('/'),
+    }]);
+    const credentialNameViolations = scanZipArchive(credentialName, 'credential-name.zip');
+    expect(credentialNameViolations).toEqual([
+      { path: 'credential-name.zip!/<redacted-entry>', rule: 'GitHub token' },
+    ]);
+    expect(JSON.stringify(credentialNameViolations)).not.toContain('ghp_');
+    expect(scanZipArchive(createZip([{ name: 'duplicate' }, { name: 'duplicate' }]), 'duplicate.zip')).toEqual([
+      { path: 'duplicate.zip', rule: 'ZIP archive inspection failed: ZIP archive contains duplicate entry names' },
+    ]);
+    expect(scanZipArchive(createZip([{ name: 'unsafe\nentry' }]), 'control.zip')).toEqual([
+      { path: 'control.zip', rule: 'ZIP archive inspection failed: ZIP entry name contains control characters' },
+    ]);
     expect(scanArtifactBuffer(Buffer.from(['Bearer', 'abcdefghijklmnopqrstuv'].join(' ')), 'response.html')).toEqual([
       { path: 'response.html', rule: 'bearer credential' },
     ]);

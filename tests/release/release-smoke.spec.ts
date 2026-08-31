@@ -911,7 +911,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     const entries = zipEntries(archive);
     const findEntry = (relativePath: string) => {
       const matches = entries.filter(({ name }) => name.endsWith(`/${project.root}/${relativePath}`));
-      expect(matches, `${project.id} archive contains one ${relativePath}`).toHaveLength(1);
+      expect(matches.length, `${project.id} archive contains one ${relativePath}`).toBe(1);
       return matches[0];
     };
     for (const relativePath of new Set([
@@ -944,7 +944,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       const identityEntries = zipEntries(identityArchive);
       const findIdentityEntry = (relativePath: string) => {
         const matches = identityEntries.filter(({ name }) => name.endsWith(`/${project.root}/${relativePath}`));
-        expect(matches, `EX15 embedded source contains one ${relativePath}`).toHaveLength(1);
+        expect(matches.length, `EX15 embedded source contains one ${relativePath}`).toBe(1);
         return matches[0];
       };
       for (const relativePath of new Set([

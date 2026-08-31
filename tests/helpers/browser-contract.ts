@@ -13,15 +13,16 @@ export function collectBrowserFailures(page: Page, targetOrigin: string) {
   const origin = new URL(targetOrigin).origin;
   const failures: string[] = [];
   page.on('console', (message) => {
-    if (message.type() === 'error') failures.push(`console: ${message.text()}`);
+    if (message.type() === 'error') failures.push('console error');
   });
-  page.on('pageerror', (error) => failures.push(`pageerror: ${error.message}`));
+  page.on('pageerror', () => failures.push('page error'));
   page.on('requestfailed', (request) => {
-    failures.push(`requestfailed: ${request.method()} ${request.url()} ${request.failure()?.errorText ?? ''}`);
+    const scope = new URL(request.url()).origin === origin ? 'target origin' : 'external origin';
+    failures.push(`request failed at ${scope}`);
   });
   page.on('response', (response) => {
     if (new URL(response.url()).origin === origin && response.status() >= 400) {
-      failures.push(`response: ${response.status()} ${response.url()}`);
+      failures.push(`response ${response.status()} at target origin`);
     }
   });
   return failures;

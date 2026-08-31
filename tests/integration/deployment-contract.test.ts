@@ -49,6 +49,12 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("scanDirectory(path.join(projectRoot, 'dist'))");
     expect(guard).toContain('Built release output failed artifact policy');
     expect(guard).toContain('artifactScan.filesScanned');
+    expect(guard.indexOf('artifactScan.violations.length')).toBeLessThan(
+      guard.indexOf("const sourceManifest = parseManifest(sourceManifestText"),
+    );
+    expect(guard).toContain("new Set(artifactScan.violations.map(({ rule }) => rule))");
+    expect(guard).toContain('Built ${label} is not valid JSON.');
+    expect(guard).toContain("console.error(error instanceof ReleaseSourceError ? error.message : 'Release source check failed before upload.')");
     expect(guard).toContain('releaseSourceCommit !== head');
     expect(guard).toContain('publicationSourceCommit !== head');
     expect(guard).toContain('JSON.stringify(embeddedReleaseManifest) !== JSON.stringify(sourceManifest)');

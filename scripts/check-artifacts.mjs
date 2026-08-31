@@ -12,7 +12,7 @@ for (const target of targets) {
   console.log(`${target}: scanned ${result.filesScanned} files`);
   for (const violation of result.violations) {
     failed = true;
-    console.error(`- ${target}/${violation.path}: ${violation.rule}`);
+    console.error(`- ${violation.rule}`);
   }
 }
 

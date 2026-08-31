@@ -90,6 +90,16 @@ function normalized(relativePath) {
   return relativePath.split(path.sep).join('/').replace(/^\.\//, '');
 }
 
+function isPngBuffer(buffer) {
+  return buffer.subarray(0, 8).toString('hex') === '89504e470d0a1a0a';
+}
+
+function isZipBuffer(buffer) {
+  if (buffer.length < 4) return false;
+  const signature = buffer.readUInt32LE(0);
+  return signature === 0x04034b50 || signature === 0x06054b50 || signature === 0x08074b50;
+}
+
 function sameRecord(left = {}, right = {}) {
   const sort = (record) => Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)));
   return JSON.stringify(sort(left)) === JSON.stringify(sort(right));
@@ -182,6 +192,7 @@ export function zipEntries(buffer) {
   if (entryCount > 10_000) throw new Error('ZIP archive exceeds 10,000 entry scan boundary');
 
   const entries = [];
+  const names = new Set();
   let offset = centralOffset;
   let totalUncompressed = 0;
   for (let index = 0; index < entryCount; index += 1) {
@@ -199,6 +210,11 @@ export function zipEntries(buffer) {
     const nameEnd = offset + 46 + nameLength;
     if (nameEnd > buffer.length) throw new Error('invalid ZIP entry name length');
     const name = buffer.subarray(offset + 46, nameEnd).toString('utf8');
+    if (/[\u0000-\u001f\u007f]/.test(name)) throw new Error('ZIP entry name contains control characters');
+    if (name.includes('\\')) throw new Error('ZIP entry name uses an unsupported path separator');
+    if (name.startsWith('/') || name.split('/').includes('..')) throw new Error('ZIP entry path is unsafe');
+    if (names.has(name)) throw new Error('ZIP archive contains duplicate entry names');
+    names.add(name);
 
     if (flags & 1) throw new Error('encrypted ZIP entries are unsupported');
     if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff || localOffset === 0xffffffff) {
@@ -239,18 +255,17 @@ function zipViolations(buffer, relativePath, depth = 0) {
     }
     for (const entry of entries) {
       const normalizedEntry = normalized(entry.name);
-      if (normalizedEntry.startsWith('/') || normalizedEntry.split('/').includes('..')) {
-        violations.push({ path: `${relativePath}!/${normalizedEntry}`, rule: 'unsafe ZIP entry path' });
-        continue;
+      for (const violation of contentViolations(entry.name)) {
+        violations.push({ path: `${relativePath}!/${normalizedEntry}`, rule: violation.rule });
       }
       if (entry.name.endsWith('/')) continue;
       for (const violation of contentViolations(entry.content.toString('utf8'))) {
         violations.push({ path: `${relativePath}!/${normalizedEntry}`, ...violation });
       }
-      if (path.extname(entry.name).toLowerCase() === '.png') {
+      if (path.extname(entry.name).toLowerCase() === '.png' || isPngBuffer(entry.content)) {
         violations.push(...pngMetadataViolations(entry.content, `${relativePath}!/${normalizedEntry}`));
       }
-      if (path.extname(entry.name).toLowerCase() === '.zip') {
+      if (path.extname(entry.name).toLowerCase() === '.zip' || isZipBuffer(entry.content)) {
         violations.push(...zipViolations(entry.content, `${relativePath}!/${normalizedEntry}`, depth + 1));
       }
     }
@@ -276,8 +291,8 @@ export function scanArtifactBuffer(buffer, relativePath) {
     rule,
   }));
   const extension = path.extname(relativePath).toLowerCase();
-  if (extension === '.png') violations.push(...pngMetadataViolations(buffer, relativePath));
-  if (extension === '.zip') violations.push(...scanZipArchive(buffer, relativePath));
+  if (extension === '.png' || isPngBuffer(buffer)) violations.push(...pngMetadataViolations(buffer, relativePath));
+  if (extension === '.zip' || isZipBuffer(buffer)) violations.push(...scanZipArchive(buffer, relativePath));
   return violations;
 }
 
