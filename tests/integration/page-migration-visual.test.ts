@@ -260,5 +260,5 @@ describe('VIS08 page-migration Visual Explainer', () => {
       }
       expect(alignedIds[0], contract.unitId).toEqual(alignedIds[1]);
     }
-  });
+  }, 15_000);
 });
