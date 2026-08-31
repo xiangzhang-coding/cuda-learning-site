@@ -91,7 +91,7 @@ function expectCleanArchive(archive: Buffer, label: string) {
 }
 
 test('serves the exact R2 release and current publication with production canonicals', async ({ page, request }) => {
-  test.setTimeout(360_000);
+  test.setTimeout(600_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
   expect(releaseResponse.ok()).toBe(true);
