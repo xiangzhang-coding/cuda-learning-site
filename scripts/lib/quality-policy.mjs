@@ -261,13 +261,13 @@ function zipViolations(buffer, relativePath, depth = 0) {
 }
 
 export function scanZipArchive(buffer, relativePath = 'archive.zip') {
-  return zipViolations(buffer, relativePath);
+  return zipViolations(buffer, relativePath).map(({ path: file, rule }) => ({ path: file, rule }));
 }
 
 export function scanArtifactBuffer(buffer, relativePath) {
-  const violations = contentViolations(buffer.toString('utf8')).map((violation) => ({
+  const violations = contentViolations(buffer.toString('utf8')).map(({ rule }) => ({
     path: relativePath,
-    ...violation,
+    rule,
   }));
   const extension = path.extname(relativePath).toLowerCase();
   if (extension === '.png') violations.push(...pngMetadataViolations(buffer, relativePath));

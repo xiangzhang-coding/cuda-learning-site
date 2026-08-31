@@ -180,10 +180,10 @@ describe('quality policy primitives', () => {
     expect(scanZipArchive(privateTrace, 'download.zip')).toContainEqual({
       path: 'download.zip!/trace.txt',
       rule: 'private host path',
-      match: ['/Users', 'person', 'trace'].join('/'),
     });
-    expect(scanArtifactBuffer(Buffer.from(['Bearer', 'abcdefghijklmnopqrstuv'].join(' ')), 'response.html'))
-      .toContainEqual(expect.objectContaining({ path: 'response.html', rule: 'bearer credential' }));
+    expect(scanArtifactBuffer(Buffer.from(['Bearer', 'abcdefghijklmnopqrstuv'].join(' ')), 'response.html')).toEqual([
+      { path: 'response.html', rule: 'bearer credential' },
+    ]);
   });
 
   it('rejects forbidden ZIP paths and malformed ZIP files', async () => {

@@ -42,18 +42,18 @@ const ex10PublishedProject = {
   ...canonicalExamplePublications.examples.EX10,
 };
 const projectExamples = [
-  { route: '/en/examples/coalesced-strided-access/', project: ex05Project },
-  { route: '/en/examples/shared-memory-tile-bank-padding/', project: ex06Project },
-  { route: '/en/examples/streams-events-overlap/', project: ex07Project },
-  { route: '/en/examples/unified-memory-migration/', project: ex08Project },
-  { route: '/en/examples/graph-capture/', project: ex09Project },
-  { route: '/en/examples/ptx-fatbinary-inspection/', project: ex10PublishedProject },
-  { route: '/en/examples/multi-stage-reduction/', project: ex11Project },
-  { route: '/en/examples/inclusive-exclusive-scan/', project: ex12Project },
-  { route: '/en/examples/privatized-histogram/', project: ex13Project },
-  { route: '/en/examples/tiled-transpose/', project: ex14Project },
-  { route: '/en/examples/tiled-gemm/', project: ex15Project },
-  { route: '/en/examples/sanitizer-defect-suite/', project: ex16Project },
+  { suffix: 'examples/coalesced-strided-access/', project: ex05Project },
+  { suffix: 'examples/shared-memory-tile-bank-padding/', project: ex06Project },
+  { suffix: 'examples/streams-events-overlap/', project: ex07Project },
+  { suffix: 'examples/unified-memory-migration/', project: ex08Project },
+  { suffix: 'examples/graph-capture/', project: ex09Project },
+  { suffix: 'examples/ptx-fatbinary-inspection/', project: ex10PublishedProject },
+  { suffix: 'examples/multi-stage-reduction/', project: ex11Project },
+  { suffix: 'examples/inclusive-exclusive-scan/', project: ex12Project },
+  { suffix: 'examples/privatized-histogram/', project: ex13Project },
+  { suffix: 'examples/tiled-transpose/', project: ex14Project },
+  { suffix: 'examples/tiled-gemm/', project: ex15Project },
+  { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 6 },
@@ -740,48 +740,35 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     viewport: { width: 390, height: 844 },
   });
   const staticPage = await staticContext.newPage();
-  const embeddedFallbacks: Record<string, { controls: string; evidence: string; visualId: string }> = {
-    '/foundations/asynchronous-errors/': {
+  const embeddedFallbacks: Record<string, { controls: string; evidence: string; visualId: string }> = {};
+  for (const { suffix, ...contract } of [
+    {
+      suffix: 'foundations/asynchronous-errors/',
       controls: '[data-timeline-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS19',
     },
-    '/en/foundations/asynchronous-errors/': {
-      controls: '[data-timeline-controls]',
-      evidence: '[data-no-evidence]',
-      visualId: 'VIS19',
-    },
-    '/foundations/compute-capability/': {
+    {
+      suffix: 'foundations/compute-capability/',
       controls: '[data-capability-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS20',
     },
-    '/en/foundations/compute-capability/': {
-      controls: '[data-capability-controls]',
-      evidence: '[data-no-evidence]',
-      visualId: 'VIS20',
-    },
-    '/foundations/runtime-driver-api/': {
+    {
+      suffix: 'foundations/runtime-driver-api/',
       controls: '[data-api-boundary-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS21',
     },
-    '/en/foundations/runtime-driver-api/': {
-      controls: '[data-api-boundary-controls]',
-      evidence: '[data-no-evidence]',
-      visualId: 'VIS21',
-    },
-    '/foundations/launch-geometry/': {
+    {
+      suffix: 'foundations/launch-geometry/',
       controls: '[data-block-shape-controls]',
       evidence: '[data-no-evidence]',
       visualId: 'VIS22',
     },
-    '/en/foundations/launch-geometry/': {
-      controls: '[data-block-shape-controls]',
-      evidence: '[data-no-evidence]',
-      visualId: 'VIS22',
-    },
-  };
+  ] as const) {
+    for (const route of localizedRoutes(suffix)) embeddedFallbacks[route] = contract;
+  }
   for (const route of [
     ...[
       'visuals/kernel-journey/',
@@ -867,7 +854,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     ex04Archive.includes(Buffer.from('/examples/ex04-error-handling-lifecycle/src/error_handling_lifecycle.cu')),
   ).toBe(true);
 
-  for (const { route, project } of projectExamples) {
+  for (const { suffix, project } of projectExamples) {
     expect(project.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
     expect(project.sourceUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${project.sourceCommit}/${project.root}`,
@@ -886,7 +873,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     expect(project.evidence.recordedObservations).toEqual([]);
 
     const canonicalRanges = Object.keys(project.ranges);
-    for (const publicationRoute of localizedRoutes(route.slice('/en/'.length))) {
+    for (const publicationRoute of localizedRoutes(suffix)) {
       await page.goto(publicationRoute);
       await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
       await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
