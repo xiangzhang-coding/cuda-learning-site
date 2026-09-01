@@ -65,25 +65,30 @@ const r2LearningUnits = [
   'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09',
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
 ] as const;
-const currentLearningUnits = [...r2LearningUnits, 'Q06', 'Q07', 'Q08'] as const;
+const currentLearningUnits = [
+  ...r2LearningUnits.slice(0, 44),
+  'A14',
+  ...r2LearningUnits.slice(44),
+  'Q06', 'Q07', 'Q08', 'Q09', 'Q10',
+] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
 const r2Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
-const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08'] as const;
+const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09'] as const;
 const r2VisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -91,11 +96,11 @@ const currentPendingHardwareVerification = [
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 8 },
-  { suffix: 'practice/', count: 53 },
-  { suffix: 'visuals/', count: 17 },
-  { suffix: 'glossary/', count: 159 },
-  { suffix: 'sources-and-versions/', count: 65 },
+  { suffix: 'labs/', count: 9 },
+  { suffix: 'practice/', count: 56 },
+  { suffix: 'visuals/', count: 18 },
+  { suffix: 'glossary/', count: 165 },
+  { suffix: 'sources-and-versions/', count: 68 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -191,7 +196,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-08-31',
+    reviewDate: '2026-09-01',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -202,20 +207,20 @@ test('serves the exact R2 release and current publication with production canoni
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
       'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'Q06-Q08, LAB06, LAB08, and VIS14 are an incremental R3 publication; the aggregate R3 release review remains pending.',
+      'Q06-Q10, A14, LAB06, LAB08, LAB09, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 198,
-    sourceRoutes: 396,
+    publicationPairs: 209,
+    sourceRoutes: 418,
     learningUnits: currentLearningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 53,
-    glossaryTerms: 159,
-    sourceRecords: 65,
+    practiceBankEntries: 56,
+    glossaryTerms: 165,
+    sourceRecords: 68,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -257,7 +262,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(396);
+  expect(publishedRoutes).toHaveLength(418);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -268,8 +273,8 @@ test('serves the exact R2 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/198.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/396.*source routes/);
+    await expect(page.locator('main')).toContainText(/209.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/418.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -279,7 +284,7 @@ test('serves the exact R2 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(302);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(316);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -290,7 +295,7 @@ test('serves the exact R2 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(8);
+    await expect(labCards).toHaveCount(9);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -300,7 +305,24 @@ test('serves the exact R2 release and current publication with production canoni
       'LAB06',
       'LAB07',
       'LAB08',
+      'LAB09',
     ]);
+  }
+
+  for (const route of localizedRoutes('labs/build-original-roofline/')) {
+    await page.goto(route);
+    await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', 'LAB09');
+    await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+    await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'Pending Hardware Verification');
+    await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+  }
+
+  for (const route of localizedRoutes('visuals/roofline/')) {
+    await page.goto(route);
+    const roofline = page.locator('cuda-roofline-explorer[data-visual-id="VIS13"]');
+    await expect(roofline).toHaveAttribute('data-ready', 'true');
+    await expect(roofline.locator('[data-static-fallback]')).toBeVisible();
+    await expect(roofline.locator('[data-no-evidence]')).toContainText('LAB09');
   }
 
   if (releaseKind === 'production') expect(releaseOrigin).toBe(canonicalOrigin);
@@ -442,6 +464,14 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/'],
     },
     {
+      query: 'Q09 Occupancy Stalls Throughput Latency Hiding',
+      expectedHrefs: ['/en/correctness/occupancy-stalls-throughput/'],
+    },
+    {
+      query: 'Q10 Auditable Roofline Arithmetic Intensity',
+      expectedHrefs: ['/en/correctness/roofline-arithmetic-intensity/'],
+    },
+    {
       query: 'EX16 Compute Sanitizer Defect Suite Runnable Example',
       expectedHrefs: ['/en/examples/sanitizer-defect-suite/'],
     },
@@ -464,6 +494,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'LAB08 Profile the Full Application Before One Kernel',
       expectedHrefs: ['/en/labs/profile-full-application-before-kernel/'],
+    },
+    {
+      query: 'LAB09 Build an Original Roofline',
+      expectedHrefs: ['/en/labs/build-original-roofline/'],
     },
     {
       query: 'Memory-request Segment Grouping',
@@ -574,6 +608,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/algorithms/sorting-selection-compaction/'],
     },
     {
+      query: 'A14 Falsifiable Algorithm Optimizations Arithmetic Intensity',
+      expectedHrefs: ['/en/algorithms/algorithm-choice-arithmetic-intensity/'],
+    },
+    {
       query: 'Q02 floating-point order determinism bitwise reproducibility',
       expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'],
     },
@@ -634,6 +672,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/visuals/gemm-tiling-hierarchy/'],
     },
     {
+      query: 'VIS13 Roofline Model Ridge Workload Point',
+      expectedHrefs: ['/en/visuals/roofline/'],
+    },
+    {
       query: 'VIS14 Nsight Systems versus Nsight Compute',
       expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'],
     },
@@ -684,6 +726,7 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
     'visuals/reduction-stages/',
     'visuals/tiled-transpose/',
     'visuals/gemm-tiling-hierarchy/',
+    'visuals/roofline/',
     'visuals/nsight-systems-versus-nsight-compute/',
   ]) {
     for (const route of localizedRoutes(suffix)) {
@@ -766,6 +809,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/algorithms/tiled-gemm-correctness/',
     '/algorithms/sorting-selection-compaction/',
     '/en/algorithms/sorting-selection-compaction/',
+    '/algorithms/algorithm-choice-arithmetic-intensity/',
+    '/en/algorithms/algorithm-choice-arithmetic-intensity/',
     '/correctness/cpu-references-tolerances-invariants/',
     '/en/correctness/cpu-references-tolerances-invariants/',
     '/correctness/floating-point-order-reproducibility/',
@@ -782,6 +827,10 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/correctness/timeline-first-nsight-systems/',
     '/correctness/kernel-first-nsight-compute/',
     '/en/correctness/kernel-first-nsight-compute/',
+    '/correctness/occupancy-stalls-throughput/',
+    '/en/correctness/occupancy-stalls-throughput/',
+    '/correctness/roofline-arithmetic-intensity/',
+    '/en/correctness/roofline-arithmetic-intensity/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
@@ -806,6 +855,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/visuals/tiled-transpose/',
     '/visuals/gemm-tiling-hierarchy/',
     '/en/visuals/gemm-tiling-hierarchy/',
+    '/visuals/roofline/',
+    '/en/visuals/roofline/',
     '/visuals/nsight-systems-versus-nsight-compute/',
     '/en/visuals/nsight-systems-versus-nsight-compute/',
     '/visuals/artifact-pipeline/',
@@ -822,6 +873,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/labs/diagnose-four-sanitizer-failures/',
     '/labs/profile-full-application-before-kernel/',
     '/en/labs/profile-full-application-before-kernel/',
+    '/labs/build-original-roofline/',
+    '/en/labs/build-original-roofline/',
   ]) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
@@ -878,6 +931,7 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
       'visuals/reduction-stages/',
       'visuals/tiled-transpose/',
       'visuals/gemm-tiling-hierarchy/',
+      'visuals/roofline/',
       'visuals/nsight-systems-versus-nsight-compute/',
       'foundations/multidimensional-indexing/',
     ].flatMap(localizedRoutes),

@@ -1,0 +1,722 @@
+---
+title: 'LAB09: Build an Original Roofline'
+description: 'Measure canonical EX02 under a frozen workload, preserve ten independent Nsight Compute attempts, and build an original provenance-bounded roofline artifact without inventing performance results.'
+pairId: lab09
+counterpart: /labs/build-original-roofline/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - workload-model
+  - manifest
+  - source-review
+  - build
+  - correctness
+  - ceilings
+  - profiler-gates
+  - warm-up
+  - acquisition
+  - report-custody
+  - reduction
+  - roofline-artifact
+  - interpretation
+  - observations
+  - criteria-blockers
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB09
+prerequisites:
+  - Q10
+relatedUnits:
+  - Q09
+  - A14
+  - EX02
+  - VIS13
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - error-checking
+  - kernel
+  - cpu-reference
+hardwareGate: 'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; C++17 in cuda-11.8, cuda-12.9, or cuda-13.3; matching Nsight Compute and CUPTI; administrator-approved non-admin performance-counter access; exactly 201,326,592 bytes of canonical application device allocation; no sudo, privilege escalation, or policy bypass'
+estimatedMinutes: 180
+difficulty: advanced
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 201326592
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device and execute NVCC, the host C++ compiler, make, the EX02 binary, and Nsight Compute CLI ncu'
+  - 'Create, hash, inspect, sanitize, retain, and remove learner-owned build files, raw logs, CSV and chart artifacts, and .ncu-rep reports'
+  - 'Read NVIDIA GPU performance counters only under an administrator-approved non-admin policy; this Lab authorizes no sudo, privilege escalation, setuid workaround, container escape, or security-policy bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - A correctness-first unprofiled EX02 run should pass the independent CPU reference, both tolerances, and every CUDA boundary at all 16,777,216 elements before any performance interpretation.
+    - The frozen source model should retain 16,777,216 counted FP32 additions, 201,326,592 requested bytes, and an algorithmic intensity of 1/12 operation per byte without relabeling those bytes as profiler traffic.
+    - Exact-GPU version, help, disabled config file, section, metric, CUPTI, report-write, and non-admin counter gates should either qualify collection or preserve a blocker rather than a zero.
+    - One excluded direct-process warm-up should precede exactly ten independently launched and fully retained profiler attempts in acquisition order.
+    - A qualifying batch should expose exact metric names, definitions, units, scopes, filters, replay effects, duration, and traffic at one declared memory level for the selected vector_add kernel.
+    - Independently provenanced compute and named memory-path bandwidth ceilings should either align for one roofline or remain separate rather than form a hybrid roof.
+    - A qualifying run should produce and hash an original CSV, table, and chart from all retained values while keeping VIS13 browser rendering outside the evidence chain.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; Nsight Compute 2022.3.0.22; CUPTI 11.8.87'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / EX02 12.9.2 Lane; Nsight Compute 2025.2.1.3; CUPTI 12.9.79'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / EX02 13.3.1 Lane; Nsight Compute 2026.2.1.5; CUPTI 13.3.75'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, reproducibility, occupancy, stall, throughput, and roofline semantics'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current query, kernel filter, collection, report, import, CSV, and unit behavior'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute GUI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightCompute/index.html'
+    version: 'NVIDIA Nsight Compute GUI 2026.2.1'
+    platform: 'Current profiler report, metric details, roofline view, and report inspection behavior'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1 with CUDA 13.3 support in the 2026.2 line'
+    platform: 'Current fixes, support, and compatibility boundary'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide - Bandwidth and Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3; bandwidth section 9.2 and occupancy section 11.1'
+    platform: 'Theoretical/effective bandwidth distinctions, timing, verification, and occupancy interpretation'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/index.html'
+    version: 'CUDA Programming Guide v13.3; updated 2026-08-27'
+    platform: 'CUDA execution, synchronization, global-memory, launch, and compute-capability semantics'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI v2026.2.1; selected Lane components 11.8.87, 12.9.79, and 13.3.75'
+    platform: 'Current compatibility, profiling, counter availability, overhead, and subscriber boundaries'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Williams, Waterman, and Patterson; Communications of the ACM 52(4), 2009; DOI 10.1145/1498765.1498785'
+    platform: 'Roofline model only; no GPU-specific metric, ceiling, or measurement prescription is inherited'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/labs/build-original-roofline/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,workload-model,manifest,source-review,build,correctness,ceilings,profiler-gates,warm-up,acquisition,report-custody,reduction,roofline-artifact,interpretation,observations,criteria-blockers,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q10 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q09,A14,EX02,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'error-checking,kernel,cpu-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CC 7.5+ CUDA GPU; matching Nsight Compute and CUPTI; administrator-approved non-admin counter access; 201,326,592-byte canonical allocation; no sudo or bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '180' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '201326592' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device; compiler, make, binary, and ncu execution; artifact writes; administrator-approved non-admin performance-counter access; no sudo, elevation, or policy bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '7 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '11' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3,13.3.1,2022.3.0.22,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75,2026.2.1,2009' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/build-original-roofline/" lang="zh-CN">阅读中文对应页</a>
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+LAB09 is a Lab performed outside the website on Native Linux. It turns a correctness-qualified canonical EX02 run into an original, reviewable roofline artifact. This page provides a measurement contract, not results: compilation evidence is empty, runtime remains Pending Hardware Verification, and recorded observations are empty.
+
+## Lab contract
+
+| Coordinate | Frozen requirement |
+| --- | --- |
+| Difficulty and time | Advanced, about 180 minutes |
+| Strict prerequisite | Exactly Q10 |
+| Related, not prerequisite | Q09, A14, [EX02](/en/examples/vector-addition/), and VIS13 |
+| Supported Environment | Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer |
+| Toolkit Lane | C++17 in `cuda-11.8`, `cuda-12.9`, or `cuda-13.3`, with matching Nsight Compute and CUPTI |
+| Frozen workload | Exactly 16,777,216 `float` elements and one canonical `vector_add` launch |
+| Application allocation | Three 67,108,864-byte device vectors, exactly 201,326,592 bytes total |
+| Permissions | Administrator-approved non-admin performance-counter access; no `sudo`, elevation, setuid workaround, container escape, or policy bypass |
+| Acquisition | One excluded direct-process warm-up, then exactly 10 independent retained profiler attempts |
+| Evidence | Compilation empty; runtime Pending Hardware Verification; recorded observations empty |
+
+Q09, A14, EX02, and VIS13 are related resources only. They do not add prerequisite edges. A measured chart is not accepted merely because a profiler UI can draw one: this Lab requires its own ceiling provenance, retained samples, CSV, table, chart, and hashes.
+
+## Prerequisite check
+
+1. Complete Q10 and be able to align an operation convention, byte domain, duration scope, ceilings, ridge point, and roof before interpreting a point.
+2. Confirm exactly one selected device is visible and is CC 7.5 or newer. Record the query, not only a product name.
+3. Select one C++17 Toolkit Lane and its matching Nsight Compute/CUPTI installation. A nearby version must be recorded as a different environment, not silently assigned a Lane label.
+4. Obtain an administrator-approved record granting this non-admin account access to performance counters. Without it, stop. LAB09 never authorizes `sudo ncu` or another bypass.
+5. Reserve a learner-owned evidence directory that can preserve reports, raw logs, statuses, hashes, manifests, CSV, table, chart, and sanitization records without overwriting.
+
+## Obtain the canonical project
+
+[View the complete EX02 project at its pinned public source/evidence commit](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition), or [download the archive for that same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip). One reviewable acquisition path is:
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout d69f7131acff7f8b1dfcd780b494426b5948735b
+cd examples/ex02-vector-addition
+```
+
+Freeze commit `d69f7131acff7f8b1dfcd780b494426b5948735b`, the unmodified canonical files, C++17, build arguments, binary hash, input generation, 256-thread block size, launch, verifier, and all CUDA boundaries. Any source, compiler option, workload, launch, input, device, or profiler option change creates another experiment and cannot inherit this batch.
+
+## Freeze the workload and byte models
+
+The immutable model coordinates are:
+
+```yaml
+element_type: float
+element_count: 16777216
+bytes_per_element: 4
+device_vector_count: 3
+bytes_per_device_vector: 67108864
+maximum_device_allocation_bytes: 201326592
+algorithmic_fp32_additions: 16777216
+algorithmic_requested_bytes: 201326592
+algorithmic_intensity_operations_per_byte: 1/12 (~0.083333)
+```
+
+For each valid element, canonical `vector_add` requests two 4-byte reads and one 4-byte write at the declared source-level device-memory boundary. Therefore:
+
+- counted work is `16,777,216 x 1 = 16,777,216` FP32 additions;
+- requested traffic is `16,777,216 x (4 + 4 + 4) = 201,326,592` bytes; and
+- requested-byte arithmetic intensity is `16,777,216 / 201,326,592 = 1/12`, approximately `0.083333` operations/byte.
+
+This is an **algorithmic requested-byte model**. It is not a measurement of DRAM sectors, L2 traffic, L1/TEX traffic, cache hits, write allocation, compression, ECC effects, or any profiler-attributed physical traffic. The equal totals for three allocations and source-level read/read/write requests are arithmetic coincidences of this workload, not evidence that allocation bytes equal transferred bytes. Profiler-owned replay storage is also outside the canonical application's 201,326,592-byte allocation and must be recorded separately if exposed.
+
+## Create the complete unfilled Environment Manifest
+
+Save this template before running anything. Every `<fill ...>` field requires an observation from this experiment. `unavailable`, `not applicable`, or `unknown` is acceptable only with a reason and, where required below, is a blocker; zero is never a substitute for missing evidence.
+
+```yaml
+subject: EX02 / LAB09
+source_repository:
+  source_commit: d69f7131acff7f8b1dfcd780b494426b5948735b
+  tree_url: https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition
+  archive_url: https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip
+  acquisition_method: <fill exact command or archive method>
+  checkout_and_worktree_state: <fill; exact commit and unmodified required>
+observation:
+  date_utc: <fill>
+  observer: <fill>
+supported_environment:
+  family: Native Linux
+  distribution: <fill>
+  version: <fill>
+  architecture: <fill>
+  kernel: <fill>
+gpu:
+  identity: <fill exact identity after privacy review>
+  selected_device_ordinal: <fill; exactly one>
+  compute_capability: <fill; 7.5 or newer>
+  compute_capability_query: <fill exact command or API>
+  visible_count: <fill>
+  used_count: 1
+driver:
+  exact_version: <fill>
+  query_command: <fill>
+toolkit:
+  lane: <fill cuda-11.8 | cuda-12.9 | cuda-13.3>
+  exact_toolkit_version: <fill>
+  exact_component_versions: <fill runtime, driver-facing components, Nsight Compute, and CUPTI>
+  nvcc_version_output: <fill>
+  host_compiler_version_output: <fill>
+profiling_stack:
+  ncu_path: <fill>
+  ncu_version_output: <fill from this executable>
+  ncu_config_file_policy: disabled with --config-file off
+  ncu_config_file_control_result: <fill actual help support, expanded argv, status, and log SHA-256>
+  ncu_help_log_and_sha256: <fill>
+  ncu_list_sections_log_and_sha256: <fill>
+  ncu_query_metrics_log_and_sha256: <fill from selected exact GPU>
+  cupti_version: <fill>
+  cupti_observation_method: <fill API, package, header, or library query>
+  cupti_library_path_and_sha256: <fill>
+  compatibility_result: <fill pass or blocker>
+build:
+  cxx_dialect: c++17
+  build_type_and_optimization: <fill>
+  architecture_targets: <fill>
+  debug_lineinfo_lto_flags: <fill>
+  link_mode: <fill>
+  environment_variables: <fill>
+  exact_ordered_commands_and_expanded_argv: <fill>
+  binary_path: build/ex02-vector-addition
+  binary_sha256: <fill>
+input:
+  generation_definition: <fill confirmed from source>
+  external_dataset_or_seed: none; deterministic canonical generation
+workload:
+  element_type: float
+  element_count: 16777216
+  algorithmic_fp32_additions: 16777216
+  algorithmic_requested_bytes: 201326592
+  algorithmic_intensity_operations_per_byte: 1/12 (~0.083333)
+allocation:
+  vector_count: 3
+  bytes_per_vector: 67108864
+  canonical_application_device_bytes: 201326592
+  profiler_owned_or_other_device_bytes: <fill separately if observable>
+launch:
+  selected_kernel: vector_add
+  block_threads: 256
+  grid_blocks: 65536
+  stream_and_context: <fill>
+  exact_launch_count_per_process: 1
+permissions:
+  device_access_result: <fill>
+  executable_and_filesystem_access: <fill learner-owned paths>
+  administrator_policy_owner: <fill>
+  non_admin_counter_approval_record: <fill>
+  actual_counter_access_result: <fill pass or exact denial>
+  privilege_escalation: prohibited; no sudo or bypass
+execution_isolation:
+  cuda_visible_devices: <fill>
+  selected_device_state: <fill>
+  bare_metal_vm_container: <fill>
+  container_image_and_digest: <fill or not used>
+  mig_state: <fill>
+  mps_state: <fill>
+  concurrent_gpu_and_cpu_load: <fill processes and exclusion policy>
+  clocks_and_persistence_policy: <fill>
+  power_limit_and_policy: <fill>
+  thermal_state_before_and_after: <fill>
+commands:
+  build: <fill exact commands>
+  correctness: <fill exact command>
+  profiler_queries: <fill exact commands>
+  direct_process_warm_up: <fill exact command>
+  profiler_attempts: <fill exact expanded argv for attempts 01..10>
+correctness:
+  oracle: independent canonical CPU reference
+  absolute_tolerance: 1e-5
+  relative_tolerance: 1e-5
+  all_elements_checked: <fill>
+  all_cuda_boundaries: <fill>
+  unprofiled_exit_status: <fill>
+  warm_up_exit_status: <fill>
+  each_profiled_process_result: <fill attempts 01..10>
+completion_boundary:
+  canonical_explicit_cudaDeviceSynchronize: required
+  synchronization_result: <fill>
+  kernel_duration_scope: <fill exact report definition and boundary>
+warm_up:
+  count: 1
+  process_mode: direct unprofiled process
+  excluded_from_retained_samples: true
+  purpose_and_limit: <fill; does not erase fresh-process or profiler first-use effects>
+repetition_plan:
+  independent_profiler_attempts: 10
+  acquisition_order: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10]
+  raw_sample_retention: all attempts, no deletion
+  statistic: median
+  spread: min and max
+  outlier_policy: no post-hoc exclusion; any invalid attempt invalidates the full batch
+  invalid_batch_policy: retain it and create a new unique full 10-attempt batch
+kernel_selection:
+  exact_reported_name: <fill name identifying canonical vector_add>
+  kernel_name_basis: <fill from actual ncu help>
+  filter: <fill exact filter>
+  launch_filter: <fill exact one-launch rule>
+collection:
+  selected_section: <fill one queried minimal section or not used>
+  selected_metrics: <fill minimal queried list or not used>
+  minimality_rationale: <fill>
+  exact_metric_names: <fill from exact-GPU query/report; no architecture copy>
+  metric_definitions: <fill owner/report definitions>
+  metric_units: <fill unscaled base units and displayed units>
+  metric_scopes: <fill kernel, device, unit, instance, and aggregation>
+  metric_filters: <fill device, process, context, stream, kernel, launch>
+  traffic_memory_level_and_path: <fill exact named level/path>
+  traffic_metric_and_definition: <fill exact bytes metric>
+  duration_metric_and_definition: <fill exact kernel duration>
+  operation_count_source: frozen canonical algorithmic count
+replay:
+  requested_mode: <fill from actual help>
+  actual_mode: <fill>
+  pass_count_per_attempt: <fill>
+  save_restore_and_cache_control: <fill>
+  clock_control_and_serialization: <fill>
+  measured_perturbation_boundary: <fill what report values can and cannot represent>
+ceilings:
+  compute:
+    operation_domain_and_precision: <fill FP32 operation convention aligned to workload>
+    value_and_unit: <fill decimal Gop/s; no preset value>
+    provenance_class: <fill calibrated-measured | modeled-theoretical-tool-reported>
+    benchmark_source_commit_binary_hash: <fill for calibrated measured, otherwise not applicable>
+    correctness_qualification_method: <fill for calibrated measured, otherwise not applicable>
+    method_commands_repetitions_raw_samples_statistic: <fill for calibrated measured, otherwise not applicable>
+    exact_owner_or_report_provenance: <fill for modeled/theoretical/tool-reported, otherwise not applicable>
+  bandwidth:
+    named_memory_path: <fill exact path, such as the level actually selected; no preset path>
+    value_and_unit: <fill decimal GB/s; no preset value>
+    provenance_class: <fill calibrated-measured | modeled-theoretical-tool-reported>
+    benchmark_source_commit_binary_hash: <fill for calibrated measured, otherwise not applicable>
+    correctness_qualification_method: <fill for calibrated measured, otherwise not applicable>
+    method_commands_repetitions_raw_samples_statistic: <fill for calibrated measured, otherwise not applicable>
+    exact_owner_or_report_provenance: <fill for modeled/theoretical/tool-reported, otherwise not applicable>
+  alignment_audit: <fill same provenance class, precision, memory path, decimal units, and scope or do not combine>
+derived_values:
+  profiler_attributed_traffic_bytes: <fill from exact metric or blocker>
+  profiler_attributed_intensity_operations_per_byte: <fill operation count / attributed bytes or blocker>
+  requested_byte_model_intensity_operations_per_byte: 1/12 (~0.083333)
+  duration_seconds: <fill from exact duration metric>
+  achieved_gops: <fill 16777216 / duration_seconds / 1e9>
+  compute_ceiling_gops: <fill aligned ceiling>
+  bandwidth_ceiling_gbytes_per_second: <fill aligned named-path ceiling>
+  ridge_operations_per_byte: <fill compute_ceiling_gops / bandwidth_ceiling_gbytes_per_second>
+  roof_gops: <fill min(compute_ceiling_gops, intensity * bandwidth_ceiling_gbytes_per_second)>
+attempt_records:
+  report_paths_and_sha256: <fill 01..10>
+  raw_stdout_stderr_paths_and_sha256: <fill 01..10>
+  exit_statuses: <fill one per command and attempt>
+  acquisition_ledger: <fill order, start/end time, and immutable attempt identity>
+artifacts:
+  csv_path_and_sha256: <fill>
+  table_path_and_sha256: <fill>
+  original_chart_path_and_sha256: <fill>
+  chart_source_or_generation_command_and_sha256: <fill>
+custody:
+  private_original_directory: <fill immutable learner-controlled path>
+  observer_and_transfer_history: <fill>
+  report_log_manifest_artifact_hash_ledger: <fill>
+  derived_exports_and_parent_hashes: <fill>
+  retention_and_access_policy: <fill>
+sanitization:
+  public_derivative_planned: <fill yes or no>
+  reviewer_and_date: <fill>
+  removed_coordinates: <fill user, host, device serial, paths, network, or none>
+  transformations: <fill>
+  original_to_derivative_hash_mapping: <fill>
+criteria_result:
+  correctness_gate: <fill>
+  environment_and_permission_gate: <fill>
+  ceiling_provenance_and_alignment_gate: <fill>
+  ten_attempt_batch_gate: <fill>
+  metric_scope_and_replay_gate: <fill>
+  original_artifact_gate: <fill>
+  interpretation_gate: <fill>
+  evidence_status_candidate: <fill only after independent review>
+```
+
+The manifest is deliberately larger than a product/version list. Performance claims are uninterpretable without workload identity, completion boundary, isolation, metric scope, replay, repetition, ceiling provenance, raw samples, and artifact custody.
+
+## Review canonical source
+
+The canonical error boundary is displayed only from EX02:
+
+<CanonicalCode exampleId="EX02" range="error-checking" />
+
+The selected kernel and bounds guard are displayed only from EX02:
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+The independent CPU reference and tolerance predicate are displayed only from EX02:
+
+<CanonicalCode exampleId="EX02" range="cpu-reference" />
+
+For 16,777,216 elements and 256 threads per block, the source contract gives exactly 65,536 blocks with no partial final block. Static review establishes the algorithmic count and requested-byte model, not elapsed time, cache traffic, DRAM traffic, occupancy, stalls, throughput, a ceiling, or a bottleneck.
+
+## Build and hash the binary
+
+Use the canonical C++17 stages and retain stdout, stderr, expanded argv, and exit status for every command:
+
+```sh
+mkdir -p lab09-evidence/{gates,correctness,warm-up,batches,ceilings,derived}
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/ex02-vector-addition
+```
+
+Any failed stage is a blocker. A learner build and host-only test do not populate LAB09's empty compilation axis, even though the pinned EX02 project has its own separately scoped Compile-Checked records.
+
+## Pass correctness before profiling
+
+Run the frozen workload directly, without a profiler:
+
+```sh
+./build/ex02-vector-addition 16777216 \
+  >lab09-evidence/correctness/unprofiled.stdout.log \
+  2>lab09-evidence/correctness/unprofiled.stderr.log
+status=$?
+printf '%s\n' "$status" >lab09-evidence/correctness/unprofiled.status
+```
+
+All of these criteria must pass before any performance interpretation:
+
+1. All three `cudaMalloc` calls and both H2D copies pass.
+2. The launch boundary and `cudaGetLastError` pass.
+3. The canonical path's explicit `cudaDeviceSynchronize` passes and establishes completion before dependent host work.
+4. The D2H copy and all three `cudaFree` calls pass.
+5. The independent CPU reference checks all 16,777,216 outputs. Each output is accepted only when absolute difference is `<= 1e-5` or relative difference is `<= 1e-5 * max(abs(expected), abs(actual))`.
+6. Process status is zero and retained logs agree with the criterion record.
+
+Any failure blocks every duration, traffic, Gop/s, intensity, ceiling, roof, occupancy, stall, throughput, bottleneck, or speedup interpretation. A printed `PASS` alone is insufficient without the boundary records and independent comparison contract.
+
+## Record two ceilings independently
+
+Record a compute ceiling and a bandwidth ceiling for one explicitly named memory path. Each ceiling independently permits only one of these provenance classes:
+
+1. **Calibrated measured ceiling:** a separately correctness-qualified benchmark with public or retained source identity, source commit, binary hash, exact method and commands, workload, repetitions, acquisition order, all raw samples, statistic, device/environment match, and operation or byte convention.
+2. **Modeled, theoretical, or tool-reported ceiling:** an explicitly labeled non-measured value with exact NVIDIA owner-document coordinate or exact report field, report hash, definition, precision, path, unit, and scope.
+
+Never silently call a theoretical or tool-reported value measured. Never combine ceilings with unlike provenance classes, precision conventions, memory paths, decimal/binary units, device scopes, or operating conditions into one ridge or roof. If the two independently valid records do not align, retain both but do not calculate a hybrid roofline. A tool roofline display may be inspected, but it is not self-authenticating provenance.
+
+For a combined chart, the compute ceiling must use the same FP32 operation-count convention as the workload. In particular, a convention that counts an FMA as two operations cannot be mixed silently with this one-addition-per-element workload. The bandwidth ceiling must name the same memory path and byte unit as the traffic point it bounds.
+
+## Pass exact-GPU profiler and permission gates
+
+Run these gates on the selected device before the warm-up and batch. Preserve stdout, stderr, exit status, and SHA-256 for each:
+
+```sh
+ncu --config-file off --version
+ncu --config-file off --help
+ncu --config-file off --list-sections
+ncu --config-file off --devices 0 --query-metrics --query-metrics-mode all
+```
+
+Nsight Compute 2026.2.1 searches the current working directory and `$HOME/.config/NVIDIA Corporation` on Linux for `config.ncu-cfg` by default, then composes its parameters with command-line options. LAB09 must pass `--config-file off` in every version, help, list, query, and ten-attempt `ncu` argv and retain actual help support, expanded argv, status, and log hash. If the selected Lane's actual help lacks this option, record a blocker; an unrecorded user config must not change the section, metric, filter, or replay contract.
+
+The actual executable's version and help govern the remaining syntax. The section must occur in this installation's list; every metric must occur in the query against this exact GPU. Do not copy architecture metric names from this page, another GPU, a screenshot, a blog, or a documentation example. Record exact names, definitions, units, scopes, aggregation, instance behavior, and filters from actual query/report evidence.
+
+Confirm the selected Lane's actual Nsight Compute and CUPTI versions, compatible driver, report-directory writes, and administrator-approved non-admin performance-counter result. `ERR_NVGPUCTRPERM`, any other denial, an unavailable or `n/a` metric, an unsupported query, a CUPTI mismatch, a missing `.ncu-rep`, or an unwritable report is a blocker, never numeric zero. Preserve the blocker. An administrator may repair policy outside the Lab, after which a new unique batch is required; do not use `sudo` or bypass policy.
+
+Choose either one minimal queried section or a shorter explicit queried metric list sufficient to obtain selected-kernel duration and traffic bytes at one declared memory level. Add only a queried occupancy, stall-reason, or throughput metric if a predeclared question requires it. Never use `--set full` as a substitute for a measurement plan.
+
+## Run one excluded direct-process warm-up
+
+After correctness and all precollection gates pass, launch exactly one additional direct, unprofiled process:
+
+```sh
+./build/ex02-vector-addition 16777216 \
+  >lab09-evidence/warm-up/direct.stdout.log \
+  2>lab09-evidence/warm-up/direct.stderr.log
+status=$?
+printf '%s\n' "$status" >lab09-evidence/warm-up/direct.status
+```
+
+This one warm-up must pass the same correctness criteria and is excluded from every retained performance statistic. It may expose process/module initialization on this machine, but it does not prove that later fresh profiler processes lack first-use effects. Do not add hidden warm-ups inside attempts or discard attempt 01 as another warm-up.
+
+## Acquire exactly ten independent profiler attempts
+
+Freeze batch ID, exact command, selected exact `vector_add` kernel filter, one queried section **or** minimal queried metrics, replay mode, cache/clock controls, device, environment, and acquisition order before attempt 01. Validate every option against captured help. The command shape is:
+
+```sh
+batch_id='<fill unique batch id>'
+kernel_filter='vector_add'
+collection_args=(<fill either --section NAME or --metrics NAME1,NAME2,...>)
+
+for attempt in 01 02 03 04 05 06 07 08 09 10; do
+  attempt_dir="lab09-evidence/batches/${batch_id}/${attempt}"
+  mkdir -p "$attempt_dir"
+  report_base="${attempt_dir}/vector-add"
+  test ! -e "${report_base}.ncu-rep" || exit 1
+  ncu --config-file off \
+    --devices 0 \
+    --kernel-name-base function \
+    --kernel-name "$kernel_filter" \
+    --launch-count 1 \
+    --replay-mode kernel \
+    "${collection_args[@]}" \
+    --export "$report_base" \
+    ./build/ex02-vector-addition 16777216 \
+    >"${attempt_dir}/profile.stdout.log" \
+    2>"${attempt_dir}/profile.stderr.log"
+  status=$?
+  printf '%s\n' "$status" >"${attempt_dir}/profile.status"
+  if [ -f "${report_base}.ncu-rep" ]; then
+    sha256sum "${report_base}.ncu-rep" >"${attempt_dir}/report.sha256"
+  fi
+done
+```
+
+This is a shape, not permission to assume every Lane supports every shown spelling. If captured help requires an owner-supported equivalent, freeze and record it before attempt 01. Each attempt is a fresh `ncu` invocation and fresh application process; replay passes inside one report are not independent attempts.
+
+A full batch has exactly ten attempted invocations in order `01..10`. Retain every directory and never overwrite or delete an inconvenient sample. All ten must independently satisfy source/binary/environment identity, selected device, exactly one intended reported `vector_add`, correctness, zero statuses, report existence, metric availability, scope, and replay records. If an attempt is invalid, the entire batch is invalid. Retain it and acquire a new uniquely named full batch of ten; never replace one row, merge batches, or shorten the denominator.
+
+## Preserve report custody and replay effects
+
+For every `.ncu-rep`, record report SHA-256, exact command, process/application status, selected reported kernel name, device/context/stream and launch filters, metric names/definitions/units/scopes, pass count, requested and actual replay mode, save/restore, cache control, clock control, serialization, and other perturbation. Preserve query/help logs and all stdout/stderr/status files beside the report.
+
+Nsight Compute inserts measurement libraries and may replay a selected kernel because all counters do not necessarily fit in one pass. Kernel replay can save and restore accessible memory, while collection choices affect pass count and overhead. A profiled duration therefore needs its exact report definition and perturbation boundary; it is not silently equivalent to the direct unprofiled process. The report remains the primary artifact. CSV exports, screenshots, copied cells, and GUI views are derivatives tied to its hash.
+
+## Reduce only a qualifying batch
+
+For each qualifying attempt, obtain these aligned inputs from the retained report and frozen model:
+
+| Quantity | Required source and scope |
+| --- | --- |
+| Operation count | Exactly 16,777,216 algorithmic FP32 additions from pinned canonical source |
+| Traffic | One exact queried byte metric at the declared named memory level/path, with definition, aggregation, and scope |
+| Duration | One exact selected-kernel duration metric and completion/scope definition |
+| Achieved rate | `16,777,216 / duration_seconds / 1e9` decimal Gop/s |
+| Attributed intensity | `16,777,216 / profiler_attributed_traffic_bytes` operations/byte |
+| Requested-byte model | `1/12`, approximately `0.083333` operations/byte, labeled model-only |
+| Ceilings | Independently provenanced, aligned compute Gop/s and named-path bandwidth GB/s |
+| Ridge | `compute_ceiling_Gop/s / bandwidth_ceiling_GB/s` operations/byte |
+| Roof | `min(compute_ceiling_Gop/s, intensity x bandwidth_ceiling_GB/s)` Gop/s |
+
+Use decimal `1e9` for both Gop/s and GB/s unless a different pair is explicitly converted before calculation. If the exact traffic metric is unavailable, retain 201,326,592 requested bytes only as the algorithmic model input. Do not relabel it profiler-attributed DRAM or cache traffic, and do not claim a measured traffic intensity. Missing required measured traffic blocks a qualifying measured roofline batch.
+
+Only when all ten attempts qualify may you report the median and the min/max range for each retained quantity. Do not publish mean, standard deviation, percentile, confidence interval, or an outlier-filtered subset unless a new, separately specified experiment requires them. The frozen LAB09 statistic is median plus min/max, with no deletion.
+
+## Generate and hash the original artifact
+
+Create an original CSV with one row per retained attempt in acquisition order. At minimum preserve this schema:
+
+```csv
+batch_id,attempt_id,acquisition_order,report_sha256,kernel_name,traffic_metric,memory_path,traffic_bytes,duration_metric,duration_seconds,algorithmic_fp32_additions,achieved_gops,attributed_intensity_ops_per_byte,requested_model_intensity_ops_per_byte,compute_ceiling_gops,bandwidth_ceiling_gbytes_per_second,ceiling_provenance,ridge_ops_per_byte,roof_gops,qualifying
+```
+
+Then generate an original human-readable table and chart from that CSV. The chart must show all ten points or an unambiguous retained-sample representation, median, min/max, both aligned ceilings, ridge, roof, operation/byte and Gop/s units, named memory path, provenance class, batch ID, and requested-model versus profiler-attributed distinction. Keep the chart-generation source or exact command.
+
+```sh
+sha256sum \
+  lab09-evidence/derived/lab09-roofline.csv \
+  lab09-evidence/derived/lab09-roofline-table.md \
+  lab09-evidence/derived/lab09-roofline-chart.svg \
+  lab09-evidence/derived/chart-generation-source
+```
+
+VIS13 may inspect the **same retained values** for learning. Its browser rendering executes no CUDA, collects no counters, and is neither the Lab's original observed chart nor evidence. A screenshot of VIS13 cannot replace the CSV, table, chart, source/command, hashes, or `.ncu-rep` custody.
+
+## Interpret within the declared roof only
+
+- If intensity is below the aligned ridge, describe the point as on the bandwidth side **relative only to the declared ceiling pair and named memory path**.
+- If intensity is above the ridge, describe it as on the compute side under that same bounded model. At the ridge, avoid forcing a side label.
+- A point below the roof leaves alternatives: latency, insufficient parallelism, launch shape, instruction issue, cache behavior, memory transactions, clock/power/thermal state, concurrent load, replay, or metric mismatch may remain. The roofline alone does not choose among them.
+- A point above the roof triggers a mismatch audit, not a performance triumph: recheck operation convention, byte level/path, units, ceiling provenance and precision, duration scope, report/filter identity, aggregation, replay, and transcription.
+
+Occupancy, stall reasons, and throughput are three distinct evidence families. For any one collected, preserve its exact metric name, definition, unit, scope, aggregation, filter, and report hash. Occupancy is resident/active-warp capacity or achieved behavior under a declared definition; maximizing occupancy is not an automatic target. Stall reasons describe sampled or aggregated scheduler states under their exact definition; a large share does not automatically diagnose a bottleneck. Throughput compares achieved activity with a stated denominator and scope; a percentage does not automatically identify root cause. None may be used interchangeably or turned into a bottleneck verdict without a separate controlled test.
+
+LAB09 reports no baseline/candidate comparison and no speedup. If a later optimization is tested, it requires another correctness-qualified contract and cannot be inferred from this chart.
+
+## Expected observations, not recorded results
+
+- The correctness-first unprofiled run should pass every CUDA boundary and independent CPU comparison before profiling.
+- The source model should remain exactly 16,777,216 FP32 additions, 201,326,592 requested bytes, and `1/12` operations/byte.
+- Exact-GPU queries and non-admin permission checks should produce either qualifying evidence or a retained blocker, never a guessed metric or zero.
+- Exactly one excluded direct-process warm-up should precede a fresh-process batch of ten retained attempts.
+- A qualifying batch should retain ten `.ncu-rep` files and complete replay, scope, status, and hash records in acquisition order.
+- Aligned ceiling records should support a bounded ridge and roof without mixing provenance, precision, path, or units.
+- The final CSV, table, and original chart should be reproducible from retained report values and carry SHA-256 custody.
+
+These are expectations, not observations. `recordedObservations` remains empty. The site publishes no measured ceiling, traffic, duration, Gop/s, intensity, roof, occupancy, stall, throughput, bottleneck, or speedup value.
+
+## Acceptance criteria and blockers
+
+The Lab record is complete only when all criteria pass:
+
+1. Pinned source, C++17 build, binary hash, frozen workload, one device, and full manifest agree.
+2. Unprofiled correctness and the one excluded warm-up pass all independent-reference, tolerance, CUDA-boundary, synchronization, and process-status checks.
+3. Exact `ncu` version/help, `--config-file off`, list/query, matching CUPTI, administrator-approved non-admin access, and report writes pass.
+4. Both ceilings have admissible independent provenance and align in operation convention, precision, path, scope, and units for the displayed roof.
+5. One unique batch contains exactly ten independent attempts, all retained and all qualifying; median and min/max use all ten.
+6. Every point has selected exact `vector_add` identity, minimal queried section/metrics, exact traffic and duration semantics, replay effects, `.ncu-rep` hash, raw logs, and statuses.
+7. Original CSV, table, chart, generation record, hashes, interpretation, and sanitization/custody ledger agree.
+
+Blockers include any correctness failure; source/binary/workload drift; extra/ambiguous GPU; permission denial; version/CUPTI incompatibility; unavailable or missing `--config-file off`; unavailable, `n/a`, or undefined metric; missing report; wrong kernel or launch count; invalid attempt; mixed batches; missing raw sample; incompatible ceiling provenance/precision/path/unit; requested bytes relabeled as profiler traffic; absent hash/custody; or an above-roof point not audited. Never repair a blocker by inserting zero, deleting a sample, changing a value, or weakening the contract.
+
+## Keep evidence axes separate
+
+| Axis | Current status | Boundary |
+| --- | --- | --- |
+| Compilation | Empty | EX02's own pinned Compile-Checked records do not make LAB09 Compile-Checked |
+| Runtime | Pending Hardware Verification | No qualifying maintainer-controlled Reference Environment run is recorded for LAB09 |
+| Recorded observations | Empty | Formulas, commands, queries, expectations, browser visuals, and unfilled templates are not measured results |
+
+A complete learner run may be reviewed as Community-Observed when accompanied by its Environment Manifest and logs. It is not Runtime-Verified unless a maintainer reproduces the criteria in a declared Reference Environment. Page metadata never upgrades automatically.
+
+## Clean up without destroying evidence
+
+First preserve the manifest, source/binary hashes, all query/help output, permission records, direct-run logs, every attempted batch including invalid batches, all `.ncu-rep` files, raw outputs/statuses, ceiling records, CSV/table/chart/source, hash ledger, custody history, and sanitization mapping. Then clean only the rebuildable canonical build directory:
+
+```sh
+make clean BUILD_DIR=build
+```
+
+Do not retain only screenshots or summaries. Do not publish credentials, user/host identifiers, device serials, private absolute paths, network coordinates, administrator records, or unreviewed reports. A sanitized derivative must retain the private original hash, parent mapping, reviewer, date, and exact transformations.
+
+## Sources and review
+
+- The selected [CUDA 11.8](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html), [CUDA 12.9 Update 1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html), and [CUDA 13.3 Update 1](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) release notes provide Toolkit, bundled Nsight Compute, and CUPTI Lane coordinates. Coordinates are provenance, not observations from the learner's machine.
+- The current [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html), [CLI Guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html), [GUI Guide](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html), and [2026.2.1 Release Notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1) define current config-file, metric, query, filter, replay, overhead, report, roofline-view, and support boundaries. The current CLI config-file contract documents the default `config.ncu-cfg` search and `--config-file off`; the current pages identify v2026.2.1, and the 2026.2 line added CUDA 13.3 support.
+- The [CUDA C++ Best Practices Guide v13.3](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) distinguishes theoretical and effective bandwidth, requires correct timing boundaries, and defines occupancy without making maximum occupancy a universal objective.
+- The [CUDA Programming Guide v13.3](https://docs.nvidia.com/cuda/cuda-programming-guide/index.html) governs asynchronous launch, explicit synchronization, memory, and compute-capability semantics; the owner page was updated 2026-08-27.
+- The current [CUPTI v2026.2.1 Usage Guide](https://docs.nvidia.com/cupti/main/main.html) governs compatibility, counter availability, profiler behavior, and overhead boundaries.
+- Williams, Waterman, and Patterson's [Roofline paper](https://doi.org/10.1145/1498765.1498785) supports only the model relating operational intensity, ceilings, and attainable performance. It does not supply LAB09's GPU metrics, byte path, ceiling values, workload counts, measurement method, or observations.
+
+Context7 IDs `/websites/nvidia_cuda` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for discovery and cross-checking. The exact NVIDIA owner documentation and release notes linked above remain authoritative for interface, version, and tool semantics; the DOI record remains authoritative for the paper coordinate. All were checked on **2026-09-01**. This Lab's workload ledger, manifest, gates, sample policy, CSV schema, chart requirements, and interpretation rules are original CC BY 4.0 prose; no private material, profiler report, result table, chart, metric value, or benchmark result was copied or fabricated.
+
+**Fact checked: 2026-09-01.** Compilation evidence is empty, runtime is Pending Hardware Verification, and recorded observations are empty.

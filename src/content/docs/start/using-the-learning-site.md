@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-31'
+      content: '2026-09-01'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -96,9 +96,9 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-截至 **2026-08-31**，[issue #25](https://github.com/xiangzhang-coding/cuda-learning-site/issues/25) 后的稳定课程当前滚动发布已完整双语发布 52 个学习单元：O01-O08、F01-F08、M01-M19、A01-A09，以及 Q01-Q08。下面是当前完整发布的严格先修关系：
+截至 **2026-09-01**，[issue #26](https://github.com/xiangzhang-coding/cuda-learning-site/issues/26) 后的稳定课程当前滚动发布已完整双语发布 55 个学习单元：O01-O08、F01-F08、M01-M19、A01-A09/A14，以及 Q01-Q10。下面是当前完整发布的严格先修关系：
 
-已完成的 R2 聚合发布复核是不可变快照，固定为 186 个 Publication Pairs 与 372 条 source routes。[Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 保存其最终 CI、Preview、生产发布和远端 smoke 的动态验收记录。当前增量发布已前进到 198 个 Publication Pairs 与 396 条 source routes，但不会改写 R2；R3 聚合复核仍待完成。
+已完成的 R2 聚合发布复核是不可变快照，固定为 186 个 Publication Pairs、372 条 source routes 与 284 条 catalog records。当前增量发布已前进到 209 个 Publication Pairs 与 418 条 source routes，但不会改写 R2；R3 聚合复核仍待完成。
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -111,23 +111,23 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 9. F01-F08 之后进入内存路线：[M01：地址空间、所有权、作用域与生命周期](/memory/address-spaces/)同时依赖 F04 和 F06；[M02：把合并访问理解为事务塑形](/memory/coalescing-transactions/)同时依赖 M01 和 F03；[M03：共享内存分块](/memory/shared-memory-tiling/)同时依赖 M01 和 M02；[M04：Bank conflict 与布局变换](/memory/bank-conflicts-layouts/)仅依赖 M03；[M05：同步作用域与内存可见性](/memory/synchronization-scopes/)同时依赖 F02 和 M01；[M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)同时依赖 F02 和 M05；[M07：用流取代全局顺序心智模型](/memory/stream-ordering/)同时依赖 F05 和 M01；[M08：用事件表达依赖并测量设备时间](/memory/event-dependencies-timing/)仅依赖 M07。
 10. 当前内存扩展包含六个完整学习单元：[M09：页锁定内存与传输重叠](/memory/pinned-memory-transfer-overlap/)同时依赖 M07 和 M08；[M10：统一内存与页面迁移](/memory/unified-memory-page-migration/)同时依赖 M01 和 M02；[M11：流顺序分配与内存池](/memory/stream-ordered-allocation-memory-pools/)同时依赖 M07 和 M08；[M12：协作组与可组合同步](/memory/cooperative-groups/)同时依赖 M05 和 M06；[M13：异步复制与分阶段流水线](/memory/asynchronous-copy-pipelines/)同时依赖 M03、M05 和 M08；[M14：CUDA 图与重复启动结构](/memory/cuda-graphs/)同时依赖 M07 和 M08。
 11. 工具链路线从 [M15：NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)开始，它同时依赖 F04 和 O04；[M16：PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)同时依赖 M15 和 F06；[M17：选择编译器架构目标](/toolchain/compiler-architecture-targets/)同时依赖 M16 和 F06；[M18：分离编译与设备链接](/toolchain/separate-compilation-device-linking/)同时依赖 M15 和 M16；[M19：CUDA C++17、C++20 与 C++23 方言边界](/toolchain/cpp-dialect-boundaries/)同时依赖 O04 和 M15。
-12. 并行算法路线从 A01-A07 延伸到 [A08：Tiled GEMM](/algorithms/tiled-gemm-correctness/)与 [A09：Sorting、Selection、Compaction](/algorithms/sorting-selection-compaction/)。A08 严格依赖 A05、M03、M04、A02；A09 严格依赖 A03、A04。
-13. 正确性与质量路线包含 [Q01：CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)，它同时依赖 F04 和 O04；[Q02：浮点顺序、确定性与逐位可复现性](/correctness/floating-point-order-reproducibility/)同时依赖 Q01 和 A02；[Q03：用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)同时依赖 F05 和 Q01；[Q04：用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)同时依赖 M05、M06 和 Q03；[Q05：诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)同时依赖 M08 和 Q01；[Q06：把 APOD 作为优化循环](/correctness/apod-optimization-loop/)仅依赖 Q05；[Q07：先用 Nsight Systems 阅读应用时间线](/correctness/timeline-first-nsight-systems/)同时依赖 M07、M09 和 Q05；[Q08：用 Nsight Compute 回答一个选定内核问题](/correctness/kernel-first-nsight-compute/)同时依赖 Q07、M02 和 M03。
-14. Runnable Example 图保留 `EX15<-A08`，当前集合是 EX01-EX16。当前 Lab 集合是 LAB01-LAB08：[LAB06：构建重叠流水线](/labs/build-overlapped-pipeline/)严格依赖 M09 和 Q07，[LAB08：先分析完整应用，再分析一个内核](/labs/profile-full-application-before-kernel/)严格依赖 Q07 和 Q08。Visual graph 保留 `VIS12<-A08`，并新增 [VIS14：Nsight Systems versus Nsight Compute](/visuals/nsight-systems-versus-nsight-compute/)`<-[Q07,Q08]`。未来的 Q11 与 LAB10 未发布，LAB10 等待 Q11；Q13、L06 与 LAB12 也未发布，LAB12 等待 Q13 profiling 与 L06 cuBLAS 两项 prerequisites。
+12. 并行算法路线保留 A01-A09，并加入 [A14：用 Arithmetic Intensity 选择可证伪的算法优化](/algorithms/algorithm-choice-arithmetic-intensity/)`<-[A01,A02,A05,A08]`。
+13. 正确性与质量路线保留 Q01-Q08，并加入 [Q09：用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)`<-[Q08,F08]`与 [Q10：从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)`<-[Q05,A14]`。
+14. Runnable Example 集合仍是 EX01-EX16。Lab 集合是 LAB01-LAB09，[LAB09：构建原创 Roofline](/labs/build-original-roofline/)`<-[Q10]`；Visual graph 加入 [VIS13：Roofline](/visuals/roofline/)`<-[Q10]`，并在 VIS14 前。未来的 Q11/LAB10 与 Q13/L06/LAB12 未发布。
 
 下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01-F08 和所有已发布 Runnable Example 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于基础课程。F05 从 F04 继续错误生命周期；F06 汇合 F02/O03；F07 汇合 F04/F05；F08 汇合 F02/F03/F06。内存路线从 F04/F06 汇入 M01，经 M02-M04 建立 memory access/layout，再分别进入 M05/M06 的同步与 warp 推理，以及由 F05/M01 汇入 M07、再到 M08 的 stream/event 路线。
 
-完成这些基础后，算法路线从 A05/M03/M04/A02 汇入 A08，并从 A03/A04 汇成 A09；EX15 与 VIS12 都严格依赖 A08。正确性路线由 Q05 进入 Q06，由 M07/M09/Q05 汇入 Q07，再由 Q07/M02/M03 汇入 Q08；LAB06 依赖 M09/Q07，LAB08 与 VIS14 都依赖 Q07/Q08。未来的 Q11/LAB10 与 Q13/L06/LAB12 未发布，不进入当前依赖图。
+完成这些基础后，算法路线在 A09 后加入由 A01/A02/A05/A08 汇入的 A14；正确性路线在 Q08 后加入由 Q08/F08 汇入的 Q09，再由 Q05/A14 汇入 Q10。LAB09 与 VIS13 都严格依赖 Q10。未来的 Q11/LAB10 与 Q13/L06/LAB12 未发布，不进入当前依赖图。
 
 O02-O08、F01-F08、M01-M19 与 Q01-Q05 都有直接练习和独立参考解答。内存路线可按顺序进入 [M09 练习](/memory/pinned-memory-transfer-overlap/exercises/)与[解答](/memory/pinned-memory-transfer-overlap/solutions/)、[M10 练习](/memory/unified-memory-page-migration/exercises/)与[解答](/memory/unified-memory-page-migration/solutions/)、[M11 练习](/memory/stream-ordered-allocation-memory-pools/exercises/)与[解答](/memory/stream-ordered-allocation-memory-pools/solutions/)、[M12 练习](/memory/cooperative-groups/exercises/)与[解答](/memory/cooperative-groups/solutions/)、[M13 练习](/memory/asynchronous-copy-pipelines/exercises/)与[解答](/memory/asynchronous-copy-pipelines/solutions/)、[M14 练习](/memory/cuda-graphs/exercises/)与[解答](/memory/cuda-graphs/solutions/)。工具链路线可进入 [M15 练习](/toolchain/nvcc-compilation-flow/exercises/)与[解答](/toolchain/nvcc-compilation-flow/solutions/)、[M16 练习](/toolchain/ptx-cubin-fatbinary/exercises/)与[解答](/toolchain/ptx-cubin-fatbinary/solutions/)、[M17 练习](/toolchain/compiler-architecture-targets/exercises/)与[解答](/toolchain/compiler-architecture-targets/solutions/)、[M18 练习](/toolchain/separate-compilation-device-linking/exercises/)与[解答](/toolchain/separate-compilation-device-linking/solutions/)、[M19 练习](/toolchain/cpp-dialect-boundaries/exercises/)与[解答](/toolchain/cpp-dialect-boundaries/solutions/)。正确性路线可直接进入 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q02 练习](/correctness/floating-point-order-reproducibility/exercises/)与[解答](/correctness/floating-point-order-reproducibility/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)；既有单元仍可通过上方严格先修图直接访问。
 
-Q06-Q08 也有直接练习与独立参考解答：[Q06 练习](/correctness/apod-optimization-loop/exercises/)与[解答](/correctness/apod-optimization-loop/solutions/)、[Q07 练习](/correctness/timeline-first-nsight-systems/exercises/)与[解答](/correctness/timeline-first-nsight-systems/solutions/)、[Q08 练习](/correctness/kernel-first-nsight-compute/exercises/)与[解答](/correctness/kernel-first-nsight-compute/solutions/)。
+Q06-Q10 都有直接练习与独立参考解答，包括 [Q09 练习](/correctness/occupancy-stalls-throughput/exercises/)与[解答](/correctness/occupancy-stalls-throughput/solutions/)，以及 [Q10 练习](/correctness/roofline-arithmetic-intensity/exercises/)与[解答](/correctness/roofline-arithmetic-intensity/solutions/)。
 
-算法路线可进入 A01-A09 各自的练习与独立解答，包括 [A08 练习](/algorithms/tiled-gemm-correctness/exercises/)与[解答](/algorithms/tiled-gemm-correctness/solutions/)，以及 [A09 练习](/algorithms/sorting-selection-compaction/exercises/)与[解答](/algorithms/sorting-selection-compaction/solutions/)。
+算法路线可进入 A01-A09 与 A14 各自的练习和独立解答，包括 [A14 练习](/algorithms/algorithm-choice-arithmetic-intensity/exercises/)与[解答](/algorithms/algorithm-choice-arithmetic-intensity/solutions/)。
 
-[实验索引](/labs/)列出 8 个 Labs（LAB01-LAB08），包括 [LAB06](/labs/build-overlapped-pipeline/)与 [LAB08](/labs/profile-full-application-before-kernel/)。[可视化讲解索引](/visuals/)列出 17 项讲解：独立 VIS01-VIS12 与 VIS14，加上内嵌 VIS19-VIS22；[VIS12](/visuals/gemm-tiling-hierarchy/)依赖 A08，[VIS14](/visuals/nsight-systems-versus-nsight-compute/)依赖 Q07 和 Q08。当前 catalog 是 8 个 Lab、53 个[练习题库](/practice/)条目、17 项 Visual Explainer、159 项[术语表](/glossary/)和 65 项[来源记录](/sources-and-versions/)，共 302 条记录；当前滚动公开内容形成 198 个 Publication Pairs 和 396 条 source routes。这些数字独立于不可变的 R2 186/372 快照，R3 聚合复核仍待完成。
+[实验索引](/labs/)列出 9 个 Labs（LAB01-LAB09），包括 [LAB09](/labs/build-original-roofline/)。[可视化讲解索引](/visuals/)列出 18 项讲解：独立 VIS01-VIS14，加上内嵌 VIS19-VIS22；[VIS13](/visuals/roofline/)依赖 Q10。当前 catalog 是 9 个 Lab、56 个[练习题库](/practice/)条目、18 项 Visual Explainer、165 项[术语表](/glossary/)和 68 项[来源记录](/sources-and-versions/)，共 316 条记录；当前滚动公开内容形成 209 个 Publication Pairs 和 418 条 source routes。这些数字独立于不可变的 R2 186/372/284 快照，R3 聚合复核仍待完成。
 
-A01-A09、Q01-Q08 与 VIS14 的 compilation/runtime axes 均为空。EX15 在三条 Toolkit Lane 共用一份原创 C++17 implementation，compilation evidence 为空，runtime 为 Pending Hardware Verification；host-only checks 不建立 GPU runtime evidence。LAB06 与 LAB08 的 compilation evidence 为空、runtime 为 Pending Hardware Verification、recorded observations 为空。本站没有执行 EX15、CUB、Thrust 或 issue #25 的 profiler Labs；本次增量没有 runtime、profiler、timeline、metric、bottleneck、timing、speedup 或 production-winner observation。
+A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空。LAB09 的 compilation evidence 与 recorded observations 为空，runtime 为 Pending Hardware Verification；没有 Reference Environment 或 `performanceObservations`。VIS13 browser values 与 static chart 不是 GPU evidence。本站没有执行 issue #26 LAB09；本次增量没有 runtime、metric、hardware ceiling、bottleneck、timing、speedup 或 production-winner observation。
 
 ## 三种视觉主题，一套内容
 

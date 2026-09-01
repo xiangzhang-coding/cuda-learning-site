@@ -68,6 +68,7 @@ const lab05Destination = PUBLISHED_DESTINATIONS.LAB05;
 const lab06Destination = PUBLISHED_DESTINATIONS.LAB06;
 const lab07Destination = PUBLISHED_DESTINATIONS.LAB07;
 const lab08Destination = PUBLISHED_DESTINATIONS.LAB08;
+const lab09Destination = PUBLISHED_DESTINATIONS.LAB09;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
 const vis03Destination = PUBLISHED_DESTINATIONS.VIS03;
@@ -80,6 +81,7 @@ const vis09Destination = PUBLISHED_DESTINATIONS.VIS09;
 const vis10Destination = PUBLISHED_DESTINATIONS.VIS10;
 const vis11Destination = PUBLISHED_DESTINATIONS.VIS11;
 const vis12Destination = PUBLISHED_DESTINATIONS.VIS12;
+const vis13Destination = PUBLISHED_DESTINATIONS.VIS13;
 const vis14Destination = PUBLISHED_DESTINATIONS.VIS14;
 const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
 const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
@@ -278,6 +280,30 @@ const labs: readonly ResourceIndexRecord[] = [
     },
     reviewedOn: '2026-08-31',
     keywords: localized('EX07 Systems Compute decision trail selected kernel metric replay report', 'EX07 Systems Compute decision trail selected kernel metric replay report'),
+  },
+  {
+    planningId: 'LAB09',
+    group: 'labs',
+    title: lab09Destination.title,
+    href: lab09Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'advanced',
+    prerequisites: lab09Destination.prerequisites,
+    relatedUnits: ['Q09', 'A14', 'EX02', 'VIS13'],
+    hardwareGate: localized(
+      '仅限原生 Linux；恰好 1 个 compute capability 7.5 或更新的 CUDA GPU；匹配的 Nsight Compute 与 CUPTI；管理员批准的非管理员 performance-counter access；canonical EX02 device allocation 恰好 201,326,592 bytes；禁止 sudo、提权或策略绕过。',
+      'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; matching Nsight Compute and CUPTI; administrator-approved non-admin performance-counter access; exactly 201,326,592 bytes of canonical EX02 device allocation; no sudo, privilege escalation, or policy bypass.',
+    ),
+    versionGate: localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；CUPTI 11.8.87/12.9.79/13.3.75；记录实际 GPU、driver、CLI、metric、permission 与 replay coordinates。',
+      'Toolkit 11.8.0/12.9.2/13.3.1; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; CUPTI 11.8.87/12.9.79/13.3.75; record actual GPU, driver, CLI, metric, permission, and replay coordinates.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-09-01',
+    keywords: localized('EX02 Roofline Nsight Compute CUPTI arithmetic intensity ceiling provenance report custody', 'EX02 Roofline Nsight Compute CUPTI arithmetic intensity ceiling provenance report custody'),
   },
 ];
 
@@ -1110,6 +1136,48 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-08-31',
     keywords: localized('Nsight Compute selected kernel question section metric replay permission report', 'Nsight Compute selected kernel question section metric replay permission report'),
   },
+  {
+    planningId: 'PB-R3-004',
+    group: 'practice',
+    title: localized('审查 occupancy、stall 与 throughput report claim', 'Audit an occupancy, stall, and throughput report claim'),
+    href: localized('/practice/#pb-r3-004', '/en/practice/#pb-r3-004'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q09'],
+    relatedUnits: ['Q08', 'F08', 'Q09', 'LAB09', 'VIS13'],
+    hardwareGate: localized('无；只审查静态 report claim 与缺失的 exact-GPU contract，不运行 CUDA 或 profiler。', 'None; audit a static report claim and its missing exact-GPU contract without running CUDA or a profiler.'),
+    versionGate: localized('CUDA Programming/Best Practices Guide v13.3 与 Nsight Compute 2026.2.1；metric definition、unit、scope 与 availability 绑定 exact GPU/report。', 'CUDA Programming and Best Practices Guides v13.3 and Nsight Compute 2026.2.1; metric definition, unit, scope, and availability bind to the exact GPU and report.'),
+    reviewedOn: '2026-09-01',
+    keywords: localized('theoretical achieved occupancy stall reason throughput exact GPU report claim audit', 'theoretical achieved occupancy stall reason throughput exact GPU report claim audit'),
+  },
+  {
+    planningId: 'PB-R3-005',
+    group: 'practice',
+    title: localized('计算并审查一个单位、边界或来源不一致的 Roofline', 'Calculate and audit a Roofline with a unit, boundary, or provenance mismatch'),
+    href: localized('/practice/#pb-r3-005', '/en/practice/#pb-r3-005'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['Q10'],
+    relatedUnits: ['Q05', 'A14', 'Q09', 'Q10', 'LAB09', 'VIS13'],
+    hardwareGate: localized('无；只计算原创合成输入并审查静态 model contract，不运行 CUDA 或 profiler。', 'None; calculate original synthetic inputs and audit a static model contract without running CUDA or a profiler.'),
+    versionGate: localized('CUDA Best Practices Guide v13.3、Nsight Compute 2026.2.1 与 2009 original Roofline model；current tool semantics 不从论文倒推。', 'CUDA Best Practices Guide v13.3, Nsight Compute 2026.2.1, and the original 2009 Roofline model; current tool semantics are not projected backward from the paper.'),
+    reviewedOn: '2026-09-01',
+    keywords: localized('Roofline arithmetic intensity ridge point unit boundary provenance mismatch audit', 'Roofline arithmetic intensity ridge point unit boundary provenance mismatch audit'),
+  },
+  {
+    planningId: 'PB-R3-006',
+    group: 'practice',
+    title: localized('比较 traffic estimates 并写出可证伪优化选择', 'Compare traffic estimates and write a falsifiable optimization choice'),
+    href: localized('/practice/#pb-r3-006', '/en/practice/#pb-r3-006'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['A14'],
+    relatedUnits: ['A01', 'A02', 'A05', 'A08', 'A14', 'Q10', 'EX02', 'EX11', 'EX14', 'EX15', 'VIS13'],
+    hardwareGate: localized('无；只比较静态 operation/traffic ledgers 并设计 falsifiable experiment，不运行 CUDA。', 'None; compare static operation and traffic ledgers and design a falsifiable experiment without running CUDA.'),
+    versionGate: localized('CUDA Programming/Best Practices Guide v13.3 与 2009 original Roofline model；所有 traffic values 都是明确标注的 estimate。', 'CUDA Programming and Best Practices Guides v13.3 and the original 2009 Roofline model; every traffic value remains an explicitly labeled estimate.'),
+    reviewedOn: '2026-09-01',
+    keywords: localized('traffic estimate arithmetic intensity algorithm choice falsifiable experiment correctness', 'traffic estimate arithmetic intensity algorithm choice falsifiable experiment correctness'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1300,6 +1368,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     keywords: localized('GEMM matrix tile thread block warp instruction hierarchy ownership', 'GEMM matrix tile thread block warp instruction hierarchy ownership'),
   },
   {
+    planningId: 'VIS13',
+    group: 'visuals',
+    title: vis13Destination.title,
+    href: vis13Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis13Destination.prerequisites,
+    relatedUnits: ['Q09', 'A14', 'LAB09'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'CUDA Best Practices Guide v13.3、Nsight Compute 2026.2.1 与 2009 original Roofline model；browser values 与 static chart 都不是 GPU evidence。',
+      'CUDA Best Practices Guide v13.3, Nsight Compute 2026.2.1, and the original 2009 Roofline model; browser values and the static chart are not GPU evidence.',
+    ),
+    reviewedOn: '2026-09-01',
+    keywords: localized('Roofline arithmetic intensity ridge point declared ceiling workload point mismatch', 'Roofline arithmetic intensity ridge point declared ceiling workload point mismatch'),
+  },
+  {
     planningId: 'VIS14',
     group: 'visuals',
     title: vis14Destination.title,
@@ -1421,11 +1505,11 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-037', 'translation unit · 翻译单元', 'kernel-vocabulary', ['O04'], 'O04 使用 ISO C++17 与 NVCC v13.3 compilation trajectory。', 'O04 uses ISO C++17 and the NVCC v13.3 compilation trajectory.'),
   glossaryRecord('TERM-038', 'reproducible command record · 可复现命令记录', 'environment-vocabulary', ['O05', 'LAB01'], 'GNU Bash 5.3、Coreutils 9.11 与 GNU Make 4.4.1。', 'GNU Bash 5.3, Coreutils 9.11, and GNU Make 4.4.1.'),
   glossaryRecord('TERM-039', 'latency · 延迟', 'kernel-vocabulary', ['O06'], '必须绑定具体操作、路径与计时边界。', 'Must bind to a named operation, path, and timing boundary.'),
-  glossaryRecord('TERM-040', 'throughput · 吞吐量', 'kernel-vocabulary', ['O06', 'O07'], '峰值 issue rate 不等于应用实际吞吐量。', 'Peak issue rate is not achieved application throughput.'),
+  glossaryRecord('TERM-040', 'throughput · 吞吐量', 'kernel-vocabulary', ['O06', 'O07', 'Q09', 'Q10', 'LAB09'], 'CUDA 13.3 与 Nsight Compute 2026.2.1；吞吐量必须声明 work/traffic、time、unit、scope 与 exact ceiling，峰值 issue rate 不等于应用实际吞吐量。', 'CUDA 13.3 and Nsight Compute 2026.2.1; throughput requires declared work or traffic, time, unit, scope, and exact ceiling, while peak issue rate is not achieved application throughput.', '2026-09-01'),
   glossaryRecord('TERM-041', 'bandwidth · 带宽', 'kernel-vocabulary', ['O06'], '必须记录 memory path、单位与 theoretical/effective/actual 口径。', 'Requires a memory path, units, and theoretical/effective/actual convention.'),
   glossaryRecord('TERM-042', 'concurrency · 并发', 'kernel-vocabulary', ['O06', 'M07', 'VIS07'], '必须说明 resident work、kernel、stream、copy/compute 或 host/device scope。', 'Must name resident-work, kernel, stream, copy/compute, or host/device scope.'),
-  glossaryRecord('TERM-043', 'arithmetic intensity · 算术强度', 'kernel-vocabulary', ['O06'], '工作计数与 memory-traffic boundary 决定数值。', 'The work count and memory-traffic boundary determine the value.'),
-  glossaryRecord('TERM-044', 'occupancy · 占用率', 'kernel-vocabulary', ['O06'], 'Occupancy 不是 utilization，也不是性能目标值。', 'Occupancy is neither utilization nor a target performance value.'),
+  glossaryRecord('TERM-043', 'arithmetic intensity · 算术强度', 'kernel-vocabulary', ['O06', 'A14', 'Q10', 'LAB09', 'VIS13'], 'CUDA 13.3、Nsight Compute 2026.2.1 与 original Roofline model；operation convention、memory-path traffic boundary 与 provenance 共同决定数值。', 'CUDA 13.3, Nsight Compute 2026.2.1, and the original Roofline model; operation convention, memory-path traffic boundary, and provenance jointly determine the value.', '2026-09-01'),
+  glossaryRecord('TERM-044', 'occupancy · 占用率', 'kernel-vocabulary', ['O06', 'Q09', 'LAB09'], 'CUDA 13.3 与 Nsight Compute 2026.2.1；active-warps numerator 与 exact-device maximum-warps denominator 必须同 scope，occupancy 不是 utilization 或性能目标值。', 'CUDA 13.3 and Nsight Compute 2026.2.1; the active-warps numerator and exact-device maximum-warps denominator must share a scope, and occupancy is neither utilization nor a performance target.', '2026-09-01'),
   glossaryRecord('TERM-045', 'programmable shader stage · 可编程着色器阶段', 'kernel-vocabulary', ['O07'], '历史接口仍受 graphics pipeline input/output 约束。', 'Historical interfaces remain constrained by graphics-pipeline inputs and outputs.'),
   glossaryRecord('TERM-046', 'GPGPU · 通用 GPU 计算', 'kernel-vocabulary', ['O07'], '历史 GPGPU mapping 不等同于 CUDA programming model。', 'Historical GPGPU mappings are not the CUDA programming model.'),
   glossaryRecord('TERM-047', 'compatibility assessment · 兼容性评估', 'environment-vocabulary', ['O08'], '只输出 documented-path、not-documented 或 indeterminate，不授予证据状态。', 'Produces only documented-path, not-documented, or indeterminate and grants no Evidence Status.'),
@@ -1535,12 +1619,18 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-151', 'stream compaction · 流压缩', 'kernel-vocabulary', ['A03', 'A09'], 'Flag/scan/scatter 建立 contiguous positions；exact library storage、policy 与 Toolkit support 跟随 selected CCCL release。', 'Flag, scan, and scatter establish contiguous positions; exact library storage, policy, and Toolkit support follow the selected CCCL release.', '2026-08-31'),
   glossaryRecord('TERM-152', 'APOD · 评估、并行化、优化、部署', 'evidence-vocabulary', ['Q05', 'Q06'], 'Best Practices Guide v13.3/11.8 APOD；每轮绑定 correctness-qualified baseline、hypothesis、controlled change 与 deploy gate。', 'Best Practices Guide v13.3/11.8 APOD; every pass binds a correctness-qualified baseline, hypothesis, controlled change, and deploy gate.', '2026-08-31'),
   glossaryRecord('TERM-153', 'Nsight Systems · 系统级性能分析器', 'environment-vocabulary', ['Q07', 'LAB06', 'LAB08', 'VIS14'], 'Current 2026.4/2026.4.1 与 selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；timeline 不是自动 bottleneck proof。', 'Current 2026.4/2026.4.1 and selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425; a timeline is not automatic bottleneck proof.', '2026-08-31'),
-  glossaryRecord('TERM-154', 'Nsight Compute · Kernel 性能分析器', 'environment-vocabulary', ['Q08', 'LAB08', 'VIS14'], 'Current 2026.2.1 与 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5；selected kernel/question 先于 metrics。', 'Current 2026.2.1 and selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5; a selected kernel and question precede metrics.', '2026-08-31'),
+  glossaryRecord('TERM-154', 'Nsight Compute · Kernel 性能分析器', 'environment-vocabulary', ['Q08', 'Q09', 'Q10', 'LAB08', 'LAB09', 'VIS13', 'VIS14'], 'Current 2026.2.1 与 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5；selected kernel/question、exact-GPU availability、permission、replay 与 report custody 先于 metric 或 Roofline interpretation。', 'Current 2026.2.1 and selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5; selected kernel and question, exact-GPU availability, permission, replay, and report custody precede metric or Roofline interpretation.', '2026-09-01'),
   glossaryRecord('TERM-155', 'CUDA Profiling Tools Interface (CUPTI) · CUDA 性能分析工具接口', 'environment-vocabulary', ['Q07', 'Q08', 'LAB06', 'LAB08'], 'CUPTI 2026.2.1 与 Lane 11.8.87/12.9.79/13.3.75；兼容性、subscriber 与 activity/counter scope 必须按 exact environment 记录。', 'CUPTI 2026.2.1 and Lane coordinates 11.8.87/12.9.79/13.3.75; compatibility, subscriber, and activity/counter scope require exact-environment records.', '2026-08-31'),
-  glossaryRecord('TERM-156', 'profiler metric · 性能分析指标', 'evidence-vocabulary', ['Q08', 'LAB08'], 'Metric name、unit、definition 与 availability 绑定 exact GPU/tool；metric list 不是结论。', 'Metric names, units, definitions, and availability bind to the exact GPU and tool; a metric list is not a conclusion.', '2026-08-31'),
+  glossaryRecord('TERM-156', 'profiler metric · 性能分析指标', 'evidence-vocabulary', ['Q08', 'Q09', 'Q10', 'LAB08', 'LAB09'], 'Nsight Compute 2026.2.1；metric name、unit、definition、denominator、scope 与 availability 绑定 exact GPU/tool/report，不能跨 occupancy、stall、throughput 或 traffic domains 静默比较。', 'Nsight Compute 2026.2.1; metric name, unit, definition, denominator, scope, and availability bind to the exact GPU, tool, and report and cannot be compared silently across occupancy, stall, throughput, or traffic domains.', '2026-09-01'),
   glossaryRecord('TERM-157', 'replay · 重放', 'evidence-vocabulary', ['Q08', 'LAB08'], 'Nsight Compute collection 可能用 kernel/application/range replay 与多 passes；记录 mode、overhead、state validity 和差异。', 'Nsight Compute collection can use kernel, application, or range replay and multiple passes; record mode, overhead, state validity, and differences.', '2026-08-31'),
-  glossaryRecord('TERM-158', 'profiler report · 性能分析报告', 'evidence-vocabulary', ['Q07', 'Q08', 'LAB06', 'LAB08'], '`.nsys-rep`/`.ncu-rep` 需要 exact tool version、method、hash、manifest 与 sanitization；存在文件不等于支持结论。', 'A `.nsys-rep` or `.ncu-rep` requires exact tool version, method, hash, manifest, and sanitization; file existence does not support a conclusion.', '2026-08-31'),
+  glossaryRecord('TERM-158', 'profiler report · 性能分析报告', 'evidence-vocabulary', ['Q07', 'Q08', 'Q09', 'Q10', 'LAB06', 'LAB08', 'LAB09'], '`.nsys-rep`/`.ncu-rep` 需要 exact tool/GPU version、method、filter、replay、hash、manifest 与 sanitization；LAB09 还保留 source command 和 derivative custody，存在文件不等于支持结论。', 'A `.nsys-rep` or `.ncu-rep` requires exact tool and GPU versions, method, filter, replay, hash, manifest, and sanitization; LAB09 also retains source-command and derivative custody, while file existence alone supports no conclusion.', '2026-09-01'),
   glossaryRecord('TERM-159', 'command-line interface (CLI) · 命令行接口', 'environment-vocabulary', ['Q07', 'Q08', 'LAB06', 'LAB08'], '记录实际 `nsys`/`ncu` version、help、expanded argv、stdout/stderr 与 exit status；owner example command 不是本机 observation。', 'Record actual `nsys`/`ncu` version, help, expanded argv, stdout/stderr, and exit status; an owner example command is not a local observation.', '2026-08-31'),
+  glossaryRecord('TERM-160', 'theoretical occupancy · 理论占用率', 'kernel-vocabulary', ['F08', 'Q09', 'LAB09'], 'CUDA 13.3 与 Nsight Compute 2026.2.1；exact binary、launch、allocation rules 与 device limits 形成 model，不是 execution observation。', 'CUDA 13.3 and Nsight Compute 2026.2.1; the exact binary, launch, allocation rules, and device limits form a model rather than an execution observation.', '2026-09-01'),
+  glossaryRecord('TERM-161', 'achieved occupancy · 实际占用率', 'evidence-vocabulary', ['Q09', 'LAB09'], 'Nsight Compute 2026.2.1；execution-derived active warps、sampling/aggregation scope 与 exact-device denominator 必须来自合格 report。', 'Nsight Compute 2026.2.1; execution-derived active warps, sampling and aggregation scope, and the exact-device denominator must come from a qualifying report.', '2026-09-01'),
+  glossaryRecord('TERM-162', 'warp stall reason · warp 停顿原因', 'evidence-vocabulary', ['Q09', 'LAB09'], 'Nsight Compute 2026.2.1；stall taxonomy、sampling、normalization 与 scheduler context 绑定 exact report，单个最大类别不是 root cause。', 'Nsight Compute 2026.2.1; stall taxonomy, sampling, normalization, and scheduler context bind to the exact report, and the largest category alone is not a root cause.', '2026-09-01'),
+  glossaryRecord('TERM-163', 'hardware ceiling · 硬件上限', 'evidence-vocabulary', ['A14', 'Q10', 'LAB09', 'VIS13'], 'CUDA 13.3、Nsight Compute 2026.2.1 与 original Roofline model；ceiling 必须声明 operation/path、unit、device、scope 与 theoretical/calibrated/tool-reported provenance。', 'CUDA 13.3, Nsight Compute 2026.2.1, and the original Roofline model; a ceiling declares operation or path, unit, device, scope, and theoretical, calibrated, or tool-reported provenance.', '2026-09-01'),
+  glossaryRecord('TERM-164', 'ridge point · 屋脊点', 'kernel-vocabulary', ['Q10', 'LAB09', 'VIS13'], 'Nsight Compute 2026.2.1 与 original Roofline model；ridge intensity 是 compatible compute 与 bandwidth ceilings 的 ratio，不是 observed bottleneck location。', 'Nsight Compute 2026.2.1 and the original Roofline model; ridge intensity is the ratio of compatible compute and bandwidth ceilings, not an observed bottleneck location.', '2026-09-01'),
+  glossaryRecord('TERM-165', 'Roofline model · Roofline 模型', 'kernel-vocabulary', ['A14', 'Q10', 'LAB09', 'VIS13'], '2009 original model 只提供上界构造；CUDA 13.3/Nsight Compute 2026.2.1 facts 另行复核，browser chart 不是 GPU evidence。', 'The original 2009 model supplies only the upper-bound construction; CUDA 13.3 and Nsight Compute 2026.2.1 facts are reviewed separately, and a browser chart is not GPU evidence.', '2026-09-01'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -1565,7 +1655,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
+    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
@@ -2166,6 +2256,42 @@ const sources: readonly ResourceIndexRecord[] = [
     localized('Nsight Systems 2026.4.1、Nsight Compute/CUPTI 2026.2.1；browser decision tree 不是完整 feature crosswalk 或 runtime evidence。', 'Nsight Systems 2026.4.1 and Nsight Compute/CUPTI 2026.2.1; the browser decision tree is not a complete feature crosswalk or runtime evidence.'),
     '2026-08-31',
     '2026-08-31',
+  ),
+  sourceRecord(
+    'SRC-CUDA-050',
+    localized('Q09 occupancy、stall 与 throughput facts', 'Q09 occupancy, stall, and throughput facts'),
+    'cuda-version-record',
+    ['F08', 'Q08', 'Q09', 'LAB09'],
+    localized(
+      'CUDA Programming/Best Practices Guide v13.3 与 Nsight Compute 2026.2.1；theoretical/achieved occupancy、scheduler/stall/throughput contract 绑定 exact GPU、metric definition、unit、scope、availability 与 report。',
+      'CUDA Programming and Best Practices Guides v13.3 and Nsight Compute 2026.2.1; theoretical and achieved occupancy plus scheduler, stall, and throughput contracts bind to the exact GPU, metric definition, unit, scope, availability, and report.',
+    ),
+    '2026-09-01',
+    '2026-09-01',
+  ),
+  sourceRecord(
+    'SRC-CUDA-051',
+    localized('A14/Q10 arithmetic intensity 与 Roofline facts', 'A14/Q10 arithmetic-intensity and Roofline facts'),
+    'cuda-version-record',
+    ['A01', 'A02', 'A05', 'A08', 'A14', 'Q10', 'LAB09', 'VIS13'],
+    localized(
+      'CUDA Programming/Best Practices Guide v13.3、Nsight Compute 2026.2.1 与 DOI 10.1145/1498765.1498785；2009 paper 只负责 original model，不负责 current GPU metric、ceiling 或 measurement prescription。',
+      'CUDA Programming and Best Practices Guides v13.3, Nsight Compute 2026.2.1, and DOI 10.1145/1498765.1498785; the 2009 paper governs only the original model, not current GPU metrics, ceilings, or measurement prescriptions.',
+    ),
+    '2026-09-01',
+    '2026-09-01',
+  ),
+  sourceRecord(
+    'SRC-CUDA-052',
+    localized('LAB09/VIS13 measured-Roofline evidence 与 model boundary', 'LAB09/VIS13 measured-Roofline evidence and model boundary'),
+    'cuda-version-record',
+    ['Q09', 'Q10', 'A14', 'EX02', 'LAB09', 'VIS13'],
+    localized(
+      'Toolkit Lanes 11.8.0/12.9.2/13.3.1；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；CUPTI 11.8.87/12.9.79/13.3.75；non-admin counter permission、replay、report custody 与 browser-no-evidence boundary。',
+      'Toolkit Lanes 11.8.0/12.9.2/13.3.1; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; CUPTI 11.8.87/12.9.79/13.3.75; non-admin counter permission, replay, report custody, and the browser-no-evidence boundary.',
+    ),
+    '2026-09-01',
+    '2026-09-01',
   ),
 ];
 

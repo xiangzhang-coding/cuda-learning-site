@@ -1,0 +1,668 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/roofline-visual.css';
+import { ROOFLINE_COPY, type RooflineLocale } from '../visuals/roofline-copy';
+import {
+  ROOFLINE_INPUT_KEYS,
+  ROOFLINE_INPUT_LIMITS,
+  ROOFLINE_MODEL_CONTRACT,
+  createRooflineState,
+  deriveRooflineView,
+  type RooflineState,
+  type RooflineSvgPoint,
+  type RooflineView,
+} from '../visuals/roofline-model';
+
+interface Props {
+  locale: RooflineLocale;
+}
+
+const { locale } = Astro.props;
+const copy = ROOFLINE_COPY[locale];
+const initialState = createRooflineState();
+
+function requireView(state: RooflineState, context: string): RooflineView {
+  const result = deriveRooflineView(state);
+  if (!result.accepted) throw new Error(`VIS13 ${context} must be a valid declared-input state.`);
+  return result.view;
+}
+
+function pointsValue(points: readonly RooflineSvgPoint[]): string {
+  return points.map(({ x, y }) => `${x},${y}`).join(' ');
+}
+
+const initialView = requireView(initialState, 'initial view');
+const geometry = initialView.geometry;
+const numberFormat = new Intl.NumberFormat(locale, {
+  maximumSignificantDigits: 9,
+  useGrouping: false,
+});
+const displayNumber = (value: number) => numberFormat.format(value);
+const numericValue = (value: number) => String(value);
+---
+
+<cuda-roofline-explorer
+  class="visual-explainer roofline-visual not-content"
+  data-visual-id="VIS13"
+  data-locale={locale}
+  data-state="valid"
+  data-declared-compute-ceiling={numericValue(initialView.values.computeCeiling)}
+  data-declared-bandwidth-ceiling={numericValue(initialView.values.bandwidthCeiling)}
+  data-arithmetic-intensity={numericValue(initialView.values.arithmeticIntensity)}
+  data-achieved-rate={numericValue(initialView.values.achievedRate)}
+  data-ridge-intensity={numericValue(initialView.ridgeIntensity)}
+  data-workload-roof={numericValue(initialView.workloadRoof)}
+  data-model-region={initialView.region}
+  data-point-relation={initialView.pointRelation}
+  data-evidence-status-effect={ROOFLINE_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls roofline-controls" data-visual-controls data-pagefind-ignore hidden>
+      <legend>{copy.controlsHeading}</legend>
+      <div class="roofline-input-grid">
+        {ROOFLINE_INPUT_KEYS.map((input) => (
+          <label>
+            <span>{copy.inputs[input].label}</span>
+            <input
+              data-roofline-input={input}
+              type="number"
+              inputmode="decimal"
+              min={ROOFLINE_INPUT_LIMITS[input].minimum}
+              max={ROOFLINE_INPUT_LIMITS[input].maximum}
+              step="any"
+              value={initialState.inputs[input]}
+              autocomplete="off"
+              aria-invalid="false"
+            />
+            <small>
+              {copy.inputs[input].help} [{ROOFLINE_INPUT_LIMITS[input].minimum}, {ROOFLINE_INPUT_LIMITS[input].maximum}]
+            </small>
+          </label>
+        ))}
+      </div>
+      <div class="roofline-actions">
+        <button type="button" data-roofline-action="apply">{copy.apply}</button>
+        <button type="button" data-roofline-action="reset">{copy.reset}</button>
+      </div>
+      <small class="roofline-control-help">{copy.controlsHelp}</small>
+      <p class="roofline-status" data-roofline-status role="status" aria-live="polite" aria-atomic="true">
+        {copy.statusReady}
+      </p>
+    </fieldset>
+
+    <section
+      class="roofline-live-workbench"
+      data-live-workbench
+      data-pagefind-ignore
+      aria-label={copy.workbenchHeading}
+      hidden
+    >
+      <h3>{copy.workbenchHeading}</h3>
+      <svg
+        class="roofline-chart roofline-live-chart"
+        data-live-chart
+        data-model-region={initialView.region}
+        data-point-relation={initialView.pointRelation}
+        viewBox={geometry.viewBoxValue}
+        role="img"
+        aria-label={copy.chartAriaLabel}
+      >
+        <g class="roofline-grid" aria-hidden="true">
+          {geometry.xTicks.map((tick) => (
+            <>
+              <line x1={tick.coordinate} y1={geometry.plot.top} x2={tick.coordinate} y2={geometry.plot.bottom} />
+              <text x={tick.coordinate} y={geometry.plot.bottom + 18} text-anchor="middle">{numericValue(tick.value)}</text>
+            </>
+          ))}
+          {geometry.yTicks.map((tick) => (
+            <>
+              <line x1={geometry.plot.left} y1={tick.coordinate} x2={geometry.plot.right} y2={tick.coordinate} />
+              <text x={geometry.plot.left - 9} y={tick.coordinate + 4} text-anchor="end">{numericValue(tick.value)}</text>
+            </>
+          ))}
+        </g>
+        <g class="roofline-axes" aria-hidden="true">
+          <line
+            x1={geometry.axes.horizontal.start.x}
+            y1={geometry.axes.horizontal.start.y}
+            x2={geometry.axes.horizontal.end.x}
+            y2={geometry.axes.horizontal.end.y}
+          />
+          <line
+            x1={geometry.axes.vertical.start.x}
+            y1={geometry.axes.vertical.start.y}
+            x2={geometry.axes.vertical.end.x}
+            y2={geometry.axes.vertical.end.y}
+          />
+        </g>
+        <g class="roofline-workload-guides" aria-hidden="true">
+          <line
+            data-live-guide-horizontal
+            x1={geometry.workloadGuides.horizontal.start.x}
+            y1={geometry.workloadGuides.horizontal.start.y}
+            x2={geometry.workloadGuides.horizontal.end.x}
+            y2={geometry.workloadGuides.horizontal.end.y}
+          />
+          <line
+            data-live-guide-vertical
+            x1={geometry.workloadGuides.vertical.start.x}
+            y1={geometry.workloadGuides.vertical.start.y}
+            x2={geometry.workloadGuides.vertical.end.x}
+            y2={geometry.workloadGuides.vertical.end.y}
+          />
+        </g>
+        <line
+          class="roofline-boundary roofline-boundary-bandwidth"
+          data-live-roof-bandwidth
+          x1={geometry.roof.bandwidthSegment.start.x}
+          y1={geometry.roof.bandwidthSegment.start.y}
+          x2={geometry.roof.bandwidthSegment.end.x}
+          y2={geometry.roof.bandwidthSegment.end.y}
+        />
+        <line
+          class="roofline-boundary roofline-boundary-compute"
+          data-live-roof-compute
+          x1={geometry.roof.computeSegment.start.x}
+          y1={geometry.roof.computeSegment.start.y}
+          x2={geometry.roof.computeSegment.end.x}
+          y2={geometry.roof.computeSegment.end.y}
+        />
+        <polygon
+          class="roofline-ridge-marker"
+          data-live-ridge-marker
+          points={pointsValue(geometry.roof.ridgeMarker)}
+        />
+        <g class="roofline-workload-marker" data-live-workload-marker data-point-relation={initialView.pointRelation}>
+          <circle
+            data-live-workload-point
+            cx={geometry.workloadPoint.x}
+            cy={geometry.workloadPoint.y}
+            r={geometry.workloadPoint.radius}
+          />
+          <line
+            data-live-point-cross-a
+            x1={geometry.workloadPoint.x - 4}
+            y1={geometry.workloadPoint.y - 4}
+            x2={geometry.workloadPoint.x + 4}
+            y2={geometry.workloadPoint.y + 4}
+          />
+          <line
+            data-live-point-cross-b
+            x1={geometry.workloadPoint.x - 4}
+            y1={geometry.workloadPoint.y + 4}
+            x2={geometry.workloadPoint.x + 4}
+            y2={geometry.workloadPoint.y - 4}
+          />
+        </g>
+        <g class="roofline-direct-labels">
+          <text x="214" y="82" text-anchor="middle">{copy.regions['bandwidth-side']}</text>
+          <text x="548" y="82" text-anchor="middle">{copy.regions['compute-side']}</text>
+          <text x="226" y="302" text-anchor="middle">{copy.bandwidthSegment}</text>
+          <text x="528" y="118" text-anchor="middle">{copy.computeSegment}</text>
+          <text data-live-ridge-label x={geometry.labels.ridge.x} y={geometry.labels.ridge.y}>{copy.ridgeLabel}</text>
+          <text data-live-workload-label x={geometry.labels.workload.x} y={geometry.labels.workload.y}>{copy.workloadPoint}</text>
+          <text x="384" y="407" text-anchor="middle">{copy.xAxis}</text>
+          <text x="20" y="194" text-anchor="middle" transform="rotate(-90 20 194)">{copy.yAxis}</text>
+        </g>
+      </svg>
+
+      <dl class="roofline-live-values">
+        <div><dt>{copy.ridgeIntensity}</dt><dd><span data-live-ridge-intensity>{displayNumber(initialView.ridgeIntensity)}</span> operations/byte</dd></div>
+        <div><dt>{copy.workloadRoof}</dt><dd><span data-live-workload-roof>{displayNumber(initialView.workloadRoof)}</span> Gop/s</dd></div>
+        <div><dt>{copy.modelRegion}</dt><dd data-live-region>{copy.regions[initialView.region]}</dd></div>
+        <div><dt>{copy.pointRelation}</dt><dd data-live-relation>{copy.relations[initialView.pointRelation]}</dd></div>
+      </dl>
+      <p class="roofline-relation-note" data-live-relation-note>{copy.relationNotes[initialView.pointRelation]}</p>
+    </section>
+
+    <section class="visual-section roofline-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <p class="roofline-formula"><code>{copy.formula}</code></p>
+      <svg
+        class="roofline-chart roofline-static-chart"
+        data-static-svg
+        data-model-region={initialView.region}
+        data-point-relation={initialView.pointRelation}
+        data-ridge-intensity={numericValue(initialView.ridgeIntensity)}
+        data-workload-roof={numericValue(initialView.workloadRoof)}
+        viewBox={geometry.viewBoxValue}
+        role="img"
+        aria-label={copy.chartAriaLabel}
+      >
+        <g class="roofline-grid" aria-hidden="true">
+          {geometry.xTicks.map((tick) => (
+            <>
+              <line x1={tick.coordinate} y1={geometry.plot.top} x2={tick.coordinate} y2={geometry.plot.bottom} />
+              <text x={tick.coordinate} y={geometry.plot.bottom + 18} text-anchor="middle">{numericValue(tick.value)}</text>
+            </>
+          ))}
+          {geometry.yTicks.map((tick) => (
+            <>
+              <line x1={geometry.plot.left} y1={tick.coordinate} x2={geometry.plot.right} y2={tick.coordinate} />
+              <text x={geometry.plot.left - 9} y={tick.coordinate + 4} text-anchor="end">{numericValue(tick.value)}</text>
+            </>
+          ))}
+        </g>
+        <g class="roofline-axes" aria-hidden="true">
+          <line
+            x1={geometry.axes.horizontal.start.x}
+            y1={geometry.axes.horizontal.start.y}
+            x2={geometry.axes.horizontal.end.x}
+            y2={geometry.axes.horizontal.end.y}
+          />
+          <line
+            x1={geometry.axes.vertical.start.x}
+            y1={geometry.axes.vertical.start.y}
+            x2={geometry.axes.vertical.end.x}
+            y2={geometry.axes.vertical.end.y}
+          />
+        </g>
+        <g class="roofline-workload-guides" aria-hidden="true">
+          <line
+            x1={geometry.workloadGuides.horizontal.start.x}
+            y1={geometry.workloadGuides.horizontal.start.y}
+            x2={geometry.workloadGuides.horizontal.end.x}
+            y2={geometry.workloadGuides.horizontal.end.y}
+          />
+          <line
+            x1={geometry.workloadGuides.vertical.start.x}
+            y1={geometry.workloadGuides.vertical.start.y}
+            x2={geometry.workloadGuides.vertical.end.x}
+            y2={geometry.workloadGuides.vertical.end.y}
+          />
+        </g>
+        <line
+          class="roofline-boundary roofline-boundary-bandwidth"
+          data-static-roof-bandwidth
+          x1={geometry.roof.bandwidthSegment.start.x}
+          y1={geometry.roof.bandwidthSegment.start.y}
+          x2={geometry.roof.bandwidthSegment.end.x}
+          y2={geometry.roof.bandwidthSegment.end.y}
+        />
+        <line
+          class="roofline-boundary roofline-boundary-compute"
+          data-static-roof-compute
+          x1={geometry.roof.computeSegment.start.x}
+          y1={geometry.roof.computeSegment.start.y}
+          x2={geometry.roof.computeSegment.end.x}
+          y2={geometry.roof.computeSegment.end.y}
+        />
+        <polygon class="roofline-ridge-marker" data-static-ridge-marker points={pointsValue(geometry.roof.ridgeMarker)} />
+        <g class="roofline-workload-marker" data-static-workload-marker data-point-relation={initialView.pointRelation}>
+          <circle
+            data-static-workload-point
+            cx={geometry.workloadPoint.x}
+            cy={geometry.workloadPoint.y}
+            r={geometry.workloadPoint.radius}
+          />
+          <line
+            x1={geometry.workloadPoint.x - 4}
+            y1={geometry.workloadPoint.y - 4}
+            x2={geometry.workloadPoint.x + 4}
+            y2={geometry.workloadPoint.y + 4}
+          />
+          <line
+            x1={geometry.workloadPoint.x - 4}
+            y1={geometry.workloadPoint.y + 4}
+            x2={geometry.workloadPoint.x + 4}
+            y2={geometry.workloadPoint.y - 4}
+          />
+        </g>
+        <g class="roofline-direct-labels">
+          <text x="214" y="82" text-anchor="middle">{copy.regions['bandwidth-side']}</text>
+          <text x="548" y="82" text-anchor="middle">{copy.regions['compute-side']}</text>
+          <text x="226" y="302" text-anchor="middle">{copy.bandwidthSegment}</text>
+          <text x="528" y="118" text-anchor="middle">{copy.computeSegment}</text>
+          <text x={geometry.labels.ridge.x} y={geometry.labels.ridge.y}>{copy.ridgeLabel}</text>
+          <text x={geometry.labels.workload.x} y={geometry.labels.workload.y}>{copy.workloadPoint}</text>
+          <text x="384" y="407" text-anchor="middle">{copy.xAxis}</text>
+          <text x="20" y="194" text-anchor="middle" transform="rotate(-90 20 194)">{copy.yAxis}</text>
+        </g>
+      </svg>
+
+      <div class="roofline-table-wrap">
+        <table data-static-table>
+          <caption>{copy.staticTableCaption}</caption>
+          <thead>
+            <tr><th scope="col">{copy.parameter}</th><th scope="col">{copy.value}</th></tr>
+          </thead>
+          <tbody>
+            <tr data-static-kind="declared-input" data-static-key="computeCeiling" data-static-value={initialState.inputs.computeCeiling}>
+              <th scope="row">{copy.inputs.computeCeiling.shortLabel}</th><td>{initialState.inputs.computeCeiling} Gop/s</td>
+            </tr>
+            <tr data-static-kind="declared-input" data-static-key="bandwidthCeiling" data-static-value={initialState.inputs.bandwidthCeiling}>
+              <th scope="row">{copy.inputs.bandwidthCeiling.shortLabel}</th><td>{initialState.inputs.bandwidthCeiling} decimal GB/s</td>
+            </tr>
+            <tr data-static-kind="declared-input" data-static-key="arithmeticIntensity" data-static-value={initialState.inputs.arithmeticIntensity}>
+              <th scope="row">{copy.inputs.arithmeticIntensity.shortLabel}</th><td>{initialState.inputs.arithmeticIntensity} operations/byte</td>
+            </tr>
+            <tr data-static-kind="declared-input" data-static-key="achievedRate" data-static-value={initialState.inputs.achievedRate}>
+              <th scope="row">{copy.inputs.achievedRate.shortLabel}</th><td>{initialState.inputs.achievedRate} Gop/s</td>
+            </tr>
+            <tr data-static-kind="derived-model-value" data-static-key="ridgeIntensity" data-static-value={numericValue(initialView.ridgeIntensity)}>
+              <th scope="row">{copy.ridgeIntensity}</th><td>{displayNumber(initialView.ridgeIntensity)} operations/byte</td>
+            </tr>
+            <tr data-static-kind="derived-model-value" data-static-key="workloadRoof" data-static-value={numericValue(initialView.workloadRoof)}>
+              <th scope="row">{copy.workloadRoof}</th><td>{displayNumber(initialView.workloadRoof)} Gop/s</td>
+            </tr>
+            <tr data-static-kind="derived-model-value" data-static-key="modelRegion" data-static-value={initialView.region}>
+              <th scope="row">{copy.modelRegion}</th><td>{copy.regions[initialView.region]}</td>
+            </tr>
+            <tr data-static-kind="derived-model-value" data-static-key="pointRelation" data-static-value={initialView.pointRelation}>
+              <th scope="row">{copy.pointRelation}</th><td>{copy.relations[initialView.pointRelation]}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-roofline-explorer>
+
+<script>
+  import { ROOFLINE_COPY } from '../visuals/roofline-copy';
+  import {
+    ROOFLINE_INPUT_KEYS,
+    createRooflineState,
+    deriveRooflineView,
+    reduceRooflineState,
+    type RooflineInputIssue,
+    type RooflineInputKey,
+    type RooflineState,
+    type RooflineSvgLine,
+    type RooflineSvgPoint,
+    type RooflineView,
+  } from '../visuals/roofline-model';
+
+  type Parts = Readonly<{
+    controls: HTMLFieldSetElement;
+    workbench: HTMLElement;
+    chart: SVGSVGElement;
+    apply: HTMLButtonElement;
+    reset: HTMLButtonElement;
+    status: HTMLElement;
+    inputs: ReadonlyMap<RooflineInputKey, HTMLInputElement>;
+  }>;
+
+  const requiredLiveSelectors = [
+    '[data-live-guide-horizontal]',
+    '[data-live-guide-vertical]',
+    '[data-live-roof-bandwidth]',
+    '[data-live-roof-compute]',
+    '[data-live-ridge-marker]',
+    '[data-live-workload-marker]',
+    '[data-live-workload-point]',
+    '[data-live-point-cross-a]',
+    '[data-live-point-cross-b]',
+    '[data-live-ridge-label]',
+    '[data-live-workload-label]',
+    '[data-live-ridge-intensity]',
+    '[data-live-workload-roof]',
+    '[data-live-region]',
+    '[data-live-relation]',
+    '[data-live-relation-note]',
+  ] as const;
+
+  class CudaRooflineExplorer extends HTMLElement {
+    private state: RooflineState = createRooflineState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const parts = this.parts();
+      if (!parts) return;
+      const initialView = this.render(parts, false);
+      if (!initialView) return;
+
+      parts.apply.addEventListener('click', () => this.applyInputs(parts));
+      parts.reset.addEventListener('click', () => this.reset(parts));
+      parts.inputs.forEach((input) => {
+        input.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' || event.isComposing) return;
+          event.preventDefault();
+          this.applyInputs(parts);
+        });
+      });
+
+      parts.controls.hidden = false;
+      parts.workbench.hidden = false;
+      this.dataset.ready = 'true';
+    }
+
+    private parts(): Parts | null {
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const chart = this.querySelector<SVGSVGElement>('[data-live-chart]');
+      const apply = this.querySelector<HTMLButtonElement>('[data-roofline-action="apply"]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-roofline-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-roofline-status]');
+      const inputs = new Map<RooflineInputKey, HTMLInputElement>();
+      this.querySelectorAll<HTMLInputElement>('[data-roofline-input]').forEach((input) => {
+        const key = ROOFLINE_INPUT_KEYS.find((candidate) => candidate === input.dataset.rooflineInput);
+        if (key) inputs.set(key, input);
+      });
+      if (
+        !controls
+        || !workbench
+        || !chart
+        || !apply
+        || !reset
+        || !status
+        || inputs.size !== ROOFLINE_INPUT_KEYS.length
+        || requiredLiveSelectors.some((selector) => !this.querySelector(selector))
+      ) return null;
+      return { controls, workbench, chart, apply, reset, status, inputs };
+    }
+
+    private copy() {
+      return ROOFLINE_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private applyInputs(parts: Parts) {
+      let nextState = this.state;
+      for (const input of ROOFLINE_INPUT_KEYS) {
+        const update = reduceRooflineState(nextState, {
+          type: 'set-input',
+          input,
+          value: parts.inputs.get(input)?.value ?? '',
+        });
+        if (!update.accepted) {
+          this.announce(parts, this.copy().stateIssues[update.issue]);
+          return;
+        }
+        nextState = update.state;
+      }
+      this.state = nextState;
+      const view = this.render(parts, true);
+      if (!view) return;
+      this.announce(
+        parts,
+        view.pointRelation === 'above-declared-roof'
+          ? this.copy().statusAboveRoof
+          : this.copy().statusApplied,
+      );
+    }
+
+    private reset(parts: Parts) {
+      const update = reduceRooflineState(this.state, { type: 'reset' });
+      if (!update.accepted) {
+        this.announce(parts, this.copy().stateIssues[update.issue]);
+        return;
+      }
+      this.state = update.state;
+      for (const input of ROOFLINE_INPUT_KEYS) {
+        const field = parts.inputs.get(input);
+        if (field) field.value = this.state.inputs[input];
+      }
+      const view = this.render(parts, true);
+      if (!view) return;
+      this.announce(parts, this.copy().statusReset);
+      parts.inputs.get(ROOFLINE_INPUT_KEYS[0])?.focus();
+    }
+
+    private render(parts: Parts, reveal: boolean): RooflineView | null {
+      const result = deriveRooflineView(this.state);
+      if (!result.accepted) {
+        this.renderInvalid(parts, result.inputIssues, result.issue);
+        return null;
+      }
+      const view = result.view;
+      const copy = this.copy();
+      this.dataset.state = 'valid';
+      this.dataset.declaredComputeCeiling = String(view.values.computeCeiling);
+      this.dataset.declaredBandwidthCeiling = String(view.values.bandwidthCeiling);
+      this.dataset.arithmeticIntensity = String(view.values.arithmeticIntensity);
+      this.dataset.achievedRate = String(view.values.achievedRate);
+      this.dataset.ridgeIntensity = String(view.ridgeIntensity);
+      this.dataset.workloadRoof = String(view.workloadRoof);
+      this.dataset.modelRegion = view.region;
+      this.dataset.pointRelation = view.pointRelation;
+      parts.inputs.forEach((input) => input.setAttribute('aria-invalid', 'false'));
+      if (reveal) parts.workbench.hidden = false;
+
+      parts.chart.dataset.modelRegion = view.region;
+      parts.chart.dataset.pointRelation = view.pointRelation;
+      this.setLine('[data-live-guide-horizontal]', view.geometry.workloadGuides.horizontal);
+      this.setLine('[data-live-guide-vertical]', view.geometry.workloadGuides.vertical);
+      this.setLine('[data-live-roof-bandwidth]', view.geometry.roof.bandwidthSegment);
+      this.setLine('[data-live-roof-compute]', view.geometry.roof.computeSegment);
+      const ridgeMarker = this.querySelector<SVGPolygonElement>('[data-live-ridge-marker]');
+      ridgeMarker?.setAttribute('points', this.pointsValue(view.geometry.roof.ridgeMarker));
+      const workloadMarker = this.querySelector<SVGGElement>('[data-live-workload-marker]');
+      if (workloadMarker) workloadMarker.dataset.pointRelation = view.pointRelation;
+      const point = view.geometry.workloadPoint;
+      const workloadPoint = this.querySelector<SVGCircleElement>('[data-live-workload-point]');
+      if (workloadPoint) {
+        workloadPoint.setAttribute('cx', String(point.x));
+        workloadPoint.setAttribute('cy', String(point.y));
+        workloadPoint.setAttribute('r', String(point.radius));
+      }
+      this.setLine('[data-live-point-cross-a]', {
+        start: { x: point.x - 4, y: point.y - 4 },
+        end: { x: point.x + 4, y: point.y + 4 },
+      });
+      this.setLine('[data-live-point-cross-b]', {
+        start: { x: point.x - 4, y: point.y + 4 },
+        end: { x: point.x + 4, y: point.y - 4 },
+      });
+      this.setPoint('[data-live-ridge-label]', view.geometry.labels.ridge);
+      this.setPoint('[data-live-workload-label]', view.geometry.labels.workload);
+      this.setText('[data-live-ridge-intensity]', this.formatNumber(view.ridgeIntensity));
+      this.setText('[data-live-workload-roof]', this.formatNumber(view.workloadRoof));
+      this.setText('[data-live-region]', copy.regions[view.region]);
+      this.setText('[data-live-relation]', copy.relations[view.pointRelation]);
+      this.setText('[data-live-relation-note]', copy.relationNotes[view.pointRelation]);
+      return view;
+    }
+
+    private renderInvalid(
+      parts: Parts,
+      inputIssues: readonly RooflineInputIssue[],
+      issue: 'invalid-state' | 'invalid-input',
+    ) {
+      this.dataset.state = 'invalid';
+      for (const name of [
+        'declaredComputeCeiling',
+        'declaredBandwidthCeiling',
+        'arithmeticIntensity',
+        'achievedRate',
+        'ridgeIntensity',
+        'workloadRoof',
+        'modelRegion',
+        'pointRelation',
+      ] as const) delete this.dataset[name];
+      parts.inputs.forEach((input) => input.setAttribute('aria-invalid', 'false'));
+      for (const inputIssue of inputIssues) {
+        parts.inputs.get(inputIssue.input)?.setAttribute('aria-invalid', 'true');
+      }
+      parts.workbench.hidden = true;
+      this.clearLiveGeometry();
+      if (issue === 'invalid-state') {
+        this.announce(parts, this.copy().stateIssues['invalid-state']);
+        return;
+      }
+      const details = inputIssues.map(({ input, reason }) =>
+        `${this.copy().inputs[input].shortLabel} ${this.copy().parseIssues[reason]}`).join('; ');
+      this.announce(parts, `${this.copy().statusInvalid} ${details}.`);
+    }
+
+    private clearLiveGeometry() {
+      for (const selector of [
+        '[data-live-guide-horizontal]',
+        '[data-live-guide-vertical]',
+        '[data-live-roof-bandwidth]',
+        '[data-live-roof-compute]',
+        '[data-live-point-cross-a]',
+        '[data-live-point-cross-b]',
+      ]) {
+        const line = this.querySelector<SVGLineElement>(selector);
+        for (const attribute of ['x1', 'y1', 'x2', 'y2']) line?.removeAttribute(attribute);
+      }
+      this.querySelector('[data-live-ridge-marker]')?.removeAttribute('points');
+      const point = this.querySelector('[data-live-workload-point]');
+      for (const attribute of ['cx', 'cy', 'r']) point?.removeAttribute(attribute);
+      for (const selector of ['[data-live-ridge-label]', '[data-live-workload-label]']) {
+        const label = this.querySelector(selector);
+        label?.removeAttribute('x');
+        label?.removeAttribute('y');
+      }
+      const marker = this.querySelector<SVGGElement>('[data-live-workload-marker]');
+      if (marker) delete marker.dataset.pointRelation;
+      const chart = this.querySelector<SVGSVGElement>('[data-live-chart]');
+      if (chart) {
+        delete chart.dataset.modelRegion;
+        delete chart.dataset.pointRelation;
+      }
+    }
+
+    private formatNumber(value: number) {
+      return new Intl.NumberFormat(this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en', {
+        maximumSignificantDigits: 9,
+        useGrouping: false,
+      }).format(value);
+    }
+
+    private pointsValue(points: readonly RooflineSvgPoint[]) {
+      return points.map(({ x, y }) => `${x},${y}`).join(' ');
+    }
+
+    private setLine(selector: string, line: RooflineSvgLine) {
+      const element = this.querySelector<SVGLineElement>(selector);
+      if (!element) return;
+      element.setAttribute('x1', String(line.start.x));
+      element.setAttribute('y1', String(line.start.y));
+      element.setAttribute('x2', String(line.end.x));
+      element.setAttribute('y2', String(line.end.y));
+    }
+
+    private setPoint(selector: string, point: RooflineSvgPoint) {
+      const element = this.querySelector<SVGTextElement>(selector);
+      if (!element) return;
+      element.setAttribute('x', String(point.x));
+      element.setAttribute('y', String(point.y));
+    }
+
+    private setText(selector: string, value: string) {
+      const element = this.querySelector<HTMLElement | SVGTextElement>(selector);
+      if (element) element.textContent = value;
+    }
+
+    private announce(parts: Parts, value: string) {
+      parts.status.textContent = value;
+    }
+  }
+
+  if (!customElements.get('cuda-roofline-explorer')) {
+    customElements.define('cuda-roofline-explorer', CudaRooflineExplorer);
+  }
+</script>

@@ -116,6 +116,8 @@ const correctnessSlugs = [
   'apod-optimization-loop',
   'timeline-first-nsight-systems',
   'kernel-first-nsight-compute',
+  'occupancy-stalls-throughput',
+  'roofline-arithmetic-intensity',
 ] as const;
 const issue19MemorySlugs = [
   'pinned-memory-transfer-overlap',
@@ -153,6 +155,7 @@ const labSlugs = [
   'build-overlapped-pipeline',
   'diagnose-four-sanitizer-failures',
   'profile-full-application-before-kernel',
+  'build-original-roofline',
 ] as const;
 
 const sortedRoutes = (routes: readonly string[]) =>
@@ -160,8 +163,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(396);
-  expect(publishedRoutes.length / 2).toBe(198);
+  expect(publishedRoutes).toHaveLength(418);
+  expect(publishedRoutes.length / 2).toBe(209);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

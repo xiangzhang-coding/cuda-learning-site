@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 159 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 165 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-31'
+      content: '2026-09-01'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -405,8 +405,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 在已声明时间窗口内完成的指定工作量，以 items/s、operations/s 等单位表示。它是速率，不是一个事件的经过时间。
 - **避免使用：** 单次操作的 latency、没有工作量和时间窗口的速率、未说明条件的 peak 值。
-- **相关单元：** O06、O07。
-- **版本说明：** 并发或批处理可以在单项 latency 不变时提高 throughput；比较时必须对齐 workload、时间窗口和单位。
+- **相关资源：** O06、O07、[Q09](/correctness/occupancy-stalls-throughput/)、[Q10](/correctness/roofline-arithmetic-intensity/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** CUDA 13.3 与 Nsight Compute 2026.2.1；并发或批处理可以在单项 latency 不变时提高 throughput，比较时必须对齐 work/traffic、时间窗口、单位、scope 与 exact ceiling。
 
 <span id="term-041" class="resource-target" aria-hidden="true"></span>
 
@@ -432,8 +432,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 对一个指定 workload，把已声明的算术工作计数除以穿过已声明内存边界的数据流量，单位为 operations/byte。
 - **避免使用：** 只有 operation count、FLOP/s、没有流量边界的比值。
-- **相关单元：** O06。
-- **版本说明：** Operation 计数规则、read/write 流量口径、memory level 或 workload scope 改变时，intensity 也会改变。
+- **相关资源：** O06、[A14](/algorithms/algorithm-choice-arithmetic-intensity/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB09](/labs/build-original-roofline/)和 [VIS13](/visuals/roofline/)。
+- **版本说明：** CUDA 13.3、Nsight Compute 2026.2.1 与 original Roofline model；operation 计数规则、read/write 流量、memory path、workload scope 或 provenance 改变时，intensity 也会改变。
 
 <span id="term-044" class="resource-target" aria-hidden="true"></span>
 
@@ -441,8 +441,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 通常指每个 SM 的 active warp 数与硬件允许的最大 active warp 数之比，不是 GPU utilization，也不保证性能。
 - **避免使用：** GPU utilization、并发执行证明、性能分数或性能保证。
-- **相关单元：** O06。
-- **版本说明：** Occupancy 受架构、block size、register 和 shared-memory 限制共同影响；更高 occupancy 不保证更高 throughput 或更短 runtime。
+- **相关资源：** O06、[Q09](/correctness/occupancy-stalls-throughput/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** CUDA 13.3 与 Nsight Compute 2026.2.1；active-warps numerator 与 exact-device maximum-warps denominator 必须同 scope。架构、block size、register 和 shared memory 共同限制 occupancy；更高 occupancy 不保证更高 throughput 或更短 runtime。
 
 <span id="term-045" class="resource-target" aria-hidden="true"></span>
 
@@ -1431,8 +1431,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** Kernel 性能分析器（Nsight Compute）针对 separate instrumented run 中与代表性 timeline 选择规则对应的 kernel occurrence，收集回答一个预先声明问题所需的 sections、rules 或 metrics，并把结果保存在 `.ncu-rep` 中。
 - **避免使用：** Application profiling 的第一步、先收集全部 metrics 再解释、Systems report 中同一 physical kernel instance、自动 bottleneck 或 speedup proof。
-- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)、[LAB08](/labs/profile-full-application-before-kernel/)和 [VIS14](/visuals/nsight-systems-versus-nsight-compute/)。
-- **版本说明：** Current coordinate 是 Nsight Compute 2026.2.1；selected Toolkit Lanes 使用 2022.3.0.22、2025.2.1.3、2026.2.1.5。实际 `ncu --version`、target GPU、permission、availability query、filter 与 replay contract 决定可解释范围；版本坐标不授予 metric availability 或 observation。
+- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)、[Q09](/correctness/occupancy-stalls-throughput/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB08](/labs/profile-full-application-before-kernel/)、[LAB09](/labs/build-original-roofline/)、[VIS13](/visuals/roofline/)和 [VIS14](/visuals/nsight-systems-versus-nsight-compute/)。
+- **版本说明：** Current coordinate 是 Nsight Compute 2026.2.1；selected Toolkit Lanes 使用 2022.3.0.22、2025.2.1.3、2026.2.1.5。实际 `ncu --version`、target GPU、permission、availability query、filter、replay 与 report custody 决定 occupancy、stall、throughput、traffic 或 Roofline 的可解释范围；版本坐标不授予 observation。
 
 <span id="term-155" class="resource-target" aria-hidden="true"></span>
 
@@ -1449,8 +1449,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 性能分析指标（profiler metric）是 profiler 按特定工具和设备合同报告或派生的命名量；可解释记录必须保留 exact name、unit、definition、scope、aggregation/denominator、availability 与 collection method。
 - **避免使用：** 任意 hardware fact、必然等同于 raw counter、跨 GPU/version 可直接比较的同名值、单个高数值就是 bottleneck。
-- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
-- **版本说明：** Current Nsight Compute 2026.2.1 与 selected Lane components 2022.3.0.22、2025.2.1.3、2026.2.1.5 的 names、definitions 与 availability 必须分开核对，并以 exact target GPU 上保留的 query/report 为准；metric catalog 本身不是 observation 或 conclusion。
+- **相关资源：** [Q08](/correctness/kernel-first-nsight-compute/)、[Q09](/correctness/occupancy-stalls-throughput/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB08](/labs/profile-full-application-before-kernel/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** Current Nsight Compute 2026.2.1 与 selected Lane components 2022.3.0.22、2025.2.1.3、2026.2.1.5 的 name、unit、definition、denominator、scope 与 availability 必须分开核对，并以 exact target GPU 上保留的 query/report 为准；不能跨 occupancy、stall、throughput 或 traffic domain 静默比较。
 
 <span id="term-157" class="resource-target" aria-hidden="true"></span>
 
@@ -1467,8 +1467,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 - **定义：** 性能分析报告（profiler report）是 profiler 生成的 primary observation artifact，例如 `.nsys-rep` 或 `.ncu-rep`；只有与 exact producer version、command/method、workload、correctness verdict、Environment Manifest、logs、hash 和 interpretation contract 一起保管时才可审查。
 - **避免使用：** 把 screenshot、stats table 或 export 当作完整 report、脱离 manifest 的结论、仅因文件存在就视为 Runtime-Verified、可由任意 tool version 无损解释的通用格式。
-- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)、[LAB06](/labs/build-overlapped-pipeline/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
-- **版本说明：** `.nsys-rep` 绑定实际 Nsight Systems version，包括 current 2026.4/2026.4.1 或 selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；`.ncu-rep` 绑定 actual 2026.2.1 或 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5。Derivative、redaction 与 reader-version 差异需记录；report existence 不支持未声明的结论。
+- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)、[Q09](/correctness/occupancy-stalls-throughput/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB06](/labs/build-overlapped-pipeline/)、[LAB08](/labs/profile-full-application-before-kernel/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** `.nsys-rep` 绑定实际 Nsight Systems version；`.ncu-rep` 绑定 actual 2026.2.1 或 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5 与 exact GPU。Filter、replay、source command、derivative、redaction、hash 和 reader-version 差异需记录；report existence 不支持未声明的结论。
 
 <span id="term-159" class="resource-target" aria-hidden="true"></span>
 
@@ -1479,6 +1479,60 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)、[LAB06](/labs/build-overlapped-pipeline/)和 [LAB08](/labs/profile-full-application-before-kernel/)。
 - **版本说明：** `nsys` syntax 绑定 actual current 2026.4/2026.4.1 或 selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425；`ncu` syntax 绑定 actual 2026.2.1 或 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5。先保存实际 `--version` 与 subcommand help，再解释 command；文档中的 symbolic shape 不是执行记录。
 
+<span id="term-160" class="resource-target" aria-hidden="true"></span>
+
+### theoretical occupancy · 理论占用率
+
+- **定义：** 根据 exact kernel binary、launch configuration、register/shared-memory allocation rules 与 exact-device limits 推导的每 SM modeled active warps 相对 maximum active warps 的比值；它描述 residency capacity，不是运行观察。
+- **避免使用：** 最大占用率、预测 utilization、达成占用率。
+- **相关资源：** [F08](/foundations/launch-geometry/)、[Q09](/correctness/occupancy-stalls-throughput/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** CUDA 13.3 与 Nsight Compute 2026.2.1；compiler/resource record、allocation granularity、device limit 或 launch 改变后必须重算，不能把 model 值写成 observed percentage。
+
+<span id="term-161" class="resource-target" aria-hidden="true"></span>
+
+### achieved occupancy · 实际占用率
+
+- **定义：** 在合格 execution report 的声明 sampling/aggregation scope 内，execution-derived active warps 相对同一 exact-device maximum active warps 的比值。
+- **避免使用：** 测得的 utilization、理论占用率、持续驻留保证。
+- **相关资源：** [Q09](/correctness/occupancy-stalls-throughput/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** Nsight Compute 2026.2.1；必须保留 exact metric definition、denominator、scope、GPU、filter、replay 与 report custody，不能从 theoretical occupancy 推导。
+
+<span id="term-162" class="resource-target" aria-hidden="true"></span>
+
+### warp stall reason · warp 停顿原因
+
+- **定义：** Profiler 在已声明 sampling 与 normalization contract 下，对 warp 暂时不 eligible 或未发射原因进行的分类；它是 investigation lead，不是 whole-kernel cause。
+- **避免使用：** 根因、瓶颈、修复方向。
+- **相关资源：** [Q09](/correctness/occupancy-stalls-throughput/)和 [LAB09](/labs/build-original-roofline/)。
+- **版本说明：** Nsight Compute 2026.2.1；taxonomy、unit、sampling、denominator、scheduler context 与 availability 绑定 exact GPU/report，最大类别不能单独证明 speedup opportunity。
+
+<span id="term-163" class="resource-target" aria-hidden="true"></span>
+
+### hardware ceiling · 硬件上限
+
+- **定义：** 对一个具名 operation family 或 memory path，在已声明 device、unit、scope 与 provenance 下使用的性能上界；它可以是 theoretical、calibrated/measured 或 tool-reported，但不能静默混合。
+- **避免使用：** 实际吞吐量、保证峰值、无来源的 roof。
+- **相关资源：** [A14](/algorithms/algorithm-choice-arithmetic-intensity/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB09](/labs/build-original-roofline/)和 [VIS13](/visuals/roofline/)。
+- **版本说明：** CUDA 13.3、Nsight Compute 2026.2.1 与 original Roofline model；operation convention、path、clock/power state、device、method 或 provenance 改变后，ceiling 也必须独立重建。
+
+<span id="term-164" class="resource-target" aria-hidden="true"></span>
+
+### ridge point · 屋脊点
+
+- **定义：** Roofline 中 compatible compute ceiling 与 path-bandwidth ceiling 的交点，其 arithmetic intensity 为 `I_ridge=P_compute/B_path`，把斜向 bandwidth-side model region 与水平 compute-side model region 分开。
+- **避免使用：** 瓶颈点、测得的拐点、自动优化阈值。
+- **相关资源：** [Q10](/correctness/roofline-arithmetic-intensity/)、[LAB09](/labs/build-original-roofline/)和 [VIS13](/visuals/roofline/)。
+- **版本说明：** Nsight Compute 2026.2.1 与 original Roofline model；两个 ceilings 必须共享 operation convention、path、unit、device/scope 与 provenance，ridge location 不是 observed bottleneck。
+
+<span id="term-165" class="resource-target" aria-hidden="true"></span>
+
+### Roofline model · Roofline 模型
+
+- **定义：** 以 arithmetic intensity 为横轴、achievable work rate 为纵轴，用 `min(P_compute, I*B_path)` 表示一组声明 compute 与 memory-path ceilings 的上界模型。
+- **避免使用：** Profiler verdict、瓶颈证明、自动 optimization selector。
+- **相关资源：** [A14](/algorithms/algorithm-choice-arithmetic-intensity/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB09](/labs/build-original-roofline/)和 [VIS13](/visuals/roofline/)。
+- **版本说明：** 2009 original paper 只负责 model 构造；CUDA 13.3 与 Nsight Compute 2026.2.1 facts 另行复核。VIS13 browser values 和 static chart 都不是 GPU evidence。
+
 ## 维护规则
 
-TERM-001 至 TERM-146 保留各自 2026-08-26 至 2026-08-30 的逐项复核记录，TERM-147 至 TERM-151 保留各自在 2026-08-31 的逐项复核记录。TERM-152 至 TERM-159，以及完整 159 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-08-31** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。TERM-152 至 TERM-159 只是静态定义：未运行 application、GPU、`nsys` 或 `ncu`，未查询 performance counter，未生成或解析 profiler report，且不声明 timeline、metric、replay、timing、bottleneck、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-159 保留各自既有逐项复核记录；更新的 TERM-040、TERM-043、TERM-044、TERM-154、TERM-156、TERM-158，以及新增 TERM-160 至 TERM-165 与完整 165 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-01** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增与更新词条只是静态定义：未运行 application、GPU 或 profiler，未生成或解析 report，且不声明 metric、timing、bottleneck、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

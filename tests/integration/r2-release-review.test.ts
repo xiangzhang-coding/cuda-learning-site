@@ -17,20 +17,25 @@ const learningUnits = [
   'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09',
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
 ] as const;
-const currentLearningUnits = [...learningUnits, 'Q06', 'Q07', 'Q08'] as const;
+const currentLearningUnits = [
+  ...learningUnits.slice(0, 44),
+  'A14',
+  ...learningUnits.slice(44),
+  'Q06', 'Q07', 'Q08', 'Q09', 'Q10',
+] as const;
 const runnableExamples = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
 const labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
-const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08'] as const;
+const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09'] as const;
 const visualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const noCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -45,7 +50,7 @@ const pendingHardwareVerification = [
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -227,21 +232,21 @@ describe('R2 release review', () => {
       'SPDX-License-Identifier': 'Apache-2.0',
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-08-31',
+      reviewDate: '2026-09-01',
       artifactType: 'static-assets',
       canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
       releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
     });
     expect(currentManifest.scope).toEqual({
-      publicationPairs: 198,
-      sourceRoutes: 396,
+      publicationPairs: 209,
+      sourceRoutes: 418,
       learningUnits: currentLearningUnits,
       runnableExamples,
       labs: currentLabs,
       visualExplainers: currentVisualExplainers,
-      practiceBankEntries: 53,
-      glossaryTerms: 159,
-      sourceRecords: 65,
+      practiceBankEntries: 56,
+      glossaryTerms: 165,
+      sourceRecords: 68,
     });
     expect(currentManifest.compatibility).toEqual(r2Manifest.compatibility);
     expect(currentManifest.evidence).toEqual({
@@ -264,7 +269,7 @@ describe('R2 release review', () => {
       'CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.',
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
       'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
-      'Q06-Q08, LAB06, LAB08, and VIS14 are an incremental R3 publication; the aggregate R3 release review remains pending.',
+      'Q06-Q10, A14, LAB06, LAB08, LAB09, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]);
     expect(currentManifest.knownLimitations).not.toContain('LAB06 has no current public destination.');
@@ -282,14 +287,14 @@ describe('R2 release review', () => {
     }
 
     const recordsByGroup = Object.groupBy(RESOURCE_INDEX_RECORDS, ({ group }) => group);
-    expect(recordsByGroup.labs).toHaveLength(8);
-    expect(recordsByGroup.practice).toHaveLength(53);
-    expect(recordsByGroup.visuals).toHaveLength(17);
-    expect(recordsByGroup.glossary).toHaveLength(159);
-    expect(recordsByGroup.sources).toHaveLength(65);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(302);
-    expect(publishedRoutes).toHaveLength(396);
-    expect(new Set(publishedRoutes).size).toBe(396);
+    expect(recordsByGroup.labs).toHaveLength(9);
+    expect(recordsByGroup.practice).toHaveLength(56);
+    expect(recordsByGroup.visuals).toHaveLength(18);
+    expect(recordsByGroup.glossary).toHaveLength(165);
+    expect(recordsByGroup.sources).toHaveLength(68);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(316);
+    expect(publishedRoutes).toHaveLength(418);
+    expect(new Set(publishedRoutes).size).toBe(418);
   });
 
   it('documents R2 as completed without pre-certifying dynamic acceptance evidence', async () => {
@@ -306,7 +311,7 @@ describe('R2 release review', () => {
       expect(document).toContain('current-publication-manifest.json');
       expect(document).toMatch(/R2.*latest completed aggregate (?:release )?review/i);
       expect(document).toMatch(/issue #24/i);
-      expect(document).toMatch(/issue #25/i);
+      expect(document).toMatch(/issue #26/i);
       expect(document).toMatch(/R3 aggregate review remains pending/i);
       expect(document).not.toMatch(/R2 aggregate review.*pending|pending R2 aggregate review|R2.*separately gated/i);
       expect(document).not.toMatch(/R3.*latest completed aggregate (?:release )?review/i);
@@ -314,24 +319,23 @@ describe('R2 release review', () => {
     for (const document of [readme, deployment, maintenance, contentLicenses]) {
       expect(document).toMatch(/186 (?:bilingual )?Publication Pairs/i);
       expect(document).toContain('372 source routes');
-      expect(document).toMatch(/198 (?:bilingual )?Publication Pairs/i);
-      expect(document).toContain('396 source routes');
+      expect(document).toMatch(/209 (?:bilingual )?Publication Pairs/i);
+      expect(document).toContain('418 source routes');
       expect(document).toMatch(/49 Learning Units.*6 Labs.*16 Visual Explainers.*50 Practice Bank entries.*151 Glossary terms.*61 source records.*284 catalog records/is);
-      expect(document).toMatch(/52 Learning Units/i);
-      expect(document).toMatch(/(?:8|eight) Labs/i);
-      expect(document).toMatch(/(?:17|seventeen)(?: formal| deterministic)? Visual Explainers/i);
-      expect(document).toMatch(/53 Practice Bank entries/i);
-      expect(document).toMatch(/159 Glossary terms/i);
-      expect(document).toMatch(/65 source(?:\/version)? records/i);
-      expect(document).toMatch(/302(?:-record catalog| catalog records| records)/i);
+      expect(document).toMatch(/55 Learning Units/i);
+      expect(document).toMatch(/(?:9|nine) Labs/i);
+      expect(document).toMatch(/(?:18|eighteen)(?: formal| deterministic)? Visual Explainers/i);
+      expect(document).toMatch(/56 Practice Bank entries/i);
+      expect(document).toMatch(/165 Glossary terms/i);
+      expect(document).toMatch(/68 source(?:\/version)? records/i);
+      expect(document).toMatch(/316(?:-record catalog| catalog records| records)/i);
     }
-    expect(maintenance).toContain('Review date: 2026-08-31');
-    expect(maintenance).toMatch(/`SRC-CUDA-041` through `SRC-CUDA-045`/);
-    expect(maintenance).toMatch(/`SRC-CUDA-046` through `SRC-CUDA-049`/);
-    expect(maintenance).toMatch(/EX14.*EX15.*build gates/i);
+    expect(maintenance).toContain('Review date: 2026-09-01');
+    expect(maintenance).toMatch(/`SRC-CUDA-050` through `SRC-CUDA-052`/);
+    expect(maintenance).toMatch(/LAB09.*empty compilation.*recorded-observation/is);
     expect(maintenance).toMatch(/issue #24.*dynamic acceptance|dynamic acceptance.*issue #24/i);
-    expect(maintenance).toMatch(/Q06-Q08.*LAB06.*LAB08.*VIS14/is);
+    expect(maintenance).toMatch(/A14.*Q09-Q10.*LAB09.*VIS13/is);
     expect(contentLicenses).toContain('src/r2-release-manifest.json');
-    expect(contentLicenses).toContain('Issue #25 is an incremental publication');
+    expect(contentLicenses).toContain('Issue #26 is an incremental publication');
   });
 });

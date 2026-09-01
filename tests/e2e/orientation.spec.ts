@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(396);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(198);
+  expect(routes).toHaveLength(418);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(209);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -83,6 +83,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/algorithms/privatized-histogram/', en: '/en/algorithms/privatized-histogram/' },
     { zh: '/algorithms/privatized-histogram/exercises/', en: '/en/algorithms/privatized-histogram/exercises/' },
     { zh: '/algorithms/privatized-histogram/solutions/', en: '/en/algorithms/privatized-histogram/solutions/' },
+    { zh: '/algorithms/algorithm-choice-arithmetic-intensity/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/' },
+    { zh: '/algorithms/algorithm-choice-arithmetic-intensity/exercises/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/exercises/' },
+    { zh: '/algorithms/algorithm-choice-arithmetic-intensity/solutions/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -107,6 +110,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/correctness/kernel-first-nsight-compute/', en: '/en/correctness/kernel-first-nsight-compute/' },
     { zh: '/correctness/kernel-first-nsight-compute/exercises/', en: '/en/correctness/kernel-first-nsight-compute/exercises/' },
     { zh: '/correctness/kernel-first-nsight-compute/solutions/', en: '/en/correctness/kernel-first-nsight-compute/solutions/' },
+    { zh: '/correctness/occupancy-stalls-throughput/', en: '/en/correctness/occupancy-stalls-throughput/' },
+    { zh: '/correctness/occupancy-stalls-throughput/exercises/', en: '/en/correctness/occupancy-stalls-throughput/exercises/' },
+    { zh: '/correctness/occupancy-stalls-throughput/solutions/', en: '/en/correctness/occupancy-stalls-throughput/solutions/' },
+    { zh: '/correctness/roofline-arithmetic-intensity/', en: '/en/correctness/roofline-arithmetic-intensity/' },
+    { zh: '/correctness/roofline-arithmetic-intensity/exercises/', en: '/en/correctness/roofline-arithmetic-intensity/exercises/' },
+    { zh: '/correctness/roofline-arithmetic-intensity/solutions/', en: '/en/correctness/roofline-arithmetic-intensity/solutions/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
@@ -128,6 +137,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/labs/build-overlapped-pipeline/', en: '/en/labs/build-overlapped-pipeline/' },
     { zh: '/labs/diagnose-four-sanitizer-failures/', en: '/en/labs/diagnose-four-sanitizer-failures/' },
     { zh: '/labs/profile-full-application-before-kernel/', en: '/en/labs/profile-full-application-before-kernel/' },
+    { zh: '/labs/build-original-roofline/', en: '/en/labs/build-original-roofline/' },
     { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
@@ -139,6 +149,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
     { zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
     { zh: '/visuals/reduction-stages/', en: '/en/visuals/reduction-stages/' },
+    { zh: '/visuals/roofline/', en: '/en/visuals/roofline/' },
     { zh: '/visuals/nsight-systems-versus-nsight-compute/', en: '/en/visuals/nsight-systems-versus-nsight-compute/' },
     { zh: '/practice/', en: '/en/practice/' },
     { zh: '/glossary/', en: '/en/glossary/' },
@@ -194,6 +205,7 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'A02 屏障 __syncthreads inactive lane', localePrefix: '/', expectedHrefs: ['/algorithms/multi-stage-reduction/'] },
     { route: '/', button: /搜索/, query: 'A03 包含式 排除式 扫描', localePrefix: '/', expectedHrefs: ['/algorithms/inclusive-exclusive-scan/'] },
     { route: '/', button: /搜索/, query: 'A04 Privatized Histogram', localePrefix: '/', expectedHrefs: ['/algorithms/privatized-histogram/'] },
+    { route: '/', button: /搜索/, query: 'A14 Arithmetic Intensity', localePrefix: '/', expectedHrefs: ['/algorithms/algorithm-choice-arithmetic-intensity/'] },
     { route: '/', button: /搜索/, query: 'Q02 浮点顺序 确定性 逐位可复现性', localePrefix: '/', expectedHrefs: ['/correctness/floating-point-order-reproducibility/'] },
     { route: '/', button: /搜索/, query: 'Q06 把 APOD 作为优化循环', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/'] },
     { route: '/', button: /搜索/, query: 'Q06 练习', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/exercises/'] },
@@ -204,8 +216,12 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'Q08 开始于一个 selected-kernel question', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/'] },
     { route: '/', button: /搜索/, query: 'Q08 练习 设计有边界的 selected-kernel profile', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/exercises/'] },
     { route: '/', button: /搜索/, query: 'Q08 参考解答 设计有边界的 selected-kernel profile', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/solutions/'] },
+    { route: '/', button: /搜索/, query: 'Q09 Occupancy Stalls Throughput 延迟隐藏', localePrefix: '/', expectedHrefs: ['/correctness/occupancy-stalls-throughput/'] },
+    { route: '/', button: /搜索/, query: 'Q10 Arithmetic Intensity 可审计 Roofline', localePrefix: '/', expectedHrefs: ['/correctness/roofline-arithmetic-intensity/'] },
     { route: '/', button: /搜索/, query: 'LAB06 构建重叠流水线', localePrefix: '/', expectedHrefs: ['/labs/build-overlapped-pipeline/'] },
     { route: '/', button: /搜索/, query: 'LAB08 先分析完整应用 再分析一个内核', localePrefix: '/', expectedHrefs: ['/labs/profile-full-application-before-kernel/'] },
+    { route: '/', button: /搜索/, query: 'LAB09 构建原创 Roofline', localePrefix: '/', expectedHrefs: ['/labs/build-original-roofline/'] },
+    { route: '/', button: /搜索/, query: 'VIS13 Roofline ridge point', localePrefix: '/', expectedHrefs: ['/visuals/roofline/'] },
     { route: '/', button: /搜索/, query: 'Nsight Systems versus Nsight Compute 从症状选择下一份证据', localePrefix: '/', expectedHrefs: ['/visuals/nsight-systems-versus-nsight-compute/'] },
     { route: '/', button: /搜索/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/', expectedHrefs: ['/examples/multi-stage-reduction/'] },
     { route: '/', button: /搜索/, query: 'EX12 Inclusive Exclusive Scan 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/inclusive-exclusive-scan/'] },
@@ -246,6 +262,7 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'A02 Multi-Stage Reduction Barriers Operation Order', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/multi-stage-reduction/'] },
     { route: '/en/', button: /Search/, query: 'A03 dependency transformation block sums offset propagation', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/inclusive-exclusive-scan/'] },
     { route: '/en/', button: /Search/, query: 'A04 Privatized Histogram', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/privatized-histogram/'] },
+    { route: '/en/', button: /Search/, query: 'A14 Falsifiable Algorithm Optimizations Arithmetic Intensity', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/algorithm-choice-arithmetic-intensity/'] },
     { route: '/en/', button: /Search/, query: 'Q02 floating-point order determinism bitwise reproducibility', localePrefix: '/en/', expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'] },
     { route: '/en/', button: /Search/, query: 'Q06 Use APOD as an optimization loop', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/'] },
     { route: '/en/', button: /Search/, query: 'Q06 Exercises Design one falsifiable APOD pass', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/exercises/'] },
@@ -256,8 +273,12 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'Q08 Ask one selected kernel question with Nsight Compute', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/'] },
     { route: '/en/', button: /Search/, query: 'Q08 Exercises Design a bounded selected-kernel profile', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/exercises/'] },
     { route: '/en/', button: /Search/, query: 'Q08 Reviewed Solutions Design a bounded selected-kernel profile', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/solutions/'] },
+    { route: '/en/', button: /Search/, query: 'Q09 Occupancy Stalls Throughput Latency Hiding', localePrefix: '/en/', expectedHrefs: ['/en/correctness/occupancy-stalls-throughput/'] },
+    { route: '/en/', button: /Search/, query: 'Q10 Auditable Roofline Arithmetic Intensity', localePrefix: '/en/', expectedHrefs: ['/en/correctness/roofline-arithmetic-intensity/'] },
     { route: '/en/', button: /Search/, query: 'LAB06 Build an Overlapped Pipeline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-overlapped-pipeline/'] },
     { route: '/en/', button: /Search/, query: 'LAB08 Profile the Full Application Before One Kernel', localePrefix: '/en/', expectedHrefs: ['/en/labs/profile-full-application-before-kernel/'] },
+    { route: '/en/', button: /Search/, query: 'LAB09 Build an Original Roofline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-original-roofline/'] },
+    { route: '/en/', button: /Search/, query: 'VIS13 Roofline Model Ridge Workload Point', localePrefix: '/en/', expectedHrefs: ['/en/visuals/roofline/'] },
     { route: '/en/', button: /Search/, query: 'Nsight Systems versus Nsight Compute Choose the Next Evidence from the Symptom', localePrefix: '/en/', expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'] },
     { route: '/en/', button: /Search/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/multi-stage-reduction/'] },
     { route: '/en/', button: /Search/, query: 'EX12 Inclusive and Exclusive Scan Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/inclusive-exclusive-scan/'] },

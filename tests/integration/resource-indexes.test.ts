@@ -14,7 +14,7 @@ import {
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-08-31T12:00:00Z');
+const asOf = new Date('2026-09-01T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all fifty-three bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all fifty-six bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(53);
+    expect(practiceIds).toHaveLength(56);
 
     const localeContracts = [
       {
@@ -173,7 +173,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(53);
+      expect(prompts.size).toBe(56);
     }
   });
 
@@ -181,8 +181,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 8, practice: 53, visuals: 17, glossary: 159, sources: 65 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(302);
+    expect(counts).toEqual({ labs: 9, practice: 56, visuals: 18, glossary: 165, sources: 68 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(316);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -254,13 +254,24 @@ describe('published resource indexes', () => {
     for (const planningId of [
       'LAB06', 'LAB08', 'VIS14',
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003',
-      'TERM-152', 'TERM-153', 'TERM-154', 'TERM-155',
-      'TERM-156', 'TERM-157', 'TERM-158', 'TERM-159',
+      'TERM-152', 'TERM-153', 'TERM-155', 'TERM-157', 'TERM-159',
       'SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049',
     ]) {
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
       expect(record?.reviewedOn, planningId).toBe('2026-08-31');
       if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-08-31');
+    }
+
+    for (const planningId of [
+      'LAB09', 'VIS13',
+      'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
+      'TERM-040', 'TERM-043', 'TERM-044', 'TERM-154', 'TERM-156', 'TERM-158',
+      'TERM-160', 'TERM-161', 'TERM-162', 'TERM-163', 'TERM-164', 'TERM-165',
+      'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052',
+    ]) {
+      const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
+      expect(record?.reviewedOn, planningId).toBe('2026-09-01');
+      if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-01');
     }
   });
 
@@ -310,7 +321,7 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]').length).toBe(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(17);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(18);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');

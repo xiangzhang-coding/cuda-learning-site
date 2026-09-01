@@ -1,0 +1,252 @@
+---
+title: 'Q10: Build an Auditable Roofline from Arithmetic Intensity'
+description: Declare operation convention and byte boundary, derive arithmetic and ridge intensity, a Roofline upper bound, and a workload point, then audit above-roof mismatches and ceiling provenance.
+pairId: q10
+counterpart: /correctness/roofline-arithmetic-intensity/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - work-traffic-boundary
+  - intensity-ridge-roof
+  - synthetic-calculation
+  - workload-point
+  - above-roof-audit
+  - regions-provenance
+  - tool-contract
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q10
+prerequisites:
+  - Q05
+  - A14
+relatedUnits:
+  - Q09
+  - LAB09
+  - VIS13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA Nsight Compute Profiling Guide - Roofline Charts'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current Roofline chart model, analysis boundary, and hierarchical ceiling context'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute User Guide - Rooflines'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#rooflines'
+    version: 'NVIDIA Nsight Compute UI 2026.2.1'
+    platform: 'Current report Rooflines page and chart interaction context'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current metric query, suffix, unit-scaling, filter, and report interface'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current theoretical and effective bandwidth calculation boundaries'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Williams, Waterman, and Patterson, 2009'
+    platform: 'Original Roofline model history and work-to-traffic upper-bound mathematics only'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/correctness/roofline-arithmetic-intensity/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,work-traffic-boundary,intensity-ridge-roof,synthetic-calculation,workload-point,above-roof-audit,regions-provenance,tool-contract,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q05,A14' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q09,LAB09,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2026.2.1,13.3,2009' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/roofline-arithmetic-intensity/" lang="zh-CN">阅读中文对应页</a>
+
+Roofline is a declared upper-bound model, not a profiler verdict. Arithmetic intensity is meaningful only when its work and traffic counting contracts are complete. The same kernel can have different intensities at DRAM, L2, or another path boundary. Q10 constructs the model from units, then separates its workload point and region label from an observed bottleneck.
+
+## What you should be able to do
+
+- Declare an operation convention, byte boundary, read/write scope, and traffic provenance.
+- Derive arithmetic intensity from `I_path = W / T_path`.
+- Derive ridge intensity and a Roofline upper bound from compute and path-bandwidth ceilings.
+- Place a workload point using achieved rate `P_achieved = W / t`.
+- Audit an above-roof mismatch while separating a modeled region from an observed bottleneck.
+
+## Prerequisites
+
+The exact prerequisites are [Q05: Time Asynchronous GPU Work Honestly](/en/correctness/timing-asynchronous-gpu-work/) and [A14: Choose Algorithm Optimizations with Arithmetic Intensity](/en/algorithms/algorithm-choice-arithmetic-intensity/), in the strict order `Q05, A14`. Q05 supplies the timed interval. A14 first supplies operation and traffic estimates. Q09, LAB09, and VIS13 are related resources only.
+
+## Freeze work and traffic boundary first
+
+Let `W` count operations in the timed workload under a declared convention. When the rate is FLOP/s, state whether an FMA counts as 2 FLOP or one instruction. Integer, special-function, or tensor operations cannot silently enter an FP32 FLOP ceiling. Let `T_path` be total bytes crossing one explicit path boundary for the same workload, including the reads and writes required by that definition.
+
+| contract field | required declaration |
+| --- | --- |
+| workload | exact kernel or range, input shape, iterations, warm-up, and correctness verdict |
+| work | algorithmic or tool-derived count, operation types, FMA convention, included and excluded work |
+| traffic | DRAM, L2, host-device, or another exact path; reads/writes, cache, write behavior, and aggregation |
+| time | start/end events, synchronization, repetitions, reported statistic, and scope |
+| provenance | theoretical, calibrated/measured, or tool-reported model; never silently mixed within one roof |
+
+“Read two arrays and write one” is only logical compulsory traffic. Transaction overfetch, cache hits and misses, intermediate arrays, and replay can change implementation or observed traffic. When the boundary changes, subscript the intensity rather than continuing to use a bare `I`.
+
+## Derive intensity, ridge, and roof
+
+For one declared path:
+
+`I_path = W / T_path`
+
+When `W` is FLOP and `T_path` is byte, the unit is FLOP/byte. Let `P_compute` be a compute ceiling in FLOP/s under the same operation convention and provenance. Let `B_path` be the corresponding path-bandwidth ceiling in byte/s. Ridge intensity is:
+
+`I_ridge = P_compute / B_path`
+
+The unit check is `(FLOP/s) / (byte/s) = FLOP/byte`. The Roofline upper bound is:
+
+`P_roof(I) = min(P_compute, I * B_path)`
+
+`I * B_path` also has unit FLOP/s. Stop any worksheet whose FLOP/byte, byte/s, and FLOP/s units do not close before drawing a chart.
+
+## Complete synthetic calculation
+
+Every value below is original synthetic arithmetic. It refers to no GPU, report, metric, or observation:
+
+| input | synthetic value | unit/provenance |
+| --- | --- | --- |
+| work `W` | `6.0e9` | FLOP, FMA=2 FLOP convention |
+| path traffic `T_path` | `3.0e9` | byte, declared path total |
+| compute ceiling `P_compute` | `12.0e12` | FLOP/s, synthetic model |
+| path ceiling `B_path` | `1.5e12` | byte/s, synthetic model |
+| elapsed time `t` | `3.0e-3` | s, synthetic workload input |
+
+Calculate in order:
+
+`I_path = 6.0e9 FLOP / 3.0e9 byte = 2.0 FLOP/byte`
+
+`I_ridge = 12.0e12 FLOP/s / 1.5e12 byte/s = 8.0 FLOP/byte`
+
+`I_path * B_path = 2.0 FLOP/byte * 1.5e12 byte/s = 3.0e12 FLOP/s`
+
+`P_roof(2.0) = min(12.0e12, 3.0e12) = 3.0e12 FLOP/s = 3.0 TFLOP/s`
+
+`P_achieved = W / t = 6.0e9 FLOP / 3.0e-3 s = 2.0e12 FLOP/s = 2.0 TFLOP/s`
+
+The synthetic workload point is therefore `(2.0 FLOP/byte, 2.0 TFLOP/s)`, below the same synthetic roof of `3.0 TFLOP/s`. Their difference is not automatically obtainable speedup.
+
+## Workload point comes from achieved rate
+
+The x-coordinate uses intensity for the same workload and byte boundary. The y-coordinate uses achieved work rate for that workload. A point based on compulsory traffic is estimate-based. A point based on queried tool traffic retains the exact metric definition. Never combine an estimated x-coordinate with a y-coordinate from a different run and call it observed.
+
+A point below its roof establishes only an unexplained gap within that matched model. Instruction mix, dependencies, latency hiding, issue limits, coalescing, cache behavior, occupancy, synchronization, load balance, launch size, and model calibration can all remain compatible with the gap.
+
+## An above-roof mismatch triggers an audit
+
+Keep the same `W`, `T_path`, and ceilings but incorrectly write the synthetic `t` as `1.5e-3 s`:
+
+`P_achieved,mismatch = 6.0e9 FLOP / 1.5e-3 s = 4.0 TFLOP/s`
+
+At `I_path = 2.0 FLOP/byte`, `4.0 TFLOP/s > 3.0 TFLOP/s`, so the point lies above the declared roof. This does not show hardware violating a physical limit. It shows that the input set is inconsistent. Audit in order:
+
+| audit | common mismatch |
+| --- | --- |
+| operation count | FMA 1/2 convention, batch or iteration count, algorithmic work mixed with executed work |
+| byte boundary | logical versus observed path bytes, read-only versus read+write, DRAM versus L2 |
+| prefixes and units | decimal versus binary bytes, ms versus s, GFLOP/s versus TFLOP/s |
+| scope | one kernel versus range, one GPU versus aggregate, warm-up versus steady interval |
+| ceilings | theoretical, calibrated, and tool-reported model values from different provenance, run, or device |
+| report | mismatched exact names, definitions, availability, filter, replay, or aggregation |
+
+Rebuild the model only after every coordinate matches. Do not move the roof to accommodate the point or discard inconvenient traffic.
+
+## Region labels are modeled regions
+
+In this two-ceiling model, `I_path < I_ridge` lies in the sloped path-ceiling region, `I_path > I_ridge` lies in the horizontal compute-ceiling region, and equality is the ridge. These may be called modeled path-limited and modeled compute-limited regions. They are **never an observed bottleneck diagnosis**.
+
+Ceiling provenance stays in complete sets:
+
+| provenance family | valid use | forbidden mix |
+| --- | --- | --- |
+| theoretical | peak model from one exact device/spec and operation/path convention | not silently joined to unrelated measured bandwidth |
+| calibrated/measured | empirical roof from a declared Reference Environment, microbenchmark, clock state, and method | not moved to another GPU/run while retaining “measured” |
+| tool-reported model | chart from documented model fields in one exact report/tool/GPU | not treated as an independently measured peak or cross-version constant |
+
+The three roof families may be plotted side by side with separate labels. Never choose the largest component from each provenance to assemble a “best” roof.
+
+## An Nsight Compute chart still needs a query contract
+
+Nsight Compute 2026.2.1 provides Roofline Charts and a UI Rooflines page, but the chart does not waive the Q08 contract. Query sections and metrics on the exact tool/GPU first. Retain report, kernel filter, replay, name, unit, definition, scope, and ceiling provenance. The CLI automatically scales SI units; review must recover the explicit factor rather than treating a display prefix as a raw unit.
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+The original Roofline paper supports only model history and `min(compute, intensity * bandwidth)` mathematics. It supports no current NVIDIA metric name, GPU value, chart implementation, or availability claim. The two NVIDIA Context7 indexes are retrieval cross-checks only; exact owner pages are authoritative.
+
+## Evidence boundary
+
+This page runs no GPU, timer, bandwidth calibration, or Nsight Compute collection. Every number is explicitly a synthetic model input. It publishes no hardware ceiling, metric, timing, bottleneck, throughput, or speedup observation. All four evidence arrays remain empty.
+
+## Retrieval check
+
+1. Why must arithmetic intensity declare both an operation convention and an exact byte boundary?
+2. How do units derive `I_path`, `I_ridge`, and `P_roof(I)`?
+3. Why is the synthetic workload point `(2.0 FLOP/byte, 2.0 TFLOP/s)`, below its `3.0 TFLOP/s` roof?
+4. When a point exceeds a matched roof, why should inputs and provenance be audited instead of declaring that hardware exceeded its ceiling?
+5. Why can neither modeled path/compute regions nor theoretical, calibrated, or tool-reported ceilings directly name an observed bottleneck?
+
+## Continue with practice
+
+- Complete the [Q10 Exercises](/en/correctness/roofline-arithmetic-intensity/exercises/), then inspect the separate [reviewed solutions](/en/correctness/roofline-arithmetic-intensity/solutions/).
+- Repair a boundary and provenance mismatch in [Practice Bank PB-R3-005](/en/practice/#pb-r3-005).
+- Return to [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/) for algorithm traffic estimates, and use [Q09](/en/correctness/occupancy-stalls-throughput/) to inspect scheduler behavior absent from Roofline.
+
+## Sources and review
+
+- [Nsight Compute 2026.2.1 Profiling Guide Roofline Charts](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts) supplies the current chart model and analysis boundary.
+- [Nsight Compute UI 2026.2.1 Rooflines page](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#rooflines) supplies the current report-page coordinate.
+- [Nsight Compute CLI 2026.2.1](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) supplies query, suffix, SI unit scaling, filter, and report interfaces.
+- [CUDA C++ Best Practices Guide v13.3 Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) distinguishes theoretical and effective bandwidth calculations.
+- The [2009 Roofline paper by Williams, Waterman, and Patterson](https://doi.org/10.1145/1498765.1498785) is used only for model history and upper-bound mathematics.
+
+Context7 `/websites/nvidia_cuda` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for retrieval cross-checking. The exact owner documents and DOI record are the factual authorities and were accessed on **2026-09-01**. All tables and calculations are original site material.
+
+**Fact checked and sources accessed: 2026-09-01.**

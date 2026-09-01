@@ -13,7 +13,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-08-31T12:00:00Z');
+const asOf = new Date('2026-09-01T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -24,13 +24,13 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(302);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(316);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 8, practice: 53, visuals: 17, glossary: 159, sources: 65 });
+    ).toEqual({ labs: 9, practice: 56, visuals: 18, glossary: 165, sources: 68 });
     for (const absentId of ['Q11', 'LAB10', 'Q13', 'L06', 'LAB12']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
@@ -70,6 +70,22 @@ describe('resource index catalog', () => {
       LAB06: { href: '/en/labs/build-overlapped-pipeline/', prerequisites: ['M09', 'Q07'] },
       LAB08: { href: '/en/labs/profile-full-application-before-kernel/', prerequisites: ['Q07', 'Q08'] },
       VIS14: { href: '/en/visuals/nsight-systems-versus-nsight-compute/', prerequisites: ['Q07', 'Q08'] },
+    });
+
+    expect(Object.fromEntries(
+      ['A14', 'Q09', 'Q10', 'LAB09', 'VIS13'].map((planningId) => [
+        planningId,
+        {
+          href: PUBLISHED_DESTINATIONS[planningId].href.en,
+          prerequisites: PUBLISHED_DESTINATIONS[planningId].prerequisites,
+        },
+      ]),
+    )).toEqual({
+      A14: { href: '/en/algorithms/algorithm-choice-arithmetic-intensity/', prerequisites: ['A01', 'A02', 'A05', 'A08'] },
+      Q09: { href: '/en/correctness/occupancy-stalls-throughput/', prerequisites: ['Q08', 'F08'] },
+      Q10: { href: '/en/correctness/roofline-arithmetic-intensity/', prerequisites: ['Q05', 'A14'] },
+      LAB09: { href: '/en/labs/build-original-roofline/', prerequisites: ['Q10'] },
+      VIS13: { href: '/en/visuals/roofline/', prerequisites: ['Q10'] },
     });
 
     expect(Object.fromEntries(
@@ -172,14 +188,17 @@ describe('resource index catalog', () => {
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-00[1-3]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'PB-R3-001', 'PB-R3-002', 'PB-R3-003',
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-00[1-6]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
     );
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-15[2-9]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 8 }, (_, index) => `TERM-${152 + index}`),
+    );
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-16[0-5]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 6 }, (_, index) => `TERM-${160 + index}`),
     );
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3\d|4[0-5])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
@@ -189,6 +208,9 @@ describe('resource index catalog', () => {
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-04[6-9]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049',
+    ]);
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-05[0-2]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
@@ -227,10 +249,10 @@ describe('resource index catalog', () => {
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-30T16:00:00Z'),
+      asOf: new Date('2026-08-31T16:00:00Z'),
     })).not.toThrow();
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-30T15:59:59Z'),
+      asOf: new Date('2026-08-31T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
 
@@ -239,6 +261,7 @@ describe('resource index catalog', () => {
     const lab01 = labs.find(({ planningId }) => planningId === 'LAB01');
     const lab = labs.find(({ planningId }) => planningId === 'LAB02');
     const lab03 = labs.find(({ planningId }) => planningId === 'LAB03');
+    const lab09 = labs.find(({ planningId }) => planningId === 'LAB09');
 
     expect(lab01).toMatchObject({
       planningId: 'LAB01',
@@ -279,6 +302,16 @@ describe('resource index catalog', () => {
       ['F05', '/en/foundations/asynchronous-errors/'],
     ]);
     expect(lab03?.searchText).toContain('EX04');
+    expect(lab09).toMatchObject({
+      planningId: 'LAB09',
+      href: '/en/labs/build-original-roofline/',
+      counterpart: '/labs/build-original-roofline/',
+      difficulty: 'advanced',
+      evidence: { compilation: [], runtime: ['Pending Hardware Verification'] },
+      reviewedOn: '2026-09-01',
+    });
+    expect(lab09?.prerequisites.map(({ id }) => id)).toEqual(['Q10']);
+    expect(lab09?.relatedUnits.map(({ id }) => id)).toEqual(['Q09', 'A14', 'EX02', 'VIS13']);
 
     for (const expected of [
       {
@@ -374,6 +407,7 @@ describe('resource index catalog', () => {
       'VIS10',
       'VIS11',
       'VIS12',
+      'VIS13',
       'VIS14',
       'VIS19',
       'VIS20',
@@ -450,6 +484,12 @@ describe('resource index catalog', () => {
         prerequisites: [['A08', '/en/algorithms/tiled-gemm-correctness/']],
       },
       {
+        planningId: 'VIS13',
+        href: '/en/visuals/roofline/',
+        counterpart: '/visuals/roofline/',
+        prerequisites: [['Q10', '/en/correctness/roofline-arithmetic-intensity/']],
+      },
+      {
         planningId: 'VIS14',
         href: '/en/visuals/nsight-systems-versus-nsight-compute/',
         counterpart: '/visuals/nsight-systems-versus-nsight-compute/',
@@ -523,7 +563,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(184);
+    expect(projected).toHaveLength(190);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );
