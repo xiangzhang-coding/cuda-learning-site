@@ -121,6 +121,7 @@ export default defineConfig({
             { slug: 'algorithms/convolution-reuse-layout' },
             { slug: 'algorithms/tiled-gemm-correctness' },
             { slug: 'algorithms/sorting-selection-compaction' },
+            { slug: 'algorithms/algorithm-choice-arithmetic-intensity' },
           ],
         },
         {
@@ -135,6 +136,8 @@ export default defineConfig({
             { slug: 'correctness/apod-optimization-loop' },
             { slug: 'correctness/timeline-first-nsight-systems' },
             { slug: 'correctness/kernel-first-nsight-compute' },
+            { slug: 'correctness/occupancy-stalls-throughput' },
+            { slug: 'correctness/roofline-arithmetic-intensity' },
           ],
         },
         {
@@ -172,6 +175,7 @@ export default defineConfig({
             { slug: 'labs/build-overlapped-pipeline' },
             { slug: 'labs/diagnose-four-sanitizer-failures' },
             { slug: 'labs/profile-full-application-before-kernel' },
+            { slug: 'labs/build-original-roofline' },
           ],
         },
         {
@@ -191,6 +195,7 @@ export default defineConfig({
             { slug: 'visuals/reduction-stages' },
             { slug: 'visuals/tiled-transpose' },
             { slug: 'visuals/gemm-tiling-hierarchy' },
+            { slug: 'visuals/roofline' },
             { slug: 'visuals/nsight-systems-versus-nsight-compute' },
           ],
         },

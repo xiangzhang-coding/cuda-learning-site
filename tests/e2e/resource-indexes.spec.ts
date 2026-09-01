@@ -76,9 +76,12 @@ const issue22GlossaryIds = [
   'TERM-140', 'TERM-141', 'TERM-142', 'TERM-143', 'TERM-144', 'TERM-145', 'TERM-146',
 ] as const;
 const issue23GlossaryIds = ['TERM-147', 'TERM-148', 'TERM-149', 'TERM-150', 'TERM-151'] as const;
-const currentGlossaryIds = [
-  'TERM-152', 'TERM-153', 'TERM-154', 'TERM-155',
-  'TERM-156', 'TERM-157', 'TERM-158', 'TERM-159',
+const issue25GlossaryIds = [
+  'TERM-152', 'TERM-153', 'TERM-155', 'TERM-157', 'TERM-159',
+] as const;
+const issue26GlossaryIds = [
+  'TERM-040', 'TERM-043', 'TERM-044', 'TERM-154', 'TERM-156', 'TERM-158',
+  'TERM-160', 'TERM-161', 'TERM-162', 'TERM-163', 'TERM-164', 'TERM-165',
 ] as const;
 const releaseSourceIds = [
   'SRC-CUDA-017', 'SRC-CUDA-018', 'SRC-CUDA-019', 'SRC-CUDA-020', 'SRC-CUDA-021',
@@ -96,12 +99,16 @@ const issue21SourceIds = [
 ] as const;
 const issue22SourceIds = ['SRC-CUDA-041', 'SRC-CUDA-042', 'SRC-CUDA-043'] as const;
 const issue23SourceIds = ['SRC-CUDA-044', 'SRC-CUDA-045'] as const;
-const currentSourceIds = ['SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049'] as const;
+const issue25SourceIds = ['SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049'] as const;
+const issue26SourceIds = ['SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052'] as const;
 const releaseLabIds = ['LAB04', 'LAB05', 'LAB07'] as const;
-const currentLabIds = ['LAB06', 'LAB08'] as const;
+const issue25LabIds = ['LAB06', 'LAB08'] as const;
+const issue26LabIds = ['LAB09'] as const;
 const releaseVisualIds = ['VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09'] as const;
-const currentVisualIds = ['VIS14'] as const;
-const currentPracticeIds = ['PB-R3-001', 'PB-R3-002', 'PB-R3-003'] as const;
+const issue25VisualIds = ['VIS14'] as const;
+const issue26VisualIds = ['VIS13'] as const;
+const issue25PracticeIds = ['PB-R3-001', 'PB-R3-002', 'PB-R3-003'] as const;
+const issue26PracticeIds = ['PB-R3-004', 'PB-R3-005', 'PB-R3-006'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -140,18 +147,30 @@ const issue23Ids = new Set<string>([
   'VIS12',
 ]);
 const currentCatalogIds = new Set<string>([
-  ...currentLabIds,
-  ...currentPracticeIds,
-  ...currentVisualIds,
-  ...currentGlossaryIds,
-  ...currentSourceIds,
+  ...issue25LabIds,
+  ...issue25PracticeIds,
+  ...issue25VisualIds,
+  ...issue25GlossaryIds,
+  ...issue25SourceIds,
+  ...issue26LabIds,
+  ...issue26PracticeIds,
+  ...issue26VisualIds,
+  ...issue26GlossaryIds,
+  ...issue26SourceIds,
+]);
+const issue26CatalogIds = new Set<string>([
+  ...issue26LabIds,
+  ...issue26PracticeIds,
+  ...issue26VisualIds,
+  ...issue26GlossaryIds,
+  ...issue26SourceIds,
 ]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
-  labs: 'LAB08',
-  practice: 'PB-R3-003',
+  labs: 'LAB09',
+  practice: 'PB-R3-006',
   visuals: 'VIS14',
-  glossary: 'TERM-159',
-  sources: 'SRC-CUDA-049',
+  glossary: 'TERM-165',
+  sources: 'SRC-CUDA-052',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -236,39 +255,44 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
-  expect(counts.labs).toBe(8);
-  expect(counts.practice).toBe(53);
-  expect(counts.visuals).toBe(17);
-  expect(counts.glossary).toBe(159);
-  expect(counts.sources).toBe(65);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(302);
+  expect(counts.labs).toBe(9);
+  expect(counts.practice).toBe(56);
+  expect(counts.visuals).toBe(18);
+  expect(counts.glossary).toBe(165);
+  expect(counts.sources).toBe(68);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(316);
 
   const expectedIds = [
     ...releaseLabIds,
-    ...currentLabIds,
+    ...issue25LabIds,
+    ...issue26LabIds,
     ...releaseVisualIds,
-    ...currentVisualIds,
+    ...issue25VisualIds,
+    ...issue26VisualIds,
     ...releasePracticeIds,
     ...issue19PracticeIds,
     ...toolchainPracticeIds,
     ...issue21PracticeIds,
     ...issue22PracticeIds,
     ...issue23PracticeIds,
-    ...currentPracticeIds,
+    ...issue25PracticeIds,
+    ...issue26PracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
     ...issue21GlossaryIds,
     ...issue22GlossaryIds,
     ...issue23GlossaryIds,
-    ...currentGlossaryIds,
+    ...issue25GlossaryIds,
+    ...issue26GlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
     ...issue21SourceIds,
     ...issue22SourceIds,
     ...issue23SourceIds,
-    ...currentSourceIds,
+    ...issue25SourceIds,
+    ...issue26SourceIds,
     'VIS10',
     'VIS11',
     'VIS12',
@@ -301,8 +325,9 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
   }
   for (const record of records.filter(({ planningId }) => currentCatalogIds.has(planningId))) {
-    expect(record.reviewedOn, record.planningId).toBe('2026-08-31');
-    if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
+    const expectedDate = issue26CatalogIds.has(record.planningId) ? '2026-09-01' : '2026-08-31';
+    expect(record.reviewedOn, record.planningId).toBe(expectedDate);
+    if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe(expectedDate);
   }
 
   for (const group of ['labs', 'practice', 'visuals', 'glossary', 'sources'] as const) {

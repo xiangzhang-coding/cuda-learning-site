@@ -1,9 +1,9 @@
 ---
 title: Practice Bank
-description: 53 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 56 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -62,6 +62,9 @@ structure:
   - entry-pb-r3-001
   - entry-pb-r3-002
   - entry-pb-r3-003
+  - entry-pb-r3-004
+  - entry-pb-r3-005
+  - entry-pb-r3-006
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -109,6 +112,7 @@ prerequisites:
   - A07
   - A08
   - A09
+  - A14
   - Q01
   - Q02
   - Q03
@@ -117,6 +121,8 @@ prerequisites:
   - Q06
   - Q07
   - Q08
+  - Q09
+  - Q10
 relatedUnits:
   - O02
   - O03
@@ -161,6 +167,7 @@ relatedUnits:
   - A07
   - A08
   - A09
+  - A14
   - Q01
   - Q02
   - Q03
@@ -169,8 +176,12 @@ relatedUnits:
   - Q06
   - Q07
   - Q08
+  - Q09
+  - Q10
   - LAB06
   - LAB08
+  - LAB09
+  - VIS13
   - VIS14
 hardwareGate: none
 evidence:
@@ -182,19 +193,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,LAB06,LAB08,VIS14' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,LAB06,LAB08,LAB09,VIS13,VIS14' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -2427,6 +2438,114 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Source date:** 2026-08-31.
 
+<span id="pb-r3-004" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-004: Audit an occupancy, stall, and throughput report claim
+
+- **ID and Publication Pair:** PB-R3-004 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [Q09: Interpret Latency Hiding with Occupancy, Stalls, and Throughput](/en/correctness/occupancy-stalls-throughput/).
+- **Hardware gate:** None; audit a static report claim and its missing exact-GPU contract without running CUDA or a profiler.
+- **Version gate:** CUDA Programming and Best Practices Guides v13.3 and Nsight Compute 2026.2.1; metric definition, unit, scope, and availability bind to the exact GPU and report.
+- **Related Learning Units and resources:** [Q08](/en/correctness/kernel-first-nsight-compute/), [F08](/en/foundations/launch-geometry/), [Q09](/en/correctness/occupancy-stalls-throughput/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
+- **Last reviewed:** 2026-09-01.
+
+**Prompt:** A summary with no attached `.ncu-rep` says that occupancy is high, the largest stall category is large, and throughput remains below a ceiling, so the kernel is memory-bound and raising occupancy will recover the remaining speedup. It identifies neither theoretical nor achieved occupancy, metric names, units, denominators, sampling scope, exact GPU, tool version, filter, replay, workload, nor correctness. Audit and repair the claim.
+
+**Goal:** Repair a causal conclusion assembled from three prominent labels as an exact-GPU, query-first, falsifiable evidence-review record that remains pending observation.
+
+**Constraints:** Separate residency, eligible and issued scheduler state, stall sampling, and named-resource throughput. Inventory exact report coordinates and missing evidence. Do not invent metric spellings, values, a bottleneck, speedup, or an observation.
+
+**Expected evidence:** A claim-audit table, missing-coordinate inventory, permitted narrow statements, at least two competing explanations, and a next-experiment contract that changes one primary mechanism.
+
+**Acceptance criteria:** The memory-bound and occupancy-speedup conclusion is marked unsupported; theoretical and achieved occupancy are not interchanged; a stall category is not automatically a root cause; throughput gap is not relabeled recoverable speedup; every observation cell remains empty.
+
+<details><summary>Hint 1</summary>Ask whether each quantity describes residency, issue eligibility, or a resource rate before checking whether they share a workload and scope.</details>
+
+<details><summary>Hint 2</summary>“Largest category” and “distance below a ceiling” are rankings or ratios, not standalone causal explanations.</details>
+
+**Reviewed solution:** The repaired record preserves the summary as an unverified claim. Its first column requires exact GPU and CC, binary, launch, workload, correctness, `ncu --version`, filter, replay, and report hash. Its second column separately requires theoretical-model inputs, achieved sampling and denominator, scheduler issue context, stall definition and normalization, and the named throughput ceiling. The only current statement is that the summary lacks the contract needed for interpretation. A next step may isolate one register or shared-memory limiter or one access-layout mechanism, hold other coordinates fixed, and predeclare support and rejection rules. Without qualifying before/after evidence, the verdict remains `pending observation`.
+
+**Valid alternative:** Audit only the occupancy numerator and denominator first, or only whether the scheduler lacks eligible warps, provided the local audit is not expanded into a whole-kernel cause.
+
+**Common errors:** Treating theoretical as achieved occupancy; treating active as eligible; declaring a bottleneck from the largest stall share; comparing same-named metrics across GPUs; recording permission denial as zero; calling throughput headroom speedup; replacing report custody with a screenshot.
+
+**Source basis:** The site's original [Q09 interpretation contract](/en/correctness/occupancy-stalls-throughput/), [Q08 query and report contract](/en/correctness/kernel-first-nsight-compute/), and [LAB09 evidence boundary](/en/labs/build-original-roofline/), plus NVIDIA's [CUDA Best Practices occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy), [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/index.html), and [Nsight Compute Profiling Guide 2026.2.1](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html).
+
+**Source date:** 2026-09-01.
+
+<span id="pb-r3-005" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-005: Calculate and audit a Roofline with a unit, boundary, or provenance mismatch
+
+- **ID and Publication Pair:** PB-R3-005 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Concepts and implementation; advanced.
+- **Direct prerequisite:** [Q10: Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/).
+- **Hardware gate:** None; calculate original synthetic inputs and audit a static model contract without running CUDA or a profiler.
+- **Version gate:** CUDA Best Practices Guide v13.3, Nsight Compute 2026.2.1, and the original 2009 Roofline model; current tool semantics are not projected backward from the paper.
+- **Related Learning Units and resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/), [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q09](/en/correctness/occupancy-stalls-throughput/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
+- **Last reviewed:** 2026-09-01.
+
+**Prompt:** A worksheet explicitly labeled synthetic supplies `W=6.0e9 FLOP`, `T=3.0e9 byte`, `P_compute=12.0e12 FLOP/s`, `B=2.0e12 byte/s`, and `P_workload=5.0e12 FLOP/s`. However, `T` is an L2 traffic estimate, `B` is labeled a measured DRAM ceiling, the compute ceiling comes from a specification, and the workload rate comes from another scope. Complete the formal arithmetic, then audit why this point and roof cannot be interpreted.
+
+**Goal:** Show that dimensionally closed arithmetic is insufficient for a valid Roofline, then turn memory-domain, workload-identity, and ceiling-provenance mismatches into an executable rebuild plan.
+
+**Constraints:** Calculate intensity, ridge, and roof. Never relabel the synthetic values as GPU observations. Propose separate theoretical, calibrated or measured, and tool-reported rebuilds without silent mixing.
+
+**Expected evidence:** A unit-bearing calculation table, above-roof mismatch flag, domain and provenance audit, three rebuild packets, and an explicit no-interpretation verdict.
+
+**Acceptance criteria:** The result includes `I=2.0 FLOP/byte`, `I_ridge=6.0 FLOP/byte`, and formal roof `4.0e12 FLOP/s`. The `5.0e12` point is above the declared roof. L2/DRAM, scope, and provenance mismatches prevent any bottleneck or speedup conclusion.
+
+<details><summary>Hint 1</summary>Close the dimensions first, then ask whether the denominator bytes belong to the same path as the bandwidth ceiling.</details>
+
+<details><summary>Hint 2</summary>An above-roof point is not an observation of exceptional speed. It first signals an audit of units, scope, run identity, and provenance.</details>
+
+**Reviewed solution:** The formal arithmetic is `I=6.0e9/3.0e9=2.0 FLOP/byte`, `I_ridge=12.0e12/2.0e12=6.0 FLOP/byte`, and a bandwidth-side roof of `2.0*2.0e12=4.0e12 FLOP/s`, so the supplied point exceeds that roof. The verdict is `reject interpretation`: x uses an L2 estimate, the sloped line uses measured DRAM bandwidth, the horizontal line comes from a specification, and y does not share the scope. A theoretical rebuild aligns specification ceilings with theoretical traffic; a calibrated rebuild measures compatible compute and path ceilings under one manifest and method; a tool-reported rebuild uses documented fields from one exact report. Each rebuild recomputes the point instead of moving the roof to fit it.
+
+**Valid alternative:** Rebuild only a DRAM roof or only an L2 roof. Three provenance families may also be displayed side by side if each line and point is labeled independently and no unaligned denominator is shared.
+
+**Common errors:** Declaring a model valid because units close; pairing L2 bytes with DRAM bandwidth; confusing GB and GiB; joining x and y from different runs; moving a ceiling to contain a point; calling a modeled region an observed bottleneck; presenting synthetic values as profiler output.
+
+**Source basis:** The site's original [Q10 Roofline contract](/en/correctness/roofline-arithmetic-intensity/), [A14 accounting contract](/en/algorithms/algorithm-choice-arithmetic-intensity/), and [VIS13 mismatch state](/en/visuals/roofline/), plus NVIDIA's [Best Practices bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth), [Nsight Compute Roofline Charts](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts), and the [original Roofline paper](https://doi.org/10.1145/1498765.1498785).
+
+**Source date:** 2026-09-01.
+
+<span id="pb-r3-006" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-006: Compare traffic estimates and write a falsifiable optimization choice
+
+- **ID and Publication Pair:** PB-R3-006 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Concepts and implementation; advanced.
+- **Direct prerequisite:** [A14: Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity](/en/algorithms/algorithm-choice-arithmetic-intensity/).
+- **Hardware gate:** None; compare static operation and traffic ledgers and design a falsifiable experiment without running CUDA.
+- **Version gate:** CUDA Programming and Best Practices Guides v13.3 and the original 2009 Roofline model; every traffic value is an explicitly labeled estimate.
+- **Related Learning Units and resources:** [A01](/en/algorithms/elementwise-map/), [A02](/en/algorithms/multi-stage-reduction/), [A05](/en/algorithms/matrix-transpose-layout/), [A08](/en/algorithms/tiled-gemm-correctness/), [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [EX02](/en/examples/vector-addition/), [EX11](/en/examples/multi-stage-reduction/), [EX14](/en/examples/tiled-transpose/), [EX15](/en/examples/tiled-gemm/), and [VIS13](/en/visuals/roofline/).
+- **Last reviewed:** 2026-09-01.
+
+**Prompt:** For the synthetic elementwise pipeline `tmp=a+b; z=g(tmp)`, count `g` as 5 FLOP per element. The materialized estimate is `6N FLOP` and `20N byte`; the fused estimate is `6N FLOP` and `12N byte`. Compare traffic and intensity, then write one first optimization choice that correctness, traffic, or timing evidence could falsify.
+
+**Goal:** Turn two boundary-explicit traffic estimates into a narrow, attributable, rejectable experiment rather than declaring a winner from an arithmetic-intensity ranking.
+
+**Constraints:** Hold workload, precision, operation convention, and output contract fixed. List register pressure, occupancy, cache behavior, and launch overhead as competing explanations. Actual traffic and timing slots remain empty.
+
+**Expected evidence:** A baseline and candidate ledger, `0.3` and `0.5 FLOP/byte` calculations, predicted traffic ratio, correctness gate, one primary mechanism, support and rejection rules, and rollback condition.
+
+**Acceptance criteria:** The fused candidate only removes the materialized intermediate's write and read. Mechanism and performance claims each remain rejectable. Higher modeled intensity is not called observed speedup. Failure and inconclusive results are valid outcomes.
+
+<details><summary>Hint 1</summary>The unfused intermediate adds one 4N-byte write and one 4N-byte read.</details>
+
+<details><summary>Hint 2</summary>Write a rejection rule for whether traffic falls before writing a separate rule for whether elapsed time falls.</details>
+
+**Reviewed solution:** Both versions perform `6N FLOP`. Materialized intensity is `6N/20N=0.3 FLOP/byte`, fused intensity is `6N/12N=0.5 FLOP/byte`, and predicted logical-traffic ratio is `12/20=0.6`. The first experiment enables fusion only while fixing source inputs, build, GPU and software, warm-up, correctness, and timing and traffic definitions. If traffic at the exact declared boundary does not fall, reject the removed-intermediate mechanism. Even if traffic falls, reject the performance claim if correct-workload time does not, then inspect register pressure, occupancy, cache behavior, and launch overhead. Current disposition is `candidate selected; observation pending`.
+
+**Valid alternative:** Select reduction partial fusion or tiled transpose first if it has corresponding before/after traffic formulas, a same-workload correctness contract, and one primary mechanism. The largest estimated reduction need not come first.
+
+**Common errors:** Calling an estimate measured traffic; comparing intensity alone; changing precision, layout, and algorithm together; omitting the intermediate read; ignoring resource cost; treating a modeled Roofline region as the winner; filling speedup before observation.
+
+**Source basis:** The site's original [A14 traffic ledger](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q10 model boundary](/en/correctness/roofline-arithmetic-intensity/), and EX02, EX11, EX14, and EX15 correctness contracts, plus NVIDIA's [CUDA Programming Guide v13.3](https://docs.nvidia.com/cuda/cuda-programming-guide/index.html), [Best Practices bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth), and the [original Roofline paper](https://doi.org/10.1145/1498765.1498785).
+
+**Source date:** 2026-09-01.
+
 ## Review record
 
-Existing entries retain their item-level records from 2026-08-26 through 2026-08-30. PB-R2-020, PB-R2-021, PB-R3-001 through PB-R3-003, and the complete 53-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-08-31**. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The new PB-R3 entries execute no CUDA, Nsight Systems, Nsight Compute, LAB06, or LAB08 and publish no runtime, metric value, numerical performance, or speedup claim. LAB12 remains unpublished until both Q13 and L06 have public destinations.
+Existing entries retain their item-level records from 2026-08-26 through 2026-08-31. PB-R3-004 through PB-R3-006 and the complete 56-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-09-01**. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The new PB-R3 entries execute no CUDA, Nsight Compute, or LAB09 and publish no runtime, metric value, numerical performance, or speedup claim; every number is explicitly a synthetic calculation or static estimate. LAB12 remains unpublished until both Q13 and L06 have public destinations.

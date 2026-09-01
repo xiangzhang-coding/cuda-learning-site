@@ -24,6 +24,7 @@ const visualPairs = [
   { id: 'VIS08', tag: 'cuda-page-migration', zh: '/visuals/page-migration/', en: '/en/visuals/page-migration/' },
   { id: 'VIS09', tag: 'cuda-artifact-pipeline', zh: '/visuals/artifact-pipeline/', en: '/en/visuals/artifact-pipeline/' },
   { id: 'VIS12', tag: 'cuda-gemm-hierarchy-explorer', zh: '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
+  { id: 'VIS13', tag: 'cuda-roofline-explorer', zh: '/visuals/roofline/', en: '/en/visuals/roofline/' },
   { id: 'VIS14', tag: 'cuda-profiler-decision-explorer', zh: '/visuals/nsight-systems-versus-nsight-compute/', en: '/en/visuals/nsight-systems-versus-nsight-compute/' },
 ] as const;
 
@@ -72,9 +73,15 @@ describe('built Visual Explainers', () => {
       expect(visual?.querySelector('[data-visual-controls][hidden]')).not.toBeNull();
       expect(visual?.querySelector('[data-static-fallback]')).not.toBeNull();
       expect(visual?.querySelector('[data-conceptual-only]')?.textContent?.trim().length).toBeGreaterThan(40);
-      expect(visual?.querySelector('[data-no-evidence]')?.textContent).toContain('Compile-Checked');
-      expect(visual?.querySelector('[data-no-evidence]')?.textContent).toContain('Community-Observed');
-      expect(visual?.querySelector('[data-no-evidence]')?.textContent).toContain('Runtime-Verified');
+      const evidenceBoundary = visual?.querySelector('[data-no-evidence]')?.textContent ?? '';
+      if (id === 'VIS13') {
+        expect(evidenceBoundary).toMatch(/Compilation.*runtime.*expected-observation.*recorded-observation/is);
+        expect(evidenceBoundary).toContain('LAB09');
+      } else {
+        expect(evidenceBoundary).toContain('Compile-Checked');
+        expect(evidenceBoundary).toContain('Community-Observed');
+        expect(evidenceBoundary).toContain('Runtime-Verified');
+      }
       expect(visual?.querySelectorAll('button, input, select').length).toBeGreaterThan(0);
       expect(visual?.querySelector('form')).toBeNull();
       expect(visual?.querySelector('img, iframe, object, embed')).toBeNull();

@@ -28,6 +28,14 @@ const issue25Routes = [
   '/en/visuals/nsight-systems-versus-nsight-compute/',
 ] as const;
 
+const issue26Routes = [
+  '/en/algorithms/algorithm-choice-arithmetic-intensity/',
+  '/en/correctness/occupancy-stalls-throughput/',
+  '/en/correctness/roofline-arithmetic-intensity/',
+  '/en/labs/build-original-roofline/',
+  '/en/visuals/roofline/',
+] as const;
+
 const themeReflowRoutes = [
   '/en/start/using-the-learning-site/',
   '/en/memory/pinned-memory-transfer-overlap/',
@@ -42,6 +50,7 @@ const themeReflowRoutes = [
   '/en/visuals/page-migration/',
   ...issue20Routes,
   ...issue25Routes,
+  ...issue26Routes,
 ] as const;
 
 async function persistTheme(page: Page, theme: LearningTheme) {
@@ -151,10 +160,10 @@ test('issue-20 pages reflow on mobile and retain teaching content in print', asy
   }
 });
 
-test('issue-25 pages reflow on mobile and retain teaching content in print', async ({ page }, testInfo) => {
+test('current incremental pages reflow on mobile and retain teaching content in print', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
-  for (const route of issue25Routes) {
+  for (const route of [...issue25Routes, ...issue26Routes]) {
     await page.goto(route);
     await expect(page.getByRole('main')).toBeVisible();
     expect(
@@ -166,7 +175,7 @@ test('issue-25 pages reflow on mobile and retain teaching content in print', asy
     await page.emulateMedia({ media: 'print' });
     await expect(page.getByRole('main')).toBeVisible();
     await expect(page.locator('.locale-pair')).toBeHidden();
-    if (route.endsWith('/visuals/nsight-systems-versus-nsight-compute/')) {
+    if (route.endsWith('/visuals/nsight-systems-versus-nsight-compute/') || route.endsWith('/visuals/roofline/')) {
       await expect(page.locator('[data-static-fallback]')).toBeVisible();
     } else {
       await expect(page.locator('main :is(.canonical-code, table)').first()).toBeVisible();

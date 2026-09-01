@@ -1,0 +1,257 @@
+---
+title: 'A14: Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity'
+description: Estimate operation count, compulsory and implementation traffic, and arithmetic intensity for map/vector addition, reduction, transpose, and GEMM before choosing a falsifiable optimization.
+pairId: a14
+counterpart: /algorithms/algorithm-choice-arithmetic-intensity/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - accounting-contract
+  - map-vector-add
+  - reduction
+  - transpose
+  - gemm
+  - transformation-table
+  - falsifiable-choice
+  - roofline-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A14
+prerequisites:
+  - A01
+  - A02
+  - A05
+  - A08
+relatedUnits:
+  - Q10
+  - EX02
+  - EX11
+  - EX14
+  - EX15
+  - VIS13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current global/shared-memory, coalescing, transpose, register, and device-property model'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide v13.3 - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current hardware multithreading, resource, latency-hiding, and asynchronous data-movement context'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current theoretical/effective bandwidth and requested-versus-transferred byte boundaries'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current classic block-local matrix-tile reuse context'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Williams, Waterman, and Patterson, 2009'
+    platform: 'Original model history and work-to-traffic upper-bound mathematics only'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a14 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/algorithm-choice-arithmetic-intensity/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,accounting-contract,map-vector-add,reduction,transpose,gemm,transformation-table,falsifiable-choice,roofline-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A14 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A01,A02,A05,A08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q10,EX02,EX11,EX14,EX15,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2009' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/algorithm-choice-arithmetic-intensity/" lang="zh-CN">阅读中文对应页</a>
+
+Optimization should begin with data-movement accounting, not with the most fashionable technique. A14 gives four familiar algorithm families an operation count, compulsory-traffic lower bound, implementation-traffic estimate, and arithmetic intensity at a declared boundary before selecting a transformation that an experiment can reject. Roofline constrains the question; it does not automatically choose a winner.
+
+## What you should be able to do
+
+- Declare an operation-count convention for map/vector addition, reduction, transpose, and GEMM.
+- Write compulsory-traffic lower bounds separately from implementation-traffic estimates.
+- Explain how caches, transactions, memory hierarchy, and boundary choice change traffic and intensity.
+- Connect fusion, hierarchical reduction, tiled transpose, and tiled GEMM to testable data-reuse hypotheses.
+- Choose an experiment that preserves correctness, changes one primary mechanism, and has a rejection rule.
+
+## Prerequisites
+
+The exact prerequisites, in order, are [A01: Elementwise Map](/en/algorithms/elementwise-map/), [A02: Multi-stage Reduction](/en/algorithms/multi-stage-reduction/), [A05: Matrix Transpose](/en/algorithms/matrix-transpose-layout/), and [A08: Tiled GEMM](/en/algorithms/tiled-gemm-correctness/): `A01, A02, A05, A08`. They supply ownership, reduction stages, layout transformation, and the GEMM reuse contract.
+
+## One accounting contract
+
+The static baseline uses FP32, four bytes per element, and algorithmic data arithmetic. Unless an item says otherwise, `W` excludes index and address arithmetic. GEMM counts an FMA as 2 FLOP. Every formula is an estimate, not an executed-instruction count or observed traffic.
+
+| field | compulsory lower bound | implementation estimate |
+| --- | --- | --- |
+| meaning | unique logical data that must cross the declared boundary to complete the workload correctly | bytes expected to cross after algorithm, stages, tiling, and cache assumptions |
+| includes | declared inputs, required outputs, and necessary reads/writes | repeated reads, intermediates, and extra passes; transaction overfetch may be a separate line |
+| excludes unless declared | cache-path traffic, write allocation, metadata, and profiler replay | unmodeled cache hits, compression, eviction, and concurrency effects |
+| status | static lower-bound argument | static hypothesis later tested with an exact observed definition |
+
+One formula serves one path only. DRAM compulsory bytes, L2-to-SM requests, and shared-memory traffic cannot be added and still called `T_DRAM`. Caches can prevent repeated global requests from reaching DRAM or allow them through after eviction. Transaction granularity can make transferred bytes exceed requested bytes.
+
+## Map and vector addition
+
+For unary map `y[i]=f(x[i])`, if `f` performs `c` declared FLOP per element, `W_map = cN`. The out-of-place FP32 compulsory traffic reads x and writes y:
+
+`T_map,compulsory = 8N byte`
+
+Thus `I_map,compulsory = c / 8 FLOP/byte`. A map with more inputs, an old-output read, or multiple outputs needs a new count and cannot retain `8N`.
+
+For `c[i]=a[i]+b[i]`, `W_vadd = N FLOP`, and out-of-place compulsory traffic is:
+
+`T_vadd,compulsory = 12N byte`
+
+`I_vadd,compulsory = 1/12 FLOP/byte`. Coalescing does not change logical `12N`, but it changes transaction efficiency and potentially the transferred bytes crossing the chosen path. Multiple elementwise stages that materialize intermediates read and write repeatedly. Fusion can preserve mathematical work and delete intermediate traffic, but it can also raise register use, change occupancy, or prevent other scheduling.
+
+## Reduction
+
+Summing N FP32 values has algorithmic work:
+
+`W_reduce = N - 1 FLOP`
+
+Counting one input read and one final scalar write gives the compulsory lower bound:
+
+`T_reduce,compulsory = 4N + 4 byte`
+
+For a materialized multi-pass implementation with `s` stages and non-final partial counts `P_1 ... P_(s-1)`, estimate:
+
+`T_reduce,implementation = 4N + 8 * sum(P_i) + 4 byte`
+
+Every partial is written as four bytes and read by a later stage as four more. An atomic final stage, persistent block, cooperative launch, or on-chip handoff changes this implementation formula. Compulsory intensity approaches `1/4 FLOP/byte`; materialized intermediates only increase this declared-boundary denominator. Parallel reduction also changes operation order, so correctness and tolerance precede traffic comparison.
+
+## Transpose
+
+For out-of-place FP32 `B[col,row]=A[row,col]`, the data-arithmetic convention gives `W_transpose = 0 FLOP`; index arithmetic is explicitly excluded. Compulsory traffic reads A and writes B:
+
+`T_transpose,compulsory = 8MN byte`
+
+Therefore `I_transpose = 0 FLOP/byte` under this convention. This does not mean “no performance problem.” It means FLOP-based intensity has little resolving power for a pure movement kernel.
+
+Naive and tiled transpose share the same logical DRAM lower bound. A shared-memory tile aims to make global reads and writes use more efficient transactions; padding can avoid shared-bank conflict. This adds shared-memory traffic and barriers while potentially reducing the global transferred/requested mismatch. For a DRAM model, shared bytes do not enter `T_DRAM`. For a shared-path question, build a separate `T_shared` and a non-FLOP throughput question.
+
+## GEMM
+
+For row-major, non-transposed FP32 `C=A*B` with `beta=0` and FMA=2 FLOP:
+
+`W_gemm = 2MNK FLOP`
+
+If each unique A and B element crosses the declared DRAM boundary once and C is written once, the compulsory lower bound is:
+
+`T_gemm,compulsory = 4(MK + KN + MN) byte`
+
+Without cross-output cache reuse, a naive one-output-per-thread request estimate is:
+
+`T_gemm,naive = 4(2MNK + MN) byte`
+
+The `2MNK` elements are K A loads and K B loads per output. This estimate better describes global-load requests or an L2-to-SM boundary. It is not guaranteed DRAM traffic because caches can serve repeated requests.
+
+For a `TM x TN` output tile, if each block loads every needed valid A/B tile value once per K slice, one block-reuse request estimate is:
+
+`T_gemm,tiled = 4[ceil(N/TN)MK + ceil(M/TM)KN + MN] byte`
+
+Blocks can still repeat A/B requests. L2 hits may lower DRAM traffic, while transaction overfetch and tails may raise transferred traffic. Tiling's falsifiable mechanism is reduced repeated movement at a declared boundary while preserving the GEMM equation, not “shared memory is always faster.”
+
+## Estimate before selecting a transformation
+
+| algorithm | low-intensity symptom in static model | candidate transformation | added cost or counterexample |
+| --- | --- | --- | --- |
+| map/vector add | intermediates repeatedly materialized | fuse adjacent elementwise stages; keep data resident | registers, code size, lost reuse or scheduling flexibility |
+| reduction | partial arrays repeatedly written and read | block/warp aggregation, fewer stages, fused consumer | order/tolerance, synchronization, atomic contention |
+| transpose | little logical work and potentially wasteful transactions | shared tile, coalesced write, padding | barriers, shared footprint, partial tiles |
+| GEMM | naive A/B requests repeated across outputs | block tiling, greater reuse, an appropriate library later | resources, occupancy, tails, layout and precision contract |
+
+The table generates candidates only. Selection also considers workload size, correctness, parallelism, resource pressure, latency, launch overhead, and production-library boundaries. Two implementations with equal arithmetic intensity can differ in coalescing, dependencies, or load balance.
+
+## One falsifiable choice: fuse elementwise stages
+
+Consider `tmp[i]=a[i]+b[i]` followed by `z[i]=g(tmp[i])`, where `g` performs `c` FLOP per element. The unfused baseline has `(c+1)N FLOP`. Its logical DRAM traffic estimate is `12N` for the first stage plus `8N` for the second:
+
+`T_unfused = 20N byte`
+
+Fusion preserves work while reading a/b and writing z directly:
+
+`T_fused = 12N byte`
+
+Thus `I_unfused = (c+1)/20 FLOP/byte` and `I_fused = (c+1)/12 FLOP/byte`. This is a model prediction, not a winner result.
+
+The falsifiable experiment predeclares the same input and shape, numerical acceptance, device/software/build, and warm-up/timing scope. Baseline and candidate change only fusion and query one exact DRAM-traffic definition. The mechanism claim requires lower candidate traffic; the performance claim requires lower elapsed time. Reject the corresponding claim if cache absorbs the intermediate, register pressure rises, occupancy or issue behavior worsens, traffic does not fall, or timing does not improve. Do not alter the model after seeing a result.
+
+## Roofline cannot choose a winner automatically
+
+[Q10](/en/correctness/roofline-arithmetic-intensity/) places an estimate under a declared roof. A modeled path-ceiling region says only that the sloped line is below the compute ceiling in that model. It does not establish an observed bottleneck. Fusion can move a point right and still slow down. Tiling can raise modeled intensity while synchronization or resources limit progress. A library can win under a different precision, layout, or workspace contract.
+
+The decision order is therefore correctness contract, operation and traffic estimate, one-mechanism hypothesis, controlled measurement, then accept or reject. Never deploy an optimization automatically because it lies near a particular roof.
+
+## Evidence boundary
+
+This page contains original formulas, static estimates, and empty experiment slots only. It compiles and runs no CUDA and publishes no cache, traffic, or timing observation, measured intensity, Roofline point, bottleneck, speedup, or winner. All four evidence arrays remain empty.
+
+## Retrieval check
+
+1. How do compulsory and implementation traffic differ in meaning, assumptions, and evidence status?
+2. Why is FP32 vector addition `N FLOP / 12N byte`, while a materialized map pipeline can move more traffic?
+3. How does `4N + 8 * sum(P_i) + 4` arise from reduction partial writes and later reads?
+4. Why can transpose have zero FLOP intensity while tiled transpose remains a reasonable transformation?
+5. How do GEMM compulsory, naive-request, and tiled-request estimates support a falsifiable choice, and why can Roofline not select the winner automatically?
+
+## Continue with practice
+
+- Complete the [A14 Exercises](/en/algorithms/algorithm-choice-arithmetic-intensity/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/algorithm-choice-arithmetic-intensity/solutions/).
+- Add a traffic boundary and rejection rule to an optimization claim in [Practice Bank PB-R3-006](/en/practice/#pb-r3-006).
+- Write static ledgers beside [EX02](/en/examples/vector-addition/), [EX11](/en/examples/multi-stage-reduction/), [EX14](/en/examples/tiled-transpose/), and [EX15](/en/examples/tiled-gemm/), then continue to [Q10](/en/correctness/roofline-arithmetic-intensity/). VIS13 remains a related Visual Explainer.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3 Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies global/shared memory, coalescing, transpose, register, and device-property models.
+- [CUDA Programming Guide v13.3 Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) supplies hardware-multithreading, resource, latency-hiding, and asynchronous-movement context.
+- [CUDA C++ Best Practices Guide v13.3 Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) distinguishes theoretical/effective and requested/transferred-byte reasoning.
+- [CUDA C++ Best Practices Guide v13.3 Shared Memory in C=AB](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab) supplies classic block-local matrix-reuse context.
+- The [2009 Roofline paper](https://doi.org/10.1145/1498765.1498785) supports model history and work/traffic upper-bound mathematics only, not a current NVIDIA metric or device claim.
+
+Context7 `/websites/nvidia_cuda` was used only for retrieval cross-checking. The exact owner documents and DOI above are the factual authorities and were accessed on **2026-09-01**. Every formula, table, Exercise, and solution is original site material.
+
+**Fact checked and sources accessed: 2026-09-01.**

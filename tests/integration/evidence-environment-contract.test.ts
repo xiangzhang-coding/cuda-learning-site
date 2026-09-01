@@ -371,7 +371,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes fifty-three complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes fifty-six complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -393,7 +393,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-007', 'PB-R2-008', 'PB-R2-009', 'PB-R2-010', 'PB-R2-011',
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
-      'PB-R3-001', 'PB-R3-002', 'PB-R3-003',
+      'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -439,6 +439,9 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-001': 'correctness/apod-optimization-loop',
       'PB-R3-002': 'correctness/timeline-first-nsight-systems',
       'PB-R3-003': 'correctness/kernel-first-nsight-compute',
+      'PB-R3-004': 'correctness/occupancy-stalls-throughput',
+      'PB-R3-005': 'correctness/roofline-arithmetic-intensity',
+      'PB-R3-006': 'algorithms/algorithm-choice-arithmetic-intensity',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -460,6 +463,34 @@ describe('Exercises and Practice Bank contract', () => {
         'correctness/kernel-first-nsight-compute',
         'labs/profile-full-application-before-kernel',
         'visuals/nsight-systems-versus-nsight-compute',
+      ],
+      'PB-R3-004': [
+        'correctness/kernel-first-nsight-compute',
+        'foundations/launch-geometry',
+        'correctness/occupancy-stalls-throughput',
+        'labs/build-original-roofline',
+        'visuals/roofline',
+      ],
+      'PB-R3-005': [
+        'correctness/timing-asynchronous-gpu-work',
+        'algorithms/algorithm-choice-arithmetic-intensity',
+        'correctness/occupancy-stalls-throughput',
+        'correctness/roofline-arithmetic-intensity',
+        'labs/build-original-roofline',
+        'visuals/roofline',
+      ],
+      'PB-R3-006': [
+        'algorithms/elementwise-map',
+        'algorithms/multi-stage-reduction',
+        'algorithms/matrix-transpose-layout',
+        'algorithms/tiled-gemm-correctness',
+        'algorithms/algorithm-choice-arithmetic-intensity',
+        'correctness/roofline-arithmetic-intensity',
+        'examples/vector-addition',
+        'examples/multi-stage-reduction',
+        'examples/tiled-transpose',
+        'examples/tiled-gemm',
+        'visuals/roofline',
       ],
     };
 
@@ -508,10 +539,12 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-00[1-3]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-00[1-6]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = entryId.startsWith('PB-R3')
+        const sourceDate = /^PB-R3-00[4-6]$/.test(entryId)
+          ? '2026-09-01'
+          : entryId.startsWith('PB-R3')
           ? '2026-08-31'
           : /^PB-R2-02[01]$/.test(entryId)
           ? '2026-08-31'
@@ -532,8 +565,8 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08']) expect(text).toContain(unitId);
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
-    for (const unitId of ['A01', 'A02', 'A03', 'A04']) expect(text).toContain(unitId);
-    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08']) expect(text).toContain(unitId);
+    for (const unitId of ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A14']) expect(text).toContain(unitId);
+    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);

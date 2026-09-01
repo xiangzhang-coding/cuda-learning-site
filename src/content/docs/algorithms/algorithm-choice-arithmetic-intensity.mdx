@@ -1,0 +1,257 @@
+---
+title: 'A14：用 Arithmetic Intensity 选择可证伪的算法优化'
+description: 在选择优化前估算 map/vector addition、reduction、transpose 与 GEMM 的 operation count、compulsory/implementation traffic 和 arithmetic intensity，再提出可证伪实验。
+pairId: a14
+counterpart: /en/algorithms/algorithm-choice-arithmetic-intensity/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - accounting-contract
+  - map-vector-add
+  - reduction
+  - transpose
+  - gemm
+  - transformation-table
+  - falsifiable-choice
+  - roofline-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A14
+prerequisites:
+  - A01
+  - A02
+  - A05
+  - A08
+relatedUnits:
+  - Q10
+  - EX02
+  - EX11
+  - EX14
+  - EX15
+  - VIS13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current global/shared-memory, coalescing, transpose, register, and device-property model'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide v13.3 - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current hardware multithreading, resource, latency-hiding, and asynchronous data-movement context'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current theoretical/effective bandwidth and requested-versus-transferred byte boundaries'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current classic block-local matrix-tile reuse context'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Williams, Waterman, and Patterson, 2009'
+    platform: 'Original model history and work-to-traffic upper-bound mathematics only'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a14 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/algorithm-choice-arithmetic-intensity/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,accounting-contract,map-vector-add,reduction,transpose,gemm,transformation-table,falsifiable-choice,roofline-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A14 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A01,A02,A05,A08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q10,EX02,EX11,EX14,EX15,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2009' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/algorithm-choice-arithmetic-intensity/" lang="en">Read the English counterpart</a>
+
+优化不应从“哪个技巧最流行”开始，而应从数据移动核算（data-movement accounting）开始。本学习单元（Learning Unit）对四类已学算法先写 operation count、强制流量（compulsory traffic）下界、实现流量（implementation traffic）估算与声明边界上的算术强度（arithmetic intensity），再选择一个能被实验拒绝的 transformation。Roofline 只约束问题，不自动选 winner。
+
+## 学完本单元，你应该能
+
+- 为 map/vector addition、reduction、transpose 与 GEMM 声明 operation-count convention。
+- 分开写 compulsory traffic lower bound 与 implementation traffic estimate。
+- 解释 cache、transaction、memory hierarchy 与 boundary 为什么改变 traffic/intensity。
+- 把 fusion、hierarchical reduction、tiled transpose 与 tiled GEMM 连接到可检验的数据复用假设。
+- 选择一个保持 correctness、只改变 primary mechanism、并有 reject rule 的优化实验。
+
+## 先修关系
+
+严格先修项按顺序为 [A01：Elementwise Map](/algorithms/elementwise-map/)、[A02：Multi-stage Reduction](/algorithms/multi-stage-reduction/)、[A05：Matrix Transpose](/algorithms/matrix-transpose-layout/)与 [A08：Tiled GEMM](/algorithms/tiled-gemm-correctness/)，即 `A01, A02, A05, A08`。它们分别提供 ownership、reduction stages、layout transformation 与 GEMM reuse contract。
+
+## 统一 accounting contract
+
+本页的静态基线冻结 FP32（每元素 4 byte）与 algorithmic data arithmetic。除非单项另行说明，index/address arithmetic 不计入 `W`；FMA 在 GEMM 中计 2 FLOP。所有 formulas 都是 estimates，不是 executed instruction count 或 observed traffic。
+
+| field | compulsory lower bound | implementation estimate |
+| --- | --- | --- |
+| meaning | 正确完成 workload 至少必须跨 declared boundary 的 unique logical data | 给定 algorithm/stages/tiling/cache assumptions 后预计跨 boundary 的 bytes |
+| includes | declared inputs、required outputs、必要 read/write | repeated reads、intermediates、extra passes；可另列 transaction overfetch |
+| excludes unless declared | cache-path traffic、write allocation、metadata、profiler replay | 未建模的 cache hits、compression、eviction、concurrency effects |
+| status | static lower-bound argument | static hypothesis，之后由 exact observed definition 检验 |
+
+同一公式只能服务一个 path。DRAM compulsory bytes、L2-to-SM requests 与 shared-memory traffic 不能相加后仍称为 `T_DRAM`。Cache 可以让 repeated global requests 不穿过 DRAM，也可以因 eviction 让它们穿过；transaction granularity 可以让 transferred bytes 大于 requested bytes。
+
+## Map 与 vector addition
+
+对 unary map `y[i]=f(x[i])`，若 `f` 每元素执行 `c` 个 declared FLOP，则 `W_map = cN`。Out-of-place FP32 compulsory traffic 是读取 x、写 y：
+
+`T_map,compulsory = 8N byte`
+
+因此 `I_map,compulsory = c / 8 FLOP/byte`。若 map 读多个 inputs、读旧 output 或写多个 outputs，重新计数，不能保留 `8N`。
+
+对 `c[i]=a[i]+b[i]`，`W_vadd = N FLOP`，out-of-place compulsory traffic 是：
+
+`T_vadd,compulsory = 12N byte`
+
+`I_vadd,compulsory = 1/12 FLOP/byte`。Coalescing 不改变 logical `12N`，但会改变 transaction efficiency 与可能穿过 chosen path 的 transferred bytes。多个 elementwise stages 若各自 materialize intermediate，会反复读写；fusion 可以保持相同 mathematical work，删除 intermediate traffic，但可能增加 registers、改变 occupancy 或阻止其他 scheduling。
+
+## Reduction
+
+对 N 个 FP32 values 求和，algorithmic work 是：
+
+`W_reduce = N - 1 FLOP`
+
+若只考虑输入一次与最终 scalar 一次，compulsory lower bound 是：
+
+`T_reduce,compulsory = 4N + 4 byte`
+
+一个有 `s` stages、非最终 partial counts 为 `P_1 ... P_(s-1)` 的 materialized multi-pass implementation，可用：
+
+`T_reduce,implementation = 4N + 8 * sum(P_i) + 4 byte`
+
+每个 partial 先写 4 byte，后续 stage 再读 4 byte。若 final stage 使用 atomic、persistent block、cooperative launch 或 on-chip handoff，公式要改变；这正是 implementation choice。Compulsory intensity 约趋近 `1/4 FLOP/byte`，materialized intermediates 只会增加这个 declared-boundary denominator。Parallel reduction 同时改变 operation order，所以 correctness/tolerance contract 先于 traffic comparison。
+
+## Transpose
+
+对 out-of-place FP32 `B[col,row]=A[row,col]`，若只数 data arithmetic，`W_transpose = 0 FLOP`；index arithmetic 被明确排除。Compulsory traffic 是读 A、写 B：
+
+`T_transpose,compulsory = 8MN byte`
+
+因此这个 FLOP convention 下 `I_transpose = 0 FLOP/byte`。这并不表示“没有性能问题”，而表示 FLOP-based intensity 对 pure movement kernel 的区分力有限。
+
+Naive 与 tiled transpose 的 logical DRAM lower bound相同。Tiled shared-memory transpose 的目标是让 global reads/writes 形成更有效的 transactions；padding 可以避免 shared-bank conflict。它会增加 shared-memory traffic 与 barriers，却可能减少 global transferred/requested mismatch。若模型边界是 DRAM，shared bytes 不进入 `T_DRAM`；若研究 shared path，则另建 `T_shared` 与非 FLOP throughput question。
+
+## GEMM
+
+对 row-major non-transposed FP32 `C=A*B`、`beta=0`，FMA=2 FLOP：
+
+`W_gemm = 2MNK FLOP`
+
+若每个 unique A/B element 只跨 declared DRAM boundary 一次，C 只写一次，compulsory lower bound 是：
+
+`T_gemm,compulsory = 4(MK + KN + MN) byte`
+
+不假设 cross-output cache reuse 的 naive one-output-per-thread request estimate 是：
+
+`T_gemm,naive = 4(2MNK + MN) byte`
+
+前 `2MNK` 个 elements 是每个 output 的 K 个 A loads 与 K 个 B loads。这个 estimate 更适合描述 global-load request/L2-to-SM boundary；它不是 guaranteed DRAM traffic，因为 cache 可以服务 repeated requests。
+
+对 `TM x TN` output tile，若每个 block 对每个 K slice 只加载需要的 valid A/B tile values，一项 block-reuse request estimate 是：
+
+`T_gemm,tiled = 4[ceil(N/TN)MK + ceil(M/TM)KN + MN] byte`
+
+它仍可能在 blocks 间重复请求 A/B；L2 hits 可以降低 DRAM traffic，transaction overfetch 或 tails 可以提高 transferred traffic。Tiling 的 falsifiable mechanism 是在声明 boundary 上减少 repeated movement并保持 same GEMM equation，不是“shared memory 一定更快”。
+
+## 先估算，再选 transformation
+
+| algorithm | low-intensity symptom from static model | candidate transformation | 新增代价/反例 |
+| --- | --- | --- | --- |
+| map/vector add | intermediates 反复 materialize | fuse adjacent elementwise stages、keep data resident | registers、code size、lost reuse/scheduling flexibility |
+| reduction | partial arrays 多次 write/read | block/warp aggregation、fewer stages、fused consumer | order/tolerance、synchronization、atomic contention |
+| transpose | logical work 很少、transactions 可能浪费 | shared tile、coalesced write、padding | barriers、shared footprint、partial tiles |
+| GEMM | naive A/B requests 随 outputs 重复 | block tiling、larger reuse、appropriate library later | resources、occupancy、tails、layout/precision contract |
+
+表格只生成候选。真正选择还要考虑 workload size、correctness、parallelism、resource pressure、latency、launch overhead 与 production-library boundary。Arithmetic intensity 相同的两个 implementations 也可能因 coalescing、dependencies 或 load balance表现不同。
+
+## 一个可证伪的选择：fuse elementwise stages
+
+考虑 `tmp[i]=a[i]+b[i]` 后接 `z[i]=g(tmp[i])`，其中 `g` 每元素 `c` FLOP。Unfused baseline 的 work 是 `(c+1)N FLOP`，logical DRAM traffic estimate 是 first stage `12N` 加 second stage `8N`：
+
+`T_unfused = 20N byte`
+
+Fusion 保持 work，直接读 a/b 并写 z：
+
+`T_fused = 12N byte`
+
+所以 `I_unfused = (c+1)/20 FLOP/byte`，`I_fused = (c+1)/12 FLOP/byte`。这是 model prediction，不是 winner result。
+
+Falsifiable experiment 预先声明：same input/shape、same numerical acceptance、same device/software/build、same warm-up/timing scope；baseline 与 candidate 只改变 fusion；查询 exact DRAM traffic definition；mechanism claim 要求 candidate traffic lower，performance claim 要求 candidate elapsed time lower。若 traffic 未下降、cache 已吸收 intermediate、register pressure 增加、occupancy/issue behavior 恶化或 timing 未改善，就拒绝对应 claim，而不是修改 model after the fact。
+
+## Roofline 不能自动选择 winner
+
+[Q10](/correctness/roofline-arithmetic-intensity/)会把 estimate 放进 declared roof。一个 modeled path-ceiling region 只说该 roof 的斜线小于 compute ceiling；它不证明 observed bottleneck。Fusion 可能右移 point 但变慢，tiling 可能提高 modeled intensity却受 synchronization/resource 限制，library implementation 也可能以完全不同的 precision/layout/workspace contract 胜出。
+
+因此决策顺序是：正确性合同 -> operation/traffic estimate -> one-mechanism hypothesis -> controlled measurement -> accept/reject。不要按“离哪个 roof 最近”自动部署 optimization。
+
+## 证据边界
+
+本页只有 original formulas、static estimates 与 empty experiment slots。没有编译或运行 CUDA，没有 cache/traffic/timing observation，没有 measured intensity、Roofline point、bottleneck、speedup 或 winner。四个 evidence arrays 均为空。
+
+## 离开前检查
+
+1. Compulsory traffic 与 implementation traffic 在含义、assumption 与 evidence status 上有什么区别？
+2. 为什么 FP32 vector addition 是 `N FLOP / 12N byte`，而 materialized map pipeline 可能有更多 traffic？
+3. Multi-stage reduction 的 `4N + 8 * sum(P_i) + 4` 如何来自 partial writes 与 later reads？
+4. 为什么 transpose 的 FLOP intensity 可以是零，而 tiled transpose 仍可能是合理 transformation？
+5. GEMM compulsory、naive request 与 tiled request estimates如何支持可证伪 choice，又为什么不能让 Roofline 自动选 winner？
+
+## 继续练习
+
+- 完成 [A14 Exercises](/algorithms/algorithm-choice-arithmetic-intensity/exercises/)，再查看独立的[复核解答](/algorithms/algorithm-choice-arithmetic-intensity/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-006](/practice/#pb-r3-006)为一个 optimization claim 补齐 traffic boundary 与 reject rule。
+- 对照 [EX02](/examples/vector-addition/)、[EX11](/examples/multi-stage-reduction/)、[EX14](/examples/tiled-transpose/)与 [EX15](/examples/tiled-gemm/)写 static ledgers；再进入 [Q10](/correctness/roofline-arithmetic-intensity/)。VIS13 仍是 related Visual Explainer。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3 Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)提供 global/shared memory、coalescing、transpose、register 与 device-property model。
+- [CUDA Programming Guide v13.3 Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)提供 hardware multithreading、resource、latency hiding 与 asynchronous movement context。
+- [CUDA C++ Best Practices Guide v13.3 Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)区分 theoretical/effective 与 requested/transferred byte reasoning。
+- [CUDA C++ Best Practices Guide v13.3 Shared Memory in C=AB](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab)提供 classic block-local matrix reuse context。
+- [2009 Roofline paper](https://doi.org/10.1145/1498765.1498785)只支持 model history 与 work/traffic upper-bound math，不支持 current NVIDIA metric 或 device claim。
+
+Context7 `/websites/nvidia_cuda` 仅用于 retrieval cross-check；以上 exact owner documents 与 DOI 是事实权威，访问于 **2026-09-01**。所有 formulas、tables、exercises 与 solutions 均为本站原创。
+
+**事实核查与来源访问日期：2026-09-01。**

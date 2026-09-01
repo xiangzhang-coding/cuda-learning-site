@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-08-31, it contains eight contiguously numbered published Labs: LAB01-LAB08. Q11/LAB10 remain unpublished. Q13, L06, and LAB12 also have no public destinations; LAB12 waits for Q13's profiling prerequisite and L06's cuBLAS prerequisite. Incomplete planned work does not appear.
+This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-09-01, it contains nine contiguously numbered published Labs: LAB01-LAB09. Q11/LAB10 remain unpublished. Q13, L06, and LAB12 also have no public destinations; LAB12 waits for Q13's profiling prerequisite and L06's cuBLAS prerequisite. Incomplete planned work does not appear.
 
 ## Published Labs
 
@@ -34,8 +34,8 @@ This index lists only Labs that form complete Publication Pairs and already prov
 
 ## Sequence and direct lookup
 
-The current sequence lists [LAB01: Record and Interpret a CUDA Environment](/en/labs/record-cuda-environment/), [LAB02: Run and Verify Vector Addition](/en/labs/vector-addition/), [LAB03: Break and Repair Indexing](/en/labs/break-and-repair-indexing/), [LAB04: Observe Coalescing](/en/labs/observe-coalescing/), [LAB05: Remove Shared-Memory Bank Conflicts](/en/labs/remove-shared-memory-bank-conflicts/), [LAB06: Build an Overlapped Pipeline](/en/labs/build-overlapped-pipeline/), [LAB07: Diagnose Four Sanitizer Failures](/en/labs/diagnose-four-sanitizer-failures/), and [LAB08: Profile the Full Application Before One Kernel](/en/labs/profile-full-application-before-kernel/). LAB01 requires O03 and O08 and uses EX01. LAB02 requires O03 and F01 and uses EX02. LAB03 requires F03 and F05 and uses EX04. LAB04 requires M02 and Q05 and uses EX05. LAB05 requires M04 and Q05 and uses EX06. LAB06 requires exactly M09 and Q07 and uses canonical EX07. LAB07 requires Q03 and Q04 and uses the original Apache-2.0 EX16 project. LAB08 requires exactly Q07 and Q08 and uses canonical EX07. F08 is related to LAB03 but is not its prerequisite. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
+The current sequence lists LAB01-LAB08 followed by [LAB09: Build an Original Roofline](/en/labs/build-original-roofline/). LAB09 requires exactly Q10. Q09, A14, EX02, and VIS13 are related rather than prerequisites. It uses Lane-matched Nsight Compute and CUPTI, administrator-approved non-admin performance-counter access, and learner-owned report custody across the three Toolkit Lanes. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
 
 ## Evidence boundary
 
-Compilation and runtime labels are copied directly from the linked Lab's controlled evidence fields. A site build, filter action, or browser test cannot upgrade CUDA evidence. LAB01 has an empty compilation axis with no Compile-Checked claim, and its runtime axis is Pending Hardware Verification. LAB02 retains its existing status. LAB03 and its EX04 Runnable Example both have empty compilation evidence and Pending Hardware Verification runtime. LAB04, LAB05, and LAB07 likewise have empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. LAB06 and LAB08 also retain empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only. Both require learner-owned report custody and existing non-admin profiling access: LAB06 authorizes no `sudo` or other privilege escalation; LAB08 additionally requires administrator-approved non-admin performance-counter access and forbids elevation or security-policy bypass. The Learning Site publishes no collected profiler report. LAB06's expected-only fixture is not an `.nsys-rep` or profiler output; LAB08's expected-only report plan is neither an `.nsys-rep` nor an `.ncu-rep` and contains no counter, timeline, timing, or runtime observation. Any actual Systems and Compute reports for LAB08 come from separate instrumented executions and cannot represent one physical launch. LAB04/LAB05 publish no profiler result or timing, and LAB07 publishes no sanitizer report. A report file, host-only test, learner-local build, expected observation, or tool manual changes none of these statuses.
+Compilation and runtime labels are copied directly from each linked Lab's controlled evidence fields. Existing LAB01-LAB08 statuses do not change. LAB09 has empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only; there is no Reference Environment or `performanceObservations` entry. LAB09 requires learner-owned `.ncu-rep`, CSV, table, chart, and hash custody, but no collected report, metric, ceiling, workload point, timing, or Roofline observation currently exists. VIS13 browser values and its static chart are outside the LAB09 evidence chain. A report file, host-only test, learner-local build, expected observation, website chart, or tool manual changes none of these statuses.

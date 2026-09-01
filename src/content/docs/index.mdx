@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-31'
+      content: '2026-09-01'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #25](https://github.com/xiangzhang-coding/cuda-learning-site/issues/25) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09 与 Q01-Q08，共 52 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；[issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) 记录其最终 CI、Preview、生产发布与 smoke 坐标。当前增量发布不改写 R2，R3 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #26](https://github.com/xiangzhang-coding/cuda-learning-site/issues/26) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09/A14 与 Q01-Q10，共 55 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；当前 issue #26 增量发布不改写 R2，R3 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -54,9 +54,9 @@ head:
 
 [M15 NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)同时依赖 F04 和 O04；[M16 PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)同时依赖 M15 和 F06；[M17 选择编译器架构目标](/toolchain/compiler-architecture-targets/)同时依赖 M16 和 F06；[M18 分离编译与设备链接](/toolchain/separate-compilation-device-linking/)同时依赖 M15 和 M16；[M19 CUDA C++17、C++20 与 C++23 方言边界](/toolchain/cpp-dialect-boundaries/)同时依赖 O04 和 M15。
 
-[A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；[A02 多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)同时依赖 M03、M05 和 M06；[A03 包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)同时依赖 A02 和 M05；[A04 私有化直方图](/algorithms/privatized-histogram/)同时依赖 M03 和 M05；[A05 矩阵转置](/algorithms/matrix-transpose-layout/)依赖 M02/M03/M04；[A06 Stencil](/algorithms/stencil-neighborhood-reuse/)依赖 M03/M04/M05；[A07 Direct 2D Convolution](/algorithms/convolution-reuse-layout/)依赖 A06/M03；[A08 Tiled GEMM](/algorithms/tiled-gemm-correctness/)依赖 A05/M03/M04/A02；[A09 Sorting、Selection 与 Compaction](/algorithms/sorting-selection-compaction/)依赖 A03/A04。
+[A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；A02-A09 保留既有边；[A14 用 Arithmetic Intensity 选择可证伪的算法优化](/algorithms/algorithm-choice-arithmetic-intensity/)严格依赖 A01、A02、A05 与 A08。
 
-[Q01 CPU 参考实现、容差与不变量](/correctness/cpu-references-tolerances-invariants/)同时依赖 F04 和 O04；[Q02 浮点顺序、确定性与逐位可复现性](/correctness/floating-point-order-reproducibility/)同时依赖 Q01 和 A02；[Q03 用 memcheck 定位非法内存访问](/correctness/memcheck-invalid-memory-access/)同时依赖 F05 和 Q01；[Q04 用 racecheck、initcheck 与 synccheck 定位缺陷](/correctness/racecheck-initcheck-synccheck/)同时依赖 M05、M06 和 Q03；[Q05 诚实计时异步 GPU 工作](/correctness/timing-asynchronous-gpu-work/)同时依赖 M08 和 Q01；[Q06 把 APOD 作为优化循环](/correctness/apod-optimization-loop/)仅依赖 Q05；[Q07 先用 Nsight Systems 阅读应用时间线](/correctness/timeline-first-nsight-systems/)同时依赖 M07、M09 和 Q05；[Q08 用 Nsight Compute 回答一个选定内核问题](/correctness/kernel-first-nsight-compute/)同时依赖 Q07、M02 和 M03。
+[Q01](/correctness/cpu-references-tolerances-invariants/)至 [Q08](/correctness/kernel-first-nsight-compute/)保留既有边；[Q09 用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)严格依赖 Q08 与 F08；[Q10 从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)严格依赖 Q05 与 A14。
 
 F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
 
@@ -64,25 +64,25 @@ M01-M14 也按顺序提供完整练习与独立解答：[M01 练习](/memory/add
 
 M15-M19 同样提供完整练习与独立解答：[M15 练习](/toolchain/nvcc-compilation-flow/exercises/)与[解答](/toolchain/nvcc-compilation-flow/solutions/)、[M16 练习](/toolchain/ptx-cubin-fatbinary/exercises/)与[解答](/toolchain/ptx-cubin-fatbinary/solutions/)、[M17 练习](/toolchain/compiler-architecture-targets/exercises/)与[解答](/toolchain/compiler-architecture-targets/solutions/)、[M18 练习](/toolchain/separate-compilation-device-linking/exercises/)与[解答](/toolchain/separate-compilation-device-linking/solutions/)、[M19 练习](/toolchain/cpp-dialect-boundaries/exercises/)与[解答](/toolchain/cpp-dialect-boundaries/solutions/)。
 
-A01-A09 都提供完整练习与独立解答；新增 [A08 练习](/algorithms/tiled-gemm-correctness/exercises/)与[解答](/algorithms/tiled-gemm-correctness/solutions/)，以及 [A09 练习](/algorithms/sorting-selection-compaction/exercises/)与[解答](/algorithms/sorting-selection-compaction/solutions/)。
+A01-A09 与 A14 都提供完整练习与独立解答；[A14 练习](/algorithms/algorithm-choice-arithmetic-intensity/exercises/)与[解答](/algorithms/algorithm-choice-arithmetic-intensity/solutions/)已直接可用。
 
 O02-O08 也保留各自的练习与独立解答。
 
 Q01-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q02 练习](/correctness/floating-point-order-reproducibility/exercises/)与[解答](/correctness/floating-point-order-reproducibility/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)。
 
-Q06-Q08 也提供完整练习与独立解答：[Q06 练习](/correctness/apod-optimization-loop/exercises/)与[解答](/correctness/apod-optimization-loop/solutions/)、[Q07 练习](/correctness/timeline-first-nsight-systems/exercises/)与[解答](/correctness/timeline-first-nsight-systems/solutions/)、[Q08 练习](/correctness/kernel-first-nsight-compute/exercises/)与[解答](/correctness/kernel-first-nsight-compute/solutions/)。
+Q06-Q10 也提供完整练习与独立解答，包括 [Q09 练习](/correctness/occupancy-stalls-throughput/exercises/)与[解答](/correctness/occupancy-stalls-throughput/solutions/)，以及 [Q10 练习](/correctness/roofline-arithmetic-intensity/exercises/)与[解答](/correctness/roofline-arithmetic-intensity/solutions/)。
 
 当前有 16 个可运行示例（Runnable Example）：EX01-EX16。新增 [EX15 Tiled GEMM](/examples/tiled-gemm/)严格依赖 A08；EX14 仍依赖 A05，EX16 仍依赖 Q03/Q04。
 
 EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane 使用同一原创 C++17 implementation；compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。Host-only utility 不建立 GPU correctness，本站没有运行 EX15，也不发布实际 output、timing、speedup 或其他 performance number。
 
-当前 8 个实验是 LAB01-LAB08。[LAB06 构建重叠流水线](/labs/build-overlapped-pipeline/)严格依赖 M09 和 Q07；[LAB08 先分析完整应用，再分析一个内核](/labs/profile-full-application-before-kernel/)严格依赖 Q07 和 Q08。未来的 Q11 与 LAB10 仍未发布，LAB10 等待 Q11 提供 evidence-based optimization prerequisite；Q13、L06 与 LAB12 也仍未发布，LAB12 等待 Q13 profiling 与 L06 cuBLAS 两项 prerequisite。
+当前 9 个实验是 LAB01-LAB09。[LAB09 构建原创 Roofline](/labs/build-original-roofline/)严格依赖 Q10，compilation 与 recorded observations 为空，runtime 为 Pending Hardware Verification。未来的 Q11/LAB10 与 Q13/L06/LAB12 仍未发布。
 
-正式 Visual Explainer 共 17 项：独立 VIS01-VIS12 与 VIS14，加上内嵌 VIS19-VIS22。[VIS12 GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)依赖 A08、关联 EX15，并保留 20 个静态 hierarchy panels；[VIS14 Nsight Systems versus Nsight Compute](/visuals/nsight-systems-versus-nsight-compute/)严格依赖 Q07 和 Q08。全部讲解都是 evidence-neutral browser models。
+正式 Visual Explainer 共 18 项：独立 VIS01-VIS14，加上内嵌 VIS19-VIS22。[VIS13 Roofline](/visuals/roofline/)严格依赖 Q10，并排在 VIS14 前。全部讲解都是 evidence-neutral browser models；VIS13 browser values 与 static chart 不是 GPU evidence。
 
-Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 compilation evidence 为空、runtime 为 Pending Hardware Verification、recorded observations 为空。本次增量没有 runtime、profiler、timeline、metric、bottleneck 或 speedup observation。
+A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空；LAB09 的 compilation evidence 与 recorded observations 为空、runtime 为 Pending Hardware Verification。本次增量没有 runtime、profiler metric、hardware ceiling、bottleneck 或 speedup observation，也没有 Reference Environment 或 `performanceObservations`。
 
-当前 catalog 为 8 个 Lab、53 个 Practice Bank 条目、17 项 Visual Explainer、159 个 Glossary 词条和 65 条 source record，共 302 条记录；当前滚动公开源文件形成 198 个 Publication Pairs，即 396 条 source routes。这些当前数字独立于不可变的 R2 186/372 快照，R3 聚合复核仍待完成。
+当前 catalog 为 9 个 Lab、56 个 Practice Bank 条目、18 项 Visual Explainer、165 个 Glossary 词条和 68 条 source record，共 316 条记录；当前滚动公开源文件形成 209 个 Publication Pairs，即 418 条 source routes。这些当前数字独立于不可变的 R2 186/372 与 284-record 快照，R3 聚合复核仍待完成。
 
 ## 边界先说清
 
@@ -311,6 +311,11 @@ Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 c
     <strong>组合排序、选择和压缩</strong>
     <small>从 flag、scan、histogram 与 movement 推导 vocabulary，再选择 production primitive。</small>
   </a>
+  <a className="route-card" href="/algorithms/algorithm-choice-arithmetic-intensity/">
+    <span>A14 · ARITHMETIC INTENSITY</span>
+    <strong>用 Arithmetic Intensity 选择可证伪的算法优化</strong>
+    <small>先比较 operation 与 traffic estimates，再选择可被实验拒绝的 transformation。</small>
+  </a>
   <a className="route-card" href="/correctness/cpu-references-tolerances-invariants/">
     <span>Q01 · CORRECTNESS ORACLE</span>
     <strong>CPU 参考实现、容差与不变量</strong>
@@ -350,6 +355,16 @@ Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 c
     <span>Q08 · KERNEL QUESTION</span>
     <strong>用 Nsight Compute 回答一个选定内核问题</strong>
     <small>选定 kernel 与问题后，只收集所需 section 或 metric，并保留 replay 边界。</small>
+  </a>
+  <a className="route-card" href="/correctness/occupancy-stalls-throughput/">
+    <span>Q09 · OCCUPANCY / STALLS</span>
+    <strong>用 Occupancy、Stalls 与 Throughput 解释延迟隐藏</strong>
+    <small>分开 residency、scheduler eligibility、stall sampling 与 resource rate。</small>
+  </a>
+  <a className="route-card" href="/correctness/roofline-arithmetic-intensity/">
+    <span>Q10 · AUDITABLE ROOFLINE</span>
+    <strong>从 Arithmetic Intensity 构建可审计 Roofline</strong>
+    <small>对齐 work、traffic、units、ceilings 与 provenance，再放置 workload point。</small>
   </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
@@ -471,6 +486,11 @@ Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 c
     <strong>先分析完整应用，再分析一个内核</strong>
     <small>用分开的 Systems 与 Compute 执行建立可复核决策链，不预填观察。</small>
   </a>
+  <a className="route-card" href="/labs/build-original-roofline/">
+    <span>LAB09 · ORIGINAL ROOFLINE</span>
+    <strong>构建原创 Roofline</strong>
+    <small>保留完整 provenance、report custody 与 blockers；当前仍待硬件验证。</small>
+  </a>
   <a className="route-card" href="/labs/">
     <span>LAB INDEX · LOOKUP</span>
     <strong>实验索引</strong>
@@ -541,6 +561,11 @@ Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 c
     <strong>GEMM Tiling Hierarchy：从 Matrix 到 Instruction</strong>
     <small>核对 matrix、tile、thread block、warp 与 source-level instruction slot。</small>
   </a>
+  <a className="route-card" href="/visuals/roofline/">
+    <span>VIS13 · ROOFLINE MODEL</span>
+    <strong>声明上限、屋脊点（ridge point）与 workload point</strong>
+    <small>检查 synthetic browser state 与 above-roof mismatch，不把图表当作 GPU evidence。</small>
+  </a>
   <a className="route-card" href="/visuals/nsight-systems-versus-nsight-compute/">
     <span>VIS14 · PROFILER DECISION</span>
     <strong>从症状选择下一份 profiler 证据</strong>
@@ -549,17 +574,17 @@ Q06-Q08 与 VIS14 的 compilation/runtime axes 均为空；LAB06 与 LAB08 的 c
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 53 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
+    <small>用 56 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 159 个中英文规范术语。</small>
+    <small>核对本站使用的 165 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 65 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 68 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

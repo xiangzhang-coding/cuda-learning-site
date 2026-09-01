@@ -145,6 +145,21 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
       },
     },
     {
+      id: 'vis13',
+      routes: { zh: '/visuals/roofline/', en: '/en/visuals/roofline/' },
+      prepare: async () => {
+        const roofline = page.locator('cuda-roofline-explorer[data-visual-id="VIS13"]');
+        await expect(roofline).toHaveAttribute('data-ready', 'true');
+        await roofline.locator('[data-roofline-input="computeCeiling"]').fill('1000');
+        await roofline.locator('[data-roofline-input="bandwidthCeiling"]').fill('100');
+        await roofline.locator('[data-roofline-input="arithmeticIntensity"]').fill('20');
+        await roofline.locator('[data-roofline-input="achievedRate"]').fill('1100');
+        await roofline.locator('[data-roofline-action="apply"]').click();
+        await expect(roofline).toHaveAttribute('data-model-region', 'compute-side');
+        await expect(roofline).toHaveAttribute('data-point-relation', 'above-declared-roof');
+      },
+    },
+    {
       id: 'vis14',
       routes: {
         zh: '/visuals/nsight-systems-versus-nsight-compute/',

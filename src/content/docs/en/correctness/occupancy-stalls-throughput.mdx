@@ -1,0 +1,221 @@
+---
+title: 'Q09: Interpret Latency Hiding with Occupancy, Stalls, and Throughput'
+description: Separate theoretical and achieved occupancy, active/eligible/issued warps, scheduler stalls, latency, throughput, and resource limits without turning one percentage into a bottleneck claim.
+pairId: q09
+counterpart: /correctness/occupancy-stalls-throughput/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - occupancy-definition
+  - theoretical-achieved
+  - resource-limits
+  - scheduler-states
+  - latency-throughput
+  - interpretation-guardrails
+  - query-contract
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q09
+prerequisites:
+  - Q08
+  - F08
+relatedUnits:
+  - Q10
+  - LAB09
+  - VIS13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current occupancy definition, latency-hiding role, and occupancy-calculation guidance'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current device-property, register, shared-memory, and launch-resource coordinates'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide v13.3 - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current warp scheduling, hardware multithreading, residency, and resource-limit model'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current Occupancy, Scheduler Statistics, Warp State Statistics, and Speed Of Light section semantics'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current metric and section query, unit display, filtering, and report-retention interface'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/correctness/occupancy-stalls-throughput/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,occupancy-definition,theoretical-achieved,resource-limits,scheduler-states,latency-throughput,interpretation-guardrails,query-contract,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q08,F08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q10,LAB09,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/occupancy-stalls-throughput/" lang="zh-CN">阅读中文对应页</a>
+
+Occupancy answers how many warps remain resident on an SM, not whether those warps are doing useful work. It is a latency-hiding resource, not utilization and not a target that must be maximized. Q09 builds an interpretation order from resource limits through scheduler states to throughput and blocks a jump from one prominent percentage to a bottleneck or speedup claim.
+
+## What you should be able to do
+
+- Define occupancy from active warps and the exact device's maximum active warps.
+- Distinguish theoretical occupancy from achieved occupancy.
+- Place active, eligible, ready-to-issue, and issued warps in one scheduler model.
+- Interpret scheduler stalls, latency, throughput, and utilization separately.
+- Query exact metric names, units, definitions, scopes, and availability before interpreting a report.
+
+## Prerequisites
+
+The exact prerequisites are [Q08: Ask One Selected Kernel Question with Nsight Compute](/en/correctness/kernel-first-nsight-compute/) and [F08: Launch Geometry Is a Correctness and Resource Decision Before Speed](/en/foundations/launch-geometry/), frozen in the order `Q08, F08`. Q08 supplies the selected-kernel, query, replay, and report-custody contract. F08 supplies exact-device and kernel resource limits, launch legality, and the resource-decision boundary.
+
+## Occupancy definition and boundary
+
+At one consistent SM scope, define:
+
+`occupancy = active warps per SM / maximum active warps per SM`
+
+The numerator counts resident warps whose execution contexts are retained. The denominator is the maximum active-warps capacity of the exact GPU at that scope. Both must use compatible definitions and denominators. Occupancy is not a pipeline busy fraction, issued-instruction rate, or percentage of “CUDA cores doing work.”
+
+This static relationship table contains no GPU observation:
+
+| quantity | question it answers | question it does not answer |
+| --- | --- | --- |
+| occupancy | how many warp contexts are resident relative to the exact maximum | whether they are eligible or issued, or how much work they perform |
+| utilization | how active one named resource is over a defined observation interval | warp residency or wait cause |
+| throughput | declared work or traffic per time, or a tool-defined relative rate | latency of one operation |
+| latency | how long an operation or dependent-instruction interval waits | how much other work can hide that wait |
+
+## Theoretical and achieved are not interchangeable
+
+Theoretical occupancy is a launch and resource model. Given threads per block, registers, static and dynamic shared memory, and exact-device limits, it derives the maximum concurrent blocks and warps per SM and divides by that device's maximum active warps. It does not establish that the kernel maintains that many warps over time.
+
+Achieved occupancy is execution-derived. It relates actual active warps over the tool's declared sampling and aggregation scope to the same maximum. A short grid, tail wave, block-duration imbalance, early completion, or other dynamic behavior can make it lower than theoretical occupancy. Read the exact averaging rule and denominator from the report rather than guessing from a label.
+
+A purely algebraic check is: if a queried launch model supplies `W_model` active warps and the exact device query supplies `W_max` maximum active warps, then `O_theoretical = W_model / W_max`. Only if a report supplies `W_observed` at a compatible scope may it state `O_achieved = W_observed / W_max`. No value is assigned here, so this calculation invents neither a hardware ceiling nor an observation.
+
+## Hardware and resource limits jointly bound residency
+
+Whether one block can reside, and how many can reside together, depends on threads or warps per block, register allocation, static plus dynamic shared memory, maximum resident blocks and warps, and other documented hardware resources. Allocation granularities matter; source variable counts are insufficient. Use the exact binary's compiler/resource record, launch configuration, `cudaGetDeviceProperties`, an owner-supported occupancy API, or the exact report rather than a remembered device table.
+
+| input family | required record | result it can change |
+| --- | --- | --- |
+| launch | grid, block, dynamic shared bytes | warps per block, waves, resident-block candidate |
+| kernel resource | exact binary, registers, static shared memory | register or shared-memory limiter |
+| device resource | exact GPU/CC and queried limits | maximum resident blocks/warps and available registers/shared memory |
+| runtime context | cache/shared configuration or documented attributes when applicable | usable resource partition or launch validity |
+
+Reducing register or shared-memory use can raise theoretical occupancy while adding spills, instructions, or worse locality. Only a correct controlled before/after measurement can determine the performance result. Higher occupancy is not itself an acceptance criterion.
+
+## From active to eligible to issued
+
+A scheduler selects work from its resident pool. Active or resident means that a warp is allocated to a scheduler or subpartition. Eligible means that the active warp is ready to issue its next instruction under the tool definition: the instruction is available, input dependencies are resolved, and the needed function unit can accept it. This page uses ready as ordinary prose; a profiler interpretation preserves the owner's exact eligible definition.
+
+| scheduler state | static meaning | gap to the next state |
+| --- | --- | --- |
+| active/resident | execution context is on the SM/subpartition | may await fetch, dependency, barrier, or resource |
+| eligible/ready-to-issue | next instruction satisfies the stated issue conditions | scheduler still chooses from the eligible set |
+| issued | scheduler issues an instruction at that opportunity | instruction has not necessarily completed; whole-SM peak throughput is not implied |
+
+A scheduler stall describes why a warp cannot issue its next instruction under a defined model. Stall reasons can participate in a longer causal chain, while sampling and normalization are tool-defined. A stall breakdown becomes a useful lead only when schedulers fail to issue consistently. The largest stall share is still not an automatic bottleneck.
+
+## Occupancy hides latency but does not shorten it
+
+When one warp awaits a memory dependency, execution dependency, instruction fetch, or synchronization, a scheduler may choose another eligible warp. More resident warps expand the pool that might contain other ready work, so occupancy can help hide latency. It does not make the original operation return sooner. If all active warps await the same dependency, high occupancy can coexist with little issue progress.
+
+Throughput is declared work or traffic per time. A Nsight Compute Speed Of Light percentage instead compares achieved throughput with a particular theoretical maximum under the exact section definition. It does not mean that the unused percentage is obtainable speedup, and percentages for different units, pipelines, clock domains, or reports cannot be added directly.
+
+## Three forbidden inferences
+
+- **High occupancy is not a bottleneck verdict.** It proves neither successful latency hiding nor a speedup from more occupancy.
+- **One stall share is not a causal verdict.** Establish scheduler issue gaps, sampling denominator, scope, and competing explanations before changing one mechanism.
+- **A throughput percentage is not a speedup forecast.** It depends on a specific resource ceiling and normalization. Near one ceiling does not prove a sole whole-kernel limit; far from it does not make 100% attainable.
+
+Within one report, theoretical and achieved occupancy, eligible warps, issue activity, stall reasons, and resource throughput can form an evidence chain, but they cannot substitute for one another. A cross-report comparison also freezes workload, kernel occurrence, correctness, binary, GPU, tool version, filter, replay, and clock/cache controls.
+
+## Query the exact report before interpreting it
+
+Retain `ncu --version`, exact GPU identity/CC, and the following query output before choosing the minimum currently available sections or metrics:
+
+```bash
+ncu --list-sections
+ncu --query-metrics
+ncu --query-metrics-mode suffix --metrics <queried-base-or-full-names>
+```
+
+Every retained field records exact name, unit, definition, scope and aggregation, denominator, availability, section or metric request, filter, replay, and report hash. Metric names, units, definitions, and availability are bound to the exact GPU, tool, and report. This page freezes no spelling to copy across devices. The owner CLI and Profiling Guide are authoritative; Context7 is retrieval cross-checking only.
+
+## Evidence boundary
+
+This page contains formulas, empty table templates, and static reasoning only. It runs no GPU or profiler and publishes no report, metric value, hardware ceiling, timing, throughput, bottleneck, or speedup observation. All four evidence arrays are empty, and no Evidence Status is granted.
+
+## Retrieval check
+
+1. Why must occupancy be a same-scope ratio of active to maximum active warps rather than utilization?
+2. How do theoretical and achieved occupancy differ in inputs, time meaning, and common causes of disagreement?
+3. What do active, eligible or ready-to-issue, and issued warps mean in a scheduler decision?
+4. Why can neither high occupancy, the largest stall share, nor one throughput percentage establish a bottleneck or speedup alone?
+5. Which name, unit, definition, availability, scope, and custody fields must be queried and retained before interpreting an exact report?
+
+## Continue with practice
+
+- Complete the [Q09 Exercises](/en/correctness/occupancy-stalls-throughput/exercises/), then inspect the separate [reviewed solutions](/en/correctness/occupancy-stalls-throughput/solutions/).
+- Audit an occupancy-to-speedup leap in [Practice Bank PB-R3-004](/en/practice/#pb-r3-004).
+- Build a separate work/traffic ceiling model in [Q10](/en/correctness/roofline-arithmetic-intensity/). LAB09 and VIS13 remain related resources, not observation sources for this page.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3 Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy) supplies the active/max-active ratio and latency-hiding boundary.
+- [CUDA Programming Guide v13.3 Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html) supplies device-property, register, shared-memory, and launch-resource coordinates.
+- [CUDA Programming Guide v13.3 Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) supplies warp-scheduling, hardware-multithreading, and residency models.
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) defines the current Occupancy, Scheduler Statistics, Warp State Statistics, and Speed Of Light sections.
+- [Nsight Compute CLI 2026.2.1](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) defines metric queries, suffixes, units, filters, and report interfaces.
+
+Context7 `/websites/nvidia_cuda` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for retrieval cross-checking. The exact NVIDIA owner documents above are the factual authorities and were accessed on **2026-09-01**. No owner prose, metric value, report, figure, table, or benchmark result is copied.
+
+**Fact checked and sources accessed: 2026-09-01.**

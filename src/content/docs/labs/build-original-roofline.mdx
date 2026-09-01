@@ -1,0 +1,722 @@
+---
+title: 'LAB09：构建原创 Roofline'
+description: '在冻结工作负载下测量 canonical EX02，保留十次独立 Nsight Compute 尝试，并在不虚构性能结果的前提下构建一份受 provenance 边界约束的原创 Roofline artifact。'
+pairId: lab09
+counterpart: /en/labs/build-original-roofline/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - workload-model
+  - manifest
+  - source-review
+  - build
+  - correctness
+  - ceilings
+  - profiler-gates
+  - warm-up
+  - acquisition
+  - report-custody
+  - reduction
+  - roofline-artifact
+  - interpretation
+  - observations
+  - criteria-blockers
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB09
+prerequisites:
+  - Q10
+relatedUnits:
+  - Q09
+  - A14
+  - EX02
+  - VIS13
+exampleIds:
+  - EX02
+canonicalExample: EX02
+canonicalRanges:
+  - error-checking
+  - kernel
+  - cpu-reference
+hardwareGate: '仅限原生 Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU；在 cuda-11.8、cuda-12.9 或 cuda-13.3 中使用 C++17；匹配的 Nsight Compute 与 CUPTI；管理员批准的非管理员 performance-counter access；canonical application device allocation 恰好 201,326,592 bytes；禁止 sudo、提权或策略绕过'
+estimatedMinutes: 180
+difficulty: advanced
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 201326592
+gpuCount: 1
+permissions:
+  - '访问恰好一张 selected CUDA device，并执行 NVCC、host C++ compiler、make、EX02 binary 与 Nsight Compute CLI ncu'
+  - '创建、哈希、检查、消毒、保留和删除 learner-owned build files、raw logs、CSV/chart artifacts 与 .ncu-rep reports'
+  - '只在管理员批准的非管理员策略下读取 NVIDIA GPU performance counters；本实验不授权 sudo、提权、setuid workaround、container escape 或 security-policy bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 在解释任何性能之前，一次 correctness-first unprofiled EX02 run 应当让全部 16,777,216 个元素通过独立 CPU reference、两项 tolerance 与所有 CUDA boundaries。
+    - 冻结的 source model 应当保持 16,777,216 次 counted FP32 additions、201,326,592 requested bytes 和 1/12 operation per byte 的 algorithmic intensity，且不把这些 bytes 改称 profiler traffic。
+    - Exact-GPU version、help、disabled config file、section、metric、CUPTI、report-write 与 non-admin counter gates 应当产生 qualifying evidence 或保留 blocker，不能产生零值替代品。
+    - 一次被排除的 direct-process warm-up 应当先于恰好十次按 acquisition order 完整保留、独立启动的 profiler attempts。
+    - Qualifying batch 应当为 selected vector_add kernel 给出精确 metric names、definitions、units、scopes、filters、replay effects、duration 与一个 declared memory level 的 traffic。
+    - 独立记录 provenance 的 compute ceiling 与 named memory-path bandwidth ceiling 应当在对齐后组成一个 Roofline，否则保持分离，不形成 hybrid roof。
+    - Qualifying run 应当从全部 retained values 生成并哈希原创 CSV、table 和 chart，同时把 VIS13 browser rendering 排除在 evidence chain 之外。
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0；Nsight Compute 2022.3.0.22；CUPTI 11.8.87'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / EX02 12.9.2 Lane；Nsight Compute 2025.2.1.3；CUPTI 12.9.79'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / EX02 13.3.1 Lane；Nsight Compute 2026.2.1.5；CUPTI 13.3.75'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric、replay、overhead、reproducibility、occupancy、stall、throughput 与 roofline semantics'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current query、kernel filter、collection、report、import、CSV 与 unit behavior'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute GUI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightCompute/index.html'
+    version: 'NVIDIA Nsight Compute GUI 2026.2.1'
+    platform: 'Current profiler report、metric details、roofline view 与 report inspection behavior'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1；2026.2 line 支持 CUDA 13.3'
+    platform: 'Current fixes、support 与 compatibility boundary'
+    accessDate: '2026-09-01'
+  - title: 'CUDA C++ Best Practices Guide - Bandwidth and Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3；bandwidth section 9.2 与 occupancy section 11.1'
+    platform: 'Theoretical/effective bandwidth distinctions、timing、verification 与 occupancy interpretation'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/index.html'
+    version: 'CUDA Programming Guide v13.3；2026-08-27 更新'
+    platform: 'CUDA execution、synchronization、global-memory、launch 与 compute-capability semantics'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI v2026.2.1；selected Lane components 11.8.87、12.9.79 与 13.3.75'
+    platform: 'Current compatibility、profiling、counter availability、overhead 与 subscriber boundaries'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Williams、Waterman 与 Patterson；Communications of the ACM 52(4)，2009；DOI 10.1145/1498765.1498785'
+    platform: '只支持 Roofline model；不继承 GPU-specific metric、ceiling 或 measurement prescription'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/labs/build-original-roofline/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,workload-model,manifest,source-review,build,correctness,ceilings,profiler-gates,warm-up,acquisition,report-custody,reduction,roofline-artifact,interpretation,observations,criteria-blockers,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q10 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q09,A14,EX02,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX02 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'error-checking,kernel,cpu-reference' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: '仅限 Native Linux；一张 CC 7.5+ CUDA GPU；匹配的 Nsight Compute 与 CUPTI；管理员批准的 non-admin counter access；201,326,592-byte canonical allocation；禁止 sudo 或 bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '180' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '201326592' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: '一张 CUDA device；执行 compiler、make、binary 与 ncu；写入 artifacts；管理员批准的 non-admin performance-counter access；禁止 sudo、提权或策略绕过' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '7 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '11' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3,13.3.1,2022.3.0.22,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75,2026.2.1,2009' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/build-original-roofline/" lang="en">Read the English counterpart</a>
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+LAB09 是一个在网站之外、仅在原生 Linux（Native Linux）上完成的实验（Lab）。它把 correctness-qualified canonical EX02 run 变成一份原创、可复核的 Roofline artifact。本页给出 measurement contract，不给出结果：compilation evidence 为空，runtime 保持待硬件验证（Pending Hardware Verification），recorded observations 为空。
+
+## 实验合同
+
+| 坐标 | 冻结要求 |
+| --- | --- |
+| 难度与时间 | 高级（advanced），约 180 分钟 |
+| 严格先修 | 恰好 Q10 |
+| 相关但不是先修 | Q09、A14、[EX02](/examples/vector-addition/)与 VIS13 |
+| 受支持环境（Supported Environment） | 仅 Native Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU |
+| 工具包通道（Toolkit Lane） | 在 `cuda-11.8`、`cuda-12.9` 或 `cuda-13.3` 中使用 C++17，并匹配 Nsight Compute 与 CUPTI |
+| 冻结工作负载 | 恰好 16,777,216 个 `float` 元素和一次 canonical `vector_add` launch |
+| Application allocation | 三个各 67,108,864 bytes 的 device vectors，总计恰好 201,326,592 bytes |
+| 权限 | 管理员批准的 non-admin performance-counter access；禁止 `sudo`、提权、setuid workaround、container escape 或策略绕过 |
+| 采集 | 一次被排除的 direct-process warm-up，然后恰好 10 次独立、完整保留的 profiler attempts |
+| 证据 | Compilation 为空；runtime 为 Pending Hardware Verification；recorded observations 为空 |
+
+Q09、A14、EX02 与 VIS13 只是相关资源，不增加先修边。Profiler UI 能画图不等于该图已经合格；本实验要求独立 ceiling provenance、retained samples、CSV、table、chart 与 hashes。
+
+## 先修检查
+
+1. 完成 Q10，能够在解释一个点之前对齐 operation convention、byte domain、duration scope、ceilings、ridge point 与 roof。
+2. 确认只有一张 selected device 可见，且至少为 CC 7.5。记录查询方法，不能只记产品名。
+3. 选择一个 C++17 Toolkit Lane 及其匹配的 Nsight Compute/CUPTI installation。相近版本必须记录成另一环境，不能静默借用 Lane 名称。
+4. 取得管理员批准的记录，允许当前非管理员账号访问 performance counters。没有授权就停止；LAB09 不把 `sudo ncu` 或其他绕过方式当成修复。
+5. 准备 learner-owned evidence directory，能够在不覆盖的前提下保存 reports、raw logs、statuses、hashes、manifest、CSV、table、chart 与 sanitization records。
+
+## 获取 canonical project
+
+[查看固定 public source/evidence commit 中的完整 EX02 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition)，或[下载同一提交的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip)。一种可复核的获取方式是：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+git checkout d69f7131acff7f8b1dfcd780b494426b5948735b
+cd examples/ex02-vector-addition
+```
+
+冻结 commit `d69f7131acff7f8b1dfcd780b494426b5948735b`、未修改的 canonical files、C++17、build arguments、binary hash、input generation、256-thread block size、launch、verifier 与所有 CUDA boundaries。Source、compiler option、workload、launch、input、device 或 profiler option 的任何变化都会建立另一项实验，不能继承本 batch。
+
+## 冻结 workload 与 byte models
+
+不可变坐标是：
+
+```yaml
+element_type: float
+element_count: 16777216
+bytes_per_element: 4
+device_vector_count: 3
+bytes_per_device_vector: 67108864
+maximum_device_allocation_bytes: 201326592
+algorithmic_fp32_additions: 16777216
+algorithmic_requested_bytes: 201326592
+algorithmic_intensity_operations_per_byte: 1/12 (~0.083333)
+```
+
+对于每个有效元素，canonical `vector_add` 在声明的 source-level device-memory boundary 请求两次 4-byte read 与一次 4-byte write。因此：
+
+- counted work 为 `16,777,216 x 1 = 16,777,216` 次 FP32 additions；
+- requested traffic 为 `16,777,216 x (4 + 4 + 4) = 201,326,592` bytes；
+- requested-byte arithmetic intensity 为 `16,777,216 / 201,326,592 = 1/12`，约 `0.083333` operations/byte。
+
+这是 **algorithmic requested-byte model**，不是 DRAM sectors、L2 traffic、L1/TEX traffic、cache hits、write allocation、compression、ECC effects 或其他 profiler-attributed physical traffic 的测量值。三个 allocations 的总字节数恰好等于 source-level read/read/write requests 的总字节数，只是本工作负载的算术巧合，不证明 allocation bytes 等于 transferred bytes。Profiler-owned replay storage 也不属于 canonical application 的 201,326,592-byte allocation；若工具暴露该值，必须另行记录。
+
+## 创建完整的未填写 Environment Manifest
+
+在任何执行之前保存下面的模板。每个 `<填写 ...>` 字段都必须来自本次实验的实际观察。只有同时写明原因时才可使用 `unavailable`、`not applicable` 或 `unknown`；下文指定的字段缺失仍是 blocker，绝不能用零代替缺失证据。
+
+```yaml
+subject: EX02 / LAB09
+source_repository:
+  source_commit: d69f7131acff7f8b1dfcd780b494426b5948735b
+  tree_url: https://github.com/xiangzhang-coding/cuda-learning-site/tree/d69f7131acff7f8b1dfcd780b494426b5948735b/examples/ex02-vector-addition
+  archive_url: https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip
+  acquisition_method: <填写精确命令或归档方式>
+  checkout_and_worktree_state: <填写；必须是精确提交且未修改>
+observation:
+  date_utc: <填写>
+  observer: <填写>
+supported_environment:
+  family: Native Linux
+  distribution: <填写>
+  version: <填写>
+  architecture: <填写>
+  kernel: <填写>
+gpu:
+  identity: <隐私复核后填写精确 identity>
+  selected_device_ordinal: <填写；恰好一个>
+  compute_capability: <填写；7.5 或更新>
+  compute_capability_query: <填写精确命令或 API>
+  visible_count: <填写>
+  used_count: 1
+driver:
+  exact_version: <填写>
+  query_command: <填写>
+toolkit:
+  lane: <填写 cuda-11.8 | cuda-12.9 | cuda-13.3>
+  exact_toolkit_version: <填写>
+  exact_component_versions: <填写 runtime、driver-facing components、Nsight Compute 与 CUPTI>
+  nvcc_version_output: <填写>
+  host_compiler_version_output: <填写>
+profiling_stack:
+  ncu_path: <填写>
+  ncu_version_output: <由本 executable 填写>
+  ncu_config_file_policy: disabled with --config-file off
+  ncu_config_file_control_result: <填写 actual help support、expanded argv、status 与 log SHA-256>
+  ncu_help_log_and_sha256: <填写>
+  ncu_list_sections_log_and_sha256: <填写>
+  ncu_query_metrics_log_and_sha256: <从 selected exact GPU 填写>
+  cupti_version: <填写>
+  cupti_observation_method: <填写 API、package、header 或 library query>
+  cupti_library_path_and_sha256: <填写>
+  compatibility_result: <填写 pass 或 blocker>
+build:
+  cxx_dialect: c++17
+  build_type_and_optimization: <填写>
+  architecture_targets: <填写>
+  debug_lineinfo_lto_flags: <填写>
+  link_mode: <填写>
+  environment_variables: <填写>
+  exact_ordered_commands_and_expanded_argv: <填写>
+  binary_path: build/ex02-vector-addition
+  binary_sha256: <填写>
+input:
+  generation_definition: <根据 source review 填写>
+  external_dataset_or_seed: none; deterministic canonical generation
+workload:
+  element_type: float
+  element_count: 16777216
+  algorithmic_fp32_additions: 16777216
+  algorithmic_requested_bytes: 201326592
+  algorithmic_intensity_operations_per_byte: 1/12 (~0.083333)
+allocation:
+  vector_count: 3
+  bytes_per_vector: 67108864
+  canonical_application_device_bytes: 201326592
+  profiler_owned_or_other_device_bytes: <若可观察则另行填写>
+launch:
+  selected_kernel: vector_add
+  block_threads: 256
+  grid_blocks: 65536
+  stream_and_context: <填写>
+  exact_launch_count_per_process: 1
+permissions:
+  device_access_result: <填写>
+  executable_and_filesystem_access: <填写 learner-owned paths>
+  administrator_policy_owner: <填写>
+  non_admin_counter_approval_record: <填写>
+  actual_counter_access_result: <填写 pass 或精确 denial>
+  privilege_escalation: prohibited; no sudo or bypass
+execution_isolation:
+  cuda_visible_devices: <填写>
+  selected_device_state: <填写>
+  bare_metal_vm_container: <填写>
+  container_image_and_digest: <填写或 not used>
+  mig_state: <填写>
+  mps_state: <填写>
+  concurrent_gpu_and_cpu_load: <填写 processes 与 exclusion policy>
+  clocks_and_persistence_policy: <填写>
+  power_limit_and_policy: <填写>
+  thermal_state_before_and_after: <填写>
+commands:
+  build: <填写精确命令>
+  correctness: <填写精确命令>
+  profiler_queries: <填写精确命令>
+  direct_process_warm_up: <填写精确命令>
+  profiler_attempts: <填写 attempts 01..10 的精确 expanded argv>
+correctness:
+  oracle: independent canonical CPU reference
+  absolute_tolerance: 1e-5
+  relative_tolerance: 1e-5
+  all_elements_checked: <填写>
+  all_cuda_boundaries: <填写>
+  unprofiled_exit_status: <填写>
+  warm_up_exit_status: <填写>
+  each_profiled_process_result: <填写 attempts 01..10>
+completion_boundary:
+  canonical_explicit_cudaDeviceSynchronize: required
+  synchronization_result: <填写>
+  kernel_duration_scope: <填写精确 report definition 与 boundary>
+warm_up:
+  count: 1
+  process_mode: direct unprofiled process
+  excluded_from_retained_samples: true
+  purpose_and_limit: <填写；不会消除 fresh-process 或 profiler first-use effects>
+repetition_plan:
+  independent_profiler_attempts: 10
+  acquisition_order: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10]
+  raw_sample_retention: all attempts, no deletion
+  statistic: median
+  spread: min and max
+  outlier_policy: no post-hoc exclusion; any invalid attempt invalidates the full batch
+  invalid_batch_policy: retain it and create a new unique full 10-attempt batch
+kernel_selection:
+  exact_reported_name: <填写识别 canonical vector_add 的 name>
+  kernel_name_basis: <根据 actual ncu help 填写>
+  filter: <填写 exact filter>
+  launch_filter: <填写 exact one-launch rule>
+collection:
+  selected_section: <填写一个 queried minimal section 或 not used>
+  selected_metrics: <填写 minimal queried list 或 not used>
+  minimality_rationale: <填写>
+  exact_metric_names: <从 exact-GPU query/report 填写；禁止借用 architecture 名称>
+  metric_definitions: <填写 owner/report definitions>
+  metric_units: <填写 unscaled base units 与 displayed units>
+  metric_scopes: <填写 kernel、device、unit、instance 与 aggregation>
+  metric_filters: <填写 device、process、context、stream、kernel 与 launch>
+  traffic_memory_level_and_path: <填写精确 named level/path；不预填 path>
+  traffic_metric_and_definition: <填写 exact bytes metric>
+  duration_metric_and_definition: <填写 exact kernel duration>
+  operation_count_source: frozen canonical algorithmic count
+replay:
+  requested_mode: <根据 actual help 填写>
+  actual_mode: <填写>
+  pass_count_per_attempt: <填写>
+  save_restore_and_cache_control: <填写>
+  clock_control_and_serialization: <填写>
+  measured_perturbation_boundary: <填写 report values 能和不能代表什么>
+ceilings:
+  compute:
+    operation_domain_and_precision: <填写与 workload 对齐的 FP32 operation convention>
+    value_and_unit: <填写 decimal Gop/s；不预填数值>
+    provenance_class: <填写 calibrated-measured | modeled-theoretical-tool-reported>
+    benchmark_source_commit_binary_hash: <calibrated measured 时填写，否则 not applicable>
+    correctness_qualification_method: <calibrated measured 时填写，否则 not applicable>
+    method_commands_repetitions_raw_samples_statistic: <calibrated measured 时填写，否则 not applicable>
+    exact_owner_or_report_provenance: <modeled/theoretical/tool-reported 时填写，否则 not applicable>
+  bandwidth:
+    named_memory_path: <填写精确 path，例如实际选择的 level；不预填 path>
+    value_and_unit: <填写 decimal GB/s；不预填数值>
+    provenance_class: <填写 calibrated-measured | modeled-theoretical-tool-reported>
+    benchmark_source_commit_binary_hash: <calibrated measured 时填写，否则 not applicable>
+    correctness_qualification_method: <calibrated measured 时填写，否则 not applicable>
+    method_commands_repetitions_raw_samples_statistic: <calibrated measured 时填写，否则 not applicable>
+    exact_owner_or_report_provenance: <modeled/theoretical/tool-reported 时填写，否则 not applicable>
+  alignment_audit: <填写相同 provenance class、precision、memory path、decimal units 与 scope，否则不组合>
+derived_values:
+  profiler_attributed_traffic_bytes: <从 exact metric 填写或 blocker>
+  profiler_attributed_intensity_operations_per_byte: <填写 operation count / attributed bytes 或 blocker>
+  requested_byte_model_intensity_operations_per_byte: 1/12 (~0.083333)
+  duration_seconds: <从 exact duration metric 填写>
+  achieved_gops: <填写 16777216 / duration_seconds / 1e9>
+  compute_ceiling_gops: <填写 aligned ceiling>
+  bandwidth_ceiling_gbytes_per_second: <填写 aligned named-path ceiling>
+  ridge_operations_per_byte: <填写 compute_ceiling_gops / bandwidth_ceiling_gbytes_per_second>
+  roof_gops: <填写 min(compute_ceiling_gops, intensity * bandwidth_ceiling_gbytes_per_second)>
+attempt_records:
+  report_paths_and_sha256: <填写 01..10>
+  raw_stdout_stderr_paths_and_sha256: <填写 01..10>
+  exit_statuses: <每条 command 与 attempt 各填一项>
+  acquisition_ledger: <填写 order、start/end time 与 immutable attempt identity>
+artifacts:
+  csv_path_and_sha256: <填写>
+  table_path_and_sha256: <填写>
+  original_chart_path_and_sha256: <填写>
+  chart_source_or_generation_command_and_sha256: <填写>
+custody:
+  private_original_directory: <填写 immutable learner-controlled path>
+  observer_and_transfer_history: <填写>
+  report_log_manifest_artifact_hash_ledger: <填写>
+  derived_exports_and_parent_hashes: <填写>
+  retention_and_access_policy: <填写>
+sanitization:
+  public_derivative_planned: <填写 yes 或 no>
+  reviewer_and_date: <填写>
+  removed_coordinates: <填写 user、host、device serial、paths、network 或 none>
+  transformations: <填写>
+  original_to_derivative_hash_mapping: <填写>
+criteria_result:
+  correctness_gate: <填写>
+  environment_and_permission_gate: <填写>
+  ceiling_provenance_and_alignment_gate: <填写>
+  ten_attempt_batch_gate: <填写>
+  metric_scope_and_replay_gate: <填写>
+  original_artifact_gate: <填写>
+  interpretation_gate: <填写>
+  evidence_status_candidate: <只在独立复核后填写>
+```
+
+这份 manifest 刻意比 product/version list 更完整。没有 workload identity、completion boundary、isolation、metric scope、replay、repetition、ceiling provenance、raw samples 与 artifact custody，性能结论就无法解释。
+
+## 复核 canonical source
+
+Canonical error boundary 只从 EX02 展示：
+
+<CanonicalCode exampleId="EX02" range="error-checking" />
+
+Selected kernel 与 bounds guard 只从 EX02 展示：
+
+<CanonicalCode exampleId="EX02" range="kernel" />
+
+Independent CPU reference 与 tolerance predicate 只从 EX02 展示：
+
+<CanonicalCode exampleId="EX02" range="cpu-reference" />
+
+16,777,216 个元素、每 block 256 threads 时，source contract 给出恰好 65,536 blocks，没有 partial final block。Static review 只建立 algorithmic count 与 requested-byte model，不建立 elapsed time、cache traffic、DRAM traffic、occupancy、stalls、throughput、ceiling 或 bottleneck。
+
+## 构建并哈希 binary
+
+使用 canonical C++17 stages，为每条命令保存 stdout、stderr、expanded argv 与 exit status：
+
+```sh
+mkdir -p lab09-evidence/{gates,correctness,warm-up,batches,ceilings,derived}
+make preprocess DIALECT=c++17 BUILD_DIR=build
+make compile DIALECT=c++17 BUILD_DIR=build
+make link DIALECT=c++17 BUILD_DIR=build
+make inspect DIALECT=c++17 BUILD_DIR=build
+make host-test DIALECT=c++17 BUILD_DIR=build
+sha256sum build/ex02-vector-addition
+```
+
+任一 stage 失败都是 blocker。Learner build 与 host-only test 不会填充 LAB09 的空 compilation axis；固定 EX02 项目已有的 Compile-Checked records 有自己独立的 scope。
+
+## Profiling 前先通过 correctness
+
+不使用 profiler，直接运行冻结工作负载：
+
+```sh
+./build/ex02-vector-addition 16777216 \
+  >lab09-evidence/correctness/unprofiled.stdout.log \
+  2>lab09-evidence/correctness/unprofiled.stderr.log
+status=$?
+printf '%s\n' "$status" >lab09-evidence/correctness/unprofiled.status
+```
+
+解释任何性能之前，下列条件必须全部通过：
+
+1. 三次 `cudaMalloc` 与两次 H2D copy 全部通过。
+2. Launch boundary 与 `cudaGetLastError` 通过。
+3. Canonical path 中显式的 `cudaDeviceSynchronize` 通过，并在后续 host work 前建立 completion boundary。
+4. D2H copy 与三次 `cudaFree` 全部通过。
+5. Independent CPU reference 检查全部 16,777,216 个 outputs。只有 absolute difference `<= 1e-5` 或 relative difference `<= 1e-5 * max(abs(expected), abs(actual))` 时才接受该元素。
+6. Process status 为零，且 retained logs 与 criterion record 一致。
+
+任何 failure 都会阻断所有 duration、traffic、Gop/s、intensity、ceiling、roof、occupancy、stall、throughput、bottleneck 或 speedup interpretation。只看到一行 `PASS` 不足以替代 boundary records 与 independent comparison contract。
+
+## 独立记录两个 ceilings
+
+记录一个 compute ceiling 和一个具有精确名称的 memory path 的 bandwidth ceiling。每个 ceiling 只能独立采用以下一种 provenance class：
+
+1. **Calibrated measured ceiling：** 一项另行通过 correctness 的 benchmark，具有公开或已保留的 source identity、source commit、binary hash、精确 method/commands、workload、repetitions、acquisition order、全部 raw samples、statistic、匹配的 device/environment 与 operation/byte convention。
+2. **Modeled、theoretical 或 tool-reported ceiling：** 明确标记为非 measured value，并具有精确 NVIDIA owner-document coordinate 或 exact report field、report hash、definition、precision、path、unit 与 scope。
+
+不得静默把 theoretical 或 tool-reported value 称为 measured。不得把 provenance class、precision convention、memory path、decimal/binary units、device scope 或 operating conditions 不同的 ceilings 合成同一个 ridge 或 roof。如果两个分别有效的记录无法对齐，就保留二者，但不计算 hybrid roofline。Tool roofline display 可以辅助检查，却不是自证 provenance。
+
+若要合成 chart，compute ceiling 必须采用与 workload 相同的 FP32 operation-count convention。尤其不能把 FMA 计为两次 operation 的 convention 静默混入本实验每元素一次 addition 的计数。Bandwidth ceiling 必须命名与 traffic point 相同的 memory path 与 byte unit。
+
+## 通过 exact-GPU profiler 与 permission gates
+
+在 warm-up 与 batch 之前，在 selected device 上运行下列 gates，并分别保存 stdout、stderr、exit status 与 SHA-256：
+
+```sh
+ncu --config-file off --version
+ncu --config-file off --help
+ncu --config-file off --list-sections
+ncu --config-file off --devices 0 --query-metrics --query-metrics-mode all
+```
+
+Nsight Compute 2026.2.1 默认会在 current working directory 与 Linux 的 `$HOME/.config/NVIDIA Corporation` 查找 `config.ncu-cfg`，并把其中参数与 command line 合并。LAB09 必须在 version/help/list/query 和十次采集的每条 `ncu` argv 中显式使用 `--config-file off`，同时保留 actual help support、expanded argv、status 与 log hash。若 selected Lane 的 actual help 不支持该 option，就记录 blocker，不得让未记录的 user config 改变 section、metric、filter 或 replay contract。
+
+Actual executable 的 version 与 help 决定其余 syntax。Section 必须出现在本 installation 的 list 中，每个 metric 必须来自针对这张 exact GPU 的 query。禁止从本页、另一张 GPU、screenshot、blog 或 documentation example 复制 architecture metric names。只能从 actual query/report evidence 记录 exact names、definitions、units、scopes、aggregation、instance behavior 与 filters。
+
+确认 selected Lane 的 actual Nsight Compute/CUPTI versions、compatible driver、report-directory writes 与管理员批准的 non-admin performance-counter result。`ERR_NVGPUCTRPERM`、其他 denial、unavailable 或 `n/a` metric、unsupported query、CUPTI mismatch、缺失 `.ncu-rep` 或 report 不可写都是 blocker，绝不是 numeric zero。保留 blocker。管理员可以在实验之外修复 policy，之后必须建立新的 unique batch；不得使用 `sudo` 或绕过策略。
+
+选择一个 minimal queried section，或选择更短且足以取得 selected-kernel duration 与某一 declared memory level traffic bytes 的 explicit queried metric list。只有预先声明的问题确实需要时，才加入 queried occupancy、stall-reason 或 throughput metric。不得用 `--set full` 替代 measurement plan。
+
+## 执行一次被排除的 direct-process warm-up
+
+Correctness 与全部 precollection gates 通过后，额外直接启动恰好一次不带 profiler 的 process：
+
+```sh
+./build/ex02-vector-addition 16777216 \
+  >lab09-evidence/warm-up/direct.stdout.log \
+  2>lab09-evidence/warm-up/direct.stderr.log
+status=$?
+printf '%s\n' "$status" >lab09-evidence/warm-up/direct.status
+```
+
+这一次 warm-up 必须通过同样的 correctness criteria，并从所有 retained performance statistics 中排除。它可以暴露本机的 process/module initialization，但不能证明后续 fresh profiler processes 已经没有 first-use effects。不要在 attempts 中加入隐藏 warm-up，也不要把 attempt 01 丢弃成第二次 warm-up。
+
+## 采集恰好十次独立 profiler attempts
+
+在 attempt 01 之前冻结 batch ID、exact command、selected exact `vector_add` kernel filter、一个 queried section **或** minimal queried metrics、replay mode、cache/clock controls、device、environment 与 acquisition order。用 captured help 验证每个 option。Command shape 是：
+
+```sh
+batch_id='<填写 unique batch id>'
+kernel_filter='vector_add'
+collection_args=(<填写 --section NAME 或 --metrics NAME1,NAME2,... 二选一>)
+
+for attempt in 01 02 03 04 05 06 07 08 09 10; do
+  attempt_dir="lab09-evidence/batches/${batch_id}/${attempt}"
+  mkdir -p "$attempt_dir"
+  report_base="${attempt_dir}/vector-add"
+  test ! -e "${report_base}.ncu-rep" || exit 1
+  ncu --config-file off \
+    --devices 0 \
+    --kernel-name-base function \
+    --kernel-name "$kernel_filter" \
+    --launch-count 1 \
+    --replay-mode kernel \
+    "${collection_args[@]}" \
+    --export "$report_base" \
+    ./build/ex02-vector-addition 16777216 \
+    >"${attempt_dir}/profile.stdout.log" \
+    2>"${attempt_dir}/profile.stderr.log"
+  status=$?
+  printf '%s\n' "$status" >"${attempt_dir}/profile.status"
+  if [ -f "${report_base}.ncu-rep" ]; then
+    sha256sum "${report_base}.ncu-rep" >"${attempt_dir}/report.sha256"
+  fi
+done
+```
+
+这只是 command shape，不表示每个 Lane 都必然支持这里的每一种 spelling。如果 captured help 要求 owner-supported equivalent，必须在 attempt 01 前冻结并记录。每个 attempt 都是一次新的 `ncu` invocation 与新的 application process；一份 report 内的 replay passes 不是 independent attempts。
+
+完整 batch 包含按 `01..10` 顺序尝试的恰好十次 invocations。保留所有目录，不得覆盖或删除不方便的 sample。十次 attempt 都必须分别满足 source/binary/environment identity、selected device、恰好一个 intended reported `vector_add`、correctness、zero statuses、report existence、metric availability、scope 与 replay records。任一 attempt 无效，则整个 batch 无效。保留该 batch，另采集一个具有新名称的完整十次 batch；不得替换单行、合并 batches 或缩小分母。
+
+## 保留 report custody 与 replay effects
+
+对每个 `.ncu-rep` 记录 report SHA-256、exact command、process/application status、selected reported kernel name、device/context/stream 与 launch filters、metric names/definitions/units/scopes、pass count、requested/actual replay mode、save/restore、cache control、clock control、serialization 与其他 perturbation。把 query/help logs 与全部 stdout/stderr/status files 保存在 report 旁边。
+
+Nsight Compute 会插入 measurement libraries；由于 counters 不一定能在一个 pass 内同时收集，它还可能 replay selected kernel。Kernel replay 可以保存和恢复 accessible memory，collection choices 会改变 pass count 与 overhead。因此 profiled duration 必须附带 exact report definition 与 perturbation boundary，不能静默等同于 direct unprofiled process。Report 是 primary artifact；CSV exports、screenshots、copied cells 与 GUI views 都是绑定其 hash 的 derivatives。
+
+## 只归约 qualifying batch
+
+对每个 qualifying attempt，从 retained report 与 frozen model 取得以下对齐输入：
+
+| Quantity | 必需 source 与 scope |
+| --- | --- |
+| Operation count | 来自 pinned canonical source 的恰好 16,777,216 次 algorithmic FP32 additions |
+| Traffic | Declared named memory level/path 上一个 exact queried byte metric，附 definition、aggregation 与 scope |
+| Duration | 一个 exact selected-kernel duration metric 与 completion/scope definition |
+| Achieved rate | `16,777,216 / duration_seconds / 1e9` decimal Gop/s |
+| Attributed intensity | `16,777,216 / profiler_attributed_traffic_bytes` operations/byte |
+| Requested-byte model | `1/12`，约 `0.083333` operations/byte，标记为 model-only |
+| Ceilings | 独立记录 provenance 且已经对齐的 compute Gop/s 与 named-path bandwidth GB/s |
+| Ridge | `compute_ceiling_Gop/s / bandwidth_ceiling_GB/s` operations/byte |
+| Roof | `min(compute_ceiling_Gop/s, intensity x bandwidth_ceiling_GB/s)` Gop/s |
+
+除非先显式转换另一组单位，否则 Gop/s 与 GB/s 都采用 decimal `1e9`。如果 exact traffic metric 不可用，只能把 201,326,592 requested bytes 保留为 algorithmic model input。不得将其改称 profiler-attributed DRAM/cache traffic，也不得声称 measured traffic intensity。缺少必需 measured traffic 会阻断 qualifying measured roofline batch。
+
+只有全部十次 attempts 都合格时，才可以对每项 retained quantity 报告 median 与 min/max range。不得发布 mean、standard deviation、percentile、confidence interval 或经过 outlier filtering 的 subset，除非另一个单独规定的实验需要这些统计量。冻结的 LAB09 statistic 是 median 加 min/max，且不得删除 sample。
+
+## 生成并哈希原创 artifact
+
+创建原创 CSV，按照 acquisition order 为每个 retained attempt 保留一行。至少保留下列 schema：
+
+```csv
+batch_id,attempt_id,acquisition_order,report_sha256,kernel_name,traffic_metric,memory_path,traffic_bytes,duration_metric,duration_seconds,algorithmic_fp32_additions,achieved_gops,attributed_intensity_ops_per_byte,requested_model_intensity_ops_per_byte,compute_ceiling_gops,bandwidth_ceiling_gbytes_per_second,ceiling_provenance,ridge_ops_per_byte,roof_gops,qualifying
+```
+
+随后从该 CSV 生成原创 human-readable table 与 chart。Chart 必须展示全部十个 points 或无歧义的 retained-sample representation、median、min/max、两个 aligned ceilings、ridge、roof、operation/byte 与 Gop/s units、named memory path、provenance class、batch ID，以及 requested-model 与 profiler-attributed 的区别。保留 chart-generation source 或 exact command。
+
+```sh
+sha256sum \
+  lab09-evidence/derived/lab09-roofline.csv \
+  lab09-evidence/derived/lab09-roofline-table.md \
+  lab09-evidence/derived/lab09-roofline-chart.svg \
+  lab09-evidence/derived/chart-generation-source
+```
+
+VIS13 可以用来检查 **同一组 retained values**。它的 browser rendering 不执行 CUDA、不采集 counters，既不是本实验的 original observed chart，也不是 evidence。VIS13 screenshot 不能替代 CSV、table、chart、source/command、hashes 或 `.ncu-rep` custody。
+
+## 只在 declared roof 内解释
+
+- 如果 intensity 低于 aligned ridge，只能把点描述成**相对于 declared ceiling pair 与 named memory path**位于 bandwidth side。
+- 如果 intensity 高于 ridge，只能在同一个 bounded model 中描述成 compute side。点位于 ridge 时，不强行归类某一侧。
+- 点低于 roof 仍留下其他解释：latency、insufficient parallelism、launch shape、instruction issue、cache behavior、memory transactions、clock/power/thermal state、concurrent load、replay 或 metric mismatch 都可能存在。Roofline 本身不能从中自动选择原因。
+- 点高于 roof 时启动 mismatch audit，而不是庆祝性能突破：重新检查 operation convention、byte level/path、units、ceiling provenance/precision、duration scope、report/filter identity、aggregation、replay 与 transcription。
+
+Occupancy、stall reasons 与 throughput 是三类不同的 evidence。采集其中任何一项，都必须保留 exact metric name、definition、unit、scope、aggregation、filter 与 report hash。Occupancy 在声明的 definition 下描述 resident/active-warp capacity 或 achieved behavior；maximum occupancy 不是自动优化目标。Stall reasons 在精确定义下描述 sampled 或 aggregated scheduler states；较大 share 不会自动诊断 bottleneck。Throughput 把 achieved activity 与特定 denominator/scope 对比；percentage 不会自动指出 root cause。三者不得互换，也不能在没有独立 controlled test 时变成 bottleneck verdict。
+
+LAB09 不进行 baseline/candidate comparison，也不报告 speedup。后续优化若要测试，必须另建 correctness-qualified contract，不能从本 chart 推导。
+
+## 预期观察，不是已记录结果
+
+- Correctness-first unprofiled run 应当在 profiling 前通过所有 CUDA boundaries 与 independent CPU comparison。
+- Source model 应当保持恰好 16,777,216 次 FP32 additions、201,326,592 requested bytes 与 `1/12` operations/byte。
+- Exact-GPU queries 与 non-admin permission checks 应当产生 qualifying evidence 或 retained blocker，不能产生 guessed metric 或 zero。
+- 恰好一次被排除的 direct-process warm-up 应当先于一个包含十次 retained attempts 的 fresh-process batch。
+- Qualifying batch 应当按 acquisition order 保留十份 `.ncu-rep`，以及完整 replay、scope、status 与 hash records。
+- 对齐后的 ceiling records 应当在不混合 provenance、precision、path 或 units 的前提下支持 bounded ridge 与 roof。
+- Final CSV、table 与 original chart 应当能从 retained report values 重建，并具有 SHA-256 custody。
+
+这些都是 expectations，不是 observations。`recordedObservations` 仍为空。本站没有发布 measured ceiling、traffic、duration、Gop/s、intensity、roof、occupancy、stall、throughput、bottleneck 或 speedup value。
+
+## 验收标准与 blockers
+
+只有以下 criteria 全部通过，Lab record 才完整：
+
+1. Pinned source、C++17 build、binary hash、frozen workload、one device 与 full manifest 一致。
+2. Unprofiled correctness 与一次 excluded warm-up 通过全部 independent-reference、tolerance、CUDA-boundary、synchronization 与 process-status checks。
+3. Exact `ncu` version/help、`--config-file off`、list/query、matching CUPTI、administrator-approved non-admin access 与 report writes 通过。
+4. 两个 ceilings 分别具有 admissible provenance，并为 displayed roof 对齐 operation convention、precision、path、scope 与 units。
+5. 一个 unique batch 包含恰好十次 independent attempts，全部保留且全部合格；median 与 min/max 使用全部十次。
+6. 每个 point 都有 selected exact `vector_add` identity、minimal queried section/metrics、exact traffic/duration semantics、replay effects、`.ncu-rep` hash、raw logs 与 statuses。
+7. Original CSV、table、chart、generation record、hashes、interpretation 与 sanitization/custody ledger 一致。
+
+Blockers 包括任何 correctness failure；source/binary/workload drift；额外或模糊的 GPU；permission denial；version/CUPTI incompatibility；`--config-file off` 不可用或缺失；unavailable、`n/a` 或 undefined metric；missing report；错误 kernel 或 launch count；invalid attempt；mixed batches；缺少 raw sample；不兼容的 ceiling provenance/precision/path/unit；把 requested bytes 改称 profiler traffic；缺少 hash/custody；或 above-roof point 未经 audit。不得通过填零、删除 sample、修改 value 或降低 contract 来修复 blocker。
+
+## 分开维护 evidence axes
+
+| Axis | 当前状态 | 边界 |
+| --- | --- | --- |
+| Compilation | 空 | EX02 自己的 pinned Compile-Checked records 不会让 LAB09 变成 Compile-Checked |
+| Runtime | Pending Hardware Verification | LAB09 尚无 maintainer-controlled Reference Environment qualifying run |
+| Recorded observations | 空 | Formulas、commands、queries、expectations、browser visuals 与 unfilled templates 不是 measured results |
+
+完整 learner run 若带有 Environment Manifest 与 logs，可以接受 Community-Observed review；但在 maintainer 使用已声明 Reference Environment 复现 criteria 之前，它不是 Runtime-Verified。Page metadata 不会自动升级。
+
+## 清理但不销毁证据
+
+首先保存 manifest、source/binary hashes、全部 query/help output、permission records、direct-run logs、每个 attempted batch（包括 invalid batches）、全部 `.ncu-rep` files、raw outputs/statuses、ceiling records、CSV/table/chart/source、hash ledger、custody history 与 sanitization mapping。然后只清理可重建的 canonical build directory：
+
+```sh
+make clean BUILD_DIR=build
+```
+
+不要只保留 screenshots 或 summaries。不要公开 credentials、user/host identifiers、device serials、private absolute paths、network coordinates、administrator records 或未经复核的 reports。Sanitized derivative 必须保留 private original hash、parent mapping、reviewer、date 与 exact transformations。
+
+## 来源与复核
+
+- Selected [CUDA 11.8](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)、[CUDA 12.9 Update 1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html)与 [CUDA 13.3 Update 1](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) release notes 提供 Toolkit、bundled Nsight Compute 与 CUPTI Lane coordinates。这些坐标是 provenance，不是 learner machine observation。
+- Current [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)、[CLI Guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)、[GUI Guide](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html)与 [2026.2.1 Release Notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1)定义 current config-file、metric、query、filter、replay、overhead、report、roofline-view 与 support boundaries。Current CLI 的 config-file contract 说明默认搜索 `config.ncu-cfg`，并允许用 `--config-file off` 禁用；current pages 标识 v2026.2.1，2026.2 line 加入 CUDA 13.3 support。
+- [CUDA C++ Best Practices Guide v13.3](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)区分 theoretical/effective bandwidth，要求正确 timing boundaries，并定义 occupancy，但不把 maximum occupancy 当成普遍目标。
+- [CUDA Programming Guide v13.3](https://docs.nvidia.com/cuda/cuda-programming-guide/index.html)约束 asynchronous launch、explicit synchronization、memory 与 compute-capability semantics；owner page 于 2026-08-27 更新。
+- Current [CUPTI v2026.2.1 Usage Guide](https://docs.nvidia.com/cupti/main/main.html)约束 compatibility、counter availability、profiler behavior 与 overhead boundaries。
+- Williams、Waterman 与 Patterson 的 [Roofline paper](https://doi.org/10.1145/1498765.1498785)只支持 operational intensity、ceilings 与 attainable performance 之间的 model。它不提供 LAB09 的 GPU metrics、byte path、ceiling values、workload counts、measurement method 或 observations。
+
+Context7 IDs `/websites/nvidia_cuda` 与 `/websites/nvidia_nsight-compute_nsightcompute` 只用于 discovery 与 cross-check。上面链接的精确 NVIDIA owner documentation 与 release notes 才是 interface、version 与 tool semantics 的权威坐标；DOI record 是论文坐标的权威来源。全部来源核查于 **2026-09-01**。本实验的 workload ledger、manifest、gates、sample policy、CSV schema、chart requirements 与 interpretation rules 都是 CC BY 4.0 原创内容；没有复制或虚构 private material、profiler report、result table、chart、metric value 或 benchmark result。
+
+**事实核查日期：2026-09-01。** Compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。

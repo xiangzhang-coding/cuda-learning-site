@@ -1,0 +1,139 @@
+---
+title: 'Roofline Model: Declared Ceilings, Ridge, and Workload Point'
+description: Derive one Roofline from four declared decimal inputs and retain a point above the declared roof as a deterministic mismatch-audit state.
+pairId: vis13
+counterpart: /visuals/roofline/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - declared-inputs
+  - model-rule
+  - mismatch-audit
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS13
+prerequisites:
+  - Q10
+relatedUnits:
+  - Q09
+  - A14
+  - LAB09
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA C++ Best Practices Guide: Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide 13.3'
+    platform: 'Theoretical and effective bandwidth, decimal GB/s, bytes read and written'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute UI User Manual: Rooflines'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#rooflines'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current GUI Rooflines report page, chart interaction, and hierarchical-ceiling scope'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Profiling Guide: Roofline Charts'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts'
+    version: 'NVIDIA Nsight Compute Profiling Guide 2026.2.1'
+    platform: 'Arithmetic intensity, logarithmic axes, bandwidth boundary, compute boundary, and ridge point'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Communications of the ACM 52(4), 65-76 (2009)'
+    platform: 'Original model only; no current NVIDIA metric, product, or device value'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis13 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/visuals/roofline/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,declared-inputs,model-rule,mismatch-audit,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q10 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q09,A14,LAB09' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1,2009' }
+---
+
+import RooflineExplorer from '../../../../components/RooflineExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/roofline/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+After Q10, use VIS13 to build a bounded single-Roofline mental model: declare a compute ceiling `Pcompute`, path-bandwidth ceiling `Bpath`, arithmetic intensity `I`, and workload rate, then distinguish the bandwidth-side model region, ridge, and compute-side model region. Q09, A14, and LAB09 are related follow-on resources; they are not additional prerequisites for this page.
+
+<RooflineExplorer locale="en" />
+
+## Declared inputs
+
+The four controls preserve raw strings and derive a result only when Apply is invoked:
+
+- **Declared compute ceiling:** `100` through `100000 Gop/s`.
+- **Declared bandwidth ceiling:** `10` through `10000 decimal GB/s`, where `1 GB = 10^9 bytes`.
+- **Arithmetic intensity:** `0.01` through `10000 operations/byte`.
+- **Achieved workload rate:** `0.01` through `100000 Gop/s`.
+
+The defaults `12000 Gop/s`, `800 decimal GB/s`, `8 operations/byte`, and `5600 Gop/s` are synthetic teaching inputs. They do not come from a GPU specification, profiler report, benchmark, or runtime observation. The page strictly rejects empty strings, surrounding whitespace, exponent notation, `NaN`, `Infinity`, nonpositive numbers, and out-of-range values. Invalid input never retains geometry from the preceding live chart.
+
+## Deterministic model rule
+
+Because `operations/byte × 10^9 bytes/second = 10^9 operations/second`, this page can multiply `I × Bpath` directly to obtain `Gop/s`. The model performs only these derivations:
+
+- `ridge intensity = Pcompute / Bpath`
+- `workload roof = min(Pcompute, I × Bpath)`
+- `I < ridge` is the bandwidth-side model region, `I = ridge` is the ridge, and `I > ridge` is the compute-side model region.
+- Comparing workload rate with workload roof yields below, on, or above the declared roof.
+
+The SVG uses a fixed `0 0 720 420` viewBox and fixed log-like coordinate domains. A sloped solid line, horizontal dashed line, ridge diamond, crossed workload circle, direct visible text, and semantic table carry the structure, so color is never the only cue. This model has one declared compute/bandwidth ceiling pair. It does not impersonate current Nsight Compute metric definitions or hierarchical rooflines.
+
+## Mismatch audit
+
+A point above the declared roof remains a valid, repeatable `above-declared-roof` state. It means the four inputs disagree and calls for an audit of units, operation-counting rule, memory path, ceiling scope, and provenance. The browser neither clips the point silently, changes the inputs, nor rejects it as “impossible GPU evidence.” A model region also does not identify the actual limiting cause of a workload.
+
+## Static fallback
+
+The server permanently renders an original inline SVG, formula, and eight-row semantic table for the synthetic defaults. Controls and the live workbench remain `hidden` in source HTML; the custom element reveals them only after locating every part and deriving a valid initial view. The static SVG and table remain under no JavaScript, a 390-pixel viewport, reduced motion, increased contrast, forced colors, and print. Print hides the controls and live chart.
+
+## Evidence boundary
+
+VIS13 executes no CUDA, reads no GPU, invokes no profiler, and observes no workload. Even if a user enters measured values, that browser action grants no Evidence Status. A measured point must be carried by a qualifying LAB09 Environment Manifest, counting rules, logs, and provenance. Compilation, runtime, expected-observation, and recorded-observation arrays are empty.
+
+## Sources
+
+The [CUDA C++ Best Practices Guide 13.3 bandwidth chapter](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) distinguishes theoretical and effective bandwidth, gives the decimal-GB/s formula `((Br + Bw) / 10^9) / time`, and requires theoretical and effective values to use the same divisor. The [Nsight Compute UI Rooflines page](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#rooflines) records the current 2026.2.1 GUI report's Rooflines section, hierarchical ceilings, and chart controls. The [Profiling Guide 2026.2.1 Roofline Charts chapter](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts) defines arithmetic intensity, logarithmic axes, the sloped memory-bandwidth boundary, flat peak-performance boundary, and ridge point.
+
+The Williams, Waterman, and Patterson [original Roofline paper](https://doi.org/10.1145/1498765.1498785) supports only the performance model's history and basic construction. It supports no current CUDA metric, NVIDIA product capability, or default on this page. Context7 `/websites/nvidia_cuda` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for retrieval cross-checking on 2026-09-01; the NVIDIA owner pages and DOI record above are the factual coordinates. No paper or NVIDIA figure, screenshot, table, metric value, or layout is copied. The SVG, copy, input bounds, and interaction are original.
+
+**Fact checked: 2026-09-01.**

@@ -1,0 +1,221 @@
+---
+title: 'Q09：用 Occupancy、Stalls 与 Throughput 解释延迟隐藏'
+description: 区分理论与实际 occupancy、active/eligible/issued warps、scheduler stalls、latency、throughput 与资源上限，并建立不从单个百分比跳到瓶颈结论的查询合同。
+pairId: q09
+counterpart: /en/correctness/occupancy-stalls-throughput/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - occupancy-definition
+  - theoretical-achieved
+  - resource-limits
+  - scheduler-states
+  - latency-throughput
+  - interpretation-guardrails
+  - query-contract
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q09
+prerequisites:
+  - Q08
+  - F08
+relatedUnits:
+  - Q10
+  - LAB09
+  - VIS13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current occupancy definition, latency-hiding role, and occupancy-calculation guidance'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide v13.3 - Writing SIMT Kernels'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current device-property, register, shared-memory, and launch-resource coordinates'
+    accessDate: '2026-09-01'
+  - title: 'CUDA Programming Guide v13.3 - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current warp scheduling, hardware multithreading, residency, and resource-limit model'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current Occupancy, Scheduler Statistics, Warp State Statistics, and Speed Of Light section semantics'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current metric and section query, unit display, filtering, and report-retention interface'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/correctness/occupancy-stalls-throughput/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,occupancy-definition,theoretical-achieved,resource-limits,scheduler-states,latency-throughput,interpretation-guardrails,query-contract,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q08,F08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q10,LAB09,VIS13' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/occupancy-stalls-throughput/" lang="en">Read the English counterpart</a>
+
+占用率（occupancy）回答“一个 SM 上有多少 warp 保持驻留”，不回答“这些 warp 是否正在做有用工作”。它是延迟隐藏资源（latency-hiding resource），不是利用率（utilization），也不是必须最大化的目标。本学习单元（Learning Unit）建立从资源上限到调度器状态再到吞吐量的解释顺序，并阻止从一个醒目的百分比直接跳到瓶颈或加速结论。
+
+## 学完本单元，你应该能
+
+- 用 active warps 与 exact-device maximum active warps 定义 occupancy。
+- 区分理论占用率（theoretical occupancy）和实际占用率（achieved occupancy）。
+- 把活跃 warp（active warp）、符合发射条件的 warp（eligible warp）、就绪 warp（ready warp）与 issued warp 放进同一个 scheduler model。
+- 分开解释调度器停顿（scheduler stall）、延迟（latency）、吞吐量（throughput）与 utilization。
+- 在解释任何 report 前查询 exact metric name、unit、definition、scope 与 availability。
+
+## 先修关系
+
+严格先修项是 [Q08：用 Nsight Compute 回答一个选定内核问题](/correctness/kernel-first-nsight-compute/)和 [F08：Launch Geometry 是先于速度的正确性与资源决策](/foundations/launch-geometry/)，顺序冻结为 `Q08, F08`。Q08 提供 selected-kernel、query、replay 与 report-custody contract；F08 提供 exact-device 与 kernel resource limits、launch legality 和 resource decision 边界。
+
+## Occupancy 的定义与边界
+
+对同一个 SM scope，定义为：
+
+`occupancy = active warps per SM / maximum active warps per SM`
+
+分子是驻留并保持 execution context 的 warps；分母是 exact GPU 在该 scope 可容纳的最大 active warps。两者必须来自兼容的 definition 与 denominator。Occupancy 不是某条 pipeline 的 busy fraction，不是 issued-instruction rate，也不是“所有 CUDA cores 都在工作”的比例。
+
+下面的静态关系表不包含任何 GPU observation：
+
+| quantity | 回答的问题 | 不回答的问题 |
+| --- | --- | --- |
+| occupancy | 有多少 warp execution contexts 驻留，相对 exact maximum 是多少 | 这些 warps 是否 eligible、是否 issued、做了多少 work |
+| utilization | 某个明确资源在某个 observation interval 内的活动程度 | 驻留 warp 数量或等待原因 |
+| throughput | 每单位时间完成的 declared work/traffic，或工具按其定义报告的相对 rate | 单次 operation 的 latency |
+| latency | 一项 operation 或相依 instruction 间隔要等待多久 | 同期可用多少其他 work 来隐藏等待 |
+
+## Theoretical 与 achieved 不能互换
+
+理论 occupancy 是 launch/resource model：给定 threads per block、registers、static/dynamic shared memory 与 exact-device limits，求每个 SM 最多能同时驻留多少 blocks/warps，再除以该设备的 maximum active warps。它不需要证明 kernel 在时间上一直拥有这些 warps。
+
+实际 occupancy 是 execution-derived quantity：在工具声明的 sampling/aggregation scope 内，实际 active warps 相对同一 maximum 的结果。Short grid、tail wave、block-duration imbalance、early completion 或其他动态行为都可能让它低于 theoretical occupancy。Exact averaging 与 denominator 必须从该 report 的定义读取；不能凭名称猜测。
+
+一个纯代数检查是：若 queried launch model 给出 `W_model` active warps，而 exact device query 给出 `W_max` maximum active warps，则 `O_theoretical = W_model / W_max`。若 report 用兼容 scope 给出 `W_observed`，才可写 `O_achieved = W_observed / W_max`。这里没有为三个变量填值，因此没有虚构 hardware ceiling 或 observation。
+
+## Hardware 与 resource limits 共同限制 residency
+
+一个 block 能否驻留以及同时驻留多少 blocks，受 threads/warps per block、register allocation、static plus dynamic shared memory、maximum resident blocks/warps 与其他 documented hardware resources共同限制。限制按 allocation granularity 生效，不能只用源码变量个数手算。使用 exact binary 的 compiler/resource record、launch configuration、`cudaGetDeviceProperties`/owner-supported occupancy API 或 exact report，而不是记忆中的设备表。
+
+| input family | 必须记录 | 可能改变的结果 |
+| --- | --- | --- |
+| launch | grid、block、dynamic shared bytes | warps per block、waves、resident-block candidate |
+| kernel resource | exact binary、registers、static shared memory | register/shared-memory limiter |
+| device resource | exact GPU/CC 与 queried limits | maximum resident blocks/warps、available registers/shared memory |
+| runtime context | cache/shared configuration 或 documented attributes（如适用） | 可用 resource partition 或 launch validity |
+
+降低 register 或 shared-memory use 可能增加 theoretical occupancy，也可能引入 spill、额外 instructions 或较差 locality。只有正确、受控的 before/after measurement 才能判断性能结果；“更高 occupancy”本身不是 acceptance criterion。
+
+## 从 active 到 eligible 再到 issued
+
+调度器从自己的 resident pool 选择 work。Active/resident 只表示 warp 已分配到 scheduler/subpartition。Eligible 表示该 active warp 已准备发射下一条 instruction：所需 instruction 可用、input dependencies 已满足，并且所需 function unit 可接受它。本文把 ready 作为普通描述词；解释 profiler report 时保留 owner tool 的 exact “eligible” definition。
+
+| scheduler state | 静态含义 | 与下一状态的差距 |
+| --- | --- | --- |
+| active/resident | execution context 在 SM/subpartition 上 | 可能等待 fetch、dependency、barrier 或 resource |
+| eligible/ready-to-issue | 下一 instruction 满足工具所列发射条件 | scheduler 仍需从 eligible set 选择 |
+| issued | scheduler 在该 issue opportunity 发射 instruction | 不等于 instruction 已完成，也不等于 whole-SM peak throughput |
+
+Scheduler stall 描述 warp 为什么在某个定义下不能发射下一条 instruction。Stall reasons 可以重叠于复杂 causal chain，sampling/normalization 也由工具决定。只有在 scheduler 未能持续 issue 时，stall breakdown 才成为后续线索；最大的 stall share 仍不是自动 bottleneck。
+
+## Occupancy 隐藏 latency，但不缩短 latency
+
+当一个 warp 等待 memory dependency、execution dependency、instruction fetch 或 synchronization 时，调度器可以选择另一个 eligible warp。更多 resident warps扩大“可能有别的 ready work”的池，因此可以帮助隐藏 latency；它不会让原 operation 更快返回。若所有 active warps 同时等待同一 dependency，high occupancy 仍可伴随低 issue progress。
+
+Throughput 衡量 declared work/traffic per time；Nsight Compute 的 Speed Of Light 类 percentage 则按 exact section definition，把 achieved throughput 与某个 theoretical maximum 比较。这个 percentage 不是“剩余百分比就是可获得 speedup”，也不能跨不同 units、pipelines、clock domains 或 reports 直接相加。
+
+## 三条禁止推断
+
+- **High occupancy 不是 bottleneck verdict。** 它既不证明 latency 已隐藏，也不证明增加 occupancy 会加速。
+- **One stall share 不是 causal verdict。** 先确认 scheduler issue gap、sampling denominator、scope 与 competing explanations，再设计改变一个 mechanism 的实验。
+- **Throughput percentage 不是 speedup forecast。** 它依赖特定 resource ceiling 与 normalization；靠近一个 ceiling 不证明 whole kernel 只有该限制，远离 ceiling 也不说明提高到 100% 可行。
+
+同一 report 中，theoretical/achieved occupancy、eligible warps、issue activity、stall reasons 与 resource throughput 可以组成证据链，但不能互相替代。跨 report comparison 还必须冻结 workload、kernel occurrence、correctness、binary、GPU、tool version、filter、replay 与 clocks/cache controls。
+
+## 先查询，再解释 exact report
+
+先保留 `ncu --version`、exact GPU identity/CC 与下面的 query output，再从当前可用 sections/metrics 选择最小集合：
+
+```bash
+ncu --list-sections
+ncu --query-metrics
+ncu --query-metrics-mode suffix --metrics <queried-base-or-full-names>
+```
+
+每个 retained field 都要记录 exact name、unit、definition、scope/aggregation、denominator、availability、section/metric request、filter、replay 与 report hash。Metric names、units、definitions 和 availability 绑定到 exact GPU/tool/report；本页不冻结任何可复制到所有设备的 metric spelling。Owner CLI/Profiling Guide 是权威，Context7 只用于 retrieval cross-check。
+
+## 证据边界
+
+本页只有公式、空表模板与静态 reasoning，没有运行 GPU 或 profiler，没有 report、metric value、hardware ceiling、timing、throughput、bottleneck 或 speedup observation。四个 evidence arrays 均为空，也没有授予任何 Evidence Status。
+
+## 离开前检查
+
+1. 为什么 occupancy 必须写成 active warps 与 maximum active warps 的同 scope ratio，而不是 utilization？
+2. Theoretical occupancy 与 achieved occupancy 的输入、时间含义和常见差异是什么？
+3. Active、eligible/ready-to-issue 与 issued warps 在 scheduler decision 中分别表示什么？
+4. 为什么 high occupancy、最大的 stall share 或一个 throughput percentage 都不能单独证明 bottleneck 或 speedup？
+5. 解释 exact report 前必须查询并保留哪些 name、unit、definition、availability、scope 与 custody fields？
+
+## 继续练习
+
+- 完成 [Q09 Exercises](/correctness/occupancy-stalls-throughput/exercises/)，再查看独立的[复核解答](/correctness/occupancy-stalls-throughput/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-004](/practice/#pb-r3-004)审查一条 occupancy-to-speedup 跳跃。
+- 用 [Q10](/correctness/roofline-arithmetic-intensity/)建立独立的 work/traffic ceiling model；LAB09 与 VIS13 仍是 related resources，而不是本页的 observation source。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3 Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy)给出 occupancy 的 active/max-active ratio 与 latency-hiding边界。
+- [CUDA Programming Guide v13.3 Writing SIMT Kernels](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html)给出 device-property、register、shared-memory 与 launch-resource coordinates。
+- [CUDA Programming Guide v13.3 Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)给出 warp scheduling、hardware multithreading 与 residency model。
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)定义当前 Occupancy、Scheduler Statistics、Warp State Statistics 与 Speed Of Light sections。
+- [Nsight Compute CLI 2026.2.1](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)定义 metric query、suffix、unit、filter 与 report interface。
+
+Context7 `/websites/nvidia_cuda` 与 `/websites/nvidia_nsight-compute_nsightcompute` 仅用于 retrieval cross-check；以上 exact NVIDIA owner documents 是事实权威，访问于 **2026-09-01**。本站没有复制 owner prose、metric value、report、figure、table 或 benchmark result。
+
+**事实核查与来源访问日期：2026-09-01。**

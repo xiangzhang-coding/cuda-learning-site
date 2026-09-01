@@ -37,6 +37,7 @@ const representativeThemeRoutes = [
   '/en/visuals/artifact-pipeline/',
   '/en/visuals/reduction-stages/',
   '/en/visuals/gemm-tiling-hierarchy/',
+  '/en/visuals/roofline/',
   '/en/visuals/nsight-systems-versus-nsight-compute/',
 ] as const;
 
@@ -46,6 +47,18 @@ const releaseVisualStateScans = [
     label: 'VIS04 offset segment state',
     route: '/en/visuals/memory-transactions/',
     prepare: async (page: Page) => page.locator('[data-memory-field="offset"]').fill('4'),
+  },
+  {
+    theme: 'silicon-light',
+    label: 'VIS13 invalid declared-input state',
+    route: '/en/visuals/roofline/',
+    prepare: async (page: Page) => {
+      const roofline = page.locator('cuda-roofline-explorer[data-visual-id="VIS13"]');
+      await roofline.locator('[data-roofline-input="achievedRate"]').fill('0');
+      await roofline.locator('[data-roofline-action="apply"]').click();
+      await expect(roofline).toHaveAttribute('data-state', 'invalid');
+      await expect(roofline.locator('[data-live-workbench]')).toBeHidden();
+    },
   },
   {
     theme: 'profiler-dark',

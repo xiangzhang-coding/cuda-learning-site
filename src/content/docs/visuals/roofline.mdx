@@ -1,0 +1,139 @@
+---
+title: 'Roofline 模型：声明上限、屋脊点（ridge point）与 workload 点'
+description: 用四个声明的十进制输入推导单层 Roofline，并把高于声明 roof 的点保留为确定性的 mismatch audit state。
+pairId: vis13
+counterpart: /en/visuals/roofline/
+factCheckDate: '2026-09-01'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - declared-inputs
+  - model-rule
+  - mismatch-audit
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS13
+prerequisites:
+  - Q10
+relatedUnits:
+  - Q09
+  - A14
+  - LAB09
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA CUDA C++ Best Practices Guide: Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide 13.3'
+    platform: 'Theoretical and effective bandwidth, decimal GB/s, bytes read and written'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute UI User Manual: Rooflines'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#rooflines'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current GUI Rooflines report page, chart interaction, and hierarchical-ceiling scope'
+    accessDate: '2026-09-01'
+  - title: 'NVIDIA Nsight Compute Profiling Guide: Roofline Charts'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts'
+    version: 'NVIDIA Nsight Compute Profiling Guide 2026.2.1'
+    platform: 'Arithmetic intensity, logarithmic axes, bandwidth boundary, compute boundary, and ridge point'
+    accessDate: '2026-09-01'
+  - title: 'Roofline: An Insightful Visual Performance Model for Multicore Architectures'
+    url: 'https://doi.org/10.1145/1498765.1498785'
+    version: 'Communications of the ACM 52(4), 65-76 (2009)'
+    platform: 'Original model only; no current NVIDIA metric, product, or device value'
+    accessDate: '2026-09-01'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis13 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/visuals/roofline/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,declared-inputs,model-rule,mismatch-audit,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q10 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'Q09,A14,LAB09' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1,2009' }
+---
+
+import RooflineExplorer from '../../../components/RooflineExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/roofline/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+完成 Q10 后，用 VIS13 建立一个受限的单层 Roofline 心智模型：声明计算上限 `Pcompute`、声明路径带宽上限 `Bpath`、算术强度 `I` 和 workload rate，然后区分输入点位于带宽侧模型区域、屋脊点（ridge point）还是计算侧模型区域。Q09、A14 与 LAB09 是相关后续资源；它们不是本页的额外 prerequisite。
+
+<RooflineExplorer locale="zh-CN" />
+
+## 声明输入
+
+四个控件保留原始字符串，只有按下“应用”才进入推导：
+
+- **声明计算上限：** `100` 到 `100000 Gop/s`。
+- **声明带宽上限：** `10` 到 `10000 decimal GB/s`，其中 `1 GB = 10^9 bytes`。
+- **算术强度：** `0.01` 到 `10000 operations/byte`。
+- **达到的 workload rate：** `0.01` 到 `100000 Gop/s`。
+
+默认 `12000 Gop/s`、`800 decimal GB/s`、`8 operations/byte` 与 `5600 Gop/s` 是合成教学输入，不来自 GPU specification、profiler report、benchmark 或运行观察。页面严格拒绝空字符串、带空白的值、指数记法、`NaN`、`Infinity`、非正数与范围外数值。无效输入不会沿用上一张动态图的 geometry。
+
+## 确定性模型规则
+
+由于 `operations/byte × 10^9 bytes/second = 10^9 operations/second`，本页的 `I × Bpath` 可以直接得到 `Gop/s`。模型只执行以下推导：
+
+- `ridge intensity = Pcompute / Bpath`
+- `workload roof = min(Pcompute, I × Bpath)`
+- `I < ridge` 为带宽侧模型区域，`I = ridge` 为屋脊点，`I > ridge` 为计算侧模型区域。
+- workload rate 与 workload roof 比较后得到低于、位于或高于声明 roof。
+
+SVG 使用固定 `0 0 720 420` viewBox 和固定对数式坐标域。斜实线、水平虚线、屋脊点菱形、workload 圆加十字、直接可见文字和语义表共同表达结构，因此颜色不是唯一线索。这个模型只有一组声明的 compute/bandwidth ceilings；它不冒充 Nsight Compute 的 current metric definitions 或 hierarchical rooflines。
+
+## Mismatch audit
+
+高于声明 roof 的点保持为有效、可重复的 `above-declared-roof` 状态。它表示四个输入彼此不一致，需要审计单位、operation counting rule、memory path、ceiling scope 与 provenance；浏览器不会静默截断点、改变输入或把它拒绝成“GPU 不可能”。模型区域也不会识别实际 workload 的限制原因。
+
+## 静态回退
+
+Server 永久渲染默认合成输入的原创 inline SVG、公式和八行语义表。Controls 与 live workbench 在 source HTML 中保持 `hidden`，custom element 只有找到全部 parts 并成功推导初始 view 后才显示它们。没有 JavaScript、390-pixel viewport、reduced motion、increased contrast、forced colors 与 print 下，静态 SVG 和表仍保留；print 隐藏 controls 与 live chart。
+
+## 证据边界
+
+VIS13 不执行 CUDA、不读取 GPU、不调用 profiler，也不观察 workload。即使用户把测量值键入四个控件，这个动作也不会授予 Evidence Status。测量点必须由符合要求的 LAB09 Environment Manifest、口径、日志和来源承载。Compilation、runtime、expected-observation 与 recorded-observation arrays 全为空。
+
+## 来源
+
+[CUDA C++ Best Practices Guide 13.3 bandwidth chapter](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) 区分 theoretical 与 effective bandwidth，给出 `((Br + Bw) / 10^9) / time` 的 decimal GB/s 公式，并要求理论值与有效值使用相同 divisor。[Nsight Compute UI Rooflines page](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#rooflines) 记录 current 2026.2.1 GUI report 的 Rooflines section、hierarchical ceilings 与 chart controls。[Profiling Guide 2026.2.1 Roofline Charts](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline-charts) 定义 arithmetic intensity、对数坐标、斜向 memory-bandwidth boundary、水平 peak-performance boundary 与 ridge point。
+
+Williams、Waterman 与 Patterson 的 [original Roofline paper](https://doi.org/10.1145/1498765.1498785) 只支持 performance model 的历史与基本构造，不支持任何 current CUDA metric、NVIDIA product capability 或本页默认值。Context7 `/websites/nvidia_cuda` 与 `/websites/nvidia_nsight-compute_nsightcompute` 只用于 2026-09-01 retrieval cross-check；上面的 NVIDIA owner pages 和 DOI record 才是事实坐标。本站没有复制 paper 或 NVIDIA figure、screenshot、table、metric value 或 layout；SVG、copy、输入范围与交互均为原创。
+
+**Fact checked: 2026-09-01.**

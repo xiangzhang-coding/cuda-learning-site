@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-08-31",
+  "reviewDate": "2026-09-01",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,8 +11,8 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 198,
-    "sourceRoutes": 396,
+    "publicationPairs": 209,
+    "sourceRoutes": 418,
     "learningUnits": [
       "O01",
       "O02",
@@ -58,6 +58,7 @@
       "A07",
       "A08",
       "A09",
+      "A14",
       "Q01",
       "Q02",
       "Q03",
@@ -65,10 +66,12 @@
       "Q05",
       "Q06",
       "Q07",
-      "Q08"
+      "Q08",
+      "Q09",
+      "Q10"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08"],
+    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09"],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -82,15 +85,16 @@
       "VIS10",
       "VIS11",
       "VIS12",
+      "VIS13",
       "VIS14",
       "VIS19",
       "VIS20",
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 53,
-    "glossaryTerms": 159,
-    "sourceRecords": 65
+    "practiceBankEntries": 56,
+    "glossaryTerms": 165,
+    "sourceRecords": 68
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -194,7 +198,8 @@
       "LAB05",
       "LAB06",
       "LAB07",
-      "LAB08"
+      "LAB08",
+      "LAB09"
     ],
     "pendingHardwareVerification": [
       "EX01",
@@ -219,7 +224,8 @@
       "LAB05",
       "LAB06",
       "LAB07",
-      "LAB08"
+      "LAB08",
+      "LAB09"
     ],
     "runtimeNotApplicable": ["EX10"],
     "runtimeVerified": [],
@@ -237,7 +243,7 @@
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
     "Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.",
     "Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.",
-    "Q06-Q08, LAB06, LAB08, and VIS14 are an incremental R3 publication; the aggregate R3 release review remains pending.",
+    "Q06-Q10, A14, LAB06, LAB08, LAB09, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.",
     "R3 material beyond this incremental publication and all later curriculum material remain outside the current publication."
   ]
 }

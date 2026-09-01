@@ -3,7 +3,7 @@ title: 实验索引
 description: 按先修、硬件、版本和证据状态（Evidence Status）直接查找当前完整发布的实验。
 pairId: labs-index
 counterpart: /en/labs/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/labs/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-08-31，共有八个连续编号的已发布实验：LAB01-LAB08。Q11/LAB10 仍未发布；Q13、L06 与 LAB12 也没有公开目标，LAB12 必须等待 Q13 的 profiling prerequisite 与 L06 的 cuBLAS prerequisite。未完成条目不会显示。
+本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-09-01，共有九个连续编号的已发布实验：LAB01-LAB09。Q11/LAB10 仍未发布；Q13、L06 与 LAB12 也没有公开目标，LAB12 必须等待 Q13 的 profiling prerequisite 与 L06 的 cuBLAS prerequisite。未完成条目不会显示。
 
 ## 已发布实验
 
@@ -34,8 +34,8 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 顺序与直接查找
 
-当前顺序依次列出 [LAB01：记录并解读 CUDA 环境](/labs/record-cuda-environment/)、[LAB02：运行并验证向量加法](/labs/vector-addition/)、[LAB03：破坏并修复索引](/labs/break-and-repair-indexing/)、[LAB04：观察合并访问](/labs/observe-coalescing/)、[LAB05：消除共享内存存储体冲突](/labs/remove-shared-memory-bank-conflicts/)、[LAB06：构建重叠流水线](/labs/build-overlapped-pipeline/)、[LAB07：诊断四类 Sanitizer 故障](/labs/diagnose-four-sanitizer-failures/)与 [LAB08：先分析完整应用，再分析一个内核](/labs/profile-full-application-before-kernel/)。LAB01 同时依赖 O03 与 O08，并使用 EX01；LAB02 同时依赖 O03 与 F01，并使用 EX02；LAB03 同时依赖 F03 与 F05，并使用 EX04；LAB04 同时依赖 M02 与 Q05，并使用 EX05；LAB05 同时依赖 M04 与 Q05，并使用 EX06；LAB06 的先修严格为 M09 与 Q07，并使用 canonical EX07；LAB07 同时依赖 Q03 与 Q04，并使用原创 Apache-2.0 EX16 project；LAB08 的先修严格为 Q07 与 Q08，并使用 canonical EX07。F08 与 LAB03 相关，但不是它的先修条件。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
+当前顺序依次列出 LAB01-LAB08，随后是 [LAB09：构建原创 Roofline](/labs/build-original-roofline/)。LAB09 的严格先修只有 Q10，相关但不是先修的资源是 Q09、A14、EX02 与 VIS13；它在三条 Toolkit Lane 使用匹配的 Nsight Compute/CUPTI、管理员批准的 non-admin performance-counter access 和 learner-owned report custody。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
 
 ## 证据边界
 
-卡片中的编译和运行状态直接复制自链接实验的受控证据字段，不会把网站构建、筛选或浏览器测试升级为 CUDA 证据。LAB01 的编译轴为空，没有编译已检查（Compile-Checked）声明，运行轴为待硬件验证（Pending Hardware Verification）。LAB02 保留既有状态。LAB03 与它使用的 EX04 的 compilation evidence 都为空，runtime 都是 Pending Hardware Verification。LAB04、LAB05 与 LAB07 的 compilation evidence 同样为空，runtime 为 Pending Hardware Verification，recorded observations 为空，只发布 expected observations。LAB06 与 LAB08 也保持 compilation evidence 为空、runtime 为 Pending Hardware Verification、recorded observations 为空且仅声明 expected observations。两者都要求 learner-owned report custody 与既有 non-admin profiling access：LAB06 不授权 `sudo` 或其他 privilege escalation；LAB08 还要求管理员预先批准 non-admin performance-counter access，并禁止提权或绕过安全策略。学习站没有发布采集所得的 profiler report：LAB06 的 expected-only fixture 不是 `.nsys-rep` 或 profiler output；LAB08 的 expected-only report plan 既不是 `.nsys-rep` 也不是 `.ncu-rep`，不含 counter、timeline、timing 或 runtime observation。LAB08 的 Systems 与 Compute reports 即使实际采集也来自分开的 instrumented executions，不能表示同一次 physical launch。LAB04/LAB05 没有 profiler 结果或 timing，LAB07 没有 sanitizer report；report 文件、host-only test、学习者本机构建、预期观察和工具文档都不会改变这些状态。
+卡片中的编译和运行状态直接复制自链接实验的受控证据字段，不会把网站构建、筛选或浏览器测试升级为 CUDA 证据。既有 LAB01-LAB08 状态不变。LAB09 的 compilation evidence 为空、runtime 为待硬件验证（Pending Hardware Verification）、recorded observations 为空，只发布 expected observations；没有 Reference Environment 或 performanceObservations。LAB09 要求 learner-owned `.ncu-rep`、CSV、table、chart 与 hash custody，但当前没有采集所得 report、metric、ceiling、workload point、timing 或 Roofline observation。VIS13 browser values 与 static chart 不属于 LAB09 evidence chain。Report 文件、host-only test、学习者本机构建、预期观察、网页图表和工具文档都不会改变这些状态。

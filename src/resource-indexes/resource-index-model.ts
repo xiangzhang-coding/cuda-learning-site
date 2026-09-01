@@ -293,6 +293,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'A09：用 Scan、Histogram 与 Movement 组合排序、选择和压缩', en: 'A09: Compose Sorting, Selection, and Compaction from Scan, Histograms, and Movement' },
     prerequisites: ['A03', 'A04'],
   },
+  A14: {
+    href: { 'zh-CN': '/algorithms/algorithm-choice-arithmetic-intensity/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/' },
+    title: { 'zh-CN': 'A14：用 Arithmetic Intensity 选择可证伪的算法优化', en: 'A14: Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity' },
+    prerequisites: ['A01', 'A02', 'A05', 'A08'],
+  },
   Q01: {
     href: { 'zh-CN': '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     title: { 'zh-CN': 'Q01：CPU 参考实现、容差与不变量', en: 'Q01: CPU references, tolerances, and invariants' },
@@ -332,6 +337,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/correctness/kernel-first-nsight-compute/', en: '/en/correctness/kernel-first-nsight-compute/' },
     title: { 'zh-CN': 'Q08：用 Nsight Compute 回答一个选定内核问题', en: 'Q08: Ask one selected kernel question with Nsight Compute' },
     prerequisites: ['Q07', 'M02', 'M03'],
+  },
+  Q09: {
+    href: { 'zh-CN': '/correctness/occupancy-stalls-throughput/', en: '/en/correctness/occupancy-stalls-throughput/' },
+    title: { 'zh-CN': 'Q09：用 Occupancy、Stalls 与 Throughput 解释延迟隐藏', en: 'Q09: Interpret Latency Hiding with Occupancy, Stalls, and Throughput' },
+    prerequisites: ['Q08', 'F08'],
+  },
+  Q10: {
+    href: { 'zh-CN': '/correctness/roofline-arithmetic-intensity/', en: '/en/correctness/roofline-arithmetic-intensity/' },
+    title: { 'zh-CN': 'Q10：从 Arithmetic Intensity 构建可审计 Roofline', en: 'Q10: Build an Auditable Roofline from Arithmetic Intensity' },
+    prerequisites: ['Q05', 'A14'],
   },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
@@ -461,6 +476,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     prerequisites: ['Q07', 'Q08'],
     indexGroup: 'labs',
   },
+  LAB09: {
+    href: { 'zh-CN': '/labs/build-original-roofline/', en: '/en/labs/build-original-roofline/' },
+    title: { 'zh-CN': 'LAB09：构建原创 Roofline', en: 'LAB09: Build an Original Roofline' },
+    prerequisites: ['Q10'],
+    indexGroup: 'labs',
+  },
   VIS01: {
     href: { 'zh-CN': '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     title: { 'zh-CN': 'VIS01：Kernel 从 launch 到完成的路径', en: 'VIS01: A Kernel Journey from Launch to Completion' },
@@ -531,6 +552,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
     title: { 'zh-CN': 'GEMM Tiling Hierarchy：从 Matrix 到 Instruction', en: 'GEMM Tiling Hierarchy: Matrix to Instruction' },
     prerequisites: ['A08'],
+    indexGroup: 'visuals',
+  },
+  VIS13: {
+    href: { 'zh-CN': '/visuals/roofline/', en: '/en/visuals/roofline/' },
+    title: { 'zh-CN': 'Roofline 模型：声明上限、屋脊点（ridge point）与 workload 点', en: 'Roofline Model: Declared Ceilings, Ridge, and Workload Point' },
+    prerequisites: ['Q10'],
     indexGroup: 'visuals',
   },
   VIS14: {

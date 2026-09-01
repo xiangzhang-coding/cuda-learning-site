@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred fifty-nine published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred sixty-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-01'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-08-31'
+      content: '2026-09-01'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -405,8 +405,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** The amount of named work completed per declared time interval, reported with units such as items/s or operations/s. It is a rate, not one event's elapsed time.
 - **Avoid:** One operation's latency, a rate without work and time boundaries, an unconditional peak value.
-- **Related units:** O06 and O07.
-- **Version note:** Concurrency or batching can raise throughput while per-item latency stays unchanged; comparisons must align workload, interval, and units.
+- **Related resources:** O06, O07, [Q09](/en/correctness/occupancy-stalls-throughput/), [Q10](/en/correctness/roofline-arithmetic-intensity/), and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** CUDA 13.3 and Nsight Compute 2026.2.1. Concurrency or batching can raise throughput while per-item latency stays unchanged; comparisons align work or traffic, interval, units, scope, and the exact ceiling.
 
 <span id="term-041" class="resource-target" aria-hidden="true"></span>
 
@@ -432,8 +432,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** For a named workload, a declared count of arithmetic work divided by data traffic across a declared memory boundary, in operations/byte.
 - **Avoid:** Operation count alone, FLOP/s, a ratio without a traffic boundary.
-- **Related unit:** O06.
-- **Version note:** Changing the operation-count rule, read/write traffic convention, memory level, or workload scope changes the intensity.
+- **Related resources:** O06, [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
+- **Version note:** CUDA 13.3, Nsight Compute 2026.2.1, and the original Roofline model. Changing operation counting, read/write traffic, memory path, workload scope, or provenance changes the intensity.
 
 <span id="term-044" class="resource-target" aria-hidden="true"></span>
 
@@ -441,8 +441,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** Commonly, the ratio of active warps per SM to the hardware maximum active warps, not GPU utilization or a performance guarantee.
 - **Avoid:** GPU utilization, proof of concurrent execution, performance score or guarantee.
-- **Related unit:** O06.
-- **Version note:** Architecture, block size, registers, and shared-memory limits jointly constrain occupancy; higher occupancy guarantees neither higher throughput nor shorter runtime.
+- **Related resources:** O06, [Q09](/en/correctness/occupancy-stalls-throughput/), and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** CUDA 13.3 and Nsight Compute 2026.2.1. The active-warps numerator and exact-device maximum-warps denominator share a scope. Architecture, block size, registers, and shared memory jointly constrain occupancy; higher occupancy guarantees neither throughput nor shorter runtime.
 
 <span id="term-045" class="resource-target" aria-hidden="true"></span>
 
@@ -1431,8 +1431,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** Nsight Compute is a kernel profiler that collects the sections, rules, or metrics needed to answer one predeclared question about a kernel occurrence corresponding to a representative timeline's selection rule in a separate instrumented run. It stores the result in an `.ncu-rep`.
 - **Avoid:** First step in application profiling, collect-all-metrics-first interpretation, same physical kernel instance as the Systems report, automatic bottleneck or speedup proof.
-- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB08](/en/labs/profile-full-application-before-kernel/), and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/).
-- **Version note:** The current coordinate is Nsight Compute 2026.2.1; selected Toolkit Lanes use 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5. The actual `ncu --version`, target GPU, permission, availability query, filter, and replay contract determine interpretive scope; a version coordinate grants neither metric availability nor an observation.
+- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/), [Q09](/en/correctness/occupancy-stalls-throughput/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB08](/en/labs/profile-full-application-before-kernel/), [LAB09](/en/labs/build-original-roofline/), [VIS13](/en/visuals/roofline/), and [VIS14](/en/visuals/nsight-systems-versus-nsight-compute/).
+- **Version note:** The current coordinate is Nsight Compute 2026.2.1; selected Toolkit Lanes use 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5. Actual `ncu --version`, target GPU, permission, availability query, filter, replay, and report custody bound occupancy, stall, throughput, traffic, or Roofline interpretation; a version coordinate grants no observation.
 
 <span id="term-155" class="resource-target" aria-hidden="true"></span>
 
@@ -1449,8 +1449,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** A profiler metric is a named quantity reported or derived by a profiler under a specific tool and device contract. An interpretable record retains its exact name, unit, definition, scope, aggregation or denominator, availability, and collection method.
 - **Avoid:** Arbitrary hardware fact, necessarily a raw counter, same-named value directly comparable across GPUs or versions, one high value as the bottleneck.
-- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/) and [LAB08](/en/labs/profile-full-application-before-kernel/).
-- **Version note:** Names, definitions, and availability in current Nsight Compute 2026.2.1 and selected Lane components 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5 require separate review, governed by the retained query and report from the exact target GPU. A metric catalog is not itself an observation or conclusion.
+- **Related resources:** [Q08](/en/correctness/kernel-first-nsight-compute/), [Q09](/en/correctness/occupancy-stalls-throughput/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB08](/en/labs/profile-full-application-before-kernel/), and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** Names, units, definitions, denominators, scopes, and availability in current Nsight Compute 2026.2.1 and selected Lane components 2022.3.0.22, 2025.2.1.3, and 2026.2.1.5 require separate review against the retained exact-target query and report. Values cannot be compared silently across occupancy, stall, throughput, or traffic domains.
 
 <span id="term-157" class="resource-target" aria-hidden="true"></span>
 
@@ -1467,8 +1467,8 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 
 - **Definition:** A profiler report is a profiler-generated primary observation artifact, such as an `.nsys-rep` or `.ncu-rep`. It becomes reviewable only when kept with the exact producer version, command or method, workload, correctness verdict, Environment Manifest, logs, hash, and interpretation contract.
 - **Avoid:** Screenshot, stats table, or export treated as the complete report, conclusion detached from a manifest, Runtime-Verified merely because a file exists, universal format losslessly interpreted by any tool version.
-- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB06](/en/labs/build-overlapped-pipeline/), and [LAB08](/en/labs/profile-full-application-before-kernel/).
-- **Version note:** An `.nsys-rep` binds to the actual Nsight Systems version, including current 2026.4/2026.4.1 or selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425. An `.ncu-rep` binds to actual 2026.2.1 or selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5. Record derivative, redaction, and reader-version differences; report existence does not support an undeclared conclusion.
+- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q09](/en/correctness/occupancy-stalls-throughput/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB06](/en/labs/build-overlapped-pipeline/), [LAB08](/en/labs/profile-full-application-before-kernel/), and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** An `.nsys-rep` binds to the actual Nsight Systems version. An `.ncu-rep` binds to actual 2026.2.1 or selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5 and the exact GPU. Record filter, replay, source command, derivative, redaction, hash, and reader-version differences; report existence supports no undeclared conclusion.
 
 <span id="term-159" class="resource-target" aria-hidden="true"></span>
 
@@ -1479,6 +1479,60 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), [LAB06](/en/labs/build-overlapped-pipeline/), and [LAB08](/en/labs/profile-full-application-before-kernel/).
 - **Version note:** `nsys` syntax binds to actual current 2026.4/2026.4.1 or selected Lane 2022.4.2.1/2025.1.3.140/2026.1.3.425; `ncu` syntax binds to actual 2026.2.1 or selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5. Preserve actual `--version` and subcommand help before interpreting a command; a symbolic shape in documentation is not an execution record.
 
+<span id="term-160" class="resource-target" aria-hidden="true"></span>
+
+### theoretical occupancy · 理论占用率
+
+- **Definition:** The ratio of modeled active warps per SM to maximum active warps, derived from an exact kernel binary, launch configuration, register and shared-memory allocation rules, and exact-device limits. It describes residency capacity, not a runtime observation.
+- **Avoid:** Maximum occupancy, predicted utilization, achieved occupancy.
+- **Related resources:** [F08](/en/foundations/launch-geometry/), [Q09](/en/correctness/occupancy-stalls-throughput/), and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** CUDA 13.3 and Nsight Compute 2026.2.1. Recalculate after a compiler or resource record, allocation granularity, device limit, or launch changes; never present the modeled ratio as an observed percentage.
+
+<span id="term-161" class="resource-target" aria-hidden="true"></span>
+
+### achieved occupancy · 实际占用率
+
+- **Definition:** The ratio of execution-derived active warps to the same exact-device maximum active warps over a qualifying report's declared sampling and aggregation scope.
+- **Avoid:** Measured utilization, theoretical occupancy, guaranteed sustained residency.
+- **Related resources:** [Q09](/en/correctness/occupancy-stalls-throughput/) and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** Nsight Compute 2026.2.1. Retain the exact metric definition, denominator, scope, GPU, filter, replay, and report custody; achieved occupancy cannot be derived from theoretical occupancy.
+
+<span id="term-162" class="resource-target" aria-hidden="true"></span>
+
+### warp stall reason · warp 停顿原因
+
+- **Definition:** A profiler classification for why a warp is temporarily not eligible or not issued under a declared sampling and normalization contract. It is an investigation lead, not a whole-kernel cause.
+- **Avoid:** Root cause, bottleneck, repair direction.
+- **Related resources:** [Q09](/en/correctness/occupancy-stalls-throughput/) and [LAB09](/en/labs/build-original-roofline/).
+- **Version note:** Nsight Compute 2026.2.1. Taxonomy, unit, sampling, denominator, scheduler context, and availability bind to the exact GPU and report. The largest category alone proves no speedup opportunity.
+
+<span id="term-163" class="resource-target" aria-hidden="true"></span>
+
+### hardware ceiling · 硬件上限
+
+- **Definition:** A performance upper bound for a named operation family or memory path under a declared device, unit, scope, and provenance. It may be theoretical, calibrated or measured, or tool-reported, but those families are not mixed silently.
+- **Avoid:** Achieved throughput, guaranteed peak, unprovenanced roof.
+- **Related resources:** [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
+- **Version note:** CUDA 13.3, Nsight Compute 2026.2.1, and the original Roofline model. Rebuild the ceiling after its operation convention, path, clock or power state, device, method, or provenance changes.
+
+<span id="term-164" class="resource-target" aria-hidden="true"></span>
+
+### ridge point · 屋脊点
+
+- **Definition:** The intersection of compatible compute and path-bandwidth ceilings in a Roofline. Its arithmetic intensity is `I_ridge=P_compute/B_path`, separating the sloped bandwidth-side model region from the flat compute-side model region.
+- **Avoid:** Bottleneck point, measured knee, automatic optimization threshold.
+- **Related resources:** [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
+- **Version note:** Nsight Compute 2026.2.1 and the original Roofline model. Both ceilings share an operation convention, path, unit, device and scope, and provenance. Ridge location is not an observed bottleneck.
+
+<span id="term-165" class="resource-target" aria-hidden="true"></span>
+
+### Roofline model · Roofline 模型
+
+- **Definition:** An upper-bound model with arithmetic intensity on the horizontal axis and achievable work rate on the vertical axis, expressed as `min(P_compute, I*B_path)` for one declared pair of compute and memory-path ceilings.
+- **Avoid:** Profiler verdict, bottleneck proof, automatic optimization selector.
+- **Related resources:** [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
+- **Version note:** The original 2009 paper governs only the model construction. CUDA 13.3 and Nsight Compute 2026.2.1 facts are reviewed separately. VIS13 browser values and its static chart are not GPU evidence.
+
 ## Maintenance rule
 
-TERM-001 through TERM-146 retain their item-level review records from 2026-08-26 through 2026-08-30, and TERM-147 through TERM-151 retain their 2026-08-31 item-level review records. TERM-152 through TERM-159 and the complete 159-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-08-31**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. TERM-152 through TERM-159 are static definitions only: no application, GPU, `nsys`, or `ncu` was run; no performance counter was queried; no profiler report was generated or parsed; and no timeline, metric, replay, timing, bottleneck, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-159 retain their existing item-level review records. Updated TERM-040, TERM-043, TERM-044, TERM-154, TERM-156, and TERM-158, plus new TERM-160 through TERM-165 and the complete 165-term Publication Pair, metadata projections, direct links, and static definitions, were reviewed with the Chinese counterpart on **2026-09-01**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New and updated entries are static definitions only: no application, GPU, or profiler ran, no report was generated or parsed, and no metric, timing, bottleneck, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
