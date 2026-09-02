@@ -89,6 +89,9 @@ describe('GitHub Actions quality contract', () => {
 
     expect(config).toContain('failOnFlakyTests: Boolean(process.env.CI)');
     expect(workflow).toMatch(
+      /e2e-cross-browser:[\s\S]*?runs-on: ubuntu-24\.04\s+timeout-minutes: 35/,
+    );
+    expect(workflow).toMatch(
       /name: Upload reviewed cross-browser evidence\s+if: \$\{\{ always\(\) && steps\.scan-cross-browser\.outcome == 'success' \}\}/,
     );
   });
