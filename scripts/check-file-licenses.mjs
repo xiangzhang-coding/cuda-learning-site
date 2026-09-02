@@ -22,7 +22,10 @@ const trackedSet = new Set(trackedFiles);
 const errors = [];
 
 for (const relativePath of trackedFiles) {
-  const assetPath = relativePath.startsWith('public/favicon.svg') || /^(?:(?:src|public)\/assets|third_party)\//.test(relativePath);
+  const downloadableSoftware = relativePath.startsWith('public/assets/exercise-solutions/') &&
+    /\.(?:c|cc|cpp|cu|cuh|h|hpp|mjs)$/.test(relativePath);
+  const assetPath = !downloadableSoftware &&
+    (relativePath.startsWith('public/favicon.svg') || /^(?:(?:src|public)\/assets|third_party)\//.test(relativePath));
   if (assetPath) {
     if (relativePath.endsWith('.license.json')) {
       const target = relativePath.slice(0, -'.license.json'.length);

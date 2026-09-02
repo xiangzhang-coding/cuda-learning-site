@@ -13,16 +13,17 @@ This scope includes:
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
 - original source, build files, host models, artifact-inspection tooling, and tests for the sixteen Runnable Examples EX01-EX16 under `examples/`
+- original reviewed-solution software under `public/assets/exercise-solutions/`, currently `q11-lab10-transpose-candidates.cu` and `lab10-report-reducer.mjs`
 
 Source files in these areas carry `SPDX-License-Identifier: Apache-2.0` where their format supports comments. JSON files use an `SPDX-License-Identifier` member.
 
 ## CC BY 4.0
 
-Original instructional prose in `src/content/docs/` and original visual teaching compositions are licensed under the [Creative Commons Attribution 4.0 International Public License](LICENSE-CONTENT). The current rolling scope includes 55 Learning Units, O01-O08/F01-F08/M01-M19/A01-A09/A14/Q01-Q10; 16 Runnable Example publication pages, EX01-EX16; 9 Labs, LAB01-LAB09; all 56 Practice Bank entries; all 165 Glossary terms; all 68 source/version records; and 18 formal Visual Explainers, standalone VIS01-VIS14 plus embedded VIS19-VIS22. The five catalog groups total 316 records, and the current public source contains exactly 209 bilingual Publication Pairs and 418 source routes. Every Markdown or MDX file declares `license: CC-BY-4.0` and `provenance: original` in frontmatter.
+Original instructional prose in `src/content/docs/` and original visual teaching compositions are licensed under the [Creative Commons Attribution 4.0 International Public License](LICENSE-CONTENT). The current rolling scope includes 56 Learning Units, O01-O08/F01-F08/M01-M19/A01-A09/A14/Q01-Q11; 16 Runnable Example publication pages, EX01-EX16; 10 Labs, LAB01-LAB10; all 58 Practice Bank entries; all 165 Glossary terms; all 70 source/version records; and 18 formal Visual Explainers, standalone VIS01-VIS14 plus embedded VIS19-VIS22. The five catalog groups total 321 records, and the current public source contains exactly 213 bilingual Publication Pairs and 426 source routes. Every Markdown or MDX file declares `license: CC-BY-4.0` and `provenance: original` in frontmatter.
 
 Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page or repository.
 
-The current file-level license scope follows the rolling `src/current-publication-manifest.json` and its `/publication.json` output. Issue #26 is an incremental publication, and R3 aggregate review remains pending. R2 is still the latest completed aggregate release review: immutable `src/r2-release-manifest.json` and `/release.json` retain 49 Learning Units, 16 Runnable Examples, 6 Labs, 16 Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records, 186 Publication Pairs, and 372 source routes. Immutable R1 history remains in `src/r1-release-manifest.json`.
+The current file-level license scope follows the rolling `src/current-publication-manifest.json` and its `/publication.json` output. Issue #27 is an incremental publication, and R3 aggregate review remains pending. R2 is still the latest completed aggregate release review: immutable `src/r2-release-manifest.json` and `/release.json` retain 49 Learning Units, 16 Runnable Examples, 6 Labs, 16 Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records, 186 Publication Pairs, and 372 source routes. Immutable R1 history remains in `src/r1-release-manifest.json`.
 
 ## Adaptations
 
@@ -34,9 +35,13 @@ The issue #25 Q06-Q08, LAB06/LAB08, VIS14, PB-R3-001 through PB-R3-003, TERM-152
 
 The issue #26 A14, Q09-Q10, LAB09, VIS13, PB-R3-004 through PB-R3-006, TERM-160 through TERM-165, and `SRC-CUDA-050` through `SRC-CUDA-052` additions are original. LAB09 has empty compilation and recorded-observation arrays, remains Pending Hardware Verification, and declares no Reference Environment or `performanceObservations`. VIS13's model, values, SVG, static chart, copy, and interaction are original; browser state is not GPU evidence.
 
+The issue #27 Q11, LAB10, PB-R3-007/008, and `SRC-CUDA-053/054` additions are original CC BY 4.0 teaching content. Q11 and LAB10 reuse the original immutable EX14 source and original VIS11 teaching composition without changing, adapting, or newly runtime-verifying either one. The original LAB10 expected-only JSON fixture has an adjacent sidecar recording `CC-BY-4.0`, `provenance: original`, and project attribution. It is not captured profiler output and contains no environment values, timing, metric, speedup, bottleneck, winner, or other performance evidence.
+
+Issue #27 also includes two original Apache-2.0 reviewed-solution software assets: `public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu` at SHA-256 `920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251`, and `public/assets/exercise-solutions/lab10-report-reducer.mjs` at SHA-256 `7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb`. The first is one reviewed answer after the learner attempt, not a second canonical EX14; its three pinned Toolkit Lane gate is compile/link/static-inspection only and never executes the binary. The second is exercised only against synthetic/static test records. Neither asset creates a seventeenth Runnable Example, records a GPU or profiler observation, or grants Compile-Checked, runtime, or other Evidence Status.
+
 VIS01-VIS14 use standalone pages; VIS19-VIS22 keep static or textual fallbacks inside their Learning Units. Every formal Visual Explainer is deterministic, browser-only, preserves a fallback, and grants no CUDA Evidence Status. Component and pure-model implementations, example software, styles, and tests are original Apache-2.0 software; instructional prose and rendered teaching compositions are CC BY 4.0.
 
-Original, upstream, or adapted files under `src/assets/`, `public/assets/`, `third_party/`, and the root favicon require an adjacent `<filename>.license.json` sidecar:
+Except for Apache-2.0 source files under `public/assets/exercise-solutions/`, which carry inline SPDX identifiers and are covered by the software scope above, original, upstream, or adapted files under `src/assets/`, `public/assets/`, `third_party/`, and the root favicon require an adjacent `<filename>.license.json` sidecar:
 
 - Every sidecar records `license`, `provenance`, and `attribution`.
 - `provenance: original` visual assets use `CC-BY-4.0`.

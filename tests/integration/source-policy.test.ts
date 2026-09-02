@@ -167,8 +167,9 @@ const profilerSoftwareFiles = [
 ] as const;
 
 const profilerFixtureFiles = [
-  'lab06-nsight-systems.expected.json',
-  'lab08-nsight-compute.expected.json',
+  { name: 'lab06-nsight-systems.expected.json', sanitizationReviewDate: '2026-08-31' },
+  { name: 'lab08-nsight-compute.expected.json', sanitizationReviewDate: '2026-08-31' },
+  { name: 'lab10-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-02' },
 ] as const;
 
 describe('source, license, and privacy policy', () => {
@@ -177,7 +178,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(418);
+    expect(contentFiles).toHaveLength(426);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');
@@ -317,7 +318,7 @@ describe('source, license, and privacy policy', () => {
       expect(content, relativePath).toContain('SPDX-License-Identifier: Apache-2.0');
     }
 
-    for (const fixtureName of profilerFixtureFiles) {
+    for (const { name: fixtureName, sanitizationReviewDate } of profilerFixtureFiles) {
       const relativePath = `public/assets/profiler-report-fixtures/${fixtureName}`;
       const fixtureFile = path.join(projectRoot, relativePath);
       const sidecarFile = `${fixtureFile}.license.json`;
@@ -329,7 +330,7 @@ describe('source, license, and privacy policy', () => {
       const sidecar = JSON.parse(sidecarSource);
       scopedFiles.push(fixtureFile, sidecarFile);
 
-      expect(validateProfilerReportFixture(fixture), relativePath).toEqual({ valid: true, errors: [] });
+      expect(validateProfilerReportFixture(fixture, fixtureSource), relativePath).toEqual({ valid: true, errors: [] });
       expect(fixture, relativePath).toMatchObject({
         'SPDX-License-Identifier': 'CC-BY-4.0',
         provenance: 'original',
@@ -337,7 +338,7 @@ describe('source, license, and privacy policy', () => {
         captureStatus: 'pending-hardware-verification',
         sanitization: {
           status: 'passed',
-          reviewDate: '2026-08-31',
+          reviewDate: sanitizationReviewDate,
           removedCoordinates: expect.arrayContaining([
             'host identity',
             'user identity',
@@ -365,6 +366,8 @@ describe('source, license, and privacy policy', () => {
     const contentLicenses = await readFile(path.join(projectRoot, 'CONTENT_LICENSES.md'), 'utf8');
     expect(contentLicenses).toMatch(/profiler fixture policy is original Apache-2\.0 tooling/i);
     expect(contentLicenses).toMatch(/two sanitized expected-only JSON fixtures are original CC BY 4\.0/i);
+    expect(contentLicenses).toMatch(/LAB10 expected-only JSON fixture has an adjacent sidecar/i);
+    expect(contentLicenses).toMatch(/no environment values, timing, metric, speedup, bottleneck, winner, or other performance evidence/i);
     expect(contentLicenses).toMatch(/Component and pure-model implementations.*styles.*original Apache-2\.0 software/is);
     expect(contentLicenses).toMatch(/not `nsys` or `ncu` captures.*no runtime, timeline, metric, bottleneck, or speedup result/is);
     expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);

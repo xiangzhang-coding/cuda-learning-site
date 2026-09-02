@@ -1,0 +1,293 @@
+---
+title: 'Q11: Optimize the Canonical Transpose with Controlled Evidence'
+description: Establish EX14 exact correctness, then run falsifiable coalescing, tiling, and bank-layout stages under one comparable workload, measurement, profiler, traffic, and Roofline contract.
+pairId: q11
+counterpart: /correctness/transpose-optimization-case-study/
+factCheckDate: '2026-09-02'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - canonical-baseline
+  - hypothesis-ledger
+  - comparability-contract
+  - workload-measurement-contract
+  - stage-coalescing
+  - stage-tiling
+  - stage-bank-layout
+  - metric-query-replay-permission
+  - traffic-roofline
+  - visual-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q11
+prerequisites:
+  - A05
+  - Q06
+  - Q08
+  - Q10
+relatedUnits:
+  - EX14
+  - VIS11
+  - LAB10
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Example Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current Writing SIMT Kernels transpose, coalesced global access, shared staging, synchronization, and padding context'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Shared Memory Access Patterns'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current shared-memory bank, stride, conflict, and broadcast terminology'
+    accessDate: '2026-09-02'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Assess, Parallelize, Optimize, Deploy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current iterative APOD and incremental verification guidance'
+    accessDate: '2026-09-02'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current theoretical and effective bandwidth accounting boundaries'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, permission, reproducibility, memory-table, and Roofline boundaries'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current exact-GPU metric query, kernel filter, collection, and report-export interface'
+    accessDate: '2026-09-02'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/correctness/transpose-optimization-case-study/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,comparability-contract,workload-measurement-contract,stage-coalescing,stage-tiling,stage-bank-layout,metric-query-replay-permission,traffic-roofline,visual-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A05,Q06,Q08,Q10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX14,VIS11,LAB10' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-transpose' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/transpose-optimization-case-study/" lang="zh-CN">阅读中文对应页</a>
+
+Q11 is an evidence-bounded optimization case study, not a published benchmark. It starts with EX14's exact transpose contract, predeclares one hypothesis, and permits one primary variable at a time through coalescing, tiling, and bank-layout stages. A source pattern, browser calculation, profiler label, or plausible mechanism never substitutes for a matched baseline/candidate record.
+
+## What you should be able to do
+
+- Establish an exact correctness gate from EX14 before creating a performance baseline.
+- Write a falsifiable hypothesis ledger with support, rejection, no-answer, and rollback rules.
+- Keep baseline and candidate comparable while changing one primary variable at a time.
+- Freeze workload, timing, profiler, traffic, and Roofline contracts before results are visible.
+- Bound every conclusion to retained evidence from one exact GPU and tool coordinate.
+
+## Prerequisites
+
+Complete [A05: Matrix Transpose, Coalescing, and Shared-Memory Layout](/en/algorithms/matrix-transpose-layout/), [Q06: Use APOD as an Optimization Loop](/en/correctness/apod-optimization-loop/), [Q08: Ask One Selected-Kernel Question with Nsight Compute](/en/correctness/kernel-first-nsight-compute/), and [Q10: Build an Auditable Roofline](/en/correctness/roofline-arithmetic-intensity/) in the exact order `A05, Q06, Q08, Q10`.
+
+A05 supplies the mapping and layout model. Q06 supplies the correctness-qualified baseline, hypothesis, controlled-change, and rollback discipline. Q08 supplies exact-GPU queries, minimal collection, replay disclosure, and report custody. Q10 supplies path-specific traffic and Roofline interpretation. EX14, VIS11, and the published [LAB10: Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) are related resources, not additional prerequisites.
+
+## Establish the EX14 exact-correctness baseline first
+
+[View EX14 at its immutable source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose), or [download the archive for that same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip). The pin, project manifest, and both imports below identify one source revision. Q11 carries no second CUDA/C++ implementation.
+
+The `cpu-reference` range comes first because it owns shape validation, the independent oracle, exact comparison, and mismatch location:
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+The `tiled-transpose` range then supplies the canonical executable mapping, edge guards, uniform barrier, shared staging, and physical padding:
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+The input shape is `rows x columns`; the output shape is `columns x rows`. Every valid coordinate must satisfy:
+
+`output[col * rows + row] = input[row * columns + col]`
+
+For `5x7`, `33x35`, and `64x32`, require the complete output shape and exact equality at every element. Transpose performs no arithmetic on values, so a mismatch, wrong leading dimension, missing edge value, or unexpected write rejects that variant before profiling or timing. EX14's current logical and physical tile extents describe this pinned implementation; they are not a recommendation for an experimental winner.
+
+The four-stage learner runner extends that gate to `5x7`, `33x35`, `64x32`, and `4096x4096` with finite, non-NaN deterministic input and oracle values. Each correctness, warm-up, and profiled process creates one stable device output allocation and keeps the same allocation and address across all four stages. Immediately before every stage launch, however, it must fill the complete output with a quiet-NaN sentinel through a checked host-to-device copy and check the CUDA status. It then launches the stage, checks `cudaDeviceSynchronize`, performs a checked device-to-host copy of the complete output, and requires the correct output shape, exact oracle equality at every element, and that no sentinel remains. This sequence runs independently for `baseline-direct`, `coalescing-direction`, `shared-memory-tiling`, and `padded-bank-layout` on every fixture; no stage may inherit a correct output from its predecessor.
+
+This is an **acceptance baseline**, not a recorded GPU result. The site has not executed EX14. A learner-owned experimental branch may retain the pinned harness and oracle while changing a candidate kernel, but its commit, patch, build, launch, and output must be separately recorded before it becomes a measurement baseline.
+
+Exercise 2 in the [Q11 Exercises](/en/correctness/transpose-optimization-case-study/exercises/) remains learner-completed and produces the learner-owned four-stage runner required by [LAB10](/en/labs/optimize-canonical-transpose/) while leaving the immutable EX14 files unchanged. Finish your own implementation and acceptance checklist before opening [Solution 2 in the separate reviewed solutions](/en/correctness/transpose-optimization-case-study/solutions/), which supplies one complete reviewed runner. Whether you use your own qualifying implementation or that reviewed solution, the runner is a Lab handoff artifact, not a second canonical EX14 implementation maintained by Q11.
+
+## Hypothesis ledger
+
+Write the ledger before collecting results. Each row owns one comparison and cannot inherit an unstated result from an earlier row.
+
+| field | required declaration |
+| --- | --- |
+| identity | stage ID; immutable baseline and candidate revisions; build artifact hashes |
+| primary variable | one lane mapping, one staging mechanism, or one physical shared-row stride |
+| mechanism | predicted address, transaction, shared-access, or traffic change; no predicted winner |
+| invariants | EX14 mapping, fixtures, value type, workload, launch, toolchain, and all non-primary variables |
+| evidence | exact correctness log, raw timing samples, query output, selected report fields, and artifact hashes |
+| decision | predeclared support, reject, no-answer, rollback, and next-question rules |
+| alternatives | at least one competing explanation that the chosen evidence does not eliminate |
+
+Use `B0` for the first correctness-qualified experimental baseline, `C1` for the coalescing candidate, `T2` for the tiling candidate, and `P3` for the bank-layout candidate. These labels order the audit; they contain no result. A failed stage does not silently become the next stage's baseline.
+
+## Make baseline and candidate comparable
+
+A pair is comparable only when every coordinate except the declared primary variable is either identical or disclosed and justified. Freeze the source base and patch, compiler and flags, generated target, allocation path, the stable output allocation and address within each process, complete quiet-NaN sentinel bytes and checked fill/copy procedure, stream, launch geometry, finite non-NaN input and oracle bytes, device ordinal, exact GPU identity and compute capability, driver, Toolkit, profiler version, permission state, replay mode, system load policy, and Environment Manifest.
+
+Both sides must run the same workload and correctness checks. Use the same warm-up exclusion, completion boundary, attempt count, sample-retention rule, statistic, outlier policy, and run-order policy. The sentinel fill, complete output copy, and host verification stay outside the selected kernel metrics, but every correctness, warm-up, and profiled process must apply them identically to all four stages. Preserve raw attempts rather than only a ratio or summary. If thermal state, clock policy, competing work, build flags, metric definition, filter, replay, or report scope differs, record the mismatch and do not describe the pair as controlled twins.
+
+The unprofiled timing run and the Nsight Compute run are separate observations. A matched profiler report can explain a mechanism; it does not retroactively attach counters to a timing sample. Likewise, a faster timing summary by itself does not prove coalescing, tiling, or padding caused the difference.
+
+## Freeze workload and measurement contract
+
+The three small EX14 fixtures are correctness gates, not a representative performance workload. Declare a separate fixed workload before the comparison: exact input shape and values, allocation and copy scope, kernel or range, launch, warm-up count, synchronization boundary, retained raw samples, predeclared statistic, repetition count, run ordering, correctness cadence, and failure policy. The baseline and every candidate use that same declaration.
+
+State whether timing covers only the selected kernel or a larger range. Place start and stop events in the same stream as the selected work, make completion explicit, exclude setup and warm-up unless the declared question includes them, and save every valid sample with units. A rejected correctness attempt never enters the timing set. Do not fill missing attempts, discard inconvenient samples after viewing results, or reduce the record to an unsupported speed claim.
+
+The performance workload must fit the declared GPU memory boundary and remain reproducible from retained arguments or input hashes. Correctness is rechecked after each build and around measured attempts according to the predeclared cadence. A shape that changes tile-edge behavior is a new workload, not another sample of the old one.
+
+## Stage 1: Control the coalescing variable
+
+Begin from `B0`, a direct-transpose experiment that already passes the EX14 gate. Compare it with `C1` by changing only the lane-to-global-address traversal selected in the ledger. Keep value type, workload, launch dimensions, direct mapping, compiler, cache policy, absence of shared staging, and every measurement coordinate fixed.
+
+Before collection, write the active-lane address ledger separately for input reads and output writes. A traversal can make adjacent lanes visit adjacent addresses in one phase while making the other phase strided. Therefore the hypothesis names the exact phase and requested-address pattern; it does not say that “the transpose is coalesced” or that the candidate must be faster.
+
+Retain exact correctness, raw timing, and only queried global-memory evidence whose documented unit and scope answer the predeclared question. Support means that the matched report moves in the hypothesized direction while still leaving named alternatives. Rejection means the observed direction contradicts the hypothesis. An unavailable or ambiguous metric yields no answer. None of those verdicts alone establishes a universal performance claim.
+
+## Stage 2: Control the tiling variable
+
+Use the accepted, fully recorded result of Stage 1 as the baseline; otherwise stop. Compare it with `T2` by introducing one shared-memory staging mechanism that separates global load and store directions. Disable padding for this pair, and keep the predeclared logical tile extent, thread ownership, block dimensions, workload, compiler, and collection contract fixed. Do not sweep tile extent or alter launch geometry in the same comparison.
+
+Shared allocation, cooperative writes, one uniform barrier, exchanged shared coordinates, and cooperative reads are the implementation parts required by this single staging intervention. The correctness proof still requires independent load/store guards and uniform barrier participation. A candidate that changes mapping or misses an edge value is rejected regardless of any profile display.
+
+The ledger predicts only an interpretable routing change: global phases may now use separate adjacent-lane directions, while additional shared traffic and synchronization enter the implementation. Exact global and shared evidence may support or reject that mechanism on the profiled run. Resource use, occupancy, cache state, instruction mix, and replay remain competing explanations for any timing difference.
+
+## Stage 3: Control the bank-layout and padding variable
+
+Use a correctness-qualified, recorded `T2` as the baseline. `P3` changes only the physical shared row stride from `T` to `T + 1`. Logical coordinates stay within `T x T`; global input/output addresses, tile ownership, launch, barrier, workload, compiler, metric set, and timing protocol remain fixed. Padding adds storage slots, not matrix columns or output values.
+
+Precompute the shared slot addresses and expected bank-index arithmetic under the declared access width and current guide model. Then query the exact GPU for available evidence. A conflict-related result can support or reject only the named shared-access hypothesis. The changed shared footprint, resource allocation, instruction mapping, profiler replay, system drift, or a different access instruction remain competing explanations until separately controlled.
+
+Tile extent is an experimental input, never a preselected winner. A different extent starts another APOD pass because it can change block resources, edge fraction, occupancy, and traffic together. Q11 therefore publishes no winning extent, padding benefit, timing, or speedup.
+
+## Query metrics, replay, and permission on the exact GPU
+
+Run availability queries in the same declared environment that will collect the report, and retain their complete output:
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Metric names, suffixes, units, definitions, and availability depend on the Nsight Compute version and exact GPU. Choose one relevant section or a short exact metric list only after the hypothesis is frozen. Retain the kernel name basis, filter, launch selection, command, `.ncu-rep`, query output, stdout/stderr, hashes, observer, and observation date for baseline and candidate separately.
+
+Record performance-counter permission before collection. If permission is denied, stop, retain the denial and policy coordinate, and request access through the environment owner. Never bypass policy, guess a value, convert an unavailable metric to zero, or move the run to another GPU while calling it comparable.
+
+Replay can re-execute the kernel or the application, save and restore memory, perturb cache state, add overhead, or serialize work. Record the exact replay mode and reported passes. Baseline and candidate reports need matching replay and filter contracts; otherwise they answer different observation questions. Use unprofiled matched runs for the timing contract and treat profiler collection as separate mechanism evidence.
+
+## Interpret Q10 traffic and Roofline without naming a winner
+
+Q10 requires traffic and Roofline coordinates to describe one workload, path, and provenance. For a row-major out-of-place `float` transpose, the logical compulsory DRAM-path estimate is:
+
+`T_compulsory = 2 * rows * columns * sizeof(float)`
+
+It counts one logical input read and one logical output write. It is not observed DRAM traffic: transaction overfetch, cache behavior, write behavior, replay, and implementation effects can change path traffic. Keep compulsory estimates, implementation estimates, and queried traffic in separate columns.
+
+If `W` uses a declared work convention for the same workload and `T_DRAM` is matched DRAM-path traffic, then `I_DRAM = W / T_DRAM`. Do not silently call copied elements FLOP. If a Roofline is used, keep operation convention, path, units, and ceiling provenance compatible:
+
+`P_roof(I) = min(P_compute, I * B_path)`
+
+A point moving along or below that roof is model geometry, not an observed bottleneck or causal proof. A transpose comparison may instead report effective bandwidth from declared logical bytes and matched elapsed time, but it must label that numerator as an estimate. Coalescing, tiling, and padding can alter different traffic paths and resource costs, so no single metric or Roofline region selects the winner.
+
+## Keep VIS11 evidence-neutral
+
+[VIS11: Tiled Transpose Logical Mapping and Physical Padding](/en/visuals/tiled-transpose/) checks `input(row, col) -> output(col, row)` and `slot = sharedRow * (T + padding) + sharedCol`. VIS11 is arithmetic only: it executes no CUDA, queries no exact GPU, reads no performance counter, and supplies no correctness or performance evidence.
+
+Use VIS11 to audit logical versus physical coordinates before writing a hypothesis. Do not copy its browser state into a metric field, claim that its bank arithmetic observed a conflict, or use it to fill a missing LAB10 result. Its evidence-neutral status is unchanged by being related to this case study.
+
+## Evidence boundary and linked-resource summaries
+
+Evidence Status applies to Labs and Runnable Examples, not to a Learning Unit. Q11 is a Learning Unit, so all four of its `compilation`, `runtime`, `expectedObservations`, and `recordedObservations` metadata arrays are empty and all four head projections are `none`; Q11 itself grants no Evidence Status. Source inspection, a host test, an integration test, or a CanonicalCode import cannot project linked-resource evidence onto Q11.
+
+Q11 only summarizes two linked resources that do carry Evidence Status: [EX14](/en/examples/tiled-transpose/) and [LAB10](/en/labs/optimize-canonical-transpose/) are both currently **Pending Hardware Verification** with empty `recordedObservations`. Those statuses belong to the resources themselves, not to Q11.
+
+The stage statements in this unit are pre-result acceptance, hypothesis, and stop-without-winner boundaries, not expected observations in Q11 metadata. They publish no observed output, timing, metric, traffic, bandwidth, bottleneck, tile winner, or speedup. [LAB10](/en/labs/optimize-canonical-transpose/) is the guided follow-on that consumes the runner produced by the Exercises; the Lab owns its Environment Manifest, execution, and evidence record.
+
+## Retrieval check
+
+1. Why must the EX14 oracle, three fixtures, output shape, and exact mapping pass before an experimental variant becomes a measurement baseline?
+2. Which fields make baseline and candidate comparable, and what happens when a non-primary coordinate changes?
+3. How do the coalescing, tiling, and bank-layout stages each isolate one primary variable without promising a result direction?
+4. Why must exact-GPU metric queries, permission, filters, replay, and report custody accompany a Nsight Compute claim?
+5. Why can neither Q10 traffic/Roofline geometry nor VIS11 address arithmetic establish an observed bottleneck, bank result, or optimization winner?
+
+## Continue with practice
+
+- Complete the [Q11 Exercises](/en/correctness/transpose-optimization-case-study/exercises/), then inspect the separate [reviewed solutions](/en/correctness/transpose-optimization-case-study/solutions/).
+- Use the published [PB-R3-007](/en/practice/#pb-r3-007) for controlled-stage design and [PB-R3-008](/en/practice/#pb-r3-008) for profiler-claim audits.
+- Carry the Exercise 2 learner-owned runner and ledger into the guided follow-on [LAB10: Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/).
+- Recheck the pinned source with [EX14](/en/examples/tiled-transpose/) and use [VIS11](/en/visuals/tiled-transpose/) only for evidence-neutral coordinate arithmetic.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Matrix Transpose Example Using Shared Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory) bounds current transpose, global-access, staging, synchronization, and padding facts.
+- [CUDA Programming Guide v13.3: Shared Memory Access Patterns](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns) bounds current bank, stride, conflict, and broadcast terminology.
+- [CUDA C++ Best Practices Guide v13.3: APOD](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy) supports iterative, incremental optimization and repeated verification.
+- [CUDA C++ Best Practices Guide v13.3: Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) supplies theoretical/effective bandwidth accounting boundaries.
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) supplies metric, replay, overhead, permission, reproducibility, memory, and Roofline boundaries.
+- [Nsight Compute CLI 2026.2.1](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) supplies exact-GPU queries, filtering, collection, and report export.
+
+Context7 `/websites/nvidia_cuda_cuda-programming-guide` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for discovery and cross-checking. The six exact NVIDIA owner URLs above are the factual authorities and were accessed on **2026-09-02**. No NVIDIA owner code, table, or figure is reproduced; the ledgers, stage design, explanations, Exercises, and solutions are original Learning Site material.
+
+**Fact checked and all sources accessed: 2026-09-02.**

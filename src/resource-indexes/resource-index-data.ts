@@ -69,6 +69,7 @@ const lab06Destination = PUBLISHED_DESTINATIONS.LAB06;
 const lab07Destination = PUBLISHED_DESTINATIONS.LAB07;
 const lab08Destination = PUBLISHED_DESTINATIONS.LAB08;
 const lab09Destination = PUBLISHED_DESTINATIONS.LAB09;
+const lab10Destination = PUBLISHED_DESTINATIONS.LAB10;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
 const vis03Destination = PUBLISHED_DESTINATIONS.VIS03;
@@ -304,6 +305,30 @@ const labs: readonly ResourceIndexRecord[] = [
     },
     reviewedOn: '2026-09-01',
     keywords: localized('EX02 Roofline Nsight Compute CUPTI arithmetic intensity ceiling provenance report custody', 'EX02 Roofline Nsight Compute CUPTI arithmetic intensity ceiling provenance report custody'),
+  },
+  {
+    planningId: 'LAB10',
+    group: 'labs',
+    title: lab10Destination.title,
+    href: lab10Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'advanced',
+    prerequisites: lab10Destination.prerequisites,
+    relatedUnits: ['A05', 'Q06', 'Q08', 'Q10', 'EX14', 'VIS11'],
+    hardwareGate: localized(
+      '仅限原生 Linux；恰好 1 个 compute capability 7.5 或更新的 CUDA GPU；问题内存上限 134,221,952 bytes；匹配的 Nsight Compute 与 CUPTI；精确 Node.js 24.19.0 分析 runtime，node --version 输出 v24.19.0；管理员批准的非管理员 performance-counter access；禁止 sudo、提权或策略绕过。',
+      'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; maximum problem memory of 134,221,952 bytes; matching Nsight Compute and CUPTI; exact Node.js 24.19.0 analysis runtime with node --version output v24.19.0; administrator-approved non-admin performance-counter access; no sudo, privilege escalation, or policy bypass.',
+    ),
+    versionGate: localized(
+      'C++17 Toolkit Lanes 11.8.0/12.9.2/13.3.1；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；CUPTI 11.8.87/12.9.79/13.3.75；精确 Node.js 24.19.0；记录实际 GPU、tool、metric query、permission、replay、warm-up、synchronization、statistics、report、Node gate 与 manifest coordinates。',
+      'C++17 Toolkit Lanes 11.8.0/12.9.2/13.3.1; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; CUPTI 11.8.87/12.9.79/13.3.75; exact Node.js 24.19.0; record actual GPU, tool, metric-query, permission, replay, warm-up, synchronization, statistics, report, Node gate, and manifest coordinates.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-09-02',
+    keywords: localized('transpose coalescing tiling bank layout padding evidence EX14 Nsight Compute Node.js reducer report custody', 'transpose coalescing tiling bank layout padding evidence EX14 Nsight Compute Node.js reducer report custody'),
   },
 ];
 
@@ -1177,6 +1202,40 @@ const practice: readonly ResourceIndexRecord[] = [
     versionGate: localized('CUDA Programming/Best Practices Guide v13.3 与 2009 original Roofline model；所有 traffic values 都是明确标注的 estimate。', 'CUDA Programming and Best Practices Guides v13.3 and the original 2009 Roofline model; every traffic value remains an explicitly labeled estimate.'),
     reviewedOn: '2026-09-01',
     keywords: localized('traffic estimate arithmetic intensity algorithm choice falsifiable experiment correctness', 'traffic estimate arithmetic intensity algorithm choice falsifiable experiment correctness'),
+  },
+  {
+    planningId: 'PB-R3-007',
+    group: 'practice',
+    title: localized('把四变量 transpose 实验修复为分阶段比较', 'Repair a four-variable transpose experiment as staged comparisons'),
+    href: localized('/practice/#pb-r3-007', '/en/practice/#pb-r3-007'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q11'],
+    relatedUnits: ['A05', 'Q06', 'Q08', 'Q10', 'EX14', 'VIS11', 'LAB10'],
+    hardwareGate: localized('无；只修复静态 transpose comparison design，不运行 CUDA 或 profiler。', 'None; repair a static transpose comparison design without running CUDA or a profiler.'),
+    versionGate: localized(
+      'CUDA Programming Guide v13.3 与 12.9.1/11.8.0 archives；Q11/EX14/VIS11 transpose、coalescing、tiling 与 bank-layout facts；无 measured claim。',
+      'CUDA Programming Guide v13.3 and the 12.9.1/11.8.0 archives; Q11/EX14/VIS11 transpose, coalescing, tiling, and bank-layout facts; no measured claim.',
+    ),
+    reviewedOn: '2026-09-02',
+    keywords: localized('transpose coalescing tile extent thread ownership padding staged one-variable comparison', 'transpose coalescing tile extent thread ownership padding staged one-variable comparison'),
+  },
+  {
+    planningId: 'PB-R3-008',
+    group: 'practice',
+    title: localized('审查无保管链 profiler 摘要中的固定 tile 与 speedup claim', 'Audit fixed-tile and speedup claims in an uncustodied profiler summary'),
+    href: localized('/practice/#pb-r3-008', '/en/practice/#pb-r3-008'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q11'],
+    relatedUnits: ['A05', 'Q06', 'Q08', 'Q10', 'EX14', 'VIS11', 'LAB10'],
+    hardwareGate: localized('无；只审查静态 profiler summary 与缺失的 evidence custody，不运行 CUDA、Nsight Compute 或 LAB10。', 'None; audit a static profiler summary and missing evidence custody without running CUDA, Nsight Compute, or LAB10.'),
+    versionGate: localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；CUPTI 11.8.87/12.9.79/13.3.75；exact GPU/tool/metric/replay/report/manifest gates。',
+      'Toolkit 11.8.0/12.9.2/13.3.1; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; CUPTI 11.8.87/12.9.79/13.3.75; exact GPU, tool, metric, replay, report, and manifest gates.',
+    ),
+    reviewedOn: '2026-09-02',
+    keywords: localized('transpose tile size speedup exact GPU tool metric replay report manifest custody competing explanations', 'transpose tile size speedup exact GPU tool metric replay report manifest custody competing explanations'),
   },
 ];
 
@@ -2292,6 +2351,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-01',
     '2026-09-01',
+  ),
+  sourceRecord(
+    'SRC-CUDA-053',
+    localized('Q11/EX14/VIS11 transpose、coalescing、tiling 与 bank-layout facts', 'Q11/EX14/VIS11 transpose, coalescing, tiling, and bank-layout facts'),
+    'cuda-version-record',
+    ['A05', 'Q11', 'EX14', 'VIS11', 'LAB10'],
+    localized(
+      'CUDA Programming Guide v13.3 与 12.9.1/11.8.0 archives；current transpose、coalesced global access、shared-memory staging、bank、broadcast 与 padding facts；无 measured claim。',
+      'CUDA Programming Guide v13.3 and the 12.9.1/11.8.0 archives; current transpose, coalesced global access, shared-memory staging, bank, broadcast, and padding facts; no measured claim.',
+    ),
+    '2026-09-02',
+    '2026-09-02',
+  ),
+  sourceRecord(
+    'SRC-CUDA-054',
+    localized('LAB10 exact-Lane profiler 与 evidence-custody boundaries', 'LAB10 exact-Lane profiler and evidence-custody boundaries'),
+    'cuda-version-record',
+    ['Q06', 'Q08', 'Q10', 'Q11', 'EX14', 'LAB10'],
+    localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；CUPTI 11.8.87/12.9.79/13.3.75；query、permission、replay、warm-up、synchronization、statistics 与 report custody。',
+      'Toolkit 11.8.0/12.9.2/13.3.1; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; CUPTI 11.8.87/12.9.79/13.3.75; query, permission, replay, warm-up, synchronization, statistics, and report custody.',
+    ),
+    '2026-09-02',
+    '2026-09-02',
   ),
 ];
 

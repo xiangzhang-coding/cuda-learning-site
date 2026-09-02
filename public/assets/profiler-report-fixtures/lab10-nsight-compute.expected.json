@@ -1,0 +1,203 @@
+{
+  "SPDX-License-Identifier": "CC-BY-4.0",
+  "schemaVersion": 1,
+  "fixtureId": "LAB10-NCU-EXPECTED",
+  "labId": "LAB10",
+  "exampleId": "EX14",
+  "sourceCommit": "981939cc705faf721ac06d1b70f2c5c4a8111e92",
+  "provenance": "original",
+  "fixtureType": "expected-only-profiler-report-plan",
+  "captureStatus": "pending-hardware-verification",
+  "tool": {
+    "name": "Nsight Compute",
+    "cli": "ncu",
+    "reportExtension": ".ncu-rep",
+    "selectedVersions": ["2022.3.0.22", "2025.2.1.3", "2026.2.1.5"]
+  },
+  "captureCommand": "ncu <lane-validated-config-control> --devices 0 --kernel-name-base function --kernel-name <actual-queried-four-stage-filter> --launch-count 4 <one-queried-section-or-minimal-queried-metrics> <validated-replay-options> --export <unique-attempt-report-base> ./build/lab10-transpose-candidates --all-stages --rows 4096 --columns 4096 --verify exact",
+  "workload": {
+    "baseline": "baseline-direct",
+    "candidate": "one declared successor stage at a time",
+    "stages": [
+      {
+        "id": "baseline-direct",
+        "changedVariable": "none; direct output-linear ownership is the frozen comparison baseline",
+        "hypothesis": "The exact-GPU evidence may characterize the baseline's input and output access behavior; no timing order is predicted."
+      },
+      {
+        "id": "coalescing-direction",
+        "changedVariable": "thread-to-coordinate direction only",
+        "hypothesis": "The queried exact-GPU global-access evidence may distinguish input-linear ownership from the baseline; no metric value or winner is predicted."
+      },
+      {
+        "id": "shared-memory-tiling",
+        "changedVariable": "unpadded 32 by 32 shared-memory staging and its uniform barrier only",
+        "hypothesis": "The queried exact-GPU evidence may support or reject the declared coalesced global read/write model while preserving exact output."
+      },
+      {
+        "id": "padded-bank-layout",
+        "changedVariable": "physical shared row stride from 32 to 33 only",
+        "hypothesis": "The queried exact-GPU shared-bank evidence may support or reject the padding hypothesis; no direction, magnitude, or winner is predicted."
+      }
+    ],
+    "rows": 4096,
+    "columns": 4096,
+    "elementType": "float",
+    "elementCount": 16777216,
+    "bytesPerMatrix": 67108864,
+    "globalMatrixCount": 2,
+    "globalMatrixBytes": 134217728,
+    "maximumSharedBytesPerBlock": 4224,
+    "maximumProblemMemoryBytes": 134221952,
+    "canonicalCorrectnessFixtureMaximumProblemMemoryBytes": 20608
+  },
+  "correctnessGate": {
+    "method": "in every correctness, warm-up, and profiled process, independently poison, launch, synchronize, copy back, and exactly verify every stage against the independent EX14 CPU reference",
+    "fixtures": ["5x7", "33x35", "64x32", "4096x4096"],
+    "inputAndOracleValues": "finite, non-NaN, and deterministic",
+    "outputAllocation": "one stable device output allocation and address per process, reused across all four stages",
+    "perStageProcedure": "immediately before every launch, checked host-to-device copy of a complete quiet-NaN sentinel output; then launch, checked cudaDeviceSynchronize, checked complete device-to-host copy, required output shape, exact oracle equality at every element, and no sentinel remaining",
+    "requiredResult": "all four stages independently pass the complete procedure for every fixture and every process before profiler evidence is interpreted"
+  },
+  "environmentManifest": {
+    "gpuIdentity": "unfilled",
+    "computeCapability": "unfilled",
+    "gpuCountUsed": "unfilled",
+    "driver": "unfilled",
+    "toolkitLane": "unfilled",
+    "cudaToolkit": "unfilled",
+    "cuptiVersion": "unfilled",
+    "profilerVersion": "unfilled",
+    "nvcc": "unfilled",
+    "hostCompiler": "unfilled",
+    "operatingSystem": "unfilled",
+    "sourceRepository": "unfilled",
+    "binarySha256": "unfilled",
+    "buildContract": "unfilled",
+    "workload": "unfilled",
+    "permissions": "unfilled",
+    "deviceAccessState": "unfilled",
+    "concurrentLoad": "unfilled",
+    "clockPowerThermal": "unfilled",
+    "exactCommands": "unfilled",
+    "correctnessMethod": "unfilled",
+    "correctnessCriteria": "unfilled",
+    "measurementMethod": "unfilled",
+    "rawLogs": "unfilled",
+    "rawReports": "unfilled",
+    "exitStatuses": "unfilled",
+    "custody": "unfilled",
+    "criteriaResult": "unfilled"
+  },
+  "method": {
+    "question": "For each adjacent baseline and candidate stage, does the minimal queried exact-GPU evidence support, reject, or leave inconclusive its one-variable coalescing, tiling, or bank-layout hypothesis while exact correctness remains fixed?",
+    "runnerProvenance": "After the learner attempts Q11 Exercise 2, LAB10 may consume the exact-hash reviewed solution asset or a learner alternative with the same CLI, stages, independent EX14 oracle, adjacent-stage diffs, C++17 build result, and source/build/binary hash contract. The reviewed asset is one solution, not a second canonical EX14 or a Runnable Example.",
+    "solutionAssets": {
+      "reviewedRunner": {
+        "publicPath": "/assets/exercise-solutions/q11-lab10-transpose-candidates.cu",
+        "repositoryPath": "public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu",
+        "sha256": "920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251",
+        "license": "Apache-2.0",
+        "boundary": "compile-link and static-inspection gate only in cuda-11.8, cuda-12.9, and cuda-13.3; no execution, runtime observation, or Evidence Status"
+      },
+      "reportReducer": {
+        "publicPath": "/assets/exercise-solutions/lab10-report-reducer.mjs",
+        "repositoryPath": "public/assets/exercise-solutions/lab10-report-reducer.mjs",
+        "sha256": "7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb",
+        "license": "Apache-2.0",
+        "boundary": "static report reduction only; no profiler capture, metric semantics inference, runtime observation, or Evidence Status"
+      }
+    },
+    "analysisRuntime": {
+      "name": "Node.js",
+      "requiredVersion": "24.19.0",
+      "requiredVersionOutput": "v24.19.0",
+      "gate": "Before reducer source-hash verification or CLI execution, run_recorded must capture node --version and a separate exact-match check; a missing executable, different output, or failed check blocks reduction.",
+      "availabilityAndEvidenceBoundary": "Selected CUDA images do not imply Node.js availability. Providing or executing Node.js and the reducer grants no CUDA compilation, profiler, runtime, performance, or Evidence Status."
+    },
+    "configControl": {
+      "gate": "The installed ncu --version and bare ncu --help must agree with the matching exact-version NVIDIA owner CLI manual about config control and the --import, --page raw, and --csv report-readback options; an unknown version, missing option, or disagreement is a blocker.",
+      "interfacePresentBranch": "freeze config_args=(--config-file off) and use ncu \"${config_args[@]}\" for every controlled command",
+      "olderNoInterfaceBranch": "freeze config_args=(), record the absent interface and exact manual coordinate, and use ncu \"${config_args[@]}\" for every controlled command; never require --config-file off on 2022.3"
+    },
+    "heldConstants": [
+      "EX14 parent commit and independent CPU reference",
+      "4096x4096 float input and output",
+      "finite non-NaN deterministic input and oracle generation plus exact comparison",
+      "one stable device output allocation and address per process plus an identical checked prelaunch full-output quiet-NaN sentinel procedure outside selected kernel metrics",
+      "one GPU, Toolkit Lane, compiler argv, candidate binary, launch order, and synchronization",
+      "256 threads per block, 32x32 logical tile, and four cooperative slots per thread",
+      "ncu version, selected filter, section or metric list, replay controls, and process environment",
+      "exact Node.js 24.19.0 analysis runtime with node --version output v24.19.0"
+    ],
+    "completionBoundary": "explicit cudaDeviceSynchronize after every selected stage launch",
+    "stageIndependence": "every correctness, warm-up, and profiled process performs the checked sentinel fill, selected launch, synchronization, complete readback, shape, every-element exact-oracle, and no-sentinel-remains checks independently for every stage",
+    "warmUp": {
+      "count": 1,
+      "processMode": "direct unprofiled process",
+      "excludedFromStatistics": true
+    },
+    "kernelSelection": {
+      "stageOrder": ["baseline-direct", "coalescing-direction", "shared-memory-tiling", "padded-bank-layout"],
+      "nameBasis": "actual function-name behavior confirmed by retained help and report evidence",
+      "filter": "one frozen exact or regular-expression filter matching only the four declared stage kernels",
+      "launchCount": 4
+    },
+    "collection": {
+      "scope": "one minimal queried section or one shorter minimal queried metric list for the three declared hypotheses",
+      "availabilityGate": "actual section list, exact-GPU metric query, and actual-help/manual agreement for report import with raw CSV output",
+      "primaryArtifact": "one hashed .ncu-rep per attempt",
+      "derivativeImport": "use the same exact ncu and frozen config branch with --import REPORT --page raw --csv, then retain and hash CSV, stderr, status, and expanded command under that attempt",
+      "statisticsInput": "only ten parent-report-hash-bound imported rows per stage and selected metric may feed median, minimum, and maximum",
+      "values": "not collected in this expected-only fixture"
+    },
+    "acquisition": {
+      "freshProfilerAttempts": 10,
+      "acquisitionOrder": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
+      "statistic": "median",
+      "spread": "minimum and maximum",
+      "sampleDeletion": "prohibited",
+      "invalidBatch": "retain the invalid batch and restart all ten attempts under a new batch ID",
+      "directoryCreation": "derive a batch directory, require it absent, create it once, then require every attempt directory absent and create it without overwrite"
+    },
+    "reduction": {
+      "runtimeGate": "Node.js 24.19.0 exactly; node --version must be retained as v24.19.0 and pass a separate recorded exact-match check before reducer source-hash verification or CLI execution",
+      "command": "node public/assets/exercise-solutions/lab10-report-reducer.mjs <ledger> <summary>",
+      "ledgerSchema": "schemaVersion 1; exactly attempts 01 through 10 with reportPath, reportSha256, rawCsvPath, and rawCsvSha256; exact four stage-to-reported-kernel mappings; exact metric name and unit pairs; exactly one installed-version mapping for kernel, metric, unit, and value CSV headers",
+      "validation": "verify unique source paths while allowing byte-identical valid observations and hashes, actual report and CSV SHA-256, exact mapped headers, and exactly one finite scalar with the declared unit for every attempt-stage-metric; reject blank, n/a, unavailable, nonnumeric, nonfinite, duplicate, or missing selected rows",
+      "output": "one count=10 median/minimum/maximum row per stage, metric name, and unit plus the report/CSV hash chain; no values are present in this expected-only fixture",
+      "semanticBoundary": "metric definitions, scopes, aggregation, replay, and pass records remain separately retained; the reducer infers no semantics, decides no hypothesis, and compares no unlike units"
+    },
+    "replayAndCustody": [
+      "requested and actual replay mode",
+      "pass count and save/restore behavior",
+      "cache, clock, serialization, and perturbation boundary",
+      "one primary .ncu-rep and report SHA-256 per attempt",
+      "one derivative raw CSV imported from that report with import stderr, exit status, exact command, and record SHA-256 per attempt",
+      "report-to-CSV hash mapping; metric names, units, values, and stage identities come only from the imported report",
+      "reviewed runner path public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu and SHA-256 920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251",
+      "reviewed reducer path public/assets/exercise-solutions/lab10-report-reducer.mjs and SHA-256 7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb",
+      "resolved Node.js path plus node --version, exact v24.19.0 match, command, stdout, stderr, status, and record-hash custody",
+      "source, binary, report, CSV, log, manifest, reduction ledger, summary, report/CSV hash chain, and sanitization hash custody"
+    ]
+  },
+  "sanitization": {
+    "status": "passed",
+    "reviewDate": "2026-09-02",
+    "removedCoordinates": ["host identity", "user identity", "absolute paths", "device identifiers", "network identifiers", "environment values"],
+    "transformations": ["This original project-authored expected-only plan contains no profiler capture and therefore required no value replacement."]
+  },
+  "expectedObservations": [
+    "After the learner attempts Q11 Exercise 2, the runner should be either the exact-hash reviewed solution asset or a learner alternative with the same interface, stages, independent oracle, adjacent diffs, and source/build/binary hash contract. Before profiling, four separate correctness invocations should qualify 5x7, 33x35, 64x32, and 4096x4096; the excluded warm-up and every profiled process should then keep only the frozen 4096x4096 workload. In each invocation, every stage should independently reuse one stable output allocation and address, receive a checked complete quiet-NaN sentinel host-to-device fill before launch, and pass checked synchronization, complete readback, output-shape, every-element exact CPU-oracle, and no-sentinel-remains checks.",
+    "The declared 4096x4096 workload should retain two 67108864-byte global matrices and at most 4224 shared bytes per block under the 134221952-byte problem bound.",
+    "Actual version and bare help should agree with the matching exact-version owner CLI manual about config control and --import, --page raw, and --csv, freeze config_args=(--config-file off) when config control exists or config_args=() for a reviewed older CLI without that interface, never require --config-file off on 2022.3, and let the remaining exact-GPU section, metric, CUPTI, report-write/import, and non-admin counter gates produce qualifying records or retained blockers.",
+    "One excluded direct-process warm-up should precede exactly ten fresh profiler attempts retained in acquisition order.",
+    "Each qualifying attempt should contain only the four selected stage kernels and preserve explicit completion, replay, a primary report and report hash, plus a same-ncu imported raw CSV with import stderr, status, command, derivative hash, and report-to-CSV hash mapping.",
+    "The coalescing-direction comparison should support, reject, or leave inconclusive its global-access hypothesis without a predeclared metric value or timing winner.",
+    "The shared-memory-tiling comparison should support, reject, or leave inconclusive its global-access hypothesis without treating static address arithmetic as observation.",
+    "The padded-bank-layout comparison should support, reject, or leave inconclusive its shared-bank hypothesis without treating browser bank arithmetic as evidence.",
+    "A qualifying full batch should first retain node --version output v24.19.0 and a separate recorded exact Node.js 24.19.0 match, then pass the exact-hash reducer and complete ledger gate and summarize only the ten parent-report-hash-bound imported rows for each stage and selected metric using count=10, the median plus minimum and maximum, and the report/CSV hash chain, with no sample deletion."
+  ],
+  "recordedObservations": [],
+  "claimBoundary": "This expected-only fixture contains no recorded timing, metric name or value, speedup, bottleneck, winner, replay result, Node.js observation, or runtime observation. It also contains no CSV header observation or report or ledger value. The two static Apache-2.0 solution assets and any host-side Node.js or reducer execution create no CUDA evidence, Runnable Example, or Evidence Status."
+}

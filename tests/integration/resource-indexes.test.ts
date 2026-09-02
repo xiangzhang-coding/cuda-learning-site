@@ -14,7 +14,7 @@ import {
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-09-01T12:00:00Z');
+const asOf = new Date('2026-09-02T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all fifty-six bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all fifty-eight bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(56);
+    expect(practiceIds).toHaveLength(58);
 
     const localeContracts = [
       {
@@ -173,7 +173,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(56);
+      expect(prompts.size).toBe(58);
     }
   });
 
@@ -181,8 +181,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 9, practice: 56, visuals: 18, glossary: 165, sources: 68 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(316);
+    expect(counts).toEqual({ labs: 10, practice: 58, visuals: 18, glossary: 165, sources: 70 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(321);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -190,7 +190,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['Q11', 'LAB10', 'Q13', 'L06', 'LAB12', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['Q13', 'L06', 'LAB12', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -272,6 +272,12 @@ describe('published resource indexes', () => {
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
       expect(record?.reviewedOn, planningId).toBe('2026-09-01');
       if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-01');
+    }
+
+    for (const planningId of ['LAB10', 'PB-R3-007', 'PB-R3-008', 'SRC-CUDA-053', 'SRC-CUDA-054']) {
+      const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
+      expect(record?.reviewedOn, planningId).toBe('2026-09-02');
+      if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-02');
     }
   });
 

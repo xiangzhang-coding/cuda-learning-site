@@ -123,7 +123,7 @@ describe('A05-A07 transpose, stencil, and convolution publication', () => {
     }
   });
 
-  it('publishes the new Practice Bank, Glossary, and source coordinates while leaving Q11/LAB10 absent', async () => {
+  it('keeps the transpose foundations present while publishing Q11 and LAB10', async () => {
     const [practice, glossary, sources, sidebar] = await Promise.all([
       readFile(path.join(docsRoot, 'en/practice.mdx'), 'utf8'),
       readFile(path.join(docsRoot, 'en/glossary.mdx'), 'utf8'),
@@ -133,11 +133,10 @@ describe('A05-A07 transpose, stencil, and convolution publication', () => {
     for (const id of ['PB-R2-017', 'PB-R2-018', 'PB-R2-019']) expect(practice).toContain(`## ${id}:`);
     for (let id = 140; id <= 146; id += 1) expect(glossary).toContain(`id="term-${id}"`);
     for (let id = 41; id <= 43; id += 1) expect(sources).toContain(`id="src-cuda-0${id}"`);
-    expect(PUBLISHED_DESTINATIONS).toHaveProperty('EX14');
-    expect(PUBLISHED_DESTINATIONS).toHaveProperty('VIS11');
-    for (const id of ['Q11', 'LAB10']) {
-      expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
-      expect(sidebar).not.toContain(id);
+    for (const id of ['A05', 'EX14', 'VIS11', 'Q11', 'LAB10']) {
+      expect(PUBLISHED_DESTINATIONS).toHaveProperty(id);
     }
+    expect(sidebar).toContain("{ slug: 'correctness/transpose-optimization-case-study' }");
+    expect(sidebar).toContain("{ slug: 'labs/optimize-canonical-transpose' }");
   });
 });

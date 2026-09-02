@@ -1,0 +1,945 @@
+---
+title: 'LAB10：优化 canonical transpose'
+description: '从 EX14 派生四个 correctness-equivalent stages，一次只检验一个 coalescing、tiling 或 bank-layout hypothesis，并在不虚构结果的前提下保留完整的十次 Nsight Compute 记录。'
+pairId: lab10
+counterpart: /en/labs/optimize-canonical-transpose/
+factCheckDate: '2026-09-02'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - workload-memory
+  - stages-hypotheses
+  - manifest
+  - canonical-review
+  - build-hash
+  - correctness
+  - profiler-gates
+  - warm-up
+  - acquisition
+  - replay-custody
+  - reduction
+  - observations
+  - criteria-blockers
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB10
+prerequisites:
+  - Q11
+relatedUnits:
+  - A05
+  - Q06
+  - Q08
+  - Q10
+  - EX14
+  - VIS11
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: '仅限 Native Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU；两个 4096x4096 float device matrices 使用 134,217,728 bytes，再加每 block 最多 4,224 shared bytes，形成 134,221,952 bytes 的保守 declared problem bound；在 cuda-11.8、cuda-12.9 或 cuda-13.3 中使用 C++17；匹配的 Nsight Compute 与 CUPTI；分析 runtime 必须是精确 Node.js 24.19.0，且 node --version 输出 v24.19.0；管理员批准的 non-admin performance-counter access；禁止 sudo、提权或策略绕过'
+estimatedMinutes: 210
+difficulty: advanced
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 134221952
+gpuCount: 1
+permissions:
+  - '访问恰好一张 selected CUDA device，并执行 NVCC、host C++ compiler、make、sha256sum、EX14/LAB10 learner-owned binaries、Nsight Compute CLI ncu、精确 Node.js 24.19.0 与 reviewed LAB10 reducer'
+  - '创建、哈希、检查、消毒、保留和删除 learner-owned source、build files、raw logs、status files、manifests、primary .ncu-rep reports、绑定 report hash 的 imported raw CSV derivatives、reduction ledger 与 reducer summary'
+  - '只在管理员批准的 non-admin policy 下读取 NVIDIA GPU performance counters；本实验不授权 sudo、提权、setuid workaround、container escape 或 security-policy bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - Profiling 前应由四次独立 correctness invocation 分别覆盖 5x7、33x35、64x32 与 4096x4096；excluded warm-up 和每个 profiled process 随后固定使用 4096x4096 workload。每次 invocation 中，四阶段都使用 finite、non-NaN deterministic input/oracle values，复用一份 stable device output allocation/address，并在每次 launch 前通过 checked host-to-device copy 写满 quiet-NaN sentinel，随后通过 checked synchronization、complete readback、output-shape、逐元素精确 comparison 与 no-sentinel-remains checks。
+    - Performance workload 应保持两个各 67,108,864 bytes 的 global matrices 与每 block 最多 4,224 shared bytes，服从 134,221,952-byte 保守 declared problem bound，并与 EX14 的 20,608-byte tiny-fixture bound 分开。
+    - Source review 应在每个相邻 stage 之间只保留一个 changed variable，同时固定 workload、logical transpose、launch ownership、correctness、tool、binary 与 process contract。
+    - Actual version、bare help 与匹配 exact-version owner manual 应确认 config control 以及 `--import`、`--page raw`、`--csv`，其余 exact-GPU section/metric、匹配 CUPTI、report-write 与批准的 non-admin counter gates 应产生 qualifying records 或保留 blockers。
+    - 一次被排除的 direct-process warm-up 应先于恰好十次新的 Nsight Compute attempts；每次都按同一顺序运行四个 stages 并按 acquisition order 保留。
+    - 每次 qualifying attempt 应保留显式 cudaDeviceSynchronize completion、selected-kernel/filter identity、replay/save-restore behavior、primary `.ncu-rep`、report-hash-bound imported raw CSV、logs、status 与 SHA-256 custody。
+    - 每个 adjacent-stage hypothesis 只能依据 queried exact-GPU evidence 分类为 supported、rejected 或 inconclusive，不能预填 timing、metric value、speedup、bottleneck 或 winner。
+    - Qualifying full batch 应先记录精确 Node.js 24.19.0，且 `node --version` 输出 `v24.19.0`，再通过 exact-hash reviewed reducer，只使用十份 imported report derivatives 中每个 selected stage/metric 的十行 retained values 汇总 count=10、median 与 minimum/maximum，保留 report/CSV hash chain，并且不删除 sample。
+    - VIS11 应保持为 evidence chain 之外的 browser arithmetic；完整 learner run 可进入 Community-Observed 复核，但不能成为 Runtime-Verified。
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0；Nsight Compute 2022.3.0.22；CUPTI 11.8.87'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / EX14 12.9.2 Lane；Nsight Compute 2025.2.1.3；CUPTI 12.9.79'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / EX14 13.3.1 Lane；Nsight Compute 2026.2.1.5；CUPTI 13.3.75'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Example Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current coalesced global access、shared staging、synchronization、bank layout 与 padding model'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current section、metric、replay、save/restore、overhead、perturbation 与 reproducibility semantics'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI 2022.3 Archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3.0'
+    platform: 'cuda-11.8 Lane 的 archived help、无 config-file interface、query、kernel filter、report 与 CLI option semantics'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI 2025.2 Archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2.1'
+    platform: 'cuda-12.9 Lane 的 archived help、config-file、query、kernel filter、report 与 CLI option semantics'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current help、config-file、query、kernel filter、report 与 CLI option semantics'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1；2026.2 line 支持 CUDA 13.3'
+    platform: 'Current fixes、support 与 compatibility boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI v2026.2.1；selected Lane components 11.8.87、12.9.79 与 13.3.75'
+    platform: 'Current compatibility、profiling、counter availability、overhead 与 subscriber boundaries'
+    accessDate: '2026-09-02'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/labs/optimize-canonical-transpose/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,workload-memory,stages-hypotheses,manifest,canonical-review,build-hash,correctness,profiler-gates,warm-up,acquisition,replay-custody,reduction,observations,criteria-blockers,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q11 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'A05,Q06,Q08,Q10,EX14,VIS11' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-transpose' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: '仅限 Native Linux；一张 CC 7.5+ GPU；三条 Toolkit Lane 使用 C++17；匹配 Nsight Compute/CUPTI；精确 Node.js 24.19.0 分析 runtime，输出 v24.19.0；批准的 non-admin counters；134,221,952-byte declared bound；禁止 sudo 或 bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '210' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '134221952' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: '一张 CUDA device；执行 compiler、binary、hash、ncu、精确 Node.js 24.19.0 与 reviewed reducer；写入 learner-owned artifacts；管理员批准的 non-admin performance-counter access；禁止 sudo、提权或策略绕过' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '9 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3,13.3.1,2022.3.0,2022.3.0.22,2025.2.1,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/optimize-canonical-transpose/" lang="en">Read the English counterpart</a>
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+LAB10 是一个在网站之外、仅在原生 Linux（Native Linux）上完成的实验（Lab）。它从 immutable EX14 出发，在学习者先尝试 Q11 Exercise 2 后接受 reviewed solution asset 或满足同一 contract 的 learner alternative，建立四阶段 comparison harness，一次只检验一个 coalescing、shared-memory tiling 或 bank-layout hypothesis。本页是 measurement contract，不是结果：compilation 为空，runtime 保持待硬件验证（Pending Hardware Verification），`recordedObservations` 为空。
+
+## 实验合同
+
+| 坐标 | 冻结要求 |
+| --- | --- |
+| 严格先修 | 恰好 Q11；先完成 [Q11 练习 2](/correctness/transpose-optimization-case-study/exercises/)的 learner attempt，再带入 reviewed Solution 2 asset 或满足同一 contract 的 learner-owned runner provenance |
+| 相关但不是先修 | A05、Q06、Q08、Q10、[EX14](/examples/tiled-transpose/)与 [VIS11](/visuals/tiled-transpose/) |
+| 受支持环境（Supported Environment） | 仅 Native Linux；恰好一张 compute capability 7.5 或更新的 CUDA GPU |
+| 工具包通道（Toolkit Lane） | 在 `cuda-11.8`、`cuda-12.9` 或 `cuda-13.3` 中使用 C++17，并匹配 Nsight Compute 与 CUPTI |
+| 分析 runtime | 精确 Node.js `24.19.0`；reduction 前 `node --version` 必须精确输出 `v24.19.0` |
+| Performance workload | 一个 `4096x4096` row-major `float` input 和一个同样大小的 out-of-place output |
+| Declared problem bound | 134,217,728 global bytes + 每 block 最多 4,224 shared bytes = 134,221,952 bytes |
+| 权限 | 管理员批准的 non-admin performance-counter access；禁止 `sudo`、提权或策略绕过 |
+| 采集 | 一次被排除的 direct-process warm-up，然后恰好 10 次包含相同四阶段的新 profiler attempts |
+| 证据 | Compilation 为空；runtime 为 Pending Hardware Verification；recorded observations 为空 |
+
+本实验不会替学习者选择 tile size、metric、result 或 winner。最终 padded stage 对齐 EX14 的 logical/physical tile contract，但源码相似、静态 address arithmetic 或 expected observations 都不能建立性能结论。
+
+Selected CUDA image 只冻结 declared CUDA Toolkit 与 operating-system planning coordinates。它**不代表**已经安装 Node.js，也不代表已安装的 `node` 满足 required version。提供或执行 Node.js 与 reducer 只满足 host analysis gate，不授予 CUDA compilation、profiler、runtime、performance 或其他 Evidence Status。
+
+## 先修检查
+
+1. 对 LAB10 而言，必须先完成 [Q11 练习 2](/correctness/transpose-optimization-case-study/exercises/)的 learner attempt。随后可选择 [Solution 2 的完整 reviewed runner](/assets/exercise-solutions/q11-lab10-transpose-candidates.cu)：repository path 为 `public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu`，精确 SHA-256 为 `920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251`。它是一份 reviewed solution，不是第二份 canonical EX14。Learner-owned alternative 仍然有效，但 completion packet 必须证明相同 required CLI、四个 stages、independent EX14 oracle、每组 adjacent-stage diff、实际 C++17 build command/result，以及 source/build/binary SHA-256；LAB10 不接受来源不明的 binary。
+2. 使用 A05 核对 transpose mapping、Q06 建立 APOD decision ledger、Q08 约束 selected-kernel collection、Q10 区分 model 与 measurement。它们只是 related resources，不新增先修边。
+3. 确认只看到一张 selected GPU，并查询 compute capability 至少为 7.5。记录 query 与结果，不能只记产品名。
+4. 选择一条 C++17 Toolkit Lane 和匹配的 Nsight Compute/CUPTI components。相近版本属于另一环境，不得静默继承 Lane label。
+5. 独立提供精确 Node.js `24.19.0` 分析 runtime。解析并记录 `node` path；`node --version` 必须精确输出 `v24.19.0`。Executable 缺失、compatible 但不精确的 release 或其他任何输出都会阻断 reduction。Selected NVIDIA CUDA image 不保证 Node.js availability 或 version。
+6. 取得管理员批准的记录，使当前非管理员账号可以访问 performance counters。没有授权就停止；LAB10 不授权 `sudo ncu`、setuid workaround、container escape 或其他 policy bypass。
+7. 准备 learner-owned evidence directory，不覆盖任何 source、report、log、status、hash、manifest、blocked batch、reduction ledger/summary 或 sanitization record。
+
+## 获取 canonical project
+
+[查看 immutable commit `981939cc705faf721ac06d1b70f2c5c4a8111e92` 中的完整 EX14 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose)，或[下载同一 commit 的精确归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip)。为同时保留后来发布的 reviewed solution assets 并证明 EX14 没有改变，在 current Learning Site source tree 的 repository root 执行：
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+source_commit='981939cc705faf721ac06d1b70f2c5c4a8111e92'
+canonical_files=(
+  examples/ex14-tiled-transpose/Makefile
+  examples/ex14-tiled-transpose/README.md
+  examples/ex14-tiled-transpose/evidence/README.md
+  examples/ex14-tiled-transpose/include/tiled_transpose_reference.hpp
+  examples/ex14-tiled-transpose/scripts/compile-check.sh
+  examples/ex14-tiled-transpose/src/tiled_transpose.cu
+  examples/ex14-tiled-transpose/tests/host_reference_test.cpp
+)
+git diff --exit-code "$source_commit" -- "${canonical_files[@]}"
+node -e "const p=require('./examples/ex14-tiled-transpose/project.json'); if(p.sourceCommit!==process.argv[1]) process.exit(1)" "$source_commit"
+```
+
+列出的 implementation/contract files 必须保持 empty diff。`project.json` 需要单独检查，因为它当前的 `sourceCommit` 是 merge 后回填的 metadata pin，不可能与它所命名的同一 commit 保持 byte-identical。不要为了取得 reviewed assets 而修改 EX14。EX14 的 CPU reference 与 padded tiled kernel 是 canonical；baseline、intermediate candidates 和四阶段 runner 是 Q11 约束下派生的 LAB10 artifacts。Reviewed runner 位于 canonical files 之外的 `public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu`；learner alternative 也必须位于 canonical files 之外。记录 parent commit 与 selected source path，并哈希每个 source；任何一种路径都不会成为新的 canonical range 或 Runnable Example。以下 command 都从 repository root 执行。
+
+## 冻结 workload 与内存算术
+
+Declared performance workload 是：
+
+```yaml
+element_type: float
+rows: 4096
+columns: 4096
+element_count: 16777216
+bytes_per_element: 4
+bytes_per_matrix: 67108864
+global_matrix_count: 2
+global_matrix_bytes: 134217728
+logical_tile: 32x32
+maximum_physical_shared_layout: 32x33
+maximum_shared_bytes_per_block: 4224
+declared_problem_bound_bytes: 134221952
+canonical_correctness_fixture_bound_bytes: 20608
+```
+
+精确算术为：
+
+- 一个 matrix：`4096 x 4096 x 4 = 67,108,864` bytes；
+- 两个 global matrices：`2 x 67,108,864 = 134,217,728` bytes；
+- 最大 stage-local shared tile：每 block `32 x 33 x 4 = 4,224` bytes；
+- 保守 declared bound：`134,217,728 + 4,224 = 134,221,952` bytes。
+
+该 bound 覆盖 canonical application problem model，不包含 host allocations、driver/context state、code、allocator granularity、全部 concurrently resident blocks、profiler libraries 或 replay save/restore storage。采集前必须检查 actual free memory 和 profiler requirements。
+
+EX14 tiny correctness fixture 的 bound 是 `2 x (64 x 32 x 4) + 4,224 = 20,608` bytes。这个 **20,608-byte bound 与 LAB10 的 134,221,952-byte performance bound 不同，必须分开**；不得相互替换，也不得把任一 bound 称为 observed allocation traffic。
+
+## 声明 stages 与 hypotheses
+
+Learner-owned runner 按固定顺序各 launch 一次以下 stages。相邻 stage 形成三次 passes，每次只改变一个变量（one variable at a time）：
+
+```yaml
+stages:
+  - stage_id: baseline-direct
+    changed_variable: none; frozen direct output-linear baseline
+    hypothesis: exact-GPU evidence 可以刻画 strided input reads 与 contiguous output writes；不预判 timing order
+  - stage_id: coalescing-direction
+    changed_variable: only thread-to-coordinate direction
+    hypothesis: exact-GPU global-access evidence 可以区分 input-linear ownership 与 baseline-direct；不预判 metric value 或 winner
+  - stage_id: shared-memory-tiling
+    changed_variable: only unpadded 32x32 shared staging plus one uniform block barrier
+    hypothesis: exact-GPU evidence 可以支持或拒绝 coalesced global reads/writes model，同时 exact output 保持不变
+  - stage_id: padded-bank-layout
+    changed_variable: only physical shared row stride changes from 32 to 33
+    hypothesis: exact-GPU shared-bank evidence 可以支持或拒绝 padding model；不预判 direction、magnitude 或 winner
+```
+
+Baseline 使用 output-linear ownership：相邻 threads 写相邻 output elements，并读取 transposed input coordinates。Coalescing-direction pass 只翻转 ownership，使相邻 threads 读取相邻 input elements 并写 transposed output coordinates。Tiling pass 保持 input-linear ownership，增加 shared staging 与 uniform barrier，让静态模型在两端都表达 contiguous global access。Bank-layout pass 只把 physical shared stride 从 `32` 改为 `33`；它不增加 logical column。
+
+四阶段之间**保持不变的常量（held constants）**是 EX14 parent 与 CPU reference、finite non-NaN deterministic input/oracle values、`4096x4096` shape、out-of-place mapping、exact comparison、每个 process 内的一份 stable device output allocation/address、每次 launch 前 identical checked full-output quiet-NaN sentinel procedure、每 block 256 threads、32x32 logical tile、每 thread 四个 cooperative slots、edge guards、stage order、一张 selected GPU、C++17 Lane、compiler/link options、candidate binary、process environment、synchronization rule、profiler executable、selected section/metrics、filter、replay controls 与 ten-attempt policy。Sentinel fill 与 complete-output readback 保持在 selected kernel metrics 之外。必须保留 reviewed source diff，证明每个相邻 stage 只改声明变量。若其他变量改变，就创建新实验。
+
+这些是 explicit hypotheses，不是结论。LAB10 **不预填 timing、metric、speedup、bottleneck 或 winner**。
+
+## 创建完整的未填写 Environment Manifest
+
+在 build 或运行前保存以下模板。每个 `unfilled` 字段都必须来自本次实验的 observation；缺失就是缺失，不能填零。常量只标识 contract，不填充 observed environment fields。
+
+```yaml
+subject: EX14 / LAB10
+source_repository:
+  canonical_commit: 981939cc705faf721ac06d1b70f2c5c4a8111e92
+  tree_url: https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose
+  archive_url: https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip
+  reviewed_solution_public_path: /assets/exercise-solutions/q11-lab10-transpose-candidates.cu
+  reviewed_solution_repository_path: public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu
+  reviewed_solution_sha256: 920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251
+  acquisition_method: unfilled
+  checkout_and_worktree_state: unfilled
+  canonical_source_sha256: unfilled
+  candidate_parent_commit: unfilled
+  candidate_source_paths: unfilled
+  selected_candidate_source_path: unfilled
+  source_sha256: unfilled
+  adjacent_stage_diff_sha256: unfilled
+observation:
+  date_utc: unfilled
+  observer: unfilled
+supported_environment:
+  family: Native Linux
+  distribution: unfilled
+  version: unfilled
+  architecture: unfilled
+  kernel: unfilled
+analysis_runtime:
+  name: Node.js
+  node_path: unfilled
+  node_version_output: unfilled
+  required_version: 24.19.0
+  required_version_output: v24.19.0
+  exact_version_match_status_and_records_sha256: unfilled
+gpu:
+  identity: unfilled
+  selected_device_ordinal: unfilled
+  compute_capability: unfilled
+  compute_capability_query: unfilled
+  visible_count: unfilled
+  used_count: 1
+driver:
+  exact_version: unfilled
+  query_command_and_log_sha256: unfilled
+toolkit:
+  lane: unfilled
+  exact_toolkit_version: unfilled
+  runtime_and_driver_facing_components: unfilled
+  nvcc_path_and_version_output: unfilled
+  host_compiler_path_and_version_output: unfilled
+profiling_stack:
+  ncu_path: unfilled
+  initial_ncu_version_output: unfilled
+  bare_ncu_help_log_status_sha256: unfilled
+  exact_version_owner_cli_manual: unfilled
+  config_file_interface_actual_help_manual_agreement: unfilled
+  report_import_raw_csv_actual_help_manual_agreement: unfilled
+  config_file_branch: unfilled
+  config_file_absence_manual_coordinate_if_applicable: unfilled
+  config_args_expanded_argv_status_sha256: unfilled
+  ncu_version_output_with_frozen_config_args: unfilled
+  ncu_list_sections_log_status_sha256: unfilled
+  ncu_query_metrics_log_status_sha256: unfilled
+  cupti_version: unfilled
+  cupti_observation_method: unfilled
+  cupti_library_path_and_sha256: unfilled
+  toolkit_driver_profiler_cupti_compatibility: unfilled
+build:
+  cxx_dialect: c++17
+  build_type_and_optimization: unfilled
+  architecture_targets: unfilled
+  debug_lineinfo_lto_flags: unfilled
+  link_mode: unfilled
+  exact_ordered_commands_and_expanded_argv: unfilled
+  canonical_binary_path: build/ex14-tiled-transpose
+  canonical_binary_sha256: unfilled
+  candidate_binary_path: build/lab10-transpose-candidates
+  binary_sha256: unfilled
+workload:
+  element_type: float
+  rows: 4096
+  columns: 4096
+  element_count: 16777216
+  bytes_per_matrix: 67108864
+  global_matrix_bytes: 134217728
+  maximum_shared_bytes_per_block: 4224
+  declared_problem_bound_bytes: 134221952
+  actual_allocation_api_results: unfilled
+  profiler_owned_or_other_memory: unfilled
+stage_contract:
+  stage_order: [baseline-direct, coalescing-direction, shared-memory-tiling, padded-bank-layout]
+  exact_kernel_symbols: unfilled
+  source_ranges_and_hashes: unfilled
+  changed_variable_per_adjacent_pair: unfilled
+  held_constants_audit: unfilled
+  output_allocation_and_sentinel_invariant: one stable device output allocation/address per process; identical checked full-output quiet-NaN host-to-device fill outside selected kernel metrics
+  hypothesis_decision_rules: unfilled
+launch:
+  block_threads: 256
+  logical_tile: 32x32
+  cooperative_slots_per_thread: 4
+  selected_grid: unfilled
+  stream_and_context: unfilled
+  launches_per_stage_per_process: 1
+  explicit_cudaDeviceSynchronize_after_each_stage: required
+permissions:
+  device_access_result: unfilled
+  executable_and_filesystem_access: unfilled
+  node_and_reducer_execution_result: unfilled
+  administrator_policy_owner: unfilled
+  non_admin_counter_approval_record: unfilled
+  actual_counter_access_result: unfilled
+  report_write_result: unfilled
+  privilege_escalation: prohibited; no sudo or bypass
+execution_isolation:
+  cuda_visible_devices: unfilled
+  selected_device_state: unfilled
+  bare_metal_vm_container: unfilled
+  container_image_and_digest: unfilled
+  mig_state: unfilled
+  mps_state: unfilled
+  concurrent_gpu_and_cpu_load: unfilled
+  clocks_and_persistence_policy: unfilled
+  power_limit_and_policy: unfilled
+  thermal_state_before_and_after: unfilled
+commands:
+  build: unfilled
+  source_and_binary_hashes: unfilled
+  reviewed_runner_hash_verification: unfilled
+  reviewed_runner_compile_link: unfilled
+  unprofiled_correctness: unfilled
+  profiler_gates: unfilled
+  direct_process_warm_up: unfilled
+  profiler_attempts_01_through_10: unfilled
+  report_imports_01_through_10: unfilled
+  node_version_and_exact_match_gate: unfilled
+  reducer_hash_verification: unfilled
+  reduction: unfilled
+  reduction_artifact_hashes: unfilled
+correctness:
+  process_scope: every correctness, warm-up, and profiled process
+  input_and_oracle_values: finite non-NaN deterministic
+  oracle: independent canonical EX14 CPU reference
+  comparison: exact float equality for every element
+  fixtures: [5x7, 33x35, 64x32, 4096x4096]
+  per_stage_prelaunch_sentinel_fill_copy_statuses: unfilled
+  complete_output_device_to_host_copy_statuses: unfilled
+  output_shape_exact_oracle_and_no_sentinel_results: unfilled
+  per_stage_fixture_results: unfilled
+  all_cuda_boundaries: unfilled
+  explicit_synchronization_results: unfilled
+  unprofiled_exit_statuses_and_log_sha256: unfilled
+  warm_up_result_status_and_log_sha256: unfilled
+  profiled_process_results_01_through_10: unfilled
+warm_up:
+  count: 1
+  process_mode: direct unprofiled process
+  excluded_from_retained_samples: true
+  purpose_and_limit: unfilled
+repetition_plan:
+  fresh_profiler_attempts: 10
+  acquisition_order: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10]
+  stage_launches_per_attempt: 4
+  raw_sample_retention: all attempts in acquisition order
+  statistic: median
+  spread: min and max
+  outlier_policy: no sample deletion or post-hoc exclusion
+  invalid_batch_policy: retain invalid full batch and restart all ten under a new batch ID
+kernel_selection:
+  actual_reported_names: unfilled
+  kernel_name_basis_from_actual_help: unfilled
+  selected_kernel_filter: unfilled
+  expected_selected_launch_count: 4
+collection:
+  selected_section: unfilled
+  selected_metrics: unfilled
+  minimality_rationale: unfilled
+  report_primary_artifact: .ncu-rep
+  derivative_interface: --import REPORT --page raw --csv
+  derivative_csv_source: imported primary report only
+  exact_metric_names_from_exact_gpu: unfilled
+  metric_definitions: unfilled
+  metric_units: unfilled
+  metric_scopes_and_aggregation: unfilled
+  device_process_context_stream_kernel_launch_filters: unfilled
+  missing_or_na_behavior: blocker, never zero
+replay:
+  requested_mode_from_actual_help: unfilled
+  actual_mode: unfilled
+  pass_count_per_stage_per_attempt: unfilled
+  save_restore_behavior: unfilled
+  cache_control: unfilled
+  clock_control: unfilled
+  serialization: unfilled
+  perturbation_boundary: unfilled
+attempt_records:
+  report_paths_and_sha256_01_through_10: unfilled
+  imported_raw_csv_paths_and_sha256_01_through_10: unfilled
+  import_stderr_and_exit_statuses_01_through_10: unfilled
+  report_to_derivative_hash_mapping: unfilled
+  stdout_stderr_paths_and_sha256_01_through_10: unfilled
+  tool_and_application_exit_statuses_01_through_10: unfilled
+  expanded_argv_01_through_10: unfilled
+  acquisition_ledger: unfilled
+reduction:
+  analysis_runtime: Node.js 24.19.0
+  required_node_version_output: v24.19.0
+  node_version_and_exact_match_records_sha256: unfilled
+  reducer_public_path: /assets/exercise-solutions/lab10-report-reducer.mjs
+  reducer_repository_path: public/assets/exercise-solutions/lab10-report-reducer.mjs
+  reducer_sha256: 7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb
+  ledger_path_and_sha256: unfilled
+  ledger_attempt_ids_01_through_10: unfilled
+  exact_stage_to_reported_kernel_mapping: unfilled
+  exact_metric_name_and_unit_pairs: unfilled
+  installed_version_csv_header_mapping: unfilled
+  raw_values_by_stage_metric_and_attempt: unfilled
+  statistics_input: exactly ten imported report-hash-bound rows per stage and selected metric
+  report_csv_hash_chain_sha256: unfilled
+  summary_path_and_sha256: unfilled
+  median_by_stage_and_metric: unfilled
+  minimum_and_maximum_by_stage_and_metric: unfilled
+  adjacent_stage_hypothesis_results: unfilled
+  no_sample_deletion_audit: unfilled
+custody:
+  private_original_directory: unfilled
+  source_binary_node_gate_reducer_report_csv_log_manifest_reduction_ledger_summary_hash_chain: unfilled
+  observer_and_transfer_history: unfilled
+  retention_and_access_policy: unfilled
+sanitization:
+  public_derivative_planned: unfilled
+  reviewer_and_date: unfilled
+  removed_coordinates: unfilled
+  transformations: unfilled
+  original_to_derivative_hash_mapping: unfilled
+criteria_result:
+  source_build_workload_gate: unfilled
+  correctness_and_synchronization_gate: unfilled
+  environment_version_permission_gate: unfilled
+  analysis_runtime_gate: unfilled
+  section_metric_filter_replay_gate: unfilled
+  report_import_raw_csv_gate: unfilled
+  ten_attempt_full_batch_gate: unfilled
+  reduction_integrity_gate: unfilled
+  hypothesis_interpretation_gate: unfilled
+  custody_and_sanitization_gate: unfilled
+  evidence_status_candidate_after_review: unfilled
+```
+
+该 manifest 刻意比 GPU 与 version 字符串更完整。若没有 stage source identity、exact workload、stable output allocation/address、per-stage sentinel fill/copy statuses、解析后的 Node.js path 与 exact version output、permissions、selected kernel/filter、completion、replay、raw attempts 与 custody，comparison 不可复核。
+
+## 复核 canonical source
+
+Independent reference 只从 EX14 渲染，并必须保持为每个 stage 的 oracle：
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+Final padded layout、edge guards、cooperative ownership 与 unconditional barrier 也只从 EX14 渲染：
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+顺序是有意的：先建立 CPU oracle，再复核最终收敛到 canonical EX14 的 GPU stage。Imported code 不包含 learner-owned baseline/intermediate stages，也不提供 timing 或 profiler evidence。VIS11 只复用为 row-major coordinates 与 stride-32/33 bank mapping 的 **browser arithmetic**；它不执行 CUDA、不读取 counter，**不是证据**。
+
+## 构建并哈希 sources 与 binaries
+
+先在一个 Bash session 中创建唯一 run root。`run_recorded` 在执行任何 command 前拒绝已有 record path，保存 expanded command、stdout、stderr 与 actual exit status，哈希这四份 records，再返回 command 的 actual status。后续每次调用都必须使用 `|| exit 1`。Canonical build outputs 仍在 `build/`；所有 command evidence 都只写入本次唯一 `${run_dir}`：
+
+```bash
+run_id='<fill unique run id>'
+run_dir="lab10-evidence/${run_id}"
+test ! -e "$run_dir" || exit 1
+mkdir -p "${run_dir}"/{build,gates,correctness,warm-up,batches,reduction,custody} || exit 1
+
+run_recorded() {
+  local output_relative="$1"
+  shift
+  local stdout_path="${run_dir}/${output_relative}"
+  local record_base="$stdout_path"
+  case "$record_base" in
+    *.stdout.log) record_base="${record_base%.stdout.log}" ;;
+    *.csv) record_base="${record_base%.csv}" ;;
+  esac
+  local stderr_path="${record_base}.stderr.log"
+  local status_path="${record_base}.status"
+  local command_path="${record_base}.command"
+  local records_hash_path="${record_base}.records.sha256"
+  local record_path actual_status
+  test "$#" -gt 0 || return 2
+  for record_path in "$stdout_path" "$stderr_path" "$status_path" "$command_path" "$records_hash_path"; do
+    test ! -e "$record_path" || return 1
+  done
+  printf '%q ' "$@" >"$command_path" || return 1
+  printf '\n' >>"$command_path" || return 1
+  "$@" >"$stdout_path" 2>"$stderr_path"
+  actual_status=$?
+  printf '%s\n' "$actual_status" >"$status_path" || return 1
+  sha256sum "$stdout_path" "$stderr_path" "$status_path" "$command_path" \
+    >"$records_hash_path" || return 1
+  return "$actual_status"
+}
+
+run_recorded build/make-preprocess.stdout.log \
+  make -C examples/ex14-tiled-transpose preprocess DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-compile.stdout.log \
+  make -C examples/ex14-tiled-transpose compile DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-link.stdout.log \
+  make -C examples/ex14-tiled-transpose link DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-inspect.stdout.log \
+  make -C examples/ex14-tiled-transpose inspect DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-host-test.stdout.log \
+  make -C examples/ex14-tiled-transpose host-test DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/canonical-source.sha256 sha256sum \
+  examples/ex14-tiled-transpose/include/tiled_transpose_reference.hpp \
+  examples/ex14-tiled-transpose/src/tiled_transpose.cu \
+  examples/ex14-tiled-transpose/Makefile || exit 1
+run_recorded build/canonical-binary.sha256 sha256sum build/ex14-tiled-transpose || exit 1
+```
+
+学习者先完成 [Q11 练习 2](/correctness/transpose-optimization-case-study/exercises/)后，LAB10 的 reviewed path 使用 Solution 2 的完整 original asset，而不是未解释的 `lab10-work` source 或 binary。先通过 `run_recorded` 验证 exact source hash，再在 selected Lane 以固定 C++17、`sm_75` SASS 加 `compute_75` PTX target 和 EX14 include path compile/link，最后哈希 binary：
+
+```bash
+run_recorded build/reviewed-runner-source-verify.stdout.log \
+  bash -c 'printf "%s  %s\n" "$1" "$2" | sha256sum --check --strict' \
+    verify-reviewed-runner \
+    920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251 \
+    public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu || exit 1
+run_recorded build/reviewed-runner-compile.stdout.log \
+  nvcc \
+    --std=c++17 \
+    --generate-code=arch=compute_75,code=sm_75 \
+    --generate-code=arch=compute_75,code=compute_75 \
+    --include-path examples/ex14-tiled-transpose/include \
+    public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu \
+    --output-file build/lab10-transpose-candidates || exit 1
+run_recorded build/candidate-binary.sha256 sha256sum \
+  build/lab10-transpose-candidates || exit 1
+```
+
+该 expanded command 就是 reviewed asset 的精确 compile/link contract。验证 command、compile stdout/stderr/status、records hash 与 candidate `binary_sha256` 全部进入 custody；在 correctness、warm-up 或 profiling 前冻结 binary。Learner alternative 只能替换 selected source path，且必须继续满足同一 CLI、四阶段顺序、independent EX14 oracle、adjacent-stage diff/hash、C++17 target/include/output 与 source/build/binary hash contract。本站对 reviewed asset 的三条 pinned Toolkit Lane gate 只 compile/link 和 static-inspect，绝不执行 binary；该 gate 和 Lab 内 local build 都不填充 LAB10 的空 compilation evidence，不产生 runtime observation，也不会把 stages 变成 canonical 或授予 Evidence Status。
+
+Selected Lane planning coordinates 如下；它们不是本机 observation：
+
+| Lane | EX14 Toolkit / OS | Nsight Compute | CUPTI | EX14 declared image |
+| --- | --- | --- | --- | --- |
+| `cuda-11.8` | 11.8.0 / Ubuntu 22.04 x86-64 | 2022.3.0.22 | 11.8.87 | `nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` |
+| `cuda-12.9` | 12.9.2 / Ubuntu 24.04 x86-64；component source 是 12.9.1 release notes | 2025.2.1.3 | 12.9.79 | `nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` |
+| `cuda-13.3` | 13.3.1 / Ubuntu 24.04 x86-64；current 13.3 Update 1 | 2026.2.1.5 | 13.3.75 | `nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` |
+
+这些 declared NVIDIA CUDA images 不承诺提供 `node` executable 或任何 Node.js version。必须独立提供 analysis runtime 并保留其 observed path 与 exact output，不能把 image declaration 当作证据。Actual `nvcc`、host compiler、driver、Toolkit、Nsight Compute、CUPTI 与 Node.js records 必须匹配各自 frozen coordinates，否则产生 blocker。
+
+## 通过精确的 unprofiled correctness baseline
+
+先运行未修改的 EX14。它必须让 `5x7`、`33x35` 与 `64x32` 通过全部 canonical CUDA boundaries 和逐元素精确 CPU comparison：
+
+```bash
+run_recorded correctness/ex14.stdout.log \
+  ./build/ex14-tiled-transpose || exit 1
+```
+
+随后让**每一个** learner-owned stage 在 profiler 之外使用相同 independent CPU reference 检查全部 fixtures，包括 declared candidate workload：
+
+```bash
+run_recorded correctness/candidates-5x7.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 5 --columns 7 --verify exact || exit 1
+run_recorded correctness/candidates-33x35.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 33 --columns 35 --verify exact || exit 1
+run_recorded correctness/candidates-64x32.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 64 --columns 32 --verify exact || exit 1
+run_recorded correctness/candidates-4096x4096.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 4096 --columns 4096 --verify exact || exit 1
+```
+
+上述五次 invocation 全部通过 `run_recorded`，分别保留 stdout、stderr、exit status、expanded command 与 records SHA-256。Learner runner 使用 finite、non-NaN deterministic input/oracle values；每个 candidate process 在 stage sequence 前只分配一次 device output，并让 `baseline-direct`、`coalescing-direction`、`shared-memory-tiling` 与 `padded-bank-layout` 复用同一 allocation/address。每个 shape/stage 都必须检查 transposed shape、`output[col * rows + row] = input[row * columns + col]`，并让所有 elements 与独立 CPU reference 逐元素精确比较。只让 candidates 相互比较不合格。
+
+在四个 fixtures 的每个 stage launch 紧前，runner 必须用 checked host-to-device copy 将 complete output 写满 quiet-NaN sentinel 并检查 fill/copy CUDA status。随后 launch、检查 `cudaDeviceSynchronize`、用 checked device-to-host copy 取回 complete output，再要求正确 output shape、every-element exact oracle equality 与 no sentinel remains。该 sequence 在每个 correctness、warm-up 与 profiled process 中独立执行；任何 stage 都不能继承前一 stage 的正确 output。
+
+每次 allocation、sentinel fill/copy、complete-output copy、launch 与 free 都必须成功。Stable allocation/address 与 identical sentinel procedure 是 held constants；sentinel fill、readback 与 host verification 位于 selected kernel metrics 之外。该显式 completion 与 verification boundary 在 direct execution 与每个 profiled process 中保持不变。任何 mismatch、missing element、remaining sentinel、partial readback、CUDA error、synchronization failure 或 nonzero process status 都阻断 profiler interpretation。
+
+## 通过 exact-GPU profiler 与 permission gates
+
+不能假设 current CLI option 一定存在于较旧 selected Lane。首先在不用 config-file control 的情况下采集 actual executable：
+
+```bash
+run_recorded gates/ncu-version.initial.stdout.log ncu --version || exit 1
+run_recorded gates/ncu-help.bare.stdout.log ncu --help || exit 1
+```
+
+保留两个 command、status 与 hashes，并为 observed version 选择匹配的 exact-version NVIDIA owner CLI manual：[2022.3 archive](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html)、[2025.2 archive](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html)或 [current 2026.2.1 manual](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)。Observed version 必须匹配 selected Lane。Actual bare help 与该 exact owner manual 必须同时对 config-file interface 和后续 report readback 所需的 `--import`、`--page raw`、`--csv` options 达成一致；未知 version、缺少任一 option 或任何不一致都是 blocker，采集不能开始。
+
+根据这份 retained review 冻结且只冻结一个分支：
+
+1. 若 actual help 与匹配 manual 都存在 config-file control，冻结 `config_args=(--config-file off)`。只有这个分支可以使用 2025.2/current manuals 对 `config.ncu-cfg` search 的说明；不得把 current search behavior 追溯到旧 CLI。
+2. 若经过复核的旧 CLI 没有 config-file interface，冻结 `config_args=()`，并记录 absence 与 exact manual coordinate。2022.3 必须走这个分支；绝不能要求或传入 `--config-file off`。
+
+不得删除 user files、静默迁移 private configuration 或假装 control 已生效。Branch 冻结后，每个 controlled command 都使用同一个 array expansion：
+
+```bash
+config_branch='<fill interface-present or older-cli-no-interface from retained review>'
+manual_coordinate='<fill matching exact-version owner CLI manual coordinate>'
+case "$config_branch" in
+  interface-present)
+    config_args=(--config-file off)
+    ;;
+  older-cli-no-interface)
+    config_args=()
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+
+run_recorded gates/config-branch.stdout.log \
+  printf '%s\n' "config_branch=$config_branch" "manual_coordinate=$manual_coordinate" || exit 1
+run_recorded gates/ncu-version.controlled.stdout.log \
+  ncu "${config_args[@]}" --version || exit 1
+run_recorded gates/ncu-help.controlled.stdout.log \
+  ncu "${config_args[@]}" --help || exit 1
+run_recorded gates/ncu-list-sections.stdout.log \
+  ncu "${config_args[@]}" --list-sections || exit 1
+run_recorded gates/ncu-query-metrics.stdout.log \
+  ncu "${config_args[@]}" --devices 0 --query-metrics --query-metrics-mode all || exit 1
+```
+
+每个 gate 都记录 config branch、manual coordinate、expanded argv、stdout、stderr、status 与 SHA-256。Selected section 必须出现在本 installation 的 list 中；每个 requested metric 必须出现在对这张 **exact GPU** 的 query 中。不得从本页、其他 architecture、screenshot、blog 或 owner example 复制 metric name；LAB10 有意不发布 architecture-specific metric name。
+
+选择**一个最小 queried section**，或能够回答三项 hypotheses 的更短**最小 queried metric list**。记录每个 actual name、definition、unit、scope、aggregation、instance behavior 与 stage/filter mapping。`--set full`、无关 occupancy/stall collections 与 extra metrics 不属于本实验，因为它们可能增加 replay passes 与 perturbation，却不回答 declared question。
+
+核对 actual Toolkit、driver、Nsight Compute 与 CUPTI compatibility、exact device selection、一个可写 learner-owned report directory 和管理员批准的 non-admin policy。Approval record 是 prerequisite；attempt 01 才确认 actual counter access、report creation 与 report import。`ERR_NVGPUCTRPERM`、其他 denial、actual help 缺失某项 required non-config option、缺失 `--import`/`--page raw`/`--csv`、缺失 section、unavailable/`n/a` metric、CUPTI mismatch、错误 device、missing report 或 failed raw-CSV import 都让整个 batch 无效并成为 blocker，绝不是 numeric zero。管理员可在 Lab 外修正 policy，随后在新 batch ID 下重启完整十次。禁止使用 `sudo` 或 bypass。
+
+## 执行一次被排除的 direct-process warm-up
+
+在 source、build、correctness、version/help/query、compatibility 与 approval gates 全部通过后，直接运行恰好一次不带 profiler 的 `4096x4096` process：
+
+```bash
+run_recorded warm-up/direct.stdout.log \
+  ./build/lab10-transpose-candidates \
+    --all-stages --rows 4096 --columns 4096 --verify exact || exit 1
+```
+
+它必须对四个 stages 执行同一 stable allocation/address 与 prelaunch full-output quiet-NaN sentinel procedure，并通过全部 fill/copy CUDA statuses、complete readbacks、no-sentinel-remains、exact comparisons 与 explicit synchronization checks。记录 `excluded_from_retained_samples: true`；该 warm-up 不进入任何 statistic。它可能暴露 direct-process context/module initialization，但不能消除 first-profiled-kernel、fresh-process、replay 或 profiler-library effects。不得加入 hidden warm-up，也不得丢弃 attempt 01。
+
+## 采集恰好十次新的 profiler attempts
+
+Attempt 01 前冻结唯一 batch ID、source/binary hashes、environment、stage order、exact selected kernel names、selected kernel 与 filter、一个 section/metric list、actual replay controls 和全部 application arguments。每个 process 依次 launch 四个 stage kernels 一次，因此一个 batch 是恰好十次新的 `ncu` invocation、每 stage 十个 observations，而不是四十个可重排的独立 processes。
+
+执行前，用 retained actual help/query/build evidence 填完所有 placeholders：
+
+```bash
+batch_id='<fill unique batch id>'
+kernel_filter='<fill exact filter matching only the four declared stage kernels>'
+collection_args=(<fill either one --section NAME or --metrics NAME1,NAME2,...>)
+replay_args=(<fill actual-help-validated replay, cache, and clock controls>)
+batch_dir="${run_dir}/batches/${batch_id}"
+test ! -e "$batch_dir" || exit 1
+mkdir "$batch_dir" || exit 1
+
+for attempt in 01 02 03 04 05 06 07 08 09 10; do
+  attempt_dir="${batch_dir}/${attempt}"
+  test ! -e "$attempt_dir" || exit 1
+  mkdir "$attempt_dir" || exit 1
+  report_base="${attempt_dir}/transpose-stages"
+  test ! -e "${report_base}.ncu-rep" || exit 1
+  run_recorded "batches/${batch_id}/${attempt}/profile.stdout.log" \
+    ncu "${config_args[@]}" \
+    --devices 0 \
+    --kernel-name-base function \
+    --kernel-name "$kernel_filter" \
+    --launch-count 4 \
+    "${collection_args[@]}" \
+    "${replay_args[@]}" \
+    --export "$report_base" \
+    ./build/lab10-transpose-candidates \
+      --all-stages --rows 4096 --columns 4096 --verify exact || exit 1
+  test -f "${report_base}.ncu-rep" || exit 1
+  run_recorded "batches/${batch_id}/${attempt}/report.sha256" \
+    sha256sum "${report_base}.ncu-rep" || exit 1
+  run_recorded "batches/${batch_id}/${attempt}/report-raw.csv" \
+    ncu "${config_args[@]}" \
+      --import "${report_base}.ncu-rep" --page raw --csv || exit 1
+done
+```
+
+这是 command shape，不证明每个 displayed option 都被每条 Lane 接受。Actual retained help 与匹配 manual 控制最终 frozen argv；collection 与 import 都复用 profiler gate 中冻结的同一个 `ncu` 和 `config_args`。`batch_dir` 必须在 batch 开始前不存在，并且只创建一次；每个 attempt directory 也必须不存在，再以不带 `-p` 的 `mkdir` 创建。`run_recorded` 还会拒绝任何已有 command-evidence path。任何 partial batch 或 partial attempt 的同 ID 重跑都会在覆盖 log、status、CSV 或 report 前 abort。保留整个 invalid batch，换新 batch ID 后重启完整十次。每次 attempt 都必须是新的 `ncu` invocation 与 fresh application process；一个 `.ncu-rep` 内的 replay passes 不是 independent attempts。
+
+按采集顺序（acquisition order）`01..10` 保留 attempts。每个 profiled process 都必须按固定顺序包含恰好四个 intended stage kernels、每个一次 launch，并在同一 stable output allocation/address 上为每个 launch 独立执行 checked full-output quiet-NaN sentinel fill、synchronization、complete readback、shape、exact oracle 与 no-sentinel-remains checks；这些非 selected-kernel operations 不进入 selected kernel metrics。每次还必须具有 zero collection/import/application statuses、完整 selected metrics、readable primary report 与 successful raw-CSV import。**不得删除任何 sample**：不能移除、替换、覆盖、重排或合并不方便的 attempt。任何 attempt invalid 都让**整个 batch 无效**。保留该 batch 与 blocker，修复原因后在新的唯一目录中**重启完整十次**。
+
+## 保留 replay、report 与 hash custody
+
+对每个 `.ncu-rep` 中的每个 stage，保留 requested/actual replay mode、pass count、memory save/restore behavior、cache control、clock control、serialization、selected device/context/stream/kernel/launch 与 measurement perturbation boundary。Nsight Compute 可能插入 measurement libraries，并因 requested counters 无法在一个 pass 中同时采集而 replay kernel。Kernel replay 可能保存 accessible memory 并恢复 written memory；application replay 则重复 host activity。必须记录 actual tool behavior，不预设任一 mode。
+
+Profiled execution 不能与 direct run 互换。Metric count、section choice、first-kernel configuration、save/restore volume、cache state、clock policy 与 serialization 都可能影响 overhead/context。Report value 只支持 documented scope 下、带 perturbation record 的结论。
+
+`.ncu-rep` 是 primary artifact。`--export` 只负责创建 report；绝不能假设它单独把 metric values 打印到 collection stdout。每个 report 创建并哈希后，必须用同一个 exact `ncu` 与 frozen `config_args` 执行 `--import REPORT --page raw --csv`。保存 attempt-local `report-raw.csv`、import stderr、status、expanded command 与 records hash，并把 derivative 明确绑定到 parent report SHA-256。Metric names、units、raw values 与四项 stage identities 只能来自该 imported report，不能来自 collection stdout、hard-coded stage order、截图或手工抄录。把 primary report SHA-256 与这些 import records、collection argv/stdout/stderr/status、source/binary hashes、help/query logs、manifest 与 acquisition ledger 一起保留。Private original 与每份 sanitized public derivative 之间必须维护 hash mapping。
+
+## 只归约 qualifying full batch
+
+使用[完整 original LAB10 report reducer](/assets/exercise-solutions/lab10-report-reducer.mjs)，其 repository path 是 `public/assets/exercise-solutions/lab10-report-reducer.mjs`，精确 SHA-256 为 `7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb`。它的 analysis runtime 精确固定为 Node.js `24.19.0`，与 `package.json` 和 `.node-version` 一致；不接受 compatibility range 或其他 Node.js 24 release。它是 Apache-2.0 static reduction software，不是 profiler capture、Runnable Example、runtime observation 或 Evidence Status record。
+
+只从十份成功的 `report-raw.csv` derivatives 建立 `${run_dir}/reduction/ledger.json`。下面是完整 schema；恰好列出 attempts `01..10`，所有 `<fill ...>` 都必须从本 batch 的 retained reports、imports 与 hashes 填入，本页不预填任何 observed name、unit、header 或 value：
+
+```json
+{
+  "schemaVersion": 1,
+  "attempts": [
+    { "id": "01", "reportPath": "<fill unique report path for attempt 01>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 01>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "02", "reportPath": "<fill unique report path for attempt 02>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 02>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "03", "reportPath": "<fill unique report path for attempt 03>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 03>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "04", "reportPath": "<fill unique report path for attempt 04>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 04>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "05", "reportPath": "<fill unique report path for attempt 05>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 05>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "06", "reportPath": "<fill unique report path for attempt 06>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 06>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "07", "reportPath": "<fill unique report path for attempt 07>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 07>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "08", "reportPath": "<fill unique report path for attempt 08>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 08>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "09", "reportPath": "<fill unique report path for attempt 09>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 09>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "10", "reportPath": "<fill unique report path for attempt 10>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 10>", "rawCsvSha256": "<fill lowercase SHA-256>" }
+  ],
+  "stages": {
+    "baseline-direct": "<copy exact reported kernel identity for baseline-direct>",
+    "coalescing-direction": "<copy exact reported kernel identity for coalescing-direction>",
+    "shared-memory-tiling": "<copy exact reported kernel identity for shared-memory-tiling>",
+    "padded-bank-layout": "<copy exact reported kernel identity for padded-bank-layout>"
+  },
+  "metrics": [
+    { "name": "<copy exact queried metric name>", "unit": "<copy exact report unit>" }
+  ],
+  "csvColumnsByVersion": {
+    "<exact installed ncu version>": {
+      "kernel": "<copy exact installed-version CSV kernel header>",
+      "metric": "<copy exact installed-version CSV metric header>",
+      "unit": "<copy exact installed-version CSV unit header>",
+      "value": "<copy exact installed-version CSV value header>"
+    }
+  }
+}
+```
+
+每个 `reportPath` 与 `rawCsvPath` 都相对 ledger directory 解析，并且二十个 resolved source paths 必须全部唯一。四个 stage value 必须逐字复制 imported reports 中的 exact kernel identities；不能从 source symbol 或固定 stage order 猜测。`metrics` 为每个 selected metric 保留 exact name 加 exact unit；若 retained NCU row 没有 unit，则精确保留 empty string；选择多个 metrics 时增加同形 entries。`csvColumnsByVersion` 必须只含 actual installed profiler version 的一项 mapping，并把 retained CSV 的 literal headers 逐字映射到 `kernel`、`metric`、`unit`、`value` 四个不同 roles。Reducer 会在 profiler/application preamble 之后定位恰好一行这样的 mapped header；owner documentation 只约束 CSV interface，不提供这些 observed header strings。
+
+先解析 executable path。在 reducer source-hash verification 或 CLI execution 之前，必须用 `run_recorded` 采集 `node --version`，再保留一次独立 recorded check，证明该 captured output 与 resolved executable output 都精确等于 `v24.19.0`。两项 gates 全部通过后，才能验证 reducer bytes、以 exact CLI `node public/assets/exercise-solutions/lab10-report-reducer.mjs <ledger> <summary>`运行，并哈希 ledger 与 summary：
+
+```bash
+node_path="$(command -v node)" || exit 1
+test -n "$node_path" || exit 1
+run_recorded reduction/node-version.stdout.log \
+  node --version || exit 1
+run_recorded reduction/node-version-exact.stdout.log \
+  bash -c 'actual="$("$1" --version)" && recorded="$(<"$3")" && test "$actual" = "$2" && test "$recorded" = "$2"' \
+    verify-node-version "$node_path" v24.19.0 \
+    "${run_dir}/reduction/node-version.stdout.log" || exit 1
+run_recorded reduction/reducer-source-verify.stdout.log \
+  bash -c 'printf "%s  %s\n" "$1" "$2" | sha256sum --check --strict' \
+    verify-lab10-reducer \
+    7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb \
+    public/assets/exercise-solutions/lab10-report-reducer.mjs || exit 1
+test -f "${run_dir}/reduction/ledger.json" || exit 1
+test ! -e "${run_dir}/reduction/summary.csv" || exit 1
+run_recorded reduction/reducer.stdout.log \
+  node public/assets/exercise-solutions/lab10-report-reducer.mjs \
+    "${run_dir}/reduction/ledger.json" \
+    "${run_dir}/reduction/summary.csv" || exit 1
+run_recorded reduction/ledger-summary.sha256 \
+  sha256sum \
+    "${run_dir}/reduction/ledger.json" \
+    "${run_dir}/reduction/summary.csv" || exit 1
+```
+
+在 custody 中保留 resolved Node.js path、version capture、exact-match command/status 以及相应 stdout/stderr/record hashes。缺失 `node`、输出不是 `v24.19.0` 或 exact-match record 失败，都会在 reducer hash 或 CLI 取得资格之前阻断 reduction。运行 Node.js 或 reducer 只是 host-side analysis，不授予 CUDA compilation、profiler、runtime、performance 或其他 Evidence Status。
+
+Reducer 要求 exact attempt IDs `01..10`、exact 四个 stage IDs、unique source paths、unique kernel mappings、unique metric names，以及 exactly one installed-version header mapping。Unique paths 不要求 unique bytes：若 paths 与 actual hashes 都有效，byte-identical reports、raw CSV、observations 或相同 hash values 可以保留，不能因相同就删除 sample。Reducer 读取每个 actual report/CSV 并核对 ledger 中的 lowercase SHA-256，在 optional preamble rows 后定位恰好一个 actual mapped header，拒绝 duplicate/missing required headers 与四阶段 mapping 之外的每个 nonblank kernel identity，并在每个 attempt-stage-metric 上要求**恰好一项 finite numeric scalar**。Blank **value**、`n/a`/`N/A`/unavailable value、nonnumeric、nonfinite、wrong-unit、unexpected-kernel、duplicate 或 missing selected rows 都是 blocker；只要与 ledger 一致，exact empty unit 是合法值。
+
+这些检查全部通过后，只有每个 stage/metric 的十行 report-hash-bound per-stage/per-metric rows 才进入统计；reducer 输出 `count=10`、median、minimum、maximum（即 median 与 min/max），以及按 acquisition order、由每个 report/CSV SHA-256 生成的 `lab10-report-csv-hash-chain-v1` chain。Summary 不合并 unlike units。Metric definition、scope、aggregation、instance behavior、filter、replay 与 pass record 仍分别保留在 manifest/report custody 中；script 不推断这些语义，不判断 adjacent hypothesis，也不把不同 unit 相互比较。
+
+只有完整 reduction gate 通过后，才根据 predeclared hypothesis 与 separately retained owner-defined metric semantics，把 `baseline-direct -> coalescing-direction`、`coalescing-direction -> shared-memory-tiling` 和 `shared-memory-tiling -> padded-bank-layout` 分别判为 `supported`、`rejected` 或 `inconclusive`。使用全部十个 samples；不得删除 outlier、替换 failed row、拼接 batches 或挑选有利 stage。未来 timing ratio 需要独立 exact duration definition 与 qualifying rows；本页没有预填。
+
+## 预期观察，不是已记录结果
+
+预期观察就是 frontmatter 中九项 statements。它们预测 process/evidence behavior，不预测 metric direction 或 magnitude。Correctness 应保持 exact；gates 应返回 record 或 blocker；一次 warm-up 应被排除；十次完整 primary reports 与绑定 hashes 的 raw-CSV imports 应全部保留；每项 hypothesis 应得到 supported、rejected 或 inconclusive，而不是被强迫通过。
+
+Recorded-result tables 有意留空：
+
+| Stage | Exact correctness | Actual queried metrics | 10 report hashes | Median | Min/max | Decision |
+| --- | --- | --- | --- | --- | --- | --- |
+| `baseline-direct` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+| `coalescing-direction` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+| `shared-memory-tiling` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+| `padded-bank-layout` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+
+| Adjacent pass | Changed variable | Hypothesis result | Timing/speedup | Bottleneck/winner |
+| --- | --- | --- | --- | --- |
+| baseline to coalescing | thread-to-coordinate direction | unfilled | unfilled | unfilled |
+| coalescing to tiling | shared staging and uniform barrier | unfilled | unfilled | unfilled |
+| tiling to padded layout | physical shared stride 32 to 33 | unfilled | unfilled | unfilled |
+
+`recordedObservations` 保持为空。Learning Site 没有发布 measured timing、metric name/value、speedup、bottleneck、replay result 或 winning stage。
+
+[LAB10 Nsight Compute expected-only fixture](/assets/profiler-report-fixtures/lab10-nsight-compute.expected.json)是原创、已消毒的 plan。它不是 profiler output，不是 `.ncu-rep`；其 Environment Manifest 全部为 `unfilled`，没有 recorded observations，也不授予 compilation/runtime evidence。
+
+## 验收条件与 blockers
+
+只有全部条件通过，Lab record 才完整：
+
+1. Immutable EX14 source 与 selected runner provenance 一致：在 learner attempt 之后选择 exact-hash reviewed asset，或选择满足同一 CLI/stage/oracle/adjacent-diff/build/hash contract 的 learner alternative；C++17 build command/result、source/binary hashes、一张 GPU、frozen workload、精确 Node.js analysis-runtime requirement 与 Environment Manifest 一致，LAB10 使用的 executable 与 retained hash 相同。
+2. Canonical EX14 通过原有 gate；profiling 前由四次独立 runner invocation 分别资格化 `5x7`、`33x35`、`64x32` 与 `4096x4096`，excluded warm-up 与每个 profiled process 随后只使用 frozen `4096x4096` workload。每次 invocation 中，四个 learner stages 都使用 finite non-NaN deterministic input/oracle values 与一份 stable device output allocation/address，并在每次 launch 前通过 checked host-to-device copy 写满 quiet-NaN sentinel。每个 stage 的 fill/copy CUDA status、`cudaDeviceSynchronize`、checked complete device-to-host readback、output shape、every-element exact oracle、no-sentinel-remains 与 process status 全部通过。
+3. Actual version/bare help 与匹配 exact-version owner manual 对 config control、`--import`、`--page raw` 和 `--csv` 达成一致；冻结的两分支 `config_args`、exact-GPU section/metric queries、matching CUPTI、report writes/imports 与管理员批准的 non-admin counter access 通过。
+4. 一次 excluded direct-process warm-up 通过完全相同的 per-stage allocation/sentinel/copy/verification procedure，且不贡献 sample。
+5. 一个 unique batch 按 acquisition order 包含恰好十次 fresh attempts；每个 profiled process 都通过完全相同的 per-stage allocation/sentinel/copy/verification procedure，并有相同四个 selected kernels、primary report/report hash、successful imported raw CSV/import status/derivative hash，以及完整 collection logs、statuses、replay/perturbation records。
+6. 在 reducer source-hash verification 或 CLI execution 之前，retained Node.js path、recorded `node --version` 输出 `v24.19.0` 与独立 recorded exact-match gate 全部通过。随后 exact-hash reducer、完整 ledger schema、attempt IDs `01..10`、二十个 unique source paths、actual report/CSV hashes、四项 report-derived stage/kernel mappings、exact metric name/unit、installed-version header mapping 与每项 exactly-one-finite-scalar gate 全部通过；summary 只使用对应十份 imported reports 的十行 per-stage/per-metric values，输出 `count=10`、median/min/max 与 report/CSV hash chain，且 ledger/summary hashes 已保留。
+7. 每个 conclusion 只使用 separately retained metric definition/scope 回答一个 predeclared adjacent-stage hypothesis；reducer 不推断 semantics、不比较 unlike units，也不得删除 sample。
+8. Private-original custody、Node.js path/version/exact-match records、runner/reducer/ledger/summary hashes、sanitization review、original-to-derivative hash mapping 与 criterion-by-criterion decision 一致。
+
+Blockers 包括 reviewed runner 或 reducer asset path/hash mismatch；learner alternative 缺失 required interface/stage/oracle/diff/hash contract；source/diff/build/binary/workload/stage-order/device/environment drift；Node.js executable 或 path 缺失、`node --version` 不是精确 `v24.19.0`、独立 exact-version record 缺失或失败，或 analysis-runtime drift；non-finite 或 NaN input/oracle；每个 process 多次 output allocation、stage 间 address 改变或 sentinel procedure drift；任何缺失、失败或不完整的 prelaunch full-output quiet-NaN fill、host-to-device/device-to-host copy、output-shape/every-element exact comparison、remaining sentinel、CUDA、synchronization 或 status failure；未知 profiler version、actual-help/manual disagreement、缺失 report-import/raw-page/CSV option、错误 config branch 或 frozen `config_args` drift；version、driver、Toolkit、CUPTI 或 profiler mismatch；permission denial；unavailable、`n/a`、undefined 或 wrong-scope section/metric；错误 kernel/filter/count；missing/corrupt `.ncu-rep`；report import/CSV failure；缺失 report-to-CSV hash mapping、log/status/hash；复用 run/batch/attempt/record/reduction path；replay ambiguity；invalid attempt；mixed/shortened batch；ledger schema、exact attempt/stage set、unique-path、actual report/CSV hash、exact header mapping、unit 或 exactly-one-finite-scalar failure；blank、nonnumeric、nonfinite、duplicate 或 missing selected row；reducer failure；ledger/summary/hash-chain custody 缺失；sample deletion；incomplete manifest/custody；或超出 metric definition 的 interpretation。保留 blocker；绝不能用零、猜测 name/value、删除 sample、`sudo` 或更强 claim 修复。
+
+## 分离 evidence axes
+
+| Axis | Current status | Boundary |
+| --- | --- | --- |
+| Compilation | Empty | Learner-local canonical/candidate build 不是 LAB10 reviewed Toolkit-Lane Compile-Checked record |
+| Runtime | Pending Hardware Verification | 当前没有 qualifying maintainer-controlled Reference Environment execution |
+| Recorded observations | Empty | Static models、browser arithmetic、commands、blank tables 与 expected-only fixtures 都不是 runtime observations |
+
+成功的精确 Node.js gate 或 reducer execution 只满足 host analysis contract。它不 compile 或 execute CUDA、不运行 profiler、不观察 GPU，也不授予 CUDA compilation、runtime、performance 或其他 Evidence Status。
+
+附完整 Environment Manifest 与 logs 的 learner submission 可以进入 **Community-Observed** review；它**不是 Runtime-Verified**，除非 maintainer 在 declared Reference Environment 复现全部 criteria。Community-Observed 可与 Pending Hardware Verification 共存，绝不会自动升级页面。
+
+## 清理与消毒且不破坏证据
+
+先保留 canonical/candidate source hashes、reviewed runner/reducer asset paths 与 exact hashes、adjacent diffs、binary hashes、完整 manifest、全部 gate/help/query output、resolved Node.js path 以及 version/exact-match command/stdout/stderr/status/hash records、permission record、correctness/warm-up logs、每个 valid/invalid batch、全部 primary `.ncu-rep` 与 report hashes、imported raw CSV 与 import stderr/status/hashes、stdout/stderr/status files、完整 reduction ledger 与 hash、summary 与 hash、report/CSV hash chain、raw rows、blockers、custody history 与 sanitization mapping，再只删除可重建文件，并继续通过同一个 unique run root 留存 cleanup command evidence：
+
+```bash
+run_recorded custody/make-clean.stdout.log \
+  make -C examples/ex14-tiled-transpose clean BUILD_DIR=../../build || exit 1
+```
+
+不得公开 credentials、environment values、administrator records、user/host identities、private absolute paths、device serials/UUIDs、network coordinates 或 unreviewed reports。Sanitized derivative 必须保留 private original hash、parent mapping、reviewer、review date 与 exact transformations。不得通过修改 measured value 或删除 inconvenient sample 来“消毒”。
+
+## 来源与复核
+
+- Selected [CUDA 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)、[CUDA 12.9 Update 1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html)与[current CUDA 13.3 Update 1](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) release notes 负责 Toolkit、bundled Nsight Compute 与 CUPTI planning coordinates；installed behavior 仍需观察。
+- Current [CUDA Programming Guide v13.3 transpose/shared-memory section](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory)负责 coalescing、shared staging、synchronization、bank layout 与 padding concepts。LAB10 不复制 owner sample/result，并独立设计 rectangular、256-thread/four-slot learner stages。
+- Archived [Nsight Compute CLI 2022.3](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html)负责 cuda-11.8 Lane 的旧 interface coordinate，且不提供 config-file interface；archived [Nsight Compute CLI 2025.2](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html)负责 cuda-12.9 Lane 的 config-file 与 CLI interface coordinate。Actual bare help 必须与匹配 manual 一致；2022.3 绝不接收 `--config-file off`。
+- Current [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)、[CLI Guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)与[2026.2.1 Release Notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1)负责 sections、metric queries、kernel filters、replay、save/restore、overhead、reports 与 current support boundaries。Current config search 说明只适用于 matching help/manual 确认该 feature 的分支，不能覆盖 archived interface；actual retained help 控制 selected-Lane syntax。
+- Current [CUPTI Usage Guide](https://docs.nvidia.com/cupti/main/main.html)负责 profiler compatibility、counter availability、overhead 与 subscriber boundaries；它不观察 learner machine 的 loaded component。
+
+Context7 IDs `/websites/nvidia_cuda_cuda-programming-guide` 与 `/websites/nvidia_nsight-compute_nsightcompute` **仅用于 discovery 与 cross-check**。上面精确链接的 NVIDIA owner documents/release notes 是权威来源并负责 version/interface claims。全部 owner sources 的 access date 为 **2026-09-02**。Stage ledger、hypotheses、workload arithmetic、manifest、commands、sample policy、blank tables、custody 与 prose 均为本站原创 CC BY 4.0 内容；没有复制或虚构 profiler output、metric name/value、timing、speedup、bottleneck 或 winner。
+
+**事实核查：2026-09-02。** Compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。

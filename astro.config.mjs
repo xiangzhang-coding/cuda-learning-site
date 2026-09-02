@@ -138,6 +138,7 @@ export default defineConfig({
             { slug: 'correctness/kernel-first-nsight-compute' },
             { slug: 'correctness/occupancy-stalls-throughput' },
             { slug: 'correctness/roofline-arithmetic-intensity' },
+            { slug: 'correctness/transpose-optimization-case-study' },
           ],
         },
         {
@@ -176,6 +177,7 @@ export default defineConfig({
             { slug: 'labs/diagnose-four-sanitizer-failures' },
             { slug: 'labs/profile-full-application-before-kernel' },
             { slug: 'labs/build-original-roofline' },
+            { slug: 'labs/optimize-canonical-transpose' },
           ],
         },
         {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { expect, test } from '@playwright/test';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -27,6 +28,16 @@ const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 const releaseOrigin = new URL(process.env.RELEASE_BASE_URL as string).origin;
 const expectedSourceCommit = process.env.RELEASE_SOURCE_COMMIT as string;
 const releaseKind = process.env.RELEASE_KIND as 'local' | 'preview' | 'production';
+const reviewedSolutionAssets = [
+  {
+    publicPath: '/assets/exercise-solutions/q11-lab10-transpose-candidates.cu',
+    sha256: '920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251',
+  },
+  {
+    publicPath: '/assets/exercise-solutions/lab10-report-reducer.mjs',
+    sha256: '7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb',
+  },
+] as const;
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
 const ex01DownloadUrl =
@@ -69,14 +80,14 @@ const currentLearningUnits = [
   ...r2LearningUnits.slice(0, 44),
   'A14',
   ...r2LearningUnits.slice(44),
-  'Q06', 'Q07', 'Q08', 'Q09', 'Q10',
+  'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11',
 ] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
 const r2Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
-const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09'] as const;
+const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r2VisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -88,7 +99,7 @@ const currentVisualExplainers = [
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -96,11 +107,11 @@ const currentPendingHardwareVerification = [
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 9 },
-  { suffix: 'practice/', count: 56 },
+  { suffix: 'labs/', count: 10 },
+  { suffix: 'practice/', count: 58 },
   { suffix: 'visuals/', count: 18 },
   { suffix: 'glossary/', count: 165 },
-  { suffix: 'sources-and-versions/', count: 68 },
+  { suffix: 'sources-and-versions/', count: 70 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -196,31 +207,31 @@ test('serves the exact R2 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-01',
+    reviewDate: '2026-09-02',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
     releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
     knownLimitations: expect.arrayContaining([
-      'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
+      'Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.',
       'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
       'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'Q06-Q10, A14, LAB06, LAB08, LAB09, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
+      'Q06-Q11, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 209,
-    sourceRoutes: 418,
+    publicationPairs: 213,
+    sourceRoutes: 426,
     learningUnits: currentLearningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 56,
+    practiceBankEntries: 58,
     glossaryTerms: 165,
-    sourceRecords: 68,
+    sourceRecords: 70,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -233,26 +244,66 @@ test('serves the exact R2 release and current publication with production canoni
     retainedCompileRuns: [32720214527, 33275734951],
   });
   expect(publication.knownLimitations).not.toContain('LAB06 has no current public destination.');
+  expect(publication.knownLimitations).not.toContain(
+    'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
+  );
+  expect(publication.knownLimitations.filter((limitation: string) =>
+    limitation.includes('no current public destination'))).toEqual([
+    'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
+  ]);
 
-  for (const fixtureName of [
-    'lab06-nsight-systems.expected.json',
-    'lab08-nsight-compute.expected.json',
+  for (const { fixtureName, reviewDate } of [
+    { fixtureName: 'lab06-nsight-systems.expected.json', reviewDate: '2026-08-31' },
+    { fixtureName: 'lab08-nsight-compute.expected.json', reviewDate: '2026-08-31' },
+    { fixtureName: 'lab10-nsight-compute.expected.json', reviewDate: '2026-09-02' },
   ]) {
     const fixtureResponse = await request.get(`/assets/profiler-report-fixtures/${fixtureName}`);
     expect(fixtureResponse.ok(), fixtureName).toBe(true);
     const fixtureBody = await fixtureResponse.body();
     expect(scanArtifactBuffer(fixtureBody, fixtureName)).toEqual([]);
-    const fixture = JSON.parse(fixtureBody.toString('utf8'));
-    expect(validateProfilerReportFixture(fixture), fixtureName).toEqual({ valid: true, errors: [] });
+    const fixtureSource = fixtureBody.toString('utf8');
+    const fixture = JSON.parse(fixtureSource);
+    expect(validateProfilerReportFixture(fixture, fixtureSource), fixtureName).toEqual({ valid: true, errors: [] });
     expect(fixture).toMatchObject({
       'SPDX-License-Identifier': 'CC-BY-4.0',
       provenance: 'original',
       fixtureType: 'expected-only-profiler-report-plan',
       captureStatus: 'pending-hardware-verification',
-      sanitization: { status: 'passed', reviewDate: '2026-08-31' },
+      sanitization: { status: 'passed', reviewDate },
       recordedObservations: [],
     });
     expect(new Set(Object.values(fixture.environmentManifest))).toEqual(new Set(['unfilled']));
+    if (fixtureName === 'lab10-nsight-compute.expected.json') {
+      expect(fixture).toMatchObject({
+        fixtureId: 'LAB10-NCU-EXPECTED',
+        labId: 'LAB10',
+        exampleId: 'EX14',
+        method: {
+          analysisRuntime: {
+            name: 'Node.js',
+            requiredVersion: '24.19.0',
+            requiredVersionOutput: 'v24.19.0',
+          },
+          reduction: {
+            runtimeGate: expect.stringMatching(/Node\.js 24\.19\.0 exactly[\s\S]*v24\.19\.0[\s\S]*separate recorded exact-match/i),
+          },
+        },
+      });
+      expect(fixture.sanitization.transformations).toContain(
+        'This original project-authored expected-only plan contains no profiler capture and therefore required no value replacement.',
+      );
+      expect(fixture.claimBoundary).toMatch(/no recorded timing, metric name or value, speedup, bottleneck, winner, replay result, Node\.js observation, or runtime observation/i);
+      expect(fixture.claimBoundary).toMatch(/no recorded[\s\S]*Node\.js observation/i);
+      expect(fixture.claimBoundary).toMatch(/Node\.js or reducer execution[\s\S]*no CUDA evidence/i);
+    }
+  }
+
+  for (const { publicPath, sha256 } of reviewedSolutionAssets) {
+    const assetResponse = await request.get(publicPath);
+    expect(assetResponse.ok(), publicPath).toBe(true);
+    const assetBody = await assetResponse.body();
+    expect(createHash('sha256').update(assetBody).digest('hex'), publicPath).toBe(sha256);
+    expect(assetBody.toString('utf8')).toMatch(/^\/\/ SPDX-License-Identifier: Apache-2\.0/);
   }
 
   const legalResponse = await request.get('/legal/THIRD_PARTY_NOTICES.md');
@@ -262,7 +313,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(418);
+  expect(publishedRoutes).toHaveLength(426);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -273,8 +324,8 @@ test('serves the exact R2 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/209.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/418.*source routes/);
+    await expect(page.locator('main')).toContainText(/213.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/426.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -284,7 +335,7 @@ test('serves the exact R2 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(316);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(321);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -295,7 +346,7 @@ test('serves the exact R2 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(9);
+    await expect(labCards).toHaveCount(10);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -306,7 +357,48 @@ test('serves the exact R2 release and current publication with production canoni
       'LAB07',
       'LAB08',
       'LAB09',
+      'LAB10',
     ]);
+  }
+
+  for (const { suffix, unitId, prerequisites, runtimeEvidence, expectedObservations } of [
+    {
+      suffix: 'correctness/transpose-optimization-case-study/',
+      unitId: 'Q11',
+      prerequisites: 'A05,Q06,Q08,Q10',
+      runtimeEvidence: 'none',
+      expectedObservations: 'none',
+    },
+    {
+      suffix: 'labs/optimize-canonical-transpose/',
+      unitId: 'LAB10',
+      prerequisites: 'Q11',
+      runtimeEvidence: 'Pending Hardware Verification',
+      expectedObservations: '9 declared expectations',
+    },
+  ] as const) {
+    for (const route of localizedRoutes(suffix)) {
+      await page.goto(route);
+      await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', unitId);
+      await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute('content', prerequisites);
+      await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', runtimeEvidence);
+      await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute('content', expectedObservations);
+      await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+      if (unitId === 'LAB10') {
+        await expect(page.locator('meta[name="cuda:hardware-gate"]')).toHaveAttribute(
+          'content',
+          /Node\.js 24\.19\.0[\s\S]*v24\.19\.0/,
+        );
+        await expect(page.locator('meta[name="cuda:permissions"]')).toHaveAttribute(
+          'content',
+          /Node\.js 24\.19\.0[\s\S]*reducer/,
+        );
+      }
+      const prefix = route.startsWith('/en/') ? '/en/' : '/';
+      await expect(page.locator(`main a[href="${prefix}examples/tiled-transpose/"]`).first()).toBeVisible();
+      await expect(page.locator(`main a[href="${prefix}visuals/tiled-transpose/"]`).first()).toBeVisible();
+    }
   }
 
   for (const route of localizedRoutes('labs/build-original-roofline/')) {
@@ -331,7 +423,7 @@ test('serves the exact R2 release and current publication with production canoni
 });
 
 test('supports direct locale navigation, keyboard flow, and relevant bilingual search', async ({ page }) => {
-  test.setTimeout(210_000);
+  test.setTimeout(240_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/start/using-the-learning-site/');
   await page.keyboard.press('Tab');
@@ -428,6 +520,26 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
   });
   for (const scenario of [
     {
+      query: 'Q11 Hypothesis ledger',
+      expectedHrefs: ['/correctness/transpose-optimization-case-study/'],
+    },
+    {
+      query: 'Q11 source/build/hash packet',
+      expectedHrefs: ['/correctness/transpose-optimization-case-study/exercises/'],
+    },
+    {
+      query: 'Q11 competing explanations',
+      expectedHrefs: ['/correctness/transpose-optimization-case-study/solutions/'],
+    },
+    {
+      query: 'LAB10 fresh profiler attempts',
+      expectedHrefs: ['/labs/optimize-canonical-transpose/'],
+    },
+  ] as const) {
+    await expectRankedSearchResult(page, { route: '/', button: /搜索/, ...scenario });
+  }
+  for (const scenario of [
+    {
       query: 'Coalesced and Strided Access Runnable Example',
       expectedHrefs: ['/en/examples/coalesced-strided-access/'],
     },
@@ -472,6 +584,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/correctness/roofline-arithmetic-intensity/'],
     },
     {
+      query: 'Q11 Optimize the Canonical Transpose with Controlled Evidence',
+      expectedHrefs: ['/en/correctness/transpose-optimization-case-study/'],
+    },
+    {
+      query: 'Q11 Exercises Repair and Design Controlled Transpose Evidence',
+      expectedHrefs: ['/en/correctness/transpose-optimization-case-study/exercises/'],
+    },
+    {
+      query: 'Q11 Reviewed Solutions Controlled Transpose Evidence',
+      expectedHrefs: ['/en/correctness/transpose-optimization-case-study/solutions/'],
+    },
+    {
       query: 'EX16 Compute Sanitizer Defect Suite Runnable Example',
       expectedHrefs: ['/en/examples/sanitizer-defect-suite/'],
     },
@@ -498,6 +622,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'LAB09 Build an Original Roofline',
       expectedHrefs: ['/en/labs/build-original-roofline/'],
+    },
+    {
+      query: 'LAB10 Optimize the Canonical Transpose',
+      expectedHrefs: ['/en/labs/optimize-canonical-transpose/'],
     },
     {
       query: 'Memory-request Segment Grouping',
@@ -831,6 +959,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/correctness/occupancy-stalls-throughput/',
     '/correctness/roofline-arithmetic-intensity/',
     '/en/correctness/roofline-arithmetic-intensity/',
+    '/correctness/transpose-optimization-case-study/',
+    '/en/correctness/transpose-optimization-case-study/',
+    '/correctness/transpose-optimization-case-study/exercises/',
+    '/en/correctness/transpose-optimization-case-study/exercises/',
+    '/correctness/transpose-optimization-case-study/solutions/',
+    '/en/correctness/transpose-optimization-case-study/solutions/',
     '/examples/multidimensional-indexing/',
     '/en/examples/multidimensional-indexing/',
     '/examples/error-handling-lifecycle/',
@@ -875,6 +1009,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/labs/profile-full-application-before-kernel/',
     '/labs/build-original-roofline/',
     '/en/labs/build-original-roofline/',
+    '/labs/optimize-canonical-transpose/',
+    '/en/labs/optimize-canonical-transpose/',
   ]) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
