@@ -1,0 +1,296 @@
+---
+title: 'Q13：用受控证据优化 Canonical GEMM'
+description: 从 EX15 出发，在保留精度、正确性、资源、架构与证据边界的前提下，依次检验 K tile、矩形 output tile 与 thread coarsening 假设。
+pairId: q13
+counterpart: /en/correctness/gemm-optimization-case-study/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - canonical-baseline
+  - hypothesis-ledger
+  - measurement-contract
+  - stage-k-tile
+  - stage-output-tile
+  - stage-thread-coarsening
+  - resource-occupancy
+  - traffic-roofline
+  - precision-compiler-architecture
+  - profiler-method
+  - visual-boundary
+  - production-library-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q13
+prerequisites:
+  - A08
+  - Q06
+  - Q08
+  - Q10
+relatedUnits:
+  - EX15
+  - VIS12
+exampleIds:
+  - EX15
+canonicalExample: EX15
+canonicalRanges:
+  - cpu-reference
+  - tiled-gemm
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current shared-memory GEMM reuse, verification, and incremental optimization context'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current occupancy, active-warp, latency-hiding, and non-maximization boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Register Pressure'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#register-pressure'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current register-allocation, occupancy, and local-memory trade-off boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Which Compute Capability Target'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#which-compute-capability-target'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current virtual and real architecture target selection boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA Programming Guide v13.3 - Notes on Host/Device Computation Accuracy'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current floating-point order, FMA, precision, and host/device comparison boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0; NVCC 11.8'
+    platform: 'Selected cuda-11.8 C++17 compile-only Lane'
+    accessDate: '2026-09-03'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2; NVCC 12.9'
+    platform: 'Selected cuda-12.9 C++17 compile-only Lane'
+    accessDate: '2026-09-03'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1; NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'Selected cuda-13.3 C++17 compile-only Lane and current target/resource interface'
+    accessDate: '2026-09-03'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, permission, resource, and reproducibility boundaries'
+    accessDate: '2026-09-03'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current exact-GPU query, kernel filtering, collection, and report interface'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q13 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/correctness/gemm-optimization-case-study/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-k-tile,stage-output-tile,stage-thread-coarsening,resource-occupancy,traffic-roofline,precision-compiler-architecture,profiler-method,visual-boundary,production-library-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,Q06,Q08,Q10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX15,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-gemm' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,11.8.0,12.9.2,13.3.1,2026.2.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/gemm-optimization-case-study/" lang="en">Read the English counterpart</a>
+
+Q13 是一个正确性优先且有证据边界的[通用矩阵乘法（general matrix multiplication，GEMM，TERM-147）](/glossary/#term-147)优化案例，不是 tile 配方或 benchmark。它从 immutable EX15 开始，在 collection 前为每条 K tile、output tile 与 thread coarsening edge 写可证伪 hypothesis。背下来的 tile size、browser 图或孤立 occupancy 百分比都不能选出 winner。学习站（Learning Site）没有执行 reviewed runner、CUDA 或 profiler。
+
+## 学完本单元，你应该能
+
+- 为每个 candidate 保留 EX15 的 row-major equation、独立 double CPU reference、finite-value policy 与绝对加相对容差。
+- 先推导 tile shape 与 reuse coordinates，再预测 requested traffic 或 resource trade-off。
+- 分开 source-declared shared storage/accumulator count、compiler allocation、theoretical occupancy、achieved occupancy 与 elapsed behavior。
+- 为每个 measured stage 冻结 matrix shape、precision、compute capability、workload、warm-up、completion、statistics、profiler method、环境清单（Environment Manifest）和 correctness result。
+- 拒绝没有 matched evidence 和 exact library contract 的 memorized tile size 与 production claim。
+
+## 先修关系
+
+严格按 `A08, Q06, Q08, Q10` 的顺序完成 [A08：从正确 Naive GEMM 到 Shared-Memory Tiling](/algorithms/tiled-gemm-correctness/)、[Q06：把 APOD 用作优化循环](/correctness/apod-optimization-loop/)、[Q08：用 Nsight Compute 回答 Selected-Kernel 问题](/correctness/kernel-first-nsight-compute/)和 [Q10：从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)。[EX15](/examples/tiled-gemm/)与 [VIS12](/visuals/gemm-tiling-hierarchy/)是 related resources，不增加 prerequisite edge。
+
+## 冻结 EX15 精度与正确性 baseline
+
+[查看 immutable EX15 source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm)，或[下载同一 revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip)。Project manifest、pin 和下面两个 canonical imports 指向同一 revision；Q13 不修改 EX15。
+
+`cpu-reference` range 拥有 checked `M`、`K`、`N` counts、deterministic fixtures、double accumulation、finite validation、mismatch coordinates 与 comparator：
+
+<CanonicalCode exampleId="EX15" range="cpu-reference" />
+
+`tiled-gemm` range 拥有 portable `16x16x16` shared-memory baseline、partial-tile zero fill、每个 K slice 两次 uniform block barriers、FP32 device accumulation 与 alpha/beta epilogue：
+
+<CanonicalCode exampleId="EX15" range="tiled-gemm" />
+
+Q13 用 `M x K x N` 表示 shape：`A[M,K] * B[K,N] -> C[M,N]`。VIS12 分别显示 matrix 与 output-tile extent；应把 labels 映射回这项声明顺序，不能从三个无标签数字猜测。冻结的 equation 是：
+
+`C[row * N + col] = alpha * sum(A[row * K + p] * B[p * N + col]) + beta * C[row * N + col]`
+
+每个 stage 必须先通过 `2x3x2-hand`、`33x31x35-partial` 与 `32x32x32-aligned`，再通过声明的 measurement shape。Reviewed runner 通过 `ex15::kFixtures` 识别这三个 shapes，调用 `ex15::make_fixture`，并保留每个 fixture 已发布的 alpha、beta 与 input bytes。它调用使用 double accumulation 的 `ex15::gemm_reference`，并用 `ex15::verify_tolerance` 检查 `absolute_error <= 1e-4 + 2e-5 * abs(cpu_reference)`。通过这项 problem-specific tolerance 不证明 bitwise identity、冻结坐标以外的 determinism 或 performance。
+
+## 在 collection 前写 hypothesis ledger
+
+每条 adjacent edge 单独保存一份记录。后来的 report 不能修复缺失的 pre-result declaration。
+
+| field | required declaration |
+| --- | --- |
+| identity | stage ID、immutable EX15 parent、candidate source/binary SHA-256、expanded build command |
+| tile and ownership | 带 label 的 `TM x TN x TK`、block dimensions、outputs per thread、K-slice count、edge behavior |
+| reuse and traffic | 每个 full tile 加载的 A/B values、reuse counts、normalization、source estimate、queried path |
+| resources | source shared bytes/accumulators、compiler-reported registers/local memory、exact hardware limits |
+| held constants | shape/bytes、alpha/beta、data/accumulation types、oracle/tolerance、toolchain、GPU、method |
+| decision | support、reject、no-answer、rollback 与 next-question rules |
+| alternatives | selected evidence 不能排除的至少两个 competing explanations |
+
+固定 stage IDs 是 `canonical-16x16x16`、`k-tile-16x16x8`、`rectangular-32x8x8` 与 `coarsened-32x16x8`。数字只标记 experimental coordinates，不是另一种 shape、precision、compiler 或 architecture 的默认值。Correctness 失败或 comparison coordinates 漂移时停止，不能静默提升这个 stage。
+
+## 冻结每个 stage 的 measurement contract
+
+四个 stages 都使用 row-major、non-transposed `A[1024,1024]`、`B[1024,1024]` 与 `C[1024,1024]`；deterministic finite FP32 inputs/output；FP32 device accumulation；独立 double CPU accumulation；`alpha=0.75`；`beta=0.25`。三份 device matrices 占 12,582,912 bytes。这是 Baseline GPU Capability Tier workload，不是 measured memory-footprint result。
+
+因为 beta 非零，每次 correctness、warm-up、retained 与 profiled attempt 紧前，都把 original C bytes 复制回同一 stable device allocation。每个 process 先执行三次 excluded direct warm-ups。每次完整 GEMM 后 checked `cudaDeviceSynchronize`。按声明顺序保留十次新的 unprofiled attempts，报告预先选定的 median 与 minimum/maximum，不删除 sample。Profiled collection 是独立 process 和 observation。
+
+每份 stage record 都重复 exact matrix shapes、A/B/C 与 accumulation types、exact GPU compute capability、source/build/workload identity、warm-up、synchronization、retained statistics、profiler version/query/filter/replay、permission result、完整 Environment Manifest、CPU-reference/tolerance result 与 bounded interpretation。任何 coordinate 缺失就停止 comparison。可下载的[原创 expected-only Q13 fixture](/assets/profiler-report-fixtures/q13-nsight-compute.expected.json)冻结这项 schema，全部 environment/result cells 都未填写。
+
+## 阶段 1：只改变 K tile extent
+
+`canonical-16x16x16` 使用 `TM=16`、`TN=16`、`TK=16`、`16x16` block、每 thread 一个 output、两份 16-by-16 shared arrays 与 2,048 source-declared shared bytes。`k-tile-16x16x8` 保留相同 output footprint、256 threads、output owner、p-order、mathematical full-tile A/B reuse 与 aligned-workload request total，只把 `TK` 改为 8。因为每份 shared array 从 256 slots 变为 128，cooperative-load ownership、active load instructions 与 per-instruction address groups 也会改变；ledger 必须披露这些变化，不能声称除了 `TK` 以外全部固定。
+
+对于 aligned `K=1024`，source arithmetic 预测 64 与 128 个 K slices，以及 128 与 256 次 block-barrier executions。它预测每 block 的 static shared bytes 从 2,048 降到 1,024，同时 full-workload tile-load estimate 不变。Resource hypothesis 要求 exact compiled record 报告更低的 static shared storage；相等或更高就 reject。只有 shared memory 是 limiting resource 时，resident blocks 才可能增加；否则 occupancy question 保持 unanswered。Load-instruction/coalescing evidence 必须结合改变后的 participant/address grouping 解释。不预测 elapsed direction。
+
+## 阶段 2：改变 output tile shape 与 reuse direction
+
+`rectangular-32x8x8` 保留 `TK=8`、256 threads、每 thread 一个 output、p-order、precision 与 collection method，但把 output tile 改为 `TM=32`、`TN=8`，block 改为 `(8,32)`。一个 full slice 为 256 个 outputs 加载 256 个 A values 和 64 个 B values：每个 A value 跨八列复用，每个 B value 跨 32 行复用。
+
+相对 `k-tile-16x16x8`，这条 edge 把 directional reuse、shared footprint、grid geometry 与 edge fraction 作为 disclosed bundle。对 fixed aligned workload，source arithmetic 预测每 completed output 请求更多 A/B values。Scope 与 normalization 匹配的 requested-traffic field 应更高；相等或更低就 reject，缺少 definition-compatible field 则 no answer。Tall 或 narrow matrix 可能改变 useful work 与 edge waste，但它会开始新的 workload comparison，而不能证明此 tile 普遍适用。
+
+## 阶段 3：用 thread-level work 换 cross-thread reuse
+
+`coarsened-32x16x8` 保留 `TM=32`、`TK=8` 与 256 threads，但把 `TN` 扩展到 16。每个 thread 在同一 column 拥有两个 output rows，因此持有两个 source accumulators。一个 full slice 为 512 个 outputs 加载 256 个 A 与 128 个 B values：A reuse 是 16，B reuse 是 32，相对 `rectangular-32x8x8`，每 output 的 source-requested A/B values 降低。
+
+Reuse hypothesis 预测按 completed output normalization 的 matching requested traffic 更低；相等或更高就 reject，缺少 matching field 则 no answer。Resource hypothesis 只预测 source 暴露两个 live accumulators 和 1,536 shared bytes，不预测最终 register count。Compiler allocation、spill、instruction mapping、更少 blocks、edge waste 与更长 per-thread dependency chains 都是 coupled changes。即使 reuse evidence 得到支持，也不能建立 elapsed winner。
+
+## 把 resource use 与 occupancy 分成不同证据
+
+四个 stages 的 source-declared shared bytes 分别是 2,048、1,024、1,280 与 1,536。每 thread 的 source accumulator counts 分别是一、一、一、二。这些是可检查 inputs，不是完整 compiled resource records。每个 template instantiation 都要保留 exact NVCC version、expanded C++17 command、`sm_75`/`compute_75` targets、source/binary hashes、compiler resource output 与 local-memory evidence。
+
+Theoretical occupancy 把 exact compiled registers/shared memory/block size 与 exact device limits 组合起来；achieved occupancy 是另一项 observed profiler field。两者都不是 speed score。较低 occupancy 仍可能足以隐藏相关 latency，较高值也可能不增加 useful work。Support 或 rejection 必须命名 specific limiting resource 与 matched coordinate。若 compiler merge、spill 或以其他方式改变预期 resource shape，应先修改 ledger，再解释 timing。
+
+## 分开 requested traffic、observed traffic 与 Roofline
+
+对 fixed aligned workload，采用 tiled A/B requests 加一次 C read/write 的 convention，两个 16-by-16 output stages 的 source estimate 都是 545,259,520 bytes，`rectangular-32x8x8` 是 679,477,248 bytes，`coarsened-32x16x8` 是 411,041,792 bytes。它们计算 cache、transaction、replay 与 hardware effects 之前的 algorithm requests；它们不是 compulsory matrix bytes，也不是 observed DRAM traffic。
+
+Main product-work convention 是 `W = 2*M*N*K = 2,147,483,648` FLOPs，把一次 multiply 和一次 add 分开计数；alpha/beta epilogue 另行报告。只有 work、traffic path、unit、shape 与 provenance 匹配时，`I_path = W / T_path` 才有意义。Q10 的 `P_roof(I) = min(P_compute, I * B_path)`限定 model geometry；它不能把 estimate 或 point location 变成 bottleneck、causal explanation 或 winning tile。
+
+## 保留 precision、compiler 与 architecture coordinates
+
+四个 reviewed stages 都保留 FP32 A/B/C 和 FP32 device accumulation，并与 double CPU reference 比较。Compiler 可能 contract multiply-add，合法 operation details 也可能改变低位，因此每个 exact build 都必须重新过 tolerance gate。改变 input precision、accumulation precision、fast-math options、contraction policy 或 tolerance 会开始一组新 comparison。
+
+三个 selected compile-only Toolkit Lanes 是 11.8.0、12.9.2 和 13.3.1，均使用 C++17。Reviewed command 为每条 Lane 生成 `sm_75` 与 `compute_75`，但 execution record 仍必须标出 exact device、compute capability、driver、可能的 JIT path 与 binary。Candidates 使用普通 FP32、shared memory 与 block barriers，minimum compute capability 是 7.5；没有 Tensor Core、WMMA、`cp.async` 或其他 architecture-specific branch。增加此类分支需要另行论证 hardware gate、fallback、correctness contract 与 experiment。
+
+## 查询 metric、permission、replay 与 report custody
+
+先在 exact measurement environment 保存：
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Metric names、units、scopes 与 availability 绑定 exact Nsight Compute version 和 GPU。先冻结 hypothesis，再选择一个 minimal queried section 或更短的 exact metric list。Runner 暴露四个唯一 kernel functions：`canonical_16x16x16_kernel`、`k_tile_16x16x8_kernel`、`rectangular_32x8x8_kernel` 与 `coarsened_32x16x8_kernel`。使用 `--kernel-name-base function` 和一个 exact queried wrapper name，不能过滤共享的 template-body name。Baseline/candidate 分别保留 kernel-name basis、wrapper-to-template mapping、filter、launch selection、replay mode、expanded command、primary `.ncu-rep`、query output、stdout/stderr、exit status、hashes、observer 与 date。
+
+Collection 前记录 performance-counter permission。Denied permission、unknown version、unavailable field、ambiguous filter、report-import failure 或 unmatched replay 都是 blocker：停止并保留记录。不得用 `sudo` 绕过 policy、猜 value 或把 unavailable 写成 zero。Replay 可能重新执行 work 并扰动 state；profiled report 回答 mechanism，matched unprofiled attempts 回答 elapsed behavior。
+
+## 保持 VIS12 证据中立
+
+[VIS12：GEMM Tiling Hierarchy](/visuals/gemm-tiling-hierarchy/)展示 matrix、tile、thread block、warp 与 source-level instruction 五层。用它标记 ownership 并映射一个 K slice，不要用它选择四个 candidate sizes。它建模的 `64x64x16` 与 `128x64x16` tiles 是 conceptual hierarchy states，不是 legal-launch 或 tuning recommendations。
+
+VIS12 不执行 EX15、不查询 compiler/GPU，也不建模 register allocation、occupancy、cache、traffic、emitted FMA/MMA instruction 或 performance。Browser state 不提供 correctness、runtime、profiler 或 tile-selection evidence。
+
+## 明确 production-library boundary
+
+EX15-shaped educational kernel 用于暴露 indexing、reuse、barrier、precision 与 evidence design，不是 production replacement。它没有覆盖 production GEMM choice 所需的 layout、transpose、precision、algorithm selection、workspace、stream、determinism、heuristic、epilogue 或 maintenance contracts。
+
+L06 尚未发布，因此 future cuBLAS contract 不可用。LAB12 同时依赖 Q13 与 L06，本 ticket 不发布 LAB12。Q13 不发明 cuBLAS API、comparison、result、Tensor Core result 或 production recommendation。未来 library comparison 必须重新建立 matched shapes、semantics、precision、correctness、hardware、toolchain 与 measurement custody，不能把 educational winner 当作 production baseline。
+
+## 证据边界
+
+证据状态（Evidence Status）只属于实验（Lab）与可运行示例（Runnable Example），不属于学习单元（Learning Unit）。Q13 的 `compilation`、`runtime`、`expectedObservations` 与 `recordedObservations` arrays 全部为空，因此 Q13 不授予 Evidence Status。Canonical imports、source arithmetic、static runner test、compile-only gates、VIS12 和 expected-only fixture 都不能改变这个边界。
+
+关联 [EX15](/examples/tiled-gemm/)继续拥有空 compilation/recorded-observation arrays，并保持**待硬件验证（Pending Hardware Verification）**。Reviewed runner 是练习解答资产（Exercise solution asset），不是新的 Runnable Example。它的三条 Toolkit Lane gates 只 compile、link 与 static-inspect，不执行。这里没有发布 matrix output、register count、occupancy、traffic、timing、speedup、winner、cuBLAS comparison、Tensor Core result、Reference Environment 或 runtime observation。
+
+## 离开前检查
+
+1. 每个 stage 在 measurement 前必须保留 EX15 的哪些 shape、precision、CPU-reference、finite-value 与 tolerance coordinates？
+2. 为什么只改变 `TK` 会改变 shared storage 与 barriers，却不会自动改变 full-workload A/B requests 或 occupancy？
+3. `rectangular-32x8x8` 与 `coarsened-32x16x8` 怎样改变 A/B reuse、output ownership 和 disclosed resource coupling？
+4. 每个 measured stage 必须重复哪些 matrix、type、architecture、workload、warm-up、synchronization、statistic、profiler、manifest、correctness 与 interpretation fields？
+5. 为什么 memorized tile size、VIS12、occupancy 百分比与 future cuBLAS 名称都不能建立 winning implementation？
+
+## 继续练习
+
+- 完成 [Q13 Exercises](/correctness/gemm-optimization-case-study/exercises/)，再查看独立的[复核解答](/correctness/gemm-optimization-case-study/solutions/)。
+- 用 [PB-R3-011](/practice/#pb-r3-011)修复 memorized-tile experiment，用 [PB-R3-012](/practice/#pb-r3-012)审查 uncustodied resource/production claim。
+- 对照 [EX15](/examples/tiled-gemm/)复核 canonical source，只把 [VIS12](/visuals/gemm-tiling-hierarchy/)用于 evidence-neutral hierarchy 与 ownership reasoning。
+
+## 来源与复核
+
+- [CUDA C++ Best Practices Guide v13.3：Shared Memory in Matrix Multiplication](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab)限定 classic GEMM reuse 与 verification claims。
+- [Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy)、[Register Pressure](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#register-pressure)与 [Which Compute Capability Target](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#which-compute-capability-target)限定 current resource、latency-hiding 与 architecture-target claims。
+- [Host/Device Computation Accuracy](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy)限定 FP32、double-reference、FMA 与 comparison statements。
+- Exact [11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases)、[12.9.2](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html)与 [13.3.1](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html) compiler-driver documents 限定三条 selected C++17 compile-only Lanes。
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)与 [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)限定 exact-GPU query、permission、filtering、replay、resource 与 report-custody workflow。
+
+Context7 `/websites/nvidia_cuda` 于 **2026-09-03** 只用于 discovery/cross-check。以上十个 exact NVIDIA owner URLs 才是事实权威。本站没有复制 NVIDIA sample、code、table、figure、tile result 或 performance number；candidate graph、runner、fixture、arithmetic ledgers、Exercises 与 solutions 都是学习站（Learning Site）原创材料。
+
+**事实核查与全部来源访问日期：2026-09-03。**

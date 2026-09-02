@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-09-02, it contains ten contiguously numbered published Labs: LAB01-LAB10. Q13, L06, and LAB12 have no public destinations; LAB12 waits for Q13's profiling prerequisite and L06's cuBLAS prerequisite. Incomplete planned work does not appear.
+This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-09-03, it contains ten contiguously numbered published Labs: LAB01-LAB10. Q13 is published and supplies the profiling prerequisite. L06 and LAB12 have no public destinations, and LAB12 still waits for L06's cuBLAS prerequisite. Incomplete planned work does not appear.
 
 ## Published Labs
 
@@ -34,7 +34,7 @@ This index lists only Labs that form complete Publication Pairs and already prov
 
 ## Sequence and direct lookup
 
-The current sequence lists LAB01-LAB09 followed by [LAB10: Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/). LAB10 requires exactly [Q11](/en/correctness/transpose-optimization-case-study/), starts from immutable [EX14](/en/examples/tiled-transpose/), and reuses [VIS11](/en/visuals/tiled-transpose/) only as evidence-neutral browser arithmetic. It declares a `4096x4096` `float` workload, a conservative 134,221,952-byte bound, one excluded warm-up, explicit synchronization, and a ten-attempt median plus min/max method. [Q12](/en/correctness/reduction-optimization-case-study/) is published, but LAB11's CUB comparison still waits for unpublished L03, so LAB11 is absent from this index. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
+The current sequence lists LAB01-LAB09 followed by [LAB10: Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/). LAB10 requires exactly [Q11](/en/correctness/transpose-optimization-case-study/), starts from immutable [EX14](/en/examples/tiled-transpose/), and reuses [VIS11](/en/visuals/tiled-transpose/) only as evidence-neutral browser arithmetic. It declares a `4096x4096` `float` workload, a conservative 134,221,952-byte bound, one excluded warm-up, explicit synchronization, and a ten-attempt median plus min/max method. [Q12](/en/correctness/reduction-optimization-case-study/) is published, but LAB11's CUB comparison still waits for unpublished L03. [Q13](/en/correctness/gemm-optimization-case-study/) is also published, but LAB12's cuBLAS comparison still waits for unpublished L06. LAB11 and LAB12 are therefore absent from this index. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
 
 ## Evidence boundary
 

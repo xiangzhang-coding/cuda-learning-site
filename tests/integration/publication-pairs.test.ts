@@ -46,14 +46,14 @@ type PublicationPair = {
 const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'home',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-03',
     structure: 'purpose,current-route,boundaries,destinations',
     zh: '/',
     en: '/en/',
   },
   {
     pairId: 'o01',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-03',
     structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
     resourceKind: 'learning-unit',
     unitId: 'O01',
@@ -1672,7 +1672,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'a08',
-    factCheckDate: '2026-08-31',
+    factCheckDate: '2026-09-03',
     structure: 'outcome,prerequisites,gemm-contract,naive-baseline,shared-tiling,partial-tiles-barriers,numerical-checks,canonical-example,visual-explainer,production-boundary,evidence-boundary,retrieval,practice,sources',
     resourceKind: 'learning-unit',
     unitId: 'A08',
@@ -1711,7 +1711,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'a09',
-    factCheckDate: '2026-08-31',
+    factCheckDate: '2026-09-03',
     structure: 'outcome,prerequisites,algorithm-contracts,compaction-from-scan,selection-from-flags,sorting-from-histogram-scan-movement,atomics-boundary,production-choice,evidence-boundary,retrieval,practice,sources',
     resourceKind: 'learning-unit',
     unitId: 'A09',
@@ -2246,6 +2246,49 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/correctness/reduction-optimization-case-study/solutions/',
   },
   {
+    pairId: 'q13',
+    factCheckDate: '2026-09-03',
+    structure: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-k-tile,stage-output-tile,stage-thread-coarsening,resource-occupancy,traffic-roofline,precision-compiler-architecture,profiler-method,visual-boundary,production-library-boundary,evidence-boundary,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'Q13',
+    prerequisites: 'A08,Q06,Q08,Q10',
+    relatedUnits: 'EX15,VIS12',
+    exampleIds: 'EX15',
+    canonicalExample: 'EX15',
+    canonicalRanges: 'cpu-reference,tiled-gemm',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    sourceCount: '10',
+    sourceVersions: '13.3,11.8.0,12.9.2,13.3.1,2026.2.1',
+    zh: '/correctness/gemm-optimization-case-study/',
+    en: '/en/correctness/gemm-optimization-case-study/',
+  },
+  {
+    pairId: 'q13-exercises',
+    factCheckDate: '2026-09-03',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'Q13-EXERCISES',
+    prerequisites: 'Q13',
+    hardwareGate: 'none',
+    zh: '/correctness/gemm-optimization-case-study/exercises/',
+    en: '/en/correctness/gemm-optimization-case-study/exercises/',
+  },
+  {
+    pairId: 'q13-solutions',
+    factCheckDate: '2026-09-03',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'Q13-SOLUTIONS',
+    prerequisites: 'Q13-EXERCISES',
+    hardwareGate: 'none',
+    zh: '/correctness/gemm-optimization-case-study/solutions/',
+    en: '/en/correctness/gemm-optimization-case-study/solutions/',
+  },
+  {
     pairId: 'ex01',
     factCheckDate: '2026-08-26',
     structure: 'purpose,project,report-contract,build,hardware,compatibility,evidence,expected-observations,sources',
@@ -2578,7 +2621,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'labs-index',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-03',
     structure: 'scope,published-index,sequence,evidence-boundary',
     zh: '/labs/',
     en: '/en/labs/',
@@ -3090,12 +3133,12 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'practice-bank',
-    factCheckDate: '2026-09-02',
-    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,review',
+    factCheckDate: '2026-09-03',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12',
-    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14',
+    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13',
+    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14',
     zh: '/practice/',
     en: '/en/practice/',
   },
@@ -3108,14 +3151,14 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'sources-and-versions',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-03',
     structure: 'scope,lookup-index,verified-interfaces,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',
   },
   {
     pairId: 'about',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-03',
     structure: 'purpose,scope,author,feedback',
     zh: '/about/',
     en: '/en/about/',
@@ -3207,11 +3250,11 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(216);
-    expect(sourceRoutes.size).toBe(432);
+    expect(publicationPairs).toHaveLength(219);
+    expect(sourceRoutes.size).toBe(438);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
-    for (const absentUnitId of ['L03', 'LAB11', 'Q13', 'L06', 'LAB12']) {
+    for (const absentUnitId of ['L03', 'LAB11', 'L06', 'LAB12']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
@@ -3288,6 +3331,12 @@ describe('Publication Pairs', () => {
       ['Q11', ['A05', 'Q06', 'Q08', 'Q10']],
       ['Q11-EXERCISES', ['Q11']],
       ['Q11-SOLUTIONS', ['Q11-EXERCISES']],
+      ['Q12', ['A02', 'Q02', 'Q06', 'Q08']],
+      ['Q12-EXERCISES', ['Q12']],
+      ['Q12-SOLUTIONS', ['Q12-EXERCISES']],
+      ['Q13', ['A08', 'Q06', 'Q08', 'Q10']],
+      ['Q13-EXERCISES', ['Q13']],
+      ['Q13-SOLUTIONS', ['Q13-EXERCISES']],
       ['LAB01', ['O03', 'O08']],
       ['LAB02', ['O03', 'F01']],
       ['LAB03', ['F03', 'F05']],
@@ -3416,6 +3465,7 @@ describe('published navigation', () => {
         '/correctness/timeline-first-nsight-systems/',
         '/correctness/kernel-first-nsight-compute/',
         '/correctness/transpose-optimization-case-study/',
+        '/correctness/gemm-optimization-case-study/',
         '/examples/environment-report/',
         '/examples/vector-addition/',
         '/examples/multidimensional-indexing/',
@@ -3518,6 +3568,7 @@ describe('published navigation', () => {
         '/en/correctness/timeline-first-nsight-systems/',
         '/en/correctness/kernel-first-nsight-compute/',
         '/en/correctness/transpose-optimization-case-study/',
+        '/en/correctness/gemm-optimization-case-study/',
         '/en/examples/environment-report/',
         '/en/examples/vector-addition/',
         '/en/examples/multidimensional-indexing/',

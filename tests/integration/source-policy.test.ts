@@ -171,6 +171,7 @@ const profilerFixtureFiles = [
   { name: 'lab08-nsight-compute.expected.json', sanitizationReviewDate: '2026-08-31' },
   { name: 'lab10-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-02' },
   { name: 'q12-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-02' },
+  { name: 'q13-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-03' },
 ] as const;
 
 describe('source, license, and privacy policy', () => {
@@ -179,7 +180,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(432);
+    expect(contentFiles).toHaveLength(438);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');

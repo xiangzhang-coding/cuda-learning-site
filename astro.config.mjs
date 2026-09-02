@@ -140,6 +140,7 @@ export default defineConfig({
             { slug: 'correctness/roofline-arithmetic-intensity' },
             { slug: 'correctness/transpose-optimization-case-study' },
             { slug: 'correctness/reduction-optimization-case-study' },
+            { slug: 'correctness/gemm-optimization-case-study' },
           ],
         },
         {

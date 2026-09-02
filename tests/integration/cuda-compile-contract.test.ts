@@ -336,6 +336,37 @@ describe('CUDA compile evidence workflow', () => {
     expect(ex11Build).not.toContain('Runtime-Verified');
   });
 
+  it('compile-gates the Q13 runner in all three EX15 lanes without granting Evidence Status', async () => {
+    const [workflow, runnerBuild] = await Promise.all([
+      readProjectFile('.github/workflows/cuda-compile.yml'),
+      readProjectFile('scripts/check-q13-runner-build.sh'),
+    ]);
+    const ex15Build = workflow.match(/^  ex15-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
+    const canonicalCompileOffset = ex15Build.indexOf('Compile EX15 without granting Evidence Status');
+    const runnerCompileOffset = ex15Build.indexOf(
+      'Compile gate for Q13 runner without granting Evidence Status',
+    );
+    const scanOffset = ex15Build.indexOf('Scan EX15 build logs');
+
+    expect(ex15Build).not.toBe('');
+    expect(canonicalCompileOffset).toBeGreaterThan(-1);
+    expect(runnerCompileOffset).toBeGreaterThan(canonicalCompileOffset);
+    expect(scanOffset).toBeGreaterThan(runnerCompileOffset);
+    expect(ex15Build.match(/bash scripts\/check-q13-runner-build\.sh/g)).toHaveLength(1);
+    expect(ex15Build).toContain(
+      'bash scripts/check-q13-runner-build.sh \\\n            "/workspace/artifacts/cuda-ex15/${{ matrix.lane }}"',
+    );
+    expect(ex15Build).toContain('--workdir /workspace');
+    expect(ex15Build).not.toContain('--gpus');
+    expect(ex15Build).not.toContain('Compile-Checked');
+    expect(ex15Build).not.toContain('Runtime-Verified');
+    expect(runnerBuild).toContain('public/assets/exercise-solutions/q13-gemm-candidates.cu');
+    expect(runnerBuild).toContain('examples/ex15-tiled-gemm/include/tiled_gemm_reference.hpp');
+    expect(runnerBuild).toContain('--generate-code=arch=compute_75,code=sm_75');
+    expect(runnerBuild).toContain('--generate-code=arch=compute_75,code=compute_75');
+    expect(runnerBuild).not.toMatch(/(?:^|\s)(?:\.\/)?q13-gemm-candidates(?:\s|$)/m);
+  });
+
   it('never executes the generated CUDA binary in the compile boundary', async () => {
     const [
       orchestrator,

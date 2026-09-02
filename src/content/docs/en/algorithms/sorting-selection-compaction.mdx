@@ -3,7 +3,7 @@ title: 'A09: Compose Sorting, Selection, and Compaction from Scan, Histograms, a
 description: Derive selection, stream compaction, and bounded-key sorting vocabulary from flags, exclusive scan, histograms, atomic ownership, and scatter before making a CUB or Thrust production decision.
 pairId: a09
 counterpart: /algorithms/sorting-selection-compaction/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -67,7 +67,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/algorithms/sorting-selection-compaction/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -149,7 +149,7 @@ The educational composition explains flags, prefix ranks, bin offsets, movement,
 
 All four A09 evidence arrays are empty. The page compiles and executes no CUB, Thrust, or custom kernel and contains no measured timing, throughput, temporary-storage footprint, contention counter, or speedup. Context7 `/nvidia/cccl` was used only for discovery and cross-checking on 2026-08-31. The exact v3.4.2 release and source URLs are the publication coordinates.
 
-LAB12 is unrelated to A09 but remains unpublished in this ticket: it strictly depends on Q13 and L06, neither of which has a public destination.
+LAB12 is unrelated to A09 and remains unpublished. [Q13](/en/correctness/gemm-optimization-case-study/) now has a public destination, but its other strict prerequisite, L06, is still unpublished.
 
 ## Retrieval check
 

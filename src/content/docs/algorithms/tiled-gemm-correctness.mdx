@@ -3,7 +3,7 @@ title: 'A08：从正确 Naive GEMM 到 Shared-Memory Tiling'
 description: 先冻结 row-major GEMM 与数值验收合同，再从每输出一线程的 naive baseline 推导 partial-safe shared-memory tiling、统一 barrier 与独立 CPU reference。
 pairId: a08
 counterpart: /en/algorithms/tiled-gemm-correctness/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -69,7 +69,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/algorithms/tiled-gemm-correctness/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -173,7 +173,7 @@ EX15 只维护一份 canonical implementation。先导入 pure-host `cpu-referen
 
 ## Production boundary
 
-EX15 是 correctness 与 tiling mental model，不是 production replacement。后续 L06/L07/L09 才分别处理 cuBLAS、cuBLASLt 与 CUTLASS 的 exact version、layout、precision、workspace、heuristic 和 architecture contracts；LAB12 还依赖未发布的 Q13 与 L06，本 ticket 不发布它。
+EX15 是 correctness 与 tiling mental model，不是 production replacement。后续 L06/L07/L09 才分别处理 cuBLAS、cuBLASLt 与 CUTLASS 的 exact version、layout、precision、workspace、heuristic 和 architecture contracts。[Q13](/correctness/gemm-optimization-case-study/)现在已经发布，但 LAB12 还依赖未发布的 L06，因此 A08 与当前 ticket 都不发布 LAB12。
 
 ## 证据边界
 

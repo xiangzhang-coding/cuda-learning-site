@@ -3,7 +3,7 @@ title: 'A08: From Correct Naive GEMM to Shared-Memory Tiling'
 description: Freeze a row-major GEMM and numerical-acceptance contract, then derive partial-safe shared-memory tiling, uniform barriers, and an independent CPU reference from a one-output-per-thread naive baseline.
 pairId: a08
 counterpart: /algorithms/tiled-gemm-correctness/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -69,7 +69,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/algorithms/tiled-gemm-correctness/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -173,7 +173,7 @@ EX15 maintains one canonical implementation. The pure-host `cpu-reference` prece
 
 ## Production boundary
 
-EX15 is a correctness and tiling mental model, not a production replacement. Later L06, L07, and L09 own exact-version cuBLAS, cuBLASLt, and CUTLASS layout, precision, workspace, heuristic, and architecture contracts. LAB12 additionally depends on unpublished Q13 and L06, so this ticket does not publish it.
+EX15 is a correctness and tiling mental model, not a production replacement. Later L06, L07, and L09 own exact-version cuBLAS, cuBLASLt, and CUTLASS layout, precision, workspace, heuristic, and architecture contracts. [Q13](/en/correctness/gemm-optimization-case-study/) is now published, but LAB12 still depends on unpublished L06, so neither A08 nor the current ticket publishes LAB12.
 
 ## Evidence boundary
 

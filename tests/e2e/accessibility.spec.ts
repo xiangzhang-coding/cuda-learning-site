@@ -30,6 +30,7 @@ const representativeThemeRoutes = [
   '/en/correctness/timing-asynchronous-gpu-work/',
   '/en/correctness/transpose-optimization-case-study/',
   '/en/correctness/reduction-optimization-case-study/',
+  '/en/correctness/gemm-optimization-case-study/',
   '/en/labs/optimize-canonical-transpose/',
   '/en/examples/streams-events-overlap/',
   '/en/examples/unified-memory-migration/',

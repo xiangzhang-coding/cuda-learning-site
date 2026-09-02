@@ -3,7 +3,7 @@ title: 实验索引
 description: 按先修、硬件、版本和证据状态（Evidence Status）直接查找当前完整发布的实验。
 pairId: labs-index
 counterpart: /en/labs/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/labs/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-09-02，共有十个连续编号的已发布实验：LAB01-LAB10。Q13、L06 与 LAB12 没有公开目标，LAB12 必须等待 Q13 的 profiling prerequisite 与 L06 的 cuBLAS prerequisite。未完成条目不会显示。
+本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-09-03，共有十个连续编号的已发布实验：LAB01-LAB10。Q13 已发布并提供 profiling prerequisite；L06 与 LAB12 没有公开目标，LAB12 仍等待 L06 的 cuBLAS prerequisite。未完成条目不会显示。
 
 ## 已发布实验
 
@@ -34,7 +34,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 顺序与直接查找
 
-当前顺序依次列出 LAB01-LAB09，随后是 [LAB10：优化 canonical transpose](/labs/optimize-canonical-transpose/)。LAB10 的严格先修只有 [Q11](/correctness/transpose-optimization-case-study/)；它从 immutable [EX14](/examples/tiled-transpose/)开始，只把 [VIS11](/visuals/tiled-transpose/)复用为 evidence-neutral browser arithmetic。它声明 `4096x4096` `float` workload、134,221,952-byte 保守上界、一次排除的 warm-up、显式同步，以及十次 retained attempts 的 median 与 min/max 方法。[Q12](/correctness/reduction-optimization-case-study/)已经发布，但 LAB11 的 CUB comparison 仍等待未发布的 L03，因此 LAB11 不在本索引中。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
+当前顺序依次列出 LAB01-LAB09，随后是 [LAB10：优化 canonical transpose](/labs/optimize-canonical-transpose/)。LAB10 的严格先修只有 [Q11](/correctness/transpose-optimization-case-study/)；它从 immutable [EX14](/examples/tiled-transpose/)开始，只把 [VIS11](/visuals/tiled-transpose/)复用为 evidence-neutral browser arithmetic。它声明 `4096x4096` `float` workload、134,221,952-byte 保守上界、一次排除的 warm-up、显式同步，以及十次 retained attempts 的 median 与 min/max 方法。[Q12](/correctness/reduction-optimization-case-study/)已经发布，但 LAB11 的 CUB comparison 仍等待未发布的 L03；[Q13](/correctness/gemm-optimization-case-study/)也已发布，但 LAB12 的 cuBLAS comparison 仍等待未发布的 L06。因此 LAB11/LAB12 都不在本索引中。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
 
 ## 证据边界
 

@@ -358,6 +358,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'Q12：用受控证据优化 Canonical Reduction', en: 'Q12: Optimize the Canonical Reduction with Controlled Evidence' },
     prerequisites: ['A02', 'Q02', 'Q06', 'Q08'],
   },
+  Q13: {
+    href: { 'zh-CN': '/correctness/gemm-optimization-case-study/', en: '/en/correctness/gemm-optimization-case-study/' },
+    title: { 'zh-CN': 'Q13：用受控证据优化 Canonical GEMM', en: 'Q13: Optimize the Canonical GEMM with Controlled Evidence' },
+    prerequisites: ['A08', 'Q06', 'Q08', 'Q10'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
