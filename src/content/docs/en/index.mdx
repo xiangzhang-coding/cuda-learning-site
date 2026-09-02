@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-After [issue #27](https://github.com/xiangzhang-coding/cuda-learning-site/issues/27), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A09/A14, and Q01-Q11 in both languages, for 56 Learning Units. The completed R2 aggregate review remains an immutable snapshot fixed at 186 Publication Pairs and 372 source routes. The current issue #27 increment does not rewrite R2, and the R3 aggregate review remains pending.
+After [issue #28](https://github.com/xiangzhang-coding/cuda-learning-site/issues/28), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A09/A14, and Q01-Q12 in both languages, for 57 Learning Units. The completed R2 aggregate review remains an immutable snapshot fixed at 186 Publication Pairs and 372 source routes. The current issue #28 increment does not rewrite R2, and the R3 aggregate review remains pending.
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
@@ -56,7 +56,7 @@ The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 
 
 [A01 Elementwise Map](/en/algorithms/elementwise-map/) through A09 retain their existing edges. [A14 Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity](/en/algorithms/algorithm-choice-arithmetic-intensity/) strictly requires A01, A02, A05, and A08.
 
-[Q01](/en/correctness/cpu-references-tolerances-invariants/) through [Q08](/en/correctness/kernel-first-nsight-compute/) retain their existing edges. [Q09 Interpret Latency Hiding with Occupancy, Stalls, and Throughput](/en/correctness/occupancy-stalls-throughput/) strictly requires Q08 and F08. [Q10 Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/) strictly requires Q05 and A14. [Q11 Optimize the Canonical Transpose with Controlled Evidence](/en/correctness/transpose-optimization-case-study/) strictly requires A05, Q06, Q08, and Q10, starts from immutable [EX14](/en/examples/tiled-transpose/), and reuses evidence-neutral [VIS11](/en/visuals/tiled-transpose/).
+[Q01](/en/correctness/cpu-references-tolerances-invariants/) through [Q08](/en/correctness/kernel-first-nsight-compute/) retain their existing edges. [Q09 Interpret Latency Hiding with Occupancy, Stalls, and Throughput](/en/correctness/occupancy-stalls-throughput/) strictly requires Q08 and F08. [Q10 Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/) strictly requires Q05 and A14. [Q11 Optimize the Canonical Transpose with Controlled Evidence](/en/correctness/transpose-optimization-case-study/) strictly requires A05, Q06, Q08, and Q10. [Q12 Optimize the Canonical Reduction with Controlled Evidence](/en/correctness/reduction-optimization-case-study/) strictly requires A02, Q02, Q06, and Q08, starts from immutable [EX11](/en/examples/multi-stage-reduction/), and reuses evidence-neutral [VIS10](/en/visuals/reduction-stages/).
 
 F01-F08 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/), [F05 Exercises](/en/foundations/asynchronous-errors/exercises/) and [solutions](/en/foundations/asynchronous-errors/solutions/), [F06 Exercises](/en/foundations/compute-capability/exercises/) and [solutions](/en/foundations/compute-capability/solutions/), [F07 Exercises](/en/foundations/runtime-driver-api/exercises/) and [solutions](/en/foundations/runtime-driver-api/solutions/), and [F08 Exercises](/en/foundations/launch-geometry/exercises/) and [solutions](/en/foundations/launch-geometry/solutions/).
 
@@ -70,19 +70,19 @@ O02-O08 retain their own Exercises and separate solutions.
 
 Q01-Q05 also publish complete Exercises and separate reviewed solutions: [Q01 Exercises](/en/correctness/cpu-references-tolerances-invariants/exercises/) and [solutions](/en/correctness/cpu-references-tolerances-invariants/solutions/), [Q02 Exercises](/en/correctness/floating-point-order-reproducibility/exercises/) and [solutions](/en/correctness/floating-point-order-reproducibility/solutions/), [Q03 Exercises](/en/correctness/memcheck-invalid-memory-access/exercises/) and [solutions](/en/correctness/memcheck-invalid-memory-access/solutions/), [Q04 Exercises](/en/correctness/racecheck-initcheck-synccheck/exercises/) and [solutions](/en/correctness/racecheck-initcheck-synccheck/solutions/), and [Q05 Exercises](/en/correctness/timing-asynchronous-gpu-work/exercises/) and [solutions](/en/correctness/timing-asynchronous-gpu-work/solutions/).
 
-Q06-Q11 also publish complete Exercises and separate reviewed solutions, including [Q09 Exercises](/en/correctness/occupancy-stalls-throughput/exercises/) and [solutions](/en/correctness/occupancy-stalls-throughput/solutions/), [Q10 Exercises](/en/correctness/roofline-arithmetic-intensity/exercises/) and [solutions](/en/correctness/roofline-arithmetic-intensity/solutions/), plus [Q11 Exercises](/en/correctness/transpose-optimization-case-study/exercises/) and [solutions](/en/correctness/transpose-optimization-case-study/solutions/).
+Q06-Q12 also publish complete Exercises and separate reviewed solutions, including [Q09 Exercises](/en/correctness/occupancy-stalls-throughput/exercises/) and [solutions](/en/correctness/occupancy-stalls-throughput/solutions/), [Q10 Exercises](/en/correctness/roofline-arithmetic-intensity/exercises/) and [solutions](/en/correctness/roofline-arithmetic-intensity/solutions/), [Q11 Exercises](/en/correctness/transpose-optimization-case-study/exercises/) and [solutions](/en/correctness/transpose-optimization-case-study/solutions/), plus [Q12 Exercises](/en/correctness/reduction-optimization-case-study/exercises/) and [solutions](/en/correctness/reduction-optimization-case-study/solutions/).
 
 The site has 16 Runnable Examples, EX01-EX16. New [EX15 Tiled GEMM](/en/examples/tiled-gemm/) strictly requires A08; EX14 still requires A05 and EX16 still requires Q03/Q04.
 
 Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1. It has empty compilation evidence, Pending Hardware Verification runtime, and empty recorded observations. A host utility establishes no GPU correctness. The site has not run EX15 and publishes no output, timing, speedup, or other performance number.
 
-The current 10 Labs are LAB01-LAB10. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11 and declares a `4096x4096` `float` workload, a conservative 134,221,952-byte bound, one excluded warm-up, explicit synchronization, and a ten-attempt median plus min/max method, but no recorded result. Q13, L06, and LAB12 remain unpublished; LAB12 waits for Q13 and L06.
+The current 10 Labs are LAB01-LAB10. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11 and has no recorded result. L03 and LAB11 remain unpublished, and Q12 invents no CUB comparison. Q13, L06, and LAB12 also remain unpublished; LAB12 waits for Q13 and L06.
 
 The site has 18 formal Visual Explainers: standalone VIS01-VIS14 plus embedded VIS19-VIS22. [VIS13 Roofline](/en/visuals/roofline/) strictly requires Q10 and appears before VIS14. Every explainer is an evidence-neutral browser model; VIS13 browser values and its static chart are not GPU evidence.
 
-A14, Q09-Q10, and VIS13 have empty compilation and runtime axes. As a Learning Unit, Q11 has empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and only summarizes linked subjects. Linked EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static or browser evidence, and the expected-only fixture do not change those boundaries. This increment publishes no timing, profiler metric, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`.
+A14, Q09-Q12, and VIS13 have empty compilation and runtime axes. Q11 and Q12 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Linked EX11, EX14, and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS10 and VIS11, static runner gates, and expected-only fixtures do not change those boundaries. This increment publishes no timing, profiler metric, numerical output, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`.
 
-The current catalog contains 10 Labs, 58 Practice Bank entries, 18 Visual Explainers, 165 Glossary terms, and 70 source records, for 321 records total. Current rolling public source files form 213 Publication Pairs, or 426 source routes. Those current figures are distinct from the immutable R2 186/372 and 284-record snapshot, and the R3 aggregate review remains pending.
+The current catalog contains 10 Labs, 60 Practice Bank entries, 18 Visual Explainers, 165 Glossary terms, and 71 source records, for 324 records total. Current rolling public source files form 216 Publication Pairs, or 432 source routes. Those current figures are distinct from the immutable R2 186/372 and 284-record snapshot, and the R3 aggregate review remains pending.
 
 ## Boundaries first
 
@@ -371,6 +371,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Optimize the Canonical Transpose with Controlled Evidence</strong>
     <small>Start from immutable EX14, reuse VIS11, and test one optimization hypothesis at a time.</small>
   </a>
+  <a className="route-card" href="/en/correctness/reduction-optimization-case-study/">
+    <span>Q12 · CONTROLLED REDUCTION</span>
+    <strong>Optimize the Canonical Reduction with Controlled Evidence</strong>
+    <small>Preserve EX11 correctness while examining the warp tail, numerical order, and partial traffic by stage.</small>
+  </a>
   <a className="route-card" href="/en/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>Environment Report Runnable Example</strong>
@@ -584,7 +589,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 58 original problems.</small>
+    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 60 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -594,7 +599,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 70 interface and owner-source records with their review dates.</small>
+    <small>Inspect 71 interface and owner-source records with their review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

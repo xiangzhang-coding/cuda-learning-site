@@ -1,0 +1,261 @@
+---
+title: 'Q12: Optimize the Canonical Reduction with Controlled Evidence'
+description: Start from the EX11 CPU-reference and tolerance contract, then examine warp-tail, numerical-order, and partial-staging changes while bounding every interpretation to a complete measurement record.
+pairId: q12
+counterpart: /correctness/reduction-optimization-case-study/
+factCheckDate: '2026-09-02'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - canonical-baseline
+  - hypothesis-ledger
+  - measurement-contract
+  - stage-divergence-synchronization
+  - stage-numerical-order
+  - stage-memory-traffic
+  - profiler-method
+  - visual-boundary
+  - production-primitive-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q12
+prerequisites:
+  - A02
+  - Q02
+  - Q06
+  - Q08
+relatedUnits:
+  - EX11
+  - VIS10
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - cpu-reference
+  - multi-stage-reduction
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Thread Block Synchronization'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current block-wide barrier participation, ordering, and visibility boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current SIMT, divergence, warp, and Independent Thread Scheduling boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Device-Callable APIs'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current warp synchronization and shuffle intrinsic contracts'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Associativity'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current floating-point nonassociativity and operation-order boundary'
+    accessDate: '2026-09-02'
+  - title: 'Floating Point and IEEE 754 v13.3 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v13.3'
+    platform: 'Current operation, rounding, accuracy, and result-verification boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested, effective, theoretical, and observed traffic distinctions'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, permission, and reproducibility boundaries'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current exact-GPU metric query, kernel filter, collection, and report interface'
+    accessDate: '2026-09-02'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/correctness/reduction-optimization-case-study/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-divergence-synchronization,stage-numerical-order,stage-memory-traffic,profiler-method,visual-boundary,production-primitive-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,Q02,Q06,Q08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX11,VIS10' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,multi-stage-reduction' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/reduction-optimization-case-study/" lang="zh-CN">阅读中文对应页</a>
+
+Q12 is a correctness-first, evidence-bounded reduction optimization case study, not a benchmark. It begins with immutable EX11 and writes divergence, synchronization, numerical-order, and memory-traffic changes into a pre-collection ledger. Any candidate may be rejected, remain unanswered, or be rolled back. The site has run neither the runner, CUDA, nor a profiler.
+
+## What you should be able to do
+
+- Qualify every candidate with EX11's independent CPU reference and absolute-plus-relative tolerance.
+- Write a pre-measurement hypothesis ledger with mechanism, coupling, support, rejection, no-answer, and rollback branches.
+- Control warp-tail, operation-tree, and partial-staging changes separately while disclosing effects that cannot be isolated.
+- Declare workload, warm-up, completion, statistics, profiler, permission, Environment Manifest, correctness result, and bounded interpretation for every measured stage.
+- Preserve expected observations without naming a winner when qualifying hardware evidence is absent.
+
+## Prerequisites
+
+Complete [A02: Multi-Stage Reduction, Barriers, and Operation Order](/en/algorithms/multi-stage-reduction/), [Q02: Floating-point Order, Determinism, and Bitwise Reproducibility](/en/correctness/floating-point-order-reproducibility/), [Q06: Use APOD as an Optimization Loop](/en/correctness/apod-optimization-loop/), and [Q08: Ask One Selected-Kernel Question with Nsight Compute](/en/correctness/kernel-first-nsight-compute/) in the exact order `A02, Q02, Q06, Q08`. [EX11](/en/examples/multi-stage-reduction/) and [VIS10](/en/visuals/reduction-stages/) are related resources, not additional prerequisite edges.
+
+## Freeze the EX11 correctness baseline first
+
+[View the immutable EX11 source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction), or [download the archive for the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip). The pin, manifest, and two canonical imports below identify one revision. Q12 does not modify EX11.
+
+The `cpu-reference` range declares deterministic input, double accumulation, stage-size helpers, and the comparator:
+
+<CanonicalCode exampleId="EX11" range="cpu-reference" />
+
+The `multi-stage-reduction` range then declares two-load staging, neutral zero, uniform block barriers, the shared tree, and host-driven kernel stages:
+
+<CanonicalCode exampleId="EX11" range="multi-stage-reduction" />
+
+The canonical workload has 4,099 `float` values, a block size of 256, at most 512 inputs per block, and the stage DAG `4099 -> 9 -> 1`. The last first-stage block has only three valid inputs. Every other lane writes neutral zero, yet all threads still reach every `__syncthreads()`. An ordinary block barrier is not a grid rendezvous; successive host-launched kernels establish stage boundaries.
+
+The independent CPU reference uses a `double` left fold. The GPU result uses EX11's published finite comparator: `absolute_error <= 1e-4 + 2e-5 * abs(cpu_reference)`. Passing tolerance means only that the result satisfies this problem-specific acceptance rule. It does not prove bitwise equality, a fixed operation order, a determinism scope, or performance. Every small boundary fixture and the declared measurement workload must pass the same CPU-reference and tolerance gate again.
+
+## Write the hypothesis ledger before collection
+
+Each edge retains the following fields independently. A later stage cannot fill an earlier gap retroactively.
+
+| field | required declaration |
+| --- | --- |
+| identity | stage ID, immutable parent, candidate source and binary SHA-256, expanded build command |
+| changed variables | the primary intervention and any disclosed coupled changes that cannot be isolated |
+| mechanism | a falsifiable control-flow, barrier/shared-access, operation-tree, or partial-traffic prediction |
+| held constants | input bytes, value type, block size, oracle, tolerance, toolchain, GPU, and collection method |
+| evidence | correctness packet, raw unprofiled samples, exact query, report, commands, logs, and hashes |
+| decision | support, reject, no-answer, rollback, and next-question rules |
+| alternatives | at least two competing explanations not eliminated by the chosen evidence |
+
+The fixed stage IDs are `canonical-shared-tree`, `warp-tail-control`, `reassociated-warp-order`, and `four-load-staging`. These labels identify source and method; they contain no result. Stop when the preceding stage fails correctness or comparison coordinates do not match. Never promote it silently to the next baseline.
+
+## Freeze every stage's measurement contract
+
+Every stage uses one declared workload of 16,777,219 deterministic finite `float` values. Hold the source parent, device ordinal, 256-thread block, input bytes, allocation policy, and CPU oracle fixed. Each process performs three excluded warm-up attempts, then explicitly calls `cudaDeviceSynchronize`, retains ten fresh unprofiled raw attempts, and predeclares the median plus minimum and maximum before values are visible; no sample is deleted. A profiler run is a separate observation with the same workload, correctness cadence, and stage identity. Every record includes a complete Environment Manifest, permission result, correctness result, and bounded interpretation.
+
+The declared stage sizes for the canonical, warp-tail, and reassociated paths are `16777219 -> 32769 -> 65 -> 1`; the four-load path uses `16777219 -> 16385 -> 17 -> 1`. Input occupies 67,108,876 bytes, while each of two buffers sized for the largest baseline partial capacity occupies 131,076 bytes, giving a conservative device problem bound of 67,371,028 bytes. These are source-derived workload coordinates, not measured traffic or memory-use observations.
+
+Every stage declares all of the following: the fixed input as its workload; three excluded direct attempts as warm-up; checked `cudaDeviceSynchronize` after each complete multi-kernel reduction as synchronization; the predeclared median and min/max across ten retained attempts as statistics; one minimal queried section or shorter exact metric list as its profiler method; a recorded permission result that stops collection when denied; a complete Environment Manifest; a same-comparator correctness result before measurement; and a bounded interpretation answering only the named stage question. Every current result field is `expected; unrecorded`.
+
+The downloadable [original expected-only Q12 fixture](/assets/profiler-report-fixtures/q12-nsight-compute.expected.json) freezes that schema as an unfilled plan. It contains no Environment Manifest values, report, sample, metric, timing, or winner.
+
+## Stage 1: Treat divergence and synchronization as one disclosed bundle
+
+`canonical-shared-tree` is the EX11-shaped experimental baseline: active `thread < stride` lanes update shared partials, and the whole block reaches a barrier before the next round. `warp-tail-control` retains two-load staging, block size, global stage sizes, the early shared tree, and lane-zero output, but changes the 32-lane tail to explicit warp synchronization and shuffle exchange.
+
+The primary intervention on this edge is the warp-tail control and synchronization mechanism. It may also change branch encoding, block-barrier count, shared accesses, and instruction mix. The ledger must list those coupled changes and cannot attribute an elapsed difference solely to “divergence removed” or “fewer barriers.” The predeclared synchronization hypothesis is directional: relative to baseline, each block stage has five fewer block-wide barriers and stops updating shared partials below stride 32, so matched queried evidence with those scopes should be lower. An unchanged or higher matched value rejects the hypothesis; no available field with a matching definition yields no answer.
+
+## Stage 2: Change numerical order explicitly
+
+`reassociated-warp-order` changes the declared warp tail from a contiguous-prefix down-shuffle operand and active-lane schedule to a periodic XOR butterfly schedule. Two-load staging, the 256-thread block, global stage sizes, early shared phases, five shuffles, 31 effective additions, workload, oracle, tolerance, and collection method remain fixed. This edge deliberately treats numerical order and the divergence pattern as a disclosed bundle. Every candidate supplies operand-edge and participant ledgers rather than saying only that it “still adds the same values.”
+
+Floating-point addition is not strictly associative. The same input set and mathematical sum do not guarantee bitwise-identical results from different trees. The predeclared numerical hypothesis predicts that the fixed workload's final scalar bits differ from `warp-tail-control`; equal bits reject that prediction, while both sides must still pass tolerance. If the exact GPU exposes an owner-defined divergence field, the periodic active-lane masks predict a higher value; an equal or lower value rejects that mechanism, while no matching field yields no answer. No observation becomes cross-build, cross-GPU, or cross-launch bitwise reproducibility.
+
+## Stage 3: Control intermediate memory traffic
+
+`four-load-staging` changes each thread's guarded first-level inputs from two to four while retaining neutral zero, block size, the warp XOR mechanism, CPU oracle, tolerance, and fixed workload. The source-derived stage DAG changes from `16777219 -> 32769 -> 65 -> 1` to `16777219 -> 16385 -> 17 -> 1`, predicting fewer intermediate partial elements and later-stage blocks. Keep that logical estimate separate from queried path traffic.
+
+This staging also adds thread-local additions and changes the operation tree, so numerical order is a disclosed coupling. The predeclared traffic hypothesis applies only to intermediate partial arrays: matched queried traffic with that path and scope should be lower than `reassociated-warp-order`; an equal or higher value rejects the mechanism, while no matching field yields no answer. Even if traffic falls, unprofiled elapsed behavior may still reflect instruction mix, resource use, cache state, clock or thermal state, or system load. Q12 does not claim that this stage is faster or a universally best reduction.
+
+## Profiler method, permission, and report custody
+
+Retain these queries in the exact measurement environment first:
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Metric names, units, scopes, and availability bind to the exact Nsight Compute version and GPU. Select one minimal queried section or a shorter exact metric list only after freezing the hypothesis, then fix kernel-name basis and filter, launch selection, replay mode, commands, and process environment. Preserve the primary `.ncu-rep`, stdout and stderr, exit status, query output, expanded command, hash, observer, and date for baseline and candidate separately.
+
+Record performance-counter permission before collection. Denied permission, an unknown version, missing metric, ambiguous filter, report-import failure, or unmatched replay is a blocker: stop and retain the record. Do not bypass policy with `sudo` or turn unavailable into zero. Replay may re-execute a kernel, save and restore memory, perturb cache state, or change overhead. Profiled reports explain mechanisms; separate unprofiled attempts answer the elapsed question.
+
+## Keep VIS10 evidence-neutral
+
+[VIS10: Reduction Tree and Inactive Lanes](/en/visuals/reduction-stages/) uses eight fixed integers to show `adjacent-pairs` and `stride-halving` dependency trees. It can audit operand edges, inactive lanes, and neutral-value placement, but it does not execute EX11 or model a 256-thread block, warp shuffles, global partial arrays, floating-point rounding, or a profiler. VIS10 provides no CUDA correctness, runtime, or performance evidence, and browser state cannot fill a fixture result.
+
+## Production primitive boundary
+
+A production reduction primitive may motivate later work, but it is not this ticket's comparison. LAB11's CUB comparison requires L03, which is not published; therefore this ticket does not publish LAB11. Q12 invents no current CUB API, build matrix, determinism guarantee, or performance result, and it does not turn the presence of existing CCCL source into a candidate winner.
+
+## Evidence boundary
+
+Evidence Status belongs to Labs and Runnable Examples, not Learning Units. All four Q12 `compilation`, `runtime`, `expectedObservations`, and `recordedObservations` arrays are empty, so Q12 grants no Evidence Status. A static runner test, compile-only CI gate, CanonicalCode import, VIS10, or expected-only fixture cannot change that boundary.
+
+Linked [EX11](/en/examples/multi-stage-reduction/) retains empty compilation and recorded-observation arrays and remains **Pending Hardware Verification**. The reviewed runner is an Exercise solution asset, not a new Runnable Example; its three Toolkit Lane gates compile, link, and statically inspect without execution. Q12 itself has no runtime Evidence Status. Its performance prose declares only expected and unrecorded stage fields and cannot receive or inherit Pending Hardware Verification.
+
+## Retrieval check
+
+1. Why must every candidate retain EX11's double CPU reference and absolute-plus-relative tolerance without requiring bitwise equality to the CPU left fold?
+2. Why must `warp-tail-control` disclose divergence, barrier, shared-access, and instruction changes as a bundle rather than attribute a result to only one?
+3. Which operation-order and traffic contracts do `reassociated-warp-order` and `four-load-staging` change?
+4. Which workload, warm-up, synchronization, statistics, profiler, permission, manifest, correctness, and interpretation fields belong to every measured stage?
+5. Why can neither VIS10, the expected-only fixture, nor a future production primitive provide a current performance result?
+
+## Continue with practice
+
+- Complete the [Q12 Exercises](/en/correctness/reduction-optimization-case-study/exercises/), then inspect the separate [reviewed solutions](/en/correctness/reduction-optimization-case-study/solutions/).
+- Use [PB-R3-009](/en/practice/#pb-r3-009) to repair confounded reduction stages and [PB-R3-010](/en/practice/#pb-r3-010) to audit an uncustodied profiler and numerical claim.
+- Recheck canonical source through [EX11](/en/examples/multi-stage-reduction/) and use [VIS10](/en/visuals/reduction-stages/) only for evidence-neutral tree audits.
+
+## Sources and review
+
+- [CUDA Programming Guide v13.3: Thread Block Synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization) bounds block-wide barrier, ordering, and participation facts.
+- [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html) and [Device-Callable APIs](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html) bound current SIMT and divergence, warp synchronization, and shuffle contracts.
+- [Associativity](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity) and [Floating Point Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy) bound numerical-order and verification claims.
+- [CUDA C++ Best Practices Guide v13.3: Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) bounds estimate, requested or effective, and observed traffic distinctions.
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) and [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) bound query, permission, filtering, replay, report, and reproducibility workflow.
+
+Context7 `/websites/nvidia_cuda_cuda-programming-guide` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for discovery and cross-checking. The eight exact NVIDIA owner URLs above are authoritative and were accessed on **2026-09-02**. This unit makes no reduction-history claim, so it uses no tutorial or slide deck in place of an original paper. No NVIDIA or CCCL code, table, figure, or result is copied. The runner, fixture, ledgers, Exercises, and solutions are original Learning Site material.
+
+**Fact checked and all sources accessed: 2026-09-02.**

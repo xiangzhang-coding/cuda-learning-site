@@ -313,6 +313,29 @@ describe('CUDA compile evidence workflow', () => {
     expect(ex14Build).not.toContain('Runtime-Verified');
   });
 
+  it('compile-gates the Q12 runner in all three EX11 lanes without granting Evidence Status', async () => {
+    const workflow = await readProjectFile('.github/workflows/cuda-compile.yml');
+    const ex11Build = workflow.match(/^  ex11-build:\n[\s\S]*?(?=^  ex12-build:)/m)?.[0] ?? '';
+    const canonicalCompileOffset = ex11Build.indexOf('Compile EX11 without granting Evidence Status');
+    const runnerCompileOffset = ex11Build.indexOf(
+      'Compile gate for Q12 runner without granting Evidence Status',
+    );
+    const scanOffset = ex11Build.indexOf('Scan EX11 build logs');
+
+    expect(ex11Build).not.toBe('');
+    expect(canonicalCompileOffset).toBeGreaterThan(-1);
+    expect(runnerCompileOffset).toBeGreaterThan(canonicalCompileOffset);
+    expect(scanOffset).toBeGreaterThan(runnerCompileOffset);
+    expect(ex11Build.match(/bash scripts\/check-q12-runner-build\.sh/g)).toHaveLength(1);
+    expect(ex11Build).toContain(
+      'bash scripts/check-q12-runner-build.sh \\\n            "/workspace/artifacts/cuda-ex11/${{ matrix.lane }}"',
+    );
+    expect(ex11Build).toContain('--workdir /workspace');
+    expect(ex11Build).not.toContain('--gpus');
+    expect(ex11Build).not.toContain('Compile-Checked');
+    expect(ex11Build).not.toContain('Runtime-Verified');
+  });
+
   it('never executes the generated CUDA binary in the compile boundary', async () => {
     const [
       orchestrator,

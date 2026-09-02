@@ -353,6 +353,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'Q11：用受控证据优化 Canonical Transpose', en: 'Q11: Optimize the Canonical Transpose with Controlled Evidence' },
     prerequisites: ['A05', 'Q06', 'Q08', 'Q10'],
   },
+  Q12: {
+    href: { 'zh-CN': '/correctness/reduction-optimization-case-study/', en: '/en/correctness/reduction-optimization-case-study/' },
+    title: { 'zh-CN': 'Q12：用受控证据优化 Canonical Reduction', en: 'Q12: Optimize the Canonical Reduction with Controlled Evidence' },
+    prerequisites: ['A02', 'Q02', 'Q06', 'Q08'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },

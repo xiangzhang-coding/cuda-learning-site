@@ -1237,6 +1237,40 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-02',
     keywords: localized('transpose tile size speedup exact GPU tool metric replay report manifest custody competing explanations', 'transpose tile size speedup exact GPU tool metric replay report manifest custody competing explanations'),
   },
+  {
+    planningId: 'PB-R3-009',
+    group: 'practice',
+    title: localized('把混杂的 reduction 改写为受控 stage graph', 'Rewrite a confounded reduction as a controlled stage graph'),
+    href: localized('/practice/#pb-r3-009', '/en/practice/#pb-r3-009'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q12'],
+    relatedUnits: ['A02', 'Q02', 'Q06', 'Q08', 'Q12', 'EX11', 'VIS10'],
+    hardwareGate: localized('无；只修复静态 reduction source、operation-tree 与 evidence plan，不运行 CUDA 或 profiler。', 'None; repair static reduction source, operation-tree, and evidence plans without running CUDA or a profiler.'),
+    versionGate: localized(
+      'CUDA Programming/Floating Point/Best Practices Guides v13.3 与 Nsight Compute 2026.2.1；无 measured claim。',
+      'CUDA Programming, Floating Point, and Best Practices Guides v13.3 plus Nsight Compute 2026.2.1; no measured claim.',
+    ),
+    reviewedOn: '2026-09-02',
+    keywords: localized('reduction divergence synchronization numerical order traffic stage graph hypothesis', 'reduction divergence synchronization numerical order traffic stage graph hypothesis'),
+  },
+  {
+    planningId: 'PB-R3-010',
+    group: 'practice',
+    title: localized('审查缺少保管链的 reduction profiler 与 bitwise claim', 'Audit an uncustodied reduction profiler and bitwise claim'),
+    href: localized('/practice/#pb-r3-010', '/en/practice/#pb-r3-010'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q12'],
+    relatedUnits: ['A02', 'Q02', 'Q06', 'Q08', 'Q12', 'EX11', 'VIS10'],
+    hardwareGate: localized('无；只审查静态 fixture 与 claim，不运行 CUDA、Nsight Compute 或未发布的 LAB11。', 'None; audit a static fixture and claim without running CUDA, Nsight Compute, or unpublished LAB11.'),
+    versionGate: localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1 与 Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；exact GPU/tool/report/manifest gates。',
+      'Toolkit 11.8.0/12.9.2/13.3.1 and Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; exact GPU, tool, report, and manifest gates.',
+    ),
+    reviewedOn: '2026-09-02',
+    keywords: localized('reduction profiler permission replay report manifest tolerance bitwise CUB audit', 'reduction profiler permission replay report manifest tolerance bitwise CUB audit'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -2372,6 +2406,18 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'Toolkit 11.8.0/12.9.2/13.3.1；Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；CUPTI 11.8.87/12.9.79/13.3.75；query、permission、replay、warm-up、synchronization、statistics 与 report custody。',
       'Toolkit 11.8.0/12.9.2/13.3.1; Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; CUPTI 11.8.87/12.9.79/13.3.75; query, permission, replay, warm-up, synchronization, statistics, and report custody.',
+    ),
+    '2026-09-02',
+    '2026-09-02',
+  ),
+  sourceRecord(
+    'SRC-CUDA-055',
+    localized('Q12/EX11/VIS10 reduction optimization 与 evidence boundary', 'Q12/EX11/VIS10 reduction optimization and evidence boundary'),
+    'cuda-version-record',
+    ['A02', 'Q02', 'Q06', 'Q08', 'Q12', 'EX11', 'VIS10'],
+    localized(
+      'CUDA Programming/Floating Point/Best Practices Guides v13.3；Nsight Compute 2026.2.1；divergence、synchronization、numerical order、partial traffic、query、permission、replay 与 expected-only fixture boundary。',
+      'CUDA Programming, Floating Point, and Best Practices Guides v13.3; Nsight Compute 2026.2.1; divergence, synchronization, numerical order, partial traffic, query, permission, replay, and expected-only fixture boundaries.',
     ),
     '2026-09-02',
     '2026-09-02',

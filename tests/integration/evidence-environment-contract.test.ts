@@ -376,7 +376,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes fifty-eight complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes sixty complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -399,7 +399,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
-      'PB-R3-007', 'PB-R3-008',
+      'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -450,6 +450,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-006': 'algorithms/algorithm-choice-arithmetic-intensity',
       'PB-R3-007': 'correctness/transpose-optimization-case-study',
       'PB-R3-008': 'correctness/transpose-optimization-case-study',
+      'PB-R3-009': 'correctness/reduction-optimization-case-study',
+      'PB-R3-010': 'correctness/reduction-optimization-case-study',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -517,6 +519,24 @@ describe('Exercises and Practice Bank contract', () => {
         'examples/tiled-transpose',
         'visuals/tiled-transpose',
         'labs/optimize-canonical-transpose',
+      ],
+      'PB-R3-009': [
+        'algorithms/multi-stage-reduction',
+        'correctness/floating-point-order-reproducibility',
+        'correctness/apod-optimization-loop',
+        'correctness/kernel-first-nsight-compute',
+        'correctness/reduction-optimization-case-study',
+        'examples/multi-stage-reduction',
+        'visuals/reduction-stages',
+      ],
+      'PB-R3-010': [
+        'algorithms/multi-stage-reduction',
+        'correctness/floating-point-order-reproducibility',
+        'correctness/apod-optimization-loop',
+        'correctness/kernel-first-nsight-compute',
+        'correctness/reduction-optimization-case-study',
+        'examples/multi-stage-reduction',
+        'visuals/reduction-stages',
       ],
     };
 

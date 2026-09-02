@@ -1,0 +1,261 @@
+---
+title: 'Q12：用受控证据优化 Canonical Reduction'
+description: 从 EX11 的 CPU reference 与 tolerance contract 出发，依次审查 warp-tail、数值顺序和 partial-staging 变化，并把每项解释限制在完整测量记录内。
+pairId: q12
+counterpart: /en/correctness/reduction-optimization-case-study/
+factCheckDate: '2026-09-02'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - canonical-baseline
+  - hypothesis-ledger
+  - measurement-contract
+  - stage-divergence-synchronization
+  - stage-numerical-order
+  - stage-memory-traffic
+  - profiler-method
+  - visual-boundary
+  - production-primitive-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q12
+prerequisites:
+  - A02
+  - Q02
+  - Q06
+  - Q08
+relatedUnits:
+  - EX11
+  - VIS10
+exampleIds:
+  - EX11
+canonicalExample: EX11
+canonicalRanges:
+  - cpu-reference
+  - multi-stage-reduction
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Thread Block Synchronization'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current block-wide barrier participation, ordering, and visibility boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Advanced Kernel Programming'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current SIMT, divergence, warp, and Independent Thread Scheduling boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Device-Callable APIs'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current warp synchronization and shuffle intrinsic contracts'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Associativity'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current floating-point nonassociativity and operation-order boundary'
+    accessDate: '2026-09-02'
+  - title: 'Floating Point and IEEE 754 v13.3 - Operations and Accuracy'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy'
+    version: 'Floating Point and IEEE 754 v13.3'
+    platform: 'Current operation, rounding, accuracy, and result-verification boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested, effective, theoretical, and observed traffic distinctions'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, permission, and reproducibility boundaries'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current exact-GPU metric query, kernel filter, collection, and report interface'
+    accessDate: '2026-09-02'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/correctness/reduction-optimization-case-study/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-divergence-synchronization,stage-numerical-order,stage-memory-traffic,profiler-method,visual-boundary,production-primitive-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,Q02,Q06,Q08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX11,VIS10' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX11 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,multi-stage-reduction' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '8' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/reduction-optimization-case-study/" lang="en">Read the English counterpart</a>
+
+Q12 是一个以正确性和证据边界为先的归约优化案例（reduction optimization case study），不是 benchmark。它从 immutable EX11 开始，把分支发散（divergence）、同步（synchronization）、数值顺序（numerical order）与内存流量（memory traffic）的变化写进 collection 前台账；任何 candidate 都可能被拒绝、保持 unanswered，或回滚。本站没有执行 runner、CUDA 或 profiler。
+
+## 学完本单元，你应该能
+
+- 用 EX11 的独立 CPU reference 与 absolute-plus-relative tolerance 资格化每个 candidate。
+- 在测量前写出包含 mechanism、coupling、support、reject、no-answer 与 rollback 的 hypothesis ledger。
+- 分开控制 warp-tail、operation tree 与 partial-staging changes，并披露不能隔离的连带变化。
+- 为每个 measured stage 声明 workload、warm-up、completion、statistics、profiler、permission、环境清单（Environment Manifest）、correctness result 与 bounded interpretation。
+- 在缺少 qualifying hardware evidence 时只保留 expected observation，不命名 winner。
+
+## 先修关系
+
+严格按 `A02, Q02, Q06, Q08` 完成 [A02：多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)、[Q02：浮点顺序、确定性与逐位可复现性](/correctness/floating-point-order-reproducibility/)、[Q06：把 APOD 用作优化循环](/correctness/apod-optimization-loop/)与 [Q08：用 Nsight Compute 回答 Selected-Kernel 问题](/correctness/kernel-first-nsight-compute/)。[EX11](/examples/multi-stage-reduction/)与 [VIS10](/visuals/reduction-stages/)是 related resources，不增加 prerequisite edge。
+
+## 先冻结 EX11 correctness baseline
+
+[查看 immutable EX11 source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction)，或[下载同一 revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip)。Pin、manifest 与下面两个 canonical imports 指向同一 revision；Q12 不修改 EX11。
+
+`cpu-reference` 先声明 deterministic input、double accumulation、stage-size helpers 和 comparator：
+
+<CanonicalCode exampleId="EX11" range="cpu-reference" />
+
+`multi-stage-reduction` 再声明 two-load staging、identity zero、uniform block barriers、shared tree 与 host-driven kernel stages：
+
+<CanonicalCode exampleId="EX11" range="multi-stage-reduction" />
+
+Canonical workload 是 4,099 个 `float`，block size 为 256，每个 block 最多接收 512 项，stage DAG 是 `4099 -> 9 -> 1`。最后一个 first-stage block 只有三个合法 inputs，其余 lanes 写 identity zero，但所有 threads 仍到达每个 `__syncthreads()`。普通 block barrier 不承担跨 block rendezvous；host 通过 successive kernel launches 建立 stage boundary。
+
+独立 CPU reference 使用 `double` left fold，GPU result 使用 EX11 已发布的 finite comparator：`absolute_error <= 1e-4 + 2e-5 * abs(cpu_reference)`。通过 tolerance 只表示结果满足这项 problem-specific acceptance；它不证明逐 bit 相同、固定 operation order、determinism scope 或 performance。每个小边界 fixture 和声明的 measurement workload 都必须重新通过同一 CPU-reference/tolerance gate。
+
+## 在 collection 前写 hypothesis ledger
+
+每条 edge 单独保存以下字段，不能由后续 stage 追溯补齐：
+
+| field | required declaration |
+| --- | --- |
+| identity | stage ID、immutable parent、candidate source/binary SHA-256、expanded build command |
+| changed variables | primary intervention，以及无法隔离但已披露的 coupled changes |
+| mechanism | 对 control flow、barrier/shared access、operation tree 或 partial traffic 的可证伪预测 |
+| held constants | input bytes、value type、block size、oracle、tolerance、toolchain、GPU、collection method |
+| evidence | correctness packet、raw unprofiled samples、exact query、report、commands、logs 与 hashes |
+| decision | support、reject、no answer、rollback 与 next-question rules |
+| alternatives | chosen evidence 不能排除的至少两个 competing explanations |
+
+固定 stage IDs 为 `canonical-shared-tree`、`warp-tail-control`、`reassociated-warp-order` 与 `four-load-staging`。这些 labels 只标识 source/method，不携带结果。前一 stage 未通过 correctness 或 comparison coordinate 不匹配时，停止；不能把它静默提升为下一项 baseline。
+
+## 冻结每个 stage 的 measurement contract
+
+所有 stages 使用同一个 declared workload：16,777,219 个 deterministic finite `float`；固定 source parent、device ordinal、block size 256、input bytes、allocation policy 与 CPU oracle。每个 process 先执行三次 excluded warm-up，随后显式 `cudaDeviceSynchronize`，保存十次新的 unprofiled raw attempts，并在查看值前声明 median 与 minimum/maximum；不得删除 sample。Profiler run 是独立 observation，使用同一 workload、correctness cadence 与 stage identity。每项记录都要包含 complete Environment Manifest、permission result、correctness result 和 bounded interpretation。
+
+Canonical/warp-tail/reassociated paths 的 declared stage sizes 是 `16777219 -> 32769 -> 65 -> 1`；four-load path 是 `16777219 -> 16385 -> 17 -> 1`。Input 占 67,108,876 bytes，两个按最大 baseline partial capacity 分配的 buffers 各占 131,076 bytes，conservative device problem bound 是 67,371,028 bytes。这些是 source-derived workload coordinates，不是 measured traffic 或 memory-use observation。
+
+每个 stage 必须逐项声明：workload 是上述 fixed input；warm-up 是三次 excluded direct attempts；synchronization 是每个完整 multi-kernel reduction 后 checked `cudaDeviceSynchronize`；statistics 是十次 retained attempts 的 predeclared median 与 min/max；profiler method 是 exact-GPU query 后的一项最小 section 或 shorter exact metric list；permissions 必须记录且 denied 时停止；Environment Manifest 必须完整；correctness result 在 measurement 前由同一 comparator 得出；bounded interpretation 只能回答该 stage 的 named question。当前这些 result fields 全部是 `expected; unrecorded`。
+
+下载的[原创 expected-only Q12 fixture](/assets/profiler-report-fixtures/q12-nsight-compute.expected.json)把这一 schema 固定为待填写 plan。它没有 Environment Manifest values、report、sample、metric、timing 或 winner。
+
+## 阶段 1：把 divergence 与 synchronization 写成一个 disclosed bundle
+
+`canonical-shared-tree` 是 EX11-shaped experimental baseline：每轮 `thread < stride` 的 active lanes 更新 shared partial，整个 block 在下一轮前到达 barrier。`warp-tail-control` 保留 two-load staging、block size、global stage sizes、前半段 shared tree 与 lane-0 output，但从 32-lane tail 开始改用 explicit warp synchronization 和 shuffle exchange。
+
+这条 edge 的 primary intervention 是 warp-tail control/synchronization mechanism。它同时可能改变 branch encoding、block-barrier count、shared accesses 与 instruction mix，因此 ledger 必须把这些列为 coupled changes，不能把任何 elapsed difference 只归因于“divergence removed”或“fewer barriers”。预先声明的 synchronization hypothesis 是：相对 baseline，每个 block stage 少五个 block-wide barriers，且 stride 低于 32 后不再更新 shared partial；能回答这些 scope 的 matched queried evidence 应降低。若 matched value 不降低则 reject，若 exact GPU 没有可用且定义匹配的 field 则 no answer。
+
+## 阶段 2：显式改变 numerical order
+
+`reassociated-warp-order` 在已声明的 warp tail 中把 contiguous-prefix down-shuffle operand/active-lane schedule 改为 periodic XOR butterfly schedule；two-load staging、256-thread block、global stage sizes、early shared phases、五次 shuffles、31 次有效 additions、workload、oracle、tolerance 与 collection method 保持不变。该 edge 有意把 numerical order 与 divergence pattern 作为 disclosed bundle；每个 candidate 必须提交 operand-edge/participant ledger，不能只写“数学上仍是加法”。
+
+浮点加法不满足严格结合律。相同输入集合和相同数学和，不保证不同 tree 得到逐 bit 相同结果。预先声明的 numerical hypothesis 预测 fixed workload 的 final scalar bits 与 `warp-tail-control` 不同；bits 相同就 reject 这项预测，但两侧仍必须通过 tolerance。若 exact GPU 有 owner-defined divergence field，periodic active-lane masks 预测得到更高值；相等或更低则 reject，没有定义匹配的 field 则 no answer。任何 observation 都不能推广为跨 build、跨 GPU 或跨 launch contract 的 bitwise reproducibility。
+
+## 阶段 3：控制 intermediate memory traffic
+
+`four-load-staging` 把每个 thread 的 guarded first-level inputs 从两项改为四项，保留 identity zero、block size、warp XOR mechanism、CPU oracle、tolerance 与 fixed workload。Source-derived stage DAG 从 `16777219 -> 32769 -> 65 -> 1` 变为 `16777219 -> 16385 -> 17 -> 1`，因此它预测更少的 intermediate partial elements 和 later-stage blocks；logical estimate 必须与 queried path traffic 分列。
+
+这项 staging 也引入额外 thread-local additions 并改变 operation tree，所以 numerical order 是已披露 coupling。预先声明的 traffic hypothesis 只针对 intermediate partial arrays：能回答该 path/scope 的 matched queried traffic 应低于 `reassociated-warp-order`；相等或更高就 reject，没有定义匹配的 field 则 no answer。即使 traffic 降低，unprofiled elapsed result 仍可能受 instruction mix、resource use、cache state、clock/thermal state 或 system load 影响。Q12 不声明它更快，也不称它为 universal best reduction。
+
+## Profiler method、permission 与 report custody
+
+在 exact measurement environment 内先保留：
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Metric name、unit、scope 与 availability 绑定 exact Nsight Compute version 和 GPU。Hypothesis 冻结后才选择一项最小 queried section 或更短的 exact metric list，并固定 kernel-name basis/filter、launch selection、replay mode、commands 与 process environment。Baseline/candidate 各自保存 primary `.ncu-rep`、stdout/stderr、exit status、query output、expanded command、hash、observer 与 date。
+
+Collection 前记录 performance-counter permission。Denied permission、unknown version、missing metric、ambiguous filter、report import failure 或 unmatched replay 都是 blocker：立即停止并保留记录，不使用 `sudo` 绕过 policy，不把 unavailable 写成 zero。Replay 可能重新执行 kernel、保存/恢复 memory、扰动 cache 或改变 overhead；profiled report 解释 mechanism，独立 unprofiled attempts 才回答 elapsed question。
+
+## 保持 VIS10 证据中立
+
+[VIS10：Reduction Tree 与 Inactive Lanes](/visuals/reduction-stages/)用固定八个整数展示 `adjacent-pairs` 与 `stride-halving` dependency trees。它适合检查 operand edges、inactive lanes 与 identity placement，但不执行 EX11、不模拟 256-thread block、warp shuffles、global partial arrays、floating-point rounding 或 profiler。VIS10 提供 no CUDA correctness、runtime 或 performance evidence；browser state 不能填入 fixture result。
+
+## Production primitive boundary
+
+Production reduction primitive 可以作为后续动机，但不是本 ticket 的 comparison。LAB11 的 CUB comparison 需要尚未发布的 L03，因此本 ticket 不发布 LAB11。Q12 不发明 current CUB API、build matrix、determinism guarantee 或 performance result，也不把既有 CCCL source presence 解释为 candidate winner。
+
+## 证据边界
+
+证据状态（Evidence Status）只属于实验（Lab）与可运行示例（Runnable Example），不属于学习单元（Learning Unit）。Q12 的 compilation、runtime、expectedObservations 与 recordedObservations 四个 arrays 全部为空，因此 Q12 本身不授予 Evidence Status。Static runner test、compile-only CI gate、CanonicalCode import、VIS10 或 expected-only fixture 都不能改变这一点。
+
+Linked [EX11](/examples/multi-stage-reduction/)继续拥有空 compilation/recorded-observation arrays，并保持**待硬件验证（Pending Hardware Verification）**。Reviewed runner 是练习解答资产（Exercise solution asset），不是新的 Runnable Example；其三条工具包通道（Toolkit Lane）gate 只 compile/link/static-inspect 而不执行。Q12 本身没有 runtime Evidence Status；本页的 performance prose 只声明 expected and unrecorded stage fields，不能获得或继承 Pending Hardware Verification。
+
+## 离开前检查
+
+1. 为什么每个 candidate 都必须保留 EX11 的 double CPU reference 与同一 absolute-plus-relative tolerance，却不能要求逐 bit 等于 CPU left fold？
+2. `warp-tail-control` 为什么必须把 divergence、barrier、shared access 与 instruction changes写成 disclosed bundle，而不能只归因于其中一项？
+3. `reassociated-warp-order` 与 `four-load-staging` 分别改变哪一条 operation/traffic contract？
+4. 每个 measured stage 必须保存哪些 workload、warm-up、synchronization、statistics、profiler、permission、manifest、correctness 与 interpretation fields？
+5. 为什么 VIS10、expected-only fixture 与未来 production primitive 都不能提供当前 performance result？
+
+## 继续练习
+
+- 完成 [Q12 Exercises](/correctness/reduction-optimization-case-study/exercises/)，再查看独立的[复核解答](/correctness/reduction-optimization-case-study/solutions/)。
+- 用 [PB-R3-009](/practice/#pb-r3-009)修复 confounded reduction stages，用 [PB-R3-010](/practice/#pb-r3-010)审计 uncustodied profiler/numerical claim。
+- 对照 [EX11](/examples/multi-stage-reduction/)复核 canonical source，只把 [VIS10](/visuals/reduction-stages/)用于 evidence-neutral tree audit。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Thread Block Synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#thread-block-synchronization)限定 block-wide barrier、ordering 与 participation facts。
+- [Advanced Kernel Programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html)和 [Device-Callable APIs](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/device-callable-apis.html)限定 current SIMT/divergence、warp synchronization 与 shuffle contracts。
+- [Associativity](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity)和 [Floating Point Operations and Accuracy](https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy)限定 numerical-order 与 verification boundary。
+- [CUDA C++ Best Practices Guide v13.3：Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)限定 estimate、requested/effective 与 observed traffic distinctions。
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)与 [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)限定 query、permission、filter、replay、report 与 reproducibility workflow。
+
+Context7 `/websites/nvidia_cuda_cuda-programming-guide` 与 `/websites/nvidia_nsight-compute_nsightcompute` 只用于 discovery/cross-check；以上八个 exact NVIDIA owner URLs 是事实权威，均访问于 **2026-09-02**。本单元不讲 reduction algorithm history，因此没有用 tutorial/slide deck 代替 original paper；也没有复制 NVIDIA/CCCL code、table、figure 或 result。Runner、fixture、ledgers、Exercises 与 solutions 是学习站（Learning Site）原创材料。
+
+**事实核查与全部来源访问日期：2026-09-02。**

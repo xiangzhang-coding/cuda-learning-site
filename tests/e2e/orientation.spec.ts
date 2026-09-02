@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(426);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(213);
+  expect(routes).toHaveLength(432);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(216);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -122,6 +122,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/correctness/transpose-optimization-case-study/', en: '/en/correctness/transpose-optimization-case-study/' },
     { zh: '/correctness/transpose-optimization-case-study/exercises/', en: '/en/correctness/transpose-optimization-case-study/exercises/' },
     { zh: '/correctness/transpose-optimization-case-study/solutions/', en: '/en/correctness/transpose-optimization-case-study/solutions/' },
+    { zh: '/correctness/reduction-optimization-case-study/', en: '/en/correctness/reduction-optimization-case-study/' },
+    { zh: '/correctness/reduction-optimization-case-study/exercises/', en: '/en/correctness/reduction-optimization-case-study/exercises/' },
+    { zh: '/correctness/reduction-optimization-case-study/solutions/', en: '/en/correctness/reduction-optimization-case-study/solutions/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },

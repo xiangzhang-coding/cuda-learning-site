@@ -2203,6 +2203,49 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/correctness/transpose-optimization-case-study/solutions/',
   },
   {
+    pairId: 'q12',
+    factCheckDate: '2026-09-02',
+    structure: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-divergence-synchronization,stage-numerical-order,stage-memory-traffic,profiler-method,visual-boundary,production-primitive-boundary,evidence-boundary,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'Q12',
+    prerequisites: 'A02,Q02,Q06,Q08',
+    relatedUnits: 'EX11,VIS10',
+    exampleIds: 'EX11',
+    canonicalExample: 'EX11',
+    canonicalRanges: 'cpu-reference,multi-stage-reduction',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    sourceCount: '8',
+    sourceVersions: '13.3,2026.2.1',
+    zh: '/correctness/reduction-optimization-case-study/',
+    en: '/en/correctness/reduction-optimization-case-study/',
+  },
+  {
+    pairId: 'q12-exercises',
+    factCheckDate: '2026-09-02',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'Q12-EXERCISES',
+    prerequisites: 'Q12',
+    hardwareGate: 'none',
+    zh: '/correctness/reduction-optimization-case-study/exercises/',
+    en: '/en/correctness/reduction-optimization-case-study/exercises/',
+  },
+  {
+    pairId: 'q12-solutions',
+    factCheckDate: '2026-09-02',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'Q12-SOLUTIONS',
+    prerequisites: 'Q12-EXERCISES',
+    hardwareGate: 'none',
+    zh: '/correctness/reduction-optimization-case-study/solutions/',
+    en: '/en/correctness/reduction-optimization-case-study/solutions/',
+  },
+  {
     pairId: 'ex01',
     factCheckDate: '2026-08-26',
     structure: 'purpose,project,report-contract,build,hardware,compatibility,evidence,expected-observations,sources',
@@ -3048,11 +3091,11 @@ const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'practice-bank',
     factCheckDate: '2026-09-02',
-    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,review',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11',
-    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14',
+    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12',
+    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14',
     zh: '/practice/',
     en: '/en/practice/',
   },
@@ -3164,11 +3207,11 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(213);
-    expect(sourceRoutes.size).toBe(426);
+    expect(publicationPairs).toHaveLength(216);
+    expect(sourceRoutes.size).toBe(432);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
-    for (const absentUnitId of ['Q13', 'L06', 'LAB12']) {
+    for (const absentUnitId of ['L03', 'LAB11', 'Q13', 'L06', 'LAB12']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

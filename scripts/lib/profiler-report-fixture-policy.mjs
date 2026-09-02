@@ -37,6 +37,7 @@ const topLevelFields = [
   'schemaVersion',
   'fixtureId',
   'labId',
+  'unitId',
   'exampleId',
   'sourceCommit',
   'provenance',
@@ -63,6 +64,7 @@ const toolFields = [
 
 const fixtureProfiles = new Map([
   ['LAB06', {
+    subjectField: 'labId',
     exampleId: 'EX07',
     fixtureId: 'LAB06-NSYS-EXPECTED',
     fixtureSha256: 'e4bf6785b011903e71874283b57832a1dce28c3c0d1e7df98bb26d1af42b44e3',
@@ -77,6 +79,7 @@ const fixtureProfiles = new Map([
     },
   }],
   ['LAB08', {
+    subjectField: 'labId',
     exampleId: 'EX07',
     fixtureId: 'LAB08-NCU-EXPECTED',
     fixtureSha256: '0ac043971a25c51ec928a37f313877faa005872f504d273b6a3e330b96e9e4dc',
@@ -91,11 +94,27 @@ const fixtureProfiles = new Map([
     },
   }],
   ['LAB10', {
+    subjectField: 'labId',
     exampleId: 'EX14',
     fixtureId: 'LAB10-NCU-EXPECTED',
     fixtureSha256: '2cde6557100be26cc0878f67bd34c27f5b530f20ebbb8f35a06f270d5fe51eab',
     fixtureBytesSha256: '12fe158fffed5f2cfe37d097c690b31d4719a1696c4188902baab5d73927807f',
     sourceCommit: '981939cc705faf721ac06d1b70f2c5c4a8111e92',
+    sanitizationReviewDate: '2026-09-02',
+    tool: {
+      name: 'Nsight Compute',
+      cli: 'ncu',
+      reportExtension: '.ncu-rep',
+      selectedVersions: ['2022.3.0.22', '2025.2.1.3', '2026.2.1.5'],
+    },
+  }],
+  ['Q12', {
+    subjectField: 'unitId',
+    exampleId: 'EX11',
+    fixtureId: 'Q12-NCU-EXPECTED',
+    fixtureSha256: 'c58cecf8d506a1ddc6c49045c5db248acc1fa1b0f662e28cc4f5d8e29c0e68f4',
+    fixtureBytesSha256: 'd510345d978c9b8e97cbbef41d7ebb3f4b8a48403977e6ed36e31787c73f616d',
+    sourceCommit: '81d43aa7568514e37ef190da59c845b8072b7011',
     sanitizationReviewDate: '2026-09-02',
     tool: {
       name: 'Nsight Compute',
@@ -168,18 +187,25 @@ export function validateProfilerReportFixture(fixture, fixtureSource) {
   const errors = [];
   if (!isRecord(fixture)) return { valid: false, errors: ['fixture must be an object'] };
 
-  const profile = fixtureProfiles.get(fixture.labId);
+  const subjectFields = ['labId', 'unitId'].filter((field) => field in fixture);
+  const subjectField = subjectFields.length === 1 ? subjectFields[0] : undefined;
+  const subjectId = subjectField === undefined ? undefined : fixture[subjectField];
+  const profile = fixtureProfiles.get(subjectId);
 
   const unknown = Object.keys(fixture).filter((key) => !topLevelFields.includes(key));
-  const missing = topLevelFields.filter((key) => !(key in fixture));
+  const missing = topLevelFields.filter((key) => !['labId', 'unitId'].includes(key) && !(key in fixture));
   if (unknown.length > 0) errors.push(`unknown top-level fields: ${unknown.join(', ')}`);
   if (missing.length > 0) errors.push(`missing top-level fields: ${missing.join(', ')}`);
+  if (subjectFields.length !== 1) errors.push('fixture must declare exactly one of labId or unitId');
   if (fixture['SPDX-License-Identifier'] !== 'CC-BY-4.0') errors.push('fixture license must be CC-BY-4.0');
   if (fixture.schemaVersion !== 1) errors.push('fixture schemaVersion must be 1');
-  if (profile === undefined) errors.push('labId is invalid');
+  if (profile === undefined) errors.push(`${subjectField ?? 'subject ID'} is invalid`);
+  if (profile !== undefined && subjectField !== profile.subjectField) {
+    errors.push(`fixture subject field must be ${profile.subjectField}`);
+  }
   if (profile !== undefined && fixture.fixtureId !== profile.fixtureId) errors.push('fixtureId is invalid');
-  if (profile !== undefined && fixture.exampleId !== profile.exampleId) errors.push('exampleId is invalid for labId');
-  if (profile !== undefined && fixture.sourceCommit !== profile.sourceCommit) errors.push('sourceCommit is invalid for labId');
+  if (profile !== undefined && fixture.exampleId !== profile.exampleId) errors.push(`exampleId is invalid for ${profile.subjectField}`);
+  if (profile !== undefined && fixture.sourceCommit !== profile.sourceCommit) errors.push(`sourceCommit is invalid for ${profile.subjectField}`);
   if (fixture.provenance !== 'original') errors.push('fixture provenance must be original');
   if (fixture.fixtureType !== 'expected-only-profiler-report-plan') errors.push('fixtureType must remain expected-only');
   if (fixture.captureStatus !== 'pending-hardware-verification') errors.push('captureStatus must remain pending');
@@ -193,15 +219,15 @@ export function validateProfilerReportFixture(fixture, fixtureSource) {
     if (extraToolFields.length > 0) errors.push(`unreviewed tool fields: ${extraToolFields.join(', ')}`);
 
     if (profile !== undefined) {
-      if (fixture.tool.name !== profile.tool.name) errors.push('tool name is invalid for labId');
-      if (fixture.tool.cli !== profile.tool.cli) errors.push('tool CLI is invalid for labId');
+      if (fixture.tool.name !== profile.tool.name) errors.push(`tool name is invalid for ${profile.subjectField}`);
+      if (fixture.tool.cli !== profile.tool.cli) errors.push(`tool CLI is invalid for ${profile.subjectField}`);
       if (fixture.tool.reportExtension !== profile.tool.reportExtension) {
-        errors.push('tool report extension is invalid for labId');
+        errors.push(`tool report extension is invalid for ${profile.subjectField}`);
       }
       if (!Array.isArray(fixture.tool.selectedVersions)
         || fixture.tool.selectedVersions.length !== profile.tool.selectedVersions.length
         || profile.tool.selectedVersions.some((version, index) => fixture.tool.selectedVersions[index] !== version)) {
-        errors.push('tool selected versions are invalid for labId');
+        errors.push(`tool selected versions are invalid for ${profile.subjectField}`);
       }
     }
   }

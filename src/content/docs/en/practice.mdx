@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: 58 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 60 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-09-02'
@@ -67,6 +67,8 @@ structure:
   - entry-pb-r3-006
   - entry-pb-r3-007
   - entry-pb-r3-008
+  - entry-pb-r3-009
+  - entry-pb-r3-010
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -126,6 +128,7 @@ prerequisites:
   - Q09
   - Q10
   - Q11
+  - Q12
 relatedUnits:
   - O02
   - O03
@@ -182,6 +185,7 @@ relatedUnits:
   - Q09
   - Q10
   - Q11
+  - Q12
   - LAB06
   - LAB08
   - LAB09
@@ -202,15 +206,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -229,13 +233,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 58 complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 60 complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 58 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 60 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -2642,6 +2646,94 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 **Source date:** 2026-09-02.
 
+<span id="pb-r3-009" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-009: Rewrite a confounded reduction as a controlled stage graph
+
+- **ID and Publication Pair:** PB-R3-009 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [Q12: Optimize the Canonical Reduction with Controlled Evidence](/en/correctness/reduction-optimization-case-study/).
+- **Hardware gate:** None; repair static reduction source, operation-tree, and evidence plans without running CUDA or a profiler.
+- **Version gate:** CUDA Programming, Floating Point, and Best Practices Guides v13.3 plus Nsight Compute 2026.2.1; no measured claim.
+- **Related Learning Units and resources:** [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), [Q06](/en/correctness/apod-optimization-loop/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q12](/en/correctness/reduction-optimization-case-study/), [EX11](/en/examples/multi-stage-reduction/), and [VIS10](/en/visuals/reduction-stages/).
+- **Last reviewed:** 2026-09-02.
+
+**Prompt:** A reduction candidate changes the final warp to shuffles, deletes block barriers, replaces the down tree with an XOR tree, and changes inputs per thread from two to four. Its author retains only the final scalar and attributes every difference to divergence, synchronization, and memory traffic at once. Rewrite it as a rejectable stage graph.
+
+**Goal:** Build a four-node graph from an immutable EX11-shaped baseline so the control and synchronization bundle, numerical order, and partial staging each own a correctness gate, hypothesis, coupling disclosure, and decision rule.
+
+**Constraints:**
+
+- Every node retains the EX11 double CPU reference, finite absolute-plus-relative comparator, neutral zero, host-driven stage boundaries, and `1/3/511/512/513/4099` edge fixtures.
+- Fix `canonical-shared-tree -> warp-tail-control -> reassociated-warp-order -> four-load-staging`. The first edge discloses branch, barrier, shared, and instruction coupling; the second supplies an operand-edge diff; the third supplies stage-size and logical partial-traffic ledgers.
+- Every measured stage predeclares one workload, warm-up, checked completion, raw attempts, median and min/max, exact-GPU profiler query, permission, Environment Manifest, correctness result, and bounded interpretation. Result cells stay empty.
+
+**Expected evidence:** A four-node graph, three adjacent diffs, operand and stage-size ledgers, a per-stage measurement schema, support, reject, no-answer, and rollback rules, and a competing-explanation matrix.
+
+**Acceptance criteria:**
+
+- The original four-variable comparison is marked confounded and grants no attribution.
+- Each edge independently passes the same CPU-reference and tolerance gate, and disclosure does not disguise unavoidable coupling as a held constant.
+- Source-derived fewer partials are not called measured traffic, tolerance acceptance is not called bitwise reproducibility, and no stage has a prefilled winner.
+
+<details><summary>Hint 1</summary>Compare source and operand graphs before deciding whether a change is the primary intervention or disclosed coupling.</details>
+
+<details><summary>Hint 2</summary>If one edge cannot isolate divergence from synchronization, name it as a bundle and narrow the claim.</details>
+
+**Reviewed solution:** The repaired plan rejects the original comparison. `canonical-shared-tree` freezes an EX11-shaped two-load tree. `warp-tail-control` is only a control and synchronization bundle, with branch encoding, barrier count, shared accesses, and instruction mix listed as coupling. `reassociated-warp-order` changes the down versus XOR operand and active-lane schedule while retaining five shuffles and 31 effective additions. `four-load-staging` changes to four inputs while disclosing local-addition order and separately records `16777219 -> 32769 -> 65 -> 1` and `16777219 -> 16385 -> 17 -> 1`. Every edge owns independent correctness, query, measurement, manifest, and rollback schemas. Current disposition is `design isolated; observations pending`.
+
+**Valid alternative:** Branch all three candidates from one canonical baseline if every branch has an independent source diff and evidence record that borrows no result from another branch.
+
+**Common errors:** Splitting one confounded candidate into three prose sections; hiding coupled instruction or order changes; using VIS10 instead of a warp-participant proof; retaining only the final scalar; inferring an elapsed winner directly from fewer partials; promoting a failed stage to the next baseline.
+
+**Source basis:** The site's original [Q12 controlled reduction contract](/en/correctness/reduction-optimization-case-study/), [A02 stage model](/en/algorithms/multi-stage-reduction/), [Q02 numerical contract](/en/correctness/floating-point-order-reproducibility/), [EX11 correctness contract](/en/examples/multi-stage-reduction/), [VIS10 evidence-neutral tree](/en/visuals/reduction-stages/), and [SRC-CUDA-055](/en/sources-and-versions/#src-cuda-055).
+
+**Source date:** 2026-09-02.
+
+<span id="pb-r3-010" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-010: Audit an uncustodied reduction profiler and bitwise claim
+
+- **ID and Publication Pair:** PB-R3-010 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [Q12: Optimize the Canonical Reduction with Controlled Evidence](/en/correctness/reduction-optimization-case-study/).
+- **Hardware gate:** None; audit a static fixture and claim without running CUDA, Nsight Compute, or unpublished LAB11.
+- **Version gate:** Toolkit 11.8.0/12.9.2/13.3.1 and Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; exact GPU, tool, report, and manifest gates.
+- **Related Learning Units and resources:** [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), [Q06](/en/correctness/apod-optimization-loop/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q12](/en/correctness/reduction-optimization-case-study/), [EX11](/en/examples/multi-stage-reduction/), and [VIS10](/en/visuals/reduction-stages/).
+- **Last reviewed:** 2026-09-02.
+
+**Prompt:** A summary detached from original artifacts says a four-load reduction is “bitwise equal to the CPU, eliminates divergence, reduces DRAM traffic, and is always fastest.” It has only a screenshot, with no EX11 revision, source or binary hashes, raw attempts, metric query, permission, filter, replay, `.ncu-rep`, Environment Manifest, or comparator record. It ends with one unversioned CUB-like API name. Audit the summary.
+
+**Goal:** Downgrade unsupported universal claims to unanswered questions and establish four independent evidence chains for numerical acceptance, unprofiled elapsed evidence, profiler mechanism evidence, and a future production comparison.
+
+**Constraints:**
+
+- The numerical chain requires exact input bytes, CPU reference, actual, absolute and allowed error, compiler and launch, and an operation-tree ledger. A tolerance pass does not become bitwise or determinism evidence.
+- The elapsed chain requires one workload, three excluded warm-ups, checked completion, ten raw attempts, a predeclared median and min/max, and no deletion. The profiler chain separately requires exact GPU and tool, availability query, permission, filtering, replay, report and hash, and manifest.
+- The production chain states that L03 and LAB11 are unpublished. Do not infer a current CUB interface, build support, determinism scope, or result from a name.
+
+**Expected evidence:** A claim-to-evidence matrix, four independent custody chains, complete but unfilled per-stage records, blocker and no-answer rules, competing explanations, and a bounded replacement statement.
+
+**Acceptance criteria:**
+
+- Reject the bitwise, divergence, traffic, and fastest claims as unsupported by the supplied evidence.
+- Permission denial, an unavailable metric, missing report or hash, incomplete manifest, or failed correctness produces a blocker rather than zero.
+- The repaired record fills no timing, metric value, speedup, winner, CUB call, or runtime result.
+
+<details><summary>Hint 1</summary>Ask first for the primary `.ncu-rep` and exact command behind the screenshot. Metric identity cannot be recovered without them.</details>
+
+<details><summary>Hint 2</summary>Separate “within tolerance,” “same bits,” “why a mechanism changed,” and “whether elapsed work changed.”</details>
+
+**Reviewed solution:** The audit labels all four conclusions `unsupported from uncustodied summary`. A numerical record needs the EX11 reference and comparator plus an operand tree. An elapsed record needs matched unprofiled attempts. A mechanism record needs exact queries, permission, filtering and replay, and a hashed report. Production comparison waits for published L03 and LAB11. No qualifying artifact exists, so no metric, bits, traffic, winner, or CUB verdict can be supplied. An acceptable replacement is: “This source proposes four-load staging and a changed operation tree; correctness and performance observations remain pending.”
+
+**Valid alternative:** If the private original reports and commands can be recovered, verify custody and create a sanitized derivative. Otherwise begin a new comparison; never attach new evidence retroactively to the old screenshot.
+
+**Common errors:** Guessing GPU or version from a filename; encoding denied permission as zero; substituting profiled duration for unprofiled attempts; claiming bitwise identity from tolerance acceptance; calling a logical partial estimate a DRAM observation; inventing a CUB contract from an API-like name.
+
+**Source basis:** The site's original [Q12 evidence boundary](/en/correctness/reduction-optimization-case-study/), [Q02 numerical contract](/en/correctness/floating-point-order-reproducibility/), [Q08 query and report custody](/en/correctness/kernel-first-nsight-compute/), [EX11](/en/examples/multi-stage-reduction/), and [SRC-CUDA-055](/en/sources-and-versions/#src-cuda-055).
+
+**Source date:** 2026-09-02.
+
 ## Review record
 
-Existing entries retain their item-level records from 2026-08-26 through 2026-09-01. Issue #27 PB-R3-007 and PB-R3-008 and the complete 58-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-09-02**. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The two new entries execute no CUDA, Nsight Compute, or LAB10 and publish no runtime, metric value, tile winner, numerical performance, or speedup claim; their stage labels, tile symbols, and Lane coordinates are static declarations rather than measurements. LAB10 remains Pending Hardware Verification. LAB12 remains unpublished until both Q13 and L06 have public destinations.
+Existing entries retain their item-level records from 2026-08-26 through 2026-09-01. Issue #28 PB-R3-009 and PB-R3-010 and the complete 60-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed together on **2026-09-02**. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The two new entries execute no CUDA, Nsight Compute, or LAB11 and publish no runtime, metric value, numerical output, winner, or speedup claim. Stage labels, workload coordinates, and source-derived sizes are static declarations rather than measurements. LAB11 and L03 remain unpublished; LAB12 continues to wait for Q13 and L06.
