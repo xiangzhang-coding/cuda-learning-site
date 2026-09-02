@@ -348,6 +348,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'Q10：从 Arithmetic Intensity 构建可审计 Roofline', en: 'Q10: Build an Auditable Roofline from Arithmetic Intensity' },
     prerequisites: ['Q05', 'A14'],
   },
+  Q11: {
+    href: { 'zh-CN': '/correctness/transpose-optimization-case-study/', en: '/en/correctness/transpose-optimization-case-study/' },
+    title: { 'zh-CN': 'Q11：用受控证据优化 Canonical Transpose', en: 'Q11: Optimize the Canonical Transpose with Controlled Evidence' },
+    prerequisites: ['A05', 'Q06', 'Q08', 'Q10'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -480,6 +485,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/labs/build-original-roofline/', en: '/en/labs/build-original-roofline/' },
     title: { 'zh-CN': 'LAB09：构建原创 Roofline', en: 'LAB09: Build an Original Roofline' },
     prerequisites: ['Q10'],
+    indexGroup: 'labs',
+  },
+  LAB10: {
+    href: { 'zh-CN': '/labs/optimize-canonical-transpose/', en: '/en/labs/optimize-canonical-transpose/' },
+    title: { 'zh-CN': 'LAB10：优化 canonical transpose', en: 'LAB10: Optimize the Canonical Transpose' },
+    prerequisites: ['Q11'],
     indexGroup: 'labs',
   },
   VIS01: {

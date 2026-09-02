@@ -233,6 +233,8 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/correctness/timeline-first-nsight-systems/exercises/',
     '/correctness/kernel-first-nsight-compute/exercises/',
     '/en/correctness/kernel-first-nsight-compute/exercises/',
+    '/correctness/transpose-optimization-case-study/exercises/',
+    '/en/correctness/transpose-optimization-case-study/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -319,6 +321,8 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/correctness/timeline-first-nsight-systems/solutions/',
     '/correctness/kernel-first-nsight-compute/solutions/',
     '/en/correctness/kernel-first-nsight-compute/solutions/',
+    '/correctness/transpose-optimization-case-study/solutions/',
+    '/en/correctness/transpose-optimization-case-study/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -347,6 +351,7 @@ describe('Exercises and Practice Bank contract', () => {
     'toolchain/compiler-architecture-targets',
     'toolchain/separate-compilation-device-linking',
     'toolchain/cpp-dialect-boundaries',
+    'correctness/transpose-optimization-case-study',
   ].flatMap((unitPath) => [
     { unitPath, localePrefix: '' },
     { unitPath, localePrefix: 'en/' },
@@ -371,7 +376,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes fifty-six complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes fifty-eight complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -394,6 +399,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
+      'PB-R3-007', 'PB-R3-008',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -442,6 +448,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-004': 'correctness/occupancy-stalls-throughput',
       'PB-R3-005': 'correctness/roofline-arithmetic-intensity',
       'PB-R3-006': 'algorithms/algorithm-choice-arithmetic-intensity',
+      'PB-R3-007': 'correctness/transpose-optimization-case-study',
+      'PB-R3-008': 'correctness/transpose-optimization-case-study',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -492,6 +500,24 @@ describe('Exercises and Practice Bank contract', () => {
         'examples/tiled-gemm',
         'visuals/roofline',
       ],
+      'PB-R3-007': [
+        'algorithms/matrix-transpose-layout',
+        'correctness/apod-optimization-loop',
+        'correctness/kernel-first-nsight-compute',
+        'correctness/roofline-arithmetic-intensity',
+        'examples/tiled-transpose',
+        'visuals/tiled-transpose',
+        'labs/optimize-canonical-transpose',
+      ],
+      'PB-R3-008': [
+        'algorithms/matrix-transpose-layout',
+        'correctness/apod-optimization-loop',
+        'correctness/kernel-first-nsight-compute',
+        'correctness/roofline-arithmetic-intensity',
+        'examples/tiled-transpose',
+        'visuals/tiled-transpose',
+        'labs/optimize-canonical-transpose',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -539,10 +565,12 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-00[1-6]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-00[1-8]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R3-00[4-6]$/.test(entryId)
+        const sourceDate = /^PB-R3-00[7-8]$/.test(entryId)
+          ? '2026-09-02'
+          : /^PB-R3-00[4-6]$/.test(entryId)
           ? '2026-09-01'
           : entryId.startsWith('PB-R3')
           ? '2026-08-31'
@@ -566,7 +594,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['O04', 'O05', 'O06', 'O07', 'O08']) expect(text).toContain(unitId);
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A14']) expect(text).toContain(unitId);
-    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10']) expect(text).toContain(unitId);
+    for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
@@ -593,7 +621,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const slug of ['nvcc-compilation-flow', 'ptx-cubin-fatbinary', 'compiler-architecture-targets', 'separate-compilation-device-linking', 'cpp-dialect-boundaries']) {
       expect(builtHtml, slug).toContain(slug);
     }
-    for (const slug of ['apod-optimization-loop', 'timeline-first-nsight-systems', 'kernel-first-nsight-compute']) {
+    for (const slug of ['apod-optimization-loop', 'timeline-first-nsight-systems', 'kernel-first-nsight-compute', 'transpose-optimization-case-study']) {
       expect(builtHtml, slug).toContain(slug);
     }
   });

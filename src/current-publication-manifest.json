@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-01",
+  "reviewDate": "2026-09-02",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,8 +11,8 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 209,
-    "sourceRoutes": 418,
+    "publicationPairs": 213,
+    "sourceRoutes": 426,
     "learningUnits": [
       "O01",
       "O02",
@@ -68,10 +68,11 @@
       "Q07",
       "Q08",
       "Q09",
-      "Q10"
+      "Q10",
+      "Q11"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09"],
+    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10"],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -92,9 +93,9 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 56,
+    "practiceBankEntries": 58,
     "glossaryTerms": 165,
-    "sourceRecords": 68
+    "sourceRecords": 70
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -199,7 +200,8 @@
       "LAB06",
       "LAB07",
       "LAB08",
-      "LAB09"
+      "LAB09",
+      "LAB10"
     ],
     "pendingHardwareVerification": [
       "EX01",
@@ -225,7 +227,8 @@
       "LAB06",
       "LAB07",
       "LAB08",
-      "LAB09"
+      "LAB09",
+      "LAB10"
     ],
     "runtimeNotApplicable": ["EX10"],
     "runtimeVerified": [],
@@ -241,9 +244,9 @@
     "EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.",
     "The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.",
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
-    "Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.",
+    "Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.",
     "Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.",
-    "Q06-Q10, A14, LAB06, LAB08, LAB09, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.",
+    "Q06-Q11, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.",
     "R3 material beyond this incremental publication and all later curriculum material remain outside the current publication."
   ]
 }

@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(418);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(209);
+  expect(routes).toHaveLength(426);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(213);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -116,6 +116,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/correctness/roofline-arithmetic-intensity/', en: '/en/correctness/roofline-arithmetic-intensity/' },
     { zh: '/correctness/roofline-arithmetic-intensity/exercises/', en: '/en/correctness/roofline-arithmetic-intensity/exercises/' },
     { zh: '/correctness/roofline-arithmetic-intensity/solutions/', en: '/en/correctness/roofline-arithmetic-intensity/solutions/' },
+    { zh: '/correctness/transpose-optimization-case-study/', en: '/en/correctness/transpose-optimization-case-study/' },
+    { zh: '/correctness/transpose-optimization-case-study/exercises/', en: '/en/correctness/transpose-optimization-case-study/exercises/' },
+    { zh: '/correctness/transpose-optimization-case-study/solutions/', en: '/en/correctness/transpose-optimization-case-study/solutions/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
@@ -138,6 +141,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/labs/diagnose-four-sanitizer-failures/', en: '/en/labs/diagnose-four-sanitizer-failures/' },
     { zh: '/labs/profile-full-application-before-kernel/', en: '/en/labs/profile-full-application-before-kernel/' },
     { zh: '/labs/build-original-roofline/', en: '/en/labs/build-original-roofline/' },
+    { zh: '/labs/optimize-canonical-transpose/', en: '/en/labs/optimize-canonical-transpose/' },
     { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
@@ -218,9 +222,12 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'Q08 参考解答 设计有边界的 selected-kernel profile', localePrefix: '/', expectedHrefs: ['/correctness/kernel-first-nsight-compute/solutions/'] },
     { route: '/', button: /搜索/, query: 'Q09 Occupancy Stalls Throughput 延迟隐藏', localePrefix: '/', expectedHrefs: ['/correctness/occupancy-stalls-throughput/'] },
     { route: '/', button: /搜索/, query: 'Q10 Arithmetic Intensity 可审计 Roofline', localePrefix: '/', expectedHrefs: ['/correctness/roofline-arithmetic-intensity/'] },
+    { route: '/', button: /搜索/, query: 'Q11 Hypothesis ledger', localePrefix: '/', expectedHrefs: ['/correctness/transpose-optimization-case-study/'] },
+    { route: '/', button: /搜索/, query: 'Q11 competing explanations', localePrefix: '/', expectedHrefs: ['/correctness/transpose-optimization-case-study/solutions/'] },
     { route: '/', button: /搜索/, query: 'LAB06 构建重叠流水线', localePrefix: '/', expectedHrefs: ['/labs/build-overlapped-pipeline/'] },
     { route: '/', button: /搜索/, query: 'LAB08 先分析完整应用 再分析一个内核', localePrefix: '/', expectedHrefs: ['/labs/profile-full-application-before-kernel/'] },
     { route: '/', button: /搜索/, query: 'LAB09 构建原创 Roofline', localePrefix: '/', expectedHrefs: ['/labs/build-original-roofline/'] },
+    { route: '/', button: /搜索/, query: 'LAB10 fresh profiler attempts', localePrefix: '/', expectedHrefs: ['/labs/optimize-canonical-transpose/'] },
     { route: '/', button: /搜索/, query: 'VIS13 Roofline ridge point', localePrefix: '/', expectedHrefs: ['/visuals/roofline/'] },
     { route: '/', button: /搜索/, query: 'Nsight Systems versus Nsight Compute 从症状选择下一份证据', localePrefix: '/', expectedHrefs: ['/visuals/nsight-systems-versus-nsight-compute/'] },
     { route: '/', button: /搜索/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/', expectedHrefs: ['/examples/multi-stage-reduction/'] },
@@ -275,9 +282,12 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'Q08 Reviewed Solutions Design a bounded selected-kernel profile', localePrefix: '/en/', expectedHrefs: ['/en/correctness/kernel-first-nsight-compute/solutions/'] },
     { route: '/en/', button: /Search/, query: 'Q09 Occupancy Stalls Throughput Latency Hiding', localePrefix: '/en/', expectedHrefs: ['/en/correctness/occupancy-stalls-throughput/'] },
     { route: '/en/', button: /Search/, query: 'Q10 Auditable Roofline Arithmetic Intensity', localePrefix: '/en/', expectedHrefs: ['/en/correctness/roofline-arithmetic-intensity/'] },
+    { route: '/en/', button: /Search/, query: 'Q11 Optimize the Canonical Transpose with Controlled Evidence', localePrefix: '/en/', expectedHrefs: ['/en/correctness/transpose-optimization-case-study/'] },
+    { route: '/en/', button: /Search/, query: 'Q11 Reviewed Solutions Controlled Transpose Evidence', localePrefix: '/en/', expectedHrefs: ['/en/correctness/transpose-optimization-case-study/solutions/'] },
     { route: '/en/', button: /Search/, query: 'LAB06 Build an Overlapped Pipeline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-overlapped-pipeline/'] },
     { route: '/en/', button: /Search/, query: 'LAB08 Profile the Full Application Before One Kernel', localePrefix: '/en/', expectedHrefs: ['/en/labs/profile-full-application-before-kernel/'] },
     { route: '/en/', button: /Search/, query: 'LAB09 Build an Original Roofline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-original-roofline/'] },
+    { route: '/en/', button: /Search/, query: 'LAB10 Optimize the Canonical Transpose', localePrefix: '/en/', expectedHrefs: ['/en/labs/optimize-canonical-transpose/'] },
     { route: '/en/', button: /Search/, query: 'VIS13 Roofline Model Ridge Workload Point', localePrefix: '/en/', expectedHrefs: ['/en/visuals/roofline/'] },
     { route: '/en/', button: /Search/, query: 'Nsight Systems versus Nsight Compute Choose the Next Evidence from the Symptom', localePrefix: '/en/', expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'] },
     { route: '/en/', button: /Search/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/multi-stage-reduction/'] },
@@ -471,6 +481,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/correctness/kernel-first-nsight-compute/exercises/',
     '/correctness/kernel-first-nsight-compute/solutions/',
     '/en/correctness/kernel-first-nsight-compute/solutions/',
+    '/correctness/transpose-optimization-case-study/',
+    '/en/correctness/transpose-optimization-case-study/',
     '/examples/vector-addition/',
     '/en/examples/vector-addition/',
     '/examples/multidimensional-indexing/',
@@ -513,6 +525,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/labs/diagnose-four-sanitizer-failures/',
     '/labs/profile-full-application-before-kernel/',
     '/en/labs/profile-full-application-before-kernel/',
+    '/labs/optimize-canonical-transpose/',
+    '/en/labs/optimize-canonical-transpose/',
     '/visuals/',
     '/en/visuals/',
     '/visuals/kernel-journey/',

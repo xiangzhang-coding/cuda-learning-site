@@ -13,7 +13,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-09-01T12:00:00Z');
+const asOf = new Date('2026-09-02T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -24,14 +24,14 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(316);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(321);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 9, practice: 56, visuals: 18, glossary: 165, sources: 68 });
-    for (const absentId of ['Q11', 'LAB10', 'Q13', 'L06', 'LAB12']) {
+    ).toEqual({ labs: 10, practice: 58, visuals: 18, glossary: 165, sources: 70 });
+    for (const absentId of ['Q13', 'L06', 'LAB12']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -73,7 +73,7 @@ describe('resource index catalog', () => {
     });
 
     expect(Object.fromEntries(
-      ['A14', 'Q09', 'Q10', 'LAB09', 'VIS13'].map((planningId) => [
+      ['A14', 'Q09', 'Q10', 'Q11', 'LAB09', 'LAB10', 'VIS13'].map((planningId) => [
         planningId,
         {
           href: PUBLISHED_DESTINATIONS[planningId].href.en,
@@ -84,7 +84,9 @@ describe('resource index catalog', () => {
       A14: { href: '/en/algorithms/algorithm-choice-arithmetic-intensity/', prerequisites: ['A01', 'A02', 'A05', 'A08'] },
       Q09: { href: '/en/correctness/occupancy-stalls-throughput/', prerequisites: ['Q08', 'F08'] },
       Q10: { href: '/en/correctness/roofline-arithmetic-intensity/', prerequisites: ['Q05', 'A14'] },
+      Q11: { href: '/en/correctness/transpose-optimization-case-study/', prerequisites: ['A05', 'Q06', 'Q08', 'Q10'] },
       LAB09: { href: '/en/labs/build-original-roofline/', prerequisites: ['Q10'] },
+      LAB10: { href: '/en/labs/optimize-canonical-transpose/', prerequisites: ['Q11'] },
       VIS13: { href: '/en/visuals/roofline/', prerequisites: ['Q10'] },
     });
 
@@ -188,8 +190,8 @@ describe('resource index catalog', () => {
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-00[1-6]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-00[1-8]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
@@ -209,8 +211,8 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-04[6-9]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-05[0-2]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052',
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-05[0-4]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052', 'SRC-CUDA-053', 'SRC-CUDA-054',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
@@ -249,10 +251,10 @@ describe('resource index catalog', () => {
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-31T16:00:00Z'),
+      asOf: new Date('2026-09-01T16:00:00Z'),
     })).not.toThrow();
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-08-31T15:59:59Z'),
+      asOf: new Date('2026-09-01T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
 
@@ -262,6 +264,7 @@ describe('resource index catalog', () => {
     const lab = labs.find(({ planningId }) => planningId === 'LAB02');
     const lab03 = labs.find(({ planningId }) => planningId === 'LAB03');
     const lab09 = labs.find(({ planningId }) => planningId === 'LAB09');
+    const lab10 = labs.find(({ planningId }) => planningId === 'LAB10');
 
     expect(lab01).toMatchObject({
       planningId: 'LAB01',
@@ -312,6 +315,21 @@ describe('resource index catalog', () => {
     });
     expect(lab09?.prerequisites.map(({ id }) => id)).toEqual(['Q10']);
     expect(lab09?.relatedUnits.map(({ id }) => id)).toEqual(['Q09', 'A14', 'EX02', 'VIS13']);
+    expect(lab10).toMatchObject({
+      planningId: 'LAB10',
+      href: '/en/labs/optimize-canonical-transpose/',
+      counterpart: '/labs/optimize-canonical-transpose/',
+      difficulty: 'advanced',
+      evidence: { compilation: [], runtime: ['Pending Hardware Verification'] },
+      reviewedOn: '2026-09-02',
+    });
+    expect(lab10?.prerequisites.map(({ id }) => id)).toEqual(['Q11']);
+    expect(lab10?.relatedUnits.map(({ id }) => id)).toEqual(['A05', 'Q06', 'Q08', 'Q10', 'EX14', 'VIS11']);
+    expect(lab10?.hardwareGate).toContain('134,221,952 bytes');
+    expect(lab10?.hardwareGate).toContain('Node.js 24.19.0');
+    expect(lab10?.hardwareGate).toContain('node --version output v24.19.0');
+    expect(lab10?.versionGate).toContain('Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5');
+    expect(lab10?.versionGate).toContain('exact Node.js 24.19.0');
 
     for (const expected of [
       {

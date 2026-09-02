@@ -1,0 +1,293 @@
+---
+title: 'Q11：用受控证据优化 Canonical Transpose'
+description: 先建立 EX14 精确正确性，再在同一个可比 workload、measurement、profiler、traffic 与 Roofline 合同下逐步检验 coalescing、tiling 和 bank-layout 假设。
+pairId: q11
+counterpart: /en/correctness/transpose-optimization-case-study/
+factCheckDate: '2026-09-02'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - canonical-baseline
+  - hypothesis-ledger
+  - comparability-contract
+  - workload-measurement-contract
+  - stage-coalescing
+  - stage-tiling
+  - stage-bank-layout
+  - metric-query-replay-permission
+  - traffic-roofline
+  - visual-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q11
+prerequisites:
+  - A05
+  - Q06
+  - Q08
+  - Q10
+relatedUnits:
+  - EX14
+  - VIS11
+  - LAB10
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Example Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current Writing SIMT Kernels transpose, coalesced global access, shared staging, synchronization, and padding context'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Shared Memory Access Patterns'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current shared-memory bank, stride, conflict, and broadcast terminology'
+    accessDate: '2026-09-02'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Assess, Parallelize, Optimize, Deploy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current iterative APOD and incremental verification guidance'
+    accessDate: '2026-09-02'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current theoretical and effective bandwidth accounting boundaries'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, permission, reproducibility, memory-table, and Roofline boundaries'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current exact-GPU metric query, kernel filter, collection, and report-export interface'
+    accessDate: '2026-09-02'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/correctness/transpose-optimization-case-study/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,comparability-contract,workload-measurement-contract,stage-coalescing,stage-tiling,stage-bank-layout,metric-query-replay-permission,traffic-roofline,visual-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A05,Q06,Q08,Q10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX14,VIS11,LAB10' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-transpose' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,2026.2.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/correctness/transpose-optimization-case-study/" lang="en">Read the English counterpart</a>
+
+Q11 是一个有证据边界的优化案例学习（optimization case study），不是已发布 benchmark。它从 EX14 的精确 transpose contract 出发，预先声明一个 hypothesis，再让 coalescing、tiling 和 bank-layout 三个阶段一次只改变一个 primary variable。Source pattern、browser calculation、profiler label 或看似合理的 mechanism 都不能代替 matched baseline/candidate record。
+
+## 学完本单元，你应该能
+
+- 在建立 performance baseline 之前，用 EX14 建立精确 correctness gate。
+- 写出包含 support、rejection、no-answer 与 rollback rules 的可证伪 hypothesis ledger。
+- 保持 baseline 与 candidate 可比，并一次只改变一个 primary variable。
+- 在看到结果前冻结 workload、timing、profiler、traffic 与 Roofline contract。
+- 把每个结论限制在一个 exact GPU/tool coordinate 的 retained evidence 内。
+
+## 先修关系
+
+严格按 `A05, Q06, Q08, Q10` 的顺序完成 [A05：Matrix Transpose、Coalescing 与 Shared-Memory Layout](/algorithms/matrix-transpose-layout/)、[Q06：把 APOD 用作优化循环](/correctness/apod-optimization-loop/)、[Q08：用 Nsight Compute 回答一个 Selected-Kernel 问题](/correctness/kernel-first-nsight-compute/)和 [Q10：构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)。
+
+A05 提供 mapping/layout model；Q06 提供 correctness-qualified baseline、hypothesis、controlled change 与 rollback discipline；Q08 提供 exact-GPU query、minimal collection、replay disclosure 与 report custody；Q10 提供 path-specific traffic 和 Roofline interpretation。EX14、VIS11 与已发布的 [LAB10：优化 canonical transpose](/labs/optimize-canonical-transpose/)只是 related resources，不是额外先修项。
+
+## 先建立 EX14 精确正确性基线
+
+[在 immutable source tree 查看 EX14](https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose)，或[下载同一 revision 的归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip)。Pin、project manifest 与下面两个 import 指向同一个 source revision；Q11 不维护第二份 CUDA/C++ implementation。
+
+`cpu-reference` range 必须先出现，因为它拥有 shape validation、independent oracle、exact comparison 与 mismatch location：
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+随后由 `tiled-transpose` range 提供 canonical executable mapping、edge guards、uniform barrier、shared staging 与 physical padding：
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+Input shape 是 `rows x columns`，output shape 是 `columns x rows`。每个合法 coordinate 都必须满足：
+
+`output[col * rows + row] = input[row * columns + col]`
+
+对 `5x7`、`33x35` 与 `64x32`，必须检查完整 output shape，并逐元素 exact equality。Transpose 不对值执行算术，所以 mismatch、错误 leading dimension、遗漏 edge value 或意外 write 都会在 profiling/timing 前拒绝该 variant。EX14 当前 logical/physical tile extent 只描述这个 pinned implementation，不是 experimental winner 建议。
+
+四阶段 learner runner 把 gate 扩展到 `5x7`、`33x35`、`64x32` 与 `4096x4096`，并使用 finite、non-NaN deterministic input/oracle values。每个 correctness、warm-up 与 profiled process 只建立一份 stable device output allocation，在四个 stages 间保持同一 allocation/address；但在每次 stage launch 紧前，必须用 checked host-to-device copy 将完整 output 填为 quiet-NaN sentinel 并检查 CUDA status。随后 launch、检查 `cudaDeviceSynchronize`、用 checked device-to-host copy 取回完整 output，再要求正确 output shape、每个 element exact oracle equality，且 no sentinel remains。这个 sequence 对每个 fixture 的 `baseline-direct`、`coalescing-direction`、`shared-memory-tiling` 与 `padded-bank-layout` 独立执行，不能继承前一 stage 的正确 output。
+
+这是 **acceptance baseline**，不是已记录 GPU result。本站没有执行 EX14。Learner-owned experimental branch 可以保留 pinned harness 与 oracle 并改变 candidate kernel，但在成为 measurement baseline 前必须单独记录 commit、patch、build、launch 与 output。
+
+[Q11 Exercises](/correctness/transpose-optimization-case-study/exercises/)中的 Exercise 2 仍由学习者完成，并产出 [LAB10](/labs/optimize-canonical-transpose/)要求的 learner-owned 四阶段 runner，同时保持 immutable EX14 files 不变。先完成自己的实现与 acceptance checklist，再查看独立[复核解答中的 Solution 2](/correctness/transpose-optimization-case-study/solutions/)所提供的一份完整 reviewed runner。无论选择自己的合格实现还是这份 reviewed solution，runner 都只是 Lab handoff artifact，不是 Q11 维护的第二份 canonical EX14 implementation。
+
+## 假设台账（Hypothesis ledger）
+
+必须在 collection 前写台账。每一行只负责一组 comparison，不能从前一行继承未声明结果。
+
+| field | required declaration |
+| --- | --- |
+| identity | stage ID、immutable baseline/candidate revisions、build artifact hashes |
+| primary variable | 一个 lane mapping、一个 staging mechanism 或一个 physical shared-row stride |
+| mechanism | 预期 address、transaction、shared access 或 traffic change；不预言 winner |
+| invariants | EX14 mapping、fixtures、value type、workload、launch、toolchain 与全部 non-primary variables |
+| evidence | exact correctness log、raw timing samples、query output、selected report fields 与 artifact hashes |
+| decision | 预先声明 support、reject、no-answer、rollback 与 next-question rules |
+| alternatives | 至少一个 chosen evidence 不能排除的 competing explanation |
+
+用 `B0` 表示第一个 correctness-qualified experimental baseline，`C1` 表示 coalescing candidate，`T2` 表示 tiling candidate，`P3` 表示 bank-layout candidate。这些 label 只给 audit 排序，不包含结果。失败 stage 不能静默成为下一阶段 baseline。
+
+## 让 baseline 与 candidate 可比
+
+只有 declared primary variable 之外的每个 coordinate 都相同，或差异被披露并证明合理，一组 pair 才可比较。冻结 source base/patch、compiler/flags、generated target、allocation path、每个 process 内 stable output allocation/address、完整 quiet-NaN sentinel bytes 与 checked fill/copy procedure、stream、launch geometry、finite non-NaN input/oracle bytes、device ordinal、exact GPU identity 与 compute capability、driver、Toolkit、profiler version、permission state、replay mode、system-load policy 和 Environment Manifest。
+
+两侧必须运行同一 workload 与 correctness checks，并使用同一 warm-up exclusion、completion boundary、attempt count、sample-retention rule、statistic、outlier policy 和 run-order policy。Sentinel fill、完整 output copy 与 host verification 保持在 selected kernel metrics 之外，但必须在每个 correctness、warm-up 与 profiled process 中对四个 stages 完全相同地执行。保留 raw attempts，不能只保留 ratio 或 summary。若 thermal state、clock policy、competing work、build flags、metric definition、filter、replay 或 report scope 不同，记录 mismatch，且不要把这组 pair 写成 controlled twins。
+
+Unprofiled timing run 与 Nsight Compute run 是两项独立 observation。Matched profiler report 可以解释 mechanism，但不会把 counter 追溯附加到 timing sample。同样，单独更小的 timing summary 不能证明差异由 coalescing、tiling 或 padding 导致。
+
+## 冻结 workload 与 measurement contract
+
+EX14 的三个小 fixtures 是 correctness gates，不是 representative performance workload。比较前另行声明一个固定 workload：精确 input 形状与 values、allocation/copy scope、kernel 或 range、launch、warm-up count、同步 boundary、保留的原始样本、预先声明的统计量、repetition count、run ordering、correctness cadence 与 failure policy。Baseline 和每个 candidate 使用完全相同的声明。
+
+说明 timing 只覆盖 selected kernel 还是更大的 range。Start/stop events 与 selected work 放在同一 stream，明确 completion，除非问题本身包含 setup/warm-up，否则排除它们，并为每个 valid sample 保存 unit。被 correctness gate 拒绝的 attempt 不进入 timing set。不能补写 missing attempt、看到结果后丢弃不方便的 sample，或把记录缩减成无支持的 speed claim。
+
+Performance workload 必须符合声明的 GPU memory boundary，并可从 retained arguments 或 input hashes 重现。每次 build 后以及 measured attempts 前后，按预声明 cadence 重做 correctness。会改变 tile-edge behavior 的 shape 是新 workload，不是旧 workload 的另一个 sample。
+
+## 阶段 1：控制 coalescing 变量
+
+从已通过 EX14 gate 的 direct-transpose experiment `B0` 开始。与 `C1` 比较时，只改变 ledger 指定的 lane-to-global-address traversal。固定 value type、workload、launch dimensions、direct mapping、compiler、cache policy、无 shared staging 以及全部 measurement coordinates。
+
+Collection 前分别为 input read 与 output write 写 active-lane address ledger。一种 traversal 可能让一个 phase 的 adjacent lanes 访问 adjacent addresses，却使另一 phase 变成 strided。因此 hypothesis 必须指出 exact phase 与 requested-address pattern，不能只说“transpose 是 coalesced”，也不能声明 candidate 必然更快。
+
+保留 exact correctness、raw timing，以及 exact query 后、documented unit/scope 能回答预声明问题的最少 global-memory evidence。Support 表示 matched report 朝 hypothesis 方向变化，同时仍列出 alternatives；rejection 表示 observed direction 与 hypothesis 冲突；unavailable/ambiguous metric 得到 no answer。任何一种 verdict 本身都不构成 universal performance claim。
+
+## 阶段 2：控制 tiling 变量
+
+只有 Stage 1 的结果已被接受并完整记录，才能把它当作 baseline；否则停止。与 `T2` 比较时，引入一个 shared-memory staging mechanism，把 global load 与 store direction 分开。该 pair 禁用 padding，并固定预声明 logical tile extent、thread ownership、block dimensions、workload、compiler 与 collection contract；同一 comparison 内不能同时 sweep tile extent 或改变 launch geometry。
+
+Shared allocation、cooperative writes、一个 uniform barrier、exchanged shared coordinates 与 cooperative reads 是这一项 staging intervention 必需的实现组成，不是额外独立 knobs。Correctness proof 仍要求独立 load/store guards 与 uniform barrier participation。任何改变 mapping 或漏掉 edge value 的 candidate 都会被拒绝，无论 profiler display 如何。
+
+Ledger 只预测可解释的 routing change：两个 global phases 可以使用独立 adjacent-lane direction，同时 implementation 新增 shared traffic 与 synchronization。Exact global/shared evidence 可以在该 profiled run 上支持或否定 mechanism。Resource use、occupancy、cache state、instruction mix 与 replay 仍是 timing difference 的 competing explanations。
+
+## 阶段 3：控制 bank layout 与 padding 变量
+
+使用 correctness-qualified 且已记录的 `T2` 作为 baseline。`P3` 只把 physical shared row stride 从 `T` 改为 `T + 1`。Logical coordinates 仍在 `T x T` 内；global input/output addresses、tile ownership、launch、barrier、workload、compiler、metric set 与 timing protocol 保持不变。Padding 增加 storage slots，不增加 matrix columns 或 output values。
+
+先在 declared access width 与 current guide model 下推导 shared slot addresses 和 expected bank-index arithmetic，再在 exact GPU 上查询 available evidence。Conflict-related result 只能支持或否定 named shared-access hypothesis。Changed shared footprint、resource allocation、instruction mapping、profiler replay、system drift 或不同 access instruction 都是仍需独立控制的 competing explanations。
+
+Tile extent 是 experimental input，不是预选 winner。另一种 extent 会开始新的 APOD pass，因为它可能同时改变 block resources、edge fraction、occupancy 与 traffic。因此 Q11 不发布 winning extent、padding benefit、timing 或 speedup。
+
+## 在 exact GPU 上查询 metric、replay 与 permission
+
+在将要 collection report 的同一 declared environment 内运行 availability query，并保留完整 output：
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Metric name、suffix、unit、definition 与 availability 取决于 Nsight Compute version 和精确 GPU。只有 hypothesis 冻结后，才选择一个 relevant section 或很短的 exact metric list。Baseline 与 candidate 必须分别保存 kernel name basis、filter、launch selection、command、`.ncu-rep`、query output、stdout/stderr、hashes、observer 与 observation date。
+
+Collection 前记录 performance-counter permission。若权限被拒绝，立即停止，保留 denial 与 policy coordinate，并通过 environment owner 申请访问。不得绕过 policy、猜测 value、把 unavailable metric 写成 zero，或换到另一块 GPU 后仍称 comparison 可比。
+
+Replay 可能重新执行 kernel 或 application、保存/恢复 memory、扰动 cache state、增加 overhead 或 serialize work。记录 exact replay mode 与 reported passes。Baseline/candidate reports 需要 matched replay/filter contract；否则它们回答的是不同 observation questions。Timing contract 使用 unprofiled matched runs，把 profiler collection 当作独立 mechanism evidence。
+
+## 不用 Q10 traffic 与 Roofline 指定 winner
+
+Q10 要求 traffic 与 Roofline coordinates 描述同一 workload、path 与 provenance。对 row-major out-of-place `float` transpose，logical compulsory DRAM-path estimate 是：
+
+`T_compulsory = 2 * rows * columns * sizeof(float)`
+
+它计一个 logical input read 与一个 logical output write，不是 observed DRAM traffic；transaction overfetch、cache behavior、write behavior、replay 与 implementation effect 都可能改变 path traffic。Compulsory estimate、implementation estimate 与 queried traffic 必须放在不同列。
+
+若 `W` 使用同一 workload 的 declared work convention，且 `T_DRAM` 是 matched DRAM-path traffic，则 `I_DRAM = W / T_DRAM`。不能把 copied elements 静默叫作 FLOP。使用 Roofline 时，operation convention、path、unit 与 ceiling provenance 必须兼容：
+
+`P_roof(I) = min(P_compute, I * B_path)`
+
+Point 沿 roof 移动或位于 roof 下方只是 model geometry，不是 observed bottleneck 或 causal proof。Transpose comparison 也可用 declared logical bytes 与 matched elapsed time 报告 effective bandwidth，但必须把 numerator 标作 estimate。Coalescing、tiling 与 padding 可能改变不同 traffic paths 与 resource costs，所以单个 metric 或 Roofline region 不能选择 winner。
+
+## 保持 VIS11 证据中立
+
+[VIS11：Tiled Transpose Logical Mapping 与 Physical Padding](/visuals/tiled-transpose/)检查 `input(row, col) -> output(col, row)` 和 `slot = sharedRow * (T + padding) + sharedCol`。VIS11 仅做地址算术，不执行 CUDA、不查询 exact GPU、不读取 performance counter，也不提供 correctness/performance 证据。
+
+写 hypothesis 前可用 VIS11 审计 logical/physical coordinates。不能把 browser state 填入 metric field、声称它观察到 bank conflict，或用它补写缺失的 LAB10 result。成为本 case study 的 related resource 不会改变其 evidence-neutral status。
+
+## 证据边界与 linked-resource summaries
+
+Evidence Status 只适用于 Lab 与 Runnable Example，不适用于 Learning Unit。Q11 是 Learning Unit，因此它的 `compilation`、`runtime`、`expectedObservations` 与 `recordedObservations` 四个 metadata arrays 全部为空，head projections 也全部为 `none`；Q11 本身不授予 Evidence Status。Source inspection、host test、integration test 或 CanonicalCode import 都不能把 linked-resource evidence 投射到 Q11。
+
+Q11 只总结两个有 Evidence Status 的 linked resources：[EX14](/examples/tiled-transpose/)与 [LAB10](/labs/optimize-canonical-transpose/)目前都为 **Pending Hardware Verification**，且 `recordedObservations` 为空。两者的状态属于各自资源，不属于 Q11。
+
+本单元写出的 stage statements 是 pre-result acceptance、hypothesis 与 stop-without-winner boundaries，不是 Q11 metadata 中的 expected observations。它们没有发布 observed output、timing、metric、traffic、bandwidth、bottleneck、tile winner 或 speedup。[LAB10](/labs/optimize-canonical-transpose/)是使用 Exercises 所产 runner 的 guided follow-on；Lab 自己负责 Environment Manifest、execution 与 evidence record。
+
+## 离开前检查
+
+1. 为什么 experimental variant 成为 measurement baseline 前，必须通过 EX14 oracle、三个 fixtures、output shape 与 exact mapping？
+2. 哪些字段让 baseline/candidate 可比？一个 non-primary coordinate 改变时应怎样处理？
+3. Coalescing、tiling 与 bank-layout 三个阶段如何分别隔离一个 primary variable，且不承诺结果方向？
+4. 为什么 Nsight Compute claim 必须附带 exact-GPU metric query、permission、filter、replay 与 report custody？
+5. 为什么 Q10 traffic/Roofline geometry 与 VIS11 address arithmetic 都不能建立 observed bottleneck、bank result 或 optimization winner？
+
+## 继续练习
+
+- 完成 [Q11 Exercises](/correctness/transpose-optimization-case-study/exercises/)，再查看独立的[复核解答](/correctness/transpose-optimization-case-study/solutions/)。
+- 用已发布的 [PB-R3-007](/practice/#pb-r3-007)练习 controlled-stage design，用 [PB-R3-008](/practice/#pb-r3-008)审计 profiler claim。
+- 把 Exercise 2 的 learner-owned runner 与 ledger 带入 guided follow-on [LAB10：优化 canonical transpose](/labs/optimize-canonical-transpose/)。
+- 对照 [EX14](/examples/tiled-transpose/)复核 pinned source，并且只把 [VIS11](/visuals/tiled-transpose/)用于 evidence-neutral coordinate arithmetic。
+
+## 来源与复核
+
+- [CUDA Programming Guide v13.3：Matrix Transpose Example Using Shared Memory](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory)限定 current transpose、global access、staging、synchronization 与 padding facts。
+- [CUDA Programming Guide v13.3：Shared Memory Access Patterns](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#shared-memory-access-patterns)限定 current bank、stride、conflict 与 broadcast terminology。
+- [CUDA C++ Best Practices Guide v13.3：APOD](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy)支持 iterative/incremental optimization 与 repeated verification。
+- [CUDA C++ Best Practices Guide v13.3：Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)提供 theoretical/effective bandwidth accounting boundary。
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)提供 metric、replay、overhead、permission、reproducibility、memory 与 Roofline boundary。
+- [Nsight Compute CLI 2026.2.1](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)提供 exact-GPU query、filtering、collection 与 report export。
+
+Context7 `/websites/nvidia_cuda_cuda-programming-guide` 与 `/websites/nvidia_nsight-compute_nsightcompute` 仅用于 discovery/cross-check。以上六个 exact NVIDIA owner URLs 才是事实权威，均访问于 **2026-09-02**。本站未复制 NVIDIA owner code、table 或 figure；ledgers、stage design、解释、Exercises 与 solutions 都是 Learning Site 原创材料。
+
+**事实核查与全部来源访问日期：2026-09-02。**

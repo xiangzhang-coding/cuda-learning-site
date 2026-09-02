@@ -284,6 +284,35 @@ describe('CUDA compile evidence workflow', () => {
     expect(ex16UploadOffset).toBeGreaterThan(ex16ScanOffset);
   });
 
+  it('compile-gates the LAB10 runner in all three EX14 lanes without granting Evidence Status', async () => {
+    const workflow = await readProjectFile('.github/workflows/cuda-compile.yml');
+    const ex14Build = workflow.match(/^  ex14-build:\n[\s\S]*?(?=^  ex15-build:)/m)?.[0] ?? '';
+    const canonicalCompileOffset = ex14Build.indexOf('Compile EX14 without granting Evidence Status');
+    const runnerCompileOffset = ex14Build.indexOf(
+      'Compile gate for LAB10 runner without granting Evidence Status',
+    );
+    const scanOffset = ex14Build.indexOf('Scan EX14 build logs');
+
+    expect(ex14Build).not.toBe('');
+    expect([...ex14Build.matchAll(/^\s+- lane: (ex14-\S+)$/gm)].map((match) => match[1])).toEqual([
+      'ex14-cuda-11-8-cxx17',
+      'ex14-cuda-12-9-cxx17',
+      'ex14-cuda-13-3-cxx17',
+    ]);
+    expect(canonicalCompileOffset).toBeGreaterThan(-1);
+    expect(runnerCompileOffset).toBeGreaterThan(canonicalCompileOffset);
+    expect(scanOffset).toBeGreaterThan(runnerCompileOffset);
+    expect(ex14Build.match(/bash scripts\/check-lab10-runner-build\.sh/g)).toHaveLength(1);
+    expect(ex14Build).toContain(
+      'bash scripts/check-lab10-runner-build.sh \\\n            "/workspace/artifacts/cuda-ex14/${{ matrix.lane }}"',
+    );
+    expect(ex14Build).toContain('--workdir /workspace');
+    expect(ex14Build).not.toContain('--gpus');
+    expect(ex14Build).toContain('path: artifacts/cuda-ex14/${{ matrix.lane }}');
+    expect(ex14Build).not.toContain('Compile-Checked');
+    expect(ex14Build).not.toContain('Runtime-Verified');
+  });
+
   it('never executes the generated CUDA binary in the compile boundary', async () => {
     const [
       orchestrator,

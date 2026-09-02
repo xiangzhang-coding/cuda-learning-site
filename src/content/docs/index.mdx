@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-09-01'
+factCheckDate: '2026-09-02'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-01'
+      content: '2026-09-02'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #26](https://github.com/xiangzhang-coding/cuda-learning-site/issues/26) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09/A14 与 Q01-Q10，共 55 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；当前 issue #26 增量发布不改写 R2，R3 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #27](https://github.com/xiangzhang-coding/cuda-learning-site/issues/27) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A09/A14 与 Q01-Q11，共 56 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；当前 issue #27 增量发布不改写 R2，R3 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -56,7 +56,7 @@ head:
 
 [A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；A02-A09 保留既有边；[A14 用 Arithmetic Intensity 选择可证伪的算法优化](/algorithms/algorithm-choice-arithmetic-intensity/)严格依赖 A01、A02、A05 与 A08。
 
-[Q01](/correctness/cpu-references-tolerances-invariants/)至 [Q08](/correctness/kernel-first-nsight-compute/)保留既有边；[Q09 用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)严格依赖 Q08 与 F08；[Q10 从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)严格依赖 Q05 与 A14。
+[Q01](/correctness/cpu-references-tolerances-invariants/)至 [Q08](/correctness/kernel-first-nsight-compute/)保留既有边；[Q09 用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)严格依赖 Q08 与 F08；[Q10 从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)严格依赖 Q05 与 A14；[Q11 用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)严格依赖 A05、Q06、Q08 与 Q10，从 immutable [EX14](/examples/tiled-transpose/)开始，并复用 evidence-neutral [VIS11](/visuals/tiled-transpose/)。
 
 F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
 
@@ -70,19 +70,19 @@ O02-O08 也保留各自的练习与独立解答。
 
 Q01-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q02 练习](/correctness/floating-point-order-reproducibility/exercises/)与[解答](/correctness/floating-point-order-reproducibility/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)。
 
-Q06-Q10 也提供完整练习与独立解答，包括 [Q09 练习](/correctness/occupancy-stalls-throughput/exercises/)与[解答](/correctness/occupancy-stalls-throughput/solutions/)，以及 [Q10 练习](/correctness/roofline-arithmetic-intensity/exercises/)与[解答](/correctness/roofline-arithmetic-intensity/solutions/)。
+Q06-Q11 也提供完整练习与独立解答，包括 [Q09 练习](/correctness/occupancy-stalls-throughput/exercises/)与[解答](/correctness/occupancy-stalls-throughput/solutions/)、[Q10 练习](/correctness/roofline-arithmetic-intensity/exercises/)与[解答](/correctness/roofline-arithmetic-intensity/solutions/)，以及 [Q11 练习](/correctness/transpose-optimization-case-study/exercises/)与[解答](/correctness/transpose-optimization-case-study/solutions/)。
 
 当前有 16 个可运行示例（Runnable Example）：EX01-EX16。新增 [EX15 Tiled GEMM](/examples/tiled-gemm/)严格依赖 A08；EX14 仍依赖 A05，EX16 仍依赖 Q03/Q04。
 
 EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane 使用同一原创 C++17 implementation；compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。Host-only utility 不建立 GPU correctness，本站没有运行 EX15，也不发布实际 output、timing、speedup 或其他 performance number。
 
-当前 9 个实验是 LAB01-LAB09。[LAB09 构建原创 Roofline](/labs/build-original-roofline/)严格依赖 Q10，compilation 与 recorded observations 为空，runtime 为 Pending Hardware Verification。未来的 Q11/LAB10 与 Q13/L06/LAB12 仍未发布。
+当前 10 个实验是 LAB01-LAB10。[LAB10 优化 canonical transpose](/labs/optimize-canonical-transpose/)严格依赖 Q11，声明 `4096x4096` `float` workload、134,221,952-byte 保守上界、一次排除的 warm-up、显式同步，以及十次 retained attempts 的 median 与 min/max 方法，但没有 recorded result。Q13、L06 与 LAB12 仍未发布；LAB12 必须等待 Q13 与 L06。
 
 正式 Visual Explainer 共 18 项：独立 VIS01-VIS14，加上内嵌 VIS19-VIS22。[VIS13 Roofline](/visuals/roofline/)严格依赖 Q10，并排在 VIS14 前。全部讲解都是 evidence-neutral browser models；VIS13 browser values 与 static chart 不是 GPU evidence。
 
-A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空；LAB09 的 compilation evidence 与 recorded observations 为空、runtime 为 Pending Hardware Verification。本次增量没有 runtime、profiler metric、hardware ceiling、bottleneck 或 speedup observation，也没有 Reference Environment 或 `performanceObservations`。
+A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空。Q11 作为 Learning Unit，其 compilation、runtime、expected-observation 与 recorded-observation 四个 evidence arrays 均为空；它不授予 Evidence Status，只汇总关联对象。关联的 EX14 与 LAB10 的 compilation 和 recorded observations 为空、runtime 为 Pending Hardware Verification；immutable EX14 source、VIS11、static/browser evidence 与 expected-only fixture 都不会改变这些边界。本次增量没有 timing、profiler metric、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
 
-当前 catalog 为 9 个 Lab、56 个 Practice Bank 条目、18 项 Visual Explainer、165 个 Glossary 词条和 68 条 source record，共 316 条记录；当前滚动公开源文件形成 209 个 Publication Pairs，即 418 条 source routes。这些当前数字独立于不可变的 R2 186/372 与 284-record 快照，R3 聚合复核仍待完成。
+当前 catalog 为 10 个 Lab、58 个 Practice Bank 条目、18 项 Visual Explainer、165 个 Glossary 词条和 70 条 source record，共 321 条记录；当前滚动公开源文件形成 213 个 Publication Pairs，即 426 条 source routes。这些当前数字独立于不可变的 R2 186/372 与 284-record 快照，R3 聚合复核仍待完成。
 
 ## 边界先说清
 
@@ -366,6 +366,11 @@ A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空；LAB09 的 compi
     <strong>从 Arithmetic Intensity 构建可审计 Roofline</strong>
     <small>对齐 work、traffic、units、ceilings 与 provenance，再放置 workload point。</small>
   </a>
+  <a className="route-card" href="/correctness/transpose-optimization-case-study/">
+    <span>Q11 · CONTROLLED TRANSPOSE</span>
+    <strong>用受控证据优化 Canonical Transpose</strong>
+    <small>从 immutable EX14 出发，复用 VIS11，并一次只检验一个优化假设。</small>
+  </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>环境报告可运行示例</strong>
@@ -491,6 +496,11 @@ A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空；LAB09 的 compi
     <strong>构建原创 Roofline</strong>
     <small>保留完整 provenance、report custody 与 blockers；当前仍待硬件验证。</small>
   </a>
+  <a className="route-card" href="/labs/optimize-canonical-transpose/">
+    <span>LAB10 · TRANSPOSE OPTIMIZATION</span>
+    <strong>优化 canonical transpose</strong>
+    <small>冻结 workload、同步与十次采集方法；当前没有 recorded result。</small>
+  </a>
   <a className="route-card" href="/labs/">
     <span>LAB INDEX · LOOKUP</span>
     <strong>实验索引</strong>
@@ -574,7 +584,7 @@ A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空；LAB09 的 compi
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 56 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
+    <small>用 58 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
@@ -584,7 +594,7 @@ A14、Q09-Q10 与 VIS13 的 compilation/runtime axes 均为空；LAB09 的 compi
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 68 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 70 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

@@ -1,0 +1,945 @@
+---
+title: 'LAB10: Optimize the Canonical Transpose'
+description: 'Derive four correctness-equivalent EX14 stages, test one coalescing, tiling, or bank-layout hypothesis at a time, and retain a complete ten-attempt Nsight Compute record without inventing a result.'
+pairId: lab10
+counterpart: /labs/optimize-canonical-transpose/
+factCheckDate: '2026-09-02'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical-project
+  - workload-memory
+  - stages-hypotheses
+  - manifest
+  - canonical-review
+  - build-hash
+  - correctness
+  - profiler-gates
+  - warm-up
+  - acquisition
+  - replay-custody
+  - reduction
+  - observations
+  - criteria-blockers
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB10
+prerequisites:
+  - Q11
+relatedUnits:
+  - A05
+  - Q06
+  - Q08
+  - Q10
+  - EX14
+  - VIS11
+exampleIds:
+  - EX14
+canonicalExample: EX14
+canonicalRanges:
+  - cpu-reference
+  - tiled-transpose
+hardwareGate: 'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; 134,217,728 bytes for two 4096x4096 float device matrices plus at most 4,224 shared bytes per block, for a conservative declared problem bound of 134,221,952 bytes; C++17 in cuda-11.8, cuda-12.9, or cuda-13.3; matching Nsight Compute and CUPTI; exact Node.js 24.19.0 analysis runtime with node --version output v24.19.0; administrator-approved non-admin performance-counter access; no sudo, privilege escalation, or policy bypass'
+estimatedMinutes: 210
+difficulty: advanced
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 134221952
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device and execute NVCC, the host C++ compiler, make, sha256sum, the EX14 and learner-owned LAB10 binaries, Nsight Compute CLI ncu, exact Node.js 24.19.0, and the reviewed LAB10 reducer'
+  - 'Create, hash, inspect, sanitize, retain, and remove learner-owned source, build files, raw logs, status files, manifests, primary .ncu-rep reports, imported raw CSV derivatives tied to report hashes, the reduction ledger, and the reducer summary'
+  - 'Read NVIDIA GPU performance counters only under an administrator-approved non-admin policy; this Lab authorizes no sudo, privilege escalation, setuid workaround, container escape, or security-policy bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - Before profiling, four separate correctness invocations should cover 5x7, 33x35, 64x32, and 4096x4096; the excluded warm-up and every profiled process should then keep the frozen 4096x4096 workload. In each invocation, all four stages should use finite, non-NaN deterministic input and oracle values, reuse one stable device output allocation and address, and receive a checked host-to-device full-output quiet-NaN sentinel fill before every launch followed by checked synchronization, complete readback, output-shape, every-element exact comparison, and no-sentinel-remains checks.
+    - The performance workload should retain two 67,108,864-byte global matrices and at most 4,224 shared bytes per block under the conservative 134,221,952-byte declared problem bound, separately from EX14's 20,608-byte tiny-fixture bound.
+    - Source review should preserve one changed variable between each adjacent stage while keeping workload, logical transpose, launch ownership, correctness, tool, binary, and process contract fixed.
+    - Actual version, bare help, and the matching exact-version owner manual should confirm config control plus `--import`, `--page raw`, and `--csv`; the remaining exact-GPU section and metric, matching CUPTI, report-write, and approved non-admin counter gates should yield qualifying records or retained blockers.
+    - One excluded direct-process warm-up should precede exactly ten fresh Nsight Compute attempts, each running the same four stages once and retained in acquisition order.
+    - Each qualifying attempt should preserve explicit cudaDeviceSynchronize completion, selected-kernel/filter identity, replay and save/restore behavior, the primary `.ncu-rep`, its report-hash-bound imported raw CSV, logs, status, and SHA-256 custody.
+    - Each adjacent-stage hypothesis should be classified as supported, rejected, or inconclusive only from queried exact-GPU evidence, without a predeclared timing, metric value, speedup, bottleneck, or winner.
+    - A qualifying full batch should first record exact Node.js 24.19.0 with `node --version` output `v24.19.0`, then use the exact-hash reviewed reducer to summarize only the ten retained rows per selected stage and metric from the ten imported report derivatives with count=10, the median plus minimum and maximum, a report/CSV hash chain, and no sample deletion.
+    - VIS11 should remain browser arithmetic outside the evidence chain, while a complete learner run may enter Community-Observed review but not Runtime-Verified status.
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; Nsight Compute 2022.3.0.22; CUPTI 11.8.87'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / EX14 12.9.2 Lane; Nsight Compute 2025.2.1.3; CUPTI 12.9.79'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / EX14 13.3.1 Lane; Nsight Compute 2026.2.1.5; CUPTI 13.3.75'
+    platform: 'Selected Linux Toolkit Lane component coordinates'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Programming Guide v13.3 - Matrix Transpose Example Using Shared Memory'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory'
+    version: 'CUDA Programming Guide v13.3'
+    platform: 'Current coalesced global access, shared staging, synchronization, bank layout, and padding model'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current section, metric, replay, save/restore, overhead, perturbation, and reproducibility semantics'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI 2022.3 Archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2022.3.0'
+    platform: 'Archived help, absence of a config-file interface, query, kernel filter, report, and CLI option semantics for the cuda-11.8 Lane'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI 2025.2 Archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2025.2.1'
+    platform: 'Archived help, config-file, query, kernel filter, report, and CLI option semantics for the cuda-12.9 Lane'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute CLI 2026.2.1'
+    platform: 'Current help, config-file, query, kernel filter, report, and CLI option semantics'
+    accessDate: '2026-09-02'
+  - title: 'NVIDIA Nsight Compute Release Notes - Updates in 2026.2.1'
+    url: 'https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1'
+    version: 'NVIDIA Nsight Compute 2026.2.1 with CUDA 13.3 support in the 2026.2 line'
+    platform: 'Current fixes, support, and compatibility boundary'
+    accessDate: '2026-09-02'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI v2026.2.1; selected Lane components 11.8.87, 12.9.79, and 13.3.75'
+    platform: 'Current compatibility, profiling, counter availability, overhead, and subscriber boundaries'
+    accessDate: '2026-09-02'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/labs/optimize-canonical-transpose/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical-project,workload-memory,stages-hypotheses,manifest,canonical-review,build-hash,correctness,profiler-gates,warm-up,acquisition,replay-custody,reduction,observations,criteria-blockers,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: Q11 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'A05,Q06,Q08,Q10,EX14,VIS11' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX14 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-transpose' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CC 7.5+ GPU; C++17 in three Toolkit Lanes; matching Nsight Compute and CUPTI; exact Node.js 24.19.0 analysis runtime with v24.19.0 output; approved non-admin counters; 134,221,952-byte declared bound; no sudo or bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '210' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '134221952' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device; compiler, binary, hash, ncu, exact Node.js 24.19.0, and reviewed reducer execution; learner-owned artifact writes; administrator-approved non-admin performance-counter access; no sudo, elevation, or policy bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '9 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.1,12.9.2,13.3,13.3.1,2022.3.0,2022.3.0.22,2025.2.1,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75,2026.2.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/optimize-canonical-transpose/" lang="zh-CN">阅读中文对应页</a>
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+LAB10 is a Lab performed outside the website on Native Linux. It starts from immutable EX14 and, after the learner first attempts Q11 Exercise 2, accepts either the reviewed solution asset or a learner alternative satisfying the same contract to establish a four-stage comparison harness. It tests one coalescing, shared-memory tiling, or bank-layout hypothesis at a time. This page is a measurement contract, not a result: compilation is empty, runtime remains Pending Hardware Verification, and `recordedObservations` is empty.
+
+## Lab contract
+
+| Coordinate | Frozen requirement |
+| --- | --- |
+| Strict prerequisite | Exactly Q11; first complete a learner attempt at [Q11 Exercise 2](/en/correctness/transpose-optimization-case-study/exercises/), then carry either the reviewed Solution 2 asset or learner-owned runner provenance satisfying the same contract |
+| Related, not prerequisite | A05, Q06, Q08, Q10, [EX14](/en/examples/tiled-transpose/), and [VIS11](/en/visuals/tiled-transpose/) |
+| Supported Environment | Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer |
+| Toolkit Lane | C++17 in `cuda-11.8`, `cuda-12.9`, or `cuda-13.3`, with matching Nsight Compute and CUPTI |
+| Analysis runtime | Exactly Node.js `24.19.0`; `node --version` must output exactly `v24.19.0` before reduction |
+| Performance workload | One `4096x4096` row-major `float` input and one equally sized out-of-place output |
+| Declared problem bound | 134,217,728 global bytes plus at most 4,224 shared bytes per block = 134,221,952 bytes |
+| Permissions | Administrator-approved non-admin performance-counter access; no `sudo`, elevation, or policy bypass |
+| Acquisition | One excluded direct-process warm-up, then exactly 10 fresh profiler attempts containing the same four stages |
+| Evidence | Compilation empty; runtime Pending Hardware Verification; recorded observations empty |
+
+The Lab never chooses a tile size, metric, result, or winner for the learner. The final padded stage matches EX14's logical and physical tile contract, but source similarity, static address arithmetic, or expected observations cannot establish performance.
+
+The selected CUDA image fixes only declared CUDA Toolkit and operating-system planning coordinates. It does **not** imply that Node.js is installed or that an installed `node` has the required version. Supplying or executing Node.js and the reducer satisfies only the host analysis gate and grants no CUDA compilation, profiler, runtime, performance, or other Evidence Status.
+
+## Prerequisite check
+
+1. For LAB10, first complete a learner attempt at [Q11 Exercise 2](/en/correctness/transpose-optimization-case-study/exercises/). You may then select [Solution 2's complete reviewed runner](/assets/exercise-solutions/q11-lab10-transpose-candidates.cu), whose repository path is `public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu` and exact SHA-256 is `920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251`. It is one reviewed solution, not a second canonical EX14. A learner-owned alternative remains valid, but its completion packet must prove the same required CLI, four stages, independent EX14 oracle, reviewed diff for every adjacent-stage pair, actual C++17 build command and result, and source/build/binary SHA-256 custody. LAB10 accepts no unexplained binary.
+2. Use A05 for transpose mapping, Q06 for the APOD decision ledger, Q08 for selected-kernel collection, and Q10 for model-versus-measurement boundaries. These are related resources, not additional prerequisite edges.
+3. Confirm exactly one selected GPU is visible and query compute capability 7.5 or newer. Record the query and result, not only a product name.
+4. Select one C++17 Toolkit Lane and its matching Nsight Compute/CUPTI components. A nearby version is a different environment and must not inherit a Lane label silently.
+5. Independently provide the exact Node.js `24.19.0` analysis runtime. Resolve and record the `node` path; `node --version` must output exactly `v24.19.0`. A missing executable, a compatible but nonexact release, or any other output blocks reduction. The selected NVIDIA CUDA image guarantees no Node.js availability or version.
+6. Obtain an administrator-approved record allowing this non-admin account to use performance counters. Without it, stop. LAB10 never authorizes `sudo ncu`, setuid workarounds, container escape, or another policy bypass.
+7. Reserve a learner-owned evidence directory that never overwrites a source, report, log, status, hash, manifest, blocked batch, reduction ledger or summary, or sanitization record.
+
+## Obtain the canonical project
+
+[View the complete EX14 project at immutable commit `981939cc705faf721ac06d1b70f2c5c4a8111e92`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose), or [download the exact archive for that commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip). To retain the later reviewed solution assets while proving EX14 is unchanged, run this from the current Learning Site source tree's repository root:
+
+```sh
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git
+cd cuda-learning-site
+source_commit='981939cc705faf721ac06d1b70f2c5c4a8111e92'
+canonical_files=(
+  examples/ex14-tiled-transpose/Makefile
+  examples/ex14-tiled-transpose/README.md
+  examples/ex14-tiled-transpose/evidence/README.md
+  examples/ex14-tiled-transpose/include/tiled_transpose_reference.hpp
+  examples/ex14-tiled-transpose/scripts/compile-check.sh
+  examples/ex14-tiled-transpose/src/tiled_transpose.cu
+  examples/ex14-tiled-transpose/tests/host_reference_test.cpp
+)
+git diff --exit-code "$source_commit" -- "${canonical_files[@]}"
+node -e "const p=require('./examples/ex14-tiled-transpose/project.json'); if(p.sourceCommit!==process.argv[1]) process.exit(1)" "$source_commit"
+```
+
+The listed implementation and contract files must have an empty diff. `project.json` is checked separately because its current `sourceCommit` field is the post-merge metadata pin and therefore cannot be byte-identical to the same commit it names. Do not modify EX14 to obtain the reviewed assets. EX14's CPU reference and padded tiled kernel are canonical; the baseline, intermediate candidates, and four-stage runner are LAB10 artifacts derived under Q11. The reviewed runner stays outside canonical files at `public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu`; a learner alternative must also stay outside canonical files. Preserve the parent commit and selected source path and hash every source. Neither path becomes a new canonical range or Runnable Example. Run all following commands from the repository root.
+
+## Freeze workload and memory arithmetic
+
+The declared performance workload is:
+
+```yaml
+element_type: float
+rows: 4096
+columns: 4096
+element_count: 16777216
+bytes_per_element: 4
+bytes_per_matrix: 67108864
+global_matrix_count: 2
+global_matrix_bytes: 134217728
+logical_tile: 32x32
+maximum_physical_shared_layout: 32x33
+maximum_shared_bytes_per_block: 4224
+declared_problem_bound_bytes: 134221952
+canonical_correctness_fixture_bound_bytes: 20608
+```
+
+The arithmetic is exact:
+
+- one matrix: `4096 x 4096 x 4 = 67,108,864` bytes;
+- two global matrices: `2 x 67,108,864 = 134,217,728` bytes;
+- the largest stage-local shared tile: `32 x 33 x 4 = 4,224` bytes per block; and
+- the conservative declared bound: `134,217,728 + 4,224 = 134,221,952` bytes.
+
+This bound covers the canonical application problem model, not host allocations, driver/context state, code, allocator granularity, all concurrently resident blocks, profiler libraries, or replay save/restore storage. Check actual free memory and profiler requirements before collection.
+
+EX14's tiny correctness-fixture bound is `2 x (64 x 32 x 4) + 4,224 = 20,608` bytes. That **20,608-byte bound remains distinct** from LAB10's `134,221,952-byte` performance-workload bound; never replace one with the other or claim that either is observed allocation traffic.
+
+## Declare stages and hypotheses
+
+The learner-owned runner launches these stages once in this fixed order. Adjacent stages form three passes, and each pass changes one variable at a time:
+
+```yaml
+stages:
+  - stage_id: baseline-direct
+    changed_variable: none; frozen direct output-linear baseline
+    hypothesis: exact-GPU evidence may characterize strided input reads and contiguous output writes; no timing order is predicted
+  - stage_id: coalescing-direction
+    changed_variable: thread-to-coordinate direction only
+    hypothesis: exact-GPU global-access evidence may distinguish input-linear ownership from baseline-direct; no metric value or winner is predicted
+  - stage_id: shared-memory-tiling
+    changed_variable: unpadded 32x32 shared staging plus one uniform block barrier only
+    hypothesis: exact-GPU evidence may support or reject the model of coalesced global reads and writes while exact output remains fixed
+  - stage_id: padded-bank-layout
+    changed_variable: physical shared row stride changes from 32 to 33 only
+    hypothesis: exact-GPU shared-bank evidence may support or reject the padding model; no direction, magnitude, or winner is predicted
+```
+
+The baseline uses output-linear ownership: adjacent threads write adjacent output elements and read transposed input coordinates. The coalescing-direction pass flips only that ownership so adjacent threads read adjacent input elements and write transposed output coordinates. The tiling pass keeps input-linear ownership and adds shared staging plus a uniform barrier so the static model can present contiguous global access on both sides. The bank-layout pass changes only physical shared stride `32` to `33`; it adds no logical column.
+
+**Held constants** across all four stages are the EX14 parent and CPU reference, finite non-NaN deterministic input and oracle values, `4096x4096` shape, out-of-place mapping, exact comparison, one stable device output allocation and address per process, the identical checked full-output quiet-NaN sentinel procedure before every launch, 256 threads per block, 32x32 logical tile, four cooperative slots per thread, edge guards, stage order, one selected GPU, C++17 Lane, compiler and link options, candidate binary, process environment, synchronization rule, profiler executable, selected section or metrics, filter, replay controls, and ten-attempt acquisition policy. The sentinel fill and complete-output readback stay outside selected kernel metrics. Preserve a reviewed source diff proving only the declared variable changed between adjacent stages. If another variable changes, create a new experiment.
+
+These are explicit hypotheses, not conclusions. LAB10 contains **no timing, metric, speedup, bottleneck, or winner**.
+
+## Create the complete unfilled Environment Manifest
+
+Save this template before any build or run. Every `unfilled` field requires an observation from this experiment. Missing evidence stays missing; never substitute zero. Constants identify the contract but do not fill observed environment fields.
+
+```yaml
+subject: EX14 / LAB10
+source_repository:
+  canonical_commit: 981939cc705faf721ac06d1b70f2c5c4a8111e92
+  tree_url: https://github.com/xiangzhang-coding/cuda-learning-site/tree/981939cc705faf721ac06d1b70f2c5c4a8111e92/examples/ex14-tiled-transpose
+  archive_url: https://github.com/xiangzhang-coding/cuda-learning-site/archive/981939cc705faf721ac06d1b70f2c5c4a8111e92.zip
+  reviewed_solution_public_path: /assets/exercise-solutions/q11-lab10-transpose-candidates.cu
+  reviewed_solution_repository_path: public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu
+  reviewed_solution_sha256: 920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251
+  acquisition_method: unfilled
+  checkout_and_worktree_state: unfilled
+  canonical_source_sha256: unfilled
+  candidate_parent_commit: unfilled
+  candidate_source_paths: unfilled
+  selected_candidate_source_path: unfilled
+  source_sha256: unfilled
+  adjacent_stage_diff_sha256: unfilled
+observation:
+  date_utc: unfilled
+  observer: unfilled
+supported_environment:
+  family: Native Linux
+  distribution: unfilled
+  version: unfilled
+  architecture: unfilled
+  kernel: unfilled
+analysis_runtime:
+  name: Node.js
+  node_path: unfilled
+  node_version_output: unfilled
+  required_version: 24.19.0
+  required_version_output: v24.19.0
+  exact_version_match_status_and_records_sha256: unfilled
+gpu:
+  identity: unfilled
+  selected_device_ordinal: unfilled
+  compute_capability: unfilled
+  compute_capability_query: unfilled
+  visible_count: unfilled
+  used_count: 1
+driver:
+  exact_version: unfilled
+  query_command_and_log_sha256: unfilled
+toolkit:
+  lane: unfilled
+  exact_toolkit_version: unfilled
+  runtime_and_driver_facing_components: unfilled
+  nvcc_path_and_version_output: unfilled
+  host_compiler_path_and_version_output: unfilled
+profiling_stack:
+  ncu_path: unfilled
+  initial_ncu_version_output: unfilled
+  bare_ncu_help_log_status_sha256: unfilled
+  exact_version_owner_cli_manual: unfilled
+  config_file_interface_actual_help_manual_agreement: unfilled
+  report_import_raw_csv_actual_help_manual_agreement: unfilled
+  config_file_branch: unfilled
+  config_file_absence_manual_coordinate_if_applicable: unfilled
+  config_args_expanded_argv_status_sha256: unfilled
+  ncu_version_output_with_frozen_config_args: unfilled
+  ncu_list_sections_log_status_sha256: unfilled
+  ncu_query_metrics_log_status_sha256: unfilled
+  cupti_version: unfilled
+  cupti_observation_method: unfilled
+  cupti_library_path_and_sha256: unfilled
+  toolkit_driver_profiler_cupti_compatibility: unfilled
+build:
+  cxx_dialect: c++17
+  build_type_and_optimization: unfilled
+  architecture_targets: unfilled
+  debug_lineinfo_lto_flags: unfilled
+  link_mode: unfilled
+  exact_ordered_commands_and_expanded_argv: unfilled
+  canonical_binary_path: build/ex14-tiled-transpose
+  canonical_binary_sha256: unfilled
+  candidate_binary_path: build/lab10-transpose-candidates
+  binary_sha256: unfilled
+workload:
+  element_type: float
+  rows: 4096
+  columns: 4096
+  element_count: 16777216
+  bytes_per_matrix: 67108864
+  global_matrix_bytes: 134217728
+  maximum_shared_bytes_per_block: 4224
+  declared_problem_bound_bytes: 134221952
+  actual_allocation_api_results: unfilled
+  profiler_owned_or_other_memory: unfilled
+stage_contract:
+  stage_order: [baseline-direct, coalescing-direction, shared-memory-tiling, padded-bank-layout]
+  exact_kernel_symbols: unfilled
+  source_ranges_and_hashes: unfilled
+  changed_variable_per_adjacent_pair: unfilled
+  held_constants_audit: unfilled
+  output_allocation_and_sentinel_invariant: one stable device output allocation/address per process; identical checked full-output quiet-NaN host-to-device fill outside selected kernel metrics
+  hypothesis_decision_rules: unfilled
+launch:
+  block_threads: 256
+  logical_tile: 32x32
+  cooperative_slots_per_thread: 4
+  selected_grid: unfilled
+  stream_and_context: unfilled
+  launches_per_stage_per_process: 1
+  explicit_cudaDeviceSynchronize_after_each_stage: required
+permissions:
+  device_access_result: unfilled
+  executable_and_filesystem_access: unfilled
+  node_and_reducer_execution_result: unfilled
+  administrator_policy_owner: unfilled
+  non_admin_counter_approval_record: unfilled
+  actual_counter_access_result: unfilled
+  report_write_result: unfilled
+  privilege_escalation: prohibited; no sudo or bypass
+execution_isolation:
+  cuda_visible_devices: unfilled
+  selected_device_state: unfilled
+  bare_metal_vm_container: unfilled
+  container_image_and_digest: unfilled
+  mig_state: unfilled
+  mps_state: unfilled
+  concurrent_gpu_and_cpu_load: unfilled
+  clocks_and_persistence_policy: unfilled
+  power_limit_and_policy: unfilled
+  thermal_state_before_and_after: unfilled
+commands:
+  build: unfilled
+  source_and_binary_hashes: unfilled
+  reviewed_runner_hash_verification: unfilled
+  reviewed_runner_compile_link: unfilled
+  unprofiled_correctness: unfilled
+  profiler_gates: unfilled
+  direct_process_warm_up: unfilled
+  profiler_attempts_01_through_10: unfilled
+  report_imports_01_through_10: unfilled
+  node_version_and_exact_match_gate: unfilled
+  reducer_hash_verification: unfilled
+  reduction: unfilled
+  reduction_artifact_hashes: unfilled
+correctness:
+  process_scope: every correctness, warm-up, and profiled process
+  input_and_oracle_values: finite non-NaN deterministic
+  oracle: independent canonical EX14 CPU reference
+  comparison: exact float equality for every element
+  fixtures: [5x7, 33x35, 64x32, 4096x4096]
+  per_stage_prelaunch_sentinel_fill_copy_statuses: unfilled
+  complete_output_device_to_host_copy_statuses: unfilled
+  output_shape_exact_oracle_and_no_sentinel_results: unfilled
+  per_stage_fixture_results: unfilled
+  all_cuda_boundaries: unfilled
+  explicit_synchronization_results: unfilled
+  unprofiled_exit_statuses_and_log_sha256: unfilled
+  warm_up_result_status_and_log_sha256: unfilled
+  profiled_process_results_01_through_10: unfilled
+warm_up:
+  count: 1
+  process_mode: direct unprofiled process
+  excluded_from_retained_samples: true
+  purpose_and_limit: unfilled
+repetition_plan:
+  fresh_profiler_attempts: 10
+  acquisition_order: [01, 02, 03, 04, 05, 06, 07, 08, 09, 10]
+  stage_launches_per_attempt: 4
+  raw_sample_retention: all attempts in acquisition order
+  statistic: median
+  spread: min and max
+  outlier_policy: no sample deletion or post-hoc exclusion
+  invalid_batch_policy: retain invalid full batch and restart all ten under a new batch ID
+kernel_selection:
+  actual_reported_names: unfilled
+  kernel_name_basis_from_actual_help: unfilled
+  selected_kernel_filter: unfilled
+  expected_selected_launch_count: 4
+collection:
+  selected_section: unfilled
+  selected_metrics: unfilled
+  minimality_rationale: unfilled
+  report_primary_artifact: .ncu-rep
+  derivative_interface: --import REPORT --page raw --csv
+  derivative_csv_source: imported primary report only
+  exact_metric_names_from_exact_gpu: unfilled
+  metric_definitions: unfilled
+  metric_units: unfilled
+  metric_scopes_and_aggregation: unfilled
+  device_process_context_stream_kernel_launch_filters: unfilled
+  missing_or_na_behavior: blocker, never zero
+replay:
+  requested_mode_from_actual_help: unfilled
+  actual_mode: unfilled
+  pass_count_per_stage_per_attempt: unfilled
+  save_restore_behavior: unfilled
+  cache_control: unfilled
+  clock_control: unfilled
+  serialization: unfilled
+  perturbation_boundary: unfilled
+attempt_records:
+  report_paths_and_sha256_01_through_10: unfilled
+  imported_raw_csv_paths_and_sha256_01_through_10: unfilled
+  import_stderr_and_exit_statuses_01_through_10: unfilled
+  report_to_derivative_hash_mapping: unfilled
+  stdout_stderr_paths_and_sha256_01_through_10: unfilled
+  tool_and_application_exit_statuses_01_through_10: unfilled
+  expanded_argv_01_through_10: unfilled
+  acquisition_ledger: unfilled
+reduction:
+  analysis_runtime: Node.js 24.19.0
+  required_node_version_output: v24.19.0
+  node_version_and_exact_match_records_sha256: unfilled
+  reducer_public_path: /assets/exercise-solutions/lab10-report-reducer.mjs
+  reducer_repository_path: public/assets/exercise-solutions/lab10-report-reducer.mjs
+  reducer_sha256: 7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb
+  ledger_path_and_sha256: unfilled
+  ledger_attempt_ids_01_through_10: unfilled
+  exact_stage_to_reported_kernel_mapping: unfilled
+  exact_metric_name_and_unit_pairs: unfilled
+  installed_version_csv_header_mapping: unfilled
+  raw_values_by_stage_metric_and_attempt: unfilled
+  statistics_input: exactly ten imported report-hash-bound rows per stage and selected metric
+  report_csv_hash_chain_sha256: unfilled
+  summary_path_and_sha256: unfilled
+  median_by_stage_and_metric: unfilled
+  minimum_and_maximum_by_stage_and_metric: unfilled
+  adjacent_stage_hypothesis_results: unfilled
+  no_sample_deletion_audit: unfilled
+custody:
+  private_original_directory: unfilled
+  source_binary_node_gate_reducer_report_csv_log_manifest_reduction_ledger_summary_hash_chain: unfilled
+  observer_and_transfer_history: unfilled
+  retention_and_access_policy: unfilled
+sanitization:
+  public_derivative_planned: unfilled
+  reviewer_and_date: unfilled
+  removed_coordinates: unfilled
+  transformations: unfilled
+  original_to_derivative_hash_mapping: unfilled
+criteria_result:
+  source_build_workload_gate: unfilled
+  correctness_and_synchronization_gate: unfilled
+  environment_version_permission_gate: unfilled
+  analysis_runtime_gate: unfilled
+  section_metric_filter_replay_gate: unfilled
+  report_import_raw_csv_gate: unfilled
+  ten_attempt_full_batch_gate: unfilled
+  reduction_integrity_gate: unfilled
+  hypothesis_interpretation_gate: unfilled
+  custody_and_sanitization_gate: unfilled
+  evidence_status_candidate_after_review: unfilled
+```
+
+The manifest is intentionally more complete than a GPU and version string. Without stage source identity, exact workload, the stable output allocation/address, per-stage sentinel fill/copy statuses, the resolved Node.js path and exact version output, permissions, selected kernel/filter, completion, replay, raw attempts, and custody, a comparison is not reviewable.
+
+## Review canonical source
+
+The independent reference is rendered only from EX14 and must remain the oracle for every stage:
+
+<CanonicalCode exampleId="EX14" range="cpu-reference" />
+
+The final padded layout, edge guards, cooperative ownership, and unconditional barrier are rendered only from EX14:
+
+<CanonicalCode exampleId="EX14" range="tiled-transpose" />
+
+The order is deliberate: establish the CPU oracle before reviewing the GPU stage that converges on canonical EX14. The imported code does not contain the learner-owned baseline or intermediate stages and supplies no timing or profiler evidence. VIS11 is reused only as **browser arithmetic** for row-major coordinates and stride-32/33 bank mapping; it runs no CUDA, reads no counter, and is **no evidence** for LAB10.
+
+## Build and hash sources and binaries
+
+First create the unique run root in one Bash session. Before executing any command, `run_recorded` rejects an existing record path; it saves the expanded command, stdout, stderr, and actual exit status, hashes those four records, and then returns the command's actual status. Every later call must use `|| exit 1`. Canonical build outputs remain in `build/`; all command evidence goes only under this unique `${run_dir}`:
+
+```bash
+run_id='<fill unique run id>'
+run_dir="lab10-evidence/${run_id}"
+test ! -e "$run_dir" || exit 1
+mkdir -p "${run_dir}"/{build,gates,correctness,warm-up,batches,reduction,custody} || exit 1
+
+run_recorded() {
+  local output_relative="$1"
+  shift
+  local stdout_path="${run_dir}/${output_relative}"
+  local record_base="$stdout_path"
+  case "$record_base" in
+    *.stdout.log) record_base="${record_base%.stdout.log}" ;;
+    *.csv) record_base="${record_base%.csv}" ;;
+  esac
+  local stderr_path="${record_base}.stderr.log"
+  local status_path="${record_base}.status"
+  local command_path="${record_base}.command"
+  local records_hash_path="${record_base}.records.sha256"
+  local record_path actual_status
+  test "$#" -gt 0 || return 2
+  for record_path in "$stdout_path" "$stderr_path" "$status_path" "$command_path" "$records_hash_path"; do
+    test ! -e "$record_path" || return 1
+  done
+  printf '%q ' "$@" >"$command_path" || return 1
+  printf '\n' >>"$command_path" || return 1
+  "$@" >"$stdout_path" 2>"$stderr_path"
+  actual_status=$?
+  printf '%s\n' "$actual_status" >"$status_path" || return 1
+  sha256sum "$stdout_path" "$stderr_path" "$status_path" "$command_path" \
+    >"$records_hash_path" || return 1
+  return "$actual_status"
+}
+
+run_recorded build/make-preprocess.stdout.log \
+  make -C examples/ex14-tiled-transpose preprocess DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-compile.stdout.log \
+  make -C examples/ex14-tiled-transpose compile DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-link.stdout.log \
+  make -C examples/ex14-tiled-transpose link DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-inspect.stdout.log \
+  make -C examples/ex14-tiled-transpose inspect DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/make-host-test.stdout.log \
+  make -C examples/ex14-tiled-transpose host-test DIALECT=c++17 BUILD_DIR=../../build || exit 1
+run_recorded build/canonical-source.sha256 sha256sum \
+  examples/ex14-tiled-transpose/include/tiled_transpose_reference.hpp \
+  examples/ex14-tiled-transpose/src/tiled_transpose.cu \
+  examples/ex14-tiled-transpose/Makefile || exit 1
+run_recorded build/canonical-binary.sha256 sha256sum build/ex14-tiled-transpose || exit 1
+```
+
+After the learner completes an attempt at [Q11 Exercise 2](/en/correctness/transpose-optimization-case-study/exercises/), LAB10's reviewed path uses Solution 2's complete original asset rather than an unexplained `lab10-work` source or binary. First verify the exact source hash through `run_recorded`, then compile and link it in the selected Lane with fixed C++17, `sm_75` SASS plus `compute_75` PTX targets, and the EX14 include path, and finally hash the binary:
+
+```bash
+run_recorded build/reviewed-runner-source-verify.stdout.log \
+  bash -c 'printf "%s  %s\n" "$1" "$2" | sha256sum --check --strict' \
+    verify-reviewed-runner \
+    920a4ca6f44586a3882e31756fca3e28feb655282327721e3fb3a308bac3f251 \
+    public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu || exit 1
+run_recorded build/reviewed-runner-compile.stdout.log \
+  nvcc \
+    --std=c++17 \
+    --generate-code=arch=compute_75,code=sm_75 \
+    --generate-code=arch=compute_75,code=compute_75 \
+    --include-path examples/ex14-tiled-transpose/include \
+    public/assets/exercise-solutions/q11-lab10-transpose-candidates.cu \
+    --output-file build/lab10-transpose-candidates || exit 1
+run_recorded build/candidate-binary.sha256 sha256sum \
+  build/lab10-transpose-candidates || exit 1
+```
+
+That expanded command is the exact compile/link contract for the reviewed asset. Its verification command, compile stdout/stderr/status, record hash, and candidate `binary_sha256` all enter custody; freeze the binary before correctness, warm-up, or profiling. A learner alternative may replace only the selected source path and must still satisfy the same CLI, stage order, independent EX14 oracle, adjacent-stage diff/hash, C++17 target/include/output, and source/build/binary hash contract. The site's three pinned Toolkit Lane gates only compile, link, and statically inspect the reviewed asset; they never execute it. Neither those gates nor this Lab-local build populate LAB10's empty compilation evidence, create a runtime observation, make the stages canonical, or grant Evidence Status.
+
+The selected Lane coordinates are fixed planning coordinates, not observations:
+
+| Lane | EX14 Toolkit / OS | Nsight Compute | CUPTI | EX14 declared image |
+| --- | --- | --- | --- | --- |
+| `cuda-11.8` | 11.8.0 / Ubuntu 22.04 x86-64 | 2022.3.0.22 | 11.8.87 | `nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` |
+| `cuda-12.9` | 12.9.2 / Ubuntu 24.04 x86-64; component source is the 12.9.1 release notes | 2025.2.1.3 | 12.9.79 | `nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` |
+| `cuda-13.3` | 13.3.1 / Ubuntu 24.04 x86-64; current 13.3 Update 1 | 2026.2.1.5 | 13.3.75 | `nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` |
+
+These declared NVIDIA CUDA images do not promise a `node` executable or any Node.js version. Provide the analysis runtime independently and retain its observed path and exact output without treating the image declaration as evidence. Actual `nvcc`, host compiler, driver, Toolkit, Nsight Compute, CUPTI, and Node.js records must match their frozen coordinates or produce a blocker.
+
+## Pass the exact unprofiled correctness baseline
+
+Run unmodified EX14 first. It must pass all canonical CUDA boundaries and exact CPU comparison for `5x7`, `33x35`, and `64x32`:
+
+```bash
+run_recorded correctness/ex14.stdout.log \
+  ./build/ex14-tiled-transpose || exit 1
+```
+
+Next run **every** learner-owned stage unprofiled against the same independent CPU reference for every fixture, including the declared candidate workload:
+
+```bash
+run_recorded correctness/candidates-5x7.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 5 --columns 7 --verify exact || exit 1
+run_recorded correctness/candidates-33x35.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 33 --columns 35 --verify exact || exit 1
+run_recorded correctness/candidates-64x32.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 64 --columns 32 --verify exact || exit 1
+run_recorded correctness/candidates-4096x4096.stdout.log \
+  ./build/lab10-transpose-candidates --all-stages --rows 4096 --columns 4096 --verify exact || exit 1
+```
+
+All five invocations use `run_recorded` and retain separate stdout, stderr, exit status, expanded command, and record SHA-256 files. The learner runner uses finite, non-NaN deterministic input and oracle values. Each candidate process allocates device output once before the stage sequence and makes `baseline-direct`, `coalescing-direction`, `shared-memory-tiling`, and `padded-bank-layout` reuse that same allocation and address. For each shape and stage, require the transposed shape, `output[col * rows + row] = input[row * columns + col]`, and exact float comparison for all elements. Comparing candidates only with each other is insufficient.
+
+Immediately before every stage launch on every fixture, the runner must fill the complete output with a quiet-NaN sentinel through a checked host-to-device copy and check the fill/copy CUDA status. It then launches, checks `cudaDeviceSynchronize`, performs a checked device-to-host copy of the complete output, and requires the correct output shape, every-element exact oracle equality, and that no sentinel remains. This sequence runs independently in every correctness, warm-up, and profiled process; no stage may inherit a correct output from its predecessor.
+
+Every allocation, sentinel fill/copy, complete-output copy, launch, and free must succeed. The stable allocation/address and identical sentinel procedure are held constants; the sentinel fill, readback, and host verification stay outside selected kernel metrics. This explicit completion and verification boundary is held across direct execution and every profiled process. Any mismatch, missing element, remaining sentinel, partial readback, CUDA error, synchronization failure, or nonzero process status blocks all profiler interpretation.
+
+## Pass exact-GPU profiler and permission gates
+
+Do not assume a current CLI option exists in an older selected Lane. First capture the actual executable without using config-file control:
+
+```bash
+run_recorded gates/ncu-version.initial.stdout.log ncu --version || exit 1
+run_recorded gates/ncu-help.bare.stdout.log ncu --help || exit 1
+```
+
+Retain both commands, statuses, and hashes, then select the exact-version NVIDIA owner CLI manual matching the observed version: the [2022.3 archive](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html), [2025.2 archive](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html), or [current 2026.2.1 manual](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html). The observed version must match the selected Lane. The actual bare help and exact owner manual must agree both about the config-file interface and about the `--import`, `--page raw`, and `--csv` options required for report readback. Collection cannot start if the version is unknown, any option is absent, or the two sources disagree.
+
+Freeze exactly one branch from that retained review:
+
+1. If both actual help and the matching manual expose config-file control, freeze `config_args=(--config-file off)`. Only this branch may use the 2025.2 or current manual's description of the `config.ncu-cfg` search; never project current search behavior onto an older CLI.
+2. If the reviewed older CLI has no config-file interface, freeze `config_args=()` and record both the absence and exact manual coordinate. Version 2022.3 must use this branch; never require or pass `--config-file off` on 2022.3.
+
+Do not delete user files, relocate private configuration silently, or pretend a control took effect. After freezing the branch, every controlled command uses the same array expansion:
+
+```bash
+config_branch='<fill interface-present or older-cli-no-interface from retained review>'
+manual_coordinate='<fill matching exact-version owner CLI manual coordinate>'
+case "$config_branch" in
+  interface-present)
+    config_args=(--config-file off)
+    ;;
+  older-cli-no-interface)
+    config_args=()
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+
+run_recorded gates/config-branch.stdout.log \
+  printf '%s\n' "config_branch=$config_branch" "manual_coordinate=$manual_coordinate" || exit 1
+run_recorded gates/ncu-version.controlled.stdout.log \
+  ncu "${config_args[@]}" --version || exit 1
+run_recorded gates/ncu-help.controlled.stdout.log \
+  ncu "${config_args[@]}" --help || exit 1
+run_recorded gates/ncu-list-sections.stdout.log \
+  ncu "${config_args[@]}" --list-sections || exit 1
+run_recorded gates/ncu-query-metrics.stdout.log \
+  ncu "${config_args[@]}" --devices 0 --query-metrics --query-metrics-mode all || exit 1
+```
+
+Record the config branch, manual coordinate, expanded argv, stdout, stderr, status, and SHA-256 for every gate. The selected section must appear in this installation's list. Every requested metric must appear in the query against this **exact GPU**. Do not copy a metric name from this page, another architecture, a screenshot, a blog, or an owner example; LAB10 intentionally publishes no architecture-specific metric name.
+
+Choose either **one minimal queried section** or a shorter **minimal queried metric list** sufficient to evaluate the three declared hypotheses. Record each actual name, definition, unit, scope, aggregation, instance behavior, and stage/filter mapping. `--set full`, unrelated occupancy/stall collections, and extra metrics are outside this experiment because they can add replay passes and perturbation without answering a declared question.
+
+Verify actual Toolkit, driver, Nsight Compute, and CUPTI compatibility, exact device selection, one writable learner-owned report directory, and the administrator-approved non-admin policy. The approval record is a precondition; actual counter access, report creation, and report import are confirmed by attempt 01. `ERR_NVGPUCTRPERM`, another denial, a required non-config option absent from actual help, absent `--import`/`--page raw`/`--csv`, an absent section, unavailable or `n/a` metric, CUPTI mismatch, wrong device, a missing report, or a failed raw-CSV import invalidates the full batch and is a blocker, never numeric zero. An administrator may correct policy outside the Lab, after which all ten attempts restart under a new batch ID. Use no `sudo` or bypass.
+
+## Run one excluded direct-process warm-up
+
+After source, build, correctness, version/help/query, compatibility, and approval gates pass, launch exactly one direct unprofiled `4096x4096` process:
+
+```bash
+run_recorded warm-up/direct.stdout.log \
+  ./build/lab10-transpose-candidates \
+    --all-stages --rows 4096 --columns 4096 --verify exact || exit 1
+```
+
+It must apply the same stable allocation/address and prelaunch full-output quiet-NaN sentinel procedure to all four stages and pass every fill/copy CUDA status, complete readback, no-sentinel-remains, exact-comparison, and explicit synchronization check. Record `excluded_from_retained_samples: true`; the warm-up contributes no statistic. It may expose direct-process context/module initialization, but it cannot remove first-profiled-kernel, fresh-process, replay, or profiler-library effects. Do not add hidden warm-ups or discard attempt 01.
+
+## Acquire exactly ten fresh profiler attempts
+
+Freeze one unique batch ID, source and binary hashes, environment, stage order, exact selected kernel names, selected kernel/filter, one section or metric list, actual replay controls, and every application argument before attempt 01. The four stage kernels run once in each process, so one batch contains exactly ten fresh `ncu` invocations and ten observations per stage, not forty independently reordered processes.
+
+Fill every placeholder from retained actual help/query/build evidence before execution:
+
+```bash
+batch_id='<fill unique batch id>'
+kernel_filter='<fill exact filter matching only the four declared stage kernels>'
+collection_args=(<fill either one --section NAME or --metrics NAME1,NAME2,...>)
+replay_args=(<fill actual-help-validated replay, cache, and clock controls>)
+batch_dir="${run_dir}/batches/${batch_id}"
+test ! -e "$batch_dir" || exit 1
+mkdir "$batch_dir" || exit 1
+
+for attempt in 01 02 03 04 05 06 07 08 09 10; do
+  attempt_dir="${batch_dir}/${attempt}"
+  test ! -e "$attempt_dir" || exit 1
+  mkdir "$attempt_dir" || exit 1
+  report_base="${attempt_dir}/transpose-stages"
+  test ! -e "${report_base}.ncu-rep" || exit 1
+  run_recorded "batches/${batch_id}/${attempt}/profile.stdout.log" \
+    ncu "${config_args[@]}" \
+    --devices 0 \
+    --kernel-name-base function \
+    --kernel-name "$kernel_filter" \
+    --launch-count 4 \
+    "${collection_args[@]}" \
+    "${replay_args[@]}" \
+    --export "$report_base" \
+    ./build/lab10-transpose-candidates \
+      --all-stages --rows 4096 --columns 4096 --verify exact || exit 1
+  test -f "${report_base}.ncu-rep" || exit 1
+  run_recorded "batches/${batch_id}/${attempt}/report.sha256" \
+    sha256sum "${report_base}.ncu-rep" || exit 1
+  run_recorded "batches/${batch_id}/${attempt}/report-raw.csv" \
+    ncu "${config_args[@]}" \
+      --import "${report_base}.ncu-rep" --page raw --csv || exit 1
+done
+```
+
+This is a command shape, not evidence that every displayed option is accepted by every Lane. Actual retained help and the matching manual govern the final frozen argv; collection and import both reuse the same `ncu` and `config_args` frozen by the profiler gate. `batch_dir` must not exist before the batch and is created exactly once. Each attempt directory must likewise be absent before `mkdir` creates it without `-p`, and `run_recorded` rejects every existing command-evidence path. Re-running a partial batch or attempt under the same ID therefore aborts before overwriting a log, status, CSV, or report. Retain the whole invalid batch and restart all ten under a new batch ID. Each attempt must be a fresh `ncu` invocation and fresh application process. Replay passes inside one `.ncu-rep` are not independent attempts.
+
+Retain attempts in acquisition order `01..10`. Each profiled process must contain exactly the four intended stage kernels in fixed order, one launch each, and independently perform the checked full-output quiet-NaN sentinel fill, synchronization, complete readback, shape, exact-oracle, and no-sentinel-remains checks on the same stable output allocation/address before and after each launch; those non-selected-kernel operations remain outside selected kernel metrics. Every attempt must also have zero collection/import/application statuses, complete selected metrics, a readable primary report, and a successful raw-CSV import. There is **no sample deletion**: never remove, replace, overwrite, reorder, or merge an inconvenient attempt. If any attempt is invalid, the **invalid attempt invalidates the full batch**. Retain that batch and blocker, correct the cause, then **restart all ten** in a new unique directory.
+
+## Preserve replay, report, and hash custody
+
+For each stage in each `.ncu-rep`, preserve requested and actual replay mode, pass count, memory save/restore behavior, cache control, clock control, serialization, selected device/context/stream/kernel/launch, and the measurement perturbation boundary. Nsight Compute may insert measurement libraries and replay a kernel because requested counters do not all fit in one pass. Kernel replay may save accessible memory and restore written memory; application replay reruns host activity instead. Record what the actual tool did rather than assuming either mode.
+
+The profiled execution is not interchangeable with the direct run. Metric count, section choice, first-kernel configuration, save/restore volume, cache state, clock policy, and serialization can affect overhead or context. A report value supports only its documented scope under that perturbation record.
+
+The `.ncu-rep` is primary. `--export` only creates the report; never assume it alone prints metric values to collection stdout. After creating and hashing each report, use the same exact `ncu` and frozen `config_args` to run `--import REPORT --page raw --csv`. Save the attempt-local `report-raw.csv`, import stderr, status, expanded command, and record hash, and tie that derivative explicitly to the parent report SHA-256. Metric names, units, raw values, and all four stage identities come only from the imported report, never collection stdout, a hard-coded stage order, a screenshot, or manual transcription. Preserve the primary report SHA-256 beside those import records, collection argv/stdout/stderr/status, source and binary hashes, help/query logs, manifest, and acquisition ledger. Maintain private-original custody and a hash mapping for every sanitized public derivative.
+
+## Reduce only a qualifying full batch
+
+Use the [complete original LAB10 report reducer](/assets/exercise-solutions/lab10-report-reducer.mjs), whose repository path is `public/assets/exercise-solutions/lab10-report-reducer.mjs` and exact SHA-256 is `7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb`. Its analysis runtime is exactly Node.js `24.19.0`, matching `package.json` and `.node-version`; a compatible range or another Node.js 24 release is not accepted. It is Apache-2.0 static reduction software, not a profiler capture, Runnable Example, runtime observation, or Evidence Status record.
+
+Create `${run_dir}/reduction/ledger.json` only from the ten successful `report-raw.csv` derivatives. The complete schema below enumerates exactly attempts `01..10`. Every `<fill ...>` comes from this batch's retained reports, imports, and hashes; this page prefills no observed name, unit, header, or value:
+
+```json
+{
+  "schemaVersion": 1,
+  "attempts": [
+    { "id": "01", "reportPath": "<fill unique report path for attempt 01>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 01>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "02", "reportPath": "<fill unique report path for attempt 02>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 02>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "03", "reportPath": "<fill unique report path for attempt 03>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 03>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "04", "reportPath": "<fill unique report path for attempt 04>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 04>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "05", "reportPath": "<fill unique report path for attempt 05>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 05>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "06", "reportPath": "<fill unique report path for attempt 06>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 06>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "07", "reportPath": "<fill unique report path for attempt 07>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 07>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "08", "reportPath": "<fill unique report path for attempt 08>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 08>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "09", "reportPath": "<fill unique report path for attempt 09>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 09>", "rawCsvSha256": "<fill lowercase SHA-256>" },
+    { "id": "10", "reportPath": "<fill unique report path for attempt 10>", "reportSha256": "<fill lowercase SHA-256>", "rawCsvPath": "<fill unique raw CSV path for attempt 10>", "rawCsvSha256": "<fill lowercase SHA-256>" }
+  ],
+  "stages": {
+    "baseline-direct": "<copy exact reported kernel identity for baseline-direct>",
+    "coalescing-direction": "<copy exact reported kernel identity for coalescing-direction>",
+    "shared-memory-tiling": "<copy exact reported kernel identity for shared-memory-tiling>",
+    "padded-bank-layout": "<copy exact reported kernel identity for padded-bank-layout>"
+  },
+  "metrics": [
+    { "name": "<copy exact queried metric name>", "unit": "<copy exact report unit>" }
+  ],
+  "csvColumnsByVersion": {
+    "<exact installed ncu version>": {
+      "kernel": "<copy exact installed-version CSV kernel header>",
+      "metric": "<copy exact installed-version CSV metric header>",
+      "unit": "<copy exact installed-version CSV unit header>",
+      "value": "<copy exact installed-version CSV value header>"
+    }
+  }
+}
+```
+
+Each `reportPath` and `rawCsvPath` resolves relative to the ledger directory, and all twenty resolved source paths must be unique. Copy the four stage values byte-for-byte from the imported reports' exact kernel identities; do not guess them from source symbols or fixed stage order. `metrics` retains each selected metric's exact name plus exact unit, including the exact empty string when the retained NCU row reports no unit; add same-shaped entries when selecting more than one metric. `csvColumnsByVersion` contains exactly one mapping for the actual installed profiler version and maps that retained CSV's literal headers to the four distinct `kernel`, `metric`, `unit`, and `value` roles. The reducer locates exactly one such mapped header row after any profiler/application preamble; owner documentation governs the CSV interface but does not supply these observed header strings.
+
+Resolve the executable path first. Before reducer source-hash verification or CLI execution, use `run_recorded` to capture `node --version`, then retain a separate recorded check proving both that captured output and the resolved executable output equal exactly `v24.19.0`. Only after both gates pass may you verify the reducer bytes, invoke the exact CLI `node public/assets/exercise-solutions/lab10-report-reducer.mjs <ledger> <summary>`, and hash both ledger and summary:
+
+```bash
+node_path="$(command -v node)" || exit 1
+test -n "$node_path" || exit 1
+run_recorded reduction/node-version.stdout.log \
+  node --version || exit 1
+run_recorded reduction/node-version-exact.stdout.log \
+  bash -c 'actual="$("$1" --version)" && recorded="$(<"$3")" && test "$actual" = "$2" && test "$recorded" = "$2"' \
+    verify-node-version "$node_path" v24.19.0 \
+    "${run_dir}/reduction/node-version.stdout.log" || exit 1
+run_recorded reduction/reducer-source-verify.stdout.log \
+  bash -c 'printf "%s  %s\n" "$1" "$2" | sha256sum --check --strict' \
+    verify-lab10-reducer \
+    7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb \
+    public/assets/exercise-solutions/lab10-report-reducer.mjs || exit 1
+test -f "${run_dir}/reduction/ledger.json" || exit 1
+test ! -e "${run_dir}/reduction/summary.csv" || exit 1
+run_recorded reduction/reducer.stdout.log \
+  node public/assets/exercise-solutions/lab10-report-reducer.mjs \
+    "${run_dir}/reduction/ledger.json" \
+    "${run_dir}/reduction/summary.csv" || exit 1
+run_recorded reduction/ledger-summary.sha256 \
+  sha256sum \
+    "${run_dir}/reduction/ledger.json" \
+    "${run_dir}/reduction/summary.csv" || exit 1
+```
+
+Retain the resolved Node.js path, version capture, exact-match command/status, and all corresponding stdout/stderr/record hashes in custody. A missing `node`, output other than `v24.19.0`, or failed exact-match record blocks reduction before the reducer hash or CLI can qualify. Running Node.js or the reducer is host-side analysis only and grants no CUDA compilation, profiler, runtime, performance, or other Evidence Status.
+
+The reducer requires the exact attempt IDs `01..10`, exact four stage IDs, unique source paths, unique kernel mappings, unique metric names, and exactly one installed-version header mapping. Unique paths do not require unique bytes: byte-identical reports, raw CSV files, valid observations, or equal hash values remain valid when their paths are unique and their actual hashes match. The reducer reads every actual report and CSV and checks its lowercase SHA-256 against the ledger, finds exactly one actual mapped header after optional preamble rows, rejects duplicate or missing required headers and every nonblank kernel identity outside the four-stage mapping, and requires **exactly one finite numeric scalar** for every attempt-stage-metric. A blank **value**, `n/a`/`N/A`/unavailable value, nonnumeric, nonfinite, wrong-unit, unexpected-kernel, duplicate, or missing selected row is a blocker; an exact empty unit is valid when it matches the ledger.
+
+Only after all checks pass may the ten report-hash-bound per-stage/per-metric rows enter statistics. The reducer emits one row for each stage, exact metric name, and unit with `count=10`, median, minimum, maximum (that is, median plus min/max), and the `lab10-report-csv-hash-chain-v1` chain derived in acquisition order from every report and CSV SHA-256. The summary never combines unlike units. Keep metric definition, scope, aggregation, instance behavior, filter, replay, and pass records separately in manifest and report custody: the script infers none of those semantics, decides no adjacent hypothesis, and never compares unlike units.
+
+Only after the complete reduction gate passes, use the predeclared hypothesis and separately retained owner-defined metric semantics to classify `baseline-direct -> coalescing-direction`, `coalescing-direction -> shared-memory-tiling`, and `shared-memory-tiling -> padded-bank-layout` separately as `supported`, `rejected`, or `inconclusive`. Use all ten samples. Do not delete an outlier, replace a failed row, join batches, or choose a favorable stage. A later timing ratio requires its own exact duration definition and qualifying rows; none is prefilled here.
+
+## Expected observations, not recorded results
+
+Expected observations are the nine frontmatter statements above. They predict process and evidence behavior, not metric direction or magnitude. In particular, correctness should remain exact, gates should return a record or blocker, one warm-up should remain excluded, ten complete primary reports and their hash-bound raw-CSV imports should be retained, and each hypothesis should end as supported, rejected, or inconclusive rather than being forced to pass.
+
+The recorded-result tables are intentionally blank:
+
+| Stage | Exact correctness | Actual queried metrics | 10 report hashes | Median | Min/max | Decision |
+| --- | --- | --- | --- | --- | --- | --- |
+| `baseline-direct` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+| `coalescing-direction` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+| `shared-memory-tiling` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+| `padded-bank-layout` | unfilled | unfilled | unfilled | unfilled | unfilled | unfilled |
+
+| Adjacent pass | Changed variable | Hypothesis result | Timing/speedup | Bottleneck/winner |
+| --- | --- | --- | --- | --- |
+| baseline to coalescing | thread-to-coordinate direction | unfilled | unfilled | unfilled |
+| coalescing to tiling | shared staging and uniform barrier | unfilled | unfilled | unfilled |
+| tiling to padded layout | physical shared stride 32 to 33 | unfilled | unfilled | unfilled |
+
+`recordedObservations` remains empty. The Learning Site publishes no measured timing, metric name or value, speedup, bottleneck, replay result, or winning stage.
+
+The [LAB10 Nsight Compute expected-only fixture](/assets/profiler-report-fixtures/lab10-nsight-compute.expected.json) is an original sanitized plan. It is not profiler output, not a `.ncu-rep`, contains an entirely `unfilled` Environment Manifest and no recorded observations, and grants no compilation or runtime evidence.
+
+## Acceptance criteria and blockers
+
+The Lab record is complete only when all criteria pass:
+
+1. Immutable EX14 source and selected runner provenance agree: after the learner attempt, select either the exact-hash reviewed asset or a learner alternative satisfying the same CLI, stage, oracle, adjacent-diff, build, and hash contract. The C++17 build command and result, source and binary hashes, one GPU, frozen workload, exact Node.js analysis-runtime requirement, and Environment Manifest agree, and the executable consumed by LAB10 matches the retained hash.
+2. Canonical EX14 passes its existing gate. Before profiling, four separate runner invocations qualify `5x7`, `33x35`, `64x32`, and `4096x4096`. The excluded warm-up and every profiled process then use only the frozen `4096x4096` workload. Within each invocation, all four learner stages use finite non-NaN deterministic input and oracle values and one stable device output allocation/address, with a checked host-to-device full-output quiet-NaN sentinel fill before every launch. Each stage passes its fill/copy CUDA status, `cudaDeviceSynchronize`, checked complete device-to-host readback, output shape, every-element exact oracle, no-sentinel-remains, and process-status checks.
+3. Actual version and bare help agree with the matching exact-version owner manual about config control, `--import`, `--page raw`, and `--csv`; the frozen two-branch `config_args`, exact-GPU section/metric queries, matching CUPTI, report writes/imports, and administrator-approved non-admin counter access pass.
+4. One excluded direct-process warm-up passes the identical per-stage allocation, sentinel, copy, and verification procedure and contributes no sample.
+5. One unique batch contains exactly ten fresh attempts in acquisition order. Every profiled process passes the identical per-stage allocation, sentinel, copy, and verification procedure and contains the same four selected kernels, its primary report and report hash, a successful imported raw CSV with import status and derivative hash, and complete collection logs, statuses, replay, and perturbation records.
+6. Before reducer source-hash verification or CLI execution, the retained Node.js path, recorded `node --version` output `v24.19.0`, and separate recorded exact-match gate pass. Then the exact-hash reducer, complete ledger schema, attempt IDs `01..10`, twenty unique source paths, actual report and CSV hashes, four report-derived stage/kernel mappings, exact metric name/unit pairs, installed-version header mapping, and every exactly-one-finite-scalar gate pass. The summary uses only the ten per-stage/per-metric values from those imported reports, emits `count=10`, median, min/max, and the report/CSV hash chain, and retains ledger and summary hashes.
+7. Each conclusion uses the separately retained metric definition and scope to answer only one predeclared adjacent-stage hypothesis. The reducer infers no semantics, compares no unlike units, and deletes no sample.
+8. Private-original custody, Node.js path/version/exact-match records, runner/reducer/ledger/summary hashes, sanitization review, original-to-derivative hash mapping, and criterion-by-criterion decision agree.
+
+Blockers include a reviewed runner or reducer asset path/hash mismatch; a learner alternative missing the required interface/stage/oracle/diff/hash contract; source, diff, build, binary, workload, stage-order, device, or environment drift; a missing Node.js executable or path, `node --version` output other than exact `v24.19.0`, a missing or failed separate exact-version record, or analysis-runtime drift; non-finite or NaN input/oracle values; multiple output allocations in one process, an address change between stages, or sentinel-procedure drift; any missing, failed, or incomplete prelaunch full-output quiet-NaN fill, host-to-device or device-to-host copy, output-shape or every-element exact comparison, remaining sentinel, CUDA, synchronization, or status check; an unknown profiler version, actual-help/manual disagreement, an absent report-import/raw-page/CSV option, wrong config branch, or frozen `config_args` drift; version, driver, Toolkit, CUPTI, or profiler mismatch; permission denial; unavailable, `n/a`, undefined, or wrongly scoped section/metric; wrong kernel/filter/count; missing or corrupt `.ncu-rep`; report import or CSV failure; a missing report-to-CSV hash mapping, log, status, or hash; a reused run, batch, attempt, record, or reduction path; replay ambiguity; invalid attempt; mixed or shortened batch; a ledger-schema, exact-attempt/stage-set, unique-path, actual-report/CSV-hash, exact-header-mapping, unit, or exactly-one-finite-scalar failure; a blank, nonnumeric, nonfinite, duplicate, or missing selected row; reducer failure; missing ledger, summary, or hash-chain custody; sample deletion; incomplete manifest/custody; or interpretation beyond the metric definition. Preserve the blocker. Never repair it with zero, a guessed name/value, sample deletion, `sudo`, or a stronger claim.
+
+## Keep evidence axes separate
+
+| Axis | Current status | Boundary |
+| --- | --- | --- |
+| Compilation | Empty | A learner-local canonical or candidate build is not a reviewed Toolkit-Lane Compile-Checked record for LAB10 |
+| Runtime | Pending Hardware Verification | No qualifying maintainer-controlled Reference Environment execution is recorded |
+| Recorded observations | Empty | Static models, browser arithmetic, commands, blank tables, and expected-only fixtures are not runtime observations |
+
+A successful exact Node.js gate or reducer execution satisfies only the host analysis contract. It does not compile or execute CUDA, run a profiler, observe a GPU, or grant CUDA compilation, runtime, performance, or other Evidence Status.
+
+A complete learner submission with its Environment Manifest and logs may be reviewed as **Community-Observed**. It is **not Runtime-Verified** unless a maintainer reproduces every criterion in a declared Reference Environment. Community-Observed evidence may coexist with Pending Hardware Verification and never upgrades the page automatically.
+
+## Clean up and sanitize without destroying evidence
+
+Preserve canonical and candidate source hashes; the reviewed runner and reducer asset paths and exact hashes; adjacent diffs; binary hashes; the complete manifest; all gate/help/query output; the resolved Node.js path plus version and exact-match command/stdout/stderr/status/hash records; permission records; correctness and warm-up logs; every valid or invalid batch; every primary `.ncu-rep` and report hash; imported raw CSV plus import stderr/status/hashes; stdout/stderr/status files; the complete reduction ledger and hash; summary and hash; report/CSV hash chain; raw rows; blockers; custody history; and sanitization mapping. Then remove only rebuildable files while retaining cleanup command evidence through the same unique run root:
+
+```bash
+run_recorded custody/make-clean.stdout.log \
+  make -C examples/ex14-tiled-transpose clean BUILD_DIR=../../build || exit 1
+```
+
+Do not publish credentials, environment values, administrator records, user/host identities, private absolute paths, device serials or UUIDs, network coordinates, or unreviewed reports. A sanitized derivative must retain the private original's hash, parent mapping, reviewer, review date, and exact transformations. Never sanitize by changing a measured value or deleting an inconvenient sample.
+
+## Sources and review
+
+- The selected [CUDA 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html), [CUDA 12.9 Update 1](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html), and [current CUDA 13.3 Update 1](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) release notes govern the Toolkit, bundled Nsight Compute, and CUPTI planning coordinates. Installed behavior still requires observation.
+- The current [CUDA Programming Guide v13.3 transpose/shared-memory section](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#matrix-transpose-example-using-shared-memory) governs coalescing, shared staging, synchronization, bank layout, and padding concepts. LAB10 copies no owner sample or result and makes its rectangular, 256-thread/four-slot learner stages independently.
+- The archived [Nsight Compute CLI 2022.3](https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html) governs the older interface coordinate for the cuda-11.8 Lane and exposes no config-file interface. The archived [Nsight Compute CLI 2025.2](https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html) governs the config-file and CLI interface coordinate for the cuda-12.9 Lane. Actual bare help must agree with the matching manual, and 2022.3 never receives `--config-file off`.
+- The current [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html), [CLI Guide](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html), and [2026.2.1 Release Notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html#updates-in-2026-2-1) govern sections, metric queries, kernel filters, replay, save/restore, overhead, reports, and current support boundaries. Current config-search behavior applies only in the branch where matching help and manual confirm that feature; it does not override an archived interface. Actual retained help controls selected-Lane syntax.
+- The current [CUPTI Usage Guide](https://docs.nvidia.com/cupti/main/main.html) governs profiler compatibility, counter availability, overhead, and subscriber boundaries; it does not observe the learner's loaded component.
+
+Context7 IDs `/websites/nvidia_cuda_cuda-programming-guide` and `/websites/nvidia_nsight-compute_nsightcompute` were used for **discovery and cross-check only**. The exact NVIDIA owner documentation and release notes linked above are authoritative and govern version/interface claims. Every owner source was accessed on **2026-09-02**. The stage ledger, hypotheses, workload arithmetic, manifest, commands, sample policy, blank tables, custody, and prose are original CC BY 4.0 content; no profiler output, metric name/value, timing, speedup, bottleneck, or winner was copied or fabricated.
+
+**Fact checked: 2026-09-02.** Compilation evidence is empty, runtime is Pending Hardware Verification, and recorded observations are empty.
