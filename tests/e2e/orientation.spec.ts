@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(432);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(216);
+  expect(routes).toHaveLength(438);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(219);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -125,6 +125,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/correctness/reduction-optimization-case-study/', en: '/en/correctness/reduction-optimization-case-study/' },
     { zh: '/correctness/reduction-optimization-case-study/exercises/', en: '/en/correctness/reduction-optimization-case-study/exercises/' },
     { zh: '/correctness/reduction-optimization-case-study/solutions/', en: '/en/correctness/reduction-optimization-case-study/solutions/' },
+    { zh: '/correctness/gemm-optimization-case-study/', en: '/en/correctness/gemm-optimization-case-study/' },
+    { zh: '/correctness/gemm-optimization-case-study/exercises/', en: '/en/correctness/gemm-optimization-case-study/exercises/' },
+    { zh: '/correctness/gemm-optimization-case-study/solutions/', en: '/en/correctness/gemm-optimization-case-study/solutions/' },
     { zh: '/examples/vector-addition/', en: '/en/examples/vector-addition/' },
     { zh: '/examples/multidimensional-indexing/', en: '/en/examples/multidimensional-indexing/' },
     { zh: '/examples/error-handling-lifecycle/', en: '/en/examples/error-handling-lifecycle/' },
@@ -237,6 +240,8 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'Q10 Arithmetic Intensity 可审计 Roofline', localePrefix: '/', expectedHrefs: ['/correctness/roofline-arithmetic-intensity/'] },
     { route: '/', button: /搜索/, query: 'Q11 Hypothesis ledger', localePrefix: '/', expectedHrefs: ['/correctness/transpose-optimization-case-study/'] },
     { route: '/', button: /搜索/, query: 'Q11 competing explanations', localePrefix: '/', expectedHrefs: ['/correctness/transpose-optimization-case-study/solutions/'] },
+    { route: '/', button: /搜索/, query: 'Q13 tile reuse occupancy traffic hypothesis', localePrefix: '/', expectedHrefs: ['/correctness/gemm-optimization-case-study/'] },
+    { route: '/', button: /搜索/, query: 'Q13 occupancy Tensor Core production claim', localePrefix: '/', expectedHrefs: ['/correctness/gemm-optimization-case-study/solutions/'] },
     { route: '/', button: /搜索/, query: 'LAB06 构建重叠流水线', localePrefix: '/', expectedHrefs: ['/labs/build-overlapped-pipeline/'] },
     { route: '/', button: /搜索/, query: 'LAB08 先分析完整应用 再分析一个内核', localePrefix: '/', expectedHrefs: ['/labs/profile-full-application-before-kernel/'] },
     { route: '/', button: /搜索/, query: 'LAB09 构建原创 Roofline', localePrefix: '/', expectedHrefs: ['/labs/build-original-roofline/'] },
@@ -297,6 +302,8 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'Q10 Auditable Roofline Arithmetic Intensity', localePrefix: '/en/', expectedHrefs: ['/en/correctness/roofline-arithmetic-intensity/'] },
     { route: '/en/', button: /Search/, query: 'Q11 Optimize the Canonical Transpose with Controlled Evidence', localePrefix: '/en/', expectedHrefs: ['/en/correctness/transpose-optimization-case-study/'] },
     { route: '/en/', button: /Search/, query: 'Q11 Reviewed Solutions Controlled Transpose Evidence', localePrefix: '/en/', expectedHrefs: ['/en/correctness/transpose-optimization-case-study/solutions/'] },
+    { route: '/en/', button: /Search/, query: 'Q13 Optimize the Canonical GEMM with Controlled Evidence', localePrefix: '/en/', expectedHrefs: ['/en/correctness/gemm-optimization-case-study/'] },
+    { route: '/en/', button: /Search/, query: 'Q13 Reviewed Solutions Controlled GEMM Evidence', localePrefix: '/en/', expectedHrefs: ['/en/correctness/gemm-optimization-case-study/solutions/'] },
     { route: '/en/', button: /Search/, query: 'LAB06 Build an Overlapped Pipeline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-overlapped-pipeline/'] },
     { route: '/en/', button: /Search/, query: 'LAB08 Profile the Full Application Before One Kernel', localePrefix: '/en/', expectedHrefs: ['/en/labs/profile-full-application-before-kernel/'] },
     { route: '/en/', button: /Search/, query: 'LAB09 Build an Original Roofline', localePrefix: '/en/', expectedHrefs: ['/en/labs/build-original-roofline/'] },
@@ -496,6 +503,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/correctness/kernel-first-nsight-compute/solutions/',
     '/correctness/transpose-optimization-case-study/',
     '/en/correctness/transpose-optimization-case-study/',
+    '/correctness/gemm-optimization-case-study/',
+    '/en/correctness/gemm-optimization-case-study/',
     '/examples/vector-addition/',
     '/en/examples/vector-addition/',
     '/examples/multidimensional-indexing/',

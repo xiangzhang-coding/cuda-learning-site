@@ -3,7 +3,7 @@ title: 'A09：用 Scan、Histogram 与 Movement 组合排序、选择和压缩'
 description: 从 flag、exclusive scan、histogram、atomic ownership 与 scatter 推导 selection、stream compaction 和 bounded-key sorting vocabulary，再进入 CUB/Thrust production decision。
 pairId: a09
 counterpart: /en/algorithms/sorting-selection-compaction/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -67,7 +67,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/algorithms/sorting-selection-compaction/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -149,7 +149,7 @@ CUB `DeviceRadixSort` 提供 device-wide radix sort，CUB `DeviceSelect` 提供 
 
 A09 四个 evidence arrays 均为空。它不编译或运行 CUB/Thrust/custom kernel，也没有 measured timing、throughput、temporary-storage footprint、contention counter 或 speedup。Context7 `/nvidia/cccl` 只用于 2026-08-31 discovery/cross-check；exact v3.4.2 release 与 source URLs 才是发布坐标。
 
-LAB12 不属于 A09，但本 ticket 仍保持它未发布：它严格依赖 Q13 与 L06，而两者都没有 public destination。
+LAB12 不属于 A09，并且当前仍未发布：[Q13](/correctness/gemm-optimization-case-study/)已经有 public destination，但它的另一项严格先修 L06 仍未发布。
 
 ## 离开前检查
 

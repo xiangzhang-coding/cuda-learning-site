@@ -1271,6 +1271,40 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-02',
     keywords: localized('reduction profiler permission replay report manifest tolerance bitwise CUB audit', 'reduction profiler permission replay report manifest tolerance bitwise CUB audit'),
   },
+  {
+    planningId: 'PB-R3-011',
+    group: 'practice',
+    title: localized('不用背诵 tile size 推导 GEMM stage graph', 'Derive a GEMM stage graph instead of memorizing a tile size'),
+    href: localized('/practice/#pb-r3-011', '/en/practice/#pb-r3-011'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['Q13'],
+    relatedUnits: ['A08', 'Q06', 'Q08', 'Q10', 'Q13', 'EX15', 'VIS12'],
+    hardwareGate: localized('无；只推导 static tile/reuse/resource ledgers 并设计 falsifiable comparison，不运行 CUDA 或 profiler。', 'None; derive static tile, reuse, and resource ledgers and design a falsifiable comparison without running CUDA or a profiler.'),
+    versionGate: localized(
+      'CUDA Programming/Best Practices Guides v13.3、Toolkit 11.8.0/12.9.2/13.3.1 与 Nsight Compute 2026.2.1；无 measured claim。',
+      'CUDA Programming and Best Practices Guides v13.3, Toolkits 11.8.0/12.9.2/13.3.1, and Nsight Compute 2026.2.1; no measured claim.',
+    ),
+    reviewedOn: '2026-09-03',
+    keywords: localized('GEMM tile shape K tile reuse shared bytes accumulator hypothesis memorized size', 'GEMM tile shape K tile reuse shared bytes accumulator hypothesis memorized size'),
+  },
+  {
+    planningId: 'PB-R3-012',
+    group: 'practice',
+    title: localized('审查无保管链的 GEMM occupancy 与 production claim', 'Audit an uncustodied GEMM occupancy and production claim'),
+    href: localized('/practice/#pb-r3-012', '/en/practice/#pb-r3-012'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['Q13'],
+    relatedUnits: ['A08', 'Q06', 'Q08', 'Q10', 'Q13', 'EX15', 'VIS12'],
+    hardwareGate: localized('无；只审查 static summary 与 expected-only fixture，不运行 CUDA、Nsight Compute 或未发布的 LAB12。', 'None; audit a static summary and expected-only fixture without running CUDA, Nsight Compute, or unpublished LAB12.'),
+    versionGate: localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1、Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5 与 exact GPU/compiler/profiler/manifest gates。',
+      'Toolkits 11.8.0/12.9.2/13.3.1, Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5, and exact GPU, compiler, profiler, and manifest gates.',
+    ),
+    reviewedOn: '2026-09-03',
+    keywords: localized('GEMM occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit', 'GEMM occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -2421,6 +2455,18 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-02',
     '2026-09-02',
+  ),
+  sourceRecord(
+    'SRC-CUDA-056',
+    localized('Q13/EX15/VIS12 GEMM optimization 与 evidence boundary', 'Q13/EX15/VIS12 GEMM optimization and evidence boundary'),
+    'cuda-version-record',
+    ['A08', 'Q06', 'Q08', 'Q10', 'Q13', 'EX15', 'VIS12'],
+    localized(
+      'CUDA Programming/Best Practices Guides v13.3；Toolkit 11.8.0/12.9.2/13.3.1；Nsight Compute 2026.2.1；tile/reuse、FP32/double、compiler resources、occupancy、traffic、query/permission/replay 与 expected-only fixture boundaries。',
+      'CUDA Programming and Best Practices Guides v13.3; Toolkits 11.8.0/12.9.2/13.3.1; Nsight Compute 2026.2.1; tile and reuse, FP32 and double, compiler resources, occupancy, traffic, query, permission, replay, and expected-only fixture boundaries.',
+    ),
+    '2026-09-03',
+    '2026-09-03',
   ),
 ];
 

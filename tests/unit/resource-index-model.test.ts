@@ -13,7 +13,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-09-02T12:00:00Z');
+const asOf = new Date('2026-09-03T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -24,14 +24,14 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(324);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(327);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 10, practice: 60, visuals: 18, glossary: 165, sources: 71 });
-    for (const absentId of ['L03', 'LAB11', 'Q13', 'L06', 'LAB12']) {
+    ).toEqual({ labs: 10, practice: 62, visuals: 18, glossary: 165, sources: 72 });
+    for (const absentId of ['L03', 'LAB11', 'L06', 'LAB12']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -73,7 +73,7 @@ describe('resource index catalog', () => {
     });
 
     expect(Object.fromEntries(
-      ['A14', 'Q09', 'Q10', 'Q11', 'Q12', 'LAB09', 'LAB10', 'VIS13'].map((planningId) => [
+      ['A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'LAB09', 'LAB10', 'VIS13'].map((planningId) => [
         planningId,
         {
           href: PUBLISHED_DESTINATIONS[planningId].href.en,
@@ -86,6 +86,7 @@ describe('resource index catalog', () => {
       Q10: { href: '/en/correctness/roofline-arithmetic-intensity/', prerequisites: ['Q05', 'A14'] },
       Q11: { href: '/en/correctness/transpose-optimization-case-study/', prerequisites: ['A05', 'Q06', 'Q08', 'Q10'] },
       Q12: { href: '/en/correctness/reduction-optimization-case-study/', prerequisites: ['A02', 'Q02', 'Q06', 'Q08'] },
+      Q13: { href: '/en/correctness/gemm-optimization-case-study/', prerequisites: ['A08', 'Q06', 'Q08', 'Q10'] },
       LAB09: { href: '/en/labs/build-original-roofline/', prerequisites: ['Q10'] },
       LAB10: { href: '/en/labs/optimize-canonical-transpose/', prerequisites: ['Q11'] },
       VIS13: { href: '/en/visuals/roofline/', prerequisites: ['Q10'] },
@@ -191,8 +192,8 @@ describe('resource index catalog', () => {
       'PB-R2-012', 'PB-R2-013', 'PB-R2-014', 'PB-R2-015', 'PB-R2-016',
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-(?:00[1-9]|010)$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010',
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-(?:00[1-9]|01[0-2])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
@@ -212,8 +213,8 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-04[6-9]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-046', 'SRC-CUDA-047', 'SRC-CUDA-048', 'SRC-CUDA-049',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-05[0-5]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052', 'SRC-CUDA-053', 'SRC-CUDA-054', 'SRC-CUDA-055',
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-05[0-6]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052', 'SRC-CUDA-053', 'SRC-CUDA-054', 'SRC-CUDA-055', 'SRC-CUDA-056',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
@@ -252,10 +253,10 @@ describe('resource index catalog', () => {
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-09-01T16:00:00Z'),
+      asOf: new Date('2026-09-02T16:00:00Z'),
     })).not.toThrow();
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-09-01T15:59:59Z'),
+      asOf: new Date('2026-09-02T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
 

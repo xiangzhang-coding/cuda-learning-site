@@ -1,0 +1,296 @@
+---
+title: 'Q13: Optimize the Canonical GEMM with Controlled Evidence'
+description: Start from EX15, then test K-tile, rectangular-tile, and thread-coarsening hypotheses while preserving precision, correctness, resource, architecture, and evidence boundaries.
+pairId: q13
+counterpart: /correctness/gemm-optimization-case-study/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - canonical-baseline
+  - hypothesis-ledger
+  - measurement-contract
+  - stage-k-tile
+  - stage-output-tile
+  - stage-thread-coarsening
+  - resource-occupancy
+  - traffic-roofline
+  - precision-compiler-architecture
+  - profiler-method
+  - visual-boundary
+  - production-library-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: Q13
+prerequisites:
+  - A08
+  - Q06
+  - Q08
+  - Q10
+relatedUnits:
+  - EX15
+  - VIS12
+exampleIds:
+  - EX15
+canonicalExample: EX15
+canonicalRanges:
+  - cpu-reference
+  - tiled-gemm
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Shared Memory in Matrix Multiplication (C=AB)'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current shared-memory GEMM reuse, verification, and incremental optimization context'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Occupancy'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current occupancy, active-warp, latency-hiding, and non-maximization boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Register Pressure'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#register-pressure'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current register-allocation, occupancy, and local-memory trade-off boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Which Compute Capability Target'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#which-compute-capability-target'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current virtual and real architecture target selection boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA Programming Guide v13.3 - Notes on Host/Device Computation Accuracy'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current floating-point order, FMA, precision, and host/device comparison boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA 11.8.0 Compiler Driver - Supported Phases'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases'
+    version: 'CUDA Toolkit 11.8.0; NVCC 11.8'
+    platform: 'Selected cuda-11.8 C++17 compile-only Lane'
+    accessDate: '2026-09-03'
+  - title: 'CUDA 12.9.2 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 12.9.2; NVCC 12.9'
+    platform: 'Selected cuda-12.9 C++17 compile-only Lane'
+    accessDate: '2026-09-03'
+  - title: 'CUDA 13.3.1 Compiler Driver'
+    url: 'https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html'
+    version: 'CUDA Toolkit 13.3.1; NVIDIA CUDA Compiler Driver v13.3'
+    platform: 'Selected cuda-13.3 C++17 compile-only Lane and current target/resource interface'
+    accessDate: '2026-09-03'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current metric, replay, overhead, permission, resource, and reproducibility boundaries'
+    accessDate: '2026-09-03'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'NVIDIA Nsight Compute 2026.2.1'
+    platform: 'Current exact-GPU query, kernel filtering, collection, and report interface'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: q13 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/correctness/gemm-optimization-case-study/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-k-tile,stage-output-tile,stage-thread-coarsening,resource-occupancy,traffic-roofline,precision-compiler-architecture,profiler-method,visual-boundary,production-library-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: Q13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,Q06,Q08,Q10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX15,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX15 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,tiled-gemm' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,11.8.0,12.9.2,13.3.1,2026.2.1' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/correctness/gemm-optimization-case-study/" lang="zh-CN">阅读中文对应页</a>
+
+Q13 is a correctness-first, evidence-bounded general matrix multiplication (GEMM, TERM-147) optimization case study, not a tile recipe or benchmark. It starts with immutable EX15 and gives each K-tile, output-tile, and thread-coarsening edge a falsifiable hypothesis before collection. A remembered tile size, a browser diagram, or an isolated occupancy percentage cannot select a winner. The Learning Site has run neither the reviewed runner, CUDA, nor a profiler.
+
+## What you should be able to do
+
+- Preserve EX15's row-major equation, independent double CPU reference, finite-value policy, and absolute-plus-relative tolerance for every candidate.
+- Derive tile-shape and reuse coordinates before predicting requested traffic or a resource trade-off.
+- Separate source-declared shared storage and accumulator count from compiler allocation, theoretical occupancy, achieved occupancy, and elapsed behavior.
+- Freeze matrix shape, precision, compute capability, workload, warm-up, completion, statistics, profiler method, Environment Manifest, and correctness result for every measured stage.
+- Reject memorized tile sizes and production claims that lack matched evidence and exact library contracts.
+
+## Prerequisites
+
+Complete [A08: From Correct Naive GEMM to Shared-Memory Tiling](/en/algorithms/tiled-gemm-correctness/), [Q06: Use APOD as an Optimization Loop](/en/correctness/apod-optimization-loop/), [Q08: Ask One Selected-Kernel Question with Nsight Compute](/en/correctness/kernel-first-nsight-compute/), and [Q10: Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/) in the exact order `A08, Q06, Q08, Q10`. [EX15](/en/examples/tiled-gemm/) and [VIS12](/en/visuals/gemm-tiling-hierarchy/) are related resources, not additional prerequisite edges.
+
+## Freeze the EX15 precision and correctness baseline
+
+[View the immutable EX15 source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm), or [download the archive for the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip). The project manifest, pin, and two canonical imports below identify one revision; Q13 does not modify EX15.
+
+The `cpu-reference` range owns checked `M`, `K`, and `N` counts, deterministic fixtures, double accumulation, finite validation, mismatch coordinates, and the comparator:
+
+<CanonicalCode exampleId="EX15" range="cpu-reference" />
+
+The `tiled-gemm` range owns the portable `16x16x16` shared-memory baseline, partial-tile zero fill, two uniform block barriers per K slice, FP32 device accumulation, and the alpha/beta epilogue:
+
+<CanonicalCode exampleId="EX15" range="tiled-gemm" />
+
+Q13 writes a shape as `M x K x N`: `A[M,K] * B[K,N] -> C[M,N]`. VIS12 separately displays matrix and output-tile extents; translate its labels back to this declared order rather than guessing from three unlabeled numbers. The frozen equation is:
+
+`C[row * N + col] = alpha * sum(A[row * K + p] * B[p * N + col]) + beta * C[row * N + col]`
+
+Every stage must first pass `2x3x2-hand`, `33x31x35-partial`, and `32x32x32-aligned`, then the declared measurement shape. The reviewed runner identifies those three shapes through `ex15::kFixtures`, calls `ex15::make_fixture`, and preserves each fixture's published alpha, beta, and input bytes. It calls `ex15::gemm_reference` with double accumulation and `ex15::verify_tolerance` with `absolute_error <= 1e-4 + 2e-5 * abs(cpu_reference)`. Passing this problem-specific tolerance does not prove bitwise identity, determinism outside the frozen coordinate, or performance.
+
+## Write the hypothesis ledger before collection
+
+Keep one record per adjacent edge. A later report cannot repair a missing pre-result declaration.
+
+| field | required declaration |
+| --- | --- |
+| identity | stage ID, immutable EX15 parent, candidate source and binary SHA-256, expanded build command |
+| tile and ownership | labeled `TM x TN x TK`, block dimensions, outputs per thread, K-slice count, edge behavior |
+| reuse and traffic | A/B values loaded per full tile, reuse counts, normalization, source estimate, queried path |
+| resources | source shared bytes and accumulators, compiler-reported registers/local memory, exact hardware limits |
+| held constants | shape and bytes, alpha/beta, data/accumulation types, oracle/tolerance, toolchain, GPU, method |
+| decision | support, reject, no-answer, rollback, and next-question rules |
+| alternatives | at least two explanations that the selected evidence cannot eliminate |
+
+The fixed stage IDs are `canonical-16x16x16`, `k-tile-16x16x8`, `rectangular-32x8x8`, and `coarsened-32x16x8`. The numbers label experimental coordinates only. They are not defaults for another shape, precision, compiler, or architecture. Stop when correctness fails or comparison coordinates drift; do not silently promote that stage.
+
+## Freeze every stage's measurement contract
+
+All four stages use row-major non-transposed `A[1024,1024]`, `B[1024,1024]`, and `C[1024,1024]`; deterministic finite FP32 inputs and output; FP32 device accumulation; independent double CPU accumulation; `alpha=0.75`; and `beta=0.25`. The three device matrices occupy 12,582,912 bytes. This is a Baseline GPU Capability Tier workload, not a measured memory-footprint result.
+
+Because beta is nonzero, copy the original C bytes into the same stable device allocation immediately before every correctness, warm-up, retained, and profiled attempt. Each process performs three excluded direct warm-ups. Each complete GEMM ends with checked `cudaDeviceSynchronize`. Retain ten fresh unprofiled attempts in declared order and report the predeclared median plus minimum and maximum without deleting samples. Profiled collection is a separate process and observation.
+
+Every stage record repeats the exact matrix shapes, A/B/C and accumulation types, exact GPU compute capability, source/build/workload identity, warm-up, synchronization, retained statistics, profiler version/query/filter/replay, permission result, complete Environment Manifest, CPU-reference/tolerance result, and bounded interpretation. Any missing coordinate stops comparison. The downloadable [original expected-only Q13 fixture](/assets/profiler-report-fixtures/q13-nsight-compute.expected.json) freezes this schema with all environment and result cells unfilled.
+
+## Stage 1: Change only the K-tile extent
+
+`canonical-16x16x16` uses `TM=16`, `TN=16`, `TK=16`, a `16x16` block, one output per thread, two 16-by-16 shared arrays, and 2,048 source-declared shared bytes. `k-tile-16x16x8` keeps the same output footprint, 256 threads, one output owner, p-order, mathematical full-tile A/B reuse, and aligned-workload request total, but changes `TK` to 8. Because each shared array now has 128 rather than 256 slots, cooperative-load ownership, active load instructions, and per-instruction address groups also change; the ledger must disclose them rather than call every non-`TK` coordinate fixed.
+
+For aligned `K=1024`, source arithmetic predicts 64 versus 128 K slices and 128 versus 256 block-barrier executions. It predicts 2,048 versus 1,024 static shared bytes per block while preserving the same total full-workload tile-load estimate. The resource hypothesis says an exact compiled record should report lower static shared storage. Equal or higher rejects that mechanism. A resident-block increase is possible only if shared memory was the limiting resource; otherwise occupancy remains unanswered. Load-instruction and coalescing evidence must be interpreted against the changed participant/address grouping. No elapsed direction is predicted.
+
+## Stage 2: Change the output-tile shape and reuse direction
+
+`rectangular-32x8x8` keeps `TK=8`, 256 threads, one output per thread, p-order, precision, and collection method, but changes the output tile to `TM=32`, `TN=8` and the block to `(8,32)`. A full slice loads 256 A values and 64 B values for 256 outputs: each A value is reused across eight columns and each B value across 32 rows.
+
+Relative to `k-tile-16x16x8`, this edge changes directional reuse, shared footprint, grid geometry, and edge fraction as a disclosed bundle. For the fixed aligned workload, source arithmetic predicts more requested A/B values per completed output. A matching requested-traffic field with the same scope and normalization should be higher; equal or lower rejects the traffic mechanism, while no definition-compatible field yields no answer. A tall or narrow matrix may change useful work and edge waste, but it begins a new workload comparison rather than proving this tile generally suitable.
+
+## Stage 3: Trade thread-level work for cross-thread reuse
+
+`coarsened-32x16x8` keeps `TM=32`, `TK=8`, and 256 threads but expands `TN` to 16. Each thread owns two output rows at one column and therefore holds two source accumulators. A full slice loads 256 A and 128 B values for 512 outputs: A reuse is 16, B reuse is 32, and source-requested A/B values per output fall relative to `rectangular-32x8x8`.
+
+The reuse hypothesis predicts lower matching requested traffic normalized to completed output; equal or higher rejects it, and no matching field yields no answer. The resource hypothesis predicts only that the source exposes two live accumulators and 1,536 shared bytes. It does not predict the final register count. Compiler allocation, spills, instruction mapping, fewer blocks, edge waste, and longer per-thread dependency chains are coupled changes. Even supported reuse evidence cannot establish an elapsed winner.
+
+## Keep resource use and occupancy as separate evidence
+
+Source-declared shared bytes are 2,048, 1,024, 1,280, and 1,536 for the four stages. Source accumulator counts are one, one, one, and two per thread. These are inspectable inputs, not complete compiled resource records. Retain the exact NVCC version, expanded C++17 command, `sm_75` and `compute_75` targets, source and binary hashes, compiler resource output, and any local-memory evidence for each template instantiation.
+
+Theoretical occupancy combines exact compiled registers/shared memory/block size with exact device limits. Achieved occupancy is a separate observed profiler field. Neither is a speed score. A lower occupancy may still be sufficient to hide relevant latency; a higher value may add no useful work. Support or rejection must name the specific limiting resource and matched coordinate. If the compiler merges, spills, or otherwise changes the expected resource shape, revise the ledger before interpreting timing.
+
+## Keep requested traffic, observed traffic, and Roofline apart
+
+For the fixed aligned workload and a convention that includes tiled A/B requests plus one C read and write, source estimates are 545,259,520 bytes for both 16-by-16 output stages, 679,477,248 bytes for `rectangular-32x8x8`, and 411,041,792 bytes for `coarsened-32x16x8`. They count algorithm requests before cache, transaction, replay, and hardware effects. They are not compulsory matrix bytes and not observed DRAM traffic.
+
+The main product-work convention is `W = 2*M*N*K = 2,147,483,648` FLOPs, counting one multiply and one add separately; report the alpha/beta epilogue separately. A derived `I_path = W / T_path` is meaningful only when work, traffic path, unit, shape, and provenance match. Q10's `P_roof(I) = min(P_compute, I * B_path)` bounds model geometry; it cannot turn an estimate or point location into a bottleneck, causal explanation, or winning tile.
+
+## Preserve precision, compiler, and architecture coordinates
+
+All four reviewed stages retain FP32 A/B/C and FP32 device accumulation against a double CPU reference. A compiler may contract multiply-add and legal operation details can affect low bits, so the tolerance gate remains mandatory for every exact build. Changing input precision, accumulation precision, fast-math options, contraction policy, or tolerance starts a new comparison.
+
+The three selected compile-only Toolkit Lanes are 11.8.0, 12.9.2, and 13.3.1 with C++17. Each emits `sm_75` plus `compute_75` from the reviewed command, but the execution record must still identify the exact device, compute capability, driver, JIT path if any, and binary. The candidates use ordinary FP32, shared memory, and block barriers with a minimum compute capability of 7.5; there is no Tensor Core, WMMA, `cp.async`, or other architecture-specific branch. Adding one requires a separately justified hardware gate, fallback, correctness contract, and experiment.
+
+## Query, permission, replay, and report custody
+
+Retain these outputs in the exact measurement environment before selecting fields:
+
+```bash
+ncu --version
+ncu --list-sections
+ncu --query-metrics
+```
+
+Metric names, units, scopes, and availability bind to the exact Nsight Compute version and GPU. Freeze the hypothesis first, then choose one minimal queried section or a shorter exact metric list. The runner exposes four unique kernel functions: `canonical_16x16x16_kernel`, `k_tile_16x16x8_kernel`, `rectangular_32x8x8_kernel`, and `coarsened_32x16x8_kernel`. Use `--kernel-name-base function` with one exact queried wrapper name rather than a shared template-body name. Baseline and candidate separately retain kernel-name basis, wrapper-to-template mapping, filter, launch selection, replay mode, expanded command, primary `.ncu-rep`, query output, stdout, stderr, exit status, hashes, observer, and date.
+
+Record performance-counter permission before collection. Denial, an unknown version, an unavailable field, an ambiguous filter, report-import failure, or unmatched replay is a blocker: stop and retain it. Do not bypass policy with `sudo`, guess a value, or encode unavailable as zero. Replay can re-execute work and perturb state; profiled reports address mechanisms, while matched unprofiled attempts address elapsed behavior.
+
+## Keep VIS12 evidence-neutral
+
+[VIS12: GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/) exposes matrix, tile, thread block, warp, and source-level instruction layers. Use it to label ownership and map one K slice, not to choose the four candidate sizes. Its modeled `64x64x16` and `128x64x16` tiles are conceptual hierarchy states, not legal-launch or tuning recommendations.
+
+VIS12 executes no EX15 code, queries no compiler or GPU, and models no register allocation, occupancy, cache, traffic, emitted FMA/MMA instruction, or performance. Browser state provides no correctness, runtime, profiler, or tile-selection evidence.
+
+## Keep the production-library boundary explicit
+
+The educational EX15-shaped kernel exists to expose indexing, reuse, barriers, precision, and evidence design. It is not a production replacement. It does not cover the layout, transpose, precision, algorithm selection, workspace, stream, determinism, heuristic, epilogue, or maintenance contracts required for a production GEMM choice.
+
+L06 is not published, so its future cuBLAS contract is unavailable. LAB12 requires both Q13 and L06 and is not published in this ticket. Q13 invents no cuBLAS API, comparison, result, Tensor Core result, or production recommendation. A future library comparison must re-establish matched shapes, semantics, precision, correctness, hardware, toolchain, and measurement custody rather than treating this educational winner as a production baseline.
+
+## Evidence boundary
+
+Evidence Status belongs to Labs and Runnable Examples, not Learning Units. Q13's `compilation`, `runtime`, `expectedObservations`, and `recordedObservations` arrays are all empty, so Q13 grants no Evidence Status. Canonical imports, source arithmetic, a static runner test, compile-only gates, VIS12, and an expected-only fixture cannot change that boundary.
+
+Linked [EX15](/en/examples/tiled-gemm/) keeps empty compilation and recorded-observation arrays and remains **Pending Hardware Verification**. The reviewed runner is an Exercise solution asset, not a new Runnable Example. Its three Toolkit Lane gates compile, link, and statically inspect without execution. No matrix output, register count, occupancy, traffic, timing, speedup, winner, cuBLAS comparison, Tensor Core result, Reference Environment, or runtime observation is published here.
+
+## Retrieval check
+
+1. Which EX15 shape, precision, CPU-reference, finite-value, and tolerance coordinates must every stage retain before measurement?
+2. Why does changing only `TK` alter shared storage and barriers without automatically changing full-workload A/B requests or occupancy?
+3. How do `rectangular-32x8x8` and `coarsened-32x16x8` change A/B reuse, output ownership, and disclosed resource coupling?
+4. Which matrix, type, architecture, workload, warm-up, synchronization, statistic, profiler, manifest, correctness, and interpretation fields must every measured stage repeat?
+5. Why can neither a memorized tile size, VIS12, an occupancy percentage, nor a future cuBLAS name establish the winning implementation?
+
+## Continue with practice
+
+- Complete the [Q13 Exercises](/en/correctness/gemm-optimization-case-study/exercises/), then inspect the separate [reviewed solutions](/en/correctness/gemm-optimization-case-study/solutions/).
+- Use [PB-R3-011](/en/practice/#pb-r3-011) to repair a memorized-tile experiment and [PB-R3-012](/en/practice/#pb-r3-012) to audit an uncustodied resource and production claim.
+- Recheck canonical source through [EX15](/en/examples/tiled-gemm/) and use [VIS12](/en/visuals/gemm-tiling-hierarchy/) only for evidence-neutral hierarchy and ownership reasoning.
+
+## Sources and review
+
+- [CUDA C++ Best Practices Guide v13.3: Shared Memory in Matrix Multiplication](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab) bounds classic GEMM reuse and verification claims.
+- [Occupancy](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy), [Register Pressure](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#register-pressure), and [Which Compute Capability Target](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#which-compute-capability-target) bound current resource, latency-hiding, and architecture-target claims.
+- [Host/Device Computation Accuracy](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#notes-on-host-device-computation-accuracy) bounds FP32, double-reference, FMA, and comparison statements.
+- The exact [11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-compiler-driver-nvcc/index.html#supported-phases), [12.9.2](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-compiler-driver-nvcc/index.html), and [13.3.1](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html) compiler-driver documents bound the three selected C++17 compile-only Lanes.
+- [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) and [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) bound exact-GPU query, permission, filtering, replay, resource, and report-custody workflow.
+
+Context7 `/websites/nvidia_cuda` was used on **2026-09-03** only for discovery and cross-checking. The ten exact NVIDIA owner URLs above are authoritative. No NVIDIA sample, code, table, figure, tile result, or performance number is copied. The candidate graph, runner, fixture, arithmetic ledgers, Exercises, and solutions are original Learning Site material.
+
+**Fact checked and all sources accessed: 2026-09-03.**

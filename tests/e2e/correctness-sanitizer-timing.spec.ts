@@ -120,6 +120,7 @@ const correctnessSlugs = [
   'roofline-arithmetic-intensity',
   'transpose-optimization-case-study',
   'reduction-optimization-case-study',
+  'gemm-optimization-case-study',
 ] as const;
 const issue19MemorySlugs = [
   'pinned-memory-transfer-overlap',
@@ -166,8 +167,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(432);
-  expect(publishedRoutes.length / 2).toBe(216);
+  expect(publishedRoutes).toHaveLength(438);
+  expect(publishedRoutes.length / 2).toBe(219);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

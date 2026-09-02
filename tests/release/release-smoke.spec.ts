@@ -41,6 +41,10 @@ const reviewedSolutionAssets = [
     publicPath: '/assets/exercise-solutions/q12-reduction-candidates.cu',
     sha256: 'a7dde4a836c44b296d62a92e7131f43f568857ff8bb910a8edad6d28a821c106',
   },
+  {
+    publicPath: '/assets/exercise-solutions/q13-gemm-candidates.cu',
+    sha256: '00a809be2e2224022f4dce544fd84cba7144a97918a2c0b2a17768054514ecc7',
+  },
 ] as const;
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
@@ -84,7 +88,7 @@ const currentLearningUnits = [
   ...r2LearningUnits.slice(0, 44),
   'A14',
   ...r2LearningUnits.slice(44),
-  'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12',
+  'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
@@ -112,10 +116,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 10 },
-  { suffix: 'practice/', count: 60 },
+  { suffix: 'practice/', count: 62 },
   { suffix: 'visuals/', count: 18 },
   { suffix: 'glossary/', count: 165 },
-  { suffix: 'sources-and-versions/', count: 71 },
+  { suffix: 'sources-and-versions/', count: 72 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -211,7 +215,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-02',
+    reviewDate: '2026-09-03',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -219,24 +223,25 @@ test('serves the exact R2 release and current publication with production canoni
     knownLimitations: expect.arrayContaining([
       'Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.',
       'Q12 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX11 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS10, and expected-only fixture add no runtime or performance evidence, and every stage result remains expected and unrecorded.',
-      'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. Q13, L06, and LAB12 also remain unpublished, and LAB12 waits for both prerequisites.',
+      'Q13 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX15 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS12, and expected-only fixture add no runtime or performance evidence, every stage result remains expected and unrecorded, and no cuBLAS or Tensor Core result is published.',
+      'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
       'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'Q06-Q12, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
+      'Q06-Q13, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 216,
-    sourceRoutes: 432,
+    publicationPairs: 219,
+    sourceRoutes: 438,
     learningUnits: currentLearningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 60,
+    practiceBankEntries: 62,
     glossaryTerms: 165,
-    sourceRecords: 71,
+    sourceRecords: 72,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -254,7 +259,7 @@ test('serves the exact R2 release and current publication with production canoni
   );
   expect(publication.knownLimitations.filter((limitation: string) =>
     limitation.includes('no current public destination'))).toEqual([
-    'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. Q13, L06, and LAB12 also remain unpublished, and LAB12 waits for both prerequisites.',
+    'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication.',
   ]);
 
   for (const { fixtureName, reviewDate } of [
@@ -262,6 +267,7 @@ test('serves the exact R2 release and current publication with production canoni
     { fixtureName: 'lab08-nsight-compute.expected.json', reviewDate: '2026-08-31' },
     { fixtureName: 'lab10-nsight-compute.expected.json', reviewDate: '2026-09-02' },
     { fixtureName: 'q12-nsight-compute.expected.json', reviewDate: '2026-09-02' },
+    { fixtureName: 'q13-nsight-compute.expected.json', reviewDate: '2026-09-03' },
   ]) {
     const fixtureResponse = await request.get(`/assets/profiler-report-fixtures/${fixtureName}`);
     expect(fixtureResponse.ok(), fixtureName).toBe(true);
@@ -319,7 +325,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(432);
+  expect(publishedRoutes).toHaveLength(438);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -330,8 +336,8 @@ test('serves the exact R2 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/216.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/432.*source routes/);
+    await expect(page.locator('main')).toContainText(/219.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/438.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -341,7 +347,7 @@ test('serves the exact R2 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(324);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(327);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -385,6 +391,15 @@ test('serves the exact R2 release and current publication with production canoni
       expectedObservations: 'none',
       exampleSuffix: 'examples/multi-stage-reduction/',
       visualSuffix: 'visuals/reduction-stages/',
+    },
+    {
+      suffix: 'correctness/gemm-optimization-case-study/',
+      unitId: 'Q13',
+      prerequisites: 'A08,Q06,Q08,Q10',
+      runtimeEvidence: 'none',
+      expectedObservations: 'none',
+      exampleSuffix: 'examples/tiled-gemm/',
+      visualSuffix: 'visuals/gemm-tiling-hierarchy/',
     },
     {
       suffix: 'labs/optimize-canonical-transpose/',
@@ -566,6 +581,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       query: 'Q12 profiler bitwise production claim',
       expectedHrefs: ['/correctness/reduction-optimization-case-study/solutions/'],
     },
+    {
+      query: 'Q13 tile reuse occupancy traffic hypothesis',
+      expectedHrefs: ['/correctness/gemm-optimization-case-study/'],
+    },
+    {
+      query: 'Q13 learner-owned q13-gemm-candidates',
+      expectedHrefs: ['/correctness/gemm-optimization-case-study/exercises/'],
+    },
+    {
+      query: 'Q13 occupancy Tensor Core production claim',
+      expectedHrefs: ['/correctness/gemm-optimization-case-study/solutions/'],
+    },
   ] as const) {
     await expectRankedSearchResult(page, { route: '/', button: /搜索/, ...scenario });
   }
@@ -637,6 +664,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'Q12 Reviewed Solutions Controlled Reduction Evidence',
       expectedHrefs: ['/en/correctness/reduction-optimization-case-study/solutions/'],
+    },
+    {
+      query: 'Q13 Optimize the Canonical GEMM with Controlled Evidence',
+      expectedHrefs: ['/en/correctness/gemm-optimization-case-study/'],
+    },
+    {
+      query: 'Q13 Exercises Design Audit Controlled GEMM Evidence',
+      expectedHrefs: ['/en/correctness/gemm-optimization-case-study/exercises/'],
+    },
+    {
+      query: 'Q13 Reviewed Solutions Controlled GEMM Evidence',
+      expectedHrefs: ['/en/correctness/gemm-optimization-case-study/solutions/'],
     },
     {
       query: 'EX16 Compute Sanitizer Defect Suite Runnable Example',

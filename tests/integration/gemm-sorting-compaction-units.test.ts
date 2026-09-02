@@ -16,6 +16,7 @@ const units = [
     prerequisites: ['A05', 'M03', 'M04', 'A02'],
     terms: ['TERM-147', 'TERM-148'],
     practice: 'PB-R2-020',
+    factCheckDate: '2026-09-03',
   },
   {
     id: 'A09',
@@ -23,6 +24,7 @@ const units = [
     prerequisites: ['A03', 'A04'],
     terms: ['TERM-149', 'TERM-150', 'TERM-151'],
     practice: 'PB-R2-021',
+    factCheckDate: '2026-09-03',
   },
 ] as const;
 
@@ -53,7 +55,7 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
     expect(declaredPrerequisites(en)).toEqual(unit.prerequisites);
     for (const source of [zh, en]) {
       expect(source).toContain(`unitId: ${unit.id}`);
-      expect(source).toContain("factCheckDate: '2026-08-31'");
+      expect(source).toContain(`factCheckDate: '${unit.factCheckDate}'`);
       expect(source).toMatch(/evidence:\n  compilation: \[\]\n  runtime: \[\]\n  expectedObservations: \[\]\n  recordedObservations: \[\]/);
       expect(source).toContain(unit.practice);
       for (const term of unit.terms) expect(source).toContain(term);
@@ -112,7 +114,7 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
     }
   });
 
-  it('publishes the aggregate records while keeping LAB12 unpublished', async () => {
+  it('publishes Q13 while keeping LAB12 unpublished', async () => {
     const [practice, glossary, sources, sidebar] = await Promise.all([
       readFile(path.join(docsRoot, 'en/practice.mdx'), 'utf8'),
       readFile(path.join(docsRoot, 'en/glossary.mdx'), 'utf8'),
@@ -122,7 +124,7 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
     for (const id of ['PB-R2-020', 'PB-R2-021']) expect(practice).toContain(`## ${id}:`);
     for (let id = 147; id <= 151; id += 1) expect(glossary).toContain(`id="term-${id}"`);
     for (const id of ['044', '045']) expect(sources).toContain(`id="src-cuda-${id}"`);
-    for (const id of ['A08', 'A09', 'EX15', 'VIS12']) expect(PUBLISHED_DESTINATIONS).toHaveProperty(id);
+    for (const id of ['A08', 'A09', 'Q13', 'EX15', 'VIS12']) expect(PUBLISHED_DESTINATIONS).toHaveProperty(id);
     expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB12');
     expect(sidebar).not.toContain('LAB12');
   });

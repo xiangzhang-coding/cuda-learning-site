@@ -77,6 +77,22 @@ const fixtureProfiles = [
       selectedVersions: ['2022.3.0.22', '2025.2.1.3', '2026.2.1.5'],
     },
   }],
+  ['q13-nsight-compute.expected.json', {
+    fixtureId: 'Q13-NCU-EXPECTED',
+    subjectField: 'unitId',
+    subjectId: 'Q13',
+    exampleId: 'EX15',
+    sourceCommit: 'd03ff3b27294f77b5f5a0a3b594bebf20a89cf70',
+    fixtureSha256: '3a51c4a4f28cf278fed985eb4db38d58d396e02e341806becec3dd921fcb932d',
+    fixtureBytesSha256: 'c6e424586f7df7d13f2bdbe5b0ba4c0defaba7110c9349bd78043dfb018f0662',
+    reviewDate: '2026-09-03',
+    tool: {
+      name: 'Nsight Compute',
+      cli: 'ncu',
+      reportExtension: '.ncu-rep',
+      selectedVersions: ['2022.3.0.22', '2025.2.1.3', '2026.2.1.5'],
+    },
+  }],
 ];
 
 const toolMutations = [
