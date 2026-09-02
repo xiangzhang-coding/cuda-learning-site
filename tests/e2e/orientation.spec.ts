@@ -22,6 +22,9 @@ test('all published routes load without browser errors', async ({ page }) => {
 
 test('locale controls keep the learner on the counterpart page', async ({ page }, testInfo) => {
   test.setTimeout(210_000);
+  const context = page.context();
+  let routePage = page;
+  let routeIndex = 0;
   for (const { zh, en } of [
     { zh: '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     { zh: '/start/evidence-status/', en: '/en/start/evidence-status/' },
@@ -159,17 +162,24 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/glossary/', en: '/en/glossary/' },
     { zh: '/sources-and-versions/', en: '/en/sources-and-versions/' },
   ]) {
-    await page.goto(zh);
-    await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', en);
+    if (routeIndex > 0 && routeIndex % 12 === 0) {
+      const nextPage = await context.newPage();
+      await routePage.close();
+      routePage = nextPage;
+    }
+    await routePage.goto(zh);
+    await expect(routePage.locator('[data-locale-counterpart]')).toHaveAttribute('href', en);
 
     if (testInfo.project.name === 'mobile-safari') {
-      await page.locator('[data-locale-counterpart]').click();
+      await routePage.locator('[data-locale-counterpart]').click();
     } else {
-      await page.getByRole('banner').locator('starlight-lang-select select').selectOption(en);
+      await routePage.getByRole('banner').locator('starlight-lang-select select').selectOption(en);
     }
-    await expect(page).toHaveURL(new RegExp(`${en}$`));
-    await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', zh);
+    await expect(routePage).toHaveURL(new RegExp(`${en}$`));
+    await expect(routePage.locator('[data-locale-counterpart]')).toHaveAttribute('href', zh);
+    routeIndex += 1;
   }
+  await routePage.close();
 });
 
 test('Chinese and English searches stay in their language index', async ({ page }) => {
