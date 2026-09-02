@@ -2,7 +2,7 @@
 
 # Cloudflare Deployment
 
-The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R2 is the latest completed aggregate review. Its immutable snapshot contains 49 Learning Units, 16 Runnable Examples, 6 Labs, 16 Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records, 186 Publication Pairs, and 372 source routes; `src/r2-release-manifest.json` emits that contract as `/release.json`. The issue #27 rolling surface advances `src/current-publication-manifest.json` and `/publication.json` independently; R3 aggregate review remains pending.
+The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R2 is the latest completed aggregate review. Its immutable snapshot contains 49 Learning Units, 16 Runnable Examples, 6 Labs, 16 Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records, 186 Publication Pairs, and 372 source routes; `src/r2-release-manifest.json` emits that contract as `/release.json`. The issue #28 rolling surface advances `src/current-publication-manifest.json` and `/publication.json` independently; R3 aggregate review remains pending.
 
 Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R2, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
 
@@ -17,7 +17,7 @@ Repository-pinned Wrangler from a clean `main` checkout is the only deployment a
 
 The first record is the immutable R2 release contract; the second describes the current artifact surface and can advance independently after R2. Neither record upgrades CUDA Evidence Status. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
 
-The current issue #27 scope is 56 Learning Units O01-O08/F01-F08/M01-M19/A01-A09/A14/Q01-Q11, sixteen Runnable Examples EX01-EX16, ten Labs LAB01-LAB10, and eighteen Visual Explainers: standalone VIS01-VIS14 plus embedded VIS19-VIS22. It also contains 58 Practice Bank entries, 165 Glossary terms, and 70 source records. The five catalog groups total 321 records; bilingual pages total 213 Publication Pairs and 426 source routes. Future Q13, L06, and LAB12 remain absent; LAB12 waits for Q13 and L06.
+The current issue #28 scope is 57 Learning Units O01-O08/F01-F08/M01-M19/A01-A09/A14/Q01-Q12, sixteen Runnable Examples EX01-EX16, ten Labs LAB01-LAB10, and eighteen Visual Explainers: standalone VIS01-VIS14 plus embedded VIS19-VIS22. It also contains 60 Practice Bank entries, 165 Glossary terms, and 71 source records. The five catalog groups total 324 records; bilingual pages total 216 Publication Pairs and 432 source routes. L03 and LAB11 remain absent; Q13, L06, and LAB12 also remain absent, and LAB12 waits for Q13 and L06.
 
 ## Release Settings
 
@@ -37,13 +37,15 @@ The build command checks source/privacy boundaries, the exact lockfile and licen
 
 ## Acceptance
 
-Before accepting production, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. EX02, EX10, and LAB02 retain Compile-Checked evidence. EX11-EX15 retain empty compilation evidence; EX14 also has empty recorded observations and remains Pending Hardware Verification. LAB09 and LAB10 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification. Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and only summarizes linked subjects. EX10 is Runtime-Not-Applicable. No Reference Environment, Runtime-Verified subject, or performance observation is declared.
+Before accepting production, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. EX02, EX10, and LAB02 retain Compile-Checked evidence. EX11-EX15 retain empty compilation evidence and Pending Hardware Verification where runtime applies. LAB09 and LAB10 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification. Q11 and Q12 are Learning Units with all four evidence arrays empty and grant no Evidence Status. EX10 is Runtime-Not-Applicable. No Reference Environment, Runtime-Verified subject, or performance observation is declared.
 
 The issue #25 profiler fixture policy and both expected-only sanitized JSON fixtures are original project-authored planning artifacts. They are not `nsys` or `ncu` captures and provide no runtime, timeline, metric, bottleneck, or speedup result. Deploying or smoke-testing those static files does not change their evidence boundary.
 
 Issue #26 adds no captured LAB09 evidence. Its compilation and recorded-observation arrays are empty, and its runtime remains Pending Hardware Verification. VIS13 browser values and static chart do not execute CUDA or query a GPU and cannot populate LAB09 evidence, `performanceObservations`, or a Reference Environment.
 
 Issue #27 adds no captured EX14 or LAB10 evidence. Q11 starts from immutable EX14 and reuses VIS11, but its four empty Learning Unit evidence arrays inherit nothing from canonical source or browser arithmetic. It grants no Evidence Status and summarizes the linked EX14/LAB10 subjects, whose compilation and recorded-observation arrays are empty and whose runtime remains Pending Hardware Verification. LAB10's original expected-only JSON fixture and provenance sidecar describe a 4096x4096 `float` workload, a 134,221,952-byte conservative bound, one excluded warm-up, explicit synchronization, and ten-attempt median/min-max reduction. They are not `.ncu-rep` output and provide no timing, metric, speedup, bottleneck, winner, or runtime result.
+
+Issue #28 adds no captured EX11 or Q12 evidence. Q12 starts from immutable EX11 and reuses VIS10; its four empty Learning Unit evidence arrays inherit nothing from source, the browser model, the static runner gate, or the expected-only fixture. EX11 remains Pending Hardware Verification. The Q12 fixture declares a 16,777,219-element workload, three excluded warm-ups, explicit synchronization, ten retained attempts, median/min-max statistics, profiler permissions, an unfilled Environment Manifest, expected correctness, and bounded interpretations. It is not `.ncu-rep` output and provides no numerical result, timing, metric, traffic, speedup, bottleneck, winner, CUB comparison, or runtime result. L03 and LAB11 remain unpublished.
 
 Run the remote browser gate against the exact deployed source:
 
@@ -63,9 +65,9 @@ gh workflow run release-smoke.yml --ref main \
   -f source_commit="<40-character-main-commit>"
 ```
 
-For a Preview URL, set `RELEASE_BASE_URL` and `RELEASE_KIND="preview"`. The gate checks that `/release.json` remains the immutable R2 contract with 186 Publication Pairs, 372 source routes, and 284 catalog records while `/publication.json` matches the current issue #27 surface with 213 Publication Pairs and 426 source routes. It covers both locales, navigation/search, current catalog counts, Q11/LAB10 routes and graph edges, Q11's four empty Learning Unit evidence arrays, the EX14/LAB10 subject boundaries, the expected-only fixture boundary, legal notices, canonical metadata, and browser/network errors.
+For a Preview URL, set `RELEASE_BASE_URL` and `RELEASE_KIND="preview"`. The gate checks that `/release.json` remains the immutable R2 contract with 186 Publication Pairs, 372 source routes, and 284 catalog records while `/publication.json` matches the current issue #28 surface with 216 Publication Pairs and 432 source routes. It covers both locales, navigation/search, current catalog counts, Q12 routes and graph edges, Q12's four empty Learning Unit evidence arrays, EX11 and LAB11/L03 boundaries, the expected-only fixture, legal notices, canonical metadata, and browser/network errors.
 
-[Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records immutable R2 acceptance. [Issue #27](https://github.com/xiangzhang-coding/cuda-learning-site/issues/27) records the current incremental publication; it is not a completed R3 aggregate review. Source files deliberately do not pre-certify dynamic coordinates.
+[Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records immutable R2 acceptance. [Issue #28](https://github.com/xiangzhang-coding/cuda-learning-site/issues/28) records the current incremental publication; it is not a completed R3 aggregate review. Source files deliberately do not pre-certify dynamic coordinates.
 
 ## Rollback
 

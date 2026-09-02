@@ -37,6 +37,10 @@ const reviewedSolutionAssets = [
     publicPath: '/assets/exercise-solutions/lab10-report-reducer.mjs',
     sha256: '7754a9b63369ea00d994c5f43627796a87f57607e869e10e5a5cd238c51056cb',
   },
+  {
+    publicPath: '/assets/exercise-solutions/q12-reduction-candidates.cu',
+    sha256: 'a7dde4a836c44b296d62a92e7131f43f568857ff8bb910a8edad6d28a821c106',
+  },
 ] as const;
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
@@ -80,7 +84,7 @@ const currentLearningUnits = [
   ...r2LearningUnits.slice(0, 44),
   'A14',
   ...r2LearningUnits.slice(44),
-  'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11',
+  'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12',
 ] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
@@ -108,10 +112,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 10 },
-  { suffix: 'practice/', count: 58 },
+  { suffix: 'practice/', count: 60 },
   { suffix: 'visuals/', count: 18 },
   { suffix: 'glossary/', count: 165 },
-  { suffix: 'sources-and-versions/', count: 70 },
+  { suffix: 'sources-and-versions/', count: 71 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -214,24 +218,25 @@ test('serves the exact R2 release and current publication with production canoni
     releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
     knownLimitations: expect.arrayContaining([
       'Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.',
-      'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
+      'Q12 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX11 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS10, and expected-only fixture add no runtime or performance evidence, and every stage result remains expected and unrecorded.',
+      'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. Q13, L06, and LAB12 also remain unpublished, and LAB12 waits for both prerequisites.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
       'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'Q06-Q11, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
+      'Q06-Q12, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 213,
-    sourceRoutes: 426,
+    publicationPairs: 216,
+    sourceRoutes: 432,
     learningUnits: currentLearningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 58,
+    practiceBankEntries: 60,
     glossaryTerms: 165,
-    sourceRecords: 70,
+    sourceRecords: 71,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -249,13 +254,14 @@ test('serves the exact R2 release and current publication with production canoni
   );
   expect(publication.knownLimitations.filter((limitation: string) =>
     limitation.includes('no current public destination'))).toEqual([
-    'Q13, L06, and LAB12 have no current public destination; LAB12 remains unpublished until both prerequisites are published.',
+    'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. Q13, L06, and LAB12 also remain unpublished, and LAB12 waits for both prerequisites.',
   ]);
 
   for (const { fixtureName, reviewDate } of [
     { fixtureName: 'lab06-nsight-systems.expected.json', reviewDate: '2026-08-31' },
     { fixtureName: 'lab08-nsight-compute.expected.json', reviewDate: '2026-08-31' },
     { fixtureName: 'lab10-nsight-compute.expected.json', reviewDate: '2026-09-02' },
+    { fixtureName: 'q12-nsight-compute.expected.json', reviewDate: '2026-09-02' },
   ]) {
     const fixtureResponse = await request.get(`/assets/profiler-report-fixtures/${fixtureName}`);
     expect(fixtureResponse.ok(), fixtureName).toBe(true);
@@ -313,7 +319,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(426);
+  expect(publishedRoutes).toHaveLength(432);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -324,8 +330,8 @@ test('serves the exact R2 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/213.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/426.*source routes/);
+    await expect(page.locator('main')).toContainText(/216.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/432.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -335,7 +341,7 @@ test('serves the exact R2 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(321);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(324);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -361,13 +367,24 @@ test('serves the exact R2 release and current publication with production canoni
     ]);
   }
 
-  for (const { suffix, unitId, prerequisites, runtimeEvidence, expectedObservations } of [
+  for (const { suffix, unitId, prerequisites, runtimeEvidence, expectedObservations, exampleSuffix, visualSuffix } of [
     {
       suffix: 'correctness/transpose-optimization-case-study/',
       unitId: 'Q11',
       prerequisites: 'A05,Q06,Q08,Q10',
       runtimeEvidence: 'none',
       expectedObservations: 'none',
+      exampleSuffix: 'examples/tiled-transpose/',
+      visualSuffix: 'visuals/tiled-transpose/',
+    },
+    {
+      suffix: 'correctness/reduction-optimization-case-study/',
+      unitId: 'Q12',
+      prerequisites: 'A02,Q02,Q06,Q08',
+      runtimeEvidence: 'none',
+      expectedObservations: 'none',
+      exampleSuffix: 'examples/multi-stage-reduction/',
+      visualSuffix: 'visuals/reduction-stages/',
     },
     {
       suffix: 'labs/optimize-canonical-transpose/',
@@ -375,6 +392,8 @@ test('serves the exact R2 release and current publication with production canoni
       prerequisites: 'Q11',
       runtimeEvidence: 'Pending Hardware Verification',
       expectedObservations: '9 declared expectations',
+      exampleSuffix: 'examples/tiled-transpose/',
+      visualSuffix: 'visuals/tiled-transpose/',
     },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {
@@ -396,8 +415,8 @@ test('serves the exact R2 release and current publication with production canoni
         );
       }
       const prefix = route.startsWith('/en/') ? '/en/' : '/';
-      await expect(page.locator(`main a[href="${prefix}examples/tiled-transpose/"]`).first()).toBeVisible();
-      await expect(page.locator(`main a[href="${prefix}visuals/tiled-transpose/"]`).first()).toBeVisible();
+      await expect(page.locator(`main a[href="${prefix}${exampleSuffix}"]`).first()).toBeVisible();
+      await expect(page.locator(`main a[href="${prefix}${visualSuffix}"]`).first()).toBeVisible();
     }
   }
 
@@ -535,6 +554,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       query: 'LAB10 fresh profiler attempts',
       expectedHrefs: ['/labs/optimize-canonical-transpose/'],
     },
+    {
+      query: 'Q12 hypothesis ledger warp-tail-control',
+      expectedHrefs: ['/correctness/reduction-optimization-case-study/'],
+    },
+    {
+      query: 'Q12 learner-owned q12_reduction_candidates',
+      expectedHrefs: ['/correctness/reduction-optimization-case-study/exercises/'],
+    },
+    {
+      query: 'Q12 profiler bitwise production claim',
+      expectedHrefs: ['/correctness/reduction-optimization-case-study/solutions/'],
+    },
   ] as const) {
     await expectRankedSearchResult(page, { route: '/', button: /搜索/, ...scenario });
   }
@@ -594,6 +625,18 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'Q11 Reviewed Solutions Controlled Transpose Evidence',
       expectedHrefs: ['/en/correctness/transpose-optimization-case-study/solutions/'],
+    },
+    {
+      query: 'Q12 Optimize the Canonical Reduction with Controlled Evidence',
+      expectedHrefs: ['/en/correctness/reduction-optimization-case-study/'],
+    },
+    {
+      query: 'Q12 Exercises Design Audit Controlled Reduction Evidence',
+      expectedHrefs: ['/en/correctness/reduction-optimization-case-study/exercises/'],
+    },
+    {
+      query: 'Q12 Reviewed Solutions Controlled Reduction Evidence',
+      expectedHrefs: ['/en/correctness/reduction-optimization-case-study/solutions/'],
     },
     {
       query: 'EX16 Compute Sanitizer Defect Suite Runnable Example',

@@ -1,0 +1,190 @@
+{
+  "SPDX-License-Identifier": "CC-BY-4.0",
+  "schemaVersion": 1,
+  "fixtureId": "Q12-NCU-EXPECTED",
+  "unitId": "Q12",
+  "exampleId": "EX11",
+  "sourceCommit": "81d43aa7568514e37ef190da59c845b8072b7011",
+  "provenance": "original",
+  "fixtureType": "expected-only-profiler-report-plan",
+  "captureStatus": "pending-hardware-verification",
+  "tool": {
+    "name": "Nsight Compute",
+    "cli": "ncu",
+    "reportExtension": ".ncu-rep",
+    "selectedVersions": ["2022.3.0.22", "2025.2.1.3", "2026.2.1.5"]
+  },
+  "captureCommand": "ncu <lane-validated-config-control> --devices 0 --kernel-name-base function --kernel-name <actual-queried-q12-stage-filter> <one-queried-section-or-minimal-queried-metrics> <validated-replay-options> --export <unique-attempt-report-base> ./build/q12-reduction-candidates --all-stages --elements 16777219 --verify tolerance",
+  "workload": {
+    "elementType": "float",
+    "elementCount": 16777219,
+    "blockSize": 256,
+    "inputBytes": 67108876,
+    "maximumPartialElements": 32769,
+    "bytesPerPartialBuffer": 131076,
+    "partialBufferCount": 2,
+    "maximumProblemMemoryBytes": 67371028,
+    "stages": [
+      {
+        "id": "canonical-shared-tree",
+        "changedVariables": "none; immutable EX11-shaped two-load shared-tree behavior is the frozen experimental baseline",
+        "hypothesis": "Source predicts nine block-wide barrier points per block stage and shared-partial updates through stride 1. A matched queried field with those scopes should be higher than warp-tail-control; equal or lower rejects the baseline-versus-tail mechanism, and no matching field yields no answer.",
+        "workload": "16777219 deterministic finite float values; 256 threads; declared sizes 16777219 -> 32769 -> 65 -> 1",
+        "warmUp": "three direct attempts excluded before retained collection",
+        "synchronization": "checked cudaDeviceSynchronize after the complete multi-kernel reduction",
+        "statistics": "ten retained attempts; predeclared median with minimum and maximum; no sample deletion",
+        "profilerMethod": "query the exact GPU, then collect one minimal section or shorter exact metric list in a separate process",
+        "permissions": "record the performance-counter permission result and stop on denial",
+        "environmentManifest": "required; use the shared unfilled template below",
+        "correctnessResult": "expected tolerance pass; unrecorded",
+        "boundedInterpretation": "characterize this exact baseline only; infer no bottleneck, cause, or ranking"
+      },
+      {
+        "id": "warp-tail-control",
+        "changedVariables": "warp-tail control and synchronization mechanism, with branch encoding, barrier count, shared access, and instruction mix disclosed as coupled changes",
+        "hypothesis": "Relative to canonical-shared-tree, source predicts five fewer block-wide barriers per block stage and no shared-partial updates below stride 32. A matched queried field with those scopes should be lower; unchanged or higher rejects the mechanism, and no matching field yields no answer.",
+        "workload": "16777219 deterministic finite float values; 256 threads; declared sizes 16777219 -> 32769 -> 65 -> 1",
+        "warmUp": "three direct attempts excluded before retained collection",
+        "synchronization": "explicit warp synchronization in the tail plus checked cudaDeviceSynchronize after the complete reduction",
+        "statistics": "ten retained attempts; predeclared median with minimum and maximum; no sample deletion",
+        "profilerMethod": "query the exact GPU, then collect one minimal section or shorter exact metric list in a separate process",
+        "permissions": "record the performance-counter permission result and stop on denial",
+        "environmentManifest": "required; use the shared unfilled template below",
+        "correctnessResult": "expected tolerance pass; unrecorded",
+        "boundedInterpretation": "interpret only the disclosed bundle; do not attribute an elapsed difference to divergence or barriers alone"
+      },
+      {
+        "id": "reassociated-warp-order",
+        "changedVariables": "warp-tail operand and active-lane schedule changes from contiguous-prefix down-shuffle to periodic XOR butterfly while five shuffles, 31 effective additions, and the two-load stage graph remain fixed",
+        "hypothesis": "The fixed-workload final scalar bits are predicted to differ from warp-tail-control; equal bits reject that numerical prediction while both results must pass tolerance. If an owner-defined exact-GPU divergence field exists, periodic masks predict a higher value; equal or lower rejects, and no matching field yields no answer.",
+        "workload": "16777219 deterministic finite float values; 256 threads; declared sizes 16777219 -> 32769 -> 65 -> 1",
+        "warmUp": "three direct attempts excluded before retained collection",
+        "synchronization": "explicit warp synchronization in the tail plus checked cudaDeviceSynchronize after the complete reduction",
+        "statistics": "ten retained attempts; predeclared median with minimum and maximum; no sample deletion",
+        "profilerMethod": "query the exact GPU, then collect one minimal section or shorter exact metric list in a separate process",
+        "permissions": "record the performance-counter permission result and stop on denial",
+        "environmentManifest": "required; use the shared unfilled template below",
+        "correctnessResult": "expected tolerance pass; unrecorded",
+        "boundedInterpretation": "bind any numerical result to the exact source, build, workload, launch, and environment; infer no universal order"
+      },
+      {
+        "id": "four-load-staging",
+        "changedVariables": "guarded inputs per thread change from two to four; added local additions and changed operation order are disclosed coupling",
+        "hypothesis": "Source-derived stage sizes predict fewer intermediate partial elements, so a matched queried field scoped to partial-array traffic should be lower than reassociated-warp-order; equal or higher rejects, and no matching field yields no answer. No elapsed direction is predicted.",
+        "workload": "16777219 deterministic finite float values; 256 threads; declared sizes 16777219 -> 16385 -> 17 -> 1",
+        "warmUp": "three direct attempts excluded before retained collection",
+        "synchronization": "explicit warp synchronization in the tail plus checked cudaDeviceSynchronize after the complete reduction",
+        "statistics": "ten retained attempts; predeclared median with minimum and maximum; no sample deletion",
+        "profilerMethod": "query the exact GPU, then collect one minimal section or shorter exact metric list in a separate process",
+        "permissions": "record the performance-counter permission result and stop on denial",
+        "environmentManifest": "required; use the shared unfilled template below",
+        "correctnessResult": "expected tolerance pass; unrecorded",
+        "boundedInterpretation": "separate logical partial estimates, queried path traffic, numerical order, and unprofiled elapsed behavior"
+      }
+    ]
+  },
+  "correctnessGate": {
+    "canonicalReference": "examples/ex11-multi-stage-reduction/include/multi_stage_reduction_reference.hpp",
+    "inputGenerator": "ex11::initialize_input",
+    "cpuReference": "ex11::cpu_reference_sum with double accumulation",
+    "comparator": "ex11::compare_reduction_sum",
+    "comparisonRule": "absolute_error <= 1e-4 + 2e-5 * abs(cpu_reference)",
+    "fixtures": [1, 3, 511, 512, 513, 4099, 16777219],
+    "partialBuffers": "two stable allocations are filled with quiet-NaN sentinels by checked host-to-device copies before every algorithm",
+    "completion": "check every launch and cudaDeviceSynchronize before reading the final valid scalar",
+    "requiredResult": "every stage independently passes every fixture before any measurement or profiler record is interpreted",
+    "currentResult": "expected; unrecorded"
+  },
+  "environmentManifest": {
+    "gpuIdentity": "unfilled",
+    "computeCapability": "unfilled",
+    "gpuCountUsed": "unfilled",
+    "driver": "unfilled",
+    "toolkitLane": "unfilled",
+    "cudaToolkit": "unfilled",
+    "cuptiVersion": "unfilled",
+    "profilerVersion": "unfilled",
+    "nvcc": "unfilled",
+    "hostCompiler": "unfilled",
+    "operatingSystem": "unfilled",
+    "sourceRepository": "unfilled",
+    "binarySha256": "unfilled",
+    "buildContract": "unfilled",
+    "workload": "unfilled",
+    "permissions": "unfilled",
+    "deviceAccessState": "unfilled",
+    "concurrentLoad": "unfilled",
+    "clockPowerThermal": "unfilled",
+    "exactCommands": "unfilled",
+    "correctnessMethod": "unfilled",
+    "correctnessCriteria": "unfilled",
+    "measurementMethod": "unfilled",
+    "rawLogs": "unfilled",
+    "rawReports": "unfilled",
+    "exitStatuses": "unfilled",
+    "custody": "unfilled",
+    "criteriaResult": "unfilled"
+  },
+  "method": {
+    "question": "For each adjacent reduction stage, does matched retained evidence support, reject, or leave unanswered its named mechanism while the EX11 correctness contract remains fixed?",
+    "runner": {
+      "publicPath": "/assets/exercise-solutions/q12-reduction-candidates.cu",
+      "repositoryPath": "public/assets/exercise-solutions/q12-reduction-candidates.cu",
+      "sha256": "a7dde4a836c44b296d62a92e7131f43f568857ff8bb910a8edad6d28a821c106",
+      "license": "Apache-2.0",
+      "boundary": "compile, link, and static inspection only in three Toolkit Lanes; no execution or Evidence Status"
+    },
+    "warmUp": {
+      "count": 3,
+      "processMode": "direct unprofiled process",
+      "excludedFromStatistics": true
+    },
+    "completionBoundary": "checked cudaDeviceSynchronize after every complete multi-kernel reduction",
+    "acquisition": {
+      "retainedAttempts": 10,
+      "order": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"],
+      "statistic": "median",
+      "spread": "minimum and maximum",
+      "sampleDeletion": "prohibited",
+      "invalidBatch": "retain the failed batch and restart all ten attempts under a new batch identifier"
+    },
+    "profiler": {
+      "availability": "retain ncu --version, ncu --list-sections, and ncu --query-metrics from the exact environment",
+      "selection": "one minimal queried section or a shorter exact metric list selected after the hypothesis is frozen",
+      "kernelIdentity": "retain actual kernel-name basis, filter, and launch selection",
+      "replay": "retain requested and actual replay mode, pass count, save and restore behavior, and perturbation boundary",
+      "custody": "hash the primary .ncu-rep, expanded command, query output, stdout, stderr, exit status, observer, and date",
+      "separation": "profiled mechanism evidence is not attached retroactively to independent unprofiled samples"
+    },
+    "permissions": {
+      "requiredRecord": "performance-counter permission state and policy coordinate",
+      "denial": "stop, retain the denial, and ask the environment owner for approved access",
+      "prohibited": "do not bypass policy with sudo, guess a value, or encode unavailable as zero"
+    },
+    "interpretation": [
+      "A correctness pass admits a stage to collection but does not rank it.",
+      "A source-derived stage-size or traffic estimate is not an observed path value.",
+      "A matched profiler report may address the named mechanism but does not prove elapsed-time causality.",
+      "A tolerance pass is not bitwise reproducibility or a universal numerical-order guarantee.",
+      "LAB11 and L03 remain unpublished, and this fixture contains no CUB API or comparison result."
+    ]
+  },
+  "sanitization": {
+    "status": "passed",
+    "reviewDate": "2026-09-02",
+    "removedCoordinates": ["host identity", "user identity", "absolute paths", "device identifiers", "network identifiers", "environment values"],
+    "transformations": ["This original expected-only plan contains no capture and therefore required no value replacement."]
+  },
+  "expectedObservations": [
+    "All four stages should independently pass the EX11 CPU-reference and tolerance contract on every declared fixture before collection begins.",
+    "The canonical, warp-tail, and reassociated paths should follow declared sizes 16777219 -> 32769 -> 65 -> 1, while four-load staging should follow 16777219 -> 16385 -> 17 -> 1; these are source-derived expectations, not observed traffic.",
+    "Each stage should retain three excluded warm-up attempts and ten fresh attempts with checked completion, raw-sample custody, a predeclared median, minimum, and maximum, and no sample deletion.",
+    "Exact-GPU version and availability queries, permission, filtering, replay, report custody, and a complete Environment Manifest should either qualify the profiler record or produce a retained blocker.",
+    "A matching block-barrier or tail shared-partial field should be lower for warp-tail-control than canonical-shared-tree; unchanged or higher evidence should reject the synchronization mechanism.",
+    "The reassociated final scalar bits are predicted to differ while remaining within tolerance, and an available owner-defined divergence field is predicted to be higher for periodic masks; equal bits or an equal-or-lower divergence value should reject the corresponding hypothesis.",
+    "A matching partial-array traffic field should be lower for four-load-staging than reassociated-warp-order; equal or higher evidence should reject the traffic mechanism.",
+    "Every interpretation should remain limited to its named mechanism and disclose numerical order, instruction mix, shared traffic, resources, cache, clocks, replay, and system load as applicable competing explanations."
+  ],
+  "recordedObservations": [],
+  "claimBoundary": "This expected-only Q12 fixture contains no recorded environment value, correctness result, profiler report, metric name or value, raw sample, timing, traffic, speedup, bottleneck, numerical result, winner, CUB comparison, or runtime observation. The static runner and fixture create no Runnable Example or Evidence Status."
+}

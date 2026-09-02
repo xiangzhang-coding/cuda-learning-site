@@ -15,7 +15,8 @@ const fixtureRoot = path.join(projectRoot, 'public/assets/profiler-report-fixtur
 const fixtureProfiles = [
   ['lab06-nsight-systems.expected.json', {
     fixtureId: 'LAB06-NSYS-EXPECTED',
-    labId: 'LAB06',
+    subjectField: 'labId',
+    subjectId: 'LAB06',
     exampleId: 'EX07',
     sourceCommit: 'fb0306db725ab960a61b50456c227545057de392',
     fixtureSha256: 'e4bf6785b011903e71874283b57832a1dce28c3c0d1e7df98bb26d1af42b44e3',
@@ -30,7 +31,8 @@ const fixtureProfiles = [
   }],
   ['lab08-nsight-compute.expected.json', {
     fixtureId: 'LAB08-NCU-EXPECTED',
-    labId: 'LAB08',
+    subjectField: 'labId',
+    subjectId: 'LAB08',
     exampleId: 'EX07',
     sourceCommit: 'fb0306db725ab960a61b50456c227545057de392',
     fixtureSha256: '0ac043971a25c51ec928a37f313877faa005872f504d273b6a3e330b96e9e4dc',
@@ -45,11 +47,28 @@ const fixtureProfiles = [
   }],
   ['lab10-nsight-compute.expected.json', {
     fixtureId: 'LAB10-NCU-EXPECTED',
-    labId: 'LAB10',
+    subjectField: 'labId',
+    subjectId: 'LAB10',
     exampleId: 'EX14',
     sourceCommit: '981939cc705faf721ac06d1b70f2c5c4a8111e92',
     fixtureSha256: '2cde6557100be26cc0878f67bd34c27f5b530f20ebbb8f35a06f270d5fe51eab',
     fixtureBytesSha256: '12fe158fffed5f2cfe37d097c690b31d4719a1696c4188902baab5d73927807f',
+    reviewDate: '2026-09-02',
+    tool: {
+      name: 'Nsight Compute',
+      cli: 'ncu',
+      reportExtension: '.ncu-rep',
+      selectedVersions: ['2022.3.0.22', '2025.2.1.3', '2026.2.1.5'],
+    },
+  }],
+  ['q12-nsight-compute.expected.json', {
+    fixtureId: 'Q12-NCU-EXPECTED',
+    subjectField: 'unitId',
+    subjectId: 'Q12',
+    exampleId: 'EX11',
+    sourceCommit: '81d43aa7568514e37ef190da59c845b8072b7011',
+    fixtureSha256: 'c58cecf8d506a1ddc6c49045c5db248acc1fa1b0f662e28cc4f5d8e29c0e68f4',
+    fixtureBytesSha256: 'd510345d978c9b8e97cbbef41d7ebb3f4b8a48403977e6ed36e31787c73f616d',
     reviewDate: '2026-09-02',
     tool: {
       name: 'Nsight Compute',
@@ -66,11 +85,11 @@ const toolMutations = [
   ['a missing report extension', (copy) => { delete copy.tool.reportExtension; }, 'missing tool fields: reportExtension'],
   ['missing selected versions', (copy) => { delete copy.tool.selectedVersions; }, 'missing tool fields: selectedVersions'],
   ['an extra key', (copy) => { copy.tool.outputFormat = 'report'; }, 'unreviewed tool fields: outputFormat'],
-  ['the wrong name', (copy) => { copy.tool.name = 'Nsight Graphics'; }, 'tool name is invalid for labId'],
-  ['the wrong CLI', (copy) => { copy.tool.cli = 'profiler'; }, 'tool CLI is invalid for labId'],
-  ['the wrong report extension', (copy) => { copy.tool.reportExtension = '.report'; }, 'tool report extension is invalid for labId'],
-  ['reordered selected versions', (copy) => { copy.tool.selectedVersions.reverse(); }, 'tool selected versions are invalid for labId'],
-  ['a wrong selected version', (copy) => { copy.tool.selectedVersions[1] = '0.0.0'; }, 'tool selected versions are invalid for labId'],
+  ['the wrong name', (copy) => { copy.tool.name = 'Nsight Graphics'; }, /^tool name is invalid for (?:labId|unitId)$/],
+  ['the wrong CLI', (copy) => { copy.tool.cli = 'profiler'; }, /^tool CLI is invalid for (?:labId|unitId)$/],
+  ['the wrong report extension', (copy) => { copy.tool.reportExtension = '.report'; }, /^tool report extension is invalid for (?:labId|unitId)$/],
+  ['reordered selected versions', (copy) => { copy.tool.selectedVersions.reverse(); }, /^tool selected versions are invalid for (?:labId|unitId)$/],
+  ['a wrong selected version', (copy) => { copy.tool.selectedVersions[1] = '0.0.0'; }, /^tool selected versions are invalid for (?:labId|unitId)$/],
 ];
 
 async function readFixture(name) {
@@ -84,7 +103,7 @@ async function readFixtureSource(name) {
 describe('profiler report fixture policy', () => {
   it.each(fixtureProfiles)('accepts the sanitized original expected-only fixture %s', async (
     name,
-    { fixtureId, labId, exampleId, sourceCommit, fixtureSha256, fixtureBytesSha256, reviewDate, tool },
+    { fixtureId, subjectField, subjectId, exampleId, sourceCommit, fixtureSha256, fixtureBytesSha256, reviewDate, tool },
   ) => {
     const [fixture, fixtureSource] = await Promise.all([readFixture(name), readFixtureSource(name)]);
     expect(validateProfilerReportFixture(fixture, fixtureSource)).toEqual({ valid: true, errors: [] });
@@ -92,7 +111,7 @@ describe('profiler report fixture policy', () => {
       'SPDX-License-Identifier': 'CC-BY-4.0',
       schemaVersion: 1,
       fixtureId,
-      labId,
+      [subjectField]: subjectId,
       exampleId,
       sourceCommit,
       provenance: 'original',
@@ -120,16 +139,20 @@ describe('profiler report fixture policy', () => {
       mutate(invalid);
       const result = validateProfilerReportFixture(invalid, JSON.stringify(invalid));
       expect(result.valid, description).toBe(false);
-      expect(result.errors, description).toContain(expectedError);
+      if (expectedError instanceof RegExp) {
+        expect(result.errors.some((error) => expectedError.test(error)), description).toBe(true);
+      } else {
+        expect(result.errors, description).toContain(expectedError);
+      }
     }
   });
 
   it.each(fixtureProfiles)('rejects a valid-looking alternate fixture ID in %s', async (
     name,
-    { labId },
+    { subjectId },
   ) => {
     const fixture = await readFixture(name);
-    fixture.fixtureId = `${labId}-ANYTHING`;
+    fixture.fixtureId = `${subjectId}-ANYTHING`;
     expect(validateProfilerReportFixture(fixture, JSON.stringify(fixture))).toMatchObject({
       valid: false,
       errors: expect.arrayContaining(['fixtureId is invalid']),

@@ -564,6 +564,17 @@ jobs:
             bash scripts/compile-check.sh c++17 ex11 \
             "/workspace/artifacts/cuda-ex11/${{ matrix.lane }}"
 
+      - name: Compile gate for Q12 runner without granting Evidence Status
+        run: |
+          docker run --platform linux/amd64 --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace \
+            "${{ matrix.image }}" \
+            bash scripts/check-q12-runner-build.sh \
+            "/workspace/artifacts/cuda-ex11/${{ matrix.lane }}"
+
       - name: Scan EX11 build logs
         run: node scripts/check-artifacts.mjs "artifacts/cuda-ex11/${{ matrix.lane }}"
 

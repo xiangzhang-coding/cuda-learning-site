@@ -139,6 +139,7 @@ export default defineConfig({
             { slug: 'correctness/occupancy-stalls-throughput' },
             { slug: 'correctness/roofline-arithmetic-intensity' },
             { slug: 'correctness/transpose-optimization-case-study' },
+            { slug: 'correctness/reduction-optimization-case-study' },
           ],
         },
         {
