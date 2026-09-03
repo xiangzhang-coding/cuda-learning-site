@@ -97,7 +97,7 @@ describe('Learning Unit and Lab metadata', () => {
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
     ]),
-    ...['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A10', 'A11', 'A14'].flatMap((unitId) => [
+    ...['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A10', 'A11', 'A12', 'A13', 'A14'].flatMap((unitId) => [
       unitId,
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
@@ -111,7 +111,7 @@ describe('Learning Unit and Lab metadata', () => {
     ]),
     'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14',
     'LAB02', 'LAB06', 'LAB08', 'LAB09', 'LAB10',
-    'PB-R0-005', 'PB-R3', 'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014',
+    'PB-R0-005', 'PB-R3', 'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
   ])(
     'accepts the controlled curriculum identifier %s',
     (identifier) => {

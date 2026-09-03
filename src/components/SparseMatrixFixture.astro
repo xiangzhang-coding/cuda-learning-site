@@ -1,0 +1,226 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/sparse-matrix-fixture.css';
+
+type Locale = 'zh-CN' | 'en';
+type View = 'formats' | 'spmm';
+
+interface Props {
+  locale: Locale;
+  view: View;
+}
+
+const { locale, view } = Astro.props;
+
+const matrixA = [
+  [4, 0, -1, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 2, 0, 0, 3],
+  [5, 0, 0, 7, 0],
+] as const;
+const vectorX = [1, 2, 3, 4, 5] as const;
+const matrixB = [
+  [1, 2],
+  [0, 1],
+  [3, 0],
+  [2, -1],
+  [1, 4],
+] as const;
+
+const entries = matrixA.flatMap((row, rowIndex) =>
+  row.flatMap((value, columnIndex) => value === 0 ? [] : [{ rowIndex, columnIndex, value }]),
+);
+const rowOffsets = [0];
+for (const row of matrixA) {
+  rowOffsets.push(rowOffsets.at(-1)! + row.filter((value) => value !== 0).length);
+}
+const spmvResult = matrixA.map((row) => row.reduce<number>(
+  (sum, value, columnIndex) => sum + value * vectorX[columnIndex],
+  0,
+));
+const spmmResult = matrixA.map((row) => matrixB[0].map((_, columnIndex) =>
+  row.reduce<number>((sum, value, innerIndex) => sum + value * matrixB[innerIndex][columnIndex], 0),
+));
+
+const copy = {
+  'zh-CN': {
+    figureTitle: view === 'formats' ? '同一矩阵的稠密、COO 与 CSR 视图' : '同一稀疏矩阵乘以一个稠密矩阵',
+    figureDescription: view === 'formats'
+      ? '四行五列矩阵 A 有六个非零项；下方用独立数组给出零基 COO 与 CSR 表示，并给出 A 乘 x 的结果。'
+      : '四行五列稀疏矩阵 A 乘五行两列稠密矩阵 B，得到四行两列矩阵 C；下方给出准备与重复执行流程。',
+    matrixA: '矩阵 A，4 x 5，nnz = 6',
+    matrixB: '矩阵 B，5 x 2',
+    matrixC: '结果 C = A B，4 x 2',
+    row: '行',
+    column: '列',
+    zero: '零',
+    nonzero: '存储的非零项',
+    arraysHeading: '物理存储数组（零基）',
+    values: 'values',
+    cooRows: 'COO row_indices',
+    columns: 'column_indices',
+    csrOffsets: 'CSR row_offsets',
+    storageHeading: '只计 A 的 FP32 值与 32-bit 索引',
+    denseStorage: '稠密：20 values = 80 B',
+    cooStorage: 'COO：6 values + 12 indices = 72 B',
+    csrStorage: 'CSR：6 values + 6 column indices + 5 row offsets = 68 B',
+    spmvHeading: 'SpMV 手算',
+    spmvPrefix: 'x = [1, 2, 3, 4, 5]，y = A x =',
+    pipelineHeading: '面向重复 SpMM 的准备流程',
+    pipelineLabel: '从表示合同到重复 SpMM 的五步流程',
+    pipeline: [
+      ['1 · 表示', '冻结 shape、format、index base/type、value type、ordering 与稠密 layout。'],
+      ['2 · 描述符', '用 metadata 对象把这些合同与调用者拥有的数组关联起来。'],
+      ['3 · 工作区', '为已选 operation 与 algorithm 查询大小；仅在结果非零时分配调用者管理的 device buffer。'],
+      ['4 · 预处理', '仅在精确组合支持且稀疏模式会复用时，选择性建立 acceleration data。'],
+      ['5 · 重复与验证', '保持被要求不变的 pattern/workspace，重复计算并用独立 reference 验收。'],
+    ],
+    spmmEquation: 'C = A B = [[1, 8], [0, 0], [3, 14], [19, 3]]',
+    evidence: '所有值都是本站共享 fixture 的确定性 host arithmetic 与静态存储账本，不是 CUDA 运行、流量或性能观测。',
+  },
+  en: {
+    figureTitle: view === 'formats' ? 'Dense, COO, and CSR views of one matrix' : 'One sparse matrix times a dense matrix',
+    figureDescription: view === 'formats'
+      ? 'The four-by-five matrix A has six nonzeros. Separate arrays below show its zero-based COO and CSR representations and the result of A times x.'
+      : 'The four-by-five sparse matrix A multiplies a five-by-two dense matrix B to produce the four-by-two matrix C. A preparation and repeated-execution flow follows.',
+    matrixA: 'Matrix A, 4 x 5, nnz = 6',
+    matrixB: 'Matrix B, 5 x 2',
+    matrixC: 'Result C = A B, 4 x 2',
+    row: 'row',
+    column: 'column',
+    zero: 'zero',
+    nonzero: 'stored nonzero',
+    arraysHeading: 'Physical storage arrays (zero-based)',
+    values: 'values',
+    cooRows: 'COO row_indices',
+    columns: 'column_indices',
+    csrOffsets: 'CSR row_offsets',
+    storageHeading: 'FP32 values and 32-bit indices for A only',
+    denseStorage: 'Dense: 20 values = 80 B',
+    cooStorage: 'COO: 6 values + 12 indices = 72 B',
+    csrStorage: 'CSR: 6 values + 6 column indices + 5 row offsets = 68 B',
+    spmvHeading: 'Hand-calculated SpMV',
+    spmvPrefix: 'x = [1, 2, 3, 4, 5], y = A x =',
+    pipelineHeading: 'Preparation flow for repeated SpMM',
+    pipelineLabel: 'Five steps from a representation contract to repeated SpMM',
+    pipeline: [
+      ['1 · Representation', 'Freeze shape, format, index base and type, value type, ordering, and dense layout.'],
+      ['2 · Descriptors', 'Associate those contracts with caller-owned arrays through metadata objects.'],
+      ['3 · Workspace', 'Query the size for the selected operation and algorithm; allocate a caller-managed device buffer only when the result is nonzero.'],
+      ['4 · Preprocessing', 'Optionally build acceleration data only when the exact combination supports it and the sparsity pattern will be reused.'],
+      ['5 · Repeat and verify', 'Keep the required pattern and workspace stable, repeat the operation, and check an independent reference.'],
+    ],
+    spmmEquation: 'C = A B = [[1, 8], [0, 0], [3, 14], [19, 3]]',
+    evidence: 'Every value is deterministic host arithmetic and static storage accounting from this shared site fixture, not an observed CUDA run, traffic result, or performance result.',
+  },
+}[locale];
+
+const formatArray = (values: readonly number[]) => `[${values.join(', ')}]`;
+---
+
+<figure
+  class="sparse-matrix-fixture"
+  data-sparse-fixture="a12-a13-4x5"
+  data-view={view}
+  aria-describedby={`sparse-fixture-description-${view}-${locale}`}
+>
+  <figcaption>
+    <strong>{copy.figureTitle}</strong>
+    <span id={`sparse-fixture-description-${view}-${locale}`}>{copy.figureDescription}</span>
+  </figcaption>
+
+  <div class="sparse-matrix-layout">
+    <div class="sparse-table-scroll" tabindex="0" role="region" aria-label={copy.matrixA}>
+      <table class="sparse-matrix-table" data-matrix="A">
+        <caption>{copy.matrixA}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{copy.row} / {copy.column}</th>
+            {matrixA[0].map((_, columnIndex) => <th scope="col">c{columnIndex}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {matrixA.map((row, rowIndex) => (
+            <tr>
+              <th scope="row">r{rowIndex}</th>
+              {row.map((value, columnIndex) => (
+                <td
+                  class:list={{ 'is-zero': value === 0, 'is-nonzero': value !== 0 }}
+                  data-row={rowIndex}
+                  data-column={columnIndex}
+                  data-value={value}
+                  aria-label={`${copy.row} ${rowIndex}, ${copy.column} ${columnIndex}: ${value}; ${value === 0 ? copy.zero : copy.nonzero}`}
+                >{value}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {view === 'formats' && (
+      <section class="sparse-array-panel" aria-labelledby={`sparse-arrays-${locale}`}>
+        <h3 id={`sparse-arrays-${locale}`}>{copy.arraysHeading}</h3>
+        <dl>
+          <div><dt>{copy.values}</dt><dd><code data-array="values">{formatArray(entries.map(({ value }) => value))}</code></dd></div>
+          <div><dt>{copy.cooRows}</dt><dd><code data-array="coo-row-indices">{formatArray(entries.map(({ rowIndex }) => rowIndex))}</code></dd></div>
+          <div><dt>{copy.columns}</dt><dd><code data-array="column-indices">{formatArray(entries.map(({ columnIndex }) => columnIndex))}</code></dd></div>
+          <div><dt>{copy.csrOffsets}</dt><dd><code data-array="csr-row-offsets">{formatArray(rowOffsets)}</code></dd></div>
+        </dl>
+      </section>
+    )}
+  </div>
+
+  {view === 'formats' ? (
+    <div class="sparse-fixture-details">
+      <section>
+        <h3>{copy.storageHeading}</h3>
+        <ul class="sparse-storage-ledger">
+          <li data-storage="dense">{copy.denseStorage}</li>
+          <li data-storage="coo">{copy.cooStorage}</li>
+          <li data-storage="csr">{copy.csrStorage}</li>
+        </ul>
+      </section>
+      <section>
+        <h3>{copy.spmvHeading}</h3>
+        <p><code data-result="spmv">{copy.spmvPrefix} {formatArray(spmvResult)}</code></p>
+      </section>
+    </div>
+  ) : (
+    <>
+      <div class="sparse-product-layout">
+        <div class="sparse-table-scroll" tabindex="0" role="region" aria-label={copy.matrixB}>
+          <table class="sparse-matrix-table" data-matrix="B">
+            <caption>{copy.matrixB}</caption>
+            <thead><tr><th scope="col">{copy.row} / {copy.column}</th><th scope="col">c0</th><th scope="col">c1</th></tr></thead>
+            <tbody>
+              {matrixB.map((row, rowIndex) => (
+                <tr><th scope="row">r{rowIndex}</th>{row.map((value) => <td>{value}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="sparse-table-scroll" tabindex="0" role="region" aria-label={copy.matrixC}>
+          <table class="sparse-matrix-table" data-matrix="C">
+            <caption>{copy.matrixC}</caption>
+            <thead><tr><th scope="col">{copy.row} / {copy.column}</th><th scope="col">c0</th><th scope="col">c1</th></tr></thead>
+            <tbody>
+              {spmmResult.map((row, rowIndex) => (
+                <tr><th scope="row">r{rowIndex}</th>{row.map((value) => <td>{value}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="sparse-result-line"><code data-result="spmm">{copy.spmmEquation}</code></p>
+      <section class="sparse-pipeline-panel" aria-labelledby={`sparse-pipeline-${locale}`}>
+        <h3 id={`sparse-pipeline-${locale}`}>{copy.pipelineHeading}</h3>
+        <ol class="sparse-pipeline" aria-label={copy.pipelineLabel}>
+          {copy.pipeline.map(([heading, detail]) => <li><strong>{heading}</strong><span>{detail}</span></li>)}
+        </ol>
+      </section>
+    </>
+  )}
+
+  <p class="sparse-evidence-note">{copy.evidence}</p>
+</figure>

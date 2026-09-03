@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-03'
+      content: '2026-09-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #30](https://github.com/xiangzhang-coding/cuda-learning-site/issues/30) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A11/A14 与 Q01-Q13，共 60 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；当前 issue #30 增量发布不改写 R2，R3 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #31](https://github.com/xiangzhang-coding/cuda-learning-site/issues/31) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；当前 issue #31 增量发布不改写 R2，R3 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -54,7 +54,7 @@ head:
 
 [M15 NVCC 主机/设备编译流程](/toolchain/nvcc-compilation-flow/)同时依赖 F04 和 O04；[M16 PTX、cubin、SASS 与 fatbinary](/toolchain/ptx-cubin-fatbinary/)同时依赖 M15 和 F06；[M17 选择编译器架构目标](/toolchain/compiler-architecture-targets/)同时依赖 M16 和 F06；[M18 分离编译与设备链接](/toolchain/separate-compilation-device-linking/)同时依赖 M15 和 M16；[M19 CUDA C++17、C++20 与 C++23 方言边界](/toolchain/cpp-dialect-boundaries/)同时依赖 O04 和 M15。
 
-[A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；A02-A09 保留既有边；[A10 数值稳定 Softmax](/algorithms/numerically-stable-softmax/)严格依赖 A02、M02 与 M03；[A11 把 Attention 分解为 IO 问题](/algorithms/attention-as-an-io-problem/)严格依赖 A08 与 A10；[A14 用 Arithmetic Intensity 选择可证伪的算法优化](/algorithms/algorithm-choice-arithmetic-intensity/)严格依赖 A01、A02、A05 与 A08。
+[A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；A02-A09 保留既有边；[A10 数值稳定 Softmax](/algorithms/numerically-stable-softmax/)严格依赖 A02、M02 与 M03；[A11 把 Attention 分解为 IO 问题](/algorithms/attention-as-an-io-problem/)严格依赖 A08 与 A10；[A12 稀疏格式、存储账本与 SpMV](/algorithms/sparse-formats-spmv/)严格依赖 M01 与 M02；[A13 稀疏矩阵乘法、预处理与工作区决策](/algorithms/sparse-matrix-multiplication-preprocessing/)严格依赖 A12 与 A08；[A14 用 Arithmetic Intensity 选择可证伪的算法优化](/algorithms/algorithm-choice-arithmetic-intensity/)严格依赖 A01、A02、A05 与 A08。
 
 [Q01](/correctness/cpu-references-tolerances-invariants/)至 [Q08](/correctness/kernel-first-nsight-compute/)保留既有边；[Q09 用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)严格依赖 Q08 与 F08；[Q10 从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)严格依赖 Q05 与 A14；[Q11 用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)严格依赖 A05、Q06、Q08 与 Q10；[Q12 用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)严格依赖 A02、Q02、Q06 与 Q08，从 immutable [EX11](/examples/multi-stage-reduction/)开始并复用 evidence-neutral [VIS10](/visuals/reduction-stages/)；[Q13 用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)严格依赖 A08、Q06、Q08 与 Q10，从 immutable [EX15](/examples/tiled-gemm/)开始并复用 evidence-neutral [VIS12](/visuals/gemm-tiling-hierarchy/)。
 
@@ -64,7 +64,7 @@ M01-M14 也按顺序提供完整练习与独立解答：[M01 练习](/memory/add
 
 M15-M19 同样提供完整练习与独立解答：[M15 练习](/toolchain/nvcc-compilation-flow/exercises/)与[解答](/toolchain/nvcc-compilation-flow/solutions/)、[M16 练习](/toolchain/ptx-cubin-fatbinary/exercises/)与[解答](/toolchain/ptx-cubin-fatbinary/solutions/)、[M17 练习](/toolchain/compiler-architecture-targets/exercises/)与[解答](/toolchain/compiler-architecture-targets/solutions/)、[M18 练习](/toolchain/separate-compilation-device-linking/exercises/)与[解答](/toolchain/separate-compilation-device-linking/solutions/)、[M19 练习](/toolchain/cpp-dialect-boundaries/exercises/)与[解答](/toolchain/cpp-dialect-boundaries/solutions/)。
 
-A01-A11 与 A14 都提供完整练习与独立解答；[A10 练习](/algorithms/numerically-stable-softmax/exercises/)、[A11 练习](/algorithms/attention-as-an-io-problem/exercises/)和各自独立解答已直接可用。
+A01-A14 都提供完整练习与独立解答；新增 [A12 练习](/algorithms/sparse-formats-spmv/exercises/)与[A13 练习](/algorithms/sparse-matrix-multiplication-preprocessing/exercises/)及各自独立解答已直接可用。
 
 O02-O08 也保留各自的练习与独立解答。
 
@@ -80,9 +80,9 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
 
 正式 Visual Explainer 共 19 项：独立 VIS01-VIS14 与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)，加上内嵌 VIS19-VIS22。VIS18 严格依赖 A11，提供 deterministic shape/stage/IO ledger 与 purpose-built static SVG；它不是 GPU traffic 或 performance evidence。
 
-A10、A11、A14、Q09-Q13、VIS13 与 VIS18 的 compilation/runtime axes 均为空。A10/A11 的数值 fixtures 是 host arithmetic，traffic formulas 与 VIS18 是 static analysis；它们不授予 Evidence Status。本次增量没有 CUDA numerical output、actual traffic、backend selection、dtype availability、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
+A10-A14、Q09-Q13、VIS13 与 VIS18 的 compilation/runtime axes 均为空。A12/A13 的矩阵、payload/contribution counts 与 shared composition 是 host arithmetic/static analysis；它们不授予 Evidence Status。本次增量没有 CUDA/cuSPARSE execution、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
 
-当前 catalog 为 10 个 Lab、64 个 Practice Bank 条目、19 项 Visual Explainer、170 个 Glossary 词条和 74 条 source record，共 337 条记录；当前滚动公开源文件形成 226 个 Publication Pairs，即 452 条 source routes。这些当前数字独立于不可变的 R2 186/372 与 284-record 快照，R3 聚合复核仍待完成。
+当前 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录；当前滚动公开源文件形成 232 个 Publication Pairs，即 464 条 source routes。这些当前数字独立于不可变的 R2 186/372 与 284-record 快照，R3 聚合复核仍待完成。
 
 ## 边界先说清
 

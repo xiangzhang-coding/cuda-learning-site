@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-03'
+      content: '2026-09-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -40,15 +40,15 @@ CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU
 
 The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable Examples, external Labs, Exercises, Visual Explainers, and a Glossary. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
 
-After [issue #30](https://github.com/xiangzhang-coding/cuda-learning-site/issues/30), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A11/A14, and Q01-Q13 in both languages, for 60 Learning Units. [A10](/en/algorithms/numerically-stable-softmax/) establishes stable and online softmax; [A11](/en/algorithms/attention-as-an-io-problem/) treats attention as an IO problem; evidence-neutral [VIS18](/en/visuals/attention-memory-traffic/) connects sequence and tile shapes, stages, and static traffic.
+After [issue #31](https://github.com/xiangzhang-coding/cuda-learning-site/issues/31), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 in both languages, for 62 Learning Units. [A12](/en/algorithms/sparse-formats-spmv/) establishes COO and CSR, storage, and SpMV contracts. [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/) establishes SpMM, descriptor, workspace, and preprocessing decision boundaries.
 
-The completed R2 aggregate review is an immutable snapshot fixed at 186 Publication Pairs, 372 source routes, and 284 catalog records. The current incremental publication has advanced to 226 Publication Pairs and 452 source routes without rewriting R2; the R3 aggregate review remains pending.
+The completed R2 aggregate review is an immutable snapshot fixed at 186 Publication Pairs, 372 source routes, and 284 catalog records. The current incremental publication has advanced to 232 Publication Pairs and 464 source routes without rewriting R2; the R3 aggregate review remains pending.
 
-Issue #30 adds `A10<-[A02,M02,M03]`, `A11<-[A08,A10]`, and `VIS18<-[A11]` to the strict graph. Later framework, cuDNN, and Triton units remain unpublished; the current algorithm pages invent no backend availability.
+Issue #31 adds `A12<-[M01,M02]` and `A13<-[A12,A08]` to the strict graph. L13 and EX20 remain unpublished. The current algorithm pages invent no Generic API code, workspace cost, determinism, structured-sparsity support, or performance result.
 
-The current public surface has 16 Runnable Examples (EX01-EX16), 10 Labs (LAB01-LAB10), 19 formal Visual Explainers (standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22), 64 [Practice Bank](/en/practice/) entries, 170 [Glossary](/en/glossary/) terms, and 74 [source records](/en/sources-and-versions/), for 337 catalog records. Current rolling public source files form 226 Publication Pairs and 452 source routes.
+The current public surface has 16 Runnable Examples (EX01-EX16), 10 Labs (LAB01-LAB10), 19 formal Visual Explainers (standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22), 66 [Practice Bank](/en/practice/) entries, 176 [Glossary](/en/glossary/) terms, and 76 [source records](/en/sources-and-versions/), for 347 catalog records. Current rolling public source files form 232 Publication Pairs and 464 source routes.
 
-A10 and A11 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Hand calculations, paper review, logical traffic formulas, and VIS18 browser state are static analysis. There is no GPU numerical output, actual traffic, backend or dtype observation, timing, speedup, or winner. All 19 Visual Explainers remain evidence-neutral browser models.
+A12 and A13 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Matrices, storage and contribution ledgers, owner review, and the shared static composition are host arithmetic or static analysis. There is no CUDA or cuSPARSE execution, workspace, preprocessing, determinism or structured-sparsity observation, actual traffic, timing, speedup, or winner. All 19 Visual Explainers remain evidence-neutral browser models.
 
 ## Author
 
@@ -56,4 +56,4 @@ A10 and A11 are Learning Units with all four evidence arrays empty and grant no 
 
 ## Feedback
 
-For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). Page facts were reviewed on **2026-09-03**.
+For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). Page facts were reviewed on **2026-09-04**.

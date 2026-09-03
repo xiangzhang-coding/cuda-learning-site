@@ -1,0 +1,197 @@
+---
+title: 'A13: Sparse Matrix Multiplication, Preprocessing, and Workspace Decisions'
+description: Derive representation, data-movement, algorithm, workspace, and preprocessing-reuse contracts from a tiny sparse-times-dense SpMM while keeping comparison with dense GEMM auditable.
+pairId: a13
+counterpart: /algorithms/sparse-matrix-multiplication-preprocessing/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - spmm-contract
+  - worked-fixture
+  - dense-comparison
+  - descriptor-contract
+  - workspace-preprocessing
+  - decision-ledger
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A13
+prerequisites:
+  - A12
+  - A08
+relatedUnits:
+  - A12
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuSPARSE v13.3 - Library Organization and Generic APIs'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#library-organization-and-features'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current descriptor metadata, layout, index/data type, call-level algorithm selection, consistency-check, and external-device-memory model'
+    accessDate: '2026-09-04'
+  - title: 'cuSPARSE v13.3 - cusparseSpMM'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#cusparsespmm'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current high-level SpMM format, algorithm, workspace, optional preprocessing, reuse, and determinism coordinates; API code deferred to L13'
+    accessDate: '2026-09-04'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA-capable systems; current requested-versus-transferred traffic and effective-bandwidth boundary'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a13 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/sparse-matrix-multiplication-preprocessing/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,spmm-contract,worked-fixture,dense-comparison,descriptor-contract,workspace-preprocessing,decision-ledger,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A12,A08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A12 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+import SparseMatrixFixture from '../../../../components/SparseMatrixFixture.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/sparse-matrix-multiplication-preprocessing/" lang="zh-CN">阅读中文对应页</a>
+
+[Sparse matrix-matrix multiplication (SpMM, TERM-174)](/en/glossary/#term-174) multiplies sparse A by dense B to produce dense C. [Preprocessing (TERM-175)](/en/glossary/#term-175) can build auxiliary data for a reused sparsity pattern. [External workspace (TERM-176)](/en/glossary/#term-176) leaves temporary device storage required by an operation and algorithm under caller management. A13 explains these steps through representation and lifetime instead of jumping directly to an API recipe.
+
+## What you should be able to do
+
+- State shapes and element equations for sparse-times-dense `C=A B` and hand-calculate an SpMM with an empty row.
+- Compare `MKN` dense contributions with `nnz*N` sparse contributions while retaining index, gather, row-imbalance, and output costs.
+- Distinguish descriptor metadata for format, shape, index and stored-data types, layout, and ordering from call-level operation, compute type, and algorithm choices.
+- Distinguish lifetimes of persistent matrix storage, caller-managed external workspace, and optional preprocessing data.
+- Decide when pattern reuse might amortize preprocessing and list changes that invalidate acceleration data.
+- Form a testable choice among workspace, determinism, algorithms, and dense GEMM rather than inventing a winner.
+
+## Prerequisites
+
+The curriculum graph fixes the prerequisites in this order: [A12: Sparse Formats and SpMV](/en/algorithms/sparse-formats-spmv/) and [A08: Tiled GEMM](/en/algorithms/tiled-gemm-correctness/), or `A12, A08`. A12 supplies COO and CSR, index overhead, and irregular row reduction. A08 supplies `M/N/K`, dense output ownership, tiling, and reuse. A13 does not require L13 or EX20.
+
+## SpMM contract
+
+Freeze `A` as an `M x K` sparse matrix, `B` as a `K x N` dense matrix, and `C` as an `M x N` dense output. Begin with `C=A B`, or `C[i,j]=sum_k A[i,k]B[k,j]`. This fixture has no transpose, batch, `alpha/beta`, mixed precision, or sparse output. Every entry is a finite integer, so the hand calculation uses exact integer arithmetic.
+
+Every stored entry `(i,k,a)` in sparse A contributes `a*B[k,j]` to N columns of C. A direct row-oriented schedule therefore contains `nnz*N` scalar product contributions rather than dense `M*K*N`; it also reads index metadata, selects a B row through k, and handles uneven row lengths.
+
+## Shared SpMM fixture
+
+A13 reuses A12's `4 x 5`, `nnz=6` matrix A and chooses:
+
+`B = [[1,2],[0,1],[3,0],[2,-1],[1,4]]`
+
+The shared composition shows A, B, C, and the preparation lifecycle. Table captions, a textual equation, keyboard-focusable overflow, forced colors, mobile reflow, and print require no JavaScript.
+
+<SparseMatrixFixture locale="en" view="spmm" />
+
+Calculate by row:
+
+- `C[0,:] = 4*B[0,:] - B[2,:] = [4,8]-[3,0] = [1,8]`
+- `C[1,:] = [0,0]` because row 1 of A is empty
+- `C[2,:] = 2*B[1,:] + 3*B[4,:] = [0,2]+[3,12] = [3,14]`
+- `C[3,:] = 5*B[0,:] + 7*B[3,:] = [5,10]+[14,-7] = [19,3]`
+
+Thus `C = A B = [[1, 8], [0, 0], [3, 14], [19, 3]]`.
+
+## An auditable comparison with dense GEMM
+
+Here `M=4,K=5,N=2`. The dense definition contains `M*K*N=40` scalar product contributions. Traversing six stored entries and updating two output columns contains `nnz*N=12`. A's FP32/32-bit-index payload is also `80 B` when dense and `68 B` in CSR. These values prove only that this contract skips 28 zero products and removes 12 B from A's payload.
+
+They omit B/C traffic, row offsets beyond the stated payload, control around index decoding, cache lines, transaction overfetch, load imbalance, parallelism, conversion, workspace, preprocessing, and implementation-specific tiling. Regular dense GEMM tiles can reuse A and B predictably. A sparse schedule exchanges fewer contributions for indices, gathers, and irregularity. Choosing the faster path requires shape, density and distribution, N, format, precision, algorithm, workspace, hardware, and measurement; `12 < 40` cannot decide it.
+
+## A descriptor is a representation contract across stages
+
+The cuSPARSE 13.3 Generic API uses descriptors to record shape, sparse storage format, index base and type, stored value type, dense layout, and pointers. A descriptor is not a second copy of values. It is host-side metadata that references caller-owned device arrays. Operation and transposition, compute type, algorithm, and scalar or output semantics are separate call-level parameters, and all dimensions and types must be compatible.
+
+That explains why “I have a pointer to values” is insufficient. Identical bytes mean different things in COO and CSR. Zero- and one-based indices change index meaning. Row-major and column-major layouts change dense address mapping. 32- and 64-bit indices change storage and accepted range. L13 owns exact constructors and destruction, streams, scalar location, status, and error handling.
+
+## Workspace and preprocessing lifetimes
+
+For an exact operation and algorithm combination, query its buffer size first. Allocate at least that much caller-managed device workspace only when the returned size is greater than zero; zero means that exact combination needs no external workspace. Workspace is temporary or acceleration storage, not part of the CSR payload. Its size cannot be guessed from `nnz` alone, and a result for one version and algorithm is not a universal constant.
+
+That conditional requirement is itself an algorithm trade-off. The current cuSPARSE 13.3 table lists COO ALG1, ALG3, and ALG4 plus BSR ALG1 as requiring no extra storage, while COO ALG2 and the listed CSR and CSC algorithms require additional memory. This is a pinned owner-document fact, not a workspace cost measured by the site, and it cannot be reused outside its operation, format, layout, and version.
+
+cuSPARSE 13.3 explicitly provides optional SpMM preprocessing. Current owner documentation reports a preprocessing benefit only for CSR ALG1 and CSR ALG3; preprocessing has no effect for the other listed format and algorithm combinations. Acceleration data binds to the sparse descriptor, indices or sparsity pattern, and active workspace. Preprocessing with a different buffer makes the former buffer inactive. Repeated calls can amortize preparation only while the exact reuse contract remains intact.
+
+This still does not mean “always preprocess.” A one-shot operation may offer no reuse. A workspace budget may exclude an algorithm. Required determinism, transpose, batch, format, layout, or data type can change allowed choices. A13 does not reproduce the enumerator support table and does not turn an owner performance note into a local observation.
+
+## Decision ledger
+
+Record at least these axes before choosing sparse SpMM or dense GEMM:
+
+| axis | freeze or query | do not infer |
+| --- | --- | --- |
+| representation | `M,K,N,nnz`, row distribution, format, base, index/value types, ordering, duplicates | “sparse” automatically saves space or time |
+| operation | transpose, batch, dense layouts, compute type, output semantics | B/C traffic from A density alone |
+| algorithm | exact cuSPARSE/component version, supported combination, determinism requirement | an eternal default or bitwise identity across environments |
+| workspace | exact buffer-size query, budget, owner, and lifetime | fixed bytes or that more is faster |
+| preprocessing | exact support, pattern reuse count, invalidation and lifetime | one preparation benefits every call |
+| evidence | independent reference, tolerance, warm-up, retained attempts, Environment Manifest | timing, speedup, or a winner from a static ledger |
+
+The output should be a falsifiable candidate such as “for a fixed CSR pattern and larger N, test whether a supported algorithm with reusable preprocessing beats a matched dense baseline,” not a production recommendation.
+
+## Production boundary
+
+A13 establishes only a backend-independent SpMM, representation, and preparation mental model. L13 will publish current Generic API code and exact component compatibility. EX20 will be the canonical cuSPARSE SpMV Runnable Example. Structured sparsity, cuSPARSELt, architecture-specific support, the API determinism matrix, and measured workspace or performance all remain outside this ticket.
+
+## Evidence boundary
+
+All four A13 evidence arrays are empty. The shared matrices, 12/40 contribution count, 68/80 B payload, descriptor and workspace lifecycle, and owner-document comparison are host arithmetic or static analysis. No CUDA or cuSPARSE ran, no workspace was allocated, no preprocessing or determinism or structured-sparsity behavior was observed, no traffic or timing was measured, and no sparse-versus-dense speedup or winner is recorded.
+
+## Retrieval check
+
+1. Why does an `M x K` sparse A times a `K x N` dense B produce an `M x N` dense C?
+2. What do `40` and `12` count in the fixture, and what do they omit?
+3. Which metadata belongs to a descriptor, and which operation, compute, and algorithm choices belong to the call-level contract?
+4. How do persistent CSR arrays, external workspace, and preprocessing data differ in lifetime?
+5. Which pattern or workspace changes prevent prepared acceleration data from continuing under its original reuse contract?
+6. Why can fewer contributions and a smaller A payload still not select a sparse or dense winner?
+
+## Continue with practice
+
+- Complete the [A13 Exercises](/en/algorithms/sparse-matrix-multiplication-preprocessing/exercises/), then inspect the [separate solutions](/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/).
+- Audit a sparse-versus-dense and preprocessing proposal in [Practice Bank PB-R3-016](/en/practice/#pb-r3-016).
+- Revisit [TERM-174](/en/glossary/#term-174), [TERM-175](/en/glossary/#term-175), and [TERM-176](/en/glossary/#term-176). L13 and EX20 remain explicitly deferred.
+
+## Sources and review
+
+The cuSPARSE 13.3 Generic API introduction governs descriptors, type and layout, algorithms, and caller-managed device memory. Its SpMM page governs current workspace, optional preprocessing, active-buffer, and algorithm-specific support boundaries. Best Practices Guide 13.3 bounds requested versus actual traffic. The Context7 NVIDIA index supported current owner-coordinate discovery and cross-checking on 2026-09-04; the exact owner URLs remain publication authority. The matrices, pipeline composition, calculations, decision table, Exercises, and prose are original site work. No owner figure, table, code, sample, benchmark, or result is copied.
+
+**Fact checked and sources accessed: 2026-09-04.**

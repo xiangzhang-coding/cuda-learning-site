@@ -303,6 +303,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'A11：把 Attention 分解为一个 IO 问题', en: 'A11: Attention as an IO Problem' },
     prerequisites: ['A08', 'A10'],
   },
+  A12: {
+    href: { 'zh-CN': '/algorithms/sparse-formats-spmv/', en: '/en/algorithms/sparse-formats-spmv/' },
+    title: { 'zh-CN': 'A12：稀疏格式、存储账本与 SpMV', en: 'A12: Sparse Formats, Storage Ledgers, and SpMV' },
+    prerequisites: ['M01', 'M02'],
+  },
+  A13: {
+    href: { 'zh-CN': '/algorithms/sparse-matrix-multiplication-preprocessing/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/' },
+    title: { 'zh-CN': 'A13：稀疏矩阵乘法、预处理与工作区决策', en: 'A13: Sparse Matrix Multiplication, Preprocessing, and Workspace Decisions' },
+    prerequisites: ['A12', 'A08'],
+  },
   A14: {
     href: { 'zh-CN': '/algorithms/algorithm-choice-arithmetic-intensity/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/' },
     title: { 'zh-CN': 'A14：用 Arithmetic Intensity 选择可证伪的算法优化', en: 'A14: Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity' },

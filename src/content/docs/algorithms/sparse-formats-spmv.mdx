@@ -1,0 +1,192 @@
+---
+title: 'A12：稀疏格式、存储账本与 SpMV'
+description: 用同一个原创小矩阵推导 COO、CSR、存储成本和 SpMV 行归约，并把表示选择与 cuSPARSE 的描述符、工作区和预处理边界连接起来。
+pairId: a12
+counterpart: /en/algorithms/sparse-formats-spmv/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - sparse-contract
+  - shared-fixture
+  - coo-storage
+  - csr-storage
+  - storage-ledger
+  - spmv
+  - library-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A12
+prerequisites:
+  - M01
+  - M02
+relatedUnits:
+  - A13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuSPARSE v13.3 - Storage Formats'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#cusparse-storage-formats'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current index-base, COO, CSR array-length, ordering, and duplicate-coordinate boundaries'
+    accessDate: '2026-09-04'
+  - title: 'cuSPARSE v13.3 - cusparseSpMV'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#cusparsespmv'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current high-level SpMV format, algorithm, workspace, preprocessing, and determinism coordinates; API code deferred to L13'
+    accessDate: '2026-09-04'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA-capable systems; current requested-versus-transferred traffic and effective-bandwidth boundary'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/sparse-formats-spmv/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,sparse-contract,shared-fixture,coo-storage,csr-storage,storage-ledger,spmv,library-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A13 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+import SparseMatrixFixture from '../../../components/SparseMatrixFixture.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/sparse-formats-spmv/" lang="en">Read the English counterpart</a>
+
+[坐标格式（coordinate format，COO，TERM-171）](/glossary/#term-171)为每个 stored entry 保留行、列和值；[压缩稀疏行（compressed sparse row，CSR，TERM-172）](/glossary/#term-172)把重复的行号压缩为 row offsets。[稀疏矩阵-向量乘法（sparse matrix-vector multiplication，SpMV，TERM-173）](/glossary/#term-173)随后按这些位置读取 `x` 并对每行归约。三者是表示和算法合同，不是“稀疏一定更快”的口号。
+
+## 学完本单元，你应该能
+
+- 从一个二维矩阵构造零基、row-sorted、无重复坐标的 COO 与 CSR 数组。
+- 用 `m`、`n`、`nnz`、value width 和 index width 核算 dense、COO 与 CSR payload。
+- 用重复 row offset 表示空行，并从 offsets 恢复每行的 half-open entry range。
+- 手算 `y=A x`，区分矩阵值的连续扫描、索引读取、`x` gather 与 row reduction。
+- 说明为什么 format、index base/type、ordering 和 duplicate policy 必须先于 library call 固定。
+- 把静态 payload/operation 账本与 actual traffic、timing 和 speedup 证据分开。
+
+## 先修关系
+
+严格先修项按课程图顺序为 [M01：Address Spaces](/memory/address-spaces/)和 [M02：Coalescing and Transactions](/memory/coalescing-transactions/)，即 `M01, M02`。M01 提供 allocation、ownership 与 lifetime；M02 提供 requested payload、实际 transaction 和 access regularity 的区分。A12 不要求任何 cuSPARSE API。
+
+## 稀疏表示合同
+
+先冻结逻辑矩阵 shape `m x n`、stored-entry count `nnz`、value type、index type、index base、entry ordering 与 duplicate policy。本页使用 `m=4`、`n=5`、`nnz=6`、FP32 values、32-bit indices、零基索引、按行再按列排序，并要求每个 coordinate 唯一。
+
+“Nonzero”在这个 fixture 中表示被存储的六个数学非零项。实际数据管线若保留 explicit zero、按阈值剪枝或允许 duplicate coordinates，必须另写转换与数学语义；不能默认为 library 会合并重复项。cuSPARSE v13.3 的 storage-format 页面说明支持零基与一基索引，并警告同一行重复 column indices 时计算正确性并非总能保证。
+
+## 共享矩阵 fixture
+
+矩阵 A 是：
+
+`A = [[4,0,-1,0,0],[0,0,0,0,0],[0,2,0,0,3],[5,0,0,7,0]]`
+
+第二行为空行。下面的语义化 HTML 构图由中英文页共享同一数据和计算；每张表都有 caption，横向滚动区域可通过键盘聚焦，并保留 forced-colors、390/420 px reflow、print 与纯文本数组。
+
+<SparseMatrixFixture locale="zh-CN" view="formats" />
+
+## COO：每项保留完整坐标
+
+按 row-major coordinate order 扫描六个 stored entries：
+
+- `row_indices = [0, 0, 2, 2, 3, 3]`
+- `column_indices = [0, 2, 1, 4, 0, 3]`
+- `values = [4, -1, 2, 3, 5, 7]`
+
+三个数组长度都是 `nnz=6`。第 `k` 个 stored entry 是三元组 `(row_indices[k], column_indices[k], values[k])`。COO 直接表达坐标，便于组装和交换，但每项付出两个 index。当前 owner 文档把 COO 说明为 row-sorted，同时允许行内 column indices 有序或无序；这种格式级说明不能被扩写成所有 operation、algorithm 和 version 的通用性能结论。
+
+## CSR：把行号压缩为 offsets
+
+CSR 保留相同的 `column_indices` 与 `values`，把六个 row indices 换成长度 `m+1=5` 的：
+
+`row_offsets = [0, 2, 2, 4, 6]`
+
+Row `r` 使用 half-open range `[row_offsets[r], row_offsets[r+1])`。因此 row 0 读取 entries `[0,2)`，row 1 读取 `[2,2)` 而为空，row 2 读取 `[2,4)`，row 3 读取 `[4,6)`。末项等于 `nnz`；offsets 单调不减。重复的 `2,2` 不是 duplicate coordinate，而是零长度 row range。
+
+## 存储账本：index metadata 也占空间
+
+令 value width 为 `b_v`，index width 为 `b_i`，且只计矩阵 A 的 payload，不计 allocator、alignment、descriptor 或 workspace：
+
+- Dense：`mn b_v`
+- COO：`nnz (b_v + 2b_i)`
+- CSR：`nnz (b_v + b_i) + (m+1)b_i`
+
+代入 `m=4,n=5,nnz=6,b_v=b_i=4 B`，dense 是 `80 B`，COO 是 `72 B`，CSR 是 `68 B`。这个小矩阵只相差 8 B 或 12 B，正好说明 density 不能单独决定表示；shape、index width、row count、explicit zeros、conversion cost 与后续 operation 都属于决策。这里的 storage footprint 也不是某次 GPU transferred-byte observation。
+
+## SpMV：按 stored entries 做 row reduction
+
+取 `x=[1,2,3,4,5]`，定义 `y=A x`。CSR row ranges 给出：
+
+- `y_0 = 4*x_0 + (-1)*x_2 = 4*1 - 1*3 = 1`
+- `y_1 = 0`，因为 `[2,2)` 没有 stored entry
+- `y_2 = 2*x_1 + 3*x_4 = 2*2 + 3*5 = 19`
+- `y_3 = 5*x_0 + 7*x_3 = 5*1 + 7*4 = 33`
+
+所以 `y = [1, 0, 19, 33]`。这包含六个 value-vector products 和六次对相应 row accumulator 的贡献，而 dense row traversal 会检查 20 个 matrix positions。Sparse traversal 还读取 indices，并按 `column_indices` gather `x`；row lengths `[2,0,2,2]` 又决定可用并行工作。较少的数学 contributions 不自动意味着较少的 hardware transactions 或较短时间。
+
+## 到 cuSPARSE 的高层边界
+
+cuSPARSE v13.3 的 Generic API 把 format、shape、index base/type、stored data type 和 arrays 放入 descriptors；operation、compute type 与 algorithm 是分开的 call-level contract。Caller 按 exact combination 查询 external device workspace，并只在返回大小非零时分配 buffer。当前 SpMV 文档还给出可选 preprocessing 和 algorithm-specific determinism/performance 取舍；这些都是 current owner facts，不是本页运行结果。
+
+A12 只要求学习者能解释为何 library 需要完整表示 metadata，以及为何 repeated sparsity pattern 可能让 preprocessing 有意义。Exact descriptor constructors、buffer-size query、algorithm enums、lifetime/error handling 与 Runnable Example EX20 全部延后到 L13。不要从 A12 推断固定 workspace bytes、某个 algorithm 最快、observed determinism、structured-sparsity support 或当前 hardware winner。
+
+## 证据边界
+
+A12 的四个 evidence arrays 全为空。共享构图、host arithmetic、storage formulas、owner-source review 与 SpMV 手算都不构成 CUDA compilation/runtime evidence。没有 sparse kernel、cuSPARSE call、actual transaction、workspace allocation、preprocessing result、determinism observation、timing、bandwidth、speedup 或 winner。
+
+## 离开前检查
+
+1. COO 的三个数组各保存什么，为什么每个长度都是 `nnz`？
+2. CSR 为什么需要 `m+1` 个 row offsets，空行如何出现？
+3. `row_offsets=[0,2,2,4,6]` 中两个连续的 2 与 duplicate coordinate 有何不同？
+4. 本 fixture 的 dense、COO、CSR 为什么分别是 80 B、72 B、68 B？
+5. `y_2=19` 使用哪些 stored entries 与 `x` positions？
+6. 为什么 `nnz` 较小仍不足以推出更少 actual traffic 或更快运行？
+
+## 继续练习
+
+- 完成 [A12 Exercises](/algorithms/sparse-formats-spmv/exercises/)，再查看[独立解答](/algorithms/sparse-formats-spmv/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-015](/practice/#pb-r3-015)为另一个矩阵重建 COO、CSR 与 SpMV。
+- 复习 [TERM-171](/glossary/#term-171)、[TERM-172](/glossary/#term-172)与 [TERM-173](/glossary/#term-173)，然后进入 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+
+## 来源与复核
+
+cuSPARSE v13.3 storage-format 页面负责 index base、COO/CSR arrays、row ordering 与 duplicate boundary；SpMV 页面只支持当前 high-level format/algorithm/workspace/preprocessing 坐标。Best Practices Guide v13.3 区分 requested payload 与 actual transferred traffic。Context7 NVIDIA index 于 2026-09-04 只用于 current owner-coordinate discovery/cross-check；上列 exact owner URLs 才是发布依据。矩阵、数组、构图、计算、练习和文字均为本站原创，没有复制 NVIDIA figure、table、code、benchmark 或 result。
+
+**事实核查与来源访问日期：2026-09-04。**

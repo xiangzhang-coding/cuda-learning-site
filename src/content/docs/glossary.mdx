@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 170 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 176 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-03'
+      content: '2026-09-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1578,6 +1578,60 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [A08](/algorithms/tiled-gemm-correctness/)、[A10](/algorithms/numerically-stable-softmax/)、[A11](/algorithms/attention-as-an-io-problem/)和 [VIS18](/visuals/attention-memory-traffic/)。
 - **版本说明：** Dao 等 2022 支持 attention IO-aware algorithm history；static logical reduction 不构成 current backend、actual traffic 或 speedup evidence。
 
+<span id="term-171" class="resource-target" aria-hidden="true"></span>
+
+### coordinate format (COO) · 坐标格式
+
+- **定义：** 坐标格式（coordinate format，COO）用独立 row-index、column-index 与 value arrays 表示每个 stored matrix entry；三个数组长度都是 `nnz`。
+- **避免使用：** 无索引稀疏数组、自动合并重复项、任意顺序都等价的格式。
+- **相关资源：** [A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+- **版本说明：** cuSPARSE v13.3 的 storage-format contract 把 COO 说明为 row-sorted 并允许行内 columns 有序或无序；本课程 fixture 使用 unique coordinates。
+
+<span id="term-172" class="resource-target" aria-hidden="true"></span>
+
+### compressed sparse row (CSR) · 压缩稀疏行
+
+- **定义：** 压缩稀疏行（compressed sparse row，CSR）用长度 `rows+1` 的 row offsets 把每行映射到长度 `nnz` 的 column-index/value arrays；相邻相等 offsets 表示空行。
+- **避免使用：** COO 的别名、每行固定长度、没有 index overhead 的格式。
+- **相关资源：** [A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+- **版本说明：** cuSPARSE v13.3 支持零基或一基 descriptor contract；duplicate columns 的正确性不能默认成立。
+
+<span id="term-173" class="resource-target" aria-hidden="true"></span>
+
+### sparse matrix-vector multiplication (SpMV) · 稀疏矩阵-向量乘法
+
+- **定义：** 稀疏矩阵-向量乘法（sparse matrix-vector multiplication，SpMV）按 stored coordinates 从 vector gather values，并将 products 归约到对应 output rows。
+- **避免使用：** 无索引的 dense dot product、天然 coalesced operation、必然 memory-bound 或更快的 kernel。
+- **相关资源：** [A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+- **版本说明：** cuSPARSE v13.3 的 format、algorithm、workspace、preprocessing 与 determinism 均是 exact combination 的 API facts；A12 没有执行它们。
+
+<span id="term-174" class="resource-target" aria-hidden="true"></span>
+
+### sparse matrix-matrix multiplication (SpMM) · 稀疏矩阵-矩阵乘法
+
+- **定义：** 稀疏矩阵-矩阵乘法（sparse matrix-matrix multiplication，SpMM）在 A13 中指 sparse `M x K` A 乘 dense `K x N` B，并生成 dense `M x N` C。
+- **避免使用：** Sparse-output SpGEMM、dense GEMM 的自动替代品、structured sparsity 的同义词。
+- **相关资源：** [A08](/algorithms/tiled-gemm-correctness/)、[A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+- **版本说明：** cuSPARSE v13.3 的 supported formats/layouts/algorithms 绑定 exact operation；A13 只发布 high-level comparison，不发布 API code。
+
+<span id="term-175" class="resource-target" aria-hidden="true"></span>
+
+### preprocessing · 预处理
+
+- **定义：** 预处理（preprocessing）是某些 sparse operation/algorithm 可选的准备阶段，可针对会复用的 sparsity pattern 在 caller workspace 中建立 acceleration data。
+- **避免使用：** 必做编译阶段、永久缓存、一次准备对任意 matrix 或 algorithm 都加速。
+- **相关资源：** [A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+- **版本说明：** cuSPARSE v13.3 SpMM 只为特定 CSR algorithms 声明 benefit；是否支持、何时失效和是否有收益必须按 exact version/combination 核对。
+
+<span id="term-176" class="resource-target" aria-hidden="true"></span>
+
+### external workspace · 外部工作区
+
+- **定义：** 外部工作区（external workspace）是 caller 在 exact operation/algorithm 的 size query 返回非零时分配和管理的 device buffer，用于 temporary 或 preprocessing acceleration storage；返回零时无需该 buffer。
+- **避免使用：** Sparse matrix payload、CUDA external-memory interoperability、可由 `nnz` 猜出的固定 buffer。
+- **相关资源：** [A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
+- **版本说明：** Workspace owner、size、lifetime 与 active preprocessing state 绑定 pinned cuSPARSE contract；A12/A13 没有分配或测量它。
+
 ## 维护规则
 
-TERM-001 至 TERM-165 保留各自逐项复核记录；新增 TERM-166 至 TERM-170 与完整 170 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-03** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation 和论文，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只是静态定义：未运行 application 或 GPU，且不声明 actual traffic、backend、dtype、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-170 保留各自逐项复核记录；新增 TERM-171 至 TERM-176 与完整 176 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-04** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只是静态定义：未运行 CUDA/cuSPARSE，且不声明 workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

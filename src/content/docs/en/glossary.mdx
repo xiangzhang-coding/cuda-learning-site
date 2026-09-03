@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred seventy published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred seventy-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-03'
+      content: '2026-09-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1578,6 +1578,60 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [A08](/en/algorithms/tiled-gemm-correctness/), [A10](/en/algorithms/numerically-stable-softmax/), [A11](/en/algorithms/attention-as-an-io-problem/), and [VIS18](/en/visuals/attention-memory-traffic/).
 - **Version note:** Dao et al. 2022 support IO-aware attention-algorithm history. A static logical reduction is not current-backend, actual-traffic, or speedup evidence.
 
+<span id="term-171" class="resource-target" aria-hidden="true"></span>
+
+### coordinate format (COO) · 坐标格式
+
+- **Definition:** Coordinate format (COO) represents every stored matrix entry with separate row-index, column-index, and value arrays, each of length `nnz`.
+- **Avoid:** Index-free sparse array, automatic duplicate coalescing, format in which every ordering is equivalent.
+- **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/) and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+- **Version note:** The cuSPARSE 13.3 storage contract describes COO as row sorted and permits sorted or unsorted columns within a row. This curriculum uses unique-coordinate fixtures.
+
+<span id="term-172" class="resource-target" aria-hidden="true"></span>
+
+### compressed sparse row (CSR) · 压缩稀疏行
+
+- **Definition:** Compressed sparse row (CSR) uses row offsets of length `rows+1` to map each row into column-index and value arrays of length `nnz`. Equal adjacent offsets denote an empty row.
+- **Avoid:** Alias for COO, fixed-length row format, format without index overhead.
+- **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/) and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+- **Version note:** cuSPARSE 13.3 supports zero- or one-based descriptor contracts. Correctness with duplicate columns must not be assumed.
+
+<span id="term-173" class="resource-target" aria-hidden="true"></span>
+
+### sparse matrix-vector multiplication (SpMV) · 稀疏矩阵-向量乘法
+
+- **Definition:** Sparse matrix-vector multiplication (SpMV) gathers vector values through stored coordinates and reduces products into the corresponding output rows.
+- **Avoid:** Index-free dense dot product, inherently coalesced operation, kernel that must be memory bound or faster.
+- **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/) and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+- **Version note:** Formats, algorithms, workspace, preprocessing, and determinism in cuSPARSE 13.3 are facts of exact combinations. A12 executes none of them.
+
+<span id="term-174" class="resource-target" aria-hidden="true"></span>
+
+### sparse matrix-matrix multiplication (SpMM) · 稀疏矩阵-矩阵乘法
+
+- **Definition:** In A13, sparse matrix-matrix multiplication (SpMM) means sparse `M x K` A times dense `K x N` B with dense `M x N` output C.
+- **Avoid:** Sparse-output SpGEMM, automatic replacement for dense GEMM, synonym for structured sparsity.
+- **Related resources:** [A08](/en/algorithms/tiled-gemm-correctness/), [A12](/en/algorithms/sparse-formats-spmv/), and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+- **Version note:** Supported formats, layouts, and algorithms in cuSPARSE 13.3 bind to an exact operation. A13 publishes a high-level comparison, not API code.
+
+<span id="term-175" class="resource-target" aria-hidden="true"></span>
+
+### preprocessing · 预处理
+
+- **Definition:** Preprocessing is an optional preparation stage for some sparse operation and algorithm combinations that can build acceleration data in caller workspace for a reused sparsity pattern.
+- **Avoid:** Required compilation stage, permanent cache, one preparation that accelerates every matrix or algorithm.
+- **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/) and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+- **Version note:** cuSPARSE 13.3 SpMM reports a benefit only for specific CSR algorithms. Support, invalidation, and benefit require an exact version and combination.
+
+<span id="term-176" class="resource-target" aria-hidden="true"></span>
+
+### external workspace · 外部工作区
+
+- **Definition:** External workspace is a caller-managed device buffer allocated when the size query for an exact operation and algorithm returns a nonzero value and used for temporary or preprocessing acceleration storage. A zero result needs no such buffer.
+- **Avoid:** Sparse matrix payload, CUDA external-memory interoperability, fixed buffer guessed from `nnz`.
+- **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/) and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+- **Version note:** Workspace ownership, size, lifetime, and active preprocessing state bind to a pinned cuSPARSE contract. A12 and A13 allocate or measure none of it.
+
 ## Maintenance rule
 
-TERM-001 through TERM-165 retain their item-level review records. New TERM-166 through TERM-170 and the complete 170-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-03**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation and papers without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New entries are static definitions only: no application or GPU ran, and no actual traffic, backend, dtype, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-170 retain their item-level review records. New TERM-171 through TERM-176 and the complete 176-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-04**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New entries are static definitions only: no CUDA or cuSPARSE ran, and no workspace, preprocessing, determinism, structured-sparsity, actual-traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.

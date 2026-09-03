@@ -19,7 +19,7 @@ const learningUnits = [
 ] as const;
 const currentLearningUnits = [
   ...learningUnits.slice(0, 44),
-  'A10', 'A11', 'A14',
+  'A10', 'A11', 'A12', 'A13', 'A14',
   ...learningUnits.slice(44),
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
@@ -233,21 +233,21 @@ describe('R2 release review', () => {
       'SPDX-License-Identifier': 'Apache-2.0',
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-03',
+      reviewDate: '2026-09-04',
       artifactType: 'static-assets',
       canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
       releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
     });
     expect(currentManifest.scope).toEqual({
-      publicationPairs: 226,
-      sourceRoutes: 452,
+      publicationPairs: 232,
+      sourceRoutes: 464,
       learningUnits: currentLearningUnits,
       runnableExamples,
       labs: currentLabs,
       visualExplainers: currentVisualExplainers,
-      practiceBankEntries: 64,
-      glossaryTerms: 170,
-      sourceRecords: 74,
+      practiceBankEntries: 66,
+      glossaryTerms: 176,
+      sourceRecords: 76,
     });
     expect(currentManifest.compatibility).toEqual(r2Manifest.compatibility);
     expect(currentManifest.evidence).toEqual({
@@ -271,9 +271,9 @@ describe('R2 release review', () => {
       'Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.',
       'Q12 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX11 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS10, and expected-only fixture add no runtime or performance evidence, and every stage result remains expected and unrecorded.',
       'Q13 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX15 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS12, and expected-only fixture add no runtime or performance evidence, every stage result remains expected and unrecorded, and no cuBLAS or Tensor Core result is published.',
-      'A10 and A11 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Their numerical fixtures and traffic ledgers are host arithmetic and static analysis only. VIS18 executes no CUDA, queries no GPU, observes no actual traffic, and grants no Evidence Status; no backend, dtype, timing, bandwidth, bottleneck, speedup, or winner is published.',
-      'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication.',
-      'Q06-Q13, A10, A11, A14, LAB06, LAB08-LAB10, VIS13, VIS14, and VIS18 are incremental R3 publications; the aggregate R3 release review remains pending.',
+      'A10 through A13 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Their numerical fixtures, sparse matrices, storage and contribution counts, and traffic ledgers are host arithmetic and static analysis only. VIS18 and the shared A12/A13 sparse composition execute no CUDA, query no GPU, observe no actual traffic, and grant no Evidence Status; no cuSPARSE execution, workspace or preprocessing result, determinism or structured-sparsity observation, backend, dtype, timing, bandwidth, bottleneck, speedup, or winner is published.',
+      'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication. L13 and EX20 have no current public destination; EX20 remains deferred until L13 publishes the exact cuSPARSE API contract.',
+      'Q06-Q13, A10-A14, LAB06, LAB08-LAB10, VIS13, VIS14, and VIS18 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]);
     expect(currentManifest.knownLimitations).not.toContain('LAB06 has no current public destination.');
@@ -306,6 +306,14 @@ describe('R2 release review', () => {
       href: { en: '/en/algorithms/attention-as-an-io-problem/' },
       prerequisites: ['A08', 'A10'],
     });
+    expect(PUBLISHED_DESTINATIONS.A12).toMatchObject({
+      href: { en: '/en/algorithms/sparse-formats-spmv/' },
+      prerequisites: ['M01', 'M02'],
+    });
+    expect(PUBLISHED_DESTINATIONS.A13).toMatchObject({
+      href: { en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/' },
+      prerequisites: ['A12', 'A08'],
+    });
     expect(PUBLISHED_DESTINATIONS.VIS18).toMatchObject({
       href: { en: '/en/visuals/attention-memory-traffic/' },
       prerequisites: ['A11'],
@@ -314,19 +322,19 @@ describe('R2 release review', () => {
       href: { en: '/en/labs/optimize-canonical-transpose/' },
       prerequisites: ['Q11'],
     });
-    for (const absentId of ['L03', 'LAB11', 'L06', 'LAB12']) {
+    for (const absentId of ['L03', 'LAB11', 'L06', 'LAB12', 'L13', 'EX20']) {
       expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(absentId);
     }
 
     const recordsByGroup = Object.groupBy(RESOURCE_INDEX_RECORDS, ({ group }) => group);
     expect(recordsByGroup.labs).toHaveLength(10);
-    expect(recordsByGroup.practice).toHaveLength(64);
+    expect(recordsByGroup.practice).toHaveLength(66);
     expect(recordsByGroup.visuals).toHaveLength(19);
-    expect(recordsByGroup.glossary).toHaveLength(170);
-    expect(recordsByGroup.sources).toHaveLength(74);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(337);
-    expect(publishedRoutes).toHaveLength(452);
-    expect(new Set(publishedRoutes).size).toBe(452);
+    expect(recordsByGroup.glossary).toHaveLength(176);
+    expect(recordsByGroup.sources).toHaveLength(76);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(347);
+    expect(publishedRoutes).toHaveLength(464);
+    expect(new Set(publishedRoutes).size).toBe(464);
   });
 
   it('documents R2 as completed without pre-certifying dynamic acceptance evidence', async () => {
@@ -351,27 +359,28 @@ describe('R2 release review', () => {
     for (const document of [readme, deployment, maintenance, contentLicenses]) {
       expect(document).toMatch(/186 (?:bilingual )?Publication Pairs/i);
       expect(document).toContain('372 source routes');
-      expect(document).toMatch(/226 (?:bilingual )?Publication Pairs/i);
-      expect(document).toContain('452 source routes');
+      expect(document).toMatch(/232 (?:bilingual )?Publication Pairs/i);
+      expect(document).toContain('464 source routes');
       expect(document).toMatch(/49 Learning Units.*6 Labs.*16 Visual Explainers.*50 Practice Bank entries.*151 Glossary terms.*61 source records.*284 catalog records/is);
-      expect(document).toMatch(/60 Learning Units/i);
+      expect(document).toMatch(/62 Learning Units/i);
       expect(document).toMatch(/(?:10|ten) Labs/i);
       expect(document).toMatch(/(?:19|nineteen)(?: formal| deterministic)? Visual Explainers/i);
-      expect(document).toMatch(/64 Practice Bank entries/i);
-      expect(document).toMatch(/170 Glossary terms/i);
-      expect(document).toMatch(/74 source(?:\/version)? records/i);
-      expect(document).toMatch(/337(?:-record catalog| catalog records| records)/i);
+      expect(document).toMatch(/66 Practice Bank entries/i);
+      expect(document).toMatch(/176 Glossary terms/i);
+      expect(document).toMatch(/76 source(?:\/version)? records/i);
+      expect(document).toMatch(/347(?:-record catalog| catalog records| records)/i);
     }
-    expect(maintenance).toContain('Review date: 2026-09-03');
+    expect(maintenance).toContain('Review date: 2026-09-04');
     expect(maintenance).toMatch(/`SRC-CUDA-050` through `SRC-CUDA-052`/);
     expect(maintenance).toMatch(/`SRC-CUDA-056`/);
     expect(maintenance).toMatch(/`SRC-CUDA-057\/058`/);
+    expect(maintenance).toMatch(/`SRC-CUDA-059\/060`/);
     expect(maintenance).toMatch(/LAB09.*empty compilation.*recorded-observation/is);
     expect(maintenance).toContain('Q11-Q13 are Learning Units with all four evidence arrays empty and grant no Evidence Status.');
     expect(maintenance).toContain('LAB09/LAB10 and EX11/EX14/EX15 remain Pending Hardware Verification with empty recorded observations.');
     expect(maintenance).toMatch(/issue #24.*dynamic acceptance|dynamic acceptance.*issue #24/i);
     expect(maintenance).toMatch(/A14.*Q09-Q10.*LAB09.*VIS13/is);
     expect(contentLicenses).toContain('src/r2-release-manifest.json');
-    expect(contentLicenses).toContain('Issue #30 is an incremental publication');
+    expect(contentLicenses).toContain('Issue #31 is an incremental publication');
   });
 });
