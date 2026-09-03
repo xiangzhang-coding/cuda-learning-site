@@ -410,7 +410,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R2-017', 'PB-R2-018', 'PB-R2-019', 'PB-R2-020', 'PB-R2-021',
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
-      'PB-R3-013', 'PB-R3-014',
+      'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -467,6 +467,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-012': 'correctness/gemm-optimization-case-study',
       'PB-R3-013': 'algorithms/numerically-stable-softmax',
       'PB-R3-014': 'algorithms/attention-as-an-io-problem',
+      'PB-R3-015': 'algorithms/sparse-formats-spmv',
+      'PB-R3-016': 'algorithms/sparse-matrix-multiplication-preprocessing',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -584,6 +586,17 @@ describe('Exercises and Practice Bank contract', () => {
         'algorithms/attention-as-an-io-problem',
         'visuals/attention-memory-traffic',
       ],
+      'PB-R3-015': [
+        'memory/address-spaces',
+        'memory/coalescing-transactions',
+        'algorithms/sparse-formats-spmv',
+        'algorithms/sparse-matrix-multiplication-preprocessing',
+      ],
+      'PB-R3-016': [
+        'algorithms/tiled-gemm-correctness',
+        'algorithms/sparse-formats-spmv',
+        'algorithms/sparse-matrix-multiplication-preprocessing',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -631,10 +644,12 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-2])$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R3-01[1-2]$/.test(entryId)
+        const sourceDate = /^PB-R3-01[5-6]$/.test(entryId)
+          ? '2026-09-04'
+          : /^PB-R3-01[1-4]$/.test(entryId)
           ? '2026-09-03'
           : /^PB-R3-(?:00[7-9]|010)$/.test(entryId)
           ? '2026-09-02'

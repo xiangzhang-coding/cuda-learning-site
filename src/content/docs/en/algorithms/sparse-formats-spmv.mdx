@@ -1,0 +1,192 @@
+---
+title: 'A12: Sparse Formats, Storage Ledgers, and SpMV'
+description: Derive COO, CSR, storage cost, and row-reduction SpMV from one original tiny matrix, then connect representation choice to descriptor, workspace, and preprocessing boundaries in cuSPARSE.
+pairId: a12
+counterpart: /algorithms/sparse-formats-spmv/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - sparse-contract
+  - shared-fixture
+  - coo-storage
+  - csr-storage
+  - storage-ledger
+  - spmv
+  - library-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A12
+prerequisites:
+  - M01
+  - M02
+relatedUnits:
+  - A13
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuSPARSE v13.3 - Storage Formats'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#cusparse-storage-formats'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current index-base, COO, CSR array-length, ordering, and duplicate-coordinate boundaries'
+    accessDate: '2026-09-04'
+  - title: 'cuSPARSE v13.3 - cusparseSpMV'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#cusparsespmv'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current high-level SpMV format, algorithm, workspace, preprocessing, and determinism coordinates; API code deferred to L13'
+    accessDate: '2026-09-04'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA-capable systems; current requested-versus-transferred traffic and effective-bandwidth boundary'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/sparse-formats-spmv/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,sparse-contract,shared-fixture,coo-storage,csr-storage,storage-ledger,spmv,library-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M01,M02' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A13 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+import SparseMatrixFixture from '../../../../components/SparseMatrixFixture.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/sparse-formats-spmv/" lang="zh-CN">阅读中文对应页</a>
+
+[Coordinate format (COO, TERM-171)](/en/glossary/#term-171) retains a row, column, and value for every stored entry. [Compressed sparse row (CSR, TERM-172)](/en/glossary/#term-172) compresses repeated row numbers into row offsets. [Sparse matrix-vector multiplication (SpMV, TERM-173)](/en/glossary/#term-173) then gathers `x` at those positions and reduces each row. These are representation and algorithm contracts, not a slogan that sparse is always faster.
+
+## What you should be able to do
+
+- Construct zero-based, row-sorted COO and CSR arrays with unique coordinates from a two-dimensional matrix.
+- Account for dense, COO, and CSR payload from `m`, `n`, `nnz`, value width, and index width.
+- Represent an empty row with repeated row offsets and recover each row's half-open entry range.
+- Hand-calculate `y=A x` while separating contiguous matrix-value scanning, index reads, `x` gathers, and row reduction.
+- Explain why format, index base and type, ordering, and duplicate policy must be fixed before a library call.
+- Separate static payload and operation ledgers from evidence about actual traffic, timing, and speedup.
+
+## Prerequisites
+
+The curriculum graph fixes the prerequisites in this order: [M01: Address Spaces](/en/memory/address-spaces/) and [M02: Coalescing and Transactions](/en/memory/coalescing-transactions/), or `M01, M02`. M01 supplies allocation, ownership, and lifetime. M02 separates requested payload, actual transactions, and access regularity. A12 requires no cuSPARSE API.
+
+## Sparse representation contract
+
+First freeze logical matrix shape `m x n`, stored-entry count `nnz`, value type, index type, index base, entry ordering, and duplicate policy. This page uses `m=4`, `n=5`, `nnz=6`, FP32 values, 32-bit indices, zero-based indexing, row-then-column ordering, and one unique coordinate per entry.
+
+“Nonzero” means the six mathematical nonzeros retained by this fixture. A real data pipeline that keeps explicit zeros, prunes by a threshold, or permits duplicate coordinates needs a separate conversion and mathematical contract; it must not assume that a library combines duplicates. The cuSPARSE 13.3 storage-format page supports zero- and one-based indices and warns that correctness is not always ensured when column indices repeat within a row.
+
+## Shared matrix fixture
+
+Matrix A is:
+
+`A = [[4,0,-1,0,0],[0,0,0,0,0],[0,2,0,0,3],[5,0,0,7,0]]`
+
+Its second row is empty. The semantic HTML composition below uses one shared data set and calculation for both locales. Every table has a caption, horizontal regions are keyboard focusable, and forced colors, 390/420 px reflow, print, and textual arrays remain available.
+
+<SparseMatrixFixture locale="en" view="formats" />
+
+## COO: retain the complete coordinate for every entry
+
+Scanning the six stored entries in row-major coordinate order gives:
+
+- `row_indices = [0, 0, 2, 2, 3, 3]`
+- `column_indices = [0, 2, 1, 4, 0, 3]`
+- `values = [4, -1, 2, 3, 5, 7]`
+
+Each array has length `nnz=6`. Stored entry `k` is the tuple `(row_indices[k], column_indices[k], values[k])`. COO states coordinates directly, which is useful for assembly and interchange, but pays for two indices per entry. Current owner documentation describes COO as row sorted while allowing column indices within one row to be sorted or unsorted. That format-level statement must not be expanded into a universal performance claim across every operation, algorithm, and version.
+
+## CSR: compress row numbers into offsets
+
+CSR retains the same `column_indices` and `values` and replaces six row indices with this length-`m+1=5` array:
+
+`row_offsets = [0, 2, 2, 4, 6]`
+
+Row `r` owns the half-open range `[row_offsets[r], row_offsets[r+1])`. Row 0 reads entries `[0,2)`, row 1 reads empty range `[2,2)`, row 2 reads `[2,4)`, and row 3 reads `[4,6)`. The final offset equals `nnz`, and offsets are nondecreasing. Repeated `2,2` denotes a zero-length row range, not a duplicate coordinate.
+
+## Storage ledger: index metadata occupies space too
+
+Let value width be `b_v` and index width be `b_i`. Count only matrix A payload, excluding allocators, alignment, descriptors, and workspace:
+
+- Dense: `mn b_v`
+- COO: `nnz (b_v + 2b_i)`
+- CSR: `nnz (b_v + b_i) + (m+1)b_i`
+
+Substituting `m=4,n=5,nnz=6,b_v=b_i=4 B` gives `80 B` for dense, `72 B` for COO, and `68 B` for CSR. This tiny matrix saves only 8 B or 12 B, which demonstrates why density alone does not choose a representation. Shape, index width, row count, explicit zeros, conversion cost, and downstream operations all belong to the decision. This storage footprint is not an observed GPU transferred-byte count.
+
+## SpMV: reduce stored entries by row
+
+Choose `x=[1,2,3,4,5]` and define `y=A x`. CSR row ranges give:
+
+- `y_0 = 4*x_0 + (-1)*x_2 = 4*1 - 1*3 = 1`
+- `y_1 = 0` because `[2,2)` contains no stored entry
+- `y_2 = 2*x_1 + 3*x_4 = 2*2 + 3*5 = 19`
+- `y_3 = 5*x_0 + 7*x_3 = 5*1 + 7*4 = 33`
+
+Therefore `y = [1, 0, 19, 33]`. This entails six value-vector products and six contributions to the corresponding row accumulators, whereas a dense row traversal examines 20 matrix positions. Sparse traversal also reads indices and gathers `x` through `column_indices`; row lengths `[2,0,2,2]` shape the available parallel work. Fewer mathematical contributions do not automatically imply fewer hardware transactions or less elapsed time.
+
+## High-level boundary to cuSPARSE
+
+The cuSPARSE 13.3 Generic API places format, shape, index base and type, stored data type, and arrays into descriptors. Operation, compute type, and algorithm remain a separate call-level contract. The caller queries external device workspace for that exact combination and allocates a buffer only when the returned size is nonzero. Current SpMV documentation also exposes optional preprocessing and algorithm-specific determinism and performance trade-offs. Those are current owner facts, not observations from this page.
+
+A12 asks only why a library needs complete representation metadata and why a repeated sparsity pattern can make preprocessing relevant. Exact descriptor constructors, buffer-size queries, algorithm enumerators, lifetime and error handling, and Runnable Example EX20 are all deferred to L13. Do not infer fixed workspace bytes, a fastest algorithm, observed determinism, structured-sparsity support, or a current hardware winner from A12.
+
+## Evidence boundary
+
+All four A12 evidence arrays are empty. The shared composition, host arithmetic, storage formulas, owner-source review, and hand-calculated SpMV are not CUDA compilation or runtime evidence. No sparse kernel, cuSPARSE call, actual transaction, workspace allocation, preprocessing result, determinism observation, timing, bandwidth, speedup, or winner is recorded.
+
+## Retrieval check
+
+1. What does each COO array store, and why does every array have length `nnz`?
+2. Why does CSR need `m+1` row offsets, and how does an empty row appear?
+3. How do adjacent values `2,2` in `row_offsets=[0,2,2,4,6]` differ from a duplicate coordinate?
+4. Why are dense, COO, and CSR 80 B, 72 B, and 68 B for this fixture?
+5. Which stored entries and `x` positions produce `y_2=19`?
+6. Why is a small `nnz` still insufficient to claim less actual traffic or faster execution?
+
+## Continue with practice
+
+- Complete the [A12 Exercises](/en/algorithms/sparse-formats-spmv/exercises/), then inspect the [separate solutions](/en/algorithms/sparse-formats-spmv/solutions/).
+- Reconstruct COO, CSR, and SpMV for another matrix in [Practice Bank PB-R3-015](/en/practice/#pb-r3-015).
+- Revisit [TERM-171](/en/glossary/#term-171), [TERM-172](/en/glossary/#term-172), and [TERM-173](/en/glossary/#term-173), then continue to [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
+
+## Sources and review
+
+The cuSPARSE 13.3 storage-format page governs index base, COO and CSR arrays, row ordering, and duplicate boundaries. Its SpMV page supports only the current high-level format, algorithm, workspace, and preprocessing coordinates. Best Practices Guide 13.3 separates requested payload from actual transferred traffic. The Context7 NVIDIA index supported current owner-coordinate discovery and cross-checking on 2026-09-04; the exact owner URLs above remain publication authority. The matrix, arrays, composition, calculations, Exercises, and prose are original site work. No NVIDIA figure, table, code, benchmark, or result is copied.
+
+**Fact checked and sources accessed: 2026-09-04.**

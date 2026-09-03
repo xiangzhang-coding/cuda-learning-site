@@ -1334,6 +1334,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-03',
     keywords: localized('attention score softmax value aggregation online row state exact tiling IO', 'attention score softmax value aggregation online row state exact tiling IO'),
   },
+  {
+    planningId: 'PB-R3-015',
+    group: 'practice',
+    title: localized('重建 COO、CSR 与包含空行的 SpMV', 'Reconstruct COO, CSR, and an SpMV with an empty row'),
+    href: localized('/practice/#pb-r3-015', '/en/practice/#pb-r3-015'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['A12'],
+    relatedUnits: ['M01', 'M02', 'A12', 'A13'],
+    hardwareGate: localized('无；只构造静态 sparse arrays、payload ledger 与 exact host result，不运行 CUDA/cuSPARSE。', 'None; construct static sparse arrays, a payload ledger, and an exact host result without running CUDA or cuSPARSE.'),
+    versionGate: localized('cuSPARSE v13.3 storage-format/SpMV owner contracts；Generic API code 与 EX20 延后到 L13。', 'cuSPARSE 13.3 storage-format and SpMV owner contracts; Generic API code and EX20 are deferred to L13.'),
+    reviewedOn: '2026-09-04',
+    keywords: localized('COO CSR row offsets empty row SpMV index overhead duplicate coordinate', 'COO CSR row offsets empty row SpMV index overhead duplicate coordinate'),
+  },
+  {
+    planningId: 'PB-R3-016',
+    group: 'practice',
+    title: localized('审查 SpMM sparse-vs-dense 与预处理提案', 'Audit an SpMM sparse-versus-dense and preprocessing proposal'),
+    href: localized('/practice/#pb-r3-016', '/en/practice/#pb-r3-016'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['A13'],
+    relatedUnits: ['A08', 'A12', 'A13'],
+    hardwareGate: localized('无；只审查 exact host matrix、static storage/contribution ledgers 与未执行的 lifecycle，不运行 CUDA/cuSPARSE。', 'None; audit an exact host matrix, static storage and contribution ledgers, and an unexecuted lifecycle without running CUDA or cuSPARSE.'),
+    versionGate: localized('cuSPARSE v13.3 Generic API/SpMM workspace 与 preprocessing owner contracts；exact API code、EX20 与 measured comparison 延后到 L13。', 'cuSPARSE 13.3 Generic API and SpMM workspace and preprocessing owner contracts; exact API code, EX20, and measured comparison are deferred to L13.'),
+    reviewedOn: '2026-09-04',
+    keywords: localized('SpMM dense GEMM descriptor workspace preprocessing sparsity pattern algorithm evidence', 'SpMM dense GEMM descriptor workspace preprocessing sparsity pattern algorithm evidence'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1808,6 +1836,12 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-168', 'online normalization · 在线归一化', 'kernel-vocabulary', ['A10', 'A11', 'VIS18'], 'Milakov/Gimelshein 2018 的 running maximum/normalizer recurrence；输出、residency、tiling 与 traffic 仍由具体 schedule 决定。', 'The running maximum and normalizer recurrence from Milakov and Gimelshein 2018; output, residency, tiling, and traffic still depend on the concrete schedule.', '2026-09-03'),
   glossaryRecord('TERM-169', 'scaled dot-product attention · 缩放点积注意力', 'kernel-vocabulary', ['A11', 'VIS18'], 'Vaswani 等 2017 的 score、row-softmax、value-aggregation contract；scale motivation 是条件化模型，不替代 stable softmax。', 'The score, row-softmax, and value-aggregation contract from Vaswani et al. 2017; its scaling motivation is conditional and does not replace stable softmax.', '2026-09-03'),
   glossaryRecord('TERM-170', 'IO-aware tiling · IO 感知分块', 'kernel-vocabulary', ['A08', 'A10', 'A11', 'VIS18'], '在明确 slow/fast boundary 与 residency assumptions 下重排 tile 和 state，以核算 movement；static reduction 不是 actual traffic 或 speedup evidence。', 'Reorder tiles and state under an explicit slow/fast boundary and residency assumptions to account for movement; a static reduction is not actual-traffic or speedup evidence.', '2026-09-03'),
+  glossaryRecord('TERM-171', 'coordinate format (COO) · 坐标格式', 'kernel-vocabulary', ['A12', 'A13'], 'cuSPARSE v13.3；每个 stored entry 使用独立 row index、column index 与 value；本课程使用 row-sorted unique coordinates。', 'cuSPARSE 13.3; every stored entry uses separate row-index, column-index, and value arrays; this curriculum uses row-sorted unique coordinates.', '2026-09-04'),
+  glossaryRecord('TERM-172', 'compressed sparse row (CSR) · 压缩稀疏行', 'kernel-vocabulary', ['A12', 'A13'], 'cuSPARSE v13.3；长度 rows+1 的 offsets 把 row ranges 映射到长度 nnz 的 column/value arrays，repeated offsets 表示空行。', 'cuSPARSE 13.3; offsets of length rows plus one map row ranges into column and value arrays of length nnz, and repeated offsets represent empty rows.', '2026-09-04'),
+  glossaryRecord('TERM-173', 'sparse matrix-vector multiplication (SpMV) · 稀疏矩阵-向量乘法', 'kernel-vocabulary', ['A12', 'A13'], '按 stored coordinates gather vector entries 并做 row reductions；index、workspace、algorithm 与 actual traffic 不由 nnz 单独决定。', 'Gather vector entries through stored coordinates and reduce rows; indices, workspace, algorithms, and actual traffic are not determined by nnz alone.', '2026-09-04'),
+  glossaryRecord('TERM-174', 'sparse matrix-matrix multiplication (SpMM) · 稀疏矩阵-矩阵乘法', 'kernel-vocabulary', ['A08', 'A12', 'A13'], 'A13 的 sparse-times-dense contract 使用 C=A B；format、B/C layout、algorithm、workspace 与 evidence 必须显式声明。', 'A13 uses a sparse-times-dense C=A B contract; format, B and C layouts, algorithm, workspace, and evidence must be explicit.', '2026-09-04'),
+  glossaryRecord('TERM-175', 'preprocessing · 预处理', 'kernel-vocabulary', ['A12', 'A13'], 'cuSPARSE v13.3 operation-specific optional stage，可为复用的 sparsity pattern 建立 acceleration data；不是通用性能保证。', 'An optional operation-specific cuSPARSE 13.3 stage that can build acceleration data for a reused sparsity pattern; it is not a universal performance guarantee.', '2026-09-04'),
+  glossaryRecord('TERM-176', 'external workspace · 外部工作区', 'kernel-vocabulary', ['A12', 'A13'], 'Exact operation/algorithm 的 size query 返回非零时由 caller 管理的 device buffer；它不属于 sparse payload，大小和 lifetime 不能从 nnz 猜测。', 'A caller-managed device buffer used when an exact operation and algorithm size query is nonzero; it is not sparse payload, and its size and lifetime cannot be guessed from nnz.', '2026-09-04'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2541,6 +2575,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-03',
     '2026-09-03',
+  ),
+  sourceRecord(
+    'SRC-CUDA-059',
+    localized('A12 COO/CSR、storage ledger 与 SpMV boundary', 'A12 COO and CSR, storage ledger, and SpMV boundary'),
+    'cuda-version-record',
+    ['M01', 'M02', 'A12', 'A13'],
+    localized(
+      'cuSPARSE v13.3 storage formats 与 SpMV、CUDA Best Practices Guide v13.3；CUDA-capable systems，本站 Supported Environment 仍为 Native Linux；index base、COO/CSR arrays、duplicate caveat、static payload 与 current high-level workspace/preprocessing boundary；无 CUDA observation。',
+      'cuSPARSE 13.3 storage formats and SpMV plus CUDA Best Practices Guide 13.3; CUDA-capable systems with native Linux remaining the site Supported Environment; index base, COO and CSR arrays, duplicate caveat, static payload, and current high-level workspace and preprocessing boundaries; no CUDA observation.',
+    ),
+    '2026-09-04',
+    '2026-09-04',
+  ),
+  sourceRecord(
+    'SRC-CUDA-060',
+    localized('A13 SpMM、descriptor、workspace 与 preprocessing boundary', 'A13 SpMM, descriptor, workspace, and preprocessing boundary'),
+    'cuda-version-record',
+    ['A08', 'A12', 'A13'],
+    localized(
+      'cuSPARSE v13.3 Generic API/SpMM 与 CUDA Best Practices Guide v13.3；CUDA-capable systems，本站 Supported Environment 仍为 Native Linux；descriptor metadata、call-level algorithm、conditional caller-managed device workspace、optional preprocessing/reuse 与 sparse-vs-dense evidence boundary；无 API code 或 execution。',
+      'cuSPARSE 13.3 Generic API and SpMM plus CUDA Best Practices Guide 13.3; CUDA-capable systems with native Linux remaining the site Supported Environment; descriptor metadata, call-level algorithms, conditional caller-managed device workspace, optional preprocessing and reuse, and sparse-versus-dense evidence boundaries; no API code or execution.',
+    ),
+    '2026-09-04',
+    '2026-09-04',
   ),
 ];
 

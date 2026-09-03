@@ -123,6 +123,8 @@ export default defineConfig({
             { slug: 'algorithms/sorting-selection-compaction' },
             { slug: 'algorithms/numerically-stable-softmax' },
             { slug: 'algorithms/attention-as-an-io-problem' },
+            { slug: 'algorithms/sparse-formats-spmv' },
+            { slug: 'algorithms/sparse-matrix-multiplication-preprocessing' },
             { slug: 'algorithms/algorithm-choice-arithmetic-intensity' },
           ],
         },

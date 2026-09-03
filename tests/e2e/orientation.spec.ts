@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(452);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(226);
+  expect(routes).toHaveLength(464);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(232);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -89,6 +89,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/algorithms/algorithm-choice-arithmetic-intensity/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/' },
     { zh: '/algorithms/algorithm-choice-arithmetic-intensity/exercises/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/exercises/' },
     { zh: '/algorithms/algorithm-choice-arithmetic-intensity/solutions/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/solutions/' },
+    { zh: '/algorithms/sparse-formats-spmv/', en: '/en/algorithms/sparse-formats-spmv/' },
+    { zh: '/algorithms/sparse-formats-spmv/exercises/', en: '/en/algorithms/sparse-formats-spmv/exercises/' },
+    { zh: '/algorithms/sparse-formats-spmv/solutions/', en: '/en/algorithms/sparse-formats-spmv/solutions/' },
+    { zh: '/algorithms/sparse-matrix-multiplication-preprocessing/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/' },
+    { zh: '/algorithms/sparse-matrix-multiplication-preprocessing/exercises/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/exercises/' },
+    { zh: '/algorithms/sparse-matrix-multiplication-preprocessing/solutions/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -227,6 +233,8 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'A04 Privatized Histogram', localePrefix: '/', expectedHrefs: ['/algorithms/privatized-histogram/'] },
     { route: '/', button: /搜索/, query: 'A10 数值稳定 Softmax Online Normalization', localePrefix: '/', expectedHrefs: ['/algorithms/numerically-stable-softmax/'] },
     { route: '/', button: /搜索/, query: 'A11 Attention IO 问题', localePrefix: '/', expectedHrefs: ['/algorithms/attention-as-an-io-problem/'] },
+    { route: '/', button: /搜索/, query: 'A12 COO CSR SpMV 存储账本', localePrefix: '/', expectedHrefs: ['/algorithms/sparse-formats-spmv/'] },
+    { route: '/', button: /搜索/, query: 'A13 SpMM 预处理 工作区', localePrefix: '/', expectedHrefs: ['/algorithms/sparse-matrix-multiplication-preprocessing/'] },
     { route: '/', button: /搜索/, query: 'A14 Arithmetic Intensity', localePrefix: '/', expectedHrefs: ['/algorithms/algorithm-choice-arithmetic-intensity/'] },
     { route: '/', button: /搜索/, query: 'Q02 浮点顺序 确定性 逐位可复现性', localePrefix: '/', expectedHrefs: ['/correctness/floating-point-order-reproducibility/'] },
     { route: '/', button: /搜索/, query: 'Q06 把 APOD 作为优化循环', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/'] },
@@ -292,6 +300,8 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'A04 Privatized Histogram', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/privatized-histogram/'] },
     { route: '/en/', button: /Search/, query: 'A10 Numerically Stable Softmax Online Normalization', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/numerically-stable-softmax/'] },
     { route: '/en/', button: /Search/, query: 'A11 Attention as an IO Problem', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/attention-as-an-io-problem/'] },
+    { route: '/en/', button: /Search/, query: 'A12 Sparse Formats Storage SpMV', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/sparse-formats-spmv/'] },
+    { route: '/en/', button: /Search/, query: 'A13 SpMM Preprocessing Workspace Decisions', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/sparse-matrix-multiplication-preprocessing/'] },
     { route: '/en/', button: /Search/, query: 'A14 Falsifiable Algorithm Optimizations Arithmetic Intensity', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/algorithm-choice-arithmetic-intensity/'] },
     { route: '/en/', button: /Search/, query: 'Q02 floating-point order determinism bitwise reproducibility', localePrefix: '/en/', expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'] },
     { route: '/en/', button: /Search/, query: 'Q06 Use APOD as an optimization loop', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/'] },

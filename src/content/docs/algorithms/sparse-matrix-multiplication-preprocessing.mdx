@@ -1,0 +1,197 @@
+---
+title: 'A13：稀疏矩阵乘法、预处理与工作区决策'
+description: 从一个稀疏乘稠密的小型 SpMM 推导表示、数据移动、算法、工作区与预处理复用合同，并与 dense GEMM 推理保持可审计比较。
+pairId: a13
+counterpart: /en/algorithms/sparse-matrix-multiplication-preprocessing/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - spmm-contract
+  - worked-fixture
+  - dense-comparison
+  - descriptor-contract
+  - workspace-preprocessing
+  - decision-ledger
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A13
+prerequisites:
+  - A12
+  - A08
+relatedUnits:
+  - A12
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuSPARSE v13.3 - Library Organization and Generic APIs'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#library-organization-and-features'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current descriptor metadata, layout, index/data type, call-level algorithm selection, consistency-check, and external-device-memory model'
+    accessDate: '2026-09-04'
+  - title: 'cuSPARSE v13.3 - cusparseSpMM'
+    url: 'https://docs.nvidia.com/cuda/cusparse/index.html#cusparsespmm'
+    version: 'cuSPARSE v13.3; last updated 2026-06-25'
+    platform: 'cuSPARSE C/C++ API on CUDA-capable systems; current high-level SpMM format, algorithm, workspace, optional preprocessing, reuse, and determinism coordinates; API code deferred to L13'
+    accessDate: '2026-09-04'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA-capable systems; current requested-versus-transferred traffic and effective-bandwidth boundary'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a13 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/sparse-matrix-multiplication-preprocessing/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,spmm-contract,worked-fixture,dense-comparison,descriptor-contract,workspace-preprocessing,decision-ledger,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A13 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A12,A08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A12 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3' }
+---
+
+import SparseMatrixFixture from '../../../components/SparseMatrixFixture.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/sparse-matrix-multiplication-preprocessing/" lang="en">Read the English counterpart</a>
+
+[稀疏矩阵-矩阵乘法（sparse matrix-matrix multiplication，SpMM，TERM-174）](/glossary/#term-174)让 sparse A 乘 dense B 并产生 dense C。[预处理（preprocessing，TERM-175）](/glossary/#term-175)可以为会重复使用的稀疏模式建立辅助数据；[外部工作区（external workspace，TERM-176）](/glossary/#term-176)则把 operation/algorithm 所需的临时 device storage 交给 caller 管理。A13 用表示与生命周期解释这些步骤，而不是直接跳到 API recipe。
+
+## 学完本单元，你应该能
+
+- 写出 sparse-times-dense `C=A B` 的 shape 和逐项合同，并手算一个包含空行的 SpMM。
+- 比较 `MKN` dense contributions 与 `nnz*N` sparse contributions，同时保留 index、gather、row-imbalance 和 output costs。
+- 区分 descriptors 携带的 format、shape、index/stored-data types、layout 与 ordering metadata，以及 call-level operation、compute type 与 algorithm。
+- 区分 persistent matrix storage、caller-managed external workspace 与 optional preprocessing data 的 lifetime。
+- 判断 pattern reuse 何时可能摊薄 preprocessing，并列出使 acceleration data 失效的变化。
+- 在 workspace、determinism、algorithm 与 dense GEMM 之间建立待测假设，而不是发明 winner。
+
+## 先修关系
+
+严格先修项按课程图顺序为 [A12：Sparse Formats and SpMV](/algorithms/sparse-formats-spmv/)与 [A08：Tiled GEMM](/algorithms/tiled-gemm-correctness/)，即 `A12, A08`。A12 提供 COO/CSR、index overhead 和 irregular row reduction；A08 提供 `M/N/K`、dense output ownership、tiling 与 reuse。A13 不要求 L13 或 EX20。
+
+## SpMM 合同
+
+冻结 `A` 为 `M x K` sparse matrix、`B` 为 `K x N` dense matrix、`C` 为 `M x N` dense output，并先使用 `C=A B`，即 `C[i,j]=sum_k A[i,k]B[k,j]`。本 fixture 不含 transpose、batch、`alpha/beta`、mixed precision 或 sparse output；每项都是有限整数，所以手算使用 exact integer arithmetic。
+
+Sparse A 的每个 stored entry `(i,k,a)` 会对 C 的 N 个 columns 贡献 `a*B[k,j]`。因此一个直接 row-oriented schedule 有 `nnz*N` 个 scalar product contributions，而不是 dense `M*K*N` 个；但它还需要 index metadata、通过 k 选择 B row，并处理不均匀 row lengths。
+
+## 共享 SpMM fixture
+
+A13 复用 A12 的 `4 x 5`、`nnz=6` 矩阵 A，并取：
+
+`B = [[1,2],[0,1],[3,0],[2,-1],[1,4]]`
+
+共享构图给出 A、B、C 与 preparation lifecycle；表格 caption、纯文本 equation、keyboard-focusable overflow、forced colors、mobile reflow 和 print 都不依赖 JavaScript。
+
+<SparseMatrixFixture locale="zh-CN" view="spmm" />
+
+逐行计算：
+
+- `C[0,:] = 4*B[0,:] - B[2,:] = [4,8]-[3,0] = [1,8]`
+- `C[1,:] = [0,0]`，因为 A 的 row 1 为空
+- `C[2,:] = 2*B[1,:] + 3*B[4,:] = [0,2]+[3,12] = [3,14]`
+- `C[3,:] = 5*B[0,:] + 7*B[3,:] = [5,10]+[14,-7] = [19,3]`
+
+所以 `C = A B = [[1, 8], [0, 0], [3, 14], [19, 3]]`。
+
+## 与 dense GEMM 的可审计比较
+
+本题 `M=4,K=5,N=2`。Dense definition 包含 `M*K*N=40` 个 scalar product contributions；遍历六个 stored entries 并更新两个 output columns 包含 `nnz*N=12` 个。A 的 FP32/32-bit-index payload 又是 dense `80 B` 对 CSR `68 B`。这些数只证明本合同跳过 28 个 zero products，并在 A payload 上少 12 B。
+
+它们没有包含 B/C traffic、row offsets、index decoding 之外的 control、cache line、transaction overfetch、load imbalance、parallelism、conversion、workspace、preprocessing 或 implementation-specific tiling。Dense GEMM 的 regular tiles 可以对 A/B 获得规则复用；sparse schedule 用更少 contributions 换来 index/gather 和 irregularity。哪条路径更快必须绑定 shape、density/distribution、N、format、precision、algorithm、workspace、hardware 和 measurement，不能由 `12 < 40` 决定。
+
+## Descriptor 是跨阶段的表示合同
+
+cuSPARSE v13.3 的 Generic API 以 descriptors 记录 sparse/dense objects 的 shape、storage format、index base/type、stored value type、dense layout 与 pointers。Descriptor 不是 values 的第二份 copy；它是 host-side metadata 对 caller-owned device arrays 的引用。Operation/transposition、compute type、algorithm 和 scalar/output semantics 是分开的 call-level 参数；所有 dimensions 与 types 必须相容。
+
+这解释了为什么“我有一个指向 values 的 pointer”还不够。相同 bytes 在 COO 与 CSR 中有不同解释；零基与一基改变 index meaning；row-major 与 column-major 改变 dense address mapping；32-bit 与 64-bit indices 改变 storage 和 accepted range。L13 将负责 exact constructors、destruction、stream、scalar location、status 与 error handling。
+
+## Workspace 与 preprocessing 生命周期
+
+对一个 exact operation/algorithm combination，先查询所需 buffer size。只有返回值大于零时才分配至少该大小的 caller-managed device workspace；返回零表示该 exact combination 不需要 external workspace。Workspace 是 temporary/acceleration storage，不属于 CSR payload；其大小不能从 `nnz` 单独猜测，也不能把某一 version/algorithm 的结果写成 universal constant。
+
+这本身就是 algorithm trade-off。cuSPARSE v13.3 当前表格把 COO ALG1/ALG3/ALG4 与 BSR ALG1 列为不需要 extra storage，而 COO ALG2 和列出的 CSR/CSC algorithms 需要 additional memory。它是 pinned owner-document fact，不是本站测得的 workspace cost，也不能脱离 operation、format、layout 和 version 复用。
+
+cuSPARSE v13.3 明确提供 optional SpMM preprocessing。当前 owner 文档只为 CSR ALG1 与 CSR ALG3 声明 preprocessing benefit；其他列出的 format/algorithm 组合中 preprocessing 没有效果。Acceleration data 绑定 sparse descriptor、indices/pattern 与 active workspace；若换用另一个 preprocessing buffer，旧 buffer 不再 active。重复调用只有在 exact reuse contract 保持时才可能摊薄 preparation cost。
+
+这仍不是“总要 preprocess”。一次性 operation 可能没有摊薄机会；workspace budget 可能排除某个 algorithm；required determinism、transpose、batch、format、layout 或 data type 也可能改变 allowed choices。A13 不复述 enum support table，更不把 owner performance note 当作本地 observation。
+
+## 决策账本
+
+在选择 sparse SpMM 或 dense GEMM 前，至少记录：
+
+| axis | 必须冻结或查询的内容 | 不能推断的内容 |
+| --- | --- | --- |
+| representation | `M,K,N,nnz`、row distribution、format、base、index/value types、ordering、duplicates | “sparse”自动节省空间或时间 |
+| operation | transpose、batch、dense layouts、compute type、output semantics | 从 A 的 density 猜 B/C traffic |
+| algorithm | exact cuSPARSE/component version、supported combination、determinism requirement | default 永久不变或逐位结果跨环境相同 |
+| workspace | exact buffer-size query、budget、owner 与 lifetime | 固定 bytes 或越大越快 |
+| preprocessing | exact support、pattern reuse count、invalidation/lifetime | 一次 preparation 对所有 calls 都有收益 |
+| evidence | independent reference、tolerance、warm-up、retained attempts、Environment Manifest | 从 static ledger 填 timing、speedup 或 winner |
+
+这个表的输出应该是可证伪候选，例如“对于固定 CSR pattern 和较大的 N，测试带可复用 preprocessing 的 supported algorithm 是否优于 matched dense baseline”，而不是 production recommendation。
+
+## Production boundary
+
+A13 只建立 backend-independent SpMM、representation 与 preparation mental model。L13 才发布 current Generic API code 和 exact component compatibility；EX20 才是 canonical cuSPARSE SpMV Runnable Example。Structured sparsity、cuSPARSELt、architecture-specific support、API determinism matrix 与 measured workspace/performance 都不在本票据范围内。
+
+## 证据边界
+
+A13 的四个 evidence arrays 全为空。共享矩阵、12/40 contribution count、68/80 B payload、descriptor/workspace lifecycle 与 owner-document comparison 都是 host arithmetic 或 static analysis。没有执行 CUDA/cuSPARSE、分配 workspace、运行 preprocessing、观察 determinism/structured sparsity、测量 traffic/timing，也没有 sparse-vs-dense speedup 或 winner。
+
+## 离开前检查
+
+1. `M x K` sparse A 与 `K x N` dense B 为什么产生 `M x N` dense C？
+2. 本 fixture 的 `40` 与 `12` 分别核算什么，又遗漏什么？
+3. 哪些 metadata 属于 descriptor，哪些 operation/compute/algorithm choices 属于 call-level contract？
+4. Persistent CSR arrays、external workspace 与 preprocessing data 的 lifetime 有何不同？
+5. 哪些 pattern/workspace 变化会让已准备的 acceleration data 不能继续按原合同复用？
+6. 为什么较少 contributions 和较小 A payload 仍不能选择 sparse 或 dense winner？
+
+## 继续练习
+
+- 完成 [A13 Exercises](/algorithms/sparse-matrix-multiplication-preprocessing/exercises/)，再查看[独立解答](/algorithms/sparse-matrix-multiplication-preprocessing/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-016](/practice/#pb-r3-016)审查一个 sparse-vs-dense 与 preprocessing proposal。
+- 复习 [TERM-174](/glossary/#term-174)、[TERM-175](/glossary/#term-175)与 [TERM-176](/glossary/#term-176)。L13 与 EX20 仍明确延后。
+
+## 来源与复核
+
+cuSPARSE v13.3 的 Generic API introduction 负责 descriptor、type/layout/algorithm 与 caller-managed device memory 模型；SpMM 页面负责 current workspace、optional preprocessing、active-buffer 与 algorithm-specific support boundary。Best Practices Guide v13.3 约束 requested 与 actual traffic。Context7 NVIDIA index 于 2026-09-04 用于 current owner-coordinate discovery/cross-check；exact owner URLs 才是发布依据。矩阵、流程构图、计算、决策表、练习和文字均为本站原创，没有复制 owner figure、table、code、sample、benchmark 或 result。
+
+**事实核查与来源访问日期：2026-09-04。**
