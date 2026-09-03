@@ -293,6 +293,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'A09：用 Scan、Histogram 与 Movement 组合排序、选择和压缩', en: 'A09: Compose Sorting, Selection, and Compaction from Scan, Histograms, and Movement' },
     prerequisites: ['A03', 'A04'],
   },
+  A10: {
+    href: { 'zh-CN': '/algorithms/numerically-stable-softmax/', en: '/en/algorithms/numerically-stable-softmax/' },
+    title: { 'zh-CN': 'A10：数值稳定 Softmax、Online Normalization 与 Fusion 边界', en: 'A10: Numerically Stable Softmax, Online Normalization, and Fusion Boundaries' },
+    prerequisites: ['A02', 'M02', 'M03'],
+  },
+  A11: {
+    href: { 'zh-CN': '/algorithms/attention-as-an-io-problem/', en: '/en/algorithms/attention-as-an-io-problem/' },
+    title: { 'zh-CN': 'A11：把 Attention 分解为一个 IO 问题', en: 'A11: Attention as an IO Problem' },
+    prerequisites: ['A08', 'A10'],
+  },
   A14: {
     href: { 'zh-CN': '/algorithms/algorithm-choice-arithmetic-intensity/', en: '/en/algorithms/algorithm-choice-arithmetic-intensity/' },
     title: { 'zh-CN': 'A14：用 Arithmetic Intensity 选择可证伪的算法优化', en: 'A14: Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity' },
@@ -585,6 +595,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/visuals/nsight-systems-versus-nsight-compute/', en: '/en/visuals/nsight-systems-versus-nsight-compute/' },
     title: { 'zh-CN': 'Nsight Systems versus Nsight Compute：从症状选择下一份证据', en: 'Nsight Systems versus Nsight Compute: Choose the Next Evidence from the Symptom' },
     prerequisites: ['Q07', 'Q08'],
+    indexGroup: 'visuals',
+  },
+  VIS18: {
+    href: { 'zh-CN': '/visuals/attention-memory-traffic/', en: '/en/visuals/attention-memory-traffic/' },
+    title: { 'zh-CN': 'Attention Memory Traffic：物化矩阵与 Exact Tiling', en: 'Attention Memory Traffic: Materialized Matrices and Exact Tiling' },
+    prerequisites: ['A11'],
     indexGroup: 'visuals',
   },
   VIS19: {

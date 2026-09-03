@@ -69,7 +69,7 @@ describe('content evidence metadata', () => {
 });
 
 describe('Visual Explainer metadata', () => {
-  it.each(['VIS01', 'VIS02', 'VIS03', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS13', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22'])('accepts the controlled visual identifier %s', (identifier) => {
+  it.each(['VIS01', 'VIS02', 'VIS03', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22'])('accepts the controlled visual identifier %s', (identifier) => {
     expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
   });
 
@@ -97,7 +97,7 @@ describe('Learning Unit and Lab metadata', () => {
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
     ]),
-    ...['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A14'].flatMap((unitId) => [
+    ...['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A10', 'A11', 'A14'].flatMap((unitId) => [
       unitId,
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
@@ -111,7 +111,7 @@ describe('Learning Unit and Lab metadata', () => {
     ]),
     'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14',
     'LAB02', 'LAB06', 'LAB08', 'LAB09', 'LAB10',
-    'PB-R0-005', 'PB-R3', 'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
+    'PB-R0-005', 'PB-R3', 'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014',
   ])(
     'accepts the controlled curriculum identifier %s',
     (identifier) => {

@@ -1,0 +1,227 @@
+---
+title: 'A11: Attention as an IO Problem'
+description: Separate score, stable row normalization, and value aggregation, then derive a real-arithmetic-equivalent query-outer tiled recurrence and bounded IO ledger from full S/P materialization.
+pairId: a11
+counterpart: /algorithms/attention-as-an-io-problem/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - attention-contract
+  - score-stage
+  - normalization-stage
+  - value-stage
+  - materialized-traffic
+  - exact-tiling
+  - worked-fixture
+  - visual-explainer
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A11
+prerequisites:
+  - A08
+  - A10
+relatedUnits:
+  - VIS18
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Attention Is All You Need'
+    url: 'https://papers.nips.cc/paper/7181-attention-is-all-you-need'
+    version: 'Vaswani et al.; NeurIPS 2017'
+    platform: 'Original scaled dot-product attention decomposition, dimensions, and scale motivation'
+    accessDate: '2026-09-03'
+  - title: 'Online normalizer calculation for softmax'
+    url: 'https://arxiv.org/abs/1805.02867'
+    version: 'Milakov and Gimelshein; arXiv:1805.02867v2; 2018-07-28'
+    platform: 'Original online maximum and normalizer recurrence'
+    accessDate: '2026-09-03'
+  - title: 'FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness'
+    url: 'https://proceedings.neurips.cc/paper_files/paper/2022/hash/67d57c32e20fd0a7a302cb81d36e40d5-Abstract-Conference.html'
+    version: 'Dao et al.; NeurIPS 2022'
+    platform: 'Original IO-aware exact-attention history, tiled recurrence, and bounded two-level analysis only'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested-versus-transferred byte and effective-bandwidth boundaries'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/attention-as-an-io-problem/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,attention-contract,score-stage,normalization-stage,value-stage,materialized-traffic,exact-tiling,worked-fixture,visual-explainer,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,A10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS18 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2017,2018,2022,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/attention-as-an-io-problem/" lang="zh-CN">阅读中文对应页</a>
+
+[Scaled dot-product attention (TERM-169)](/en/glossary/#term-169) can be written as a three-matrix-stage contract or executed as an exact tiled recurrence that never materializes full intermediate matrices. A11 uses [IO-aware tiling (TERM-170)](/en/glossary/#term-170) to explain the distinction: no mystical backend label, only an account of which values are reused, reread, or written back.
+
+## What you should be able to do
+
+- Use Q/K/V shapes to state score, row normalization, and value aggregation separately.
+- Explain the conditional variance motivation for `1/sqrt(d_k)` and distinguish it from the numerical purpose of max shifting.
+- Write a general logical-element ledger for a materialized S/P stable schedule.
+- Derive the exact merge recurrence between tile-local `(m_t,l_t,a_t)` and running `(m,l,a)` states.
+- Calculate tile counts, K/V replay, and the IO difference for a fixed query-outer schedule.
+- Separate real-arithmetic equivalence, floating-point acceptance, paper history, current backends, and runtime evidence.
+
+## Prerequisites
+
+The exact prerequisites are [A08: Tiled GEMM](/en/algorithms/tiled-gemm-correctness/) and [A10: Stable Softmax](/en/algorithms/numerically-stable-softmax/), or `A08, A10`. A08 supplies tiled matrix-product shapes and reuse. A10 supplies stable and online row normalization plus a traffic boundary. VIS18 is a related Visual Explainer and does not add a prerequisite edge.
+
+## Attention contract
+
+For one dense, unmasked, single-head forward problem, freeze:
+
+- `Q` has shape `n_q x d_k`.
+- `K` has shape `n_k x d_k`.
+- `V` has shape `n_k x d_v`.
+- Output `O` has shape `n_q x d_v`.
+
+The three stages are:
+
+`S = QK^T / sqrt(d_k)`
+
+`P = softmax_row(S)`
+
+`O = PV`
+
+This subset excludes Q/K/V projection, mask, bias, dropout, backward, and multi-head packing. Adding any one of them extends shape, semantics, and the traffic ledger; the numbers below cannot be reused silently.
+
+## Score stage: scaling and stabilization solve different problems
+
+Each `S[i,j]` is the length-`d_k` dot product between query row `Q[i,:]` and key row `K[j,:]`, divided by `sqrt(d_k)`. The Transformer paper's motivation has an explicit assumption: if query and key components are independent, mean-zero, unit-variance variables, the unscaled dot product has variance `d_k`, and scaling makes the modeled variance one.
+
+This is neither universal normalization of arbitrary real data nor a substitute for softmax max shifting. Scaling controls modeled dot-product magnitude; max shifting avoids exponential overflow. They serve different purposes.
+
+## Normalization stage: one independent reduction per query row
+
+`softmax_row` normalizes along the key dimension. Every query row owns its own maximum `m_i` and denominator `l_i`; separate dense-score rows do not share one global denominator. Finite-input row probabilities are nonnegative and sum to one in real arithmetic. Floating-point acceptance still needs a predeclared tolerance and non-finite policy.
+
+If full S is materialized first, stable three-pass normalization reads every S element for max, sum, and output, then writes P. A10's online state can remove one S read, but “online” alone does not remove full S/P materialization. Schedule and residency decide IO.
+
+## Value stage: probability-weighted V
+
+Each output row is `O[i,:] = sum_j P[i,j] V[j,:]`. The reduction runs across key rows, and output depth is `d_v`, not `d_k`. If P is materialized, this stage reads P and V and writes O. If tile-local weights and a weighted accumulator remain in fast storage, the key/value sweep can accumulate directly without writing full P.
+
+## Traffic for materialized S/P
+
+Declare FP32 storage, precomputed Q/K/V, separate O, and logical slow/fast-store element transfers as the boundary. Exclude cache lines, transaction overfetch, projections, masks, dropout, backward, allocation, and host-device movement.
+
+The stable three-pass materialized schedule counts:
+
+`E_mat = (n_q+n_k)d_k + (n_q+n_k)d_v + 6n_qn_k`
+
+The `6n_qn_k` term is one S write, three S reads, one P write, and one P read. For self-attention with `n_q=n_k=N,d_k=d_v=d`:
+
+`E_mat = 4Nd + 6N^2`
+
+This ledger is neither a compulsory lower bound nor actual DRAM transactions. It belongs only to the stated materialized schedule and boundary.
+
+## Exact tiling: merge row state instead of materializing S/P
+
+Take a query tile of `Br` rows. Retain its Q values, per-row running maximum `m`, denominator `l`, and value accumulator `a` in fast storage while sweeping `Bc`-row K/V tiles. For one query row and current tile, first compute:
+
+`m_t = max_{j in tile} s_j`
+
+`l_t = sum_{j in tile} exp(s_j-m_t)`
+
+`a_t = sum_{j in tile} exp(s_j-m_t)v_j`
+
+Merge this with state for prior keys:
+
+`m' = max(m, m_t)`
+
+`l' = exp(m - m')l + exp(m_t - m')l_t`
+
+`a' = exp(m - m')a + exp(m_t - m')a_t`
+
+Initialize `m=-infinity,l=0,a=0`; after all key tiles, emit `o=a/l`. The invariants are `l=sum_processed exp(s_j-m)` and `a=sum_processed exp(s_j-m)v_j`. Every dense score still contributes, but full S/P need not cross the declared slow/fast boundary.
+
+“Exact” means equivalent to the dense contract in real arithmetic, not bitwise identity across floating-point reduction orders. Tile size, accumulation type, operation order, and tolerance remain correctness contracts.
+
+## Worked IO fixture
+
+VIS18 freezes unmasked self-attention with `N=8,d=4`, FP32, and `Br=Bc=4`. The query-tile count is `T_r=ceil(N/Br)=2`; the key-tile count is also two. Four temporary score tiles contain 16 elements each.
+
+The query-outer schedule retains each Q tile and sweeps all K/V tiles:
+
+`E_tile = Nd + T_r*Nd + T_r*Nd + Nd = 2Nd + 2T_rNd`
+
+The first and final terms are the Q read and O write; the middle terms reread K and V for every query tile. The stable materialized schedule counts `512 elements = 2048 B`; substitution in the tiled formula gives `192 elements = 768 B`; the static-analysis difference is `1280 B`.
+
+This is not a FlashAttention traffic number. The paper's concrete pseudocode, loop order, state residency, and IO theorem have their own boundaries. VIS18 selects a query-outer schedule only to make the four ledger terms directly auditable. Do not attribute `768 B` to an existing implementation or infer timing or speedup from fewer logical requests.
+
+## Visual Explainer: VIS18
+
+[VIS18: Attention Memory Traffic](/en/visuals/attention-memory-traffic/) offers `8x4` and `16x8` sequence shapes, `4x4` and `8x8` score tiles, and a score/normalize/value stage selector. Its purpose-built static SVG and four-row ledger remain without script, on mobile, under reduced motion and forced colors, and in print.
+
+## Production boundary
+
+A11 contains no framework, cuDNN, or Triton API. Later units separately review exact software versions, dtypes, masks, workspaces, dispatch, compilation, and hardware gates. They can reuse VIS18's algorithm-level visual instead of treating a paper idea as current backend availability. A11 chooses no “best” tile or backend.
+
+## Evidence boundary
+
+All four evidence arrays for A11 and VIS18 are empty. Formulas, host arithmetic, paper review, a browser model, and a static diagram do not constitute CUDA execution. There is no actual memory traffic, cache behavior, timing, bandwidth, bottleneck, backend selection, speedup, or winner.
+
+## Retrieval check
+
+1. What are the shapes of Q/K/V/O and S/P, and along which dimension does softmax reduce?
+2. Why is the conditional variance motivation for `1/sqrt(d_k)` different from max shifting?
+3. Which transfers make up the materialized schedule's `6n_qn_k` term?
+4. When a new tile maximum grows, why are old `l` and `a` rescaled by the same exponential factor?
+5. Why does the query-outer schedule reread K/V `T_r` times while avoiding full S/P writes?
+6. Why are real-arithmetic exactness, floating-point tolerance, and runtime performance three different claims?
+
+## Continue with practice
+
+- Complete the [A11 Exercises](/en/algorithms/attention-as-an-io-problem/exercises/), then inspect the [separate solutions](/en/algorithms/attention-as-an-io-problem/solutions/).
+- Audit another attention ledger in [Practice Bank PB-R3-014](/en/practice/#pb-r3-014).
+- Use [VIS18](/en/visuals/attention-memory-traffic/) and revisit [TERM-169](/en/glossary/#term-169) and [TERM-170](/en/glossary/#term-170).
+
+## Sources and review
+
+Vaswani et al. supply the original scaled-dot-product decomposition and conditional scaling motivation. Milakov and Gimelshein supply the online-normalizer basis. The FlashAttention paper supports only IO-aware exact-attention history, recurrence, and bounded two-level analysis, not a current backend, dtype, availability, or speedup claim. CUDA C++ Best Practices Guide v13.3 bounds requested/effective versus actual transferred traffic. The Context7 NVIDIA index was used only to cross-check owner-coordinate retrieval on 2026-09-03. Every formula presentation, worked fixture, Exercise, solution, and VIS18 composition is original to this site.
+
+**Fact checked and sources accessed: 2026-09-03.**

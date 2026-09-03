@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all sixty-two bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all sixty-four bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(62);
+    expect(practiceIds).toHaveLength(64);
 
     const localeContracts = [
       {
@@ -173,7 +173,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(62);
+      expect(prompts.size).toBe(64);
     }
   });
 
@@ -181,8 +181,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 10, practice: 62, visuals: 18, glossary: 165, sources: 72 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(327);
+    expect(counts).toEqual({ labs: 10, practice: 64, visuals: 19, glossary: 170, sources: 74 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(337);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -283,7 +283,11 @@ describe('published resource indexes', () => {
       if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-02');
     }
 
-    for (const planningId of ['PB-R3-011', 'PB-R3-012', 'SRC-CUDA-056']) {
+    for (const planningId of [
+      'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014', 'VIS18',
+      'TERM-166', 'TERM-167', 'TERM-168', 'TERM-169', 'TERM-170',
+      'SRC-CUDA-056', 'SRC-CUDA-057', 'SRC-CUDA-058',
+    ]) {
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
       expect(record?.reviewedOn, planningId).toBe('2026-09-03');
       if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-03');
@@ -336,7 +340,7 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]').length).toBe(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(18);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(19);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');

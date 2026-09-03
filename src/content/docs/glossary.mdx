@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 165 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 170 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-01'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-01'
+      content: '2026-09-03'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1533,6 +1533,51 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [A14](/algorithms/algorithm-choice-arithmetic-intensity/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB09](/labs/build-original-roofline/)和 [VIS13](/visuals/roofline/)。
 - **版本说明：** 2009 original paper 只负责 model 构造；CUDA 13.3 与 Nsight Compute 2026.2.1 facts 另行复核。VIS13 browser values 和 static chart 都不是 GPU evidence。
 
+<span id="term-166" class="resource-target" aria-hidden="true"></span>
+
+### softmax · Softmax 归一化
+
+- **定义：** Softmax 把一组有限 logits `x_i` 映射为 `exp(x_i)/sum_j exp(x_j)`；在实数算术中结果非负且和为 1，实际计算还必须声明 row domain、shift、precision 与 non-finite policy。
+- **避免使用：** 指数函数、任意归一化、自动稳定的 framework 操作。
+- **相关资源：** [A10](/algorithms/numerically-stable-softmax/)和 [A11](/algorithms/attention-as-an-io-problem/)。
+- **版本说明：** Milakov/Gimelshein 2018 与 Blanchard/Higham/Higham 2019 提供算法和 floating-point analysis；术语不声明 current backend behavior。
+
+<span id="term-167" class="resource-target" aria-hidden="true"></span>
+
+### numerically stable softmax · 数值稳定 softmax
+
+- **定义：** 数值稳定 softmax（numerically stable softmax）先从 row logits 减去 maximum，再求指数和归一化，从而避免 large positive exponent overflow，同时保持数学 softmax。
+- **避免使用：** 逐位精确 softmax、绝不 underflow、没有 floating-point error。
+- **相关资源：** [A10](/algorithms/numerically-stable-softmax/)和 [A11](/algorithms/attention-as-an-io-problem/)。
+- **版本说明：** Max-shift 不消除 underflow、rounding 或 reduction-order differences；CUDA Programming Guide v13.3 的 floating-point boundary 仍适用。
+
+<span id="term-168" class="resource-target" aria-hidden="true"></span>
+
+### online normalization · 在线归一化
+
+- **定义：** 在线归一化（online normalization）在扫描 values 时共同维护 running maximum 和相对该 maximum 的 denominator，并在 maximum 变化时重标定旧 state。
+- **避免使用：** One-read output、自动 fusion、完整 probabilities 的单遍保证。
+- **相关资源：** [A10](/algorithms/numerically-stable-softmax/)、[A11](/algorithms/attention-as-an-io-problem/)和 [VIS18](/visuals/attention-memory-traffic/)。
+- **版本说明：** Milakov/Gimelshein 2018 提供 recurrence；输出 pass、residency、tiling 和 traffic 仍取决于具体 schedule。
+
+<span id="term-169" class="resource-target" aria-hidden="true"></span>
+
+### scaled dot-product attention · 缩放点积注意力
+
+- **定义：** 缩放点积注意力（scaled dot-product attention）计算 `S=QK^T/sqrt(d_k)`，沿 key dimension 对每个 query row 做 softmax，再以 probabilities 聚合 V 得到 O。
+- **避免使用：** Attention backend、FlashAttention、自动选择的 fused kernel。
+- **相关资源：** [A11](/algorithms/attention-as-an-io-problem/)和 [VIS18](/visuals/attention-memory-traffic/)。
+- **版本说明：** Vaswani 等 2017 的 scale motivation 依赖独立、零均值、单位方差 components 假设；它不替代 stable softmax 或 current backend review。
+
+<span id="term-170" class="resource-target" aria-hidden="true"></span>
+
+### IO-aware tiling · IO 感知分块
+
+- **定义：** IO 感知分块（IO-aware tiling）在明确 slow/fast-store boundary、tile order 与 residency assumptions 后重排计算和 state，使中间值在声明层级中复用并可逐项核算 movement。
+- **避免使用：** 必然更快的 tiling、FlashAttention 的同义词、实际 DRAM traffic。
+- **相关资源：** [A08](/algorithms/tiled-gemm-correctness/)、[A10](/algorithms/numerically-stable-softmax/)、[A11](/algorithms/attention-as-an-io-problem/)和 [VIS18](/visuals/attention-memory-traffic/)。
+- **版本说明：** Dao 等 2022 支持 attention IO-aware algorithm history；static logical reduction 不构成 current backend、actual traffic 或 speedup evidence。
+
 ## 维护规则
 
-TERM-001 至 TERM-159 保留各自既有逐项复核记录；更新的 TERM-040、TERM-043、TERM-044、TERM-154、TERM-156、TERM-158，以及新增 TERM-160 至 TERM-165 与完整 165 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-01** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增与更新词条只是静态定义：未运行 application、GPU 或 profiler，未生成或解析 report，且不声明 metric、timing、bottleneck、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-165 保留各自逐项复核记录；新增 TERM-166 至 TERM-170 与完整 170 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-03** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation 和论文，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只是静态定义：未运行 application 或 GPU，且不声明 actual traffic、backend、dtype、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

@@ -3,7 +3,7 @@ title: 可视化讲解索引
 description: 按概念、相关学习单元（Learning Unit）和版本边界查找当前完整发布的可视化讲解。
 pairId: visuals-index
 counterpart: /en/visuals/
-factCheckDate: '2026-09-01'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/visuals/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。截至 2026-09-01，共有十八项正式讲解：VIS01-VIS14 使用十四个独立页面，其中 [VIS13 Roofline](/visuals/roofline/)严格依赖 Q10，并在 VIS14 之前；VIS19-VIS22 嵌入各自学习单元，四张卡片直接深链到页内锚点，导航不会复制页面。
+本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。截至 2026-09-03，共有十九项正式讲解：VIS01-VIS14 与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)使用十五个独立页面；VIS19-VIS22 嵌入各自学习单元，四张卡片直接深链到页内锚点，导航不会复制页面。
 
 ## 已发布可视化讲解
 
@@ -38,4 +38,4 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 证据边界
 
-VIS01-VIS14 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，保留静态或文字回退，并且不执行 CUDA。VIS13 的四个 browser inputs、derived point、SVG 与 static chart 都是 synthetic teaching state：它不查询 GPU、不启动 profiler、不读取 LAB09 artifact，也不是 measured Roofline evidence；四个 evidence arrays 全为空。交互、静态回退与工具文档均保持 evidence-neutral；十八项讲解都没有 CUDA Evidence Status。复核日期：**2026-09-01**。
+VIS01-VIS14、VIS18 与 VIS19-VIS22 都只在浏览器中运行确定性教学模型，保留静态或文字回退，并且不执行 CUDA。VIS18 的 sequence/tile values、logical-byte ledger 与 purpose-built SVG 都是 static teaching analysis：它不查询 GPU、不观察 actual traffic，也不选择 backend 或预测 speedup；四个 evidence arrays 全为空。交互、静态回退与工具文档均保持 evidence-neutral；十九项讲解都没有 CUDA Evidence Status。复核日期：**2026-09-03**。

@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-After [issue #29](https://github.com/xiangzhang-coding/cuda-learning-site/issues/29), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A09/A14, and Q01-Q13 in both languages, for 58 Learning Units. The completed R2 aggregate review remains an immutable snapshot fixed at 186 Publication Pairs and 372 source routes. The current issue #29 increment does not rewrite R2, and the R3 aggregate review remains pending.
+After [issue #30](https://github.com/xiangzhang-coding/cuda-learning-site/issues/30), the current rolling Stable Curriculum publication completely publishes O01-O08, F01-F08, M01-M19, A01-A11/A14, and Q01-Q13 in both languages, for 60 Learning Units. The completed R2 aggregate review remains an immutable snapshot fixed at 186 Publication Pairs and 372 source routes. The current issue #30 increment does not rewrite R2, and the R3 aggregate review remains pending.
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
@@ -54,7 +54,7 @@ The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 
 
 [M15 NVCC Host/Device Compilation Flow](/en/toolchain/nvcc-compilation-flow/) requires F04 and O04; [M16 PTX, cubin, SASS, and fatbinary](/en/toolchain/ptx-cubin-fatbinary/) requires M15 and F06; [M17 Select Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/) requires M16 and F06; [M18 Separate Compilation and Device Linking](/en/toolchain/separate-compilation-device-linking/) requires M15 and M16; and [M19 CUDA C++17, C++20, and C++23 Dialect Boundaries](/en/toolchain/cpp-dialect-boundaries/) requires O04 and M15.
 
-[A01 Elementwise Map](/en/algorithms/elementwise-map/) through A09 retain their existing edges. [A14 Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity](/en/algorithms/algorithm-choice-arithmetic-intensity/) strictly requires A01, A02, A05, and A08.
+[A01 Elementwise Map](/en/algorithms/elementwise-map/) through A09 retain their existing edges. [A10 Numerically Stable Softmax](/en/algorithms/numerically-stable-softmax/) strictly requires A02, M02, and M03. [A11 Attention as an IO Problem](/en/algorithms/attention-as-an-io-problem/) strictly requires A08 and A10. [A14 Choose Falsifiable Algorithm Optimizations with Arithmetic Intensity](/en/algorithms/algorithm-choice-arithmetic-intensity/) strictly requires A01, A02, A05, and A08.
 
 [Q01](/en/correctness/cpu-references-tolerances-invariants/) through [Q08](/en/correctness/kernel-first-nsight-compute/) retain their existing edges. [Q09 Interpret Latency Hiding with Occupancy, Stalls, and Throughput](/en/correctness/occupancy-stalls-throughput/) strictly requires Q08 and F08. [Q10 Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/) strictly requires Q05 and A14. [Q11 Optimize the Canonical Transpose with Controlled Evidence](/en/correctness/transpose-optimization-case-study/) strictly requires A05, Q06, Q08, and Q10. [Q12 Optimize the Canonical Reduction with Controlled Evidence](/en/correctness/reduction-optimization-case-study/) strictly requires A02, Q02, Q06, and Q08, starts from immutable [EX11](/en/examples/multi-stage-reduction/), and reuses evidence-neutral [VIS10](/en/visuals/reduction-stages/). [Q13 Optimize the Canonical GEMM with Controlled Evidence](/en/correctness/gemm-optimization-case-study/) strictly requires A08, Q06, Q08, and Q10, starts from immutable [EX15](/en/examples/tiled-gemm/), and reuses evidence-neutral [VIS12](/en/visuals/gemm-tiling-hierarchy/).
 
@@ -64,7 +64,7 @@ M01-M14 also publish complete Exercises and separate reviewed solutions in order
 
 M15-M19 likewise publish complete Exercises and separate reviewed solutions: [M15 Exercises](/en/toolchain/nvcc-compilation-flow/exercises/) and [solutions](/en/toolchain/nvcc-compilation-flow/solutions/), [M16 Exercises](/en/toolchain/ptx-cubin-fatbinary/exercises/) and [solutions](/en/toolchain/ptx-cubin-fatbinary/solutions/), [M17 Exercises](/en/toolchain/compiler-architecture-targets/exercises/) and [solutions](/en/toolchain/compiler-architecture-targets/solutions/), [M18 Exercises](/en/toolchain/separate-compilation-device-linking/exercises/) and [solutions](/en/toolchain/separate-compilation-device-linking/solutions/), and [M19 Exercises](/en/toolchain/cpp-dialect-boundaries/exercises/) and [solutions](/en/toolchain/cpp-dialect-boundaries/solutions/).
 
-A01-A09 and A14 all publish complete Exercises and separate reviewed solutions. [A14 Exercises](/en/algorithms/algorithm-choice-arithmetic-intensity/exercises/) and [solutions](/en/algorithms/algorithm-choice-arithmetic-intensity/solutions/) are directly available.
+A01-A11 and A14 all publish complete Exercises and separate reviewed solutions. [A10 Exercises](/en/algorithms/numerically-stable-softmax/exercises/), [A11 Exercises](/en/algorithms/attention-as-an-io-problem/exercises/), and their separate solutions are directly available.
 
 O02-O08 retain their own Exercises and separate solutions.
 
@@ -78,11 +78,11 @@ Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes
 
 The current 10 Labs are LAB01-LAB10. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11 and has no recorded result. L03 and LAB11 remain unpublished, and Q12 invents no CUB comparison. L06 and LAB12 also remain unpublished. Q13 now supplies LAB12's profiling prerequisite, but LAB12 still waits for L06's cuBLAS prerequisite.
 
-The site has 18 formal Visual Explainers: standalone VIS01-VIS14 plus embedded VIS19-VIS22. [VIS13 Roofline](/en/visuals/roofline/) strictly requires Q10 and appears before VIS14. Every explainer is an evidence-neutral browser model; VIS13 browser values and its static chart are not GPU evidence.
+The site has 19 formal Visual Explainers: standalone VIS01-VIS14 and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/) plus embedded VIS19-VIS22. VIS18 strictly requires A11 and provides a deterministic shape, stage, and IO ledger with a purpose-built static SVG. It is not GPU-traffic or performance evidence.
 
-A14, Q09-Q13, and VIS13 have empty compilation and runtime axes. Q11-Q13 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Linked EX11, EX14, EX15, and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS10-VIS12, static runner gates, and expected-only fixtures do not change those boundaries. This increment publishes no timing, profiler metric, numerical output, register, occupancy, or traffic observation, speedup, bottleneck, winner, cuBLAS or Tensor Core result, Reference Environment, or `performanceObservations`.
+A10, A11, A14, Q09-Q13, VIS13, and VIS18 have empty compilation and runtime axes. A10/A11 numerical fixtures are host arithmetic, while their traffic formulas and VIS18 are static analysis; they grant no Evidence Status. This increment publishes no CUDA numerical output, actual traffic, backend selection, dtype availability, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`.
 
-The current catalog contains 10 Labs, 62 Practice Bank entries, 18 Visual Explainers, 165 Glossary terms, and 72 source records, for 327 records total. Current rolling public source files form 219 Publication Pairs, or 438 source routes. Those current figures are distinct from the immutable R2 186/372 and 284-record snapshot, and the R3 aggregate review remains pending.
+The current catalog contains 10 Labs, 64 Practice Bank entries, 19 Visual Explainers, 170 Glossary terms, and 74 source records, for 337 records total. Current rolling public source files form 226 Publication Pairs, or 452 source routes. Those current figures are distinct from the immutable R2 186/372 and 284-record snapshot, and the R3 aggregate review remains pending.
 
 ## Boundaries first
 
@@ -310,6 +310,16 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <span>A09 · SORT / SELECT / COMPACT</span>
     <strong>Compose Sorting, Selection, and Compaction</strong>
     <small>Derive vocabulary from flags, scans, histograms, and movement before selecting a production primitive.</small>
+  </a>
+  <a className="route-card" href="/en/algorithms/numerically-stable-softmax/">
+    <span>A10 · STABLE SOFTMAX</span>
+    <strong>Numerically Stable Softmax and Online Normalization</strong>
+    <small>Derive numerical boundaries, pass count, and fusion traffic from max shifting and running state.</small>
+  </a>
+  <a className="route-card" href="/en/algorithms/attention-as-an-io-problem/">
+    <span>A11 · ATTENTION IO</span>
+    <strong>Attention as an IO Problem</strong>
+    <small>Separate score, normalization, and value aggregation before accounting for an exact tiled recurrence.</small>
   </a>
   <a className="route-card" href="/en/algorithms/algorithm-choice-arithmetic-intensity/">
     <span>A14 · ARITHMETIC INTENSITY</span>
@@ -591,20 +601,25 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Choose the Next Profiler Evidence from the Symptom</strong>
     <small>Use the application timeline first; move to Nsight Compute only after selecting a kernel and question.</small>
   </a>
+  <a className="route-card" href="/en/visuals/attention-memory-traffic/">
+    <span>VIS18 · ATTENTION IO LEDGER</span>
+    <strong>Attention Memory Traffic</strong>
+    <small>Compare three-stage logical IO for full S/P materialization and exact query-outer tiling.</small>
+  </a>
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 62 original problems.</small>
+    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, toolchain, and correctness models through 64 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 165-term canonical bilingual vocabulary.</small>
+    <small>Check the 170-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 71 interface and owner-source records with their review dates.</small>
+    <small>Inspect 74 interface and owner-source records with their review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

@@ -1,0 +1,404 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import '../styles/visual-explainers.css';
+import '../styles/attention-io-visual.css';
+import {
+  ATTENTION_IO_COPY,
+  formatAttentionIoCopy,
+  type AttentionIoLocale,
+} from '../visuals/attention-io-copy';
+import {
+  ATTENTION_IO_MODEL_CONTRACT,
+  ATTENTION_IO_SEQUENCE_SHAPES,
+  ATTENTION_IO_STAGES,
+  ATTENTION_IO_TILE_SHAPES,
+  createAttentionIoState,
+  deriveAttentionIoView,
+  type AttentionIoStage,
+  type AttentionIoState,
+  type AttentionIoView,
+} from '../visuals/attention-io-model';
+
+interface Props {
+  locale: AttentionIoLocale;
+}
+
+const { locale } = Astro.props;
+const copy = ATTENTION_IO_COPY[locale];
+const initialState = createAttentionIoState();
+
+function requireView(state: AttentionIoState, context: string): AttentionIoView {
+  const result = deriveAttentionIoView(state);
+  if (!result.accepted) throw new Error(`VIS18 ${context} must be a reviewed state.`);
+  return result.view;
+}
+
+function stageBytes(view: AttentionIoView, stage: AttentionIoStage, path: 'materialized' | 'tiled') {
+  return view[path].stages.find((traffic) => traffic.stage === stage)?.bytes ?? 0;
+}
+
+const initialView = requireView(initialState, 'initial view');
+const staticLedgers = ATTENTION_IO_SEQUENCE_SHAPES.flatMap((sequenceShape) =>
+  ATTENTION_IO_TILE_SHAPES.map((tileShape) => ({
+    sequenceShape,
+    tileShape,
+    view: requireView({ sequenceShape, tileShape, stage: 'score' }, `static ${sequenceShape}:${tileShape}`),
+  })));
+const initialStatus = formatAttentionIoCopy(copy.statusReady, {
+  sequence: initialView.sequenceShape,
+  tile: initialView.tileShape,
+  stage: copy.stages[initialView.stage].label,
+});
+---
+
+<cuda-attention-io-explorer
+  class="visual-explainer attention-io-visual not-content"
+  data-visual-id="VIS18"
+  data-locale={locale}
+  data-sequence-shape={initialView.sequenceShape}
+  data-tile-shape={initialView.tileShape}
+  data-attention-stage={initialView.stage}
+  data-query-tile-count={initialView.queryTileCount}
+  data-key-tile-count={initialView.keyTileCount}
+  data-score-tile-count={initialView.scoreTileCount}
+  data-materialized-bytes={initialView.materialized.bytes}
+  data-tiled-bytes={initialView.tiled.bytes}
+  data-analysis-difference-bytes={initialView.analysisDifference.bytes}
+  data-evidence-status-effect={ATTENTION_IO_MODEL_CONTRACT.evidenceStatusEffect}
+>
+  <div class="visual-shell">
+    <header class="visual-header">
+      <p class="visual-eyebrow">{copy.eyebrow}</p>
+      <h2>{copy.title}</h2>
+      <p class="visual-summary">{copy.summary}</p>
+    </header>
+
+    <p class="visual-notice" data-conceptual-only>{copy.conceptualNotice}</p>
+
+    <fieldset class="visual-controls attention-io-controls" data-visual-controls hidden>
+      <legend>{copy.controlsHeading}</legend>
+      <label>
+        <span>{copy.sequenceShapeLabel}</span>
+        <select data-attention-sequence-shape aria-label={copy.sequenceShapeLabel}>
+          {ATTENTION_IO_SEQUENCE_SHAPES.map((shape) => (
+            <option value={shape} selected={shape === initialState.sequenceShape}>{shape}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.tileShapeLabel}</span>
+        <select data-attention-tile-shape aria-label={copy.tileShapeLabel}>
+          {ATTENTION_IO_TILE_SHAPES.map((shape) => (
+            <option value={shape} selected={shape === initialState.tileShape}>{shape}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>{copy.stageLabel}</span>
+        <select data-attention-stage-select aria-label={copy.stageLabel}>
+          {ATTENTION_IO_STAGES.map((stage) => (
+            <option value={stage} selected={stage === initialState.stage}>{copy.stages[stage].label}</option>
+          ))}
+        </select>
+      </label>
+      <button type="button" data-attention-action="reset">{copy.reset}</button>
+      <p class="attention-io-status" data-attention-status role="status" aria-live="polite" aria-atomic="true">
+        {initialStatus}
+      </p>
+    </fieldset>
+
+    <section class="attention-live-workbench" data-live-workbench data-pagefind-ignore hidden aria-label={copy.workbenchHeading}>
+      <header>
+        <h3>{copy.workbenchHeading}</h3>
+        <p data-live-selection>{formatAttentionIoCopy(copy.selection, {
+          sequence: initialView.sequenceShape,
+          tile: initialView.tileShape,
+          stage: copy.stages[initialView.stage].label,
+        })}</p>
+      </header>
+
+      <dl class="attention-io-metrics">
+        <div><dt>{copy.queryTiles}</dt><dd data-live-query-tiles>{initialView.queryTileCount}</dd></div>
+        <div><dt>{copy.keyTiles}</dt><dd data-live-key-tiles>{initialView.keyTileCount}</dd></div>
+        <div><dt>{copy.scoreTiles}</dt><dd data-live-score-tiles>{initialView.scoreTileCount}</dd></div>
+        <div><dt>{copy.fullScore}</dt><dd data-live-full-score>{initialView.fullScoreElements}</dd></div>
+        <div><dt>{copy.temporaryTile}</dt><dd data-live-temporary-tile>{initialView.temporaryScoreTileElements}</dd></div>
+      </dl>
+
+      <ol class="attention-stage-track" aria-label={copy.stageLabel}>
+        {ATTENTION_IO_STAGES.map((stage) => (
+          <li data-live-stage={stage} aria-current={stage === initialView.stage ? 'step' : undefined}>
+            <span>{copy.stages[stage].label}</span>
+            <strong>{copy.stages[stage].equation}</strong>
+          </li>
+        ))}
+      </ol>
+
+      <div class="attention-paths">
+        <article class="attention-path attention-path-materialized" data-live-materialized-path>
+          <header><span>S + P</span><h4>{copy.materializedPath}</h4></header>
+          <p data-live-materialized-description>{copy.stages[initialView.stage].materialized}</p>
+          <dl>
+            <div><dt>{copy.stageTraffic}</dt><dd><strong data-live-materialized-stage-bytes>{initialView.selectedStage.materializedBytes} B</strong><span data-live-materialized-stage-elements>{initialView.selectedStage.materializedElements} {copy.elements}</span></dd></div>
+            <div><dt>{copy.totalTraffic}</dt><dd><strong data-live-materialized-total>{initialView.materialized.bytes} B</strong><span>{initialView.materialized.elements} {copy.elements}</span></dd></div>
+          </dl>
+        </article>
+        <article class="attention-path attention-path-tiled" data-live-tiled-path>
+          <header><span>Br × Bc + (m,l,a)</span><h4>{copy.tiledPath}</h4></header>
+          <p data-live-tiled-description>{copy.stages[initialView.stage].tiled}</p>
+          <dl>
+            <div><dt>{copy.stageTraffic}</dt><dd><strong data-live-tiled-stage-bytes>{initialView.selectedStage.tiledBytes} B</strong><span data-live-tiled-stage-elements>{initialView.selectedStage.tiledElements} {copy.elements}</span></dd></div>
+            <div><dt>{copy.totalTraffic}</dt><dd><strong data-live-tiled-total>{initialView.tiled.bytes} B</strong><span>{initialView.tiled.elements} {copy.elements}</span></dd></div>
+          </dl>
+        </article>
+      </div>
+
+      <aside class="attention-analysis" data-static-analysis>
+        <h4>{copy.analysisHeading}</h4>
+        <p><strong data-live-analysis-difference>{initialView.analysisDifference.bytes} B</strong> · {copy.analysisText}</p>
+        <p data-live-stage-boundary>{copy.stages[initialView.stage].boundary}</p>
+      </aside>
+    </section>
+
+    <section class="visual-section attention-static" data-static-fallback aria-label={copy.staticHeading}>
+      <h3>{copy.staticHeading}</h3>
+      <p class="visual-section-intro">{copy.staticIntro}</p>
+      <p class="attention-scroll-hint">{copy.staticScrollHint}</p>
+
+      <div class="attention-diagram-scroll" tabindex="0">
+        <svg data-static-diagram viewBox="0 0 760 360" role="img" aria-label={copy.diagramTitle}>
+          <title>{copy.diagramTitle}</title>
+          <desc>{copy.diagramDescription}</desc>
+          <text class="attention-diagram-path-label" x="8" y="108">{copy.diagramMaterialized}</text>
+          <text class="attention-diagram-path-label" x="8" y="270">{copy.diagramTiled}</text>
+          <path class="attention-diagram-rail attention-diagram-rail-materialized" d="M 148 104 H 742" />
+          <path class="attention-diagram-rail attention-diagram-rail-tiled" d="M 148 266 H 742" />
+          {ATTENTION_IO_STAGES.map((stage, index) => (
+            <g data-diagram-stage={stage} transform={`translate(${158 + index * 198} 0)`}>
+              <text class="attention-diagram-stage-name" x="82" y="30" text-anchor="middle">{copy.stages[stage].label}</text>
+              <rect class="attention-diagram-node attention-diagram-node-materialized" x="0" y="60" width="164" height="88" rx="5" />
+              <text class="attention-diagram-node-title" x="82" y="86" text-anchor="middle">{copy.stages[stage].materializedNode}</text>
+              <text class="attention-diagram-byte" x="82" y="117" text-anchor="middle">{stageBytes(initialView, stage, 'materialized')} B</text>
+              <rect class="attention-diagram-node attention-diagram-node-tiled" x="0" y="222" width="164" height="88" rx="5" />
+              <text class="attention-diagram-node-title" x="82" y="248" text-anchor="middle">{copy.stages[stage].tiledNode}</text>
+              <text class="attention-diagram-byte" x="82" y="279" text-anchor="middle">{stageBytes(initialView, stage, 'tiled')} B</text>
+            </g>
+          ))}
+          <text class="attention-diagram-total" x="742" y="170" text-anchor="end">2048 B</text>
+          <text class="attention-diagram-total" x="742" y="332" text-anchor="end">768 B</text>
+        </svg>
+      </div>
+
+      <div class="attention-ledger-scroll" tabindex="0">
+        <table class="attention-ledger-table">
+          <thead>
+            <tr>
+              <th scope="col">{copy.ledgerSequence}</th>
+              <th scope="col">{copy.ledgerTile}</th>
+              <th scope="col">{copy.ledgerQueryTiles}</th>
+              <th scope="col">{copy.ledgerKeyTiles}</th>
+              <th scope="col">{copy.ledgerScoreTiles}</th>
+              <th scope="col">{copy.ledgerMaterialized}</th>
+              <th scope="col">{copy.ledgerTiled}</th>
+              <th scope="col">{copy.ledgerDifference}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {staticLedgers.map(({ sequenceShape, tileShape, view }) => (
+              <tr
+                data-static-ledger={`${sequenceShape}:${tileShape}`}
+                data-sequence-shape={sequenceShape}
+                data-tile-shape={tileShape}
+                data-query-tile-count={view.queryTileCount}
+                data-key-tile-count={view.keyTileCount}
+                data-score-tile-count={view.scoreTileCount}
+                data-materialized-bytes={view.materialized.bytes}
+                data-tiled-bytes={view.tiled.bytes}
+                data-analysis-difference-bytes={view.analysisDifference.bytes}
+              >
+                <th scope="row">{sequenceShape}</th>
+                <td>{tileShape}</td>
+                <td>{view.queryTileCount}</td>
+                <td>{view.keyTileCount}</td>
+                <td>{view.scoreTileCount}</td>
+                <td>{view.materialized.bytes}</td>
+                <td>{view.tiled.bytes}</td>
+                <td>{view.analysisDifference.bytes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="visual-evidence-notice" data-no-evidence>{copy.noEvidence}</p>
+  </div>
+</cuda-attention-io-explorer>
+
+<script>
+  import {
+    ATTENTION_IO_COPY,
+    formatAttentionIoCopy,
+  } from '../visuals/attention-io-copy';
+  import {
+    createAttentionIoState,
+    deriveAttentionIoView,
+    reduceAttentionIoState,
+    type AttentionIoIssue,
+    type AttentionIoState,
+    type AttentionIoView,
+  } from '../visuals/attention-io-model';
+
+  type Parts = Readonly<{
+    controls: HTMLFieldSetElement;
+    workbench: HTMLElement;
+    sequence: HTMLSelectElement;
+    tile: HTMLSelectElement;
+    stage: HTMLSelectElement;
+    reset: HTMLButtonElement;
+    status: HTMLElement;
+  }>;
+
+  class CudaAttentionIoExplorer extends HTMLElement {
+    private state: AttentionIoState = createAttentionIoState();
+
+    connectedCallback() {
+      if (this.dataset.ready === 'true') return;
+      const parts = this.parts();
+      if (!parts) return;
+      const initialView = this.render(parts);
+      if (!initialView) return;
+
+      parts.sequence.addEventListener('change', () => {
+        const update = reduceAttentionIoState(this.state, {
+          type: 'select-sequence-shape', sequenceShape: parts.sequence.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        const view = this.render(parts);
+        if (view) this.announce(parts, formatAttentionIoCopy(this.copy().statusSequence, {
+          sequence: view.sequenceShape,
+        }));
+      });
+      parts.tile.addEventListener('change', () => {
+        const update = reduceAttentionIoState(this.state, {
+          type: 'select-tile-shape', tileShape: parts.tile.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        const view = this.render(parts);
+        if (view) this.announce(parts, formatAttentionIoCopy(this.copy().statusTile, {
+          tile: view.tileShape,
+        }));
+      });
+      parts.stage.addEventListener('change', () => {
+        const update = reduceAttentionIoState(this.state, {
+          type: 'select-stage', stage: parts.stage.value,
+        });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        const view = this.render(parts);
+        if (view) this.announce(parts, formatAttentionIoCopy(this.copy().statusStage, {
+          stage: this.copy().stages[view.stage].label,
+        }));
+      });
+      parts.reset.addEventListener('click', () => {
+        const update = reduceAttentionIoState(this.state, { type: 'reset' });
+        if (!update.accepted) return this.reject(parts, update.issue);
+        this.state = update.state;
+        if (!this.render(parts)) return;
+        this.announce(parts, this.copy().statusReset);
+        parts.sequence.focus();
+      });
+
+      parts.controls.hidden = false;
+      parts.workbench.hidden = false;
+      this.dataset.ready = 'true';
+    }
+
+    private parts(): Parts | null {
+      const controls = this.querySelector<HTMLFieldSetElement>('[data-visual-controls]');
+      const workbench = this.querySelector<HTMLElement>('[data-live-workbench]');
+      const sequence = this.querySelector<HTMLSelectElement>('[data-attention-sequence-shape]');
+      const tile = this.querySelector<HTMLSelectElement>('[data-attention-tile-shape]');
+      const stage = this.querySelector<HTMLSelectElement>('[data-attention-stage-select]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-attention-action="reset"]');
+      const status = this.querySelector<HTMLElement>('[data-attention-status]');
+      if (!controls || !workbench || !sequence || !tile || !stage || !reset || !status) return null;
+      return { controls, workbench, sequence, tile, stage, reset, status };
+    }
+
+    private copy() {
+      return ATTENTION_IO_COPY[this.dataset.locale === 'zh-CN' ? 'zh-CN' : 'en'];
+    }
+
+    private reject(parts: Parts, issue: AttentionIoIssue) {
+      parts.sequence.value = this.state.sequenceShape;
+      parts.tile.value = this.state.tileShape;
+      parts.stage.value = this.state.stage;
+      this.announce(parts, this.copy().issues[issue]);
+    }
+
+    private announce(parts: Parts, text: string) {
+      parts.status.textContent = text;
+    }
+
+    private render(parts: Parts): AttentionIoView | undefined {
+      const result = deriveAttentionIoView(this.state);
+      if (!result.accepted) {
+        this.announce(parts, this.copy().issues[result.issue]);
+        return undefined;
+      }
+      const view = result.view;
+      const stageCopy = this.copy().stages[view.stage];
+      parts.sequence.value = view.sequenceShape;
+      parts.tile.value = view.tileShape;
+      parts.stage.value = view.stage;
+      this.dataset.sequenceShape = view.sequenceShape;
+      this.dataset.tileShape = view.tileShape;
+      this.dataset.attentionStage = view.stage;
+      this.dataset.queryTileCount = String(view.queryTileCount);
+      this.dataset.keyTileCount = String(view.keyTileCount);
+      this.dataset.scoreTileCount = String(view.scoreTileCount);
+      this.dataset.materializedBytes = String(view.materialized.bytes);
+      this.dataset.tiledBytes = String(view.tiled.bytes);
+      this.dataset.analysisDifferenceBytes = String(view.analysisDifference.bytes);
+
+      this.setText('[data-live-selection]', formatAttentionIoCopy(this.copy().selection, {
+        sequence: view.sequenceShape,
+        tile: view.tileShape,
+        stage: stageCopy.label,
+      }));
+      this.setText('[data-live-query-tiles]', String(view.queryTileCount));
+      this.setText('[data-live-key-tiles]', String(view.keyTileCount));
+      this.setText('[data-live-score-tiles]', String(view.scoreTileCount));
+      this.setText('[data-live-full-score]', String(view.fullScoreElements));
+      this.setText('[data-live-temporary-tile]', String(view.temporaryScoreTileElements));
+      this.setText('[data-live-materialized-description]', stageCopy.materialized);
+      this.setText('[data-live-tiled-description]', stageCopy.tiled);
+      this.setText('[data-live-materialized-stage-bytes]', `${view.selectedStage.materializedBytes} B`);
+      this.setText('[data-live-materialized-stage-elements]', `${view.selectedStage.materializedElements} ${this.copy().elements}`);
+      this.setText('[data-live-tiled-stage-bytes]', `${view.selectedStage.tiledBytes} B`);
+      this.setText('[data-live-tiled-stage-elements]', `${view.selectedStage.tiledElements} ${this.copy().elements}`);
+      this.setText('[data-live-materialized-total]', `${view.materialized.bytes} B`);
+      this.setText('[data-live-tiled-total]', `${view.tiled.bytes} B`);
+      this.setText('[data-live-analysis-difference]', `${view.analysisDifference.bytes} B`);
+      this.setText('[data-live-stage-boundary]', stageCopy.boundary);
+
+      for (const marker of this.querySelectorAll<HTMLElement>('[data-live-stage]')) {
+        if (marker.dataset.liveStage === view.stage) marker.setAttribute('aria-current', 'step');
+        else marker.removeAttribute('aria-current');
+      }
+      return view;
+    }
+
+    private setText(selector: string, text: string) {
+      const element = this.querySelector<HTMLElement>(selector);
+      if (element) element.textContent = text;
+    }
+  }
+
+  if (!customElements.get('cuda-attention-io-explorer')) {
+    customElements.define('cuda-attention-io-explorer', CudaAttentionIoExplorer);
+  }
+</script>

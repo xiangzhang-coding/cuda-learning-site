@@ -174,6 +174,22 @@ test('@visual selected Visual Explainer states produce reviewable screenshots', 
         await expect(decision.locator('[data-tool-card="nsight-compute"]')).toHaveAttribute('aria-current', 'true');
       },
     },
+    {
+      id: 'vis18',
+      routes: {
+        zh: '/visuals/attention-memory-traffic/',
+        en: '/en/visuals/attention-memory-traffic/',
+      },
+      prepare: async () => {
+        const attention = page.locator('cuda-attention-io-explorer[data-visual-id="VIS18"]');
+        await expect(attention).toHaveAttribute('data-ready', 'true');
+        await attention.locator('[data-attention-sequence-shape]').selectOption('16x8');
+        await attention.locator('[data-attention-tile-shape]').selectOption('8x8');
+        await attention.locator('[data-attention-stage-select]').selectOption('normalize');
+        await expect(attention).toHaveAttribute('data-analysis-difference-bytes', '5120');
+        await expect(attention.locator('[data-live-stage="normalize"]')).toHaveAttribute('aria-current', 'step');
+      },
+    },
   ]) {
     for (const locale of ['zh', 'en'] as const) {
       for (const theme of THEME_IDS) {

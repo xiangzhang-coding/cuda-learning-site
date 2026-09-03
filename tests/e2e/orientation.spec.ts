@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(438);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(219);
+  expect(routes).toHaveLength(452);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(226);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -225,6 +225,8 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'A02 屏障 __syncthreads inactive lane', localePrefix: '/', expectedHrefs: ['/algorithms/multi-stage-reduction/'] },
     { route: '/', button: /搜索/, query: 'A03 包含式 排除式 扫描', localePrefix: '/', expectedHrefs: ['/algorithms/inclusive-exclusive-scan/'] },
     { route: '/', button: /搜索/, query: 'A04 Privatized Histogram', localePrefix: '/', expectedHrefs: ['/algorithms/privatized-histogram/'] },
+    { route: '/', button: /搜索/, query: 'A10 数值稳定 Softmax Online Normalization', localePrefix: '/', expectedHrefs: ['/algorithms/numerically-stable-softmax/'] },
+    { route: '/', button: /搜索/, query: 'A11 Attention IO 问题', localePrefix: '/', expectedHrefs: ['/algorithms/attention-as-an-io-problem/'] },
     { route: '/', button: /搜索/, query: 'A14 Arithmetic Intensity', localePrefix: '/', expectedHrefs: ['/algorithms/algorithm-choice-arithmetic-intensity/'] },
     { route: '/', button: /搜索/, query: 'Q02 浮点顺序 确定性 逐位可复现性', localePrefix: '/', expectedHrefs: ['/correctness/floating-point-order-reproducibility/'] },
     { route: '/', button: /搜索/, query: 'Q06 把 APOD 作为优化循环', localePrefix: '/', expectedHrefs: ['/correctness/apod-optimization-loop/'] },
@@ -248,6 +250,7 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/', button: /搜索/, query: 'LAB10 fresh profiler attempts', localePrefix: '/', expectedHrefs: ['/labs/optimize-canonical-transpose/'] },
     { route: '/', button: /搜索/, query: 'VIS13 Roofline ridge point', localePrefix: '/', expectedHrefs: ['/visuals/roofline/'] },
     { route: '/', button: /搜索/, query: 'Nsight Systems versus Nsight Compute 从症状选择下一份证据', localePrefix: '/', expectedHrefs: ['/visuals/nsight-systems-versus-nsight-compute/'] },
+    { route: '/', button: /搜索/, query: 'VIS18 Attention Memory Traffic', localePrefix: '/', expectedHrefs: ['/visuals/attention-memory-traffic/'] },
     { route: '/', button: /搜索/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/', expectedHrefs: ['/examples/multi-stage-reduction/'] },
     { route: '/', button: /搜索/, query: 'EX12 Inclusive Exclusive Scan 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/inclusive-exclusive-scan/'] },
     { route: '/', button: /搜索/, query: 'EX13 私有化 Histogram 可运行示例', localePrefix: '/', expectedHrefs: ['/examples/privatized-histogram/'] },
@@ -287,6 +290,8 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'A02 Multi-Stage Reduction Barriers Operation Order', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/multi-stage-reduction/'] },
     { route: '/en/', button: /Search/, query: 'A03 dependency transformation block sums offset propagation', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/inclusive-exclusive-scan/'] },
     { route: '/en/', button: /Search/, query: 'A04 Privatized Histogram', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/privatized-histogram/'] },
+    { route: '/en/', button: /Search/, query: 'A10 Numerically Stable Softmax Online Normalization', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/numerically-stable-softmax/'] },
+    { route: '/en/', button: /Search/, query: 'A11 Attention as an IO Problem', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/attention-as-an-io-problem/'] },
     { route: '/en/', button: /Search/, query: 'A14 Falsifiable Algorithm Optimizations Arithmetic Intensity', localePrefix: '/en/', expectedHrefs: ['/en/algorithms/algorithm-choice-arithmetic-intensity/'] },
     { route: '/en/', button: /Search/, query: 'Q02 floating-point order determinism bitwise reproducibility', localePrefix: '/en/', expectedHrefs: ['/en/correctness/floating-point-order-reproducibility/'] },
     { route: '/en/', button: /Search/, query: 'Q06 Use APOD as an optimization loop', localePrefix: '/en/', expectedHrefs: ['/en/correctness/apod-optimization-loop/'] },
@@ -310,6 +315,7 @@ test('Chinese and English searches stay in their language index', async ({ page 
     { route: '/en/', button: /Search/, query: 'LAB10 Optimize the Canonical Transpose', localePrefix: '/en/', expectedHrefs: ['/en/labs/optimize-canonical-transpose/'] },
     { route: '/en/', button: /Search/, query: 'VIS13 Roofline Model Ridge Workload Point', localePrefix: '/en/', expectedHrefs: ['/en/visuals/roofline/'] },
     { route: '/en/', button: /Search/, query: 'Nsight Systems versus Nsight Compute Choose the Next Evidence from the Symptom', localePrefix: '/en/', expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'] },
+    { route: '/en/', button: /Search/, query: 'VIS18 Attention Memory Traffic Exact Tiling', localePrefix: '/en/', expectedHrefs: ['/en/visuals/attention-memory-traffic/'] },
     { route: '/en/', button: /Search/, query: 'EX11 Multi-Stage Reduction Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/multi-stage-reduction/'] },
     { route: '/en/', button: /Search/, query: 'EX12 Inclusive and Exclusive Scan Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/inclusive-exclusive-scan/'] },
     { route: '/en/', button: /Search/, query: 'EX13 Privatized Histogram Runnable Example', localePrefix: '/en/', expectedHrefs: ['/en/examples/privatized-histogram/'] },
