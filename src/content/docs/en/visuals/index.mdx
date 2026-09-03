@@ -3,7 +3,7 @@ title: Visual Explainer Index
 description: Find every completely published Visual Explainer by concept, related Learning Unit, and version boundary.
 pairId: visuals-index
 counterpart: /visuals/
-factCheckDate: '2026-09-01'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-01' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/visuals/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. As of 2026-09-01, it contains eighteen formal explainers: VIS01-VIS14 use fourteen standalone pages, with [VIS13 Roofline](/en/visuals/roofline/) strictly requiring Q10 and appearing before VIS14. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors without duplicate pages.
+This index lists only Visual Explainers that form complete Publication Pairs and provide both interaction and a static fallback. As of 2026-09-03, it contains nineteen formal explainers: VIS01-VIS14 and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/) use fifteen standalone pages. VIS19-VIS22 are embedded in their Learning Units; their four cards deep-link to page anchors without duplicate pages.
 
 ## Published Visual Explainers
 
@@ -38,4 +38,4 @@ A planning ID is a stable discussion label. It neither generates nor promises a 
 
 ## Evidence boundary
 
-VIS01-VIS14 and VIS19-VIS22 run deterministic teaching models only in the browser, retain static or textual fallbacks, and execute no CUDA. VIS13's four browser inputs, derived point, SVG, and static chart are synthetic teaching state. It queries no GPU, launches no profiler, reads no LAB09 artifact, and is not measured Roofline evidence; all four evidence arrays are empty. Interaction, static fallback, and tool documentation remain evidence-neutral; none of the eighteen Visual Explainers has CUDA Evidence Status. Reviewed: **2026-09-01**.
+VIS01-VIS14, VIS18, and VIS19-VIS22 run deterministic teaching models only in the browser, retain static or textual fallbacks, and execute no CUDA. VIS18's sequence and tile values, logical-byte ledger, and purpose-built SVG are static teaching analysis. It queries no GPU, observes no actual traffic, selects no backend, and predicts no speedup; all four evidence arrays are empty. Interaction, static fallback, and tool documentation remain evidence-neutral; none of the nineteen Visual Explainers has CUDA Evidence Status. Reviewed: **2026-09-03**.

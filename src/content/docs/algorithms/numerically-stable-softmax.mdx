@@ -1,0 +1,203 @@
+---
+title: 'A10：数值稳定 Softmax、Online Normalization 与 Fusion 边界'
+description: 从 max-shift 不变量推导数值稳定与 online softmax，明确 finite-value 策略、pass 数、logical memory traffic 和不构成性能证据的 fusion 边界。
+pairId: a10
+counterpart: /en/algorithms/numerically-stable-softmax/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - softmax-contract
+  - max-shift
+  - online-normalizer
+  - traffic-ledger
+  - fusion-boundary
+  - numerical-verification
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A10
+prerequisites:
+  - A02
+  - M02
+  - M03
+relatedUnits:
+  - A11
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Online normalizer calculation for softmax'
+    url: 'https://arxiv.org/abs/1805.02867'
+    version: 'Milakov and Gimelshein; arXiv:1805.02867v2; 2018-07-28'
+    platform: 'Original stable and online normalizer algorithms and memory-access motivation'
+    accessDate: '2026-09-03'
+  - title: 'Accurate Computation of the Log-Sum-Exp and Softmax Functions'
+    url: 'https://arxiv.org/abs/1909.03469'
+    version: 'Blanchard, Higham, and Higham; arXiv:1909.03469; 2019'
+    platform: 'Original floating-point analysis of shifted log-sum-exp and softmax formulas'
+    accessDate: '2026-09-03'
+  - title: 'CUDA Programming Guide v13.3 - Floating-Point Computation'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current floating-point nonassociativity and operation-order boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested-versus-transferred traffic and effective-bandwidth boundary'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/numerically-stable-softmax/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,softmax-contract,max-shift,online-normalizer,traffic-ledger,fusion-boundary,numerical-verification,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,M02,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A11 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2018,2019,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/numerically-stable-softmax/" lang="en">Read the English counterpart</a>
+
+[Softmax（TERM-166）](/glossary/#term-166)把一行 logits 归一化为非负、和为 1 的权重。本学习单元不从某个 framework call 开始，而是从等价变换、归约状态和数据移动开始，推导[数值稳定 softmax（numerically stable softmax，TERM-167）](/glossary/#term-167)与[在线归一化（online normalization，TERM-168）](/glossary/#term-168)。
+
+## 学完本单元，你应该能
+
+- 证明减去任意共同常数不改变数学 softmax，并解释为什么选择 row maximum。
+- 区分避免指数上溢、仍可能发生的下溢、floating-point error 与 bitwise identity。
+- 写出 online maximum/normalizer recurrence 和它保持的不变量。
+- 对 stable three-pass 与 online-plus-output schedules 逐 pass 核算 logical element traffic。
+- 在 fusion 删除 intermediate 时写出假设、代价与证据边界，而不是推断 speedup。
+
+## 先修关系
+
+严格先修项按课程图顺序为 [A02：Reduction](/algorithms/multi-stage-reduction/)、[M02：Coalescing and Transactions](/memory/coalescing-transactions/)和 [M03：Shared-Memory Tiling](/memory/shared-memory-tiling/)，即 `A02, M02, M03`。A02 提供 max/sum reduction 与 operation-order reasoning；M02 提供 requested/transferred boundary；M03 提供 fast-store residency 与 reuse vocabulary。
+
+## Softmax 合同
+
+对非空、有限实数向量 `x`，定义：
+
+`p_i = exp(x_i) / sum_j exp(x_j)`
+
+每个 `p_i >= 0`，实数算术下 `sum_i p_i = 1`。这份教学合同先限定 finite inputs；NaN、正负 infinity 和全 masking 等策略必须由调用者另行声明，不能让普通 comparison 意外决定。
+
+Softmax 对共同平移不变。任意常数 `c` 都满足：
+
+`exp(x_i - c) / sum_j exp(x_j - c) = exp(x_i) / sum_j exp(x_j)`
+
+因为分子分母都有同一因子 `exp(-c)`，约分后得到原式。
+
+## Max-shift：避免 overflow，不承诺万能精确
+
+取 `m = max_j x_j`，再计算：
+
+`p_i = exp(x_i - m) / l, where l = sum_j exp(x_j - m)`
+
+所有 `x_i-m <= 0`，所以 shifted exponentials 不会因正指数过大而 overflow；至少一个 exponent 是 1，因此有限输入在实数算术下有 `1 <= l <= n`。但是很小的项仍可能下溢为 0，sum/reduction order 仍会改变低位，稳定形式也不保证逐位相同。
+
+对 `x = [1000, 1001, 1002, 1003]`，`m=1003`，shifted exponentials 约为 `[0.04978707, 0.13533528, 0.36787944, 1]`，`l=1.55300179`，所以：
+
+`p ~= [0.03205860, 0.08714432, 0.23688282, 0.64391426]`
+
+直接计算 `exp(1003)` 不属于可接受 baseline；上述结果是 rounded real-arithmetic reference，不是某次 GPU observation。
+
+## Online normalizer：把 max 与 sum 合成一个 scan
+
+从 `m_0 = -infinity, l_0 = 0` 开始，读入第 `j` 个值时更新：
+
+`m_j = max(m_{j-1}, x_j)`
+
+`l_j = l_{j-1} * exp(m_{j-1} - m_j) + exp(x_j - m_j)`
+
+它保持 `m_j = max_{k<=j} x_k` 和 `l_j = sum_{k<=j} exp(x_k-m_j)`。当新 maximum 出现时，旧 denominator 用 `exp(m_{j-1}-m_j)` 重标定到新 reference frame，而不是丢弃旧项。
+
+同一 fixture 的 `(m_j,l_j)` 依次约为 `(1000,1)`、`(1001,1.36787944)`、`(1002,1.50321472)`、`(1003,1.55300179)`。Online state 把 maximum 和 denominator 放进一次 input pass，但若需要输出全部 `p_i`，除非 logits 仍驻留在 fast storage，否则仍要再读一次 input。
+
+## Memory-traffic 账本
+
+先声明 boundary：分离的 FP32 input/output，每元素 4 byte；scalar max/sum state 驻留在 fast storage；不保存 exponent array；不把 cache hit、cache line、write allocation 或 transaction overfetch算入 logical element count。
+
+| schedule | input reads | output writes | logical total |
+| --- | ---: | ---: | ---: |
+| stable three-pass：max、sum、output | `3n` | `n` | `4n elements` |
+| online normalizer + output pass | `2n` | `n` | `3n elements` |
+
+对 `n=4`，两项分别是 64 B 与 48 B。这个 16 B difference 是静态分析（static analysis），不是实际 DRAM bytes、elapsed time 或 speedup；若 logits 已在 cache、发生 spill 或 implementation 保存 intermediate，账本要重写。
+
+## Fusion boundary：删除一次写回与再次读取
+
+设相邻 stages 之间的 intermediate `Z` 有 `M` 个元素，每元素 `b` byte。若 fused consumer 能在 declared fast storage 中直接使用 Z，而且 Z 没有其他 consumer、无需持久化也不 spill，那么不物化 Z 删除一次 write 和一次 later read：
+
+`traffic removed = 2M elements = 2Mb bytes`
+
+Fusion 不改变 mathematical softmax，但可以改变 registers、shared-memory footprint、occupancy、parallelism、instruction mix、compilation 与 scheduling。`2Mb` 只能支持“在该 logical ledger 中少了这些 requests”；它不能支持“必然更快”。如果输出概率被其他 consumer 需要，或者 fused state spill 回 slow store，就不能删除对应项。
+
+## 数值验收
+
+可信验收至少包含：独立高精度 reference；finite/non-finite policy；预先声明的 absolute-plus-relative tolerance；`p_i >= 0` 与 sum-near-one invariant；large-offset fixture；以及对 `softmax(x)` 和 `softmax(x+c)` 的 shift-invariance check。Reduction order、approximate exponential 与 FMA choices 可能改变低位，因此不要用 bitwise equality 作为通用 FP32 acceptance。
+
+Max-shift 解决的是 overflow pathway，不自动解决 underflow、NaN propagation、all-masked rows 或任意精度需求。每个扩展都需要自己的 input domain 和 acceptance contract。
+
+## Production boundary
+
+A10 只建立 backend-independent algorithm and traffic contract。后续课程才分别拥有 framework、cuDNN 与 Triton 的 exact version、dtype、mask、dispatch、compilation 和 hardware gates。本页不调用这些 API，不声称当前 backend availability，也不把任何 paper result 投射到当前软件。
+
+## 证据边界
+
+A10 的四个 evidence arrays 全为空。手算 reference、host arithmetic、source review 与 static traffic ledger 都不是 CUDA compilation/runtime evidence。没有记录 GPU output、actual traffic、timing、bandwidth、bottleneck、speedup 或 winner。
+
+## 离开前检查
+
+1. 为什么共同减去 `m` 不改变数学 softmax？为什么通常选 maximum 而不是任意常数？
+2. Max-shift 避免哪一种 overflow，又为什么不能保证没有 underflow？
+3. Online recurrence 中旧 `l` 为什么要乘 `exp(m_old-m_new)`？
+4. 为什么 online normalizer 仍可能需要第二次 input pass 才能写出全部 probabilities？
+5. `4n elements` 与 `3n elements` 分别来自哪些 reads/writes？
+6. 删除 `2Mb` logical bytes 后，还缺哪些观测才能提出 performance claim？
+
+## 继续练习
+
+- 完成 [A10 Exercises](/algorithms/numerically-stable-softmax/exercises/)，再查看[独立解答](/algorithms/numerically-stable-softmax/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-013](/practice/#pb-r3-013)复核 stable/online traffic ledger。
+- 复习 [TERM-166](/glossary/#term-166)、[TERM-167](/glossary/#term-167)与 [TERM-168](/glossary/#term-168)，然后进入 [A11](/algorithms/attention-as-an-io-problem/)。
+
+## 来源与复核
+
+Milakov/Gimelshein 提供 original online normalizer recurrence 与 memory-access motivation；Blanchard/Higham/Higham 提供 shifted formulas 的 floating-point analysis。CUDA Programming Guide v13.3 限定 nonassociativity 与 operation-order boundary，CUDA C++ Best Practices Guide v13.3 区分 requested/effective 与 actual transferred traffic。Context7 NVIDIA index 于 2026-09-03 只作 current owner-coordinate retrieval cross-check；上列 exact paper/owner URLs 才是发布依据。本站没有复制 paper/NVIDIA code、figure、table、benchmark 或 result。
+
+**事实核查与来源访问日期：2026-09-03。**

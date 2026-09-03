@@ -26,6 +26,7 @@ const visualPairs = [
   { id: 'VIS12', tag: 'cuda-gemm-hierarchy-explorer', zh: '/visuals/gemm-tiling-hierarchy/', en: '/en/visuals/gemm-tiling-hierarchy/' },
   { id: 'VIS13', tag: 'cuda-roofline-explorer', zh: '/visuals/roofline/', en: '/en/visuals/roofline/' },
   { id: 'VIS14', tag: 'cuda-profiler-decision-explorer', zh: '/visuals/nsight-systems-versus-nsight-compute/', en: '/en/visuals/nsight-systems-versus-nsight-compute/' },
+  { id: 'VIS18', tag: 'cuda-attention-io-explorer', zh: '/visuals/attention-memory-traffic/', en: '/en/visuals/attention-memory-traffic/' },
 ] as const;
 
 const embeddedVisuals = [

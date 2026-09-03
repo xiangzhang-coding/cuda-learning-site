@@ -84,6 +84,7 @@ const vis11Destination = PUBLISHED_DESTINATIONS.VIS11;
 const vis12Destination = PUBLISHED_DESTINATIONS.VIS12;
 const vis13Destination = PUBLISHED_DESTINATIONS.VIS13;
 const vis14Destination = PUBLISHED_DESTINATIONS.VIS14;
+const vis18Destination = PUBLISHED_DESTINATIONS.VIS18;
 const vis19Destination = PUBLISHED_DESTINATIONS.VIS19;
 const vis20Destination = PUBLISHED_DESTINATIONS.VIS20;
 const vis21Destination = PUBLISHED_DESTINATIONS.VIS21;
@@ -1305,6 +1306,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-03',
     keywords: localized('GEMM occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit', 'GEMM occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit'),
   },
+  {
+    planningId: 'PB-R3-013',
+    group: 'practice',
+    title: localized('复核 stable 与 online softmax 的数值和 traffic ledger', 'Audit numerical and traffic ledgers for stable and online softmax'),
+    href: localized('/practice/#pb-r3-013', '/en/practice/#pb-r3-013'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['A10'],
+    relatedUnits: ['A02', 'M02', 'M03', 'A10', 'A11'],
+    hardwareGate: localized('无；只计算 finite host reference 与 static logical traffic，不运行 CUDA。', 'None; calculate a finite host reference and static logical traffic without running CUDA.'),
+    versionGate: localized('Milakov/Gimelshein 2018、Blanchard/Higham/Higham 2019 与 CUDA Programming/Best Practices Guides v13.3；无 backend 或 measured claim。', 'Milakov and Gimelshein 2018, Blanchard, Higham, and Higham 2019, and CUDA Programming and Best Practices Guides v13.3; no backend or measured claim.'),
+    reviewedOn: '2026-09-03',
+    keywords: localized('softmax stable max shift online normalizer fusion logical traffic underflow', 'softmax stable max shift online normalizer fusion logical traffic underflow'),
+  },
+  {
+    planningId: 'PB-R3-014',
+    group: 'practice',
+    title: localized('推导 exact tiled attention 的 row state 与 IO ledger', 'Derive row state and an IO ledger for exact tiled attention'),
+    href: localized('/practice/#pb-r3-014', '/en/practice/#pb-r3-014'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['A11'],
+    relatedUnits: ['A08', 'A10', 'A11', 'VIS18'],
+    hardwareGate: localized('无；只复核 real-arithmetic recurrence 与 static logical IO，不运行 CUDA。', 'None; audit a real-arithmetic recurrence and static logical IO without running CUDA.'),
+    versionGate: localized('Vaswani 等 2017、Milakov/Gimelshein 2018、Dao 等 2022 与 CUDA Best Practices Guide v13.3；论文不提供 current backend/dtype claim。', 'Vaswani et al. 2017, Milakov and Gimelshein 2018, Dao et al. 2022, and CUDA Best Practices Guide v13.3; papers supply no current backend or dtype claim.'),
+    reviewedOn: '2026-09-03',
+    keywords: localized('attention score softmax value aggregation online row state exact tiling IO', 'attention score softmax value aggregation online row state exact tiling IO'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1525,6 +1554,22 @@ const visuals: readonly ResourceIndexRecord[] = [
     ),
     reviewedOn: '2026-08-31',
     keywords: localized('symptom Nsight Systems Nsight Compute timeline kernel question decision tree', 'symptom Nsight Systems Nsight Compute timeline kernel question decision tree'),
+  },
+  {
+    planningId: 'VIS18',
+    group: 'visuals',
+    title: vis18Destination.title,
+    href: vis18Destination.href,
+    resourceType: 'mental-model',
+    prerequisites: vis18Destination.prerequisites,
+    relatedUnits: ['A10'],
+    hardwareGate: noCudaHardware,
+    versionGate: localized(
+      'Vaswani 等 2017、Milakov/Gimelshein 2018、Dao 等 2022 与 CUDA Best Practices Guide v13.3；browser ledger 是 static analysis，不是 GPU evidence。',
+      'Vaswani et al. 2017, Milakov and Gimelshein 2018, Dao et al. 2022, and CUDA Best Practices Guide v13.3; the browser ledger is static analysis, not GPU evidence.',
+    ),
+    reviewedOn: '2026-09-03',
+    keywords: localized('attention sequence tile score normalization value aggregation logical IO traffic', 'attention sequence tile score normalization value aggregation logical IO traffic'),
   },
   {
     planningId: 'VIS19',
@@ -1758,6 +1803,11 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-163', 'hardware ceiling · 硬件上限', 'evidence-vocabulary', ['A14', 'Q10', 'LAB09', 'VIS13'], 'CUDA 13.3、Nsight Compute 2026.2.1 与 original Roofline model；ceiling 必须声明 operation/path、unit、device、scope 与 theoretical/calibrated/tool-reported provenance。', 'CUDA 13.3, Nsight Compute 2026.2.1, and the original Roofline model; a ceiling declares operation or path, unit, device, scope, and theoretical, calibrated, or tool-reported provenance.', '2026-09-01'),
   glossaryRecord('TERM-164', 'ridge point · 屋脊点', 'kernel-vocabulary', ['Q10', 'LAB09', 'VIS13'], 'Nsight Compute 2026.2.1 与 original Roofline model；ridge intensity 是 compatible compute 与 bandwidth ceilings 的 ratio，不是 observed bottleneck location。', 'Nsight Compute 2026.2.1 and the original Roofline model; ridge intensity is the ratio of compatible compute and bandwidth ceilings, not an observed bottleneck location.', '2026-09-01'),
   glossaryRecord('TERM-165', 'Roofline model · Roofline 模型', 'kernel-vocabulary', ['A14', 'Q10', 'LAB09', 'VIS13'], '2009 original model 只提供上界构造；CUDA 13.3/Nsight Compute 2026.2.1 facts 另行复核，browser chart 不是 GPU evidence。', 'The original 2009 model supplies only the upper-bound construction; CUDA 13.3 and Nsight Compute 2026.2.1 facts are reviewed separately, and a browser chart is not GPU evidence.', '2026-09-01'),
+  glossaryRecord('TERM-166', 'softmax · Softmax 归一化', 'kernel-vocabulary', ['A10', 'A11'], 'Milakov/Gimelshein 2018 与 Blanchard/Higham/Higham 2019；finite input、row domain、shift、precision 与 non-finite policy 先于 implementation claim。', 'Milakov and Gimelshein 2018 plus Blanchard, Higham, and Higham 2019; finite input, row domain, shift, precision, and non-finite policy precede implementation claims.', '2026-09-03'),
+  glossaryRecord('TERM-167', 'numerically stable softmax · 数值稳定 softmax', 'kernel-vocabulary', ['A10', 'A11'], 'Max-shift 避免 positive-exponent overflow，但不消除 underflow、rounding 或 reduction-order differences，也不保证 bitwise identity。', 'Max shifting avoids positive-exponent overflow but does not eliminate underflow, rounding, or reduction-order differences and does not guarantee bitwise identity.', '2026-09-03'),
+  glossaryRecord('TERM-168', 'online normalization · 在线归一化', 'kernel-vocabulary', ['A10', 'A11', 'VIS18'], 'Milakov/Gimelshein 2018 的 running maximum/normalizer recurrence；输出、residency、tiling 与 traffic 仍由具体 schedule 决定。', 'The running maximum and normalizer recurrence from Milakov and Gimelshein 2018; output, residency, tiling, and traffic still depend on the concrete schedule.', '2026-09-03'),
+  glossaryRecord('TERM-169', 'scaled dot-product attention · 缩放点积注意力', 'kernel-vocabulary', ['A11', 'VIS18'], 'Vaswani 等 2017 的 score、row-softmax、value-aggregation contract；scale motivation 是条件化模型，不替代 stable softmax。', 'The score, row-softmax, and value-aggregation contract from Vaswani et al. 2017; its scaling motivation is conditional and does not replace stable softmax.', '2026-09-03'),
+  glossaryRecord('TERM-170', 'IO-aware tiling · IO 感知分块', 'kernel-vocabulary', ['A08', 'A10', 'A11', 'VIS18'], '在明确 slow/fast boundary 与 residency assumptions 下重排 tile 和 state，以核算 movement；static reduction 不是 actual traffic 或 speedup evidence。', 'Reorder tiles and state under an explicit slow/fast boundary and residency assumptions to account for movement; a static reduction is not actual-traffic or speedup evidence.', '2026-09-03'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -1782,7 +1832,7 @@ const sources: readonly ResourceIndexRecord[] = [
     'SRC-WEB-006',
     localized('浏览器接口与 CSS 媒体', 'Browser APIs and CSS media'),
     'publishing-interface',
-    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
+    ['O01', 'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08', 'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22'],
     localized('WHATWG Living Standard、WCAG 2.2 技术与当前 CSS 规范', 'WHATWG Living Standard, WCAG 2.2 techniques, and current CSS specifications'),
   ),
   sourceRecord(
@@ -2464,6 +2514,30 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'CUDA Programming/Best Practices Guides v13.3；Toolkit 11.8.0/12.9.2/13.3.1；Nsight Compute 2026.2.1；tile/reuse、FP32/double、compiler resources、occupancy、traffic、query/permission/replay 与 expected-only fixture boundaries。',
       'CUDA Programming and Best Practices Guides v13.3; Toolkits 11.8.0/12.9.2/13.3.1; Nsight Compute 2026.2.1; tile and reuse, FP32 and double, compiler resources, occupancy, traffic, query, permission, replay, and expected-only fixture boundaries.',
+    ),
+    '2026-09-03',
+    '2026-09-03',
+  ),
+  sourceRecord(
+    'SRC-CUDA-057',
+    localized('A10 stable/online softmax 与 fusion traffic', 'A10 stable and online softmax plus fusion traffic'),
+    'cuda-version-record',
+    ['A02', 'M02', 'M03', 'A10', 'A11'],
+    localized(
+      'Milakov/Gimelshein 2018、Blanchard/Higham/Higham 2019 与 CUDA Programming/Best Practices Guides v13.3；stable/online recurrence、underflow/order 与 requested/transferred traffic boundary；无 CUDA observation。',
+      'Milakov and Gimelshein 2018, Blanchard, Higham, and Higham 2019, and CUDA Programming and Best Practices Guides v13.3; stable and online recurrences, underflow and order, and requested-versus-transferred traffic boundaries; no CUDA observation.',
+    ),
+    '2026-09-03',
+    '2026-09-03',
+  ),
+  sourceRecord(
+    'SRC-CUDA-058',
+    localized('A11/VIS18 attention decomposition、exact tiling 与 IO boundary', 'A11/VIS18 attention decomposition, exact tiling, and IO boundary'),
+    'cuda-version-record',
+    ['A08', 'A10', 'A11', 'VIS18'],
+    localized(
+      'Vaswani 等 2017、Milakov/Gimelshein 2018、Dao 等 2022 与 CUDA Best Practices Guide v13.3；paper 只负责算法历史、recurrence 与 bounded IO idea，不负责 current backend/dtype availability。',
+      'Vaswani et al. 2017, Milakov and Gimelshein 2018, Dao et al. 2022, and CUDA Best Practices Guide v13.3; papers govern algorithm history, recurrence, and bounded IO ideas only, not current backend or dtype availability.',
     ),
     '2026-09-03',
     '2026-09-03',

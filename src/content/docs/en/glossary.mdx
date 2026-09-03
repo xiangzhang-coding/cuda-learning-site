@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred sixty-five published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred seventy published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-01'
+factCheckDate: '2026-09-03'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-01'
+      content: '2026-09-03'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -1533,6 +1533,51 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
 - **Version note:** The original 2009 paper governs only the model construction. CUDA 13.3 and Nsight Compute 2026.2.1 facts are reviewed separately. VIS13 browser values and its static chart are not GPU evidence.
 
+<span id="term-166" class="resource-target" aria-hidden="true"></span>
+
+### softmax · Softmax 归一化
+
+- **Definition:** Softmax maps finite logits `x_i` to `exp(x_i)/sum_j exp(x_j)`. Results are nonnegative and sum to one in real arithmetic; computation still declares a row domain, shift, precision, and non-finite policy.
+- **Avoid:** Exponential function, any normalization, automatically stable framework operation.
+- **Related resources:** [A10](/en/algorithms/numerically-stable-softmax/) and [A11](/en/algorithms/attention-as-an-io-problem/).
+- **Version note:** Milakov and Gimelshein 2018 plus Blanchard, Higham, and Higham 2019 supply algorithmic and floating-point analysis. The term claims no current backend behavior.
+
+<span id="term-167" class="resource-target" aria-hidden="true"></span>
+
+### numerically stable softmax · 数值稳定 softmax
+
+- **Definition:** Numerically stable softmax subtracts the row maximum before exponentiation and normalization, avoiding large-positive-exponent overflow while preserving mathematical softmax.
+- **Avoid:** Bitwise-exact softmax, never underflows, free of floating-point error.
+- **Related resources:** [A10](/en/algorithms/numerically-stable-softmax/) and [A11](/en/algorithms/attention-as-an-io-problem/).
+- **Version note:** Max shifting does not eliminate underflow, rounding, or reduction-order differences. CUDA Programming Guide v13.3 floating-point boundaries still apply.
+
+<span id="term-168" class="resource-target" aria-hidden="true"></span>
+
+### online normalization · 在线归一化
+
+- **Definition:** Online normalization maintains a running maximum and a denominator relative to that maximum while scanning values, rescaling prior state when the maximum changes.
+- **Avoid:** One-read output, automatic fusion, guaranteed single pass for full probabilities.
+- **Related resources:** [A10](/en/algorithms/numerically-stable-softmax/), [A11](/en/algorithms/attention-as-an-io-problem/), and [VIS18](/en/visuals/attention-memory-traffic/).
+- **Version note:** Milakov and Gimelshein 2018 supply the recurrence. Output passes, residency, tiling, and traffic remain properties of a concrete schedule.
+
+<span id="term-169" class="resource-target" aria-hidden="true"></span>
+
+### scaled dot-product attention · 缩放点积注意力
+
+- **Definition:** Scaled dot-product attention computes `S=QK^T/sqrt(d_k)`, applies softmax over keys for each query row, then aggregates V with those probabilities to produce O.
+- **Avoid:** Attention backend, FlashAttention, automatically selected fused kernel.
+- **Related resources:** [A11](/en/algorithms/attention-as-an-io-problem/) and [VIS18](/en/visuals/attention-memory-traffic/).
+- **Version note:** The scale motivation in Vaswani et al. 2017 assumes independent, mean-zero, unit-variance components. It replaces neither stable softmax nor a current-backend review.
+
+<span id="term-170" class="resource-target" aria-hidden="true"></span>
+
+### IO-aware tiling · IO 感知分块
+
+- **Definition:** IO-aware tiling reorders computation and state under an explicit slow/fast-store boundary, tile order, and residency assumptions so intermediates are reused at the declared level and movement can be accounted for term by term.
+- **Avoid:** Tiling that must be faster, synonym for FlashAttention, actual DRAM traffic.
+- **Related resources:** [A08](/en/algorithms/tiled-gemm-correctness/), [A10](/en/algorithms/numerically-stable-softmax/), [A11](/en/algorithms/attention-as-an-io-problem/), and [VIS18](/en/visuals/attention-memory-traffic/).
+- **Version note:** Dao et al. 2022 support IO-aware attention-algorithm history. A static logical reduction is not current-backend, actual-traffic, or speedup evidence.
+
 ## Maintenance rule
 
-TERM-001 through TERM-159 retain their existing item-level review records. Updated TERM-040, TERM-043, TERM-044, TERM-154, TERM-156, and TERM-158, plus new TERM-160 through TERM-165 and the complete 165-term Publication Pair, metadata projections, direct links, and static definitions, were reviewed with the Chinese counterpart on **2026-09-01**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New and updated entries are static definitions only: no application, GPU, or profiler ran, no report was generated or parsed, and no metric, timing, bottleneck, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-165 retain their item-level review records. New TERM-166 through TERM-170 and the complete 170-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-03**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation and papers without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New entries are static definitions only: no application or GPU ran, and no actual traffic, backend, dtype, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.

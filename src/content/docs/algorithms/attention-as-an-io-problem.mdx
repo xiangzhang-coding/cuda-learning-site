@@ -1,0 +1,227 @@
+---
+title: 'A11：把 Attention 分解为一个 IO 问题'
+description: 分开 score、stable row normalization 与 value aggregation，再从完整 S/P 物化推导实数算术等价的 query-outer tiled recurrence 和明确边界的 IO 账本。
+pairId: a11
+counterpart: /en/algorithms/attention-as-an-io-problem/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - attention-contract
+  - score-stage
+  - normalization-stage
+  - value-stage
+  - materialized-traffic
+  - exact-tiling
+  - worked-fixture
+  - visual-explainer
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A11
+prerequisites:
+  - A08
+  - A10
+relatedUnits:
+  - VIS18
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Attention Is All You Need'
+    url: 'https://papers.nips.cc/paper/7181-attention-is-all-you-need'
+    version: 'Vaswani et al.; NeurIPS 2017'
+    platform: 'Original scaled dot-product attention decomposition, dimensions, and scale motivation'
+    accessDate: '2026-09-03'
+  - title: 'Online normalizer calculation for softmax'
+    url: 'https://arxiv.org/abs/1805.02867'
+    version: 'Milakov and Gimelshein; arXiv:1805.02867v2; 2018-07-28'
+    platform: 'Original online maximum and normalizer recurrence'
+    accessDate: '2026-09-03'
+  - title: 'FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness'
+    url: 'https://proceedings.neurips.cc/paper_files/paper/2022/hash/67d57c32e20fd0a7a302cb81d36e40d5-Abstract-Conference.html'
+    version: 'Dao et al.; NeurIPS 2022'
+    platform: 'Original IO-aware exact-attention history, tiled recurrence, and bounded two-level analysis only'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested-versus-transferred byte and effective-bandwidth boundaries'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/algorithms/attention-as-an-io-problem/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,attention-contract,score-stage,normalization-stage,value-stage,materialized-traffic,exact-tiling,worked-fixture,visual-explainer,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,A10' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS18 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2017,2018,2022,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/algorithms/attention-as-an-io-problem/" lang="en">Read the English counterpart</a>
+
+[缩放点积注意力（scaled dot-product attention，TERM-169）](/glossary/#term-169)可以写成三步矩阵合同，也可以执行为不物化完整中间矩阵的精确 tiled recurrence。A11 用 [IO-aware tiling（TERM-170）](/glossary/#term-170)解释两者的差异：不是给 backend 加神秘标签，而是逐项说明哪些 values 在哪里重用、重读或写回。
+
+## 学完本单元，你应该能
+
+- 用 Q/K/V shapes 分开写 score、row normalization 与 value aggregation。
+- 解释 `1/sqrt(d_k)` 的条件化方差动机，并把它与 max-shift 的数值目的分开。
+- 为物化 S/P 的 stable schedule 写出通用 logical element ledger。
+- 推导 tile-local `(m_t,l_t,a_t)` 与 running `(m,l,a)` 的 exact merge recurrence。
+- 对固定 query-outer schedule 手算 tile counts、K/V replay 和 IO difference。
+- 把 real-arithmetic equivalence、floating-point acceptance、paper history、current backend 与 runtime evidence 分开。
+
+## 先修关系
+
+严格先修项是 [A08：Tiled GEMM](/algorithms/tiled-gemm-correctness/)与 [A10：Stable Softmax](/algorithms/numerically-stable-softmax/)，即 `A08, A10`。A08 提供 tiled matrix-product shapes 与 reuse；A10 提供 stable/online row normalization 和 traffic boundary。VIS18 是 related Visual Explainer，不增加先修边。
+
+## Attention 合同
+
+对一个 dense、unmasked、single-head forward problem，冻结：
+
+- `Q` shape 为 `n_q x d_k`。
+- `K` shape 为 `n_k x d_k`。
+- `V` shape 为 `n_k x d_v`。
+- Output `O` shape 为 `n_q x d_v`。
+
+三阶段是：
+
+`S = QK^T / sqrt(d_k)`
+
+`P = softmax_row(S)`
+
+`O = PV`
+
+这里不包含 Q/K/V projection、mask、bias、dropout、backward 或 multi-head packing。加入任意一项都要扩展 shape、semantics 与 traffic ledger，不能沿用本页数值而不声明。
+
+## Score stage：缩放与稳定化不是同一件事
+
+每个 `S[i,j]` 是 query row `Q[i,:]` 与 key row `K[j,:]` 的长度 `d_k` dot product，再除以 `sqrt(d_k)`。Transformer 论文给出的动机依赖明确假设：query/key components 独立、均值 0、方差 1 时，未缩放 dot product 的方差为 `d_k`，缩放后 modeled variance 为 1。
+
+这不是对任意真实数据的 universal normalization，也不替代 softmax max-shift。Scale 控制 modeled dot-product magnitude；max-shift 避免 exponential overflow。两者服务不同问题。
+
+## Normalization stage：每个 query row 独立
+
+`softmax_row` 沿 key dimension 归一化，每个 query row 有自己的 maximum `m_i` 与 denominator `l_i`。Dense score matrix 的不同 rows 不共享一个 global denominator。Finite inputs 下，row probabilities 非负并在实数算术中和为 1；floating-point acceptance 仍需要预先声明 tolerance 与 non-finite policy。
+
+若先物化完整 S，stable three-pass normalization 对每个 S element 做 max read、sum read 和 output read，再写 P。A10 的 online state 可以删除其中一次 S read，但“online”本身不会自动删除完整 S/P 物化；schedule 和 residency 才决定 IO。
+
+## Value stage：probability 加权 V
+
+每个 output row 是 `O[i,:] = sum_j P[i,j] V[j,:]`。这是沿 key rows 的 reduction，输出 depth 是 `d_v`，不是 `d_k`。如果 P 已物化，stage 读取 P 与 V 并写 O；如果 tile-local weights 和 weighted accumulator 保留在 fast storage，就可以在 key/value sweep 中直接累加而不写完整 P。
+
+## 物化 S/P 的 traffic
+
+声明 FP32 storage、预先得到的 Q/K/V、分离的 O，并以 logical slow/fast-store element transfers 为 boundary。排除 cache line、transaction overfetch、projection、mask、dropout、backward、allocation 与 host-device movement。
+
+Stable three-pass materialized schedule 的元素数是：
+
+`E_mat = (n_q+n_k)d_k + (n_q+n_k)d_v + 6n_qn_k`
+
+`6n_qn_k` 来自写 S 一次、读 S 三次、写 P 一次、读 P 一次。Self-attention 且 `n_q=n_k=N,d_k=d_v=d` 时：
+
+`E_mat = 4Nd + 6N^2`
+
+这个 ledger 不是 compulsory lower bound，也不是 actual DRAM transactions；它只属于上述 materialized schedule 和 boundary。
+
+## Exact tiling：合并 row state，不物化完整 S/P
+
+让一个 query tile 有 `Br` rows，在 fast storage 中保留 Q tile、每行 running maximum `m`、denominator `l` 与 value accumulator `a`，然后扫过 `Bc`-row K/V tiles。对某一 query row和当前 tile，先求：
+
+`m_t = max_{j in tile} s_j`
+
+`l_t = sum_{j in tile} exp(s_j-m_t)`
+
+`a_t = sum_{j in tile} exp(s_j-m_t)v_j`
+
+将它与已处理 keys 的 state 合并：
+
+`m' = max(m, m_t)`
+
+`l' = exp(m - m')l + exp(m_t - m')l_t`
+
+`a' = exp(m - m')a + exp(m_t - m')a_t`
+
+初始 state 是 `m=-infinity,l=0,a=0`；扫完全部 key tiles 后输出 `o=a/l`。Invariant 是 `l=sum_processed exp(s_j-m)` 与 `a=sum_processed exp(s_j-m)v_j`。因此每个 dense score 仍参与结果，但完整 S/P 不必跨 declared slow/fast boundary。
+
+“Exact”表示实数算术下与 dense contract 等价，不表示不同 floating-point reduction order 逐位相同。Tile size、accumulation type、operation order 与 tolerance 仍是 correctness contract。
+
+## Worked IO fixture
+
+VIS18 冻结 unmasked self-attention `N=8,d=4`、FP32、`Br=Bc=4`。Query tile count `T_r=ceil(N/Br)=2`，key tile count也是 2，temporary score tiles 共 4，每块 16 elements。
+
+Query-outer schedule 保留每个 Q tile并扫过全部 K/V tiles：
+
+`E_tile = Nd + T_r*Nd + T_r*Nd + Nd = 2Nd + 2T_rNd`
+
+第一/最后一项是 Q read/O write，中间两项是 K/V 各被每个 query tile 读取。Materialized stable schedule 是 `512 elements = 2048 B`；代入 tiled 公式得到 `192 elements = 768 B`；所以该静态分析的 difference 是 `1280 B`。
+
+这不是 FlashAttention 的流量数字。论文的具体 pseudocode、loop order、state residency 与 IO theorem 有自己的边界；VIS18 选择 query-outer schedule 只为让四项 ledger 可直接复核。不要把 `768 B` 归因于某个现成 implementation，也不要由较少 logical requests 推断 timing 或 speedup。
+
+## Visual Explainer：VIS18
+
+[VIS18：Attention Memory Traffic](/visuals/attention-memory-traffic/)提供 `8x4`/`16x8` sequence shapes、`4x4`/`8x8` score tiles 和 score/normalize/value stage selector。Purpose-built static SVG 与四行 ledger 在无脚本、移动端、reduced motion、forced colors 和 print 中都保留。
+
+## Production boundary
+
+A11 没有 framework、cuDNN 或 Triton API。后续单位会各自核对 exact software version、dtype、mask、workspace、dispatch、compilation 与 hardware gates，并复用 VIS18 的算法层 visual，而不是把 paper idea 当成 current backend availability。A11 也不选择“最佳”tile 或 backend。
+
+## 证据边界
+
+A11 与 VIS18 的四个 evidence arrays 都为空。Formulas、host arithmetic、paper review、browser model 和 static diagram 不构成 CUDA execution。没有 actual memory traffic、cache、timing、bandwidth、bottleneck、backend selection、speedup 或 winner。
+
+## 离开前检查
+
+1. Q/K/V/O 与 S/P 的 shapes 分别是什么，softmax 沿哪个 dimension？
+2. `1/sqrt(d_k)` 的条件化方差动机为什么不等于 max-shift？
+3. Materialized schedule 的 `6n_qn_k` 分别来自哪些 transfers？
+4. 新 tile maximum 变大时，旧 `l` 和 `a` 为什么要用同一个 exponent factor 重标定？
+5. Query-outer schedule 中 K/V 为什么重复 `T_r` 次，而完整 S/P 可以不写出？
+6. 为什么 real-arithmetic exactness、floating-point tolerance 与 runtime performance 是三种不同 claim？
+
+## 继续练习
+
+- 完成 [A11 Exercises](/algorithms/attention-as-an-io-problem/exercises/)，再查看[独立解答](/algorithms/attention-as-an-io-problem/solutions/)。
+- 在[练习题库（Practice Bank）PB-R3-014](/practice/#pb-r3-014)审查另一个 attention ledger。
+- 操作 [VIS18](/visuals/attention-memory-traffic/)，并复习 [TERM-169](/glossary/#term-169)与 [TERM-170](/glossary/#term-170)。
+
+## 来源与复核
+
+Vaswani 等人的 original paper 提供 scaled dot-product decomposition 与条件化 scale motivation；Milakov/Gimelshein 提供 online-normalizer basis；FlashAttention 论文只支持 IO-aware exact-attention history、recurrence 与 bounded two-level analysis，不支持 current backend、dtype、availability 或 speedup claim。CUDA C++ Best Practices Guide v13.3 限定 requested/effective 与 actual transferred traffic。Context7 NVIDIA index 于 2026-09-03 只作 owner-coordinate retrieval cross-check。所有 formulas、worked fixtures、exercises、solutions 与 VIS18 构图都是本站原创。
+
+**事实核查与来源访问日期：2026-09-03。**

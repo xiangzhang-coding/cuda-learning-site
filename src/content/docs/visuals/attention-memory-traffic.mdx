@@ -1,0 +1,136 @@
+---
+title: 'Attention Memory Traffic：物化矩阵与 Exact Tiling'
+description: 用确定性 sequence/tile fixtures 和三阶段 IO 账本，对照完整 S/P 物化与 exact query-outer tiled recurrence，并保留专门设计的静态图。
+pairId: vis18
+counterpart: /en/visuals/attention-memory-traffic/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - fixture
+  - stages
+  - io-accounting
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS18
+prerequisites:
+  - A11
+relatedUnits:
+  - A10
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Attention Is All You Need'
+    url: 'https://papers.nips.cc/paper/7181-attention-is-all-you-need'
+    version: 'Vaswani et al.; NeurIPS 2017'
+    platform: 'Original scaled dot-product attention decomposition and scale motivation'
+    accessDate: '2026-09-03'
+  - title: 'Online normalizer calculation for softmax'
+    url: 'https://arxiv.org/abs/1805.02867'
+    version: 'Milakov and Gimelshein; arXiv:1805.02867v2; 2018-07-28'
+    platform: 'Original online max/normalizer recurrence and memory-access motivation'
+    accessDate: '2026-09-03'
+  - title: 'FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness'
+    url: 'https://proceedings.neurips.cc/paper_files/paper/2022/hash/67d57c32e20fd0a7a302cb81d36e40d5-Abstract-Conference.html'
+    version: 'Dao et al.; NeurIPS 2022'
+    platform: 'Original IO-aware exact-attention history, tiled recurrence, and two-level model only'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested-versus-transferred byte and effective-bandwidth boundaries'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis18 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/visuals/attention-memory-traffic/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,fixture,stages,io-accounting,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS18 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A11 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A10 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2017,2018,2022,13.3' }
+---
+
+import AttentionIoExplorer from '../../../components/AttentionIoExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/attention-memory-traffic/" lang="en">Read the English counterpart</a>
+
+## 学习目的
+
+完成 [A11](/algorithms/attention-as-an-io-problem/) 后，用 VIS18 同时看见 score、normalization 与 value aggregation 的 logical IO。上轨物化完整 `S` 和 `P`，下轨让一个 query tile 扫过 key/value tiles，并把 temporary score tile、online row statistics 与 weighted accumulator 保留在 fast store。
+
+<AttentionIoExplorer locale="zh-CN" />
+
+## 控件
+
+三个原生 select 选择 `N×d`、`Br×Bc` 与 score/normalize/value stage。重置恢复 `8×4`、`4×4` 与 score，并把焦点返回 sequence select；polite live region 报告变化。页面没有 autoplay、timer、randomness、storage、canvas 或拖拽依赖。
+
+Controls 与 live workbench 在 source HTML 中保持 `hidden`，custom element 只有在完整 DOM parts 和初始 model 都通过校验后才显示。无 JavaScript 时，purpose-built static diagram 与四行账本仍是完整解释，而不是“请启用脚本”占位符。
+
+## 固定 fixture 与边界
+
+两组 self-attention shape 是 `N=8,d=4` 与 `N=16,d=8`，两组 score tile 是 `Br×Bc=4×4` 与 `8×8`。Storage 固定为 FP32，每个 counted element 为 4 byte；Q、K、V 已预先得到。模型排除 projection、mask、bias、dropout、backward、allocation、host-device transfer、cache line、transaction overfetch 与 spill。
+
+这里的 boundary 是 stipulated slow store 和 fast store 之间的 logical element transfer。它不是 GPU DRAM counter。`ceil(N/Br)` 是 query tile count，`ceil(N/Bc)` 是 key/value tile count；所有组合都整除，只为让 learner 先复核核心 ledger。
+
+## 三阶段
+
+1. **Score**：物化路径读取 Q/K 并写完整 `S=QK^T/sqrt(d)`；tiled 路径只形成 `Br×Bc` temporary scores。
+2. **Normalize**：物化路径为 stable softmax 三次读取 S 并写 P；tiled 路径合并 online `(m,l)` state，S/P 不跨该 boundary。
+3. **Value**：物化路径读取 P/V 并写 O；tiled 路径让 V 随 query tiles 重读，保留 accumulator `a`，最终写 `O=a/l`。
+
+Exact tiled recurrence 实际交错 normalization 与 value aggregation。Stage selector 是概念分账，不声称三个独立 kernels 或某个 backend dispatch。Exact 表示实数算术下与 dense attention 等价，不表示 floating-point bitwise identity。
+
+## IO 账本
+
+对 self-attention `N,d` 与 `Tr=ceil(N/Br)`，完整 S/P 加 stable three-pass normalization 的元素数是 `4Nd + 6N^2`。Query-outer tiled schedule 的元素数是 `2Nd + 2TrNd`：Q/O 各跨 boundary 一次，K/V 各跨 boundary `Tr` 次，完整 S/P 从不物化。
+
+默认 `N=8,d=4,Br=Bc=4` 得到物化路径 `512 elements = 2048 B`，tiled 路径 `192 elements = 768 B`，静态分析差值 `1280 B`。Normalize card 的 `0 B` 只表示没有该阶段的 slow-store transfer，不表示没有指数、max、sum 或 rescale 工作。
+
+更大的 query tile 在这个简化 ledger 中减少 K/V replay，但模型没有 fast-store capacity、register pressure、occupancy、parallelism 或 spill，所以不能据此宣布 `8×8` 是更快或更好的 tile。
+
+## 静态回退
+
+专门设计的 inline SVG 同时呈现三列 stage 与两条 data path；不是论文图的复制、描摹或改编。四组 shape/tile 的 server-rendered table 包含 query/key tile counts、temporary score tile count 和两条路径的 bytes。390-pixel viewport、reduced motion、forced colors 与 print 都保留内容；文本、边框与数值承担语义，不只依赖颜色。
+
+## 证据边界
+
+VIS18 只发布 deterministic browser arithmetic 与 static analysis。它没有编译或执行 CUDA、查询 GPU、读取 profiler、观察 actual transferred bytes，也没有 timing、bandwidth、bottleneck、backend、speedup 或 winner。四个 evidence arrays 都为空，不授予 Compile-Checked、Community-Observed 或 Runtime-Verified。
+
+## 来源
+
+Vaswani 等人的 2017 论文支持 scaled dot-product attention decomposition；Milakov/Gimelshein 支持 online normalizer；FlashAttention 论文只支持 IO-aware exact-attention history、recurrence 与 two-level model，不支持任何 current backend、dtype 或 availability claim。CUDA C++ Best Practices Guide v13.3 用于区分 requested/effective 与 actual transferred traffic。四个 primary/owner coordinates 于 **2026-09-03** 访问；所有 copy、数值、布局、SVG 与交互均为本站原创。

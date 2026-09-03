@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 62 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 64 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-09-03'
@@ -71,6 +71,8 @@ structure:
   - entry-pb-r3-010
   - entry-pb-r3-011
   - entry-pb-r3-012
+  - entry-pb-r3-013
+  - entry-pb-r3-014
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -118,6 +120,8 @@ prerequisites:
   - A07
   - A08
   - A09
+  - A10
+  - A11
   - A14
   - Q01
   - Q02
@@ -176,6 +180,8 @@ relatedUnits:
   - A07
   - A08
   - A09
+  - A10
+  - A11
   - A14
   - Q01
   - Q02
@@ -196,6 +202,7 @@ relatedUnits:
   - LAB10
   - VIS13
   - VIS14
+  - VIS18
 hardwareGate: none
 evidence:
   compilation: []
@@ -210,15 +217,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -237,13 +244,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 62 个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 64 个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 62 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 64 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -2826,6 +2833,78 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期（Source date）：** 2026-09-03。
 
+<span id="pb-r3-013" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-013：复核 stable 与 online softmax 的数值和 traffic ledger
+
+- **ID 与双语发布对：** PB-R3-013；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Concepts and implementation；高级。
+- **直接先修条件：** [A10：数值稳定 Softmax、Online Normalization 与 Fusion 边界](/algorithms/numerically-stable-softmax/)。
+- **硬件门槛（Hardware gate）：** 无；只计算 finite host reference 与 static logical traffic，不运行 CUDA。
+- **版本门槛（Version gate）：** Milakov/Gimelshein 2018、Blanchard/Higham/Higham 2019 与 CUDA Programming/Best Practices Guides v13.3；无 backend 或 measured claim。
+- **相关学习单元与资源：** [A02](/algorithms/multi-stage-reduction/)、[M02](/memory/coalescing-transactions/)、[M03](/memory/shared-memory-tiling/)、[A10](/algorithms/numerically-stable-softmax/)和 [A11](/algorithms/attention-as-an-io-problem/)。
+- **最后复核（Last reviewed）：** 2026-09-03。
+
+**题目：** 一份 proposal 对 `x=[1000,1001,1002,1003]` 直接求 exponentials，随后宣称“online softmax 只读一次、fusion 必然更快”。修复 numerical path 和 traffic claims：给出 stable probabilities、逐步 online `(m,l)` state，并为 `n=4096` 的 FP32 row 核算 stable three-pass 与 online-plus-output 的 logical bytes。
+
+**目标：** 交付一份可独立复核的 numerical worksheet 与 pass ledger，并把“少一次 logical read”限制在明确 boundary 和 residency assumptions 内。
+
+**约束：** Input 全部 finite；scalar state 留在 fast storage；不保存 exponentials；输出 probabilities 需要重读 logits；不计 cache line、transaction 或 spill。必须声明 underflow、rounding 与 bitwise boundary，不能填写 timing 或 speedup。
+
+**预期证据：** Stable-softmax 四行表、四步 online state、两条 pass ledgers、assumption/exclusion list，以及 static-analysis replacement statement。
+
+**验收条件：** Maximum 是 1003，最后 probability 约 `0.64391426`，final `l` 约 `1.55300179`；stable schedule 是 `4*4096*4=65536 B`，online-plus-output 是 `3*4096*4=49152 B`，difference `16384 B`；结论不声称 actual DRAM traffic 或性能。
+
+<details><summary>提示 1</summary>Shift 后是 `[-3,-2,-1,0]`；maximum 每增加 1 时，旧 denominator 乘 `exp(-1)`。</details>
+
+<details><summary>提示 2</summary>Online normalizer 合并 max 和 sum pass，但若 logits 不驻留，写每个 probability 仍需第二遍 input read。</details>
+
+**参考解答（Reviewed solution）：** Shifted exponentials 约为 `[0.04978707,0.13533528,0.36787944,1]`，除以 `1.55300179` 得 `[0.03205860,0.08714432,0.23688282,0.64391426]`；online states 依次为 `(1000,1)`、`(1001,1.36787944)`、`(1002,1.50321472)`、`(1003,1.55300179)`。Stable schedule 的 max/sum/output 三读加一写共 `4n` elements，online normalizer/output 两读加一写共 `3n`，代入得到 65,536 B 与 49,152 B。16,384 B 只是 declared logical boundary 的静态差值；actual transactions、cache、spills、resource pressure 与 elapsed time 都未知。
+
+**有效替代方案：** 可以换用另一个带大共同 offset 的 finite row，或用 tile-wise merge 复核同一 invariant；只要 reference、pass count、boundary 与 exclusions 都重新写明。
+
+**常见错误：** 直接求 `exp(1003)`；把 overflow avoidance 写成没有 underflow；maximum 改变时不重标定旧 `l`；把 one-pass normalizer 误写为 one-read output；从 logical bytes 推断 speedup。
+
+**来源依据（Source basis）：** 本站原创的 [A10 stable/online contract](/algorithms/numerically-stable-softmax/)、[A02 reduction model](/algorithms/multi-stage-reduction/)与 [SRC-CUDA-057](/sources-and-versions/#src-cuda-057)，以及 [Online normalizer paper](https://arxiv.org/abs/1805.02867)、[Accurate log-sum-exp/softmax paper](https://arxiv.org/abs/1909.03469)和 NVIDIA [Best Practices bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)。
+
+**来源日期（Source date）：** 2026-09-03。
+
+<span id="pb-r3-014" class="resource-target" aria-hidden="true"></span>
+
+## PB-R3-014：推导 exact tiled attention 的 row state 与 IO ledger
+
+- **ID 与双语发布对：** PB-R3-014；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Concepts and implementation；高级。
+- **直接先修条件：** [A11：把 Attention 分解为一个 IO 问题](/algorithms/attention-as-an-io-problem/)。
+- **硬件门槛（Hardware gate）：** 无；只复核 real-arithmetic recurrence 与 static logical IO，不运行 CUDA。
+- **版本门槛（Version gate）：** Vaswani 等 2017、Milakov/Gimelshein 2018、Dao 等 2022 与 CUDA Best Practices Guide v13.3；论文不提供 current backend/dtype claim。
+- **相关学习单元与资源：** [A08](/algorithms/tiled-gemm-correctness/)、[A10](/algorithms/numerically-stable-softmax/)、[A11](/algorithms/attention-as-an-io-problem/)和 [VIS18](/visuals/attention-memory-traffic/)。
+- **最后复核（Last reviewed）：** 2026-09-03。
+
+**题目：** 对 unmasked self-attention `N=16,d=8`、FP32，比对 materialized stable schedule 与 query-outer tiled schedule。分别使用 `Br=Bc=4` 和 `Br=Bc=8`，计算 tile counts、每阶段 transfers 与总 bytes；再写出合并两个 tile-local `(m_t,l_t,a_t)` 的 recurrence。Reviewer 看到较大的 Br 有更少 logical bytes，就宣布它是最快 tile 和某个 production backend 的选择。
+
+**目标：** 建立 shape、row-state、residency 与 traffic 四层合同，并把 static schedule comparison 与 backend/runtime claims 分开。
+
+**约束：** Q/K/V 已存在，O 分离；完整 S/P 路径对 S 做三读一写 P；tiled Q/state/accumulator 驻留 fast storage；排除 projection、mask、dropout、backward、cache line、transaction、resource capacity 与 spill。Exact 只指实数算术等价。
+
+**预期证据：** 三阶段 decomposition、merge recurrence、两行 tile-count/traffic table、full S/P materialization ledger、assumption list 与 bounded verdict。
+
+**验收条件：** Materialized 总量为 `4Nd+6N^2=2048 elements=8192 B`；`4x4` 有 16 score tiles、tiled 总量 `1280 elements=5120 B`；`8x8` 有 4 score tiles、tiled 总量 `768 elements=3072 B`。记录较大 Br 在本模型减少 K/V replay，但拒绝 fastest/backend claim。
+
+<details><summary>提示 1</summary>`T_r=ceil(N/Br)`，tiled total 是 `2Nd+2T_rNd`；Bc 改变 score-tile count，但在该 query-outer ledger 中不改变 K/V 的总 logical elements。</details>
+
+<details><summary>提示 2</summary>Merge 使用共同的新 maximum：`l'=exp(m-m')l+exp(m_t-m')l_t`，`a'` 使用相同两个 scale factors。</details>
+
+**参考解答（Reviewed solution）：** 三阶段仍是 `S=QK^T/sqrt(d)`、row softmax 与 `O=PV`。Materialized 是 512 score、1,024 normalize、512 value elements，共 8,192 B。`4x4` 有 `T_r=T_c=4` 与 16 score tiles；score/value 各 640 elements，normalize 跨 boundary 为 0，共 5,120 B。`8x8` 有 `T_r=T_c=2` 与 4 score tiles；score/value 各 384 elements，共 3,072 B。Tile merge 取 `m'=max(m,m_t)`，再按共同 reference 重标定并相加 `l` 与 `a`。Larger Br 在这份省略 capacity/spill/parallelism 的静态模型中减少 K/V replay，仅此而已；没有证据支持 fastest tile、backend dispatch、timing 或 speedup。
+
+**有效替代方案：** 可以选择 K/V-outer schedule，但必须重新核算 Q/O state replay；也可以加入 non-square `Br,Bc`，只要 tail、residency 和 resource assumptions 都明确。
+
+**常见错误：** 沿 query dimension 做 softmax；用 `d_v` 缩放 score；只重标定 `l` 不重标定 `a`；把 normalize 的零 slow-store bytes 当成零工作；把 query-outer ledger 称为 FlashAttention implementation result；用 static bytes 选择 backend。
+
+**来源依据（Source basis）：** 本站原创的 [A11 attention/IO contract](/algorithms/attention-as-an-io-problem/)、[A10 online state](/algorithms/numerically-stable-softmax/)、[VIS18](/visuals/attention-memory-traffic/)与 [SRC-CUDA-058](/sources-and-versions/#src-cuda-058)，以及 [Attention Is All You Need](https://papers.nips.cc/paper/7181-attention-is-all-you-need)、[Online normalizer](https://arxiv.org/abs/1805.02867)、[FlashAttention](https://proceedings.neurips.cc/paper_files/paper/2022/hash/67d57c32e20fd0a7a302cb81d36e40d5-Abstract-Conference.html)和 NVIDIA [Best Practices bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)。
+
+**来源日期（Source date）：** 2026-09-03。
+
 ## 复核记录
 
-既有条目保留各自 2026-08-26 至 2026-09-02 的 item-level records。Issue #29 的 PB-R3-011、PB-R3-012 与完整 62 个条目的双语发布对、metadata projection、直接链接和静态合同在 **2026-09-03** 同步复核。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。两项新增练习没有执行 CUDA、Nsight Compute 或 LAB12，也没有发布 runtime、metric value、register count、occupancy、traffic、numerical output、winner、Tensor Core 或 speedup claim；stage labels、workload coordinates 与 source-derived sizes 都是静态声明，不是 measurement。L06 与 LAB12 保持未发布。
+既有条目保留各自 2026-08-26 至 2026-09-02 的 item-level records。Issue #29 的 PB-R3-011/PB-R3-012 和 issue #30 的 PB-R3-013/PB-R3-014，与完整 64 个条目的双语发布对、metadata projection、直接链接和静态合同在 **2026-09-03** 同步复核。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。新增 softmax/attention 练习只发布 host arithmetic 与 static analysis，不执行 CUDA，也不发布 runtime、actual traffic、backend、dtype、timing、winner 或 speedup claim。

@@ -1,0 +1,136 @@
+---
+title: 'Attention Memory Traffic: Materialized Matrices and Exact Tiling'
+description: Compare full S/P materialization with an exact query-outer tiled recurrence through deterministic sequence/tile fixtures, a three-stage IO ledger, and a purpose-built static diagram.
+pairId: vis18
+counterpart: /visuals/attention-memory-traffic/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - controls
+  - fixture
+  - stages
+  - io-accounting
+  - static-fallback
+  - evidence-boundary
+  - sources
+resourceKind: visual-explainer
+unitId: VIS18
+prerequisites:
+  - A11
+relatedUnits:
+  - A10
+hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Attention Is All You Need'
+    url: 'https://papers.nips.cc/paper/7181-attention-is-all-you-need'
+    version: 'Vaswani et al.; NeurIPS 2017'
+    platform: 'Original scaled dot-product attention decomposition and scale motivation'
+    accessDate: '2026-09-03'
+  - title: 'Online normalizer calculation for softmax'
+    url: 'https://arxiv.org/abs/1805.02867'
+    version: 'Milakov and Gimelshein; arXiv:1805.02867v2; 2018-07-28'
+    platform: 'Original online max/normalizer recurrence and memory-access motivation'
+    accessDate: '2026-09-03'
+  - title: 'FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness'
+    url: 'https://proceedings.neurips.cc/paper_files/paper/2022/hash/67d57c32e20fd0a7a302cb81d36e40d5-Abstract-Conference.html'
+    version: 'Dao et al.; NeurIPS 2022'
+    platform: 'Original IO-aware exact-attention history, tiled recurrence, and two-level model only'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested-versus-transferred byte and effective-bandwidth boundaries'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: vis18 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/visuals/attention-memory-traffic/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,controls,fixture,stages,io-accounting,static-fallback,evidence-boundary,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: visual-explainer }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: VIS18 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: A11 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A10 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2017,2018,2022,13.3' }
+---
+
+import AttentionIoExplorer from '../../../../components/AttentionIoExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/attention-memory-traffic/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+After [A11](/en/algorithms/attention-as-an-io-problem/), use VIS18 to see the logical IO of score, normalization, and value aggregation together. The upper track materializes full `S` and `P`. The lower track retains a query tile while sweeping key/value tiles and keeps the temporary score tile, online row statistics, and weighted accumulator in fast storage.
+
+<AttentionIoExplorer locale="en" />
+
+## Controls
+
+Three native selects choose `N×d`, `Br×Bc`, and the score, normalize, or value stage. Reset restores `8×4`, `4×4`, and score, then returns focus to the sequence select. A polite live region announces each change. The page has no autoplay, timer, randomness, storage, canvas, or drag dependency.
+
+Controls and the live workbench remain `hidden` in source HTML. The custom element reveals them only after validating all DOM parts and the initial model. Without JavaScript, the purpose-built static diagram and four-row ledger remain a complete explanation rather than an enable-script placeholder.
+
+## Fixed fixture and boundary
+
+The two self-attention shapes are `N=8,d=4` and `N=16,d=8`; the score tiles are `Br×Bc=4×4` and `8×8`. Storage is FP32, so every counted element is 4 bytes, and Q, K, and V already exist. The model excludes projections, mask, bias, dropout, backward, allocation, host-device transfer, cache lines, transaction overfetch, and spills.
+
+The boundary is a stipulated logical element transfer between slow and fast stores. It is not a GPU DRAM counter. `ceil(N/Br)` is the query-tile count and `ceil(N/Bc)` is the key/value-tile count. Every reviewed combination divides evenly so that learners can first audit the core ledger.
+
+## Three stages
+
+1. **Score:** the materialized path reads Q/K and writes the full `S=QK^T/sqrt(d)`; the tiled path forms only a `Br×Bc` temporary score tile.
+2. **Normalize:** the materialized path reads S three times for stable softmax and writes P; the tiled path merges online `(m,l)` state without moving S/P across this boundary.
+3. **Value:** the materialized path reads P/V and writes O; the tiled path rereads V per query tile, retains accumulator `a`, and finally writes `O=a/l`.
+
+An exact tiled recurrence actually interleaves normalization and value aggregation. The stage selector is a conceptual ledger, not a claim about three separate kernels or any backend dispatch. Exact means equivalent to dense attention over real arithmetic, not floating-point bitwise identity.
+
+## IO ledger
+
+For self-attention shape `N,d` and `Tr=ceil(N/Br)`, full S/P materialization plus stable three-pass normalization counts `4Nd + 6N^2` elements. The query-outer tiled schedule counts `2Nd + 2TrNd`: Q and O cross once, K and V cross `Tr` times, and full S/P is never materialized.
+
+The default `N=8,d=4,Br=Bc=4` yields `512 elements = 2048 B` for the materialized path, `192 elements = 768 B` for the tiled path, and a `1280 B` static-analysis difference. The normalize card's `0 B` means no slow-store transfer is counted for that stage; it does not mean zero exponent, max, sum, or rescale work.
+
+A larger query tile reduces K/V replay in this simplified ledger, but the model has no fast-store capacity, register pressure, occupancy, parallelism, or spill term. It therefore cannot declare `8×8` faster or better.
+
+## Static fallback
+
+The purpose-built inline SVG presents three stage columns and both data paths together. It is not copied, traced, or adapted from a paper figure. The server-rendered table for all four shape/tile selections includes query/key tile counts, temporary-score-tile count, and both path totals. Content remains at a 390-pixel viewport, under reduced motion and forced colors, and in print. Text, borders, and numbers carry meaning beyond color.
+
+## Evidence boundary
+
+VIS18 publishes deterministic browser arithmetic and static analysis only. It compiles and executes no CUDA, queries no GPU, reads no profiler, and observes no actual transferred bytes. It publishes no timing, bandwidth, bottleneck, backend, speedup, or winner. All four evidence arrays are empty, so it grants no Compile-Checked, Community-Observed, or Runtime-Verified status.
+
+## Sources
+
+Vaswani et al. support the 2017 scaled dot-product attention decomposition. Milakov and Gimelshein support the online normalizer. The FlashAttention paper supports only IO-aware exact-attention history, recurrence, and its two-level model, not any current backend, dtype, or availability claim. CUDA C++ Best Practices Guide v13.3 distinguishes requested/effective from actual transferred traffic. All four primary or owner coordinates were accessed on **2026-09-03**. Every word, number, layout, SVG shape, and interaction here is original to this site.

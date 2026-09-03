@@ -1,0 +1,203 @@
+---
+title: 'A10: Numerically Stable Softmax, Online Normalization, and Fusion Boundaries'
+description: Derive max-shifted and online softmax while making finite-value policy, pass count, logical memory traffic, and the non-evidentiary boundary of fusion explicit.
+pairId: a10
+counterpart: /algorithms/numerically-stable-softmax/
+factCheckDate: '2026-09-03'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - softmax-contract
+  - max-shift
+  - online-normalizer
+  - traffic-ledger
+  - fusion-boundary
+  - numerical-verification
+  - production-boundary
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: A10
+prerequisites:
+  - A02
+  - M02
+  - M03
+relatedUnits:
+  - A11
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'Online normalizer calculation for softmax'
+    url: 'https://arxiv.org/abs/1805.02867'
+    version: 'Milakov and Gimelshein; arXiv:1805.02867v2; 2018-07-28'
+    platform: 'Original stable and online normalizer algorithms and memory-access motivation'
+    accessDate: '2026-09-03'
+  - title: 'Accurate Computation of the Log-Sum-Exp and Softmax Functions'
+    url: 'https://arxiv.org/abs/1909.03469'
+    version: 'Blanchard, Higham, and Higham; arXiv:1909.03469; 2019'
+    platform: 'Original floating-point analysis of shifted log-sum-exp and softmax formulas'
+    accessDate: '2026-09-03'
+  - title: 'CUDA Programming Guide v13.3 - Floating-Point Computation'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#associativity'
+    version: 'CUDA Programming Guide v13.3; last updated 2026-05-27'
+    platform: 'Current floating-point nonassociativity and operation-order boundary'
+    accessDate: '2026-09-03'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Current requested-versus-transferred traffic and effective-bandwidth boundary'
+    accessDate: '2026-09-03'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: a10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/algorithms/numerically-stable-softmax/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,softmax-contract,max-shift,online-normalizer,traffic-ledger,fusion-boundary,numerical-verification,production-boundary,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: A10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,M02,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: A11 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '4' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '2018,2019,13.3' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/algorithms/numerically-stable-softmax/" lang="zh-CN">阅读中文对应页</a>
+
+[Softmax (TERM-166)](/en/glossary/#term-166) normalizes a row of logits into nonnegative weights that sum to one. This Learning Unit begins with equivalent transformations, reduction state, and data movement rather than a framework call. It derives [numerically stable softmax (TERM-167)](/en/glossary/#term-167) and [online normalization (TERM-168)](/en/glossary/#term-168).
+
+## What you should be able to do
+
+- Prove that subtracting a common constant preserves mathematical softmax and explain why the row maximum is chosen.
+- Distinguish exponential-overflow avoidance, residual underflow, floating-point error, and bitwise identity.
+- Write the online maximum/normalizer recurrence and its invariant.
+- Account for logical element traffic pass by pass for stable three-pass and online-plus-output schedules.
+- State assumptions, costs, and evidence boundaries when fusion removes an intermediate instead of inferring speedup.
+
+## Prerequisites
+
+The curriculum graph fixes the prerequisites in this order: [A02: Reduction](/en/algorithms/multi-stage-reduction/), [M02: Coalescing and Transactions](/en/memory/coalescing-transactions/), and [M03: Shared-Memory Tiling](/en/memory/shared-memory-tiling/), or `A02, M02, M03`. A02 supplies max/sum reductions and operation-order reasoning. M02 supplies requested/transferred boundaries. M03 supplies fast-store residency and reuse vocabulary.
+
+## Softmax contract
+
+For a nonempty vector of finite real logits `x`, define:
+
+`p_i = exp(x_i) / sum_j exp(x_j)`
+
+Every `p_i >= 0`, and `sum_i p_i = 1` in real arithmetic. This teaching contract first restricts the domain to finite inputs. NaN, positive or negative infinity, and all-masked-row policies must be declared by a caller; ordinary comparisons must not decide them accidentally.
+
+Softmax is invariant under a common shift. For every constant `c`:
+
+`exp(x_i - c) / sum_j exp(x_j - c) = exp(x_i) / sum_j exp(x_j)`
+
+The numerator and denominator share a factor `exp(-c)`, which cancels to recover the original expression.
+
+## Max shift: avoid overflow without promising universal exactness
+
+Choose `m = max_j x_j`, then compute:
+
+`p_i = exp(x_i - m) / l, where l = sum_j exp(x_j - m)`
+
+Every `x_i-m <= 0`, so the shifted exponentials cannot overflow from a large positive exponent. At least one exponential is 1, so finite inputs satisfy `1 <= l <= n` in real arithmetic. Very small terms can still underflow to zero, sum/reduction order can still change low bits, and the stable form is not bitwise exact.
+
+For `x = [1000, 1001, 1002, 1003]`, `m=1003`; the shifted exponentials are approximately `[0.04978707, 0.13533528, 0.36787944, 1]` and `l=1.55300179`, giving:
+
+`p ~= [0.03205860, 0.08714432, 0.23688282, 0.64391426]`
+
+Directly evaluating `exp(1003)` is not an acceptable baseline. These values are a rounded real-arithmetic reference, not a GPU observation.
+
+## Online normalizer: combine maximum and sum in one scan
+
+Start with `m_0 = -infinity, l_0 = 0`. When value `j` arrives, update:
+
+`m_j = max(m_{j-1}, x_j)`
+
+`l_j = l_{j-1} * exp(m_{j-1} - m_j) + exp(x_j - m_j)`
+
+The recurrence preserves `m_j = max_{k<=j} x_k` and `l_j = sum_{k<=j} exp(x_k-m_j)`. When a new maximum appears, `exp(m_{j-1}-m_j)` rescales the old denominator into the new reference frame instead of discarding prior terms.
+
+For the same fixture, `(m_j,l_j)` is approximately `(1000,1)`, `(1001,1.36787944)`, `(1002,1.50321472)`, and `(1003,1.55300179)`. Online state combines maximum and denominator into one input pass. If every `p_i` must be emitted, another input read is still required unless logits remain in fast storage.
+
+## Memory-traffic ledger
+
+Declare the boundary first: separate FP32 input and output at 4 bytes per element; scalar max/sum state retained in fast storage; no exponential array stored; cache hits, cache lines, write allocation, and transaction overfetch excluded from the logical element count.
+
+| schedule | input reads | output writes | logical total |
+| --- | ---: | ---: | ---: |
+| stable three-pass: max, sum, output | `3n` | `n` | `4n elements` |
+| online normalizer plus output pass | `2n` | `n` | `3n elements` |
+
+For `n=4`, the schedules count 64 B and 48 B. The 16 B difference is static analysis, not actual DRAM bytes, elapsed time, or speedup. If logits reside in cache, state spills, or an implementation stores another intermediate, rewrite the ledger.
+
+## Fusion boundary: remove one write and later read
+
+Suppose intermediate `Z` between adjacent stages has `M` elements of `b` bytes each. If a fused consumer can use Z in the declared fast store, Z has no other consumer, Z need not persist, and Z does not spill, then avoiding materialization removes one write and one later read:
+
+`traffic removed = 2M elements = 2Mb bytes`
+
+Fusion preserves mathematical softmax but can change registers, shared-memory footprint, occupancy, parallelism, instruction mix, compilation, and scheduling. `2Mb` supports only “these requests leave this logical ledger,” not “execution must be faster.” If another consumer needs the probabilities or fused state spills to slow storage, those terms cannot be removed.
+
+## Numerical verification
+
+A credible acceptance packet includes an independent high-precision reference; a finite/non-finite policy; a predeclared absolute-plus-relative tolerance; `p_i >= 0` and sum-near-one invariants; a large-offset fixture; and a shift-invariance check between `softmax(x)` and `softmax(x+c)`. Reduction order, approximate exponential, and FMA choices can change low bits, so bitwise equality is not a general FP32 criterion.
+
+Max shifting addresses an overflow path. It does not automatically settle underflow, NaN propagation, all-masked rows, or arbitrary precision requirements. Each extension needs its own input domain and acceptance contract.
+
+## Production boundary
+
+A10 establishes a backend-independent algorithm and traffic contract. Later curriculum material owns exact framework, cuDNN, and Triton version, dtype, mask, dispatch, compilation, and hardware gates. This page calls none of those APIs, claims no current backend availability, and projects no paper result onto current software.
+
+## Evidence boundary
+
+All four A10 evidence arrays are empty. A hand reference, host arithmetic, source review, and static traffic ledger are not CUDA compilation or runtime evidence. No GPU output, actual traffic, timing, bandwidth, bottleneck, speedup, or winner is recorded.
+
+## Retrieval check
+
+1. Why does subtracting `m` preserve mathematical softmax, and why is the maximum usually chosen instead of an arbitrary constant?
+2. Which overflow path does max shifting avoid, and why can underflow still occur?
+3. Why does the online recurrence multiply old `l` by `exp(m_old-m_new)`?
+4. Why can an online normalizer still need a second input pass to emit every probability?
+5. Which reads and writes produce `4n elements` and `3n elements`?
+6. After removing `2Mb` logical bytes, which observations are still missing from a performance claim?
+
+## Continue with practice
+
+- Complete the [A10 Exercises](/en/algorithms/numerically-stable-softmax/exercises/), then inspect the [separate solutions](/en/algorithms/numerically-stable-softmax/solutions/).
+- Audit stable and online traffic in [Practice Bank PB-R3-013](/en/practice/#pb-r3-013).
+- Revisit [TERM-166](/en/glossary/#term-166), [TERM-167](/en/glossary/#term-167), and [TERM-168](/en/glossary/#term-168), then continue to [A11](/en/algorithms/attention-as-an-io-problem/).
+
+## Sources and review
+
+Milakov and Gimelshein supply the original online-normalizer recurrence and memory-access motivation. Blanchard, Higham, and Higham supply floating-point analysis of shifted formulas. CUDA Programming Guide v13.3 bounds nonassociativity and operation order; CUDA C++ Best Practices Guide v13.3 separates requested/effective from actual transferred traffic. The Context7 NVIDIA index was used only to cross-check retrieval of current owner coordinates on 2026-09-03; the exact paper and owner URLs above remain publication authority. No paper or NVIDIA code, figure, table, benchmark, or result is copied.
+
+**Fact checked and sources accessed: 2026-09-03.**

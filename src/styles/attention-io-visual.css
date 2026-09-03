@@ -1,0 +1,509 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+.attention-io-visual {
+  --attention-line: color-mix(in srgb, var(--theme-accent) 38%, var(--sl-color-gray-5));
+  --attention-panel: color-mix(in srgb, var(--theme-canvas) 93%, var(--theme-accent) 7%);
+  --attention-materialized: color-mix(in srgb, var(--theme-signal) 18%, var(--theme-canvas));
+  --attention-tiled: color-mix(in srgb, var(--theme-accent) 18%, var(--theme-canvas));
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.attention-io-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(9rem, 1fr)) auto;
+  align-items: end;
+  margin: 0;
+}
+
+.attention-io-controls legend {
+  padding-inline: 0.35rem;
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  font-weight: 800;
+}
+
+.attention-io-controls label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-xs);
+}
+
+.attention-io-controls select {
+  width: 100%;
+  min-width: 0;
+}
+
+.attention-io-controls :focus-visible,
+.attention-diagram-scroll:focus-visible,
+.attention-ledger-scroll:focus-visible {
+  outline: 3px solid var(--theme-signal);
+  outline-offset: 2px;
+}
+
+.attention-io-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-inline-start: 0.3rem solid var(--theme-signal);
+  background: var(--attention-materialized);
+  font-size: var(--sl-text-sm);
+}
+
+.attention-live-workbench {
+  display: grid;
+  min-width: 0;
+  gap: 0.9rem;
+  padding: clamp(0.75rem, 2vw, 1.05rem);
+  border: 2px solid var(--theme-accent-strong);
+  background: var(--sl-color-bg);
+}
+
+.attention-live-workbench > header {
+  display: grid;
+  gap: 0.25rem;
+  padding-block-end: 0.65rem;
+  border-block-end: 1px solid var(--attention-line);
+}
+
+.attention-live-workbench h3,
+.attention-live-workbench h4,
+.attention-live-workbench p,
+.attention-path dl,
+.attention-analysis p {
+  margin: 0;
+}
+
+.attention-live-workbench > header p {
+  color: var(--sl-color-gray-2);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-sm);
+}
+
+.attention-io-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.attention-io-metrics > div {
+  min-width: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--attention-line);
+  background: var(--attention-panel);
+}
+
+.attention-io-metrics dt,
+.attention-path dt {
+  color: var(--sl-color-gray-2);
+  font-size: 0.68rem;
+}
+
+.attention-io-metrics dd {
+  margin: 0.2rem 0 0;
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-sm);
+  font-weight: 800;
+}
+
+.attention-stage-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attention-stage-track li {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+  padding: 0.65rem 0.7rem 0.85rem;
+  border: 1px dashed var(--attention-line);
+  background: var(--attention-panel);
+  overflow-wrap: anywhere;
+}
+
+.attention-stage-track li::after {
+  position: absolute;
+  inset-inline: 0.7rem;
+  inset-block-end: 0.35rem;
+  height: 0.18rem;
+  background: var(--attention-line);
+  content: '';
+}
+
+.attention-stage-track li[aria-current='step'] {
+  border: 3px solid var(--theme-signal);
+  background: var(--attention-materialized);
+}
+
+.attention-stage-track li[aria-current='step']::after {
+  background: var(--theme-signal);
+}
+
+.attention-stage-track span {
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.attention-stage-track strong {
+  color: var(--theme-ink);
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.attention-paths {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.attention-path {
+  display: grid;
+  min-width: 0;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  border: 1px solid var(--attention-line);
+  border-block-start-width: 0.4rem;
+  overflow-wrap: anywhere;
+}
+
+.attention-path-materialized {
+  border-block-start-color: var(--theme-signal);
+  background: var(--attention-materialized);
+}
+
+.attention-path-tiled {
+  border-block-start-color: var(--theme-accent-strong);
+  background: var(--attention-tiled);
+}
+
+.attention-path header {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.attention-path header span {
+  color: var(--theme-ink);
+  font-family: var(--sl-font-mono);
+  font-size: 0.68rem;
+}
+
+.attention-path > p {
+  min-height: 4.5rem;
+  color: var(--theme-ink);
+  font-size: var(--sl-text-sm);
+}
+
+.attention-path dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.attention-path dl > div {
+  padding: 0.5rem;
+  border: 1px solid var(--attention-line);
+  background: var(--sl-color-bg);
+}
+
+.attention-path dd {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.2rem 0 0;
+}
+
+.attention-path dd strong,
+.attention-analysis strong {
+  color: var(--theme-accent-strong);
+  font-family: var(--sl-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.attention-path dd span {
+  color: var(--sl-color-gray-2);
+  font-size: 0.68rem;
+}
+
+.attention-analysis {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+  border: 1px solid var(--attention-line);
+  border-inline-start: 0.35rem solid var(--theme-signal);
+  background: var(--attention-panel);
+  font-size: var(--sl-text-sm);
+}
+
+.attention-analysis p:last-child {
+  padding-block-start: 0.35rem;
+  border-block-start: 1px dashed var(--attention-line);
+  color: var(--sl-color-gray-2);
+}
+
+.attention-diagram-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.attention-scroll-hint {
+  margin: 0;
+  color: var(--sl-color-gray-2);
+  font-family: var(--sl-font-mono);
+  font-size: 0.7rem;
+}
+
+.attention-static svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--attention-line);
+  background: var(--sl-color-bg);
+}
+
+.attention-diagram-rail {
+  fill: none;
+  stroke-width: 4;
+}
+
+.attention-diagram-rail-materialized {
+  stroke: var(--theme-signal);
+  stroke-dasharray: 8 6;
+}
+
+.attention-diagram-rail-tiled {
+  stroke: var(--theme-accent-strong);
+}
+
+.attention-diagram-node {
+  stroke: var(--attention-line);
+  stroke-width: 2;
+}
+
+.attention-diagram-node-materialized {
+  fill: var(--attention-materialized);
+}
+
+.attention-diagram-node-tiled {
+  fill: var(--attention-tiled);
+}
+
+.attention-diagram-path-label,
+.attention-diagram-stage-name,
+.attention-diagram-node-title,
+.attention-diagram-byte,
+.attention-diagram-total {
+  fill: var(--theme-ink);
+  font-family: var(--sl-font-mono);
+}
+
+.attention-diagram-path-label,
+.attention-diagram-stage-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.attention-diagram-node-title {
+  font-size: 13px;
+}
+
+.attention-diagram-byte {
+  fill: var(--theme-accent-strong);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.attention-diagram-total {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.attention-ledger-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.attention-ledger-table {
+  width: 100%;
+  min-width: 42rem;
+  margin: 0;
+  border-collapse: collapse;
+  background: var(--sl-color-bg);
+  font-family: var(--sl-font-mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.attention-ledger-table th,
+.attention-ledger-table td {
+  padding: 0.5rem;
+  border: 1px solid var(--attention-line);
+  text-align: end;
+}
+
+.attention-ledger-table th:first-child,
+.attention-ledger-table td:first-child,
+.attention-ledger-table th:nth-child(2),
+.attention-ledger-table td:nth-child(2) {
+  text-align: start;
+}
+
+.attention-ledger-table thead {
+  background: var(--attention-panel);
+  color: var(--theme-accent-strong);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .attention-stage-track li,
+  .attention-path {
+    transition: border-color 120ms linear, background-color 120ms linear;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attention-io-visual,
+  .attention-io-visual * {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .attention-io-status,
+  .attention-live-workbench,
+  .attention-io-metrics > div,
+  .attention-stage-track li,
+  .attention-path,
+  .attention-path dl > div,
+  .attention-analysis,
+  .attention-static svg,
+  .attention-ledger-table th,
+  .attention-ledger-table td {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  .attention-stage-track li[aria-current='step'] {
+    border: 3px solid Highlight;
+  }
+
+  .attention-diagram-rail,
+  .attention-diagram-node {
+    stroke: CanvasText;
+  }
+
+  .attention-diagram-node {
+    fill: Canvas;
+  }
+
+  .attention-diagram-path-label,
+  .attention-diagram-stage-name,
+  .attention-diagram-node-title,
+  .attention-diagram-byte,
+  .attention-diagram-total {
+    fill: CanvasText;
+  }
+}
+
+@media (max-width: 56rem) {
+  .attention-io-controls,
+  .attention-io-metrics,
+  .attention-paths {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .attention-io-controls button {
+    width: 100%;
+  }
+
+  .attention-path > p {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .attention-live-workbench,
+  .attention-path,
+  .attention-analysis {
+    padding: 0.55rem;
+  }
+
+  .attention-stage-track,
+  .attention-path dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .attention-diagram-path-label,
+  .attention-diagram-stage-name {
+    font-size: 16px;
+  }
+
+  .attention-static svg {
+    width: 42rem;
+    max-width: none;
+  }
+}
+
+@media print {
+  .attention-io-controls,
+  .attention-live-workbench {
+    display: none !important;
+  }
+
+  .attention-static {
+    display: grid !important;
+  }
+
+  .attention-static svg,
+  .attention-ledger-table th,
+  .attention-ledger-table td {
+    border-color: #777;
+    background: #fff;
+    color: #222;
+    box-shadow: none;
+  }
+
+  .attention-diagram-rail,
+  .attention-diagram-node {
+    stroke: #222;
+  }
+
+  .attention-diagram-node {
+    fill: #fff;
+  }
+
+  .attention-diagram-path-label,
+  .attention-diagram-stage-name,
+  .attention-diagram-node-title,
+  .attention-diagram-byte,
+  .attention-diagram-total {
+    fill: #222;
+  }
+
+  .attention-ledger-table {
+    min-width: 0;
+    font-size: 0.58rem;
+  }
+
+  .attention-static svg {
+    width: 100%;
+    max-width: 100%;
+  }
+}

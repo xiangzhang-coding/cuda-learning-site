@@ -43,6 +43,7 @@ const representativeThemeRoutes = [
   '/en/visuals/gemm-tiling-hierarchy/',
   '/en/visuals/roofline/',
   '/en/visuals/nsight-systems-versus-nsight-compute/',
+  '/en/visuals/attention-memory-traffic/',
 ] as const;
 
 const releaseVisualStateScans = [
@@ -142,6 +143,18 @@ const releaseVisualStateScans = [
       await decision.locator('[data-profiler-symptom]').selectOption('selected-kernel-memory-question');
       await expect(decision).toHaveAttribute('data-recommended-tool', 'nsight-compute');
       await expect(decision.locator('[data-tool-card="nsight-compute"]')).toHaveAttribute('aria-current', 'true');
+    },
+  },
+  {
+    theme: 'blueprint',
+    label: 'VIS18 tiled attention normalization state',
+    route: '/en/visuals/attention-memory-traffic/',
+    prepare: async (page: Page) => {
+      const attention = page.locator('cuda-attention-io-explorer[data-visual-id="VIS18"]');
+      await attention.locator('[data-attention-sequence-shape]').selectOption('16x8');
+      await attention.locator('[data-attention-tile-shape]').selectOption('8x8');
+      await attention.locator('[data-attention-stage-select]').selectOption('normalize');
+      await expect(attention).toHaveAttribute('data-attention-stage', 'normalize');
     },
   },
 ] as const;

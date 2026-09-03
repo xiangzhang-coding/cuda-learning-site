@@ -86,7 +86,7 @@ const r2LearningUnits = [
 ] as const;
 const currentLearningUnits = [
   ...r2LearningUnits.slice(0, 44),
-  'A14',
+  'A10', 'A11', 'A14',
   ...r2LearningUnits.slice(44),
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
@@ -102,7 +102,7 @@ const r2VisualExplainers = [
 ] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -116,10 +116,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 10 },
-  { suffix: 'practice/', count: 62 },
-  { suffix: 'visuals/', count: 18 },
-  { suffix: 'glossary/', count: 165 },
-  { suffix: 'sources-and-versions/', count: 72 },
+  { suffix: 'practice/', count: 64 },
+  { suffix: 'visuals/', count: 19 },
+  { suffix: 'glossary/', count: 170 },
+  { suffix: 'sources-and-versions/', count: 74 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -224,24 +224,25 @@ test('serves the exact R2 release and current publication with production canoni
       'Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.',
       'Q12 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX11 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS10, and expected-only fixture add no runtime or performance evidence, and every stage result remains expected and unrecorded.',
       'Q13 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX15 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS12, and expected-only fixture add no runtime or performance evidence, every stage result remains expected and unrecorded, and no cuBLAS or Tensor Core result is published.',
+      'A10 and A11 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Their numerical fixtures and traffic ledgers are host arithmetic and static analysis only. VIS18 executes no CUDA, queries no GPU, observes no actual traffic, and grants no Evidence Status; no backend, dtype, timing, bandwidth, bottleneck, speedup, or winner is published.',
       'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
       'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'Q06-Q13, A14, LAB06, LAB08-LAB10, VIS13, and VIS14 are incremental R3 publications; the aggregate R3 release review remains pending.',
+      'Q06-Q13, A10, A11, A14, LAB06, LAB08-LAB10, VIS13, VIS14, and VIS18 are incremental R3 publications; the aggregate R3 release review remains pending.',
       'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 219,
-    sourceRoutes: 438,
+    publicationPairs: 226,
+    sourceRoutes: 452,
     learningUnits: currentLearningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 62,
-    glossaryTerms: 165,
-    sourceRecords: 72,
+    practiceBankEntries: 64,
+    glossaryTerms: 170,
+    sourceRecords: 74,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -325,7 +326,7 @@ test('serves the exact R2 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(438);
+  expect(publishedRoutes).toHaveLength(452);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -336,8 +337,8 @@ test('serves the exact R2 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/219.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/438.*source routes/);
+    await expect(page.locator('main')).toContainText(/226.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/452.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -347,7 +348,7 @@ test('serves the exact R2 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(327);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(337);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -432,6 +433,28 @@ test('serves the exact R2 release and current publication with production canoni
       const prefix = route.startsWith('/en/') ? '/en/' : '/';
       await expect(page.locator(`main a[href="${prefix}${exampleSuffix}"]`).first()).toBeVisible();
       await expect(page.locator(`main a[href="${prefix}${visualSuffix}"]`).first()).toBeVisible();
+    }
+  }
+
+  for (const { suffix, unitId, prerequisites } of [
+    { suffix: 'algorithms/numerically-stable-softmax/', unitId: 'A10', prerequisites: 'A02,M02,M03' },
+    { suffix: 'algorithms/attention-as-an-io-problem/', unitId: 'A11', prerequisites: 'A08,A10' },
+    { suffix: 'visuals/attention-memory-traffic/', unitId: 'VIS18', prerequisites: 'A11' },
+  ] as const) {
+    for (const route of localizedRoutes(suffix)) {
+      await page.goto(route);
+      await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', unitId);
+      await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute('content', prerequisites);
+      await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+      if (unitId === 'VIS18') {
+        const visual = page.locator('cuda-attention-io-explorer[data-visual-id="VIS18"]');
+        await expect(visual).toHaveAttribute('data-ready', 'true');
+        await expect(visual).toHaveAttribute('data-materialized-bytes', '2048');
+        await expect(visual).toHaveAttribute('data-tiled-bytes', '768');
+        await expect(visual.locator('[data-static-ledger]')).toHaveCount(4);
+      }
     }
   }
 
