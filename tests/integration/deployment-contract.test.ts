@@ -125,11 +125,24 @@ describe('Cloudflare assets-only deployment contract', () => {
       publicationId: 'current',
       releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
       scope: {
-        publicationPairs: 232,
-        sourceRoutes: 464,
-        practiceBankEntries: 66,
-        glossaryTerms: 176,
-        sourceRecords: 76,
+        publicationPairs: 238,
+        sourceRoutes: 476,
+        exerciseSetPublicationPairs: 63,
+        solutionSetPublicationPairs: 63,
+        practiceBankEntries: 68,
+        glossaryTerms: 182,
+        sourceRecords: 78,
+      },
+      compatibility: {
+        componentBoundaries: {
+          cccl: {
+            version: '3.4.2',
+            selection: 'independent',
+            commit: 'd36012203ef73ac7f966e848dd88482273e91e02',
+            toolkitLanes: ['cuda-12.9', 'cuda-13.3'],
+            excludedToolkitLanes: ['cuda-11.8'],
+          },
+        },
       },
       evidence: {
         noCompileCheckedClaim: expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10']),
@@ -143,6 +156,7 @@ describe('Cloudflare assets-only deployment contract', () => {
           '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
         ]),
         capturedProfilerReports: [],
+        r4EvidenceNeutralLearningUnits: ['L01', 'L02'],
       },
     });
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('Q11');
@@ -153,8 +167,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('Q13');
     expect(publication.evidence.noCompileCheckedClaim).toContain('LAB10');
     expect(publication.evidence.pendingHardwareVerification).toContain('LAB10');
-    expect(publication.scope.learningUnits).toHaveLength(62);
-    expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13']));
+    expect(publication.scope.learningUnits).toHaveLength(64);
+    expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02']));
     expect(publication.scope.labs).toHaveLength(10);
     expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10']));
     expect(publication.scope.visualExplainers).toHaveLength(19);
@@ -165,12 +179,13 @@ describe('Cloudflare assets-only deployment contract', () => {
       publication.scope.visualExplainers.length +
       publication.scope.glossaryTerms +
       publication.scope.sourceRecords,
-    ).toBe(347);
+    ).toBe(357);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'The five profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
-      'L01-L13 production-library Learning Units and all R4 or later curriculum material are outside this release.',
+      'L01-L02 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, and static decision or iterator records provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L02 are published in the rolling R4 surface; L03-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]));
     expect(publication.knownLimitations).not.toContain(
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
@@ -208,17 +223,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
     expect(deployment).toContain('dist/publication.json');
     expect(deployment).toContain('62 Learning Units');
+    expect(deployment).toContain('64 Learning Units');
     expect(deployment).toContain('sixteen Runnable Examples EX01-EX16');
     expect(deployment).toContain('ten Labs LAB01-LAB10');
     expect(deployment).toContain('nineteen Visual Explainers');
-    expect(deployment).toContain('66 Practice Bank entries, 176 Glossary terms, and 76 source records');
-    expect(deployment).toContain('five catalog groups total 347 records');
-    expect(deployment).toContain('232 Publication Pairs and 464 source routes');
-    expect(deployment).toContain('61 Exercise-set Publication Pairs and 61 solution-set Publication Pairs');
+    expect(deployment).toContain('68 Practice Bank entries, 182 Glossary terms, 78 source records');
+    expect(deployment).toContain('357 catalog records');
+    expect(deployment).toContain('238 Publication Pairs, and 476 source routes');
+    expect(deployment).toContain('63 Exercise-set and 63 solution-set Publication Pairs');
     expect(deployment).toContain('10 Nsight report-analysis Practice Bank entries');
     expect(deployment).toContain('Q01-Q13');
     expect(deployment).toContain('LAB09 and LAB10 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification.');
-    expect(deployment).toContain('Q06-Q13 and A10-A14');
+    expect(deployment).toContain('Q06-Q13, A10-A14, and current L01-L02');
     expect(deployment).toContain('It grants no Evidence Status and summarizes the linked EX14/LAB10 subjects, whose compilation and recorded-observation arrays are empty and whose runtime remains Pending Hardware Verification.');
     expect(deployment).toContain('VIS13');
     expect(deployment).toMatch(/LAB12 waits for L06 after Q13 publication/i);
@@ -235,6 +251,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/issue #29/i);
     expect(deployment).toMatch(/issue #30/i);
     expect(deployment).toMatch(/issue #31/i);
+    expect(deployment).toMatch(/issue #33/i);
     expect(deployment).toMatch(/administrator-approved non-admin performance-counter access/i);
     expect(deployment).toMatch(/denied or unavailable metric/i);
     expect(deployment).toContain('npm run test:release-smoke');

@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: One hundred seventy-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred eighty-two published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-09-04'
@@ -1632,6 +1632,60 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/) and [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/).
 - **Version note:** Workspace ownership, size, lifetime, and active preprocessing state bind to a pinned cuSPARSE contract. A12 and A13 allocate or measure none of it.
 
+<span id="term-177" class="resource-target" aria-hidden="true"></span>
+
+### production library · 生产库
+
+- **Definition:** A production library exposes a broad domain operation whose implementation and release lifecycle are maintained by an external owner, while the caller owns integration, complete operation semantics, validation, and evidence.
+- **Avoid:** Automatically fastest code, maintenance-free dependency, synonym for any reusable function.
+- **Related resources:** [L01](/en/libraries/library-primitive-dsl-custom-kernel/) and [PB-R4-001](/en/practice/#pb-r4-001).
+- **Version note:** A library decision records the exact component independently from the Toolkit label. API presence or owner testing is not local build, runtime, or performance evidence.
+
+<span id="term-178" class="resource-target" aria-hidden="true"></span>
+
+### reusable primitive · 可复用原语
+
+- **Definition:** A reusable primitive is a focused composable operation, such as reduction, scan, selection, or sorting, whose surrounding storage, stream, lifetime, and end-to-end composition remain caller responsibilities.
+- **Avoid:** Complete production application, ownerless building block, guaranteed replacement for custom code.
+- **Related resources:** [L01](/en/libraries/library-primitive-dsl-custom-kernel/) and [L02](/en/libraries/thrust-algorithm-vocabulary/).
+- **Version note:** L01/L02 use independently pinned CCCL v3.4.2 only for Toolkit 12.9.2 and 13.3.1 evaluation; CUDA 11.8 needs another reviewed coordinate.
+
+<span id="term-179" class="resource-target" aria-hidden="true"></span>
+
+### domain-specific language (DSL) · 领域特定语言
+
+- **Definition:** A domain-specific language (DSL) describes a constrained problem family so a compiler or generator can select or create an implementation; the application team still owns the specification, toolchain pin, generated-artifact acceptance, cache, fallback, and upgrade policy.
+- **Avoid:** General-purpose CUDA C++, automatically correct generated code, implementation without an owner.
+- **Related resources:** [L01](/en/libraries/library-primitive-dsl-custom-kernel/) and [PB-R4-001](/en/practice/#pb-r4-001).
+- **Version note:** Availability, accepted language, generated behavior, and supported deployment rows bind to an exact DSL/compiler release and require separate evidence.
+
+<span id="term-180" class="resource-target" aria-hidden="true"></span>
+
+### custom kernel · 自定义内核
+
+- **Definition:** A custom kernel is a CUDA kernel whose source, correctness, portability, tuning, regression response, handoff, and removal are owned by the application team.
+- **Avoid:** Educational kernel promoted by default, automatically faster code, one-time implementation cost.
+- **Related resources:** [L01](/en/libraries/library-primitive-dsl-custom-kernel/) and [PB-R4-001](/en/practice/#pb-r4-001).
+- **Version note:** A production rationale requires an unmet semantic or deployment contract, or a correctness-qualified material gap measured on the target workload. Source existence alone supplies neither.
+
+<span id="term-181" class="resource-target" aria-hidden="true"></span>
+
+### execution policy · 执行策略
+
+- **Definition:** In Thrust, an execution policy selects a sequential, configured host, or configured device system; a CUDA policy can also bind work to a stream.
+- **Avoid:** Pointer validator, automatic memory migration, guarantee that return means asynchronous work completed.
+- **Related resources:** [M07](/en/memory/stream-ordering/) and [L02](/en/libraries/thrust-algorithm-vocabulary/).
+- **Version note:** At CCCL v3.4.2, `par_nosync` permits optional synchronization to be omitted but does not guarantee that no synchronization occurs. Extents, accessibility, lifetimes, and completion remain caller contracts.
+
+<span id="term-182" class="resource-target" aria-hidden="true"></span>
+
+### fancy iterator · 花式迭代器
+
+- **Definition:** A fancy iterator represents a generated, transformed, zipped, or otherwise virtual range through iterator operations rather than requiring one stored array for each logical range.
+- **Avoid:** Guaranteed fused kernel, range that stops at its shortest zipped component, automatic performance improvement.
+- **Related resources:** [L02](/en/libraries/thrust-algorithm-vocabulary/) and [PB-R4-002](/en/practice/#pb-r4-002).
+- **Version note:** CCCL v3.4.2 composition requires explicit extent, system, value/reference, and lifetime contracts. Current `cuda::` counting, transform, and zip forms are preferred where stated; not every legacy Thrust fancy iterator is deprecated.
+
 ## Maintenance rule
 
-TERM-001 through TERM-170 retain their item-level review records. New TERM-171 through TERM-176 and the complete 176-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-04**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New entries are static definitions only: no CUDA or cuSPARSE ran, and no workspace, preprocessing, determinism, structured-sparsity, actual-traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-176 retain their item-level review records. New TERM-177 through TERM-182 and the complete 182-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-04**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New entries are static definitions only: no CUDA, CCCL, Thrust, DSL, or custom kernel ran, and no local API availability, synchronization observation, fusion, traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.

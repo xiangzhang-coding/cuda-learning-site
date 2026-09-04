@@ -1,0 +1,209 @@
+---
+title: 'L01：在生产库、可复用原语、DSL 与自定义内核之间做选择'
+description: 在承担实现所有权之前，用 correctness-first 决策包比较生产库、可复用原语、领域特定语言与自定义内核。
+pairId: l01
+counterpart: /en/libraries/library-primitive-dsl-custom-kernel/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - decision-first
+  - option-boundaries
+  - decision-table
+  - correctness
+  - portability-versioning
+  - performance-evidence
+  - ownership
+  - worked-scenario
+  - cccl-coordinate
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L01
+prerequisites:
+  - A02
+  - A03
+  - A08
+  - Q06
+relatedUnits:
+  - L02
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - APOD'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA-capable systems；correctness-qualified assessment、optimization 与 deployment process'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2；commit d36012203ef73ac7f966e848dd88482273e91e02；2026-08-05 发布'
+    platform: '独立选择的 CCCL release coordinate；release metadata 不是本站 build/runtime evidence'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 Toolkit compatibility and installation boundary'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2；tagged README'
+    platform: 'Latest-patch CUDA 12.x/13.x support policy；此 independent pin 排除 CUDA 11.8'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 CUB device-wide primitive index'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst'
+    version: 'CCCL v3.4.2'
+    platform: 'Reusable device-wide primitive scope 的 exact tagged owner index'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 aggregate license'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE'
+    version: 'CCCL v3.4.2'
+    platform: 'Aggregate license map；任何 adaptation 仍需检查 exact file SPDX 与 embedded notice'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l01 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/library-primitive-dsl-custom-kernel/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,decision-first,option-boundaries,decision-table,correctness,portability-versioning,performance-evidence,ownership,worked-scenario,cccl-coordinate,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,A03,A08,Q06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L02 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,CCCL-v3.4.2' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/library-primitive-dsl-custom-kernel/" lang="en">Read the English counterpart</a>
+
+[生产库（production library，TERM-177）](/glossary/#term-177)承担宽领域合同；[可复用原语（reusable primitive，TERM-178）](/glossary/#term-178)承担一个可组合操作；[领域特定语言（domain-specific language，DSL，TERM-179）](/glossary/#term-179)从受限问题描述生成或选择实现；[自定义内核（custom kernel，TERM-180）](/glossary/#term-180)则把实现、验证和演进责任交给自己的团队。源文件最短的选择不一定具有最低生产成本。
+
+## 学习成果
+
+- 在选择实现层级之前冻结语义、类型、形状、布局、数值验收、确定性需求、stream、内存所有权和部署 Lane。
+- 从正确性、维护、可移植性、性能证据与所有权成本比较生产库、可复用原语、DSL 和自定义内核。
+- 当自定义实现没有通过正确性验收且匹配 workload 的测量时，拒绝其性能优势主张。
+- 区分 API 可用性、owner tests、本地编译、运行行为与性能证据。
+- 记录明确的重新评估触发条件，而不是把一次决策变成永久规则。
+
+## 先修关系
+
+课程图按此顺序固定先修项：[A02：多阶段归约](/algorithms/multi-stage-reduction/)、[A03：包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)、[A08：分块 GEMM 正确性](/algorithms/tiled-gemm-correctness/)和 [Q06：APOD](/correctness/apod-optimization-loop/)，即 `A02, A03, A08, Q06`。三个算法单元揭示可复用操作必须保持什么；Q06 提供通过正确性验收的 baseline、受控比较和部署循环。
+
+## 从合同出发，而不是从代码偏好出发
+
+先写决策包，不要先写实现。决策包记录 exact operation 与 workload；可接受输出与数值容差；数据类型、布局、alias 和 lifetime；Toolkit、component、compiler、architecture 与 operating-system coordinates；stream 与同步要求；现有 correctness fixtures；当前 baseline；测量方法；维护负责人；以及重新评估条件。
+
+只有 documented contract 符合该决策包的抽象才有资格参与选择。改变 stability、累加顺序、支持布局或同步语义的熟悉 API 不是替代品。尚未测量的自定义内核只是假设，不是性能结果。
+
+## 四种选择的边界
+
+**生产库。** 当领域级 operation 能表达所需语义与数据合同时选择它。生产库通常拥有更广的 owner-maintained validation 与平台集成，但可能要求 descriptor、layout、workspace、plan 或不透明 algorithm selection。这些默认是决策输入，不是缺陷。
+
+**可复用原语。** 当外围 composition 属于应用，但 reduction、scan、selection、sorting 等 primitive 的合同已匹配时选择它。调用者仍负责 temporary storage、stream ordering、composition correctness 与端到端测量。
+
+**DSL。** 当受限 graph、schedule 或 tensor expression 能表达操作，而且 generated artifact 可检查、测试、固定版本与部署时选择它。DSL 可把 implementation ownership 转移给 compiler/generator，但团队仍拥有 specification、toolchain pin、generated-code acceptance、fallback 与 upgrade policy。
+
+**自定义内核。** 只有其他层级无法表达必要语义或部署约束，或者通过正确性验收的测量表明存在值得承担整个生命周期成本的 workload-specific material gap 时，才选择 custom ownership。“我们能写”和“kernel 很短”都不充分。
+
+## 决策表
+
+| 判据 | 生产库 | 可复用原语 | DSL | 自定义内核 |
+| --- | --- | --- | --- | --- |
+| 正确性 | 核对 exact operation、type、layout、alias、numerical 与 determinism contract | 核对 primitive semantics 及每条 composition edge | 核对 source specification、generated artifact、fallback 与 numerical contract | 自己负责 reference、edge cases、synchronization、numerical behavior 与 regression matrix |
+| 维护 | 跟踪 component lifecycle 与 integration changes | 跟踪 primitive API 及外围 orchestration | 跟踪 compiler/generator、language、generated artifacts 与 cache | 跟踪 source、compiler behavior、architecture changes、tests、debugging 与 handoff |
+| 可移植性 | 只使用声明的 component/platform combination | 独立固定 component 并验证每个 deployment lane | 验证 supported hosts、devices、dialects 与 generator versions | 构建并验证每个声称支持的 compiler、Toolkit、architecture 与 host combination |
+| 性能证据 | 在目标 workload 测量 selected algorithm 与完整 call lifecycle | 纳入 storage、setup、synchronization 与 composition overhead | 纳入 compilation/cache/setup 与 generated execution | 用相同语义和输入比较，并纳入 launch、workspace、transfer 与 integration cost |
+| 所有权成本 | 领域集成和 upgrade policy | composition、storage 与 stream policy | specification、toolchain、generated-artifact review 与 fallback | 完整实现、验证、调优、incident response 与未来 portability |
+| 良好进入条件 | 领域合同匹配 | 一个已知 primitive 主导自定义部分 | 重复且受约束的问题族符合语言 | 存在未满足语义约束或已测量的 material gap |
+| 重新评估触发条件 | 出现 unsupported requirement 或 measured bottleneck | composition 成为主要成本或合同变化 | generator 限制、升级或 artifact regression | 优势消失、owner 变化或 supported matrix 扩展 |
+
+该表不对四列做全局排名，而是强制每个候选回答同一组问题。
+
+## 替换之前先证明正确
+
+每个候选都使用同一 CPU reference、invariants、tolerance policy、edge cases 与 deterministic requirements。计时之前先对齐语义：stable sort 与 unstable sort 是不同操作；inclusive scan 与 exclusive scan 输出不同；fused epilogue 可能改变 rounding；library 的 product-specific determinism scope 也不会自动转移到 DSL 或自定义内核。
+
+Owner documentation 与 owner tests 可以支持合同事实，但不能证明本站 source 已在 Toolkit Lane 编译、在 Reference Environment 运行，或满足你的应用验收条件。
+
+## 可移植性是一张矩阵
+
+“CUDA”不是单一版本坐标。记录 Toolkit、独立选择的 library/DSL version、host compiler 与 dialect、GPU feature gates、operating system 和 build integration。明确 component 来自 Toolkit bundle 还是独立供应；存在 override 时绝不能从 Toolkit label 推断 component version。
+
+Portability 还包含 fallback behavior 与 upgrade cadence。如果缓存 DSL-generated artifact，要记录生成它的 compiler 与 options；如果 custom code 包含 architecture-specific path，要声明 dispatch 与 test matrix。未经测试的矩阵行保持未声明。
+
+## 性能需要可比证据
+
+比较必须在同一 Environment Manifest 下使用相同 operation semantics、input distribution、shape、data type、layout、warmup、synchronization boundary、correctness check 与 reported statistic。按生产生命周期纳入 setup、temporary storage、compilation/planning、data movement 与 dispatch costs，而不是只计时最有利的区间。
+
+没有测量就没有胜者、更快结果或性能优势。Profiler hypothesis 可以推动下一次实验，但不能单独选择 custom ownership。Microbenchmark 可以回答一个有边界的问题，却不能自动预测应用 throughput 或 latency。
+
+## 所有权比第一个内核持续得更久
+
+估算谁负责 review numerical changes、triage failures、更新 compiler/architecture support、保留 fallback、重跑 tests/benchmarks、记录限制，以及原作者离开后的维护。这些工作对库和 DSL 也存在，但负担并不对称：custom code 会让你的团队成为 implementation owner。
+
+有效决策应记录 owner、review date、supported matrix、evidence links、rollback 与 revisit trigger。“永远 custom”不是 deployment policy。
+
+## 一个决策场景
+
+假设服务需要在 CUDA 12.9.2 与 13.3.1 上执行 FP32 row reductions，随后执行 exclusive scan。已有 exact CPU references 与 tolerances，但没有合格 performance run。Production library candidate 没有增加领域操作；reusable CCCL primitive composition 可以表达两个阶段；DSL candidate 能表达该 shape family，但引入 compiler/cache lifecycle；custom kernels 则重复 A02 与 A03 已教授的算法。
+
+在当前证据边界，可复用原语是 provisional baseline，因为语义匹配且可避免立即承担实现所有权。这不是速度主张。团队仍需固定 component、验证输出、声明 streams 与 temporary storage，并测量完整 workload。只有记录 unmet contract 或 correctness-qualified material gap 后，custom code 才有资格。CUDA 11.8 仍是独立 component decision，不能静默复用较新的 pin。
+
+## 独立 CCCL 坐标与许可边界
+
+本站独立于 Toolkit label 选择 **CCCL v3.4.2**，commit `d36012203ef73ac7f966e848dd88482273e91e02`。Tagged compatibility policy 接受 latest-patch CUDA 12.x/13.x；本站只为 Toolkit 12.9.2 与 13.3.1 评估该 independent coordinate。CUDA 11.8 被排除，必须使用其 bundled libraries 或另行复核的 compatible release。Owner v3.4.2 matrix 本身不授予任何 Lane 本站 Compile-Checked 结果。
+
+CCCL 包含混合的 file-level licenses 与 notices。本单元相关文件涉及 Apache-2.0、Apache-2.0 WITH LLVM-exception、BSD-3-Clause 与 Boost-derived notices。Aggregate `LICENSE` 不能替代 exact file review。本单元只链接并改写 owner material，没有复制或改编 CCCL source、test、example、table、figure 或 benchmark，因此不新增 third-party code notice。
+
+2026-09-04 已查询 Context7 `/nvidia/cccl` 用于 discovery/cross-check。它展示 current/main-branch material，不是 immutable v3.4.2 documentation snapshot；版本事实以 exact tagged release、README、source、tests 与 license 为准。
+
+## 证据边界
+
+L01 四个 evidence arrays 全为空。Decision table、owner-source review 与 worked scenario 都是教学记录，不是 CUDA build 或 execution。L01 不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified），不记录本地 API availability，也不声称 runtime behavior 或 performance advantage。
+
+## 检索检查
+
+1. 比较实现层级前必须冻结哪些事实？
+2. 可复用原语何时比生产库更窄、又比自定义内核拥有更低 ownership cost？
+3. 为什么 owner documentation 与 owner tests 不能建立本站 Compile-Checked 或 Runtime-Verified evidence？
+4. 什么证据能让自定义内核获得资格，哪些证据仍不充分？
+5. 为什么 CCCL release 必须独立于 Toolkit label 记录？
+
+## 继续练习
+
+- 完成 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)，再查看[独立解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)。
+- 在[练习题库 PB-R4-001](/practice/#pb-r4-001)中为另一个 workload 构建决策包。
+- 复习 [TERM-177](/glossary/#term-177)至 [TERM-180](/glossary/#term-180)，然后继续 [L02](/libraries/thrust-algorithm-vocabulary/)。
+
+## 来源与复核
+
+Best Practices Guide 负责 APOD 决策流程；CCCL v3.4.2 immutable release、tagged compatibility table、CUB index 与 aggregate license 只负责上述 exact version、reusable-primitive boundary、support policy 与 license map。Context7 仅支持 discovery，不是版本权威。所有文字、表格、场景、练习与解答均为学习站原创内容。
+
+**事实核对和来源访问日期：2026-09-04。**

@@ -1,0 +1,314 @@
+---
+title: 'L02: Thrust as an Algorithm Vocabulary'
+description: Relate Thrust transform, scan, sorting, execution policies, and iterator composition to A01, A03, and A09 under an exact CCCL release and evidence boundary.
+pairId: l02
+counterpart: /libraries/thrust-algorithm-vocabulary/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - release-coordinate
+  - algorithm-map
+  - transform
+  - scan
+  - sorting
+  - execution-policies
+  - iterator-composition
+  - composition-packet
+  - deprecations
+  - known-issues
+  - license-review
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L02
+prerequisites:
+  - A01
+  - A03
+  - A09
+relatedUnits:
+  - L01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; released 2026-08-05'
+    platform: 'Independent selected CCCL and Thrust C++ release coordinate'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 Toolkit compatibility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; tagged README'
+    platform: 'Latest-patch CUDA 12.x and 13.x policy; CUDA 11.8 excluded from this pin'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 transform interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/transform.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged unary and binary transform contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 scan interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/scan.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged inclusive, exclusive, and scan-by-key contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 sort interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/sort.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged sort, stable-sort, and by-key contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 execution policy and dispatch model'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/thrust/developer/systems.rst'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged explicit and iterator-derived system dispatch model'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 public execution policy interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/execution_policy.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged public policy surface and Apache-2.0 WITH LLVM-exception file coordinate'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA stream policies'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/execution_policy.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged par.on(stream) and par_nosync.on(stream) contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA transform backend'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/transform.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged transform dispatch and optional synchronization implementation'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA scan backend'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/scan.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged scan dispatch, temporary storage, and optional synchronization implementation'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA sort backend'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/sort.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged sort dispatch and optional synchronization implementation'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA backend utility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/util.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged default-stream and mandatory-versus-optional synchronization helpers'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA temporary buffer implementation'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/temporary_buffer.h'
+    version: 'CCCL and Thrust v3.4.2'
+    platform: 'Exact tagged asynchronous allocation attempt and synchronous fallback behavior'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 cuda iterator aggregate'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/iterator'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact tagged current counting, transform, zip, and zip-transform iterator surface'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 Thrust and cuda iterator interoperability tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/testing/catch2_test_cuda_iterators.cu'
+    version: 'CCCL v3.4.2 owner tests'
+    platform: 'Tagged owner test coverage; not Learning Site compilation or runtime evidence'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.0 deprecation release notes'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.0'
+    version: 'CCCL v3.4.0 deprecations retained by v3.4.2'
+    platform: 'Owner deprecation record for legacy Thrust utilities and selected iterators'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 10684 and post-v3.4.2 fix'
+    url: 'https://github.com/NVIDIA/cccl/issues/10684'
+    version: 'Issue closed 2026-08-11 after v3.4.2; fix absent from the immutable pin'
+    platform: 'Legacy host reverse and zip-iterator composition boundary'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 10965'
+    url: 'https://github.com/NVIDIA/cccl/issues/10965'
+    version: 'Open as of 2026-09-04'
+    platform: 'Optional-stride make_counting_iterator distance boundary'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 1155'
+    url: 'https://github.com/NVIDIA/cccl/issues/1155'
+    version: 'Open as of 2026-09-04'
+    platform: 'Legacy zip-iterator aligned-extent boundary'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 2747'
+    url: 'https://github.com/NVIDIA/cccl/issues/2747'
+    version: 'Open documentation issue as of 2026-09-04'
+    platform: 'Tagged stable_sort example mismatch; textual interface contract remains authoritative'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 aggregate license'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE'
+    version: 'CCCL v3.4.2'
+    platform: 'Aggregate license map; exact source adaptation requires file-level review'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l02 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/thrust-algorithm-vocabulary/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,release-coordinate,algorithm-map,transform,scan,sorting,execution-policies,iterator-composition,composition-packet,deprecations,known-issues,license-review,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A01,A03,A09' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L01 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '21' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2,CCCL-v3.4.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/thrust-algorithm-vocabulary/" lang="zh-CN">阅读中文对应页</a>
+
+Thrust is useful here as an algorithm vocabulary: name the transformation, scan, ordering, or composition contract before discussing its backend. An [execution policy (TERM-181)](/en/glossary/#term-181) selects a system and, for CUDA policies, can attach work to a stream. A [fancy iterator (TERM-182)](/en/glossary/#term-182) represents a generated, transformed, or zipped range without requiring a stored array for every logical input.
+
+## What you should be able to do
+
+- Map `thrust::transform`, inclusive/exclusive scans, and sorting APIs back to A01, A03, and A09 contracts.
+- Choose explicit or iterator-derived dispatch without assuming pointers are validated or migrated.
+- Compose counting, transform, and zip iterators while stating system, extent, value/reference, and lifetime boundaries.
+- Distinguish `thrust::cuda::par.on(stream)` from `par_nosync.on(stream)` and place required completion edges.
+- Avoid v3.4.2 deprecations and known issue boundaries without claiming local compilation, runtime behavior, fusion, or speedup.
+
+## Prerequisites
+
+The curriculum graph fixes the prerequisites in this order: [A01: Elementwise Map](/en/algorithms/elementwise-map/), [A03: Inclusive and Exclusive Scan](/en/algorithms/inclusive-exclusive-scan/), and [A09: Sorting, Selection, and Compaction](/en/algorithms/sorting-selection-compaction/), or `A01, A03, A09`. L02 does not replace their ownership, prefix, stability, or movement reasoning; it gives those contracts production algorithm names.
+
+## Release coordinate before API names
+
+This unit selects **CCCL v3.4.2**, commit `d36012203ef73ac7f966e848dd88482273e91e02`, independently from Toolkit labels. It treats that release as one matching Thrust, CUB, and libcu++ header set for Toolkit 12.9.2 and 13.3.1 evaluation. CUDA 11.8 is excluded by the CCCL 3.x latest-patch 12.x/13.x policy and needs its bundled libraries or another separately reviewed compatible release. The tagged v3.4.2 owner matrix stops before exact Toolkit 13.3.1, so site compilation would still require separate evidence.
+
+The release is an API/source coordinate, not an Environment Manifest. Its owner tests do not establish that this site compiled or ran it.
+
+## Algorithm map
+
+| Prior contract | Thrust vocabulary at v3.4.2 | Contract that remains yours |
+| --- | --- | --- |
+| A01 one output owner per element | `thrust::transform`, `transform_if`, `transform_n` | Range extents, overlap, functor validity, system, output lifetime |
+| A03 prefix semantics | `inclusive_scan`, `exclusive_scan`, and by-key forms | Identity/init, associative operation, overlap, numerical acceptance |
+| A09 ordering and movement | `sort`, `stable_sort`, `sort_by_key`, `stable_sort_by_key` | Key range, strict weak ordering, stability need, value extent and overlap |
+| Generated index range | `cuda::counting_iterator` | Start, extent, arithmetic range, selected system through composition |
+| Lazy projection | `cuda::transform_iterator` | Base lifetime, callable return semantics, system, consumer requirements |
+| Lockstep fields | `cuda::zip_iterator` | Equal logical extents, references/values, component lifetimes and systems |
+
+## Transform names A01's ownership contract
+
+`thrust::transform` applies a unary or binary callable elementwise and returns the output-end iterator; this is the library vocabulary for [A01](/en/algorithms/elementwise-map/). The exact input/output range may be in place. Other partial overlap violates the tagged interface precondition. The binary form requires both input ranges to cover the requested extent. Do not make correctness depend on the identity or address of functor arguments; that use is deprecated.
+
+An explicit policy chooses a system. A policy-free overload derives systems from iterators and seeks a compatible common system. Neither form verifies logical extents, object lifetime, or numerical acceptance.
+
+## Scan names A03's prefix contract
+
+`thrust::inclusive_scan` and `thrust::exclusive_scan` expose the prefix operations from [A03](/en/algorithms/inclusive-exclusive-scan/). Inclusive output includes the current item. Exclusive output begins from the declared initial value, or the default zero form. A custom operator must be associative; commutativity is not required. Exact in-place input/output is supported, while partial overlap is not.
+
+The tagged interface warns that pseudo-associative operations such as floating-point addition may produce different results across executions. Therefore a parallel floating-point scan must use a problem-specific acceptance rule and cannot be assumed to match a serial left fold bit for bit.
+
+## Sort names A09's ordering and movement contract
+
+`thrust::sort` and `thrust::stable_sort` apply ordering to mutable random-access ranges and require a strict weak ordering; these names connect directly to [A09](/en/algorithms/sorting-selection-compaction/). `sort` does not preserve the order of equivalent elements. `stable_sort` does. The by-key forms move a value range with the key range, and the tagged contract forbids key/value overlap.
+
+Stability, comparator semantics, range extent, mutability, and movement remain application decisions. Tagged CUDA implementation choices such as radix or merge paths are version-specific implementation details, not public promises or performance evidence.
+
+## Execution policies, dispatch, and streams
+
+| Form | v3.4.2 decision boundary |
+| --- | --- |
+| `thrust::seq` | Selects sequential execution |
+| `thrust::host` | Selects the configured host system; invocation and dereference order remain unspecified |
+| `thrust::device` | Selects the configured device system; with the CUDA backend it does not validate or migrate supplied memory |
+| No explicit policy | Derives systems from iterators; incompatible host/device systems normally fail at compile time |
+| `thrust::cuda::par.on(stream)` | Uses the supplied stream; tagged transform, scan, and sort backends perform their optional synchronization before returning |
+| `thrust::cuda::par_nosync.on(stream)` | Permits optional synchronization to be omitted and may return before completion; it is a hint, not a promise that no synchronization occurs |
+
+Same-stream work remains ordered by enqueue order, so a no-sync producer can feed a same-stream consumer without a host wait. Host access, memory release, or another stream needs a valid completion/dependency edge. Algorithms returning host values can still require completion. Asynchronous CUDA errors can surface at a later synchronization point. Allocations and callables must outlive unfinished work.
+
+The tagged v3.4.2 `temporary_buffer.h` default no-sync path first tries `cudaMallocAsync`/`cudaFreeAsync` and can fall back to synchronous allocation; `util.h` selects the legacy or per-thread default stream according to compilation mode. These are source-derived implementation facts, not observed allocation, synchronization, or latency behavior on a Learning Site environment.
+
+## Iterator composition without materializing every range
+
+The current v3.4.2 `<cuda/iterator>` surface provides `cuda::counting_iterator`, `cuda::transform_iterator`, `cuda::zip_iterator`, and `cuda::zip_transform_iterator`. A counting iterator represents consecutive values. A transform iterator applies a callable on dereference. A zip iterator advances components together and exposes tuple-like values or references. A zip-transform iterator combines lockstep dereference and n-ary transformation.
+
+One composition can represent indices with a counting iterator, map each index to a segment key with a value-returning transform iterator, and consume that virtual key range with scan-by-key. Another can zip equally sized keys and payloads for a lockstep transform. Such virtual ranges can avoid storing an intermediate range and can enable optimization, but they do not guarantee kernel fusion, lower traffic, or speedup.
+
+Write four contracts before composing:
+
+- **Extent:** every consumed range covers the same declared logical interval; zip does not safely stop at the shortest component.
+- **System:** component iterators and explicit policy select a compatible host or device path.
+- **Value/reference:** transformations over temporary values return values rather than dangling references.
+- **Lifetime:** containers, callable state, stream, and output remain valid until required work completes.
+
+## A composition packet
+
+For “square values, inclusive-scan them, then stable-sort records by the prefix,” first state three stages rather than write an opaque chain. Stage one is an A01 transform with `N` inputs and outputs. Stage two is an A03 inclusive scan whose FP32 tolerance permits valid parallel order differences. Stage three is an A09 stable by-key sort with `N` keys and `N` records under a strict weak ordering. Record each range's system, extent, overlap, lifetime, stream, and completion edge.
+
+You may replace the materialized square array with a transform iterator only after checking the scan consumer's iterator contract and callable lifetime. You may not claim fusion or fewer transactions without inspecting and measuring the selected artifact in an exact environment.
+
+## Current deprecations at this pin
+
+The core algorithms taught here, including `transform`, scans, and sorts, are not deprecated in v3.4.2. Legacy `thrust::counting_iterator`, `thrust::transform_iterator`, and `thrust::zip_iterator` are also not formally deprecated at this pin, although current owner guidance generally prefers newer `cuda::` iterator counterparts.
+
+CCCL 3.4 deprecated `thrust::constant_iterator` and `thrust::strided_iterator` in favor of `cuda::constant_iterator` and `cuda::strided_iterator`. The tagged source also deprecates several `thrust::tuple`, functional aliases, iterator traits, and standard-like iterator helpers in favor of `cuda::std` or `cuda::` forms. Check the exact tagged declaration rather than generalizing that every fancy iterator is deprecated.
+
+## Scoped known issues for v3.4.2
+
+- Issue [#10684](https://github.com/NVIDIA/cccl/issues/10684) documents legacy host `reverse` with a `thrust::zip_iterator`, including a descending sort-by-key path. Its fix landed after the immutable v3.4.2 release, so this pin must not publish that composition as validated.
+- Open issue [#10965](https://github.com/NVIDIA/cccl/issues/10965) reports incorrect distance behavior for the optional-stride legacy `make_counting_iterator(start, stride)` form. Use unit-stride counting or a separately checked modern composition at this boundary.
+- Open issue [#1155](https://github.com/NVIDIA/cccl/issues/1155) reinforces that legacy zip equality and distance follow one component. Require aligned extents instead of expecting shortest-range termination.
+- Issue [#2747](https://github.com/NVIDIA/cccl/issues/2747) tracks tagged `stable_sort` documentation examples that invoke `sort`. Do not copy those examples; the textual stable-order contract remains the authority.
+
+This is a scoped teaching ledger, not an exhaustive defect list. Issue state after v3.4.2 does not mutate the pinned release.
+
+## File-level license review
+
+The exact algorithm headers `transform.h`, `scan.h`, and `sort.h` carry Apache-2.0. The public execution-policy header uses Apache-2.0 WITH LLVM-exception; CUDA backend policy files use BSD-3-Clause. Modern `cuda::` iterator headers use Apache-2.0 WITH LLVM-exception. Legacy iterator files can also retain Boost-derived author and license notices. CCCL's aggregate license additionally maps other component-specific terms.
+
+L02 copies or adapts no owner source, test, example, tutorial, table, figure, or benchmark. It uses original prose and tables and links exact owner coordinates. Any future adaptation must review the exact file's SPDX line, copyright block, embedded notices, and applicable component/root license; “CCCL is Apache-2.0” is not a sufficient file-level review.
+
+Context7 `/nvidia/cccl` was queried on 2026-09-04 for discovery and cross-checking. It returns current/main-branch material rather than a v3.4.2 snapshot, so exact tagged source, tests, releases, issues, and licenses govern the facts above.
+
+## Evidence boundary
+
+All four L02 evidence arrays are empty. API presence, tagged implementation, owner tests, issue review, and static compositions grant no Learning Site Compile-Checked or Runtime-Verified status. No CUDA/Thrust source is displayed, compiled, or run. No backend execution, kernel count, observed synchronization or allocation path, output, timing, traffic, fusion, or performance advantage is recorded.
+
+## Retrieval check
+
+1. Which A01, A03, and A09 contracts remain the caller's responsibility after choosing a Thrust algorithm name?
+2. Why can `par_nosync` return before completion without guaranteeing that no synchronization occurs?
+3. What four contracts must be stated before composing counting, transform, or zip iterators?
+4. Why can an inclusive floating-point scan be correct without matching a serial left fold bit for bit?
+5. Which iterator APIs are actually deprecated at v3.4.2, and why is “all fancy iterators are deprecated” false?
+
+## Continue with practice
+
+- Complete the [L02 Exercises](/en/libraries/thrust-algorithm-vocabulary/exercises/), then inspect the [separate solutions](/en/libraries/thrust-algorithm-vocabulary/solutions/).
+- Audit another composition in [Practice Bank PB-R4-002](/en/practice/#pb-r4-002).
+- Revisit [TERM-181](/en/glossary/#term-181), [TERM-182](/en/glossary/#term-182), [TERM-126](/en/glossary/#term-126), [TERM-130](/en/glossary/#term-130), and [TERM-149](/en/glossary/#term-149).
+
+## Sources and review
+
+The immutable release and tagged README govern the selected coordinate and compatibility. Tagged public headers govern algorithm preconditions; tagged policy source governs dispatch and stream behavior; tagged iterator headers/tests govern composition vocabulary; release notes and exact issues govern deprecation and known-issue boundaries. Context7 is discovery-only. The Learning Site copied no owner code or tutorial.
+
+**Fact checked and sources accessed: 2026-09-04.**

@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(464);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(232);
+  expect(routes).toHaveLength(476);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(238);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -95,6 +95,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/algorithms/sparse-matrix-multiplication-preprocessing/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/' },
     { zh: '/algorithms/sparse-matrix-multiplication-preprocessing/exercises/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/exercises/' },
     { zh: '/algorithms/sparse-matrix-multiplication-preprocessing/solutions/', en: '/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/' },
+    { zh: '/libraries/library-primitive-dsl-custom-kernel/', en: '/en/libraries/library-primitive-dsl-custom-kernel/' },
+    { zh: '/libraries/library-primitive-dsl-custom-kernel/exercises/', en: '/en/libraries/library-primitive-dsl-custom-kernel/exercises/' },
+    { zh: '/libraries/library-primitive-dsl-custom-kernel/solutions/', en: '/en/libraries/library-primitive-dsl-custom-kernel/solutions/' },
+    { zh: '/libraries/thrust-algorithm-vocabulary/', en: '/en/libraries/thrust-algorithm-vocabulary/' },
+    { zh: '/libraries/thrust-algorithm-vocabulary/exercises/', en: '/en/libraries/thrust-algorithm-vocabulary/exercises/' },
+    { zh: '/libraries/thrust-algorithm-vocabulary/solutions/', en: '/en/libraries/thrust-algorithm-vocabulary/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },

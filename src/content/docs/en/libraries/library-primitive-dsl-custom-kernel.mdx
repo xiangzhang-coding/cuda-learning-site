@@ -1,0 +1,209 @@
+---
+title: 'L01: Choose a Library, Primitive, DSL, or Custom Kernel'
+description: Build a correctness-first decision packet that compares production libraries, reusable primitives, domain-specific languages, and custom kernels before accepting implementation ownership.
+pairId: l01
+counterpart: /libraries/library-primitive-dsl-custom-kernel/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - decision-first
+  - option-boundaries
+  - decision-table
+  - correctness
+  - portability-versioning
+  - performance-evidence
+  - ownership
+  - worked-scenario
+  - cccl-coordinate
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L01
+prerequisites:
+  - A02
+  - A03
+  - A08
+  - Q06
+relatedUnits:
+  - L02
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Best Practices Guide v13.3 - APOD'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#assess-parallelize-optimize-deploy'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'CUDA-capable systems; correctness-qualified assessment, optimization, and deployment process'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; released 2026-08-05'
+    platform: 'Independent selected CCCL release coordinate; release metadata is not site build or runtime evidence'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 Toolkit compatibility and installation boundary'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; tagged README'
+    platform: 'Latest-patch CUDA 12.x and 13.x support policy; CUDA 11.8 excluded from this independent pin'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 CUB device-wide primitive index'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact tagged owner index for reusable device-wide primitive scope'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 aggregate license'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE'
+    version: 'CCCL v3.4.2'
+    platform: 'Aggregate license map; exact adapted files still require file-level SPDX and embedded-notice review'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l01 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/library-primitive-dsl-custom-kernel/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,decision-first,option-boundaries,decision-table,correctness,portability-versioning,performance-evidence,ownership,worked-scenario,cccl-coordinate,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L01 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,A03,A08,Q06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L02 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '5' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,CCCL-v3.4.2' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/library-primitive-dsl-custom-kernel/" lang="zh-CN">阅读中文对应页</a>
+
+A [production library (TERM-177)](/en/glossary/#term-177) owns a broad domain contract. A [reusable primitive (TERM-178)](/en/glossary/#term-178) owns one composable operation. A [domain-specific language, or DSL (TERM-179)](/en/glossary/#term-179), generates or selects implementations from a constrained problem description. A [custom kernel (TERM-180)](/en/glossary/#term-180) transfers implementation, validation, and evolution responsibility to your team. The narrowest source file is not automatically the lowest-cost production choice.
+
+## What you should be able to do
+
+- Freeze semantics, types, shapes, layouts, numerical acceptance, determinism needs, streams, memory ownership, and deployment lanes before choosing an implementation level.
+- Compare a production library, reusable primitive, DSL, and custom kernel on correctness, maintenance, portability, performance evidence, and ownership cost.
+- Reject a custom implementation when its claimed advantage has no correctness-qualified, workload-matched measurement.
+- Distinguish API availability and owner tests from local compilation, runtime behavior, and performance evidence.
+- Record an explicit revisit trigger rather than turning one decision into a permanent rule.
+
+## Prerequisites
+
+The curriculum graph fixes the prerequisites in this order: [A02: Multi-Stage Reduction](/en/algorithms/multi-stage-reduction/), [A03: Inclusive and Exclusive Scan](/en/algorithms/inclusive-exclusive-scan/), [A08: Tiled GEMM Correctness](/en/algorithms/tiled-gemm-correctness/), and [Q06: APOD](/en/correctness/apod-optimization-loop/), or `A02, A03, A08, Q06`. The algorithm units expose what reusable operations must preserve. Q06 supplies the correctness-qualified baseline, controlled comparison, and deployment loop.
+
+## Decide from the contract, not from code preference
+
+Start with a decision packet, not an implementation. It records the exact operation and workload; accepted outputs and numerical tolerances; data types, layouts, aliases, and lifetimes; Toolkit, component, compiler, architecture, and operating-system coordinates; stream and synchronization requirements; available correctness fixtures; current baseline; measurement method; maintenance owner; and a revisit condition.
+
+An abstraction is eligible only if its documented contract fits that packet. A familiar API that changes stability, accumulation order, supported layout, or synchronization is not a substitute. A custom kernel that has not yet been measured is a hypothesis, not a performance result.
+
+## Four option boundaries
+
+**Production library.** Choose the domain-level operation when it expresses the required semantics and supported data contract. It usually offers the broadest owner-maintained validation and platform integration, but it can impose descriptors, layouts, workspace, plans, or opaque algorithm selection. Those are decision inputs, not defects by default.
+
+**Reusable primitive.** Choose a reduction, scan, selection, sorting, or related building block when the surrounding composition is application-specific but the primitive contract already matches. The caller still owns temporary storage, stream ordering, composition correctness, and end-to-end measurement.
+
+**DSL.** Choose a constrained graph, schedule, or tensor expression when its accepted language can represent the operation and its generated artifact can be inspected, tested, version-pinned, and deployed. A DSL can move implementation ownership to a compiler or generator, but your team still owns the specification, toolchain pin, generated-code acceptance, fallback, and upgrade policy.
+
+**Custom kernel.** Choose custom ownership only when the other levels cannot express a required semantic or deployment constraint, or when a correctness-qualified measurement shows a material workload-specific gap worth the lifetime cost. “We can write it” and “the kernel is small” are not sufficient reasons.
+
+## Decision table
+
+| Criterion | Production library | Reusable primitive | DSL | Custom kernel |
+| --- | --- | --- | --- | --- |
+| Correctness | Validate the exact operation, type, layout, alias, numerical, and determinism contract | Validate primitive semantics plus every composition edge | Validate source specification, generated artifact, fallback, and numerical contract | Own reference, edge cases, synchronization, numerical behavior, and regression matrix |
+| Maintenance | Track component lifecycle and integration changes | Track primitive API plus surrounding orchestration | Track compiler/generator, language, generated artifacts, and cache | Track source, compiler behavior, architecture changes, tests, debugging, and handoff |
+| Portability | Use only declared component/platform combinations | Pin component independently and verify every deployment lane | Verify supported hosts, devices, dialects, and generator versions | Build and validate every claimed compiler, Toolkit, architecture, and host combination |
+| Performance evidence | Measure the selected algorithm and full call lifecycle on the target workload | Include storage, setup, synchronization, and composition overhead | Include compilation/cache/setup and generated execution | Compare identical semantics and inputs; include launch, workspace, transfer, and integration costs |
+| Ownership cost | Domain integration and upgrade policy | Composition, storage, and stream policy | Specification, toolchain, generated-artifact review, and fallback | Full implementation, validation, tuning, incident response, and future portability |
+| Good entry condition | Domain contract fits | One known primitive dominates the custom portion | Repeated constrained family fits the language | Unmet semantic constraint or measured material gap |
+| Revisit trigger | Unsupported requirement or measured bottleneck | Composition becomes dominant or contract changes | Generator limitation, upgrade, or artifact regression | Advantage disappears, owner changes, or supported matrix expands |
+
+The table does not rank the columns globally. It forces the same questions onto every candidate.
+
+## Correctness comes before replacement
+
+Use the same CPU reference, invariants, tolerance policy, edge cases, and deterministic requirements for every candidate. Match semantics before timing: stable and unstable sort are different operations; inclusive and exclusive scan are different outputs; a fused epilogue can change rounding; and a library's product-specific determinism scope does not transfer to a DSL or custom kernel.
+
+Owner documentation and owner tests are useful contract evidence. They do not show that this site's source compiled in a Toolkit Lane, ran on a Reference Environment, or met your application's acceptance criteria.
+
+## Portability is a matrix
+
+“CUDA” is not one version coordinate. Record Toolkit, independently selected library or DSL version, host compiler and dialect, GPU feature gates, operating system, and build integration. Decide whether the component is bundled with the Toolkit or independently supplied. Never infer a component version from the Toolkit label when an override is present.
+
+Portability also includes fallback behavior and upgrade cadence. If a DSL-generated artifact is cached, record which compiler and options produced it. If custom code has architecture-specific paths, state their dispatch and test matrix. An untested row stays unclaimed.
+
+## Performance requires comparable evidence
+
+The comparison must use identical operation semantics, input distributions, shapes, data types, layouts, warmup, synchronization boundary, correctness check, and reported statistic in one declared Environment Manifest. Include setup, temporary storage, compilation or planning, data movement, and dispatch costs according to the production lifecycle rather than timing only the most favorable interval.
+
+No measurement means no winner, faster result, or performance advantage. A profiler hypothesis can justify the next experiment, but it cannot select custom ownership by itself. A microbenchmark can answer a bounded question; it does not automatically predict application throughput or latency.
+
+## Ownership lasts longer than the first kernel
+
+Estimate who will review numerical changes, triage failures, update compiler and architecture support, preserve fallbacks, rerun tests and benchmarks, document limitations, and respond when the original author leaves. Count this work for libraries and DSLs too, but do not pretend the burden is symmetric: custom code makes your team the implementation owner.
+
+A useful decision records an owner, review date, supported matrix, evidence links, rollback, and revisit trigger. “Custom forever” is not a deployment policy.
+
+## Worked decision scenario
+
+Suppose a service needs FP32 row reductions followed by an exclusive scan on CUDA 12.9.2 and 13.3.1. It has exact CPU references and tolerances but no qualifying performance run. The production library candidate does not add a domain operation; a reusable CCCL primitive composition can express both stages; a DSL candidate can express the shape family but adds a compiler/cache lifecycle; and custom kernels repeat algorithms already taught in A02 and A03.
+
+At this evidence boundary, the reusable primitive is the provisional baseline because its semantics fit and it avoids immediate implementation ownership. That is not a speed claim. The team still must pin the component, validate outputs, specify streams and temporary storage, and measure the complete workload. Custom code becomes eligible only after an unmet contract or a correctness-qualified material gap is recorded. CUDA 11.8 remains a separate component decision rather than silently reusing the newer pin.
+
+## Independent CCCL coordinate and license boundary
+
+This site selects **CCCL v3.4.2**, commit `d36012203ef73ac7f966e848dd88482273e91e02`, independently from Toolkit labels. The tagged compatibility policy admits latest-patch CUDA 12.x and 13.x; the site evaluates that independent coordinate only for Toolkit 12.9.2 and 13.3.1. CUDA 11.8 is excluded and requires its bundled libraries or another separately reviewed compatible release. The owner v3.4.2 matrix does not itself grant a site Compile-Checked result for either lane.
+
+CCCL has mixed file-level licenses and notices. Files relevant to these units include Apache-2.0, Apache-2.0 WITH LLVM-exception, BSD-3-Clause, and Boost-derived notices. The aggregate `LICENSE` is not a substitute for reviewing the exact file. This unit links and paraphrases owner material; it copies or adapts no CCCL source, test, example, table, figure, or benchmark, so it adds no third-party code notice.
+
+Context7 `/nvidia/cccl` was queried on 2026-09-04 for discovery and cross-checking. It exposes current/main-branch material, not an immutable v3.4.2 documentation snapshot. The exact tagged release, README, source, tests, and license above govern version-specific facts.
+
+## Evidence boundary
+
+All four L01 evidence arrays are empty. A decision table, owner-source review, and worked scenario are instructional records, not a CUDA build or execution. L01 grants no Compile-Checked or Runtime-Verified status, records no local API availability, and claims no runtime behavior or performance advantage.
+
+## Retrieval check
+
+1. Which facts must be frozen before comparing implementation levels?
+2. When is a reusable primitive narrower than a production library but cheaper to own than a custom kernel?
+3. Why do owner documentation and owner tests not establish local Compile-Checked or Runtime-Verified evidence?
+4. What evidence makes a custom kernel eligible, and what evidence is still insufficient?
+5. Why must the CCCL release be recorded independently from the Toolkit label?
+
+## Continue with practice
+
+- Complete the [L01 Exercises](/en/libraries/library-primitive-dsl-custom-kernel/exercises/), then inspect the [separate solutions](/en/libraries/library-primitive-dsl-custom-kernel/solutions/).
+- Build another decision packet in [Practice Bank PB-R4-001](/en/practice/#pb-r4-001).
+- Revisit [TERM-177](/en/glossary/#term-177) through [TERM-180](/en/glossary/#term-180), then continue to [L02](/en/libraries/thrust-algorithm-vocabulary/).
+
+## Sources and review
+
+The Best Practices Guide governs the APOD decision process. CCCL v3.4.2's immutable release, tagged compatibility table, CUB index, and aggregate license govern only the exact version, reusable-primitive boundary, support policy, and license map stated above. Context7 supported discovery but is not version authority. All prose, tables, scenarios, Exercises, and solutions are original Learning Site material.
+
+**Fact checked and sources accessed: 2026-09-04.**

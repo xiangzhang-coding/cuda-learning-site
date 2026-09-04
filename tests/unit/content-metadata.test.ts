@@ -109,6 +109,11 @@ describe('Learning Unit and Lab metadata', () => {
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
     ]),
+    ...['L01', 'L02'].flatMap((unitId) => [
+      unitId,
+      `${unitId}-EXERCISES`,
+      `${unitId}-SOLUTIONS`,
+    ]),
     'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14',
     'LAB02', 'LAB06', 'LAB08', 'LAB09', 'LAB10',
     'PB-R0-005', 'PB-R3', 'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
@@ -119,7 +124,7 @@ describe('Learning Unit and Lab metadata', () => {
     },
   );
 
-  it.each(['F1', 'F001', 'f01', 'M1', 'M001', 'm01', 'A1', 'A001', 'a01', 'Q1', 'Q001', 'q01', 'Q01-exercises', 'LAB2', 'LAB02-EXERCISES'])(
+  it.each(['F1', 'F001', 'f01', 'M1', 'M001', 'm01', 'A1', 'A001', 'a01', 'Q1', 'Q001', 'q01', 'L1', 'L001', 'l01', 'Q01-exercises', 'LAB2', 'LAB02-EXERCISES'])(
     'rejects the malformed curriculum identifier %s',
     (identifier) => {
       expect(curriculumIdSchema.safeParse(identifier).success).toBe(false);

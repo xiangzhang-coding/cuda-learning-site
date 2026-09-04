@@ -1,0 +1,314 @@
+---
+title: 'L02：把 Thrust 作为算法词汇'
+description: 在 exact CCCL release 与 evidence boundary 下，把 Thrust transform、scan、sorting、execution policy 和 iterator composition 映射回 A01、A03 与 A09。
+pairId: l02
+counterpart: /en/libraries/thrust-algorithm-vocabulary/
+factCheckDate: '2026-09-04'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - release-coordinate
+  - algorithm-map
+  - transform
+  - scan
+  - sorting
+  - execution-policies
+  - iterator-composition
+  - composition-packet
+  - deprecations
+  - known-issues
+  - license-review
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L02
+prerequisites:
+  - A01
+  - A03
+  - A09
+relatedUnits:
+  - L01
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2；commit d36012203ef73ac7f966e848dd88482273e91e02；2026-08-05 发布'
+    platform: '独立选择的 CCCL/Thrust C++ release coordinate'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 Toolkit compatibility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2；tagged README'
+    platform: 'Latest-patch CUDA 12.x/13.x policy；此 pin 排除 CUDA 11.8'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 transform interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/transform.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged unary/binary transform contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 scan interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/scan.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged inclusive、exclusive 与 scan-by-key contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 sort interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/sort.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged sort、stable-sort 与 by-key contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 execution policy and dispatch model'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/thrust/developer/systems.rst'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged explicit 与 iterator-derived system dispatch model'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 public execution policy interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/execution_policy.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged public policy surface 与 Apache-2.0 WITH LLVM-exception file coordinate'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA stream policies'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/execution_policy.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged par.on(stream) 与 par_nosync.on(stream) contracts'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA transform backend'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/transform.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged transform dispatch 与 optional synchronization implementation'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA scan backend'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/scan.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged scan dispatch、temporary storage 与 optional synchronization implementation'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA sort backend'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/sort.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged sort dispatch 与 optional synchronization implementation'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA backend utility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/util.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged default-stream 与 mandatory-versus-optional synchronization helpers'
+    accessDate: '2026-09-04'
+  - title: 'Thrust v3.4.2 CUDA temporary buffer implementation'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/thrust/system/cuda/detail/temporary_buffer.h'
+    version: 'CCCL/Thrust v3.4.2'
+    platform: 'Exact tagged asynchronous allocation attempt 与 synchronous fallback behavior'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 cuda iterator aggregate'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/iterator'
+    version: 'CCCL v3.4.2'
+    platform: 'Exact tagged current counting、transform、zip 与 zip-transform iterator surface'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 Thrust and cuda iterator interoperability tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/thrust/testing/catch2_test_cuda_iterators.cu'
+    version: 'CCCL v3.4.2 owner tests'
+    platform: 'Tagged owner test coverage；不是学习站 compilation/runtime evidence'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.0 deprecation release notes'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.0'
+    version: 'CCCL v3.4.0 deprecations retained by v3.4.2'
+    platform: 'Legacy Thrust utilities 与 selected iterators 的 owner deprecation record'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 10684 and post-v3.4.2 fix'
+    url: 'https://github.com/NVIDIA/cccl/issues/10684'
+    version: 'Issue 于 2026-08-11 在 v3.4.2 后关闭；immutable pin 不含 fix'
+    platform: 'Legacy host reverse 与 zip-iterator composition boundary'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 10965'
+    url: 'https://github.com/NVIDIA/cccl/issues/10965'
+    version: '截至 2026-09-04 仍 open'
+    platform: 'Optional-stride make_counting_iterator distance boundary'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 1155'
+    url: 'https://github.com/NVIDIA/cccl/issues/1155'
+    version: '截至 2026-09-04 仍 open'
+    platform: 'Legacy zip-iterator aligned-extent boundary'
+    accessDate: '2026-09-04'
+  - title: 'CCCL issue 2747'
+    url: 'https://github.com/NVIDIA/cccl/issues/2747'
+    version: '截至 2026-09-04 仍 open 的 documentation issue'
+    platform: 'Tagged stable_sort example mismatch；textual interface contract 仍为权威'
+    accessDate: '2026-09-04'
+  - title: 'CCCL v3.4.2 aggregate license'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE'
+    version: 'CCCL v3.4.2'
+    platform: 'Aggregate license map；exact source adaptation 仍需 file-level review'
+    accessDate: '2026-09-04'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l02 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/thrust-algorithm-vocabulary/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,release-coordinate,algorithm-map,transform,scan,sorting,execution-policies,iterator-composition,composition-packet,deprecations,known-issues,license-review,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L02 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A01,A03,A09' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L01 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '21' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2,CCCL-v3.4.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/thrust-algorithm-vocabulary/" lang="en">Read the English counterpart</a>
+
+这里把 Thrust 用作算法词汇：先命名 transformation、scan、ordering 或 composition contract，再讨论 backend。[执行策略（execution policy，TERM-181）](/glossary/#term-181)选择 system，并可为 CUDA policy 绑定 stream；[花式迭代器（fancy iterator，TERM-182）](/glossary/#term-182)表示 generated、transformed 或 zipped range，无需为每个逻辑输入物化数组。
+
+## 学习成果
+
+- 把 `thrust::transform`、inclusive/exclusive scan 与 sorting APIs 映射回 A01、A03 与 A09 的合同。
+- 选择 explicit 或 iterator-derived dispatch，同时不假设 pointer 会被验证或迁移。
+- 组合 counting、transform 与 zip iterators，并声明 system、extent、value/reference 和 lifetime boundaries。
+- 区分 `thrust::cuda::par.on(stream)` 与 `par_nosync.on(stream)`，放置必要 completion edges。
+- 避开 v3.4.2 deprecations 与 known-issue boundaries，同时不声称本地 compilation、runtime behavior、fusion 或 speedup。
+
+## 先修关系
+
+课程图按此顺序固定先修项：[A01：逐元素映射](/algorithms/elementwise-map/)、[A03：包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)和 [A09：排序、选择与压缩](/algorithms/sorting-selection-compaction/)，即 `A01, A03, A09`。L02 不替代 ownership、prefix、stability 或 movement reasoning，而是为这些合同提供 production algorithm names。
+
+## API 名称之前先固定 release coordinate
+
+本单元独立于 Toolkit label 选择 **CCCL v3.4.2**，commit `d36012203ef73ac7f966e848dd88482273e91e02`，并把它视为一组匹配的 Thrust、CUB 与 libcu++ headers，供 Toolkit 12.9.2/13.3.1 评估。CCCL 3.x 的 latest-patch 12.x/13.x policy 排除 CUDA 11.8；11.8 必须使用 bundled libraries 或另行复核的 compatible release。Tagged v3.4.2 owner matrix 停在 exact Toolkit 13.3.1 之前，因此本站仍需独立 compilation evidence。
+
+Release 只是 API/source coordinate，不是 Environment Manifest；owner tests 也不能证明本站已编译或运行它。
+
+## 算法映射
+
+| 既有合同 | v3.4.2 Thrust 词汇 | 仍由调用者负责的合同 |
+| --- | --- | --- |
+| A01：每元素一个 output owner | `thrust::transform`、`transform_if`、`transform_n` | Range extents、overlap、functor validity、system、output lifetime |
+| A03：prefix semantics | `inclusive_scan`、`exclusive_scan` 与 by-key forms | Identity/init、associative operation、overlap、numerical acceptance |
+| A09：ordering 与 movement | `sort`、`stable_sort`、`sort_by_key`、`stable_sort_by_key` | Key range、strict weak ordering、stability need、value extent/overlap |
+| Generated index range | `cuda::counting_iterator` | Start、extent、arithmetic range、composition 选择的 system |
+| Lazy projection | `cuda::transform_iterator` | Base lifetime、callable return semantics、system、consumer requirements |
+| Lockstep fields | `cuda::zip_iterator` | Equal logical extents、references/values、component lifetimes/systems |
+
+## Transform 命名 A01 的 ownership contract
+
+`thrust::transform` 对元素应用 unary/binary callable 并返回 output-end iterator；这是 [A01](/algorithms/elementwise-map/)的 library vocabulary。Exact input/output range 可以 in place，其他 partial overlap 违反 tagged interface precondition。Binary form 要求两个输入 range 都覆盖 requested extent。不能让正确性依赖 functor argument 的 identity/address；这种用法已 deprecated。
+
+Explicit policy 选择 system；policy-free overload 从 iterators 推导 systems 并寻找 compatible common system。两种形式都不会验证 logical extents、object lifetime 或 numerical acceptance。
+
+## Scan 命名 A03 的 prefix contract
+
+`thrust::inclusive_scan` 与 `thrust::exclusive_scan` 暴露 [A03](/algorithms/inclusive-exclusive-scan/)的 prefix operations。Inclusive output 包含 current item；exclusive output 从 declared initial value 开始，或使用默认 zero form。Custom operator 必须 associative，不要求 commutative。Exact in-place input/output 可用，partial overlap 不可用。
+
+Tagged interface 警告：floating-point addition 等 pseudo-associative operation 可能在不同执行中产生不同结果。因此 parallel floating-point scan 必须使用 problem-specific acceptance rule，不能假设它与 serial left fold 逐位相同。
+
+## Sort 命名 A09 的 ordering 与 movement contract
+
+`thrust::sort` 与 `thrust::stable_sort` 对 mutable random-access ranges 排序并要求严格弱序（strict weak ordering）；这些名称直接连接 [A09](/algorithms/sorting-selection-compaction/)。`sort` 不保持 equivalent elements 的原顺序，`stable_sort` 保持。By-key forms 随 key range 移动 value range，tagged contract 禁止 key/value overlap。
+
+Stability、comparator semantics、range extent、mutability 与 movement 仍是应用决策。Tagged CUDA implementation 选择 radix 或 merge path 属于 version-specific implementation detail，不是 public promise 或 performance evidence。
+
+## Execution policy、dispatch 与 stream
+
+| 形式 | v3.4.2 决策边界 |
+| --- | --- |
+| `thrust::seq` | 选择 sequential execution |
+| `thrust::host` | 选择 configured host system；invocation/dereference order 仍 unspecified |
+| `thrust::device` | 选择 configured device system；CUDA backend 不验证或迁移 supplied memory |
+| 无 explicit policy | 从 iterators 推导 systems；incompatible host/device systems 通常 compile-time failure |
+| `thrust::cuda::par.on(stream)` | 使用 supplied stream；tagged transform、scan、sort backend 返回前执行 optional synchronization |
+| `thrust::cuda::par_nosync.on(stream)` | 允许省略 optional synchronization，可能在完成前返回；它是 hint，不承诺绝不同步 |
+
+Same-stream work 按 enqueue order 排序，因此 no-sync producer 可供 same-stream consumer 使用而不等待 host。Host access、memory release 或另一 stream 需要有效 completion/dependency edge。返回 host value 的算法仍可能需要完成。Asynchronous CUDA error 可在后续 synchronization point 暴露。Allocation 与 callable 必须活到 unfinished work 完成。
+
+Tagged v3.4.2 `temporary_buffer.h` 的默认 no-sync path 先尝试 `cudaMallocAsync`/`cudaFreeAsync`，失败后可回退 synchronous allocation；`util.h` 根据 compilation mode 选择 legacy/per-thread default stream。这些是 source-derived implementation facts，不是学习站环境中 observed allocation、synchronization 或 latency behavior。
+
+## 不物化每个 range 的 iterator composition
+
+当前 v3.4.2 `<cuda/iterator>` surface 提供 `cuda::counting_iterator`、`cuda::transform_iterator`、`cuda::zip_iterator` 与 `cuda::zip_transform_iterator`。Counting iterator 表示连续值；transform iterator 在 dereference 时应用 callable；zip iterator 同步推进 components，并暴露 tuple-like values/references；zip-transform iterator 合并 lockstep dereference 与 n-ary transformation。
+
+一种 composition 可用 counting iterator 表示 indices，用 value-returning transform iterator 把 index 映射为 segment key，再让 scan-by-key 消费 virtual key range。另一种可 zip 等长 keys/payloads 做 lockstep transform。Virtual range 可以避免存储 intermediate range 并允许优化，但不保证 kernel 融合、更少 traffic 或加速。
+
+组合前写出四份合同：
+
+- **Extent：** 每个 consumed range 覆盖相同 declared logical interval；zip 不会安全地停在最短 component。
+- **System：** Component iterators 与 explicit policy 选择 compatible host/device path。
+- **Value/reference：** 对 temporary value 的 transformation 返回 value，不返回 dangling reference。
+- **Lifetime：** Containers、callable state、stream 与 output 保持有效，直到 required work 完成。
+
+## 一个 composition packet
+
+对于“平方每个 value，做 inclusive scan，再按 prefix stable-sort records”，先声明三个 stage，而不是写 opaque chain。Stage one 是 `N` inputs/outputs 的 A01 transform；stage two 是 A03 inclusive scan，其 FP32 tolerance 接受合法 parallel order difference；stage three 是 A09 stable by-key sort，包含 `N` keys、`N` records 与 strict weak ordering。记录每个 range 的 system、extent、overlap、lifetime、stream 与 completion edge。
+
+只有核对 scan consumer 的 iterator contract 与 callable lifetime 后，才可用 transform iterator 替代 materialized square array。没有在 exact environment 检查并测量 selected artifact，就不能声称 fusion 或更少 transactions。
+
+## 当前 pin 的 deprecations
+
+这里教授的 core algorithms，包括 `transform`、scans 与 sorts，在 v3.4.2 中没有 deprecated。Legacy `thrust::counting_iterator`、`thrust::transform_iterator` 与 `thrust::zip_iterator` 在该 pin 也没有正式 deprecated，尽管 current owner guidance 通常偏好新的 `cuda::` counterparts。
+
+CCCL 3.4 deprecated `thrust::constant_iterator` 与 `thrust::strided_iterator`，替代项是 `cuda::constant_iterator` 与 `cuda::strided_iterator`。Tagged source 还把若干 `thrust::tuple`、functional aliases、iterator traits 与 standard-like iterator helpers 标为 deprecated，建议使用 `cuda::std` 或 `cuda::` forms。必须检查 exact tagged declaration，不能泛化为“所有 fancy iterators 都 deprecated”。
+
+## v3.4.2 的限定已知问题
+
+- Issue [#10684](https://github.com/NVIDIA/cccl/issues/10684)记录 legacy host `reverse` 与 `thrust::zip_iterator` 的问题，包括 descending sort-by-key path。Fix 在 immutable v3.4.2 之后落地，因此本 pin 不把该 composition 发布为已验证。
+- Open issue [#10965](https://github.com/NVIDIA/cccl/issues/10965)报告 optional-stride legacy `make_counting_iterator(start, stride)` 的 distance behavior 错误。当前边界使用 unit-stride counting 或另行检查的 modern composition。
+- Open issue [#1155](https://github.com/NVIDIA/cccl/issues/1155)强调 legacy zip equality/distance 依赖一个 component。应要求 aligned extents，不能期待 shortest-range termination。
+- Issue [#2747](https://github.com/NVIDIA/cccl/issues/2747)跟踪 tagged `stable_sort` 文档示例实际调用 `sort`。不要复制这些 examples；textual stable-order contract 仍是权威。
+
+这是一份限定教学 ledger，不是完整 defect list。v3.4.2 之后的 issue state 不会改变 pinned release。
+
+## File-level license review
+
+Exact algorithm headers `transform.h`、`scan.h`、`sort.h` 使用 Apache-2.0；public execution-policy header 使用 Apache-2.0 WITH LLVM-exception；CUDA backend policy files 使用 BSD-3-Clause；modern `cuda::` iterator headers 使用 Apache-2.0 WITH LLVM-exception；legacy iterator files 还可能保留 Boost-derived author/license notices。CCCL aggregate license 还映射其他 component-specific terms。
+
+L02 没有复制或改编 owner source、test、example、tutorial、table、figure 或 benchmark。它使用原创文字和表格并链接 exact owner coordinates。未来如有 adaptation，必须检查 exact file 的 SPDX、copyright block、embedded notices 与 applicable component/root license；“CCCL is Apache-2.0”不是充分 file-level review。
+
+2026-09-04 已查询 Context7 `/nvidia/cccl` 用于 discovery/cross-check。它返回 current/main-branch material，而非 v3.4.2 snapshot，因此以上事实由 exact tagged source、tests、releases、issues 与 licenses 负责。
+
+## 证据边界
+
+L02 四个 evidence arrays 全为空。API presence、tagged implementation、owner tests、issue review 与 static compositions 不授予学习站编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）。页面不展示、编译或运行 CUDA/Thrust source，也不记录 backend execution、kernel count、observed synchronization/allocation path、output、timing、traffic、fusion 或 performance advantage。
+
+## 检索检查
+
+1. 选择 Thrust algorithm name 后，哪些 A01、A03 与 A09 合同仍由 caller 负责？
+2. 为什么 `par_nosync` 可以在完成前返回，却不保证完全没有同步？
+3. 组合 counting、transform 或 zip iterator 前必须声明哪四份合同？
+4. 为什么 inclusive floating-point scan 可以正确却不与 serial left fold 逐位相同？
+5. v3.4.2 中哪些 iterator APIs 确实 deprecated，为什么“所有 fancy iterators 都 deprecated”是错误的？
+
+## 继续练习
+
+- 完成 [L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)，再查看[独立解答](/libraries/thrust-algorithm-vocabulary/solutions/)。
+- 在[练习题库 PB-R4-002](/practice/#pb-r4-002)中审查另一条 composition。
+- 复习 [TERM-181](/glossary/#term-181)、[TERM-182](/glossary/#term-182)、[TERM-126](/glossary/#term-126)、[TERM-130](/glossary/#term-130)与 [TERM-149](/glossary/#term-149)。
+
+## 来源与复核
+
+Immutable release 与 tagged README 负责 selected coordinate/compatibility；tagged public headers 负责 algorithm preconditions；tagged policy source 负责 dispatch/stream behavior；tagged iterator headers/tests 负责 composition vocabulary；release notes 与 exact issues 负责 deprecation/known-issue boundaries。Context7 仅作 discovery。学习站没有复制 owner code 或 tutorial。
+
+**事实核对和来源访问日期：2026-09-04。**

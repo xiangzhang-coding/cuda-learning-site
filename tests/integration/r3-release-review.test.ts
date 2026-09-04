@@ -22,6 +22,7 @@ const learningUnits = [
   'A10', 'A11', 'A12', 'A13', 'A14',
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02'] as const;
 const r3EvidenceNeutralLearningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
   'A10', 'A11', 'A12', 'A13', 'A14',
@@ -129,7 +130,20 @@ describe('R3 release review', () => {
       glossaryTerms: 176,
       sourceRecords: 76,
     });
-    expect(currentManifest.scope).toEqual(r3Manifest.scope);
+    expect(currentManifest.scope).toEqual({
+      publicationPairs: 238,
+      sourceRoutes: 476,
+      exerciseSetPublicationPairs: 63,
+      solutionSetPublicationPairs: 63,
+      learningUnits: currentLearningUnits,
+      runnableExamples,
+      labs,
+      visualExplainers,
+      practiceBankEntries: 68,
+      nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
+      glossaryTerms: 182,
+      sourceRecords: 78,
+    });
     expect(r3Manifest.compatibility).toMatchObject({
       supportedEnvironment: 'native-linux',
       profilerComponents: {
@@ -167,7 +181,16 @@ describe('R3 release review', () => {
         },
       },
     });
-    expect(currentManifest.compatibility).toEqual(r3Manifest.compatibility);
+    expect(currentManifest.compatibility).toMatchObject(r3Manifest.compatibility);
+    expect(currentManifest.compatibility.componentBoundaries.cccl).toEqual({
+      version: '3.4.2',
+      selection: 'independent',
+      commit: 'd36012203ef73ac7f966e848dd88482273e91e02',
+      releasedOn: '2026-08-05',
+      toolkitLanes: ['cuda-12.9', 'cuda-13.3'],
+      excludedToolkitLanes: ['cuda-11.8'],
+      excludedLaneRequires: 'separately reviewed library versions',
+    });
     expect(r3Manifest.evidence).toEqual({
       compileChecked: ['EX02', 'EX10', 'LAB02'],
       noCompileCheckedClaim,
@@ -183,8 +206,15 @@ describe('R3 release review', () => {
       capturedProfilerReports: [],
       retainedCompileRuns: [32720214527, 33275734951],
     });
-    expect(currentManifest.evidence).toEqual(r3Manifest.evidence);
-    expect(currentManifest.knownLimitations).toEqual(r3Manifest.knownLimitations);
+    expect(currentManifest.evidence).toEqual({
+      ...r3Manifest.evidence,
+      r4EvidenceNeutralLearningUnits: ['L01', 'L02'],
+    });
+    expect(currentManifest.knownLimitations).toEqual(expect.arrayContaining([
+      ...r3Manifest.knownLimitations.slice(0, -1),
+      'L01-L02 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, and static decision or iterator records provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L02 are published in the rolling R4 surface; L03-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+    ]));
     expect(r3Manifest.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
@@ -220,6 +250,7 @@ describe('R3 release review', () => {
     }
 
     expectExactMembers(destinationIds(/^(?:O|F|M|A|Q)\d{2}$/), learningUnits);
+    expectExactMembers(destinationIds(/^L\d{2}$/), ['L01', 'L02']);
     expectExactMembers(destinationIds(/^EX\d{2}$/), runnableExamples);
     expectExactMembers(destinationIds(/^LAB\d{2}$/), labs);
     expectExactMembers(destinationIds(/^VIS\d{2}$/), visualExplainers);
@@ -229,13 +260,13 @@ describe('R3 release review', () => {
 
     const recordsByGroup = Object.groupBy(RESOURCE_INDEX_RECORDS, ({ group }) => group);
     expect(recordsByGroup.labs).toHaveLength(10);
-    expect(recordsByGroup.practice).toHaveLength(66);
+    expect(recordsByGroup.practice).toHaveLength(68);
     expect(recordsByGroup.visuals).toHaveLength(19);
-    expect(recordsByGroup.glossary).toHaveLength(176);
-    expect(recordsByGroup.sources).toHaveLength(76);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(347);
-    expect(publishedRoutes).toHaveLength(464);
-    expect(new Set(publishedRoutes).size).toBe(464);
+    expect(recordsByGroup.glossary).toHaveLength(182);
+    expect(recordsByGroup.sources).toHaveLength(78);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(357);
+    expect(publishedRoutes).toHaveLength(476);
+    expect(new Set(publishedRoutes).size).toBe(476);
 
     for (const publicPath of profilerReportPlans) {
       const source = await readFile(path.join(projectRoot, 'public', publicPath.slice(1)), 'utf8');
@@ -299,9 +330,10 @@ describe('R3 release review', () => {
       expect(document).not.toMatch(/R3 aggregate review remains pending|R3 聚合复核仍待完成/i);
     }
     for (const practice of [zhPractice, enPractice]) {
-      expect(practice).toMatch(/66 (?:complete entries|个完整条目|道完整题目)/i);
+      expect(practice).toMatch(/68 (?:complete entries|个完整条目|道完整题目)/i);
       expect(practice).not.toMatch(/64 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
+      for (const id of ['PB-R4-001', 'PB-R4-002']) expect(practice).toContain(id);
     }
   });
 });

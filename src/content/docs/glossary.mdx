@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 176 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 182 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-09-04'
@@ -1632,6 +1632,60 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [A12](/algorithms/sparse-formats-spmv/)和 [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)。
 - **版本说明：** Workspace owner、size、lifetime 与 active preprocessing state 绑定 pinned cuSPARSE contract；A12/A13 没有分配或测量它。
 
+<span id="term-177" class="resource-target" aria-hidden="true"></span>
+
+### production library · 生产库
+
+- **定义：** 生产库（production library）暴露 broad domain operation，由外部 owner 维护 implementation/release lifecycle；caller 仍拥有 integration、完整 operation semantics、validation 与 evidence。
+- **避免使用：** 自动最快的代码、无需维护的依赖、任意 reusable function 的同义词。
+- **相关资源：** [L01](/libraries/library-primitive-dsl-custom-kernel/)和 [PB-R4-001](/practice/#pb-r4-001)。
+- **版本说明：** Library decision 要独立于 Toolkit label 记录 exact component；API presence/owner testing 不是本地 build、runtime 或 performance evidence。
+
+<span id="term-178" class="resource-target" aria-hidden="true"></span>
+
+### reusable primitive · 可复用原语
+
+- **定义：** 可复用原语（reusable primitive）是 reduction、scan、selection、sorting 等专注且可组合的 operation；外围 storage、stream、lifetime 与 end-to-end composition 仍由 caller 负责。
+- **避免使用：** 完整生产应用、无人拥有的 building block、custom code 的保证替代品。
+- **相关资源：** [L01](/libraries/library-primitive-dsl-custom-kernel/)和 [L02](/libraries/thrust-algorithm-vocabulary/)。
+- **版本说明：** L01/L02 独立固定 CCCL v3.4.2，只评估 Toolkit 12.9.2/13.3.1；CUDA 11.8 需要另一个 reviewed coordinate。
+
+<span id="term-179" class="resource-target" aria-hidden="true"></span>
+
+### domain-specific language (DSL) · 领域特定语言
+
+- **定义：** 领域特定语言（domain-specific language，DSL）描述 constrained problem family，让 compiler/generator 选择或生成 implementation；应用团队仍拥有 specification、toolchain pin、generated-artifact acceptance、cache、fallback 与 upgrade policy。
+- **避免使用：** General-purpose CUDA C++、自动正确的 generated code、没有 owner 的实现。
+- **相关资源：** [L01](/libraries/library-primitive-dsl-custom-kernel/)和 [PB-R4-001](/practice/#pb-r4-001)。
+- **版本说明：** Availability、accepted language、generated behavior 与 supported deployment rows 绑定 exact DSL/compiler release，并需要独立 evidence。
+
+<span id="term-180" class="resource-target" aria-hidden="true"></span>
+
+### custom kernel · 自定义内核
+
+- **定义：** 自定义内核（custom kernel）是由应用团队拥有 source、correctness、portability、tuning、regression response、handoff 与 removal 的 CUDA kernel。
+- **避免使用：** 默认晋升为生产实现的教学 kernel、自动更快的代码、一次性 implementation cost。
+- **相关资源：** [L01](/libraries/library-primitive-dsl-custom-kernel/)和 [PB-R4-001](/practice/#pb-r4-001)。
+- **版本说明：** 生产理由需要 unmet semantic/deployment contract，或在 target workload 上通过正确性验收的 material measured gap；只有 source existence 两者都不能提供。
+
+<span id="term-181" class="resource-target" aria-hidden="true"></span>
+
+### execution policy · 执行策略
+
+- **定义：** 在 Thrust 中，执行策略（execution policy）选择 sequential、configured host 或 configured device system；CUDA policy 还可把 work 绑定到 stream。
+- **避免使用：** Pointer validator、automatic memory migration、返回即代表 asynchronous work 完成的保证。
+- **相关资源：** [M07](/memory/stream-ordering/)和 [L02](/libraries/thrust-algorithm-vocabulary/)。
+- **版本说明：** CCCL v3.4.2 的 `par_nosync` 允许省略 optional synchronization，但不保证完全不发生同步；extent、accessibility、lifetime 与 completion 仍是 caller contracts。
+
+<span id="term-182" class="resource-target" aria-hidden="true"></span>
+
+### fancy iterator · 花式迭代器
+
+- **定义：** 花式迭代器（fancy iterator）通过 iterator operations 表示 generated、transformed、zipped 或其他 virtual range，无需为每个 logical range 单独存储数组。
+- **避免使用：** 保证 fused kernel、停在最短 zipped component 的 range、自动性能提升。
+- **相关资源：** [L02](/libraries/thrust-algorithm-vocabulary/)和 [PB-R4-002](/practice/#pb-r4-002)。
+- **版本说明：** CCCL v3.4.2 composition 必须显式声明 extent、system、value/reference 与 lifetime；在 owner 指明处优先 current `cuda::` counting/transform/zip forms，但并非所有 legacy Thrust fancy iterator 都 deprecated。
+
 ## 维护规则
 
-TERM-001 至 TERM-170 保留各自逐项复核记录；新增 TERM-171 至 TERM-176 与完整 176 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-04** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只是静态定义：未运行 CUDA/cuSPARSE，且不声明 workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-176 保留各自逐项复核记录；新增 TERM-177 至 TERM-182 与完整 182 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-04** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只是静态定义：未运行 CUDA、CCCL、Thrust、DSL 或 custom kernel，且不声明 local API availability、synchronization observation、fusion、traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

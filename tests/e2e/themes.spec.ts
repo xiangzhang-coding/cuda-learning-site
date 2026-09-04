@@ -36,6 +36,11 @@ const issue26Routes = [
   '/en/visuals/roofline/',
 ] as const;
 
+const issue33Routes = [
+  '/en/libraries/library-primitive-dsl-custom-kernel/',
+  '/en/libraries/thrust-algorithm-vocabulary/',
+] as const;
+
 const themeReflowRoutes = [
   '/en/start/using-the-learning-site/',
   '/en/memory/pinned-memory-transfer-overlap/',
@@ -51,6 +56,7 @@ const themeReflowRoutes = [
   ...issue20Routes,
   ...issue25Routes,
   ...issue26Routes,
+  ...issue33Routes,
 ] as const;
 
 async function persistTheme(page: Page, theme: LearningTheme) {
@@ -163,7 +169,7 @@ test('issue-20 pages reflow on mobile and retain teaching content in print', asy
 test('current incremental pages reflow on mobile and retain teaching content in print', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
-  for (const route of [...issue25Routes, ...issue26Routes]) {
+  for (const route of [...issue25Routes, ...issue26Routes, ...issue33Routes]) {
     await page.goto(route);
     await expect(page.getByRole('main')).toBeVisible();
     expect(

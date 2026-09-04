@@ -148,6 +148,14 @@ export default defineConfig({
           ],
         },
         {
+          label: '可复用库',
+          translations: { en: 'Reusable Libraries' },
+          items: [
+            { slug: 'libraries/library-primitive-dsl-custom-kernel' },
+            { slug: 'libraries/thrust-algorithm-vocabulary' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [
