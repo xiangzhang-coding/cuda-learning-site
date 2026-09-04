@@ -256,7 +256,9 @@ Review the linked prerequisite, then produce your own artifact before reading th
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 64 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 66 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+
+The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -2502,23 +2504,23 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <span id="pb-r3-005" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-005: Calculate and audit a Roofline with a unit, boundary, or provenance mismatch
+## PB-R3-005: Analyze a synthetic Nsight Roofline report with a unit, boundary, or provenance mismatch
 
 - **ID and Publication Pair:** PB-R3-005 in the `practice-bank` Publication Pair.
-- **Type and difficulty:** Concepts and implementation; advanced.
+- **Type and difficulty:** Evidence review; advanced.
 - **Direct prerequisite:** [Q10: Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/).
-- **Hardware gate:** None; calculate original synthetic inputs and audit a static model contract without running CUDA or a profiler.
+- **Hardware gate:** None; analyze an original synthetic Nsight report packet and audit its static model contract without running CUDA or a profiler.
 - **Version gate:** CUDA Best Practices Guide v13.3, Nsight Compute 2026.2.1, and the original 2009 Roofline model; current tool semantics are not projected backward from the paper.
 - **Related Learning Units and resources:** [Q05](/en/correctness/timing-asynchronous-gpu-work/), [A14](/en/algorithms/algorithm-choice-arithmetic-intensity/), [Q09](/en/correctness/occupancy-stalls-throughput/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [LAB09](/en/labs/build-original-roofline/), and [VIS13](/en/visuals/roofline/).
 - **Last reviewed:** 2026-09-01.
 
-**Prompt:** A worksheet explicitly labeled synthetic supplies `W=6.0e9 FLOP`, `T=3.0e9 byte`, `P_compute=12.0e12 FLOP/s`, `B=2.0e12 byte/s`, and `P_workload=5.0e12 FLOP/s`. However, `T` is an L2 traffic estimate, `B` is labeled a measured DRAM ceiling, the compute ceiling comes from a specification, and the workload rate comes from another scope. Complete the formal arithmetic, then audit why this point and roof cannot be interpreted.
+**Prompt:** An original synthetic Nsight Compute Roofline report-analysis packet, explicitly not a captured `.ncu-rep`, supplies `W=6.0e9 FLOP`, `T=3.0e9 byte`, `P_compute=12.0e12 FLOP/s`, `B=2.0e12 byte/s`, and `P_workload=5.0e12 FLOP/s`. Its field provenance says that `T` is an L2 traffic estimate from report A, `B` is a measured DRAM ceiling from report B, the compute ceiling comes from a specification, and the workload rate comes from report C under another scope. Complete the formal arithmetic, then audit why this cross-report point and roof cannot be interpreted.
 
-**Goal:** Show that dimensionally closed arithmetic is insufficient for a valid Roofline, then turn memory-domain, workload-identity, and ceiling-provenance mismatches into an executable rebuild plan.
+**Goal:** Analyze the report fields and their provenance, show that dimensionally closed arithmetic is insufficient for a valid Roofline, then turn memory-domain, workload-identity, and ceiling-provenance mismatches into an executable rebuild plan.
 
 **Constraints:** Calculate intensity, ridge, and roof. Never relabel the synthetic values as GPU observations. Propose separate theoretical, calibrated or measured, and tool-reported rebuilds without silent mixing.
 
-**Expected evidence:** A unit-bearing calculation table, above-roof mismatch flag, domain and provenance audit, three rebuild packets, and an explicit no-interpretation verdict.
+**Expected evidence:** A report-field-to-source matrix, unit-bearing calculation table, above-roof mismatch flag, domain and provenance audit, three rebuild packets, and an explicit no-interpretation verdict.
 
 **Acceptance criteria:** The result includes `I=2.0 FLOP/byte`, `I_ridge=6.0 FLOP/byte`, and formal roof `4.0e12 FLOP/s`. The `5.0e12` point is above the declared roof. L2/DRAM, scope, and provenance mismatches prevent any bottleneck or speedup conclusion.
 
@@ -2526,7 +2528,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <details><summary>Hint 2</summary>An above-roof point is not an observation of exceptional speed. It first signals an audit of units, scope, run identity, and provenance.</details>
 
-**Reviewed solution:** The formal arithmetic is `I=6.0e9/3.0e9=2.0 FLOP/byte`, `I_ridge=12.0e12/2.0e12=6.0 FLOP/byte`, and a bandwidth-side roof of `2.0*2.0e12=4.0e12 FLOP/s`, so the supplied point exceeds that roof. The verdict is `reject interpretation`: x uses an L2 estimate, the sloped line uses measured DRAM bandwidth, the horizontal line comes from a specification, and y does not share the scope. A theoretical rebuild aligns specification ceilings with theoretical traffic; a calibrated rebuild measures compatible compute and path ceilings under one manifest and method; a tool-reported rebuild uses documented fields from one exact report. Each rebuild recomputes the point instead of moving the roof to fit it.
+**Reviewed solution:** The report matrix first maps the five fields to report A, report B, the specification, and report C, proving that they share no run identity. The formal arithmetic is `I=6.0e9/3.0e9=2.0 FLOP/byte`, `I_ridge=12.0e12/2.0e12=6.0 FLOP/byte`, and a bandwidth-side roof of `2.0*2.0e12=4.0e12 FLOP/s`, so the supplied point exceeds that roof. The verdict is `reject interpretation`: x uses an L2 estimate, the sloped line uses measured DRAM bandwidth, the horizontal line comes from a specification, and y does not share the scope. A theoretical rebuild aligns specification ceilings with theoretical traffic; a calibrated rebuild measures compatible compute and path ceilings under one manifest and method; a tool-reported rebuild uses documented fields from one exact report. Each rebuild recomputes the point instead of moving the roof to fit it.
 
 **Valid alternative:** Rebuild only a DRAM roof or only an L2 roof. Three provenance families may also be displayed side by side if each line and point is labeled independently and no unaligned denominator is shared.
 
@@ -2574,19 +2576,19 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <span id="pb-r3-007" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-007: Repair a four-variable transpose experiment as staged comparisons
+## PB-R3-007: Analyze a four-variable transpose report and repair it as staged comparisons
 
 - **ID and Publication Pair:** PB-R3-007 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Evidence review; advanced.
 - **Direct prerequisite:** [Q11: Optimize the Canonical Transpose with Controlled Evidence](/en/correctness/transpose-optimization-case-study/).
-- **Hardware gate:** None; repair a static transpose comparison design without running CUDA or a profiler.
-- **Version gate:** CUDA Programming Guide v13.3 and the 12.9.1/11.8.0 archives; Q11/EX14/VIS11 transpose, coalescing, tiling, and bank-layout facts; no measured claim.
+- **Hardware gate:** None; analyze a synthetic Nsight report packet and repair a static transpose comparison design without running CUDA or a profiler.
+- **Version gate:** CUDA Programming Guide v13.3 and the 12.9.1/11.8.0 archives; Nsight Compute 2026.2.1 and selected Lane versions 2022.3.0.22/2025.2.1.3/2026.2.1.5; Q11/EX14/VIS11 facts; no measured claim.
 - **Related Learning Units and resources:** [A05](/en/algorithms/matrix-transpose-layout/), [Q06](/en/correctness/apod-optimization-loop/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [EX14](/en/examples/tiled-transpose/), [VIS11](/en/visuals/tiled-transpose/), and [LAB10](/en/labs/optimize-canonical-transpose/).
 - **Last reviewed:** 2026-09-02.
 
-**Prompt:** A transpose proposal jumps directly from a purportedly correct baseline to a candidate that simultaneously changes the lane-to-global-address direction, logical tile extent, thread-to-slot ownership, and physical shared-row padding. It attributes any difference to coalescing and padding despite having no adjacent source diffs, fixed workload, per-stage correctness gate, or one-variable decision rule. Repair it as a staged comparison plan.
+**Prompt:** An original synthetic Nsight Compute report-analysis packet, explicitly not a captured `.ncu-rep`, has only `B0` and `candidate` rows. It reduces unnamed duration, throughput, and bank-conflict fields to “candidate is faster” but has no report hash, exact GPU or tool, metric name or unit, filter, replay, permission, raw attempts, or Environment Manifest. Its linked transpose proposal also changes lane-to-global-address direction, logical tile extent, thread-to-slot ownership, and physical shared-row padding together. Reject the report's attribution first, then repair the proposal as a staged comparison plan.
 
-**Goal:** Split the four entangled knobs into reviewable adjacent stages so each comparison has one primary variable and permits support, rejection, inconclusive, and rollback outcomes.
+**Goal:** Audit the report packet's identity, metric, and custody gaps, then split the four entangled knobs into reviewable adjacent stages so each comparison has one primary variable and permits support, rejection, inconclusive, and rollback outcomes.
 
 **Constraints:**
 
@@ -2594,10 +2596,11 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - Build a `B0 -> C1 -> E2 -> O3 -> P4` ledger that changes only global coalescing direction, logical tile extent, thread ownership, and physical stride `T -> T+1`, respectively. In `E2`, hold launch policy and every independent launch knob constant, and deterministically recompute and record the grid dimensions needed to cover the same fixed workload. Record those grid dimensions, edge fraction, and shared-resource footprint as derived consequences and confounders of tile extent, not separately tuned variables.
 - At every stage, hold source parent, value type, workload, oracle, compiler and flags, selected GPU and tool coordinates, launch policy, every independent launch knob, warm-up, completion, sample policy, metric query, filter, replay, and report custody fixed. Stop when a prior stage is unqualified; it cannot silently become the next baseline.
 
-**Expected evidence:** A five-node variant graph, four adjacent one-variable diff ledgers, per-stage held-constant, derived-consequence, and confounder tables, an unfilled correctness and measurement artifact schema, and predeclared support, reject, inconclusive, and rollback rules.
+**Expected evidence:** A report-field and custody rejection table, five-node variant graph, four adjacent one-variable diff ledgers, per-stage held-constant, derived-consequence, and confounder tables, an unfilled correctness and measurement artifact schema, and predeclared support, reject, inconclusive, and rollback rules.
 
 **Acceptance criteria:**
 
+- The synthetic report packet and original four-variable comparison are both marked confounded and grant no attribution.
 - `C1` changes only the named global address direction, `E2` only logical tile extent, `O3` only thread-to-slot ownership, and `P4` only physical shared-row stride.
 - Every candidate must pass the same correctness contract again. Apart from the named primary variable and its declared derived consequences, any additional source, workload, tool, or collection difference, or any unexplained or independently tuned launch-policy or launch-knob difference, makes that pair unattributable. The deterministic grid-dimension recomputation required for `E2` to cover the fixed workload is a necessary derived change, not grounds for rejection.
 - Tile extent, ownership, and padding retain separate hypotheses and competing explanations. A later stage cannot retroactively fill evidence missing from an earlier stage.
@@ -2606,6 +2609,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <details><summary>Hint 1</summary>Draw the variant graph first, then check whether each edge's source diff has exactly one named primary variable.</details>
 
 <details><summary>Hint 2</summary>Passing correctness only admits a stage to evidence collection; it does not make that stage an optimization winner.</details>
+
+**Report audit:** Every unnamed field is `uninterpretable`. The “faster” conclusion must be rejected when report identity, exact environment, query, replay, permission, samples, and custody are missing.
 
 **Reviewed solution:** The repaired ledger first labels the original proposal `confounded comparison; no attributable result`. `B0` exists only after the EX14 oracle, three fixtures, and fixed-workload contract are complete. `C1` changes lane and global direction alone. `E2` changes tile extent alone while keeping launch policy and every independent launch knob fixed; it deterministically recomputes and records the grid dimensions needed to cover the same fixed workload, then lists grid dimensions, edge fraction, and shared-resource footprint as extent-derived consequences and confounders. `O3` changes slot ownership alone under `E2`'s extent, derived grid, and the same launch-policy and independent-knob contract. `P4` finally changes only physical stride from `T` to `T+1`. Every edge preserves source and binary identity, held constants, the derivation of launch and resource consequences, correctness schema, query, replay, and report schema, and an independent decision rule; all observation fields remain empty. The only current verdict is “the design is isolated; no measured winner exists.”
 
@@ -2665,19 +2670,19 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <span id="pb-r3-009" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-009: Rewrite a confounded reduction as a controlled stage graph
+## PB-R3-009: Analyze a confounded reduction report and rewrite it as a controlled stage graph
 
 - **ID and Publication Pair:** PB-R3-009 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Evidence review; advanced.
 - **Direct prerequisite:** [Q12: Optimize the Canonical Reduction with Controlled Evidence](/en/correctness/reduction-optimization-case-study/).
-- **Hardware gate:** None; repair static reduction source, operation-tree, and evidence plans without running CUDA or a profiler.
+- **Hardware gate:** None; analyze a synthetic Nsight report packet and repair static reduction source, operation-tree, and evidence plans without running CUDA or a profiler.
 - **Version gate:** CUDA Programming, Floating Point, and Best Practices Guides v13.3 plus Nsight Compute 2026.2.1; no measured claim.
 - **Related Learning Units and resources:** [A02](/en/algorithms/multi-stage-reduction/), [Q02](/en/correctness/floating-point-order-reproducibility/), [Q06](/en/correctness/apod-optimization-loop/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q12](/en/correctness/reduction-optimization-case-study/), [EX11](/en/examples/multi-stage-reduction/), and [VIS10](/en/visuals/reduction-stages/).
 - **Last reviewed:** 2026-09-02.
 
-**Prompt:** A reduction candidate changes the final warp to shuffles, deletes block barriers, replaces the down tree with an XOR tree, and changes inputs per thread from two to four. Its author retains only the final scalar and attributes every difference to divergence, synchronization, and memory traffic at once. Rewrite it as a rejectable stage graph.
+**Prompt:** An original synthetic Nsight Compute report-analysis packet, explicitly not a captured `.ncu-rep`, retains only a final scalar and the sentence “the profiler shows fewer stalls.” It has no exact report identity, metric name, unit, or scope, GPU or tool, filter, replay, permission, raw attempts, correctness record, or Environment Manifest. Its linked reduction candidate also changes the final warp to shuffles, deletes block barriers, replaces the down tree with an XOR tree, and changes inputs per thread from two to four. Audit and reject the report claim first, then rewrite the candidate as a rejectable stage graph.
 
-**Goal:** Build a four-node graph from an immutable EX11-shaped baseline so the control and synchronization bundle, numerical order, and partial staging each own a correctness gate, hypothesis, coupling disclosure, and decision rule.
+**Goal:** Separate the report-field, correctness, and custody gaps, then build a four-node graph from an immutable EX11-shaped baseline so the control and synchronization bundle, numerical order, and partial staging each own a correctness gate, hypothesis, coupling disclosure, and decision rule.
 
 **Constraints:**
 
@@ -2685,17 +2690,19 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - Fix `canonical-shared-tree -> warp-tail-control -> reassociated-warp-order -> four-load-staging`. The first edge discloses branch, barrier, shared, and instruction coupling; the second supplies an operand-edge diff; the third supplies stage-size and logical partial-traffic ledgers.
 - Every measured stage predeclares one workload, warm-up, checked completion, raw attempts, median and min/max, exact-GPU profiler query, permission, Environment Manifest, correctness result, and bounded interpretation. Result cells stay empty.
 
-**Expected evidence:** A four-node graph, three adjacent diffs, operand and stage-size ledgers, a per-stage measurement schema, support, reject, no-answer, and rollback rules, and a competing-explanation matrix.
+**Expected evidence:** A report-field and custody rejection table, four-node graph, three adjacent diffs, operand and stage-size ledgers, a per-stage measurement schema, support, reject, no-answer, and rollback rules, and a competing-explanation matrix.
 
 **Acceptance criteria:**
 
-- The original four-variable comparison is marked confounded and grants no attribution.
+- The synthetic report packet and original four-variable comparison are both marked confounded and grant no attribution.
 - Each edge independently passes the same CPU-reference and tolerance gate, and disclosure does not disguise unavoidable coupling as a held constant.
 - Source-derived fewer partials are not called measured traffic, tolerance acceptance is not called bitwise reproducibility, and no stage has a prefilled winner.
 
 <details><summary>Hint 1</summary>Compare source and operand graphs before deciding whether a change is the primary intervention or disclosed coupling.</details>
 
 <details><summary>Hint 2</summary>If one edge cannot isolate divergence from synchronization, name it as a bundle and narrow the claim.</details>
+
+**Report audit:** `stalls` has no metric identity, unit, denominator, scope, or availability, and the final scalar has no correctness custody. Neither supports optimization attribution.
 
 **Reviewed solution:** The repaired plan rejects the original comparison. `canonical-shared-tree` freezes an EX11-shaped two-load tree. `warp-tail-control` is only a control and synchronization bundle, with branch encoding, barrier count, shared accesses, and instruction mix listed as coupling. `reassociated-warp-order` changes the down versus XOR operand and active-lane schedule while retaining five shuffles and 31 effective additions. `four-load-staging` changes to four inputs while disclosing local-addition order and separately records `16777219 -> 32769 -> 65 -> 1` and `16777219 -> 16385 -> 17 -> 1`. Every edge owns independent correctness, query, measurement, manifest, and rollback schemas. Current disposition is `design isolated; observations pending`.
 
@@ -2753,19 +2760,19 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <span id="pb-r3-011" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-011: Derive a GEMM stage graph instead of memorizing a tile size
+## PB-R3-011: Analyze a memorized-tile GEMM report and derive a stage graph
 
 - **ID and Publication Pair:** PB-R3-011 in the `practice-bank` Publication Pair.
-- **Type and difficulty:** Concepts and implementation; advanced.
+- **Type and difficulty:** Evidence review; advanced.
 - **Direct prerequisite:** [Q13: Optimize the Canonical GEMM with Controlled Evidence](/en/correctness/gemm-optimization-case-study/).
-- **Hardware gate:** None; derive static tile, reuse, and resource ledgers and design a falsifiable comparison without running CUDA or a profiler.
+- **Hardware gate:** None; analyze a synthetic Nsight report packet, derive static ledgers, and design a falsifiable comparison without running CUDA or a profiler.
 - **Version gate:** CUDA Programming and Best Practices Guides v13.3, Toolkits 11.8.0/12.9.2/13.3.1, and Nsight Compute 2026.2.1; no measured claim.
 - **Related Learning Units and resources:** [A08](/en/algorithms/tiled-gemm-correctness/), [Q06](/en/correctness/apod-optimization-loop/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q10](/en/correctness/roofline-arithmetic-intensity/), [Q13](/en/correctness/gemm-optimization-case-study/), [EX15](/en/examples/tiled-gemm/), and [VIS12](/en/visuals/gemm-tiling-hierarchy/).
 - **Last reviewed:** 2026-09-03.
 
-**Prompt:** A team asks to “use the common 32-by-32 tile from the web.” Do not accept that number as an explanation. For `A[1024,1024] * B[1024,1024] -> C[1024,1024]`, use Q13's four stages to derive full-K-slice A/B loads, reuse per value, outputs, source shared bytes, source accumulators, K slices, and barriers, then design three rejectable adjacent hypotheses.
+**Prompt:** An original synthetic Nsight Compute report-analysis packet, explicitly not a captured `.ncu-rep`, asks to “use the common 32-by-32 tile from the web” and calls it best from an unnamed occupancy screenshot and one timing ratio. It lacks the exact GPU, tool, and report hash, metric definition, compiler resources, permission, replay, raw attempts, correctness result, and Environment Manifest. Reject that report claim first. Then, for `A[1024,1024] * B[1024,1024] -> C[1024,1024]`, use Q13's four stages to derive full-K-slice A/B loads, reuse per value, outputs, source shared bytes, source accumulators, K slices, and barriers, and design three rejectable adjacent hypotheses.
 
-**Goal:** Produce a tile, reuse, and resource ledger from the immutable EX15 correctness baseline so workload, ownership, and mechanism rather than a memorized size drive every candidate.
+**Goal:** Audit the report, metric, compiler, and custody gaps, then produce a tile, reuse, and resource ledger from the immutable EX15 correctness baseline so workload, ownership, and mechanism rather than a memorized size drive every candidate.
 
 **Constraints:**
 
@@ -2773,10 +2780,11 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - For `canonical-16x16x16`, `k-tile-16x16x8`, `rectangular-32x8x8`, and `coarsened-32x16x8`, label `TM/TN/TK`, block, outputs per thread, edge guards, and cooperative-load ownership. Source arithmetic cannot masquerade as compiled registers, occupancy, or observed traffic.
 - Predeclare support, rejection, no answer, rollback, normalization, and at least two competing explanations for each edge. Name no winner.
 
-**Expected evidence:** A four-row tile, reuse, and resource table, three adjacent hypothesis ledgers, a correctness checklist, source-versus-compiler-versus-profiler boundary, and a reject/no-answer matrix.
+**Expected evidence:** A report-field and custody rejection table, four-row tile, reuse, and resource table, three adjacent hypothesis ledgers, a correctness checklist, source-versus-compiler-versus-profiler boundary, and a reject/no-answer matrix.
 
 **Acceptance criteria:**
 
+- Reject the synthetic report's occupancy and timing claims for missing identity, definitions, samples, correctness, and custody.
 - Reject the 32-by-32 suggestion for missing a labeled K depth, block legality, workload, resource, and evidence contract rather than replacing it with another memorized number.
 - Separate the direct effects and coupling of `TK`, rectangular shape, and two-output ownership. Matched evidence can falsify every hypothesis.
 - Publish no metric value, timing, speedup, occupancy target, universal tile, or production claim.
@@ -2784,6 +2792,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <details><summary>Hint 1</summary>Full-slice inputs are `TM*TK + TK*TN`, while outputs are `TM*TN`. Compare that ratio before discussing cache or DRAM.</details>
 
 <details><summary>Hint 2</summary>Source shared bytes are directly calculable. Register allocation waits for exact compiler output, and resident blocks additionally require exact device limits.</details>
+
+**Report audit:** The unnamed occupancy screenshot has no metric denominator or exact-device limits, and the lone ratio has no raw attempts, matched timing method, or correctness gate. Neither can establish a tile winner.
 
 **Reviewed solution:** The ledger records 512 loads/256 outputs, 2,048 shared bytes, and one accumulator for canonical; 256/256, 1,024 bytes, and one accumulator for K-tile, with twice the K slices and barriers and with cooperative-load ownership and active instruction groups changing from all 256 threads to the participating half-block per shared array; 320/256, 1,280 bytes, one accumulator, and A/B reuse of 8/32 for rectangular; and 384/512, 1,536 bytes, two source accumulators, and reuse of 16/32 for coarsened. The three hypotheses predict static shared/barrier coordinates with disclosed load-group coupling, normalized requested inputs, and a source-accumulator/resource question. Each includes rejection and no answer and predicts no elapsed winner. Disposition: `tile rationale derived; observations pending`.
 
@@ -2797,7 +2807,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 <span id="pb-r3-012" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-012: Audit an uncustodied GEMM occupancy and production claim
+## PB-R3-012: Audit occupancy and production claims in an uncustodied GEMM report
 
 - **ID and Publication Pair:** PB-R3-012 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Evidence review; advanced.
@@ -2985,4 +2995,4 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## Review record
 
-Existing entries retain their item-level records from 2026-08-26 through 2026-09-03. Issue #31 PB-R3-015/PB-R3-016 and the complete 66-entry Publication Pair, metadata projections, direct links, and static contracts were reviewed on **2026-09-04**. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The new sparse-format and SpMM entries publish exact host arithmetic and static analysis only. They execute no CUDA or cuSPARSE and publish no workspace result, preprocessing or determinism observation, structured-sparsity support, actual traffic, timing, winner, or speedup claim.
+Existing entries retain their item-level records from 2026-08-26 through 2026-09-03. On **2026-09-04**, issue #32 performed the aggregate review of the complete 66-entry Publication Pair, metadata projections, direct links, static contracts, and the exact ten-entry Nsight report-analysis inventory above. Every scenario, prompt, goal, derivation, and reviewed solution is original project work. Owner documentation is cited and paraphrased; no external question, prose, table, figure, source example, output, log, artifact, diagnostic, timing, performance result, or private material was copied. The sparse-format and SpMM entries publish exact host arithmetic and static analysis only. They execute no CUDA or cuSPARSE and publish no workspace result, preprocessing or determinism observation, structured-sparsity support, actual traffic, timing, winner, or speedup claim.

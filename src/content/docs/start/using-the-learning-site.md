@@ -96,9 +96,9 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-截至 **2026-09-04**，[issue #31](https://github.com/xiangzhang-coding/cuda-learning-site/issues/31) 后的稳定课程当前滚动发布已完整双语发布 62 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14，以及 Q01-Q13。下面是当前完整发布的严格先修关系：
+截至 **2026-09-04**，[issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成复核的 R3 稳定课程已完整双语发布 62 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14，以及 Q01-Q13。下面是当前完整发布的严格先修关系：
 
-已完成的 R2 聚合发布复核是不可变快照，固定为 186 个 Publication Pairs、372 条 source routes 与 284 条 catalog records。当前增量发布已前进到 232 个 Publication Pairs 与 464 条 source routes，但不会改写 R2；R3 聚合复核仍待完成。
+已完成的 R3 聚合发布复核是不可变快照，固定为 232 个 Publication Pairs、464 条 source routes 与 347 条 catalog records；它还明确清点 61 组 Exercises、61 组独立 reviewed solutions 和 10 个 Nsight report-analysis Practice Bank 条目。R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -125,9 +125,9 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 算法路线可进入 A01-A14 各自的练习和独立解答，包括 [A12 练习](/algorithms/sparse-formats-spmv/exercises/)与[解答](/algorithms/sparse-formats-spmv/solutions/)，以及 [A13 练习](/algorithms/sparse-matrix-multiplication-preprocessing/exercises/)与[解答](/algorithms/sparse-matrix-multiplication-preprocessing/solutions/)。
 
-[实验索引](/labs/)列出 10 个 Labs（LAB01-LAB10）。[可视化讲解索引](/visuals/)列出 19 项讲解：独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22。当前 catalog 是 10 个 Lab、66 个[练习题库](/practice/)条目、19 项 Visual Explainer、176 项[术语表](/glossary/)和 76 项[来源记录](/sources-and-versions/)，共 347 条记录；当前滚动公开内容形成 232 个 Publication Pairs 和 464 条 source routes。这些数字独立于不可变的 R2 186/372/284 快照，R3 聚合复核仍待完成。
+[实验索引](/labs/)列出 10 个 Labs（LAB01-LAB10）。[可视化讲解索引](/visuals/)列出 19 项讲解：独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22。R3 catalog 是 10 个 Lab、66 个[练习题库](/practice/)条目、19 项 Visual Explainer、176 项[术语表](/glossary/)和 76 项[来源记录](/sources-and-versions/)，共 347 条记录；公开内容形成 232 个 Publication Pairs 和 464 条 source routes。R4 聚合复核仍待完成。
 
-A12/A13 的四个 evidence arrays 均为空且不授予 Evidence Status。Sparse matrices、storage/contribution ledgers 与 shared composition 是 host arithmetic/static analysis；本次增量没有 CUDA/cuSPARSE execution、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup、winner、Reference Environment 或 `performanceObservations`。
+Q06-Q13 与 A10-A14 的四个 evidence arrays 均为空且不授予 Evidence Status。Sparse matrices、storage/contribution ledgers 与 shared composition 是 host arithmetic/static analysis；五份 profiler fixtures 是 expected-only plans，不是 captured reports。R3 没有 CUDA/cuSPARSE execution、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup、winner、Reference Environment 或 `performanceObservations`。
 
 ## 三种视觉主题，一套内容
 

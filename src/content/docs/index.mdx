@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的当前滚动发布已在 [issue #31](https://github.com/xiangzhang-coding/cuda-learning-site/issues/31) 后完整双语发布 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R2 聚合发布复核是不可变快照，固定为 186 个双语发布对（Publication Pair）与 372 条 source routes；当前 issue #31 增量发布不改写 R2，R3 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R3 聚合发布复核是不可变快照，固定为 232 个双语发布对（Publication Pair）、464 条 source routes 与 347 条 catalog records；R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -80,9 +80,9 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
 
 正式 Visual Explainer 共 19 项：独立 VIS01-VIS14 与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)，加上内嵌 VIS19-VIS22。VIS18 严格依赖 A11，提供 deterministic shape/stage/IO ledger 与 purpose-built static SVG；它不是 GPU traffic 或 performance evidence。
 
-A10-A14、Q09-Q13、VIS13 与 VIS18 的 compilation/runtime axes 均为空。A12/A13 的矩阵、payload/contribution counts 与 shared composition 是 host arithmetic/static analysis；它们不授予 Evidence Status。本次增量没有 CUDA/cuSPARSE execution、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
+A10-A14、Q06-Q13、VIS13 与 VIS18 的 compilation/runtime axes 均为空。A12/A13 的矩阵、payload/contribution counts 与 shared composition 是 host arithmetic/static analysis；它们不授予 Evidence Status。R3 没有 CUDA/cuSPARSE execution、captured profiler report、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
 
-当前 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录；当前滚动公开源文件形成 232 个 Publication Pairs，即 464 条 source routes。这些当前数字独立于不可变的 R2 186/372 与 284-record 快照，R3 聚合复核仍待完成。
+R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录；公开源文件形成 232 个 Publication Pairs，即 464 条 source routes。61 组 Exercises、61 组独立 reviewed solutions，以及 10 个 Nsight report-analysis Practice Bank 条目都纳入同一发布合同；R4 聚合复核仍待完成。
 
 ## 边界先说清
 

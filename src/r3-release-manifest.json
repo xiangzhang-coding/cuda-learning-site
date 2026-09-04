@@ -1,15 +1,10 @@
 {
   "SPDX-License-Identifier": "Apache-2.0",
-  "schemaVersion": 1,
-  "publicationId": "current",
+  "schemaVersion": 4,
+  "releaseId": "R3",
   "reviewDate": "2026-09-04",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
-  "releaseReview": {
-    "latestCompleted": "R3",
-    "next": "R4",
-    "status": "pending"
-  },
   "scope": {
     "publicationPairs": 232,
     "sourceRoutes": 464,

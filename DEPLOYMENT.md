@@ -2,9 +2,9 @@
 
 # Cloudflare Deployment
 
-The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R2 is the latest completed aggregate review. Its immutable snapshot contains 49 Learning Units, 16 Runnable Examples, 6 Labs, 16 Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records, 186 Publication Pairs, and 372 source routes; `src/r2-release-manifest.json` emits that contract as `/release.json`. The issue #31 rolling surface advances `src/current-publication-manifest.json` and `/publication.json` independently; R3 aggregate review remains pending.
+The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R3 is the latest completed aggregate review. Its immutable snapshot contains 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis Practice Bank entries, 176 Glossary terms, 76 source records, 347 catalog records, 61 Exercise-set Publication Pairs and 61 solution-set Publication Pairs, 232 Publication Pairs and 464 source routes; `src/r3-release-manifest.json` emits that contract as `/release.json`. `src/current-publication-manifest.json` and `/publication.json` currently match that release boundary while recording R4 as pending. Issue #32 owns dynamic R3 acceptance, and R4 aggregate review remains pending.
 
-Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R2, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
+Repository-pinned Wrangler from a clean `main` checkout is the only deployment authority. Cloudflare Workers Builds behavior was reviewed for R3, but account automation remains disabled; enabling it later must replace this flow rather than create a second authority. GitHub Actions produces independent web-quality, CUDA compilation, and remote smoke evidence without deploying the site.
 
 ## Static Architecture
 
@@ -12,12 +12,12 @@ Repository-pinned Wrangler from a clean `main` checkout is the only deployment a
 
 `npm run quality:deployment` runs Wrangler's dry-run parser against the built output and must report no bindings. Every build emits two source-bound records:
 
-- `dist/release.json` copies the reviewed R2 contract from `src/r2-release-manifest.json` and adds the checked-out Git commit.
+- `dist/release.json` copies the reviewed R3 contract from `src/r3-release-manifest.json` and adds the checked-out Git commit.
 - `dist/publication.json` copies the exact rolling publication scope from `src/current-publication-manifest.json` and adds the same commit.
 
-The first record is the immutable R2 release contract; the second describes the current artifact surface and can advance independently after R2. Neither record upgrades CUDA Evidence Status. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
+The first record is the immutable R3 release contract; the second describes the current artifact surface and can advance independently after R3. Neither record upgrades CUDA Evidence Status. Production also carries the project licenses and the Astro, Starlight, and Pagefind notices under `/legal/`.
 
-The current issue #31 scope is 62 Learning Units O01-O08/F01-F08/M01-M19/A01-A14/Q01-Q13, sixteen Runnable Examples EX01-EX16, ten Labs LAB01-LAB10, and nineteen Visual Explainers: standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. It also contains 66 Practice Bank entries, 176 Glossary terms, and 76 source records. The five catalog groups total 347 records; bilingual pages total 232 Publication Pairs and 464 source routes. L03/LAB11, L06/LAB12, and L13/EX20 remain absent; LAB12 waits for L06 after Q13 publication, and EX20 waits for L13's exact cuSPARSE API contract.
+The R3 scope is 62 Learning Units O01-O08/F01-F08/M01-M19/A01-A14/Q01-Q13, sixteen Runnable Examples EX01-EX16, ten Labs LAB01-LAB10, and nineteen Visual Explainers: standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. It also contains 61 Exercise-set Publication Pairs and 61 solution-set Publication Pairs, 66 Practice Bank entries, 176 Glossary terms, and 76 source records. The five catalog groups total 347 records; bilingual pages total 232 Publication Pairs and 464 source routes. The release identifies exactly 10 Nsight report-analysis Practice Bank entries: PB-R3-002 through PB-R3-005 and PB-R3-007 through PB-R3-012. L03/LAB11, L06/LAB12, and L13/EX20 remain absent; LAB12 waits for L06 after Q13 publication, and EX20 waits for L13's exact cuSPARSE API contract.
 
 ## Release Settings
 
@@ -26,7 +26,7 @@ The current issue #31 scope is 62 Learning Units O01-O08/F01-F08/M01-M19/A01-A14
 - Build command: `npm run build:release`
 - Production deploy command: `npm run deploy`
 - Preview deploy command: `npm run deploy:preview`
-- Workers Builds: reviewed, disabled for R2
+- Workers Builds: reviewed, disabled for R3
 - Current deployment authority: repository-pinned Wrangler
 - Node.js: `24.19.0` from `.node-version`
 - npm: `11.17.0` from `packageManager` and the package engine contract
@@ -37,7 +37,9 @@ The build command checks source/privacy boundaries, the exact lockfile and licen
 
 ## Acceptance
 
-Before accepting production, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. EX02, EX10, and LAB02 retain Compile-Checked evidence. EX11-EX15 retain empty compilation evidence and Pending Hardware Verification where runtime applies. LAB09 and LAB10 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification. A10-A13 and Q11-Q13 are Learning Units with all four evidence arrays empty and grant no Evidence Status. EX10 is Runtime-Not-Applicable. No Reference Environment, Runtime-Verified subject, or performance observation is declared.
+Before accepting production, require successful `web-quality` and `cuda-compile-gate` checks for the same `main` commit. EX02, EX10, and LAB02 retain Compile-Checked evidence. EX11-EX15 retain empty compilation evidence and Pending Hardware Verification where runtime applies. LAB09 and LAB10 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification. A10-A13 and Q11-Q13 are Learning Units with all four evidence arrays empty and grant no Evidence Status; the aggregate R3 contract extends that explicit empty-axis inventory to Q06-Q13 and A10-A14. EX10 is Runtime-Not-Applicable. No Reference Environment, Community-Observed subject, Runtime-Verified subject, captured profiler report, or performance observation is declared.
+
+The R3 compatibility record binds current Nsight Systems 2026.4/2026.4.1, Nsight Compute 2026.2.1, and CUPTI 2026.2.1 to exact selected-Lane component versions. Profiler collection requires administrator-approved non-admin performance-counter access where counters apply. A denied or unavailable metric blocks collection and is recorded as a blocker; the Labs prohibit `sudo`, privilege escalation, and policy bypass. The five expected-only report plans retain unfilled Environment Manifests and empty recorded observations and are not `.nsys-rep` or `.ncu-rep` captures.
 
 The issue #25 profiler fixture policy and both expected-only sanitized JSON fixtures are original project-authored planning artifacts. They are not `nsys` or `ncu` captures and provide no runtime, timeline, metric, bottleneck, or speedup result. Deploying or smoke-testing those static files does not change their evidence boundary.
 
@@ -71,9 +73,9 @@ gh workflow run release-smoke.yml --ref main \
   -f source_commit="<40-character-main-commit>"
 ```
 
-For a Preview URL, set `RELEASE_BASE_URL` and `RELEASE_KIND="preview"`. The gate checks that `/release.json` remains the immutable R2 contract with 186 Publication Pairs, 372 source routes, and 284 catalog records while `/publication.json` matches the current issue #31 surface with 232 Publication Pairs and 464 source routes. It covers both locales, navigation/search, current catalog counts, A12/A13 routes and graph edges, empty evidence arrays, legal notices, canonical metadata, and browser/network errors.
+For a Preview URL, set `RELEASE_BASE_URL` and `RELEASE_KIND="preview"`. The gate checks that `/release.json` remains the immutable R3 contract with 232 Publication Pairs, 464 source routes, and 347 catalog records while `/publication.json` matches the current R3/R4 boundary. It covers both locales, all 464 routes, navigation/search, current catalog counts, R3 graph edges, the exact ten-entry report-analysis inventory, five expected-only profiler plans, empty evidence arrays, legal notices, canonical metadata, and browser/network errors.
 
-[Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records immutable R2 acceptance. [Issue #31](https://github.com/xiangzhang-coding/cuda-learning-site/issues/31) records the current incremental publication; it is not a completed R3 aggregate review. Source files deliberately do not pre-certify dynamic coordinates.
+[Issue #18](https://github.com/xiangzhang-coding/cuda-learning-site/issues/18) remains the R1 dynamic acceptance record. [Issue #24](https://github.com/xiangzhang-coding/cuda-learning-site/issues/24) records immutable R2 acceptance. Issues #25 through #31 retain R3 increment provenance, while [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) records final R3 CI, Preview, production, and smoke acceptance. Source files deliberately do not pre-certify dynamic coordinates.
 
 ## Rollback
 

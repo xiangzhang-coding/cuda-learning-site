@@ -256,7 +256,9 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 64 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 66 道完整题目、先修链接和参考解答始终保留在静态页面中。
+
+R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -2502,23 +2504,23 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <span id="pb-r3-005" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-005：计算并审查一个单位、边界或来源不一致的 Roofline
+## PB-R3-005：分析单位、边界或来源不一致的 synthetic Nsight Roofline report
 
 - **ID 与双语发布对：** PB-R3-005；位于 `practice-bank` Publication Pair。
-- **类型与难度：** Concepts and implementation；高级。
+- **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q10：从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)。
-- **硬件门槛（Hardware gate）：** 无；只计算原创合成输入并审查静态 model contract，不运行 CUDA 或 profiler。
+- **硬件门槛（Hardware gate）：** 无；只分析原创 synthetic Nsight report packet 并审查静态 model contract，不运行 CUDA 或 profiler。
 - **版本门槛（Version gate）：** CUDA Best Practices Guide v13.3、Nsight Compute 2026.2.1 与 2009 original Roofline model；current tool semantics 不从论文倒推。
 - **相关学习单元与资源：** [Q05](/correctness/timing-asynchronous-gpu-work/)、[A14](/algorithms/algorithm-choice-arithmetic-intensity/)、[Q09](/correctness/occupancy-stalls-throughput/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[LAB09](/labs/build-original-roofline/)和 [VIS13](/visuals/roofline/)。
 - **最后复核（Last reviewed）：** 2026-09-01。
 
-**题目：** 一个明确标为 synthetic 的 worksheet 给出 `W=6.0e9 FLOP`、`T=3.0e9 byte`、`P_compute=12.0e12 FLOP/s`、`B=2.0e12 byte/s` 与 `P_workload=5.0e12 FLOP/s`。但 `T` 是 L2 traffic estimate，`B` 被标成 DRAM measured ceiling，compute ceiling 来自 specification，workload rate 来自另一 scope。完成形式计算，再审查为何这个 point/roof 不能解释。
+**题目：** 一份明确标为原创 synthetic、不是 captured `.ncu-rep` 的 Nsight Compute Roofline report-analysis packet 给出 `W=6.0e9 FLOP`、`T=3.0e9 byte`、`P_compute=12.0e12 FLOP/s`、`B=2.0e12 byte/s` 与 `P_workload=5.0e12 FLOP/s`。Packet 的 field provenance 说明 `T` 是 report A 的 L2 traffic estimate，`B` 是 report B 的 DRAM measured ceiling，compute ceiling 来自 specification，workload rate 来自 report C 的另一 scope。完成形式计算，再审查为何这个跨 report 拼接的 point/roof 不能解释。
 
-**目标：** 证明单位闭合仍不足以建立合法 Roofline，并把 memory domain、workload identity 与 ceiling provenance mismatch 转成可执行的 rebuild plan。
+**目标：** 分析 report fields 及其 provenance，证明单位闭合仍不足以建立合法 Roofline，并把 memory domain、workload identity 与 ceiling provenance mismatch 转成可执行的 rebuild plan。
 
 **约束：** 必须计算 intensity、ridge 与 roof；synthetic 数值不得改写成 GPU observation；分别提出 theoretical、calibrated/measured 与 tool-reported rebuild，不得静默混合。
 
-**预期证据：** 带单位的 calculation table、above-roof mismatch flag、domain/provenance audit、三份 rebuild packets，以及禁止解释的明确 verdict。
+**预期证据：** Report-field-to-source matrix、带单位的 calculation table、above-roof mismatch flag、domain/provenance audit、三份 rebuild packets，以及禁止解释的明确 verdict。
 
 **验收条件：** 得到 `I=2.0 FLOP/byte`、`I_ridge=6.0 FLOP/byte` 与形式 roof `4.0e12 FLOP/s`；`5.0e12` point 被标记 above declared roof；由于 L2/DRAM、scope 与 provenance 不一致，原图不产生 bottleneck 或 speedup 结论。
 
@@ -2526,7 +2528,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <details><summary>提示 2</summary>Above-roof point 不是“异常快”的观察，而是优先审查 units、scope、run identity 与 provenance 的信号。</details>
 
-**参考解答（Reviewed solution）：** 形式计算为 `I=6.0e9/3.0e9=2.0 FLOP/byte`，`I_ridge=12.0e12/2.0e12=6.0 FLOP/byte`，bandwidth-side roof 为 `2.0*2.0e12=4.0e12 FLOP/s`，所以 supplied point 高于该 roof。Verdict 是 `reject interpretation`，因为 x 使用 L2 estimate，斜线使用 DRAM measured bandwidth，水平线来自 specification，y 又不共享 scope。Theoretical rebuild 对齐 specification ceilings 与 theoretical traffic；calibrated rebuild 在一个 manifest/method 下重测 compatible compute/path ceilings；tool-reported rebuild 使用同一 exact report 的 documented fields。三者都重新计算 point，不移动 roof 迎合输入。
+**参考解答（Reviewed solution）：** Report matrix 先把五个 fields 映射到 report A、report B、specification 与 report C，证明它们没有共同 run identity。形式计算为 `I=6.0e9/3.0e9=2.0 FLOP/byte`，`I_ridge=12.0e12/2.0e12=6.0 FLOP/byte`，bandwidth-side roof 为 `2.0*2.0e12=4.0e12 FLOP/s`，所以 supplied point 高于该 roof。Verdict 是 `reject interpretation`，因为 x 使用 L2 estimate，斜线使用 DRAM measured bandwidth，水平线来自 specification，y 又不共享 scope。Theoretical rebuild 对齐 specification ceilings 与 theoretical traffic；calibrated rebuild 在一个 manifest/method 下重测 compatible compute/path ceilings；tool-reported rebuild 使用同一 exact report 的 documented fields。三者都重新计算 point，不移动 roof 迎合输入。
 
 **有效替代方案：** 可以只重建 DRAM roof 或只重建 L2 roof；也可以并排展示三种 provenance，只要每条线和每个 point 独立标注且不共享未对齐的 denominator。
 
@@ -2574,19 +2576,19 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <span id="pb-r3-007" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-007：把四变量 transpose 实验修复为分阶段比较
+## PB-R3-007：分析四变量 transpose report 并修复为分阶段比较
 
 - **ID 与双语发布对：** PB-R3-007；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q11：用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)。
-- **硬件门槛（Hardware gate）：** 无；只修复静态 transpose comparison design，不运行 CUDA 或 profiler。
-- **版本门槛（Version gate）：** CUDA Programming Guide v13.3 与 12.9.1/11.8.0 archives；Q11/EX14/VIS11 transpose、coalescing、tiling 与 bank-layout facts；无 measured claim。
+- **硬件门槛（Hardware gate）：** 无；只分析 synthetic Nsight report packet 并修复静态 transpose comparison design，不运行 CUDA 或 profiler。
+- **版本门槛（Version gate）：** CUDA Programming Guide v13.3 与 12.9.1/11.8.0 archives；Nsight Compute 2026.2.1 与 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5；Q11/EX14/VIS11 facts；无 measured claim。
 - **相关学习单元与资源：** [A05](/algorithms/matrix-transpose-layout/)、[Q06](/correctness/apod-optimization-loop/)、[Q08](/correctness/kernel-first-nsight-compute/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[EX14](/examples/tiled-transpose/)、[VIS11](/visuals/tiled-transpose/)和 [LAB10](/labs/optimize-canonical-transpose/)。
 - **最后复核（Last reviewed）：** 2026-09-02。
 
-**题目：** 一份 transpose proposal 从一个声称已正确的 baseline 直接跳到 candidate，同时改变 lane-to-global-address direction、logical tile extent、thread-to-slot ownership 和 physical shared-row padding。Proposal 把任何差异都归因于 coalescing 与 padding，却没有相邻 source diff、固定 workload、逐阶段 correctness gate 或 one-variable decision rule。把它修复成 staged comparison plan。
+**题目：** 一份原创 synthetic、不是 captured `.ncu-rep` 的 Nsight Compute report-analysis packet 只有 `B0` 与 `candidate` 两行，把未命名的 duration、throughput 与 bank-conflict fields 汇总成“candidate 更快”，却没有 report hash、exact GPU/tool、metric name/unit、filter、replay、permission、raw attempts 或 Environment Manifest。它关联的 transpose proposal 还同时改变 lane-to-global-address direction、logical tile extent、thread-to-slot ownership 和 physical shared-row padding。先拒绝这份 report 的 attribution，再把 proposal 修复成 staged comparison plan。
 
-**目标：** 把四个混在一起的 knobs 拆成可审计的相邻阶段，使每一组 comparison 只有一个 primary variable，并允许 support、rejection、inconclusive 与 rollback。
+**目标：** 审查 report packet 的 identity、metric 与 custody 缺口，再把四个混在一起的 knobs 拆成可审计的相邻阶段，使每一组 comparison 只有一个 primary variable，并允许 support、rejection、inconclusive 与 rollback。
 
 **约束：**
 
@@ -2594,10 +2596,11 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - 建立 `B0 -> C1 -> E2 -> O3 -> P4` ledger：依次只改变 global coalescing direction、logical tile extent、thread ownership、physical stride `T -> T+1`。在 `E2` 中固定 launch policy 与所有独立 launch knobs，并为同一固定 workload 确定性地重新计算、记录完整覆盖所需的 grid dimensions。把这些 grid dimensions、edge fraction 与 shared-resource footprint 记作 tile extent 的派生后果与 confounders，而不是分别调优的变量。
 - 每一阶段固定 source parent、value type、workload、oracle、compiler/flags、selected GPU/tool coordinates、launch policy、所有独立 launch knobs、warm-up、completion、sample policy、metric query/filter/replay 与 report custody；前一阶段不合格就停止，不能静默成为下一阶段 baseline。
 
-**预期证据：** 一张五节点 variant graph、四份相邻 one-variable diff ledger、逐阶段 held-constant/derived-consequence/confounder table、待填写的 correctness/measurement artifact schema，以及预声明的 support/reject/inconclusive/rollback rules。
+**预期证据：** Report-field/custody rejection table、一张五节点 variant graph、四份相邻 one-variable diff ledger、逐阶段 held-constant/derived-consequence/confounder table、待填写的 correctness/measurement artifact schema，以及预声明的 support/reject/inconclusive/rollback rules。
 
 **验收条件：**
 
+- Synthetic report packet 与原四变量 comparison 都被标为 confounded，不能建立 attribution。
 - `C1` 只改变具名 global address direction，`E2` 只改变 logical tile extent，`O3` 只改变 thread-to-slot ownership，`P4` 只改变 physical shared-row stride。
 - 每个 candidate 都必须重新通过相同 correctness contract。除具名 primary variable 及其已声明的派生后果外，任何额外 source、workload、tool 或 collection 差异，以及任何未解释或独立调优的 launch-policy/launch-knob 差异，都会使该 pair 不可归因；`E2` 为覆盖固定 workload 而确定性重算的 grid dimensions 是必需的派生变化，不属于拒绝理由。
 - Tile extent、ownership 与 padding 各自保留独立 hypothesis 和 competing explanations；不能用后续 stage 的材料追溯填补前一 stage。
@@ -2606,6 +2609,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <details><summary>提示 1</summary>先画 variant graph，再检查每条 edge 的 source diff 是否只有一个具名 primary variable。</details>
 
 <details><summary>提示 2</summary>一个 stage 通过 correctness 只允许它进入 evidence collection，不会让它自动成为 optimization winner。</details>
+
+**Report audit：** 所有 unnamed fields 都是 `uninterpretable`；缺少 report identity、exact environment、query、replay、permission、samples 与 custody 时，“更快”结论必须被拒绝。
 
 **参考解答（Reviewed solution）：** 修订 ledger 先把原 proposal 标为 `confounded comparison; no attributable result`。`B0` 只在 EX14 oracle、三个 fixtures 和固定 workload contract 完整后成立；`C1` 单独改变 lane/global direction；`E2` 单独改变 tile extent，保持 launch policy 与所有独立 launch knobs 不变，为同一固定 workload 确定性地重算并记录完整覆盖所需的 grid dimensions，再把 grid dimensions、edge fraction 与 shared-resource footprint 列为 extent-derived consequences/confounders；`O3` 在 `E2` 的 extent、派生 grid 与同一 launch-policy/independent-knob contract 下单独改变 slot ownership；`P4` 最后只把 physical stride 从 `T` 改为 `T+1`。每条 edge 都保存 source/binary identity、held constants、派生 launch/resource changes 的 derivation、correctness schema、query/replay/report schema 与独立 decision rule，observation 字段全部为空。当前唯一 verdict 是“实验设计已隔离；尚无 measured winner”。
 
@@ -2665,19 +2670,19 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <span id="pb-r3-009" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-009：把混杂的 reduction 改写为受控 stage graph
+## PB-R3-009：分析混杂的 reduction report 并改写为受控 stage graph
 
 - **ID 与双语发布对：** PB-R3-009；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q12：用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)。
-- **硬件门槛（Hardware gate）：** 无；只修复静态 reduction source、operation-tree 与 evidence plan，不运行 CUDA 或 profiler。
+- **硬件门槛（Hardware gate）：** 无；只分析 synthetic Nsight report packet 并修复静态 reduction source、operation-tree 与 evidence plan，不运行 CUDA 或 profiler。
 - **版本门槛（Version gate）：** CUDA Programming/Floating Point/Best Practices Guides v13.3 与 Nsight Compute 2026.2.1；无 measured claim。
 - **相关学习单元与资源：** [A02](/algorithms/multi-stage-reduction/)、[Q02](/correctness/floating-point-order-reproducibility/)、[Q06](/correctness/apod-optimization-loop/)、[Q08](/correctness/kernel-first-nsight-compute/)、[Q12](/correctness/reduction-optimization-case-study/)、[EX11](/examples/multi-stage-reduction/)和 [VIS10](/visuals/reduction-stages/)。
 - **最后复核（Last reviewed）：** 2026-09-02。
 
-**题目：** 一个 reduction candidate 把最后一个 warp 改成 shuffle、删除 block barriers、把 down tree 改成 XOR tree，并把每个 thread 的 inputs 从两项改成四项。作者只保留 final scalar，然后把任何差异同时归因于 divergence、synchronization 与 memory traffic。把它改写成可拒绝的 stage graph。
+**题目：** 一份原创 synthetic、不是 captured `.ncu-rep` 的 Nsight Compute report-analysis packet 只保留 final scalar 与一句“profiler 表明更少 stalls”，没有 exact report identity、metric name/unit/scope、GPU/tool、filter、replay、permission、raw attempts、correctness record 或 Environment Manifest。关联的 reduction candidate 又把最后一个 warp 改成 shuffle、删除 block barriers、把 down tree 改成 XOR tree，并把每个 thread 的 inputs 从两项改成四项。先审查并拒绝 report claim，再把 candidate 改写成可拒绝的 stage graph。
 
-**目标：** 建立一个从 immutable EX11-shaped baseline 出发的四节点 graph，使 control/synchronization bundle、numerical order 与 partial staging 各有自己的 correctness gate、hypothesis、coupling 和 decision rule。
+**目标：** 分离 report field、correctness 与 custody 缺口，再建立一个从 immutable EX11-shaped baseline 出发的四节点 graph，使 control/synchronization bundle、numerical order 与 partial staging 各有自己的 correctness gate、hypothesis、coupling 和 decision rule。
 
 **约束：**
 
@@ -2685,17 +2690,19 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - 固定 `canonical-shared-tree -> warp-tail-control -> reassociated-warp-order -> four-load-staging`；第一条 edge 披露 branch/barrier/shared/instruction coupling，第二条提交 operand-edge diff，第三条提交 stage-size 与 logical partial-traffic ledger。
 - 每个 measured stage 都预先声明同一 workload、warm-up、checked completion、raw attempts、median/min/max、exact-GPU profiler query、permission、Environment Manifest、correctness result 与 bounded interpretation；result cells 保持空。
 
-**预期证据：** 四节点 graph、三份 adjacent diffs、operand/stage-size ledgers、per-stage measurement schema、support/reject/no-answer/rollback rules 与 competing-explanation matrix。
+**预期证据：** Report-field/custody rejection table、四节点 graph、三份 adjacent diffs、operand/stage-size ledgers、per-stage measurement schema、support/reject/no-answer/rollback rules 与 competing-explanation matrix。
 
 **验收条件：**
 
-- 原四变量 comparison 被标为 confounded，不能建立 attribution。
+- Synthetic report packet 与原四变量 comparison 都被标为 confounded，不能建立 attribution。
 - 每条 edge 单独通过同一 CPU-reference/tolerance gate，且 disclosure 不把 unavoidable coupling 伪装成 held constant。
 - Source-derived fewer partials 不被称为 measured traffic，tolerance pass 不被称为 bitwise reproducibility，任何 stage 都没有预填 winner。
 
 <details><summary>提示 1</summary>先比较 source 和 operand graph，再决定一项变化是 primary intervention 还是 disclosed coupling。</details>
 
 <details><summary>提示 2</summary>如果一条 edge 不能隔离 divergence 与 synchronization，就明确把它命名为 bundle，并收窄 claim。</details>
+
+**Report audit：** `stalls` 没有 metric identity、unit、denominator、scope 或 availability，final scalar 也没有 correctness custody；两者都不能支持优化归因。
 
 **参考解答（Reviewed solution）：** 修订 plan 先拒绝原 comparison。`canonical-shared-tree` 固定 EX11-shaped two-load tree；`warp-tail-control` 只作为 control/synchronization bundle，并把 branch encoding、barrier count、shared accesses 与 instruction mix 列为 coupling；`reassociated-warp-order` 改变 down/XOR operand 与 active-lane schedule，同时保持五次 shuffles 和 31 次有效 additions；`four-load-staging` 改为四项 input staging，同时披露 local-addition order 并分别记录 `16777219 -> 32769 -> 65 -> 1` 与 `16777219 -> 16385 -> 17 -> 1`。每条 edge 有独立 correctness、query、measurement、manifest 与 rollback schema。当前 disposition 是 `design isolated; observations pending`。
 
@@ -2753,19 +2760,19 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <span id="pb-r3-011" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-011：不用背诵 tile size 推导 GEMM stage graph
+## PB-R3-011：分析背诵 tile size 的 GEMM report 并推导 stage graph
 
 - **ID 与双语发布对：** PB-R3-011；位于 `practice-bank` Publication Pair。
-- **类型与难度：** Concepts and implementation；高级。
+- **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q13：用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)。
-- **硬件门槛（Hardware gate）：** 无；只推导 static tile/reuse/resource ledgers 并设计 falsifiable comparison，不运行 CUDA 或 profiler。
+- **硬件门槛（Hardware gate）：** 无；只分析 synthetic Nsight report packet、推导 static ledgers 并设计 falsifiable comparison，不运行 CUDA 或 profiler。
 - **版本门槛（Version gate）：** CUDA Programming/Best Practices Guides v13.3、Toolkit 11.8.0/12.9.2/13.3.1 与 Nsight Compute 2026.2.1；无 measured claim。
 - **相关学习单元与资源：** [A08](/algorithms/tiled-gemm-correctness/)、[Q06](/correctness/apod-optimization-loop/)、[Q08](/correctness/kernel-first-nsight-compute/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[Q13](/correctness/gemm-optimization-case-study/)、[EX15](/examples/tiled-gemm/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)。
 - **最后复核（Last reviewed）：** 2026-09-03。
 
-**题目：** 团队要求“直接使用网上常见的 32-by-32 tile”。不接受这个数字作为解释。以 Q13 的四个 stages 为坐标，为 `A[1024,1024] * B[1024,1024] -> C[1024,1024]` 推导每个 full K slice 的 A/B loads、每值 reuse、outputs、source shared bytes、source accumulators、K slices 与 barriers，并设计三条可拒绝的 adjacent hypotheses。
+**题目：** 一份原创 synthetic、不是 captured `.ncu-rep` 的 Nsight Compute report-analysis packet 要求“直接使用网上常见的 32-by-32 tile”，并用未命名的 occupancy screenshot 与单个 timing ratio 声称它最佳；packet 缺少 exact GPU/tool/report hash、metric definition、compiler resources、permission、replay、raw attempts、correctness result 与 Environment Manifest。先拒绝这个 report claim。再以 Q13 的四个 stages 为坐标，为 `A[1024,1024] * B[1024,1024] -> C[1024,1024]` 推导每个 full K slice 的 A/B loads、每值 reuse、outputs、source shared bytes、source accumulators、K slices 与 barriers，并设计三条可拒绝的 adjacent hypotheses。
 
-**目标：** 产出一份从 immutable EX15 correctness baseline 出发的 tile/reuse/resource ledger，使每个 candidate 由 workload、ownership 与机制而不是 memorized size 驱动。
+**目标：** 审查 report、metric、compiler 与 custody 缺口，再产出一份从 immutable EX15 correctness baseline 出发的 tile/reuse/resource ledger，使每个 candidate 由 workload、ownership 与机制而不是 memorized size 驱动。
 
 **约束：**
 
@@ -2773,10 +2780,11 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - 对 `canonical-16x16x16`、`k-tile-16x16x8`、`rectangular-32x8x8` 与 `coarsened-32x16x8`分别标出 `TM/TN/TK`、block、outputs/thread、edge guards 与 cooperative-load ownership；source arithmetic 不能冒充 compiled register、occupancy 或 observed traffic。
 - 每条 edge 预先声明 support、reject、no answer、rollback、normalization 与至少两个 competing explanations；不得命名 winner。
 
-**预期证据：** 四行 tile/reuse/resource table、三份 adjacent hypothesis ledgers、correctness checklist、source-versus-compiler-versus-profiler boundary 和 reject/no-answer matrix。
+**预期证据：** Report-field/custody rejection table、四行 tile/reuse/resource table、三份 adjacent hypothesis ledgers、correctness checklist、source-versus-compiler-versus-profiler boundary 和 reject/no-answer matrix。
 
 **验收条件：**
 
+- Synthetic report 的 occupancy 与 timing claim 因缺少 identity、definition、samples、correctness 与 custody 被拒绝。
 - 32-by-32 建议因缺少 labeled K depth、block legality、workload、resource 与 evidence contract 被拒绝，而不是换成另一个背诵数字。
 - `TK`、rectangular shape 与 two-output ownership 的 direct effects 和 coupling 分列；每条 hypothesis 都可被 matched evidence 否定。
 - 输出没有 metric value、timing、speedup、occupancy target、universal tile 或 production claim。
@@ -2784,6 +2792,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <details><summary>提示 1</summary>Full slice 的 inputs 是 `TM*TK + TK*TN`，outputs 是 `TM*TN`；先比较比值，再讨论 cache 或 DRAM。</details>
 
 <details><summary>提示 2</summary>Source shared bytes 可以直接计算；register allocation 必须等待 exact compiler output，resident blocks 还需要 exact device limits。</details>
+
+**Report audit：** Unnamed occupancy screenshot 没有 metric denominator 与 exact-device limits，单个 ratio 没有 raw attempts、匹配 timing method 或 correctness gate；两者都不能确定 tile winner。
 
 **参考解答（Reviewed solution）：** Ledger 记录 canonical 为 512 loads/256 outputs、2,048 shared bytes、一 accumulator；K-tile 为 256/256、1,024 bytes、一 accumulator，K slices/barriers 翻倍，而且每份 shared array 的 cooperative-load ownership/active instruction groups 从全部 256 threads 改为参与的 half-block；rectangular 为 320/256、1,280 bytes、一 accumulator，并将 A/B reuse 改为 8/32；coarsened 为 384/512、1,536 bytes、两个 source accumulators，并将 reuse 改为 16/32。三条 hypotheses 分别预测带 disclosed load-group coupling 的 static shared/barrier coordinates、normalized requested inputs 与 source accumulator/resource question；它们都包含 reject/no-answer，且不预测 elapsed winner。Disposition 是 `tile rationale derived; observations pending`。
 
@@ -2797,7 +2807,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <span id="pb-r3-012" class="resource-target" aria-hidden="true"></span>
 
-## PB-R3-012：审查无保管链的 GEMM occupancy 与 production claim
+## PB-R3-012：审查无保管链 GEMM report 的 occupancy 与 production claim
 
 - **ID 与双语发布对：** PB-R3-012；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
@@ -2985,4 +2995,4 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## 复核记录
 
-既有条目保留各自 2026-08-26 至 2026-09-03 的 item-level records。Issue #31 的 PB-R3-015/PB-R3-016 与完整 66 个条目的双语发布对、metadata projection、直接链接和静态合同在 **2026-09-04** 同步复核。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。新增 sparse-format/SpMM 练习只发布 exact host arithmetic 与 static analysis，不执行 CUDA/cuSPARSE，也不发布 workspace result、preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、winner 或 speedup claim。
+既有条目保留各自 2026-08-26 至 2026-09-03 的 item-level records。Issue #32 在 **2026-09-04** 聚合复核完整 66 个条目的双语发布对、metadata projection、直接链接、静态合同，以及上述 10 个 Nsight report-analysis 条目的精确清单。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。Sparse-format/SpMM 练习只发布 exact host arithmetic 与 static analysis，不执行 CUDA/cuSPARSE，也不发布 workspace result、preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、winner 或 speedup claim。
