@@ -383,6 +383,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'Q13：用受控证据优化 Canonical GEMM', en: 'Q13: Optimize the Canonical GEMM with Controlled Evidence' },
     prerequisites: ['A08', 'Q06', 'Q08', 'Q10'],
   },
+  L01: {
+    href: { 'zh-CN': '/libraries/library-primitive-dsl-custom-kernel/', en: '/en/libraries/library-primitive-dsl-custom-kernel/' },
+    title: { 'zh-CN': 'L01：在生产库、可复用原语、DSL 与自定义内核之间做选择', en: 'L01: Choose a Library, Primitive, DSL, or Custom Kernel' },
+    prerequisites: ['A02', 'A03', 'A08', 'Q06'],
+  },
+  L02: {
+    href: { 'zh-CN': '/libraries/thrust-algorithm-vocabulary/', en: '/en/libraries/thrust-algorithm-vocabulary/' },
+    title: { 'zh-CN': 'L02：把 Thrust 作为算法词汇', en: 'L02: Thrust as an Algorithm Vocabulary' },
+    prerequisites: ['A01', 'A03', 'A09'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },

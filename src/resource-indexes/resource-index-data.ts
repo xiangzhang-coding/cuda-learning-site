@@ -1375,6 +1375,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-04',
     keywords: localized('SpMM dense GEMM descriptor workspace preprocessing sparsity pattern algorithm evidence', 'SpMM dense GEMM descriptor workspace preprocessing sparsity pattern algorithm evidence'),
   },
+  {
+    planningId: 'PB-R4-001',
+    group: 'practice',
+    title: localized('为生产库、原语、DSL 与自定义内核构建决策包', 'Build a decision packet for a library, primitive, DSL, and custom kernel'),
+    href: localized('/practice/#pb-r4-001', '/en/practice/#pb-r4-001'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L01'],
+    relatedUnits: ['A02', 'A03', 'A08', 'Q06', 'L01'],
+    hardwareGate: localized('无；只审查静态 decision/evidence records，不运行 CUDA、CCCL、DSL 或自定义内核。', 'None; audit static decision and evidence records without running CUDA, CCCL, a DSL, or a custom kernel.'),
+    versionGate: localized('独立 CCCL v3.4.2 coordinate 只评估 Toolkit 12.9.2/13.3.1；11.8 需要 bundled 或另行复核的 compatible release；无 measured claim。', 'The independent CCCL v3.4.2 coordinate is evaluated only for Toolkits 12.9.2 and 13.3.1; 11.8 needs bundled or separately reviewed compatible libraries; no measured claim.'),
+    reviewedOn: '2026-09-04',
+    keywords: localized('production library reusable primitive DSL custom kernel correctness maintenance portability performance evidence ownership cost', 'production library reusable primitive DSL custom kernel correctness maintenance portability performance evidence ownership cost'),
+  },
+  {
+    planningId: 'PB-R4-002',
+    group: 'practice',
+    title: localized('审查 Thrust 算法、迭代器与 stream composition', 'Audit a Thrust algorithm, iterator, and stream composition'),
+    href: localized('/practice/#pb-r4-002', '/en/practice/#pb-r4-002'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['L02'],
+    relatedUnits: ['A01', 'A03', 'A09', 'L01', 'L02'],
+    hardwareGate: localized('无；只构造静态 range、policy 与 dependency contracts，不展示、编译或运行 CUDA/Thrust source。', 'None; construct static range, policy, and dependency contracts without displaying, compiling, or running CUDA or Thrust source.'),
+    versionGate: localized('CCCL/Thrust v3.4.2 exact tagged API、policy、iterator、deprecation 与 scoped known-issue boundaries；只覆盖 Toolkit 12.9.2/13.3.1 evaluation。', 'Exact CCCL and Thrust v3.4.2 tagged API, policy, iterator, deprecation, and scoped known-issue boundaries; Toolkit 12.9.2 and 13.3.1 evaluation only.'),
+    reviewedOn: '2026-09-04',
+    keywords: localized('Thrust transform scan stable sort execution policy par_nosync counting transform zip iterator stream lifetime', 'Thrust transform scan stable sort execution policy par_nosync counting transform zip iterator stream lifetime'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1855,6 +1883,12 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-174', 'sparse matrix-matrix multiplication (SpMM) · 稀疏矩阵-矩阵乘法', 'kernel-vocabulary', ['A08', 'A12', 'A13'], 'A13 的 sparse-times-dense contract 使用 C=A B；format、B/C layout、algorithm、workspace 与 evidence 必须显式声明。', 'A13 uses a sparse-times-dense C=A B contract; format, B and C layouts, algorithm, workspace, and evidence must be explicit.', '2026-09-04'),
   glossaryRecord('TERM-175', 'preprocessing · 预处理', 'kernel-vocabulary', ['A12', 'A13'], 'cuSPARSE v13.3 operation-specific optional stage，可为复用的 sparsity pattern 建立 acceleration data；不是通用性能保证。', 'An optional operation-specific cuSPARSE 13.3 stage that can build acceleration data for a reused sparsity pattern; it is not a universal performance guarantee.', '2026-09-04'),
   glossaryRecord('TERM-176', 'external workspace · 外部工作区', 'kernel-vocabulary', ['A12', 'A13'], 'Exact operation/algorithm 的 size query 返回非零时由 caller 管理的 device buffer；它不属于 sparse payload，大小和 lifetime 不能从 nnz 猜测。', 'A caller-managed device buffer used when an exact operation and algorithm size query is nonzero; it is not sparse payload, and its size and lifetime cannot be guessed from nnz.', '2026-09-04'),
+  glossaryRecord('TERM-177', 'production library · 生产库', 'kernel-vocabulary', ['L01'], '由外部 owner 维护的 broad domain operation；选择仍需 exact component/version、correctness、workspace、lifecycle、portability 与 measured workload contract。', 'A broad domain operation maintained by an external owner; selection still requires exact component and version, correctness, workspace, lifecycle, portability, and measured-workload contracts.', '2026-09-04'),
+  glossaryRecord('TERM-178', 'reusable primitive · 可复用原语', 'kernel-vocabulary', ['L01', 'L02'], 'CCCL v3.4.2 context 下可组合的 reduction、scan、sort 等窄操作；caller 仍拥有 composition、storage、stream、lifetime 与 evidence。', 'A narrow composable operation such as reduction, scan, or sort in the CCCL v3.4.2 context; the caller still owns composition, storage, streams, lifetimes, and evidence.', '2026-09-04'),
+  glossaryRecord('TERM-179', 'domain-specific language (DSL) · 领域特定语言', 'kernel-vocabulary', ['L01'], '从 constrained specification 生成或选择 implementation 的语言；团队仍拥有 toolchain pin、artifact acceptance、cache、fallback、upgrade 与 evidence。', 'A language that generates or selects an implementation from a constrained specification; the team still owns the toolchain pin, artifact acceptance, cache, fallback, upgrades, and evidence.', '2026-09-04'),
+  glossaryRecord('TERM-180', 'custom kernel · 自定义内核', 'kernel-vocabulary', ['L01'], '由应用团队拥有实现、正确性、portability、调优、incident response 与 removal 的 CUDA kernel；只有 unmet contract 或合格 measured gap 才支持其生产理由。', 'A CUDA kernel whose implementation, correctness, portability, tuning, incident response, and removal are owned by the application team; only an unmet contract or qualifying measured gap supports its production rationale.', '2026-09-04'),
+  glossaryRecord('TERM-181', 'execution policy · 执行策略', 'kernel-vocabulary', ['M07', 'L02'], 'Thrust v3.4.2 中选择 host/device/sequential system，并可为 CUDA policy 绑定 stream；policy 不验证 extent、pointer accessibility、lifetime 或 numerical acceptance。', 'In Thrust v3.4.2, selects a host, device, or sequential system and can bind a CUDA policy to a stream; it does not validate extents, pointer accessibility, lifetimes, or numerical acceptance.', '2026-09-04'),
+  glossaryRecord('TERM-182', 'fancy iterator · 花式迭代器', 'kernel-vocabulary', ['L02'], 'CCCL v3.4.2 中表示 generated、transformed 或 zipped virtual range 的 iterator；必须声明 extent、system、value/reference 与 lifetime，且不保证 fusion 或 speedup。', 'In CCCL v3.4.2, an iterator representing a generated, transformed, or zipped virtual range; extent, system, value or reference behavior, and lifetime must be explicit, and fusion or speedup is not guaranteed.', '2026-09-04'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2609,6 +2643,30 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'cuSPARSE v13.3 Generic API/SpMM 与 CUDA Best Practices Guide v13.3；CUDA-capable systems，本站 Supported Environment 仍为 Native Linux；descriptor metadata、call-level algorithm、conditional caller-managed device workspace、optional preprocessing/reuse 与 sparse-vs-dense evidence boundary；无 API code 或 execution。',
       'cuSPARSE 13.3 Generic API and SpMM plus CUDA Best Practices Guide 13.3; CUDA-capable systems with native Linux remaining the site Supported Environment; descriptor metadata, call-level algorithms, conditional caller-managed device workspace, optional preprocessing and reuse, and sparse-versus-dense evidence boundaries; no API code or execution.',
+    ),
+    '2026-09-04',
+    '2026-09-04',
+  ),
+  sourceRecord(
+    'SRC-CUDA-061',
+    localized('L01 library/primitive/DSL/custom 决策与 CCCL release/license boundary', 'L01 library, primitive, DSL, custom decision and CCCL release and license boundary'),
+    'cuda-version-record',
+    ['A02', 'A03', 'A08', 'Q06', 'L01'],
+    localized(
+      'CUDA Best Practices Guide v13.3 APOD；CCCL v3.4.2 immutable release/commit、tagged latest-patch 12.x/13.x compatibility、CUB device-wide index 与 mixed file-level license map；Toolkit 12.9.2/13.3.1 evaluation，排除 11.8；无 adaptation 或 CUDA evidence。',
+      'CUDA Best Practices Guide 13.3 APOD; the CCCL v3.4.2 immutable release and commit, tagged latest-patch 12.x and 13.x compatibility, CUB device-wide index, and mixed file-level license map; Toolkit 12.9.2 and 13.3.1 evaluation with 11.8 excluded; no adaptation or CUDA evidence.',
+    ),
+    '2026-09-04',
+    '2026-09-04',
+  ),
+  sourceRecord(
+    'SRC-CUDA-062',
+    localized('L02 Thrust algorithms、policy、iterator、deprecation 与 known-issue boundary', 'L02 Thrust algorithm, policy, iterator, deprecation, and known-issue boundary'),
+    'cuda-version-record',
+    ['A01', 'A03', 'A09', 'L01', 'L02'],
+    localized(
+      'CCCL/Thrust v3.4.2 tagged transform/scan/sort interfaces 与 CUDA backends、dispatch/stream/temporary-buffer utilities、current cuda iterators、owner interoperability tests、3.4 deprecations、issues #10684/#10965/#1155/#2747 与 exact mixed file-level licenses；无 displayed source 或 observed local API/build/runtime/performance claim。',
+      'CCCL and Thrust v3.4.2 tagged transform, scan, and sort interfaces and CUDA backends, dispatch, stream, and temporary-buffer utilities, current cuda iterators, owner interoperability tests, 3.4 deprecations, issues #10684, #10965, #1155, and #2747, and exact mixed file-level licenses; no displayed source or observed local API, build, runtime, or performance claim.',
     ),
     '2026-09-04',
     '2026-09-04',

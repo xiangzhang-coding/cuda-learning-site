@@ -86,6 +86,7 @@ const learningUnits = [
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -122,10 +123,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 10 },
-  { suffix: 'practice/', count: 66 },
+  { suffix: 'practice/', count: 68 },
   { suffix: 'visuals/', count: 19 },
-  { suffix: 'glossary/', count: 176 },
-  { suffix: 'sources-and-versions/', count: 76 },
+  { suffix: 'glossary/', count: 182 },
+  { suffix: 'sources-and-versions/', count: 78 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -243,28 +244,41 @@ test('serves the exact R3 release and current publication with production canoni
     artifactType: 'static-assets',
     canonicalOrigin,
     releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
+    compatibility: {
+      componentBoundaries: {
+        cccl: {
+          version: '3.4.2',
+          selection: 'independent',
+          commit: 'd36012203ef73ac7f966e848dd88482273e91e02',
+          releasedOn: '2026-08-05',
+          toolkitLanes: ['cuda-12.9', 'cuda-13.3'],
+          excludedToolkitLanes: ['cuda-11.8'],
+        },
+      },
+    },
     knownLimitations: expect.arrayContaining([
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'The five profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
       'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'L01-L13 production-library Learning Units and all R4 or later curriculum material are outside this release.',
+      'L01-L02 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, and static decision or iterator records provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L02 are published in the rolling R4 surface; L03-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 232,
-    sourceRoutes: 464,
-    exerciseSetPublicationPairs: 61,
-    solutionSetPublicationPairs: 61,
-    learningUnits,
+    publicationPairs: 238,
+    sourceRoutes: 476,
+    exerciseSetPublicationPairs: 63,
+    solutionSetPublicationPairs: 63,
+    learningUnits: currentLearningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 66,
+    practiceBankEntries: 68,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
-    glossaryTerms: 176,
-    sourceRecords: 76,
+    glossaryTerms: 182,
+    sourceRecords: 78,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -276,6 +290,7 @@ test('serves the exact R3 release and current publication with production canoni
     referenceEnvironments: [],
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
+    r4EvidenceNeutralLearningUnits: ['L01', 'L02'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: profilerReportPlans,
     capturedProfilerReports: [],
@@ -353,7 +368,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(464);
+  expect(publishedRoutes).toHaveLength(476);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -364,8 +379,8 @@ test('serves the exact R3 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/232.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/464.*source routes/);
+    await expect(page.locator('main')).toContainText(/238.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/476.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -375,7 +390,7 @@ test('serves the exact R3 release and current publication with production canoni
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(347);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(357);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -468,6 +483,8 @@ test('serves the exact R3 release and current publication with production canoni
     { suffix: 'algorithms/attention-as-an-io-problem/', unitId: 'A11', prerequisites: 'A08,A10' },
     { suffix: 'algorithms/sparse-formats-spmv/', unitId: 'A12', prerequisites: 'M01,M02' },
     { suffix: 'algorithms/sparse-matrix-multiplication-preprocessing/', unitId: 'A13', prerequisites: 'A12,A08' },
+    { suffix: 'libraries/library-primitive-dsl-custom-kernel/', unitId: 'L01', prerequisites: 'A02,A03,A08,Q06' },
+    { suffix: 'libraries/thrust-algorithm-vocabulary/', unitId: 'L02', prerequisites: 'A01,A03,A09' },
     { suffix: 'visuals/attention-memory-traffic/', unitId: 'VIS18', prerequisites: 'A11' },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {

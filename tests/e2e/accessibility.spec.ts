@@ -31,6 +31,8 @@ const representativeThemeRoutes = [
   '/en/correctness/transpose-optimization-case-study/',
   '/en/correctness/reduction-optimization-case-study/',
   '/en/correctness/gemm-optimization-case-study/',
+  '/en/libraries/library-primitive-dsl-custom-kernel/',
+  '/en/libraries/thrust-algorithm-vocabulary/',
   '/en/labs/optimize-canonical-transpose/',
   '/en/examples/streams-events-overlap/',
   '/en/examples/unified-memory-migration/',

@@ -239,6 +239,10 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/correctness/reduction-optimization-case-study/exercises/',
     '/correctness/gemm-optimization-case-study/exercises/',
     '/en/correctness/gemm-optimization-case-study/exercises/',
+    '/libraries/library-primitive-dsl-custom-kernel/exercises/',
+    '/en/libraries/library-primitive-dsl-custom-kernel/exercises/',
+    '/libraries/thrust-algorithm-vocabulary/exercises/',
+    '/en/libraries/thrust-algorithm-vocabulary/exercises/',
     '/start/cpp17-for-cuda/exercises/',
     '/en/start/cpp17-for-cuda/exercises/',
     '/start/linux-command-line/exercises/',
@@ -331,6 +335,10 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/correctness/reduction-optimization-case-study/solutions/',
     '/correctness/gemm-optimization-case-study/solutions/',
     '/en/correctness/gemm-optimization-case-study/solutions/',
+    '/libraries/library-primitive-dsl-custom-kernel/solutions/',
+    '/en/libraries/library-primitive-dsl-custom-kernel/solutions/',
+    '/libraries/thrust-algorithm-vocabulary/solutions/',
+    '/en/libraries/thrust-algorithm-vocabulary/solutions/',
     '/start/cpp17-for-cuda/solutions/',
     '/en/start/cpp17-for-cuda/solutions/',
     '/start/linux-command-line/solutions/',
@@ -362,6 +370,8 @@ describe('Exercises and Practice Bank contract', () => {
     'correctness/transpose-optimization-case-study',
     'correctness/reduction-optimization-case-study',
     'correctness/gemm-optimization-case-study',
+    'libraries/library-primitive-dsl-custom-kernel',
+    'libraries/thrust-algorithm-vocabulary',
   ].flatMap((unitPath) => [
     { unitPath, localePrefix: '' },
     { unitPath, localePrefix: 'en/' },
@@ -386,7 +396,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes sixty-six complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes sixty-eight complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -411,6 +421,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
       'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
+      'PB-R4-001', 'PB-R4-002',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -469,6 +480,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-014': 'algorithms/attention-as-an-io-problem',
       'PB-R3-015': 'algorithms/sparse-formats-spmv',
       'PB-R3-016': 'algorithms/sparse-matrix-multiplication-preprocessing',
+      'PB-R4-001': 'libraries/library-primitive-dsl-custom-kernel',
+      'PB-R4-002': 'libraries/thrust-algorithm-vocabulary',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -597,6 +610,20 @@ describe('Exercises and Practice Bank contract', () => {
         'algorithms/sparse-formats-spmv',
         'algorithms/sparse-matrix-multiplication-preprocessing',
       ],
+      'PB-R4-001': [
+        'algorithms/multi-stage-reduction',
+        'algorithms/inclusive-exclusive-scan',
+        'algorithms/tiled-gemm-correctness',
+        'correctness/apod-optimization-loop',
+        'libraries/library-primitive-dsl-custom-kernel',
+      ],
+      'PB-R4-002': [
+        'algorithms/elementwise-map',
+        'algorithms/inclusive-exclusive-scan',
+        'algorithms/sorting-selection-compaction',
+        'libraries/library-primitive-dsl-custom-kernel',
+        'libraries/thrust-algorithm-vocabulary',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -624,8 +651,10 @@ describe('Exercises and Practice Bank contract', () => {
           ? /\/(?:en\/)?algorithms\//
         : prerequisitePath?.startsWith('correctness/')
           ? /\/(?:en\/)?correctness\//
-          : prerequisitePath?.startsWith('toolchain/')
+        : prerequisitePath?.startsWith('toolchain/')
             ? /\/(?:en\/)?toolchain\//
+          : prerequisitePath?.startsWith('libraries/')
+            ? /\/(?:en\/)?libraries\//
         : /\/(?:en\/)?(?:start|foundations)\//;
       expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link))).toBe(true);
       if (prerequisitePath) {
@@ -644,10 +673,10 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[12]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R3-01[5-6]$/.test(entryId)
+        const sourceDate = /^PB-R4-00[12]$|^PB-R3-01[5-6]$/.test(entryId)
           ? '2026-09-04'
           : /^PB-R3-01[1-4]$/.test(entryId)
           ? '2026-09-03'
@@ -678,6 +707,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A14']) expect(text).toContain(unitId);
     for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13']) expect(text).toContain(unitId);
+    for (const unitId of ['L01', 'L02']) expect(text).toContain(unitId);
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
@@ -705,6 +735,9 @@ describe('Exercises and Practice Bank contract', () => {
       expect(builtHtml, slug).toContain(slug);
     }
     for (const slug of ['apod-optimization-loop', 'timeline-first-nsight-systems', 'kernel-first-nsight-compute', 'transpose-optimization-case-study', 'reduction-optimization-case-study', 'gemm-optimization-case-study']) {
+      expect(builtHtml, slug).toContain(slug);
+    }
+    for (const slug of ['library-primitive-dsl-custom-kernel', 'thrust-algorithm-vocabulary']) {
       expect(builtHtml, slug).toContain(slug);
     }
   });

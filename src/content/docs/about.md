@@ -44,11 +44,11 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 已完成的 R3 聚合发布复核是不可变快照，固定为 232 个 Publication Pairs、464 条 source routes 与 347 条 catalog records。它包含 61 组 Exercises、61 组独立 reviewed solutions，以及 10 个 Nsight report-analysis Practice Bank 条目；R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
 
-Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。L13 与 EX20 仍未发布；当前算法页不发明 Generic API code、workspace cost、determinism、structured-sparsity support 或 performance result。
+Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)在 rolling R4 surface 新增 [L01](/libraries/library-primitive-dsl-custom-kernel/)`<-[A02,A03,A08,Q06]`与 [L02](/libraries/thrust-algorithm-vocabulary/)`<-[A01,A03,A09]`。L03-L13、LAB11/LAB12 与 EX20 仍未发布。
 
-R3 公开内容有 16 个 Runnable Examples（EX01-EX16）、10 个 Labs（LAB01-LAB10）、19 项 Visual Explainer（独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22）、66 个[练习题库](/practice/)条目、176 项[术语表](/glossary/)词条和 76 项[来源记录](/sources-and-versions/)，共 347 条 catalog records；公开源文件形成 232 个 Publication Pairs 和 464 条 source routes。
+Rolling current public surface 有 64 个 Learning Units、16 个 Runnable Examples（EX01-EX16）、10 个 Labs（LAB01-LAB10）、19 项 Visual Explainer（独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22）、68 个[练习题库](/practice/)条目、182 项[术语表](/glossary/)词条和 78 项[来源记录](/sources-and-versions/)，共 357 条 catalog records；公开源文件形成 238 个 Publication Pairs 和 476 条 source routes，包含 63 组 Exercises 与 63 组独立 reviewed solutions。
 
-Q06-Q13 与 A10-A14 作为 Learning Units，其四个 evidence arrays 均为空且不授予 Evidence Status。五份 profiler fixtures 都是 Environment Manifest 未填写、recorded observations 为空的 expected-only plans，不是 captured reports。Matrices、storage/contribution ledgers、owner review 与 shared static composition 都是 host arithmetic/static analysis；没有 CUDA/cuSPARSE execution、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup 或 winner。19 项 Visual Explainer 仍是 evidence-neutral browser models。
+Q06-Q13、A10-A14 与 L01-L02 作为 Learning Units，其四个 evidence arrays 均为空且不授予 Evidence Status。L01/L02 使用原创 decision/vocabulary tables，不展示 owner source，也不记录 local API availability、build、runtime、synchronization、traffic、fusion、timing、speedup 或 winner。Selected CCCL v3.4.2 coordinate 独立于 Toolkit labels，只用于 12.9.2/13.3.1 evaluation，并排除 11.8。19 项 Visual Explainer 仍是 evidence-neutral browser models。
 
 ## 作者
 

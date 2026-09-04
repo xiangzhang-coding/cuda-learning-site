@@ -24,13 +24,13 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(347);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(357);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 10, practice: 66, visuals: 19, glossary: 176, sources: 76 });
+    ).toEqual({ labs: 10, practice: 68, visuals: 19, glossary: 182, sources: 78 });
     for (const absentId of ['L03', 'LAB11', 'L06', 'LAB12']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
@@ -199,6 +199,9 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R3-(?:00[1-9]|01[0-6])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
     ]);
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R4-/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'PB-R4-001', 'PB-R4-002',
+    ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
     );
@@ -211,6 +214,9 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:16[6-9]|17[0-6])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 11 }, (_, index) => `TERM-${166 + index}`),
     );
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:17[7-9]|18[0-2])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 6 }, (_, index) => `TERM-${177 + index}`),
+    );
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3\d|4[0-5])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
       'SRC-CUDA-031', 'SRC-CUDA-032', 'SRC-CUDA-033', 'SRC-CUDA-034', 'SRC-CUDA-035',
@@ -222,6 +228,9 @@ describe('resource index catalog', () => {
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-(?:05\d|060)$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052', 'SRC-CUDA-053', 'SRC-CUDA-054', 'SRC-CUDA-055', 'SRC-CUDA-056', 'SRC-CUDA-057', 'SRC-CUDA-058', 'SRC-CUDA-059', 'SRC-CUDA-060',
+    ]);
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-06[12]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-061', 'SRC-CUDA-062',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
@@ -597,7 +606,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(201);
+    expect(projected).toHaveLength(207);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

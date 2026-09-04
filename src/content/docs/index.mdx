@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R3 聚合发布复核是不可变快照，固定为 232 个双语发布对（Publication Pair）、464 条 source routes 与 347 条 catalog records；R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R3 聚合发布复核保持为不可变快照，固定为 232 个双语发布对（Publication Pair）、464 条 source routes 与 347 条 catalog records。Rolling R4 surface 通过 [issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)新增 [L01](/libraries/library-primitive-dsl-custom-kernel/)与 [L02](/libraries/thrust-algorithm-vocabulary/)，使 current scope 达到 64 个 Learning Units、238 个 Publication Pairs、476 条 source routes 与 357 条 catalog records；R4 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -57,6 +57,8 @@ head:
 [A01 逐元素映射与一元素一所有者](/algorithms/elementwise-map/)同时依赖 F03、F04 和 M02；A02-A09 保留既有边；[A10 数值稳定 Softmax](/algorithms/numerically-stable-softmax/)严格依赖 A02、M02 与 M03；[A11 把 Attention 分解为 IO 问题](/algorithms/attention-as-an-io-problem/)严格依赖 A08 与 A10；[A12 稀疏格式、存储账本与 SpMV](/algorithms/sparse-formats-spmv/)严格依赖 M01 与 M02；[A13 稀疏矩阵乘法、预处理与工作区决策](/algorithms/sparse-matrix-multiplication-preprocessing/)严格依赖 A12 与 A08；[A14 用 Arithmetic Intensity 选择可证伪的算法优化](/algorithms/algorithm-choice-arithmetic-intensity/)严格依赖 A01、A02、A05 与 A08。
 
 [Q01](/correctness/cpu-references-tolerances-invariants/)至 [Q08](/correctness/kernel-first-nsight-compute/)保留既有边；[Q09 用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)严格依赖 Q08 与 F08；[Q10 从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)严格依赖 Q05 与 A14；[Q11 用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)严格依赖 A05、Q06、Q08 与 Q10；[Q12 用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)严格依赖 A02、Q02、Q06 与 Q08，从 immutable [EX11](/examples/multi-stage-reduction/)开始并复用 evidence-neutral [VIS10](/visuals/reduction-stages/)；[Q13 用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)严格依赖 A08、Q06、Q08 与 Q10，从 immutable [EX15](/examples/tiled-gemm/)开始并复用 evidence-neutral [VIS12](/visuals/gemm-tiling-hierarchy/)。
+
+[L01 在生产库、可复用原语、DSL 与自定义内核之间做选择](/libraries/library-primitive-dsl-custom-kernel/)严格依赖 A02、A03、A08 与 Q06；[L02 把 Thrust 作为算法词汇](/libraries/thrust-algorithm-vocabulary/)严格依赖 A01、A03 与 A09。两者都发布完整练习和独立解答，独立固定 CCCL v3.4.2 用于 Toolkit 12.9.2/13.3.1 evaluation，排除 CUDA 11.8，不展示 source listing，也不授予 Evidence Status。
 
 F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
 
@@ -72,6 +74,8 @@ Q01-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invaria
 
 Q06-Q13 也提供完整练习与独立解答，包括 [Q09 练习](/correctness/occupancy-stalls-throughput/exercises/)与[解答](/correctness/occupancy-stalls-throughput/solutions/)、[Q10 练习](/correctness/roofline-arithmetic-intensity/exercises/)与[解答](/correctness/roofline-arithmetic-intensity/solutions/)、[Q11 练习](/correctness/transpose-optimization-case-study/exercises/)与[解答](/correctness/transpose-optimization-case-study/solutions/)、[Q12 练习](/correctness/reduction-optimization-case-study/exercises/)与[解答](/correctness/reduction-optimization-case-study/solutions/)，以及 [Q13 练习](/correctness/gemm-optimization-case-study/exercises/)与[解答](/correctness/gemm-optimization-case-study/solutions/)。
 
+L01-L02 发布 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)，以及 [L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)。
+
 当前有 16 个可运行示例（Runnable Example）：EX01-EX16。新增 [EX15 Tiled GEMM](/examples/tiled-gemm/)严格依赖 A08；EX14 仍依赖 A05，EX16 仍依赖 Q03/Q04。
 
 EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane 使用同一原创 C++17 implementation；compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。Host-only utility 不建立 GPU correctness，本站没有运行 EX15，也不发布实际 output、timing、speedup 或其他 performance number。
@@ -80,9 +84,9 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
 
 正式 Visual Explainer 共 19 项：独立 VIS01-VIS14 与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)，加上内嵌 VIS19-VIS22。VIS18 严格依赖 A11，提供 deterministic shape/stage/IO ledger 与 purpose-built static SVG；它不是 GPU traffic 或 performance evidence。
 
-A10-A14、Q06-Q13、VIS13 与 VIS18 的 compilation/runtime axes 均为空。A12/A13 的矩阵、payload/contribution counts 与 shared composition 是 host arithmetic/static analysis；它们不授予 Evidence Status。R3 没有 CUDA/cuSPARSE execution、captured profiler report、workspace/preprocessing/determinism observation、structured-sparsity support、actual traffic、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
+A10-A14、Q06-Q13、L01-L02、VIS13 与 VIS18 的 compilation/runtime axes 均为空。L01/L02 decision/iterator records 是静态教学材料；API presence 与 owner tests 不授予本站状态。Current publication 没有 CUDA、CCCL、Thrust 或 cuSPARSE execution、captured profiler report、local library output、synchronization observation、actual traffic、fusion、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
 
-R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录；公开源文件形成 232 个 Publication Pairs，即 464 条 source routes。61 组 Exercises、61 组独立 reviewed solutions，以及 10 个 Nsight report-analysis Practice Bank 条目都纳入同一发布合同；R4 聚合复核仍待完成。
+Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录。Rolling current catalog 为 10 个 Lab、68 个 Practice Bank 条目、19 项 Visual Explainer、182 个 Glossary 词条和 78 条 source record，共 357 条记录；current source files 形成 238 个 Publication Pairs，即 476 条 source routes，包含 63 组 Exercises 与 63 组独立 reviewed solutions。R3 精确 10 项 Nsight report-analysis inventory 不变；R4 聚合复核仍待完成。
 
 ## 边界先说清
 
@@ -391,6 +395,16 @@ R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explaine
     <strong>用受控证据优化 Canonical GEMM</strong>
     <small>从 EX15 出发，检验 tile shape、reuse、resource、occupancy 与 traffic 假设。</small>
   </a>
+  <a className="route-card" href="/libraries/library-primitive-dsl-custom-kernel/">
+    <span>L01 · IMPLEMENTATION DECISION</span>
+    <strong>在生产库、可复用原语、DSL 与自定义内核之间做选择</strong>
+    <small>在写 custom code 前比较正确性、维护、可移植性、证据与所有权。</small>
+  </a>
+  <a className="route-card" href="/libraries/thrust-algorithm-vocabulary/">
+    <span>L02 · THRUST VOCABULARY</span>
+    <strong>把 Thrust 作为算法词汇</strong>
+    <small>把 transform、scan、sort、policy 与 iterator composition 映射回既有合同。</small>
+  </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>环境报告可运行示例</strong>
@@ -609,17 +623,17 @@ R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explaine
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 64 道原创题迁移证据、环境、架构、kernel、内存、算法、工具链与正确性判断。</small>
+    <small>用 68 道原创题迁移证据、环境、架构、kernel、内存、算法、library、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 170 个中英文规范术语。</small>
+    <small>核对本站使用的 182 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 74 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 78 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>
