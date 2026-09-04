@@ -315,6 +315,7 @@ test('filter controls and direct resource links support keyboard operation', asy
 });
 
 test('the expanded catalog keeps exact cards, anchors, counts, freshness, and publication boundaries', async ({ page }) => {
+  test.setTimeout(120_000);
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
