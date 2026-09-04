@@ -96,9 +96,9 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 ## The published route
 
-As of **2026-09-04**, the current rolling Stable Curriculum publication after [issue #31](https://github.com/xiangzhang-coding/cuda-learning-site/issues/31) completely publishes 62 Learning Units in both languages: O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13. The complete strict prerequisite graph currently published is:
+As of **2026-09-04**, the R3 Stable Curriculum reviewed in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) completely publishes 62 Learning Units in both languages: O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13. The complete strict prerequisite graph currently published is:
 
-The completed R2 aggregate review is an immutable snapshot fixed at 186 Publication Pairs, 372 source routes, and 284 catalog records. The current incremental publication has advanced to 232 Publication Pairs and 464 source routes without rewriting R2; the R3 aggregate review remains pending.
+The completed R3 aggregate release review is an immutable snapshot fixed at 232 Publication Pairs, 464 source routes, and 347 catalog records. It also inventories 61 Exercise sets, 61 separate reviewed-solution sets, and 10 Nsight report-analysis Practice Bank entries. R1 and R2 remain historical coordinates, and the R4 aggregate review remains pending.
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
@@ -125,9 +125,9 @@ Q06-Q13 have direct Exercises and separate reviewed solutions, including [Q09 Ex
 
 The algorithms route links to Exercises and separate solutions for A01-A14, including [A12 Exercises](/en/algorithms/sparse-formats-spmv/exercises/) and [solutions](/en/algorithms/sparse-formats-spmv/solutions/), plus [A13 Exercises](/en/algorithms/sparse-matrix-multiplication-preprocessing/exercises/) and [solutions](/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/).
 
-The [Lab Index](/en/labs/) lists 10 Labs, LAB01-LAB10. The [Visual Explainer Index](/en/visuals/) lists 19 explainers: standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. The current catalog has 10 Labs, 66 [Practice Bank](/en/practice/) entries, 19 Visual Explainers, 176 [Glossary](/en/glossary/) terms, and 76 [source records](/en/sources-and-versions/), for 347 records total. Current rolling public content forms 232 Publication Pairs and 464 source routes. These figures are distinct from immutable R2's 186/372/284 snapshot, and the R3 aggregate review remains pending.
+The [Lab Index](/en/labs/) lists 10 Labs, LAB01-LAB10. The [Visual Explainer Index](/en/visuals/) lists 19 explainers: standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. The R3 catalog has 10 Labs, 66 [Practice Bank](/en/practice/) entries, 19 Visual Explainers, 176 [Glossary](/en/glossary/) terms, and 76 [source records](/en/sources-and-versions/), for 347 records total. Public content forms 232 Publication Pairs and 464 source routes. The R4 aggregate review remains pending.
 
-A12 and A13 have all four evidence arrays empty and grant no Evidence Status. Sparse matrices, storage and contribution ledgers, and the shared composition are host arithmetic or static analysis. This increment records no CUDA or cuSPARSE execution, workspace, preprocessing, determinism or structured-sparsity observation, actual traffic, timing, speedup, winner, Reference Environment, or `performanceObservations`.
+Q06-Q13 and A10-A14 have all four evidence arrays empty and grant no Evidence Status. Sparse matrices, storage and contribution ledgers, and the shared composition are host arithmetic or static analysis. The five profiler fixtures are expected-only plans, not captured reports. R3 records no CUDA or cuSPARSE execution, workspace, preprocessing, determinism or structured-sparsity observation, actual traffic, timing, speedup, winner, Reference Environment, or `performanceObservations`.
 
 ## Three visual themes, one body of content
 

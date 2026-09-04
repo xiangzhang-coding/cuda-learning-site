@@ -75,34 +75,40 @@ const projectExamples = [
   { suffix: 'examples/tiled-gemm/', project: ex15Project },
   { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
 ] as const;
-const r2LearningUnits = [
+const learningUnits = [
   'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
   'F01', 'F02', 'F03', 'F04', 'F05', 'F06', 'F07', 'F08',
   'M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08',
   'M09', 'M10', 'M11', 'M12', 'M13', 'M14',
   'M15', 'M16', 'M17', 'M18', 'M19',
   'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09',
-  'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
-] as const;
-const currentLearningUnits = [
-  ...r2LearningUnits.slice(0, 44),
   'A10', 'A11', 'A12', 'A13', 'A14',
-  ...r2LearningUnits.slice(44),
+  'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
-const r2Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB07'] as const;
 const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
-const r2VisualExplainers = [
-  'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
-  'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
-] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
+] as const;
+const r3EvidenceNeutralLearningUnits = [
+  'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
+  'A10', 'A11', 'A12', 'A13', 'A14',
+] as const;
+const nsightReportAnalysisPracticeIds = [
+  'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-007',
+  'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
+] as const;
+const profilerReportPlans = [
+  '/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json',
+  '/assets/profiler-report-fixtures/lab08-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/lab10-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/q12-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -149,7 +155,7 @@ function expectCleanArchive(archive: Buffer, label: string) {
   expect(scanArtifactBuffer(archive, label), `${label} passes the complete artifact policy`).toEqual([]);
 }
 
-test('serves the exact R2 release and current publication with production canonicals', async ({ page, request }) => {
+test('serves the exact R3 release and current publication with production canonicals', async ({ page, request }) => {
   test.setTimeout(600_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
@@ -158,9 +164,9 @@ test('serves the exact R2 release and current publication with production canoni
   expect(scanArtifactBuffer(releaseBody, 'release.json')).toEqual([]);
   const release = JSON.parse(releaseBody.toString('utf8'));
   expect(release).toMatchObject({
-    schemaVersion: 3,
-    releaseId: 'R2',
-    reviewDate: '2026-08-31',
+    schemaVersion: 4,
+    releaseId: 'R3',
+    reviewDate: '2026-09-04',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -175,29 +181,46 @@ test('serves the exact R2 release and current publication with production canoni
         expect.objectContaining({ id: 'R1-GCC13-CXX23', result: 'unsupported', grantsOrdinaryDialectSupport: false }),
         expect.objectContaining({ id: 'EX10-GCC14-CXX23', result: 'passed', grantsOrdinaryDialectSupport: false }),
       ]),
+      profilerComponents: {
+        nsightSystems: expect.objectContaining({ currentDocumentationVersion: '2026.4', reportFormat: '.nsys-rep' }),
+        nsightCompute: expect.objectContaining({ currentVersion: '2026.2.1', reportFormat: '.ncu-rep' }),
+        cupti: expect.objectContaining({ currentVersion: '2026.2.1' }),
+        permissionPolicy: {
+          performanceCounters: 'administrator-approved-non-admin-access',
+          privilegeEscalationAllowed: false,
+          deniedOrUnavailableMetrics: 'block-and-record',
+        },
+      },
     },
     evidence: {
       compileChecked: ['EX02', 'EX10', 'LAB02'],
       runtimeNotApplicable: ['EX10'],
+      communityObserved: [],
       runtimeVerified: [],
       referenceEnvironments: [],
       performanceObservations: [],
+      expectedOnlyProfilerReportPlans: profilerReportPlans,
+      capturedProfilerReports: [],
     },
     knownLimitations: expect.arrayContaining([
-      'No Reference Environment or Runtime-Verified R2 subject is declared.',
-      'R3 and later curriculum material is outside this release.',
+      'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
+      'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
+      'L01-L13 production-library Learning Units and all R4 or later curriculum material are outside this release.',
     ]),
   });
   expect(release.scope).toEqual({
-    publicationPairs: 186,
-    sourceRoutes: 372,
-    learningUnits: r2LearningUnits,
+    publicationPairs: 232,
+    sourceRoutes: 464,
+    exerciseSetPublicationPairs: 61,
+    solutionSetPublicationPairs: 61,
+    learningUnits,
     runnableExamples: runnableExampleIds,
-    labs: r2Labs,
-    visualExplainers: r2VisualExplainers,
-    practiceBankEntries: 50,
-    glossaryTerms: 151,
-    sourceRecords: 61,
+    labs: currentLabs,
+    visualExplainers: currentVisualExplainers,
+    practiceBankEntries: 66,
+    nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
+    glossaryTerms: 176,
+    sourceRecords: 76,
   });
   expect(
     release.scope.labs.length +
@@ -205,7 +228,7 @@ test('serves the exact R2 release and current publication with production canoni
     release.scope.visualExplainers.length +
     release.scope.glossaryTerms +
     release.scope.sourceRecords,
-  ).toBe(284);
+  ).toBe(347);
 
   const publicationResponse = await request.get('/publication.json');
   expect(publicationResponse.ok()).toBe(true);
@@ -219,28 +242,27 @@ test('serves the exact R2 release and current publication with production canoni
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    releaseReview: { latestCompleted: 'R2', next: 'R3', status: 'pending' },
+    releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
     knownLimitations: expect.arrayContaining([
-      'Q11 is a Learning Unit with empty compilation, runtime, expected-observation, and recorded-observation arrays; it grants no Evidence Status and summarizes linked subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable EX14 source, VIS11, static material, browser models, and the expected-only fixture do not change those boundaries, and no timing, profiler metric, speedup, bottleneck, or winner is recorded.',
-      'Q12 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX11 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS10, and expected-only fixture add no runtime or performance evidence, and every stage result remains expected and unrecorded.',
-      'Q13 is a Learning Unit with all four evidence arrays empty and grants no Evidence Status. Linked EX15 retains empty compilation and recorded observations and remains Pending Hardware Verification; the reviewed runner, compile-only gate, VIS12, and expected-only fixture add no runtime or performance evidence, every stage result remains expected and unrecorded, and no cuBLAS or Tensor Core result is published.',
-      'A10 through A13 are Learning Units with all four evidence arrays empty and grant no Evidence Status. Their numerical fixtures, sparse matrices, storage and contribution counts, and traffic ledgers are host arithmetic and static analysis only. VIS18 and the shared A12/A13 sparse composition execute no CUDA, query no GPU, observe no actual traffic, and grant no Evidence Status; no cuSPARSE execution, workspace or preprocessing result, determinism or structured-sparsity observation, backend, dtype, timing, bandwidth, bottleneck, speedup, or winner is published.',
-      'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication. L13 and EX20 have no current public destination; EX20 remains deferred until L13 publishes the exact cuSPARSE API contract.',
+      'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
+      'The five profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
       'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
-      'The current publication records no sanitizer, profiler, numerical-output, timing, overlap, migration, contention, performance, or speedup observation.',
+      'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'Q06-Q13, A10-A14, LAB06, LAB08-LAB10, VIS13, VIS14, and VIS18 are incremental R3 publications; the aggregate R3 release review remains pending.',
-      'R3 material beyond this incremental publication and all later curriculum material remain outside the current publication.',
+      'L01-L13 production-library Learning Units and all R4 or later curriculum material are outside this release.',
     ]),
   });
   expect(publication.scope).toEqual({
     publicationPairs: 232,
     sourceRoutes: 464,
-    learningUnits: currentLearningUnits,
+    exerciseSetPublicationPairs: 61,
+    solutionSetPublicationPairs: 61,
+    learningUnits,
     runnableExamples: runnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
     practiceBankEntries: 66,
+    nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     glossaryTerms: 176,
     sourceRecords: 76,
   });
@@ -249,9 +271,14 @@ test('serves the exact R2 release and current publication with production canoni
     noCompileCheckedClaim: currentNoCompileCheckedClaim,
     pendingHardwareVerification: currentPendingHardwareVerification,
     runtimeNotApplicable: ['EX10'],
+    communityObserved: [],
     runtimeVerified: [],
     referenceEnvironments: [],
     performanceObservations: [],
+    r3EvidenceNeutralLearningUnits,
+    evidenceNeutralVisualExplainers: currentVisualExplainers,
+    expectedOnlyProfilerReportPlans: profilerReportPlans,
+    capturedProfilerReports: [],
     retainedCompileRuns: [32720214527, 33275734951],
   });
   expect(publication.knownLimitations).not.toContain('LAB06 has no current public destination.');
@@ -259,8 +286,8 @@ test('serves the exact R2 release and current publication with production canoni
     'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
   );
   expect(publication.knownLimitations.filter((limitation: string) =>
-    limitation.includes('no current public destination'))).toEqual([
-    'L03 and LAB11 have no current public destination; LAB11 remains unpublished until L03 provides its production-primitives prerequisite. L06 and LAB12 also remain unpublished, and LAB12 waits for L06 after Q13 publication. L13 and EX20 have no current public destination; EX20 remains deferred until L13 publishes the exact cuSPARSE API contract.',
+    limitation.includes('no R3 public destination'))).toEqual([
+    "L03 and LAB11, L06 and LAB12, and L13 and EX20 have no R3 public destination. LAB11 waits for L03, LAB12 waits for L06, and EX20 waits for L13's exact cuSPARSE API contract.",
   ]);
 
   for (const { fixtureName, reviewDate } of [

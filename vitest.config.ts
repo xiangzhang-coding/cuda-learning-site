@@ -16,8 +16,7 @@ export default defineConfig({
         'src/resource-indexes/resource-index-model.ts',
         'src/visuals/*-model.ts',
       ],
-      reporter: ['text', 'json-summary'],
-      reportsDirectory: 'coverage',
+      reporter: ['text'],
       thresholds: {
         branches: 80,
         functions: 90,

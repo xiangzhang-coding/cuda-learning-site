@@ -11,6 +11,19 @@ const same = (value: string): LocalizedText => localized(value, value);
 const noHardware = localized('无；仅浏览静态记录。', 'None; static record lookup only.');
 const noCudaHardware = localized('无；浏览器教学模型不需要 CUDA-capable 系统。', 'None; the browser teaching model requires no CUDA-capable system.');
 
+export const R3_NSIGHT_REPORT_ANALYSIS_PRACTICE_IDS = [
+  'PB-R3-002',
+  'PB-R3-003',
+  'PB-R3-004',
+  'PB-R3-005',
+  'PB-R3-007',
+  'PB-R3-008',
+  'PB-R3-009',
+  'PB-R3-010',
+  'PB-R3-011',
+  'PB-R3-012',
+] as const;
+
 function glossaryRecord(
   planningId: string,
   title: string,
@@ -1179,16 +1192,16 @@ const practice: readonly ResourceIndexRecord[] = [
   {
     planningId: 'PB-R3-005',
     group: 'practice',
-    title: localized('计算并审查一个单位、边界或来源不一致的 Roofline', 'Calculate and audit a Roofline with a unit, boundary, or provenance mismatch'),
+    title: localized('分析单位、边界或来源不一致的 synthetic Nsight Roofline report', 'Analyze a synthetic Nsight Roofline report with a unit, boundary, or provenance mismatch'),
     href: localized('/practice/#pb-r3-005', '/en/practice/#pb-r3-005'),
-    resourceType: 'concepts-implementation',
+    resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['Q10'],
     relatedUnits: ['Q05', 'A14', 'Q09', 'Q10', 'LAB09', 'VIS13'],
-    hardwareGate: localized('无；只计算原创合成输入并审查静态 model contract，不运行 CUDA 或 profiler。', 'None; calculate original synthetic inputs and audit a static model contract without running CUDA or a profiler.'),
+    hardwareGate: localized('无；只分析原创 synthetic Nsight report packet 并审查静态 model contract，不运行 CUDA 或 profiler。', 'None; analyze an original synthetic Nsight report packet and audit its static model contract without running CUDA or a profiler.'),
     versionGate: localized('CUDA Best Practices Guide v13.3、Nsight Compute 2026.2.1 与 2009 original Roofline model；current tool semantics 不从论文倒推。', 'CUDA Best Practices Guide v13.3, Nsight Compute 2026.2.1, and the original 2009 Roofline model; current tool semantics are not projected backward from the paper.'),
     reviewedOn: '2026-09-01',
-    keywords: localized('Roofline arithmetic intensity ridge point unit boundary provenance mismatch audit', 'Roofline arithmetic intensity ridge point unit boundary provenance mismatch audit'),
+    keywords: localized('Nsight Compute synthetic report Roofline arithmetic intensity ridge point unit boundary provenance mismatch audit', 'Nsight Compute synthetic report Roofline arithmetic intensity ridge point unit boundary provenance mismatch audit'),
   },
   {
     planningId: 'PB-R3-006',
@@ -1207,19 +1220,19 @@ const practice: readonly ResourceIndexRecord[] = [
   {
     planningId: 'PB-R3-007',
     group: 'practice',
-    title: localized('把四变量 transpose 实验修复为分阶段比较', 'Repair a four-variable transpose experiment as staged comparisons'),
+    title: localized('分析四变量 transpose report 并修复为分阶段比较', 'Analyze a four-variable transpose report and repair it as staged comparisons'),
     href: localized('/practice/#pb-r3-007', '/en/practice/#pb-r3-007'),
     resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['Q11'],
     relatedUnits: ['A05', 'Q06', 'Q08', 'Q10', 'EX14', 'VIS11', 'LAB10'],
-    hardwareGate: localized('无；只修复静态 transpose comparison design，不运行 CUDA 或 profiler。', 'None; repair a static transpose comparison design without running CUDA or a profiler.'),
+    hardwareGate: localized('无；只分析 synthetic Nsight report packet 并修复静态 transpose comparison design，不运行 CUDA 或 profiler。', 'None; analyze a synthetic Nsight report packet and repair a static transpose comparison design without running CUDA or a profiler.'),
     versionGate: localized(
-      'CUDA Programming Guide v13.3 与 12.9.1/11.8.0 archives；Q11/EX14/VIS11 transpose、coalescing、tiling 与 bank-layout facts；无 measured claim。',
-      'CUDA Programming Guide v13.3 and the 12.9.1/11.8.0 archives; Q11/EX14/VIS11 transpose, coalescing, tiling, and bank-layout facts; no measured claim.',
+      'CUDA Programming Guide v13.3 与 12.9.1/11.8.0 archives；Nsight Compute 2026.2.1 与 selected Lane 2022.3.0.22/2025.2.1.3/2026.2.1.5；Q11/EX14/VIS11 facts；无 measured claim。',
+      'CUDA Programming Guide v13.3 and the 12.9.1/11.8.0 archives; Nsight Compute 2026.2.1 and selected Lane versions 2022.3.0.22/2025.2.1.3/2026.2.1.5; Q11/EX14/VIS11 facts; no measured claim.',
     ),
     reviewedOn: '2026-09-02',
-    keywords: localized('transpose coalescing tile extent thread ownership padding staged one-variable comparison', 'transpose coalescing tile extent thread ownership padding staged one-variable comparison'),
+    keywords: localized('Nsight Compute synthetic report transpose coalescing tile ownership padding staged comparison', 'Nsight Compute synthetic report transpose coalescing tile ownership padding staged comparison'),
   },
   {
     planningId: 'PB-R3-008',
@@ -1241,19 +1254,19 @@ const practice: readonly ResourceIndexRecord[] = [
   {
     planningId: 'PB-R3-009',
     group: 'practice',
-    title: localized('把混杂的 reduction 改写为受控 stage graph', 'Rewrite a confounded reduction as a controlled stage graph'),
+    title: localized('分析混杂的 reduction report 并改写为受控 stage graph', 'Analyze a confounded reduction report and rewrite it as a controlled stage graph'),
     href: localized('/practice/#pb-r3-009', '/en/practice/#pb-r3-009'),
     resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['Q12'],
     relatedUnits: ['A02', 'Q02', 'Q06', 'Q08', 'Q12', 'EX11', 'VIS10'],
-    hardwareGate: localized('无；只修复静态 reduction source、operation-tree 与 evidence plan，不运行 CUDA 或 profiler。', 'None; repair static reduction source, operation-tree, and evidence plans without running CUDA or a profiler.'),
+    hardwareGate: localized('无；只分析 synthetic Nsight report packet 并修复静态 reduction source、operation-tree 与 evidence plan，不运行 CUDA 或 profiler。', 'None; analyze a synthetic Nsight report packet and repair static reduction source, operation-tree, and evidence plans without running CUDA or a profiler.'),
     versionGate: localized(
       'CUDA Programming/Floating Point/Best Practices Guides v13.3 与 Nsight Compute 2026.2.1；无 measured claim。',
       'CUDA Programming, Floating Point, and Best Practices Guides v13.3 plus Nsight Compute 2026.2.1; no measured claim.',
     ),
     reviewedOn: '2026-09-02',
-    keywords: localized('reduction divergence synchronization numerical order traffic stage graph hypothesis', 'reduction divergence synchronization numerical order traffic stage graph hypothesis'),
+    keywords: localized('Nsight Compute synthetic report reduction divergence synchronization numerical order stage graph', 'Nsight Compute synthetic report reduction divergence synchronization numerical order stage graph'),
   },
   {
     planningId: 'PB-R3-010',
@@ -1275,24 +1288,24 @@ const practice: readonly ResourceIndexRecord[] = [
   {
     planningId: 'PB-R3-011',
     group: 'practice',
-    title: localized('不用背诵 tile size 推导 GEMM stage graph', 'Derive a GEMM stage graph instead of memorizing a tile size'),
+    title: localized('分析背诵 tile size 的 GEMM report 并推导 stage graph', 'Analyze a memorized-tile GEMM report and derive a stage graph'),
     href: localized('/practice/#pb-r3-011', '/en/practice/#pb-r3-011'),
-    resourceType: 'concepts-implementation',
+    resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['Q13'],
     relatedUnits: ['A08', 'Q06', 'Q08', 'Q10', 'Q13', 'EX15', 'VIS12'],
-    hardwareGate: localized('无；只推导 static tile/reuse/resource ledgers 并设计 falsifiable comparison，不运行 CUDA 或 profiler。', 'None; derive static tile, reuse, and resource ledgers and design a falsifiable comparison without running CUDA or a profiler.'),
+    hardwareGate: localized('无；只分析 synthetic Nsight report packet、推导 static ledgers 并设计 falsifiable comparison，不运行 CUDA 或 profiler。', 'None; analyze a synthetic Nsight report packet, derive static ledgers, and design a falsifiable comparison without running CUDA or a profiler.'),
     versionGate: localized(
       'CUDA Programming/Best Practices Guides v13.3、Toolkit 11.8.0/12.9.2/13.3.1 与 Nsight Compute 2026.2.1；无 measured claim。',
       'CUDA Programming and Best Practices Guides v13.3, Toolkits 11.8.0/12.9.2/13.3.1, and Nsight Compute 2026.2.1; no measured claim.',
     ),
     reviewedOn: '2026-09-03',
-    keywords: localized('GEMM tile shape K tile reuse shared bytes accumulator hypothesis memorized size', 'GEMM tile shape K tile reuse shared bytes accumulator hypothesis memorized size'),
+    keywords: localized('Nsight Compute synthetic report GEMM tile shape K reuse shared bytes hypothesis', 'Nsight Compute synthetic report GEMM tile shape K reuse shared bytes hypothesis'),
   },
   {
     planningId: 'PB-R3-012',
     group: 'practice',
-    title: localized('审查无保管链的 GEMM occupancy 与 production claim', 'Audit an uncustodied GEMM occupancy and production claim'),
+    title: localized('审查无保管链 GEMM report 的 occupancy 与 production claim', 'Audit occupancy and production claims in an uncustodied GEMM report'),
     href: localized('/practice/#pb-r3-012', '/en/practice/#pb-r3-012'),
     resourceType: 'evidence-review',
     difficulty: 'advanced',
@@ -1304,7 +1317,7 @@ const practice: readonly ResourceIndexRecord[] = [
       'Toolkits 11.8.0/12.9.2/13.3.1, Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5, and exact GPU, compiler, profiler, and manifest gates.',
     ),
     reviewedOn: '2026-09-03',
-    keywords: localized('GEMM occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit', 'GEMM occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit'),
+    keywords: localized('GEMM report occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit', 'GEMM report occupancy compiler resources traffic profiler custody Tensor Core cuBLAS audit'),
   },
   {
     planningId: 'PB-R3-013',

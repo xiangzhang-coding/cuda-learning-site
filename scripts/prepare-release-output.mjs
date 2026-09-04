@@ -11,23 +11,23 @@ const legalRoot = path.join(distRoot, 'legal');
 const environmentCommit = process.env.WORKERS_CI_COMMIT_SHA || process.env.GITHUB_SHA;
 const sourceCommit = environmentCommit ?? (await execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot })).stdout.trim();
 const [releaseManifest, publicationManifest] = await Promise.all(
-  ['src/r2-release-manifest.json', 'src/current-publication-manifest.json'].map(async (relativePath) =>
+  ['src/r3-release-manifest.json', 'src/current-publication-manifest.json'].map(async (relativePath) =>
     JSON.parse(await readFile(path.join(projectRoot, relativePath), 'utf8')),
   ),
 );
 
 if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error(`Invalid release source commit: ${sourceCommit}`);
-if (releaseManifest.releaseId !== 'R2' || releaseManifest.schemaVersion !== 3) {
-  throw new Error('The source release manifest is not the reviewed R2 schema.');
+if (releaseManifest.releaseId !== 'R3' || releaseManifest.schemaVersion !== 4) {
+  throw new Error('The source release manifest is not the reviewed R3 schema.');
 }
 if (
   publicationManifest.publicationId !== 'current' ||
   publicationManifest.schemaVersion !== 1 ||
-  publicationManifest.releaseReview?.latestCompleted !== 'R2' ||
-  publicationManifest.releaseReview?.next !== 'R3' ||
+  publicationManifest.releaseReview?.latestCompleted !== 'R3' ||
+  publicationManifest.releaseReview?.next !== 'R4' ||
   publicationManifest.releaseReview?.status !== 'pending'
 ) {
-  throw new Error('The source publication manifest is not the current incremental publication schema.');
+  throw new Error('The source publication manifest is not the current rolling publication schema.');
 }
 
 await mkdir(legalRoot, { recursive: true });

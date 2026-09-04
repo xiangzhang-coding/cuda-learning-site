@@ -8,7 +8,7 @@ Website source, configuration, styles, test tooling, and scripts are licensed un
 
 This scope includes:
 
-- `astro.config.mjs`, `src/content.config.ts`, `src/r1-release-manifest.json`, `src/r2-release-manifest.json`, `src/current-publication-manifest.json`, `src/components/`, `src/resource-indexes/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
+- `astro.config.mjs`, `src/content.config.ts`, `src/r1-release-manifest.json`, `src/r2-release-manifest.json`, `src/r3-release-manifest.json`, `src/current-publication-manifest.json`, `src/components/`, `src/resource-indexes/`, `src/styles/`, `src/visuals/`, and `src/theme-contract.ts`
 - `scripts/` and `tests/`, including generation and validation of both `release.json` and `publication.json`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
@@ -19,11 +19,11 @@ Source files in these areas carry `SPDX-License-Identifier: Apache-2.0` where th
 
 ## CC BY 4.0
 
-Original instructional prose in `src/content/docs/` and original visual teaching compositions are licensed under the [Creative Commons Attribution 4.0 International Public License](LICENSE-CONTENT). The current rolling scope includes 62 Learning Units, O01-O08/F01-F08/M01-M19/A01-A14/Q01-Q13; 16 Runnable Example publication pages, EX01-EX16; 10 Labs, LAB01-LAB10; all 66 Practice Bank entries; all 176 Glossary terms; all 76 source/version records; and 19 formal Visual Explainers, standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. The five catalog groups total 347 records, and the current public source contains exactly 232 bilingual Publication Pairs and 464 source routes. Every Markdown or MDX file declares `license: CC-BY-4.0` and `provenance: original` in frontmatter.
+Original instructional prose in `src/content/docs/` and original visual teaching compositions are licensed under the [Creative Commons Attribution 4.0 International Public License](LICENSE-CONTENT). The R3 scope includes 62 Learning Units, O01-O08/F01-F08/M01-M19/A01-A14/Q01-Q13; 61 Exercise-set and 61 solution-set Publication Pairs; 16 Runnable Example publication pages, EX01-EX16; 10 Labs, LAB01-LAB10; all 66 Practice Bank entries, including 10 Nsight report-analysis entries; all 176 Glossary terms; all 76 source/version records; and 19 formal Visual Explainers, standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. The five catalog groups total 347 records, and public source contains exactly 232 bilingual Publication Pairs and 464 source routes. Every Markdown or MDX file declares `license: CC-BY-4.0` and `provenance: original` in frontmatter.
 
 Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page or repository.
 
-The current file-level license scope follows the rolling `src/current-publication-manifest.json` and its `/publication.json` output. Issue #31 is an incremental publication, and R3 aggregate review remains pending. R2 is still the latest completed aggregate release review: immutable `src/r2-release-manifest.json` and `/release.json` retain 49 Learning Units, 16 Runnable Examples, 6 Labs, 16 Visual Explainers, 50 Practice Bank entries, 151 Glossary terms, 61 source records, 284 catalog records, 186 Publication Pairs, and 372 source routes. Immutable R1 history remains in `src/r1-release-manifest.json`.
+The current file-level license scope follows `src/current-publication-manifest.json` and its `/publication.json` output. R3 is the latest completed aggregate release review: immutable `src/r3-release-manifest.json` and `/release.json` retain 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 232 Publication Pairs, and 464 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) owns dynamic R3 acceptance. R1 and R2 remain immutable history in `src/r1-release-manifest.json` and `src/r2-release-manifest.json`; R4 aggregate review remains pending.
 
 ## Adaptations
 

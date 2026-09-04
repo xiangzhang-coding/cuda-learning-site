@@ -41,7 +41,7 @@ async function main() {
     execFileAsync('git', ['status', '--porcelain=v1', '--untracked-files=all'], { cwd: projectRoot }),
     execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot }),
     execFileAsync('git', ['branch', '--show-current'], { cwd: projectRoot }),
-    readFile(path.join(projectRoot, 'src/r2-release-manifest.json'), 'utf8'),
+    readFile(path.join(projectRoot, 'src/r3-release-manifest.json'), 'utf8'),
     readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8'),
     readFile(path.join(projectRoot, 'dist/release.json'), 'utf8'),
     readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8'),
@@ -60,7 +60,7 @@ async function main() {
   }
   if (!/^[0-9a-f]{40}$/.test(head)) rejectRelease('Release source commit is invalid.');
 
-  const sourceManifest = parseManifest(sourceManifestText, 'R2 source manifest');
+  const sourceManifest = parseManifest(sourceManifestText, 'R3 source manifest');
   const currentSourceManifest = parseManifest(currentSourceManifestText, 'current source manifest');
   const release = parseManifest(releaseText, 'release metadata');
   const publication = parseManifest(publicationText, 'publication metadata');

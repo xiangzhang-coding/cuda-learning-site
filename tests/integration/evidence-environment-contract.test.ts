@@ -386,7 +386,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes sixty-four complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes sixty-six complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
