@@ -11,7 +11,6 @@
     "EX17": {
       "sourceCommit": "4c3ce46c201dbf321510b573beec3c78659be60c",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/4c3ce46c201dbf321510b573beec3c78659be60c/examples/ex17-cub-device-reduction-scan",
-      "evidenceBundleCommit": "4c3ce46c201dbf321510b573beec3c78659be60c",
       "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/4c3ce46c201dbf321510b573beec3c78659be60c.zip"
     }
   }

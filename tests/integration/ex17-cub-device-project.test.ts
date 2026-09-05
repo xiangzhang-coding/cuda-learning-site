@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -19,7 +19,6 @@ const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex17-cub-device-reduction-scan');
 const sourcePath = path.join(exampleRoot, 'src/cub_device_reduction_scan.cu');
 const sourceCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
-const publicationBundleCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
 
 const lanes = [
   {
@@ -94,17 +93,14 @@ const checks = [
   },
 ] as const;
 
-function portable(relativePath: string) {
-  return relativePath.split(path.sep).join('/');
-}
-
 async function listFiles(root: string) {
-  const entries = await readdir(root, { recursive: true, withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => portable(path.relative(root, path.join(entry.parentPath, entry.name))))
-    .filter((relativePath) => !relativePath.startsWith('build/'))
-    .sort();
+  const relativeRoot = path.relative(projectRoot, root).split(path.sep).join('/');
+  const { stdout } = await execFileAsync('git', ['ls-files', '--', relativeRoot], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  });
+  const prefix = `${relativeRoot}/`;
+  return stdout.trim().split('\n').filter(Boolean).map((file) => file.slice(prefix.length)).sort();
 }
 
 function count(source: string, expression: RegExp) {
@@ -162,12 +158,12 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
       license: 'Apache-2.0',
       provenance: 'original',
     });
-    expect(example.evidenceBundleCommit).toBe(publicationBundleCommit);
+    expect(example).not.toHaveProperty('evidenceBundleCommit');
     expect(example.sourceUrl).toBe(
       `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${sourceCommit}/${example.root}`,
     );
     expect(example.downloadUrl).toBe(
-      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${publicationBundleCommit}.zip`,
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${sourceCommit}.zip`,
     );
     expect(standaloneManifest).not.toHaveProperty('sourceCommit');
     expect(standaloneManifest).not.toHaveProperty('sourceUrl');
@@ -252,12 +248,12 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
     await expect(loadCompileEvidence(projectRoot, 'EX17')).resolves.toEqual([]);
   });
 
-  it('keeps build inputs identical between the source tree and publication bundle', async () => {
+  it('keeps build inputs identical between the source tree and download archive', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX17');
     const standaloneManifestSource = await readFile(path.join(exampleRoot, 'project.json'), 'utf8');
     const archivedManifest = await execFileAsync(
       'git',
-      ['show', `${publicationBundleCommit}:${example.root}/project.json`],
+      ['show', `${sourceCommit}:${example.root}/project.json`],
       { cwd: projectRoot, encoding: 'utf8' },
     );
     expect(archivedManifest.stdout).toBe(standaloneManifestSource);
@@ -268,18 +264,18 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
       ...example.build.contractFiles,
     ]);
     for (const relativePath of buildContractFiles) {
-      const [sourceRevision, bundleRevision, local] = await Promise.all([
+      const [sourceRevision, archiveRevision, local] = await Promise.all([
         execFileAsync('git', ['show', `${sourceCommit}:${example.root}/${relativePath}`], {
           cwd: projectRoot,
           encoding: 'utf8',
         }),
-        execFileAsync('git', ['show', `${publicationBundleCommit}:${example.root}/${relativePath}`], {
+        execFileAsync('git', ['show', `${sourceCommit}:${example.root}/${relativePath}`], {
           cwd: projectRoot,
           encoding: 'utf8',
         }),
         readFile(path.join(exampleRoot, relativePath), 'utf8'),
       ]);
-      expect(bundleRevision.stdout, relativePath).toBe(sourceRevision.stdout);
+      expect(archiveRevision.stdout, relativePath).toBe(sourceRevision.stdout);
       expect(local, relativePath).toBe(sourceRevision.stdout);
     }
   });
@@ -363,6 +359,15 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
       expect(secondBuild).toContain('--std=c++20');
       expect(secondBuild).toContain('-DEX17_EXPECTED_CUB_VERSION=200802');
       expect(secondBuild).not.toBe(firstBuild);
+
+      const { stdout } = await execFileAsync('make', [
+        'host-test',
+        `BUILD_DIR=${buildRoot}`,
+        'DIALECT=c++17',
+      ], { cwd: exampleRoot });
+      expect(stdout).toContain('host-reference: pass');
+      expect(await readFile(path.join(buildRoot, 'cub_device_reduction_scan.o'), 'utf8'))
+        .toBe(secondBuild);
     } finally {
       await rm(tempRoot, { recursive: true, force: true });
     }

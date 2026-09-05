@@ -127,7 +127,6 @@
         "exampleId": "EX17",
         "role": "cub-device-reduce-candidate",
         "sourceCommit": "4c3ce46c201dbf321510b573beec3c78659be60c",
-        "publicationBundleCommit": "4c3ce46c201dbf321510b573beec3c78659be60c",
         "projectPath": "examples/ex17-cub-device-reduction-scan",
         "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/4c3ce46c201dbf321510b573beec3c78659be60c/examples/ex17-cub-device-reduction-scan",
         "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/4c3ce46c201dbf321510b573beec3c78659be60c.zip",

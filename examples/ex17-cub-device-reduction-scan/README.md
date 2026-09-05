@@ -45,7 +45,7 @@ CCCL_ROOT=/path/to/cccl scripts/compile-check.sh c++17 cuda-12-9-selected-cccl-3
 For a bundled profile:
 
 ```sh
-scripts/compile-check.sh c++17 cuda-11-8-bundled-cub-1-15-1 results/ex17-11-8
+scripts/compile-check.sh c++17 cuda-11-8-bundled-cub-1-15-1 artifacts/ex17-11-8
 ```
 
 The optional third argument is the result directory. Without it, the script creates a temporary result directory. It runs clean, preprocess, compile, link, inspect, and host-test, but does not execute the CUDA binary.

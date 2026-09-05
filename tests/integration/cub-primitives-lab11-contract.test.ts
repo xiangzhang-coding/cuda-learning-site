@@ -19,7 +19,6 @@ const runnerPath = 'public/assets/exercise-solutions/lab11-reduction-comparison.
 const runnerSha256 = '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c';
 const reviewDate = '2026-09-05';
 const sourceCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
-const publicationBundleCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
 const selectedCcclCommit = 'd36012203ef73ac7f966e848dd88482273e91e02';
 
 const profileIds = [
@@ -569,9 +568,9 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
         },
       },
     });
-    expect(project.evidenceBundleCommit).toBe(publicationBundleCommit);
+    expect(project).not.toHaveProperty('evidenceBundleCommit');
     expect(project.downloadUrl).toBe(
-      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${publicationBundleCommit}.zip`,
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${sourceCommit}.zip`,
     );
     expect(standaloneProject).not.toHaveProperty('sourceCommit');
     expect(standaloneProject).not.toHaveProperty('sourceUrl');
@@ -596,7 +595,7 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
       expect(yamlList(metadata, 'canonicalRanges')).toEqual(['cpu-reference', 'device-reduce', 'device-scan']);
       expect(canonicalRanges(source)).toEqual(['cpu-reference', 'device-reduce', 'device-scan']);
       expect(content).toContain(`tree/${sourceCommit}/examples/ex17-cub-device-reduction-scan`);
-      expect(content).toContain(`archive/${publicationBundleCommit}.zip`);
+      expect(content).toContain(`archive/${sourceCommit}.zip`);
       expect(content).toMatch(/4,099[\s\S]{0,220}(?:double CPU reference|double oracle|double CPU|`double`)/i);
       expect(content).toMatch(/uint32[\s\S]{0,280}(?:independent|独立)[\s\S]{0,160}(?:inclusive|exclusive)/i);
       for (const id of profileIds) expect(content, id).toContain(id);

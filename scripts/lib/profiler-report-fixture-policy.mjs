@@ -115,8 +115,8 @@ const fixtureProfiles = new Map([
     captureCommandKeys: ['custom', 'cub'],
     exampleId: 'EX17',
     fixtureId: 'LAB11-NCU-EXPECTED',
-    fixtureSha256: 'f32f97ab8db0dff118c851e09cb94cd559252b38358da7778bec9179892ae010',
-    fixtureBytesSha256: '590fea7b53fe608f8966fb7f82700deec40b285abe7e4868c9bd2fc52935f718',
+    fixtureSha256: '40af32e371f957f552a7468d6e402a6393ec8b7a463e090f6b65dc8b395a1f1f',
+    fixtureBytesSha256: '23c841329a7e98a47a6d74d7fb648bb926eec7fdf20e88fe0aa60e692f32791f',
     sourceCommit: '4c3ce46c201dbf321510b573beec3c78659be60c',
     sanitizationReviewDate: '2026-09-05',
     tool: {

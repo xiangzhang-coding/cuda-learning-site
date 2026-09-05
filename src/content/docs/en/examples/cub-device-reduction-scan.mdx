@@ -207,7 +207,7 @@ The sole strict prerequisite is [L03: CUB Device Reduction and Scan Primitives](
 
 ## Canonical project
 
-[View the EX17 source tree at immutable commit `4c3ce46c201dbf321510b573beec3c78659be60c`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/4c3ce46c201dbf321510b573beec3c78659be60c/examples/ex17-cub-device-reduction-scan), or [download the complete archive for the same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/4c3ce46c201dbf321510b573beec3c78659be60c.zip). This immutable tree fixes the build-contract inputs, final `project.json`, bilingual publication pages, LAB11 runner, and expected-only records together. After extraction, enter `examples/ex17-cub-device-reduction-scan/`.
+[View the EX17 source tree at immutable commit `4c3ce46c201dbf321510b573beec3c78659be60c`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/4c3ce46c201dbf321510b573beec3c78659be60c/examples/ex17-cub-device-reduction-scan), or [download the complete archive for the same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/4c3ce46c201dbf321510b573beec3c78659be60c.zip). This archive fixes the eight EX17 project files and byte-identical build-contract inputs; the current publication registry binds page links to that immutable source tree in a later commit. After extraction, enter `examples/ex17-cub-device-reduction-scan/`.
 
 The eight project files comprise the manifest, README, Makefile, one host-only reference header, one CUDA source, a host test, a compile-check script, and the empty evidence-directory note. All project source is original Apache-2.0 work from this site; this page is original CC-BY-4.0 prose. CUB is an external dependency acquired under its own terms. The Learning Site does not republish the owner implementation as example source.
 
@@ -283,8 +283,8 @@ make inspect DIALECT=c++17 COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501
 The profile wrapper runs clean, preprocess, compile, link, inspect, and host-test in order, but never executes the CUDA binary:
 
 ```sh
-scripts/compile-check.sh c++17 cuda-11-8-bundled-cub-1-15-1 results/ex17-11-8
-CCCL_ROOT=/path/to/cccl scripts/compile-check.sh c++17 cuda-12-9-selected-cccl-3-4-2 results/ex17-12-9-selected
+scripts/compile-check.sh c++17 cuda-11-8-bundled-cub-1-15-1 artifacts/ex17-11-8
+CCCL_ROOT=/path/to/cccl scripts/compile-check.sh c++17 cuda-12-9-selected-cccl-3-4-2 artifacts/ex17-12-9-selected
 ```
 
 Run the binary only after satisfying the runtime gate:
