@@ -46,6 +46,10 @@ const reviewedSolutionAssets = [
     publicPath: '/assets/exercise-solutions/q13-gemm-candidates.cu',
     sha256: '00a809be2e2224022f4dce544fd84cba7144a97918a2c0b2a17768054514ecc7',
   },
+  {
+    publicPath: '/assets/exercise-solutions/lab11-reduction-comparison.cu',
+    sha256: '456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd',
+  },
 ] as const;
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
@@ -62,6 +66,10 @@ const ex10PublishedProject = {
   ...ex10Project,
   ...canonicalExamplePublications.examples.EX10,
 };
+const ex17PublishedProject = {
+  ...ex17Project,
+  ...canonicalExamplePublications.examples.EX17,
+};
 const projectExamples = [
   { suffix: 'examples/coalesced-strided-access/', project: ex05Project },
   { suffix: 'examples/shared-memory-tile-bank-padding/', project: ex06Project },
@@ -75,7 +83,7 @@ const projectExamples = [
   { suffix: 'examples/tiled-transpose/', project: ex14Project },
   { suffix: 'examples/tiled-gemm/', project: ex15Project },
   { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
-  { suffix: 'examples/cub-device-reduction-scan/', project: ex17Project },
+  { suffix: 'examples/cub-device-reduction-scan/', project: ex17PublishedProject },
 ] as const;
 const learningUnits = [
   'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
@@ -743,7 +751,7 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/labs/optimize-canonical-transpose/'],
     },
     {
-      query: 'L03 CUB Device Primitives 归约 扫描',
+      query: 'L03 CUB Device Primitives',
       expectedHrefs: ['/libraries/cub-device-primitives/'],
     },
     {
@@ -1546,6 +1554,14 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
           `EX15 embedded source reproduces ${relativePath}`,
         ).toBe(true);
       }
+    }
+
+    if (project.id === 'EX17') {
+      const archivedManifest = JSON.parse(findEntry('project.json').content.toString('utf8'));
+      expect(archivedManifest).toEqual(ex17Project);
+      expect(archivedManifest).not.toHaveProperty('sourceCommit');
+      expect(archivedManifest).not.toHaveProperty('sourceUrl');
+      expect(archivedManifest).not.toHaveProperty('downloadUrl');
     }
 
     if (project.id === 'EX10') {

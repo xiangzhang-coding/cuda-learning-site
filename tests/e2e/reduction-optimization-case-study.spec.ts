@@ -19,13 +19,19 @@ const routePairs = [
     zh: '/correctness/reduction-optimization-case-study/exercises/',
     en: '/en/correctness/reduction-optimization-case-study/exercises/',
     unitId: 'Q12-EXERCISES',
-    relatedSuffixes: [],
+    relatedSuffixes: [
+      'libraries/cub-device-primitives/',
+      'labs/compare-custom-reduction-with-cub/',
+    ],
   },
   {
     zh: '/correctness/reduction-optimization-case-study/solutions/',
     en: '/en/correctness/reduction-optimization-case-study/solutions/',
     unitId: 'Q12-SOLUTIONS',
-    relatedSuffixes: [],
+    relatedSuffixes: [
+      'libraries/cub-device-primitives/',
+      'labs/compare-custom-reduction-with-cub/',
+    ],
   },
 ] as const;
 
@@ -61,9 +67,6 @@ test('Q12 remains evidence-bounded while linking to published L03 and LAB11 foll
         await expect(firstHint).toHaveJSProperty('open', true);
       }
 
-      if (publication.unitId !== 'Q12') {
-        await expect(page.locator('main a[href*="/labs/"]')).toHaveCount(0);
-      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
     }
   }
