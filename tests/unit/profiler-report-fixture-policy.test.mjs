@@ -67,9 +67,9 @@ const fixtureProfiles = [
     subjectField: 'labId',
     subjectId: 'LAB11',
     exampleId: 'EX17',
-    sourceCommit: '4c3ce46c201dbf321510b573beec3c78659be60c',
-    fixtureSha256: '40af32e371f957f552a7468d6e402a6393ec8b7a463e090f6b65dc8b395a1f1f',
-    fixtureBytesSha256: '23c841329a7e98a47a6d74d7fb648bb926eec7fdf20e88fe0aa60e692f32791f',
+    sourceCommit: 'ce36601d293f6175258389e78562ac9efe138fb6',
+    fixtureSha256: 'c13cfffb21cbe09a8c01d97b629e55bd589eacc1813b9470a7c7dafcdda10697',
+    fixtureBytesSha256: '771ebf10042c72d763b3ef6106be0f90e4294786e690479513f8264a339d0a8e',
     reviewDate: '2026-09-05',
     tool: {
       name: 'Nsight Compute',
