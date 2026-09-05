@@ -1,15 +1,17 @@
 ---
 title: Glossary
-description: One hundred eighty-two published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred eighty-four published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-04'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
   - use
   - lookup-index
   - entries
+  - entry-term-183
+  - entry-term-184
   - maintenance
 head:
   - tag: meta
@@ -19,7 +21,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-04'
+      content: '2026-09-05'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -27,7 +29,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1686,6 +1688,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [L02](/en/libraries/thrust-algorithm-vocabulary/) and [PB-R4-002](/en/practice/#pb-r4-002).
 - **Version note:** CCCL v3.4.2 composition requires explicit extent, system, value/reference, and lifetime contracts. Current `cuda::` counting, transform, and zip forms are preferred where stated; not every legacy Thrust fancy iterator is deprecated.
 
+<span id="term-183" class="resource-target" aria-hidden="true"></span>
+
+### temporary storage · 临时存储
+
+- **Definition:** Temporary storage is scratch supplied by the caller for a collective operation that has not completed. Traditional device-wide CUB APIs first query a device-buffer byte count, while warp and block CUB classes use a nested `TempStorage` matching the exact specialization. Both forms require explicit ownership, exclusivity, stream or participant scope, completion, and reuse edges.
+- **Avoid:** Output or persistent state, one fixed byte count valid across operations, devices, types, and problem sizes, shared buffer that concurrent groups may reuse without synchronization.
+- **Related resources:** [L03](/en/libraries/cub-device-primitives/), [L04](/en/libraries/cub-warp-block-primitives/), [EX17](/en/examples/cub-device-reduction-scan/), and [LAB11](/en/labs/compare-custom-reduction-with-cub/).
+- **Version note:** L03's traditional two-phase contract spans bundled CUB 1.15.1/2.8.2/3.3.4 and selected 3.4.2; L04 pins the nested `TempStorage` contract to CCCL/CUB v3.4.2. Query, allocation, and reuse facts require the exact environment. This entry records no actual byte count or execution.
+
+<span id="term-184" class="resource-target" aria-hidden="true"></span>
+
+### logical warp · 逻辑线程束
+
+- **Definition:** A logical warp is a consecutive group of threads within one hardware warp whose size is set at compile time by `LogicalWarpThreads` and whose members jointly participate in the matching CUB warp collective according to logical lane rank.
+- **Avoid:** Arbitrary runtime-selected active mask, synonym that always means the complete 32-lane hardware warp, branch-local group that may omit required participants.
+- **Related resources:** [F02](/en/foundations/execution-hierarchy/), [M06](/en/memory/warp-divergence-reconvergence/), [M12](/en/memory/cooperative-groups/), and [L04](/en/libraries/cub-warp-block-primitives/).
+- **Version note:** CCCL/CUB v3.4.2 accepts a compile-time size from 1 through 32. A power-of-two size can partition one hardware warp into subwarps; a non-power-of-two size does not make that partition and only the first logical warp executes. Exact participation still requires review against the pinned interface and launch; this is not a hardware observation.
+
 ## Maintenance rule
 
-TERM-001 through TERM-176 retain their item-level review records. New TERM-177 through TERM-182 and the complete 182-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-04**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. New entries are static definitions only: no CUDA, CCCL, Thrust, DSL, or custom kernel ran, and no local API availability, synchronization observation, fusion, traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-182 retain their item-level review records. New TERM-183 through TERM-184 and the complete 184-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-05**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. The new entries define only temporary-storage ownership and reuse plus logical-warp participant scope. No CUDA, CUB, EX17, or LAB11 execution occurred, and no local API availability, queried bytes, output, synchronization observation, traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.

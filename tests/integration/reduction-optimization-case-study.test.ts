@@ -8,7 +8,8 @@ import { describe, expect, it } from 'vitest';
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const docsRoot = path.join(projectRoot, 'src/content/docs');
 const slug = 'reduction-optimization-case-study';
-const reviewDate = '2026-09-02';
+const reviewDate = '2026-09-05';
+const fixtureReviewDate = '2026-09-02';
 const sourceCommit = '81d43aa7568514e37ef190da59c845b8072b7011';
 const runnerPath = 'public/assets/exercise-solutions/q12-reduction-candidates.cu';
 const fixturePath = 'public/assets/profiler-report-fixtures/q12-nsight-compute.expected.json';
@@ -62,7 +63,7 @@ async function readPage(locale: '' | 'en/', child?: 'exercises' | 'solutions') {
 }
 
 describe('Q12 controlled reduction optimization case study', () => {
-  it('publishes an aligned evidence-neutral Learning Unit from EX11 and VIS10', async () => {
+  it('publishes an aligned evidence-neutral Learning Unit with separate L03 and LAB11 follow-ons', async () => {
     const [zh, en] = await Promise.all([readPage(''), readPage('en/')]);
     const pages = [
       [zh, `/en/correctness/${slug}/`, 'en', '', "import CanonicalCode from '../../../components/CanonicalCode.astro';"],
@@ -82,7 +83,7 @@ describe('Q12 controlled reduction optimization case study', () => {
       expect(metadata).toContain('provenance: original');
       expect(yamlList(metadata, 'structure')).toEqual(structure);
       expect(yamlList(metadata, 'prerequisites')).toEqual(['A02', 'Q02', 'Q06', 'Q08']);
-      expect(yamlList(metadata, 'relatedUnits')).toEqual(['EX11', 'VIS10']);
+      expect(yamlList(metadata, 'relatedUnits')).toEqual(['EX11', 'VIS10', 'L03', 'EX17', 'LAB11']);
       expect(yamlList(metadata, 'exampleIds')).toEqual(['EX11']);
       expect(metadata).toContain('canonicalExample: EX11');
       expect(yamlList(metadata, 'canonicalRanges')).toEqual(['cpu-reference', 'multi-stage-reduction']);
@@ -111,9 +112,12 @@ describe('Q12 controlled reduction optimization case study', () => {
       expect(content).toMatch(/correctness result|正确性结果/i);
       expect(content).toMatch(/bounded interpretation|有界解释/i);
       expect(content).toMatch(/VIS10[\s\S]{0,300}(?:no|不)[\s\S]{0,120}(?:evidence|证据)/i);
-      expect(content).toMatch(/LAB11[\s\S]{0,220}L03[\s\S]{0,220}(?:not published|不发布|未发布)/i);
+      expect(content).toContain(`${localePrefix}/libraries/cub-device-primitives/`);
+      expect(content).toContain(`${localePrefix}/examples/cub-device-reduction-scan/`);
+      expect(content).toContain(`${localePrefix}/labs/compare-custom-reduction-with-cub/`);
+      expect(content).toMatch(/does not backfill Q12 evidence|不会回填 Q12 的证据/i);
+      expect(content).toMatch(/Q12 (?:still invents no|仍不发明) current CUB API[\s\S]{0,180}performance result/i);
       expect(content).not.toContain('cub::DeviceReduce');
-      expect(content).not.toMatch(/\/labs\/(?:reduction|optimize-reduction|lab11)/i);
       expect(content).toContain(`${localePrefix}/correctness/${slug}/exercises/`);
       expect(content).toContain(`${localePrefix}/correctness/${slug}/solutions/`);
       expect(content).toContain('PB-R3-009');
@@ -234,7 +238,7 @@ describe('Q12 controlled reduction optimization case study', () => {
       fixtureType: 'expected-only-profiler-report-plan',
       captureStatus: 'pending-hardware-verification',
       recordedObservations: [],
-      sanitization: { status: 'passed', reviewDate },
+      sanitization: { status: 'passed', reviewDate: fixtureReviewDate },
     });
     expect(fixture.workload.elementCount).toBe(16777219);
     expect(fixture.workload.stages.map(({ id }: { id: string }) => id)).toEqual(stageIds);

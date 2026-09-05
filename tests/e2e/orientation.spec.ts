@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(476);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(238);
+  expect(routes).toHaveLength(492);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(246);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -101,6 +101,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/libraries/thrust-algorithm-vocabulary/', en: '/en/libraries/thrust-algorithm-vocabulary/' },
     { zh: '/libraries/thrust-algorithm-vocabulary/exercises/', en: '/en/libraries/thrust-algorithm-vocabulary/exercises/' },
     { zh: '/libraries/thrust-algorithm-vocabulary/solutions/', en: '/en/libraries/thrust-algorithm-vocabulary/solutions/' },
+    { zh: '/libraries/cub-device-primitives/', en: '/en/libraries/cub-device-primitives/' },
+    { zh: '/libraries/cub-device-primitives/exercises/', en: '/en/libraries/cub-device-primitives/exercises/' },
+    { zh: '/libraries/cub-device-primitives/solutions/', en: '/en/libraries/cub-device-primitives/solutions/' },
+    { zh: '/libraries/cub-warp-block-primitives/', en: '/en/libraries/cub-warp-block-primitives/' },
+    { zh: '/libraries/cub-warp-block-primitives/exercises/', en: '/en/libraries/cub-warp-block-primitives/exercises/' },
+    { zh: '/libraries/cub-warp-block-primitives/solutions/', en: '/en/libraries/cub-warp-block-primitives/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -153,6 +159,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/examples/inclusive-exclusive-scan/', en: '/en/examples/inclusive-exclusive-scan/' },
     { zh: '/examples/privatized-histogram/', en: '/en/examples/privatized-histogram/' },
     { zh: '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
+    { zh: '/examples/cub-device-reduction-scan/', en: '/en/examples/cub-device-reduction-scan/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
     { zh: '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
@@ -163,6 +170,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/labs/profile-full-application-before-kernel/', en: '/en/labs/profile-full-application-before-kernel/' },
     { zh: '/labs/build-original-roofline/', en: '/en/labs/build-original-roofline/' },
     { zh: '/labs/optimize-canonical-transpose/', en: '/en/labs/optimize-canonical-transpose/' },
+    { zh: '/labs/compare-custom-reduction-with-cub/', en: '/en/labs/compare-custom-reduction-with-cub/' },
     { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
@@ -451,6 +459,18 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/toolchain/separate-compilation-device-linking/',
     '/toolchain/cpp-dialect-boundaries/',
     '/en/toolchain/cpp-dialect-boundaries/',
+    '/libraries/cub-device-primitives/',
+    '/en/libraries/cub-device-primitives/',
+    '/libraries/cub-device-primitives/exercises/',
+    '/en/libraries/cub-device-primitives/exercises/',
+    '/libraries/cub-device-primitives/solutions/',
+    '/en/libraries/cub-device-primitives/solutions/',
+    '/libraries/cub-warp-block-primitives/',
+    '/en/libraries/cub-warp-block-primitives/',
+    '/libraries/cub-warp-block-primitives/exercises/',
+    '/en/libraries/cub-warp-block-primitives/exercises/',
+    '/libraries/cub-warp-block-primitives/solutions/',
+    '/en/libraries/cub-warp-block-primitives/solutions/',
     '/algorithms/elementwise-map/',
     '/en/algorithms/elementwise-map/',
     '/algorithms/elementwise-map/exercises/',
@@ -553,6 +573,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/examples/privatized-histogram/',
     '/examples/sanitizer-defect-suite/',
     '/en/examples/sanitizer-defect-suite/',
+    '/examples/cub-device-reduction-scan/',
+    '/en/examples/cub-device-reduction-scan/',
     '/labs/',
     '/en/labs/',
     '/labs/vector-addition/',
@@ -571,6 +593,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/labs/profile-full-application-before-kernel/',
     '/labs/optimize-canonical-transpose/',
     '/en/labs/optimize-canonical-transpose/',
+    '/labs/compare-custom-reduction-with-cub/',
+    '/en/labs/compare-custom-reduction-with-cub/',
     '/visuals/',
     '/en/visuals/',
     '/visuals/kernel-journey/',

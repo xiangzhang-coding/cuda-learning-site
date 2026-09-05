@@ -1,15 +1,17 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 182 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 184 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-04'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
   - use
   - lookup-index
   - entries
+  - entry-term-183
+  - entry-term-184
   - maintenance
 head:
   - tag: meta
@@ -19,7 +21,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-04'
+      content: '2026-09-05'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -27,7 +29,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1686,6 +1688,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [L02](/libraries/thrust-algorithm-vocabulary/)和 [PB-R4-002](/practice/#pb-r4-002)。
 - **版本说明：** CCCL v3.4.2 composition 必须显式声明 extent、system、value/reference 与 lifetime；在 owner 指明处优先 current `cuda::` counting/transform/zip forms，但并非所有 legacy Thrust fancy iterator 都 deprecated。
 
+<span id="term-183" class="resource-target" aria-hidden="true"></span>
+
+### temporary storage · 临时存储
+
+- **定义：** 临时存储（temporary storage）是调用者为一项尚未完成的 collective operation 提供的 scratch。Device-wide CUB 传统 API 先查询 device buffer 字节数；warp/block CUB class 则使用与 exact specialization 匹配的 nested `TempStorage`。两种形式的 owner、独占期、stream 或 participant scope、completion 与 reuse edge 都必须显式声明。
+- **避免使用：** Output 或 persistent state、跨 operation/device/type/problem size 通用的固定字节数、多个并发 group 可无同步共享的 shared buffer。
+- **相关资源：** [L03](/libraries/cub-device-primitives/)、[L04](/libraries/cub-warp-block-primitives/)、[EX17](/examples/cub-device-reduction-scan/)和 [LAB11](/labs/compare-custom-reduction-with-cub/)。
+- **版本说明：** L03 的传统两阶段合同覆盖 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected 3.4.2；L04 的 nested `TempStorage` 合同固定 CCCL/CUB v3.4.2。查询、分配或复用事实必须来自 exact environment；本词条没有记录实际字节数或 execution。
+
+<span id="term-184" class="resource-target" aria-hidden="true"></span>
+
+### logical warp · 逻辑线程束
+
+- **定义：** 逻辑线程束（logical warp）是同一 hardware warp 内由 compile-time `LogicalWarpThreads` 指定的一组连续 threads，它们按 logical lane rank 共同参与匹配的 CUB warp collective。
+- **避免使用：** 任意 runtime-selected active mask、永远等于完整 32-lane hardware warp 的同义词、可以缺少 required participants 的分支内小组。
+- **相关资源：** [F02](/foundations/execution-hierarchy/)、[M06](/memory/warp-divergence-reconvergence/)、[M12](/memory/cooperative-groups/)和 [L04](/libraries/cub-warp-block-primitives/)。
+- **版本说明：** CCCL/CUB v3.4.2 接受 compile-time size 1 至 32；2 的幂可把一个 hardware warp 划分为多个 subwarps，非 2 的幂不做该 partition 且只有第一个 logical warp 执行。Exact participation 仍需按 pinned interface 与 launch 复核；这不是 hardware observation。
+
 ## 维护规则
 
-TERM-001 至 TERM-176 保留各自逐项复核记录；新增 TERM-177 至 TERM-182 与完整 182 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-04** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只是静态定义：未运行 CUDA、CCCL、Thrust、DSL 或 custom kernel，且不声明 local API availability、synchronization observation、fusion、traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-182 保留各自逐项复核记录；新增 TERM-183 至 TERM-184 与完整 184 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-05** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只定义 temporary-storage ownership/reuse 和 logical-warp participant scope：未运行 CUDA、CUB、EX17 或 LAB11，且不声明 local API availability、queried bytes、output、synchronization observation、traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

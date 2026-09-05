@@ -126,16 +126,30 @@ export async function validateCanonicalExample(projectRoot, exampleId) {
           new Set(checkIds).size !== checkIds.length) {
         errors.push(`${exampleId} check identifiers must be unique and valid`);
       }
-      const expectedCoordinates = [
-        ...(example.compatibility.lanes ?? []).flatMap((lane) =>
-          (lane.dialects ?? []).map((dialect) => `${lane.id}\0${dialect}\0ex10`)),
-        ...(example.compatibility.probes ?? []).map((probe) =>
-          `${probe.toolkitLane}\0${probe.dialect}\0cxx23-probe`),
-      ].sort();
-      const actualCoordinates = checks.map((check) =>
-        `${check?.toolkitLane}\0${check?.dialect}\0${check?.kind}`).sort();
-      if (!sameValues(actualCoordinates, expectedCoordinates)) {
-        errors.push(`${exampleId} explicit checks do not match its Lane, dialect, and kind matrix`);
+      if (exampleId === 'EX10') {
+        const expectedCoordinates = [
+          ...(example.compatibility.lanes ?? []).flatMap((lane) =>
+            (lane.dialects ?? []).map((dialect) => `${lane.id}\0${dialect}\0ex10`)),
+          ...(example.compatibility.probes ?? []).map((probe) =>
+            `${probe.toolkitLane}\0${probe.dialect}\0cxx23-probe`),
+        ].sort();
+        const actualCoordinates = checks.map((check) =>
+          `${check?.toolkitLane}\0${check?.dialect}\0${check?.kind}`).sort();
+        if (!sameValues(actualCoordinates, expectedCoordinates)) {
+          errors.push(`${exampleId} explicit checks do not match its Lane, dialect, and kind matrix`);
+        }
+      } else {
+        const expectedKind = exampleId.toLowerCase();
+        const lanes = new Map((example.compatibility.lanes ?? []).map((lane) => [lane.id, lane]));
+        const invalidCheck = checks.find((check) => {
+          const lane = lanes.get(check?.toolkitLane);
+          return !lane || check?.kind !== expectedKind ||
+            !lane.dialects?.includes(check?.dialect) ||
+            !Array.isArray(check?.allowedResults) || check.allowedResults.length === 0;
+        });
+        if (invalidCheck) {
+          errors.push(`${exampleId} explicit checks do not match a declared Lane, dialect, kind, and result contract`);
+        }
       }
     }
   }
@@ -266,6 +280,52 @@ function expectedEx10Inspection(kind) {
   };
 }
 
+function expectedComponentProfileInspection(check) {
+  const coordinateKey = check?.dependencyMode === 'bundled'
+    ? 'packageCoordinate'
+    : check?.dependencyMode === 'selected'
+    ? 'sourceCoordinate'
+    : null;
+  if (!coordinateKey || typeof check?.component !== 'string' ||
+      typeof check?.componentVersion !== 'string' ||
+      !Number.isSafeInteger(check?.expectedCubVersion) ||
+      !Array.isArray(check?.includeRoots) ||
+      check.includeRoots.some((root) => typeof root !== 'string' || root.length === 0) ||
+      typeof check?.[coordinateKey] !== 'string' || check[coordinateKey].length === 0) {
+    return null;
+  }
+  return {
+    componentProfile: {
+      component: check.component,
+      dependencyMode: check.dependencyMode,
+      componentVersion: check.componentVersion,
+      expectedCubVersion: check.expectedCubVersion,
+      includeRoots: check.includeRoots,
+      [coordinateKey]: check[coordinateKey],
+    },
+    exitStatuses: {
+      clean: 0,
+      preprocess: 0,
+      compile: 0,
+      link: 0,
+      inspect: 0,
+      'host-test': 0,
+    },
+  };
+}
+
+function expandExampleBuildCommand(command, check, fallbackDialect) {
+  const replacements = {
+    dialect: check?.dialect ?? fallbackDialect,
+    dependencyMode: check?.dependencyMode,
+    expectedCubVersion: check?.expectedCubVersion,
+  };
+  return Object.entries(replacements).reduce((expanded, [placeholder, value]) =>
+    value === undefined
+      ? expanded
+      : expanded.replaceAll(`{${placeholder}}`, String(value)), command);
+}
+
 function isSanitizedOutputLines(value) {
   return Array.isArray(value) && value.every((line) =>
     typeof line === 'string' && line.length <= 8 * 1024 && !/[\r\n]|[^\x20-\x7e]/.test(line));
@@ -280,13 +340,15 @@ export async function validateCompileEvidenceRecord(
   const example = await loadCanonicalExample(projectRoot, exampleId);
   const errors = [];
   const isExample = record?.subject === exampleId;
+  const declaredChecks = example.compatibility.checks ?? [];
   const declaredProbe = (example.compatibility.probes ?? []).find(
     (candidate) => candidate.subject === record?.subject,
   );
   const isLegacyProbe = record?.subject === 'CUDA-13.3-CXX23-PROBE';
   const isProbe = Boolean(declaredProbe) || isLegacyProbe;
-  const recordKind = isExample ? 'ex10' : (isProbe ? 'cxx23-probe' : null);
-  const declaredChecks = example.compatibility.checks ?? [];
+  const recordKind = isExample
+    ? (declaredChecks.length > 0 ? exampleId.toLowerCase() : 'ex10')
+    : (isProbe ? 'cxx23-probe' : null);
   const declaredCheck = declaredChecks.find((candidate) => candidate.id === record?.check);
   const lane = declaredCheck
     ? example.compatibility.lanes.find((candidate) => candidate.id === declaredCheck.toolkitLane)
@@ -297,7 +359,7 @@ export async function validateCompileEvidenceRecord(
       );
   const expectedCommands = isExample && lane
     ? Object.values(example.build.commands).map((command) =>
-        command.replace('{dialect}', record.toolchain.dialect),
+        expandExampleBuildCommand(command, declaredCheck, record?.toolchain?.dialect),
       )
     : declaredProbe?.commands ?? [
         'nvcc --help',
@@ -310,8 +372,11 @@ export async function validateCompileEvidenceRecord(
   if (record?.['SPDX-License-Identifier'] !== 'Apache-2.0' || record?.schemaVersion !== 1) {
     errors.push('record schema and SPDX declaration are invalid');
   }
+  const allowedExampleResults = Array.isArray(declaredCheck?.allowedResults)
+    ? declaredCheck.allowedResults
+    : ['pass'];
   const validResult = isExample
-    ? record?.result === 'pass'
+    ? allowedExampleResults.includes(record?.result)
     : Boolean(declaredProbe
       ? declaredProbe.allowedResults.includes(record?.result)
       : isLegacyProbe && ['pass', 'unsupported'].includes(record?.result));
@@ -460,8 +525,12 @@ export async function validateCompileEvidenceRecord(
         isSanitizedOutputLines(compilerOutput) &&
         artifactHash?.path === 'build/cxx23_probe.o' &&
         artifactHash?.sha256 === probeArtifact?.sha256;
-    } else {
+    } else if (recordKind === 'ex10') {
       inspectionIsValid = sameValues(record?.inspection, expectedEx10Inspection(recordKind));
+    } else {
+      const expectedInspection = expectedComponentProfileInspection(declaredCheck);
+      inspectionIsValid = expectedInspection !== null &&
+        sameValues(record?.inspection, expectedInspection);
     }
     if (!inspectionIsValid) errors.push('inspection evidence is incomplete or unexpected');
   }
@@ -539,7 +608,7 @@ export async function loadCompileEvidence(projectRoot, exampleId) {
 
     const ordinaryRecords = records.filter((record) => record.subject === exampleId);
     const expectedCoordinates = (declaredChecks.length > 0
-      ? declaredChecks.filter(({ kind }) => kind === 'ex10').map((check) => {
+      ? declaredChecks.filter(({ kind }) => kind === exampleId.toLowerCase()).map((check) => {
           const lane = example.compatibility.lanes.find(({ id }) => id === check.toolkitLane);
           return `${lane.toolkit}\0${check.dialect}`;
         })

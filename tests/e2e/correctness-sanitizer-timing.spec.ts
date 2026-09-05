@@ -148,6 +148,7 @@ const exampleSlugs = [
   'tiled-transpose',
   'tiled-gemm',
   'sanitizer-defect-suite',
+  'cub-device-reduction-scan',
 ] as const;
 const labSlugs = [
   'record-cuda-environment',
@@ -160,6 +161,7 @@ const labSlugs = [
   'profile-full-application-before-kernel',
   'build-original-roofline',
   'optimize-canonical-transpose',
+  'compare-custom-reduction-with-cub',
 ] as const;
 
 const sortedRoutes = (routes: readonly string[]) =>
@@ -167,8 +169,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(476);
-  expect(publishedRoutes.length / 2).toBe(238);
+  expect(publishedRoutes).toHaveLength(492);
+  expect(publishedRoutes.length / 2).toBe(246);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

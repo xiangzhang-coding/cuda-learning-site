@@ -87,6 +87,87 @@ async function passingEx02Record(root = projectRoot) {
   };
 }
 
+async function passingEx17Record(checkId, root = projectRoot) {
+  const example = await loadCanonicalExample(root, 'EX17');
+  const check = example.compatibility.checks.find(({ id }) => id === checkId);
+  const lane = example.compatibility.lanes.find(({ id }) => id === check.toolkitLane);
+  const coordinateKey = check.dependencyMode === 'bundled'
+    ? 'packageCoordinate'
+    : 'sourceCoordinate';
+  return {
+    'SPDX-License-Identifier': 'Apache-2.0',
+    schemaVersion: 1,
+    result: 'pass',
+    claim: 'Compile-Checked',
+    subject: 'EX17',
+    check: check.id,
+    sourceCommit: example.sourceCommit,
+    buildContractSha256: await hashCanonicalBuildContract(root, 'EX17'),
+    verificationDate: '2026-09-05',
+    workflowRun: 'https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/12345',
+    runner: {
+      operatingSystem: 'Linux',
+      architecture: 'X64',
+      imageOS: 'ubuntu24',
+      imageVersion: '20260816.277.1',
+      dockerEngine: '29.0.0',
+      dockerBuildx: 'github.com/docker/buildx v0.30.0',
+    },
+    container: {
+      declaredReference: lane.image,
+      manifestDigest: lane.manifestDigest,
+      expectedAmd64Digest: lane.amd64Digest,
+      actualAmd64Digest: lane.amd64Digest,
+      actualImageId: `sha256:${'b'.repeat(64)}`,
+      actualRepoDigests: [`nvidia/cuda@${lane.manifestDigest}`],
+      operatingSystem: {
+        id: 'ubuntu',
+        versionId: /Ubuntu ([0-9.]+)/.exec(lane.operatingSystem)[1],
+        prettyName: lane.operatingSystem,
+      },
+    },
+    toolchain: {
+      toolkit: lane.toolkit,
+      hostCompiler: 'g++ (Ubuntu) 11.4.0',
+      nvcc: `Cuda compilation tools, release ${lane.toolkit}`,
+      cuobjdump: `cuobjdump ${lane.toolkit}`,
+      dialect: check.dialect,
+      target: example.compatibility.target,
+    },
+    commands: Object.values(example.build.commands).map((command) => command
+      .replaceAll('{dialect}', check.dialect)
+      .replaceAll('{dependencyMode}', check.dependencyMode)
+      .replaceAll('{expectedCubVersion}', String(check.expectedCubVersion))),
+    artifacts: example.build.artifacts.map((artifactPath) => ({
+      path: artifactPath,
+      bytes: 1,
+      sha256: 'c'.repeat(64),
+    })),
+    inspection: {
+      componentProfile: {
+        component: check.component,
+        dependencyMode: check.dependencyMode,
+        componentVersion: check.componentVersion,
+        expectedCubVersion: check.expectedCubVersion,
+        includeRoots: check.includeRoots,
+        [coordinateKey]: check[coordinateKey],
+      },
+      exitStatuses: {
+        clean: 0,
+        preprocess: 0,
+        compile: 0,
+        link: 0,
+        inspect: 0,
+        'host-test': 0,
+      },
+    },
+    hostReferenceExecuted: true,
+    hostExecutableExecuted: false,
+    gpuExecutableExecuted: false,
+    runtimeEvidence: 'Pending Hardware Verification',
+  };
+}
+
 describe('canonical Runnable Example resolver', () => {
   it('loads EX01 as one C++17 query project with no borrowed evidence', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX01');
@@ -299,6 +380,120 @@ describe('canonical Runnable Example resolver', () => {
     expect(errors).toContain('container coordinates do not match the declared Toolkit Lane');
     expect(errors).toContain('compile commands do not match the build contract');
     expect(errors).toContain('execution boundary is invalid');
+  });
+
+  it('accepts complete EX17 bundled and selected component-profile evidence', async () => {
+    const bundled = await passingEx17Record('cuda-11-8-bundled-cub-1-15-1');
+    const selected = await passingEx17Record('cuda-12-9-selected-cccl-3-4-2');
+
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX17', bundled)).resolves.toEqual([]);
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX17', selected)).resolves.toEqual([]);
+    expect(bundled.commands).toEqual([
+      'make preprocess DIALECT=c++17 BUILD_DIR=build COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501',
+      'make compile DIALECT=c++17 BUILD_DIR=build COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501',
+      'make link DIALECT=c++17 BUILD_DIR=build COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501',
+      'make inspect DIALECT=c++17 BUILD_DIR=build COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501',
+      'make host-test DIALECT=c++17 BUILD_DIR=build',
+    ]);
+    expect(selected.inspection.componentProfile).toEqual({
+      component: 'CUB',
+      dependencyMode: 'selected',
+      componentVersion: '3.4.2',
+      expectedCubVersion: 300402,
+      includeRoots: [
+        '${CCCL_ROOT}/cub',
+        '${CCCL_ROOT}/thrust',
+        '${CCCL_ROOT}/libcudacxx/include',
+      ],
+      sourceCoordinate: 'https://github.com/NVIDIA/cccl/tree/d36012203ef73ac7f966e848dd88482273e91e02',
+    });
+    for (const record of [bundled, selected]) {
+      expect(record.sourceCommit).toBe('b848390aeb6b28065a3421ab4c8b82758c8b114c');
+      expect(record.commands.join('\n')).not.toMatch(/\{(?:dialect|dependencyMode|expectedCubVersion)\}/);
+      expect(record.gpuExecutableExecuted).toBe(false);
+      expect(record.runtimeEvidence).toBe('Pending Hardware Verification');
+    }
+  });
+
+  it('rejects EX17 component profiles with the wrong result, dependency, macro, or coordinate', async () => {
+    const bundled = await passingEx17Record('cuda-11-8-bundled-cub-1-15-1');
+    const selected = await passingEx17Record('cuda-12-9-selected-cccl-3-4-2');
+    const invalidInspections = [
+      {
+        ...bundled.inspection,
+        componentProfile: {
+          ...bundled.inspection.componentProfile,
+          dependencyMode: 'selected',
+        },
+      },
+      {
+        ...bundled.inspection,
+        componentProfile: {
+          ...bundled.inspection.componentProfile,
+          expectedCubVersion: 300402,
+        },
+      },
+      {
+        ...bundled.inspection,
+        componentProfile: {
+          ...bundled.inspection.componentProfile,
+          packageCoordinate: 'cuda-cccl-11-8=wrong',
+        },
+      },
+      {
+        ...selected.inspection,
+        componentProfile: {
+          ...selected.inspection.componentProfile,
+          sourceCoordinate: 'https://github.com/NVIDIA/cccl/tree/wrong',
+        },
+      },
+    ];
+
+    await expect(validateCompileEvidenceRecord(projectRoot, 'EX17', {
+      ...bundled,
+      result: 'unsupported',
+    })).resolves.toContain('record subject or result is invalid');
+    for (const [index, inspection] of invalidInspections.entries()) {
+      const record = index === invalidInspections.length - 1 ? selected : bundled;
+      await expect(validateCompileEvidenceRecord(projectRoot, 'EX17', {
+        ...record,
+        inspection,
+      })).resolves.toContain('inspection evidence is incomplete or unexpected');
+    }
+  });
+
+  it('loads five independent EX17 checks even when Toolkit and dialect coordinates repeat', async () => {
+    const fixtureRoot = await mkdtemp(path.join(os.tmpdir(), 'canonical-ex17-evidence-'));
+    temporaryRoots.push(fixtureRoot);
+    const sourceRoot = path.join(projectRoot, 'examples/ex17-cub-device-reduction-scan');
+    const fixtureExampleRoot = path.join(fixtureRoot, 'examples/ex17-cub-device-reduction-scan');
+    await mkdir(path.dirname(fixtureExampleRoot), { recursive: true });
+    await cp(sourceRoot, fixtureExampleRoot, { recursive: true });
+
+    const manifest = await loadCanonicalExample(projectRoot, 'EX17');
+    manifest.evidence.compilation = manifest.compatibility.checks.map(({ id }) => ({
+      status: 'Compile-Checked',
+      record: `evidence/${id}.json`,
+    }));
+    await writeFile(path.join(fixtureExampleRoot, 'project.json'), JSON.stringify(manifest));
+    await Promise.all(manifest.compatibility.checks.map(async ({ id }) => {
+      const record = await passingEx17Record(id, fixtureRoot);
+      await writeFile(
+        path.join(fixtureExampleRoot, `evidence/${id}.json`),
+        JSON.stringify(record),
+      );
+    }));
+
+    const records = await loadCompileEvidence(fixtureRoot, 'EX17');
+    const coordinates = records.map(({ toolchain }) =>
+      `${toolchain.toolkit}\0${toolchain.dialect}`);
+    expect(records).toHaveLength(5);
+    expect(new Set(records.map(({ check }) => check)).size).toBe(5);
+    expect(coordinates.filter((coordinate) => coordinate === '12.9.2\0c++17')).toHaveLength(2);
+    expect(coordinates.filter((coordinate) => coordinate === '13.3.1\0c++17')).toHaveLength(2);
+    expect(records.every(({ gpuExecutableExecuted }) => !gpuExecutableExecuted)).toBe(true);
+    expect(records.every(({ runtimeEvidence }) =>
+      runtimeEvidence === 'Pending Hardware Verification')).toBe(true);
   });
 
   it('loads committed records and rejects one after its build contract drifts', async () => {

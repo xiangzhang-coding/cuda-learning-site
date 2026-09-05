@@ -166,7 +166,7 @@
       "A source-derived stage-size or traffic estimate is not an observed path value.",
       "A matched profiler report may address the named mechanism but does not prove elapsed-time causality.",
       "A tolerance pass is not bitwise reproducibility or a universal numerical-order guarantee.",
-      "LAB11 and L03 remain unpublished, and this fixture contains no CUB API or comparison result."
+      "L03 and LAB11 are now published at /libraries/cub-device-primitives/ and /labs/compare-custom-reduction-with-cub/, but this Q12 fixture remains evidence-neutral and contains no CUB API, comparison metric, observed result, or inherited EX17/LAB11 evidence."
     ]
   },
   "sanitization": {

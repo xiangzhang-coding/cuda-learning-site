@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-09-03, it contains ten contiguously numbered published Labs: LAB01-LAB10. Q13 is published and supplies the profiling prerequisite. L06 and LAB12 have no public destinations, and LAB12 still waits for L06's cuBLAS prerequisite. Incomplete planned work does not appear.
+This index lists only Labs that form complete Publication Pairs and already provide runnable steps and acceptance criteria. As of 2026-09-05, it contains eleven contiguously numbered published Labs, LAB01-LAB11; the newest row is [LAB11: Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/). L06 and LAB12 have no public destinations, and LAB12 still waits for L06's cuBLAS prerequisite. Incomplete planned work does not appear.
 
 ## Published Labs
 
@@ -34,8 +34,8 @@ This index lists only Labs that form complete Publication Pairs and already prov
 
 ## Sequence and direct lookup
 
-The current sequence lists LAB01-LAB09 followed by [LAB10: Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/). LAB10 requires exactly [Q11](/en/correctness/transpose-optimization-case-study/), starts from immutable [EX14](/en/examples/tiled-transpose/), and reuses [VIS11](/en/visuals/tiled-transpose/) only as evidence-neutral browser arithmetic. It declares a `4096x4096` `float` workload, a conservative 134,221,952-byte bound, one excluded warm-up, explicit synchronization, and a ten-attempt median plus min/max method. [Q12](/en/correctness/reduction-optimization-case-study/) is published, but LAB11's CUB comparison still waits for unpublished L03. [Q13](/en/correctness/gemm-optimization-case-study/) is also published, but LAB12's cuBLAS comparison still waits for unpublished L06. LAB11 and LAB12 are therefore absent from this index. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
+The current sequence lists LAB01-LAB09 followed by [LAB10: Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) and [LAB11: Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/). LAB10 strictly requires [Q11](/en/correctness/transpose-optimization-case-study/) and starts from immutable [EX14](/en/examples/tiled-transpose/). LAB11 strictly requires [Q12](/en/correctness/reduction-optimization-case-study/) and [L03](/en/libraries/cub-device-primitives/), compares immutable [EX11](/en/examples/multi-stage-reduction/) with [EX17](/en/examples/cub-device-reduction-scan/)'s CUB path, and uses [VIS10](/en/visuals/reduction-stages/) only for evidence-neutral reasoning. [Q13](/en/correctness/gemm-optimization-case-study/) is published, but LAB12's cuBLAS comparison still waits for unpublished L06, so only LAB12 is absent from the sequence. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
 
 ## Evidence boundary
 
-Compilation and runtime labels are copied directly from each linked Lab's controlled evidence fields. Existing LAB01-LAB09 statuses do not change. LAB10 has empty compilation evidence, Pending Hardware Verification runtime, empty recorded observations, and expected observations only; there is no Reference Environment or `performanceObservations` entry. Its expected-only fixture is not a collected `.ncu-rep` and contains no timing, metric, speedup, bottleneck, or winner. Immutable EX14, VIS11, static or browser evidence, a host-only test, learner-local build, or tool manual cannot populate LAB10's evidence fields.
+Compilation and runtime labels are copied directly from each linked Lab's controlled evidence fields. Existing LAB01-LAB10 statuses do not change. LAB11 has empty compilation evidence and recorded observations, no observed runtime evidence, Pending Hardware Verification runtime, and expected observations only; there is no Reference Environment or `performanceObservations` entry. Its expected-only fixture is not a collected `.ncu-rep` and contains no CUB output, temporary-storage value, kernel mapping, timing, metric, traffic, speedup, maintenance score, or winner. EX17 likewise has empty compilation evidence and Pending Hardware Verification runtime. Its declared component matrix is a non-evidentiary build gate and does not state that CI ran.

@@ -8,23 +8,34 @@ const routePairs = [
     zh: '/correctness/reduction-optimization-case-study/',
     en: '/en/correctness/reduction-optimization-case-study/',
     unitId: 'Q12',
-    relatedSuffixes: ['examples/multi-stage-reduction/', 'visuals/reduction-stages/'],
+    relatedSuffixes: [
+      'examples/multi-stage-reduction/',
+      'visuals/reduction-stages/',
+      'libraries/cub-device-primitives/',
+      'labs/compare-custom-reduction-with-cub/',
+    ],
   },
   {
     zh: '/correctness/reduction-optimization-case-study/exercises/',
     en: '/en/correctness/reduction-optimization-case-study/exercises/',
     unitId: 'Q12-EXERCISES',
-    relatedSuffixes: [],
+    relatedSuffixes: [
+      'libraries/cub-device-primitives/',
+      'labs/compare-custom-reduction-with-cub/',
+    ],
   },
   {
     zh: '/correctness/reduction-optimization-case-study/solutions/',
     en: '/en/correctness/reduction-optimization-case-study/solutions/',
     unitId: 'Q12-SOLUTIONS',
-    relatedSuffixes: [],
+    relatedSuffixes: [
+      'libraries/cub-device-primitives/',
+      'labs/compare-custom-reduction-with-cub/',
+    ],
   },
 ] as const;
 
-test('Q12 exposes bilingual evidence-bounded browser contracts without LAB11', async ({ page }) => {
+test('Q12 remains evidence-bounded while linking to published L03 and LAB11 follow-ons', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
@@ -56,7 +67,6 @@ test('Q12 exposes bilingual evidence-bounded browser contracts without LAB11', a
         await expect(firstHint).toHaveJSProperty('open', true);
       }
 
-      await expect(page.locator('main a[href*="/labs/"]')).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
     }
   }

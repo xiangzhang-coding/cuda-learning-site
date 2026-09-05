@@ -1,0 +1,251 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX17",
+  "title": "CUB Device Reduction and Scan",
+  "purpose": "Exercise the legacy temporary-storage CUB DeviceReduce and DeviceScan APIs on fixed reduction and exact bounded-scan correctness contracts without making a timing claim.",
+  "root": "examples/ex17-cub-device-reduction-scan",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": [
+      "include/cub_device_reduction_scan_reference.hpp",
+      "src/cub_device_reduction_scan.cu"
+    ],
+    "hostTestInputs": [
+      "include/cub_device_reduction_scan_reference.hpp",
+      "tests/host_reference_test.cpp"
+    ],
+    "contractFiles": [
+      "Makefile",
+      "scripts/compile-check.sh"
+    ],
+    "stages": [
+      "preprocess",
+      "compile",
+      "link",
+      "inspect"
+    ],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build COMPONENT_MODE={dependencyMode} EXPECTED_CUB_VERSION={expectedCubVersion}",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build COMPONENT_MODE={dependencyMode} EXPECTED_CUB_VERSION={expectedCubVersion}",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build COMPONENT_MODE={dependencyMode} EXPECTED_CUB_VERSION={expectedCubVersion}",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build COMPONENT_MODE={dependencyMode} EXPECTED_CUB_VERSION={expectedCubVersion}",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": [
+      "build/cub_device_reduction_scan.ii",
+      "build/cub_device_reduction_scan.o",
+      "build/ex17-cub-device-reduction-scan"
+    ]
+  },
+  "correctness": {
+    "cpuReference": "include/cub_device_reduction_scan_reference.hpp",
+    "elementCount": 4099,
+    "reduction": {
+      "inputType": "float",
+      "referenceType": "double",
+      "absoluteTolerance": 0.0001,
+      "relativeTolerance": 0.00002,
+      "comparisonRule": "absolute_error <= absolute_tolerance + relative_tolerance * abs(cpu_reference)"
+    },
+    "scan": {
+      "inputType": "uint32_t",
+      "inputBounds": {
+        "minimum": 0,
+        "maximum": 7
+      },
+      "deterministicInputBounds": {
+        "minimum": 1,
+        "maximum": 7
+      },
+      "maximumPossibleTotal": 28693,
+      "deterministicTotal": 16390,
+      "references": [
+        "inclusive_scan_reference",
+        "exclusive_scan_reference"
+      ],
+      "comparison": "exact",
+      "invariants": [
+        "inclusive[0] = input[0] and inclusive[i] = inclusive[i - 1] + input[i]",
+        "exclusive[0] = 0 and exclusive[i] = exclusive[i - 1] + input[i - 1]",
+        "inclusive[last] = total and exclusive[last] + input[last] = total"
+      ]
+    }
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "fixedDeviceMemoryBytes": 65588,
+    "maximumProblemMemoryBytes": 8000000000,
+    "temporaryStorage": "queried independently from each selected CUB primitive and version",
+    "target": [
+      "sm_75",
+      "compute_75"
+    ],
+    "versionGate": {
+      "header": "cub/version.cuh",
+      "macro": "CUB_VERSION",
+      "makeVariable": "EXPECTED_CUB_VERSION",
+      "compileDefinition": "EX17_EXPECTED_CUB_VERSION"
+    },
+    "lanes": [
+      {
+        "id": "cuda-11.8",
+        "toolkit": "11.8.0",
+        "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-12.9",
+        "toolkit": "12.9.2",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": [
+          "c++17"
+        ]
+      },
+      {
+        "id": "cuda-13.3",
+        "toolkit": "13.3.1",
+        "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": [
+          "c++17"
+        ]
+      }
+    ],
+    "checks": [
+      {
+        "id": "cuda-11-8-bundled-cub-1-15-1",
+        "toolkitLane": "cuda-11.8",
+        "dialect": "c++17",
+        "kind": "ex17",
+        "dependencyMode": "bundled",
+        "component": "CUB",
+        "componentVersion": "1.15.1",
+        "packageCoordinate": "cuda-cccl-11-8=11.8.89-1",
+        "expectedCubVersion": 101501,
+        "includeRoots": [
+          "/usr/local/cuda/include"
+        ],
+        "allowedResults": [
+          "pass"
+        ]
+      },
+      {
+        "id": "cuda-12-9-bundled-cub-2-8-2",
+        "toolkitLane": "cuda-12.9",
+        "dialect": "c++17",
+        "kind": "ex17",
+        "dependencyMode": "bundled",
+        "component": "CUB",
+        "componentVersion": "2.8.2",
+        "packageCoordinate": "cuda-cccl-12-9=12.9.27-1",
+        "expectedCubVersion": 200802,
+        "includeRoots": [
+          "/usr/local/cuda/include"
+        ],
+        "allowedResults": [
+          "pass"
+        ]
+      },
+      {
+        "id": "cuda-13-3-bundled-cub-3-3-4",
+        "toolkitLane": "cuda-13.3",
+        "dialect": "c++17",
+        "kind": "ex17",
+        "dependencyMode": "bundled",
+        "component": "CUB",
+        "componentVersion": "3.3.4",
+        "packageCoordinate": "cccl-13-3=13.3.3.4.1-1",
+        "expectedCubVersion": 300304,
+        "includeRoots": [
+          "/usr/local/cuda/include/cccl"
+        ],
+        "allowedResults": [
+          "pass"
+        ]
+      },
+      {
+        "id": "cuda-12-9-selected-cccl-3-4-2",
+        "toolkitLane": "cuda-12.9",
+        "dialect": "c++17",
+        "kind": "ex17",
+        "dependencyMode": "selected",
+        "component": "CUB",
+        "componentVersion": "3.4.2",
+        "sourceCoordinate": "https://github.com/NVIDIA/cccl/tree/d36012203ef73ac7f966e848dd88482273e91e02",
+        "expectedCubVersion": 300402,
+        "includeRoots": [
+          "${CCCL_ROOT}/cub",
+          "${CCCL_ROOT}/thrust",
+          "${CCCL_ROOT}/libcudacxx/include"
+        ],
+        "allowedResults": [
+          "pass"
+        ]
+      },
+      {
+        "id": "cuda-13-3-selected-cccl-3-4-2",
+        "toolkitLane": "cuda-13.3",
+        "dialect": "c++17",
+        "kind": "ex17",
+        "dependencyMode": "selected",
+        "component": "CUB",
+        "componentVersion": "3.4.2",
+        "sourceCoordinate": "https://github.com/NVIDIA/cccl/tree/d36012203ef73ac7f966e848dd88482273e91e02",
+        "expectedCubVersion": 300402,
+        "includeRoots": [
+          "${CCCL_ROOT}/cub",
+          "${CCCL_ROOT}/thrust",
+          "${CCCL_ROOT}/libcudacxx/include"
+        ],
+        "allowedResults": [
+          "pass"
+        ]
+      }
+    ]
+  },
+  "ranges": {
+    "cpu-reference": {
+      "file": "include/cub_device_reduction_scan_reference.hpp",
+      "startMarker": "// [ex17-cpu-reference-start]",
+      "endMarker": "// [ex17-cpu-reference-end]",
+      "language": "cpp"
+    },
+    "device-reduce": {
+      "file": "src/cub_device_reduction_scan.cu",
+      "startMarker": "// [ex17-device-reduce-start]",
+      "endMarker": "// [ex17-device-reduce-end]",
+      "language": "cpp"
+    },
+    "device-scan": {
+      "file": "src/cub_device_reduction_scan.cu",
+      "startMarker": "// [ex17-device-scan-start]",
+      "endMarker": "// [ex17-device-scan-end]",
+      "language": "cpp"
+    }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "DeviceReduce::Sum should pass the declared absolute-plus-relative comparator against the double CPU reference for the exact EX11-compatible 4,099-float input.",
+      "DeviceScan::InclusiveSum and DeviceScan::ExclusiveSum should exactly match their independently computed uint32 CPU references and all recurrence and last-total invariants.",
+      "The selected CUB_VERSION should equal the profile's expected macro before any executable can be linked."
+    ],
+    "recordedObservations": []
+  }
+}

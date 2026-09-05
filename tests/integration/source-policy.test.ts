@@ -159,17 +159,21 @@ const issue20Project = {
 } as const;
 
 const profilerSoftwareFiles = [
+  'public/assets/exercise-solutions/lab11-reduction-comparison.cu',
+  'scripts/check-lab11-runner-build.sh',
   'scripts/lib/profiler-report-fixture-policy.mjs',
   'src/components/ProfilerDecisionExplorer.astro',
   'src/styles/profiler-decision-visual.css',
   'src/visuals/profiler-decision-copy.ts',
   'src/visuals/profiler-decision-model.ts',
+  'tests/integration/lab11-comparison-runner.test.ts',
 ] as const;
 
 const profilerFixtureFiles = [
   { name: 'lab06-nsight-systems.expected.json', sanitizationReviewDate: '2026-08-31' },
   { name: 'lab08-nsight-compute.expected.json', sanitizationReviewDate: '2026-08-31' },
   { name: 'lab10-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-02' },
+  { name: 'lab11-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-05' },
   { name: 'q12-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-02' },
   { name: 'q13-nsight-compute.expected.json', sanitizationReviewDate: '2026-09-03' },
 ] as const;
@@ -180,7 +184,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(476);
+    expect(contentFiles).toHaveLength(492);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');
@@ -372,6 +376,9 @@ describe('source, license, and privacy policy', () => {
     expect(contentLicenses).toMatch(/no environment values, timing, metric, speedup, bottleneck, winner, or other performance evidence/i);
     expect(contentLicenses).toMatch(/Component and pure-model implementations.*styles.*original Apache-2\.0 software/is);
     expect(contentLicenses).toMatch(/not `nsys` or `ncu` captures.*no runtime, timeline, metric, bottleneck, or speedup result/is);
+    expect(contentLicenses).toContain('public/assets/exercise-solutions/lab11-reduction-comparison.cu');
+    expect(contentLicenses).toContain('755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c');
+    expect(contentLicenses).toMatch(/LAB11 runner has no upstream adaptation/i);
     expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);
   });
 

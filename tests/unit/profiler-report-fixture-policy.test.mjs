@@ -61,14 +61,31 @@ const fixtureProfiles = [
       selectedVersions: ['2022.3.0.22', '2025.2.1.3', '2026.2.1.5'],
     },
   }],
+  ['lab11-nsight-compute.expected.json', {
+    fixtureId: 'LAB11-NCU-EXPECTED',
+    schemaVersion: 2,
+    subjectField: 'labId',
+    subjectId: 'LAB11',
+    exampleId: 'EX17',
+    sourceCommit: 'b848390aeb6b28065a3421ab4c8b82758c8b114c',
+    fixtureSha256: '0abca1908a4fbec8bbd96a05bf3baa157f31bf279e107b6897f4baa08cabfa12',
+    fixtureBytesSha256: 'd69f2a58167da7fd0190b63336160f4cafa283907425b1d172a7689e8eab75a1',
+    reviewDate: '2026-09-05',
+    tool: {
+      name: 'Nsight Compute',
+      cli: 'ncu',
+      reportExtension: '.ncu-rep',
+      selectedVersions: ['2022.3.0.22', '2025.2.1.3', '2026.2.1.5'],
+    },
+  }],
   ['q12-nsight-compute.expected.json', {
     fixtureId: 'Q12-NCU-EXPECTED',
     subjectField: 'unitId',
     subjectId: 'Q12',
     exampleId: 'EX11',
     sourceCommit: '81d43aa7568514e37ef190da59c845b8072b7011',
-    fixtureSha256: 'c58cecf8d506a1ddc6c49045c5db248acc1fa1b0f662e28cc4f5d8e29c0e68f4',
-    fixtureBytesSha256: 'd510345d978c9b8e97cbbef41d7ebb3f4b8a48403977e6ed36e31787c73f616d',
+    fixtureSha256: '6857340f5a13500b0fd83d7cce5cb48d8eb1502fe2cfbd2c7ee2f983dcc00f9b',
+    fixtureBytesSha256: 'd411ae2738ea5d2c4bd294e52449b1a5d98be5ae452258e297bcad498d4ddfd8',
     reviewDate: '2026-09-02',
     tool: {
       name: 'Nsight Compute',
@@ -119,13 +136,13 @@ async function readFixtureSource(name) {
 describe('profiler report fixture policy', () => {
   it.each(fixtureProfiles)('accepts the sanitized original expected-only fixture %s', async (
     name,
-    { fixtureId, subjectField, subjectId, exampleId, sourceCommit, fixtureSha256, fixtureBytesSha256, reviewDate, tool },
+    { fixtureId, schemaVersion = 1, subjectField, subjectId, exampleId, sourceCommit, fixtureSha256, fixtureBytesSha256, reviewDate, tool },
   ) => {
     const [fixture, fixtureSource] = await Promise.all([readFixture(name), readFixtureSource(name)]);
     expect(validateProfilerReportFixture(fixture, fixtureSource)).toEqual({ valid: true, errors: [] });
     expect(fixture).toMatchObject({
       'SPDX-License-Identifier': 'CC-BY-4.0',
-      schemaVersion: 1,
+      schemaVersion,
       fixtureId,
       [subjectField]: subjectId,
       exampleId,
@@ -208,6 +225,26 @@ describe('profiler report fixture policy', () => {
       const result = validateProfilerReportFixture(invalid, JSON.stringify(invalid));
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('requires LAB11 schema v2 capture commands for exactly custom and cub', async () => {
+    const fixture = await readFixture('lab11-nsight-compute.expected.json');
+    expect(Object.keys(fixture.captureCommands)).toEqual(['custom', 'cub']);
+    for (const [description, mutate, expectedError] of [
+      ['the singular v1 field', (copy) => {
+        copy.captureCommand = copy.captureCommands.cub;
+        delete copy.captureCommands;
+      }, 'captureCommand is not allowed for schemaVersion 2'],
+      ['a missing candidate', (copy) => { delete copy.captureCommands.custom; }, 'captureCommands keys must be custom, cub'],
+      ['an extra candidate', (copy) => { copy.captureCommands.scan = 'ncu scan'; }, 'captureCommands keys must be custom, cub'],
+      ['a non-string command', (copy) => { copy.captureCommands.custom = []; }, 'captureCommands values must be nonempty strings'],
+      ['both versioned fields', (copy) => { copy.captureCommand = copy.captureCommands.cub; }, 'captureCommand is not allowed for schemaVersion 2'],
+    ]) {
+      const invalid = structuredClone(fixture);
+      mutate(invalid);
+      const result = validateProfilerReportFixture(invalid, JSON.stringify(invalid));
+      expect(result.errors, description).toContain(expectedError);
     }
   });
 

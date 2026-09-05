@@ -83,6 +83,7 @@ const lab07Destination = PUBLISHED_DESTINATIONS.LAB07;
 const lab08Destination = PUBLISHED_DESTINATIONS.LAB08;
 const lab09Destination = PUBLISHED_DESTINATIONS.LAB09;
 const lab10Destination = PUBLISHED_DESTINATIONS.LAB10;
+const lab11Destination = PUBLISHED_DESTINATIONS.LAB11;
 const vis01Destination = PUBLISHED_DESTINATIONS.VIS01;
 const vis02Destination = PUBLISHED_DESTINATIONS.VIS02;
 const vis03Destination = PUBLISHED_DESTINATIONS.VIS03;
@@ -343,6 +344,30 @@ const labs: readonly ResourceIndexRecord[] = [
     },
     reviewedOn: '2026-09-02',
     keywords: localized('transpose coalescing tiling bank layout padding evidence EX14 Nsight Compute Node.js reducer report custody', 'transpose coalescing tiling bank layout padding evidence EX14 Nsight Compute Node.js reducer report custody'),
+  },
+  {
+    planningId: 'LAB11',
+    group: 'labs',
+    title: lab11Destination.title,
+    href: lab11Destination.href,
+    resourceType: 'guided-lab',
+    difficulty: 'advanced',
+    prerequisites: lab11Destination.prerequisites,
+    relatedUnits: ['A02', 'Q01', 'Q02', 'Q06', 'Q08', 'Q10', 'L01', 'L04', 'EX11', 'EX17', 'VIS10'],
+    hardwareGate: localized(
+      '仅限原生 Linux；恰好 1 个 compute capability 7.5 或更新的 CUDA GPU；问题内存上限 8000000000 bytes；管理员批准的非管理员 performance-counter access；禁止 sudo、提权或策略绕过。',
+      'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; maximum problem memory of 8000000000 bytes; administrator-approved non-admin performance-counter access; no sudo, privilege escalation, or policy bypass.',
+    ),
+    versionGate: localized(
+      'C++17 Toolkit Lanes cuda-11.8、cuda-12.9、cuda-13.3；bundled CUB 1.15.1/2.8.2/3.3.4；selected CCCL 3.4.2 只配对 cuda-12.9/cuda-13.3；匹配的 Nsight Compute/CUPTI；恰好 10 项 expected observations，recorded observations 为空。',
+      'C++17 Toolkit Lanes cuda-11.8, cuda-12.9, and cuda-13.3; bundled CUB 1.15.1/2.8.2/3.3.4; selected CCCL 3.4.2 only with cuda-12.9/cuda-13.3; matching Nsight Compute/CUPTI; exactly 10 expected observations and no recorded observations.',
+    ),
+    evidence: {
+      compilation: [],
+      runtime: ['Pending Hardware Verification'],
+    },
+    reviewedOn: '2026-09-05',
+    keywords: localized('EX11 EX17 CUB DeviceReduce correctness numerical order temporary storage traffic timing maintenance 10 expected observations', 'EX11 EX17 CUB DeviceReduce correctness numerical order temporary storage traffic timing maintenance 10 expected observations'),
   },
 ];
 
@@ -1277,7 +1302,7 @@ const practice: readonly ResourceIndexRecord[] = [
     difficulty: 'advanced',
     prerequisites: ['Q12'],
     relatedUnits: ['A02', 'Q02', 'Q06', 'Q08', 'Q12', 'EX11', 'VIS10'],
-    hardwareGate: localized('无；只审查静态 fixture 与 claim，不运行 CUDA、Nsight Compute 或未发布的 LAB11。', 'None; audit a static fixture and claim without running CUDA, Nsight Compute, or unpublished LAB11.'),
+    hardwareGate: localized('无；只审查静态 fixture 与 claim，不运行 CUDA、Nsight Compute 或 LAB11。', 'None; audit a static fixture and claim without running CUDA, Nsight Compute, or LAB11.'),
     versionGate: localized(
       'Toolkit 11.8.0/12.9.2/13.3.1 与 Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；exact GPU/tool/report/manifest gates。',
       'Toolkit 11.8.0/12.9.2/13.3.1 and Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5; exact GPU, tool, report, and manifest gates.',
@@ -1402,6 +1427,34 @@ const practice: readonly ResourceIndexRecord[] = [
     versionGate: localized('CCCL/Thrust v3.4.2 exact tagged API、policy、iterator、deprecation 与 scoped known-issue boundaries；只覆盖 Toolkit 12.9.2/13.3.1 evaluation。', 'Exact CCCL and Thrust v3.4.2 tagged API, policy, iterator, deprecation, and scoped known-issue boundaries; Toolkit 12.9.2 and 13.3.1 evaluation only.'),
     reviewedOn: '2026-09-04',
     keywords: localized('Thrust transform scan stable sort execution policy par_nosync counting transform zip iterator stream lifetime', 'Thrust transform scan stable sort execution policy par_nosync counting transform zip iterator stream lifetime'),
+  },
+  {
+    planningId: 'PB-R4-003',
+    group: 'practice',
+    title: localized('修复 CUB device-primitive selection、storage 与 determinism matrix', 'Repair a CUB device-primitive selection, storage, and determinism matrix'),
+    href: localized('/practice/#pb-r4-003', '/en/practice/#pb-r4-003'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['L03'],
+    relatedUnits: ['A02', 'A03', 'M07', 'Q02', 'L03', 'EX17', 'LAB11'],
+    hardwareGate: localized('无；只审查静态 primitive、storage、stream 与 determinism contracts，不展示、编译或运行 CUDA/CUB source。', 'None; audit static primitive, storage, stream, and determinism contracts without displaying, compiling, or running CUDA or CUB source.'),
+    versionGate: localized('Toolkit 11.8.0/12.9.2/13.3.1 bundled CUB 1.15.1/2.8.2/3.3.4，加上只在 12.9.2/13.3.1 评估的 selected CCCL/CUB v3.4.2；传统两阶段 API 是共同边界。', 'Bundled CUB 1.15.1/2.8.2/3.3.4 in Toolkits 11.8.0/12.9.2/13.3.1 plus selected CCCL/CUB v3.4.2 evaluated only with 12.9.2/13.3.1; the traditional two-phase API is the common boundary.'),
+    reviewedOn: '2026-09-05',
+    keywords: localized('CUB DeviceReduce DeviceScan temporary storage query execute overlap stream lifetime determinism component matrix', 'CUB DeviceReduce DeviceScan temporary storage query execute overlap stream lifetime determinism component matrix'),
+  },
+  {
+    planningId: 'PB-R4-004',
+    group: 'practice',
+    title: localized('修复 warp/block group、scratch 与 synchronization selection', 'Repair warp/block group, scratch, and synchronization selection'),
+    href: localized('/practice/#pb-r4-004', '/en/practice/#pb-r4-004'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['L04'],
+    relatedUnits: ['F02', 'M03', 'M05', 'M06', 'M12', 'A02', 'A03', 'L03', 'L04', 'VIS10'],
+    hardwareGate: localized('无；只审查静态 participant、output、TempStorage 与 barrier contracts，不展示、编译或运行 CUDA/CUB source。', 'None; audit static participant, output, TempStorage, and barrier contracts without displaying, compiling, or running CUDA or CUB source.'),
+    versionGate: localized('Exact CCCL/CUB v3.4.2 commit d36012203ef73ac7f966e848dd88482273e91e02 的 WarpReduce、WarpScan、BlockReduce、BlockScan、developer guide、test 与逐文件许可边界。', 'Exact WarpReduce, WarpScan, BlockReduce, BlockScan, developer-guide, test, and file-level license boundaries at CCCL/CUB v3.4.2 commit d36012203ef73ac7f966e848dd88482273e91e02.'),
+    reviewedOn: '2026-09-05',
+    keywords: localized('CUB logical warp block collective participant contributor output TempStorage syncwarp syncthreads algorithm variant', 'CUB logical warp block collective participant contributor output TempStorage syncwarp syncthreads algorithm variant'),
   },
 ];
 
@@ -1889,6 +1942,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-180', 'custom kernel · 自定义内核', 'kernel-vocabulary', ['L01'], '由应用团队拥有实现、正确性、portability、调优、incident response 与 removal 的 CUDA kernel；只有 unmet contract 或合格 measured gap 才支持其生产理由。', 'A CUDA kernel whose implementation, correctness, portability, tuning, incident response, and removal are owned by the application team; only an unmet contract or qualifying measured gap supports its production rationale.', '2026-09-04'),
   glossaryRecord('TERM-181', 'execution policy · 执行策略', 'kernel-vocabulary', ['M07', 'L02'], 'Thrust v3.4.2 中选择 host/device/sequential system，并可为 CUDA policy 绑定 stream；policy 不验证 extent、pointer accessibility、lifetime 或 numerical acceptance。', 'In Thrust v3.4.2, selects a host, device, or sequential system and can bind a CUDA policy to a stream; it does not validate extents, pointer accessibility, lifetimes, or numerical acceptance.', '2026-09-04'),
   glossaryRecord('TERM-182', 'fancy iterator · 花式迭代器', 'kernel-vocabulary', ['L02'], 'CCCL v3.4.2 中表示 generated、transformed 或 zipped virtual range 的 iterator；必须声明 extent、system、value/reference 与 lifetime，且不保证 fusion 或 speedup。', 'In CCCL v3.4.2, an iterator representing a generated, transformed, or zipped virtual range; extent, system, value or reference behavior, and lifetime must be explicit, and fusion or speedup is not guaranteed.', '2026-09-04'),
+  glossaryRecord('TERM-183', 'temporary storage · 临时存储', 'kernel-vocabulary', ['L03', 'L04', 'EX17', 'LAB11'], 'Device-wide CUB 1.15.1/2.8.2/3.3.4/3.4.2 使用 exact query 得到 caller-owned device scratch；CCCL/CUB v3.4.2 warp/block class 使用 specialization-specific nested TempStorage；独占期、completion 与 reuse synchronization 必须显式。', 'Device-wide CUB 1.15.1/2.8.2/3.3.4/3.4.2 obtains caller-owned device scratch through an exact query; CCCL/CUB v3.4.2 warp and block classes use specialization-specific nested TempStorage; exclusivity, completion, and reuse synchronization must be explicit.', '2026-09-05'),
+  glossaryRecord('TERM-184', 'logical warp · 逻辑线程束', 'kernel-vocabulary', ['F02', 'M06', 'M12', 'L04'], 'CCCL/CUB v3.4.2 中同一 hardware warp 内 compile-time 1 至 32 个连续 threads；2 的幂可 partition，非 2 的幂不 partition 且只有第一个 logical warp 执行；不是任意 active mask。', 'In CCCL/CUB v3.4.2, a compile-time group of 1 through 32 consecutive threads in one hardware warp; power-of-two sizes can partition it, while non-power-of-two sizes do not partition and only the first logical warp executes; it is not an arbitrary active mask.', '2026-09-05'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2670,6 +2725,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-04',
     '2026-09-04',
+  ),
+  sourceRecord(
+    'SRC-CUDA-063',
+    localized('L03/EX17/LAB11 CUB device APIs、component matrix 与 evidence boundary', 'L03/EX17/LAB11 CUB device APIs, component matrix, and evidence boundary'),
+    'cuda-version-record',
+    ['A02', 'A03', 'M07', 'Q02', 'Q12', 'L03', 'EX17', 'LAB11', 'VIS10'],
+    localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL/CUB v3.4.2；DeviceReduce/DeviceScan、manifests、traditional temporary storage、stream/lifetime、determinism、exact header/test licenses 与 expected-only evidence boundary；无 measured evidence。',
+      'Bundled CUB 1.15.1/2.8.2/3.3.4 in Toolkits 11.8.0/12.9.2/13.3.1 plus selected CCCL/CUB v3.4.2; DeviceReduce and DeviceScan, manifests, traditional temporary storage, streams and lifetimes, determinism, exact header and test licenses, and the expected-only evidence boundary; no measured evidence.',
+    ),
+    '2026-09-05',
+    '2026-09-05',
+  ),
+  sourceRecord(
+    'SRC-CUDA-064',
+    localized('L04 CUB warp/block APIs、participants、TempStorage 与 variants', 'L04 CUB warp and block APIs, participants, TempStorage, and variants'),
+    'cuda-version-record',
+    ['F02', 'M03', 'M05', 'M06', 'M12', 'A02', 'A03', 'L03', 'L04', 'VIS10'],
+    localized(
+      'CCCL/CUB v3.4.2 exact warp/block indexes、developer guides、WarpReduce/WarpScan/BlockReduce/BlockScan headers、participant/output/partial contracts、TempStorage reuse synchronization、algorithm variants、owner tests 与 mixed file-level licenses；无 adaptation 或 CUDA/performance evidence。',
+      'Exact CCCL/CUB v3.4.2 warp and block indexes, developer guides, WarpReduce, WarpScan, BlockReduce, and BlockScan headers, participant, output, and partial contracts, TempStorage reuse synchronization, algorithm variants, owner tests, and mixed file-level licenses; no adaptation or CUDA or performance evidence.',
+    ),
+    '2026-09-05',
+    '2026-09-05',
   ),
 ];
 

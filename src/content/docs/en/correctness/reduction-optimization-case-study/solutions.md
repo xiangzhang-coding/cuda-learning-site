@@ -3,7 +3,7 @@ title: 'Q12 Reviewed Solutions: Controlled Reduction Evidence'
 description: Review the EX11 baseline, four-stage runner, and profiler and numerical claim audit, then compare valid alternatives and common errors.
 pairId: q12-solutions
 counterpart: /correctness/reduction-optimization-case-study/solutions/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -29,7 +29,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/correctness/reduction-optimization-case-study/solutions/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -96,7 +96,7 @@ Reject every universal, causal, bitwise, and fastest claim in the summary. A fri
 
 The repair gives each of four stage records a fixed workload, three excluded warm-up attempts, checked synchronization, ten retained attempts and a predeclared median plus min/max, an exact-GPU query-first profiler method, a permission gate, a complete Environment Manifest, a same-comparator correctness result, and a bounded interpretation answering only its named mechanism. Every result field stays `expected; unrecorded`. Competing explanations include instruction mix, shared traffic, resource use, cache state, clock or thermal state, replay perturbation, and numerical-order coupling.
 
-LAB11's production CUB comparison continues to wait for the unpublished L03. No current CUB API, determinism scope, build result, or performance result is supplied.
+The production CUB comparison now belongs to the published [L03](/en/libraries/cub-device-primitives/) and [LAB11](/en/labs/compare-custom-reduction-with-cub/). They do not backfill the evidence missing from this answer; Q12 still supplies no CUB build, runtime, timing, or performance result.
 
 **Review:** Pass. Unsupported claims are downgraded, and missing evidence is not replaced with zero, a guess, or browser state.
 
@@ -117,6 +117,6 @@ LAB11's production CUB comparison continues to wait for the unpublished L03. No 
 - Changing warm-up, deleting an outlier, or selecting a statistic after viewing samples.
 - Recording denied permission or an unavailable metric as zero, or replacing a report and hash with a screenshot.
 - Inferring GPU scheduling, floating-point results, or performance from the VIS10 integer tree.
-- Inventing a CUB API or comparison result before L03 and LAB11 publish.
+- Treating L03/LAB11 API contracts as this Q12 summary's comparison result merely because those resources are now published.
 
-Reviewed: **2026-09-02**. Continue with [PB-R3-009](/en/practice/#pb-r3-009) and [PB-R3-010](/en/practice/#pb-r3-010) for transfer practice.
+Reviewed: **2026-09-05**. Continue with [PB-R3-009](/en/practice/#pb-r3-009) and [PB-R3-010](/en/practice/#pb-r3-010) for transfer practice.

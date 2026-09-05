@@ -3,7 +3,7 @@ title: 'Q12 练习：设计并审查受控 Reduction 证据'
 description: 三项迁移任务分别重建 EX11 baseline、实现四阶段 reduction runner，并审查 profiler 与数值结论。
 pairId: q12-exercises
 counterpart: /en/correctness/reduction-optimization-case-study/exercises/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -29,7 +29,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/correctness/reduction-optimization-case-study/exercises/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -96,11 +96,11 @@ head:
 
 **目标：** 审查一份摘要：它给出 friendly metric labels，却没有 raw samples、query、permission、replay、report/hash、环境清单（Environment Manifest）或 correctness result；随后宣称 four-load variant “消除 divergence、减少 synchronization、保持逐 bit 相同并且总是最快”，再引用一个未固定 API 的 CUB 调用作为证明。
 
-**约束：** 对四个 stage 分别要求 workload、warm-up、synchronization、statistics、profiler method/permissions、Environment Manifest、correctness result 与 bounded interpretation。分开 source-derived traffic estimate、queried metric、unprofiled elapsed samples 和 numerical acceptance。明确 LAB11/L03 尚未发布，不发明 CUB API 或 result。
+**约束：** 对四个 stage 分别要求 workload、warm-up、synchronization、statistics、profiler method/permissions、Environment Manifest、correctness result 与 bounded interpretation。分开 source-derived traffic estimate、queried metric、unprofiled elapsed samples 和 numerical acceptance。明确 [L03](/libraries/cub-device-primitives/)与 [LAB11](/labs/compare-custom-reduction-with-cub/)是独立的已发布后续资源，但不会为这份 Q12 summary 回填 CUB API、build、runtime 或 result。
 
 **预期证据：** Claim-by-claim verdict、missing-coordinate register、exact-GPU query-first repair plan、四项未填写 stage records、timing/profiler/numerical boundaries，以及至少四个 competing explanations。
 
-**验收标准：** Supplied universal/causal/bitwise claims全部被拒绝。修复后的每项 claim足够窄，可得到 support、reject 或 no answer；缺失 measurement继续明确标为 expected and unrecorded，production comparison被推迟而不是补写。
+**验收标准：** Supplied universal/causal/bitwise claims全部被拒绝。修复后的每项 claim足够窄，可得到 support、reject 或 no answer；缺失 measurement继续明确标为 expected and unrecorded，production comparison移交 LAB11 而不是在 Q12 中补写。
 
 <details><summary>提示 1</summary>Profiler report可以帮助解释 mechanism，但不能追溯附加到另一组 unprofiled samples。</details>
 

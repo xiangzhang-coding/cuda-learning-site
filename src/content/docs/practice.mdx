@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 68 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 70 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-09-04'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -77,6 +77,8 @@ structure:
   - entry-pb-r3-016
   - entry-pb-r4-001
   - entry-pb-r4-002
+  - entry-pb-r4-003
+  - entry-pb-r4-004
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -144,6 +146,8 @@ prerequisites:
   - Q13
   - L01
   - L02
+  - L03
+  - L04
 relatedUnits:
   - O02
   - O03
@@ -208,10 +212,15 @@ relatedUnits:
   - Q13
   - L01
   - L02
+  - L03
+  - L04
+  - EX17
   - LAB06
   - LAB08
   - LAB09
   - LAB10
+  - LAB11
+  - VIS10
   - VIS13
   - VIS14
   - VIS18
@@ -225,19 +234,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-04' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -256,13 +265,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 68 个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 70 个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 68 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 70 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
@@ -2727,7 +2736,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - **ID 与双语发布对：** PB-R3-010；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q12：用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)。
-- **硬件门槛（Hardware gate）：** 无；只审查静态 fixture 与 claim，不运行 CUDA、Nsight Compute 或未发布的 LAB11。
+- **硬件门槛（Hardware gate）：** 无；只审查静态 fixture 与 claim，不运行 CUDA、Nsight Compute 或 LAB11。
 - **版本门槛（Version gate）：** Toolkit 11.8.0/12.9.2/13.3.1 与 Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5；exact GPU/tool/report/manifest gates。
 - **相关学习单元与资源：** [A02](/algorithms/multi-stage-reduction/)、[Q02](/correctness/floating-point-order-reproducibility/)、[Q06](/correctness/apod-optimization-loop/)、[Q08](/correctness/kernel-first-nsight-compute/)、[Q12](/correctness/reduction-optimization-case-study/)、[EX11](/examples/multi-stage-reduction/)和 [VIS10](/visuals/reduction-stages/)。
 - **最后复核（Last reviewed）：** 2026-09-02。
@@ -2740,7 +2749,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 - Numerical chain 要求 exact input bytes、CPU reference、actual、absolute/allowed error、compiler/launch 与 operation-tree ledger；tolerance pass 不能自动升级为 bitwise 或 determinism guarantee。
 - Elapsed chain 要求同一 workload、三次 excluded warm-up、checked completion、十次 raw attempts、predeclared median/min/max 与 no-deletion policy；profiler chain 另需 exact GPU/tool、availability query、permission、filter、replay、report/hash 与 manifest。
-- Production chain 明确 L03 与 LAB11 未发布，不从名称猜测 current CUB interface、build support、determinism scope 或 result。
+- Production chain 把已发布的 [L03](/libraries/cub-device-primitives/)与 [LAB11](/labs/compare-custom-reduction-with-cub/)作为独立后续资源；不能从 route、名称或静态 API contract 猜测 build support、runtime behavior、determinism observation 或 result。
 
 **预期证据：** Claim-to-evidence matrix、四条独立 custody chains、完整但未填写的 per-stage records、blocker/no-answer rules、competing explanations 与 bounded replacement statement。
 
@@ -2754,7 +2763,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <details><summary>提示 2</summary>把“结果在 tolerance 内”“bits 是否一致”“为什么 mechanism 变化”和“elapsed 是否变化”拆开。</details>
 
-**参考解答（Reviewed solution）：** Audit 将四项结论全部标为 `unsupported from uncustodied summary`。Numerical record 需要 EX11 reference/comparator 与 operand tree；elapsed record 需要 matched unprofiled attempts；mechanism record 需要 exact query、permission、filter/replay 和 hashed report；production comparison 则等待公开 L03/LAB11。当前没有任何 qualifying artifact，因此不能给 metric、bits、traffic、winner 或 CUB verdict。可接受 replacement 是：“该 source proposes four-load staging and a changed operation tree; correctness and performance observations remain pending.”
+**参考解答（Reviewed solution）：** Audit 将四项结论全部标为 `unsupported from uncustodied summary`。Numerical record 需要 EX11 reference/comparator 与 operand tree；elapsed record 需要 matched unprofiled attempts；mechanism record 需要 exact query、permission、filter/replay 和 hashed report；production comparison 使用独立 LAB11 contract，不能回填旧 summary。当前没有任何 qualifying artifact，因此不能给 metric、bits、traffic、winner 或 CUB verdict。可接受 replacement 是：“该 source proposes four-load staging and a changed operation tree; correctness and performance observations remain pending.”
 
 **有效替代方案：** 若 original private reports 和 commands 可恢复，可以先验证 custody 并生成 sanitized derivative；否则开始一组新 comparison，不能把新 evidence 追溯附加到旧 screenshot。
 
@@ -3071,6 +3080,78 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期（Source date）：** 2026-09-04。
 
+<span id="pb-r4-003" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-003：修复 CUB device-primitive selection、storage 与 determinism matrix
+
+- **ID 与双语发布对：** PB-R4-003；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Concepts and implementation；高级。
+- **直接先修条件：** [L03：用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)。
+- **硬件门槛（Hardware gate）：** 无；只审查静态 primitive、storage、stream 与 determinism contracts，不展示、编译或运行 CUDA/CUB source。
+- **版本门槛（Version gate）：** Toolkit 11.8.0/12.9.2/13.3.1 bundled CUB 1.15.1/2.8.2/3.3.4，以及只在 12.9.2/13.3.1 评估的 independently selected CCCL/CUB v3.4.2；共同边界是传统两阶段 API，reduction/scan determinism 则保持 per-version header contracts。
+- **相关学习单元与资源：** [A02](/algorithms/multi-stage-reduction/)、[A03](/algorithms/inclusive-exclusive-scan/)、[M07](/memory/stream-ordering/)、[Q02](/correctness/floating-point-order-reproducibility/)、[L03](/libraries/cub-device-primitives/)、[EX17](/examples/cub-device-reduction-scan/)和 [LAB11](/labs/compare-custom-reduction-with-cub/)。
+- **最后复核（Last reviewed）：** 2026-09-05。
+
+**题目：** 一份三行 review matrix 要求：R 把 4,099 个 FP32 inputs 变成一个 total，I 为 `N` 个 `uint32_t` inputs 生成包含当前位置的 `N` 个 prefixes，E 生成 `y[0]=0` 且不含当前位置的 `N` 个 offsets。Proposal 却依次选择 `InclusiveSum`、`ExclusiveSum` 与 `DeviceReduce::Sum`；它还在 selected v3.4.2 上只查询一次 temporary bytes，就跨三个操作、五个 component profiles 和不同 current devices 复用该值，把 reduction output 放进 input range、让 scan ranges 部分重叠、在两条 streams 上并发共享 scratch、API 返回后立即释放，并宣称所有 rows 都逐 bit 等于 serial CPU 且更快。修复完整 matrix。
+
+**目标：** 交付一个可审计的 device-primitive selection、temporary-storage、overlap、stream/lifetime、version 与 determinism matrix，同时把 API facts 与 execution evidence 分开。
+
+**约束：** 只使用 `DeviceReduce::Sum`、`DeviceScan::InclusiveSum` 和 `DeviceScan::ExclusiveSum` 的传统两阶段 forms。每个 profile/operation 都记录 exact CUB coordinate，并让 query/execute 保持同一 current device、overload、iterator/type instantiation、item-count type、problem size 与 stream contract。Reduction ranges 必须 disjoint；scan 只允许 exact in-place 或完全 disjoint。所有 local availability、queried bytes、outputs、bits、traffic 与 timing 保持 `unrecorded`。
+
+**预期证据：** 三行 semantic/output selection table、五行 component matrix、per-operation query/allocate/execute ledger、range-overlap verdict、scratch ownership 与 stream dependency graph、determinism claim matrix，以及 bounded evidence statement。
+
+**验收条件：** R 选择 `DeviceReduce::Sum` 并只写一个 aggregate；I 选择 `InclusiveSum` 并让 `x[i]` 进入 `y[i]`；E 选择 `ExclusiveSum`、让 `y[0]=0`，并在证明零 identity 与 no overflow 后保留 exact integer-prefix acceptance。五个 profiles 分别固定 1.15.1/2.8.2/3.3.4/3.4.2/3.4.2；每项 work 独立 query，scratch 不并发 alias，input/output/scratch 活到 completion。每个 `DeviceReduce::Sum` profile 都记录带 cross-compute-capability caveat 的 same-GPU run-to-run determinism。CUB 1.15.1 `DeviceScan` 记录同一 scoped guarantee；CUB 2.8.2、3.3.4 与 selected 3.4.2 记录 possible pseudo-associative run-to-run variation。任何 guarantee 都不升级为 serial 或 cross-GPU identity；没有 fastest、traffic、output、determinism observation 或 runtime conclusion。
+
+<details><summary>提示 1</summary>先用“一个 aggregate、包含当前项的 prefixes、不含当前项的 prefixes”修正前三列，再看 API 名称。</details>
+
+<details><summary>提示 2</summary>把 temporary-storage byte count 当作 exact invocation configuration 的 query result，而不是 CUB 或 GPU 的全局常量。</details>
+
+**参考解答（Reviewed solution）：** 修复后 R/I/E 分别是 `DeviceReduce::Sum`、`DeviceScan::InclusiveSum` 与 `DeviceScan::ExclusiveSum`。每个 component profile 和 operation 先用 null storage 查询，再为相同 current device、types、count 和 problem configuration 分配并执行；任何 coordinate 变化都重新查询。Reduction output 与 input 完全分离；scan 选择 exact alias 或 disjoint output。每项未完成 work 独占 scratch，同 stream 可在顺序完成后复用，cross-stream reuse 先放 event/completion edge；全部 allocations 活到最后一个 consumer 完成。Inspected traditional headers 为五个 `DeviceReduce::Sum` profile rows 都给出带 cross-compute-capability caveat 的 same-GPU run-to-run determinism；CUB 1.15.1 `DeviceScan` 也有该 scoped guarantee，CUB 2.8.2、3.3.4 与 selected 3.4.2 则允许 pseudo-associative run-to-run variation。它们都不承诺 serial fold 或 cross-compute-capability identity。Declared no-overflow bound 下，`uint32_t` scan rows 仍要求 exact prefixes。这是一份 static contract repair，没有 local query、build、output、determinism observation 或 performance evidence。
+
+**有效替代方案：** 可以让每项 operation 使用完全独立的 scratch 与 disjoint output，或把两条 streams 合并为一条 ordered stream；只要重新记录 allocation ownership、completion 与相同的 numerical/version boundaries，两者都有效。
+
+**常见错误：** 用 scan 产生 scalar 或用 reduction 产生 prefixes；把 query 当成 kernel execution；跨 device/type/count/profile 沿用 bytes；把 partial overlap 当成 in-place；API 返回即释放；两条 streams 并发 alias scratch；拒绝 reviewed 1.15.1 scan guarantee 或把它继承到后续 scan rows；把 TERM-138 的 bounded determinism 扩展成 serial/cross-GPU bits；从 API/source presence 宣布 speedup。
+
+**来源依据（Source basis）：** 本站原创 [L03 device-primitive contract](/libraries/cub-device-primitives/)、[A02 reduction semantics](/algorithms/multi-stage-reduction/)、[A03 scan semantics](/algorithms/inclusive-exclusive-scan/)、[M07 stream ordering](/memory/stream-ordering/)、[Q02 numerical contract](/correctness/floating-point-order-reproducibility/)、已发布的 [EX17](/examples/cub-device-reduction-scan/)、已发布的 [LAB11](/labs/compare-custom-reduction-with-cub/)、[TERM-107](/glossary/#term-107)、[TERM-127](/glossary/#term-127)、[TERM-130](/glossary/#term-130)、[TERM-138](/glossary/#term-138)、[TERM-183](/glossary/#term-183)与 [SRC-CUDA-063](/sources-and-versions/#src-cuda-063)。Bundled contracts 来自 [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)、[12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)与 [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) manifests 指定的 hash-addressed archives 内已检查的 `device_reduce.cuh`、`device_scan.cuh` 与 `version.cuh`。Selected 3.4.2 使用 exact tagged [device-wide guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst)、[`device_reduce.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh)和 [`device_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh)。Context7 没有验证这些 archives。
+
+**来源日期（Source date）：** 2026-09-05。
+
+<span id="pb-r4-004" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-004：修复 warp/block group、scratch 与 synchronization selection
+
+- **ID 与双语发布对：** PB-R4-004；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Concepts and implementation；高级。
+- **直接先修条件：** [L04：用 CUB Warp 与 Block Primitives 组合内核](/libraries/cub-warp-block-primitives/)。
+- **硬件门槛（Hardware gate）：** 无；只审查静态 participant、output、TempStorage 与 barrier contracts，不展示、编译或运行 CUDA/CUB source。
+- **版本门槛（Version gate）：** Exact CCCL/CUB v3.4.2 commit `d36012203ef73ac7f966e848dd88482273e91e02` 的 WarpReduce、WarpScan、BlockReduce 与 BlockScan public contracts、developer guides、tests 与 file-level licenses。
+- **相关学习单元与资源：** [F02](/foundations/execution-hierarchy/)、[M03](/memory/shared-memory-tiling/)、[M05](/memory/synchronization-scopes/)、[M06](/memory/warp-divergence-reconvergence/)、[M12](/memory/cooperative-groups/)、[A02](/algorithms/multi-stage-reduction/)、[A03](/algorithms/inclusive-exclusive-scan/)、[L03](/libraries/cub-device-primitives/)、[L04](/libraries/cub-warp-block-primitives/)和 [VIS10](/visuals/reduction-stages/)。
+- **最后复核（Last reviewed）：** 2026-09-05。
+
+**题目：** 一个 `16 x 8 x 1`、共 128 threads 的 block 有两个阶段。Warp 阶段把每个 hardware warp 划成两个连续 16-lane logical warps；每组前 11 项有效，每个有效 lane 需要 exclusive prefix，整组还需要 aggregate。Block 阶段只归约 row-major 前 101 个 thread values 为一个 scalar，并要求 repeated invocations 不主动选择 variable reduction order。Proposal 为第一阶段选择 `WarpReduce`、只让 11 lanes 调用、让同一 physical warp 的两组 alias 一个 `TempStorage` 并让所有 lanes 读取 return；第二阶段选择 `BlockScan`、只让 101 threads 调用、立刻复用 shared union，不放 caller barrier，并选择 nondeterministic variant 后宣布最快。修复 selection 与 phase graph。
+
+**目标：** 根据 group scope 与 output shape 选择最窄 warp/block collective，并把 callers、contributors、readers、scratch slots、reuse/publication barriers 与 algorithm guarantee 分开。
+
+**约束：** 固定 `LogicalWarpThreads=16`、block template shape `16 x 8 x 1`、row-major rank `x + 16*y`、每个 warp group 统一 `valid_items=11`，以及 block `num_valid=101`。所有 required participants 都调用；invalid inputs 不贡献，undefined/unmodified outputs 不读取。每个 concurrent group 使用 matching exclusive `TempStorage`。复用、repurpose 或 shared publication 都必须有准确 scope 的 caller synchronization；不声称 output、barrier trace、occupancy、timing 或 speedup。
+
+**预期证据：** 两行 primitive/overload matrix、八组 logical-warp participant/contributor/reader sets、block row-rank map、TempStorage slot map、reuse 与 publication phase graph、algorithm-variant rejection，以及 evidence-boundary verdict。
+
+**验收条件：** Warp 阶段选择 partial `WarpScan<T,16>` exclusive aggregate form；128 threads 中的八个 16-lane groups 都完整参与，每组前 11 lanes 贡献，valid outputs 只按 partial contract 消费，aggregate 对 participating group 可用，每组 scratch 独占。Block 阶段选择 shape-matched `BlockReduce` 的 `num_valid=101` form；128 threads 全部调用，只有 linear thread 0 读取 aggregate。Warp scratch reuse 使用准确 `__syncwarp(mask)`，block/shared phase reuse 或 publication 使用 full-block `__syncthreads()`；明确排除 `BLOCK_REDUCE_WARP_REDUCTIONS_NONDETERMINISTIC`，但不把其他 variant 写成 bitwise 或 performance guarantee。
+
+<details><summary>提示 1</summary>为每个阶段分别画“必须调用、提供有效输入、拥有可读 output”三个集合，再选择 reduce 或 scan。</details>
+
+<details><summary>提示 2</summary>Collective 内部同步只完成当前 call；把 scratch 交给下一阶段仍需要 caller-owned phase edge。</details>
+
+**参考解答（Reviewed solution）：** Warp request 需要每 lane exclusive prefix，所以使用 `WarpScan<T,16>` 的 partial aggregate overload，而不是 leader-only `WarpReduce`。每个 physical warp 的两个 16-lane groups、整个 block 的八组都由全部 16 lanes 调用，并使用不同 `TempStorage` slots；统一 count 11 只控制 contributors，invalid outputs 保持 unmodified 且不被消费，requested aggregate 对每组 participants 可用。每组 reuse slot 前执行覆盖准确 16 lanes 的 `__syncwarp(mask)`。Block request 只要一个 scalar，所以使用 launch/template shape 一致的 `BlockReduce<T,16,Algorithm,8,1>` 并传 `num_valid=101`；全部 128 threads 调用，前 101 row-major ranks 贡献，只有 rank 0 读取。跨全 block 的 shared publication/union repurpose 在 `__syncthreads()` 后发生。Repeated-order requirement 排除显式 nondeterministic variant；其余 eligible variants 仍需 exact compile/correctness/measurement，当前没有 winner。
+
+**有效替代方案：** 可以不用 shared union，而为 warp groups 与 block collective分配分离的 storage；也可在有已证明 identity 时构造 guarded full block tile。若 group 是 runtime-selected arbitrary lanes，则先改用 [M12](/memory/cooperative-groups/)重述 abstraction，而不是伪造 CUB logical warp。
+
+**常见错误：** 把 logical warp 当任意 active mask；只让 valid-data lanes/threads 调用；多个 live groups alias scratch；读取 WarpReduce/BlockReduce 的非 leader returns；把 scan 当 scalar reduction；混淆 contributor count 与 participant count；省略 reuse/publication barrier；把 embedded synchronization 当下一阶段 edge；从 algorithm name 或 owner tests宣布性能或本站 evidence。
+
+**来源依据（Source basis）：** 本站原创 [L04 warp/block contract](/libraries/cub-warp-block-primitives/)、[M05 synchronization scopes](/memory/synchronization-scopes/)、[M06 warp-safe reasoning](/memory/warp-divergence-reconvergence/)、[M12 explicit groups](/memory/cooperative-groups/)、[VIS10](/visuals/reduction-stages/)、[TERM-107](/glossary/#term-107)、[TERM-127](/glossary/#term-127)、[TERM-130](/glossary/#term-130)、[TERM-138](/glossary/#term-138)、[TERM-183](/glossary/#term-183)、[TERM-184](/glossary/#term-184)与 [SRC-CUDA-064](/sources-and-versions/#src-cuda-064)，以及 exact v3.4.2 tagged [`warp_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/warp/warp_scan.cuh)、[`block_reduce.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/block/block_reduce.cuh)、[warp guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/warp_level.rst)和 [block guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/block_scope.rst)。
+
+**来源日期（Source date）：** 2026-09-05。
+
 ## 复核记录
 
-既有条目保留各自 2026-08-26 至 2026-09-04 的 item-level records。Issue #32 在 **2026-09-04** 对 R3 边界 66 个条目及其精确 10 个 Nsight report-analysis inventory 完成不可变聚合复核；issue #33 新增 PB-R4-001/002，并复核当前完整 68 个条目的 Publication Pair、metadata projection、直接链接与静态合同。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。新增条目不展示 CUDA/Thrust source，不执行 component/custom kernel，也不发布 local API availability、output、synchronization observation、traffic、fusion、timing、winner、speedup 或 Evidence Status。
+既有条目保留各自 2026-08-26 至 2026-09-04 的 item-level records。Issue #32 在 **2026-09-04** 对 R3 边界 66 个条目及其精确 10 个 Nsight report-analysis inventory 完成不可变聚合复核；issue #33 新增 PB-R4-001/002；issue #34 又新增 PB-R4-003/004，并在 **2026-09-05** 复核当前完整 70 个条目的 Publication Pair、metadata projection、直接链接与静态合同。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。Issue #34 条目只审查 static selection、storage、participant、synchronization 与 determinism contracts，不展示或执行 CUDA/CUB source，也不发布 local API availability、queried bytes、output、barrier trace、traffic、timing、winner、speedup 或 Evidence Status。

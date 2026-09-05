@@ -16,6 +16,7 @@ import ex13Project from '../../examples/ex13-privatized-histogram/project.json' 
 import ex14Project from '../../examples/ex14-tiled-transpose/project.json' with { type: 'json' };
 import ex15Project from '../../examples/ex15-tiled-gemm/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
+import ex17Project from '../../examples/ex17-cub-device-reduction-scan/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
@@ -45,6 +46,10 @@ const reviewedSolutionAssets = [
     publicPath: '/assets/exercise-solutions/q13-gemm-candidates.cu',
     sha256: '00a809be2e2224022f4dce544fd84cba7144a97918a2c0b2a17768054514ecc7',
   },
+  {
+    publicPath: '/assets/exercise-solutions/lab11-reduction-comparison.cu',
+    sha256: '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c',
+  },
 ] as const;
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
@@ -61,6 +66,10 @@ const ex10PublishedProject = {
   ...ex10Project,
   ...canonicalExamplePublications.examples.EX10,
 };
+const ex17PublishedProject = {
+  ...ex17Project,
+  ...canonicalExamplePublications.examples.EX17,
+};
 const projectExamples = [
   { suffix: 'examples/coalesced-strided-access/', project: ex05Project },
   { suffix: 'examples/shared-memory-tile-bank-padding/', project: ex06Project },
@@ -74,6 +83,7 @@ const projectExamples = [
   { suffix: 'examples/tiled-transpose/', project: ex14Project },
   { suffix: 'examples/tiled-gemm/', project: ex15Project },
   { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
+  { suffix: 'examples/cub-device-reduction-scan/', project: ex17PublishedProject },
 ] as const;
 const learningUnits = [
   'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
@@ -86,12 +96,14 @@ const learningUnits = [
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
-const currentLearningUnits = [...learningUnits, 'L01', 'L02'] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
-const currentLabs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
+const currentRunnableExampleIds = [...runnableExampleIds, 'EX17'] as const;
+const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
+const currentLabs = [...r3Labs, 'LAB11'] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -104,32 +116,41 @@ const nsightReportAnalysisPracticeIds = [
   'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-007',
   'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
 ] as const;
-const profilerReportPlans = [
+const r3ProfilerReportPlans = [
   '/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json',
   '/assets/profiler-report-fixtures/lab08-nsight-compute.expected.json',
   '/assets/profiler-report-fixtures/lab10-nsight-compute.expected.json',
   '/assets/profiler-report-fixtures/q12-nsight-compute.expected.json',
   '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
 ] as const;
+const currentProfilerReportPlans = [
+  '/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json',
+  '/assets/profiler-report-fixtures/lab08-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/lab10-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/lab11-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/q12-nsight-compute.expected.json',
+  '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
+] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17',
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 10 },
-  { suffix: 'practice/', count: 68 },
+  { suffix: 'labs/', count: 11 },
+  { suffix: 'practice/', count: 70 },
   { suffix: 'visuals/', count: 19 },
-  { suffix: 'glossary/', count: 182 },
-  { suffix: 'sources-and-versions/', count: 78 },
+  { suffix: 'glossary/', count: 184 },
+  { suffix: 'sources-and-versions/', count: 80 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
+  'cub-device-reduction-scan',
   'environment-report',
   'error-handling-lifecycle',
   'graph-capture',
@@ -200,7 +221,7 @@ test('serves the exact R3 release and current publication with production canoni
       runtimeVerified: [],
       referenceEnvironments: [],
       performanceObservations: [],
-      expectedOnlyProfilerReportPlans: profilerReportPlans,
+      expectedOnlyProfilerReportPlans: r3ProfilerReportPlans,
       capturedProfilerReports: [],
     },
     knownLimitations: expect.arrayContaining([
@@ -216,7 +237,7 @@ test('serves the exact R3 release and current publication with production canoni
     solutionSetPublicationPairs: 61,
     learningUnits,
     runnableExamples: runnableExampleIds,
-    labs: currentLabs,
+    labs: r3Labs,
     visualExplainers: currentVisualExplainers,
     practiceBankEntries: 66,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
@@ -239,7 +260,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-04',
+    reviewDate: '2026-09-05',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -254,31 +275,61 @@ test('serves the exact R3 release and current publication with production canoni
           toolkitLanes: ['cuda-12.9', 'cuda-13.3'],
           excludedToolkitLanes: ['cuda-11.8'],
         },
+        cub: {
+          bundled: [
+            {
+              toolkitLane: 'cuda-11.8',
+              version: '1.15.1',
+              versionMacro: 101501,
+              package: 'cuda-cccl-11-8=11.8.89-1',
+            },
+            {
+              toolkitLane: 'cuda-12.9',
+              version: '2.8.2',
+              versionMacro: 200802,
+              package: 'cuda-cccl-12-9=12.9.27-1',
+            },
+            {
+              toolkitLane: 'cuda-13.3',
+              version: '3.3.4',
+              versionMacro: 300304,
+              package: 'cccl-13-3=13.3.3.4.1-1',
+            },
+          ],
+          selected: {
+            version: '3.4.2',
+            versionMacro: 300402,
+            commit: 'd36012203ef73ac7f966e848dd88482273e91e02',
+            toolkitLanes: ['cuda-12.9', 'cuda-13.3'],
+          },
+        },
       },
     },
     knownLimitations: expect.arrayContaining([
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
-      'The five profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
-      'EX11, EX12, EX13, EX14, and EX15 have empty compilation evidence and remain Pending Hardware Verification.',
+      'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
+      'EX11 through EX17 have empty compilation evidence and remain Pending Hardware Verification.',
       'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'L01-L02 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, and static decision or iterator records provide no local compilation, runtime, synchronization, or performance evidence.',
-      'L01-L02 are published in the rolling R4 surface; L03-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+      'L01-L04 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
+      'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
+      'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
+      'L01-L04 are published in the rolling R4 surface; L05-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 238,
-    sourceRoutes: 476,
-    exerciseSetPublicationPairs: 63,
-    solutionSetPublicationPairs: 63,
+    publicationPairs: 246,
+    sourceRoutes: 492,
+    exerciseSetPublicationPairs: 65,
+    solutionSetPublicationPairs: 65,
     learningUnits: currentLearningUnits,
-    runnableExamples: runnableExampleIds,
+    runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 68,
+    practiceBankEntries: 70,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
-    glossaryTerms: 182,
-    sourceRecords: 78,
+    glossaryTerms: 184,
+    sourceRecords: 80,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -290,9 +341,9 @@ test('serves the exact R3 release and current publication with production canoni
     referenceEnvironments: [],
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
-    r4EvidenceNeutralLearningUnits: ['L01', 'L02'],
+    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
-    expectedOnlyProfilerReportPlans: profilerReportPlans,
+    expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
     retainedCompileRuns: [32720214527, 33275734951],
   });
@@ -309,6 +360,7 @@ test('serves the exact R3 release and current publication with production canoni
     { fixtureName: 'lab06-nsight-systems.expected.json', reviewDate: '2026-08-31' },
     { fixtureName: 'lab08-nsight-compute.expected.json', reviewDate: '2026-08-31' },
     { fixtureName: 'lab10-nsight-compute.expected.json', reviewDate: '2026-09-02' },
+    { fixtureName: 'lab11-nsight-compute.expected.json', reviewDate: '2026-09-05' },
     { fixtureName: 'q12-nsight-compute.expected.json', reviewDate: '2026-09-02' },
     { fixtureName: 'q13-nsight-compute.expected.json', reviewDate: '2026-09-03' },
   ]) {
@@ -351,6 +403,40 @@ test('serves the exact R3 release and current publication with production canoni
       expect(fixture.claimBoundary).toMatch(/no recorded[\s\S]*Node\.js observation/i);
       expect(fixture.claimBoundary).toMatch(/Node\.js or reducer execution[\s\S]*no CUDA evidence/i);
     }
+    if (fixtureName === 'lab11-nsight-compute.expected.json') {
+      expect(fixture).toMatchObject({
+        schemaVersion: 2,
+        fixtureId: 'LAB11-NCU-EXPECTED',
+        labId: 'LAB11',
+        exampleId: 'EX17',
+        method: {
+          exampleIds: ['EX11', 'EX17'],
+          canonicalExampleId: 'EX17',
+        },
+      });
+      expect(fixture.method.componentProfiles.map(({ id }: { id: string }) => id)).toEqual([
+        'cuda-11-8-bundled-cub-1-15-1',
+        'cuda-12-9-bundled-cub-2-8-2',
+        'cuda-13-3-bundled-cub-3-3-4',
+        'cuda-12-9-selected-cccl-3-4-2',
+        'cuda-13-3-selected-cccl-3-4-2',
+      ]);
+      expect(fixture.captureCommands).toEqual({
+        custom: expect.stringMatching(/--export <unique-profile-pair-custom-report-base>[\s\S]*--candidate custom --timing none/),
+        cub: expect.stringMatching(/--export <unique-profile-pair-cub-report-base>[\s\S]*--candidate cub --timing none/),
+      });
+      expect(fixture.method.recordedResults).toEqual({
+        actualMetricNames: [],
+        actualMetricValues: [],
+        correctnessAndNumerical: [],
+        steadyStateTiming: [],
+        setupInclusiveTiming: [],
+        callToKernelMappings: [],
+        profilerTraffic: [],
+        maintenance: [],
+      });
+      expect(fixture.claimBoundary).toMatch(/no recorded environment value[\s\S]*component winner/i);
+    }
   }
 
   for (const { publicPath, sha256 } of reviewedSolutionAssets) {
@@ -368,7 +454,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(476);
+  expect(publishedRoutes).toHaveLength(492);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -379,8 +465,8 @@ test('serves the exact R3 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/238.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/476.*source routes/);
+    await expect(page.locator('main')).toContainText(/246.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/492.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -388,9 +474,18 @@ test('serves the exact R3 release and current publication with production canoni
         [...new Set(links.map((link) => new URL(link.getAttribute('href') ?? '', location.origin).pathname))].sort(),
       ),
     ).toEqual(exampleRouteSlugs.map((slug) => `${examplePrefix}${slug}/`).sort());
+    for (const suffix of [
+      'libraries/cub-device-primitives/',
+      'libraries/cub-warp-block-primitives/',
+      'examples/cub-device-reduction-scan/',
+      'labs/compare-custom-reduction-with-cub/',
+    ]) {
+      const href = `${prefix}/${suffix}`;
+      await expect(navigation.locator(`a[href="${href}"]`), href).toHaveCount(1);
+    }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(357);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(364);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -401,7 +496,7 @@ test('serves the exact R3 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(10);
+    await expect(labCards).toHaveCount(11);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -413,6 +508,7 @@ test('serves the exact R3 release and current publication with production canoni
       'LAB08',
       'LAB09',
       'LAB10',
+      'LAB11',
     ]);
   }
 
@@ -453,6 +549,15 @@ test('serves the exact R3 release and current publication with production canoni
       exampleSuffix: 'examples/tiled-transpose/',
       visualSuffix: 'visuals/tiled-transpose/',
     },
+    {
+      suffix: 'labs/compare-custom-reduction-with-cub/',
+      unitId: 'LAB11',
+      prerequisites: 'Q12,L03',
+      runtimeEvidence: 'Pending Hardware Verification',
+      expectedObservations: '10 declared expectations',
+      exampleSuffix: 'examples/cub-device-reduction-scan/',
+      visualSuffix: 'visuals/reduction-stages/',
+    },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -472,6 +577,16 @@ test('serves the exact R3 release and current publication with production canoni
           /Node\.js 24\.19\.0[\s\S]*reducer/,
         );
       }
+      if (unitId === 'LAB11') {
+        await expect(page.locator('meta[name="cuda:hardware-gate"]')).toHaveAttribute(
+          'content',
+          /bundled CUB 1\.15\.1\/2\.8\.2\/3\.3\.4[\s\S]*selected CCCL 3\.4\.2/,
+        );
+        await expect(page.locator('meta[name="cuda:permissions"]')).toHaveAttribute(
+          'content',
+          /approved non-admin counters[\s\S]*no sudo/,
+        );
+      }
       const prefix = route.startsWith('/en/') ? '/en/' : '/';
       await expect(page.locator(`main a[href="${prefix}${exampleSuffix}"]`).first()).toBeVisible();
       await expect(page.locator(`main a[href="${prefix}${visualSuffix}"]`).first()).toBeVisible();
@@ -485,6 +600,8 @@ test('serves the exact R3 release and current publication with production canoni
     { suffix: 'algorithms/sparse-matrix-multiplication-preprocessing/', unitId: 'A13', prerequisites: 'A12,A08' },
     { suffix: 'libraries/library-primitive-dsl-custom-kernel/', unitId: 'L01', prerequisites: 'A02,A03,A08,Q06' },
     { suffix: 'libraries/thrust-algorithm-vocabulary/', unitId: 'L02', prerequisites: 'A01,A03,A09' },
+    { suffix: 'libraries/cub-device-primitives/', unitId: 'L03', prerequisites: 'A02,A03,M07,L01' },
+    { suffix: 'libraries/cub-warp-block-primitives/', unitId: 'L04', prerequisites: 'F02,M03,M05,A02,A03,L03' },
     { suffix: 'visuals/attention-memory-traffic/', unitId: 'VIS18', prerequisites: 'A11' },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {
@@ -639,6 +756,22 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/labs/optimize-canonical-transpose/'],
     },
     {
+      query: 'L03 CUB Device Primitives',
+      expectedHrefs: ['/libraries/cub-device-primitives/'],
+    },
+    {
+      query: 'L04 CUB Warp Block Primitives 组合内核',
+      expectedHrefs: ['/libraries/cub-warp-block-primitives/'],
+    },
+    {
+      query: 'EX17 CUB Device Reduction Scan 可运行示例',
+      expectedHrefs: ['/examples/cub-device-reduction-scan/'],
+    },
+    {
+      query: 'LAB11 比较自定义归约与 CUB',
+      expectedHrefs: ['/labs/compare-custom-reduction-with-cub/'],
+    },
+    {
       query: 'Q12 hypothesis ledger warp-tail-control',
       expectedHrefs: ['/correctness/reduction-optimization-case-study/'],
     },
@@ -751,6 +884,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/examples/sanitizer-defect-suite/'],
     },
     {
+      query: 'EX17 CUB Device Reduction and Scan Runnable Example',
+      expectedHrefs: ['/en/examples/cub-device-reduction-scan/'],
+    },
+    {
       query: 'LAB04 Observe Coalescing',
       expectedHrefs: ['/en/labs/observe-coalescing/'],
     },
@@ -777,6 +914,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'LAB10 Optimize the Canonical Transpose',
       expectedHrefs: ['/en/labs/optimize-canonical-transpose/'],
+    },
+    {
+      query: 'LAB11 Compare a Custom Reduction with CUB',
+      expectedHrefs: ['/en/labs/compare-custom-reduction-with-cub/'],
     },
     {
       query: 'Memory-request Segment Grouping',
@@ -849,6 +990,14 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
     {
       query: 'M19 CUDA C++17 C++20 C++23 Dialect Boundaries',
       expectedHrefs: ['/en/toolchain/cpp-dialect-boundaries/'],
+    },
+    {
+      query: 'L03 Reduce and Scan with CUB Device Primitives',
+      expectedHrefs: ['/en/libraries/cub-device-primitives/'],
+    },
+    {
+      query: 'L04 Compose Kernels with CUB Warp and Block Primitives',
+      expectedHrefs: ['/en/libraries/cub-warp-block-primitives/'],
     },
     {
       query: 'A01 Elementwise Map One Owner per Element',
@@ -1070,6 +1219,18 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/toolchain/separate-compilation-device-linking/',
     '/toolchain/cpp-dialect-boundaries/',
     '/en/toolchain/cpp-dialect-boundaries/',
+    '/libraries/cub-device-primitives/',
+    '/en/libraries/cub-device-primitives/',
+    '/libraries/cub-device-primitives/exercises/',
+    '/en/libraries/cub-device-primitives/exercises/',
+    '/libraries/cub-device-primitives/solutions/',
+    '/en/libraries/cub-device-primitives/solutions/',
+    '/libraries/cub-warp-block-primitives/',
+    '/en/libraries/cub-warp-block-primitives/',
+    '/libraries/cub-warp-block-primitives/exercises/',
+    '/en/libraries/cub-warp-block-primitives/exercises/',
+    '/libraries/cub-warp-block-primitives/solutions/',
+    '/en/libraries/cub-warp-block-primitives/solutions/',
     '/algorithms/elementwise-map/',
     '/en/algorithms/elementwise-map/',
     '/algorithms/multi-stage-reduction/',
@@ -1122,6 +1283,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/examples/error-handling-lifecycle/',
     '/examples/sanitizer-defect-suite/',
     '/en/examples/sanitizer-defect-suite/',
+    '/examples/cub-device-reduction-scan/',
+    '/en/examples/cub-device-reduction-scan/',
     '/examples/ptx-fatbinary-inspection/',
     '/en/examples/ptx-fatbinary-inspection/',
     '/examples/multi-stage-reduction/',
@@ -1162,6 +1325,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/labs/build-original-roofline/',
     '/labs/optimize-canonical-transpose/',
     '/en/labs/optimize-canonical-transpose/',
+    '/labs/compare-custom-reduction-with-cub/',
+    '/en/labs/compare-custom-reduction-with-cub/',
   ]) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
@@ -1394,6 +1559,14 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
           `EX15 embedded source reproduces ${relativePath}`,
         ).toBe(true);
       }
+    }
+
+    if (project.id === 'EX17') {
+      const archivedManifest = JSON.parse(findEntry('project.json').content.toString('utf8'));
+      expect(archivedManifest).toEqual(ex17Project);
+      expect(archivedManifest).not.toHaveProperty('sourceCommit');
+      expect(archivedManifest).not.toHaveProperty('sourceUrl');
+      expect(archivedManifest).not.toHaveProperty('downloadUrl');
     }
 
     if (project.id === 'EX10') {

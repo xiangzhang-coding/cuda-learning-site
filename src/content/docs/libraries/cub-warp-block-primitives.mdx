@@ -1,0 +1,290 @@
+---
+title: 'L04：用 CUB Warp 与 Block Primitives 组合内核'
+description: 在 CCCL v3.4.2 下选择 WarpReduce、WarpScan、BlockReduce 与 BlockScan，并精确声明参与者、布局、TempStorage、同步、部分有效输入与算法变体。
+pairId: l04
+counterpart: /en/libraries/cub-warp-block-primitives/
+factCheckDate: '2026-09-05'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - scope-and-headers
+  - participant-contract
+  - warp-primitives
+  - block-primitives
+  - data-arrangement
+  - temporary-storage
+  - partial-valid
+  - algorithm-variants
+  - known-issues
+  - visual-reuse
+  - license-review
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L04
+prerequisites:
+  - F02
+  - M03
+  - M05
+  - A02
+  - A03
+  - L03
+relatedUnits:
+  - M06
+  - M12
+  - VIS10
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; released 2026-08-05'
+    platform: 'Immutable selected CCCL and CUB source coordinate'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 warp-wide primitive index'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/warp_wide.rst'
+    version: 'CCCL and CUB v3.4.2; tagged documentation'
+    platform: 'Warp collective scope and consecutive-thread boundary'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 block-wide primitive index'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/block_wide.rst'
+    version: 'CCCL and CUB v3.4.2; tagged documentation'
+    platform: 'Thread-block collective scope'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 generated-documentation aliases'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/Doxyfile#L64-L83'
+    version: 'CCCL and CUB v3.4.2; tagged Doxyfile aliases'
+    platform: 'Warp/block TempStorage reuse barriers, row-major ranking, and blocked arrangement definitions'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 developer overview'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer_overview.rst'
+    version: 'CCCL and CUB v3.4.2; tagged developer documentation'
+    platform: 'Layered invocation, participant, TempStorage, and output-validity model'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 warp-level developer guide'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/warp_level.rst'
+    version: 'CCCL and CUB v3.4.2; tagged developer documentation'
+    platform: 'Logical-warp shape, specialization, TempStorage ownership, and reuse synchronization'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 block-scope developer guide'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/block_scope.rst'
+    version: 'CCCL and CUB v3.4.2; tagged developer documentation'
+    platform: 'Block template shape, constructors, algorithm selection, and TempStorage reuse synchronization'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 WarpReduce interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/warp/warp_reduce.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'Logical-warp participants, lane-0 result, valid_items, and TempStorage contract'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 WarpScan interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/warp/warp_scan.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'Per-lane scans, aggregate overloads, partial-valid behavior, and TempStorage contract'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 BlockReduce interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/block/block_reduce.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'Block shape, row-major ranking, partial-valid reduction, output validity, and algorithm variants'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 BlockScan interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/block/block_scan.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'Block shape, blocked arrangement, per-thread outputs, aggregate overloads, and algorithm variants'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 row-major thread-rank source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/util_ptx.cuh#L124-L131'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'RowMajorTid linear-rank definition for multidimensional blocks'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 WarpReduce tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/warp/catch2_test_warp_reduce.cu'
+    version: 'CCCL and CUB v3.4.2; tagged owner tests'
+    platform: 'Selected logical-warp and valid_items owner coverage; not Learning Site evidence'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 WarpScan partial tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_warp_scan_partial.cu'
+    version: 'CCCL and CUB v3.4.2; tagged owner tests'
+    platform: 'Selected partial-scan owner coverage; not Learning Site evidence'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 BlockReduce tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_block_reduce.cu'
+    version: 'CCCL and CUB v3.4.2; tagged owner tests'
+    platform: 'Selected full and partial block-reduction owner coverage; not Learning Site evidence'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 BlockScan tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_block_scan.cu'
+    version: 'CCCL and CUB v3.4.2; tagged owner tests'
+    platform: 'Selected block-scan owner coverage; not Learning Site evidence'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 aggregate license'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE'
+    version: 'CCCL v3.4.2'
+    platform: 'Aggregate license map; exact adapted files would still require file-level review'
+    accessDate: '2026-09-05'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l04 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/cub-warp-block-primitives/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,scope-and-headers,participant-contract,warp-primitives,block-primitives,data-arrangement,temporary-storage,partial-valid,algorithm-variants,known-issues,visual-reuse,license-review,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L04 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'F02,M03,M05,A02,A03,L03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M06,M12,VIS10' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '17' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: CCCL-v3.4.2 }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cub-warp-block-primitives/" lang="en">Read the English counterpart</a>
+
+CUB 的 warp/block [集体原语（collective，TERM-107）](/glossary/#term-107)要求一组明确参与者共同调用同一 operation。[逻辑线程束（logical warp，TERM-184）](/glossary/#term-184)不是“当前恰好 active 的任意 lanes”，而是同一 hardware warp 内 compile-time 大小的连续线程组。`WarpReduce`/`BlockReduce`实现[归约（reduction，TERM-127）](/glossary/#term-127)，`WarpScan`/`BlockScan`实现[扫描（scan，TERM-130）](/glossary/#term-130)；四者都把 participant、output validity 与 [临时存储（temporary storage，TERM-183）](/glossary/#term-183)合同留给调用者。
+
+## 学习成果
+
+- 根据需要协调的 group scope 与 output shape，在四个 focused collectives 间选择。
+- 精确声明 logical-warp participant count、block template shape、row-major rank 与 blocked arrangement。
+- 为每个同时活动的 group 提供匹配 specialization 的 `TempStorage`，并在 reuse/repurpose 前加入 caller barrier。
+- 处理 `valid_items`/`num_valid` 与 output-validity boundaries，不让 inactive data 进入 operation。
+- 选择 v3.4.2 algorithm variant 时描述语义与[确定性（determinism，TERM-138）](/glossary/#term-138)，不从名字生成 performance claim。
+
+## 先修关系
+
+课程图按此顺序固定先修项：[F02：执行层级](/foundations/execution-hierarchy/)、[M03：共享内存分块](/memory/shared-memory-tiling/)、[M05：同步作用域](/memory/synchronization-scopes/)、[A02：多阶段归约](/algorithms/multi-stage-reduction/)、[A03：包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)和 [L03：CUB Device Primitives](/libraries/cub-device-primitives/)，即 `F02, M03, M05, A02, A03, L03`。这些单元分别提供 hierarchy、storage、barrier、operation semantics 与 device-wide 对照。
+
+## 范围与 canonical headers
+
+本单元固定 **CCCL/CUB v3.4.2**，commit `d36012203ef73ac7f966e848dd88482273e91e02`，并使用四个 focused canonical headers：
+
+- `cub::WarpReduce`：`<cub/warp/warp_reduce.cuh>`
+- `cub::WarpScan`：`<cub/warp/warp_scan.cuh>`
+- `cub::BlockReduce`：`<cub/block/block_reduce.cuh>`
+- `cub::BlockScan`：`<cub/block/block_scan.cuh>`
+
+`<cub/cub.cuh>` 是可用 aggregate header，但不是最窄 dependency。这里不教授 device-wide orchestration、WarpReduceBatched、load/store/exchange、segmented operations 或 cooperative-groups replacement。
+
+## Participant contract 先于 primitive name
+
+| Primitive scope | Compile-time shape | 必须共同调用的 participants | 结果合同 |
+| --- | --- | --- | --- |
+| Warp | `T, LogicalWarpThreads`，其中 `1 <= n <= 32` | 同一 hardware warp 中 `n` 个连续 threads；entrant count 必须是 `n` 的倍数 | 由 logical lane rank 定义 |
+| Block | `T, BlockDimX, Algorithm, BlockDimY, BlockDimZ` | launch 中与 template shape 完全匹配的整个 CUDA thread block | 由 row-major linear thread rank 定义 |
+
+Collective call 必须由该 group 的所有 required participants 以一致参数到达。只让“有数据”的 threads 调用不是 partial-tile protocol；它可能让内部 communication 或 barrier 缺少参与者。[M06](/memory/warp-divergence-reconvergence/)解释 converged participation，[M12](/memory/cooperative-groups/)提供另一套 explicit-group vocabulary，但不会自动改变 CUB class 的 participant contract。
+
+v3.4.2 对 logical-warp shape 还有一条容易漏掉的边界：当 `LogicalWarpThreads` 是 2 的幂时，一个 hardware warp 可按该大小划分 subwarps；当它不是 2 的幂时，tagged developer guide 明确说不做 partitioning，只有第一个 logical warp 执行。不能把 32 lanes 简单切成多个 7-lane 或 9-lane sibling groups。Exercise 使用 8，因而不触发这条边界。
+
+## Warp primitives：一个 logical warp 的 reduction 或 prefixes
+
+`WarpReduce<T, LogicalWarpThreads>`让每个 logical lane 提供一个 item（部分 overload 可提供 fixed-size range），并只在每个 logical warp 的 **lane 0** 返回有效 aggregate；其他 lanes 的 return value undefined。若一个 block 同时运行多个 logical warps，每组必须有自己的 `TempStorage` slot，不能让仍在执行的 groups alias 同一 slot。
+
+`WarpScan<T, LogicalWarpThreads>`为每个 participating lane 产生 inclusive 或 exclusive prefix。普通 output 对对应 lane 有效；带 `warp_aggregate` 的 overload 把全部 inputs 的 aggregate 提供给每个 participating lane。`ExclusiveSum`提供 zero initial value，所以 logical lane 0 的 output 是零；不带 initial value 的 generic `ExclusiveScan` 则明确让 lane 0 output undefined。不能把 reduce 的 leader-only output rule误套到 scan，也不能反过来读取每个 lane 的 reduce return value。
+
+## Block primitives：整个 launch block 的 reduction 或 prefixes
+
+`BlockReduce` 与 `BlockScan` 的 template shape 不是建议值。Runtime launch 必须与 `BlockDimX * BlockDimY * BlockDimZ` 及各维形状匹配，整个 block 共同调用。两类 class 都有匹配 specialization 的 nested `TempStorage`；v3.4.2 也提供 internally allocated private shared-storage constructor，但 explicit storage 使 ownership 与 reuse phase 更容易审查。
+
+`BlockReduce`的 public `Sum`/`Reduce` return value只在 row-major **thread 0** 有定义，其他 threads 不得消费，即使某个 internal algorithm 恰好让更多 lanes 看见值。`BlockScan`则为每个 thread 的 item(s)产生 prefix outputs；带 `block_aggregate` 的 overload 把 aggregate 提供给所有 threads。Reduction 与 scan 的 output cardinality 始终不同。
+
+## Row-major blocked arrangement
+
+多维 block 的 linear rank 是 `threadIdx.x + BlockDimX * (threadIdx.y + BlockDimY * threadIdx.z)`；X 变化最快。Single-item overload 按该 row-major rank 排序 participants。
+
+当每个 thread 持有 `ItemsPerThread` 个 items 时，array overload 假设 **blocked arrangement**：linear thread `i` 拥有 global logical sequence 中从 `i * ItemsPerThread` 开始的连续区间。也就是说，先按 thread rank 排列，再按该 thread 的 local item index 排列。把 striped load 直接当成 blocked input 会改变 reduction/scan 的 logical order；应先转换 arrangement，或选择匹配数据布局的 load path。
+
+## `TempStorage` 与 caller synchronization
+
+`TempStorage` 是 opaque nested type，其 layout 取决于 class specialization、algorithm、data type 和 group shape。Caller 为每个同时活动且可能互相干扰的 group 提供独占 slot。可以在不同 collectives 之间用 union/alias 复用 shared memory，但 phase boundary 必须明确。
+
+Collective 内部可能使用 shuffle、shared memory 和 embedded barriers；这些内部步骤只实现当前 call，**不能替代 caller 为 storage reuse 或 following use 所需的同步**：
+
+- Warp collective 返回后，若要复用/repurpose 该 warp `TempStorage`，先让准确的 participating lanes 执行 `__syncwarp(mask)`；uniform full-warp case 才可无歧义使用默认 full-warp form。
+- Block collective 返回后，若要复用/repurpose block `TempStorage`，整个 block 先执行 `__syncthreads()`。
+- 若 leader 把 reduction result 发布到 shared memory 供 peers 消费，还要为这条 producer/consumer edge放置匹配 scope 的 synchronization；内部 barrier 不证明 publication 已完成。
+
+Barrier 的 participant mask/phase 必须与 group ledger 一致。过宽 mask 中缺少到达者与过窄 mask 漏掉 consumer 都不是安全协议。
+
+## Partial-valid contracts
+
+`WarpReduce` 的 `valid_items` overload只归约 logical warp 中前 `valid_items` 个 lanes；calling warp 的所有 threads 必须对该值达成一致，否则结果 undefined。参与 collective 与贡献有效 input 是两个不同集合：无效 lane 仍按 group contract 调用，但其 input 不进入 reduction；结果仍只在 logical lane 0 有效。
+
+v3.4.2 `WarpScan` 的 partial forms 同样只把前 `valid_items` 个 lane inputs 传给 scan operator。Invalid outputs 保持 unmodified；请求 aggregate 时，零个 valid inputs 会让 aggregate undefined。所有 participating lanes 仍需遵守同一个 group call 与 storage phase。
+
+`BlockReduce(input, op, num_valid)`或 `Sum(input, num_valid)`只让 row-major rank 位于前 `num_valid` 的 threads贡献 item，但整个 block仍调用 collective，结果只在 thread 0 有效。Focused `BlockScan` surface 没有对应的 dynamic valid-count parameter；tail tile 必须由 caller 用正确 identity/padding 与 output guard 构造 full logical tile，或选择另一个有明确 partial contract 的 abstraction。对 generic operation，没有已证明的 identity 就不能随意 padding。
+
+## v3.4.2 algorithm variants
+
+`BlockReduceAlgorithm`公开 `BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY`、`BLOCK_REDUCE_RAKING`、默认 `BLOCK_REDUCE_WARP_REDUCTIONS` 与 `BLOCK_REDUCE_WARP_REDUCTIONS_NONDETERMINISTIC`。第一个只接受交换 reduction；tagged source 把后三个列为可接受交换与非交换 operation。最后一种用 atomic operations 合并 warp aggregates，所以同一 kernel 的不同 invocation 不保证相同 reduction order。无论 variant，public return contract 仍只授权 thread 0。
+
+`BlockScanAlgorithm`公开默认 `BLOCK_SCAN_RAKING`、`BLOCK_SCAN_RAKING_MEMOIZE` 与 `BLOCK_SCAN_WARP_SCANS`。在 v3.4.2 source 中，如果 block thread count 不是 architecture warp size 的倍数，请求 `BLOCK_SCAN_WARP_SCANS`会映射到 safe `BLOCK_SCAN_RAKING` implementation。Warp classes 还会按 logical-warp shape 选择内部 specialization。这些 names 描述 available implementation families 与约束，不证明某一 variant 在目标 workload 上更快、使用多少 instructions、产生何种 occupancy 或赢得 benchmark。改变 reduction order 时，还必须重新应用数值验收与 determinism requirement。
+
+## 限定的 owner-test boundary
+
+Tagged `WarpReduce` test 覆盖 generic custom-operation path、selected predefined operations、logical-warp sizes 与 partial counts，但其 exact type list 不包含 floating-point types；其他三份 tagged tests 同样只覆盖各自声明的 selected cases。因此本页只用 tests 佐证 owner repository 的具体 coverage，不把它们扩展为所有 overload/type/shape 的完整验证，更不转化为本站 evidence。
+
+截至 2026-09-05，没有另一个 issue 同时满足“与本页四个 focused public contracts 直接相关”且“已证明适用于 exact v3.4.2 pin”的纳入门槛。本页不把 stale issue title、旧 CUB/GPU report 或 performance request 当作当前 correctness defect。
+
+## 复用 VIS10，不复制 visual
+
+[VIS10：Reduction Stages](/visuals/reduction-stages/)可帮助检查一个 reduction tree 的 operand edges 与 inactive lanes，但它不模拟 CUB logical-warps、TempStorage、embedded barriers、algorithm dispatch、floating-point order 或 GPU scheduling。L04 复用这个 evidence-neutral Visual Explainer，不创建第二个 visual，也不把 browser output 当作 CUB observation。
+
+## File-level license review
+
+四个 exact v3.4.2 headers、`util_ptx.cuh` 与两个 block tests 标记为 BSD-3；WarpReduce test 标记为 BSD-3-Clause；WarpScan partial test 标记为 Apache-2.0 WITH LLVM-exception。CCCL aggregate license 还包含其他 component mappings。L04 本身是 CC-BY-4.0、`provenance: original`，没有复制或改编 owner source、tests、examples、developer-guide code、tables、figures 或 benchmarks。
+
+页面只用原创 prose/tables 描述 owner contracts，并链接 exact tagged coordinates。未来 adaptation 需要逐文件检查 SPDX、copyright 与 embedded notices。2026-09-05 已查询 Context7 `/nvidia/cccl`用于 discovery/cross-check；它提供 current/main material，不是 v3.4.2 authority，版本事实由 tagged source/docs/developer docs/tests 负责。
+
+## 证据边界
+
+L04 的 `compilation`、`runtime`、`expectedObservations` 与 `recordedObservations` 四个 arrays 全为空。Static API review、owner tests、VIS10 与 selection exercises 都不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）。本页没有 CUDA/C++ code fence，没有编译或 execution，也没有 output、barrier trace、metric、timing、speedup 或 performance ranking。
+
+## 检索检查
+
+1. WarpReduce、WarpScan、BlockReduce 与 BlockScan 各自要求哪些 participants，哪些 threads/lane 拥有有效 output？
+2. `LogicalWarpThreads` 与 block template shape 为什么都是 correctness contract，而不是 tuning hint？
+3. Row-major blocked arrangement 如何把三维 thread rank 和每线程多个 items 映射到一个 logical sequence？
+4. 为什么 collective 内部 barrier 不能替代 `TempStorage` reuse 后的 `__syncwarp(mask)` 或 `__syncthreads()`？
+5. Partial-valid overload 如何区分“参与调用”与“贡献数据”，nondeterministic BlockReduce variant 又改变了哪项 guarantee？
+
+## 继续练习
+
+- 完成 [L04 练习](/libraries/cub-warp-block-primitives/exercises/)，再查看[独立复核解答](/libraries/cub-warp-block-primitives/solutions/)。
+- 在[练习题库（Practice Bank）PB-R4-004](/practice/#pb-r4-004)审查另一份 group/TempStorage packet。
+- 复习 [M06](/memory/warp-divergence-reconvergence/)与 [M12](/memory/cooperative-groups/)，并继续复用 [VIS10](/visuals/reduction-stages/)而不是创建重复 visual。
+- 复习 [TERM-107](/glossary/#term-107)、[TERM-127](/glossary/#term-127)、[TERM-130](/glossary/#term-130)、[TERM-138](/glossary/#term-138)、[TERM-183](/glossary/#term-183)和 [TERM-184](/glossary/#term-184)。
+
+## 来源与复核
+
+Immutable pin 来自 [v3.4.2 release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2)。Scope 来自 tagged [warp-wide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/warp_wide.rst)与 [block-wide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/block_wide.rst) indexes；reuse/layout rules 来自 [Doxyfile aliases](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/Doxyfile#L64-L83)、[developer overview](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer_overview.rst)、[warp guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/warp_level.rst)与 [block guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/block_scope.rst)。Public contracts 来自 [`warp_reduce.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/warp/warp_reduce.cuh)、[`warp_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/warp/warp_scan.cuh)、[`block_reduce.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/block/block_reduce.cuh)、[`block_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/block/block_scan.cuh)与 [`util_ptx.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/util_ptx.cuh#L124-L131)。Owner-test coordinates 是 [WarpReduce](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/warp/catch2_test_warp_reduce.cu)、[WarpScan partial](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_warp_scan_partial.cu)、[BlockReduce](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_block_reduce.cu)与 [BlockScan](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_block_scan.cu)；[aggregate license](https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE)只提供 license map。Context7 不是版本权威。
+
+**事实核对和来源访问日期：2026-09-05。**

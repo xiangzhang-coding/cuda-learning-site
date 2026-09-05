@@ -1,0 +1,347 @@
+---
+title: 'EX17：CUB Device Reduction 与 Scan 可运行示例'
+description: 用传统 CUB DeviceReduce 与 DeviceScan 两阶段接口处理固定的 4,099 项归约和有界 uint32 扫描，并以独立 CPU reference、精确版本门槛和单一 stream completion 验证正确性。
+pairId: ex17
+counterpart: /en/examples/cub-device-reduction-scan/
+factCheckDate: '2026-09-05'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - cpu-reference
+  - device-reduce
+  - device-scan
+  - storage-stream-lifetime
+  - version-profiles
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX17
+prerequisites:
+  - L03
+relatedUnits:
+  - A02
+  - A03
+  - Q02
+  - L01
+  - EX11
+  - EX12
+  - LAB11
+exampleIds:
+  - EX17
+canonicalExample: EX17
+canonicalRanges:
+  - cpu-reference
+  - device-reduce
+  - device-scan
+hardwareGate: 'Build: x86-64 CPU with a host C++17 compiler and the selected CUDA Toolkit/component profile; runtime: Native Linux only, exactly one CUDA GPU with compute capability 7.5 or newer; fixed device allocations total 65,588 bytes and all three per-profile queried temporary-storage allocations must keep total problem memory at or below 8,000,000,000 bytes'
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read the selected Toolkit bundled CUB headers or a learner-owned CCCL v3.4.2 checkout at the pinned commit'
+  - 'Access exactly one selected CUDA device and execute NVCC, the host C++ compiler, make, the EX17 compile-check script, host test, and CUDA binary'
+  - 'Create and remove files in the EX17 build directory, an optional result directory, and a learner-owned evidence directory'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'DeviceReduce::Sum should pass the declared absolute-plus-relative comparator against the double CPU reference for the exact EX11-compatible 4,099-float input.'
+    - 'DeviceScan::InclusiveSum and DeviceScan::ExclusiveSum should exactly match their independently computed uint32 CPU references and all recurrence and last-total invariants.'
+    - 'The selected CUB_VERSION should equal the profile expected macro before any executable can be linked.'
+  recordedObservations: []
+sources:
+  - title: 'CUDA Runtime API 13.3.1 - Stream Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'CUDA Runtime API v13.3.1; last updated 2026-06-29'
+    platform: 'Nonblocking stream creation, synchronization, and destruction contracts'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; CUB_VERSION 300402; CCCL_VERSION 3004002; released 2026-08-05'
+    platform: 'Immutable selected CCCL and CUB source coordinate for CUDA 12.9.2 and 13.3.1 profiles'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 Toolkit compatibility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; tagged README'
+    platform: 'Latest-patch CUDA 12.x and 13.x compatibility policy; CUDA 11.8 excluded from the selected pin'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 device-wide API guide'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst'
+    version: 'CCCL and CUB v3.4.2; tagged documentation'
+    platform: 'Traditional temporary-storage query, allocation, and execution protocol'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 device-scope developer guide'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/device_scope.rst'
+    version: 'CCCL and CUB v3.4.2; tagged developer documentation'
+    platform: 'Temporary-storage allocation, stream-order reuse, and dispatch boundaries'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 DeviceReduce interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'DeviceReduce::Sum semantics, overlap, stream, storage, and determinism contracts'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 DeviceScan interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'InclusiveSum and ExclusiveSum semantics, overlap, storage, and stream contracts'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 version header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/version.cuh'
+    version: 'CUB_VERSION 300402; CUB v3.4.2'
+    platform: 'Exact selected component-version coordinate'
+    accessDate: '2026-09-05'
+  - title: 'CUB v2.8.2 version header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v2.8.2/cub/cub/version.cuh'
+    version: 'CUB_VERSION 200802; CUB v2.8.2; commit 207d20fb6a4165fcd2551bcf2f04b8a5ea40829f'
+    platform: 'Exact component coordinate corresponding to the CUDA 12.9.2 bundle'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.3.4 version header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.3.4/cub/cub/version.cuh'
+    version: 'CUB_VERSION 300304; CUB v3.3.4; commit 413d2efd811ebb2ca0333a281d04a2de838ecad6'
+    platform: 'Exact component coordinate corresponding to the CUDA 13.3.1 bundle'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA cuda-cccl-11-8 package artifact'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-cccl-11-8_11.8.89-1_amd64.deb'
+    version: 'cuda-cccl-11-8 11.8.89-1; package SHA-256 38dc61ecf5059b8b22dc7cae2e5aa1f09263b8b9295eb225f69b3d4d76778c53; CUB_VERSION 101501 (1.15.1)'
+    platform: 'Exact bundled CUB package and header coordinate for cuda-11.8'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA cuda-cccl-12-9 package artifact'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cccl-12-9_12.9.27-1_amd64.deb'
+    version: 'cuda-cccl-12-9 12.9.27-1; package SHA-256 255b92bd5e09cd10aedaf098d1ee0f66ca1a9062efe96e2e1f385583ddf18c73; CUB_VERSION 200802; CCCL_VERSION 2008002'
+    platform: 'Exact bundled CUB and CCCL package/header coordinate for cuda-12.9'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA cccl-13-3 package artifact'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cccl-13-3_13.3.3.4.1-1_amd64.deb'
+    version: 'cccl-13-3 13.3.3.4.1-1; package SHA-256 7fb49a9a684e97f48374c230b7a548cee61f62ff925d09238f038aba601dbdb2; CUB_VERSION 300304; CCCL_VERSION 3003004'
+    platform: 'Exact bundled CUB 3.3.4 package and header coordinate for cuda-13.3'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'CUDA 11.8.0; cuda_cccl 11.8.89; linux-x86_64 SHA-256 99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7; bundled CUB_VERSION 101501 (1.15.1)'
+    platform: 'NVIDIA manifest plus its hash-addressed Linux x86_64 archive version-header inspection'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'CUDA 12.9.2; cuda_cccl 12.9.27; linux-x86_64 SHA-256 8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa; bundled CUB_VERSION 200802 (2.8.2)'
+    platform: 'NVIDIA manifest plus its hash-addressed Linux x86_64 archive version-header inspection'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'CUDA 13.3.1; cccl 13.3.3.4.1; linux-x86_64 SHA-256 26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268; bundled CUB_VERSION 300304 (3.3.4)'
+    platform: 'NVIDIA manifest plus its hash-addressed Linux x86_64 archive version-header inspection'
+    accessDate: '2026-09-05'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: ex17 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/examples/cub-device-reduction-scan/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,device-reduce,device-scan,storage-stream-lifetime,version-profiles,build,compatibility,evidence,expected-observations,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: runnable-example }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: EX17 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: L03 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'A02,A03,Q02,L01,EX11,EX12,LAB11' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX17 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX17 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,device-reduce,device-scan' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host plus selected Toolkit/component profile; runtime: Native Linux only, one CC 7.5+ GPU; 65,588 fixed bytes plus three queried scratch allocations must not exceed 8,000,000,000 bytes' }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'read bundled or pinned selected headers; one CUDA device; compiler, make, compile-check, host-test, and CUDA-binary execution; EX17 build/result/evidence-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '16' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CUB-1.15.1,CUB-2.8.2,CUB-3.3.4,CCCL-v3.4.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1,CUDA-Runtime-13.3.1' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/cub-device-reduction-scan/" lang="en">Read the English counterpart</a>
+
+EX17 是一个独立、原创的 C++17 CUB Device Reduction 与 Scan 可运行示例（Runnable Example）。它调用 production `cub::DeviceReduce::Sum`、`cub::DeviceScan::InclusiveSum` 和 `cub::DeviceScan::ExclusiveSum`，但不复制或改编 CUB implementation。项目只产生 correctness verdict，没有 timer，也不发布 measured performance result。
+
+## 用途
+
+唯一严格先修是 [L03：用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)。L03 已建立 focused headers、operation semantics、传统 temporary-storage protocol、stream order、lifetime 与 version-matrix contract；本页把这些合同放进一个可独立构建和运行的 project。
+
+[A02 多阶段归约](/algorithms/multi-stage-reduction/)、[A03 Inclusive 与 Exclusive Scan](/algorithms/inclusive-exclusive-scan/)、[Q02 浮点顺序和可复现性](/correctness/floating-point-order-reproducibility/)、[L01 选择库、原语、DSL 或自定义内核](/libraries/library-primitive-dsl-custom-kernel/)、[EX11 custom reduction](/examples/multi-stage-reduction/)、[EX12 custom scan](/examples/inclusive-exclusive-scan/)和 [LAB11 custom/CUB comparison](/labs/compare-custom-reduction-with-cub/)都是 related resources，不增加 prerequisite edge。
+
+## 获取 canonical project
+
+[查看 immutable commit `b848390aeb6b28065a3421ab4c8b82758c8b114c` 中的 EX17 source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b848390aeb6b28065a3421ab4c8b82758c8b114c/examples/ex17-cub-device-reduction-scan)，或[下载同一 commit 的完整 archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/b848390aeb6b28065a3421ab4c8b82758c8b114c.zip)。这个 archive 固定八个 EX17 project files 与 byte-identical build-contract inputs；当前 publication registry 在后续 commit 中将页面链接绑定到这棵 immutable source tree。解压后进入 `examples/ex17-cub-device-reduction-scan/`。
+
+八个 project files 包含 manifest、README、Makefile、一个 host-only reference header、一个 CUDA source、host test、compile-check script 与空 evidence directory 说明。所有 project source 都是本站原创 Apache-2.0 work；本页文字是原创 CC-BY-4.0 work。CUB 是按自身许可取得的 external dependency，本站没有把 owner implementation 重新发布为示例源码。
+
+## CPU reference 与两个正确性合同
+
+同一个 host-only header 同时定义 reduction 和 scan oracle，不包含 CUDA 或 CUB header：
+
+<CanonicalCode exampleId="EX17" range="cpu-reference" />
+
+**Reduction contract：** 恰好 4,099 个 stored `float` 使用与 EX11 byte-for-byte compatible 的 deterministic generator。每项先由 `float` 表示，再按 input order 转为 `double` 并 serially accumulate。Device output 是一个 `float`；验收规则固定为 `absolute_error <= 1.0e-4 + 2.0e-5 * abs(cpu_reference)`。Parallel reduction 可以改变加法结合顺序，因此 EX17 不要求等于 serial left fold 的 bit pattern，也不把 tolerance pass 写成 bitwise reproducibility。
+
+**Scan contract：** Public reference 最多接受 4,099 个 `std::uint32_t`，并在写 output 前拒绝任何大于 7 的 input。于是所有 prefix 都不超过 `4,099 * 7 = 28,693`，不会发生 `uint32_t` overflow。固定 input 重复 1 到 7，其 total 恰为 16,390。Inclusive 与 exclusive references 分别独立 serially compute；两个完整 device arrays 必须 exact match，并满足 recurrence、`exclusive[0] = 0` 和两条 last-total identity。
+
+## DeviceReduce path
+
+Reduction range 只维护传统 `DeviceReduce::Sum` public API 的 query/allocate/execute plumbing：
+
+<CanonicalCode exampleId="EX17" range="device-reduce" />
+
+`TemporaryStorage::bytes` 从 0 开始。Query 用 `nullptr`、相同 input/output pointer types、`int item_count` 与 explicit stream 调用 `Sum`，然后分配该次 query 返回的 bytes。Execution 在同一 current device 上把 allocation 和同一个 byte count 传回相同 overload。源文件还静态证明 4,099 能放进 legacy API 的 `int` extent。
+
+GPU result 只与前述独立 `double` oracle 比较。调用 production primitive 不会让 serial order 成为 device order，也不会自动建立跨 GPU bitwise equality。
+
+## DeviceScan paths
+
+Scan range 对 inclusive 与 exclusive operation 分别维护 storage；一个 query 的结果不会复用为另一个 primitive 的 capacity：
+
+<CanonicalCode exampleId="EX17" range="device-scan" />
+
+`InclusiveSum` 和 `ExclusiveSum` 都先以 null storage 查询，再各自执行一次 allocation 和 execution。它们共享同一个 4,099-element input 和 explicit stream，但输出与 scratch allocations 相互独立。Completion 后，程序分别 exact-compare 两个 arrays，再检查每个相邻 prefix、inclusive/exclusive relation 与 16,390 last total；一项失败就使 process 返回失败。
+
+## Canonical headers、temporary storage、stream 与 lifetime
+
+CUDA source 的 CUB imports 恰好是 focused public headers `<cub/device/device_reduce.cuh>`、`<cub/device/device_scan.cuh>` 与 version gate 所需的 `<cub/version.cuh>`，没有用 aggregate `<cub/cub.cuh>` 隐藏 dependency，也没有引用 CUB internal symbol。本页只通过 `CanonicalCode` 渲染 project manifest 声明的三个 ranges，不维护第二份 CUDA/C++ code fence。
+
+三项 primitive 都遵循同一个 legacy two-phase protocol：以 null storage 和归零 byte count 查询，在同一 current device 分配至少该 capacity，再以相同 API、template/argument types、4,099-item shape 和 stream execute。三个 queried values 分别属于 reduction、inclusive scan 与 exclusive scan；它们不是跨 version、device 或 operation 的常量，也不是 memory traffic measurement。
+
+`main` 只创建一个 `cudaStreamNonBlocking` stream。六次 CUB calls 和五次 checked `cudaMemcpyAsync` calls 都接收这一个 handle；五次 copy 是两个 H2D inputs 和三个 D2H outputs。三个 output copies 之后只有一次 checked `cudaStreamSynchronize(stream)`，这是 host validation 前唯一的 completion boundary。Input、output 与三个 scratch allocations 都存活越过该 boundary，随后才被释放；所有 CUDA/CUB return values、free 和 stream destruction 也被检查。Submission success 本身不是 completion。
+
+## Version macro gate 与五个 profiles
+
+所有 CUDA build target 都必须提供 decimal `EXPECTED_CUB_VERSION`。Makefile 把它定义为 `EX17_EXPECTED_CUB_VERSION`；source 先拒绝缺失 macro，再以 `static_assert(CUB_VERSION == EX17_EXPECTED_CUB_VERSION)` 对照 `<cub/version.cuh>`。因此 wrong or ambiguous header selection 必须在 executable link 之前失败。
+
+| Profile ID | Toolkit Lane | Component acquisition | Include roots | Required `CUB_VERSION` |
+| --- | --- | --- | --- | ---: |
+| `cuda-11-8-bundled-cub-1-15-1` | CUDA 11.8.0 | bundled `cuda-cccl-11-8=11.8.89-1`, CUB 1.15.1 | `/usr/local/cuda/include` | 101501 |
+| `cuda-12-9-bundled-cub-2-8-2` | CUDA 12.9.2 | bundled `cuda-cccl-12-9=12.9.27-1`, CUB 2.8.2 | `/usr/local/cuda/include` | 200802 |
+| `cuda-13-3-bundled-cub-3-3-4` | CUDA 13.3.1 | bundled `cccl-13-3=13.3.3.4.1-1`, CUB 3.3.4 | `/usr/local/cuda/include/cccl` | 300304 |
+| `cuda-12-9-selected-cccl-3-4-2` | CUDA 12.9.2 | selected CCCL 3.4.2 at `d36012203ef73ac7f966e848dd88482273e91e02` | `CCCL_ROOT/cub`, `CCCL_ROOT/thrust`, `CCCL_ROOT/libcudacxx/include` | 300402 |
+| `cuda-13-3-selected-cccl-3-4-2` | CUDA 13.3.1 | selected CCCL 3.4.2 at the same commit | the same three `CCCL_ROOT` component roots | 300402 |
+
+Selected CCCL 3.4.2 只与 latest-patch CUDA 12.x/13.x policy 对齐，所以没有 selected CUDA 11.8 profile。Bundled 与 selected include roots 不得在同一个 translation unit 中混用。五行使用同一传统 API 结构是为了保持 compatibility surface 一致，不表示五行已编译成功。
+
+## Build、host test 与运行命令
+
+Host test 不需要 CUDA headers、CUDA runtime 或 GPU：
+
+```sh
+make host-test DIALECT=c++17
+```
+
+它检查 4,099-float fixture、`double` oracle、absolute/relative tolerance boundaries、bounded scan rejection、两个独立 scan references、exact comparator、recurrences 与 last totals。`host-reference: pass` 只建立 host contract behavior，不建立 CUDA compilation 或 GPU execution evidence。
+
+以 11.8 bundled profile 为例，direct staged build 是：
+
+```sh
+make preprocess DIALECT=c++17 COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501
+make compile DIALECT=c++17 COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501
+make link DIALECT=c++17 COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501
+make inspect DIALECT=c++17 COMPONENT_MODE=bundled EXPECTED_CUB_VERSION=101501
+```
+
+Profile wrapper 会依次 clean、preprocess、compile、link、inspect 和 host-test，但不会执行 CUDA binary：
+
+```sh
+scripts/compile-check.sh c++17 cuda-11-8-bundled-cub-1-15-1 artifacts/ex17-11-8
+CCCL_ROOT=/path/to/cccl scripts/compile-check.sh c++17 cuda-12-9-selected-cccl-3-4-2 artifacts/ex17-12-9-selected
+```
+
+只有满足 runtime gate 后才运行：
+
+```sh
+./build/ex17-cub-device-reduction-scan
+```
+
+Build 产生 preprocessed source、object 和 executable；inspection 要求 native `sm_75` cubin 与从 `compute_75` 生成的 PTX。Binary 会打印 selected CUB macro 和五个 correctness verdict，但本页没有保存任何实际 stdout 或 exit status。
+
+## Compatibility 与精确 memory gate
+
+| Toolkit Lane | OS / architecture | Digest-pinned development image |
+| --- | --- | --- |
+| `cuda-11.8` | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` |
+| `cuda-12.9` | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` |
+| `cuda-13.3` | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` |
+
+Build contract 是 x86-64 host、C++17 和 selected Toolkit/component profile。Runtime 只属于 Native Linux Supported Environment，要求恰好一张 compute capability 7.5 或更新的 CUDA GPU。Pinned image、package、tag、include root 和 compiler target 都只是 acceptance coordinates，不是 build record。
+
+五个固定 device allocations 是 4,099-float reduction input 的 16,396 bytes、一个 4-byte reduction output，以及三个各 16,396-byte 的 scan input/inclusive/exclusive arrays，合计 **65,588 bytes**。实际 problem memory 是 `65,588 + T_reduce + T_inclusive + T_exclusive`，其中三个 `T` 必须由当前 device 上的 selected profile 和对应 primitive 分别查询。
+
+Frontmatter 的 `maximumProblemMemoryBytes: 8000000000` 是 Baseline GPU Capability Tier 的十进制 8,000,000,000-byte upper gate，不是假定 scratch 为零，也不是对实际 queried capacity 的预填值。三项 query、所有 allocations 与总和都必须成功且不超过该 gate；否则该环境不合格。Static bytes 和 temporary-storage capacity 都不能当作 observed traffic 或 performance result。
+
+## 编译与运行证据边界
+
+Compilation 与 runtime 是独立 axes。EX17 的 compilation array 为空，所以五个 profiles 都没有 Compile-Checked status。Runtime Evidence Status 是 **Pending Hardware Verification**，`recordedObservations` 也为空；本站没有在 Reference Environment 中执行该 binary。
+
+Canonical source 存在、host test 通过、owner API/test 存在、version/package/manifest coordinate 已核对，或某个 learner local build 成功，都不会自动填充这两个 evidence axes。本页没有 recorded CUB macro、scratch bytes、device output、bit pattern、error、kernel count、timing、traffic、speedup 或 winner。未来记录必须绑定完整 Environment Manifest、exact profile/acquisition/include trace、source and binary hashes、commands、raw output、exit status 与 correctness verdict，审核后才能改变 Evidence Status。
+
+## 预期观察，不是记录结果
+
+1. `DeviceReduce::Sum` 应在恰好 4,099 个与 EX11 compatible 的 `float` input 上，通过相对于独立 `double` CPU reference 的预声明 absolute-plus-relative comparator。
+2. `DeviceScan::InclusiveSum` 和 `DeviceScan::ExclusiveSum` 应分别 exact match 独立计算的 `uint32` CPU references，并通过全部 recurrence 和 last-total invariants。
+3. Selected `CUB_VERSION` 应在任何 executable link 之前等于该 profile 的 expected macro；不相等或无法唯一解析 header 时 build 应失败。
+
+这三项来自 canonical manifest，是 acceptance directions，不是本站已观察的 build 或 runtime output。
+
+## 来源与复核
+
+Traditional API、storage 与 public operation contracts 以 immutable CCCL v3.4.2 release、tagged device-wide/developer guides 和 exact `DeviceReduce`/`DeviceScan` sources 为准；stream creation/completion 以 CUDA Runtime API v13.3.1 为准。Selected coordinate 由 v3.4.2 release/compatibility/version header 固定；bundled coordinates 同时由 exact package artifacts、version headers 和三个 NVIDIA redistribution manifests 固定。Manifest/archive inspection 与 package hashes 只建立 acquisition coordinate，不建立 EX17 compilation 或 execution。
+
+- [CUDA Runtime API v13.3.1 Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)
+- [CCCL v3.4.2 immutable release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2)
+- [CCCL v3.4.2 Toolkit compatibility](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility)
+- [CUB v3.4.2 device-wide API guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst)
+- [CUB v3.4.2 device-scope developer guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/device_scope.rst)
+- [CUB v3.4.2 `DeviceReduce` interface](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh)
+- [CUB v3.4.2 `DeviceScan` interface](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh)
+- [CUB v3.4.2 version header](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/version.cuh)
+- [CUB v2.8.2 version header](https://github.com/NVIDIA/cccl/blob/v2.8.2/cub/cub/version.cuh)
+- [CUB v3.3.4 version header](https://github.com/NVIDIA/cccl/blob/v3.3.4/cub/cub/version.cuh)
+- [NVIDIA `cuda-cccl-11-8_11.8.89-1` package](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-cccl-11-8_11.8.89-1_amd64.deb)
+- [NVIDIA `cuda-cccl-12-9_12.9.27-1` package](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cccl-12-9_12.9.27-1_amd64.deb)
+- [NVIDIA `cccl-13-3_13.3.3.4.1-1` package](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cccl-13-3_13.3.3.4.1-1_amd64.deb)
+- [CUDA 11.8.0 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)
+- [CUDA 12.9.2 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)
+- [CUDA 13.3.1 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json)
+
+页面没有复制 owner source、example、test、table、figure 或 benchmark。事实核查与全部 16 项来源的访问日期均为 **2026-09-05**。

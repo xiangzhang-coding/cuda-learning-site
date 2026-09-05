@@ -1,0 +1,589 @@
+---
+title: 'LAB11: Compare a Custom Reduction with CUB'
+description: 'Compare the EX11 custom reduction and EX17 DeviceReduce under one 4,099-float correctness, timing, traffic, and maintenance contract across five explicitly pinned CUB component profiles, without prefilling a runtime or performance conclusion.'
+pairId: lab11
+counterpart: /labs/compare-custom-reduction-with-cub/
+factCheckDate: '2026-09-05'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - source-coordinates
+  - component-profiles
+  - canonical-review
+  - workload-correctness
+  - timing-boundaries
+  - traffic-boundaries
+  - manifest
+  - build-version-gates
+  - warm-up-acquisition
+  - profiler-mapping
+  - reduction-custody
+  - maintenance-rubric
+  - observations
+  - criteria-blockers
+  - evidence
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB11
+prerequisites:
+  - Q12
+  - L03
+relatedUnits:
+  - A02
+  - Q01
+  - Q02
+  - Q06
+  - Q08
+  - Q10
+  - L01
+  - L04
+  - EX11
+  - EX17
+  - VIS10
+exampleIds:
+  - EX11
+  - EX17
+canonicalExample: EX17
+canonicalRanges:
+  - cpu-reference
+  - device-reduce
+hardwareGate: 'Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer; C++17; cuda-11.8, cuda-12.9, or cuda-13.3; bundled CUB 1.15.1, 2.8.2, and 3.3.4 plus selected CCCL 3.4.2 checked only on cuda-12.9 and cuda-13.3; matching Nsight Compute and CUPTI; actual single-candidate-process memory gate max(16,468, 16,400 plus temporary_storage_bytes queried for this device and profile), rather than a prefilled fixed maximum; administrator-approved non-admin profiler-counter access; no sudo, privilege escalation, or policy bypass'
+estimatedMinutes: 240
+difficulty: advanced
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Access exactly one selected CUDA device and execute NVCC, the host C++ compiler, EX11, EX17, the reviewed LAB11 runner or a contract-equivalent learner alternative, sha256sum, git, and the selected Lane Nsight Compute CLI ncu'
+  - 'Create, hash, inspect, retain, sanitize, and remove learner-owned build files, component acquisitions, include traces, version probes, logs, status records, manifests, timing ledgers, primary .ncu-rep reports, and derivatives tied to report hashes'
+  - 'Read NVIDIA GPU performance counters only under an administrator-approved non-admin policy; this Lab authorizes no sudo, privilege escalation, setuid workaround, container escape, driver-policy modification, or other security-policy bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'Each of the five component profiles should prove its actual CUB/CCCL macros, acquisition hash, and resolved include path. Bundled profiles use CUB 1.15.1, 2.8.2, and 3.3.4; selected CCCL 3.4.2 is paired only with Toolkit 12.9.2 and 13.3.1.'
+    - 'EX11 and EX17 should use exactly the same 4,099 deterministic finite floats, double left-fold oracle, and absolute-plus-relative comparator. Each side should record result bits, absolute error, allowed error, and pass/fail separately instead of substituting agreement with the other candidate for the oracle.'
+    - 'For every profile, the CUB two-phase path should query temporary storage on the same current device with the same template arguments and 4,099-item shape before allocation and execution. The query value, allocation status, and setup timing should be recorded, but temporary-storage capacity should not be interpreted as traffic.'
+    - 'Every profile should retain preallocated steady-state invocation timing separately from candidate-specific setup-inclusive timing. On the same explicit nonblocking stream, every timed single-candidate process should run one checked, excluded, timing-disabled process-local warm-up of that candidate before the measured call; timing none executes once for correctness and profiler mapping.'
+    - 'Every profile should run one separate excluded warm-up pair, then retain exactly ten paired attempts in the predeclared alternating EX11-to-EX17 and EX17-to-EX11 order. Both candidates should keep device selection, stream policy, workload, checked stream-completion rule, clock, binary, and correctness cadence equal, and a failed subrecord should invalidate the complete ten-pair batch.'
+    - 'EX11 should retain its 16,472-byte global logical/static kernel-traffic ledger as source-derived. Profiler-observed candidate traffic for both sides should come from exact-GPU queried fields and remain separate from logical bytes, allocation bytes, and temporary-storage bytes.'
+    - 'The mapping from every EX17 logical DeviceReduce call to actual reported kernel launches should come from the report and allow zero, one, or multiple actual launches; the method should not assume one CUB call equals one kernel.'
+    - 'Ten qualifying pairs should be summarized separately by candidate, component profile, timing family, or exact metric scope using count=10, the median, minimum, and maximum. No sample should be deleted, no batches mixed, no unavailable value replaced with zero, and no profiled elapsed time substituted for unprofiled timing.'
+    - 'The maintenance rubric should record owned source, tests, component pins and upgrades, compatibility, and incident/debug burden for both candidates. It should name no winner without a complete correctness, measurement, and ownership packet.'
+    - 'VIS10 should remain outside the evidence chain and be used only for reduction-tree vocabulary. A complete learner submission may enter Community-Observed review but cannot grant itself Runtime-Verified status.'
+  recordedObservations: []
+sources:
+  - title: 'CUDA Toolkit 11.8 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 11.8.0; NVCC 11.8.89; Nsight Compute 2022.3.0.22; CUPTI 11.8.87'
+    platform: 'Toolkit, compiler, profiler, and CUPTI owner coordinates for the cuda-11.8 Lane'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA cuda-cccl-11-8 package artifact'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-cccl-11-8_11.8.89-1_amd64.deb'
+    version: 'cuda-cccl-11-8 11.8.89-1; package SHA-256 38dc61ecf5059b8b22dc7cae2e5aa1f09263b8b9295eb225f69b3d4d76778c53; CUB_VERSION 101501 (1.15.1)'
+    platform: 'Exact bundled CUB package and header coordinate for cuda-11.8'
+    accessDate: '2026-09-05'
+  - title: 'CUDA Toolkit 12.9 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 12.9 Update 1 / selected 12.9.2 Lane; CUB 2.8.2; Nsight Compute 2025.2.1.3; CUPTI 12.9.79'
+    platform: 'Bundled component coordinates for cuda-12.9'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA cuda-cccl-12-9 package artifact'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cccl-12-9_12.9.27-1_amd64.deb'
+    version: 'cuda-cccl-12-9 12.9.27-1; package SHA-256 255b92bd5e09cd10aedaf098d1ee0f66ca1a9062efe96e2e1f385583ddf18c73; CUB_VERSION 200802; CCCL_VERSION 2008002'
+    platform: 'Exact bundled CUB/CCCL package and header coordinate for cuda-12.9'
+    accessDate: '2026-09-05'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'CUDA Toolkit 13.3 Update 1 / selected 13.3.1 Lane; Nsight Compute 2026.2.1.5; CUPTI 13.3.75'
+    platform: 'Toolkit, profiler, and CUPTI owner coordinates for cuda-13.3; the exact package artifact pins the CUB patch'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA cccl-13-3 package artifact'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cccl-13-3_13.3.3.4.1-1_amd64.deb'
+    version: 'cccl-13-3 13.3.3.4.1-1; package SHA-256 7fb49a9a684e97f48374c230b7a548cee61f62ff925d09238f038aba601dbdb2; CUB_VERSION 300304; CCCL_VERSION 3003004'
+    platform: 'Exact bundled CUB 3.3.4 package and header coordinate for cuda-13.3'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; CUB_VERSION 300402; CCCL_VERSION 3004002'
+    platform: 'Selected component coordinate for cuda-12.9 and cuda-13.3; not a bundled component'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 Toolkit compatibility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2 tagged README'
+    platform: 'CCCL 3.x support for latest-patch CUDA 12.x and 13.x, exclusion of CUDA 11.8, and include-order/integration boundary'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 CUB device-wide two-phase API'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst'
+    version: 'CCCL v3.4.2 tagged documentation'
+    platform: 'Temporary-storage query, allocation, same-template, and same-current-device contract'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 DeviceReduce owner source'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
+    version: 'CCCL v3.4.2 tagged source'
+    platform: 'DeviceReduce Sum, stream, and scoped determinism contract; no site runtime or performance result'
+    accessDate: '2026-09-05'
+  - title: 'CUDA C++ Best Practices Guide v13.3 - Bandwidth'
+    url: 'https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth'
+    version: 'CUDA C++ Best Practices Guide v13.3'
+    platform: 'Logical, requested, effective, and observed traffic and bandwidth claim boundary'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA Nsight Compute CLI 2022.3 Archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2022.3/NsightComputeCli/index.html'
+    version: 'Nsight Compute CLI 2022.3.0'
+    platform: 'Exact-version CLI, filter, query, report, and import interface for cuda-11.8'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA Nsight Compute CLI 2025.2 Archive'
+    url: 'https://docs.nvidia.com/nsight-compute/2025.2/NsightComputeCli/index.html'
+    version: 'Nsight Compute CLI 2025.2.1'
+    platform: 'Exact-version CLI, filter, query, report, and import interface for cuda-12.9'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA Nsight Compute CLI'
+    url: 'https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html'
+    version: 'Nsight Compute CLI 2026.2.1'
+    platform: 'Current CLI, actual kernel identity, query, report, and import interface for cuda-13.3'
+    accessDate: '2026-09-05'
+  - title: 'NVIDIA Nsight Compute Profiling Guide'
+    url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html'
+    version: 'Nsight Compute 2026.2.1'
+    platform: 'Metric availability, overhead, replay, save/restore, cache and clock control, and reproducibility boundary'
+    accessDate: '2026-09-05'
+  - title: 'CUDA Profiling Tools Interface Usage'
+    url: 'https://docs.nvidia.com/cupti/main/main.html'
+    version: 'CUPTI v2026.2.1; Lane components 11.8.87, 12.9.79, and 13.3.75'
+    platform: 'Profiler/CUPTI compatibility, counter availability, and permission boundary'
+    accessDate: '2026-09-05'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/labs/compare-custom-reduction-with-cub/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,source-coordinates,component-profiles,canonical-review,workload-correctness,timing-boundaries,traffic-boundaries,manifest,build-version-gates,warm-up-acquisition,profiler-mapping,reduction-custody,maintenance-rubric,observations,criteria-blockers,evidence,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q12,L03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'A02,Q01,Q02,Q06,Q08,Q10,L01,L04,EX11,EX17,VIS10' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: 'EX11,EX17' }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX17 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,device-reduce' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux only; one CC 7.5+ GPU; C++17; cuda-11.8/12.9/13.3; bundled CUB 1.15.1/2.8.2/3.3.4; selected CCCL 3.4.2 only on 12.9/13.3; matching NCU/CUPTI; per-process max(16,468, 16,400 + T) bytes; approved non-admin counters; no sudo or bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '240' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA device; compiler/example/reviewed-runner/hash/git/ncu execution; learner-owned artifact custody; approved non-admin counters; no sudo, elevation, driver-policy change, or bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '10 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '16' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,11.8.89,CUB-1.15.1,12.9.1,12.9.2,CUB-2.8.2,13.3,13.3.1,CUB-3.3.4,CCCL-3.4.2,2022.3.0.22,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/labs/compare-custom-reduction-with-cub/" lang="zh-CN">阅读中文对应页</a>
+
+LAB11 is a Lab performed outside the website on Native Linux. It compares the [EX11 custom multi-stage reduction](/en/examples/multi-stage-reduction/) with [EX17 CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/)'s `DeviceReduce` path through a reviewed single-candidate runner, without assuming that either the library or custom kernel wins. This page publishes only an expected-only measurement contract: compilation evidence is empty, runtime is Pending Hardware Verification, and `recordedObservations` is empty. It contains no actual output bits, error, temporary-storage size, kernel mapping, metric, traffic, timing, speedup, maintenance score, or winner.
+
+## Lab contract
+
+| Coordinate | Frozen requirement |
+| --- | --- |
+| Strict prerequisites | Exactly `Q12, L03`, in that order |
+| Related, not prerequisite | `A02, Q01, Q02, Q06, Q08, Q10, L01, L04, EX11, EX17, VIS10` |
+| Supported Environment | Native Linux only; exactly one CUDA GPU with compute capability 7.5 or newer |
+| Language / Lane | C++17 in `cuda-11.8`, `cuda-12.9`, or `cuda-13.3` |
+| Component matrix | Bundled CUB 1.15.1 / 2.8.2 / 3.3.4; selected CCCL 3.4.2 checked only with 12.9.2 / 13.3.1 |
+| Workload | EX11 and EX17 share exactly 4,099 deterministic finite `float` values and one `double` oracle |
+| Process / stream / completion | One process selects only one candidate identity and creates exactly one explicit `cudaStreamNonBlocking` stream. `timing none` executes one selected-candidate call; every timed process runs one excluded process-local warm-up and then one measured call on the same input and stream. Candidate processes share the policy, not a cross-process handle. |
+| Repetition | One separate excluded warm-up pair per component profile, then ten retained paired attempts; odd pairs run EX11→EX17 and even pairs run EX17→EX11; every timed process also contains one explicitly excluded same-candidate local warm-up |
+| Permissions | Administrator-approved non-admin performance-counter access; no `sudo`, elevation, driver-policy modification, or bypass |
+| Evidence | Compilation `[]`; runtime Pending Hardware Verification; recorded observations `[]` |
+
+`maximumProblemMemoryBytes: 8000000000` is the hard Baseline GPU Capability Tier ceiling, not a prefilled actual allocation. Because one process executes one candidate, the custom process owns 16,396 input bytes plus two 36-byte partial buffers, or 16,468 bytes. The CUB process owns the same 16,396 input bytes, one four-byte output, and `T` queried temporary bytes, or `16,400 + T`. The actual preflight is therefore `max(16,468, 16,400 + T) <= 8,000,000,000`, where `T` comes from the current device, component profile, identical API/template arguments, and 4,099-item shape. Candidate workspaces never coexist. Context, module, allocator, profiler replay, and tool memory are recorded separately and do not enter the problem-memory claim.
+
+## Prerequisite check
+
+1. Complete [Q12: Controlled Reduction Evidence](/en/correctness/reduction-optimization-case-study/) and retain its separation among numerical order, source-derived traffic, unprofiled elapsed time, and profiler mechanism evidence.
+2. Complete [L03: CUB Device Primitives](/en/libraries/cub-device-primitives/), including its device-wide API, temporary-storage, stream, and determinism contract. L03 is a strict prerequisite, not something this page's owner-source summary replaces.
+3. Use [A02](/en/algorithms/multi-stage-reduction/) to review custom stages, [Q01](/en/correctness/cpu-references-tolerances-invariants/) and [Q02](/en/correctness/floating-point-order-reproducibility/) to review the oracle, tolerance, and bits, and [Q06](/en/correctness/apod-optimization-loop/), [Q08](/en/correctness/kernel-first-nsight-compute/), [Q10](/en/correctness/roofline-arithmetic-intensity/), and [L01](/en/libraries/library-primitive-dsl-custom-kernel/) to bound comparison and ownership. [L04](/en/libraries/cub-warp-block-primitives/), EX11, EX17, and VIS10 are also only related resources and add no prerequisite edge.
+4. Confirm that the current account sees and uses exactly one selected GPU, query its identity and compute capability, and require at least CC 7.5. A product name or VRAM number is not a capability query.
+5. Obtain an administrator-approved non-admin counter-policy record. Stop and preserve a blocker on denial. Do not run `sudo ncu`, modify the driver module policy, use a setuid or container-escape workaround, or bypass another control.
+
+## Freeze both source coordinates
+
+EX11 remains immutable. View the [complete EX11 project at commit `81d43aa7568514e37ef190da59c845b8072b7011`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/81d43aa7568514e37ef190da59c845b8072b7011/examples/ex11-multi-stage-reduction), or [download the archive for that exact commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/81d43aa7568514e37ef190da59c845b8072b7011.zip). Record the actual acquisition, commit, clean-tree or diff state, and SHA-256 of every contract and source file. LAB11 does not modify EX11.
+
+EX17's registry binds the source tree and download archive to one immutable commit. [Open the EX17 source tree at commit `b848390aeb6b28065a3421ab4c8b82758c8b114c`](https://github.com/xiangzhang-coding/cuda-learning-site/tree/b848390aeb6b28065a3421ab4c8b82758c8b114c/examples/ex17-cub-device-reduction-scan), or [download the complete archive for the same commit](https://github.com/xiangzhang-coding/cuda-learning-site/archive/b848390aeb6b28065a3421ab4c8b82758c8b114c.zip). The archive contains byte-identical build-contract inputs and the final `project.json`. The actual Lab record retains the resolved commit, both URLs, and file hashes rather than only `main`, a web route, or `EX17`. Frontmatter has one `canonicalExample` slot, so this page assigns it to EX17 and renders only EX17. EX11 uses the immutable link above instead of fabricating a second canonical metadata slot.
+
+The executable boundary is the original Apache-2.0 reviewed asset [lab11-reduction-comparison.cu](/assets/exercise-solutions/lab11-reduction-comparison.cu), at repository path `public/assets/exercise-solutions/lab11-reduction-comparison.cu` and exact SHA-256 `755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c`. It directly includes `examples/ex11-multi-stage-reduction/include/multi_stage_reduction_reference.hpp`, so the generator, serial `double` reference, and comparator are not reimplemented. Its custom kernel body preserves EX11's tree exactly; only the launch/wrapper receives the selected process's stream. Its CUB branch calls the public legacy two-phase `DeviceReduce::Sum` API and copies or adapts no CUB implementation. This asset is neither canonical EX11/EX17 nor a new Runnable Example, and its source or build gate grants no Evidence Status.
+
+A learner alternative remains valid. It must implement the same exact CLI and output fields below; select only one candidate identity per process, execute once for `timing none`, and execute one excluded process-local warm-up plus one measured call in timed modes; include the same EX11 reference header; preserve the `4099 -> 9 -> 1` custom tree and two nine-float buffers; use the same public CUB query/execution API, compile-time `CUB_VERSION` gate, device-input setup, explicit nonblocking-stream policy, checked API/launch/completion rules, and timing boundaries; and retain source, diff, build, and binary hashes. An unexplained alternative binary is a blocker.
+
+## Freeze five component profiles
+
+Each row is an independent build, correctness, timing, profiling, and custody scope. A binary, include trace, temporary-storage query, report, or result from one row cannot support another.
+
+| Profile ID | Toolkit Lane | Component source | Expected version probe | Nsight Compute / CUPTI |
+| --- | --- | --- | --- | --- |
+| `cuda-11-8-bundled-cub-1-15-1` | 11.8.0 | Toolkit-bundled `cuda-cccl-11-8` | `CUB_VERSION=101501`; do not encode the legacy absence of `CCCL_VERSION` as zero | 2022.3.0.22 / 11.8.87 |
+| `cuda-12-9-bundled-cub-2-8-2` | 12.9.2 | Toolkit-bundled `cuda-cccl-12-9` | `CUB_VERSION=200802`; `CCCL_VERSION=2008002` | 2025.2.1.3 / 12.9.79 |
+| `cuda-13-3-bundled-cub-3-3-4` | 13.3.1 | Exact `cccl-13-3_13.3.3.4.1-1` package | `CUB_VERSION=300304`; `CCCL_VERSION=3003004` | 2026.2.1.5 / 13.3.75 |
+| `cuda-12-9-selected-cccl-3-4-2` | 12.9.2 | CCCL tag v3.4.2, commit `d36012203ef73ac7f966e848dd88482273e91e02` | `CUB_VERSION=300402`; `CCCL_VERSION=3004002` | 2025.2.1.3 / 12.9.79 |
+| `cuda-13-3-selected-cccl-3-4-2` | 13.3.1 | The same CCCL v3.4.2 pin | `CUB_VERSION=300402`; `CCCL_VERSION=3004002` | 2026.2.1.5 / 13.3.75 |
+
+Declared include roots are also part of profile identity. The first two bundled profiles use `/usr/local/cuda/include`; the 13.3 bundled profile uses `/usr/local/cuda/include/cccl`; and both selected profiles use `${CCCL_ROOT}/cub`, `${CCCL_ROOT}/thrust`, and `${CCCL_ROOT}/libcudacxx/include` in that order. These are build-contract values, not actual path evidence. The manifest still retains this acquisition root, ordered argv, include trace, and resolved-header hashes.
+
+CCCL v3.4.2's tagged compatibility policy admits 3.x only on latest-patch CUDA 12.x and 13.x, so there is no `cuda-11-8-selected-cccl-3-4-2` profile. Bundled and selected headers must never remain ambiguous. A bundled profile adds no override include root. A selected profile uses explicit CUB, Thrust, and libcudacxx roots from the acquired tree and proves through compiler include traces and preprocessed provenance that the selected headers won. Record the acquisition URL, tag, commit, archive or tree hash, every include root, resolved path and SHA-256 for `cub/version.cuh` and `cub/device/device_reduce.cuh`, and the complete ordered compiler argv.
+
+The CUDA 13.3 profile does not guess a patch from a broad release-note table. It pins NVIDIA package artifact `cccl-13-3_13.3.3.4.1-1_amd64.deb` at package SHA-256 `7fb49a9a684e97f48374c230b7a548cee61f62ff925d09238f038aba601dbdb2` and requires the actual header probe to return `300304`. A disagreement among package, probe, or resolved header is a blocker.
+
+## Review the canonical EX17 ranges
+
+First render EX17's deterministic generator, `double` oracle, and comparator aligned with EX11:
+
+<CanonicalCode exampleId="EX17" range="cpu-reference" />
+
+Then render the traditional two-phase `DeviceReduce` path. It owns the query, caller-managed temporary storage, explicit stream, and checked API boundaries. The import supplies no build or runtime evidence:
+
+<CanonicalCode exampleId="EX17" range="device-reduce" />
+
+Against immutable EX11 source, confirm that the reviewed runner's custom path remains `4099 -> 9 -> 1`, uses 256 threads, admits at most two guarded loads per block thread, supplies neutral zero, reaches uniform block barriers, and obtains stage boundaries from successive kernel launches. The runner adds only its process-local stream argument to EX11's launch/wrapper and completes through checked `cudaStreamSynchronize`; the focused source contract compares the complete custom kernel body with canonical EX11. Do not modify canonical EX11, copy or adapt CUB implementation, or treat a CUB internal symbol as stable API.
+
+The complete EX17 executable also demonstrates `DeviceScan`, but that primitive is not a LAB11 candidate. The reviewed runner consumes only the `DeviceReduce` contract and shared EX11 CPU contract above and contains no scan API. Scan inputs and outputs, scan temporary-storage queries, scan allocations, and scan kernels all remain outside correctness, memory, timing, and profiler scope. Any mapped scan launch invalidates the reduction batch.
+
+[VIS10: Reduction Tree and Inactive Lanes](/en/visuals/reduction-stages/) is reused only to inspect tree vocabulary, neutral values, and inactive-lane reasoning. It cannot execute 4,099-item EX11 or EX17, CUB dispatch, floating-point rounding, temporary storage, kernel mapping, or a profiler. VIS10 is **evidence-neutral** and cannot fill a recorded field.
+
+## Freeze the 4,099-float correctness contract
+
+Both candidates consume the same input bytes generated once and copied to the device. For `i = 0..4098`:
+
+```text
+centered = int((i * 37 + 11) % 101) - 50
+coarse   = float(centered) * 0.125F
+fine     = float((i * 13 + 3) % 17) * 0.001F
+input[i] = coarse + fine
+```
+
+The oracle converts each binary32 input exactly to `double` and performs a serial left fold in index order. Each candidate returns one `float` and independently applies:
+
+```text
+absolute_error = abs(double(candidate_result) - cpu_reference)
+allowed_error  = 1.0e-4 + 2.0e-5 * abs(cpu_reference)
+pass           = finite(cpu_reference) && finite(candidate_result)
+                 && absolute_error <= allowed_error
+```
+
+Every correctness, warm-up, unprofiled-timing, and profiled process checks allocation, API, and launch status; checked completion; a complete four-byte result copy; finite output; and the comparator. Preserve `result_float_bits_hex`, `absolute_error`, `allowed_error`, and `pass` **separately by candidate**, then record `cross_candidate_bits_equal` in its own field. A tolerance pass is not CPU bitwise equality. Equal candidate bit patterns do not replace the double oracle, and different bits are not automatically a failure.
+
+## Separate setup-inclusive and steady-state timing
+
+Every candidate process uses the same runner code to generate the common input, allocate one host input and one device input, and perform one checked H2D copy before candidate-specific timing. Pair records require identical input bytes and hashes; process-local addresses and stream handles are recorded separately and are not claimed to be equal. Each process creates exactly one explicit `cudaStreamNonBlocking` stream and passes it to all operations of its one selected candidate. Every timed process first runs the same candidate with `timing none` on that input and stream, completes its result copy and oracle check, releases that workspace, and only then runs the measured call; a warm-up failure stops before any timer read. `timing none` itself executes only once, so profiler mapping contains no extra call. Both timing families use `std::chrono::steady_clock`, device 0, the same workload/compiler/binary/profile contract, and checked `cudaStreamSynchronize(stream)` immediately before the end clock read. Profiler elapsed time never enters either timing ledger.
+
+| Timing family | Start | Included | End | Excluded |
+| --- | --- | --- | --- | --- |
+| `steady-state-invocation` | The process-local warm-up has completed and passed; measured-call candidate allocations exist and the clock read immediately precedes the API or launch | The complete EX11 `4099 -> 9 -> 1` invocation or one logical EX17 `DeviceReduce` execution call, plus identical checked completion | Read the clock immediately after completion returns | Process-local warm-up, storage query, allocation/free, input setup, result D2H, oracle/comparator, profiler |
+| `setup-inclusive` | The process-local warm-up has completed and passed; immediately before the first candidate-specific measured setup host operation | Custom partial-capacity calculation and two nine-float partial allocations, or CUB four-byte output allocation, zeroed byte count, null-storage query, and `T`-byte temporary allocation; then the selected invocation and checked completion | Read the clock immediately after completion returns | Process-local warm-up, common input setup, result D2H, oracle/comparator, teardown; teardown status is still recorded separately |
+
+EX17 steady-state may reuse only measured-call storage queried and allocated on the same current device for the same component profile, API/template arguments, 4,099-item shape, and the same explicit stream handle. Process-local warm-up workspace is released before measured setup; it neither coexists with measured workspace nor enters either timer. The measured query and allocation always remain outside the steady-state timer; the setup-inclusive timer explicitly includes them. EX11 and EX17 each retain candidate-specific workspace. Never charge CUB temporary bytes to the custom path or omit custom partial setup.
+
+Record the clock source and resolution, timer-read overhead policy, start and end source coordinates, and every raw elapsed value and unit. Do not preselect a faster candidate, publish only the best run, or derive unprofiled elapsed time from profiler duration.
+
+## Separate logical/static traffic from profiler-observed traffic
+
+EX11 source supports this static global-memory ledger:
+
+| EX11 stage | Logical input reads | Logical partial writes |
+| --- | ---: | ---: |
+| `4099 -> 9` | 4,099 floats | 9 floats |
+| `9 -> 1` | 9 floats | 1 float |
+| Total | 4,108 floats = 16,432 bytes | 10 floats = 40 bytes |
+
+The resulting **16,472 bytes** is source-derived logical global traffic for the EX11 reduction kernels. It excludes input H2D, result D2H, allocation, instruction fetch, cache-line or sector overfetch, writeback policy, profiler save/restore, and every CUB operation. The ten launched blocks also express 2,560 initial shared-value writes and 2,550 tree additions statically, but the compiler, register, shared-instruction, and transaction behavior comes only from the actual artifact and report. Source counts are not observed transactions.
+
+CUB's fixed user allocation consists of a 16,396-byte input, four-byte output, and queried `T`-byte capacity. **Capacity is not bytes read or written.** Never derive CUB logical traffic, DRAM traffic, cache traffic, kernel count, or elapsed behavior from `T`. CUB traffic comes only from owner-defined profiler fields queried on the exact GPU for the exact profile binary. EX11 likewise keeps its 16,472-byte static ledger separate from observed fields.
+
+When one logical CUB call maps to multiple reported kernels, preserve the raw field for every launch first. Produce a call-level aggregate only when the owner definition says that field is additive across those launches. Otherwise leave the aggregate `unfilled/inapplicable`; do not sum it by intuition.
+
+## Create the complete unfilled Environment Manifest
+
+Copy this table before building or executing. Replace `unfilled` only with a retained observation from this profile. Preserve unknown, unavailable, and not-applicable with a reason rather than zero. Every component profile receives its own manifest.
+
+| Manifest area | Required fields | Initial value |
+| --- | --- | --- |
+| Observation | UTC date/time, observer, run ID, batch ID, component profile ID | `unfilled` |
+| GPU identity | Exact name, private custody of UUID/serial, selected ordinal, private PCI coordinate, compute-capability query/result | `unfilled` |
+| GPU count | Visible count, selected count, used count; used must equal 1 | `unfilled` |
+| Driver | Exact loaded driver, query command/status/log SHA-256, Toolkit compatibility decision | `unfilled` |
+| Toolkit Lane | Lane ID, exact Toolkit/runtime versions, installation/acquisition coordinate | `unfilled` |
+| NVCC / host | Resolved `nvcc` path/version, host C++ compiler path/version, C++17 acceptance, ordered flags | `unfilled` |
+| Operating system | Native Linux distribution/version, architecture, kernel, bare-metal/VM/container, image digest | `unfilled` |
+| CUB macros | `CUB_VERSION` integer and decoded version, probe source/command/status/log hash | `unfilled` |
+| CCCL macros | `CCCL_VERSION` integer and decoded version, or a legacy 11.8 absence record; absence is not zero | `unfilled` |
+| Component acquisition | Bundled package name/version/repository/package SHA-256, or selected tag/commit/archive/tree SHA-256 | `unfilled` |
+| Include provenance | Ordered include flags/search list, resolved `cub/version.cuh` and `device_reduce.cuh` paths/SHA-256, preprocess/include-trace records | `unfilled` |
+| Nsight Compute | Resolved `ncu` path/version, matching owner manual, bare/controlled help, section list, exact-GPU metric query records | `unfilled` |
+| CUPTI | Exact version, loaded library path/SHA-256, observation method, profiler compatibility result | `unfilled` |
+| Permissions | Current user/non-admin state, device access, administrator approval coordinate, actual counter access, report-write access, no-sudo/bypass audit | `unfilled` |
+| Example sources | EX11 commit/URL/file hashes; EX17 project-metadata commit/URL/file hashes; clean/diff state | `unfilled` |
+| Comparison runner source | Reviewed asset path/hash or contract-equivalent learner-alternative path, parent coordinates, source diff, source SHA-256, candidate call-boundary coordinates | `unfilled` |
+| Build contract | Exact ordered preprocess/compile/link/inspect/test commands, cwd, environment allowlist/hash, statuses, stdout/stderr hashes | `unfilled` |
+| Binary | Profile-specific LAB11 comparison binary path/SHA-256, selected candidate argv, and match to the actually executed binary | `unfilled` |
+| Workload | Generator identity/formula, element type/count, input SHA-256, 16,396 input bytes, output/partial capacities | `unfilled` |
+| Temporary storage | Query API/template arguments/current device, returned `T`, allocation/free statuses, address identity per scope | `unfilled` |
+| Warm-up | Count=1 profile-level pair plus one same-candidate local warm-up per timed process; each excluded=true, with order/path, effective `CUDA_MODULE_LOADING`, statuses, correctness, and log hashes | `unfilled` |
+| Attempts | Exact IDs `01..10`, predeclared alternating order, acquisition timestamps, no-overwrite paths | `unfilled` |
+| Process / stream / completion | One selected candidate identity and one explicit nonblocking stream per process; record the single `none` call or timed mode's excluded warm-up plus measured call, process-local handle, checked `cudaStreamSynchronize` results, and no-other-candidate-work audit | `unfilled` |
+| Timing method | Clock/source/resolution, both start/end boundaries, unit, process-local warm-up source coordinates/status/exclusion, ten raw values per candidate/family, profiled-time exclusion | `unfilled` |
+| Kernel mapping | Logical candidate call ID, actual context/stream/kernel/launch IDs/names/count/order; CUB count not assumed | `unfilled` |
+| Traffic method | EX11 static-ledger version; actual metric names/definitions/units/scopes/aggregation; no temp-byte inference | `unfilled` |
+| Replay / perturbation | Requested/actual replay, pass count, save/restore, cache, clock, serialization, first-kernel and overhead boundary | `unfilled` |
+| Concurrent load | GPU/CPU processes, MIG, MPS, compute mode, concurrent-load observation window | `unfilled` |
+| Clock/power/thermal | Persistence and clock policy, power limit/state, temperature/thermal/throttle state before/after | `unfilled` |
+| Correctness criteria | Double oracle, abs+rel tolerance, per-candidate bits/errors/pass, every CUDA status, result readback | `unfilled` |
+| Measurement criteria | One profile-level warm-up pair, each timed process's checked and excluded local warm-up, ten complete pairs, median/min/max, no deletion, whole-batch invalidation, mapping/traffic scope | `unfilled` |
+| Command custody | Every exact argv as an array rather than shell prose, cwd, selected environment, start/end, status, stdout/stderr path/hash | `unfilled` |
+| Report custody | Primary `.ncu-rep` path/hash, same-version import derivative/hash, report-to-derivative mapping, private-original chain | `unfilled` |
+| Result custody | Correctness/timing/mapping/traffic/maintenance ledgers and summary SHA-256, reviewer, sanitization mapping | `unfilled` |
+| Criteria result | Per-criterion pass/fail/blocker, evidence links, Evidence Status candidate after review | `unfilled` |
+
+## Pass source, build, and version gates
+
+Create a fresh, non-overwriting run directory per profile. Every command record preserves at least JSON-array argv, cwd, controlled environment, UTC start/end, actual exit status, stdout, stderr, and SHA-256 for those records. A shell transcript does not replace structured argv, and failed commands remain retained. At minimum, run and record:
+
+```bash
+nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader
+nvcc --version
+c++ --version
+ncu --version
+ncu --help
+ncu --list-sections
+ncu --devices 0 --query-metrics --query-metrics-mode all
+sha256sum <EX11-sources> <EX17-sources> <runner-source> <executed-binaries>
+```
+
+These are command shapes. Actual selected-Lane help and the matching exact-version NVIDIA manual govern final options. The older 2022.3 interface cannot inherit options such as `--config-file` from the current manual. As in LAB10, first record bare version and help, then freeze the config-control branch from agreement between actual help and the exact manual. An unsupported option is a blocker, not a reason to add `sudo`.
+
+Build EX11 and EX17 independently through their canonical C++17 build and test contracts without modifying either project. Verify the reviewed runner before every profile build:
+
+```bash
+printf '%s  %s\n' \
+  '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c' \
+  'public/assets/exercise-solutions/lab11-reduction-comparison.cu' \
+  | sha256sum --check --strict
+bash scripts/check-lab11-runner-build.sh <profile-id> [result-dir]
+```
+
+The script accepts exactly the five profile IDs in the matrix above, requires `CCCL_ROOT` for either selected profile, preprocesses, compiles, links, and inspects `sm_75` SASS plus `compute_75` PTX, and retains status, stdout/stderr, profile, input-hash, log-hash, and inspection-hash records. It builds in a temporary directory, deletes the binary, and never executes it. The CI invocation is only a non-evidentiary build gate and is not claimed to have run.
+
+For a learner runtime binary, use this exact repository-root C++17 contract after setting one profile ID. The `case` keeps selected CCCL roots ahead of Toolkit-bundled headers and supplies the same compile-time `CUB_VERSION` gate as the build-check script:
+
+```bash
+profile_id="${PROFILE_ID:?set one declared LAB11 profile ID}"
+case "$profile_id" in
+  cuda-11-8-bundled-cub-1-15-1)
+    expected_cub_version=101501
+    component_include_args=(-I /usr/local/cuda/include)
+    ;;
+  cuda-12-9-bundled-cub-2-8-2)
+    expected_cub_version=200802
+    component_include_args=(-I /usr/local/cuda/include)
+    ;;
+  cuda-13-3-bundled-cub-3-3-4)
+    expected_cub_version=300304
+    component_include_args=(-I /usr/local/cuda/include/cccl)
+    ;;
+  cuda-12-9-selected-cccl-3-4-2|cuda-13-3-selected-cccl-3-4-2)
+    : "${CCCL_ROOT:?selected profiles require CCCL_ROOT}"
+    expected_cub_version=300402
+    component_include_args=(-I "$CCCL_ROOT/cub" -I "$CCCL_ROOT/thrust" -I "$CCCL_ROOT/libcudacxx/include")
+    ;;
+  *) printf 'unsupported profile: %s\n' "$profile_id" >&2; exit 2 ;;
+esac
+mkdir -p build
+nvcc --std=c++17 \
+  --generate-code=arch=compute_75,code=sm_75 \
+  --generate-code=arch=compute_75,code=compute_75 \
+  "-DLAB11_EXPECTED_CUB_VERSION=$expected_cub_version" \
+  "${component_include_args[@]}" \
+  -I examples/ex11-multi-stage-reduction/include \
+  public/assets/exercise-solutions/lab11-reduction-comparison.cu \
+  -o build/lab11-reduction-comparison
+```
+
+The runner CLI is positional and closed: all four option/value pairs are mandatory and no other element count, verification mode, candidate, or timing name is accepted. One invocation selects only one candidate identity. Use `none` for correctness and profiler mapping, where it executes one candidate call; run each timing family in a fresh unprofiled process that first executes one excluded process-local warm-up and then one measured call:
+
+```bash
+./build/lab11-reduction-comparison --candidate custom --timing none --elements 4099 --verify tolerance
+./build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance
+./build/lab11-reduction-comparison --candidate custom --timing steady-state --elements 4099 --verify tolerance
+./build/lab11-reduction-comparison --candidate cub --timing steady-state --elements 4099 --verify tolerance
+./build/lab11-reduction-comparison --candidate custom --timing setup-inclusive --elements 4099 --verify tolerance
+./build/lab11-reduction-comparison --candidate cub --timing setup-inclusive --elements 4099 --verify tolerance
+```
+
+Every successful invocation emits `candidate`, `timing`, `elements`, compile-time `cub_version`, `result_float_bits_hex`, `cpu_reference`, `result_float`, `absolute_error`, `allowed_error`, and `pass`. The CUB process also emits the measured call's queried `temporary_storage_bytes`. Timed processes additionally emit `process_local_warmup=excluded-pass`, `clock=std::chrono::steady_clock`, and `elapsed_nanoseconds`; `--timing none` reads no host clock and emits neither warm-up nor elapsed field. A CLI, CUDA API, custom launch, CUB call, stream completion, copy, allocation, free, stream-destroy, or warm-up/measured tolerance failure returns nonzero.
+
+Re-preprocess, compile, link, inspect, and run applicable host tests plus the version gate for every component profile. The gate is the `static_assert(CUB_VERSION == LAB11_EXPECTED_CUB_VERSION)` in the runner. A selected profile also proves that ordered `-I` roots precede Toolkit-bundled roots and locates exact headers through an include trace. A bundled profile proves that no selected override exists. Stop the profile on a macro, path, hash, package/tag, Toolkit, or binary mismatch. Never insert selected 3.4.2 headers into a binary already compiled with bundled headers. A local build passes only this Lab gate and does not populate the empty frontmatter compilation evidence.
+
+## Run one warm-up and ten paired attempts
+
+Every component profile uses this frozen schedule, written to the ledger before attempt 01 and never changed after values are visible:
+
+| Pair | Candidate order |
+| --- | --- |
+| excluded warm-up | EX11 → EX17 |
+| 01, 03, 05, 07, 09 | EX11 → EX17 |
+| 02, 04, 06, 08, 10 | EX17 → EX11 |
+
+The profile-level warm-up pair executes the same correctness, setup-inclusive, steady-state, stream, and completion cadence as a retained pair, but carries `excluded_from_statistics: true`. A pair consists of two ordered single-candidate process invocations, never one process that launches both candidates. Every timed invocation still performs the runner-declared same-candidate process-local warm-up. No hidden extra warm-up beyond these two explicitly recorded and excluded layers is allowed, and attempt 01 is never deleted.
+
+Before every retained pair, verify that source, binary, input, and environment hashes have not drifted, then run both candidates in the declared order. Each candidate measurement unit retains setup-inclusive and steady-state raw values, query/allocation/free statuses, result bits/error/pass, and completion status. If profiler collection is also performed, use an independent fresh profiled process/subrecord with the same pair ID. Profiled duration contributes no timing, and profiler mapping/results bind to the same source, binary, workload, and profile hashes.
+
+A missing candidate, wrong order, correctness failure, nonzero API/process status, clock or boundary drift, environment drift, ambiguous mapping, missing report/import/hash, or unexpected concurrent load invalidates the **entire ten-pair batch**. Preserve the complete invalid batch and reason, correct the cause, assign new run and batch IDs, and restart all ten pairs after the profile's warm-up. Never fill one missing pair, join two batches, or delete a sample.
+
+## Record actual call-to-kernel mapping and profiler traffic
+
+After freezing the hypothesis, select one minimal section or a shorter exact metric list from the retained exact-GPU query to answer only the candidate traffic/path question. Record every name, definition, unit, scope, aggregation or instance behavior, and availability. This page publishes no architecture-specific metric name. A full set adds replay and perturbation and is invalid unless another predeclared question needs it.
+
+Give the EX11 logical call and EX17 logical `DeviceReduce` call stable host-side call IDs. For every report, copy actual context, stream, kernel name, launch ID, and sequence into this mapping:
+
+```text
+component_profile + pair_id + candidate + logical_call_id
+  -> zero, one, or more actual reported kernel launches
+```
+
+The EX17 mapping must permit multiple kernels and must record a blocker when the report has no selected launch. Never force the assumption by setting `launch-count=1`. Freeze the kernel-name filter only after actual-help semantics and retained discovery/report evidence establish it. A filter that captures an unrelated launch, misses a mapped launch, or guesses a reported name from a source symbol invalidates the batch.
+
+Hash every primary `.ncu-rep` immediately after creation, then use the same exact `ncu` and frozen config branch through the owner-supported report import/raw CSV interface. Retain import argv, stdout/stderr, status, derivative hash, and parent-report hash mapping. Replay can re-execute kernels, save and restore memory, modify cache state, or insert measurement libraries. Record requested and actual mode, passes, save/restore, cache and clock controls, serialization, and the perturbation boundary.
+
+Denied counters, `ERR_NVGPUCTRPERM`, an unknown profiler, CUPTI mismatch, unavailable or `n/a` fields, wrong scope or unit, a missing report, failed import, or ambiguous call mapping is a blocker and never numeric zero. An administrator may repair access outside the Lab under policy; this page authorizes no bypass.
+
+## Reduce only a qualifying full batch and preserve custody
+
+For each profile, candidate, and timing family, compute `count=10`, median, minimum, and maximum only from ten raw values in one qualifying batch. When an exact metric is retained per mapped kernel, preserve every kernel row first and form a call aggregate only under an owner-defined additive scope. Equal numeric observations still represent ten valid samples and are not deduplicated. Do not emit a mean, remove an outlier, replace a failure, reorder acquisition, or backfill timing from profiler duration.
+
+The custody chain connects component acquisition and header hashes, canonical-example and comparison-runner sources, build records, binaries, input, version/help/query/permission logs, warm-up, every valid and invalid pair, correctness and timing ledgers, primary reports, imports, mapping and traffic ledgers, maintenance packet, summary, and sanitization mapping. A sanitized derivative points to its private original hash but publishes no credentials, administrator record, user or host identity, private absolute path, GPU UUID or serial, or network coordinate.
+
+## Complete the maintenance rubric
+
+Maintenance is not a score inferred from timing. Fill both candidates under the same review date, deployment scope, and evidence window. A missing field remains a blocker.
+
+| Criterion | EX11 custom reduction record | EX17 CUB reduction record | Recorded assessment |
+| --- | --- | --- | --- |
+| Owned source | Kernel, stage orchestration, stream/completion adapter, numerical changes, review owner, and bus factor | Application adapter, temporary-storage and stream policy, and integration source; the component owner maintains CUB implementation | `unfilled` |
+| Tests | Generator/oracle/comparator, edge sizes, inactive lanes, barriers, stage progress, and regression responsibility for every claimed lane/GPU | The same application oracle/fixtures, API/error/storage/stream integration, and all five profiles; owner tests do not replace local acceptance | `unfilled` |
+| Component pin / upgrades | EX11 commit, Toolkit/compiler pin, custom source change and rebenchmark policy | Bundled package or selected tag/commit/archive hash, macro/include proof, upgrade/deprecation/retest policy | `unfilled` |
+| Compatibility | C++17, 11.8/12.9/13.3, CC 7.5+, and every claimed host/compiler/device row | The same deployment rows; selected 3.4.2 covers only latest-patch 12.x/13.x, while 11.8 uses bundled 1.15.1 | `unfilled` |
+| Incident / debug burden | Source-level triage, numerical/synchronization/performance ownership, on-call/escalation, fallback, and handoff records | Integration/version/include/storage/report triage, owner issue/upstream escalation, fallback, and upgrade response records | `unfilled` |
+
+Record the actual owner, test inventory, historical or rehearsed incidents, definition of debug hours, upgrade cadence, fallback, rollback trigger, and revisit date. Do not prefill “library is easier” or “custom is more controllable.” The two options own different boundaries, and a conclusion requires the complete packet.
+
+## Expected observations, not recorded results
+
+The ten frontmatter expectations declare gates and record shape rather than result direction. These four recorded-results tables are intentionally blank.
+
+| Component profile | Candidate | Result bits | CPU reference | Absolute error | Allowed error | Tolerance pass | Cross-candidate bit equality |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| each of five | EX11 | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` |
+| each of five | EX17 | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` |
+
+| Component profile | Candidate | Timing family | Count | Median | Minimum | Maximum | Unit |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| each of five | EX11 | steady-state / setup-inclusive as separate rows | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` |
+| each of five | EX17 | steady-state / setup-inclusive as separate rows | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` |
+
+| Component profile | Candidate | Logical call → actual kernels | Exact queried field / unit / scope | Ten retained values | Median | Min/max | Static-ledger comparison |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| each of five | EX11 | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` | separate from the 16,472-byte static ledger |
+| each of five | EX17 | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` | no inference from `T` |
+
+| Component profile | Owned source | Tests | Pin/upgrades | Compatibility | Incident/debug burden | Decision / revisit trigger |
+| --- | --- | --- | --- | --- | --- | --- |
+| each of five | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` | `unfilled` |
+
+`recordedObservations` remains `[]`. The [LAB11 Nsight Compute expected-only fixture](/assets/profiler-report-fixtures/lab11-nsight-compute.expected.json) is an original unfilled plan, not a `.ncu-rep`, runtime log, or metric export. It contains five profile contracts and empty recorded arrays, but no actual metric, value, bits, error, temporary bytes, mapping, timing, score, or winner.
+
+## Acceptance criteria and blockers
+
+A component-profile record is complete only when every criterion passes:
+
+1. Strict prerequisites, the immutable EX11 coordinate, EX17 canonical metadata, and reviewed-runner or conforming learner-alternative provenance agree, with complete source/build/version/include/binary hashes.
+2. Exact Toolkit, NVCC, host compiler, Native Linux, one CC 7.5+ GPU, CUB/CCCL macros, component acquisition, Nsight Compute, CUPTI, device, and permission gates match the profile.
+3. The shared 4,099-float generator and input hash, double oracle, and abs+rel comparator do not drift. Candidate bits/errors/pass remain separate, and all CUDA, status, completion, and result-copy checks pass.
+4. CUB query and execution use the same current device, API/template arguments, shape, and stream. `T`, allocation/free statuses, and dynamic memory preflight are complete, without interpreting `T` as traffic.
+5. Steady-state and setup-inclusive timing boundaries remain separate; every timed process's same-candidate local warm-up is checked and excluded under the same clock, device, stream, workload, completion, and order, and profiler duration is excluded.
+6. After one profile-level excluded warm-up pair, one unique batch retains ten complete pairs in the predeclared alternating order. Any failure triggers whole-batch invalidation without sample deletion.
+7. Exact-GPU queried profiler fields, actual EX11/EX17 call-to-kernel mappings, replay/perturbation, and primary report/import/hash custody are complete. CUB kernel count is not assumed.
+8. Statistics use only ten values from the corresponding full batch and report count=10, median, minimum, and maximum. The static EX11 ledger, observed traffic, and temporary capacity remain separate.
+9. All five maintenance criteria identify owner, scope, evidence, and revisit trigger. No decision exceeds correctness, measurement, or compatibility evidence.
+10. The complete Environment Manifest, command/log/report/result custody, blocker records, and sanitization mapping pass review.
+
+Blockers include an unmet strict prerequisite; an EX11/EX17 commit, range, source, or hash mismatch; unknown or dirty source; unsupported profile; mixed selected and bundled headers; a CUB/CCCL macro, include trace, package/tag/commit, or binary mismatch; non-Native Linux, GPU count other than one, or CC below 7.5; driver, Toolkit, compiler, NCU, or CUPTI mismatch; permission denial; `sudo` or policy bypass; insufficient queried memory; drift between query and execution device, template, shape, or stream; allocation, API, launch, completion, copy, or free failure; input, generator, oracle, or tolerance drift; nonfinite output or correctness failure; missing bits or error; timing clock, boundary, or order drift; a missing, failed, timed, unrecorded, or hidden warm-up; a missing, reordered, or deleted pair; mixed or shortened batch; missing concurrent-load, clock, power, or thermal record; unknown metric semantics, unavailable or `n/a` value, or wrong unit/scope; filter or mapping ambiguity; assuming one CUB kernel; report, replay, import, or hash failure; treating static bytes or `T` as observed traffic; summing a non-additive field; incomplete maintenance/custody; or a winner/speedup claim beyond the evidence.
+
+The only response is to stop the affected profile, retain the complete blocker and partial or invalid batch, repair a permissible environment or method problem, allocate new IDs, and rerun that profile from its warm-up through all ten pairs. Never write zero, guess a value, delete a sample, inherit another profile, splice batches, elevate privileges, or weaken a criterion.
+
+## Keep evidence axes separate
+
+| Axis | Current status | Boundary |
+| --- | --- | --- |
+| Compilation | Empty | Owner packages, canonical imports, local five-profile builds, and static checks are not reviewed LAB11 Compile-Checked records |
+| Runtime | Pending Hardware Verification | No maintainer-controlled Reference Environment has completed all five profiles and criteria |
+| Recorded observations | Empty | Expected statements, commands, static EX11 arithmetic, VIS10, and blank tables are not runtime observations |
+
+A learner packet with a complete manifest and logs may enter **Community-Observed** review. It is not **Runtime-Verified** unless a maintainer reproduces every criterion for that profile in a declared Reference Environment. Community-Observed may coexist with Pending Hardware Verification, never upgrades the page automatically, and does not support the other four profiles.
+
+## Clean up without destroying evidence
+
+First preserve every component artifact and header-provenance record; source, build, binary, and input hash; manifest; command; version/help/query/permission record; warm-up; valid and invalid batch; raw correctness and timing row; primary report; import; mapping; replay; traffic record; maintenance packet; summary; criterion result; and sanitization chain. Then remove only rebuildable learner-owned build and workspace files, adding cleanup argv, status, log, and hash to the same custody. Do not delete canonical source, owner packages, private originals, or an inconvenient sample.
+
+Before publication, remove credentials, administrator records, user or host identity, private absolute paths, GPU UUIDs or serials, network coordinates, and unreviewed environment values. Sanitization removes or replaces only sensitive coordinates and never changes a measurement value. A public derivative retains the private original hash, parent mapping, reviewer, date, and exact transformations.
+
+## Sources and review
+
+- NVIDIA Toolkit release notes pin compiler, Nsight Compute, and CUPTI planning coordinates for 11.8, 12.9, and 13.3. Exact package artifacts and `cub/version.cuh` probes pin bundled CUB 1.15.1, 2.8.2, and 3.3.4. In particular, the 13.3 patch comes from exact artifact `cccl-13-3_13.3.3.4.1-1`, not a guess from a broader component table.
+- The immutable CCCL v3.4.2 release, tagged compatibility statement, device-wide documentation, and `device_reduce.cuh` pin the selected component, latest-patch 12.x/13.x boundary, traditional two-phase query and allocation, stream, and scoped determinism facts. They provide no site build, runtime, or performance result.
+- The Best Practices Guide governs only logical/requested/effective/observed traffic vocabulary. Nsight Compute and CUPTI owner guides govern exact-GPU query, filter, mapping, replay, overhead, report, and permission methods. No owner source supplies this page's metric value, timing, kernel count, or winner.
+
+Context7 `/nvidia/cccl` and `/websites/nvidia_nsight-compute_nsightcompute` were queried on 2026-09-05 for discovery and cross-checking. The exact NVIDIA packages, tagged source, and owner manuals listed here govern version-specific facts. The site copies no NVIDIA or CCCL code, table, figure, or benchmark. The component matrix, workload arithmetic, manifest, timing and traffic separation, alternating schedule, maintenance rubric, blank tables, and fixture are original CC BY 4.0 Learning Site material.
+
+**Fact checked and all sources accessed: 2026-09-05.** Compilation evidence is empty, runtime is Pending Hardware Verification, and recorded observations are empty.

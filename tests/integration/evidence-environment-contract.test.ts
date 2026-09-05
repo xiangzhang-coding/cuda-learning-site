@@ -253,6 +253,10 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/programmable-gpus/exercises/',
     '/start/reference-environment-candidate/exercises/',
     '/en/start/reference-environment-candidate/exercises/',
+    '/libraries/cub-device-primitives/exercises/',
+    '/en/libraries/cub-device-primitives/exercises/',
+    '/libraries/cub-warp-block-primitives/exercises/',
+    '/en/libraries/cub-warp-block-primitives/exercises/',
   ])('provides goals, constraints, acceptance criteria, and layered hints in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/Goal|目标/);
@@ -349,9 +353,13 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/start/programmable-gpus/solutions/',
     '/start/reference-environment-candidate/solutions/',
     '/en/start/reference-environment-candidate/solutions/',
+    '/libraries/cub-device-primitives/solutions/',
+    '/en/libraries/cub-device-primitives/solutions/',
+    '/libraries/cub-warp-block-primitives/solutions/',
+    '/en/libraries/cub-warp-block-primitives/solutions/',
   ])('keeps reviewed solutions on a separate route in $route', async (route) => {
     const text = mainText(await readRoute(route));
-    expect(text).toMatch(/参考解答|Reviewed solutions?/i);
+    expect(text).toMatch(/参考解答|复核解答|Reviewed solutions?/i);
     expect(text).toMatch(/Common errors|常见错误/);
   });
 
@@ -372,6 +380,8 @@ describe('Exercises and Practice Bank contract', () => {
     'correctness/gemm-optimization-case-study',
     'libraries/library-primitive-dsl-custom-kernel',
     'libraries/thrust-algorithm-vocabulary',
+    'libraries/cub-device-primitives',
+    'libraries/cub-warp-block-primitives',
   ].flatMap((unitPath) => [
     { unitPath, localePrefix: '' },
     { unitPath, localePrefix: 'en/' },
@@ -380,7 +390,7 @@ describe('Exercises and Practice Bank contract', () => {
     const exercises = await readRoute(`${baseRoute}exercises/`);
     const solutions = await readRoute(`${baseRoute}solutions/`);
     const taskHeadings = [...exercises.querySelectorAll('main h2')]
-      .map((heading) => heading.textContent?.trim() ?? '')
+      .map((heading) => heading.textContent?.replace(/（.*?）/g, ' ').replace(/\s+/g, ' ').trim() ?? '')
       .filter((heading) => /^(?:Exercise|练习) [1-3](?::|：)/.test(heading));
     const solutionHeadings = [...solutions.querySelectorAll('main h2')]
       .map((heading) => heading.textContent?.trim() ?? '')
@@ -396,7 +406,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes sixty-eight complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes seventy complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -421,7 +431,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
       'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
-      'PB-R4-001', 'PB-R4-002',
+      'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -482,6 +492,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-016': 'algorithms/sparse-matrix-multiplication-preprocessing',
       'PB-R4-001': 'libraries/library-primitive-dsl-custom-kernel',
       'PB-R4-002': 'libraries/thrust-algorithm-vocabulary',
+      'PB-R4-003': 'libraries/cub-device-primitives',
+      'PB-R4-004': 'libraries/cub-warp-block-primitives',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -624,6 +636,27 @@ describe('Exercises and Practice Bank contract', () => {
         'libraries/library-primitive-dsl-custom-kernel',
         'libraries/thrust-algorithm-vocabulary',
       ],
+      'PB-R4-003': [
+        'algorithms/multi-stage-reduction',
+        'algorithms/inclusive-exclusive-scan',
+        'memory/stream-ordering',
+        'correctness/floating-point-order-reproducibility',
+        'libraries/cub-device-primitives',
+        'examples/cub-device-reduction-scan',
+        'labs/compare-custom-reduction-with-cub',
+      ],
+      'PB-R4-004': [
+        'foundations/execution-hierarchy',
+        'memory/shared-memory-tiling',
+        'memory/synchronization-scopes',
+        'memory/warp-divergence-reconvergence',
+        'memory/cooperative-groups',
+        'algorithms/multi-stage-reduction',
+        'algorithms/inclusive-exclusive-scan',
+        'libraries/cub-device-primitives',
+        'libraries/cub-warp-block-primitives',
+        'visuals/reduction-stages',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -673,10 +706,12 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[12]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[1-4]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R4-00[12]$|^PB-R3-01[5-6]$/.test(entryId)
+        const sourceDate = /^PB-R4-00[34]$/.test(entryId)
+          ? '2026-09-05'
+          : /^PB-R4-00[12]$|^PB-R3-01[5-6]$/.test(entryId)
           ? '2026-09-04'
           : /^PB-R3-01[1-4]$/.test(entryId)
           ? '2026-09-03'
@@ -707,7 +742,9 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A14']) expect(text).toContain(unitId);
     for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13']) expect(text).toContain(unitId);
-    for (const unitId of ['L01', 'L02']) expect(text).toContain(unitId);
+    for (const unitId of ['L01', 'L02', 'L03', 'L04']) expect(text).toContain(unitId);
+    expect(text).toContain('EX17');
+    expect(text).toContain('LAB11');
     expect(text).toMatch(/Hardware gate|硬件门槛/);
     expect(text).toMatch(/Source basis|来源依据/);
     expect(text).toMatch(/Last reviewed|最后复核/);
@@ -737,8 +774,10 @@ describe('Exercises and Practice Bank contract', () => {
     for (const slug of ['apod-optimization-loop', 'timeline-first-nsight-systems', 'kernel-first-nsight-compute', 'transpose-optimization-case-study', 'reduction-optimization-case-study', 'gemm-optimization-case-study']) {
       expect(builtHtml, slug).toContain(slug);
     }
-    for (const slug of ['library-primitive-dsl-custom-kernel', 'thrust-algorithm-vocabulary']) {
+    for (const slug of ['library-primitive-dsl-custom-kernel', 'thrust-algorithm-vocabulary', 'cub-device-primitives', 'cub-warp-block-primitives']) {
       expect(builtHtml, slug).toContain(slug);
     }
+    expect(builtHtml).toContain('cub-device-reduction-scan');
+    expect(builtHtml).toContain('compare-custom-reduction-with-cub');
   });
 });
