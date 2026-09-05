@@ -60,7 +60,7 @@ head:
 
 本页是 [L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)的独立参考解答，遵循 [L05 v3.4.2 来源合同](/libraries/libcu-plus-plus-synchronization/)。这里只提供静态证明，不提供 CUDA/C++ 实现、执行、观察或性能结果。四个证据数组全为空，不赋予证据状态（Evidence Status）。事实与来源复核均对齐 **2026-09-05**。
 
-## 解答 1：可复用 payload 需要两次所有权移交
+## 解答 1：可复用载荷（payload）需要两次所有权移交
 
 **复核解答：** P、C 位于同一线程块（thread block），所以两个标志都显式选择线程块作用域（block scope）`cuda::thread_scope_block`，使用内存序（memory order）中的释放（release）写入与获取（acquire）读取。一种有效表示是：对分别初始化、四字节对齐、无填充位（padding bits）的 32 位整数各建立一个原子引用（atomic reference）。原始对象活得比所有引用、原子访问和最终确认更久。使用引用前初始化已可见，引用使用期间不对任何标志做普通访问。拥有对象的 `cuda::atomic` 是另一种表示，不改变证明。
 
@@ -106,7 +106,7 @@ Release 读取与 acquire 写入均为非法内存序选择。普通原子读取
 
 错误方案中的重置也没有必要，如果还有参与者使用原阶段或令牌，则不安全。重新初始化不是普通阶段转换操作，当前屏障已经管理未来计数。这四个阶段是书面顺序证明，不是执行过的调度。本题 A 采用普通同步写入，因此没有需要额外记账的异步复制（asynchronous copy）完成贡献。
 
-## 解答 3：分开判断 eligibility、dispatch 与 ownership
+## 解答 3：分开判断资格、实现分派与所有权
 
 **复核解答：** 先检查编译坐标，再选择复制加速路径。C++17 使用 CCCL 一般下限 GCC 7 / Clang 7；C++20 提升到 GCC 10 / Clang 11。选定 12.9 工具包通道（Toolkit Lane）的 NVCC 上限为 GCC 14 / Clang 19；13.3 通道则为 GCC 15 / Clang 21。NVCC 接受 GCC 6 不会覆盖 CCCL 更高的下限。
 

@@ -164,7 +164,7 @@ NVIDIA CUDA Toolkit Archive 在 2026-08-26 将 CUDA Toolkit 13.4.0 标记为 **D
 
 ## SRC-CUDA-065：选定版本的 libcu++ 合同
 
-**相关 ID：** M05、M13、L05。**访问与复核日期：** 2026-09-05。**坐标：** independently selected CCCL/libcu++ v3.4.2，commit `d36012203ef73ac7f966e848dd88482273e91e02`，2026-08-05 发布。本记录支撑 [L05](/libraries/libcu-plus-plus-synchronization/)、原创 PB-R4-005/006 reviews 和 TERM-185/186；它是 source inspection，不是 API call、build 或 runtime report。
+**相关 ID：** M05、M13、L05。**访问与复核日期：** 2026-09-05。**坐标：** 独立选定 CCCL/libcu++ v3.4.2，提交为 `d36012203ef73ac7f966e848dd88482273e91e02`，2026-08-05 发布。本记录支撑 [L05](/libraries/libcu-plus-plus-synchronization/)、原创 PB-R4-005/006 审查与 TERM-185/186；它是源码检查，不是 API 调用、构建或运行报告。
 
 所审查的库以仅头文件（header-only）形式分发。它的 `cuda::std` 是面向标准、可用于主机与设备（host/device）的不完整子集，并非 `std` 的替代品；`cuda::` 扩展另行提供作用域（scope）。L05 只使用受支持的 32 位原子类型。默认系统作用域（system scope）不会自动提供 CPU/GPU 内存可访问性（accessibility），也不保证系统原子操作受支持；块作用域（block scope）不覆盖不同线程块；设备作用域（device scope）要求双方处于同一内存同步域（memory synchronization domain）。内存序（Memory Order）中的 `relaxed` 操作不发布非原子载荷（payload）；`acquire` 必须观察到相应 `release`，且双方作用域都足够。`atomic_ref` 所指的对象（referent）必须有效、正确对齐，并在所有引用存活期间保持存活；这段期间只能通过原子引用访问该对象。
 
@@ -187,10 +187,10 @@ NVIDIA CUDA Toolkit Archive 在 2026-08-26 将 CUDA Toolkit 13.4.0 标记为 **D
 | [`cuda/std/__atomic/api/common.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/api/common.h)、[`cuda/std/__atomic/order.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/order.h) | 作用域与内存序的实现位置 | 每个文件：NVIDIA 2023；Apache-2.0 WITH LLVM-exception |
 | [`cuda/std/__barrier/barrier.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__barrier/barrier.h) | 阶段、到达与完成的实现 | NVIDIA 2024；Apache-2.0 WITH LLVM-exception |
 | [`cuda/__memcpy_async/memcpy_async.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/memcpy_async.h)、[`dispatch_memcpy_async.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/dispatch_memcpy_async.h) | CUDA 编译条件保护与主机端的同步分派 | 每个文件：NVIDIA 2024；Apache-2.0 WITH LLVM-exception |
-| Barrier tests [`arrive.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp)、[`arrive_and_drop.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive_and_drop.pass.cpp)、[`completion.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/completion.pass.cpp) | 上游选定的到达、退出与完成测试覆盖；仅检查源码、未执行 | 每个文件：不带年份的 LLVM Project 声明；Apache-2.0 WITH LLVM-exception |
+| 屏障测试 [`arrive.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp)、[`arrive_and_drop.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive_and_drop.pass.cpp)、[`completion.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/completion.pass.cpp) | 上游选定的到达、退出与完成测试覆盖；仅检查源码、未执行 | 每个文件：不带年份的 LLVM Project 声明；Apache-2.0 WITH LLVM-exception |
 | [`cuda/memcpy_async/preconditions.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/memcpy_async/preconditions.pass.cpp) | 只检查前提条件；该测试不执行复制 | NVIDIA 2025；Apache-2.0 WITH LLVM-exception |
 | [`cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp) | 选定的 1/8 阶段配置、角色与作用域；仅检查源码、未执行 | NVIDIA 2023；Apache-2.0 WITH LLVM-exception |
-| [`heterogeneous/atomic/reference_cuda.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp) | Selected atomic-reference operations，不是 release/acquire payload test；只检查、未执行 | 不带年份的 libcu++ Project notice；Apache-2.0 WITH LLVM-exception |
+| [`heterogeneous/atomic/reference_cuda.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp) | 选定的原子引用操作，不是 release/acquire 载荷测试；只检查、未执行 | 不带年份的 libcu++ Project 声明；Apache-2.0 WITH LLVM-exception |
 
 组件许可文件 [`libcudacxx/LICENSE.TXT`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/LICENSE.TXT) 提供 Apache-2.0 与 LLVM exception；汇总文件 [`LICENSE`](https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE) 只列出组件与许可的对应关系，不能代替逐文件声明复核。文档缺少单独声明，不能被改写成“已找到明确的逐文件许可”。NVIDIA 独立的[流水线收敛指南（pipeline convergence guide）](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html) 带有 NVIDIA 专有文档声明，保留所有权利（all rights reserved），不适用 CCCL 头文件许可。本站仅引用并用原创文字转述事实，没有复制或改编上游代码、文档、测试、图示或表格。上游测试未在本地执行，不证明普遍覆盖，也不授予本站任何证据状态（Evidence Status）。
 
@@ -198,17 +198,17 @@ NVIDIA CUDA Toolkit Archive 在 2026-08-26 将 CUDA Toolkit 13.4.0 标记为 **D
 
 ## SRC-CUDA-066：兼容性与已知问题边界
 
-**相关 ID：** M19、L05。**访问与复核日期：** 2026-09-05。**坐标：** CCCL v3.4.2，commit `d36012203ef73ac7f966e848dd88482273e91e02`，2026-08-05 发布。这是 support-policy 与 issue-boundary review，不是 local compilation 或 tested Cartesian product。
+**相关 ID：** M19、L05。**访问与复核日期：** 2026-09-05。**坐标：** CCCL v3.4.2，提交为 `d36012203ef73ac7f966e848dd88482273e91e02`，2026-08-05 发布。这是对支持政策与已知问题边界的复核，不是本地编译，也不代表所有配置组合都经过测试。
 
 | 精确上游来源 | 事实的适用边界与声明复核 |
 | --- | --- |
-| Tagged [`README.md`](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md) | CCCL 的 12.x/13.x 最新补丁版本（latest-patch）政策排除 11.8；本站只选择 12.9.2/13.3.1、CC 7.5+ 和常规 C++17/C++20 通道。CCCL 要求 GCC 7+；C++20 要求 GCC 10+ 或 Clang 11+。此文件无单独的 SPDX 或版权声明，不能声称已找到明确的逐文件许可 |
-| Tagged [`ci/matrix.yaml`](https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml) | `12.X=12.9`、`13.X=13.2`；这些别名都不证明 13.3 测试已经执行。此文件无单独的 SPDX 或版权声明，不能声称已找到明确的逐文件许可 |
-| [v3.4.2 release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2) | 仅用于核实版本、日期与 disableTile 变更，不能据此宣布所有 API 和环境均无问题。只引用发布页，不复制正文，也不套用头文件的 SPDX 许可 |
-| Open [#10967](https://github.com/NVIDIA/cccl/issues/10967) | 该问题仍未关闭：报告称大小为 3/5/6/7（不是 2 的幂）的原子类型编译失败。问题记录与源码已经检查，本站未复现。L05 仍只讨论受支持的 32 位原子类型，不扩展到任意形状的 atomic_ref。只引用问题正文，不套用头文件许可 |
-| Open [#10499](https://github.com/NVIDIA/cccl/issues/10499) | 该问题仍未关闭：P2588R3 放宽屏障完成要求（relaxed barrier completion）的工作尚待完成，不能将实时更新的标准草案语义直接用于此标签。只引用问题正文，不套用头文件许可 |
-| [NVCC 12.9 Linux host-compiler policy，12.9 Update 1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy) | 本站 12.9.2 工具包通道（Toolkit Lane）采用的上游主机编译器支持范围：GCC 6-14、Clang 7-19。文档带有独立的 NVIDIA 专有声明，保留所有权利；仅引用并转述事实 |
-| [NVCC 13.3 Linux host-compiler policy，13.3 Update 1](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy) | 13.3.1 采用的上游主机编译器支持范围：GCC 6-15、Clang 7-21。文档带有独立的 NVIDIA 专有声明，保留所有权利；仅引用并转述事实 |
+| 标签下的 [`README.md`](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md) | CCCL 的 12.x/13.x 最新补丁版本（latest-patch）政策排除 11.8；本站只选择 12.9.2/13.3.1、CC 7.5+ 和常规 C++17/C++20 通道。CCCL 要求 GCC 7+；C++20 要求 GCC 10+ 或 Clang 11+。此文件无单独的 SPDX 或版权声明，不能声称已找到明确的逐文件许可 |
+| 标签下的 [`ci/matrix.yaml`](https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml) | `12.X=12.9`、`13.X=13.2`；这些别名都不证明 13.3 测试已经执行。此文件无单独的 SPDX 或版权声明，不能声称已找到明确的逐文件许可 |
+| [v3.4.2 发布记录](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2) | 仅用于核实版本、日期与 disableTile 变更，不能据此宣布所有 API 和环境均无问题。只引用发布页，不复制正文，也不套用头文件的 SPDX 许可 |
+| 未关闭的问题 [#10967](https://github.com/NVIDIA/cccl/issues/10967) | 该问题仍未关闭：报告称大小为 3/5/6/7（不是 2 的幂）的原子类型编译失败。问题记录与源码已经检查，本站未复现。L05 仍只讨论受支持的 32 位原子类型，不扩展到任意形状的 atomic_ref。只引用问题正文，不套用头文件许可 |
+| 未关闭的问题 [#10499](https://github.com/NVIDIA/cccl/issues/10499) | 该问题仍未关闭：P2588R3 放宽屏障完成要求（relaxed barrier completion）的工作尚待完成，不能将实时更新的标准草案语义直接用于此标签。只引用问题正文，不套用头文件许可 |
+| [NVCC 12.9 Linux 主机编译器政策，12.9 Update 1 归档](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy) | 本站 12.9.2 工具包通道（Toolkit Lane）采用的上游主机编译器支持范围：GCC 6-14、Clang 7-19。文档带有独立的 NVIDIA 专有声明，保留所有权利；仅引用并转述事实 |
+| [NVCC 13.3 Linux 主机编译器政策，13.3 Update 1](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy) | 13.3.1 采用的上游主机编译器支持范围：GCC 6-15、Clang 7-21。文档带有独立的 NVIDIA 专有声明，保留所有权利；仅引用并转述事实 |
 
 对支持政策取交集，而非并集：12.9/13.3 下的 GCC 范围分别成为 7-14/7-15，采用 C++20 时再缩到 10-14/10-15；Clang 范围分别为 7-19/7-21，采用 C++20 时缩到 11-19/11-21。操作系统、编译器、Toolkit、组件、目标架构和所选 API 的精确配置仍须逐项检查。这些范围不代表测试矩阵已经执行，也不保证每个仅面向主机的翻译单元（host-only translation unit）都能使用全部 CUDA 接口。EX10 的窄范围 C++23 探测（probe）不扩展 M19 的常规通道支持。未满足门槛的环境应选择另行复核的兼容组件，或保留同步语义的回退方案；不能将 `--allow-unsupported-compiler` 当作受支持的证据。
 
