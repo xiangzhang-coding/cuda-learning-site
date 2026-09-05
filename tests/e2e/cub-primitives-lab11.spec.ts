@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
 
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
-const sourceCommit = 'f018a694ec4f57a40e1374352e320ddd9c9511e0';
+const sourceCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
 
 const routePairs = [
   {

@@ -18,8 +18,8 @@ const fixturePath = 'public/assets/profiler-report-fixtures/lab11-nsight-compute
 const runnerPath = 'public/assets/exercise-solutions/lab11-reduction-comparison.cu';
 const runnerSha256 = '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c';
 const reviewDate = '2026-09-05';
-const sourceCommit = 'f018a694ec4f57a40e1374352e320ddd9c9511e0';
-const publicationBundleCommit = 'd52211040927f647ca3440529d4728c5edefd01e';
+const sourceCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
+const publicationBundleCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
 const selectedCcclCommit = 'd36012203ef73ac7f966e848dd88482273e91e02';
 
 const profileIds = [

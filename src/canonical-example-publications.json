@@ -9,10 +9,10 @@
       "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/72cf757de9e893479508c24e810fce5ae6bd5275.zip"
     },
     "EX17": {
-      "sourceCommit": "f018a694ec4f57a40e1374352e320ddd9c9511e0",
-      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/f018a694ec4f57a40e1374352e320ddd9c9511e0/examples/ex17-cub-device-reduction-scan",
-      "evidenceBundleCommit": "d52211040927f647ca3440529d4728c5edefd01e",
-      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/d52211040927f647ca3440529d4728c5edefd01e.zip"
+      "sourceCommit": "4c3ce46c201dbf321510b573beec3c78659be60c",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/4c3ce46c201dbf321510b573beec3c78659be60c/examples/ex17-cub-device-reduction-scan",
+      "evidenceBundleCommit": "4c3ce46c201dbf321510b573beec3c78659be60c",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/4c3ce46c201dbf321510b573beec3c78659be60c.zip"
     }
   }
 }

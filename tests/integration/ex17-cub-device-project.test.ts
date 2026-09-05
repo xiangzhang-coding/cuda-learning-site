@@ -18,8 +18,8 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex17-cub-device-reduction-scan');
 const sourcePath = path.join(exampleRoot, 'src/cub_device_reduction_scan.cu');
-const sourceCommit = 'f018a694ec4f57a40e1374352e320ddd9c9511e0';
-const publicationBundleCommit = 'd52211040927f647ca3440529d4728c5edefd01e';
+const sourceCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
+const publicationBundleCommit = '4c3ce46c201dbf321510b573beec3c78659be60c';
 
 const lanes = [
   {
