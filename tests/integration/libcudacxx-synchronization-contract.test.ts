@@ -62,11 +62,15 @@ describe('L05 libcu++ synchronization publication contract', () => {
       for (const issue of ['10967', '10499']) {
         expect(unit.querySelector(`main a[href="https://github.com/NVIDIA/cccl/issues/${issue}"]`)).not.toBeNull();
       }
-      const sources = await readRoute(`${locale}sources-and-versions`);
-      const copyParagraph = [...sources.querySelectorAll('main p')]
-        .find((paragraph) => paragraph.textContent?.includes('GCC-only compilation'))?.textContent ?? '';
-      expect(copyParagraph).toMatch(/barrier-bound/);
-      expect(copyParagraph).not.toMatch(/all reviewed memcpy_async overloads|overloads 均有/);
+      for (const route of ['sources-and-versions', 'practice']) {
+        const document = await readRoute(`${locale}${route}`);
+        const copyParagraph = [...document.querySelectorAll('main p')]
+          .find((paragraph) => paragraph.textContent?.includes('CUDA-compilation')
+            && paragraph.textContent.includes('memcpy_async'))?.textContent ?? '';
+        expect(copyParagraph, `${locale}${route}: scoped compilation guard`).toMatch(/barrier-bound/);
+        expect(copyParagraph).toMatch(/pipeline-bound/);
+        expect(copyParagraph).not.toMatch(/all reviewed memcpy_async overloads|overloads 均有/);
+      }
     }
   });
 
@@ -82,7 +86,8 @@ describe('L05 libcu++ synchronization publication contract', () => {
       for (const hint of hints) {
         expect(hint.hasAttribute('open')).toBe(false);
         expect(hint.querySelector('summary')?.textContent?.trim()).toBeTruthy();
-        expect(hint.textContent!.length).toBeGreaterThan(60);
+        expect([...hint.childNodes].filter((node) => node.nodeName !== 'SUMMARY')
+          .map((node) => node.textContent ?? '').join('').trim()).not.toBe('');
       }
       expect(exercises.querySelector(`main a[href="/${locale}${slug}/solutions/"]`)).not.toBeNull();
       expect(solutions.querySelectorAll('main details')).toHaveLength(0);
@@ -101,5 +106,25 @@ describe('L05 libcu++ synchronization publication contract', () => {
       sourceLists.push(primarySources.sort());
     }
     expect(sourceLists[0]).toEqual(sourceLists[1]);
+  });
+
+  it('requires all continuing barrier participants to finish each phase before arriving again', async () => {
+    for (const locale of ['', 'en/']) {
+      const solutions = await readRoute(`${locale}${slug}/solutions`);
+      const phases = [...solutions.querySelectorAll('main tbody tr')].filter((row) =>
+        /^(?:ready|consumed)-[01]$/.test(row.querySelector('td')?.textContent?.trim() ?? ''));
+      expect(phases.map((row) => row.querySelector('td')?.textContent?.trim()))
+        .toEqual(['ready-0', 'consumed-0', 'ready-1', 'consumed-1']);
+      for (const phase of phases) {
+        const contribution = phase.querySelectorAll('td')[1];
+        expect(contribution.textContent).toMatch(/A.*B.*C/);
+        expect(contribution.querySelector('code')?.textContent).toBe('arrive_and_wait');
+      }
+      const paragraphs = [...solutions.querySelectorAll('main p')].map((paragraph) => paragraph.textContent ?? '');
+      expect(paragraphs.some((text) => text.includes('arrive_and_wait')
+        && /Each continuing participant waits|每个继续参与的线程必须等待/.test(text))).toBe(true);
+      expect(paragraphs.some((text) => text.includes('consumed-0') && text.includes('ready-1')
+        && /current countdown|当前倒计数/.test(text))).toBe(true);
+    }
   });
 });

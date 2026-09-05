@@ -1,0 +1,16 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import PageTitle from '@astrojs/starlight/components/PageTitle.astro';
+
+const { entry, lang } = Astro.locals.starlightRoute;
+// Pagefind's indexer and browser can disagree on Chinese compound boundaries.
+const searchTitle = lang.startsWith('zh')
+  ? Array.from(new Intl.Segmenter(lang, { granularity: 'word' }).segment(entry.data.title))
+      .filter(({ isWordLike }) => isWordLike)
+      .map(({ segment }) => segment)
+      .join(' ')
+  : undefined;
+---
+
+<PageTitle />
+{searchTitle && <span data-pagefind-index-attrs="data-search-title" data-search-title={searchTitle} />}

@@ -89,18 +89,20 @@ A release load and an acquire store are invalid memory-order choices. A plain lo
 
 **Reviewed solution:** Reserve one barrier and one tile, let one initializer establish expected count four, then have all four threads cross an independent initialization-visibility boundary before using the barrier. Shared declaration is not initialization, and waiting on the uninitialized barrier cannot perform that boundary. Keep the barrier alive through every arrival and wait.
 
-For each ready phase, A finishes writing before arriving. B and C can arrive before their reads but must wait before reading. For each consumed phase, B and C arrive only after their final read; A arrives and waits to regain overwrite permission. Each ordinary arrival contributes one. D contributes once using `arrive_and_drop` during ready-0 and takes no later part.
+For **every ready and consumed phase**, A, B, and C each call `arrive_and_wait`. Each continuing participant waits for that phase to complete before beginning the next phase or making its next arrival. For a ready phase, A finishes writing before its call; B and C read only after their ready calls return. For a consumed phase, B and C finish their last reads before their calls, and all three wait. A may overwrite only after its consumed call returns. Each ordinary call already contributes one arrival; do not add a separate arrival for that phase. D contributes once using `arrive_and_drop` during ready-0 and neither reads the tile nor rejoins later.
 
 | Phase | Expected count and contributions | Next expected count | Authorized access and reuse |
 | --- | --- | --- | --- |
-| ready-0 | 4: A, B, C arrive; D contributes the fourth via drop | 3 | After their waits, B/C may read tile 0. A still cannot overwrite. |
-| consumed-0 | 3: A arrives; B/C arrive after their last tile-0 reads | 3 | After A's wait completes, A may overwrite with tile 1. |
-| ready-1 | 3: A arrives after writing tile 1; B/C arrive | 3 | After their waits, B/C may read tile 1. No early overwrite. |
-| consumed-1 | 3: A arrives; B/C arrive after their last tile-1 reads | 3 | Payload access is finished after the corresponding waits; reclaim the barrier only after all users/waits finish. |
+| ready-0 | 4: A, B, C each `arrive_and_wait`; D contributes the fourth via drop | 3 | A writes tile 0 before arrival. After their waits, B/C may read it. Each of A/B/C waits before its own consumed-0 arrival; A still cannot overwrite. |
+| consumed-0 | 3: A, B, C each `arrive_and_wait`; B/C arrive after their last tile-0 reads | 3 | Each of A/B/C waits before its own ready-1 arrival. A may overwrite with tile 1 only after its consumed-0 wait returns. |
+| ready-1 | 3: A, B, C each `arrive_and_wait`; A arrives after writing tile 1 | 3 | After their waits, B/C may read tile 1. Each of A/B/C waits before its own consumed-1 arrival; no early overwrite. |
+| consumed-1 | 3: A, B, C each `arrive_and_wait`; B/C arrive after their last tile-1 reads | 3 | All three wait for completion. Reclaim the barrier and tile only after all users/waits finish; there is no further arrival in this protocol. |
 
 The count becomes three by the drop's future-phase effect. It is not manually reinitialized at the tile boundary. D's drop contributes to the current total of four; skipping D's arrival leaves ready-0 incomplete. D cannot reappear in a phase that expects only A/B/C. The barrier's next expected count remaining three after consumed-1 is harmless if no further phase is entered and destruction waits for all users to finish; no artificial extra arrivals are needed to end a completed protocol.
 
-A counterexample to the flawed reuse rule is enough: all required arrivals complete ready-0; A returns from its wait; B is delayed before reading; A writes tile 1 over the buffer; B then reads. The ready phase authorized B to begin reading tile 0 but never established that B had finished. The consumed phase fixes this by putting B's final read before its arrival and A's overwrite after the corresponding wait. The same reasoning applies to C.
+A counterexample to the flawed reuse rule is: all required arrivals complete ready-0; A returns from its wait; B is delayed before reading; A writes tile 1 over the buffer; B then reads. The ready phase authorized B to begin reading tile 0 but never established that B had finished. The consumed phase fixes this by putting B's final read before its arrival and A's overwrite after the corresponding wait. The same reasoning applies to C.
+
+Waiting only in A leaves a second bug. Suppose consumed-0 expects three arrivals: A arrives and waits, B finishes reading and arrives, but C is still reading. The current countdown is one. If B skips its consumed wait and issues what it calls a "ready-1 arrival," that arrival decrements **consumed-0's current countdown** to zero. A can then return and overwrite while C still reads. The names ready-0, consumed-0, ready-1, and consumed-1 are only ledger labels; they do not direct an arrival to a future phase. Requiring B and C, as well as A, to complete every `arrive_and_wait` before their next arrival prevents this false completion.
 
 The flawed reset is also unnecessary and unsafe if any participant still uses the existing phase/token. Reinitialization is not the ordinary phase-transition operation; the current barrier already manages future counts. These four phases are a written ordering proof, not an executed schedule. There is no async-copy completion contribution to count in this exercise, because A performs ordinary synchronous writes.
 
@@ -154,7 +156,7 @@ SM75 meets the selected GPU floor and the SM70+ barrier/pipeline API floor, but 
 - Assuming sequential consistency repairs narrow scope, system scope proves allocation atomic support, or either forces producer progress.
 - Reusing generation values without an ownership proof, destroying referenced objects too early, or racing ordinary accesses against `atomic_ref` operations.
 - Counting drop only against the current expected count, skipping its current arrival, or rejoining without restoring a valid participation protocol.
-- Reading after arrival but before wait, or overwriting after a ready wait without a consumed boundary.
+- Reading after arrival but before wait, overwriting after a ready wait without a consumed boundary, or letting a continuing participant arrive again before its current phase wait completes.
 - Treating `aligned_size_t` as a rounding request, duplicating nongroup copies across threads, or satisfying an eight-member cooperative copy with only two callers.
 - Deleting wait/release for synchronous dispatch, confusing commit with completion, or using `quit` as drain, cancellation, or missing-arrival repair.
 - Upgrading upstream tests, a CI alias, EX10, or an architecture name into L05 compilation, execution, instruction-selection, or performance claims.
