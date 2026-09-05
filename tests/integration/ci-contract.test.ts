@@ -94,6 +94,12 @@ describe('GitHub Actions quality contract', () => {
     expect(workflow).toMatch(
       /name: Upload reviewed cross-browser evidence\s+if: \$\{\{ always\(\) && steps\.scan-cross-browser\.outcome == 'success' \}\}/,
     );
+    const crossBrowser = workflow.split('  e2e-cross-browser:')[1].split('  accessibility-automated:')[0];
+    expect(crossBrowser).toMatch(/strategy:\s+fail-fast: false\s+matrix:\s+shard: \[1, 2\]/);
+    expect(crossBrowser).toContain('npm run test:e2e:cross-browser -- --shard=${{ matrix.shard }}/2');
+    expect(crossBrowser).toContain('name: cross-browser-evidence-${{ matrix.shard }}');
+    expect(crossBrowser).not.toContain('continue-on-error');
+    expect(workflow).toContain('CROSS_BROWSER_RESULT: ${{ needs.e2e-cross-browser.result }}');
   });
 
   it('runs the full accessibility scan without competing browser workers', async () => {

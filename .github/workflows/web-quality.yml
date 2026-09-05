@@ -152,10 +152,14 @@ jobs:
           retention-days: 7
 
   e2e-cross-browser:
-    name: e2e-cross-browser
+    name: e2e-cross-browser (${{ matrix.shard }}/2)
     needs: static-and-integration
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - name: Check out public source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -182,7 +186,7 @@ jobs:
         run: npx playwright install --with-deps firefox webkit
 
       - name: Run Firefox, WebKit, and Mobile Safari emulation
-        run: npm run test:e2e:cross-browser
+        run: npm run test:e2e:cross-browser -- --shard=${{ matrix.shard }}/2
 
       - name: Scan cross-browser reports before retention
         id: scan-cross-browser
@@ -196,7 +200,7 @@ jobs:
         if: ${{ always() && steps.scan-cross-browser.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: cross-browser-evidence
+          name: cross-browser-evidence-${{ matrix.shard }}
           path: |
             test-results
             playwright-report
