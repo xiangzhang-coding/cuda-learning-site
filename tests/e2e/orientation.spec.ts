@@ -208,6 +208,23 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
   await routePage.close();
 });
 
+test('M13 title and identifier searches retain the unit in each locale', async ({ page }) => {
+  for (const route of ['/', '/en/']) {
+    const expectedHref = `${route}memory/asynchronous-copy-pipelines/`;
+    await page.goto(expectedHref);
+    const title = await page.locator('main h1').innerText();
+    for (const query of [title, 'M13']) {
+      await expectRankedSearchResult(page, {
+        route,
+        button: route === '/' ? /搜索/ : /Search/,
+        query,
+        localePrefix: route,
+        expectedHrefs: [expectedHref],
+      });
+    }
+  }
+});
+
 test('Chinese and English searches stay in their language index', async ({ page }) => {
   test.setTimeout(270_000);
   for (const scenario of [
