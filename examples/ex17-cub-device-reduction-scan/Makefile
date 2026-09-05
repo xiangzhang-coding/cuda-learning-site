@@ -91,8 +91,8 @@ $(BUILD_DIR)/ex17-cub-device-reduction-scan: $(BUILD_DIR)/cub_device_reduction_s
 	$(NVCC) --std=$(DIALECT) $(NVCC_ARCH) $< -o $@
 
 inspect: check-cub-config check-cuda-build-config $(BUILD_DIR)/ex17-cub-device-reduction-scan
-	$(CUOBJDUMP) --list-elf $< > $(BUILD_DIR)/cubin-list.txt
-	$(CUOBJDUMP) --dump-ptx $< > $(BUILD_DIR)/ptx-dump.txt
+	$(CUOBJDUMP) --list-elf $(BUILD_DIR)/ex17-cub-device-reduction-scan > $(BUILD_DIR)/cubin-list.txt
+	$(CUOBJDUMP) --dump-ptx $(BUILD_DIR)/ex17-cub-device-reduction-scan > $(BUILD_DIR)/ptx-dump.txt
 	grep -Eq 'sm_75' $(BUILD_DIR)/cubin-list.txt
 	grep -Eq '(arch = sm_75|\.target[[:space:]]+sm_75)' $(BUILD_DIR)/ptx-dump.txt
 

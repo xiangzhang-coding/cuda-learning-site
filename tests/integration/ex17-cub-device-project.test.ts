@@ -293,6 +293,11 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
       '#include <cub/version.cuh>',
     ]);
     expect(source).toMatch(/static_assert\s*\(\s*CUB_VERSION\s*==\s*EX17_EXPECTED_CUB_VERSION/);
+    expect(source).toMatch(/void execute_device_reduce\(\s*TemporaryStorage& storage,/);
+    expect(source).toMatch(/void execute_device_scan\(\s*ScanTemporaryStorage& storage,/);
+    expect(source).not.toMatch(/const (?:Scan)?TemporaryStorage& storage/);
+    expect(source).toContain('TemporaryStorage reduce_storage = query_device_reduce_storage(');
+    expect(source).toContain('ScanTemporaryStorage scan_storage = query_device_scan_storage(');
     expect(makefile).toContain('-DEX17_EXPECTED_CUB_VERSION=$(EXPECTED_CUB_VERSION)');
 
     expectLegacyCalls(source, 'cub::DeviceReduce::Sum', 'storage.data');
@@ -314,6 +319,9 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
     expect(makefile).toContain('-I$(CCCL_ROOT)/thrust');
     expect(makefile).toContain('-I$(CCCL_ROOT)/libcudacxx/include');
     expect(makefile).toContain('-I$(BUNDLED_INCLUDE_ROOT)');
+    expect(makefile).toContain(
+      '$(CUOBJDUMP) --list-elf $(BUILD_DIR)/ex17-cub-device-reduction-scan',
+    );
     expect(script).toContain('bundled_include_root="/usr/local/cuda/include/cccl"');
     expect(script).toContain('"BUNDLED_INCLUDE_ROOT=$bundled_include_root"');
     expect(script).toMatch(/\$# -lt 2 \|\| \$# -gt 3/);

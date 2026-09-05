@@ -62,7 +62,7 @@ TemporaryStorage query_device_reduce_storage(
 }
 
 void execute_device_reduce(
-    const TemporaryStorage& storage,
+    TemporaryStorage& storage,
     const float* device_input,
     float* device_output,
     int item_count,
@@ -111,7 +111,7 @@ ScanTemporaryStorage query_device_scan_storage(
 }
 
 void execute_device_scan(
-    const ScanTemporaryStorage& storage,
+    ScanTemporaryStorage& storage,
     const std::uint32_t* device_input,
     std::uint32_t* device_inclusive,
     std::uint32_t* device_exclusive,
@@ -207,12 +207,12 @@ int main() {
   CUDA_CHECK(cudaMalloc(
       reinterpret_cast<void**>(&device_exclusive), scan_bytes));
 
-  const TemporaryStorage reduce_storage = query_device_reduce_storage(
+  TemporaryStorage reduce_storage = query_device_reduce_storage(
       device_reduction_input,
       device_reduction_output,
       item_count,
       stream);
-  const ScanTemporaryStorage scan_storage = query_device_scan_storage(
+  ScanTemporaryStorage scan_storage = query_device_scan_storage(
       device_scan_input,
       device_inclusive,
       device_exclusive,
