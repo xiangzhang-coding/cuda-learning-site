@@ -408,7 +408,7 @@ describe('canonical Runnable Example resolver', () => {
       sourceCoordinate: 'https://github.com/NVIDIA/cccl/tree/d36012203ef73ac7f966e848dd88482273e91e02',
     });
     for (const record of [bundled, selected]) {
-      expect(record.sourceCommit).toBe('ce36601d293f6175258389e78562ac9efe138fb6');
+      expect(record.sourceCommit).toBe('b848390aeb6b28065a3421ab4c8b82758c8b114c');
       expect(record.commands.join('\n')).not.toMatch(/\{(?:dialect|dependencyMode|expectedCubVersion)\}/);
       expect(record.gpuExecutableExecuted).toBe(false);
       expect(record.runtimeEvidence).toBe('Pending Hardware Verification');

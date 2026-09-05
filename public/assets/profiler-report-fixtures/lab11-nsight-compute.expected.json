@@ -4,7 +4,7 @@
   "fixtureId": "LAB11-NCU-EXPECTED",
   "labId": "LAB11",
   "exampleId": "EX17",
-  "sourceCommit": "ce36601d293f6175258389e78562ac9efe138fb6",
+  "sourceCommit": "b848390aeb6b28065a3421ab4c8b82758c8b114c",
   "provenance": "original",
   "fixtureType": "expected-only-profiler-report-plan",
   "captureStatus": "pending-hardware-verification",
@@ -126,10 +126,10 @@
       {
         "exampleId": "EX17",
         "role": "cub-device-reduce-candidate",
-        "sourceCommit": "ce36601d293f6175258389e78562ac9efe138fb6",
+        "sourceCommit": "b848390aeb6b28065a3421ab4c8b82758c8b114c",
         "projectPath": "examples/ex17-cub-device-reduction-scan",
-        "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/ce36601d293f6175258389e78562ac9efe138fb6/examples/ex17-cub-device-reduction-scan",
-        "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/ce36601d293f6175258389e78562ac9efe138fb6.zip",
+        "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/b848390aeb6b28065a3421ab4c8b82758c8b114c/examples/ex17-cub-device-reduction-scan",
+        "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/b848390aeb6b28065a3421ab4c8b82758c8b114c.zip",
         "canonicalRanges": ["cpu-reference", "device-reduce"],
         "renderedOnLabPage": true,
         "pageBinding": "canonicalExample EX17 at the immutable source commit"
