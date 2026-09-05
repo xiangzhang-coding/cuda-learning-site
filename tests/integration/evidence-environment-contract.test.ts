@@ -257,6 +257,8 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/libraries/cub-device-primitives/exercises/',
     '/libraries/cub-warp-block-primitives/exercises/',
     '/en/libraries/cub-warp-block-primitives/exercises/',
+    '/libraries/libcu-plus-plus-synchronization/exercises/',
+    '/en/libraries/libcu-plus-plus-synchronization/exercises/',
   ])('provides goals, constraints, acceptance criteria, and layered hints in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/Goal|目标/);
@@ -357,6 +359,8 @@ describe('Exercises and Practice Bank contract', () => {
     '/en/libraries/cub-device-primitives/solutions/',
     '/libraries/cub-warp-block-primitives/solutions/',
     '/en/libraries/cub-warp-block-primitives/solutions/',
+    '/libraries/libcu-plus-plus-synchronization/solutions/',
+    '/en/libraries/libcu-plus-plus-synchronization/solutions/',
   ])('keeps reviewed solutions on a separate route in $route', async (route) => {
     const text = mainText(await readRoute(route));
     expect(text).toMatch(/参考解答|复核解答|Reviewed solutions?/i);
@@ -382,6 +386,7 @@ describe('Exercises and Practice Bank contract', () => {
     'libraries/thrust-algorithm-vocabulary',
     'libraries/cub-device-primitives',
     'libraries/cub-warp-block-primitives',
+    'libraries/libcu-plus-plus-synchronization',
   ].flatMap((unitPath) => [
     { unitPath, localePrefix: '' },
     { unitPath, localePrefix: 'en/' },
@@ -406,7 +411,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes seventy complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes seventy-two complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -431,7 +436,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006',
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
       'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
-      'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004',
+      'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -494,6 +499,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R4-002': 'libraries/thrust-algorithm-vocabulary',
       'PB-R4-003': 'libraries/cub-device-primitives',
       'PB-R4-004': 'libraries/cub-warp-block-primitives',
+      'PB-R4-005': 'libraries/libcu-plus-plus-synchronization',
+      'PB-R4-006': 'libraries/libcu-plus-plus-synchronization',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -657,6 +664,17 @@ describe('Exercises and Practice Bank contract', () => {
         'libraries/cub-warp-block-primitives',
         'visuals/reduction-stages',
       ],
+      'PB-R4-005': [
+        'memory/synchronization-scopes',
+        'toolchain/cpp-dialect-boundaries',
+        'libraries/libcu-plus-plus-synchronization',
+      ],
+      'PB-R4-006': [
+        'memory/synchronization-scopes',
+        'memory/asynchronous-copy-pipelines',
+        'toolchain/cpp-dialect-boundaries',
+        'libraries/libcu-plus-plus-synchronization',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -706,10 +724,10 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[1-4]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[1-6]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R4-00[34]$/.test(entryId)
+        const sourceDate = /^PB-R4-00[3-6]$/.test(entryId)
           ? '2026-09-05'
           : /^PB-R4-00[12]$|^PB-R3-01[5-6]$/.test(entryId)
           ? '2026-09-04'
@@ -742,7 +760,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A14']) expect(text).toContain(unitId);
     for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13']) expect(text).toContain(unitId);
-    for (const unitId of ['L01', 'L02', 'L03', 'L04']) expect(text).toContain(unitId);
+    for (const unitId of ['L01', 'L02', 'L03', 'L04', 'L05']) expect(text).toContain(unitId);
     expect(text).toContain('EX17');
     expect(text).toContain('LAB11');
     expect(text).toMatch(/Hardware gate|硬件门槛/);
@@ -774,7 +792,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const slug of ['apod-optimization-loop', 'timeline-first-nsight-systems', 'kernel-first-nsight-compute', 'transpose-optimization-case-study', 'reduction-optimization-case-study', 'gemm-optimization-case-study']) {
       expect(builtHtml, slug).toContain(slug);
     }
-    for (const slug of ['library-primitive-dsl-custom-kernel', 'thrust-algorithm-vocabulary', 'cub-device-primitives', 'cub-warp-block-primitives']) {
+    for (const slug of ['library-primitive-dsl-custom-kernel', 'thrust-algorithm-vocabulary', 'cub-device-primitives', 'cub-warp-block-primitives', 'libcu-plus-plus-synchronization']) {
       expect(builtHtml, slug).toContain(slug);
     }
     expect(builtHtml).toContain('cub-device-reduction-scan');

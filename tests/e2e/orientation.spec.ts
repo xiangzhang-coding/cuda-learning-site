@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(492);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(246);
+  expect(routes).toHaveLength(498);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(249);
 
   for (const route of routes) {
     const response = await page.goto(route);

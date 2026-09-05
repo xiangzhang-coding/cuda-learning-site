@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 184 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 186 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-09-05'
@@ -12,6 +12,8 @@ structure:
   - entries
   - entry-term-183
   - entry-term-184
+  - entry-term-185
+  - entry-term-186
   - maintenance
 head:
   - tag: meta
@@ -29,7 +31,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1706,6 +1708,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [F02](/foundations/execution-hierarchy/)、[M06](/memory/warp-divergence-reconvergence/)、[M12](/memory/cooperative-groups/)和 [L04](/libraries/cub-warp-block-primitives/)。
 - **版本说明：** CCCL/CUB v3.4.2 接受 compile-time size 1 至 32；2 的幂可把一个 hardware warp 划分为多个 subwarps，非 2 的幂不做该 partition 且只有第一个 logical warp 执行。Exact participation 仍需按 pinned interface 与 launch 复核；这不是 hardware observation。
 
+<span id="term-185" class="resource-target" aria-hidden="true"></span>
+
+### Memory Order · 内存顺序
+
+- **定义：** 内存顺序（Memory Order）规定一个 atomic operation 如何排序其周围的 memory accesses，与界定 participating agents 的 scope 分开。在 publication protocol 中，acquire 观察到 producer 的 release，且双方 scope 与 storage contract 都足够时，consumer 才能据此看到此前的 payload writes；relaxed atomicity 本身不发布 payload。
+- **避免：** 同步作用域的同义词、自动 rendezvous、system scope 让 device memory 自动变成 CPU-readable 的保证。
+- **相关资源：** [M05](/memory/synchronization-scopes/)、[L05](/libraries/libcu-plus-plus-synchronization/)和 [PB-R4-005](/practice/#pb-r4-005)。
+- **版本说明：** 2026-09-05 按 [SRC-CUDA-065](/sources-and-versions/#src-cuda-065) 的 selected CCCL/libcu++ v3.4.2 复核。L05 只讨论受支持的 32-bit atomic types；device scope 要求相同 memory synchronization domain，system scope 仍要求 accessible storage 和 documented system atomic support。没有 execution record。
+
+<span id="term-186" class="resource-target" aria-hidden="true"></span>
+
+### Barrier Phase · 屏障阶段
+
+- **定义：** 屏障阶段（Barrier Phase）是 reusable barrier 中 expected arrivals 与 completion 的一个重复周期。参与前必须完成 initialization publication；arrival 为 phase 贡献到达，但本身不等待 completion。Consumer 在读取前等待 appropriate phase，buffer reuse 仍需要 consume-before-overwrite edge。它不是 pipeline stage 所指的 reusable storage slot。
+- **避免：** 流水线阶段、arrive 就是 wait、drop 就是跳过 arrival、一个 participant arrive 后即可覆写。
+- **相关资源：** [M05](/memory/synchronization-scopes/)、[M13](/memory/asynchronous-copy-pipelines/)、[L05](/libraries/libcu-plus-plus-synchronization/)和 [PB-R4-006](/practice/#pb-r4-006)。
+- **版本说明：** 2026-09-05 按 [SRC-CUDA-065](/sources-and-versions/#src-cuda-065) 的 selected CCCL/libcu++ v3.4.2 复核。`arrive_and_drop` 同时减少当前 countdown 与未来 expected count，不是省略调用。[SRC-CUDA-066](/sources-and-versions/#src-cuda-066) 记录 P2588R3 relaxed-completion work 仍待完成，不假设 live standard draft 已适用。Owner test inspection 不提供 observed barrier behavior。
+
 ## 维护规则
 
-TERM-001 至 TERM-182 保留各自逐项复核记录；新增 TERM-183 至 TERM-184 与完整 184 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-05** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条只定义 temporary-storage ownership/reuse 和 logical-warp participant scope：未运行 CUDA、CUB、EX17 或 LAB11，且不声明 local API availability、queried bytes、output、synchronization observation、traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-184 保留各自逐项复核记录；新增 TERM-185/186 与完整 186 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-05** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条区分 memory order 与 scope、barrier phase 与 pipeline stage；未运行 CUDA 或 libcu++，且不声明 local API availability、output、synchronization observation、traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。

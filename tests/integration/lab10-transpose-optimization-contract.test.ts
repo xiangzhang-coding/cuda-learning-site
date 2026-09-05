@@ -551,7 +551,7 @@ describe('LAB10 canonical transpose optimization contract', () => {
     for (const source of await readSourcePair()) {
       const record = source.split('\n').find((line) => line.includes('id="src-cuda-054"')) ?? '';
       for (const url of [archive2022, archive2025, current]) expect(record).toContain(url);
-      expect(source).toMatch(/80 个 source record|80 source records/);
+      expect(source).toMatch(/82 个 source record|82 source records/);
       expect(source.match(/id="src-cuda-054"/g)).toHaveLength(1);
     }
   });

@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 70 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 72 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-09-05'
@@ -79,6 +79,8 @@ structure:
   - entry-pb-r4-002
   - entry-pb-r4-003
   - entry-pb-r4-004
+  - entry-pb-r4-005
+  - entry-pb-r4-006
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -148,6 +150,7 @@ prerequisites:
   - L02
   - L03
   - L04
+  - L05
 relatedUnits:
   - O02
   - O03
@@ -214,6 +217,7 @@ relatedUnits:
   - L02
   - L03
   - L04
+  - L05
   - EX17
   - LAB06
   - LAB08
@@ -238,15 +242,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -265,13 +269,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 70 个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 72 个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 70 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 72 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
@@ -3152,6 +3156,80 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期（Source date）：** 2026-09-05。
 
+<span id="pb-r4-005" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-005：审查 scope/order 发布协议与 system-scope 内存假设
+
+- **ID 与双语发布对：** PB-R4-005；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Evidence review；高级。
+- **直接先修条件：** [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)。
+- **硬件门槛（Hardware gate）：** 静态审查无需硬件。未来执行要求 Native Linux 和 CC 7.5+；CPU/GPU 共享还必须有 exact system 的 allocation accessibility 与 atomic support 依据。
+- **版本门槛（Version gate）：** Selected CCCL/libcu++ v3.4.2，commit `d36012203ef73ac7f966e848dd88482273e91e02`；只使用 Toolkit 12.9.2/13.3.1 ordinary C++17/C++20，不覆盖 11.8，也不继承 EX10 的 C++23 声明。Atomic objects 只使用受支持的 32-bit types。
+- **相关学习单元与资源：** [M05](/memory/synchronization-scopes/)、[M19](/toolchain/cpp-dialect-boundaries/)和 [L05](/libraries/libcu-plus-plus-synchronization/)。
+- **最后复核（Last reviewed）：** 2026-09-05。
+
+**题目：** 一份原创 review packet 为 non-atomic payload 提出三种单槽交接。A 中同一 block 的两个 threads 在 producer 写完 payload 后以 relaxed order 存储 ready flag，consumer 的 relaxed load 看到 ready 就读 payload。B 中 producer/consumer 属于同一 device 的不同 blocks，却仍用 block-scoped release/acquire，且未记录内存同步域（memory synchronization domain）。C 中 CPU consumer 轮询 GPU payload 对应的 default-system-scope flag，却未记录 allocation kind、CPU accessibility 或 host/device atomic support；proposal 把 system scope 当作 ordinary device memory 自动变成 CPU-readable 的证明。另有 debug thread 在一个 32-bit flag 的 `atomic_ref` 存活期间用 non-atomic access 读取它，packed flag 的 required alignment 和 lifetime 也没有证明。每个 producer 设置 ready 后立即覆写槽位。在不运行的前提下修复整份 packet。
+
+**目标：** 区分 atomicity、内存顺序（Memory Order）、participant scope、storage accessibility、lifetime、progress 和 slot ownership，并在无法证明 shared atomic protocol 时给出正确 fallback。
+
+**约束：** 每行分别画出 publication edge 和 consume-before-reuse edge。不得静默更换 allocation type、把 fence 当 rendezvous，或假设所有 blocks 在 spin 时都能 progress。不扩展到 arbitrary-sized atomic 或 `atomic_ref`。
+
+**预期证据：** 三行静态 verdict、participant/allocation ledger、release 到 observing-acquire 的边、`atomic_ref` alignment/lifetime/access checklist、reuse acknowledgement 或 completion edge，以及 fallback plan。Build、runtime、payload values 和 timing 保持 unrecorded。
+
+**验收条件：** A 拒绝 relaxed publication，要求 payload writes 后 release store、consumer 以 acquire 观察该 release 后再消费，双方 scope 都覆盖参与者。B 拒绝跨 blocks 的 block scope，要求有依据的 same-memory-synchronization-domain device scope，以及 progress argument 或 fallback。C 在 accessibility 和 exact system atomic requirements 有依据前保持 blocked；default system scope 不够。不得让 ordinary access 与 live `atomic_ref` 冲突，也不得在消费结束前复用 payload。
+
+<details><summary>提示 1</summary>对每条边分别问：scope 包含哪些 agents？Observing operation 排序了哪些此前的 writes？两个答案都不会分配 accessible memory。</details>
+
+<details><summary>提示 2</summary>Ready 把读槽位的权限交给 consumer，并没有把覆写权限交还 producer。</details>
+
+**参考解答（Reviewed solution）：** A 选择已初始化、object lifetime 明确的受支持 32-bit flag。Producer 先写 payload，再以 release 发布 ready；consumer 只有通过 acquire 观察到该 publication 后才能读。双方操作的 scope 都覆盖这两个 threads，例如 block scope。若重复使用槽位，consumer 完成全部 payload reads 后才 release 独立 acknowledgement，producer acquire 它以后才覆写；若只交接一次，则让 storage 保留到 external completion boundary。B 不能只靠更强 order 修复：双方 scope 都必须覆盖两个 blocks，device scope 还要求同一 memory synchronization domain。它不保证 spinning progress，缺少 scheduling justification 时改成有顺序的 producer/consumer launches。C 不能从 namespace 或 default scope 获准；先记录 exact allocation、双方 accessibility 和 documented system atomic support，否则先完成 producer operation，再通过 checked transfer 移到 host-owned memory，等待 transfer completion 后才让 CPU 消费。对于 `atomic_ref`，证明 referent 在全部 references 存活期间正确对齐且存活，并在此期间 exclusively through atomic references 访问；ordinary debug inspection 移到该 lifetime 结束且同步之后。所有修复都是静态合同，不是 observed execution。
+
+对于 repeated-use variant，ready 和 acknowledgement 必须标识同一 generation，不能反复复用不带代次的 boolean。从已初始化的 32-bit generation counters 开始，每次 acquire 要求准确匹配本代次，并限定 handoff 次数以保证两个 counters 都不 wrap。否则旧 ready/acknowledgement 可能错误授权访问下一批 payload。One-shot completion variant 不需要这项额外协议。
+
+**有效替代方案：** A 可以用正确初始化并发布的 block barrier 代替 flag，所有 required participants 都等待，并在 overwrite 前安排第二次 rendezvous。B/C 可以用 explicit completion 与分离的 staging buffers 消除 concurrent sharing。每种替代都必须保留相同 payload/ownership contract；单独扩大 scope 不是 fallback。
+
+**常见错误：** 把 relaxed atomicity 当 payload publication；acquire 没观察相应 release；增强 order 却保留过窄 scope；遗漏 device-domain 条件；认为 system scope 创造 CPU-readable memory；在 `atomic_ref` lifetime 中做 ordinary debug access；遗漏 alignment 或 storage lifetime；ready 后而非 acknowledgement 后复用；从 source inspection 保证 progress 或成功执行。
+
+**来源依据（Source basis）：** 本站原创 L05/M05 协议推理、[TERM-185](/glossary/#term-185)、[SRC-CUDA-065](/sources-and-versions/#src-cuda-065)和 [SRC-CUDA-066](/sources-and-versions/#src-cuda-066)；exact v3.4.2 [memory model](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory_model.rst)、[atomic](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic.rst)和 [atomic_ref](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic_ref.rst)。只引用并改写事实，没有复制或改编 source、test 或 scenario。
+
+**来源日期（Source date）：** 2026-09-05。
+
+<span id="pb-r4-006" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-006：审查 libcu++ portability、stage ownership 与 alignment fallback
+
+- **ID 与双语发布对：** PB-R4-006；位于 `practice-bank` Publication Pair。
+- **类型与难度：** Evidence review；高级。
+- **直接先修条件：** [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)。
+- **硬件门槛（Hardware gate）：** 静态审查无需硬件。SM 70 是 API 下限，不是本站受支持下限：site/CCCL evaluation 从 CC 7.5 开始，CC 8.0+ 也只让 eligible `cp.async` path 成为可能，不保证 overlap 或 speedup。
+- **版本门槛（Version gate）：** Exact CCCL/libcu++ v3.4.2 contracts；Toolkit 12.9.2/13.3.1 ordinary C++17/C++20，并与 NVCC/CCCL host-compiler policy 取交集。排除 11.8；EX10 不授予 ordinary C++23 lane。
+- **相关学习单元与资源：** [M05](/memory/synchronization-scopes/)、[M13](/memory/asynchronous-copy-pipelines/)、[M19](/toolchain/cpp-dialect-boundaries/)和 [L05](/libraries/libcu-plus-plus-synchronization/)。
+- **最后复核（Last reviewed）：** 2026-09-05。
+
+**题目：** 一个 64-thread block 将 32 producers 和 32 consumers 分配给两个 shared pipeline stages，处理六批 trivially copyable payload。只有 producers 为 shared state 构造 handle；commit 经 divergent paths 到达；consumers 在 wait 前读取、最后一次 read 前 release；producer 覆写已 committed stage。28-byte tail 的 source/destination addresses 都是 16-byte-aligned base 加四 bytes，proposal 却声称满足 `aligned_size_t<16>`。Producer-group callers 还传入不同 counts，拟议 nongroup 替代方案则让每个 producer 复制同一区域。退出时作者调用 `quit` 并销毁 state，把它当作取消 pending copies。另一个 barrier 的 expected count 为 64，八个 retiring participants 跳过 arrival，其余 threads 把 `arrive` 当 wait。Portability note 宣称 header-only 意味着全部接口仅用 GCC 就能编译、`cuda::std` 取代 `std`、所有 lanes 支持 C++23、tagged `13.X` CI 证明 13.3 已执行。修复设计和这些声明。
+
+**目标：** 交付 role/stage ownership ledger、屏障阶段（Barrier Phase）ledger、诚实的 alignment verdict 与 synchronous fallback，以及有边界的 compatibility matrix。
+
+**约束：** 保留六批数据和 logical payload。区分 collective group copies 与分别发出的 nongroup copies。不用 delay、函数名称或 `quit` 替代 completion；全部 local build、runtime、instruction mapping、overlap 和 timing cells 留空。
+
+**预期证据：** Collective construction/lifetime contract；batch-to-stage 六行映射；acquire、issue、commit、wait、consume、release edges；tail-address arithmetic；当前/未来 barrier counts；teardown preconditions；version/compiler/API-versus-instruction matrix。
+
+**验收条件：** 每批数据拥有 stage，直到最后一个 consumer release。Group-copy participants 参数一致、source/destination ranges 不重叠；nongroup callers 各自发起复制且分配的 work 互不冲突。两侧 addresses 和 `28 mod 16 = 12` 都不满足 16-byte proof。Barrier arrival 不是 wait；八次 `arrive_and_drop` 计入当前 phase，并把未来 expected count 降到 56，不是静默跳过八次 arrival。不得把 handle quit 描述为 drain 或 cancel。
+
+<details><summary>提示 1</summary>画两条时间线：shared state lifetime，以及每个 stage 反复移交的 ownership。Stage commit 不是 release。</details>
+
+<details><summary>提示 2</summary>Alignment wrapper 是 caller 提供的证明。在选择 accelerated path 前，分别检查 source address、destination address 和 byte count。</details>
+
+**参考解答（Reviewed solution）：** 全部 64 members 按 declared producer/consumer roles collective 构造 shared pipeline，让 shared state 活到所有 participating handles 与 unfinished work 都结束。Batches 0/2/4 使用 stage 0，1/3/5 使用 stage 1，且每次复用都等待上一 owner release。Producers 按 required converged collective sequence acquire、issue selected copies、commit；consumers wait、完成全部 payload reads，再 release。Group copy 使用明确的 producer subgroup 和完全一致的 arguments；nongroup 则为每个 caller 分配独立、互不重叠的 ranges。Tail 不能携带 16-byte proof：两侧 address residue 为 4，byte-count residue 为 12。选择合法的未断言对齐 copy form，或使用 assigned writers 的 ordinary synchronous copy，在 consumption 前保留 completion/publication synchronization，最后一次 read 后保留 reuse barrier。没有 tail data 的 threads 仍到达 required participant boundaries。另一个 barrier 必须先 initialize 并 publish。八个 retiring members 执行 `arrive_and_drop` 后，当前 countdown 还需其余 56 arrivals，未来 phases 则期待 56。留下的 consumers 在读取前等待 appropriate phase，shared-buffer reuse 前再安排一个 phase。Dropping member 停止访问 shared payload，teardown 仍等到无人使用 barrier。Pipeline work 必须显式 drain/release 后才 quit handles；`quit` 只放弃 ownership。最后区分 incomplete standards-oriented host/device `cuda::std` subset、`std` 和 scoped `cuda::` extensions。Header-only 是分发属性，不是 GCC-only 保证：所审查的 `memcpy_async` overloads 都受 CUDA-compilation guards 约束，即使 host dispatcher 为 synchronous。Compiler intersection 后只选 12.9.2/13.3.1 C++17/C++20；tagged CI aliases 是 `12.X=12.9`、`13.X=13.2`，不是 executed 13.3 claim。Support policy 和 inspected tests 不证明 tested Cartesian product 或 local result。
+
+**有效替代方案：** 用单个 synchronous shared stage 配 explicit publication/reuse barriers，或为 blocked environment 禁用 pipeline path。只有同时证明两侧 addresses 和 byte count 后，另一种真实 alignment proof 才有效。11.8 可以另行复核旧 library，但不能静默 backport selected v3.4.2。
+
+**常见错误：** 混淆 group participation 与 data validity；遗漏 collective state construction；重复 nongroup writes；wait 前 consume；最后 read 前 release；覆写 committed stage；把 false alignment 当 performance hint；跳过 arrival 而不 drop；把 `quit` 当 cancel；混淆 SM 70 API support、CC 7.5 policy 与 CC 8.0 acceleration；从无关坐标推导 C++23 或 CI execution。
+
+**来源依据（Source basis）：** 本站原创 L05/M13/M19 reviews；[TERM-186](/glossary/#term-186)、[SRC-CUDA-065](/sources-and-versions/#src-cuda-065)和 [SRC-CUDA-066](/sources-and-versions/#src-cuda-066)；exact v3.4.2 [pipeline](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline.rst)、[quit](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/quit.rst)、[memcpy_async](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/asynchronous_operations/memcpy_async.rst)、[aligned size](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory/aligned_size.rst)，以及 NVIDIA [pipeline convergence guide](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html)。Owner tests 只检查、未执行；没有复制或改编 source、test 或 figure。
+
+**来源日期（Source date）：** 2026-09-05。
+
 ## 复核记录
 
-既有条目保留各自 2026-08-26 至 2026-09-04 的 item-level records。Issue #32 在 **2026-09-04** 对 R3 边界 66 个条目及其精确 10 个 Nsight report-analysis inventory 完成不可变聚合复核；issue #33 新增 PB-R4-001/002；issue #34 又新增 PB-R4-003/004，并在 **2026-09-05** 复核当前完整 70 个条目的 Publication Pair、metadata projection、直接链接与静态合同。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。Issue #34 条目只审查 static selection、storage、participant、synchronization 与 determinism contracts，不展示或执行 CUDA/CUB source，也不发布 local API availability、queried bytes、output、barrier trace、traffic、timing、winner、speedup 或 Evidence Status。
+既有条目保留各自 item-level records。Issue #32 在 **2026-09-04** 对 R3 边界 66 个条目及其精确 10 个 Nsight report-analysis inventory 完成不可变聚合复核；issue #33 新增 PB-R4-001/002，issue #34 新增 PB-R4-003/004。PB-R4-005/006 将当前完整 Publication Pair 扩展到 72 个条目，metadata projection、直接链接与静态合同于 **2026-09-05** 同步复核。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制或改编外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。新增 L05 条目只审查 scope/order、accessibility、phase/stage ownership、alignment fallback 与 portability；不展示或执行 CUDA/libcu++ source，也不发布 local API availability、output、barrier trace、traffic、timing、winner、speedup 或 Evidence Status。

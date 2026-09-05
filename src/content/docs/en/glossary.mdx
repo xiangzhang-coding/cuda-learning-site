@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: One hundred eighty-four published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred eighty-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-09-05'
@@ -12,6 +12,8 @@ structure:
   - entries
   - entry-term-183
   - entry-term-184
+  - entry-term-185
+  - entry-term-186
   - maintenance
 head:
   - tag: meta
@@ -29,7 +31,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1706,6 +1708,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [F02](/en/foundations/execution-hierarchy/), [M06](/en/memory/warp-divergence-reconvergence/), [M12](/en/memory/cooperative-groups/), and [L04](/en/libraries/cub-warp-block-primitives/).
 - **Version note:** CCCL/CUB v3.4.2 accepts a compile-time size from 1 through 32. A power-of-two size can partition one hardware warp into subwarps; a non-power-of-two size does not make that partition and only the first logical warp executes. Exact participation still requires review against the pinned interface and launch; this is not a hardware observation.
 
+<span id="term-185" class="resource-target" aria-hidden="true"></span>
+
+### Memory Order · 内存顺序
+
+- **Definition:** Memory order specifies how an atomic operation orders memory accesses around it. It is separate from the scope identifying participating agents. In a publication protocol, an acquire that observes the producer's release can make the preceding payload writes available to the consumer when both scopes and the storage contract are sufficient; relaxed atomicity alone does not publish that payload.
+- **Avoid:** Synonym for synchronization scope, automatic rendezvous, guarantee that system scope makes device memory CPU-readable.
+- **Related resources:** [M05](/en/memory/synchronization-scopes/), [L05](/en/libraries/libcu-plus-plus-synchronization/), and [PB-R4-005](/en/practice/#pb-r4-005).
+- **Version note:** Reviewed 2026-09-05 against selected CCCL/libcu++ v3.4.2 in [SRC-CUDA-065](/en/sources-and-versions/#src-cuda-065). L05 restricts atomics to supported 32-bit types. Device scope requires the same memory synchronization domain; system scope still requires accessible storage and documented system atomic support. No execution is recorded.
+
+<span id="term-186" class="resource-target" aria-hidden="true"></span>
+
+### Barrier Phase · 屏障阶段
+
+- **Definition:** A barrier phase is one repeated cycle of expected arrivals and completion in a reusable barrier. Initialization must be published before participation. Arrival contributes to a phase but does not itself wait for completion; a consumer waits for the appropriate phase before reading, and buffer reuse needs its own consume-before-overwrite edge. This is not the reusable storage slot called a pipeline stage.
+- **Avoid:** Pipeline stage, arrive means wait, drop means skip arrival, permission to overwrite as soon as one participant arrives.
+- **Related resources:** [M05](/en/memory/synchronization-scopes/), [M13](/en/memory/asynchronous-copy-pipelines/), [L05](/en/libraries/libcu-plus-plus-synchronization/), and [PB-R4-006](/en/practice/#pb-r4-006).
+- **Version note:** Reviewed 2026-09-05 against selected CCCL/libcu++ v3.4.2 in [SRC-CUDA-065](/en/sources-and-versions/#src-cuda-065). `arrive_and_drop` reduces both the current countdown and future expected count; it is not an omitted call. [SRC-CUDA-066](/en/sources-and-versions/#src-cuda-066) records pending P2588R3 relaxed-completion work rather than assuming the live standard draft applies. Owner test inspection supplies no observed barrier behavior.
+
 ## Maintenance rule
 
-TERM-001 through TERM-182 retain their item-level review records. New TERM-183 through TERM-184 and the complete 184-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-05**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. The new entries define only temporary-storage ownership and reuse plus logical-warp participant scope. No CUDA, CUB, EX17, or LAB11 execution occurred, and no local API availability, queried bytes, output, synchronization observation, traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-184 retain their item-level review records. New TERM-185/186 and the complete 186-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-05**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. The new entries distinguish memory order from scope and barrier phases from pipeline stages. No CUDA or libcu++ execution occurred, and no local API availability, output, synchronization observation, traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.

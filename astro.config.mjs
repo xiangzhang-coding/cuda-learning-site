@@ -155,6 +155,7 @@ export default defineConfig({
             { slug: 'libraries/thrust-algorithm-vocabulary' },
             { slug: 'libraries/cub-device-primitives' },
             { slug: 'libraries/cub-warp-block-primitives' },
+            { slug: 'libraries/libcu-plus-plus-synchronization' },
           ],
         },
         {

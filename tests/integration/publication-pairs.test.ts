@@ -2599,6 +2599,48 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/libraries/cub-warp-block-primitives/solutions/',
   },
   {
+    pairId: 'l05',
+    factCheckDate: '2026-09-05',
+    structure: 'outcome,prerequisites,history-and-namespaces,scope-and-headers,atomic-scope,memory-order,atomic-ref,barrier-phases,pipeline-lifecycle,copy-contract,portability,known-issues,license-review,evidence-boundary,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'L05',
+    prerequisites: 'M05,M13,M19',
+    relatedUnits: 'M05,M13,M19',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    sourceCount: '20',
+    sourceVersions: 'CCCL-v3.4.2,12.9.1,13.3.1',
+    zh: '/libraries/libcu-plus-plus-synchronization/',
+    en: '/en/libraries/libcu-plus-plus-synchronization/',
+  },
+  {
+    pairId: 'l05-exercises',
+    factCheckDate: '2026-09-05',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'L05-EXERCISES',
+    prerequisites: 'L05',
+    hardwareGate: 'none',
+    expectedObservations: 'none',
+    zh: '/libraries/libcu-plus-plus-synchronization/exercises/',
+    en: '/en/libraries/libcu-plus-plus-synchronization/exercises/',
+  },
+  {
+    pairId: 'l05-solutions',
+    factCheckDate: '2026-09-05',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'L05-SOLUTIONS',
+    prerequisites: 'L05-EXERCISES',
+    hardwareGate: 'none',
+    expectedObservations: 'none',
+    zh: '/libraries/libcu-plus-plus-synchronization/solutions/',
+    en: '/en/libraries/libcu-plus-plus-synchronization/solutions/',
+  },
+  {
     pairId: 'ex01',
     factCheckDate: '2026-08-26',
     structure: 'purpose,project,report-contract,build,hardware,compatibility,evidence,expected-observations,sources',
@@ -3518,25 +3560,25 @@ const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'practice-bank',
     factCheckDate: '2026-09-05',
-    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,review',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04',
-    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18',
+    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05',
+    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18',
     zh: '/practice/',
     en: '/en/practice/',
   },
   {
     pairId: 'glossary',
     factCheckDate: '2026-09-05',
-    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,maintenance',
+    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,maintenance',
     zh: '/glossary/',
     en: '/en/glossary/',
   },
   {
     pairId: 'sources-and-versions',
     factCheckDate: '2026-09-05',
-    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,content-sources,review-record',
+    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',
   },
@@ -3634,11 +3676,11 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(246);
-    expect(sourceRoutes.size).toBe(492);
+    expect(publicationPairs).toHaveLength(249);
+    expect(sourceRoutes.size).toBe(498);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
-    for (const publishedUnitId of ['L03', 'L04', 'EX17', 'LAB11']) {
+    for (const publishedUnitId of ['L03', 'L04', 'L05', 'EX17', 'LAB11']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
     for (const absentUnitId of ['L06', 'LAB12', 'L13', 'EX20']) {
@@ -3748,6 +3790,9 @@ describe('Publication Pairs', () => {
       ['L04', ['F02', 'M03', 'M05', 'A02', 'A03', 'L03']],
       ['L04-EXERCISES', ['L04']],
       ['L04-SOLUTIONS', ['L04-EXERCISES']],
+      ['L05', ['M05', 'M13', 'M19']],
+      ['L05-EXERCISES', ['L05']],
+      ['L05-SOLUTIONS', ['L05-EXERCISES']],
       ['LAB01', ['O03', 'O08']],
       ['LAB02', ['O03', 'F01']],
       ['LAB03', ['F03', 'F05']],
@@ -3888,6 +3933,7 @@ describe('published navigation', () => {
           '/libraries/thrust-algorithm-vocabulary/',
           '/libraries/cub-device-primitives/',
           '/libraries/cub-warp-block-primitives/',
+          '/libraries/libcu-plus-plus-synchronization/',
         '/examples/environment-report/',
         '/examples/vector-addition/',
         '/examples/multidimensional-indexing/',
@@ -4002,6 +4048,7 @@ describe('published navigation', () => {
           '/en/libraries/thrust-algorithm-vocabulary/',
           '/en/libraries/cub-device-primitives/',
           '/en/libraries/cub-warp-block-primitives/',
+          '/en/libraries/libcu-plus-plus-synchronization/',
         '/en/examples/environment-report/',
         '/en/examples/vector-addition/',
         '/en/examples/multidimensional-indexing/',

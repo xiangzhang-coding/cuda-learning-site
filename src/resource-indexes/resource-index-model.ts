@@ -403,6 +403,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L04：用 CUB Warp 与 Block Primitives 组合内核', en: 'L04: Compose Kernels with CUB Warp and Block Primitives' },
     prerequisites: ['F02', 'M03', 'M05', 'A02', 'A03', 'L03'],
   },
+  L05: {
+    href: { 'zh-CN': '/libraries/libcu-plus-plus-synchronization/', en: '/en/libraries/libcu-plus-plus-synchronization/' },
+    title: { 'zh-CN': 'L05：用 libcu++ 表达同步合同', en: 'L05: Synchronization Contracts with libcu++' },
+    prerequisites: ['M05', 'M13', 'M19'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },

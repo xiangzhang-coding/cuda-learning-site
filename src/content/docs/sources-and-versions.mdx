@@ -1,6 +1,6 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L04、LAB01-LAB11、EX01-EX17、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L05、LAB01-LAB11、EX01-EX17、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
 factCheckDate: '2026-09-05'
@@ -12,6 +12,8 @@ structure:
   - verified-interfaces
   - entry-src-cuda-063
   - entry-src-cuda-064
+  - entry-src-cuda-065
+  - entry-src-cuda-066
   - content-sources
   - review-record
 head:
@@ -30,18 +32,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L04、LAB01-LAB11、十七个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L05、LAB01-LAB11、十七个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-本页覆盖 Home、66 个 Learning Units、其 Exercises 与 reviewed solutions、17 个 Runnable Examples、11 个 Labs、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、70 个 Practice Bank 条目、184 个 Glossary 词条、四个 OrientationVisual 视图、Compatibility Explorer、三套视觉主题和静态发布外壳。当前资源目录恰好包含 **364** 条记录：11 个 Lab、70 个 Practice Bank 条目、19 个 Visual Explainer、184 个 Glossary 词条和 80 个 source record。公开源文件形成 246 个 Publication Pairs 和 492 条 source routes。`SRC-CUDA-063` 与 `SRC-CUDA-064` 于 2026-09-05 访问并复核。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+本页覆盖 Home、67 个 Learning Units、其 Exercises 与 reviewed solutions、17 个 Runnable Examples、11 个 Labs、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、72 个 Practice Bank 条目、186 个 Glossary 词条、四个 OrientationVisual 视图、Compatibility Explorer、三套视觉主题和静态发布外壳。当前资源目录恰好包含 **370** 条记录：11 个 Lab、72 个 Practice Bank 条目、19 个 Visual Explainer、186 个 Glossary 词条和 82 个 source record。公开源文件形成 249 个 Publication Pairs 和 498 条 source routes，包含 66 组 Exercises 与 66 组独立 reviewed solutions。新增 `SRC-CUDA-065` 与 `SRC-CUDA-066` 于 2026-09-05 访问并复核；旧 source records 保留原日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -148,7 +150,7 @@ Context7 libraries `/websites/nvidia_cuda`（2026-08-29 至 2026-09-04）、`/we
 
 **`SRC-CUDA-063` bundled-header authority。** 对 bundled rows，权威合同是从 Linux x86-64 redistribution archives 内检查的 `cub/device/device_reduce.cuh`、`cub/device/device_scan.cuh` 与 `cub/version.cuh`；三个 archives 的 SHA-256 分别为 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`、`8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`和 `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`。这些 headers 为 bundled CUB 1.15.1、2.8.2、3.3.4 的传统 pseudo-associative `DeviceReduce` 都记录带 cross-compute-capability caveat 的 same-GPU run-to-run determinism。Bundled CUB 1.15.1 `DeviceScan` 记录相同 scoped guarantee，bundled 2.8.2 与 3.3.4 则记录 possible pseudo-associative run-to-run variation。Selected 3.4.2 由 exact tagged headers 负责：reduction 保留该 scoped guarantee，scan 允许 variation。Context7 没有检查或验证这些 archives。Header review 不建立本站 compilation、runtime、output、determinism observation 或 performance evidence。
 
-VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，使 current catalog 恰好包含 80 条 source record。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static primitive selection、manifest/archive/source/test review、TempStorage 或 participant contract 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
+VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，使 current catalog 恰好包含 82 条 source record。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
 
 CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、PTX ISA、Binary Utilities、cuBLAS 等 component、paired driver 和 compatibility floor 都不能合并成一个“CUDA 版本”。本站把 Toolkit 13.3.1 下 current page label v13.3、`archive/12.9.2` 下 NVCC v12.9/PTX ISA 8.8、`archive/11.8.0` 下 PTX ISA 7.8，以及既有 `archive/12.9.2` Runtime API 自标 v12.9.1 的差异原样保留；current PTX ISA 9.3 也只绑定 selected 13.3.1 Lane。CUDA 13.3.1 Linux 指南与 Programming Guide 列出 C++23，而同版本 NVCC `--std` 参考仍只列到 C++20。GCC 13.3/NVCC 13.3.73 的 exact-image `unsupported` result 保持 immutable R1 history；run 33275734951 另行保留 EX10 + NVCC 13.3.73 + GCC 14.2.0 的 narrow `C++23-Dialect-Probe` pass。两者都不是 ordinary EX10 C++23 support。
 
@@ -158,19 +160,73 @@ NVIDIA CUDA Toolkit Archive 在 2026-08-26 将 CUDA Toolkit 13.4.0 标记为 **D
 
 `SRC-CUDA-032` 的 EX10 symbol-ledger 部分还使用 GNU owner 的 [`nm` 2.38](https://sourceware.org/binutils/docs-2.38/binutils/nm.html)与 [`nm` 2.42](https://sourceware.org/binutils/docs-2.42/binutils/nm.html)精确手册：前者对应 11.8 Lane，后者对应 12.9.2/13.3.1 Lanes。每份 retained record 都保存实际 `GNU nm` version line；`nm -C` output 只是 static symbol inspection，不是 device-link、runtime 或 performance evidence。
 
+<span id="src-cuda-065" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-065：Selected libcu++ contracts
+
+**相关 ID：** M05、M13、L05。**访问与复核日期：** 2026-09-05。**坐标：** independently selected CCCL/libcu++ v3.4.2，commit `d36012203ef73ac7f966e848dd88482273e91e02`，2026-08-05 发布。本记录支撑 [L05](/libraries/libcu-plus-plus-synchronization/)、原创 PB-R4-005/006 reviews 和 TERM-185/186；它是 source inspection，不是 API call、build 或 runtime report。
+
+所审查的 header-only library 提供 incomplete standards-oriented host/device `cuda::std` subset，并非 `std` 替代品；`cuda::` extensions 另行提供 scopes。L05 只使用受支持的 32-bit atomic types。Default system scope 不提供 CPU/GPU memory accessibility 或 system atomic support；block scope 不覆盖不同 blocks；device scope 要求相同内存同步域（memory synchronization domain）。Relaxed operations 不发布 non-atomic payload；acquire 必须观察相关 release，双方 scopes 都要足够。`atomic_ref` 要求有效且正确对齐的 referent、足够的 lifetime，以及 references 存活期间 exclusive atomic-reference accesses。
+
+Barrier initialization 必须在参与前 publish。`arrive` 不等待；`arrive_and_drop` 同时减少当前 countdown 和未来 expected count，不是跳过参与。Consumers 等待 appropriate phase，shared-buffer reuse 还需 consume-before-overwrite edge。Pipeline 顺序是 producer acquire、issue、commit，再由 consumer wait、consume、release。Collective shared-state construction、roles、convergence 和 lifetime 都是 caller obligations。`quit` 只放弃 ownership，不 drain 或 cancel unfinished work。
+
+Group `cuda::memcpy_async` participants 提供相同 arguments；source/destination 不重叠，payload 必须 trivially copyable。Nongroup callers 每人都发出一次 copy。`aligned_size_t` 断言两侧 addresses 和 byte count 都满足 alignment；false assertion 是 undefined behavior，不是 hint。SM 70 API floor 与本站/CCCL 的 CC 7.5 floor、eligible CC 8.0+ `cp.async` acceleration 分开。Instruction mapping、overlap 和 speedup 都不是自动成立。Synchronous fallback 仍保留 completion、publication 和 reuse boundaries。Namespace 与 host/device annotations 不证明 GCC-only compilation：所审查的 barrier-bound `memcpy_async` definitions 受 CUDA-compilation guards 保护；这一结论不覆盖所有 pipeline-bound overloads。Host dispatcher 则同步复制。
+
+以下 exact tagged files 已检查。下列每个 header/test 都声明 **Apache-2.0 WITH LLVM-exception**；notice 栏保留逐文件 owner/year 区别，不把仓库层面的 license 分配给全部文件。
+
+| 精确文件或文件组 | 合同或检查边界 | 逐文件 notice 复核 |
+| --- | --- | --- |
+| [`docs/libcudacxx/index.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/index.rst)、[`memory_model.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory_model.rst) | Library/namespace boundary、scopes 与 memory ordering | 两个文件均无 individual SPDX/copyright notice；不声明 explicit per-file license |
+| [`atomic.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic.rst)、[`atomic_ref.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic_ref.rst)、[`barrier.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/barrier.rst)、[`pipeline.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline.rst) | Selected synchronization interfaces | 每个文件都无 individual SPDX/copyright notice；不声明 explicit per-file license |
+| [`pipeline/make_pipeline.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/make_pipeline.rst)、[`pipeline/quit.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/quit.rst) | Collective construction、roles 与 ownership relinquishment | 每个文件都无 individual SPDX/copyright notice；不声明 explicit per-file license |
+| [`asynchronous_operations/memcpy_async.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/asynchronous_operations/memcpy_async.rst)、[`memory/aligned_size.rst`](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory/aligned_size.rst) | Copy participation、overlap、type 与 alignment preconditions | 每个文件都无 individual SPDX/copyright notice；不声明 explicit per-file license |
+| [`libcudacxx/include/cuda/atomic`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/atomic) | Public atomic interface | NVIDIA 2023-2024；Apache-2.0 WITH LLVM-exception |
+| [`libcudacxx/include/cuda/barrier`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/barrier) | Public barrier interface | NVIDIA 2023；Apache-2.0 WITH LLVM-exception |
+| [`libcudacxx/include/cuda/pipeline`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/pipeline) | Public pipeline/shared-state interface | NVIDIA 2025；Apache-2.0 WITH LLVM-exception |
+| [`cuda/__atomic/atomic.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__atomic/atomic.h) | Atomic/atomic_ref implementation boundary | LLVM Project notice 与 NVIDIA 2023；Apache-2.0 WITH LLVM-exception |
+| [`cuda/std/__atomic/api/common.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/api/common.h)、[`cuda/std/__atomic/order.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/order.h) | Scope/order implementation coordinates | 每个文件：NVIDIA 2023；Apache-2.0 WITH LLVM-exception |
+| [`cuda/std/__barrier/barrier.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__barrier/barrier.h) | Phase、arrival 与 completion implementation | NVIDIA 2024；Apache-2.0 WITH LLVM-exception |
+| [`cuda/__memcpy_async/memcpy_async.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/memcpy_async.h)、[`dispatch_memcpy_async.h`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/dispatch_memcpy_async.h) | CUDA compilation guards 与 synchronous host dispatch | 每个文件：NVIDIA 2024；Apache-2.0 WITH LLVM-exception |
+| Barrier tests [`arrive.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp)、[`arrive_and_drop.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive_and_drop.pass.cpp)、[`completion.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/completion.pass.cpp) | Selected owner arrival/drop/completion coverage；只检查、未执行 | 每个文件：不带年份的 LLVM Project notice；Apache-2.0 WITH LLVM-exception |
+| [`cuda/memcpy_async/preconditions.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/memcpy_async/preconditions.pass.cpp) | 仅 preconditions；已检查的 test 不执行 copies | NVIDIA 2025；Apache-2.0 WITH LLVM-exception |
+| [`cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp) | Selected stage counts 1/8、roles 与 scopes；只检查、未执行 | NVIDIA 2023；Apache-2.0 WITH LLVM-exception |
+| [`heterogeneous/atomic/reference_cuda.pass.cpp`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp) | Selected atomic-reference operations，不是 release/acquire payload test；只检查、未执行 | 不带年份的 libcu++ Project notice；Apache-2.0 WITH LLVM-exception |
+
+Component [`libcudacxx/LICENSE.TXT`](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/LICENSE.TXT) 提供 Apache-2.0 与 LLVM exception；aggregate [`LICENSE`](https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE) 是 component map，不能代替 individual notice review。Docs 缺少 notices 不被表述为 explicit per-file licensing。NVIDIA 独立的 [pipeline convergence guide](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html) 具有 proprietary NVIDIA documentation notices、all rights reserved，不适用 CCCL header license。使用方式仅为 citation 和 original paraphrase：没有复制或改编 owner code、documentation、test、figure 或 table。Owner tests 未在本地执行，不建立 general coverage 或任何本站 Evidence Status。
+
+<span id="src-cuda-066" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-066：Compatibility 与 known-issue boundaries
+
+**相关 ID：** M19、L05。**访问与复核日期：** 2026-09-05。**坐标：** CCCL v3.4.2，commit `d36012203ef73ac7f966e848dd88482273e91e02`，2026-08-05 发布。这是 support-policy 与 issue-boundary review，不是 local compilation 或 tested Cartesian product。
+
+| 精确 owner source | 有边界的事实与 notice 复核 |
+| --- | --- |
+| Tagged [`README.md`](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md) | CCCL latest-patch 12.x/13.x policy 排除 11.8；本站只选择 12.9.2/13.3.1、CC 7.5+ 和 ordinary C++17/C++20。CCCL 要求 GCC 7+；C++20 要求 GCC 10+ 或 Clang 11+。此文件无 individual SPDX/copyright notice，不声明 explicit per-file license |
+| Tagged [`ci/matrix.yaml`](https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml) | `12.X=12.9`、`13.X=13.2`；都不证明 executed 13.3 testing。此文件无 individual SPDX/copyright notice，不声明 explicit per-file license |
+| [v3.4.2 release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2) | 只支持 version/date 和 disableTile change，不是全部 API/environment 的 all-clear。Release-page prose 仅引用、不复制，也不套用 header SPDX license |
+| Open [#10967](https://github.com/NVIDIA/cccl/issues/10967) | Reported non-power-of-two atomic sizes 3/5/6/7 compilation failure；issue/source 已检查，本站未复现。L05 保持受支持的 32-bit atomic types，不扩展 arbitrary atomic_ref shapes。Issue prose 仅引用，不作为 header 许可 |
+| Open [#10499](https://github.com/NVIDIA/cccl/issues/10499) | P2588R3 relaxed barrier completion 仍 pending，不把 live-draft semantics 导入 tag。Issue prose 仅引用，不作为 header 许可 |
+| [NVCC 12.9 Linux host-compiler policy，12.9 Update 1 archive](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy) | 用于本站 12.9.2 Lane 的 owner policy：GCC 6-14、Clang 7-19。独立 proprietary NVIDIA documentation notices、all rights reserved；只 citation/paraphrase |
+| [NVCC 13.3 Linux host-compiler policy，13.3 Update 1](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy) | 用于 13.3.1 的 owner policy：GCC 6-15、Clang 7-21。独立 proprietary NVIDIA documentation notices、all rights reserved；只 citation/paraphrase |
+
+对 policies 取交集而非并集：GCC ranges 在 12.9/13.3 下分别成为 7-14/7-15，C++20 再缩到 10-14/10-15。Clang ranges 分别为 7-19/7-21，C++20 缩到 11-19/11-21。Exact OS、compiler、Toolkit、component、target 和 selected API 仍需分别检查；这些 ranges 都不是 executed matrix，也不保证每个 host-only translation unit 暴露全部 CUDA interfaces。EX10 的 narrow C++23 probe 不扩展 M19 ordinary lanes。Blocked environment 选择另行复核的 compatible component 或保留同步语义的 fallback，不能把 `--allow-unsupported-compiler` 当作 support evidence。
+
+对 README/CI，SRC-CUDA-065 链接的 component license 与 aggregate map 只提供背景，不能补造 individual notices。Release/issue citations 不复制其 prose，也不套用 header license。两个新 source records 只把 **2026-09-05** 的 Context7 `/nvidia/cccl` retrieval 用于 discovery；current/main-branch results 不是 exact v3.4.2 source、local build 或 issue reproduction。以上 exact tagged owner coordinates 才是权威。没有复制或改编 code、documentation、test、figure 或 table，也不产生 compile、runtime、synchronization、overlap 或 performance evidence。
+
 ## 内容与素材来源
 
-- Home、66 个 Learning Units、17 个 Runnable Examples、11 个 Labs、70 个 Practice Bank 条目、184 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、67 个 Learning Units、17 个 Runnable Examples、11 个 Labs、72 个 Practice Bank 条目、186 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
 
 ## 复核记录
 
-**复核日期：2026-09-05。** 既有 source records 保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的 immutable R3 聚合复核，issue #33 新增并复核 `SRC-CUDA-061/062`，issue #34 新增并复核 `SRC-CUDA-063/064` 的 L03/L04/EX17/LAB11 边界。
+**复核日期：2026-09-05。** 既有 source records 保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的 immutable R3 聚合复核，issue #33 新增并复核 `SRC-CUDA-061/062`，issue #34 新增并复核 `SRC-CUDA-063/064` 的 L03/L04/EX17/LAB11 边界。L05 新增 `SRC-CUDA-065/066` 的 selected libcu++ contracts 与 compatibility/known-issue boundaries，两者均于 2026-09-05 访问并复核。
 
 2026-09-04 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成 R3 聚合来源复核；[issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)随后固定 L01/L02 的 CCCL/Thrust 边界。[Issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)于 2026-09-05 通过 Context7 `/nvidia/cccl` discovery 交叉核对 current device/warp/block contracts，并以 exact v3.4.2 release/commit、tagged docs/source/tests、NVIDIA manifests、hash-addressed archives、issues 与逐文件 license review 为权威。Current hosted/main-branch material 不作为 immutable v3.4.2 snapshot，也不证明 bundled archive 内容。
 
 R3 是最近一次已完成的聚合发布复核；不可变 `src/r3-release-manifest.json` 固定 62 个 Learning Units、10 个 Labs、19 个 Visual Explainers、66 个 Practice Bank 条目（其中 10 个 Nsight report-analysis 条目）、176 个 Glossary 词条、76 条 source records、347 条 catalog records、232 个 Publication Pairs 和 464 条 source routes。R1/R2 继续作为历史发布坐标。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保存最终 CI、Cloudflare Preview/production 与 smoke 的动态验收记录；R4 聚合复核仍待完成。
 
-F01/LAB02 的既有 canonical import 和 retained compile runs 保持不变。网站没有为 A10-A14、Q06-Q13、L01-L04、LAB06、LAB08-LAB11、EX17、VIS13、VIS14 或 VIS18 记录 GPU execution、actual traffic、captured profiler report、metric、numerical output、temporary-storage bytes、timing、backend、hardware ceiling 或 speedup。六份 expected-only profiler plans 的 Environment Manifests 未填写且 recorded observations 为空；LAB11 保持 Pending Hardware Verification，所有十九项 browser Visual Explainer 都没有 Evidence Status。L01-L04 是 current evidence-neutral R4 Learning Units，仍不属于 immutable R3；L05-L13 尚未发布。自动化结果不构成 WCAG 一致性声明。
+F01/LAB02 的既有 canonical import 和 retained compile runs 保持不变。网站没有为 A10-A14、Q06-Q13、L01-L05、LAB06、LAB08-LAB11、EX17、VIS13、VIS14 或 VIS18 记录 GPU execution、actual traffic、captured profiler report、metric、numerical output、temporary-storage bytes、timing、backend、hardware ceiling 或 speedup。六份 expected-only profiler plans 的 Environment Manifests 未填写且 recorded observations 为空；LAB11 保持 Pending Hardware Verification，所有十九项 browser Visual Explainer 都没有 Evidence Status。L01-L05 是 current evidence-neutral R4 Learning Units，仍不属于 immutable R3；L06-L13 尚未发布。自动化结果不构成 WCAG 一致性声明。

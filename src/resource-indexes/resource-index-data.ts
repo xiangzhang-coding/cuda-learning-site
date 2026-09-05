@@ -1456,6 +1456,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-05',
     keywords: localized('CUB logical warp block collective participant contributor output TempStorage syncwarp syncthreads algorithm variant', 'CUB logical warp block collective participant contributor output TempStorage syncwarp syncthreads algorithm variant'),
   },
+  {
+    planningId: 'PB-R4-005',
+    group: 'practice',
+    title: localized('审查 scope/order 发布协议与 system-scope 内存假设', 'Audit a scope/order publication protocol and system-scope memory assumptions'),
+    href: localized('/practice/#pb-r4-005', '/en/practice/#pb-r4-005'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L05'],
+    relatedUnits: ['M05', 'M19', 'L05'],
+    hardwareGate: localized('无；静态协议审查。未来执行需 Native Linux、CC 7.5+，CPU/GPU 共享另查 allocation accessibility 与 atomic support。', 'None; static protocol review. Future execution requires native Linux and CC 7.5+; CPU/GPU sharing separately requires allocation accessibility and atomic support.'),
+    versionGate: localized('Selected CCCL/libcu++ v3.4.2；仅 Toolkit 12.9.2/13.3.1 的 C++17/C++20；只讨论 32-bit atomic types，不把 system scope 当共享内存支持。', 'Selected CCCL/libcu++ v3.4.2; C++17/C++20 in Toolkits 12.9.2/13.3.1 only; 32-bit atomic types only, with no shared-memory support inferred from system scope.'),
+    reviewedOn: '2026-09-05',
+    keywords: localized('libcu++ atomic atomic_ref memory order release acquire relaxed system device block scope payload lifetime fallback', 'libcu++ atomic atomic_ref memory order release acquire relaxed system device block scope payload lifetime fallback'),
+  },
+  {
+    planningId: 'PB-R4-006',
+    group: 'practice',
+    title: localized('审查 libcu++ portability、stage ownership 与 alignment fallback', 'Audit libcu++ portability, stage ownership, and an alignment fallback'),
+    href: localized('/practice/#pb-r4-006', '/en/practice/#pb-r4-006'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L05'],
+    relatedUnits: ['M05', 'M13', 'M19', 'L05'],
+    hardwareGate: localized('无；静态审查。SM 70 是 API 下限，本站/CCCL 下限为 CC 7.5；CC 8.0+ 的 eligible cp.async 不证明 overlap/speedup。', 'None; static review. SM 70 is the API floor, while the site/CCCL floor is CC 7.5; eligible cp.async on CC 8.0+ proves no overlap or speedup.'),
+    versionGate: localized('CCCL/libcu++ v3.4.2 exact pipeline/memcpy_async/aligned_size_t contracts；12.9.2/13.3.1 ordinary C++17/C++20；排除 11.8，不从 EX10 推导 C++23。', 'Exact CCCL/libcu++ v3.4.2 pipeline, memcpy_async, and aligned_size_t contracts; ordinary C++17/C++20 on 12.9.2/13.3.1; excludes 11.8 and inherits no C++23 support from EX10.'),
+    reviewedOn: '2026-09-05',
+    keywords: localized('libcu++ barrier phase pipeline producer consumer acquire commit wait release quit collective alignment aligned_size_t memcpy_async fallback portability', 'libcu++ barrier phase pipeline producer consumer acquire commit wait release quit collective alignment aligned_size_t memcpy_async fallback portability'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1944,6 +1972,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-182', 'fancy iterator · 花式迭代器', 'kernel-vocabulary', ['L02'], 'CCCL v3.4.2 中表示 generated、transformed 或 zipped virtual range 的 iterator；必须声明 extent、system、value/reference 与 lifetime，且不保证 fusion 或 speedup。', 'In CCCL v3.4.2, an iterator representing a generated, transformed, or zipped virtual range; extent, system, value or reference behavior, and lifetime must be explicit, and fusion or speedup is not guaranteed.', '2026-09-04'),
   glossaryRecord('TERM-183', 'temporary storage · 临时存储', 'kernel-vocabulary', ['L03', 'L04', 'EX17', 'LAB11'], 'Device-wide CUB 1.15.1/2.8.2/3.3.4/3.4.2 使用 exact query 得到 caller-owned device scratch；CCCL/CUB v3.4.2 warp/block class 使用 specialization-specific nested TempStorage；独占期、completion 与 reuse synchronization 必须显式。', 'Device-wide CUB 1.15.1/2.8.2/3.3.4/3.4.2 obtains caller-owned device scratch through an exact query; CCCL/CUB v3.4.2 warp and block classes use specialization-specific nested TempStorage; exclusivity, completion, and reuse synchronization must be explicit.', '2026-09-05'),
   glossaryRecord('TERM-184', 'logical warp · 逻辑线程束', 'kernel-vocabulary', ['F02', 'M06', 'M12', 'L04'], 'CCCL/CUB v3.4.2 中同一 hardware warp 内 compile-time 1 至 32 个连续 threads；2 的幂可 partition，非 2 的幂不 partition 且只有第一个 logical warp 执行；不是任意 active mask。', 'In CCCL/CUB v3.4.2, a compile-time group of 1 through 32 consecutive threads in one hardware warp; power-of-two sizes can partition it, while non-power-of-two sizes do not partition and only the first logical warp executes; it is not an arbitrary active mask.', '2026-09-05'),
+  glossaryRecord('TERM-185', 'Memory Order · 内存顺序', 'kernel-vocabulary', ['M05', 'L05'], 'CCCL/libcu++ v3.4.2；relaxed 不发布 payload，acquire 必须观察相应 release 且双方 scope 足够；order 不赋予 memory accessibility 或 system atomic support。', 'CCCL/libcu++ v3.4.2; relaxed does not publish a payload, and acquire must observe the corresponding release with sufficient scopes on both sides; order grants neither memory accessibility nor system atomic support.', '2026-09-05'),
+  glossaryRecord('TERM-186', 'Barrier Phase · 屏障阶段', 'kernel-vocabulary', ['M05', 'M13', 'L05'], 'CCCL/libcu++ v3.4.2；参与前 initialize 并 publish，arrive 不等待，arrive_and_drop 同时减少当前和未来 count；consume/reuse 需要适当 phase wait，不借用尚未落实的 P2588R3 completion 语义。', 'CCCL/libcu++ v3.4.2; initialize and publish before participation, arrive does not wait, and arrive_and_drop reduces current and future counts; consumption and reuse require the appropriate phase wait, without assuming pending P2588R3 completion semantics.', '2026-09-05'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2746,6 +2776,30 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'CCCL/CUB v3.4.2 exact warp/block indexes、developer guides、WarpReduce/WarpScan/BlockReduce/BlockScan headers、participant/output/partial contracts、TempStorage reuse synchronization、algorithm variants、owner tests 与 mixed file-level licenses；无 adaptation 或 CUDA/performance evidence。',
       'Exact CCCL/CUB v3.4.2 warp and block indexes, developer guides, WarpReduce, WarpScan, BlockReduce, and BlockScan headers, participant, output, and partial contracts, TempStorage reuse synchronization, algorithm variants, owner tests, and mixed file-level licenses; no adaptation or CUDA or performance evidence.',
+    ),
+    '2026-09-05',
+    '2026-09-05',
+  ),
+  sourceRecord(
+    'SRC-CUDA-065',
+    localized('L05 selected libcu++ 同步、phase 与 async-copy contracts', 'L05 selected libcu++ synchronization, phase, and async-copy contracts'),
+    'cuda-version-record',
+    ['M05', 'M13', 'L05'],
+    localized(
+      'CCCL/libcu++ v3.4.2 commit d36012203ef73ac7f966e848dd88482273e91e02；tagged atomic/atomic_ref、barrier、pipeline、memcpy_async 与 aligned_size_t；逐文件 Apache-2.0 WITH LLVM-exception header/test notices，docs 无 individual notices；owner tests 仅检查、未执行，无复制或 adaptation。',
+      'CCCL/libcu++ v3.4.2 commit d36012203ef73ac7f966e848dd88482273e91e02; tagged atomic and atomic_ref, barrier, pipeline, memcpy_async, and aligned_size_t; file-level Apache-2.0 WITH LLVM-exception header/test notices, docs without individual notices; owner tests inspected, not executed, with no copying or adaptation.',
+    ),
+    '2026-09-05',
+    '2026-09-05',
+  ),
+  sourceRecord(
+    'SRC-CUDA-066',
+    localized('L05 libcu++ compatibility 与 known-issue boundaries', 'L05 libcu++ compatibility and known-issue boundaries'),
+    'cuda-version-record',
+    ['M19', 'L05'],
+    localized(
+      'CCCL v3.4.2 README、ci/matrix.yaml、2026-08-05 release、open #10967/#10499 与 NVCC 12.9/13.3 Linux policies；只评估 12.9.2/13.3.1 ordinary C++17/C++20，排除 11.8；12.X=12.9、13.X=13.2 不是 13.3 execution；无 tested Cartesian product 或 issue reproduction。',
+      'CCCL v3.4.2 README, ci/matrix.yaml, 2026-08-05 release, open #10967/#10499, and NVCC 12.9/13.3 Linux policies; evaluates only ordinary C++17/C++20 on 12.9.2/13.3.1, excludes 11.8; 12.X=12.9 and 13.X=13.2 are not 13.3 execution; no tested Cartesian product or issue reproduction.',
     ),
     '2026-09-05',
     '2026-09-05',

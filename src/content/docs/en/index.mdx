@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. The completed R3 aggregate release review remains an immutable snapshot fixed at 232 Publication Pairs, 464 source routes, and 347 catalog records. The rolling R4 surface first added L01/L02 through issue #33, then publishes [L03](/en/libraries/cub-device-primitives/), [L04](/en/libraries/cub-warp-block-primitives/), [EX17](/en/examples/cub-device-reduction-scan/), and [LAB11](/en/labs/compare-custom-reduction-with-cub/) through [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34), bringing current scope to 66 Learning Units, 246 Publication Pairs, 492 source routes, and 364 catalog records while the R4 aggregate review remains pending.
+The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. The completed R3 aggregate release review remains an immutable snapshot fixed at 232 Publication Pairs, 464 source routes, and 347 catalog records. The rolling R4 surface added L01/L02 through issue #33 and [L03](/en/libraries/cub-device-primitives/), [L04](/en/libraries/cub-warp-block-primitives/), [EX17](/en/examples/cub-device-reduction-scan/), and [LAB11](/en/labs/compare-custom-reduction-with-cub/) through [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34). It now adds [L05: libcu++ Synchronization Abstractions](/en/libraries/libcu-plus-plus-synchronization/), bringing current scope to 67 Learning Units, 249 Publication Pairs, 498 source routes, and 370 catalog records while the R4 aggregate review remains pending.
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
@@ -58,7 +58,7 @@ The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 
 
 [Q01](/en/correctness/cpu-references-tolerances-invariants/) through [Q08](/en/correctness/kernel-first-nsight-compute/) retain their existing edges. [Q09 Interpret Latency Hiding with Occupancy, Stalls, and Throughput](/en/correctness/occupancy-stalls-throughput/) strictly requires Q08 and F08. [Q10 Build an Auditable Roofline from Arithmetic Intensity](/en/correctness/roofline-arithmetic-intensity/) strictly requires Q05 and A14. [Q11 Optimize the Canonical Transpose with Controlled Evidence](/en/correctness/transpose-optimization-case-study/) strictly requires A05, Q06, Q08, and Q10. [Q12 Optimize the Canonical Reduction with Controlled Evidence](/en/correctness/reduction-optimization-case-study/) strictly requires A02, Q02, Q06, and Q08, starts from immutable [EX11](/en/examples/multi-stage-reduction/), and reuses evidence-neutral [VIS10](/en/visuals/reduction-stages/). [Q13 Optimize the Canonical GEMM with Controlled Evidence](/en/correctness/gemm-optimization-case-study/) strictly requires A08, Q06, Q08, and Q10, starts from immutable [EX15](/en/examples/tiled-gemm/), and reuses evidence-neutral [VIS12](/en/visuals/gemm-tiling-hierarchy/).
 
-[L01 Choose a Library, Primitive, DSL, or Custom Kernel](/en/libraries/library-primitive-dsl-custom-kernel/) strictly requires A02, A03, A08, and Q06. [L02 Thrust as an Algorithm Vocabulary](/en/libraries/thrust-algorithm-vocabulary/) strictly requires A01, A03, and A09. [L03 Use CUB Device Primitives for Reduction and Scan](/en/libraries/cub-device-primitives/) strictly requires A02, A03, M07, and L01. [L04 Compose Kernels with CUB Warp and Block Primitives](/en/libraries/cub-warp-block-primitives/) strictly requires F02, M03, M05, A02, A03, and L03. All four publish complete Exercises and separate reviewed solutions; L03/L04 only link and paraphrase exact CUB owner contracts and grant no Evidence Status.
+[L01 Choose a Library, Primitive, DSL, or Custom Kernel](/en/libraries/library-primitive-dsl-custom-kernel/) strictly requires A02, A03, A08, and Q06. [L02 Thrust as an Algorithm Vocabulary](/en/libraries/thrust-algorithm-vocabulary/) strictly requires A01, A03, and A09. [L03 Use CUB Device Primitives for Reduction and Scan](/en/libraries/cub-device-primitives/) strictly requires A02, A03, M07, and L01. [L04 Compose Kernels with CUB Warp and Block Primitives](/en/libraries/cub-warp-block-primitives/) strictly requires F02, M03, M05, A02, A03, and L03. [L05: libcu++ Synchronization Abstractions](/en/libraries/libcu-plus-plus-synchronization/) strictly requires M05, M13, and M19. All five publish complete Exercises and separate reviewed solutions; L03-L05 only link and paraphrase exact CUB/libcu++ owner contracts and grant no Evidence Status.
 
 F01-F08 each publish complete Exercises and separate reviewed solutions: [F01 Exercises](/en/foundations/first-cuda-kernel/exercises/) and [solutions](/en/foundations/first-cuda-kernel/solutions/), [F02 Exercises](/en/foundations/execution-hierarchy/exercises/) and [solutions](/en/foundations/execution-hierarchy/solutions/), [F03 Exercises](/en/foundations/multidimensional-indexing/exercises/) and [solutions](/en/foundations/multidimensional-indexing/solutions/), [F04 Exercises](/en/foundations/host-device-lifecycle/exercises/) and [solutions](/en/foundations/host-device-lifecycle/solutions/), [F05 Exercises](/en/foundations/asynchronous-errors/exercises/) and [solutions](/en/foundations/asynchronous-errors/solutions/), [F06 Exercises](/en/foundations/compute-capability/exercises/) and [solutions](/en/foundations/compute-capability/solutions/), [F07 Exercises](/en/foundations/runtime-driver-api/exercises/) and [solutions](/en/foundations/runtime-driver-api/solutions/), and [F08 Exercises](/en/foundations/launch-geometry/exercises/) and [solutions](/en/foundations/launch-geometry/solutions/).
 
@@ -74,7 +74,7 @@ Q01-Q05 also publish complete Exercises and separate reviewed solutions: [Q01 Ex
 
 Q06-Q13 also publish complete Exercises and separate reviewed solutions, including [Q09 Exercises](/en/correctness/occupancy-stalls-throughput/exercises/) and [solutions](/en/correctness/occupancy-stalls-throughput/solutions/), [Q10 Exercises](/en/correctness/roofline-arithmetic-intensity/exercises/) and [solutions](/en/correctness/roofline-arithmetic-intensity/solutions/), [Q11 Exercises](/en/correctness/transpose-optimization-case-study/exercises/) and [solutions](/en/correctness/transpose-optimization-case-study/solutions/), [Q12 Exercises](/en/correctness/reduction-optimization-case-study/exercises/) and [solutions](/en/correctness/reduction-optimization-case-study/solutions/), plus [Q13 Exercises](/en/correctness/gemm-optimization-case-study/exercises/) and [solutions](/en/correctness/gemm-optimization-case-study/solutions/).
 
-L01-L04 publish [L01 Exercises](/en/libraries/library-primitive-dsl-custom-kernel/exercises/) and [solutions](/en/libraries/library-primitive-dsl-custom-kernel/solutions/), [L02 Exercises](/en/libraries/thrust-algorithm-vocabulary/exercises/) and [solutions](/en/libraries/thrust-algorithm-vocabulary/solutions/), [L03 Exercises](/en/libraries/cub-device-primitives/exercises/) and [solutions](/en/libraries/cub-device-primitives/solutions/), plus [L04 Exercises](/en/libraries/cub-warp-block-primitives/exercises/) and [solutions](/en/libraries/cub-warp-block-primitives/solutions/).
+L01-L05 publish [L01 Exercises](/en/libraries/library-primitive-dsl-custom-kernel/exercises/) and [solutions](/en/libraries/library-primitive-dsl-custom-kernel/solutions/), [L02 Exercises](/en/libraries/thrust-algorithm-vocabulary/exercises/) and [solutions](/en/libraries/thrust-algorithm-vocabulary/solutions/), [L03 Exercises](/en/libraries/cub-device-primitives/exercises/) and [solutions](/en/libraries/cub-device-primitives/solutions/), [L04 Exercises](/en/libraries/cub-warp-block-primitives/exercises/) and [solutions](/en/libraries/cub-warp-block-primitives/solutions/), plus [L05 Exercises](/en/libraries/libcu-plus-plus-synchronization/exercises/) and [solutions](/en/libraries/libcu-plus-plus-synchronization/solutions/).
 
 The site has 17 Runnable Examples, EX01-EX17. [EX17 CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/) strictly requires L03; EX15 requires A08, EX14 requires A05, and EX16 requires Q03/Q04.
 
@@ -82,13 +82,13 @@ Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes
 
 EX17's five bundled CUB 1.15.1/2.8.2/3.3.4 and selected CCCL 3.4.2 component rows are only a declared non-evidentiary build gate; the site does not claim CI ran. EX17 has empty compilation evidence and recorded observations, no observed runtime evidence, and Pending Hardware Verification runtime.
 
-The current 11 Labs are LAB01-LAB11. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11. [LAB11 Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/) strictly requires Q12 and L03 and compares immutable EX11 with EX17. Neither has a recorded result. L05-L13 and LAB12 remain pending. Q13 supplies LAB12's profiling prerequisite, but LAB12 still waits for L06's cuBLAS prerequisite.
+The current 11 Labs are LAB01-LAB11. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11. [LAB11 Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/) strictly requires Q12 and L03 and compares immutable EX11 with EX17. Neither has a recorded result. L06-L13 and LAB12 remain pending. Q13 supplies LAB12's profiling prerequisite, but LAB12 still waits for L06's cuBLAS prerequisite.
 
 The site has 19 formal Visual Explainers: standalone VIS01-VIS14 and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/) plus embedded VIS19-VIS22. VIS18 strictly requires A11 and provides a deterministic shape, stage, and IO ledger with a purpose-built static SVG. It is not GPU-traffic or performance evidence.
 
-A10-A14, Q06-Q13, L01-L04, VIS13, and VIS18 have empty compilation and runtime axes. API presence, owner tests, and static teaching records grant no site status. EX17/LAB11 have empty compilation evidence and recorded observations, no observed runtime evidence, and remain Pending Hardware Verification. The current publication records no CUDA, CCCL, CUB, Thrust, or cuSPARSE execution, captured profiler report, local library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`.
+A10-A14, Q06-Q13, L01-L05, VIS13, and VIS18 have empty compilation and runtime axes. API presence, owner tests, and static teaching records grant no site status. EX17/LAB11 have empty compilation evidence and recorded observations, no observed runtime evidence, and remain Pending Hardware Verification. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, or cuSPARSE execution, captured profiler report, local library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`.
 
-The immutable R3 catalog contains 10 Labs, 66 Practice Bank entries, 19 Visual Explainers, 176 Glossary terms, and 76 source records, for 347 records total. The rolling current catalog contains 11 Labs, 70 Practice Bank entries, 19 Visual Explainers, 184 Glossary terms, and 80 source records, for 364 records total. Current source files form 246 Publication Pairs, or 492 source routes, including 65 Exercise sets and 65 separate reviewed-solution sets. R3's exact 10-entry Nsight report-analysis inventory is unchanged, and the R4 aggregate review remains pending.
+The immutable R3 catalog contains 10 Labs, 66 Practice Bank entries, 19 Visual Explainers, 176 Glossary terms, and 76 source records, for 347 records total. The rolling current catalog contains 11 Labs, 72 Practice Bank entries, 19 Visual Explainers, 186 Glossary terms, and 82 source records, for 370 records total. Current source files form 249 Publication Pairs, or 498 source routes, including 66 Exercise sets and 66 separate reviewed-solution sets. R3's exact 10-entry Nsight report-analysis inventory is unchanged, and the R4 aggregate review remains pending.
 
 ## Boundaries first
 
@@ -417,6 +417,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Compose Kernels with CUB Warp and Block Primitives</strong>
     <small>Make participants, TempStorage, synchronization, layout, and partial-valid boundaries explicit.</small>
   </a>
+  <a className="route-card" href="/en/libraries/libcu-plus-plus-synchronization/">
+    <span>L05 · LIBCU++ SYNCHRONIZATION</span>
+    <strong>libcu++ Synchronization Abstractions</strong>
+    <small>Review scope, memory order, barrier phases, stage ownership, and synchronization-preserving fallbacks.</small>
+  </a>
   <a className="route-card" href="/en/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>Environment Report Runnable Example</strong>
@@ -645,17 +650,17 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, library, toolchain, and correctness models through 70 original problems.</small>
+    <small>Transfer evidence, environment, architecture, kernel, memory, algorithm, library, toolchain, and correctness models through 72 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 184-term canonical bilingual vocabulary.</small>
+    <small>Check the 186-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 80 interface and owner-source records with their review dates.</small>
+    <small>Inspect 82 interface and owner-source records with their review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

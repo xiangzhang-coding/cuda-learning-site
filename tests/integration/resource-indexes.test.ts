@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all seventy bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all seventy-two bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(70);
+    expect(practiceIds).toHaveLength(72);
 
     const localeContracts = [
       {
@@ -173,7 +173,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(70);
+      expect(prompts.size).toBe(72);
     }
   });
 
@@ -181,8 +181,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 11, practice: 70, visuals: 19, glossary: 184, sources: 80 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(364);
+    expect(counts).toEqual({ labs: 11, practice: 72, visuals: 19, glossary: 186, sources: 82 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(370);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -307,9 +307,9 @@ describe('published resource indexes', () => {
     }
 
     for (const planningId of [
-      'LAB11', 'PB-R4-003', 'PB-R4-004',
-      'TERM-183', 'TERM-184',
-      'SRC-CUDA-063', 'SRC-CUDA-064',
+      'LAB11', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006',
+      'TERM-183', 'TERM-184', 'TERM-185', 'TERM-186',
+      'SRC-CUDA-063', 'SRC-CUDA-064', 'SRC-CUDA-065', 'SRC-CUDA-066',
     ]) {
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
       expect(record?.reviewedOn, planningId).toBe('2026-09-05');

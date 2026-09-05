@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 246,
-    "sourceRoutes": 492,
-    "exerciseSetPublicationPairs": 65,
-    "solutionSetPublicationPairs": 65,
+    "publicationPairs": 249,
+    "sourceRoutes": 498,
+    "exerciseSetPublicationPairs": 66,
+    "solutionSetPublicationPairs": 66,
     "learningUnits": [
       "O01",
       "O02",
@@ -81,7 +81,8 @@
       "L01",
       "L02",
       "L03",
-      "L04"
+      "L04",
+      "L05"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11"],
@@ -106,7 +107,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 70,
+    "practiceBankEntries": 72,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -119,8 +120,8 @@
       "PB-R3-011",
       "PB-R3-012"
     ],
-    "glossaryTerms": 184,
-    "sourceRecords": 80
+    "glossaryTerms": 186,
+    "sourceRecords": 82
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -330,7 +331,7 @@
     "referenceEnvironments": [],
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
-    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04"],
+    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -352,7 +353,7 @@
     "R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.",
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
     "Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.",
-    "L01-L04 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.",
+    "L01-L05 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.",
     "The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.",
     "Profiler collection requires the exact tool, CUPTI, driver, GPU, metric availability, filter, replay, workload, command, permission, report-custody, and Environment Manifest coordinates. Performance-counter access must be administrator-approved for a non-admin user; denial or an unavailable metric blocks collection and must be recorded without sudo, privilege escalation, or policy bypass.",
     "Q11 summarizes linked EX14 and LAB10 subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS11, static material, browser models, and the expected-only plan grant no timing, profiler metric, speedup, bottleneck, or winner.",
@@ -361,6 +362,6 @@
     "A10-A14 publish finite host arithmetic and static logical traffic, matrix, storage, and contribution ledgers only. VIS18 and the A12/A13 sparse composition execute no CUDA, query no GPU, and record no backend, workspace, preprocessing, determinism, structured sparsity, actual traffic, timing, speedup, or winner.",
     "L03 and LAB11, L06 and LAB12, and L13 and EX20 have no R3 public destination. LAB11 waits for L03, LAB12 waits for L06, and EX20 waits for L13's exact cuSPARSE API contract.",
     "EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.",
-    "L01-L04 are published in the rolling R4 surface; L05-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
+    "L01-L05 are published in the rolling R4 surface; L06-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
   ]
 }
