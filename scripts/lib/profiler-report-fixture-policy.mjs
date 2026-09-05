@@ -112,8 +112,8 @@ const fixtureProfiles = new Map([
     subjectField: 'labId',
     exampleId: 'EX17',
     fixtureId: 'LAB11-NCU-EXPECTED',
-    fixtureSha256: 'e35f14cdf496e7b391e019c9a3ff113a73a692356ade5544bccc4978b98b60cd',
-    fixtureBytesSha256: 'eb6864bf4a8874f68ce8168d1bb413afa7fb270d72b11f3a27a228bacbdf7f4f',
+    fixtureSha256: '7e96f2701a64fc9aa85716cd3ce916da1b87c1e86f92e26ec15332f93ed1763e',
+    fixtureBytesSha256: '7c9ddc680d536879cbcb9e4f81d5e5f4dc9197dd66ddfd7b23142d1d1e564f32',
     sourceCommit: 'f018a694ec4f57a40e1374352e320ddd9c9511e0',
     sanitizationReviewDate: '2026-09-05',
     tool: {

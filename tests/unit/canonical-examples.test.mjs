@@ -470,7 +470,7 @@ describe('canonical Runnable Example resolver', () => {
     await mkdir(path.dirname(fixtureExampleRoot), { recursive: true });
     await cp(sourceRoot, fixtureExampleRoot, { recursive: true });
 
-    const manifest = await loadCanonicalExample(fixtureRoot, 'EX17');
+    const manifest = await loadCanonicalExample(projectRoot, 'EX17');
     manifest.evidence.compilation = manifest.compatibility.checks.map(({ id }) => ({
       status: 'Compile-Checked',
       record: `evidence/${id}.json`,

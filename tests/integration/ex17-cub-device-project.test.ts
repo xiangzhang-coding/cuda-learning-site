@@ -18,6 +18,8 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const exampleRoot = path.join(projectRoot, 'examples/ex17-cub-device-reduction-scan');
 const sourcePath = path.join(exampleRoot, 'src/cub_device_reduction_scan.cu');
+const sourceCommit = 'f018a694ec4f57a40e1374352e320ddd9c9511e0';
+const publicationBundleCommit = 'd52211040927f647ca3440529d4728c5edefd01e';
 
 const lanes = [
   {
@@ -134,7 +136,11 @@ function expectLegacyCalls(
 
 describe('EX17 standalone CUB device reduction and scan project', () => {
   it('declares the isolated original eight-file project and three canonical ranges', async () => {
-    const example = await loadCanonicalExample(projectRoot, 'EX17');
+    const [example, standaloneManifestSource] = await Promise.all([
+      loadCanonicalExample(projectRoot, 'EX17'),
+      readFile(path.join(exampleRoot, 'project.json'), 'utf8'),
+    ]);
+    const standaloneManifest = JSON.parse(standaloneManifestSource);
     const expectedFiles = [
       'Makefile',
       'README.md',
@@ -151,10 +157,20 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
       schemaVersion: 1,
       id: 'EX17',
       root: 'examples/ex17-cub-device-reduction-scan',
-      sourceCommit: 'f018a694ec4f57a40e1374352e320ddd9c9511e0',
+      sourceCommit,
       license: 'Apache-2.0',
       provenance: 'original',
     });
+    expect(example.evidenceBundleCommit).toBe(publicationBundleCommit);
+    expect(example.sourceUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/tree/${sourceCommit}/${example.root}`,
+    );
+    expect(example.downloadUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${publicationBundleCommit}.zip`,
+    );
+    expect(standaloneManifest).not.toHaveProperty('sourceCommit');
+    expect(standaloneManifest).not.toHaveProperty('sourceUrl');
+    expect(standaloneManifest).not.toHaveProperty('downloadUrl');
     expect(example.build.standard).toBe('c++17');
     expect(await listFiles(exampleRoot)).toEqual(expectedFiles);
     expect(Object.keys(example.ranges)).toEqual([
@@ -233,6 +249,38 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
     expect(example.evidence.recordedObservations).toEqual([]);
     await expect(validateCanonicalExample(projectRoot, 'EX17')).resolves.toEqual([]);
     await expect(loadCompileEvidence(projectRoot, 'EX17')).resolves.toEqual([]);
+  });
+
+  it('keeps build inputs identical between the source tree and publication bundle', async () => {
+    const example = await loadCanonicalExample(projectRoot, 'EX17');
+    const standaloneManifestSource = await readFile(path.join(exampleRoot, 'project.json'), 'utf8');
+    const archivedManifest = await execFileAsync(
+      'git',
+      ['show', `${publicationBundleCommit}:${example.root}/project.json`],
+      { cwd: projectRoot, encoding: 'utf8' },
+    );
+    expect(archivedManifest.stdout).toBe(standaloneManifestSource);
+
+    const buildContractFiles = new Set([
+      ...example.build.inputs,
+      ...example.build.hostTestInputs,
+      ...example.build.contractFiles,
+    ]);
+    for (const relativePath of buildContractFiles) {
+      const [sourceRevision, bundleRevision, local] = await Promise.all([
+        execFileAsync('git', ['show', `${sourceCommit}:${example.root}/${relativePath}`], {
+          cwd: projectRoot,
+          encoding: 'utf8',
+        }),
+        execFileAsync('git', ['show', `${publicationBundleCommit}:${example.root}/${relativePath}`], {
+          cwd: projectRoot,
+          encoding: 'utf8',
+        }),
+        readFile(path.join(exampleRoot, relativePath), 'utf8'),
+      ]);
+      expect(bundleRevision.stdout, relativePath).toBe(sourceRevision.stdout);
+      expect(local, relativePath).toBe(sourceRevision.stdout);
+    }
   });
 
   it('gates exact CUB headers and all three legacy query/allocate/execute forms', async () => {

@@ -8,6 +8,7 @@ import {
   PROFILER_FIXTURE_MANIFEST_FIELDS,
   validateProfilerReportFixture,
 } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
+import { loadCanonicalExample } from '../../scripts/lib/canonical-examples.mjs';
 import { scanFiles } from '../../scripts/lib/quality-policy.mjs';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
@@ -18,6 +19,7 @@ const runnerPath = 'public/assets/exercise-solutions/lab11-reduction-comparison.
 const runnerSha256 = '456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd';
 const reviewDate = '2026-09-05';
 const sourceCommit = 'f018a694ec4f57a40e1374352e320ddd9c9511e0';
+const publicationBundleCommit = 'd52211040927f647ca3440529d4728c5edefd01e';
 const selectedCcclCommit = 'd36012203ef73ac7f966e848dd88482273e91e02';
 
 const profileIds = [
@@ -538,12 +540,13 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
   });
 
   it('binds EX17 pages to original canonical source, headers, CPU references, and five profiles', async () => {
-    const [pages, projectSource, cudaSource] = await Promise.all([
+    const [pages, projectSource, cudaSource, project] = await Promise.all([
       readPublication(publications[6]),
       readFile(path.join(exampleRoot, 'project.json'), 'utf8'),
       readFile(path.join(exampleRoot, 'src/cub_device_reduction_scan.cu'), 'utf8'),
+      loadCanonicalExample(projectRoot, 'EX17'),
     ]);
-    const project = JSON.parse(projectSource);
+    const standaloneProject = JSON.parse(projectSource);
 
     expect(project).toMatchObject({
       'SPDX-License-Identifier': 'Apache-2.0',
@@ -566,6 +569,13 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
         },
       },
     });
+    expect(project.evidenceBundleCommit).toBe(publicationBundleCommit);
+    expect(project.downloadUrl).toBe(
+      `https://github.com/xiangzhang-coding/cuda-learning-site/archive/${publicationBundleCommit}.zip`,
+    );
+    expect(standaloneProject).not.toHaveProperty('sourceCommit');
+    expect(standaloneProject).not.toHaveProperty('sourceUrl');
+    expect(standaloneProject).not.toHaveProperty('downloadUrl');
     expect(Object.keys(project.ranges)).toEqual(['cpu-reference', 'device-reduce', 'device-scan']);
     expect(project.compatibility.checks.map(({ id }: { id: string }) => id)).toEqual(profileIds);
     expect(project.evidence).toMatchObject({
@@ -586,7 +596,7 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
       expect(yamlList(metadata, 'canonicalRanges')).toEqual(['cpu-reference', 'device-reduce', 'device-scan']);
       expect(canonicalRanges(source)).toEqual(['cpu-reference', 'device-reduce', 'device-scan']);
       expect(content).toContain(`tree/${sourceCommit}/examples/ex17-cub-device-reduction-scan`);
-      expect(content).toContain(`archive/${sourceCommit}.zip`);
+      expect(content).toContain(`archive/${publicationBundleCommit}.zip`);
       expect(content).toMatch(/4,099[\s\S]{0,220}(?:double CPU reference|double oracle|double CPU|`double`)/i);
       expect(content).toMatch(/uint32[\s\S]{0,280}(?:independent|独立)[\s\S]{0,160}(?:inclusive|exclusive)/i);
       for (const id of profileIds) expect(content, id).toContain(id);
