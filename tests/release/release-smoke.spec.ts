@@ -48,7 +48,7 @@ const reviewedSolutionAssets = [
   },
   {
     publicPath: '/assets/exercise-solutions/lab11-reduction-comparison.cu',
-    sha256: '456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd',
+    sha256: '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c',
   },
 ] as const;
 const downloadUrl =
@@ -405,6 +405,7 @@ test('serves the exact R3 release and current publication with production canoni
     }
     if (fixtureName === 'lab11-nsight-compute.expected.json') {
       expect(fixture).toMatchObject({
+        schemaVersion: 2,
         fixtureId: 'LAB11-NCU-EXPECTED',
         labId: 'LAB11',
         exampleId: 'EX17',
@@ -420,6 +421,10 @@ test('serves the exact R3 release and current publication with production canoni
         'cuda-12-9-selected-cccl-3-4-2',
         'cuda-13-3-selected-cccl-3-4-2',
       ]);
+      expect(fixture.captureCommands).toEqual({
+        custom: expect.stringMatching(/--export <unique-profile-pair-custom-report-base>[\s\S]*--candidate custom --timing none/),
+        cub: expect.stringMatching(/--export <unique-profile-pair-cub-report-base>[\s\S]*--candidate cub --timing none/),
+      });
       expect(fixture.method.recordedResults).toEqual({
         actualMetricNames: [],
         actualMetricValues: [],

@@ -337,6 +337,7 @@ describe('R3 release review', () => {
       expect(new Set(Object.values(fixture.environmentManifest))).toEqual(new Set(['unfilled']));
       if (publicPath.endsWith('lab11-nsight-compute.expected.json')) {
         expect(fixture).toMatchObject({
+          schemaVersion: 2,
           fixtureId: 'LAB11-NCU-EXPECTED',
           labId: 'LAB11',
           exampleId: 'EX17',
@@ -353,6 +354,9 @@ describe('R3 release review', () => {
           'cuda-12-9-selected-cccl-3-4-2',
           'cuda-13-3-selected-cccl-3-4-2',
         ]);
+        expect(Object.keys(fixture.captureCommands)).toEqual(['custom', 'cub']);
+        expect(fixture.captureCommands.custom).toMatch(/--candidate custom --timing none/);
+        expect(fixture.captureCommands.cub).toMatch(/--candidate cub --timing none/);
         expect(fixture.claimBoundary).toMatch(/no recorded environment value[\s\S]*component winner/i);
       }
     }

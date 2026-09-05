@@ -377,7 +377,7 @@ describe('source, license, and privacy policy', () => {
     expect(contentLicenses).toMatch(/Component and pure-model implementations.*styles.*original Apache-2\.0 software/is);
     expect(contentLicenses).toMatch(/not `nsys` or `ncu` captures.*no runtime, timeline, metric, bottleneck, or speedup result/is);
     expect(contentLicenses).toContain('public/assets/exercise-solutions/lab11-reduction-comparison.cu');
-    expect(contentLicenses).toContain('456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd');
+    expect(contentLicenses).toContain('755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c');
     expect(contentLicenses).toMatch(/LAB11 runner has no upstream adaptation/i);
     expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);
   });

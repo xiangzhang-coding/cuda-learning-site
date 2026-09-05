@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -103,6 +103,7 @@ async function listFiles(root: string) {
   return entries
     .filter((entry) => entry.isFile())
     .map((entry) => portable(path.relative(root, path.join(entry.parentPath, entry.name))))
+    .filter((relativePath) => !relativePath.startsWith('build/'))
     .sort();
 }
 
@@ -325,6 +326,46 @@ describe('EX17 standalone CUB device reduction and scan project', () => {
       expect(script).toContain(String(check.expectedCubVersion));
     }
     expect(script).toContain('CCCL_ROOT is required by selected CCCL profiles');
+  });
+
+  it('invalidates cached CUDA outputs when the effective profile changes', async () => {
+    const tempRoot = await mkdtemp(path.join(tmpdir(), 'ex17-profile-'));
+    const buildRoot = path.join(tempRoot, 'build');
+    const bundledIncludeRoot = path.join(tempRoot, 'include');
+    const fakeCompiler = path.join(tempRoot, 'fake-compiler.mjs');
+    const make = async (expectedCubVersion: number, dialect: string) => execFileAsync('make', [
+      'compile',
+      `NVCC=${process.execPath} ${fakeCompiler}`,
+      `BUILD_DIR=${buildRoot}`,
+      `BUNDLED_INCLUDE_ROOT=${bundledIncludeRoot}`,
+      'COMPONENT_MODE=bundled',
+      `EXPECTED_CUB_VERSION=${expectedCubVersion}`,
+      `DIALECT=${dialect}`,
+    ], { cwd: exampleRoot });
+
+    try {
+      await mkdir(bundledIncludeRoot, { recursive: true });
+      await writeFile(fakeCompiler, [
+        "import { writeFile } from 'node:fs/promises';",
+        "const outputIndex = process.argv.indexOf('-o');",
+        "if (outputIndex < 0 || !process.argv[outputIndex + 1]) throw new Error('missing -o output');",
+        "await writeFile(process.argv[outputIndex + 1], process.argv.slice(2).join('\\n'));",
+        '',
+      ].join('\n'));
+
+      await make(101501, 'c++17');
+      const firstBuild = await readFile(path.join(buildRoot, 'cub_device_reduction_scan.o'), 'utf8');
+      expect(firstBuild).toContain('--std=c++17');
+      expect(firstBuild).toContain('-DEX17_EXPECTED_CUB_VERSION=101501');
+
+      await make(200802, 'c++20');
+      const secondBuild = await readFile(path.join(buildRoot, 'cub_device_reduction_scan.o'), 'utf8');
+      expect(secondBuild).toContain('--std=c++20');
+      expect(secondBuild).toContain('-DEX17_EXPECTED_CUB_VERSION=200802');
+      expect(secondBuild).not.toBe(firstBuild);
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it('uses one checked nondefault stream completion boundary before host validation', async () => {

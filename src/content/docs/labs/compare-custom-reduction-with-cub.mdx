@@ -72,8 +72,8 @@ evidence:
     - '五个 component profiles 应分别证明实际 CUB/CCCL macro、acquisition hash 与 resolved include path；bundled profiles 使用 CUB 1.15.1、2.8.2、3.3.4，selected CCCL 3.4.2 只与 Toolkit 12.9.2 和 13.3.1 配对。'
     - 'EX11 与 EX17 应使用完全相同的 4,099 个 deterministic finite float、double left-fold oracle 和 absolute-plus-relative comparator；两侧 result bits、absolute error、allowed error 与 pass/fail 应分别记录，不能用互相相等代替 oracle。'
     - '每个 profile 的 CUB two-phase path 应在同一 current device、相同 template arguments 与 4,099-item shape 下先查询 temporary storage，再分配并执行；查询值、allocation status 与 setup timing 应被记录，但 temporary-storage capacity 不应被解释成 traffic。'
-    - '每个 profile 应分别保留 preallocated steady-state invocation timing 与 candidate-specific setup-inclusive timing。每个 single-candidate process 恰好使用一个 explicit nonblocking stream，两侧保持相同 device selection、stream policy、workload、checked stream-completion rule、clock、binary 与 correctness cadence。'
-    - '每个 profile 应先执行一组被排除的 warm-up pair，再按预声明的 EX11→EX17、EX17→EX11 交替顺序保留恰好十组 paired attempts；任何 subrecord 失败都应使整个十组 batch 无效，并在新 batch ID 下完整重启。'
+    - '每个 profile 应分别保留 preallocated steady-state invocation timing 与 candidate-specific setup-inclusive timing。每个 timed single-candidate process 应在同一 explicit nonblocking stream 上先执行一次 checked、excluded、timing-disabled 的同-candidate process-local warm-up，再执行 measured call；timing none 只执行一次，供 correctness 与 profiler mapping。'
+    - '每个 profile 应先执行一组独立的 excluded warm-up pair，再按预声明的 EX11→EX17、EX17→EX11 交替顺序保留恰好十组 paired attempts；两侧保持相同 device selection、stream policy、workload、checked stream-completion rule、clock、binary 与 correctness cadence，任何 subrecord 失败都应使整个十组 batch 无效。'
     - 'EX11 的 16,472-byte global logical/static kernel-traffic ledger 应保持 source-derived；两侧 profiler-observed candidate traffic 应来自 exact-GPU queried fields 并分开保存，不应把 logical bytes、allocation bytes、temporary-storage bytes 与 observed path traffic混合。'
     - '每个 EX17 logical DeviceReduce call 到实际 reported kernel launches 的 mapping 应从 report 记录，包括零个、一个或多个实际 launches；不能预设一个 CUB call 等于一个 kernel。'
     - '十组 qualifying pairs 应按 candidate、component profile、timing family 或 exact metric scope分别汇总 count=10、median、minimum 与 maximum；不得删除 sample、混合 batches、补零或使用 profiled elapsed time替代 unprofiled timing。'
@@ -234,12 +234,12 @@ LAB11 是一个在网站之外、仅在原生 Linux（Native Linux）上完成�
 | Language / Lane | C++17；`cuda-11.8`、`cuda-12.9` 或 `cuda-13.3` |
 | Component matrix | bundled CUB 1.15.1 / 2.8.2 / 3.3.4；selected CCCL 3.4.2 只检查 12.9.2 / 13.3.1 |
 | Workload | EX11/EX17 共用恰好 4,099 个 deterministic finite `float` 与同一 `double` oracle |
-| Process / stream / completion | 一个 process 恰好执行一个 selected candidate。每个 process 恰好创建一个 explicit `cudaStreamNonBlocking` stream，把该 handle 传给 selected candidate 的全部操作，并用 checked `cudaStreamSynchronize(stream)` 完成；两侧共享 policy，不声称跨 process 共享 handle。 |
-| Repetition | 每个 component profile 一组 excluded warm-up pair，随后十组 retained paired attempts，奇数 EX11→EX17、偶数 EX17→EX11 |
+| Process / stream / completion | 一个 process 只选择一个 candidate identity，并恰好创建一个 explicit `cudaStreamNonBlocking` stream。`timing none` 只执行一次 selected-candidate call；每个 timed process 在同一 input 与 stream 上执行一次 excluded process-local warm-up，再执行一次 measured call。两侧共享 policy，不声称跨 process 共享 handle。 |
+| Repetition | 每个 component profile 一组独立的 excluded warm-up pair，随后十组 retained paired attempts，奇数 EX11→EX17、偶数 EX17→EX11；每个 timed process 另含一次明确排除的同-candidate local warm-up |
 | Permissions | 管理员批准的 non-admin performance-counter access；禁止 `sudo`、提权、driver-policy 修改与 bypass |
 | Evidence | Compilation `[]`；runtime Pending Hardware Verification；recorded observations `[]` |
 
-`maximumProblemMemoryBytes: 8000000000` 是基础 GPU 能力层级的硬上限，不是预填的实际 allocation。因为一个 process 只执行一个 candidate，custom process 持有 16,396 input bytes 与两个 36-byte partial buffers，共 16,468 bytes；CUB process 持有相同 16,396 input bytes、一个 4-byte output 与 queried `T`，共 `16,400 + T` bytes。因此 actual preflight 是 `max(16,468, 16,400 + T) <= 8,000,000,000`；`T` 必须来自当前 device、当前 component profile、相同 API/template arguments 与 4,099-item shape。两侧 workspace 不会同时存在。Context、module、allocator、profiler replay 与工具自身所需空间另行记录，不能混入 problem-memory claim。
+`maximumProblemMemoryBytes: 8000000000` 是基础 GPU 能力层级（Baseline GPU Capability Tier）的硬上限，不是预填的实际 allocation。因为一个 process 只执行一个 candidate，custom process 持有 16,396 input bytes 与两个 36-byte partial buffers，共 16,468 bytes；CUB process 持有相同 16,396 input bytes、一个 4-byte output 与 queried `T`，共 `16,400 + T` bytes。因此 actual preflight 是 `max(16,468, 16,400 + T) <= 8,000,000,000`；`T` 必须来自当前 device、当前 component profile、相同 API/template arguments 与 4,099-item shape。两侧 workspace 不会同时存在。Context、module、allocator、profiler replay 与工具自身所需空间另行记录，不能混入 problem-memory claim。
 
 ## 先修检查
 
@@ -255,9 +255,9 @@ EX11 保持 immutable。查看 [commit `81d43aa7568514e37ef190da59c845b8072b7011
 
 EX17 registry 把 build-source commit 与 publication bundle 分开。[打开 immutable commit `f018a694ec4f57a40e1374352e320ddd9c9511e0` 中的 EX17 build-source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/f018a694ec4f57a40e1374352e320ddd9c9511e0/examples/ex17-cub-device-reduction-scan)，或[打开 publication-bundle commit `d52211040927f647ca3440529d4728c5edefd01e` 的完整 archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d52211040927f647ca3440529d4728c5edefd01e.zip)。Bundle 包含 byte-identical build-contract inputs 与最终 `project.json`；实际 Lab record还要保存解析后的两个 commits、URLs 与 file hashes，不能仅写 `main`、一个网页 route 或 `EX17`。Frontmatter 只有一个 `canonicalExample` slot，所以本页把它交给 EX17，并只渲染 EX17；EX11 使用上面的 immutable link，而不是伪造第二个 canonical metadata slot。
 
-Executable boundary 是原创 Apache-2.0 reviewed asset [lab11-reduction-comparison.cu](/assets/exercise-solutions/lab11-reduction-comparison.cu)，repository path 为 `public/assets/exercise-solutions/lab11-reduction-comparison.cu`，exact SHA-256 为 `456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd`。它直接 include `examples/ex11-multi-stage-reduction/include/multi_stage_reduction_reference.hpp`，不重新实现 generator、serial `double` reference 或 comparator。Custom kernel body 完整保持 EX11 tree，只有 launch/wrapper 接收 selected process 的 stream；CUB branch 只调用 public legacy two-phase `DeviceReduce::Sum` API，没有复制或改编 CUB implementation。这个 asset 既不是 canonical EX11/EX17，也不是新的 Runnable Example；source 或 build gate 都不授予 Evidence Status。
+Executable boundary 是原创 Apache-2.0 reviewed asset [lab11-reduction-comparison.cu](/assets/exercise-solutions/lab11-reduction-comparison.cu)，repository path 为 `public/assets/exercise-solutions/lab11-reduction-comparison.cu`，exact SHA-256 为 `755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c`。它直接 include `examples/ex11-multi-stage-reduction/include/multi_stage_reduction_reference.hpp`，不重新实现 generator、serial `double` reference 或 comparator。Custom kernel body 完整保持 EX11 tree，只有 launch/wrapper 接收 selected process 的 stream；CUB branch 只调用 public legacy two-phase `DeviceReduce::Sum` API，没有复制或改编 CUB implementation。这个 asset 既不是 canonical EX11/EX17，也不是新的 Runnable Example；source 或 build gate 都不授予 Evidence Status。
 
-Learner alternative 仍然有效，但必须实现下文完全相同的 CLI 与 output fields；每个 process 恰好执行一个 candidate；include 同一 EX11 reference header；保持 `4099 -> 9 -> 1` custom tree 与两个 nine-float buffers；使用相同 public CUB query/execution API、compile-time `CUB_VERSION` gate、device-input setup、explicit nonblocking-stream policy、checked API/launch/completion rules 与 timing boundaries；并保留 source、diff、build 与 binary hashes。无法解释的 alternative binary 是 blocker。
+Learner alternative 仍然有效，但必须实现下文完全相同的 CLI 与 output fields；每个 process 只选择一个 candidate identity，`timing none` 执行一次，timed mode 执行一次 excluded process-local warm-up 和一次 measured call；include 同一 EX11 reference header；保持 `4099 -> 9 -> 1` custom tree 与两个 nine-float buffers；使用相同 public CUB query/execution API、compile-time `CUB_VERSION` gate、device-input setup、explicit nonblocking-stream policy、checked API/launch/completion rules 与 timing boundaries；并保留 source、diff、build 与 binary hashes。无法解释的 alternative binary 是 blocker。
 
 ## 冻结五个 component profiles
 
@@ -317,14 +317,14 @@ pass           = finite(cpu_reference) && finite(candidate_result)
 
 ## 分开 setup-inclusive 与 steady-state timing
 
-每个 candidate process 通过同一 runner code 生成 common input、分配一个 host input 和一个 device input，并在 candidate-specific timer 之前完成一次 checked H2D copy。Pair records 要求 input bytes 与 hashes 相同；process-local addresses 与 stream handles 分别记录，不声称相等。每个 process 恰好创建一个 explicit `cudaStreamNonBlocking` stream，并传给唯一 selected candidate 的全部操作。两种 timing family 都使用 `std::chrono::steady_clock`、device 0、相同 workload/compiler/binary/profile contract，并在 end clock read 紧前执行 checked `cudaStreamSynchronize(stream)`。Profiler elapsed 永远不进入这两张 timing ledger。
+每个 candidate process 通过同一 runner code 生成 common input、分配一个 host input 和一个 device input，并在 candidate-specific timer 之前完成一次 checked H2D copy。Pair records 要求 input bytes 与 hashes 相同；process-local addresses 与 stream handles 分别记录，不声称相等。每个 process 恰好创建一个 explicit `cudaStreamNonBlocking` stream，并传给唯一 selected candidate 的全部操作。每个 timed process 先以 `timing none` 在同一 input 和 stream 上执行一次同-candidate warm-up、完成 result copy 与 oracle check、释放该次 workspace，再执行 measured call；warm-up failure 会在读取 timer 前终止。`timing none` 本身只执行一次，所以 profiler mapping 不含额外 call。两种 timing family 都使用 `std::chrono::steady_clock`、device 0、相同 workload/compiler/binary/profile contract，并在 end clock read 紧前执行 checked `cudaStreamSynchronize(stream)`。Profiler elapsed 永远不进入这两张 timing ledger。
 
 | Timing family | Start | Included | End | Excluded |
 | --- | --- | --- | --- | --- |
-| `steady-state-invocation` | candidate-specific allocations 已存在且 clock 紧邻 API/launch 前 | EX11 complete `4099 -> 9 -> 1` invocation 或一个 logical EX17 `DeviceReduce` execution call，加相同 checked completion | completion 返回后立即读取 clock | storage query、allocation/free、input setup、result D2H、oracle/comparator、profiler |
-| `setup-inclusive` | candidate-specific setup 的第一条 host operation 前 | Custom partial-capacity calculation 与两个 9-float partial allocations，或 CUB 4-byte output allocation、zeroed byte count、null-storage query 与 `T`-byte temporary allocation；随后执行 selected invocation 与 checked completion | completion 返回后立即读取 clock | common input setup、result D2H、oracle/comparator、teardown；teardown status仍单独记录 |
+| `steady-state-invocation` | process-local warm-up 已完成并通过；candidate-specific measured-call allocations 已存在且 clock 紧邻 API/launch 前 | EX11 complete `4099 -> 9 -> 1` invocation 或一个 logical EX17 `DeviceReduce` execution call，加相同 checked completion | completion 返回后立即读取 clock | process-local warm-up、storage query、allocation/free、input setup、result D2H、oracle/comparator、profiler |
+| `setup-inclusive` | process-local warm-up 已完成并通过；candidate-specific measured setup 的第一条 host operation 前 | Custom partial-capacity calculation 与两个 9-float partial allocations，或 CUB 4-byte output allocation、zeroed byte count、null-storage query 与 `T`-byte temporary allocation；随后执行 selected invocation 与 checked completion | completion 返回后立即读取 clock | process-local warm-up、common input setup、result D2H、oracle/comparator、teardown；teardown status仍单独记录 |
 
-EX17 steady-state 只能复用同一 current device 上、同一 component profile、相同 API/template arguments、4,099-item shape 与同一 explicit stream handle 查询并成功分配的 storage。Query 与 allocation 永远在 steady-state timer 外；setup-inclusive timer 则明确包含它们。EX11 与 EX17 各有自己的 candidate-specific workspace，不能用 CUB temporary bytes 给 custom path收费，也不能删除 custom partial setup。
+EX17 steady-state 只能复用 measured call 在同一 current device、同一 component profile、相同 API/template arguments、4,099-item shape 与同一 explicit stream handle 查询并成功分配的 storage。Process-local warm-up 的 workspace 在 measured setup 前释放；它不与 measured workspace 共存，也不进入任何 timer。Measured query 与 allocation 永远在 steady-state timer 外；setup-inclusive timer 则明确包含它们。EX11 与 EX17 各有自己的 candidate-specific workspace，不能用 CUB temporary bytes 给 custom path收费，也不能删除 custom partial setup。
 
 记录 clock source/resolution、timer read overhead policy、start/end source coordinates、每次 raw elapsed value 与 unit。不要预先选择更快者，不要只发布 best run，不要从 profile duration推导 unprofiled elapsed。
 
@@ -370,17 +370,17 @@ CUB 的固定 user allocation 是 16,396-byte input、4-byte output 与 queried 
 | Binary | Profile-specific LAB11 comparison binary path/SHA-256、selected candidate argv 与 actual executed binary hash match | `unfilled` |
 | Workload | generator identity/formula、element type/count、input SHA-256、16,396 input bytes、output/partial capacities | `unfilled` |
 | Temporary storage | query API/template arguments/current device、returned `T`、allocation/free statuses、address identity per scope | `unfilled` |
-| Warm-up | count=1 pair、excluded=true、candidate order、statuses、correctness与log hashes | `unfilled` |
+| Warm-up | count=1 profile-level pair及每个 timed process 的 count=1 同-candidate local warm-up；各自 excluded=true、order/path、effective `CUDA_MODULE_LOADING`、statuses、correctness与log hashes | `unfilled` |
 | Attempts | exact IDs `01..10`、predeclared alternating order、acquisition timestamps、no-overwrite paths | `unfilled` |
-| Process / stream / completion | 每个 process 一个 selected candidate 与一个 explicit nonblocking stream；记录 process-local handle、per-candidate checked `cudaStreamSynchronize` results 与 no-hidden-candidate-work audit | `unfilled` |
-| Timing method | clock/source/resolution、two start/end boundaries、unit、raw ten values per candidate/family、profiled-time exclusion | `unfilled` |
+| Process / stream / completion | 每个 process 一个 selected candidate identity 与一个 explicit nonblocking stream；记录 `none` 的单 call 或 timed mode 的 excluded warm-up + measured call、process-local handle、checked `cudaStreamSynchronize` results 与 no-other-candidate-work audit | `unfilled` |
+| Timing method | clock/source/resolution、two start/end boundaries、unit、process-local warm-up source coordinates/status/exclusion、raw ten values per candidate/family、profiled-time exclusion | `unfilled` |
 | Kernel mapping | logical candidate call ID、actual context/stream/kernel/launch IDs/names/count/order；CUB count not assumed | `unfilled` |
 | Traffic method | EX11 static ledger version；actual metric names/definitions/units/scopes/aggregation；no temp-byte inference | `unfilled` |
 | Replay / perturbation | requested/actual replay、pass count、save/restore、cache、clock、serialization、first-kernel与overhead boundary | `unfilled` |
 | Concurrent load | GPU/CPU processes、MIG、MPS、compute mode、concurrent load observation window | `unfilled` |
 | Clock/power/thermal | persistence/clock policy、power limit/state、temperature/thermal/throttle state before/after | `unfilled` |
 | Correctness criteria | double oracle、abs+rel tolerance、per-candidate bits/errors/pass、all CUDA statuses、result readback | `unfilled` |
-| Measurement criteria | one warm-up + ten complete pairs、median/min/max、no deletion、whole-batch invalidation、mapping/traffic scope | `unfilled` |
+| Measurement criteria | one profile-level warm-up pair、每个 timed process 的 checked/excluded local warm-up、ten complete pairs、median/min/max、no deletion、whole-batch invalidation、mapping/traffic scope | `unfilled` |
 | Command custody | every exact argv（array，不只 shell prose）、cwd、selected env、start/end、status、stdout/stderr path/hash | `unfilled` |
 | Report custody | primary `.ncu-rep` path/hash、same-version import derivative/hash、report-to-derivative mapping、private original chain | `unfilled` |
 | Result custody | correctness/timing/mapping/traffic/maintenance ledgers与summary SHA-256、reviewer、sanitization mapping | `unfilled` |
@@ -407,7 +407,7 @@ EX11 与 EX17 各自先按其 canonical C++17 build/test contract 构建，不�
 
 ```bash
 printf '%s  %s\n' \
-  '456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd' \
+  '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c' \
   'public/assets/exercise-solutions/lab11-reduction-comparison.cu' \
   | sha256sum --check --strict
 bash scripts/check-lab11-runner-build.sh <profile-id> [result-dir]
@@ -450,7 +450,7 @@ nvcc --std=c++17 \
   -o build/lab11-reduction-comparison
 ```
 
-Runner CLI 是 closed positional contract：四组 option/value 都必须存在，不接受其他 element count、verification mode、candidate 或 timing name。一次 invocation 恰好执行一个 candidate。`none` 用于 correctness 与 profiler mapping；两种 timing family 分别在 fresh unprofiled processes 中运行：
+Runner CLI 是 closed positional contract：四组 option/value 都必须存在，不接受其他 element count、verification mode、candidate 或 timing name。一次 invocation 只选择一个 candidate identity。`none` 用于 correctness 与 profiler mapping，并只执行一次 candidate call；两种 timing family 分别在 fresh unprofiled processes 中运行，每次先执行一次 excluded process-local warm-up，再执行一次 measured call：
 
 ```bash
 ./build/lab11-reduction-comparison --candidate custom --timing none --elements 4099 --verify tolerance
@@ -461,7 +461,7 @@ Runner CLI 是 closed positional contract：四组 option/value 都必须存在�
 ./build/lab11-reduction-comparison --candidate cub --timing setup-inclusive --elements 4099 --verify tolerance
 ```
 
-每次成功 invocation 输出 `candidate`、`timing`、`elements`、compile-time `cub_version`、`result_float_bits_hex`、`cpu_reference`、`result_float`、`absolute_error`、`allowed_error` 与 `pass`。CUB process 还输出 queried `temporary_storage_bytes`。Timed processes 额外输出 `clock=std::chrono::steady_clock` 与 `elapsed_nanoseconds`；`--timing none` 不读取 host clock，也不输出 elapsed field。CLI、CUDA API、custom launch、CUB call、stream completion、copy、allocation、free、stream-destroy 或 tolerance failure 都返回 nonzero。
+每次成功 invocation 输出 `candidate`、`timing`、`elements`、compile-time `cub_version`、`result_float_bits_hex`、`cpu_reference`、`result_float`、`absolute_error`、`allowed_error` 与 `pass`。CUB process 还输出 measured call 查询的 `temporary_storage_bytes`。Timed processes 额外输出 `process_local_warmup=excluded-pass`、`clock=std::chrono::steady_clock` 与 `elapsed_nanoseconds`；`--timing none` 不读取 host clock，也不输出 warm-up 或 elapsed field。CLI、CUDA API、custom launch、CUB call、stream completion、copy、allocation、free、stream-destroy 或 warm-up/measured tolerance failure 都返回 nonzero。
 
 每个 component profile 都要重新 preprocess、compile、link、inspect，并执行 applicable host tests 与 version gate。Runner 中的 `static_assert(CUB_VERSION == LAB11_EXPECTED_CUB_VERSION)` 就是该 gate。Selected profile还要证明 ordered `-I` roots先于 Toolkit bundled roots，并从 include trace定位 exact headers；bundled profile证明没有 selected override。任何 macro、path、hash、package/tag、Toolkit 或 binary不匹配都停止该 profile。不能把 selected 3.4.2 header换进已经由 bundled header编译的 binary。Local build结果只完成本 Lab gate，不会填充 frontmatter 的空 compilation evidence。
 
@@ -475,7 +475,7 @@ Runner CLI 是 closed positional contract：四组 option/value 都必须存在�
 | 01, 03, 05, 07, 09 | EX11 → EX17 |
 | 02, 04, 06, 08, 10 | EX17 → EX11 |
 
-Warm-up pair 执行与 retained pair 相同的 correctness、setup-inclusive、steady-state、stream 与 completion cadence，但标记 `excluded_from_statistics: true`。每个 pair 是两个按顺序执行的 single-candidate process invocations，绝不是一个 process 同时启动两侧。它不允许 hidden extra warm-up，也不允许丢弃 attempt 01。
+Profile-level warm-up pair 执行与 retained pair 相同的 correctness、setup-inclusive、steady-state、stream 与 completion cadence，但标记 `excluded_from_statistics: true`。每个 pair 是两个按顺序执行的 single-candidate process invocations，绝不是一个 process 同时启动两侧。每个 timed invocation 仍执行 runner 声明的同-candidate process-local warm-up；除了这两层明确记录并排除的 warm-up，不允许 hidden extra warm-up，也不允许丢弃 attempt 01。
 
 每组 retained pair 先确认 source/binary/input/environment hash没有漂移，再按该行顺序运行两个 candidates。每个 candidate measurement unit 保留 setup-inclusive raw value、steady-state raw value、query/allocation/free statuses、result bits/error/pass 与 completion status。若同时采集 profiler，使用同一 pair ID 的独立 fresh profiled process/subrecord；profiled duration不进入 timing，且 profiler mapping/result必须绑定同一 source/binary/workload/profile hashes。
 
@@ -551,14 +551,14 @@ Frontmatter 的十项 expected observations声明 gate和record shape，不声�
 2. Exact Toolkit、NVCC、host compiler、Native Linux、one CC 7.5+ GPU、CUB/CCCL macros、component acquisition、Nsight Compute、CUPTI、device与permission gates全部匹配该 profile。
 3. Shared 4,099-float generator/input hash、double oracle与abs+rel comparator不漂移；两侧 bits/errors/pass分别保留，全部 CUDA/status/completion/result-copy checks通过。
 4. CUB query与execution使用同一 current device、API/template arguments、shape与stream；`T`、allocation/free statuses与dynamic memory preflight完整，但没有把 `T`解释成traffic。
-5. Steady-state与setup-inclusive timing边界分开；同一 clock/device/stream/workload/completion/order，profiled duration被排除。
-6. 一次 excluded warm-up后，唯一 batch按预声明alternating order保留完整十组 pairs；任何失败触发whole-batch invalidation且没有sample deletion。
+5. Steady-state与setup-inclusive timing边界分开；每个 timed process 的同-candidate local warm-up 已检查并排除，且使用同一 clock/device/stream/workload/completion/order；profiled duration被排除。
+6. 一次 profile-level excluded warm-up pair后，唯一 batch按预声明alternating order保留完整十组 pairs；任何失败触发whole-batch invalidation且没有sample deletion。
 7. Exact-GPU queried profiler fields、actual EX11/EX17 call-to-kernel mappings、replay/perturbation、primary report/import/hash custody完整；CUB kernel count不是假设。
 8. Statistics只使用对应同一 full batch的十个 values，报告count=10、median、minimum、maximum；static EX11 ledger、observed traffic与temporary capacity分开。
 9. Maintenance五项均有owner、scope、evidence与revisit trigger；任何decision不超过correctness、measurement和compatibility evidence。
 10. 完整Environment Manifest、command/log/report/result custody、blocker records与sanitization mapping通过review。
 
-Blockers 包括：strict prerequisite未完成；EX11/EX17 commit、range、source或hash mismatch；unknown/dirty source；unsupported profile；selected/bundled headers混用；CUB/CCCL macro、include trace、package/tag/commit或binary mismatch；非Native Linux、GPU count不等于1或CC小于7.5；driver/Toolkit/compiler/NCU/CUPTI mismatch；permission denial；`sudo`或policy bypass；insufficient queried memory；query/execution device、template、shape或stream drift；allocation/API/launch/completion/copy/free failure；input/generator/oracle/tolerance drift；nonfinite result或correctness failure；missing bits/error；timing clock/boundary/order drift；hidden warm-up；missing/reordered/deleted pair；mixed/shortened batch；concurrent-load/clock/power/thermal record缺失；unknown metric semantics、unavailable/`n/a` value或wrong unit/scope；filter/mapping ambiguity；假设CUB只有一个kernel；report/replay/import/hash failure；把static bytes或`T`当成observed traffic；non-additive field被擅自求和；incomplete maintenance/custody；或超出证据的winner/speedup claim。
+Blockers 包括：strict prerequisite未完成；EX11/EX17 commit、range、source或hash mismatch；unknown/dirty source；unsupported profile；selected/bundled headers混用；CUB/CCCL macro、include trace、package/tag/commit或binary mismatch；非Native Linux、GPU count不等于1或CC小于7.5；driver/Toolkit/compiler/NCU/CUPTI mismatch；permission denial；`sudo`或policy bypass；insufficient queried memory；query/execution device、template、shape或stream drift；allocation/API/launch/completion/copy/free failure；input/generator/oracle/tolerance drift；nonfinite result或correctness failure；missing bits/error；timing clock/boundary/order drift；missing、failed、timed、unrecorded 或 hidden warm-up；missing/reordered/deleted pair；mixed/shortened batch；concurrent-load/clock/power/thermal record缺失；unknown metric semantics、unavailable/`n/a` value或wrong unit/scope；filter/mapping ambiguity；假设CUB只有一个kernel；report/replay/import/hash failure；把static bytes或`T`当成observed traffic；non-additive field被擅自求和；incomplete maintenance/custody；或超出证据的winner/speedup claim。
 
 处理方式只有：立即停止受影响 profile，保留完整 blocker 与 partial/invalid batch，修复允许修复的环境或方法问题，分配新 ID，并从该 profile 的 warm-up 与全部十组pairs重新执行。不得写零、猜值、删除sample、沿用其他profile、拼接batch、提升权限或弱化criteria。
 
@@ -584,6 +584,6 @@ Blockers 包括：strict prerequisite未完成；EX11/EX17 commit、range、sour
 - CCCL v3.4.2 immutable release、tagged compatibility、device-wide docs与`device_reduce.cuh`固定selected component、latest-patch 12.x/13.x boundary、traditional two-phase query/allocation、stream与scoped determinism facts。它们不提供本站build/runtime/performance result。
 - Best Practices Guide只限定logical/requested/effective/observed traffic词义；Nsight Compute/CUPTI owner guides限定exact-GPU query、filter、mapping、replay、overhead、report与permission method。没有owner source提供本页的metric value、timing、kernel count或winner。
 
-2026-09-05 使用Context7 `/nvidia/cccl` 与 `/websites/nvidia_nsight-compute_nsightcompute` 进行discovery/cross-check；version-specific事实以本页列出的exact NVIDIA package、tagged source和owner manuals为准。本站没有复制NVIDIA/CCCL code、table、figure或benchmark；component matrix、workload arithmetic、manifest、timing/traffic split、alternating schedule、maintenance rubric、blank tables与fixture均为学习站原创CC BY 4.0内容。
+2026-09-05 使用Context7 `/nvidia/cccl` 与 `/websites/nvidia_nsight-compute_nsightcompute` 进行discovery/cross-check；version-specific事实以本页列出的exact NVIDIA package、tagged source和owner manuals为准。本站没有复制NVIDIA/CCCL code、table、figure或benchmark；component matrix、workload arithmetic、manifest、timing/traffic split、alternating schedule、maintenance rubric、blank tables与fixture均为学习站（Learning Site）原创CC BY 4.0内容。
 
 **事实核查与全部来源访问日期：2026-09-05。** Compilation evidence为空，runtime为Pending Hardware Verification，recorded observations为空。

@@ -259,7 +259,7 @@ Open documentation issue [#5966](https://github.com/NVIDIA/cccl/issues/5966)用 
 
 Exact v3.4.2 CUB headers 标记为 BSD-3；本页引用的两个 environment API tests 标记为 BSD-3-Clause。CCCL aggregate license 还映射 Thrust、libcu++ 与其他 component terms。Redistribution manifests 对 Toolkit archives 记录各自 license label。本站页面本身是 CC-BY-4.0、`provenance: original`。
 
-L03 没有复制或改编 owner source、test、example、tutorial、table、figure 或 benchmark；公式、矩阵、练习与解答均为学习站原创表达。未来若复制任何 owner material，必须检查 exact file 的 SPDX、copyright block、embedded notice 与适用 license，而不能只引用 aggregate `LICENSE`。
+L03 没有复制或改编 owner source、test、example、tutorial、table、figure 或 benchmark；公式、矩阵、练习（Exercise）与解答均为学习站（Learning Site）原创表达。未来若复制任何 owner material，必须检查 exact file 的 SPDX、copyright block、embedded notice 与适用 license，而不能只引用 aggregate `LICENSE`。
 
 2026-09-05 已查询 Context7 `/nvidia/cccl` 进行 discovery 与交叉核对。它返回 current/main-branch material，不是 immutable v3.4.2 snapshot，也没有验证 bundled archive 内容。Exact tags 与 selected commit 负责 3.4.2；manifest 指定的 hash-addressed redistribution archives 内已检查的 `device_reduce.cuh`、`device_scan.cuh` 和 `version.cuh` 负责 bundled contracts 与 versions。
 
@@ -278,7 +278,7 @@ L03 的 `compilation`、`runtime`、`expectedObservations` 与 `recordedObservat
 ## 继续练习
 
 - 完成 [L03 练习](/libraries/cub-device-primitives/exercises/)，再查看[独立复核解答](/libraries/cub-device-primitives/solutions/)。
-- 在[练习题库 PB-R4-003](/practice/#pb-r4-003)复核另一份 device-primitive contract packet。
+- 在[练习题库（Practice Bank）PB-R4-003](/practice/#pb-r4-003)复核另一份 device-primitive contract packet。
 - [EX17 canonical route](/examples/cub-device-reduction-scan/)承载可执行代码；本单元不维护第二份 CUDA/C++ code fence。[LAB11](/labs/compare-custom-reduction-with-cub/)按 expected-only protocol 比较 EX11 与 EX17，且不发布 recorded result。
 - 继续 [L04：CUB Warp 与 Block Primitives](/libraries/cub-warp-block-primitives/)，并只把 [VIS10](/visuals/reduction-stages/)用于 evidence-neutral reduction-tree reasoning。
 - 复习 [TERM-107](/glossary/#term-107)、[TERM-127](/glossary/#term-127)、[TERM-130](/glossary/#term-130)、[TERM-138](/glossary/#term-138)与 [TERM-183](/glossary/#term-183)。

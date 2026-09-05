@@ -58,7 +58,7 @@ head:
 
 ## 复核前
 
-这是 [L04 练习](/libraries/cub-warp-block-primitives/exercises/)的独立 reference，只复核 selection 与 contracts。它不提供 CUDA/C++ implementation、compile、execution、output 或 performance observation；四个 evidence arrays 仍为空。
+这是 [L04 练习（Exercise）](/libraries/cub-warp-block-primitives/exercises/)的独立 reference，只复核 selection 与 contracts。它不提供 CUDA/C++ implementation、compile、execution、output 或 performance observation；四个 evidence arrays 仍为空。
 
 ## 解答 1：8-lane groups 的两种 outputs
 

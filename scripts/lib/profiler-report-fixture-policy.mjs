@@ -45,6 +45,7 @@ const topLevelFields = [
   'captureStatus',
   'tool',
   'captureCommand',
+  'captureCommands',
   'workload',
   'correctnessGate',
   'environmentManifest',
@@ -110,10 +111,12 @@ const fixtureProfiles = new Map([
   }],
   ['LAB11', {
     subjectField: 'labId',
+    schemaVersion: 2,
+    captureCommandKeys: ['custom', 'cub'],
     exampleId: 'EX17',
     fixtureId: 'LAB11-NCU-EXPECTED',
-    fixtureSha256: '7e96f2701a64fc9aa85716cd3ce916da1b87c1e86f92e26ec15332f93ed1763e',
-    fixtureBytesSha256: '7c9ddc680d536879cbcb9e4f81d5e5f4dc9197dd66ddfd7b23142d1d1e564f32',
+    fixtureSha256: '5b05557b331c8c206220a72c2dc8d672968d9c76f02bc41287bfa9a00d29acb0',
+    fixtureBytesSha256: '378c847c2453942a880adf4016d13b27af5ffa9fd735e42ae4b7bdacfc96f350',
     sourceCommit: 'f018a694ec4f57a40e1374352e320ddd9c9511e0',
     sanitizationReviewDate: '2026-09-05',
     tool: {
@@ -221,14 +224,19 @@ export function validateProfilerReportFixture(fixture, fixtureSource) {
   const subjectField = subjectFields.length === 1 ? subjectFields[0] : undefined;
   const subjectId = subjectField === undefined ? undefined : fixture[subjectField];
   const profile = fixtureProfiles.get(subjectId);
+  const expectedSchemaVersion = profile?.schemaVersion ?? 1;
+  const unusedCaptureField = expectedSchemaVersion === 2 ? 'captureCommand' : 'captureCommands';
 
   const unknown = Object.keys(fixture).filter((key) => !topLevelFields.includes(key));
-  const missing = topLevelFields.filter((key) => !['labId', 'unitId'].includes(key) && !(key in fixture));
+  const missing = topLevelFields.filter((key) =>
+    !['labId', 'unitId', unusedCaptureField].includes(key) && !(key in fixture));
   if (unknown.length > 0) errors.push(`unknown top-level fields: ${unknown.join(', ')}`);
   if (missing.length > 0) errors.push(`missing top-level fields: ${missing.join(', ')}`);
   if (subjectFields.length !== 1) errors.push('fixture must declare exactly one of labId or unitId');
   if (fixture['SPDX-License-Identifier'] !== 'CC-BY-4.0') errors.push('fixture license must be CC-BY-4.0');
-  if (fixture.schemaVersion !== 1) errors.push('fixture schemaVersion must be 1');
+  if (fixture.schemaVersion !== expectedSchemaVersion) {
+    errors.push(`fixture schemaVersion must be ${expectedSchemaVersion}`);
+  }
   if (profile === undefined) errors.push(`${subjectField ?? 'subject ID'} is invalid`);
   if (profile !== undefined && subjectField !== profile.subjectField) {
     errors.push(`fixture subject field must be ${profile.subjectField}`);
@@ -239,6 +247,28 @@ export function validateProfilerReportFixture(fixture, fixtureSource) {
   if (fixture.provenance !== 'original') errors.push('fixture provenance must be original');
   if (fixture.fixtureType !== 'expected-only-profiler-report-plan') errors.push('fixtureType must remain expected-only');
   if (fixture.captureStatus !== 'pending-hardware-verification') errors.push('captureStatus must remain pending');
+
+  if (expectedSchemaVersion === 1) {
+    if (typeof fixture.captureCommand !== 'string' || fixture.captureCommand.trim() === '') {
+      errors.push('captureCommand must be a nonempty string for schemaVersion 1');
+    }
+    if ('captureCommands' in fixture) errors.push('captureCommands is not allowed for schemaVersion 1');
+  } else {
+    if ('captureCommand' in fixture) errors.push('captureCommand is not allowed for schemaVersion 2');
+    if (!isRecord(fixture.captureCommands)) {
+      errors.push('captureCommands must be an object for schemaVersion 2');
+    } else {
+      const captureCommandKeys = Object.keys(fixture.captureCommands);
+      if (captureCommandKeys.length !== profile.captureCommandKeys.length
+        || profile.captureCommandKeys.some((key, index) => captureCommandKeys[index] !== key)) {
+        errors.push(`captureCommands keys must be ${profile.captureCommandKeys.join(', ')}`);
+      }
+      if (captureCommandKeys.some((key) =>
+        typeof fixture.captureCommands[key] !== 'string' || fixture.captureCommands[key].trim() === '')) {
+        errors.push('captureCommands values must be nonempty strings');
+      }
+    }
+  }
 
   if (!isRecord(fixture.tool)) errors.push('tool must be an object');
   else {

@@ -1,6 +1,6 @@
 {
   "SPDX-License-Identifier": "CC-BY-4.0",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "fixtureId": "LAB11-NCU-EXPECTED",
   "labId": "LAB11",
   "exampleId": "EX17",
@@ -14,7 +14,10 @@
     "reportExtension": ".ncu-rep",
     "selectedVersions": ["2022.3.0.22", "2025.2.1.3", "2026.2.1.5"]
   },
-  "captureCommand": "ncu <lane-validated-config-control> --devices 0 <actual-report-derived-kernel-selection> <one-minimal-exact-gpu-queried-section-or-metric-list> <validated-replay-options> --export <unique-report-base> ./build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance",
+  "captureCommands": {
+    "custom": "ncu <lane-validated-config-control> --devices 0 <actual-report-derived-custom-kernel-selection> <one-minimal-exact-gpu-queried-section-or-metric-list> <validated-replay-options> --export <unique-profile-pair-custom-report-base> ./build/lab11-reduction-comparison --candidate custom --timing none --elements 4099 --verify tolerance",
+    "cub": "ncu <lane-validated-config-control> --devices 0 <actual-report-derived-cub-kernel-selection> <one-minimal-exact-gpu-queried-section-or-metric-list> <validated-replay-options> --export <unique-profile-pair-cub-report-base> ./build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance"
+  },
   "workload": {
     "elementType": "float",
     "elementCount": 4099,
@@ -49,10 +52,11 @@
       "absolute_error",
       "allowed_error",
       "pass",
+      "process_local_warmup_status_for_timed_modes",
       "allocation_api_launch_completion_copy_and_free_statuses"
     ],
     "crossCandidateRecord": "cross_candidate_bits_equal is separate and never substitutes for the oracle",
-    "requiredResult": "both candidates independently pass in every correctness, warm-up, unprofiled timing, and profiled process before interpretation",
+    "requiredResult": "both candidates independently pass every correctness, profile-level warm-up, timed-process local warm-up, measured timing, and profiled process before interpretation",
     "currentResult": "expected; unrecorded"
   },
   "environmentManifest": {
@@ -87,11 +91,11 @@
   },
   "method": {
     "question": "Under the same exact workload, device-selection, per-process stream policy, completion, correctness, and acquisition contract, what do qualifying evidence and lifecycle ownership show for immutable EX11 and EX17 DeviceReduce in each of five component profiles?",
-    "runnerProvenance": "Use the exact-hash original Apache-2.0 reviewed solution asset or a learner alternative that preserves the same CLI, output fields, EX11 reference include, custom tree, public CUB API, compile-time profile gate, single-candidate process boundary, checked CUDA lifecycle, and timing boundaries. The runner is not canonical EX11/EX17, a new Runnable Example, or Evidence Status.",
+    "runnerProvenance": "Use the exact-hash original Apache-2.0 reviewed solution asset or a learner alternative that preserves the same CLI, output fields, EX11 reference include, custom tree, public CUB API, compile-time profile gate, one-candidate process boundary, checked timed-process local warm-up, CUDA lifecycle, and timing boundaries. The runner is not canonical EX11/EX17, a new Runnable Example, or Evidence Status.",
     "solutionAsset": {
       "publicPath": "/assets/exercise-solutions/lab11-reduction-comparison.cu",
       "repositoryPath": "public/assets/exercise-solutions/lab11-reduction-comparison.cu",
-      "sha256": "456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd",
+      "sha256": "755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c",
       "license": "Apache-2.0",
       "provenance": "original",
       "upstreamAdaptation": "none"
@@ -101,10 +105,10 @@
       "usage": "./build/lab11-reduction-comparison --candidate custom|cub --timing none|steady-state|setup-inclusive --elements 4099 --verify tolerance",
       "profileCustom": "./build/lab11-reduction-comparison --candidate custom --timing none --elements 4099 --verify tolerance",
       "profileCub": "./build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance",
-      "processBoundary": "one invocation executes exactly one candidate and creates exactly one explicit nonblocking stream; candidate processes use identical policy but do not share a cross-process handle",
+      "processBoundary": "one invocation selects one candidate identity and creates exactly one explicit nonblocking stream; timing none executes one candidate call, while each timed mode executes one excluded same-candidate local warm-up and one measured call; candidate processes use identical policy but do not share a cross-process handle",
       "requiredOutput": ["candidate", "timing", "elements", "cub_version", "result_float_bits_hex", "cpu_reference", "result_float", "absolute_error", "allowed_error", "pass"],
-      "timedOutput": ["clock=std::chrono::steady_clock", "elapsed_nanoseconds"],
-      "noneOutputBoundary": "timing none reads no host clock and emits no elapsed field"
+      "timedOutput": ["process_local_warmup=excluded-pass", "clock=std::chrono::steady_clock", "elapsed_nanoseconds"],
+      "noneOutputBoundary": "timing none executes one candidate call, reads no host clock, and emits no process-local-warm-up or elapsed field"
     },
     "exampleIds": ["EX11", "EX17"],
     "canonicalExampleId": "EX17",
@@ -264,9 +268,9 @@
       "profileRunnerBinaryPathSha256AndSelectedCandidateArgv": "unfilled",
       "generatorInputCountBytesAndInputSha256": "unfilled",
       "temporaryStorageQueryArgumentsDeviceBytesAllocationAndFree": "unfilled",
-      "oneExcludedWarmUpPairOrderCorrectnessAndHashes": "unfilled",
+      "oneExcludedWarmUpPairAndPerTimedProcessWarmUpOrderCorrectnessAndHashes": "unfilled",
       "attemptIds01Through10AlternatingOrderAndTimestamps": "unfilled",
-      "oneExplicitNonblockingStreamPerSingleCandidateProcessAndCheckedCompletion": "unfilled",
+      "oneCandidateIdentityAndOneExplicitNonblockingStreamPerProcessWithCheckedCompletion": "unfilled",
       "timingClockResolutionBoundariesUnitsAndRawValues": "unfilled",
       "logicalCallsToActualContextStreamKernelLaunchMappings": "unfilled",
       "trafficFieldNamesDefinitionsUnitsScopesAndAggregation": "unfilled",
@@ -283,8 +287,8 @@
     "heldConstants": [
       "exactly 4099 generated float values and one input byte hash",
       "double serial left-fold oracle and absolute-plus-relative comparator",
-      "one selected CC 7.5 or newer GPU and device ordinal 0, with exactly one explicit nonblocking stream in each single-candidate process",
-      "the same stream creation and checked cudaStreamSynchronize policy for both candidates without claiming cross-process handle identity",
+      "one selected CC 7.5 or newer GPU and device ordinal 0, with one candidate identity and exactly one explicit nonblocking stream in each process",
+      "the same stream creation and checked cudaStreamSynchronize policy for both candidates without claiming cross-process handle identity, plus one excluded same-candidate local warm-up before each measured call",
       "same C++17 Toolkit Lane, host compiler, process environment, clock, and candidate binaries within a profile",
       "one excluded warm-up pair and ten retained pairs in a predeclared alternating order",
       "separate correctness, unprofiled timing, profiler traffic, and maintenance records",
@@ -293,14 +297,15 @@
     "temporaryStorage": {
       "query": "call the same traditional DeviceReduce API with null storage and a zeroed byte count on the same current device, with identical template arguments and 4099-item shape",
       "allocation": "allocate at least the returned byte count, retain status and address scope, then execute with the same arguments and the process-local explicit nonblocking stream",
-      "steadyStateBoundary": "query and allocation are outside the timer",
-      "setupInclusiveBoundary": "query, output allocation, temporary allocation, one execution call, and checked completion are inside the timer",
+      "steadyStateBoundary": "after the process-local warm-up workspace is released, the measured call's query and allocation are outside the timer",
+      "setupInclusiveBoundary": "after the process-local warm-up workspace is released, the measured call's query, output allocation, temporary allocation, one execution call, and checked completion are inside the timer",
       "trafficBoundary": "returned capacity is not a read/write count and cannot infer logical, DRAM, cache, or other traffic"
     },
     "timing": {
       "clock": "one recorded monotonic host-clock implementation and unit for both candidates",
-      "steadyState": "preallocated candidate storage; start std::chrono::steady_clock immediately before one complete custom multi-stage invocation or one logical DeviceReduce execution call and end immediately after checked completion",
-      "setupInclusive": "start the same clock before custom partial-capacity calculation and both nine-float allocations or before CUB output allocation, zeroed null-storage query, and temporary allocation; end immediately after the selected invocation's checked completion; common input setup, result copy/verification, and teardown remain outside, with teardown status retained",
+      "processLocalWarmUp": "for each timed invocation, execute the same candidate once with timing disabled on the same input and explicit stream, complete result copy and oracle verification, release warm-up workspace, and require process_local_warmup=excluded-pass before the measured call; timing none executes only once",
+      "steadyState": "after the checked process-local warm-up, use preallocated measured-call candidate storage; start std::chrono::steady_clock immediately before one complete custom multi-stage invocation or one logical DeviceReduce execution call and end immediately after checked completion",
+      "setupInclusive": "after the checked process-local warm-up, start the same clock before the measured custom partial-capacity calculation and both nine-float allocations or before measured CUB output allocation, zeroed null-storage query, and temporary allocation; end immediately after the selected invocation's checked completion; common input setup, result copy/verification, and teardown remain outside, with teardown status retained",
       "profiledElapsedUse": "prohibited as unprofiled timing evidence",
       "actualValues": []
     },
@@ -315,6 +320,8 @@
       "scope": "independent full batch per component profile",
       "excludedWarmUpPairsPerProfile": 1,
       "warmUpOrder": ["EX11", "EX17"],
+      "processLocalWarmUpsPerTimedInvocation": 1,
+      "processLocalWarmUpBoundary": "same selected candidate, input, explicit stream, completion, result-copy, and oracle contract as the measured process; timing disabled and workspace released before the measured setup",
       "retainedPairedAttemptsPerProfile": 10,
       "pairOrder": {
         "01": ["EX11", "EX17"],
@@ -335,6 +342,7 @@
     "profiler": {
       "availabilityGate": "retain installed version, matching exact-version owner manual, actual help, section list, and exact-GPU metric query",
       "selection": "one minimal queried section or shorter exact metric list answering only the traffic/path question; no actual metric is selected in this fixture",
+      "captureCoverage": "separate non-overwriting custom and CUB reports per profile and pair, each using timing none so exactly one logical candidate call is profiled",
       "logicalCallIdentity": "stable host-side call IDs for EX11 and EX17",
       "callToKernelMapping": "copy actual context, stream, reported kernel name, launch ID, count, order, and pair ID from reports; allow zero, one, or multiple kernels for DeviceReduce",
       "singleKernelAssumption": "prohibited",
@@ -361,9 +369,9 @@
       "Native Linux, one CC 7.5 or newer GPU, exact Toolkit/compiler/component/profiler/CUPTI profile, device access, and approved non-admin permission gates pass",
       "both candidates independently pass the same 4099-float double-oracle absolute-plus-relative correctness contract with separate result bits and errors",
       "the same-device same-template CUB temporary-storage query, allocation, execution, and free records pass without treating capacity as traffic",
-      "steady-state and setup-inclusive timing boundaries stay separate and matched across candidates",
-      "one excluded warm-up and all ten retained pairs follow the predeclared alternating order with no sample deletion and whole-batch invalidation",
-      "actual report-derived logical-call-to-kernel mappings, exact queried traffic fields, replay records, primary reports, imports, and hashes are complete without assuming one CUB kernel",
+      "steady-state and setup-inclusive timing boundaries stay separate and matched across candidates after a checked and excluded same-candidate process-local warm-up",
+      "one profile-level excluded warm-up pair and all ten retained pairs follow the predeclared alternating order, while every timed process records its local warm-up, with no sample deletion and whole-batch invalidation",
+      "separate custom and CUB reports provide actual report-derived logical-call-to-kernel mappings, exact queried traffic fields, replay records, primary reports, imports, and hashes without assuming one CUB kernel",
       "count=10 median, minimum, and maximum use only one qualifying full batch and preserve static logical, observed traffic, and temporary-capacity boundaries",
       "the five-part maintenance rubric has owner, scope, evidence, rollback, and revisit records for both candidates",
       "the complete Environment Manifest, command/log/report/result custody, blocker handling, sanitization, and claim boundary pass review"
@@ -389,10 +397,10 @@
     "Each component profile should prove its bundled or selected CUB/CCCL macros, acquisition hash, resolved include paths, exact build, and binary hash, with selected CCCL 3.4.2 limited to Toolkit 12.9.2 and 13.3.1.",
     "EX11 and EX17 should independently pass the same exact 4099-float generator, double left-fold oracle, and absolute-plus-relative tolerance gate while retaining result bits and errors separately.",
     "The DeviceReduce two-phase path should query and allocate temporary storage on the same current device with identical template arguments, workload, and process-local explicit stream before execution, while the returned capacity remains separate from every traffic claim.",
-    "Steady-state invocation timing and candidate-specific setup-inclusive timing should remain separate under the same device-selection and stream policy, workload, checked stream completion, std::chrono::steady_clock, and correctness cadence, with one candidate and one stream per process.",
-    "One excluded warm-up pair should precede ten retained pairs in the frozen odd EX11-to-EX17 and even EX17-to-EX11 order for every profile.",
+    "Steady-state invocation timing and candidate-specific setup-inclusive timing should remain separate under the same device-selection and stream policy, workload, checked stream completion, std::chrono::steady_clock, and correctness cadence, with one candidate identity, one stream, one excluded local warm-up, and one measured call per timed process.",
+    "One profile-level excluded warm-up pair should precede ten retained pairs in the frozen odd EX11-to-EX17 and even EX17-to-EX11 order for every profile, while timing none executes only one candidate call.",
     "Any failed subrecord should invalidate and preserve the whole batch, after which a new batch should rerun warm-up and all ten pairs without deleting or replacing a sample.",
-    "EX11's 16472-byte source-derived logical global ledger should remain separate from exact-GPU profiler observations for both candidates, and no CUB traffic should be inferred from temporary-storage bytes.",
+    "EX11's 16472-byte source-derived logical global ledger should remain separate from distinct exact-GPU custom and CUB profiler observations, and no CUB traffic should be inferred from temporary-storage bytes.",
     "Every logical DeviceReduce call should map to the actual zero, one, or multiple reported kernel launches rather than a predeclared one-kernel assumption.",
     "A qualifying batch should report count=10, median, minimum, and maximum separately for each candidate, profile, timing family, and valid exact field scope, with no actual value prefilled here.",
     "The maintenance packet should cover owned source, tests, component pins and upgrades, compatibility, and incident/debug burden without naming a winner; VIS10 should remain evidence-neutral."

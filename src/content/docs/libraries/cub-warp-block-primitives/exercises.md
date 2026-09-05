@@ -64,7 +64,7 @@ head:
 
 候选范围只有 `WarpReduce`、`WarpScan`、`BlockReduce` 与 `BlockScan`。每题先声明 scope、participants 和 output shape，再选择 primitive、overload 与 algorithm requirement。必须同时审查 `TempStorage` slot、reuse barrier、row-major/blocked layout、partial-valid contract 与 output validity。打开[独立复核解答](/libraries/cub-warp-block-primitives/solutions/)前不要寻找实现答案。
 
-## 练习 1：为 8-lane logical groups 选择两种 output shape
+## 练习（Exercise）1：为 8-lane logical groups 选择两种 output shape
 
 **目标：** 一个 physical warp 被划成四个连续 8-lane groups。请求 A 每组只要一个 sum；请求 B 每个 lane 都要 inclusive prefix，并让每组所有 lanes 取得 group aggregate。分别选择最窄的 warp collective。
 

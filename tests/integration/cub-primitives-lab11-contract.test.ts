@@ -16,7 +16,7 @@ const docsRoot = path.join(projectRoot, 'src/content/docs');
 const exampleRoot = path.join(projectRoot, 'examples/ex17-cub-device-reduction-scan');
 const fixturePath = 'public/assets/profiler-report-fixtures/lab11-nsight-compute.expected.json';
 const runnerPath = 'public/assets/exercise-solutions/lab11-reduction-comparison.cu';
-const runnerSha256 = '456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd';
+const runnerSha256 = '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c';
 const reviewDate = '2026-09-05';
 const sourceCommit = 'f018a694ec4f57a40e1374352e320ddd9c9511e0';
 const publicationBundleCommit = 'd52211040927f647ca3440529d4728c5edefd01e';
@@ -140,9 +140,9 @@ const lab11ManifestFields = [
   'profileRunnerBinaryPathSha256AndSelectedCandidateArgv',
   'generatorInputCountBytesAndInputSha256',
   'temporaryStorageQueryArgumentsDeviceBytesAllocationAndFree',
-  'oneExcludedWarmUpPairOrderCorrectnessAndHashes',
+  'oneExcludedWarmUpPairAndPerTimedProcessWarmUpOrderCorrectnessAndHashes',
   'attemptIds01Through10AlternatingOrderAndTimestamps',
-  'oneExplicitNonblockingStreamPerSingleCandidateProcessAndCheckedCompletion',
+  'oneCandidateIdentityAndOneExplicitNonblockingStreamPerProcessWithCheckedCompletion',
   'timingClockResolutionBoundariesUnitsAndRawValues',
   'logicalCallsToActualContextStreamKernelLaunchMappings',
   'trafficFieldNamesDefinitionsUnitsScopesAndAggregation',
@@ -402,10 +402,10 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
 
     for (const source of exercisePages) {
       const content = body(source);
-      expect(content.match(/^## (?:练习|Exercise) \d[:：]/gm)).toHaveLength(3);
+      expect(content.match(/^## (?:练习(?:（Exercise）)? ?\d|Exercise \d)[:：]/gm)).toHaveLength(3);
       expect(content.match(/<details><summary>(?:提示|Hint) [12]<\/summary>/g)).toHaveLength(6);
       for (const number of [1, 2, 3]) {
-        expect(markdownSection(source, new RegExp(`^(?:Exercise|练习) ${number}[:：]`))
+        expect(markdownSection(source, new RegExp(`^(?:Exercise ${number}|练习(?:（Exercise）)? ?${number})[:：]`))
           .match(/<details><summary>(?:提示|Hint) [12]<\/summary>/g)).toHaveLength(2);
       }
       for (const label of [
@@ -633,6 +633,7 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
         'cross_candidate_bits_equal',
         'steady-state-invocation',
         'setup-inclusive',
+        'process_local_warmup=excluded-pass',
         '16,472 bytes',
         'Owned source',
         'Incident / debug burden',
@@ -662,6 +663,7 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
 
     expect(fixture).toMatchObject({
       'SPDX-License-Identifier': 'CC-BY-4.0',
+      schemaVersion: 2,
       fixtureId: 'LAB11-NCU-EXPECTED',
       labId: 'LAB11',
       exampleId: 'EX17',
@@ -674,9 +676,17 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
     });
     expect(validateProfilerReportFixture(fixture, fixtureSource)).toEqual({ valid: true, errors: [] });
     expect(fixture.method.componentProfiles.map(({ id }: { id: string }) => id)).toEqual(profileIds);
-    expect(fixture.captureCommand).toContain(
-      './build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance',
-    );
+    expect(fixture.captureCommands).toEqual({
+      custom: expect.stringContaining(
+        './build/lab11-reduction-comparison --candidate custom --timing none --elements 4099 --verify tolerance',
+      ),
+      cub: expect.stringContaining(
+        './build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance',
+      ),
+    });
+    expect(fixture.captureCommands.custom).toContain('<unique-profile-pair-custom-report-base>');
+    expect(fixture.captureCommands.cub).toContain('<unique-profile-pair-cub-report-base>');
+    expect(fixture.captureCommands.custom).not.toBe(fixture.captureCommands.cub);
     expect(fixture.method.solutionAsset).toEqual({
       publicPath: '/assets/exercise-solutions/lab11-reduction-comparison.cu',
       repositoryPath: runnerPath,
@@ -685,7 +695,8 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
       provenance: 'original',
       upstreamAdaptation: 'none',
     });
-    expect(fixture.method.runnerCli.processBoundary).toMatch(/one invocation executes exactly one candidate/i);
+    expect(fixture.method.runnerCli.processBoundary).toMatch(/one invocation selects one candidate identity/i);
+    expect(fixture.method.runnerCli.timedOutput).toContain('process_local_warmup=excluded-pass');
     expect(fixture.method.componentProfiles.map(({ expectedCUBVersionMacro }: { expectedCUBVersionMacro: number }) =>
       expectedCUBVersionMacro)).toEqual([101501, 200802, 300304, 300402, 300402]);
     expect(fixture.workload).toMatchObject({
@@ -715,6 +726,8 @@ describe('issue #34 CUB primitives, EX17, and LAB11 publication contract', () =>
     expect(fixture.method.timing.actualValues).toEqual([]);
     expect(fixture.method.timing).toHaveProperty('steadyState');
     expect(fixture.method.timing).toHaveProperty('setupInclusive');
+    expect(fixture.method.timing).toHaveProperty('processLocalWarmUp');
+    expect(fixture.method.acquisition.processLocalWarmUpsPerTimedInvocation).toBe(1);
     expect(fixture.method.traffic).toMatchObject({
       ex11SourceDerivedLogicalGlobalBytes: 16472,
       observedCandidateTraffic: expect.stringMatching(/^unfilled/),

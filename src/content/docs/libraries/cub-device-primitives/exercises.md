@@ -64,7 +64,7 @@ head:
 
 每题从 L03 教授的三个 entry points 中选择满足需求的最窄 primitive。先写 operation semantics，再写 overlap、temporary storage、stream、completion、lifetime、version 与 numerical acceptance。不要从 API 名称推断 backend 或 performance；打开[独立复核解答](/libraries/cub-device-primitives/solutions/)前完成自己的 packet。
 
-## 练习 1：把一个向量压成一个标量
+## 练习（Exercise）1：把一个向量压成一个标量
 
 **目标：** 为 `N` 个 FP32 samples 只产生一个总和，选择一个 device-wide primitive，并定义 host 何时可以读取这个 scalar。
 

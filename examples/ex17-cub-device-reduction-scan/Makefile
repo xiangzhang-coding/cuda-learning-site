@@ -18,14 +18,33 @@ COMPONENT_INCLUDE_FLAGS = $(if $(filter selected,$(COMPONENT_MODE)),$(SELECTED_I
 NVCC_FLAGS := --std=$(DIALECT) $(NVCC_ARCH) -Iinclude \
 	$(COMPONENT_INCLUDE_FLAGS) -DEX17_EXPECTED_CUB_VERSION=$(EXPECTED_CUB_VERSION)
 HOST_FLAGS := -Wall -Wextra -Wpedantic -Iinclude
+CONFIG_STAMP := $(BUILD_DIR)/.build-config
 
 .NOTPARALLEL:
-.PHONY: all clean check-cub-config preprocess compile link inspect host-test
+.PHONY: all clean check-build-config check-cub-config preprocess compile link inspect host-test
 
 all: link
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+
+check-build-config: | $(BUILD_DIR)
+	@tmp="$(CONFIG_STAMP).tmp"; \
+	{ \
+		printf '%s\n' "NVCC=$(NVCC)" "CXX=$(CXX)" "DIALECT=$(DIALECT)"; \
+		printf '%s\n' "COMPONENT_MODE=$(COMPONENT_MODE)" "EXPECTED_CUB_VERSION=$(EXPECTED_CUB_VERSION)"; \
+		printf '%s\n' "CCCL_ROOT=$(CCCL_ROOT)" "BUNDLED_INCLUDE_ROOT=$(BUNDLED_INCLUDE_ROOT)"; \
+		printf '%s\n' "NVCC_FLAGS=$(NVCC_FLAGS)" "NVCC_ARCH=$(NVCC_ARCH)" "HOST_FLAGS=$(HOST_FLAGS)"; \
+	} > "$$tmp"; \
+	if [ -r "$(CONFIG_STAMP)" ] && cmp -s "$$tmp" "$(CONFIG_STAMP)"; then \
+		rm -f "$$tmp"; \
+	else \
+		rm -f $(BUILD_DIR)/cub_device_reduction_scan.ii \
+			$(BUILD_DIR)/cub_device_reduction_scan.o \
+			$(BUILD_DIR)/ex17-cub-device-reduction-scan \
+			$(BUILD_DIR)/host_reference_test; \
+		mv "$$tmp" "$(CONFIG_STAMP)"; \
+	fi
 
 check-cub-config:
 	@case "$(EXPECTED_CUB_VERSION)" in \
@@ -46,28 +65,28 @@ check-cub-config:
 		printf 'COMPONENT_MODE must be bundled or selected: %s\n' "$(COMPONENT_MODE)" >&2; exit 2; \
 	fi
 
-preprocess: check-cub-config $(BUILD_DIR)/cub_device_reduction_scan.ii
+preprocess: check-cub-config check-build-config $(BUILD_DIR)/cub_device_reduction_scan.ii
 
 $(BUILD_DIR)/cub_device_reduction_scan.ii: src/cub_device_reduction_scan.cu include/cub_device_reduction_scan_reference.hpp | $(BUILD_DIR)
 	$(NVCC) $(NVCC_FLAGS) -E src/cub_device_reduction_scan.cu -o $@
 
-compile: check-cub-config $(BUILD_DIR)/cub_device_reduction_scan.o
+compile: check-cub-config check-build-config $(BUILD_DIR)/cub_device_reduction_scan.o
 
 $(BUILD_DIR)/cub_device_reduction_scan.o: src/cub_device_reduction_scan.cu include/cub_device_reduction_scan_reference.hpp | $(BUILD_DIR)
 	$(NVCC) $(NVCC_FLAGS) --compile src/cub_device_reduction_scan.cu -o $@
 
-link: check-cub-config $(BUILD_DIR)/ex17-cub-device-reduction-scan
+link: check-cub-config check-build-config $(BUILD_DIR)/ex17-cub-device-reduction-scan
 
 $(BUILD_DIR)/ex17-cub-device-reduction-scan: $(BUILD_DIR)/cub_device_reduction_scan.o
 	$(NVCC) --std=$(DIALECT) $(NVCC_ARCH) $< -o $@
 
-inspect: check-cub-config $(BUILD_DIR)/ex17-cub-device-reduction-scan
+inspect: check-cub-config check-build-config $(BUILD_DIR)/ex17-cub-device-reduction-scan
 	$(CUOBJDUMP) --list-elf $< > $(BUILD_DIR)/cubin-list.txt
 	$(CUOBJDUMP) --dump-ptx $< > $(BUILD_DIR)/ptx-dump.txt
 	grep -Eq 'sm_75' $(BUILD_DIR)/cubin-list.txt
 	grep -Eq '(arch = sm_75|\.target[[:space:]]+sm_75)' $(BUILD_DIR)/ptx-dump.txt
 
-host-test: $(BUILD_DIR)/host_reference_test
+host-test: check-build-config $(BUILD_DIR)/host_reference_test
 	$(BUILD_DIR)/host_reference_test
 
 $(BUILD_DIR)/host_reference_test: tests/host_reference_test.cpp include/cub_device_reduction_scan_reference.hpp | $(BUILD_DIR)

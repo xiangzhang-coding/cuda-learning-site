@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const runnerPath = 'public/assets/exercise-solutions/lab11-reduction-comparison.cu';
 const runnerUrl = '/assets/exercise-solutions/lab11-reduction-comparison.cu';
-const runnerSha256 = '456fdc21e4d28d7079d86a18cee9869ad05d43d23cd4be9145b2f04e991bc5cd';
+const runnerSha256 = '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c';
 const buildScriptPath = 'scripts/check-lab11-runner-build.sh';
 const referencePath = 'examples/ex11-multi-stage-reduction/include/multi_stage_reduction_reference.hpp';
 const canonicalSourcePath = 'examples/ex11-multi-stage-reduction/src/multi_stage_reduction.cu';
@@ -154,9 +154,17 @@ describe('LAB11 reviewed comparison runner', () => {
     expect(selection.match(/run_custom_candidate\(/g)).toHaveLength(1);
     expect(selection.match(/run_cub_candidate\(/g)).toHaveLength(1);
     expect(selection).toMatch(/if \(config\.candidate == Candidate::kCustom\)[\s\S]*return run_custom_candidate[\s\S]*return run_cub_candidate/);
-    expect(main.match(/run_selected_candidate\(/g)).toHaveLength(1);
+    expect(main.match(/run_selected_candidate\(/g)).toHaveLength(2);
     expect(main).toContain('cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking)');
+    expect(main).toContain('if (config.timing != TimingMode::kNone)');
+    expect(main).toContain('Config warmup_config = config;');
+    expect(main).toContain('warmup_config.timing = TimingMode::kNone;');
+    expect(main).toContain('run_selected_candidate(\n              warmup_config,\n              device_input.as<float>(),\n              stream)');
+    expect(main).toContain('ex11::compare_reduction_sum(reference, warmup_result.value)');
+    expect(main).toContain('process-local warm-up failed: actual=');
     expect(main).toContain('run_selected_candidate(config, device_input.as<float>(), stream)');
+    expect(main.indexOf('run_selected_candidate(\n              warmup_config'))
+      .toBeLessThan(main.indexOf('run_selected_candidate(config'));
     expect(source).not.toContain('cudaDeviceSynchronize');
   });
 
@@ -189,6 +197,7 @@ describe('LAB11 reviewed comparison runner', () => {
     }
     expect(finish).toMatch(/TimingMode::kNone\) return std::nullopt;[\s\S]*MonotonicClock::now\(\)/);
     expect(main).toContain('result.elapsed_nanoseconds.has_value()');
+    expect(main).toContain('process_local_warmup=excluded-pass');
     expect(main).toContain('"elapsed_nanoseconds="');
     for (const field of [
       'result_float_bits_hex=',
@@ -254,9 +263,16 @@ describe('LAB11 reviewed comparison runner', () => {
       expect(page).toContain('--timing setup-inclusive');
       expect(page).toContain('max(16,468, 16,400 + T)');
     }
-    expect(fixture.captureCommand).toContain(
-      './build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance',
-    );
+    expect(fixture.captureCommands).toEqual({
+      custom: expect.stringContaining(
+        './build/lab11-reduction-comparison --candidate custom --timing none --elements 4099 --verify tolerance',
+      ),
+      cub: expect.stringContaining(
+        './build/lab11-reduction-comparison --candidate cub --timing none --elements 4099 --verify tolerance',
+      ),
+    });
+    expect(fixture.captureCommands.custom).toContain('<unique-profile-pair-custom-report-base>');
+    expect(fixture.captureCommands.cub).toContain('<unique-profile-pair-cub-report-base>');
     expect(fixture.method.solutionAsset).toEqual({
       publicPath: runnerUrl,
       repositoryPath: runnerPath,

@@ -58,7 +58,7 @@ head:
 
 ## 复核前
 
-这是 [L03 练习](/libraries/cub-device-primitives/exercises/)的独立 reference。它复核 primitive selection 与 contracts，不提供第二份 EX17 implementation。没有 CUDA/C++ source、local compile、execution、output、allocation observation 或 timing；四个 evidence arrays 仍为空。
+这是 [L03 练习（Exercise）](/libraries/cub-device-primitives/exercises/)的独立 reference。它复核 primitive selection 与 contracts，不提供第二份 EX17 implementation。没有 CUDA/C++ source、local compile、execution、output、allocation observation 或 timing；四个 evidence arrays 仍为空。
 
 ## 解答 1：一个 FP32 aggregate
 

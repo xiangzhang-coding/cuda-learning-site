@@ -414,6 +414,31 @@ int main(int argc, char** argv) {
         stream));
     CUDA_CHECK(cudaStreamSynchronize(stream));
 
+    bool process_local_warmup_passed = false;
+    if (config.timing != TimingMode::kNone) {
+      Config warmup_config = config;
+      warmup_config.timing = TimingMode::kNone;
+      const CandidateResult warmup_result =
+          run_selected_candidate(
+              warmup_config,
+              device_input.as<float>(),
+              stream);
+      const ex11::SumComparison warmup_comparison =
+          ex11::compare_reduction_sum(reference, warmup_result.value);
+      if (!warmup_comparison.matches) {
+        device_input.release();
+        CUDA_CHECK(cudaStreamDestroy(stream));
+        std::ostringstream message;
+        message << std::setprecision(std::numeric_limits<double>::max_digits10)
+                << "process-local warm-up failed: actual="
+                << warmup_comparison.actual
+                << " absolute_error=" << warmup_comparison.absolute_error
+                << " allowed_error=" << warmup_comparison.allowed_error;
+        throw std::runtime_error(message.str());
+      }
+      process_local_warmup_passed = true;
+    }
+
     const CandidateResult result =
         run_selected_candidate(config, device_input.as<float>(), stream);
     const ex11::SumComparison comparison =
@@ -429,6 +454,9 @@ int main(int argc, char** argv) {
     if (result.temporary_storage_bytes.has_value()) {
       std::cout << "temporary_storage_bytes="
                 << *result.temporary_storage_bytes << '\n';
+    }
+    if (process_local_warmup_passed) {
+      std::cout << "process_local_warmup=excluded-pass\n";
     }
     std::cout << "result_float_bits_hex=0x"
               << std::hex << std::setw(8) << std::setfill('0')
