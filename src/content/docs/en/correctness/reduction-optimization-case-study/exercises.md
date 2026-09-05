@@ -3,7 +3,7 @@ title: 'Q12 Exercises: Design and Audit Controlled Reduction Evidence'
 description: Three transfer tasks rebuild the EX11 baseline, implement a four-stage reduction runner, and audit profiler and numerical claims.
 pairId: q12-exercises
 counterpart: /correctness/reduction-optimization-case-study/exercises/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -29,7 +29,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/correctness/reduction-optimization-case-study/exercises/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -96,11 +96,11 @@ There are exactly three transfer tasks. Exercises 1 and 3 produce static ledgers
 
 **Goal:** Audit a summary with friendly metric labels but no raw samples, query, permission, replay, report and hash, Environment Manifest, or correctness result. It then says the four-load variant “eliminates divergence, reduces synchronization, stays bitwise identical, and is always fastest,” citing an unpinned CUB call as proof.
 
-**Constraints:** Require workload, warm-up, synchronization, statistics, profiler method and permissions, Environment Manifest, correctness result, and bounded interpretation for each of the four stages. Separate source-derived traffic estimates, queried metrics, unprofiled elapsed samples, and numerical acceptance. State that LAB11 and L03 are unpublished; invent no CUB API or result.
+**Constraints:** Require workload, warm-up, synchronization, statistics, profiler method and permissions, Environment Manifest, correctness result, and bounded interpretation for each of the four stages. Separate source-derived traffic estimates, queried metrics, unprofiled elapsed samples, and numerical acceptance. State that [L03](/en/libraries/cub-device-primitives/) and [LAB11](/en/labs/compare-custom-reduction-with-cub/) are separate published follow-ons, but they do not backfill this Q12 summary with a CUB API, build, runtime, or result.
 
 **Expected evidence:** A claim-by-claim verdict, missing-coordinate register, exact-GPU query-first repair plan, four unfilled stage records, timing, profiler, and numerical boundaries, and at least four competing explanations.
 
-**Acceptance criteria:** Reject every supplied universal, causal, and bitwise claim. Each repaired claim is narrow enough to receive support, rejection, or no answer. Missing measurements remain explicitly expected and unrecorded; production comparison is deferred rather than filled in.
+**Acceptance criteria:** Reject every supplied universal, causal, and bitwise claim. Each repaired claim is narrow enough to receive support, rejection, or no answer. Missing measurements remain explicitly expected and unrecorded; production comparison moves to LAB11 rather than being filled into Q12.
 
 <details><summary>Hint 1</summary>A profiler report can help explain a mechanism, but it cannot be attached retroactively to a different set of unprofiled samples.</details>
 

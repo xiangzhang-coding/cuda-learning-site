@@ -25,6 +25,7 @@ type PublicationPair = {
   canonicalExample?: string;
   canonicalRanges?: string;
   hardwareGate?: string;
+  hardwareGateEn?: string;
   toolGate?: string;
   evidenceCompilation?: string;
   evidenceRuntime?: string;
@@ -37,6 +38,7 @@ type PublicationPair = {
   maximumProblemMemoryBytes?: string;
   gpuCount?: string;
   permissions?: string;
+  permissionsEn?: string;
   sourceCount?: string;
   sourceVersions?: string;
   zh: string;
@@ -46,14 +48,14 @@ type PublicationPair = {
 const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'home',
-    factCheckDate: '2026-09-04',
+    factCheckDate: '2026-09-05',
     structure: 'purpose,current-route,boundaries,destinations',
     zh: '/',
     en: '/en/',
   },
   {
     pairId: 'o01',
-    factCheckDate: '2026-09-04',
+    factCheckDate: '2026-09-05',
     structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
     resourceKind: 'learning-unit',
     unitId: 'O01',
@@ -2348,12 +2350,12 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'q12',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-05',
     structure: 'outcome,prerequisites,canonical-baseline,hypothesis-ledger,measurement-contract,stage-divergence-synchronization,stage-numerical-order,stage-memory-traffic,profiler-method,visual-boundary,production-primitive-boundary,evidence-boundary,retrieval,practice,sources',
     resourceKind: 'learning-unit',
     unitId: 'Q12',
     prerequisites: 'A02,Q02,Q06,Q08',
-    relatedUnits: 'EX11,VIS10',
+    relatedUnits: 'EX11,VIS10,L03,EX17,LAB11',
     exampleIds: 'EX11',
     canonicalExample: 'EX11',
     canonicalRanges: 'cpu-reference,multi-stage-reduction',
@@ -2369,7 +2371,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'q12-exercises',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-05',
     structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
     resourceKind: 'exercise-set',
     unitId: 'Q12-EXERCISES',
@@ -2380,7 +2382,7 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'q12-solutions',
-    factCheckDate: '2026-09-02',
+    factCheckDate: '2026-09-05',
     structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
     resourceKind: 'solution-set',
     unitId: 'Q12-SOLUTIONS',
@@ -2511,6 +2513,90 @@ const publicationPairs: readonly PublicationPair[] = [
     hardwareGate: 'none',
     zh: '/libraries/thrust-algorithm-vocabulary/solutions/',
     en: '/en/libraries/thrust-algorithm-vocabulary/solutions/',
+  },
+  {
+    pairId: 'l03',
+    factCheckDate: '2026-09-05',
+    structure: 'outcome,prerequisites,scope-and-headers,device-reduce-sum,device-scan-sums,two-phase-storage,streams-and-lifetimes,determinism,version-matrix,environment-overloads,known-issues,license-review,evidence-boundary,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'L03',
+    prerequisites: 'A02,A03,M07,L01',
+    relatedUnits: 'L04,EX17,LAB11,VIS10',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    sourceCount: '17',
+    sourceVersions: 'CUB-1.15.1,CUB-2.8.2,CUB-3.3.4,CCCL-v3.4.0,CCCL-v3.4.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1',
+    zh: '/libraries/cub-device-primitives/',
+    en: '/en/libraries/cub-device-primitives/',
+  },
+  {
+    pairId: 'l03-exercises',
+    factCheckDate: '2026-09-05',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'L03-EXERCISES',
+    prerequisites: 'L03',
+    hardwareGate: 'none',
+    expectedObservations: 'none',
+    zh: '/libraries/cub-device-primitives/exercises/',
+    en: '/en/libraries/cub-device-primitives/exercises/',
+  },
+  {
+    pairId: 'l03-solutions',
+    factCheckDate: '2026-09-05',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'L03-SOLUTIONS',
+    prerequisites: 'L03-EXERCISES',
+    hardwareGate: 'none',
+    expectedObservations: 'none',
+    zh: '/libraries/cub-device-primitives/solutions/',
+    en: '/en/libraries/cub-device-primitives/solutions/',
+  },
+  {
+    pairId: 'l04',
+    factCheckDate: '2026-09-05',
+    structure: 'outcome,prerequisites,scope-and-headers,participant-contract,warp-primitives,block-primitives,data-arrangement,temporary-storage,partial-valid,algorithm-variants,known-issues,visual-reuse,license-review,evidence-boundary,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'L04',
+    prerequisites: 'F02,M03,M05,A02,A03,L03',
+    relatedUnits: 'M06,M12,VIS10',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    sourceCount: '17',
+    sourceVersions: 'CCCL-v3.4.2',
+    zh: '/libraries/cub-warp-block-primitives/',
+    en: '/en/libraries/cub-warp-block-primitives/',
+  },
+  {
+    pairId: 'l04-exercises',
+    factCheckDate: '2026-09-05',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'L04-EXERCISES',
+    prerequisites: 'L04',
+    hardwareGate: 'none',
+    expectedObservations: 'none',
+    zh: '/libraries/cub-warp-block-primitives/exercises/',
+    en: '/en/libraries/cub-warp-block-primitives/exercises/',
+  },
+  {
+    pairId: 'l04-solutions',
+    factCheckDate: '2026-09-05',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'L04-SOLUTIONS',
+    prerequisites: 'L04-EXERCISES',
+    hardwareGate: 'none',
+    expectedObservations: 'none',
+    zh: '/libraries/cub-warp-block-primitives/solutions/',
+    en: '/en/libraries/cub-warp-block-primitives/solutions/',
   },
   {
     pairId: 'ex01',
@@ -2844,8 +2930,34 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/examples/sanitizer-defect-suite/',
   },
   {
+    pairId: 'ex17',
+    factCheckDate: '2026-09-05',
+    structure: 'purpose,project,cpu-reference,device-reduce,device-scan,storage-stream-lifetime,version-profiles,build,compatibility,evidence,expected-observations,sources',
+    resourceKind: 'runnable-example',
+    unitId: 'EX17',
+    prerequisites: 'L03',
+    relatedUnits: 'A02,A03,Q02,L01,EX11,EX12,LAB11',
+    exampleIds: 'EX17',
+    canonicalExample: 'EX17',
+    canonicalRanges: 'cpu-reference,device-reduce,device-scan',
+    hardwareGate: 'Build: x86-64 C++17 host plus selected Toolkit/component profile; runtime: Native Linux only, one CC 7.5+ GPU; 65,588 fixed bytes plus three queried scratch allocations must not exceed 8,000,000,000 bytes',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'Pending Hardware Verification',
+    expectedObservations: '3 declared expectations',
+    recordedObservations: 'none',
+    toolkitLanes: 'cuda-11.8,cuda-12.9,cuda-13.3',
+    minimumComputeCapability: '7.5',
+    maximumProblemMemoryBytes: '8000000000',
+    gpuCount: '1',
+    permissions: 'read bundled or pinned selected headers; one CUDA device; compiler, make, compile-check, host-test, and CUDA-binary execution; EX17 build/result/evidence-directory write/delete',
+    sourceCount: '16',
+    sourceVersions: 'CUB-1.15.1,CUB-2.8.2,CUB-3.3.4,CCCL-v3.4.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1,CUDA-Runtime-13.3.1',
+    zh: '/examples/cub-device-reduction-scan/',
+    en: '/en/examples/cub-device-reduction-scan/',
+  },
+  {
     pairId: 'labs-index',
-    factCheckDate: '2026-09-03',
+    factCheckDate: '2026-09-05',
     structure: 'scope,published-index,sequence,evidence-boundary',
     zh: '/labs/',
     en: '/en/labs/',
@@ -3105,6 +3217,36 @@ const publicationPairs: readonly PublicationPair[] = [
     sourceVersions: '11.8.0,12.9.1,12.9.2,13.3,13.3.1,2022.3.0,2022.3.0.22,2025.2.1,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75,2026.2.1',
     zh: '/labs/optimize-canonical-transpose/',
     en: '/en/labs/optimize-canonical-transpose/',
+  },
+  {
+    pairId: 'lab11',
+    factCheckDate: '2026-09-05',
+    structure: 'contract,prerequisites,source-coordinates,component-profiles,canonical-review,workload-correctness,timing-boundaries,traffic-boundaries,manifest,build-version-gates,warm-up-acquisition,profiler-mapping,reduction-custody,maintenance-rubric,observations,criteria-blockers,evidence,cleanup,sources',
+    resourceKind: 'lab',
+    unitId: 'LAB11',
+    prerequisites: 'Q12,L03',
+    relatedUnits: 'A02,Q01,Q02,Q06,Q08,Q10,L01,L04,EX11,EX17,VIS10',
+    exampleIds: 'EX11,EX17',
+    canonicalExample: 'EX17',
+    canonicalRanges: 'cpu-reference,device-reduce',
+    hardwareGate: 'Native Linux only；one CC 7.5+ GPU；C++17；cuda-11.8/12.9/13.3；bundled CUB 1.15.1/2.8.2/3.3.4；selected CCCL 3.4.2 only on 12.9/13.3；matching NCU/CUPTI；per-process max(16,468, 16,400 + T) bytes；approved non-admin counters；no sudo or bypass',
+    hardwareGateEn: 'Native Linux only; one CC 7.5+ GPU; C++17; cuda-11.8/12.9/13.3; bundled CUB 1.15.1/2.8.2/3.3.4; selected CCCL 3.4.2 only on 12.9/13.3; matching NCU/CUPTI; per-process max(16,468, 16,400 + T) bytes; approved non-admin counters; no sudo or bypass',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'Pending Hardware Verification',
+    expectedObservations: '10 declared expectations',
+    recordedObservations: 'none',
+    estimatedMinutes: '240',
+    difficulty: 'advanced',
+    toolkitLanes: 'cuda-11.8,cuda-12.9,cuda-13.3',
+    minimumComputeCapability: '7.5',
+    maximumProblemMemoryBytes: '8000000000',
+    gpuCount: '1',
+    permissions: 'one CUDA device；compiler/example/reviewed-runner/hash/git/ncu execution；learner-owned artifact custody；approved non-admin counters；no sudo、elevation、driver-policy change or bypass',
+    permissionsEn: 'one CUDA device; compiler/example/reviewed-runner/hash/git/ncu execution; learner-owned artifact custody; approved non-admin counters; no sudo, elevation, driver-policy change, or bypass',
+    sourceCount: '16',
+    sourceVersions: '11.8.0,11.8.89,CUB-1.15.1,12.9.1,12.9.2,CUB-2.8.2,13.3,13.3.1,CUB-3.3.4,CCCL-3.4.2,2022.3.0.22,2025.2.1.3,2026.2.1.5,11.8.87,12.9.79,13.3.75',
+    zh: '/labs/compare-custom-reduction-with-cub/',
+    en: '/en/labs/compare-custom-reduction-with-cub/',
   },
   {
     pairId: 'visuals-index',
@@ -3375,32 +3517,32 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'practice-bank',
-    factCheckDate: '2026-09-04',
-    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,review',
+    factCheckDate: '2026-09-05',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02',
-    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,LAB06,LAB08,LAB09,LAB10,VIS13,VIS14,VIS18',
+    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04',
+    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18',
     zh: '/practice/',
     en: '/en/practice/',
   },
   {
     pairId: 'glossary',
-    factCheckDate: '2026-09-04',
-    structure: 'use,lookup-index,entries,maintenance',
+    factCheckDate: '2026-09-05',
+    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,maintenance',
     zh: '/glossary/',
     en: '/en/glossary/',
   },
   {
     pairId: 'sources-and-versions',
-    factCheckDate: '2026-09-04',
-    structure: 'scope,lookup-index,verified-interfaces,content-sources,review-record',
+    factCheckDate: '2026-09-05',
+    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',
   },
   {
     pairId: 'about',
-    factCheckDate: '2026-09-04',
+    factCheckDate: '2026-09-05',
     structure: 'purpose,scope,author,feedback',
     zh: '/about/',
     en: '/en/about/',
@@ -3413,9 +3555,9 @@ function metadata(document: Document, name: string) {
 
 describe('Publication Pairs', () => {
   it.each(
-    publicationPairs.flatMap(({ pairId, factCheckDate = '2026-08-24', structure, zh, en, ...contract }) => [
+    publicationPairs.flatMap(({ pairId, factCheckDate = '2026-08-24', structure, zh, en, hardwareGateEn, permissionsEn, ...contract }) => [
       { route: zh, lang: 'zh-CN', counterpart: en, pairId, factCheckDate, structure, ...contract },
-      { route: en, lang: 'en', counterpart: zh, pairId, factCheckDate, structure, ...contract },
+      { route: en, lang: 'en', counterpart: zh, pairId, factCheckDate, structure, ...contract, hardwareGate: hardwareGateEn ?? contract.hardwareGate, permissions: permissionsEn ?? contract.permissions },
     ]),
   )('publishes $route with aligned metadata and a direct counterpart', async ({ route, lang, counterpart, pairId, factCheckDate, structure, resourceKind, unitId, prerequisites, relatedUnits, exampleIds, canonicalExample, canonicalRanges, hardwareGate, toolGate, evidenceCompilation = 'none', evidenceRuntime = 'none', expectedObservations, recordedObservations = 'none', estimatedMinutes, difficulty, toolkitLanes, minimumComputeCapability, maximumProblemMemoryBytes, gpuCount, permissions, sourceCount, sourceVersions }) => {
     const document = await readRoute(route);
@@ -3492,11 +3634,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(238);
-    expect(sourceRoutes.size).toBe(476);
+    expect(publicationPairs).toHaveLength(246);
+    expect(sourceRoutes.size).toBe(492);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
-    for (const absentUnitId of ['L03', 'LAB11', 'L06', 'LAB12', 'L13', 'EX20']) {
+    for (const publishedUnitId of ['L03', 'L04', 'EX17', 'LAB11']) {
+      expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
+    }
+    for (const absentUnitId of ['L06', 'LAB12', 'L13', 'EX20']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
@@ -3597,6 +3742,12 @@ describe('Publication Pairs', () => {
       ['L02', ['A01', 'A03', 'A09']],
       ['L02-EXERCISES', ['L02']],
       ['L02-SOLUTIONS', ['L02-EXERCISES']],
+      ['L03', ['A02', 'A03', 'M07', 'L01']],
+      ['L03-EXERCISES', ['L03']],
+      ['L03-SOLUTIONS', ['L03-EXERCISES']],
+      ['L04', ['F02', 'M03', 'M05', 'A02', 'A03', 'L03']],
+      ['L04-EXERCISES', ['L04']],
+      ['L04-SOLUTIONS', ['L04-EXERCISES']],
       ['LAB01', ['O03', 'O08']],
       ['LAB02', ['O03', 'F01']],
       ['LAB03', ['F03', 'F05']],
@@ -3607,6 +3758,7 @@ describe('Publication Pairs', () => {
       ['LAB08', ['Q07', 'Q08']],
       ['LAB09', ['Q10']],
       ['LAB10', ['Q11']],
+      ['LAB11', ['Q12', 'L03']],
       ['EX01', []],
       ['EX02', []],
       ['EX03', ['F03']],
@@ -3623,6 +3775,7 @@ describe('Publication Pairs', () => {
       ['EX14', ['A05']],
       ['EX15', ['A08']],
       ['EX16', ['Q03', 'Q04']],
+      ['EX17', ['L03']],
       ['VIS01', []],
       ['VIS02', []],
       ['VIS03', []],
@@ -3731,8 +3884,10 @@ describe('published navigation', () => {
         '/correctness/kernel-first-nsight-compute/',
          '/correctness/transpose-optimization-case-study/',
          '/correctness/gemm-optimization-case-study/',
-         '/libraries/library-primitive-dsl-custom-kernel/',
-         '/libraries/thrust-algorithm-vocabulary/',
+          '/libraries/library-primitive-dsl-custom-kernel/',
+          '/libraries/thrust-algorithm-vocabulary/',
+          '/libraries/cub-device-primitives/',
+          '/libraries/cub-warp-block-primitives/',
         '/examples/environment-report/',
         '/examples/vector-addition/',
         '/examples/multidimensional-indexing/',
@@ -3748,7 +3903,8 @@ describe('published navigation', () => {
           '/examples/privatized-histogram/',
           '/examples/tiled-transpose/',
           '/examples/tiled-gemm/',
-          '/examples/sanitizer-defect-suite/',
+           '/examples/sanitizer-defect-suite/',
+           '/examples/cub-device-reduction-scan/',
         '/labs/',
         '/labs/record-cuda-environment/',
         '/labs/vector-addition/',
@@ -3758,7 +3914,8 @@ describe('published navigation', () => {
         '/labs/build-overlapped-pipeline/',
         '/labs/diagnose-four-sanitizer-failures/',
         '/labs/profile-full-application-before-kernel/',
-        '/labs/optimize-canonical-transpose/',
+         '/labs/optimize-canonical-transpose/',
+         '/labs/compare-custom-reduction-with-cub/',
         '/visuals/',
         '/visuals/kernel-journey/',
         '/visuals/indexing/',
@@ -3841,8 +3998,10 @@ describe('published navigation', () => {
         '/en/correctness/kernel-first-nsight-compute/',
          '/en/correctness/transpose-optimization-case-study/',
          '/en/correctness/gemm-optimization-case-study/',
-         '/en/libraries/library-primitive-dsl-custom-kernel/',
-         '/en/libraries/thrust-algorithm-vocabulary/',
+          '/en/libraries/library-primitive-dsl-custom-kernel/',
+          '/en/libraries/thrust-algorithm-vocabulary/',
+          '/en/libraries/cub-device-primitives/',
+          '/en/libraries/cub-warp-block-primitives/',
         '/en/examples/environment-report/',
         '/en/examples/vector-addition/',
         '/en/examples/multidimensional-indexing/',
@@ -3858,7 +4017,8 @@ describe('published navigation', () => {
           '/en/examples/privatized-histogram/',
           '/en/examples/tiled-transpose/',
           '/en/examples/tiled-gemm/',
-          '/en/examples/sanitizer-defect-suite/',
+           '/en/examples/sanitizer-defect-suite/',
+           '/en/examples/cub-device-reduction-scan/',
         '/en/labs/',
         '/en/labs/record-cuda-environment/',
         '/en/labs/vector-addition/',
@@ -3868,7 +4028,8 @@ describe('published navigation', () => {
         '/en/labs/build-overlapped-pipeline/',
         '/en/labs/diagnose-four-sanitizer-failures/',
         '/en/labs/profile-full-application-before-kernel/',
-        '/en/labs/optimize-canonical-transpose/',
+         '/en/labs/optimize-canonical-transpose/',
+         '/en/labs/compare-custom-reduction-with-cub/',
         '/en/visuals/',
         '/en/visuals/kernel-journey/',
         '/en/visuals/indexing/',

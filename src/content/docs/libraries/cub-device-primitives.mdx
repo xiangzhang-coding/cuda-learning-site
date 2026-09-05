@@ -1,0 +1,290 @@
+---
+title: 'L03：用 CUB Device Primitives 完成归约与扫描'
+description: 在精确的 bundled/selected CUB 矩阵下，使用 DeviceReduce::Sum 与 DeviceScan 的包含式、排除式求和，并负责临时存储、流、生命周期和数值合同。
+pairId: l03
+counterpart: /en/libraries/cub-device-primitives/
+factCheckDate: '2026-09-05'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - scope-and-headers
+  - device-reduce-sum
+  - device-scan-sums
+  - two-phase-storage
+  - streams-and-lifetimes
+  - determinism
+  - version-matrix
+  - environment-overloads
+  - known-issues
+  - license-review
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L03
+prerequisites:
+  - A02
+  - A03
+  - M07
+  - L01
+relatedUnits:
+  - L04
+  - EX17
+  - LAB11
+  - VIS10
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; released 2026-08-05'
+    platform: 'Immutable selected CCCL and CUB source coordinate'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.0 environment API release record'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.0'
+    version: 'CCCL v3.4.0; commit a5630ac57111e1aaef8cfe0069ede566c3d15f60; released 2026-07-16'
+    platform: 'Single-call environment API rollout record; traditional two-phase APIs retained'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 Toolkit compatibility'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility'
+    version: 'CCCL v3.4.2; tagged README'
+    platform: 'Latest-patch CUDA 12.x and 13.x compatibility policy; CUDA 11.8 excluded from the selected pin'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 device-wide API guide'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst'
+    version: 'CCCL and CUB v3.4.2; tagged documentation'
+    platform: 'Two-phase query/execute and single-call environment contracts'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 device-scope developer guide'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/device_scope.rst'
+    version: 'CCCL and CUB v3.4.2; tagged developer documentation'
+    platform: 'Temporary-storage allocation, stream-order reuse, and dispatch boundaries'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 DeviceReduce interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'DeviceReduce::Sum semantics, overlap, stream, storage, and determinism contracts'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 DeviceScan interface'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh'
+    version: 'CCCL and CUB v3.4.2; exact tagged source'
+    platform: 'InclusiveSum and ExclusiveSum semantics, overlap, storage, stream, and environment overloads'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 DeviceReduce environment API tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_device_reduce_env_api.cu'
+    version: 'CCCL and CUB v3.4.2; tagged owner tests'
+    platform: 'Owner coverage only; not Learning Site compilation or runtime evidence'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 DeviceScan environment API tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_device_scan_env_api.cu'
+    version: 'CCCL and CUB v3.4.2; tagged owner tests'
+    platform: 'Owner coverage only; not Learning Site compilation or runtime evidence'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.4.2 version header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/version.cuh'
+    version: 'CUB_VERSION 300402; CUB v3.4.2'
+    platform: 'Exact selected component-version coordinate'
+    accessDate: '2026-09-05'
+  - title: 'CUB v2.8.2 version header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v2.8.2/cub/cub/version.cuh'
+    version: 'CUB_VERSION 200802; CUB v2.8.2; commit 207d20fb6a4165fcd2551bcf2f04b8a5ea40829f'
+    platform: 'Exact component coordinate corresponding to the CUDA 12.9.2 bundle'
+    accessDate: '2026-09-05'
+  - title: 'CUB v3.3.4 version header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.3.4/cub/cub/version.cuh'
+    version: 'CUB_VERSION 300304; CUB v3.3.4; commit 413d2efd811ebb2ca0333a281d04a2de838ecad6'
+    platform: 'Exact component coordinate corresponding to the CUDA 13.3.1 redistribution archive'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'CUDA 11.8.0; cuda_cccl 11.8.89; linux-x86_64 SHA-256 99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7; bundled CUB_VERSION 101501 (1.15.1)'
+    platform: 'NVIDIA manifest plus authoritative device_reduce.cuh, device_scan.cuh, and version.cuh inspection in its hash-addressed Linux x86_64 archive'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'CUDA 12.9.2; cuda_cccl 12.9.27; linux-x86_64 SHA-256 8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa; bundled CUB_VERSION 200802 (2.8.2)'
+    platform: 'NVIDIA manifest plus authoritative device_reduce.cuh, device_scan.cuh, and version.cuh inspection in its hash-addressed Linux x86_64 archive'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'CUDA 13.3.1; cccl 13.3.3.4.1; linux-x86_64 SHA-256 26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268; bundled CUB_VERSION 300304 (3.3.4)'
+    platform: 'NVIDIA manifest plus authoritative device_reduce.cuh, device_scan.cuh, and version.cuh inspection in its hash-addressed Linux x86_64 archive'
+    accessDate: '2026-09-05'
+  - title: 'CCCL issue 5966'
+    url: 'https://github.com/NVIDIA/cccl/issues/5966'
+    version: 'Open documentation issue with needs-triage label as of 2026-09-05; scope limited to NumItemsT-sensitive temporary-storage sizing'
+    platform: 'Scoped query/execute type-consistency caveat; not a Sum or Scan correctness verdict'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 aggregate license'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE'
+    version: 'CCCL v3.4.2'
+    platform: 'Aggregate license map; exact adapted files would still require file-level review'
+    accessDate: '2026-09-05'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l03 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/cub-device-primitives/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,scope-and-headers,device-reduce-sum,device-scan-sums,two-phase-storage,streams-and-lifetimes,determinism,version-matrix,environment-overloads,known-issues,license-review,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L03 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A02,A03,M07,L01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L04,EX17,LAB11,VIS10' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '17' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CUB-1.15.1,CUB-2.8.2,CUB-3.3.4,CCCL-v3.4.0,CCCL-v3.4.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cub-device-primitives/" lang="en">Read the English counterpart</a>
+
+CUB 的 device-wide [集体原语（collective，TERM-107）](/glossary/#term-107)把 [A02 的归约（reduction，TERM-127）](/glossary/#term-127)和 [A03 的扫描（scan，TERM-130）](/glossary/#term-130)交给库实现，但调用者仍拥有 [临时存储（temporary storage，TERM-183）](/glossary/#term-183)、流顺序、对象生命周期、重叠关系与[确定性（determinism，TERM-138）](/glossary/#term-138)合同。本单元只教授 `DeviceReduce::Sum`、`DeviceScan::InclusiveSum` 与 `DeviceScan::ExclusiveSum` 这一小组入口。
+
+## 学习成果
+
+- 根据“一个 aggregate”与“每个位置一个 prefix”选择正确的 device-wide primitive。
+- 准确说明三种操作的输出、允许的原地形式与禁止的部分重叠。
+- 执行传统 API 的查询、分配、执行两阶段协议，并让临时存储活到 GPU 工作完成。
+- 在显式 stream 上建立 producer、consumer、host observation 与释放边。
+- 区分 bundled CUB 1.15.1/2.8.2/3.3.4、独立选择的 v3.4.2，以及 reduction 与 scan 不同的浮点确定性合同。
+
+## 先修关系
+
+课程图按此顺序固定先修项：[A02：多阶段归约](/algorithms/multi-stage-reduction/)、[A03：包含式与排除式扫描](/algorithms/inclusive-exclusive-scan/)、[M07：流顺序](/memory/stream-ordering/)和 [L01：选择库、原语、DSL 或自定义内核](/libraries/library-primitive-dsl-custom-kernel/)，即 `A02, A03, M07, L01`。A02/A03 提供语义与数值模型，M07 提供 completion edge，L01 解释为何采用 reusable primitive 仍不转移 composition ownership。
+
+## 范围、调用层级与 canonical headers
+
+`cub::DeviceReduce` 和 `cub::DeviceScan` 是 host 侧调用的 device-scope 类；它们提交 device work，并把结果写入 device-accessible output。Focused canonical headers 分别是 `<cub/device/device_reduce.cuh>` 与 `<cub/device/device_scan.cuh>`。聚合头 `<cub/cub.cuh>` 也会公开这些名称，但 review packet 应记录实际依赖的窄头文件。
+
+这里不覆盖通用 `Reduce`/`Scan`、segmented forms、by-key forms、selection 或 sorting。选择 production primitive 并不证明其 backend、kernel 数量、traffic 或速度。
+
+## `DeviceReduce::Sum`：N 个输入，一个 aggregate
+
+对 `N` 个输入 `x[0] ... x[N-1]`，`DeviceReduce::Sum` 使用加法和零初值，向 `d_out` 写一个 aggregate。数学合同是对全部 `N` 项求和；并行实现可以重新结合操作数，因此这不是固定的 serial left fold。Tagged interface 不支持非交换的自定义 `+` 语义。
+
+输入范围 `[d_in, d_in + N)` 不得与 `d_out` 重叠。Reduction 没有 scan 那种 exact in-place 例外；把 output 放进 input range 会违反前置条件。`d_out` 只有在提交到 stream 的工作完成后才可由 host 或无依赖的其他 stream 观察。
+
+## `DeviceScan::InclusiveSum` 与 `ExclusiveSum`：每个位置一个 prefix
+
+对相同输入，`InclusiveSum` 的逻辑输出满足 `y[i] = x[0] + ... + x[i]`：当前位置参与自己的 prefix。`ExclusiveSum` 使用该输入类型的零初始化值作为初值，满足 `y[0] = 0`，且 `i > 0` 时 `y[i] = 0 + x[0] + ... + x[i-1]`：当前位置不参与自己的 prefix。这个零值必须确实适合作为应用类型的加法单位元。
+
+两种 scan 都允许 `d_in == d_out` 的 exact in-place 形式。除此之外，完整 input/output ranges 不得以任何方式重叠。逻辑公式固定每个 prefix 包含哪些元素，不固定 parallel parenthesization；custom sum type 仍需满足 associative operation contract，tagged scan interface 允许非交换的 scan order。
+
+| 所需结果 | 选择边界 | 输出有效范围 |
+| --- | --- | --- |
+| 全部 `N` 项的一个和 | Device reduction | 一个 output aggregate |
+| 包含当前项的 `N` 个 prefixes | Inclusive device scan | `N` 个 outputs |
+| 从零开始、不含当前项的 `N` 个 prefixes | Exclusive device scan | `N` 个 outputs |
+
+## 传统 API 的两阶段临时存储协议
+
+三种传统入口都把 `void* d_temp_storage` 与 `size_t& temp_storage_bytes` 放在最前面。严格协议是：
+
+- **查询阶段：** 用 `d_temp_storage == nullptr` 调用同一 overload。API 把所需字节数写入 `temp_storage_bytes`，不启动 kernel、不访问用户 input/output storage，也不执行算法。
+- **分配阶段：** 在当前 device 上分配至少该字节数的 device-accessible storage。Tagged developer guide 要求即使某项配置不需要 scratch，传统 overload 仍提供至少一字节 allocation。
+- **执行阶段：** 在同一当前 device 上，以相同 API、template instantiation、参数类型和问题配置传入 allocation，再检查返回的 `cudaError_t`。
+
+查询结果不是跨 API、跨 `NumItemsT`、跨 device 或跨配置的常量。改变当前 device、operation、iterator/type instantiation 或 problem size 后应重新查询。把 scratch 当作该未完成 operation 的独占可写资源；不要让它与 input/output allocation 重叠，也不要并发交给另一项 work。
+
+## 显式 streams、completion 与 lifetime
+
+传统 overload 的最后一个可选参数是 `cudaStream_t`，默认 stream 为 `0`。可维护的 composition 应把同一个显式 stream 传给执行调用，并在 ledger 中记录它。Device-level 调用返回 `cudaError_t`，但不会因此同步 host 与 device；成功返回表示 submission 没有报告该错误，不表示 output 已可在 host 使用。
+
+同一 stream 的先后调用可按 stream order 复用同一 scratch，无需插入 host synchronization。不同 streams 不能同时复用它：先用 event dependency 或 stream completion 建立前一使用结束的边。Input、output 与 temporary allocation 都必须存活到最后一个使用者完成；host read、无依赖 cross-stream consumer、重新分配或释放都必须位于相应 completion edge 之后。后续同步点还可能报告异步错误。
+
+## Reduction 与 scan 的确定性合同随版本而变
+
+已检查的传统 owner headers 不支持一条不分版本的“reduction 对 scan”规则。对于浮点加法等 pseudo-associative operations：
+
+- Bundled CUB 1.15.1、2.8.2、3.3.4 与 selected 3.4.2 的 `DeviceReduce::Sum` 都记录 **same-GPU run-to-run determinism**。该合同不承诺等于 serial left fold，也不承诺不同 compute capability 的 GPU 给出同一 bit pattern；架构相关 tile sizing 构成已记录的 cross-compute-capability caveat。
+- CUB 1.15.1 的 `DeviceScan::InclusiveSum` 与 `ExclusiveSum` 也记录 same-GPU run-to-run determinism，并带有相同的 cross-compute-capability caveat。Bundled CUB 2.8.2、3.3.4 与 selected 3.4.2 则记录 pseudo-associative scan results 可能在不同运行之间变化。不能把 1.15.1 scan guarantee 继承到后续 rows，也不能拒绝其 inspected header 已明确给出的保证。
+
+这些是 version/operation-specific owner contracts，不是已观察的 EX17 behavior。对于整数加法，正确的零 identity 与已证明的 no-overflow bound 让每个 prefix 不受 parenthesization 影响而保持 exact。EX17 因而继续要求完整 `uint32_t` scan arrays 精确匹配，但本页没有记录 device output 或 determinism observation。
+
+## Bundled 与 independently selected version matrix
+
+Toolkit label 与 CUB semantic version 是两个坐标。NVIDIA redistribution manifests 给出 package archive 与 hash。在 SHA-256 分别为 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`、`8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa` 与 `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268` 的 exact Linux x86-64 archives 内检查到的 `cub/device/device_reduce.cuh`、`cub/device/device_scan.cuh` 与 `cub/version.cuh`，是三个 bundled contract rows 的权威。Selected commit 的 exact tagged headers 负责 3.4.2。Context7 没有检查或验证任何 redistribution archive。每一行仍需独立 compilation evidence；下表不是本站 build 或 runtime result。
+
+| Toolkit Lane candidate | CUB coordinate | 供应方式 | 传统 FP32 `DeviceReduce::Sum` | 传统 FP32 `DeviceScan` sums | EX17 采用的公共合同 |
+| --- | --- | --- | --- | --- | --- |
+| CUDA 11.8.0 | CUB 1.15.1 (`CUB_VERSION 101501`) | bundled `cuda_cccl 11.8.89` | Documented same-GPU run-to-run determinism; cross-compute-capability caveat | Documented same-GPU run-to-run determinism; cross-compute-capability caveat | 传统两阶段 API 与显式 stream |
+| CUDA 12.9.2 | CUB 2.8.2 (`CUB_VERSION 200802`) | bundled `cuda_cccl 12.9.27` | Documented same-GPU run-to-run determinism; cross-compute-capability caveat | Documented possible run-to-run variation for pseudo-associative operations | 传统两阶段 API 与显式 stream |
+| CUDA 13.3.1 | CUB 3.3.4 (`CUB_VERSION 300304`) | bundled `cccl 13.3.3.4.1` | Documented same-GPU run-to-run determinism; cross-compute-capability caveat | Documented possible run-to-run variation for pseudo-associative operations | 传统两阶段 API 与显式 stream |
+| CUDA 12.9.2 | CUB/CCCL 3.4.2 (`CUB_VERSION 300402`) | independent selected headers at commit `d36012203ef73ac7f966e848dd88482273e91e02` | Documented same-GPU run-to-run determinism; cross-compute-capability caveat | Documented possible run-to-run variation for pseudo-associative operations | 同一传统两阶段 API，用于矩阵可比性 |
+| CUDA 13.3.1 | CUB/CCCL 3.4.2 (`CUB_VERSION 300402`) | independent selected headers at the same commit | Documented same-GPU run-to-run determinism; cross-compute-capability caveat | Documented possible run-to-run variation for pseudo-associative operations | 同一传统两阶段 API，用于矩阵可比性 |
+
+CCCL 3.x 的 tagged policy 只覆盖 latest-patch CUDA 12.x/13.x，因此 selected 3.4.2 不进入 CUDA 11.8.0 行。Bundled 与 independently selected headers 也不能在同一 translation unit 中被含糊混用；Environment Manifest 必须记录实际 include coordinate。
+
+## v3.4.2 的 environment overload 边界
+
+CCCL 3.4.0 的 immutable release 记录“完成”CUB device-wide single-call environment overload rollout；传统两阶段 API 没有 deprecated。v3.4.2 同时提供 environment forms，可从 environment 取得 stream、memory resource 与受支持的 execution requirements。Exact v3.4.2 `DeviceScan` source 把这里的 `InclusiveSum`/`ExclusiveSum` environment overload 标为 **added in 3.4.0，first appears in CUDA Toolkit 13.4**；`DeviceReduce::Sum` environment form 在 v3.4.2 也可用。
+
+“First Toolkit 13.4”是 owner 的 availability annotation，不是本站新增 Toolkit Lane 或 runtime claim。已发布的 [EX17](/examples/cub-device-reduction-scan/)为覆盖上表三个 bundles 并保持调用结构可比较，使用传统两阶段 API；它不以 v3.4.2 environment form 作为矩阵前置条件。
+
+## 限定的 known-issue ledger
+
+Open documentation issue [#5966](https://github.com/NVIDIA/cccl/issues/5966)用 `DeviceReduce::Min` 展示：相同数值的 item count 以 `size_t` 或 `int` 实例化时，查询出的 temporary-storage bytes 可以不同。它不证明本单元的 Sum/Scan 存在 correctness defect，也不覆盖所有版本；它只强化 tagged v3.4.2 guide 已明确的规则：query 与 execute 必须使用同一 template arguments 和 current device。
+
+其他 issue 没有进入本单元：不同 pointer/input configurations 的比较不能直接反驳同一合同的 run-to-run guarantee，已在 v3.4.2 前关闭并修复的问题也不是当前缺陷。这是一份限定 ledger，不是 CCCL issue dump。
+
+## File-level license review
+
+Exact v3.4.2 CUB headers 标记为 BSD-3；本页引用的两个 environment API tests 标记为 BSD-3-Clause。CCCL aggregate license 还映射 Thrust、libcu++ 与其他 component terms。Redistribution manifests 对 Toolkit archives 记录各自 license label。本站页面本身是 CC-BY-4.0、`provenance: original`。
+
+L03 没有复制或改编 owner source、test、example、tutorial、table、figure 或 benchmark；公式、矩阵、练习与解答均为学习站原创表达。未来若复制任何 owner material，必须检查 exact file 的 SPDX、copyright block、embedded notice 与适用 license，而不能只引用 aggregate `LICENSE`。
+
+2026-09-05 已查询 Context7 `/nvidia/cccl` 进行 discovery 与交叉核对。它返回 current/main-branch material，不是 immutable v3.4.2 snapshot，也没有验证 bundled archive 内容。Exact tags 与 selected commit 负责 3.4.2；manifest 指定的 hash-addressed redistribution archives 内已检查的 `device_reduce.cuh`、`device_scan.cuh` 和 `version.cuh` 负责 bundled contracts 与 versions。
+
+## 证据边界
+
+L03 的 `compilation`、`runtime`、`expectedObservations` 与 `recordedObservations` 四个 arrays 全为空。API presence、owner tests、archive inspection 与 static contract review 不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）。本单元没有新增、展示、编译或运行 CUDA/C++ source，也没有记录 output、bit pattern、allocation path、kernel count、timing、traffic、speedup 或 winner。
+
+## 检索检查
+
+1. `DeviceReduce::Sum`、`InclusiveSum` 与 `ExclusiveSum` 各自写出多少 outputs，每个 output 包含哪些 inputs？
+2. 为什么 `d_temp_storage == nullptr` 的调用不是一次 GPU execution，query 与 execute 又必须保持哪些坐标一致？
+3. Reduction 与 scan 分别允许哪种 input/output overlap，temporary allocation 必须活到何时？
+4. 哪四个 CUB coordinates 为浮点 reduction 记录 same-GPU run-to-run determinism，哪个 scan coordinate 也记录该保证，哪三个 scan coordinates 允许 run-to-run variation，且它们保留什么 cross-compute-capability caveat？
+5. 为什么 EX17 在 selected v3.4.2 也有意使用传统 API，而不把 3.4 environment overload 设为矩阵公共前置条件？
+
+## 继续练习
+
+- 完成 [L03 练习](/libraries/cub-device-primitives/exercises/)，再查看[独立复核解答](/libraries/cub-device-primitives/solutions/)。
+- 在[练习题库 PB-R4-003](/practice/#pb-r4-003)复核另一份 device-primitive contract packet。
+- [EX17 canonical route](/examples/cub-device-reduction-scan/)承载可执行代码；本单元不维护第二份 CUDA/C++ code fence。[LAB11](/labs/compare-custom-reduction-with-cub/)按 expected-only protocol 比较 EX11 与 EX17，且不发布 recorded result。
+- 继续 [L04：CUB Warp 与 Block Primitives](/libraries/cub-warp-block-primitives/)，并只把 [VIS10](/visuals/reduction-stages/)用于 evidence-neutral reduction-tree reasoning。
+- 复习 [TERM-107](/glossary/#term-107)、[TERM-127](/glossary/#term-127)、[TERM-130](/glossary/#term-130)、[TERM-138](/glossary/#term-138)与 [TERM-183](/glossary/#term-183)。
+
+## 来源与复核
+
+Selected coordinate 由 [v3.4.2 release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2)、[v3.4.0 release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.0)与 [tagged compatibility table](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md#cuda-toolkit-ctk-compatibility)负责。API 与 storage facts 来自 tagged [device-wide guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/api_docs/device_wide.rst)、[device-scope developer guide](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/cub/developer/device_scope.rst)、[`device_reduce.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_reduce.cuh)、[`device_scan.cuh`](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/device/device_scan.cuh)、[reduce owner tests](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_device_reduce_env_api.cu)与 [scan owner tests](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/test/catch2_test_device_scan_env_api.cu)。Selected version 来自 [v3.4.2 version header](https://github.com/NVIDIA/cccl/blob/v3.4.2/cub/cub/version.cuh)。对于 bundled rows，由 [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)、[12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)与 [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) manifests 指定的 hash-addressed archives 内三份已检查 owner headers 才是权威；GitHub [v2.8.2](https://github.com/NVIDIA/cccl/blob/v2.8.2/cub/cub/version.cuh)和 [v3.3.4](https://github.com/NVIDIA/cccl/blob/v3.3.4/cub/cub/version.cuh) version headers 只是 coordinate cross-check，不能替代 archive contract headers。Known-issue scope 只引用 [#5966](https://github.com/NVIDIA/cccl/issues/5966)，许可边界引用 [v3.4.2 aggregate license](https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE)。Context7 只作 discovery，没有验证 archives。
+
+**事实核对和来源访问日期：2026-09-05。**

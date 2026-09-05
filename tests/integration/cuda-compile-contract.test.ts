@@ -85,6 +85,11 @@ describe('CUDA compile evidence workflow', () => {
       'lane: ex16-cuda-11-8-cxx17',
       'lane: ex16-cuda-12-9-cxx17',
       'lane: ex16-cuda-13-3-cxx17',
+      'profile: cuda-11-8-bundled-cub-1-15-1',
+      'profile: cuda-12-9-bundled-cub-2-8-2',
+      'profile: cuda-13-3-bundled-cub-3-3-4',
+      'profile: cuda-12-9-selected-cccl-3-4-2',
+      'profile: cuda-13-3-selected-cccl-3-4-2',
     ]) {
       expect(workflow).toContain(coordinate);
     }
@@ -104,7 +109,7 @@ describe('CUDA compile evidence workflow', () => {
     const ex13Build = workflow.match(/^  ex13-build:\n[\s\S]*?(?=^  ex14-build:)/m)?.[0] ?? '';
     const ex14Build = workflow.match(/^  ex14-build:\n[\s\S]*?(?=^  ex15-build:)/m)?.[0] ?? '';
     const ex15Build = workflow.match(/^  ex15-build:\n[\s\S]*?(?=^  ex16-build:)/m)?.[0] ?? '';
-    const ex16Build = workflow.match(/^  ex16-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
+    const ex16Build = workflow.match(/^  ex16-build:\n[\s\S]*?(?=^  ex17-build:)/m)?.[0] ?? '';
 
     expect(workflow).toContain('node scripts/run-cuda-compile.mjs');
     expect(workflow).toContain('node scripts/check-artifacts.mjs');
@@ -113,7 +118,7 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain("docker version --format '{{.Server.Version}}'");
     expect(workflow).toContain('docker buildx version');
     expect(workflow).toContain('path: artifacts/cuda/${{ matrix.lane }}');
-    expect(workflow).not.toContain('path: .quality/');
+    expect(workflow.match(/^\s+path: \.quality\/cccl-v3\.4\.2$/gm)).toHaveLength(1);
     expect(workflow).toContain('retention-days: 7');
     expect(workflow).toContain('include-hidden-files: false');
     expect(workflow).toMatch(/^  cuda-compile-gate:/m);
@@ -133,8 +138,9 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('EX14_BUILD_RESULT: ${{ needs.ex14-build.result }}');
     expect(workflow).toContain('EX15_BUILD_RESULT: ${{ needs.ex15-build.result }}');
     expect(workflow).toContain('EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}');
+    expect(workflow).toContain('EX17_BUILD_RESULT: ${{ needs.ex17-build.result }}');
     expect(workflow).toContain(
-      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build]',
+      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build, ex17-build]',
     );
     expect(workflow).toContain('EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}');
     expect(workflow).toContain('if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi');
@@ -150,6 +156,7 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('if [ "$EX14_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX15_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('if [ "$EX16_BUILD_RESULT" != "success" ]; then exit 1; fi');
+    expect(workflow).toContain('if [ "$EX17_BUILD_RESULT" != "success" ]; then exit 1; fi');
     expect(workflow).toContain('bash scripts/compile-check.sh c++17 ex03');
     expect(workflow).toContain('artifacts/cuda-ex03/${{ matrix.lane }}');
 
@@ -282,6 +289,147 @@ describe('CUDA compile evidence workflow', () => {
     const ex16UploadOffset = ex16Build.indexOf('uses: actions/upload-artifact@');
     expect(ex16ScanOffset).toBeGreaterThan(-1);
     expect(ex16UploadOffset).toBeGreaterThan(ex16ScanOffset);
+  });
+
+  it('build-gates all five EX17 CUB profiles without granting Evidence Status', async () => {
+    const [workflow, ex17LaneScript, lab11RunnerBuild] = await Promise.all([
+      readProjectFile('.github/workflows/cuda-compile.yml'),
+      readProjectFile('examples/ex17-cub-device-reduction-scan/scripts/compile-check.sh'),
+      readProjectFile('scripts/check-lab11-runner-build.sh'),
+    ]);
+    const ex17Build = workflow.match(/^  ex17-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
+    const checkoutPin = '3d3c42e5aac5ba805825da76410c181273ba90b1';
+    const ccclCommit = 'd36012203ef73ac7f966e848dd88482273e91e02';
+    const profiles = [...ex17Build.matchAll(
+      /^\s+- profile: (\S+)\n\s+dependency_mode: (\S+)\n\s+image: (\S+)$/gm,
+    )].map((match) => ({
+      id: match[1],
+      dependencyMode: match[2],
+      image: match[3],
+    }));
+
+    expect(ex17Build).not.toBe('');
+    expect(profiles).toEqual([
+      {
+        id: 'cuda-11-8-bundled-cub-1-15-1',
+        dependencyMode: 'bundled',
+        image: 'nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f',
+      },
+      {
+        id: 'cuda-12-9-bundled-cub-2-8-2',
+        dependencyMode: 'bundled',
+        image: 'nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5',
+      },
+      {
+        id: 'cuda-13-3-bundled-cub-3-3-4',
+        dependencyMode: 'bundled',
+        image: 'nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87',
+      },
+      {
+        id: 'cuda-12-9-selected-cccl-3-4-2',
+        dependencyMode: 'selected',
+        image: 'nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5',
+      },
+      {
+        id: 'cuda-13-3-selected-cccl-3-4-2',
+        dependencyMode: 'selected',
+        image: 'nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87',
+      },
+    ]);
+
+    expect(ex17Build.match(new RegExp(`uses: actions/checkout@${checkoutPin}`, 'g')))
+      .toHaveLength(2);
+    expect(ex17Build).toContain([
+      '      - name: Check out canonical public source',
+      `        uses: actions/checkout@${checkoutPin}`,
+      '        with:',
+      '          persist-credentials: false',
+      '          ref: ${{ github.event.pull_request.head.sha || github.sha }}',
+    ].join('\n'));
+    expect(ex17Build).toContain([
+      '      - name: Check out selected CCCL 3.4.2 source',
+      "        if: ${{ matrix.dependency_mode == 'selected' }}",
+      `        uses: actions/checkout@${checkoutPin}`,
+      '        with:',
+      '          repository: NVIDIA/cccl',
+      `          ref: ${ccclCommit}`,
+      '          path: .quality/cccl-v3.4.2',
+      '          persist-credentials: false',
+    ].join('\n'));
+    expect(ex17Build).toContain([
+      '          cccl_args=()',
+      '          if [[ "${{ matrix.dependency_mode }}" == "selected" ]]; then',
+      '            cccl_args+=(--env "CCCL_ROOT=/workspace/.quality/cccl-v3.4.2")',
+      '          fi',
+    ].join('\n'));
+    expect(ex17Build.match(/CCCL_ROOT=\/workspace\/\.quality\/cccl-v3\.4\.2/g)).toHaveLength(2);
+    expect(ex17Build).toContain('"${cccl_args[@]}"');
+
+    expect(ex17Build).toContain('docker run --platform linux/amd64 --rm --network none');
+    expect(ex17Build).not.toContain('--gpus');
+    expect(ex17Build).toContain('bash scripts/compile-check.sh c++17 "${{ matrix.profile }}"');
+    const ex17CompileOffset = ex17Build.indexOf('Compile EX17 without granting Evidence Status');
+    const lab11CompileOffset = ex17Build.indexOf(
+      'Compile LAB11 comparison runner without granting Evidence Status',
+    );
+    const scanOffset = ex17Build.indexOf('Scan EX17 and LAB11 build logs');
+    expect(ex17CompileOffset).toBeGreaterThan(-1);
+    expect(lab11CompileOffset).toBeGreaterThan(ex17CompileOffset);
+    expect(scanOffset).toBeGreaterThan(lab11CompileOffset);
+    expect(ex17Build.match(/bash scripts\/check-lab11-runner-build\.sh/g)).toHaveLength(1);
+    expect(ex17Build).toContain([
+      'bash scripts/check-lab11-runner-build.sh "${{ matrix.profile }}" \\',
+      '            "/workspace/artifacts/cuda-ex17/${{ matrix.profile }}"',
+    ].join('\n'));
+    expect(ex17Build).toContain('--workdir /workspace');
+    expect(ex17Build).toContain('Scan EX17 and LAB11 build logs');
+    expect(ex17Build).toContain('Upload EX17 and LAB11 build-gate logs');
+    expect(ex17Build).not.toMatch(
+      /(?:^|\s)(?:\.\/)?build\/ex17-cub-device-reduction-scan(?:\s|$)/m,
+    );
+    for (const target of ['preprocess', 'compile', 'link', 'inspect', 'host-test']) {
+      expect(ex17LaneScript).toContain(`make -C "$example_root" ${target} `);
+    }
+    for (const [profileId, expectedCubVersion] of [
+      ['cuda-11-8-bundled-cub-1-15-1', '101501'],
+      ['cuda-12-9-bundled-cub-2-8-2', '200802'],
+      ['cuda-13-3-bundled-cub-3-3-4', '300304'],
+      ['cuda-12-9-selected-cccl-3-4-2', '300402'],
+      ['cuda-13-3-selected-cccl-3-4-2', '300402'],
+    ]) {
+      expect(lab11RunnerBuild).toContain(profileId);
+      expect(lab11RunnerBuild).toContain(`expected_cub_version="${expectedCubVersion}"`);
+    }
+    expect(lab11RunnerBuild).toContain('CCCL_ROOT is required by selected CCCL profiles');
+    expect(lab11RunnerBuild).toContain('--preprocess "$runner_source"');
+    expect(lab11RunnerBuild).toContain('--compile "$runner_source"');
+    expect(lab11RunnerBuild).toContain('nvcc --std=c++17 "$object" --output-file "$binary"');
+    expect(lab11RunnerBuild).toContain('cuobjdump --list-elf "$binary"');
+    expect(lab11RunnerBuild).toContain('cuobjdump --dump-ptx "$binary"');
+    expect(lab11RunnerBuild).toContain('lab11-runner-commands.log');
+    expect(lab11RunnerBuild).not.toMatch(/^\s*(?:"\$binary"|\$binary)(?:\s|$)/m);
+    expect(lab11RunnerBuild).not.toMatch(/cp[^\n]*\$binary/);
+    const executableLines = ex17LaneScript
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== '' && !line.startsWith('#'))
+      .join('\n');
+    expect(executableLines).not.toMatch(
+      /(?:^|\n)\s*(?:\.\/)?build\/ex17-cub-device-reduction-scan(?:\s|$)/m,
+    );
+
+    const artifactPath = 'artifacts/cuda-ex17/${{ matrix.profile }}';
+    expect(ex17Build).toContain(`node scripts/check-artifacts.mjs "${artifactPath}"`);
+    expect(ex17Build).toContain(`path: ${artifactPath}`);
+    expect(ex17Build).toContain('retention-days: 7');
+    const artifactScanOffset = ex17Build.indexOf('node scripts/check-artifacts.mjs');
+    const uploadOffset = ex17Build.indexOf('uses: actions/upload-artifact@');
+    expect(artifactScanOffset).toBeGreaterThan(-1);
+    expect(uploadOffset).toBeGreaterThan(artifactScanOffset);
+    expect(ex17Build).toContain('Compile EX17 without granting Evidence Status');
+    expect(ex17Build).not.toContain('Compile-Checked');
+    expect(ex17Build).not.toContain('Runtime-Verified');
+    expect(ex17Build).not.toContain('examples/ex17-cub-device-reduction-scan/evidence/');
   });
 
   it('compile-gates the LAB10 runner in all three EX14 lanes without granting Evidence Status', async () => {

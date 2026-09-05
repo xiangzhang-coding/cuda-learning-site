@@ -109,13 +109,13 @@ describe('Learning Unit and Lab metadata', () => {
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
     ]),
-    ...['L01', 'L02'].flatMap((unitId) => [
+    ...['L01', 'L02', 'L03', 'L04'].flatMap((unitId) => [
       unitId,
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
     ]),
-    'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14',
-    'LAB02', 'LAB06', 'LAB08', 'LAB09', 'LAB10',
+    'EX07', 'EX08', 'EX09', 'EX10', 'EX11', 'EX12', 'EX13', 'EX14', 'EX17',
+    'LAB02', 'LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11',
     'PB-R0-005', 'PB-R3', 'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
   ])(
     'accepts the controlled curriculum identifier %s',

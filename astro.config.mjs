@@ -153,6 +153,8 @@ export default defineConfig({
           items: [
             { slug: 'libraries/library-primitive-dsl-custom-kernel' },
             { slug: 'libraries/thrust-algorithm-vocabulary' },
+            { slug: 'libraries/cub-device-primitives' },
+            { slug: 'libraries/cub-warp-block-primitives' },
           ],
         },
         {
@@ -175,6 +177,7 @@ export default defineConfig({
             { slug: 'examples/tiled-transpose' },
             { slug: 'examples/tiled-gemm' },
             { slug: 'examples/sanitizer-defect-suite' },
+            { slug: 'examples/cub-device-reduction-scan' },
           ],
         },
         {
@@ -192,6 +195,7 @@ export default defineConfig({
             { slug: 'labs/profile-full-application-before-kernel' },
             { slug: 'labs/build-original-roofline' },
             { slug: 'labs/optimize-canonical-transpose' },
+            { slug: 'labs/compare-custom-reduction-with-cub' },
           ],
         },
         {

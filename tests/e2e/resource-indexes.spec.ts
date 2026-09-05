@@ -126,6 +126,10 @@ const issue31PracticeIds = ['PB-R3-015', 'PB-R3-016'] as const;
 const issue31GlossaryIds = ['TERM-171', 'TERM-172', 'TERM-173', 'TERM-174', 'TERM-175', 'TERM-176'] as const;
 const issue33PracticeIds = ['PB-R4-001', 'PB-R4-002'] as const;
 const issue33GlossaryIds = ['TERM-177', 'TERM-178', 'TERM-179', 'TERM-180', 'TERM-181', 'TERM-182'] as const;
+const issue34LabIds = ['LAB11'] as const;
+const issue34PracticeIds = ['PB-R4-003', 'PB-R4-004'] as const;
+const issue34GlossaryIds = ['TERM-183', 'TERM-184'] as const;
+const issue34SourceIds = ['SRC-CUDA-063', 'SRC-CUDA-064'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -191,6 +195,10 @@ const currentCatalogIds = new Set<string>([
   ...issue33PracticeIds,
   ...issue33GlossaryIds,
   ...issue33SourceIds,
+  ...issue34LabIds,
+  ...issue34PracticeIds,
+  ...issue34GlossaryIds,
+  ...issue34SourceIds,
 ]);
 const issue26CatalogIds = new Set<string>([
   ...issue26LabIds,
@@ -228,12 +236,18 @@ const issue33CatalogIds = new Set<string>([
   ...issue33GlossaryIds,
   ...issue33SourceIds,
 ]);
+const issue34CatalogIds = new Set<string>([
+  ...issue34LabIds,
+  ...issue34PracticeIds,
+  ...issue34GlossaryIds,
+  ...issue34SourceIds,
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
-  labs: 'LAB10',
-  practice: 'PB-R4-002',
+  labs: 'LAB11',
+  practice: 'PB-R4-004',
   visuals: 'VIS18',
-  glossary: 'TERM-182',
-  sources: 'SRC-CUDA-062',
+  glossary: 'TERM-184',
+  sources: 'SRC-CUDA-064',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -319,18 +333,19 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
-  expect(counts.labs).toBe(10);
-  expect(counts.practice).toBe(68);
+  expect(counts.labs).toBe(11);
+  expect(counts.practice).toBe(70);
   expect(counts.visuals).toBe(19);
-  expect(counts.glossary).toBe(182);
-  expect(counts.sources).toBe(78);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(357);
+  expect(counts.glossary).toBe(184);
+  expect(counts.sources).toBe(80);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(364);
 
   const expectedIds = [
     ...releaseLabIds,
     ...issue25LabIds,
     ...issue26LabIds,
     ...issue27LabIds,
+    ...issue34LabIds,
     ...releaseVisualIds,
     ...issue25VisualIds,
     ...issue26VisualIds,
@@ -349,6 +364,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue30PracticeIds,
     ...issue31PracticeIds,
     ...issue33PracticeIds,
+    ...issue34PracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
@@ -360,6 +376,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue30GlossaryIds,
     ...issue31GlossaryIds,
     ...issue33GlossaryIds,
+    ...issue34GlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
@@ -374,6 +391,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue30SourceIds,
     ...issue31SourceIds,
     ...issue33SourceIds,
+    ...issue34SourceIds,
     'VIS10',
     'VIS11',
     'VIS12',
@@ -406,7 +424,9 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
   }
   for (const record of records.filter(({ planningId }) => currentCatalogIds.has(planningId))) {
-    const expectedDate = issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId)
+    const expectedDate = issue34CatalogIds.has(record.planningId)
+      ? '2026-09-05'
+      : issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId)
       ? '2026-09-04'
       : issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId)
       ? '2026-09-03'
@@ -433,7 +453,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
       await index.locator('[data-resource-query]').fill('');
     }
     if (group === 'labs') {
-      for (const futureId of ['LAB11', 'LAB12']) {
+      for (const futureId of ['LAB12']) {
         await expect(index.locator(`[data-resource-id="${futureId}"]`)).toHaveCount(0);
         await expect(index.locator('h3 a', { hasText: new RegExp(`^${futureId}\\b`) })).toHaveCount(0);
       }
@@ -443,7 +463,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
       const card = index.locator(`[data-resource-id="${record.planningId}"]`);
       await expect(card, record.planningId).toHaveCount(1);
       await expect(card.locator('h3 a')).toHaveAttribute('href', record.href.en);
-      if (issue27CatalogIds.has(record.planningId) || issue28CatalogIds.has(record.planningId) || issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId) || issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId)) {
+      if (issue27CatalogIds.has(record.planningId) || issue28CatalogIds.has(record.planningId) || issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId) || issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId) || issue34CatalogIds.has(record.planningId)) {
         await index.locator('[data-resource-query]').fill(record.planningId);
         await expect(card, `${record.planningId} is searchable`).toBeVisible();
         await index.locator('[data-resource-query]').fill('');

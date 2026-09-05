@@ -3,7 +3,7 @@ title: 'Q12：用受控证据优化 Canonical Reduction'
 description: 从 EX11 的 CPU reference 与 tolerance contract 出发，依次审查 warp-tail、数值顺序和 partial-staging 变化，并把每项解释限制在完整测量记录内。
 pairId: q12
 counterpart: /en/correctness/reduction-optimization-case-study/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -32,6 +32,9 @@ prerequisites:
 relatedUnits:
   - EX11
   - VIS10
+  - L03
+  - EX17
+  - LAB11
 exampleIds:
   - EX11
 canonicalExample: EX11
@@ -91,7 +94,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/correctness/reduction-optimization-case-study/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -105,7 +108,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'A02,Q02,Q06,Q08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'EX11,VIS10' }
+    attrs: { name: 'cuda:related-units', content: 'EX11,VIS10,L03,EX17,LAB11' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX11 }
   - tag: meta
@@ -226,7 +229,7 @@ Collection 前记录 performance-counter permission。Denied permission、unknow
 
 ## Production primitive boundary
 
-Production reduction primitive 可以作为后续动机，但不是本 ticket 的 comparison。LAB11 的 CUB comparison 需要尚未发布的 L03，因此本 ticket 不发布 LAB11。Q12 不发明 current CUB API、build matrix、determinism guarantee 或 performance result，也不把既有 CCCL source presence 解释为 candidate winner。
+Production reduction primitive 仍不是 Q12 自身的 comparison。Rolling R4 现已另行发布 [L03：CUB Device Primitives](/libraries/cub-device-primitives/)、[EX17：CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)与 [LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)；这不会回填 Q12 的证据。L03 是 evidence-neutral Learning Unit，EX17 与 LAB11 的 compilation evidence 和 recorded observations 均为空、没有 observed runtime evidence，并保持 Pending Hardware Verification。Q12 仍不发明 current CUB API、build matrix、determinism guarantee 或 performance result，也不把既有 CCCL source presence 解释为 candidate winner。
 
 ## 证据边界
 
@@ -256,6 +259,6 @@ Linked [EX11](/examples/multi-stage-reduction/)继续拥有空 compilation/recor
 - [CUDA C++ Best Practices Guide v13.3：Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth)限定 estimate、requested/effective 与 observed traffic distinctions。
 - [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)与 [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)限定 query、permission、filter、replay、report 与 reproducibility workflow。
 
-Context7 `/websites/nvidia_cuda_cuda-programming-guide` 与 `/websites/nvidia_nsight-compute_nsightcompute` 只用于 discovery/cross-check；以上八个 exact NVIDIA owner URLs 是事实权威，均访问于 **2026-09-02**。本单元不讲 reduction algorithm history，因此没有用 tutorial/slide deck 代替 original paper；也没有复制 NVIDIA/CCCL code、table、figure 或 result。Runner、fixture、ledgers、Exercises 与 solutions 是学习站（Learning Site）原创材料。
+Context7 `/websites/nvidia_cuda_cuda-programming-guide` 与 `/websites/nvidia_nsight-compute_nsightcompute` 只用于 discovery/cross-check；以上八个 exact NVIDIA owner URLs 是事实权威，均访问于 **2026-09-02**。L03、EX17 与 LAB11 的当前链接和不回填证据边界于 **2026-09-05** 复核。本单元不讲 reduction algorithm history，因此没有用 tutorial/slide deck 代替 original paper；也没有复制 NVIDIA/CCCL code、table、figure 或 result。Runner、fixture、ledgers、Exercises 与 solutions 是学习站（Learning Site）原创材料。
 
-**事实核查与全部来源访问日期：2026-09-02。**
+**事实核查日期：2026-09-05；上述八项 owner source 的访问日期：2026-09-02。**

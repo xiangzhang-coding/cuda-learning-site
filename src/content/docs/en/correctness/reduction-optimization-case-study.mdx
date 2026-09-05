@@ -3,7 +3,7 @@ title: 'Q12: Optimize the Canonical Reduction with Controlled Evidence'
 description: Start from the EX11 CPU-reference and tolerance contract, then examine warp-tail, numerical-order, and partial-staging changes while bounding every interpretation to a complete measurement record.
 pairId: q12
 counterpart: /correctness/reduction-optimization-case-study/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -32,6 +32,9 @@ prerequisites:
 relatedUnits:
   - EX11
   - VIS10
+  - L03
+  - EX17
+  - LAB11
 exampleIds:
   - EX11
 canonicalExample: EX11
@@ -91,7 +94,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/correctness/reduction-optimization-case-study/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -105,7 +108,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'A02,Q02,Q06,Q08' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'EX11,VIS10' }
+    attrs: { name: 'cuda:related-units', content: 'EX11,VIS10,L03,EX17,LAB11' }
   - tag: meta
     attrs: { name: 'cuda:example-ids', content: EX11 }
   - tag: meta
@@ -226,7 +229,7 @@ Record performance-counter permission before collection. Denied permission, an u
 
 ## Production primitive boundary
 
-A production reduction primitive may motivate later work, but it is not this ticket's comparison. LAB11's CUB comparison requires L03, which is not published; therefore this ticket does not publish LAB11. Q12 invents no current CUB API, build matrix, determinism guarantee, or performance result, and it does not turn the presence of existing CCCL source into a candidate winner.
+A production reduction primitive is still not Q12's own comparison. Rolling R4 now separately publishes [L03: CUB Device Primitives](/en/libraries/cub-device-primitives/), [EX17: CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/), and [LAB11: Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/); that publication does not backfill Q12 evidence. L03 is an evidence-neutral Learning Unit. EX17 and LAB11 have empty compilation evidence and recorded observations, no observed runtime evidence, and remain Pending Hardware Verification. Q12 still invents no current CUB API, build matrix, determinism guarantee, or performance result, and it does not turn the presence of existing CCCL source into a candidate winner.
 
 ## Evidence boundary
 
@@ -256,6 +259,6 @@ Linked [EX11](/en/examples/multi-stage-reduction/) retains empty compilation and
 - [CUDA C++ Best Practices Guide v13.3: Bandwidth](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#bandwidth) bounds estimate, requested or effective, and observed traffic distinctions.
 - [Nsight Compute 2026.2.1 Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) and [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) bound query, permission, filtering, replay, report, and reproducibility workflow.
 
-Context7 `/websites/nvidia_cuda_cuda-programming-guide` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for discovery and cross-checking. The eight exact NVIDIA owner URLs above are authoritative and were accessed on **2026-09-02**. This unit makes no reduction-history claim, so it uses no tutorial or slide deck in place of an original paper. No NVIDIA or CCCL code, table, figure, or result is copied. The runner, fixture, ledgers, Exercises, and solutions are original Learning Site material.
+Context7 `/websites/nvidia_cuda_cuda-programming-guide` and `/websites/nvidia_nsight-compute_nsightcompute` were used only for discovery and cross-checking. The eight exact NVIDIA owner URLs above are authoritative and were accessed on **2026-09-02**. The current links to L03, EX17, and LAB11 and the no-backfill evidence boundary were reviewed on **2026-09-05**. This unit makes no reduction-history claim, so it uses no tutorial or slide deck in place of an original paper. No NVIDIA or CCCL code, table, figure, or result is copied. The runner, fixture, ledgers, Exercises, and solutions are original Learning Site material.
 
-**Fact checked and all sources accessed: 2026-09-02.**
+**Fact checked: 2026-09-05; the eight owner sources above were accessed on 2026-09-02.**

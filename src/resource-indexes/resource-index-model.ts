@@ -393,6 +393,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L02：把 Thrust 作为算法词汇', en: 'L02: Thrust as an Algorithm Vocabulary' },
     prerequisites: ['A01', 'A03', 'A09'],
   },
+  L03: {
+    href: { 'zh-CN': '/libraries/cub-device-primitives/', en: '/en/libraries/cub-device-primitives/' },
+    title: { 'zh-CN': 'L03：用 CUB Device Primitives 完成归约与扫描', en: 'L03: Reduce and Scan with CUB Device Primitives' },
+    prerequisites: ['A02', 'A03', 'M07', 'L01'],
+  },
+  L04: {
+    href: { 'zh-CN': '/libraries/cub-warp-block-primitives/', en: '/en/libraries/cub-warp-block-primitives/' },
+    title: { 'zh-CN': 'L04：用 CUB Warp 与 Block Primitives 组合内核', en: 'L04: Compose Kernels with CUB Warp and Block Primitives' },
+    prerequisites: ['F02', 'M03', 'M05', 'A02', 'A03', 'L03'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -473,6 +483,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'EX16：Compute Sanitizer 缺陷套件可运行示例', en: 'EX16: Compute Sanitizer Defect Suite Runnable Example' },
     prerequisites: ['Q03', 'Q04'],
   },
+  EX17: {
+    href: { 'zh-CN': '/examples/cub-device-reduction-scan/', en: '/en/examples/cub-device-reduction-scan/' },
+    title: { 'zh-CN': 'EX17：CUB Device Reduction 与 Scan 可运行示例', en: 'EX17: CUB Device Reduction and Scan Runnable Example' },
+    prerequisites: ['L03'],
+  },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
     title: { 'zh-CN': 'LAB01：记录并解读 CUDA 环境', en: 'LAB01: Record and Interpret a CUDA Environment' },
@@ -531,6 +546,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/labs/optimize-canonical-transpose/', en: '/en/labs/optimize-canonical-transpose/' },
     title: { 'zh-CN': 'LAB10：优化 canonical transpose', en: 'LAB10: Optimize the Canonical Transpose' },
     prerequisites: ['Q11'],
+    indexGroup: 'labs',
+  },
+  LAB11: {
+    href: { 'zh-CN': '/labs/compare-custom-reduction-with-cub/', en: '/en/labs/compare-custom-reduction-with-cub/' },
+    title: { 'zh-CN': 'LAB11：比较自定义归约与 CUB', en: 'LAB11: Compare a Custom Reduction with CUB' },
+    prerequisites: ['Q12', 'L03'],
     indexGroup: 'labs',
   },
   VIS01: {

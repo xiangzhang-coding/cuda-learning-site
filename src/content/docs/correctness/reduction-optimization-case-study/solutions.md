@@ -3,7 +3,7 @@ title: 'Q12 复核解答：受控 Reduction 证据'
 description: 复核 EX11 baseline、四阶段 runner 与 profiler/numerical claim audit，并列出有效替代方案和常见错误。
 pairId: q12-solutions
 counterpart: /en/correctness/reduction-optimization-case-study/solutions/
-factCheckDate: '2026-09-02'
+factCheckDate: '2026-09-05'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -29,7 +29,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/correctness/reduction-optimization-case-study/solutions/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-02' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -96,7 +96,7 @@ nvcc \
 
 修复后的四项 stage records 各自声明 fixed workload、三次 excluded warm-up、checked synchronization、十次 retained attempts 与 predeclared median/min/max、exact-GPU query-first profiler method、permission gate、完整环境清单（Environment Manifest）、同一 comparator correctness result，以及只回答 named mechanism 的 bounded interpretation。所有 result fields 保持 `expected; unrecorded`。Competing explanations 包括 instruction mix、shared traffic、resource use、cache state、clock/thermal state、replay perturbation 与 numerical-order coupling。
 
-LAB11 的 production CUB comparison继续等待尚未发布的 L03。当前不写 CUB API、determinism scope、build result或 performance result。
+Production CUB comparison 现在属于已发布的 [L03](/libraries/cub-device-primitives/)与 [LAB11](/labs/compare-custom-reduction-with-cub/)。它们不会回填本题缺失的 evidence；Q12 仍不提供 CUB build、runtime、timing 或 performance result。
 
 **复核：** 通过。Unsupported claims被降级，missing evidence没有被 zero、guess或 browser state替代。
 
@@ -117,6 +117,6 @@ LAB11 的 production CUB comparison继续等待尚未发布的 L03。当前不�
 - 在查看 samples后改变warm-up、删除outlier或选择statistic。
 - 把 permission denial/unavailable metric写成 zero，或用screenshot替代 report/hash。
 - 从 VIS10 integer tree推断GPU schedule、floating-point result或performance。
-- 在 L03/LAB11 发布前发明 CUB API或comparison result。
+- 因为 L03/LAB11 已发布，就把其 API contract 当成这份 Q12 summary 的 comparison result。
 
-复核日期：**2026-09-02**。继续使用 [PB-R3-009](/practice/#pb-r3-009)与 [PB-R3-010](/practice/#pb-r3-010)完成迁移练习。
+复核日期：**2026-09-05**。继续使用 [PB-R3-009](/practice/#pb-r3-009)与 [PB-R3-010](/practice/#pb-r3-010)完成迁移练习。
