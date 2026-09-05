@@ -126,13 +126,13 @@ describe('Cloudflare assets-only deployment contract', () => {
       reviewDate: '2026-09-05',
       releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
       scope: {
-        publicationPairs: 246,
-        sourceRoutes: 492,
-        exerciseSetPublicationPairs: 65,
-        solutionSetPublicationPairs: 65,
-        practiceBankEntries: 70,
-        glossaryTerms: 184,
-        sourceRecords: 80,
+        publicationPairs: 249,
+        sourceRoutes: 498,
+        exerciseSetPublicationPairs: 66,
+        solutionSetPublicationPairs: 66,
+        practiceBankEntries: 72,
+        glossaryTerms: 186,
+        sourceRecords: 82,
       },
       compatibility: {
         componentBoundaries: {
@@ -186,7 +186,7 @@ describe('Cloudflare assets-only deployment contract', () => {
           '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
         ]),
         capturedProfilerReports: [],
-        r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04'],
+        r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05'],
       },
     });
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('Q11');
@@ -202,8 +202,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.noCompileCheckedClaim).toContain('LAB11');
     expect(publication.evidence.pendingHardwareVerification).toContain('LAB11');
     expect(publication.evidence.expectedOnlyProfilerReportPlans).toHaveLength(6);
-    expect(publication.scope.learningUnits).toHaveLength(66);
-    expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04']));
+    expect(publication.scope.learningUnits).toHaveLength(67);
+    expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05']));
     expect(publication.scope.runnableExamples).toHaveLength(17);
     expect(publication.scope.runnableExamples).toContain('EX17');
     expect(publication.scope.labs).toHaveLength(11);
@@ -216,16 +216,16 @@ describe('Cloudflare assets-only deployment contract', () => {
       publication.scope.visualExplainers.length +
       publication.scope.glossaryTerms +
       publication.scope.sourceRecords,
-    ).toBe(364);
+    ).toBe(370);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
-      'L01-L04 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L05 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
       "L03 and LAB11, L06 and LAB12, and L13 and EX20 have no R3 public destination. LAB11 waits for L03, LAB12 waits for L06, and EX20 waits for L13's exact cuSPARSE API contract.",
       'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
-      'L01-L04 are published in the rolling R4 surface; L05-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+      'L01-L05 are published in the rolling R4 surface; L06-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]));
     expect(publication.knownLimitations).not.toContain(
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
@@ -263,20 +263,20 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
     expect(deployment).toContain('dist/publication.json');
     expect(deployment).toContain('62 Learning Units');
-    expect(deployment).toContain('66 Learning Units');
+    expect(deployment).toContain('67 Learning Units');
     expect(deployment).toContain('sixteen Runnable Examples EX01-EX16');
     expect(deployment).toContain('ten Labs LAB01-LAB10');
     expect(deployment).toContain('17 Runnable Examples');
     expect(deployment).toContain('11 Labs');
     expect(deployment).toContain('nineteen Visual Explainers');
-    expect(deployment).toContain('70 Practice Bank entries, 184 Glossary terms, 80 source records');
-    expect(deployment).toContain('364 catalog records');
-    expect(deployment).toContain('246 Publication Pairs, and 492 source routes');
-    expect(deployment).toContain('65 Exercise-set and 65 solution-set Publication Pairs');
+    expect(deployment).toContain('72 Practice Bank entries, 186 Glossary terms, 82 source records');
+    expect(deployment).toContain('370 catalog records');
+    expect(deployment).toContain('249 Publication Pairs, and 498 source routes');
+    expect(deployment).toContain('66 Exercise-set and 66 solution-set Publication Pairs');
     expect(deployment).toContain('10 Nsight report-analysis Practice Bank entries');
     expect(deployment).toContain('Q01-Q13');
     expect(deployment).toContain('LAB09-LAB11 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification.');
-    expect(deployment).toContain('Q06-Q13, A10-A14, and current L01-L04');
+    expect(deployment).toContain('Q06-Q13, A10-A14, and current L01-L05');
     expect(deployment).toContain('It grants no Evidence Status and summarizes the linked EX14/LAB10 subjects, whose compilation and recorded-observation arrays are empty and whose runtime remains Pending Hardware Verification.');
     expect(deployment).toContain('VIS13');
     expect(deployment).toMatch(/LAB12 still waits for L06/i);
@@ -286,7 +286,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/bundled\/selected component matrix/i);
     expect(deployment).toMatch(/No Reference Environment.*performance observation/i);
     expect(deployment).toMatch(/R3.*latest completed aggregate review/i);
-    expect(deployment).toMatch(/R4 aggregate review remains pending/i);
+    expect(deployment).toContain('L06-L13 and the R4 aggregate review remain pending.');
     expect(deployment).toMatch(/issue #32/i);
     expect(deployment).toMatch(/issue #26/i);
     expect(deployment).toMatch(/issue #27/i);

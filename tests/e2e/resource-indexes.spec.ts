@@ -130,6 +130,9 @@ const issue34LabIds = ['LAB11'] as const;
 const issue34PracticeIds = ['PB-R4-003', 'PB-R4-004'] as const;
 const issue34GlossaryIds = ['TERM-183', 'TERM-184'] as const;
 const issue34SourceIds = ['SRC-CUDA-063', 'SRC-CUDA-064'] as const;
+const l05PracticeIds = ['PB-R4-005', 'PB-R4-006'] as const;
+const l05GlossaryIds = ['TERM-185', 'TERM-186'] as const;
+const l05SourceIds = ['SRC-CUDA-065', 'SRC-CUDA-066'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -199,6 +202,9 @@ const currentCatalogIds = new Set<string>([
   ...issue34PracticeIds,
   ...issue34GlossaryIds,
   ...issue34SourceIds,
+  ...l05PracticeIds,
+  ...l05GlossaryIds,
+  ...l05SourceIds,
 ]);
 const issue26CatalogIds = new Set<string>([
   ...issue26LabIds,
@@ -242,12 +248,17 @@ const issue34CatalogIds = new Set<string>([
   ...issue34GlossaryIds,
   ...issue34SourceIds,
 ]);
+const l05CatalogIds = new Set<string>([
+  ...l05PracticeIds,
+  ...l05GlossaryIds,
+  ...l05SourceIds,
+]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
   labs: 'LAB11',
-  practice: 'PB-R4-004',
+  practice: 'PB-R4-006',
   visuals: 'VIS18',
-  glossary: 'TERM-184',
-  sources: 'SRC-CUDA-064',
+  glossary: 'TERM-186',
+  sources: 'SRC-CUDA-066',
 };
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -334,11 +345,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(11);
-  expect(counts.practice).toBe(70);
+  expect(counts.practice).toBe(72);
   expect(counts.visuals).toBe(19);
-  expect(counts.glossary).toBe(184);
-  expect(counts.sources).toBe(80);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(364);
+  expect(counts.glossary).toBe(186);
+  expect(counts.sources).toBe(82);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(370);
 
   const expectedIds = [
     ...releaseLabIds,
@@ -365,6 +376,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue31PracticeIds,
     ...issue33PracticeIds,
     ...issue34PracticeIds,
+    ...l05PracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
@@ -377,6 +389,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue31GlossaryIds,
     ...issue33GlossaryIds,
     ...issue34GlossaryIds,
+    ...l05GlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
@@ -392,6 +405,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue31SourceIds,
     ...issue33SourceIds,
     ...issue34SourceIds,
+    ...l05SourceIds,
     'VIS10',
     'VIS11',
     'VIS12',
@@ -424,7 +438,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
   }
   for (const record of records.filter(({ planningId }) => currentCatalogIds.has(planningId))) {
-    const expectedDate = issue34CatalogIds.has(record.planningId)
+    const expectedDate = issue34CatalogIds.has(record.planningId) || l05CatalogIds.has(record.planningId)
       ? '2026-09-05'
       : issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId)
       ? '2026-09-04'
@@ -463,7 +477,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
       const card = index.locator(`[data-resource-id="${record.planningId}"]`);
       await expect(card, record.planningId).toHaveCount(1);
       await expect(card.locator('h3 a')).toHaveAttribute('href', record.href.en);
-      if (issue27CatalogIds.has(record.planningId) || issue28CatalogIds.has(record.planningId) || issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId) || issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId) || issue34CatalogIds.has(record.planningId)) {
+      if (issue27CatalogIds.has(record.planningId) || issue28CatalogIds.has(record.planningId) || issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId) || issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId) || issue34CatalogIds.has(record.planningId) || l05CatalogIds.has(record.planningId)) {
         await index.locator('[data-resource-query]').fill(record.planningId);
         await expect(card, `${record.planningId} is searchable`).toBeVisible();
         await index.locator('[data-resource-query]').fill('');

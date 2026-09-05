@@ -24,20 +24,20 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(364);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(370);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 11, practice: 70, visuals: 19, glossary: 184, sources: 80 });
+    ).toEqual({ labs: 11, practice: 72, visuals: 19, glossary: 186, sources: 82 });
     for (const absentId of ['L06', 'LAB12']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
 
     expect(Object.fromEntries(
-      ['L03', 'L04', 'EX17', 'LAB11'].map((planningId) => [
+      ['L03', 'L04', 'L05', 'EX17', 'LAB11'].map((planningId) => [
         planningId,
         {
           href: PUBLISHED_DESTINATIONS[planningId].href.en,
@@ -47,6 +47,7 @@ describe('resource index catalog', () => {
     )).toEqual({
       L03: { href: '/en/libraries/cub-device-primitives/', prerequisites: ['A02', 'A03', 'M07', 'L01'] },
       L04: { href: '/en/libraries/cub-warp-block-primitives/', prerequisites: ['F02', 'M03', 'M05', 'A02', 'A03', 'L03'] },
+      L05: { href: '/en/libraries/libcu-plus-plus-synchronization/', prerequisites: ['M05', 'M13', 'M19'] },
       EX17: { href: '/en/examples/cub-device-reduction-scan/', prerequisites: ['L03'] },
       LAB11: { href: '/en/labs/compare-custom-reduction-with-cub/', prerequisites: ['Q12', 'L03'] },
     });
@@ -215,7 +216,7 @@ describe('resource index catalog', () => {
       'PB-R3-001', 'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-006', 'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012', 'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R4-/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004',
+      'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
@@ -229,8 +230,8 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:16[6-9]|17[0-6])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 11 }, (_, index) => `TERM-${166 + index}`),
     );
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:17[7-9]|18[0-4])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
-      Array.from({ length: 8 }, (_, index) => `TERM-${177 + index}`),
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:17[7-9]|18[0-6])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
+      Array.from({ length: 10 }, (_, index) => `TERM-${177 + index}`),
     );
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-0(?:2[5-9]|3\d|4[0-5])$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-025', 'SRC-CUDA-026', 'SRC-CUDA-027', 'SRC-CUDA-028', 'SRC-CUDA-029', 'SRC-CUDA-030',
@@ -244,12 +245,20 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-(?:05\d|060)$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'SRC-CUDA-050', 'SRC-CUDA-051', 'SRC-CUDA-052', 'SRC-CUDA-053', 'SRC-CUDA-054', 'SRC-CUDA-055', 'SRC-CUDA-056', 'SRC-CUDA-057', 'SRC-CUDA-058', 'SRC-CUDA-059', 'SRC-CUDA-060',
     ]);
-    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-06[1-4]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
-      'SRC-CUDA-061', 'SRC-CUDA-062', 'SRC-CUDA-063', 'SRC-CUDA-064',
+    expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^SRC-CUDA-06[1-6]$/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
+      'SRC-CUDA-061', 'SRC-CUDA-062', 'SRC-CUDA-063', 'SRC-CUDA-064', 'SRC-CUDA-065', 'SRC-CUDA-066',
     ]);
     expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === 'SRC-HIST-003')).toBe(true);
 
-    for (const expected of TOOLCHAIN_CATALOG_RELATIONSHIPS) {
+    for (const expected of [
+      ...TOOLCHAIN_CATALOG_RELATIONSHIPS,
+      { planningId: 'PB-R4-005', group: 'practice', prerequisites: ['L05'], relatedUnits: ['M05', 'M19', 'L05'] },
+      { planningId: 'PB-R4-006', group: 'practice', prerequisites: ['L05'], relatedUnits: ['M05', 'M13', 'M19', 'L05'] },
+      { planningId: 'TERM-185', group: 'glossary', prerequisites: [], relatedUnits: ['M05', 'L05'] },
+      { planningId: 'TERM-186', group: 'glossary', prerequisites: [], relatedUnits: ['M05', 'M13', 'L05'] },
+      { planningId: 'SRC-CUDA-065', group: 'sources', prerequisites: [], relatedUnits: ['M05', 'M13', 'L05'] },
+      { planningId: 'SRC-CUDA-066', group: 'sources', prerequisites: [], relatedUnits: ['M19', 'L05'] },
+    ]) {
       const record = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === expected.planningId);
       expect(record, expected.planningId).toMatchObject({
         group: expected.group,
@@ -640,7 +649,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(209);
+    expect(projected).toHaveLength(211);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

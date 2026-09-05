@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R3 聚合发布复核保持为不可变快照，固定为 232 个双语发布对（Publication Pair）、464 条 source routes 与 347 条 catalog records。Rolling R4 surface 先通过 issue #33 新增 L01/L02，再通过 [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)发布 [L03](/libraries/cub-device-primitives/)、[L04](/libraries/cub-warp-block-primitives/)、[EX17](/examples/cub-device-reduction-scan/)与 [LAB11](/labs/compare-custom-reduction-with-cub/)，使 current scope 达到 66 个 Learning Units、246 个 Publication Pairs、492 条 source routes 与 364 条 catalog records；R4 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R3 聚合发布复核保持为不可变快照，固定为 232 个双语发布对（Publication Pair）、464 条 source routes 与 347 条 catalog records。Rolling R4 surface 通过 issue #33 新增 L01/L02，并通过 [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)发布 [L03](/libraries/cub-device-primitives/)、[L04](/libraries/cub-warp-block-primitives/)、[EX17](/examples/cub-device-reduction-scan/)与 [LAB11](/labs/compare-custom-reduction-with-cub/)。当前再新增 [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)，使 current scope 达到 67 个 Learning Units、249 个 Publication Pairs、498 条 source routes 与 370 条 catalog records；R4 聚合复核仍待完成。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -58,7 +58,7 @@ head:
 
 [Q01](/correctness/cpu-references-tolerances-invariants/)至 [Q08](/correctness/kernel-first-nsight-compute/)保留既有边；[Q09 用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)严格依赖 Q08 与 F08；[Q10 从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)严格依赖 Q05 与 A14；[Q11 用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)严格依赖 A05、Q06、Q08 与 Q10；[Q12 用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)严格依赖 A02、Q02、Q06 与 Q08，从 immutable [EX11](/examples/multi-stage-reduction/)开始并复用 evidence-neutral [VIS10](/visuals/reduction-stages/)；[Q13 用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)严格依赖 A08、Q06、Q08 与 Q10，从 immutable [EX15](/examples/tiled-gemm/)开始并复用 evidence-neutral [VIS12](/visuals/gemm-tiling-hierarchy/)。
 
-[L01 在生产库、可复用原语、DSL 与自定义内核之间做选择](/libraries/library-primitive-dsl-custom-kernel/)严格依赖 A02、A03、A08 与 Q06；[L02 把 Thrust 作为算法词汇](/libraries/thrust-algorithm-vocabulary/)严格依赖 A01、A03 与 A09；[L03 用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)严格依赖 A02、A03、M07 与 L01；[L04 用 CUB Warp 与 Block Primitives 组合内核](/libraries/cub-warp-block-primitives/)严格依赖 F02、M03、M05、A02、A03 与 L03。四者都发布完整练习（Exercise）和独立解答；L03/L04 只链接并复述 exact CUB owner contracts，不授予 Evidence Status。
+[L01 在生产库、可复用原语、DSL 与自定义内核之间做选择](/libraries/library-primitive-dsl-custom-kernel/)严格依赖 A02、A03、A08 与 Q06；[L02 把 Thrust 作为算法词汇](/libraries/thrust-algorithm-vocabulary/)严格依赖 A01、A03 与 A09；[L03 用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)严格依赖 A02、A03、M07 与 L01；[L04 用 CUB Warp 与 Block Primitives 组合内核](/libraries/cub-warp-block-primitives/)严格依赖 F02、M03、M05、A02、A03 与 L03；[L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)严格依赖 M05、M13 与 M19。五者都发布完整练习（Exercise）和独立解答；L03-L05 只链接并复述 exact CUB/libcu++ owner contracts，不授予 Evidence Status。
 
 F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
 
@@ -74,7 +74,7 @@ Q01-Q05 同样提供 [Q01 练习](/correctness/cpu-references-tolerances-invaria
 
 Q06-Q13 也提供完整练习与独立解答，包括 [Q09 练习](/correctness/occupancy-stalls-throughput/exercises/)与[解答](/correctness/occupancy-stalls-throughput/solutions/)、[Q10 练习](/correctness/roofline-arithmetic-intensity/exercises/)与[解答](/correctness/roofline-arithmetic-intensity/solutions/)、[Q11 练习](/correctness/transpose-optimization-case-study/exercises/)与[解答](/correctness/transpose-optimization-case-study/solutions/)、[Q12 练习](/correctness/reduction-optimization-case-study/exercises/)与[解答](/correctness/reduction-optimization-case-study/solutions/)，以及 [Q13 练习](/correctness/gemm-optimization-case-study/exercises/)与[解答](/correctness/gemm-optimization-case-study/solutions/)。
 
-L01-L04 发布 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)，以及 [L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)。
+L01-L05 发布 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)、[L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)，以及 [L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)与[解答](/libraries/libcu-plus-plus-synchronization/solutions/)。
 
 当前有 17 个可运行示例（Runnable Example）：EX01-EX17。[EX17 CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)严格依赖 L03；EX15 依赖 A08，EX14 依赖 A05，EX16 依赖 Q03/Q04。
 
@@ -82,13 +82,13 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
 
 EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component matrix 只是声明的 non-evidentiary build gate；本站不声称 CI 已运行。EX17 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，runtime 为 Pending Hardware Verification。
 
-当前 11 个实验（Lab）是 LAB01-LAB11。[LAB10 优化 canonical transpose](/labs/optimize-canonical-transpose/)严格依赖 Q11；[LAB11 比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)严格依赖 Q12 与 L03，并比较 immutable EX11 和 EX17。两者都没有 recorded result。L05-L13 与 LAB12 仍待发布；Q13 已完成 LAB12 的 profiling prerequisite，但 LAB12 仍等待 L06 的 cuBLAS prerequisite。
+当前 11 个实验（Lab）是 LAB01-LAB11。[LAB10 优化 canonical transpose](/labs/optimize-canonical-transpose/)严格依赖 Q11；[LAB11 比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)严格依赖 Q12 与 L03，并比较 immutable EX11 和 EX17。两者都没有 recorded result。L06-L13 与 LAB12 仍待发布；Q13 已完成 LAB12 的 profiling prerequisite，但 LAB12 仍等待 L06 的 cuBLAS prerequisite。
 
 正式 Visual Explainer 共 19 项：独立 VIS01-VIS14 与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)，加上内嵌 VIS19-VIS22。VIS18 严格依赖 A11，提供 deterministic shape/stage/IO ledger 与 purpose-built static SVG；它不是 GPU traffic 或 performance evidence。
 
-A10-A14、Q06-Q13、L01-L04、VIS13 与 VIS18 的 compilation/runtime axes 均为空。API presence、owner tests 与静态 teaching records 不授予本站状态。EX17/LAB11 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，并保持 Pending Hardware Verification。Current publication 没有 CUDA、CCCL、CUB、Thrust 或 cuSPARSE execution、captured profiler report、local library output、synchronization observation、actual traffic、fusion、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
+A10-A14、Q06-Q13、L01-L05、VIS13 与 VIS18 的 compilation/runtime axes 均为空。API presence、owner tests 与静态 teaching records 不授予本站状态。EX17/LAB11 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，并保持 Pending Hardware Verification。Current publication 没有 CUDA、CCCL、CUB、Thrust、libcu++ 或 cuSPARSE execution、captured profiler report、local library output、synchronization observation、actual traffic、fusion、timing、speedup、bottleneck、winner、Reference Environment 或 `performanceObservations`。
 
-Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录。Rolling current catalog 为 11 个 Lab、70 个 Practice Bank 条目、19 项 Visual Explainer、184 个 Glossary 词条和 80 条 source record，共 364 条记录；current source files 形成 246 个 Publication Pairs，即 492 条 source routes，包含 65 组 Exercises 与 65 组独立 reviewed solutions。R3 精确 10 项 Nsight report-analysis inventory 不变；R4 聚合复核仍待完成。
+Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录。Rolling current catalog 为 11 个 Lab、72 个 Practice Bank 条目、19 项 Visual Explainer、186 个 Glossary 词条和 82 条 source record，共 370 条记录；current source files 形成 249 个 Publication Pairs，即 498 条 source routes，包含 66 组 Exercises 与 66 组独立 reviewed solutions。R3 精确 10 项 Nsight report-analysis inventory 不变；R4 聚合复核仍待完成。
 
 ## 边界先说清
 
@@ -417,6 +417,11 @@ Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visua
     <strong>用 CUB Warp 与 Block Primitives 组合内核</strong>
     <small>明确 participants、TempStorage、同步、布局与 partial-valid 边界。</small>
   </a>
+  <a className="route-card" href="/libraries/libcu-plus-plus-synchronization/">
+    <span>L05 · LIBCU++ SYNCHRONIZATION</span>
+    <strong>libcu++ 同步抽象</strong>
+    <small>审查 scope、内存顺序、屏障阶段、stage ownership 与保留同步语义的 fallback。</small>
+  </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>环境报告可运行示例</strong>
@@ -645,17 +650,17 @@ Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visua
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 70 道原创题迁移证据、环境、架构、kernel、内存、算法、library、工具链与正确性判断。</small>
+    <small>用 72 道原创题迁移证据、环境、架构、kernel、内存、算法、library、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 184 个中英文规范术语。</small>
+    <small>核对本站使用的 186 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 80 条接口、owner source 与复核日期。</small>
+    <small>查看当前发布依据的 82 条接口、owner source 与复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

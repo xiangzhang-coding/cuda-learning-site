@@ -96,7 +96,7 @@ const learningUnits = [
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
-const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04'] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -143,10 +143,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 11 },
-  { suffix: 'practice/', count: 70 },
+  { suffix: 'practice/', count: 72 },
   { suffix: 'visuals/', count: 19 },
-  { suffix: 'glossary/', count: 184 },
-  { suffix: 'sources-and-versions/', count: 80 },
+  { suffix: 'glossary/', count: 186 },
+  { suffix: 'sources-and-versions/', count: 82 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
@@ -311,25 +311,25 @@ test('serves the exact R3 release and current publication with production canoni
       'EX11 through EX17 have empty compilation evidence and remain Pending Hardware Verification.',
       'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'L01-L04 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L05 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
       'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
-      'L01-L04 are published in the rolling R4 surface; L05-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+      'L01-L05 are published in the rolling R4 surface; L06-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 246,
-    sourceRoutes: 492,
-    exerciseSetPublicationPairs: 65,
-    solutionSetPublicationPairs: 65,
+    publicationPairs: 249,
+    sourceRoutes: 498,
+    exerciseSetPublicationPairs: 66,
+    solutionSetPublicationPairs: 66,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 70,
+    practiceBankEntries: 72,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
-    glossaryTerms: 184,
-    sourceRecords: 80,
+    glossaryTerms: 186,
+    sourceRecords: 82,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -341,7 +341,7 @@ test('serves the exact R3 release and current publication with production canoni
     referenceEnvironments: [],
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
-    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04'],
+    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
@@ -454,7 +454,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(492);
+  expect(publishedRoutes).toHaveLength(498);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -465,8 +465,8 @@ test('serves the exact R3 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/246.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/492.*source routes/);
+    await expect(page.locator('main')).toContainText(/249.*Publication Pairs/);
+    await expect(page.locator('main')).toContainText(/498.*source routes/);
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -477,6 +477,7 @@ test('serves the exact R3 release and current publication with production canoni
     for (const suffix of [
       'libraries/cub-device-primitives/',
       'libraries/cub-warp-block-primitives/',
+      'libraries/libcu-plus-plus-synchronization/',
       'examples/cub-device-reduction-scan/',
       'labs/compare-custom-reduction-with-cub/',
     ]) {
@@ -485,7 +486,7 @@ test('serves the exact R3 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(364);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(370);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -602,6 +603,9 @@ test('serves the exact R3 release and current publication with production canoni
     { suffix: 'libraries/thrust-algorithm-vocabulary/', unitId: 'L02', prerequisites: 'A01,A03,A09' },
     { suffix: 'libraries/cub-device-primitives/', unitId: 'L03', prerequisites: 'A02,A03,M07,L01' },
     { suffix: 'libraries/cub-warp-block-primitives/', unitId: 'L04', prerequisites: 'F02,M03,M05,A02,A03,L03' },
+    { suffix: 'libraries/libcu-plus-plus-synchronization/', unitId: 'L05', prerequisites: 'M05,M13,M19' },
+    { suffix: 'libraries/libcu-plus-plus-synchronization/exercises/', unitId: 'L05-EXERCISES', prerequisites: 'L05' },
+    { suffix: 'libraries/libcu-plus-plus-synchronization/solutions/', unitId: 'L05-SOLUTIONS', prerequisites: 'L05-EXERCISES' },
     { suffix: 'visuals/attention-memory-traffic/', unitId: 'VIS18', prerequisites: 'A11' },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {
@@ -1231,6 +1235,12 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/libraries/cub-warp-block-primitives/exercises/',
     '/libraries/cub-warp-block-primitives/solutions/',
     '/en/libraries/cub-warp-block-primitives/solutions/',
+    '/libraries/libcu-plus-plus-synchronization/',
+    '/en/libraries/libcu-plus-plus-synchronization/',
+    '/libraries/libcu-plus-plus-synchronization/exercises/',
+    '/en/libraries/libcu-plus-plus-synchronization/exercises/',
+    '/libraries/libcu-plus-plus-synchronization/solutions/',
+    '/en/libraries/libcu-plus-plus-synchronization/solutions/',
     '/algorithms/elementwise-map/',
     '/en/algorithms/elementwise-map/',
     '/algorithms/multi-stage-reduction/',

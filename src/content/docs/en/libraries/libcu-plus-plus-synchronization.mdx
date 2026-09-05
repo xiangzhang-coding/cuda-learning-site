@@ -1,0 +1,371 @@
+---
+title: 'L05: Synchronization Contracts with libcu++'
+description: Use CCCL v3.4.2 libcu++ atomics, barriers, and pipelines to reason about scope, publication, phase counts, storage lifetime, and portable fallbacks without inferring GPU execution.
+pairId: l05
+counterpart: /libraries/libcu-plus-plus-synchronization/
+factCheckDate: '2026-09-05'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - history-and-namespaces
+  - scope-and-headers
+  - atomic-scope
+  - memory-order
+  - atomic-ref
+  - barrier-phases
+  - pipeline-lifecycle
+  - copy-contract
+  - portability
+  - known-issues
+  - license-review
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L05
+prerequisites:
+  - M05
+  - M13
+  - M19
+relatedUnits:
+  - M05
+  - M13
+  - M19
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; released 2026-08-05'
+    platform: 'Selected libcu++ source identity; not synchronization validation'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 support policy'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md'
+    version: 'CCCL v3.4.2; tagged README'
+    platform: 'C++ dialect, compiler, Toolkit, and architecture support intersection'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 owner CI matrix'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml'
+    version: 'CCCL v3.4.2; tagged CI configuration'
+    platform: '12.X maps to 12.9 and 13.X to 13.2; not actual 13.3 coverage'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 library overview'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/index.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Standards-oriented heterogeneous library and namespace boundaries'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 extended memory model'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory_model.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Scope, synchronization domains, atomicity, and system-access restrictions'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 scoped atomic contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Explicit scope and ordinary 32-bit publication teaching boundary'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 atomic_ref contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic_ref.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Borrowed object lifetime, required alignment, and consistent access'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 barrier contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/barrier.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Initialization, phase participation, arrival, wait, and drop'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 pipeline contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Stage ownership and shared state; linked make_pipeline and quit contracts'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 memcpy_async contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/asynchronous_operations/memcpy_async.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Copy participation, memory preconditions, completion, and fallback'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 aligned size proof'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory/aligned_size.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Address and byte-count alignment obligations'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 atomic public header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/atomic'
+    version: 'CCCL and libcu++ v3.4.2; exact tagged source'
+    platform: 'Public scope defaults; linked atomic implementation and memory-order checks'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 barrier public header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/barrier'
+    version: 'CCCL and libcu++ v3.4.2; exact tagged source'
+    platform: 'Public barrier and linked phase and asynchronous-copy implementation'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 pipeline public header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/pipeline'
+    version: 'CCCL and libcu++ v3.4.2; exact tagged source'
+    platform: 'Stage lifecycle and exact tagged API, not live documentation signatures'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 barrier owner tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner tests'
+    platform: 'Selected arrival cases; linked drop and completion tests; not executed here'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 copy precondition owner test'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/memcpy_async/preconditions.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner test'
+    platform: 'Precondition checks, not copy execution or performance evidence'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 pipeline owner test'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner test'
+    platform: 'Selected stage, role, producer-count, and scope cases; not executed here'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 atomic_ref owner test'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner test'
+    platform: 'Selected atomic_ref operations, not a release/acquire payload litmus'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 12.9 Linux host compiler policy'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Linux guide 12.9.1 Update 1; owner policy used for selected Toolkit 12.9.2'
+    platform: 'Native Linux; NVCC GCC 6-14 and Clang 7-19 before CCCL and dialect intersection'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 13.3 Linux host compiler policy'
+    url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Linux guide 13.3 Update 1; selected Toolkit 13.3.1; accessed 2026-09-05'
+    platform: 'Native Linux; NVCC GCC 6-15 and Clang 7-21 before CCCL and dialect intersection'
+    accessDate: '2026-09-05'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l05 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/libcu-plus-plus-synchronization/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history-and-namespaces,scope-and-headers,atomic-scope,memory-order,atomic-ref,barrier-phases,pipeline-lifecycle,copy-contract,portability,known-issues,license-review,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M05,M13,M19' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M05,M13,M19' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '20' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2,12.9.1,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/libcu-plus-plus-synchronization/" lang="zh-CN">阅读中文对应页</a>
+
+A synchronization object does not know which application data it protects. The programmer must connect its operations to the payload, its readers, and the next reuse of storage. libcu++ gives that proof a standards-oriented vocabulary; it does not supply the missing proof. This unit reviews contracts on paper, with no CUDA execution or hardware requirement.
+
+## What you should be able to do
+
+- Separate host `std`, the implemented `cuda::std` subset, and scoped `cuda::` extensions.
+- Choose scope and memory order independently for an ordinary 32-bit publication flag.
+- Prove payload visibility from the release actually observed by an acquire, including object lifetime and reuse boundaries.
+- Account for barrier initialization, arrivals, waits, drops, and the next phase's expected count.
+- Track pipeline stage ownership from acquire through release and choose a correct fallback without inventing an acceleration claim.
+
+## Prerequisites
+
+The exact prerequisite sequence is [M05: Synchronization Scopes](/en/memory/synchronization-scopes/), [M13: Asynchronous Copy and Pipelines](/en/memory/asynchronous-copy-pipelines/), and [M19: C++ Dialect Boundaries](/en/toolchain/cpp-dialect-boundaries/), or `M05, M13, M19`. They remain the related units for revisiting the mental model, storage protocol, and compilation coordinate. Scope never replaces M05's distinction between atomicity, ordering, rendezvous, visibility, and progress.
+
+## Why a heterogeneous standard library?
+
+Traditional CUDA intrinsics make the execution hierarchy explicit, but an atomic update alone does not express the complete producer/consumer protocol. C++11 supplied standard atomic and memory-order vocabulary; C++20 added facilities including atomic references and reusable barriers. Moving such reasoning into heterogeneous programs requires another question: which threads can participate across the memory and execution boundaries? libcu++ adopts familiar concepts while exposing CUDA-specific scope and asynchronous-operation contracts.
+
+| Surface | What it means | What it does not promise |
+| --- | --- | --- |
+| Host `std`, such as the host compiler's `<atomic>` | The host standard library and its supported dialect | General device callability or CPU/GPU interoperability for an arbitrary object |
+| `cuda::std`, with headers such as `<cuda/std/atomic>` | libcu++'s implemented, standards-oriented host/device facilities | A complete implementation of every standard-library facility or identical availability in every compilation mode |
+| `cuda::`, with headers such as `<cuda/atomic>` | Extensions including explicit thread scope and CUDA synchronization objects | A new memory model that overrides storage accessibility, lifetime, or scheduling constraints |
+
+Do not rename a namespace and assume portability is finished. Some familiar newer-standard facilities are provided under supported older language modes; that is not blanket support for the newer dialect. The selected release and the exact header decide availability, not the date of a live C++ draft.
+
+## Scope and canonical headers
+
+The fixed source coordinate is **CCCL/libcu++ v3.4.2**, released **2026-08-05**, commit `d36012203ef73ac7f966e848dd88482273e91e02`.
+
+| Focused facility | Canonical public header | Caller must establish |
+| --- | --- | --- |
+| `cuda::atomic` and `cuda::atomic_ref` | `<cuda/atomic>` | Supported object representation, sufficient scope, legal memory order, and access discipline |
+| `cuda::barrier` and its bound copy path | `<cuda/barrier>` | Initialization visibility, participant counts, phase completion, and reuse |
+| `cuda::pipeline`, shared state, and its bound copy path | `<cuda/pipeline>` | Collective construction, role counts, FIFO stage ownership, and storage lifetime |
+
+Teaching is restricted to ordinary 32-bit integer atomics with no padding bits, ordinary barrier waiters without a custom completion function, and bounded pipeline/copy protocols. Arbitrary-sized atomics, transaction-barrier APIs, TMA programming, and a grid-wide synchronization implementation are outside the contract. These are static API-selection exercises, not a new Lab, Runnable Example, or Visual Explainer.
+
+## Atomic scope: name the communicating threads
+
+[Synchronization scope (TERM-077)](/en/glossary/#term-077) determines the participating threads covered by the atomic protocol. It does not choose memory placement or the ordering of surrounding accesses. Both `cuda::atomic` and `cuda::atomic_ref` default to **system scope** in this pin; state the intended scope explicitly rather than relying on that default.
+
+| Explicit scope | Communication covered for this unit | Separate condition |
+| --- | --- | --- |
+| `cuda::thread_scope_block` | Threads of the same block | Every accessor is in that block and can access the object |
+| `cuda::thread_scope_device` | Threads of the same device and memory synchronization domain | Cross-block storage is accessible, and the protocol does not assume all blocks are resident |
+| `cuda::thread_scope_system` | Potential CPU/GPU or cross-device participants | The allocation, devices, and operations actually support the required system-scope atomic communication |
+
+A pointer usable from two processors is not by itself proof of system-scope atomic support. Unified or mapped storage still needs its allocation and device capabilities checked. Do not mix concurrent atomic accesses with different scope contracts to the same object. A device-scoped flag cannot authorize communication across different memory synchronization domains merely because both threads run on one GPU.
+
+Widening scope cannot make an unscheduled producer run. An arbitrary grid spin barrier can occupy the device with waiting blocks while the blocks needed to release them cannot execute. Use a documented execution boundary, such as ordered kernel completion between phases, or a separately justified coordination mechanism. Neither system scope nor the strongest memory order supplies a progress guarantee.
+
+## Memory order: prove the publication edge
+
+[Memory order (TERM-185)](/en/glossary/#term-185) describes how an atomic operation orders surrounding accesses. [Memory visibility (TERM-078)](/en/glossary/#term-078) for a non-atomic payload needs a complete relationship, not simply an atomic flag somewhere nearby.
+
+Consider one writer, one reader, a flag initialized to zero before either uses it, and a payload not overwritten during this one-shot exchange. The writer writes the payload, then stores one to the flag with release ordering. The reader loads the flag with acquire ordering. **If that load reads the value from this release store**, and both operations have sufficient compatible scope, the writer's preceding payload write happens before the reader's subsequent payload read. A read of the initial zero gives no permission to consume. In a reused protocol, the numeric value one alone does not identify which generation published it.
+
+| Operation choice | Suitable purpose | Not established |
+| --- | --- | --- |
+| Relaxed flag operation | Atomic access to the flag itself | Publication of separate non-atomic payload writes |
+| Release store, acquire load reading that store | Ordering payload production before consumption | Consumer completion, safe overwrite, or producer progress |
+| Acquire-release read-modify-write | A supported operation that needs both directions | Permission to use acquire-release on a plain load or store |
+| Sequentially consistent operations | Stronger ordering among appropriately scoped operations | Repair of a too-narrow scope or inaccessible storage |
+
+A load cannot use release or acquire-release order. A store cannot use acquire, consume, or acquire-release order. This unit uses release/acquire, not a consume-dependent protocol. A standalone fence or `volatile` flag is not a substitute for the demonstrated reads-from publication relationship.
+
+For reuse, add a reverse ownership transfer: after consuming, the reader releases an acknowledgement; the writer acquires that acknowledgement before modifying the payload again. Identify each generation or otherwise prove that an old flag cannot be mistaken for a new publication. This adds a second ordering proof, not a promise that arbitrary polling will make progress. A static proof may specify what is safe when an observation occurs without implementing a wait loop.
+
+## `atomic_ref`: borrow an object, not its lifetime
+
+`cuda::atomic` owns its atomic object. `cuda::atomic_ref` applies atomic operations to an existing object; it does not allocate, initialize, relocate, or keep that object alive. Initialization must precede publication to users, and the referenced object must outlive every reference and every access through it.
+
+For the ordinary 32-bit integer case here, v3.4.2's `required_alignment` is `sizeof(T)`, so the object address must satisfy four-byte alignment. Check the actual referenced address, not merely an allocator's base address; a field offset can break the proof. The tagged implementation excludes padding-bit representations. These statements do not authorize arbitrary structures or object sizes.
+
+While references are in use, all accesses to the object must follow the atomic-reference access discipline. Do not keep an ordinary load/store path racing with atomic references, alias overlapping subobjects with incompatible references, or mix scopes concurrently. Destroying a reference neither waits for another thread nor ends the referenced object's lifetime safely. Put object destruction or a return to ordinary access after a proven quiescent boundary.
+
+## Barrier phases: count arrivals before waiting
+
+A [barrier phase (TERM-186)](/en/glossary/#term-186) is one round of expected arrivals and completion. It is not the same thing as a reusable buffer or a pipeline stage. A shared-memory declaration only reserves storage; it does **not** initialize the barrier. One designated initializer establishes the positive expected arrival count, then an independent visibility edge, such as an all-block synchronization, makes that initialization available before anyone uses the barrier. The barrier cannot bootstrap its own initialization.
+
+| Operation or boundary | Current phase | Following phase or storage |
+| --- | --- | --- |
+| Initialization | Establish the expected count before use | Object remains alive throughout all participating phases |
+| `arrive` | Contribute the specified arrival count and obtain the phase token | Arrival alone does not authorize consuming peers' data |
+| `wait` with the matching token | Wait for the corresponding phase to complete | Only then consume the data protected by that completion |
+| `arrive_and_wait` | Combine one arrival and its wait | Does not prove that every consumer has finished reading |
+| `arrive_and_drop` | Contribute this participant's current arrival | Reduce future expected counts; not permission to skip this round and rejoin at will |
+
+With ordinary waiters and the default completion behavior taught here, the phase boundary orders pre-arrival work before the reads authorized after waiting. Independent work may fit between arrival and wait, but dependent reads may not. Tokens belong to the corresponding barrier phase and must not be treated as indefinitely reusable tickets. Future expected counts reset according to the barrier contract, including permanent drops, rather than being manually reset after every tile.
+
+For four participants A, B, C, and D, let A, B, and C each arrive and wait while D uses `arrive_and_drop`. The current round still receives **four** arrivals. The following round expects **three**. Simply omitting D would leave the current round short; making D arrive again in the three-participant round would over-contribute. If D only wants to skip an iteration temporarily, redesign participation rather than calling drop as a pause button.
+
+There are two ownership boundaries for a shared tile: **ready to read** and **safe to overwrite**. Finishing a ready phase permits consumers to start; a fast producer returning from that phase does not know that slower consumers have finished. Add a consumed phase or an equivalent documented handoff before reuse. A barrier-bound `memcpy_async` additionally binds copy completion to its barrier phase; track copy completion separately from the declared thread arrivals and do not treat issuing a copy as a participant's arrival. This unit makes no promise about custom completion or no-wait corner cases.
+
+## Pipeline lifecycle: own the stage until consumers release it
+
+A [pipeline (TERM-109)](/en/glossary/#term-109) manages a finite FIFO of [pipeline stages (TERM-110)](/en/glossary/#term-110). A stage tracks ownership of in-flight work; the application still owns the associated data buffers. For a shared-state pipeline, `make_pipeline` is collective over its declared group: members use the same shared state and consistent construction arguments, including the producer count or role assignment required by the selected overload.
+
+Unified participation gives each member both producer and consumer duties. Partitioned participation gives specified members producer or consumer duties. The role plan and participant counts must match construction and every stage's operations; a producer-only member does not substitute for a missing consumer release.
+
+| Step | Ownership fact | Storage obligation |
+| --- | --- | --- |
+| Producer acquire: `producer_acquire` | Wait for and obtain a reusable stage | Do not overwrite a stage still owned by consumers |
+| Issue copy work | Attach work to that stage | Source and destination remain valid; source is not modified while the copy may read it |
+| Producer commit: `producer_commit` | Submit that producer's batch | Commit is not proof that the destination may already be read |
+| Consumer wait: `consumer_wait` | Establish readiness for the stage being consumed | Read only after the required completion boundary |
+| Consume | Use the completed payload | Keep the destination stable through the last authorized read |
+| Consumer release: `consumer_release` | Relinquish the consumer's stage ownership | Reuse waits for the required consumers and a following producer acquire |
+
+Shared state outlives all pipeline objects using it, and buffers outlive pending copies and consumers. `quit` releases pipeline ownership only; it is not a drain, cancellation primitive, or repair for missing arrivals. End participation through a protocol that accounts for outstanding work, rather than freeing state immediately after quitting.
+
+On the relevant accelerated path, divergent warp commits can entangle batches and cause consumers to wait for more work than their local reasoning suggests. Reconverge the relevant warp participants before commit. This is separate from a cooperative copy's requirement that all members of its declared group invoke the same copy. Neither requirement permits inventing a different group from whichever lanes happen to be active.
+
+## Copy contract: completion survives fallback
+
+[Asynchronous copy (TERM-108)](/en/glossary/#term-108) is an API contract, not a promise that the hardware will overlap it with computation. Select a barrier-bound or pipeline-bound operation and retain its completion protocol.
+
+- Source and destination ranges must be valid, nonoverlapping, and suitable for a trivial byte copy. This is not object construction or a call to a nontrivial copy constructor.
+- In a group overload, all members of that group call with the same arguments. In a nongroup overload, each caller issues its own copy; give callers nonoverlapping destination work rather than issuing overlapping copies to the same tile.
+- `cuda::aligned_size_t<N>` asserts that **both addresses and the byte count** satisfy the alignment multiple. It is a proof supplied by the caller, not a request to round or realign storage. A false proof is undefined behavior.
+- If that alignment proof is unavailable, select an ordinary-size overload that can handle the case, or a deliberately synchronous copy with an explicit producer/consumer handoff. Neither choice removes readiness or safe-reuse obligations.
+
+The eligible global-to-shared `cp.async` acceleration path requires SM80 or newer and its other preconditions. On a semantically supported path without that acceleration, a fallback may perform synchronous movement while preserving the API's completion protocol. Do not delete wait or release because one observed dispatch happens to be synchronous. Optional SM90+ TMA capabilities require a separate transaction-API review and are not taught here.
+
+The exact v3.4.2 copy definitions also have compilation-mode boundaries: barrier-bound `memcpy_async` overload definitions are guarded by `_CCCL_CUDA_COMPILATION`. The library's host/device purpose does not imply a GCC-only translation unit sees the entire asynchronous-copy surface. A CUDA-compiled host dispatch can perform a synchronous copy; that says nothing about device overlap. Live documentation and tagged headers differ in displayed signatures, so this page deliberately gives no function signatures; the tag governs, including a `void` producer commit return rather than an imagined completion receipt.
+
+## Portability is an intersection, not a namespace property
+
+The tagged README supports C++17/C++20 with a general GCC 7 / Clang 7 minimum; C++20 raises that to GCC 10+ / Clang 11+. Intersect those requirements with NVCC's host-compiler ranges and the selected [C++ dialect (TERM-125)](/en/glossary/#term-125), then check the actual operating system, compiler, headers, and target. Native Linux is the Learning Site's only Supported Environment.
+
+| Selected Toolkit Lane | NVCC Linux host range before intersection | L05 policy boundary |
+| --- | --- | --- |
+| 12.9.2 | GCC 6-14; Clang 7-19 | Select C++17 or C++20; GCC 6 fails the CCCL minimum, and C++20 raises the lower bounds further |
+| 13.3.1 | GCC 6-15; Clang 7-21 | Select C++17 or C++20, and use CCCL no older than that bundled with this Toolkit |
+| 11.8.0 | Not an eligible selected-v3.4.2 combination | An older bundled-library fallback requires a separate API/source review; this contract does not transfer automatically |
+
+The CUDA 12.9 host policy is taken from the archived **12.9.1 Update 1** guide for the selected 12.9.2 lane. The 13.3 policy is the current **13.3 Update 1** guide accessed on 2026-09-05. CCCL's policy admits the latest patch of CUDA 12.x and applies the not-older-than-bundled rule to CUDA 13.x; a major-version label alone does not meet either policy. The narrow EX10 GCC 14 C++23 probe does not grant libcu++ C++23 support.
+
+Barrier/pipeline APIs have an SM70+ floor, distinct from the Learning Site and selected supported GPU floor of **SM75+**. SM75 can therefore be relevant to semantic fallback review without becoming an SM80 acceleration claim. The tag's CI matrix maps `12.X` to **12.9** and `13.X` to **13.2**. Reading that configuration neither establishes actual 13.3 coverage nor supplies local compilation results. Support policy, test configuration, emitted instructions, correct execution, and measured overlap are separate claims.
+
+## Known issues and owner-test limits
+
+As of **2026-09-05**, [issue #10967](https://github.com/NVIDIA/cccl/issues/10967) is open and reports compilation failures for non-power-of-two atomic object sizes 3, 5, 6, and 7. It motivates this unit's conservative ordinary-32-bit boundary; the report was not reproduced locally, and its title is not a proof about every supported type. [Issue #10499](https://github.com/NVIDIA/cccl/issues/10499) is open for unimplemented P2588R3 barrier relaxation. Do not substitute the live C++ draft's relaxed completion wording for this pin.
+
+The tagged barrier tests cover selected arrival, drop, and completion cases. The copy precondition test checks **preconditions**, not copy execution. The pipeline producer/consumer test checks three copied values with one- and eight-stage cases and specified role/scope variants; its producer-count overload uses half the group, not three different producer counts. It is not a proof of arbitrary partitioning. The heterogeneous atomic-reference test checks operations, not the publication litmus above. These tests were **not executed** for this publication. Windows/MSVC exclusions in a completion test and pre-SM70, NVRTC, or Tile exclusions in individual tests delimit those tests, not universal support claims. The v3.4.2 release's version bump and Tile disabling are not a synchronization all-clear.
+
+## File-level license review
+
+All cited exact headers and tests carry **Apache-2.0 WITH LLVM-exception**. The notices differ: public `cuda/atomic` names NVIDIA 2023-2024, `cuda/barrier` NVIDIA 2023, and `cuda/pipeline` NVIDIA 2025. The internal atomic header names the LLVM Project and NVIDIA 2023; atomic common/order headers name NVIDIA 2023; the internal barrier and copy headers name NVIDIA 2024. Barrier tests name the LLVM Project without a year, the copy precondition test NVIDIA 2025, the pipeline test NVIDIA 2023, and the atomic-reference test the libcu++ Project without a year.
+
+The cited README, CI matrix, and documentation files have no individual SPDX/copyright notice. Do not invent one from a neighboring header. The component [LICENSE.TXT](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/LICENSE.TXT) supplies Apache-2.0 with the LLVM exception; the aggregate [LICENSE](https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE) is a component license map. NVIDIA's external guides retain their all-rights-reserved notices. This CC-BY-4.0 publication uses original prose and tables, links and paraphrases its sources, and adapts no source, test, example, figure, or benchmark. Any future adaptation needs a new file-level notice review.
+
+## Evidence boundary
+
+The four arrays `compilation`, `runtime`, `expectedObservations`, and `recordedObservations` are empty. No Evidence Status is assigned. Static reasoning and upstream test inspection establish no build, execution, output, instruction selection, overlap, timing, or speedup result. The Exercises request written reasoning artifacts, not GPU observations. There is no code fence or executable counterpart in this publication.
+
+## Retrieval check
+
+1. Why do host `std`, `cuda::std`, and `cuda::` require separate availability checks?
+2. Which release must an acquire read from to authorize a payload read, and what prevents an old generation from authorizing reuse?
+3. Why can sequential consistency not fix block scope for cross-block communication or guarantee grid progress?
+4. For four participants with one drop, how many arrivals finish the current phase, and how many does the next phase expect?
+5. Why is completing a ready phase different from permission to overwrite, and which pipeline steps preserve that distinction?
+6. What remains mandatory when an ordinary-size copy or synchronous fallback replaces an unprovable alignment claim?
+
+## Continue with practice
+
+- Complete the [L05 Exercises](/en/libraries/libcu-plus-plus-synchronization/exercises/) before opening the [separate reviewed solutions](/en/libraries/libcu-plus-plus-synchronization/solutions/).
+- Audit publication in [PB-R4-005](/en/practice/#pb-r4-005) and phase/lifetime reasoning in [PB-R4-006](/en/practice/#pb-r4-006).
+- Revisit [M05](/en/memory/synchronization-scopes/), [M13](/en/memory/asynchronous-copy-pipelines/), and [M19](/en/toolchain/cpp-dialect-boundaries/) whenever a scope, buffer, or compiler assumption changes.
+- Review [TERM-077](/en/glossary/#term-077), [TERM-078](/en/glossary/#term-078), [TERM-108](/en/glossary/#term-108), [TERM-109](/en/glossary/#term-109), [TERM-110](/en/glossary/#term-110), [TERM-125](/en/glossary/#term-125), [TERM-185](/en/glossary/#term-185), and [TERM-186](/en/glossary/#term-186).
+
+## Sources and review
+
+The grouped public review records are [SRC-CUDA-065](/en/sources-and-versions/#src-cuda-065) and [SRC-CUDA-066](/en/sources-and-versions/#src-cuda-066). The 20 source rows above bound the primary set; the following exact links identify the grouped implementation and test details rather than treating a current landing page as version authority.
+
+| Claim family | Exact tagged coordinates |
+| --- | --- |
+| Identity and availability | [Release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2), [README](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md), [CI matrix](https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml), [libcu++ overview](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/index.rst) |
+| Scope and atomics | [Memory model](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory_model.rst), [atomic](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic.rst), [atomic_ref](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic_ref.rst), [public header](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/atomic), [atomic implementation](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__atomic/atomic.h), [common atomic API](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/api/common.h), [order checks](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/order.h) |
+| Barrier lifecycle | [Contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/barrier.rst), [public header](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/barrier), [phase implementation](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__barrier/barrier.h) |
+| Pipeline lifecycle | [Contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline.rst), [make_pipeline](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/make_pipeline.rst), [quit](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/quit.rst), [public header](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/pipeline) |
+| Copy and alignment | [memcpy_async](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/asynchronous_operations/memcpy_async.rst), [aligned size](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory/aligned_size.rst), [copy definitions](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/memcpy_async.h), [dispatch](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/dispatch_memcpy_async.h) |
+| Owner tests, not executed | [Arrival](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp), [drop](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive_and_drop.pass.cpp), [completion](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/completion.pass.cpp), [copy preconditions](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/memcpy_async/preconditions.pass.cpp), [pipeline producer/consumer](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp), [atomic reference](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp) |
+
+Host policy comes from the [12.9.1 archived Linux guide](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy) and [13.3 Update 1 Linux guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy). The [Programming Guide pipeline discussion](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html) supplies the convergence cross-check, not the pin's signatures. Context7 `/nvidia/cccl` was queried on 2026-09-05 for discovery and cross-checking; it returned current/main documentation and is not the authority for v3.4.2.
+
+**Fact checked and sources accessed: 2026-09-05.**

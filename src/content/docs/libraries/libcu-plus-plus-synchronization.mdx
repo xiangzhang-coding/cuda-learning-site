@@ -1,0 +1,371 @@
+---
+title: 'L05：用 libcu++ 表达同步合同'
+description: 在 CCCL v3.4.2 下用 libcu++ atomics、barriers 与 pipelines 推理作用域、发布、阶段计数、存储生命周期和可移植回退，不推断 GPU 执行结果。
+pairId: l05
+counterpart: /en/libraries/libcu-plus-plus-synchronization/
+factCheckDate: '2026-09-05'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - outcome
+  - prerequisites
+  - history-and-namespaces
+  - scope-and-headers
+  - atomic-scope
+  - memory-order
+  - atomic-ref
+  - barrier-phases
+  - pipeline-lifecycle
+  - copy-contract
+  - portability
+  - known-issues
+  - license-review
+  - evidence-boundary
+  - retrieval
+  - practice
+  - sources
+resourceKind: learning-unit
+unitId: L05
+prerequisites:
+  - M05
+  - M13
+  - M19
+relatedUnits:
+  - M05
+  - M13
+  - M19
+hardwareGate: none
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CCCL v3.4.2 immutable release'
+    url: 'https://github.com/NVIDIA/cccl/releases/tag/v3.4.2'
+    version: 'CCCL v3.4.2; commit d36012203ef73ac7f966e848dd88482273e91e02; released 2026-08-05'
+    platform: 'Selected libcu++ source identity; not synchronization validation'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 support policy'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md'
+    version: 'CCCL v3.4.2; tagged README'
+    platform: 'C++ dialect, compiler, Toolkit, and architecture support intersection'
+    accessDate: '2026-09-05'
+  - title: 'CCCL v3.4.2 owner CI matrix'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml'
+    version: 'CCCL v3.4.2; tagged CI configuration'
+    platform: '12.X maps to 12.9 and 13.X to 13.2; not actual 13.3 coverage'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 library overview'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/index.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Standards-oriented heterogeneous library and namespace boundaries'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 extended memory model'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory_model.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Scope, synchronization domains, atomicity, and system-access restrictions'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 scoped atomic contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Explicit scope and ordinary 32-bit publication teaching boundary'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 atomic_ref contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic_ref.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Borrowed object lifetime, required alignment, and consistent access'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 barrier contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/barrier.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Initialization, phase participation, arrival, wait, and drop'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 pipeline contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Stage ownership and shared state; linked make_pipeline and quit contracts'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 memcpy_async contract'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/asynchronous_operations/memcpy_async.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Copy participation, memory preconditions, completion, and fallback'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 aligned size proof'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory/aligned_size.rst'
+    version: 'CCCL and libcu++ v3.4.2; tagged documentation'
+    platform: 'Address and byte-count alignment obligations'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 atomic public header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/atomic'
+    version: 'CCCL and libcu++ v3.4.2; exact tagged source'
+    platform: 'Public scope defaults; linked atomic implementation and memory-order checks'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 barrier public header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/barrier'
+    version: 'CCCL and libcu++ v3.4.2; exact tagged source'
+    platform: 'Public barrier and linked phase and asynchronous-copy implementation'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 pipeline public header'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/pipeline'
+    version: 'CCCL and libcu++ v3.4.2; exact tagged source'
+    platform: 'Stage lifecycle and exact tagged API, not live documentation signatures'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 barrier owner tests'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner tests'
+    platform: 'Selected arrival cases; linked drop and completion tests; not executed here'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 copy precondition owner test'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/memcpy_async/preconditions.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner test'
+    platform: 'Precondition checks, not copy execution or performance evidence'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 pipeline owner test'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner test'
+    platform: 'Selected stage, role, producer-count, and scope cases; not executed here'
+    accessDate: '2026-09-05'
+  - title: 'libcu++ v3.4.2 atomic_ref owner test'
+    url: 'https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp'
+    version: 'CCCL and libcu++ v3.4.2; tagged owner test'
+    platform: 'Selected atomic_ref operations, not a release/acquire payload litmus'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 12.9 Linux host compiler policy'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Linux guide 12.9.1 Update 1; owner policy used for selected Toolkit 12.9.2'
+    platform: 'Native Linux; NVCC GCC 6-14 and Clang 7-19 before CCCL and dialect intersection'
+    accessDate: '2026-09-05'
+  - title: 'CUDA 13.3 Linux host compiler policy'
+    url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'CUDA Linux guide 13.3 Update 1; selected Toolkit 13.3.1; accessed 2026-09-05'
+    platform: 'Native Linux; NVCC GCC 6-15 and Clang 7-21 before CCCL and dialect intersection'
+    accessDate: '2026-09-05'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l05 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/libcu-plus-plus-synchronization/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history-and-namespaces,scope-and-headers,atomic-scope,memory-order,atomic-ref,barrier-phases,pipeline-lifecycle,copy-contract,portability,known-issues,license-review,evidence-boundary,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L05 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'M05,M13,M19' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'M05,M13,M19' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '20' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'CCCL-v3.4.2,12.9.1,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/libcu-plus-plus-synchronization/" lang="en">Read the English counterpart</a>
+
+同步对象不知道自己保护的是哪份应用数据。程序员必须把对象操作与载荷（payload）、读者以及下一次存储复用联系起来。libcu++ 为这份证明提供面向标准的词汇，却不会补上缺失的证明。本单元只做纸面合同审查，不执行 CUDA，也不要求硬件。
+
+## 学习成果
+
+- 区分 host `std`、已实现的 `cuda::std` 子集与带作用域的 `cuda::` 扩展。
+- 为普通 32 位发布标志分别选择作用域与内存序。
+- 从 acquire 实际观察到的 release 证明 payload 可见性，并说明对象生命周期和复用边界。
+- 计算 barrier 初始化、到达、等待、退出及下一阶段的预期计数。
+- 从 acquire 到 release 跟踪 pipeline stage 所有权，并选择正确回退而不虚构加速结论。
+
+## 先修关系
+
+精确先修顺序为 [M05：同步作用域](/memory/synchronization-scopes/)、[M13：异步复制与流水线](/memory/asynchronous-copy-pipelines/)和 [M19：C++ 方言边界](/toolchain/cpp-dialect-boundaries/)，即 `M05, M13, M19`。它们同时作为 related units，供读者回顾心智模型、存储协议和编译坐标。作用域从来不替代 M05 对原子性（atomicity）、顺序（ordering）、会合（rendezvous）、可见性（visibility）和进展（progress）的区分。
+
+## 为什么需要异构标准库？
+
+传统 CUDA 内建函数（intrinsics）明确暴露执行层级，但一次原子更新并不能表达完整的生产者/消费者协议。C++11 提供了标准原子与内存序词汇；C++20 又加入原子引用、可复用屏障等设施。把这些推理带入异构程序时，还必须回答：跨越内存与执行边界后，哪些线程能够参与？libcu++ 沿用熟悉的概念，同时暴露 CUDA 特有的作用域与异步操作合同。
+
+| 接口范围 | 含义 | 不承诺的事情 |
+| --- | --- | --- |
+| Host `std`，如主机编译器的 `<atomic>` | 主机标准库及其支持的方言 | 通用 device 可调用性，或任意对象的 CPU/GPU 互操作 |
+| `cuda::std`，如 `<cuda/std/atomic>` | libcu++ 已实现、面向标准的 host/device 设施 | 完整实现全部标准库设施，或在每种编译模式下具有相同可用性 |
+| `cuda::`，如 `<cuda/atomic>` | 显式线程作用域与 CUDA 同步对象等扩展 | 覆盖存储可访问性、生命周期或调度约束的新内存模型 |
+
+不能改一个 namespace 就宣称移植完成。一些熟悉的较新标准设施可以在受支持的较早语言模式中提供，但这不等于支持整个新方言。可用性由选定版本和精确 header 决定，而不是由当前 C++ draft 的日期决定。
+
+## 范围与 canonical headers
+
+固定来源坐标为 **CCCL/libcu++ v3.4.2**，发布于 **2026-08-05**，commit `d36012203ef73ac7f966e848dd88482273e91e02`。
+
+| 本单元设施 | Canonical public header | 调用者必须建立 |
+| --- | --- | --- |
+| `cuda::atomic` 与 `cuda::atomic_ref` | `<cuda/atomic>` | 支持的对象表示、足够的作用域、合法内存序与访问纪律 |
+| `cuda::barrier` 及其绑定复制路径 | `<cuda/barrier>` | 初始化可见性、参与者计数、阶段完成与复用 |
+| `cuda::pipeline`、shared state 及其绑定复制路径 | `<cuda/pipeline>` | 集体构造、角色计数、FIFO stage 所有权与存储生命周期 |
+
+教学范围限定为无填充位（padding bits）的普通 32 位整数原子、没有自定义 completion function 的普通 barrier waiters，以及有界的 pipeline/copy 协议。任意大小的原子对象、transaction-barrier APIs、TMA 编程和 grid-wide 同步实现均不在合同内。这些是静态 API 选择练习，不是新的实验（Lab）、可运行示例（Runnable Example）或可视化讲解（Visual Explainer）。
+
+## 原子作用域：明确通信线程
+
+[同步作用域（synchronization scope，TERM-077）](/glossary/#term-077)决定原子协议覆盖的线程。它既不选择内存位置，也不决定周围访问的顺序。本次 pin 中，`cuda::atomic` 和 `cuda::atomic_ref` 都默认使用 **system scope**；应显式写出实际需要的 scope，而不是依赖默认值。
+
+| 显式作用域 | 本单元覆盖的通信 | 独立条件 |
+| --- | --- | --- |
+| `cuda::thread_scope_block` | 同一个 block 的 threads | 每个访问者均属于该 block，且能够访问对象 |
+| `cuda::thread_scope_device` | 同一 device、同一内存同步域（memory synchronization domain）的 threads | 跨 block 存储可访问，且协议不假设所有 blocks 同时驻留 |
+| `cuda::thread_scope_system` | 潜在的 CPU/GPU 或跨 device 参与者 | Allocation、devices 与 operations 确实支持需要的 system-scope 原子通信 |
+
+两个处理器都能使用某个指针，不足以证明 system-scope 原子支持。Unified 或 mapped storage 仍需检查 allocation 与 device capabilities。不要对同一对象混用不同 scope 合同的并发原子访问。两个线程都在一块 GPU 上，也不能让 device-scoped flag 授权不同 memory synchronization domains 之间的通信。
+
+扩大 scope 不能让尚未获调度的生产者开始运行。任意 grid 自旋屏障（spin barrier）可能让等待中的 blocks 占满设备，而释放它们所需的 blocks 无法执行。应使用有文档合同的执行边界，例如阶段间有序的 kernel completion，或另行证明的协调机制。System scope 与最强内存序都不提供 progress guarantee。
+
+## 内存序：证明发布边
+
+[内存序（memory order，TERM-185）](/glossary/#term-185)描述原子操作如何约束周围访问。非原子 payload 的[内存可见性（memory visibility，TERM-078）](/glossary/#term-078)需要完整关系，而不是附近恰好存在一个原子 flag。
+
+考虑一个写者、一个读者、双方使用前已初始化为零的 flag，以及单次交换期间不会被覆盖的 payload。写者先写 payload，再以 release 顺序向 flag 存入一；读者以 acquire 顺序读取 flag。**只有当该 load 读取的值来自这次 release store**，且两次操作具有足够且兼容的 scope 时，写者此前的 payload write 才先发生于（happens before）读者此后的 payload read。读到初始零不授予消费权限。复用协议中，数值一自身也不能表明是哪一代数据发布了它。
+
+| 操作选择 | 适合的用途 | 没有建立的保证 |
+| --- | --- | --- |
+| Relaxed flag operation | Flag 本身的原子访问 | 发布独立的非原子 payload writes |
+| Release store，及读取该 store 的 acquire load | 让 payload 生产先于消费 | 消费者已完成、安全覆盖或生产者 progress |
+| Acquire-release 读改写（read-modify-write） | 合法操作同时需要两个方向的顺序 | 对普通 load/store 使用 acquire-release 的许可 |
+| Sequentially consistent operations | 为 scope 合适的操作提供更强顺序 | 修复过窄 scope 或不可访问存储 |
+
+Load 不能使用 release 或 acquire-release；store 不能使用 acquire、consume 或 acquire-release。本单元使用 release/acquire，不构造依赖 consume 的协议。独立 fence 或 `volatile` flag 都不能替代已证明的读取来源（reads-from）发布关系。
+
+若要复用，需要增加反向所有权移交：读者消费后 release 一次确认，写者 acquire 该确认后才能再次修改 payload。应标识每一代，或用其他方式证明旧 flag 不会被误认成新发布。这是第二份 ordering proof，不是任意轮询都会取得进展的承诺。静态证明可以说明“观察发生时什么是安全的”，而不实现等待循环。
+
+## `atomic_ref`：借用对象，不延长生命周期
+
+`cuda::atomic` 拥有自身原子对象；`cuda::atomic_ref` 对已有对象施加原子操作，不会分配、初始化、移动对象，也不会延长其生命周期。初始化必须先于向使用者发布；被引用对象必须活得比所有引用和通过引用进行的访问更久。
+
+对这里的普通 32 位整数，v3.4.2 的 `required_alignment` 为 `sizeof(T)`，因此对象地址必须满足四字节对齐。应检查实际被引用地址，而不只看 allocator 的 base address，因为 field offset 可能破坏对齐证明。Tagged implementation 排除带 padding bits 的表示。这些结论不授权任意结构体或对象大小。
+
+引用仍在使用时，所有对象访问都必须遵守原子引用的访问纪律。不要让普通 load/store 与原子引用竞争，不要对重叠子对象建立不兼容引用，也不要并发混用 scopes。销毁一个引用既不会等待其他线程，也不能安全结束被引用对象的生命周期。对象销毁或恢复普通访问都应位于已证明没有在途访问的边界之后。
+
+## 屏障阶段：先数到达，再等待
+
+[屏障阶段（barrier phase，TERM-186）](/glossary/#term-186)是一轮预期到达及其完成，不等于可复用 buffer，也不等于 pipeline stage。Shared-memory declaration 只保留存储，**不会**初始化 barrier。一个指定初始化者设置正的 expected arrival count，随后由独立的可见性边，例如全 block 同步，保证其他使用者先看见初始化。Barrier 不能用自己来引导自己的初始化。
+
+| 操作或边界 | 当前阶段 | 后续阶段或存储 |
+| --- | --- | --- |
+| 初始化 | 使用前建立 expected count | 对象在全部参与阶段中保持存活 |
+| `arrive` | 贡献指定 arrival count，并取得 phase token | 单纯到达不授权读取 peers 的数据 |
+| 使用匹配 token 的 `wait` | 等待对应阶段完成 | 此后才能消费该 completion 保护的数据 |
+| `arrive_and_wait` | 合并一次到达及其等待 | 不证明所有消费者已经读完 |
+| `arrive_and_drop` | 贡献该参与者的本轮到达 | 减少未来 expected counts；不是跳过本轮再任意加入的许可 |
+
+对本单元采用的普通 waiters 与默认 completion 行为，phase boundary 让到达前的工作先于等待后被授权的读取。Arrival 与 wait 之间可以安排独立工作，但不能读取尚依赖完成的数据。Token 属于相应 barrier phase，不是可无限复用的通行证。未来 expected counts 按 barrier 合同重置，并计入永久退出，而不是由调用者在每块 tile 后重新初始化。
+
+设四个参与者为 A、B、C、D。A、B、C 各自 arrive 并 wait，D 使用 `arrive_and_drop`。当前轮仍收到 **四次** arrival，下一轮则期待 **三次**。直接省略 D 会让当前轮少一次到达；让 D 又在三人轮到达则会过量贡献。如果 D 只是想临时跳过某次迭代，应重设参与协议，不能把 drop 当成暂停按钮。
+
+Shared tile 有两条所有权边界：**可以读取**与**可以覆盖**。完成 ready phase 允许消费者开始读取；较快生产者从该 phase 返回，并不意味着较慢消费者已经读完。复用前需要 consumed phase 或等价的、具有明确合同的移交。绑定 barrier 的 `memcpy_async` 还会把 copy completion 绑定到该 barrier phase；应将复制完成与声明的 thread arrivals 分开记账，不能把 issue copy 当成线程到达。本单元不承诺自定义 completion 或没有 waiter 的特殊情况。
+
+## Pipeline 生命周期：消费者释放后才能归还 stage
+
+[流水线（pipeline，TERM-109）](/glossary/#term-109)管理由有限个[流水线阶段（pipeline stages，TERM-110）](/glossary/#term-110)组成的 FIFO。Stage 跟踪在途工作的所有权，实际数据 buffer 仍由应用拥有。对使用 shared state 的 pipeline，`make_pipeline` 是其声明 group 上的 collective：成员使用同一 shared state，并按选定 overload 提交一致的构造参数，包括所需的 producer count 或 role assignment。
+
+统一角色（unified participation）让每个成员兼任生产者和消费者；分离角色（partitioned participation）将指定成员分为生产者或消费者。Role plan 与 participant counts 必须同时匹配构造和每个 stage 的操作；producer-only 成员不能替代缺失的 consumer release。
+
+| 步骤 | 所有权事实 | 存储责任 |
+| --- | --- | --- |
+| Producer acquire：`producer_acquire` | 等待并获得可复用 stage | 不覆盖仍由消费者持有的 stage |
+| Issue copy work | 将工作附着到该 stage | Source/destination 保持有效；复制可能读取 source 时不得修改它 |
+| Producer commit：`producer_commit` | 提交该生产者的 batch | Commit 不证明 destination 已经可读 |
+| Consumer wait：`consumer_wait` | 建立待消费 stage 的 readiness | 必须先经过所需 completion boundary 才能读取 |
+| Consume | 使用已完成的 payload | Destination 在最后一次被授权读取结束前保持稳定 |
+| Consumer release：`consumer_release` | 放弃消费者的 stage 所有权 | 复用等待所需 consumers 释放及后续 producer acquire |
+
+Shared state 必须比使用它的所有 pipeline objects 活得更久，buffers 必须覆盖 pending copies 与 consumers 的生命周期。`quit` 只释放 pipeline ownership，不是排空（drain）、取消（cancellation）操作，也不会修复缺失 arrivals。结束参与时应明确处理 outstanding work，不能退出后立即释放 state。
+
+在相关加速路径上，warp 内分歧的 commits 可能把 batches 纠缠（warp entanglement）起来，让消费者等待比其局部推理更多的工作。应在 commit 前让相关 warp participants 重新汇合（reconverge）。这与 cooperative copy 要求声明 group 的全部成员调用同一复制是两项独立责任；两者都不允许用“当前恰好 active 的 lanes”临时发明另一个 group。
+
+## 复制合同：回退仍需完成边界
+
+[异步复制（asynchronous copy，TERM-108）](/glossary/#term-108)是 API 合同，不是硬件一定让它与计算重叠的承诺。选择绑定 barrier 或 pipeline 的操作后，应保留它的 completion protocol。
+
+- Source/destination ranges 必须有效、不重叠，并适合平凡字节复制（trivial byte copy）。这不是对象构造，也不会调用非平凡 copy constructor。
+- Group overload 要求该 group 全体成员以相同参数调用；nongroup overload 中每个调用者各自发出复制，应划分不重叠的 destination 工作，不能重复向同一 tile 发出重叠 copies。
+- `cuda::aligned_size_t<N>` 断言 **两个地址和 byte count** 都满足对应 alignment multiple。它是调用者提交的证明，不是要求库四舍五入长度或重新对齐存储。错误证明属于未定义行为（undefined behavior）。
+- 无法证明对齐时，应选择能处理该情况的普通 size overload，或使用带显式 producer/consumer 移交的同步复制。两种选择都不取消 readiness 与 safe-reuse 责任。
+
+符合条件的 global-to-shared `cp.async` 加速路径要求 SM80 或更新架构，并满足其他前提。在语义受支持但不能采用该加速的路径上，回退可以同步搬运数据，同时保留 API 的 completion protocol。不能因某次观察中的 dispatch 恰好同步，就删除 wait 或 release。可选的 SM90+ TMA 能力需要单独的 transaction-API 审查，本单元不教授。
+
+精确 v3.4.2 copy definitions 还存在编译模式边界：绑定 barrier 的 `memcpy_async` overload definitions 受 `_CCCL_CUDA_COMPILATION` 保护。库面向 host/device，不代表 GCC-only translation unit 能看见全部异步复制接口。经 CUDA 编译的 host dispatch 可以同步复制，这不说明 device overlap。Live documentation 与 tagged headers 展示的 signatures 有差异，所以本页不展示函数签名；以 tag 为准，包括 producer commit 返回 `void`，而不是想象中的 completion receipt。
+
+## 可移植性是交集，不是 namespace 属性
+
+Tagged README 支持 C++17/C++20，一般最低要求 GCC 7 / Clang 7；C++20 将下限提高到 GCC 10+ / Clang 11+。将这些要求与 NVCC host-compiler ranges、选定的 [C++ 方言（C++ dialect，TERM-125）](/glossary/#term-125)取交集，再检查实际 OS、compiler、headers 与 target。Native Linux 是学习站唯一的受支持环境（Supported Environment）。
+
+| 选定工具包通道（Toolkit Lane） | 取交集前的 NVCC Linux host range | L05 政策边界 |
+| --- | --- | --- |
+| 12.9.2 | GCC 6-14；Clang 7-19 | 选择 C++17 或 C++20；GCC 6 不满足 CCCL 最低要求，C++20 还会进一步提高下限 |
+| 13.3.1 | GCC 6-15；Clang 7-21 | 选择 C++17 或 C++20，且 CCCL 不得早于该 Toolkit 所附版本 |
+| 11.8.0 | 不属于选定 v3.4.2 的合格组合 | 较旧 bundled library 回退需单独复核 API/source；不能自动继承本合同 |
+
+CUDA 12.9 host policy 来自 **12.9.1 Update 1** archive guide，用于选定 12.9.2 lane；13.3 policy 来自 2026-09-05 访问的 current **13.3 Update 1** guide。CCCL 政策接受 CUDA 12.x 的最新 patch，对 CUDA 13.x 则要求 CCCL 不早于 bundled version；只有 major-version 标签不满足任何一项政策。EX10 的窄范围 GCC 14 C++23 probe 不授予 libcu++ C++23 支持。
+
+Barrier/pipeline APIs 的最低要求为 SM70+，与学习站及选定支持政策的 **SM75+** GPU 下限不同。因此 SM75 可以进入语义回退审查，却不能据此声称 SM80 加速。Tag 的 CI matrix 将 `12.X` 映射为 **12.9**，将 `13.X` 映射为 **13.2**。读到该配置既不证明实际 13.3 coverage，也不提供本地编译结果。支持政策、测试配置、生成指令、正确执行与实测 overlap 是不同结论。
+
+## 已知问题与 owner-test 边界
+
+截至 **2026-09-05**，[issue #10967](https://github.com/NVIDIA/cccl/issues/10967)处于 open 状态，报告非二次幂大小 3、5、6、7 的 atomic objects 编译失败。它促使本单元保守地限定普通 32 位对象；没有本地复现该报告，issue title 也不证明所有支持类型的行为。[Issue #10499](https://github.com/NVIDIA/cccl/issues/10499)仍 open，内容为尚未实现的 P2588R3 barrier relaxation。不能用 live C++ draft 中放宽的 completion wording 替代本次 pin。
+
+Tagged barrier tests 覆盖选定的 arrival、drop 与 completion cases。Copy precondition test 检查的是 **preconditions**，不是 copy execution。Pipeline producer/consumer test 在一阶段、八阶段及指定 role/scope variants 下检查三个复制值；其 producer-count overload 使用 group 的一半成员，而非三种不同生产者数量。这不是任意 partitioning 的证明。Heterogeneous atomic-reference test 检查 operations，不是上面的发布 litmus。这次发布**没有执行**这些 tests。Completion test 中的 Windows/MSVC exclusions，以及个别 tests 的 pre-SM70、NVRTC 或 Tile exclusions，只界定各自测试，不是通用支持结论。v3.4.2 release 的版本递增与禁用 Tile 也不是同步问题已全部排除的声明。
+
+## File-level license review
+
+引用的全部 exact headers 与 tests 都标记为 **Apache-2.0 WITH LLVM-exception**，但 notices 不同：public `cuda/atomic` 标注 NVIDIA 2023-2024，`cuda/barrier` 为 NVIDIA 2023，`cuda/pipeline` 为 NVIDIA 2025。Internal atomic header 标注 LLVM Project 与 NVIDIA 2023；atomic common/order headers 为 NVIDIA 2023；internal barrier 与 copy headers 为 NVIDIA 2024。Barrier tests 标注 LLVM Project、不含年份；copy precondition test 为 NVIDIA 2025；pipeline test 为 NVIDIA 2023；atomic-reference test 标注 libcu++ Project、不含年份。
+
+引用的 README、CI matrix 与 documentation files 没有各自的 SPDX/copyright notice，不能从邻近 header 为它们补造声明。Component [LICENSE.TXT](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/LICENSE.TXT)提供 Apache-2.0 加 LLVM exception；aggregate [LICENSE](https://github.com/NVIDIA/cccl/blob/v3.4.2/LICENSE)是 component license map。NVIDIA 外部 guides 保留 all-rights-reserved notices。本 CC-BY-4.0 发布使用原创 prose/tables，对来源只链接和释义，没有改编 source、test、example、figure 或 benchmark。未来 adaptation 必须重新进行逐文件 notice review。
+
+## 证据边界
+
+`compilation`、`runtime`、`expectedObservations` 与 `recordedObservations` 四个 arrays 全为空，不赋予证据状态（Evidence Status）。静态推理与上游测试审读不建立 build、execution、output、instruction selection、overlap、timing 或 speedup 结果。练习要求书面推理材料，不要求 GPU observations。本发布没有 code fence，也没有 executable counterpart。
+
+## 检索检查
+
+1. 为什么 host `std`、`cuda::std` 与 `cuda::` 必须分别检查可用性？
+2. Acquire 必须从哪次 release 读取才能授权 payload read？什么条件防止旧 generation 错误授权复用？
+3. 为什么 sequential consistency 不能修复跨 block 通信所用的 block scope，也不能保证 grid progress？
+4. 四个参与者中一个 drop 时，本轮需要几次到达，下一轮期待几次？
+5. Ready phase 完成为什么不等于可以覆盖？Pipeline 的哪些步骤保留了这一区分？
+6. 用普通 size copy 或同步回退替代无法证明的 alignment claim 后，哪些责任仍然存在？
+
+## 继续练习
+
+- 先完成 [L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)，再打开[独立复核解答](/libraries/libcu-plus-plus-synchronization/solutions/)。
+- 在 [PB-R4-005](/practice/#pb-r4-005)审查发布，在 [PB-R4-006](/practice/#pb-r4-006)审查 phase/lifetime 推理。
+- Scope、buffer 或 compiler 假设改变时，复习 [M05](/memory/synchronization-scopes/)、[M13](/memory/asynchronous-copy-pipelines/)和 [M19](/toolchain/cpp-dialect-boundaries/)。
+- 复习 [TERM-077](/glossary/#term-077)、[TERM-078](/glossary/#term-078)、[TERM-108](/glossary/#term-108)、[TERM-109](/glossary/#term-109)、[TERM-110](/glossary/#term-110)、[TERM-125](/glossary/#term-125)、[TERM-185](/glossary/#term-185)和 [TERM-186](/glossary/#term-186)。
+
+## 来源与复核
+
+分组公开复核记录为 [SRC-CUDA-065](/sources-and-versions/#src-cuda-065)和 [SRC-CUDA-066](/sources-and-versions/#src-cuda-066)。上面的 20 条 source rows 限定主要来源集合；以下精确链接标明分组中的 implementation/test details，不把 current landing page 当作版本权威。
+
+| 结论类别 | Exact tagged coordinates |
+| --- | --- |
+| 身份与可用性 | [Release](https://github.com/NVIDIA/cccl/releases/tag/v3.4.2)、[README](https://github.com/NVIDIA/cccl/blob/v3.4.2/README.md)、[CI matrix](https://github.com/NVIDIA/cccl/blob/v3.4.2/ci/matrix.yaml)、[libcu++ overview](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/index.rst) |
+| Scope 与 atomics | [Memory model](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory_model.rst)、[atomic](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic.rst)、[atomic_ref](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/atomic_ref.rst)、[public header](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/atomic)、[atomic implementation](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__atomic/atomic.h)、[common atomic API](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/api/common.h)、[order checks](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__atomic/order.h) |
+| Barrier 生命周期 | [Contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/barrier.rst)、[public header](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/barrier)、[phase implementation](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/std/__barrier/barrier.h) |
+| Pipeline 生命周期 | [Contract](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline.rst)、[make_pipeline](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/make_pipeline.rst)、[quit](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/synchronization_primitives/pipeline/quit.rst)、[public header](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/pipeline) |
+| Copy 与 alignment | [memcpy_async](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/asynchronous_operations/memcpy_async.rst)、[aligned size](https://github.com/NVIDIA/cccl/blob/v3.4.2/docs/libcudacxx/extended_api/memory/aligned_size.rst)、[copy definitions](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/memcpy_async.h)、[dispatch](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/include/cuda/__memcpy_async/dispatch_memcpy_async.h) |
+| 未执行的 owner tests | [Arrival](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive.pass.cpp)、[drop](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/arrive_and_drop.pass.cpp)、[completion](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/std/thread/thread.barrier/completion.pass.cpp)、[copy preconditions](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/memcpy_async/preconditions.pass.cpp)、[pipeline producer/consumer](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/cuda/pipeline/pipeline_memcpy_async_producer_consumer.pass.cpp)、[atomic reference](https://github.com/NVIDIA/cccl/blob/v3.4.2/libcudacxx/test/libcudacxx/heterogeneous/atomic/reference_cuda.pass.cpp) |
+
+Host policy 来自 [12.9.1 archived Linux guide](https://docs.nvidia.com/cuda/archive/12.9.1/cuda-installation-guide-linux/index.html#host-compiler-support-policy)与 [13.3 Update 1 Linux guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy)。[Programming Guide pipeline discussion](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/pipelines.html)用于交叉核对 convergence，不负责本 pin 的 signatures。2026-09-05 已查询 Context7 `/nvidia/cccl` 做 discovery/cross-check；返回的是 current/main documentation，不是 v3.4.2 权威。
+
+**事实核对和来源访问日期：2026-09-05。**

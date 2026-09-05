@@ -109,7 +109,7 @@ describe('Learning Unit and Lab metadata', () => {
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
     ]),
-    ...['L01', 'L02', 'L03', 'L04'].flatMap((unitId) => [
+    ...['L01', 'L02', 'L03', 'L04', 'L05'].flatMap((unitId) => [
       unitId,
       `${unitId}-EXERCISES`,
       `${unitId}-SOLUTIONS`,
