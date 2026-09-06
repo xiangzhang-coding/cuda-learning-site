@@ -12,8 +12,8 @@ This scope includes:
 - `scripts/` and `tests/`, including generation and validation of both `release.json` and `publication.json`
 - `.github/` repository automation and templates
 - root TypeScript, Vitest, Playwright, and package configuration
-- original source, build files, host models, artifact-inspection tooling, and tests for the seventeen Runnable Examples EX01-EX17 under `examples/`
-- original reviewed-solution software under `public/assets/exercise-solutions/`, currently `q11-lab10-transpose-candidates.cu`, `lab10-report-reducer.mjs`, `q12-reduction-candidates.cu`, `q13-gemm-candidates.cu`, and `lab11-reduction-comparison.cu`
+- original source, build files, host models, artifact-inspection tooling, and tests for the eighteen Runnable Examples EX01-EX18 under `examples/`
+- original reviewed-solution software under `public/assets/exercise-solutions/`, currently `q11-lab10-transpose-candidates.cu`, `lab10-report-reducer.mjs`, `q12-reduction-candidates.cu`, `q13-gemm-candidates.cu`, `lab11-reduction-comparison.cu`, and `lab12-gemm-comparison.cu`
 
 Source files in these areas carry `SPDX-License-Identifier: Apache-2.0` where their format supports comments. JSON files use an `SPDX-License-Identifier` member.
 
@@ -23,11 +23,11 @@ Original instructional prose in `src/content/docs/` and original visual teaching
 
 Attribution: **CUDA Learning Site, Xiang Zhang, 2026** with a link to the page or repository.
 
-The current file-level license scope follows `src/current-publication-manifest.json` and its `/publication.json` output. R3 is the latest completed aggregate release review: immutable `src/r3-release-manifest.json` and `/release.json` retain 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 232 Publication Pairs, and 464 source routes. The rolling current surface adds L01-L05, EX17, and LAB11 and contains 67 Learning Units, 17 Runnable Examples, 11 Labs, 19 Visual Explainers, 72 Practice Bank entries, 186 Glossary terms, 82 source records, 370 catalog records, 66 Exercise-set and 66 solution-set Publication Pairs, 249 Publication Pairs, and 498 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) owns dynamic R3 acceptance. R1 and R2 remain immutable history; L06-L13 and the R4 aggregate review remain pending.
+The current file-level license scope follows `src/current-publication-manifest.json` and its `/publication.json` output. R3 is the latest completed aggregate release review: immutable `src/r3-release-manifest.json` and `/release.json` retain 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 232 Publication Pairs, and 464 source routes. The rolling current surface adds L01-L07, EX17/EX18, and LAB11/LAB12 and contains 69 Learning Units, 18 Runnable Examples, 12 Labs, 19 Visual Explainers, 74 Practice Bank entries, 188 Glossary terms, 84 source records, 377 catalog records, 68 Exercise-set and 68 solution-set Publication Pairs, 257 Publication Pairs, and 514 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) owns dynamic R3 acceptance. R1 and R2 remain immutable history; L08-L13 and the R4 aggregate review remain pending.
 
 ## Adaptations
 
-No adapted content or assets are included in the current publication. It contains no copied, traced, or adapted NVIDIA sample, figure, table, diagram, prose, source listing, external font, third-party image, owner asset, or private material. EX01-EX17 are original code rather than reconstructions of NVIDIA samples.
+No adapted content or assets are included in the current publication. It contains no copied, traced, or adapted NVIDIA sample, figure, table, diagram, prose, source listing, external font, third-party image, owner asset, or private material. EX01-EX18 are original code rather than reconstructions of NVIDIA samples.
 
 The issue #23 A08-A09, EX15, VIS12, PB-R2-020/021, TERM-147 through TERM-151, and `SRC-CUDA-044/045` additions are original. EX15 is an original Apache-2.0 C++17 project with empty compilation evidence, Pending Hardware Verification runtime, and no recorded observations. VIS12's controls, hierarchy model, and static fallback are an original teaching composition. These additions publish no observed runtime or measured performance result.
 
@@ -67,6 +67,24 @@ Except for Apache-2.0 source files under `public/assets/exercise-solutions/`, wh
 - Adapted assets additionally record `modifications`.
 
 The file-level license check rejects an asset or orphaned sidecar that does not meet this contract.
+
+## cuBLAS reference-only review
+
+Reviewed 2026-09-06 for issue #36: L06/L07 and their Exercise and separate solution Publication Pairs, EX18/LAB12 publication prose, PB-R4-007/008, TERM-187/188, and `SRC-CUDA-067/068` are original CC BY 4.0 content. The new Practice Bank scenarios, address proofs, candidate audits, hints, and separate solutions are not adapted upstream questions or examples. `examples/ex18-cublas-gemm/` source, reference header, tests, Makefile, manifest, and scripts, plus `public/assets/exercise-solutions/lab12-gemm-comparison.cu` and site integration software, are original Apache-2.0 work. The helper reuses original EX15/EX18 source and calls public APIs rather than copying NVIDIA implementation. It is not another Runnable Example or a separate Evidence Status subject.
+
+| Exact owner document | Rights and review boundary | Project use |
+| --- | --- | --- |
+| [cuBLAS 11.8.0 API Notices](https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html#notices) | NVIDIA Corporation & Affiliates; copyright 2012-2022, all rights reserved | Historical and EX18 API facts, linked and independently paraphrased; no owner code or sample copied |
+| [cuBLAS 12.9.2 archived API Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices) | NVIDIA Corporation & Affiliates; copyright 2012-2025, all rights reserved; guide label 12.9, footer 2025-05-31 | L06/L07 teaching authority for GEMM and ordinary single cuBLASLt Matmul; original prose, derivations, and tables only |
+| [Current cuBLAS API Notices](https://docs.nvidia.com/cuda/cublas/index.html#notices) | NVIDIA Corporation & Affiliates; copyright 2012-2026, all rights reserved; label 13.3, footer 2026-06-25; accessed 2026-09-06 | Explicit current-doc comparison and EX18/LAB12 API review, not an archived 13.3.1 snapshot |
+| [CUDA Toolkit 12.9.2 EULA and supplement](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) | NVIDIA license agreement, page last updated 2025-01-07; associated documentation, license grant, distribution conditions, ownership/reservation of rights, Toolkit supplement and Attachment A cuBLAS entries reviewed | External-library and documentation terms, not an open-source grant or permission to relicense as Apache-2.0/CC BY 4.0; learners must follow the terms for their actual installation |
+| [11.8 release notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cublas-11.8.0), [12.9 Update 2 release notes](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2), [current 13.3 Update 1 release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1) | NVIDIA owner documentation; no project license is applied to upstream text | Version-scoped facts and narrow known-issue conditions only; no copied note, benchmark, or claimed local reproduction |
+| NVIDIA [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json), [12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json), and [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) redistribution manifests | Owner acquisition metadata; independent libcublas 11.11.3.6/12.9.2.10/13.6.0.2 coordinates, not inferred from Toolkit labels | Cite version and owner-declared hashes only; no SDK archive downloaded or bundled by this source review |
+| Current CUDA Runtime [stream](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html) and [event](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html) documentation | NVIDIA owner API documentation under its own notices, not project software | Original completion and measurement protocols, not copied samples or reports |
+
+Exact 13.3.1 cuBLAS API and release-note archives returned HTTP 404. The dated live 13.3 API and 13.3 Update 1 release notes are the explicit fallback, not a claim that the unavailable archives were reviewed. No cuBLAS binary, library source, SDK header, NVIDIA sample, document passage, diagram, or test output is redistributed. Merely linking or calling cuBLAS does not turn it into project-owned software. Any future adaptation or redistribution needs a new exact-file and license review. `NOTICE` needs no new upstream adaptation notice; `THIRD_PARTY_NOTICES.md` records this external dependency without treating it as bundled software.
+
+L06/L07 have four empty evidence arrays. EX18/LAB12 retain empty compilation and recorded observations and Pending Hardware Verification runtime. The legal review, three EX18 component profiles, static algebra, and host tests supply no GPU correctness, timing, Lt selection, fusion, workspace, or speedup observation.
 
 ## L05 file-level review
 

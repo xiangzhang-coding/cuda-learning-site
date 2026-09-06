@@ -96,7 +96,7 @@ Pinned `cuda-11.8`、`cuda-12.9` 与 `cuda-13.3` gates 只 compile、link 与 st
 
 Source 使用普通 FP32 multiplication/addition、shared arrays 与 block barriers；没有 Tensor Core、WMMA、MMA 或 architecture-specific branch。不能从 source-level multiply-accumulate panel 推断 emitted instructions。每份修复后的 stage record 都重复 `1024x1024x1024`、FP32 inputs/output/device accumulation、double CPU reference、exact compute capability、C restoration、三次 excluded warm-ups、checked completion、十次 retained attempts 和 median/min/max、query-first profiler method、permission、完整 Environment Manifest、EX15 tolerance result 与 named bounded interpretation。Source estimates、compiler resources、theoretical occupancy、achieved occupancy、queried path traffic 与 unprofiled elapsed samples 保持分列。
 
-L06 与 LAB12 尚未发布。Educational kernel 缺少 production-library contracts，不能替代 cuBLAS。这里不提供 API 或 comparison 来修补这项 claim。
+Educational kernel 缺少 production-library contracts，不能替代 cuBLAS。[L06](/libraries/cublas-gemm/)与 [LAB12](/labs/compare-gemm-with-cublas/)提供库调用合同和匹配比较流程，但没有实测结果可用于修补这项 claim。
 
 **复核：** 通过。Unsupported universal、causal、architecture 与 production statements 被拒绝；missing evidence 继续 expected and unrecorded，不被写成 zero 或 guess。
 
@@ -119,6 +119,6 @@ L06 与 LAB12 尚未发布。Educational kernel 缺少 production-library contra
 - 在 tile comparison 中改变 precision、fast-math、target architecture 或 compiler flags，却不建立新 edge。
 - 从 source syntax 或 VIS12 推断 Tensor Core 或 FMA/MMA instructions。
 - 只保留 ratio/screenshot，不保留 raw attempts、query output、report、command、status 与 hashes。
-- 在 L06 发布前写 cuBLAS API/result 或 LAB12，或把 educational kernel 称为 production replacement。
+- 跳过 L06/LAB12 的合同与测量要求，或把 educational kernel 称为 production replacement。
 
 复核日期：**2026-09-03**。继续使用 [PB-R3-011](/practice/#pb-r3-011)与 [PB-R3-012](/practice/#pb-r3-012)。

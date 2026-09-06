@@ -408,6 +408,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L05：用 libcu++ 表达同步合同', en: 'L05: Synchronization Contracts with libcu++' },
     prerequisites: ['M05', 'M13', 'M19'],
   },
+  L06: {
+    href: { 'zh-CN': '/libraries/cublas-gemm/', en: '/en/libraries/cublas-gemm/' },
+    title: { 'zh-CN': 'L06：把矩阵乘法正确交给 cuBLAS', en: 'L06: Hand Matrix Multiplication to cuBLAS Correctly' },
+    prerequisites: ['A08', 'Q01'],
+  },
+  L07: {
+    href: { 'zh-CN': '/libraries/cublaslt-matmul/', en: '/en/libraries/cublaslt-matmul/' },
+    title: { 'zh-CN': 'L07：用 cuBLASLt 描述、筛选与复用矩阵乘法', en: 'L07: Describe, Select, and Reuse cuBLASLt Matmul' },
+    prerequisites: ['L06', 'Q05'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -493,6 +503,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'EX17：CUB Device Reduction 与 Scan 可运行示例', en: 'EX17: CUB Device Reduction and Scan Runnable Example' },
     prerequisites: ['L03'],
   },
+  EX18: {
+    href: { 'zh-CN': '/examples/cublas-gemm/', en: '/en/examples/cublas-gemm/' },
+    title: { 'zh-CN': 'EX18：cuBLAS GEMM 参考可运行示例', en: 'EX18: cuBLAS GEMM Reference Runnable Example' },
+    prerequisites: ['L06'],
+  },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },
     title: { 'zh-CN': 'LAB01：记录并解读 CUDA 环境', en: 'LAB01: Record and Interpret a CUDA Environment' },
@@ -557,6 +572,12 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/labs/compare-custom-reduction-with-cub/', en: '/en/labs/compare-custom-reduction-with-cub/' },
     title: { 'zh-CN': 'LAB11：比较自定义归约与 CUB', en: 'LAB11: Compare a Custom Reduction with CUB' },
     prerequisites: ['Q12', 'L03'],
+    indexGroup: 'labs',
+  },
+  LAB12: {
+    href: { 'zh-CN': '/labs/compare-gemm-with-cublas/', en: '/en/labs/compare-gemm-with-cublas/' },
+    title: { 'zh-CN': 'LAB12：对比教学 GEMM 与 cuBLAS', en: 'LAB12: Compare an Educational GEMM with cuBLAS' },
+    prerequisites: ['Q13', 'L06'],
     indexGroup: 'labs',
   },
   VIS01: {

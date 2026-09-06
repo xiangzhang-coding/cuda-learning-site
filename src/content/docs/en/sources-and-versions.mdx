@@ -1,9 +1,9 @@
 ---
 title: Sources and Version Record
-description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L05, LAB01-LAB11, EX01-EX17, visuals, and practice resources.
+description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L07, LAB01-LAB12, EX01-EX18, visuals, and practice resources.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-05'
+factCheckDate: '2026-09-06'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -14,6 +14,8 @@ structure:
   - entry-src-cuda-064
   - entry-src-cuda-065
   - entry-src-cuda-066
+  - entry-src-cuda-067
+  - entry-src-cuda-068
   - content-sources
   - review-record
 head:
@@ -24,7 +26,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-05'
+      content: '2026-09-06'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -32,18 +34,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L05, LAB01-LAB11, the seventeen current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
+This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L07, LAB01-LAB12, the eighteen current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers Home, 67 Learning Units, their Exercises and reviewed solutions, 17 Runnable Examples, 11 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 72 Practice Bank entries, 186 Glossary terms, four OrientationVisual views, the Compatibility Explorer, three visual themes, and the static publishing shell. The current resource catalog contains exactly **370** records: 11 Labs, 72 Practice Bank entries, 19 Visual Explainers, 186 Glossary terms, and 82 source records. Public source files form 249 Publication Pairs and 498 source routes, including 66 Exercise sets and 66 separate reviewed-solution sets. New `SRC-CUDA-065` and `SRC-CUDA-066` were accessed and reviewed on 2026-09-05; older source records retain their dates. Website builds use Node.js 24.19.0 and npm 11.17.0.
+This page covers Home, 69 Learning Units, their Exercises and separate reviewed solutions, 18 Runnable Examples, 12 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 74 Practice Bank entries, 188 Glossary terms, and the existing static publishing and visual interfaces. The current resource catalog contains exactly **377** records: 12 Labs, 74 Practice Bank entries, 19 Visual Explainers, 188 Glossary terms, and 84 source records. Public source files form 257 Publication Pairs and 514 source routes, including 68 Exercise sets and 68 separate reviewed-solution sets. New `SRC-CUDA-067/068` were accessed and reviewed on 2026-09-06; older records retain their dates. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -150,7 +152,7 @@ Context7 libraries `/websites/nvidia_cuda` (2026-08-29 through 2026-09-04), `/we
 
 **`SRC-CUDA-063` bundled-header authority.** For the bundled rows, the authoritative contracts are the `cub/device/device_reduce.cuh`, `cub/device/device_scan.cuh`, and `cub/version.cuh` files inspected inside the Linux x86-64 redistribution archives addressed by SHA-256 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`, `8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`, and `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`. Those headers document same-GPU run-to-run determinism with a cross-compute-capability caveat for traditional pseudo-associative `DeviceReduce` in bundled CUB 1.15.1, 2.8.2, and 3.3.4. Bundled CUB 1.15.1 `DeviceScan` documents the same scoped guarantee, while bundled 2.8.2 and 3.3.4 document possible pseudo-associative run-to-run variation. Exact tagged headers govern selected 3.4.2: reduction retains the scoped guarantee and scan permits variation. Context7 did not inspect or verify these archives. Header review establishes no Learning Site compilation, runtime, output, determinism observation, or performance evidence.
 
-VIS19 and VIS21 reuse `SRC-CUDA-015`, while VIS20 and VIS22 reuse `SRC-CUDA-016`. Existing CUDA records remain unchanged. A10/A11/VIS18 use `SRC-CUDA-057/058`, A12/A13 use `SRC-CUDA-059/060`, L01/L02 use `SRC-CUDA-061/062`, L03/EX17/LAB11 use `SRC-CUDA-063`, L04 uses `SRC-CUDA-064`, and L05 uses `SRC-CUDA-065/066`, bringing the current catalog to exactly 82 source records. All nineteen Visual Explainers remain evidence-neutral browser teaching models. No new record turns static contracts or source/test inspection into CUDA build, execution, observed synchronization, traffic, timing, or speedup evidence.
+VIS19 and VIS21 reuse `SRC-CUDA-015`, while VIS20 and VIS22 reuse `SRC-CUDA-016`. Existing CUDA records remain unchanged. A10/A11/VIS18 use `SRC-CUDA-057/058`, A12/A13 use `SRC-CUDA-059/060`, L01/L02 use `SRC-CUDA-061/062`, L03/EX17/LAB11 use `SRC-CUDA-063`, L04 uses `SRC-CUDA-064`, and L05 uses `SRC-CUDA-065/066`. L06/EX18/LAB12 and L07 add `SRC-CUDA-067/068`, bringing the current catalog to 84 source records. All nineteen Visual Explainers remain evidence-neutral browser teaching models. No new record turns static contracts or source/test inspection into CUDA build, execution, observed synchronization, traffic, timing, or speedup evidence.
 
 Toolkit components have been independently versioned since CUDA 11, so Toolkit, NVCC, PTX ISA, Binary Utilities, a component such as cuBLAS, paired driver, and compatibility floor cannot collapse into one “CUDA version.” The site preserves the current v13.3 page labels under Toolkit 13.3.1, NVCC v12.9 and PTX ISA 8.8 under `archive/12.9.2`, PTX ISA 7.8 under `archive/11.8.0`, and the existing Runtime API v12.9.1 self-label under `archive/12.9.2`; current PTX ISA 9.3 binds only to the selected 13.3.1 Lane. The CUDA 13.3.1 Linux guide and Programming Guide list C++23 while the same-version NVCC `--std` reference still stops at C++20. The exact-image GCC 13.3/NVCC 13.3.73 `unsupported` result remains immutable R1 history. Run 33275734951 separately retains a narrow EX10 + NVCC 13.3.73 + GCC 14.2.0 `C++23-Dialect-Probe` pass. Neither result is ordinary EX10 C++23 support.
 
@@ -214,19 +216,66 @@ Intersect policies rather than unioning them: the stated GCC ranges become 7-14 
 
 For README/CI, the component license and aggregate map linked in SRC-CUDA-065 supply context, not missing individual notices. Release/issue citations do not copy their prose or apply the header license to it. Both new source records use the **2026-09-05** Context7 `/nvidia/cccl` retrieval for discovery only; its current/main-branch results are not the exact v3.4.2 source, a local build, or issue reproduction. The exact tagged owner coordinates above govern. No code, documentation, test, figure, or table is copied or adapted, and no compile, runtime, synchronization, overlap, or performance evidence is created.
 
+<span id="src-cuda-067" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-067: cuBLAS GEMM, components, and validation contracts
+
+**Related IDs:** A08, Q01, Q13, L06, L07, EX15, EX18, LAB12, VIS12. **Accessed and reviewed:** 2026-09-06. This record connects [L06](/en/libraries/cublas-gemm/), [EX18](/en/examples/cublas-gemm/), [LAB12](/en/labs/compare-gemm-with-cublas/), [PB-R4-007](/en/practice/#pb-r4-007), and [TERM-187](/en/glossary/#term-187). Native Linux is the only Supported Environment.
+
+The API teaching baseline is the cuBLAS guide in the **Toolkit 12.9.2 archive**, labeled 12.9 with footer date 2025-05-31; the footer is not a Toolkit release date. The 11.8.0 archive supplies historical and EX18 interface checks. Exact 13.3.1 API and release-note archives returned HTTP 404 during this review, so the current cuBLAS guide (label 13.3, footer 2026-06-25) and current **13.3 Update 1** release notes are explicitly dated comparisons, not successfully accessed archives.
+
+| Exact owner source | Reviewed contract and boundary |
+| --- | --- |
+| 12.9.2 [Data Layout](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#data-layout), [GemmEx](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasgemmex) | Mathematical shapes, N/T/C stored shapes and leading dimensions, row-major swapped-operand derivation, and initial C for nonzero beta; legal parameters are not numerical correctness |
+| 12.9.2 [Scalar Parameters](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#scalar-parameters), [Compute Type](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublascomputetype-t), [Isamax](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasi-t-amax) | Separate storage/compute/scale types and pointer modes; one-based returned vector positions do not change GEMM pointer origins |
+| 12.9.2 [Context](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublas-context), [SetStream](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublassetstream), [SetWorkspace](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublassetworkspace), [Destroy](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasdestroy) | Device/handle ownership, stream completion, stream assignment resetting user workspace, 256-byte workspace alignment, and destruction's synchronization boundary |
+| [11.8.0 API](https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html), [current API](https://docs.nvidia.com/cuda/cublas/index.html) | Traditional GEMM, FP32 pedantic, streams, scalars, and version queries used by EX18; four-part header versions are not actual loaded-library build identity |
+| Current Runtime [Stream Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html), [Event Management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html) | EX18 lifetime and LAB12 explicit-stream event intervals, completion, and units; not end-to-end costs or collected samples |
+| [11.8 release notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cublas-11.8.0), [12.9 Update 2 release notes](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2), [current 13.3 Update 1 release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1) | Specific H100 workspace advice, alignment-enforcement history, and narrow fixes/known issues; not an all-clear for every version, algorithm, or GPU |
+
+Components are independently versioned. These SHA-256 values are NVIDIA-declared Linux x86-64 acquisition coordinates, not local download, build, or runtime observations.
+
+| Toolkit and owner redistribution manifest | `libcublas` | Owner archive SHA-256 |
+| --- | --- | --- |
+| [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json) | 11.11.3.6 | `045e6455c9f8789b1c7ced19957c7904d23c221f4d1d75bb574a2c856aebae98` |
+| [12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json) | 12.9.2.10 | `c80a724aafa1ee49110b0d3385316ea54d418b03e796e91e8f0b47d52f8022fd` |
+| [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) | 13.6.0.2 | `1794edb653adf48f5fa02d86bb738ed75888dd355aa39dadb6202d84d554c0dc` |
+
+EX18 declares build profiles for three C++17 Toolkit Lanes. LAB12 measurement instructions select only 13.3.1 / cuBLAS 13.6.0.2, not inherited Lab support for the other two lanes. Both use traditional FP32 pedantic, matched inputs, and an independent double reference; compilation evidence is empty, runtime remains Pending Hardware Verification, and recorded observations are empty. Fixed data, host tests, and source derivations supply no timing, Tensor Core, or winner result.
+
+**Rights and use:** NVIDIA Corporation & Affiliates owns the cuBLAS documentation and library. The review covers the [12.9.2 EULA and Toolkit supplement](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) (page last updated 2025-01-07), [12.9.2 Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices), [11.8 Notices](https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html#notices), and [current Notices](https://docs.nvidia.com/cuda/cublas/index.html#notices). Those API guides respectively retain NVIDIA all-rights-reserved notices for 2012-2025, 2012-2022, and 2012-2026. The EULA's license grant, distribution requirements, reservation of rights, and Attachment A cuBLAS entries do not authorize relicensing documentation or the SDK as project work. The site links and paraphrases only. EX18 and the LAB12 measurement helper are original Apache-2.0 code; instructional prose is original CC BY 4.0. No upstream sample is copied or adapted, and no cuBLAS binary, source, SDK header, or sample is bundled.
+
+<span id="src-cuda-068" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-068: cuBLASLt descriptors, epilogues, and selection boundaries
+
+**Related IDs:** L06, Q05, L07, EX18, LAB12, VIS12. **Accessed and reviewed:** 2026-09-06. This record supports [L07](/en/libraries/cublaslt-matmul/), [PB-R4-008](/en/practice/#pb-r4-008), and [TERM-188](/en/glossary/#term-188), using the preceding record's independent component coordinates and archive gap. The teaching contract is **12.9.2 ordinary single FP32 Matmul**; EX18/LAB12 are not Lt implementations.
+
+| Exact 12.9.2 owner source | Reviewed contract and boundary |
+| --- | --- |
+| [Matmul](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmul), [DescCreate](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmuldesccreate), [operation attributes](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmuldescattributes-t) | Compute/scale types, typed attribute buffers, explicit stream, and C/D roles; in-place requires both the same pointer and the same descriptor |
+| [LayoutCreate](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatrixlayoutcreate), [layout attributes](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatrixlayoutattribute-t), [preference attributes](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulpreferenceattributes-t) | Pre-operation stored shapes, default column-major order, truthful matrix alignment; workspace budget allocates nothing, and demand must fit both budget and actual capacity |
+| [GetHeuristic](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgogetheuristic), [heuristic results](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulheuristicresult-t), [AlgoCheck](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgocheck) | Overall status, actual count, each state, workspace, and device/descriptor compatibility; successful checks do not prove actual pointer alignment, numerics, or performance |
+| [Epilogue](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltepilogue-t), [Matmul footnote 8](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmul) | Epilogues, D-row bias orientation, and bias before ReLU; row-major D restrictions for ReLU, dReLU, GELU, dGELU, and Bias |
+| [Algorithm objects](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgo-t), [heuristics cache](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#heuristics-cache) | Same-library-version serialization; application reuse conditions remain separate from the internal recommendation cache, which records neither application numerical acceptance nor measured winners |
+
+Current [13.3 Matmul](https://docs.nvidia.com/cuda/cublas/index.html#cublasltmatmul) describes the row-major restriction as activation combined with Bias; that does not backport permission into 12.9.2. Current ForStream, grouped GEMM, FP4, and emulation interfaces do not become Stable Curriculum prerequisites. Algorithm 66 fixes in the [12.9 Update 2 notes](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2) retain their architecture, concurrent Tensor Memory, leading-dimension range, or FP8 scaling conditions. Capture-time queries, GEMV-like shapes/workspaces, and CUB-10445 in [current 13.3 Update 1](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1) likewise are not statements about every GEMM. L07 retains individual conditions without claiming local reproduction.
+
+Context7 `/websites/nvidia_cuda_cublas` retrieval for both records is discovery and cross-checking only; exact NVIDIA archives, explicitly dated current documents, and official manifests govern version conclusions. No NVIDIA prose, table, figure, code, sample, or output is copied or adapted. Lt remains under NVIDIA's [EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) and [Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices), not the project code license. All four L06/L07 evidence arrays remain empty. Static candidate packets, address arithmetic, website checks, and VIS12 create no candidate-query, workspace-allocation, fusion, runtime, or performance observation.
+
 ## Content and asset sources
 
-- Home, 67 Learning Units, 17 Runnable Examples, 11 Labs, 72 Practice Bank entries, 186 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
+- Home, 69 Learning Units, 18 Runnable Examples, 12 Labs, 74 Practice Bank entries, 188 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
 
 ## Review record
 
-**Reviewed: 2026-09-05.** Existing source records retain their original access dates. Issue #32 performed the immutable R3 aggregate review through `SRC-CUDA-060`; issue #33 added and reviewed `SRC-CUDA-061/062`; issue #34 added and reviewed the L03/L04/EX17/LAB11 boundaries in `SRC-CUDA-063/064`. L05 adds the selected libcu++ contracts and compatibility/known-issue boundaries in `SRC-CUDA-065/066`, both accessed and reviewed on 2026-09-05.
+**Reviewed: 2026-09-06.** Existing sources retain their original access dates; issue #32 performed the immutable R3 aggregate review through `SRC-CUDA-060`. L01-L05 records `SRC-CUDA-061` through `SRC-CUDA-066` retain their 2026-09-04/05 dates. Issue #36 adds and reviews `SRC-CUDA-067` for L06/EX18/LAB12 and `SRC-CUDA-068` for L07, both accessed 2026-09-06, without claiming aggregate R4 acceptance.
 
 On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) completed the R3 aggregate source review, and [issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33) then fixed the L01/L02 CCCL and Thrust boundaries. On 2026-09-05, [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34) cross-checked current device, warp, and block contracts through Context7 `/nvidia/cccl` for discovery, while the exact v3.4.2 release and commit, tagged docs, source and tests, NVIDIA manifests, hash-addressed archives, issues, and per-file license review remain authoritative. Current hosted or main-branch material is neither the immutable v3.4.2 snapshot nor evidence of bundled archive contents.
 
 R3 is the latest completed aggregate release review. Immutable `src/r3-release-manifest.json` fixes 62 Learning Units, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 232 Publication Pairs, and 464 source routes. R1 and R2 remain historical release coordinates. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains the dynamic acceptance record for final CI, Cloudflare Preview and production, and smoke. The R4 aggregate review remains pending.
 
-Existing F01/LAB02 canonical imports and retained compile runs remain unchanged. The site records no GPU execution, actual traffic, captured profiler report, metric, numerical output, temporary-storage byte count, timing, backend, hardware ceiling, or speedup for A10-A14, Q06-Q13, L01-L05, LAB06, LAB08-LAB11, EX17, VIS13, VIS14, or VIS18. The six expected-only profiler plans have unfilled Environment Manifests and empty recorded observations. LAB11 remains Pending Hardware Verification, and all nineteen browser Visual Explainers have no Evidence Status. L01-L05 are current evidence-neutral R4 Learning Units and remain outside immutable R3; L06-L13 remain unpublished. Automated results do not establish WCAG conformance.
+Existing F01/LAB02 canonical imports and retained compile runs remain unchanged. New L06/L07 publish only static teaching contracts with all four evidence arrays empty; EX18/LAB12 have empty compilation and recorded observations and Pending Hardware Verification runtime. Six existing expected-only profiler plans retain unfilled Environment Manifests, and nineteen browser Visual Explainers grant no CUDA Evidence Status. L01-L07 belong to the rolling R4 publication, not immutable R3; L08-L13 remain unpublished. No GPU output, workspace, profiler, traffic, timing, Tensor Core, or speedup record is added. Automated results do not establish WCAG conformance.

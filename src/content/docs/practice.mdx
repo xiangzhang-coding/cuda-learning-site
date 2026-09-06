@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 72 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 74 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-09-05'
+factCheckDate: '2026-09-06'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -81,6 +81,8 @@ structure:
   - entry-pb-r4-004
   - entry-pb-r4-005
   - entry-pb-r4-006
+  - entry-pb-r4-007
+  - entry-pb-r4-008
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -151,6 +153,8 @@ prerequisites:
   - L03
   - L04
   - L05
+  - L06
+  - L07
 relatedUnits:
   - O02
   - O03
@@ -218,13 +222,19 @@ relatedUnits:
   - L03
   - L04
   - L05
+  - L06
+  - L07
+  - EX15
   - EX17
+  - EX18
   - LAB06
   - LAB08
   - LAB09
   - LAB10
   - LAB11
+  - LAB12
   - VIS10
+  - VIS12
   - VIS13
   - VIS14
   - VIS18
@@ -238,19 +248,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,EX17,LAB06,LAB08,LAB09,LAB10,LAB11,VIS10,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,EX15,EX17,EX18,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -269,13 +279,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 72 个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 74 个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 72 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 74 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
@@ -2831,7 +2841,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 - **ID 与双语发布对：** PB-R3-012；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q13：用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)。
-- **硬件门槛（Hardware gate）：** 无；只审查 static summary 与 expected-only fixture，不运行 CUDA、Nsight Compute 或未发布的 LAB12。
+- **硬件门槛（Hardware gate）：** 无；只审查 static summary 与 expected-only fixture，不运行 CUDA、Nsight Compute 或 LAB12。
 - **版本门槛（Version gate）：** Toolkit 11.8.0/12.9.2/13.3.1、Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5 与 exact GPU/compiler/profiler/manifest gates。
 - **相关学习单元与资源：** [A08](/algorithms/tiled-gemm-correctness/)、[Q06](/correctness/apod-optimization-loop/)、[Q08](/correctness/kernel-first-nsight-compute/)、[Q10](/correctness/roofline-arithmetic-intensity/)、[Q13](/correctness/gemm-optimization-case-study/)、[EX15](/examples/tiled-gemm/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)。
 - **最后复核（Last reviewed）：** 2026-09-03。
@@ -2844,7 +2854,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 - 每个 stage 重复 matrix shapes、A/B/C 与 accumulation types、compute capability、workload/C restoration、warm-up、checked synchronization、ten retained attempts/median/min-max、profiler method/permission、完整 manifest、correctness result 与 bounded interpretation。
 - 分开 source shared/accumulator estimates、compiler registers/local memory、theoretical occupancy、achieved occupancy、queried path traffic 与 unprofiled elapsed samples；一项不能替代另一项。
-- Source 没有 Tensor Core path；L06 与 LAB12 未发布。不得发明 cuBLAS API、comparison、result 或 production recommendation。
+- Source 没有 Tensor Core path；这份 R3 情景没有 cuBLAS 对比证据。L06/LAB12 的滚动 R4 发布不向它回填 API、comparison、result 或 production recommendation。
 
 **预期证据：** Claim-to-evidence matrix、五条 custody chains、missing-coordinate register、exact-GPU query-first repair plan、四份未填写 stage records、blocker/no-answer rules 与 bounded replacement statement。
 
@@ -2858,7 +2868,7 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 <details><summary>提示 2</summary>Source-level multiply-add 不证明 emitted FMA/MMA；同样，library 名称不提供 layout、precision、workspace、stream 或 algorithm contract。</details>
 
-**参考解答（Reviewed solution）：** Audit 把四项结论标为 `unsupported from uncustodied summary`。Resource chain 需要 exact template instantiation、NVCC/flags/targets、compiler registers/shared/local memory 与 binary hash；occupancy chain 再加入 exact device limits 或 queried metric definition/report；traffic chain 要求 matched path/normalization；elapsed chain 要求 correctness-qualified unprofiled raw attempts；architecture/production chain 则指出 source 没有 Tensor Core primitive，L06/LAB12 也不存在。可接受 replacement 是：“该 source proposes a two-output FP32 shared-memory candidate; correctness, compiled resources, occupancy, traffic, elapsed behavior, and production comparison remain pending.”
+**参考解答（Reviewed solution）：** Audit 把四项结论标为 `unsupported from uncustodied summary`。Resource chain 需要 exact template instantiation、NVCC/flags/targets、compiler registers/shared/local memory 与 binary hash；occupancy chain 再加入 exact device limits 或 queried metric definition/report；traffic chain 要求 matched path/normalization；elapsed chain 要求 correctness-qualified unprofiled raw attempts；architecture/production chain 则指出 source 没有 Tensor Core primitive，也没有受支持的生产替代结论。[L06](/libraries/cublas-gemm/)与 [LAB12](/labs/compare-gemm-with-cublas/)现已发布，但它们不向这份摘要回填证据；LAB12 的编译证据和实际观察记录仍为空，运行仍待硬件验证。只有完成 LAB12 的先修并另行采集匹配的正确性与测量记录，才可讨论新的、有条件的比较结论。可接受 replacement 是：“该 source proposes a two-output FP32 shared-memory candidate; correctness, compiled resources, occupancy, traffic, elapsed behavior, and production comparison remain pending.”
 
 **有效替代方案：** 若能恢复 original reports、compiler outputs、commands 与 manifest，可先验证 custody 并生成 sanitized derivative；否则从 Q13 fixture 开始新 comparison，不能把新 evidence 追溯附加到旧截图。
 
@@ -3230,6 +3240,112 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期（Source date）：** 2026-09-05。
 
+<span id="pb-r4-007" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-007：修复 GEMM 子矩阵的地址、标量与完成合同
+
+- **ID 与双语发布对：** PB-R4-007；属于 `practice-bank` 双语发布对（Publication Pair）。
+- **类型与难度：** 正确性与调试；进阶。
+- **直接先修：** [L06](/libraries/cublas-gemm/)。
+- **硬件门槛：** 无；只做静态推导，不编译或运行 CUDA。
+- **版本门槛：** L06 的 Toolkit 12.9.2 归档 API 合同；FP32 存储、FP32 pedantic 计算与主机标量。
+- **相关学习单元与资源：** [A08](/algorithms/tiled-gemm-correctness/)、[Q01](/correctness/cpu-references-tolerances-invariants/)、[L06](/libraries/cublas-gemm/)、[L07](/libraries/cublaslt-matmul/)、[EX15](/examples/tiled-gemm/)、[EX18](/examples/cublas-gemm/)、[LAB12](/labs/compare-gemm-with-cublas/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)。
+- **最后复核：** 2026-09-06。
+
+**题目：** 一份原创审查材料要在三个互不重叠的列主序（column-major）父矩阵中计算 `C_out = 0.5*A^T*B - C_in`。下表坐标从零起算，主维度（leading dimension）以元素为单位。实现移动了三个起始指针，却将主维度改成视图行数；它还按字节偏移指针、对地址额外加一以“兼容 BLAS”，并在每次重复中把上次 C 输出当成新输入。句柄（handle）设置为设备指针模式（pointer mode），但收到栈上的 `float` 标量。库返回成功后，主机立即读取输出并释放父矩阵。
+
+| 对象 | 父矩阵形状 | 父主维度 | 视图起点 `(row,col)` | 未转置视图形状 |
+| --- | --- | --- | --- | --- |
+| A | `7 x 6` | 9 | `(2,1)` | `3 x 4` |
+| B | `6 x 5` | 8 | `(1,2)` | `3 x 2` |
+| C | `8 x 4` | 10 | `(3,1)` | `4 x 2` |
+
+**目标：** 给出可审核的参数与地址证明，并将独立数值验收和异步完成分开。不要以参数“看起来合法”替代原问题的证明。
+
+**约束：** 不改变父存储、视图、标量或数学转置。假定父分配覆盖完整物理列，所有索引乘法先检查范围。未来输入采用有界 FP32 数据；对视图外的有效元素和填充分别设保护值。没有真实运行日志。
+
+**预期证据：** 父分配元素数、三个起点与最后有效元素偏移、完整 GEMM 参数、一条从原始父坐标推导的 double 参考表达式、初始 C 恢复协议，以及提交/完成/清理检查表。
+
+**验收条件：** 主维度始终来自父矩阵；操作尺寸来自转置后的数学形状。参考独立读取原始输入而不是复用待验证的参数映射；所有逻辑输出都通过有限值与预先声明的容差检查，视图外保护值也要检查。库调用状态不替代流（stream）完成状态。静态地址值不写成 GPU 输出。
+
+<details><summary>提示 1：先区分三个坐标系</summary>父坐标、视图局部坐标和 op(A) 坐标不是一回事。列主序的起点是 row + col*ld；转置只改变局部行列的解释。</details>
+
+<details><summary>提示 2：从一个输出倒推读取</summary>对输出 (i,j)，A^T 的第 (i,p) 项来自未转置视图 A 的 (p,i)。写出其父地址，再独立写 B 和原始 C 的地址。</details>
+
+<details><summary>提示 3：成功返回后还有谁在使用存储？</summary>主机输入标量的取值时点、矩阵的设备使用完成、结果复制完成与父存储释放是不同边界。重复运行还需要保留未被覆盖的 C_in。</details>
+
+<details>
+<summary>独立参考解答：完成作答后展开</summary>
+
+**参考解答：** 父分配分别为 `9*6=54`、`8*5=40`、`10*4=40` 个 float 元素。三个视图起点相对各自父指针的元素偏移为 `11,17,13`；最后有效元素的父偏移为 `40,27,26`，均在对应分配内。C++ 的 float 指针加法已经按元素缩放，不能再乘四，也不增加 BLAS 一起点占位。
+
+调用使用 `transa=T, transb=N`，`m=4,n=2,k=3`，`lda=9,ldb=8,ldc=10`，指针为三个父指针加上述元素偏移。A/B/C 为 `CUDA_R_32F`，计算为 `CUBLAS_COMPUTE_32F_PEDANTIC`，主机 `float alpha=0.5, beta=-1`，显式选择 `CUBLAS_POINTER_MODE_HOST`。这些参数无需任何物理转置或压紧视图。
+
+对 `0 <= i < 4, 0 <= j < 2`，CPU 从原始父输入计算 `0.5*sum_p(double(A_parent[11+p+9*i])*double(B_parent[17+p+8*j])) - double(C_initial[13+i+10*j])`，其中 `p=0,1,2`。只验收逻辑输出，不将填充当成矩阵；另验收视图外及填充值未变。对有界测试数据预先采用 `abs(got-ref) <= 1e-4 + 2e-5*abs(ref)`，拒绝非有限值；若失败先审查地址，不放宽容差掩盖错误。这不是 cuBLAS 的通用误差保证。
+
+保留不可变初始 C，每次预热和正式操作前在同一显式流恢复它，再提交 GEMM、结果回传和完成检查。逐项检查 cuBLAS 与 CUDA 状态；确认复制完成后才允许 CPU 验证或父缓冲区复用。主机 GEMM 输入标量在调用时取值，不意味着矩阵工作同步完成。若另有消费者流，须建立事件依赖并等最后使用者完成后回收。执行失败时保留诊断，禁止读取旧输出作为成功结果。
+
+**有效替代：** 显式打包视图可以成为另一个实现，但必须另证打包/回写、原始 C 语义与计时边界；它不满足本题“不改变存储”的主解约束。真正的设备标量也可行，但必须改变其分配、初始化、依赖与存活期证明，不能只换模式枚举。
+
+**常见错误：** 把视图行数当主维度；把字节数当 float 指针增量；把转置后的形状当存储形状；只比较两份同源错误输出；忘记 beta 非零时恢复 C；从库返回推断设备完成。
+
+</details>
+
+**来源依据：** 本站原创推导，依据 [L06](/libraries/cublas-gemm/)、[TERM-187](/glossary/#term-187)和 [SRC-CUDA-067](/sources-and-versions/#src-cuda-067)。这不是 EX18 已实现的填充子矩阵测试；EX18/LAB12 的编译证据为空，运行状态仍为待硬件验证（Pending Hardware Verification），本题不改变其证据。
+
+**来源日期：** 2026-09-06。
+
+<span id="pb-r4-008" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-008：拒绝失效的 Lt 缓存并保留收尾语义
+
+- **ID 与双语发布对：** PB-R4-008；属于 `practice-bank` 双语发布对。
+- **类型与难度：** 证据审查；进阶。
+- **直接先修：** [L07](/libraries/cublaslt-matmul/)。
+- **硬件门槛：** 无；候选材料是人为构造的输入，不查询库、不运行 CUDA。
+- **版本门槛：** Toolkit 12.9.2 归档的普通单次 FP32 Matmul 合同；不得套用当前 13.3 文档放宽后的措辞。
+- **相关学习单元与资源：** [L06](/libraries/cublas-gemm/)、[Q05](/correctness/timing-asynchronous-gpu-work/)、[L07](/libraries/cublaslt-matmul/)、[EX18](/examples/cublas-gemm/)、[LAB12](/labs/compare-gemm-with-cublas/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)。
+- **最后复核：** 2026-09-06。
+
+**题目：** 应用需要行主序（row-major）`Y = ReLU(0.75*A*B + 0.25*C + bias)`，A 为 `2 x 3, ld=5`，B 为 `3 x 4, ld=6`，C 为 `2 x 4, ld=7`，输出 Y 为 `2 x 4, ld=8`。C 与 Y 不重叠，bias 是四个不同的 FP32 输出特征偏置（bias），按列添加。所有矩阵实际起始地址只能保证 16 字节对齐。
+
+作者给行主序 D 设置 `RELU_BIAS`，只按 `(m,n,k)` 命中以前默认收尾操作（epilogue）的算法缓存，并把搜索偏好（preference）设为 2 MiB 工作区（workspace）及 256 字节矩阵对齐。实际工作区只有 512 KiB，地址满足 256 字节对齐。一份**假设的**查询材料写着“请求 4 项，返回 2 项；第 0 项状态失败；第 1 项状态成功，需要 768 KiB”，却将第 0 项视为最快、读取第 2 项，并计划在失败后改用无偏置的普通 GEMM。审查全部缺陷，而不是寻找一个看似能运行的编号。
+
+**目标：** 保留完整输出语义，区分描述合法性、资源可行性、数值正确性、实测比较和缓存复用。
+
+**约束：** 固定 FP32 存储、FP32 pedantic 计算、FP32 主机标量及原始 alpha/beta。不改变 C，不抛弃偏置或激活，不假设增加预算会分配内存。新查询、候选编号、输出和耗时均留空。
+
+**预期证据：** 版本限制判定、正确的转置输出布局或分离后处理方案、每条候选材料的拒绝原因、真实资源偏好、缓存失效规则、数值与匹配计时计划。
+
+**验收条件：** 拒绝 12.9.2 的行主序 D 与所选收尾组合；偏置长度与重新描述的 D 行数一致。查询总状态、实际返回数量、逐项状态、工作区需求和真实地址保证分别检查；只在数值验收后进入计时。`AlgoCheck` 与内部启发式缓存（heuristics cache）都不等于执行或实测赢家。
+
+<details><summary>提示 1：先判断缓存是否还对应同一个问题</summary>尺寸相同不代表收尾、布局、对齐、预算、库版本和设备资源相同。不要在旧算法上补一个新名字就继续使用。</details>
+
+<details><summary>提示 2：转置的是整个等式</summary>令 D=Y^T 后，四个输出特征成为 D 的四行；乘法顺序和 C 的解释也必须一起改变，不能只翻转 D 的存储枚举。</details>
+
+<details><summary>提示 3：先验收再计时</summary>预算、真实容量和候选需求是三个数。查询排序不是计时；错误状态下的其他字段不是可用候选资料。</details>
+
+<details>
+<summary>独立参考解答：完成作答后展开</summary>
+
+**参考解答：** 12.9.2 的 Matmul 注 8 禁止行主序 D 使用该收尾，必须先改正描述。可以令列主序 `D=Y^T:4 x 2, ld=8`，输入 C 描述为列主序 `4 x 2, ld=7`；第一乘法输入使用 B 字节、列主序 `4 x 3, ld=6`，第二输入使用 A 字节、列主序 `3 x 2, ld=5`，两者操作均 N。C/D 保持同类型、形状、顺序和批属性而主维度不同，使用分离指针。四元素偏置沿 D 行广播，映射回原输出的列；alpha/beta 不变，先加偏置再 ReLU。独立 CPU 参考仍从原行主序坐标计算，并检查每个有限输出。合法描述不是存在候选的保证。
+
+拒绝旧缓存项。假设材料仅允许检查 0、1 两项；第 0 项的失败状态阻止读取其算法或工作区字段；第 2、3 项从未返回。第 1 项需求超过真实容量，不能运行。即使容量足够，256 字节矩阵对齐承诺仍不真实，不能沿用该查询结果。根据当前 512 KiB 容量与各矩阵 16 字节保证重建偏好并重新查询；bias 另需证明类型、紧密长度、范围、适用对齐和存活期。若愿意另行分配更大工作区，先证明实际容量与对齐，不仅更改预算数字。
+
+新查询先检查总状态，再检查数量、逐项状态、需求和限制。复用或修改配置时执行 `AlgoCheck`，仍独立检查实际地址、库返回、流完成和数值。保留输入 C；试算不得把输出 Y 写回 C 后当成下一候选的输入。只有正确候选才按统一预热、重复、同步与计时范围比较；描述创建、查询和分配的主机成本另列，不偷算到某一方。
+
+缓存键至少包含设备与资源配置、实际组件版本、A/B/C/D 全部布局/类型/转置、计算和标量模式、收尾及附加属性、别名关系、工作区与对齐保证、数值和搜索政策。任何相关变化都使旧选择失效；相同合同下更换数据也要重新绑定并证明指针有效。内部缓存只复用推荐，既不保存本应用数值验收，也不授权跨版本算法对象恢复。
+
+**有效替代：** 保留行主序输出，先使用合法默认收尾 GEMM，再按原列方向加 bias 和 ReLU，并把后处理纳入正确性与同范围成本比较。零候选时记录阻塞或选此等价方案；`algo=nullptr` 不保证成功。设备执行错误后停止并诊断，不能在出错上下文里盲试回退。
+
+**常见错误：** 直接套用当前文档放宽旧版本限制；只翻转 D 的布局；把 bias 加到原行；只按尺寸命中缓存；读取失败项的字段或未返回项；把预算当分配；丢掉 beta、偏置或激活；称启发式第一项为最快。
+
+</details>
+
+**来源依据：** 原创 [L07](/libraries/cublaslt-matmul/) 综合审查、[TERM-188](/glossary/#term-188)与 [SRC-CUDA-068](/sources-and-versions/#src-cuda-068)。EX18/LAB12 只提供传统 FP32 基线，不实现本题 Lt 选择；两者编译证据为空，运行仍待硬件验证。VIS12 不揭示库内部实现。
+
+**来源日期：** 2026-09-06。
+
 ## 复核记录
 
-既有条目保留各自 item-level records。Issue #32 在 **2026-09-04** 对 R3 边界 66 个条目及其精确 10 个 Nsight report-analysis inventory 完成不可变聚合复核；issue #33 新增 PB-R4-001/002，issue #34 新增 PB-R4-003/004。PB-R4-005/006 将当前完整 Publication Pair 扩展到 72 个条目，metadata projection、直接链接与静态合同于 **2026-09-05** 同步复核。所有情景、题目、目标、推导和参考解答都是项目原创；owner documentation 只用于引用和改写，没有复制或改编外部题目、正文、表格、figure、source example、输出、日志、artifact、diagnostic、timing、performance result 或 private material。新增 L05 条目只审查 scope/order、accessibility、phase/stage ownership、alignment fallback 与 portability；不展示或执行 CUDA/libcu++ source，也不发布 local API availability、output、barrier trace、traffic、timing、winner、speedup 或 Evidence Status。
+既有条目保留各自复核记录。Issue #32 在 **2026-09-04** 的不可变 R3 聚合复核固定 66 个条目和精确 10 项 Nsight 报告分析清单。PB-R4-001 至 PB-R4-006 保留 2026-09-04/05 记录，其中 PB-R4-006 仍属于 L05。PB-R4-007/008 将当前完整双语发布对扩展到 **74** 个条目；元数据、链接、分层提示与独立解答于 **2026-09-06** 同步复核。新情景分别审查子矩阵地址/生命周期，以及 Lt 描述、资源、缓存和收尾合同。全部题目与解答均为原创，只引用并转述上游文档，不复制或改编上游题目、代码、正文、表格、图示或结果。静态候选材料和地址算术不是 GPU 观察；没有新增编译、运行、流量、计时、Tensor Core、加速比、赢家或证据状态。

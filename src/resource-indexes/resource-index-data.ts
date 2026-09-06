@@ -369,6 +369,27 @@ const labs: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-05',
     keywords: localized('EX11 EX17 CUB DeviceReduce correctness numerical order temporary storage traffic timing maintenance 10 expected observations', 'EX11 EX17 CUB DeviceReduce correctness numerical order temporary storage traffic timing maintenance 10 expected observations'),
   },
+  {
+    planningId: 'LAB12',
+    group: 'labs',
+    title: localized('LAB12：对比教学 GEMM 与 cuBLAS', 'LAB12: Compare an Educational GEMM with cuBLAS'),
+    href: localized('/labs/compare-gemm-with-cublas/', '/en/labs/compare-gemm-with-cublas/'),
+    resourceType: 'guided-lab',
+    difficulty: 'advanced',
+    prerequisites: ['Q13', 'L06'],
+    relatedUnits: ['L07', 'EX15', 'EX18', 'VIS12'],
+    hardwareGate: localized(
+      '仅限原生 Linux；1 个选定的 CC 7.5+ CUDA GPU；问题内存不超过 8 GB；可选性能分析需管理员批准的非管理员计数器访问，禁止 sudo 或策略绕过；精度扩展另设门槛。',
+      'Native Linux only; one selected CC 7.5+ CUDA GPU; problems fit within 8 GB; optional profiling requires administrator-approved non-admin counter access, without sudo or policy bypass; precision extensions have separate gates.',
+    ),
+    versionGate: localized(
+      'C++17；仅 Toolkit 13.3.1 / cuBLAS 13.6.0.2 测量合同；记录实际头文件、链接库和加载库身份。EX18 的另外两条构建通道不扩展 LAB12。',
+      'C++17; measurement contract only for Toolkit 13.3.1 / cuBLAS 13.6.0.2; record actual headers, linked and loaded library identities. EX18\'s other two build lanes do not extend LAB12.',
+    ),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] },
+    reviewedOn: '2026-09-06',
+    keywords: localized('EX15 EX18 cuBLAS GEMM FP32 pedantic 独立参考 初始 C 事件计时 原始样本 维护成本', 'EX15 EX18 cuBLAS GEMM FP32 pedantic independent oracle initial C event timing raw samples maintenance cost'),
+  },
 ];
 
 const practice: readonly ResourceIndexRecord[] = [
@@ -1336,7 +1357,7 @@ const practice: readonly ResourceIndexRecord[] = [
     difficulty: 'advanced',
     prerequisites: ['Q13'],
     relatedUnits: ['A08', 'Q06', 'Q08', 'Q10', 'Q13', 'EX15', 'VIS12'],
-    hardwareGate: localized('无；只审查 static summary 与 expected-only fixture，不运行 CUDA、Nsight Compute 或未发布的 LAB12。', 'None; audit a static summary and expected-only fixture without running CUDA, Nsight Compute, or unpublished LAB12.'),
+    hardwareGate: localized('无；只审查 static summary 与 expected-only fixture，不运行 CUDA、Nsight Compute 或 LAB12。', 'None; audit a static summary and expected-only fixture without running CUDA, Nsight Compute, or LAB12.'),
     versionGate: localized(
       'Toolkit 11.8.0/12.9.2/13.3.1、Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5 与 exact GPU/compiler/profiler/manifest gates。',
       'Toolkits 11.8.0/12.9.2/13.3.1, Nsight Compute 2022.3.0.22/2025.2.1.3/2026.2.1.5, and exact GPU, compiler, profiler, and manifest gates.',
@@ -1483,6 +1504,34 @@ const practice: readonly ResourceIndexRecord[] = [
     versionGate: localized('以 CCCL/libcu++ v3.4.2 的 pipeline、memcpy_async 和 aligned_size_t 精确合同为准；仅采用 12.9.2/13.3.1 常规通道的 C++17/C++20；排除 11.8，不从 EX10 推导 C++23 支持。', 'Exact CCCL/libcu++ v3.4.2 pipeline, memcpy_async, and aligned_size_t contracts; ordinary C++17/C++20 on 12.9.2/13.3.1; excludes 11.8 and inherits no C++23 support from EX10.'),
     reviewedOn: '2026-09-05',
     keywords: localized('libcu++ barrier phase pipeline producer consumer acquire commit wait release quit collective alignment aligned_size_t memcpy_async fallback portability', 'libcu++ barrier phase pipeline producer consumer acquire commit wait release quit collective alignment aligned_size_t memcpy_async fallback portability'),
+  },
+  {
+    planningId: 'PB-R4-007',
+    group: 'practice',
+    title: localized('修复 GEMM 子矩阵的地址、标量与完成合同', 'Repair a GEMM submatrix address, scalar, and completion contract'),
+    href: localized('/practice/#pb-r4-007', '/en/practice/#pb-r4-007'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['L06'],
+    relatedUnits: ['A08', 'Q01', 'L06', 'L07', 'EX15', 'EX18', 'LAB12', 'VIS12'],
+    hardwareGate: localized('无；只做静态地址与生命周期推导，不编译或运行 CUDA。', 'None; static address and lifetime derivations without compiling or running CUDA.'),
+    versionGate: localized('L06 的 Toolkit 12.9.2 归档合同；FP32 pedantic 与主机标量；三个独立 cuBLAS 组件坐标不提供运行证据。', 'L06 Toolkit 12.9.2 archived contract; FP32 pedantic and host scalars; three independently versioned cuBLAS coordinates grant no runtime evidence.'),
+    reviewedOn: '2026-09-06',
+    keywords: localized('cuBLAS leading dimension 主维度 子矩阵 转置 beta 指针模式 工作区 生命周期', 'cuBLAS leading dimension submatrix transpose beta pointer mode workspace lifetime'),
+  },
+  {
+    planningId: 'PB-R4-008',
+    group: 'practice',
+    title: localized('拒绝失效的 Lt 缓存并保留收尾语义', 'Reject a stale Lt cache entry while preserving epilogue semantics'),
+    href: localized('/practice/#pb-r4-008', '/en/practice/#pb-r4-008'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L07'],
+    relatedUnits: ['L06', 'Q05', 'L07', 'EX18', 'LAB12', 'VIS12'],
+    hardwareGate: localized('无；只审查人为构造的配置，不查询候选、不运行 CUDA、不预填测量。', 'None; audit constructed configurations without querying candidates, running CUDA, or prefilling measurements.'),
+    versionGate: localized('L07 的 12.9.2 普通单次 FP32 Matmul 合同；保留行主序 D 的收尾限制；当前 13.3 文档不回填旧版许可。', 'L07 12.9.2 ordinary single FP32 Matmul contract; retain row-major D epilogue restrictions rather than backporting current 13.3 wording.'),
+    reviewedOn: '2026-09-06',
+    keywords: localized('cuBLASLt epilogue 收尾操作 bias 偏置 启发式 工作区 对齐 缓存 失效 回退', 'cuBLASLt epilogue bias heuristic workspace alignment cache invalidation fallback'),
   },
 ];
 
@@ -1974,6 +2023,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-184', 'logical warp · 逻辑线程束', 'kernel-vocabulary', ['F02', 'M06', 'M12', 'L04'], 'CCCL/CUB v3.4.2 中同一 hardware warp 内 compile-time 1 至 32 个连续 threads；2 的幂可 partition，非 2 的幂不 partition 且只有第一个 logical warp 执行；不是任意 active mask。', 'In CCCL/CUB v3.4.2, a compile-time group of 1 through 32 consecutive threads in one hardware warp; power-of-two sizes can partition it, while non-power-of-two sizes do not partition and only the first logical warp executes; it is not an arbitrary active mask.', '2026-09-05'),
   glossaryRecord('TERM-185', 'Memory Order · 内存序', 'kernel-vocabulary', ['M05', 'L05'], 'CCCL/libcu++ v3.4.2 的内存序（Memory Order）合同：relaxed 不发布载荷（payload），acquire 必须观察到相应 release，且双方作用域（scope）足够；内存序不赋予内存可访问性或系统原子操作支持。', 'CCCL/libcu++ v3.4.2; relaxed does not publish a payload, and acquire must observe the corresponding release with sufficient scopes on both sides; order grants neither memory accessibility nor system atomic support.', '2026-09-05'),
   glossaryRecord('TERM-186', 'Barrier Phase · 屏障阶段', 'kernel-vocabulary', ['M05', 'M13', 'L05'], 'CCCL/libcu++ v3.4.2 的屏障阶段（Barrier Phase）合同：参与前先初始化并发布；arrive 不等待，arrive_and_drop 同时减少当前与未来计数；消费和复用前须等待相应阶段完成，不假设尚未落实的 P2588R3 完成语义已适用。', 'CCCL/libcu++ v3.4.2; initialize and publish before participation, arrive does not wait, and arrive_and_drop reduces current and future counts; consumption and reuse require the appropriate phase wait, without assuming pending P2588R3 completion semantics.', '2026-09-05'),
+  glossaryRecord('TERM-187', 'Leading Dimension · 主维度', 'kernel-vocabulary', ['L06', 'L07', 'EX18', 'LAB12'], 'Toolkit 12.9.2 归档：普通行/列主序中的物理步长，以元素为单位；转置和子矩阵视图不重排底层存储，不自动缩短主维度。', 'Toolkit 12.9.2 archive: physical stride in elements for ordinary row/column-major storage; transposition and submatrix views do not rearrange storage or automatically shorten its leading dimension.', '2026-09-06'),
+  glossaryRecord('TERM-188', 'Epilogue · 收尾操作', 'kernel-vocabulary', ['L06', 'L07', 'EX18', 'LAB12'], '12.9.2 cuBLASLt Matmul 的偏置/激活合同及行主序 D 限制；EX18/LAB12 仅提供传统 FP32 基线，没有 Lt 融合实现或实测收益。', '12.9.2 cuBLASLt Matmul bias/activation contract and row-major D restriction; EX18/LAB12 provide only a traditional FP32 baseline, not Lt fusion implementation or measured benefit.', '2026-09-06'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2803,6 +2854,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-05',
     '2026-09-05',
+  ),
+  sourceRecord(
+    'SRC-CUDA-067',
+    localized('L06/EX18/LAB12 cuBLAS GEMM、组件版本与正确性合同', 'L06/EX18/LAB12 cuBLAS GEMM, component versions, and correctness contracts'),
+    'cuda-version-record',
+    ['A08', 'Q01', 'Q13', 'L06', 'L07', 'EX15', 'EX18', 'LAB12', 'VIS12'],
+    localized(
+      '12.9.2 归档 API 教学基线；11.8.0/12.9.2/13.3.1 分发清单分别固定 cuBLAS 11.11.3.6/12.9.2.10/13.6.0.2。精确 13.3.1 归档不可用，明确使用当前 13.3 API 与 13.3 Update 1 发布说明作比较；LAB12 只选 13.3.1。NVIDIA EULA/Notices 与项目原创许可分开；没有上游改编、编译或运行证据。',
+      '12.9.2 archived API teaching baseline; 11.8.0/12.9.2/13.3.1 redistribution manifests independently pin cuBLAS 11.11.3.6/12.9.2.10/13.6.0.2. Exact 13.3.1 archives unavailable; explicit current 13.3 API and 13.3 Update 1 release-note comparison; LAB12 selects only 13.3.1. NVIDIA EULA/Notices remain separate from original project licenses; no upstream adaptation, compilation, or runtime evidence.',
+    ),
+    '2026-09-06',
+    '2026-09-06',
+  ),
+  sourceRecord(
+    'SRC-CUDA-068',
+    localized('L07 cuBLASLt 布局、收尾、候选与复用边界', 'L07 cuBLASLt layout, epilogue, candidate, and reuse boundaries'),
+    'cuda-version-record',
+    ['L06', 'Q05', 'L07', 'EX18', 'LAB12', 'VIS12'],
+    localized(
+      '12.9.2 普通单次 FP32 合同：描述符、C/D 别名、工作区/对齐、候选状态、AlgoCheck、偏置方向和缓存失效；保留注 8 的行主序 D 限制。当前 13.3/13.3 Update 1 仅作带日期的差异与窄范围问题检查，不授予候选、融合或性能证据。',
+      '12.9.2 ordinary single FP32 contract: descriptors, C/D aliasing, workspace/alignment, candidate state, AlgoCheck, bias orientation, and cache invalidation; retain footnote 8 row-major D restrictions. Current 13.3/13.3 Update 1 provides dated differences and narrow issue checks only, not candidate, fusion, or performance evidence.',
+    ),
+    '2026-09-06',
+    '2026-09-06',
   ),
 ];
 

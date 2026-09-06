@@ -1,0 +1,257 @@
+---
+title: 'L07: Describe, Select, and Reuse cuBLASLt Matmul'
+description: Audit layouts, epilogues, workspace, and heuristic candidates under the 12.9.2 contract, separating feasibility, measured selection, and cache reuse while preserving version limits and correct fallbacks.
+pairId: l07
+counterpart: /libraries/cublaslt-matmul/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, descriptors, layouts, workspace, selection, epilogues, reuse, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L07
+prerequisites: [L06, Q05]
+relatedUnits: [EX18, LAB12, VIS12]
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuBLASLt 12.9 archived API contract'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#using-the-cublaslt-api'
+    version: 'Toolkit 12.9.2 archive; guide label 12.9'
+    platform: 'Native Linux; ordinary single-matmul teaching contract, not execution'
+    accessDate: '2026-09-06'
+  - title: 'Current cuBLASLt API comparison'
+    url: 'https://docs.nvidia.com/cuda/cublas/index.html#cublasltmatmul'
+    version: 'Live guide label 13.3; footer 2026-06-25; accessed 2026-09-06'
+    platform: 'Changed epilogue wording and ForStream comparison only; not the 12.9.2 contract'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'Toolkit 11.8.0; libcublas 11.11.3.6'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'Toolkit 12.9.2; libcublas 12.9.2.10'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; libcublas 13.6.0.2'
+    platform: 'Linux x86_64 package identity only; no algorithm portability claim'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cublas-11.8.0'
+    version: 'Toolkit 11.8.0; cuBLAS Release 11.8 section'
+    platform: 'Heuristics-cache introduction and historical preference deprecations'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9 Update 2 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2'
+    version: 'Toolkit 12.9.2; includes 12.8 and 12.9 issue history'
+    platform: 'Algorithm 66 fixes, bias and layout restrictions; not local reproduction'
+    accessDate: '2026-09-06'
+  - title: 'Current CUDA 13.3 Update 1 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1'
+    version: 'Live guide label 13.3 Update 1, accessed 2026-09-06; component 13.6.0.2'
+    platform: 'Narrow capture and GEMV-like issue ledger; exact 13.3.1 archive returned 404'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 EULA and Toolkit supplement'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html'
+    version: 'Archived EULA; last updated 2025-01-07'
+    platform: 'Documentation and redistribution boundary; no upstream code adapted'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l07 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/cublaslt-matmul/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,descriptors,layouts,workspace,selection,epilogues,reuse,measurement,versions,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'L06,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX18,LAB12,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/cublaslt-matmul/" lang="zh-CN">阅读中文对应页</a>
+
+L06 lets the library select an implementation of a matrix multiplication. The next question is how an application can constrain layout, temporary memory, or bias fusion without confusing "recommended" with "validated as fastest." cuBLASLt separates those conditions into inspectable objects.
+
+## Learning goals
+
+Allow about 30 minutes for the unit, layout derivations, and retrieval check. You will describe an ordinary matmul completely, reject candidates that violate workspace, alignment, or epilogue requirements, and define a reuse policy with invalidation conditions. This page teaches selection, not the best algorithm for a particular GPU.
+
+## Prerequisites
+
+The exact prerequisites are [L06: Hand Matrix Multiplication to cuBLAS Correctly](/en/libraries/cublas-gemm/) and [Q05: Timing Asynchronous GPU Work](/en/correctness/timing-asynchronous-gpu-work/), in the order `L06, Q05`. The first supplies shape, stride, and numerical contracts; the second separates host overhead from device completion. Related EX18, LAB12, and VIS12 add no prerequisite edges.
+
+## From one call to reusable descriptions
+
+Available since CUDA 10.1, cuBLASLt provides a flexible GEMM interface. A descriptor records the requested operation, layouts explain the bytes, preferences constrain permitted resources, and an algorithm object records a particular implementation configuration. This is neither a model requiring expensive training nor a compiler that automatically optimizes an entire graph.
+
+This unit pins the **Toolkit 12.9.2 archive's ordinary, single, real-valued matmul contract**. Start with FP32 storage, `CUBLAS_COMPUTE_32F_PEDANTIC`, FP32 scaling scalars, host pointer mode, and the default epilogue. The operation is `D = alpha*op(A)*op(B) + beta*C`. C is input and D is output: do not retain traditional GEMM's assumption that C is always overwritten. Later epilogue exercises remain static derivations, not extensions of EX18 execution.
+
+## Create objects before setting attributes
+
+Use the explicit object interface in `cublasLt.h`. Check the status of every creation and attribute update. Creating a descriptor does not mean GPU work has executed.
+
+| Object | Creation and configuration | Responsibility |
+| --- | --- | --- |
+| Library handle | `cublasLtCreate` | Library resources, not a stream-completion receipt |
+| Operation description | `cublasLtMatmulDescCreate`, then `cublasLtMatmulDescSetAttribute` | Creation selects `computeType,scaleType`; attributes include `TRANSA`, `TRANSB`, `POINTER_MODE`, and `EPILOGUE` |
+| A/B/C/D layouts | Separate `cublasLtMatrixLayoutCreate` calls, then `cublasLtMatrixLayoutSetAttribute` | Type, untransformed rows/columns, leading dimension, and `CUBLASLT_MATRIX_LAYOUT_ORDER` |
+| Search preferences | `cublasLtMatmulPreferenceCreate`, then `cublasLtMatmulPreferenceSetAttribute` | Workspace budget and actual guaranteed matrix-pointer alignments, among other filters |
+
+`SetAttribute` accepts a buffer containing the attribute value and its byte size, not an untyped integer slot. Enums, `uint32_t` alignments, `uint64_t` workspace budgets, and pointer attributes each need their documented representation. To set the bias pointer, supply the **address of the host variable holding the device-pointer value**, not the first bytes of the device vector. The application still allocates and keeps that vector alive.
+
+In 12.9.2, `TRANSA` and `TRANSB` default to N, `TRANSC` supports only N, and layouts default to column-major. Stating relevant choices explicitly makes review easier. `cublasLtMatmul` receives its stream directly; it does not need traditional `cublasSetStream` configuration. This unit conservatively keeps description objects until work finishes and then calls their matching `Destroy` functions. Matrices and workspace must remain alive through their last device use. Error cleanup similarly releases only successfully created resources.
+
+## Layout is not a transpose operation
+
+Row-major and column-major describe storage; transposition describes the mathematical operation. Layout creation takes the pre-operation shape. If `op(A)` must be `3 x 2` and A uses T, its layout must be `2 x 3`. Marking row-major A as `CUBLASLT_ORDER_ROW` does not remove that T.
+
+For positive-dimensional ordinary layouts, row-major requires `ld >= stored_cols`, and column-major requires `ld >= stored_rows`, in elements. Combine this rule with L06's N/T/C storage-shape table to derive leading dimensions for every ordinary transpose case. Real-valued T/C are numerically equivalent here, but the unit does not authorize every mixed-layout complex conjugation case; the archive imposes a separate restriction on row layouts combined with conjugation.
+
+| Target and flag | Actual storage shape | Row-major minimum `ld` | Column-major minimum `ld` |
+| --- | --- | --- | --- |
+| `op(A):m x k`, N | `m x k` | k | m |
+| `op(A):m x k`, T | `k x m` | m | k |
+| `op(B):k x n`, N | `k x n` | n | k |
+| `op(B):k x n`, T | `n x k` | k | n |
+| C/D, N | `m x n` | n | m |
+
+Ordinary out-of-place use here keeps C and D disjoint. They have the same data type, rows, columns, batch size, and memory order, but may have different leading dimensions. In-place operation requires both `C == D` and `Cdesc == Ddesc`, not merely two descriptors with apparently identical attributes. This unit uses neither `ldc=0` broadcasting nor omitted-descriptor shortcuts.
+
+Concrete check: A is row-major `2 x 3, ld=4` with T; B is row-major `2 x 5, ld=7` with N; C/D are row-major `3 x 5` with leading dimensions 6 and 8 respectively. This describes `3 x 2` multiplied by `2 x 5` without L06's swapped-operand trick for the default epilogue. Correct logical shapes are the first check. Device, type, and algorithm support for the complete combination still require a query.
+
+## A budget does not allocate workspace
+
+`CUBLASLT_MATMUL_PREF_MAX_WORKSPACE_BYTES` sets the **maximum bytes** permitted by search, defaulting to zero. Setting 4 MiB allocates nothing and does not mean each candidate requires exactly 4 MiB. Actual requirements come from a successful candidate's `workspaceSize`; execution needs a real device pointer and real capacity.
+
+You can choose a budget, query, and allocate for the surviving requirement, or start with a controlled allocation and use its capacity as the budget. Either way, prove that the requirement fits both budget and allocation, that the workspace address is at least 256-byte aligned, and that no unordered work reuses it before completion. A zero-workspace algorithm may use a null workspace with zero capacity. A zero budget does not promise any candidate exists.
+
+A/B/C/D minimum-alignment preferences each default to 256 bytes. State the alignment guaranteed for the **actual passed address**, not alignment you wish the library would provide. Moving one FP32 element into a 256-byte-aligned allocation generally leaves only a four-byte guarantee. Advertising 256 can retain an algorithm the real pointer cannot run. Leave device-memory headroom even after budgeting: heuristic queries can load kernels through the driver and are not pure arithmetic functions detached from device resources.
+
+## Candidates pass several independent gates
+
+A heuristic estimates suitable implementations from problem and device conditions; it is not a measurement. `cublasLtMatmulAlgoGetHeuristic` returns candidates ordered by increasing estimated compute time. `requestedAlgoCount` is the array capacity and requested upper bound; `returnAlgoCount` is the number actually written.
+
+1. Check the query's `cublasStatus_t`. On failure, retain the configuration and error without reading unestablished results.
+2. Check `returnAlgoCount`. Zero candidates is a required branch. Iterate only the returned range rather than blindly reading result zero.
+3. Check each entry's `state == CUBLAS_STATUS_SUCCESS` before using its other fields.
+4. Compare `workspaceSize` with budget and actual capacity, and check matrix addresses, subview alignment, and applicable algorithm restrictions.
+5. For a reused or modified configuration, use `cublasLtMatmulAlgoCheck` to recheck descriptor/device compatibility and workspace requirements. Success still proves neither actual pointer alignment nor correct execution.
+6. In external validation, check `cublasLtMatmul` status, stream completion, and an independent reference. Only numerically accepted candidates enter comparison under the same timing boundary.
+
+The result's `wavesCount` is an algorithm device-utilization estimate, not measured occupancy or elapsed time. The first entry is not a measured winner. This page recommends no algorithm ID and records no candidate, allocation, or execution observation.
+
+A fallback must preserve the problem. When resources allow, query another budget, return to the default epilogue plus separate postprocessing, or use L06's cuBLAS comparison for ordinary FP32 multiplication. Do not silently change precision or drop `beta*C`, bias, or activation. `algo=nullptr` triggers an implicit query with default preferences, not a guaranteed universal fallback. After a device execution error, stop and diagnose rather than blindly trying another candidate in a potentially failed context.
+
+## Epilogues and bias orientation
+
+An epilogue applies processing such as bias or activation to the multiply-add result. It can reduce the steps required by separate postprocessing, but without measurement it promises neither a traffic reduction, exactly one kernel launch, nor a speedup.
+
+For ordinary FP32 here, establish `CUBLASLT_EPILOGUE_DEFAULT` first. Selecting `CUBLASLT_EPILOGUE_BIAS` or `CUBLASLT_EPILOGUE_RELU_BIAS` means setting `CUBLASLT_MATMUL_DESC_EPILOGUE` and a device `CUBLASLT_MATMUL_DESC_BIAS_POINTER`. The ReLU-bias path adds bias before applying `max(x,0)`. Bias type must also match the support table; it is FP32 for the all-FP32 case here.
+
+**Footnote 8 of the archived 12.9.2 `cublasLtMatmul` contract excludes ReLU, dReLU, GELU, dGELU, and Bias epilogues when D uses `CUBLASLT_ORDER_ROW`.** This contract therefore does not permit directly combining row-major D with standalone bias or bias/activation. An enum's existence, a successful attribute setter, or an implementation accidentally accepting a case does not override the restriction. Current 13.3 documentation narrows the wording to combinations of activation with Bias; that does not backport permission into 12.9.2.
+
+The packed bias vector matches the **described D row count** and broadcasts to every column. Column-major `D:3 x 5` takes three bias elements, meaning `D[i,j] = product[i,j] + bias[i]`, not the output-feature-column `bias[j]` convention common in frameworks.
+
+If the application needs row-major `Y:3 x 5` with five output-feature biases, rederive the operation as column-major `D=Y^T:5 x 3`. Swap multiplication operands and rebuild their layouts correctly. Broadcasting five values across D's columns then corresponds to the original Y's feature columns. This changes the **whole operation description**, not just D's order enum from ROW to COL. If the application instead needs original Y row bias, this trick cannot simply take three values; use a legal column-major intermediate with explicit conversion or correct separate postprocessing.
+
+This unit does not implement gradients or auxiliary buffers. Those modes add buffer-type, leading-dimension, alignment, and input/output-role constraints. Selecting an AUX enum without supplying those objects is not a valid configuration. In 12.9.2, pointer-array batch mode supports only the default epilogue. A single FP32 contract cannot authorize fusion across every type, layout, and batch mode.
+
+## Reusing a selection is not the internal cache
+
+An application reuses its stored algorithm configuration and acceptance conditions. A key containing only `m,n,k` conflates different problems. Use a conservative key here and retain whether the selection is a heuristic suggestion or has been validated and measured in a declared environment.
+
+| Key portion | Conditions to record |
+| --- | --- |
+| Execution environment | GPU identity/architecture, available resource configuration, and actual cuBLAS component version; measurement-environment changes also require performance reassessment |
+| Operation | All transposes, compute/scale types, pointer mode, epilogue, relevant bias/auxiliary attributes, and necessary scalar semantic classes |
+| Storage | A/B/C/D types, rows/columns, leading dimensions, orders, batch attributes, and C/D alias relation |
+| Resources | Workspace budget, actual capacity, matrix/additional-buffer alignment guarantees, search filters, and numerical policy |
+
+Changing shape, transpose, leading dimension, output layout, epilogue, types, device, or library version invalidates the old selection first. Shrinking workspace or weakening address alignment also requires rechecking. Changing only data contents under the same contract can reuse the configuration, but bind current pointers again and prove their extents, alignment, and lifetimes, then check execution. A cache hit cannot excuse an error. The archive permits algorithm-object serialization and restoration with the **same library version**, not a universal cross-version or cross-device format.
+
+The library's internal heuristics cache instead maps problems to previously recommended kernels. The 11.8 release notes record its introduction. The 12.9 guide describes a thread-safe, LRU-like cache with default capacity 8192, controlled by `CUBLASLT_HEURISTICS_CACHE_CAPACITY` or the higher-precedence `cublasLtHeuristicsCacheSetCapacity`; zero disables it. This can change query overhead. It neither allocates application workspace, stores numerical acceptance, nor maintains the application's invalidation rules above. It is not a database of measured winners.
+
+## Record correctness and timing separately
+
+Before timing, validate the plain product and then the epilogue result. The CPU reference independently handles logical coordinates, `alpha,beta`, and bias orientation. Small nonsquare shapes and distinct bias values expose orientation mistakes. If trials overwrite C, particularly in-place with `beta != 0`, restore identical inputs before each trial or candidates no longer solve the same problem.
+
+Q05's device-event interval can measure execution after data and configuration are ready. A separate host-wall-clock interval can measure descriptor creation, heuristic queries, allocation, and end-to-end costs. Use consistent warmup, repetitions, synchronization, and timing placement. Do not charge query overhead to only one candidate or silently charge input restoration to only one side. The workload determines how much repetition amortizes setup; general documentation advice cannot supply a fabricated crossover count.
+
+A complete evidence packet contains an Environment Manifest, component version, canonical source identity, descriptors/preferences, actual pointer alignment, candidate states/workspace, numerical criteria, raw measurements, and fallback reasons. Without actual work, mark these as not executed rather than filling fictional results. [EX18](/en/examples/cublas-gemm/) and [LAB12](/en/labs/compare-gemm-with-cublas/) provide the traditional FP32 baseline, not an implemented or validated Lt search. [VIS12](/en/visuals/gemm-tiling-hierarchy/) remains a logical tiling model.
+
+## Versions and a narrow issue ledger
+
+Toolkit 11.8.0, 12.9.2, and 13.3.1 manifests respectively identify `libcublas 11.11.3.6`, `12.9.2.10`, and `13.6.0.2`. Documentation label 13.3 is not component version 13.3. Exact 13.3.1 API and release-note archives returned 404, so the latest rows below use the **current 13.3 Update 1 release notes accessed on 2026-09-06**, not an unvisited archive.
+
+| Source and state | Exact conditions | Consequence here |
+| --- | --- | --- |
+| Fixed in 12.8, 4910924 | `BGRADA/B` had allowed row-major output and computed wrong gradients; that layout was disallowed | Do not conflate gradient and ordinary bias modes; retain output-layout restrictions |
+| Fixed in 12.8 Update 1, 5104822 | Lt with `m` or `n` equal to 1 and BIAS could produce wrong results | Include degenerate shapes in a test plan; not reproduced here |
+| Fixed in 12.9 Update 2, 5807900/5943783 | Algorithm ID 66, CC 10.x/11.x, concurrent with a Tensor Memory-using kernel; existed since 12.8 | Do not generalize the historical condition to every algorithm or GPU |
+| Fixed in 12.9 Update 2, CUB-9572 | ID 66, CC 9.0/10.x/11.0, element bytes times leading dimension exceeds signed 32-bit range; existed since 12.6 Update 2 | Audit leading-dimension legality separately from address-calculation safety |
+| Fixed in 12.9 Update 2, CUB-9627 | ID 66, CC 9.0, FP8 with `beta != 0` and `scale_C=0` could hang | FP8 scaling is not an ordinary FP32 prerequisite |
+| Known in current 13.3 Update 1, 6288786 | Heuristic query during capture of a non-default blocking stream returns internal error; introduced in Toolkit 13.3 / cuBLAS 13.5.1 | Keep this selection process outside capture, in ordinary execution |
+| Known in current 13.3 Update 1 | Certain GEMV/Lt shapes/workspace configurations with `M` or `N` equal to 1 return not supported; introduced in Toolkit 13.3 / cuBLAS 13.5.1 | Zero-candidate and unsupported paths must be explicit |
+| Known in current 13.3 Update 1, CUB-10445 | GEMV-like operation, CC 12.0/12.1, transposed matrix, non-accumulation dimension above 3145680, `beta != 0`; introduced in Toolkit 13.3 Update 1 / cuBLAS 13.6.0 | The newest component does not replace independent numerical acceptance |
+
+This is a small set of sourced, conditional records, not a complete defect catalog or local observation. Current `ForStream` query/check interfaces account for resources in the stream's execution context; their signatures and guarantees must not be projected onto the older 12.9.2 query here. Emulation, grouped GEMM, FP4, Green Contexts, and graph-capture additions are not Stable Curriculum prerequisites. Migration requires reviewing the target version's contract and issue ledger again.
+
+## Evidence boundary
+
+This unit and its Exercises are static API reasoning. There are no canonical CUDA imports, candidate queries, or observed runs. All four evidence arrays are empty. They establish no compilation, execution, utilization, fused-kernel-count, or speedup evidence. Native Linux is the only Supported Environment. External implementation, compilation, and validation belong to their canonical examples and Labs; the browser presents learning material only.
+
+## Retrieval check
+
+1. Why do layout rows and columns describe storage before transposition? How does an operation's compute type differ from a layout's data type?
+2. After setting a 4 MiB workspace maximum, which three capacity, alignment, or lifetime obligations remain?
+3. Why must a successful query still inspect returned count and per-entry state? Why is `AlgoCheck` not numerical validation?
+4. Under 12.9.2, why cannot row-major `3 x 5` D directly take five bias elements? What changes when rederiving the problem as `Y^T`?
+5. How does an application's stored algorithm selection differ from the internal heuristics cache? Can weaker pointer alignment or a new library version directly reuse the old selection?
+
+## Continue with practice
+
+- Complete the [three L07 Exercises](/en/libraries/cublaslt-matmul/exercises/) before opening the [separate solutions](/en/libraries/cublaslt-matmul/solutions/).
+- Audit [PB-R4-008](/en/practice/#pb-r4-008), separating selection reasoning from [LAB12](/en/labs/compare-gemm-with-cublas/)'s traditional baseline evidence.
+- Reuse [VIS12](/en/visuals/gemm-tiling-hierarchy/) for logical data requirements, not predictions of library algorithm selection.
+
+## Sources and licensing
+
+[SRC-CUDA-068](/en/sources-and-versions/#src-cuda-068) groups this review. Exact 12.9.2 coordinates are [Matmul](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmul) (type tables, footnote 8, aliases, and workspace), [DescCreate](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmuldesccreate), [operation attributes](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmuldescattributes-t), [LayoutCreate](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatrixlayoutcreate), [layout attributes](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatrixlayoutattribute-t), [preference attributes](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulpreferenceattributes-t), [GetHeuristic](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgogetheuristic), [heuristic results](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulheuristicresult-t), [AlgoCheck](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgocheck), [Epilogue](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltepilogue-t), [algorithm objects](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgo-t), and [Heuristics Cache](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#heuristics-cache).
+
+Review covered the archived [EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) and [Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices); current documentation also retains NVIDIA copyright notices. Prose, derivations, tables, and Exercises are original, linking and paraphrasing facts without copying or adapting owner samples, source, figures, or measurements or relicensing the library as CC BY 4.0. Two scoped Context7 queries supplied discovery; the epilogue search also returned cuBLASDx material, which was not used as Lt authority.
+
+**Facts checked and sources accessed: 2026-09-06.**

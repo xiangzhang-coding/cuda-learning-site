@@ -157,6 +157,8 @@ export default defineConfig({
             { slug: 'libraries/cub-device-primitives' },
             { slug: 'libraries/cub-warp-block-primitives' },
             { slug: 'libraries/libcu-plus-plus-synchronization' },
+            { slug: 'libraries/cublas-gemm' },
+            { slug: 'libraries/cublaslt-matmul' },
           ],
         },
         {
@@ -180,6 +182,7 @@ export default defineConfig({
             { slug: 'examples/tiled-gemm' },
             { slug: 'examples/sanitizer-defect-suite' },
             { slug: 'examples/cub-device-reduction-scan' },
+            { slug: 'examples/cublas-gemm' },
           ],
         },
         {
@@ -198,6 +201,7 @@ export default defineConfig({
             { slug: 'labs/build-original-roofline' },
             { slug: 'labs/optimize-canonical-transpose' },
             { slug: 'labs/compare-custom-reduction-with-cub' },
+            { slug: 'labs/compare-gemm-with-cublas' },
           ],
         },
         {

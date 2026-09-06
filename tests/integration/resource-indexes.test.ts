@@ -14,7 +14,7 @@ import {
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-09-05T12:00:00Z');
+const asOf = new Date('2026-09-06T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -116,24 +116,24 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all seventy-two bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all seventy-four bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(72);
+    expect(practiceIds).toHaveLength(74);
 
     const localeContracts = [
       {
         locale: 'zh-CN',
         source: await readFile(path.join(projectRoot, 'src/content/docs/practice.mdx'), 'utf8'),
-        prerequisite: /- \*\*(?:直接先修条件|先修条件)：\*\*[^\n]*\]\(\//,
-        hardwareGate: /- \*\*硬件门槛（Hardware gate）：\*\*[^\n]+/,
-        reviewDate: /- \*\*最后复核（Last reviewed）：\*\* \d{4}-\d{2}-\d{2}。/,
+        prerequisite: /- \*\*(?:直接先修(?:条件)?|先修条件)：\*\*[^\n]*\]\(\//,
+        hardwareGate: /- \*\*硬件门槛(?:（Hardware gate）)?：\*\*[^\n]+/,
+        reviewDate: /- \*\*最后复核(?:（Last reviewed）)?：\*\* \d{4}-\d{2}-\d{2}。/,
         expectedEvidence: /\*\*预期证据：\*\*[^\n]+/,
         acceptanceCriteria: /\*\*验收条件：\*\*/,
         hint: /<details><summary>提示 [^<]+<\/summary>/g,
-        solution: /\*\*(?:解答|参考解答（Reviewed solution）)：\*\*[^\n]+/,
-        sourceBasis: /\*\*来源依据（Source basis）：\*\*[^\n]+/,
+        solution: /\*\*(?:解答|参考解答(?:（Reviewed solution）)?)：\*\*[^\n]+/,
+        sourceBasis: /\*\*来源依据(?:（Source basis）)?：\*\*[^\n]+/,
         prompt: /\*\*题目：\*\*\s*([^\n]+)/,
       },
       {
@@ -165,7 +165,9 @@ describe('published resource indexes', () => {
         expect(section, `${contract.locale} ${planningId} review date`).toMatch(contract.reviewDate);
         expect(section, `${contract.locale} ${planningId} expected evidence`).toMatch(contract.expectedEvidence);
         expect(section, `${contract.locale} ${planningId} acceptance criteria`).toMatch(contract.acceptanceCriteria);
-        expect(section.match(contract.hint), `${contract.locale} ${planningId} layered hints`).toHaveLength(2);
+        expect(section.match(contract.hint), `${contract.locale} ${planningId} layered hints`).toHaveLength(
+          ['PB-R4-007', 'PB-R4-008'].includes(planningId) ? 3 : 2,
+        );
         expect(section, `${contract.locale} ${planningId} solution`).toMatch(contract.solution);
         expect(section, `${contract.locale} ${planningId} source basis`).toMatch(contract.sourceBasis);
         const prompt = section.match(contract.prompt)?.[1].trim();
@@ -173,7 +175,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(72);
+      expect(prompts.size).toBe(74);
     }
   });
 
@@ -181,8 +183,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 11, practice: 72, visuals: 19, glossary: 186, sources: 82 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(370);
+    expect(counts).toEqual({ labs: 12, practice: 74, visuals: 19, glossary: 188, sources: 84 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(377);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -190,7 +192,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['L06', 'LAB12', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['L08', 'LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -314,6 +316,16 @@ describe('published resource indexes', () => {
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
       expect(record?.reviewedOn, planningId).toBe('2026-09-05');
       if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-05');
+    }
+
+    for (const planningId of [
+      'LAB12', 'PB-R4-007', 'PB-R4-008',
+      'TERM-187', 'TERM-188', 'SRC-CUDA-067', 'SRC-CUDA-068',
+    ]) {
+      expect(indexedIds, planningId).toContain(planningId);
+      const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
+      expect(record?.reviewedOn, planningId).toBe('2026-09-06');
+      if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-06');
     }
   });
 

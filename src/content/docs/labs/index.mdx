@@ -26,7 +26,9 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/labs/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-09-05，共有十一个连续编号的已发布实验：LAB01-LAB11；最新条目是 [LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)。L06 与 LAB12 没有公开目标，LAB12 仍等待 L06 的 cuBLAS prerequisite。未完成条目不会显示。
+本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-09-06，共有十二个连续编号的已发布实验：LAB01-LAB12；最新条目是 [LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)。其前置学习单元 [Q13](/correctness/gemm-optimization-case-study/)与 [L06](/libraries/cublas-gemm/)均已发布。页面完整不等于运行已验证（Runtime-Verified）；未完成条目仍不会显示。
+
+**发布清单与导航更新：2026-09-06。** 本次不重新核查 CUDA API 事实；各实验的技术来源与证据记录保留各自日期。
 
 ## 已发布实验
 
@@ -34,8 +36,12 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 顺序与直接查找
 
-当前顺序依次列出 LAB01-LAB09，随后是 [LAB10：优化 canonical transpose](/labs/optimize-canonical-transpose/)和 [LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)。LAB10 严格依赖 [Q11](/correctness/transpose-optimization-case-study/)并从 immutable [EX14](/examples/tiled-transpose/)开始。LAB11 严格依赖 [Q12](/correctness/reduction-optimization-case-study/)与 [L03](/libraries/cub-device-primitives/)，比较 immutable [EX11](/examples/multi-stage-reduction/)和 [EX17](/examples/cub-device-reduction-scan/)的 CUB path，同时只把 [VIS10](/visuals/reduction-stages/)用于 evidence-neutral reasoning。[Q13](/correctness/gemm-optimization-case-study/)已经发布，但 LAB12 的 cuBLAS comparison 仍等待未发布的 L06，因此只有 LAB12 不在本索引中。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
+当前顺序依次列出 LAB01-LAB09，随后是 [LAB10：优化 canonical transpose](/labs/optimize-canonical-transpose/)、[LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)和 [LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)。LAB10 严格依赖 [Q11](/correctness/transpose-optimization-case-study/)，从不可变 [EX14](/examples/tiled-transpose/)开始。LAB11 严格依赖 [Q12](/correctness/reduction-optimization-case-study/)与 [L03](/libraries/cub-device-primitives/)，比较不可变 [EX11](/examples/multi-stage-reduction/)和 [EX17](/examples/cub-device-reduction-scan/)的 CUB 实现；[VIS10](/visuals/reduction-stages/)仅帮助推理，不提供运行证据。
+
+LAB12 的直接先修恰好是 [Q13](/correctness/gemm-optimization-case-study/)与 [L06](/libraries/cublas-gemm/)，按此顺序完成后，在站外比较 [EX15](/examples/tiled-gemm/)与 [EX18](/examples/cublas-gemm/)。[L07](/libraries/cublaslt-matmul/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)是相关资源，不增加先修要求，也不把这份传统 cuBLAS 对比变成 Lt 选择实验。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
 
 ## 证据边界
 
 卡片中的编译和运行状态直接复制自链接实验的受控证据字段，不会把网站构建、筛选或浏览器测试升级为 CUDA 证据。既有 LAB01-LAB10 状态不变。LAB11 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，runtime 为待硬件验证（Pending Hardware Verification），只发布 expected observations；没有 Reference Environment 或 `performanceObservations`。其 expected-only fixture 不是采集所得 `.ncu-rep`，也没有 CUB output、temporary-storage value、kernel mapping、timing、metric、traffic、speedup、maintenance score 或 winner。EX17 的 compilation evidence 同样为空且 runtime 待硬件验证；声明的 component matrix 是 non-evidentiary build gate，并不表示 CI 已运行。
+
+新增 LAB12 与 EX18 的编译证据和实际观察记录也为空，运行状态均为待硬件验证（Pending Hardware Verification）。LAB12 提供匹配输入、逐次正确性检查和原始计时样本的采集步骤，不发布已测得的输出、耗时、加速比或赢家。预期观察不是实际观察；发布页面、主机检查和浏览器测试不会升级其证据状态。L06/L07 的四个证据数组保持为空。

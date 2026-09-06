@@ -22,7 +22,7 @@ const learningUnits = [
   'A10', 'A11', 'A12', 'A13', 'A14',
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
-const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05'] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07'] as const;
 const r3EvidenceNeutralLearningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
   'A10', 'A11', 'A12', 'A13', 'A14',
@@ -31,9 +31,9 @@ const runnableExamples = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
-const currentRunnableExamples = [...runnableExamples, 'EX17'] as const;
+const currentRunnableExamples = [...runnableExamples, 'EX17', 'EX18'] as const;
 const labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
-const currentLabs = [...labs, 'LAB11'] as const;
+const currentLabs = [...labs, 'LAB11', 'LAB12'] as const;
 const visualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -50,12 +50,12 @@ const pendingHardwareVerification = [
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18',
   ...currentLabs,
 ] as const;
 const r3ProfilerReportPlans = [
@@ -130,7 +130,7 @@ describe('R3 release review', () => {
       'SPDX-License-Identifier': 'Apache-2.0',
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-05',
+      reviewDate: '2026-09-06',
       artifactType: 'static-assets',
       canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
       releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
@@ -151,18 +151,18 @@ describe('R3 release review', () => {
       sourceRecords: 76,
     });
     expect(currentManifest.scope).toEqual({
-      publicationPairs: 249,
-      sourceRoutes: 498,
-      exerciseSetPublicationPairs: 66,
-      solutionSetPublicationPairs: 66,
+      publicationPairs: 257,
+      sourceRoutes: 514,
+      exerciseSetPublicationPairs: 68,
+      solutionSetPublicationPairs: 68,
       learningUnits: currentLearningUnits,
       runnableExamples: currentRunnableExamples,
       labs: currentLabs,
       visualExplainers,
-      practiceBankEntries: 72,
+      practiceBankEntries: 74,
       nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
-      glossaryTerms: 186,
-      sourceRecords: 82,
+      glossaryTerms: 188,
+      sourceRecords: 84,
     });
     expect(r3Manifest.compatibility).toMatchObject({
       supportedEnvironment: 'native-linux',
@@ -258,18 +258,19 @@ describe('R3 release review', () => {
       ...r3Manifest.evidence,
       noCompileCheckedClaim: currentNoCompileCheckedClaim,
       pendingHardwareVerification: currentPendingHardwareVerification,
-      r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05'],
+      r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07'],
       expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     });
     expect(currentManifest.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
-      'L01-L05 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L07 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
-      "L03 and LAB11, L06 and LAB12, and L13 and EX20 have no R3 public destination. LAB11 waits for L03, LAB12 waits for L06, and EX20 waits for L13's exact cuSPARSE API contract.",
+      'L03/LAB11 and L06/LAB12 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03 and LAB12 requires Q13/L06; L13 and EX20 remain unpublished pending the exact cuSPARSE API contract.',
       'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
-      'L01-L05 are published in the rolling R4 surface; L06-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+      'EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.',
+      'L01-L07 are published in the rolling R4 surface; L08-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]));
     expect(r3Manifest.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
@@ -307,23 +308,23 @@ describe('R3 release review', () => {
     }
 
     expectExactMembers(destinationIds(/^(?:O|F|M|A|Q)\d{2}$/), learningUnits);
-    expectExactMembers(destinationIds(/^L\d{2}$/), ['L01', 'L02', 'L03', 'L04', 'L05']);
+    expectExactMembers(destinationIds(/^L\d{2}$/), ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07']);
     expectExactMembers(destinationIds(/^EX\d{2}$/), currentRunnableExamples);
     expectExactMembers(destinationIds(/^LAB\d{2}$/), currentLabs);
     expectExactMembers(destinationIds(/^VIS\d{2}$/), visualExplainers);
-    for (const absentId of ['L06', 'LAB12', 'L13', 'EX20']) {
+    for (const absentId of ['L08', 'LAB13', 'L13', 'EX20']) {
       expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(absentId);
     }
 
     const recordsByGroup = Object.groupBy(RESOURCE_INDEX_RECORDS, ({ group }) => group);
-    expect(recordsByGroup.labs).toHaveLength(11);
-    expect(recordsByGroup.practice).toHaveLength(72);
+    expect(recordsByGroup.labs).toHaveLength(12);
+    expect(recordsByGroup.practice).toHaveLength(74);
     expect(recordsByGroup.visuals).toHaveLength(19);
-    expect(recordsByGroup.glossary).toHaveLength(186);
-    expect(recordsByGroup.sources).toHaveLength(82);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(370);
-    expect(publishedRoutes).toHaveLength(498);
-    expect(new Set(publishedRoutes).size).toBe(498);
+    expect(recordsByGroup.glossary).toHaveLength(188);
+    expect(recordsByGroup.sources).toHaveLength(84);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(377);
+    expect(publishedRoutes).toHaveLength(514);
+    expect(new Set(publishedRoutes).size).toBe(514);
 
     for (const publicPath of currentProfilerReportPlans) {
       const source = await readFile(path.join(projectRoot, 'public', publicPath.slice(1)), 'utf8');
@@ -411,10 +412,10 @@ describe('R3 release review', () => {
       expect(document).not.toMatch(/R3 aggregate review remains pending|R3 聚合复核仍待完成/i);
     }
     for (const practice of [zhPractice, enPractice]) {
-      expect(practice).toMatch(/72 (?:complete entries|个完整条目|道完整题目)/i);
+      expect(practice).toMatch(/74 (?:complete entries|个完整条目|道完整题目)/i);
       expect(practice).not.toMatch(/68 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
-      for (const id of ['PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006']) expect(practice).toContain(id);
+      for (const id of ['PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006', 'PB-R4-007', 'PB-R4-008']) expect(practice).toContain(id);
     }
   });
 });

@@ -261,7 +261,7 @@ VIS12 executes no EX15 code, queries no compiler or GPU, and models no register 
 
 The educational EX15-shaped kernel exists to expose indexing, reuse, barriers, precision, and evidence design. It is not a production replacement. It does not cover the layout, transpose, precision, algorithm selection, workspace, stream, determinism, heuristic, epilogue, or maintenance contracts required for a production GEMM choice.
 
-L06 is not published, so its future cuBLAS contract is unavailable. LAB12 requires both Q13 and L06 and is not published in this ticket. Q13 invents no cuBLAS API, comparison, result, Tensor Core result, or production recommendation. A future library comparison must re-establish matched shapes, semantics, precision, correctness, hardware, toolchain, and measurement custody rather than treating this educational winner as a production baseline.
+[L06: Hand Matrix Multiplication to cuBLAS Correctly](/en/libraries/cublas-gemm/) supplies the library-call contract. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) requires Q13 and L06 and re-establishes matched shapes, semantics, precision, correctness, hardware, toolchain, and measurement custody. Q13 supplies no measured cuBLAS comparison, Tensor Core result, or production recommendation; an educational winner is not automatically a production baseline.
 
 ## Evidence boundary
 

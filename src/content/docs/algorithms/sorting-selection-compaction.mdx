@@ -149,7 +149,7 @@ CUB `DeviceRadixSort` 提供 device-wide radix sort，CUB `DeviceSelect` 提供 
 
 A09 四个 evidence arrays 均为空。它不编译或运行 CUB/Thrust/custom kernel，也没有 measured timing、throughput、temporary-storage footprint、contention counter 或 speedup。Context7 `/nvidia/cccl` 只用于 2026-08-31 discovery/cross-check；exact v3.4.2 release 与 source URLs 才是发布坐标。
 
-LAB12 不属于 A09，并且当前仍未发布：[Q13](/correctness/gemm-optimization-case-study/)已经有 public destination，但它的另一项严格先修 L06 仍未发布。
+[LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)现已发布，直接先修为 [Q13](/correctness/gemm-optimization-case-study/)与 [L06](/libraries/cublas-gemm/)。它不属于 A09 的排序、选择或压缩实践，也不增加 A09 的先修要求。其编译证据和实际观察记录为空，运行仍待硬件验证（Pending Hardware Verification）；不能用实验页面的发布替代测量结果。此处于 2026-09-06 更新发布链接，既有 API 事实与来源日期不变。
 
 ## 离开前检查
 

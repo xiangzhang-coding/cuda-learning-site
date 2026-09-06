@@ -1,0 +1,275 @@
+---
+title: 'EX18：cuBLAS GEMM 参考可运行示例'
+description: 将 EX15 行主序输入映射到 cuBLAS GEMM，显式选择 FP32 严格计算，并逐元素对照独立的 double CPU 参考结果。
+pairId: ex18
+counterpart: /en/examples/cublas-gemm/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - cpu-reference
+  - gemm-call
+  - stream-lifecycle
+  - version-profiles
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX18
+prerequisites:
+  - L06
+relatedUnits:
+  - L07
+  - EX15
+  - LAB12
+exampleIds:
+  - EX18
+canonicalExample: EX18
+canonicalRanges:
+  - cpu-reference
+  - gemm-call
+  - stream-lifecycle
+hardwareGate: 'Build: x86-64 C++17 host and selected CUDA Toolkit/cuBLAS profile; runtime: Native Linux, one selected CC 7.5+ GPU; 13,056 fixed device matrix bytes plus library-owned resources must fit within 8,000,000,000 bytes'
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read the selected Toolkit cuBLAS headers and shared libraries'
+  - 'Access one selected CUDA device and execute NVCC, C++ compiler, make, bash, readelf, ldd, the host test, and the CUDA binary'
+  - 'Create and remove files in EX18 build, result, and learner-owned evidence directories'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'All three EX15-compatible fixtures should pass a finite full-output tolerance check against the independent double CPU oracle, including the literal hand result and nonzero beta case.'
+    - 'The row-major mapping should use swapped operands and dimensions with explicit FP32 pedantic computation, host scalars, and completion before CPU validation.'
+    - 'The four header version macros should match the selected component profile, and the reported loaded major/minor/patch should match those headers before GEMM.'
+  recordedObservations: []
+sources:
+  - title: 'cuBLAS reference archived with CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html'
+    version: 'CUDA 11.8.0 archive; cuBLAS 11.11.3.6 manifest coordinate'
+    platform: 'Linux; GEMM, pedantic computation, pointer modes, streams, version queries'
+    accessDate: '2026-09-06'
+  - title: 'cuBLAS reference archived with CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html'
+    version: 'CUDA 12.9.2 archive; cuBLAS 12.9.2.10 manifest coordinate'
+    platform: 'Linux; GEMM and helper API contracts'
+    accessDate: '2026-09-06'
+  - title: 'Current cuBLAS owner reference'
+    url: 'https://docs.nvidia.com/cuda/cublas/index.html'
+    version: 'Current owner reference reviewed 2026-09-06; CUDA 13.3.1 cuBLAS archive unavailable'
+    platform: 'Linux; GEMM precision, emulation, workspace, and version query boundaries'
+    accessDate: '2026-09-06'
+  - title: 'CUDA Runtime stream management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'Current owner Runtime API reviewed 2026-09-06'
+    platform: 'Nonblocking streams, synchronization, and destruction'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcublas 11.11.3.6; linux-x86_64 SHA-256 045e6455c9f8789b1c7ced19957c7904d23c221f4d1d75bb574a2c856aebae98'
+    platform: 'Owner-declared Linux x86-64 acquisition coordinate; archive not downloaded locally'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcublas 12.9.2.10; linux-x86_64 SHA-256 c80a724aafa1ee49110b0d3385316ea54d418b03e796e91e8f0b47d52f8022fd'
+    platform: 'Owner-declared Linux x86-64 acquisition coordinate; archive not downloaded locally'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcublas 13.6.0.2; linux-x86_64 SHA-256 1794edb653adf48f5fa02d86bb738ed75888dd355aa39dadb6202d84d554c0dc'
+    platform: 'Owner-declared Linux x86-64 acquisition coordinate; archive not downloaded locally'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: ex18 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/examples/cublas-gemm/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,gemm-call,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: runnable-example }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: L06 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L07,EX15,LAB12' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,gemm-call,stream-lifecycle' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host and selected CUDA Toolkit/cuBLAS profile; runtime: Native Linux, one selected CC 7.5+ GPU; 13,056 fixed device matrix bytes plus library-owned resources must fit within 8,000,000,000 bytes' }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'read Toolkit/cuBLAS; one CUDA device; compiler, make, bash, readelf, ldd, host-test, and CUDA-binary execution; EX18 build/result/evidence-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'cuBLAS-11.11.3.6,cuBLAS-12.9.2.10,cuBLAS-13.6.0.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1,current-owner-reference' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/cublas-gemm/" lang="en">Read the English counterpart</a>
+
+EX18 是原创、独立的 C++17 cuBLAS GEMM 可运行示例（Runnable Example），只检查正确性，不比较速度。CUDA 仅在外部环境运行，学习站（Learning Site）不会执行 CUDA。
+
+## 用途
+
+先完成 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)。EX18 把布局、主维度（leading dimension）、精度、句柄（handle）状态和流（stream）的完成边界放进同一个可独立构建的项目。[L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)、[EX15：分块 GEMM](/examples/tiled-gemm/) 和 [LAB12：对比 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/) 是相关资源，不增加先修要求。
+
+## 规范项目
+
+[查看固定的 EX18 源码目录](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm)，或[下载同一源码版本](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip)。解压后进入 `examples/ex18-cublas-gemm/`。项目包含清单、README、Makefile、纯主机参考头文件、CUDA 源码、主机测试、编译检查脚本和证据目录说明。
+
+项目代码是原创 Apache-2.0 作品，本页文字使用 CC-BY-4.0。cuBLAS 是按其自身条款安装的外部依赖；项目不重新分发 NVIDIA 示例、库实现或 SDK 头文件。双语发布对（Publication Pair）导入同样的三个规范源码范围，不另存一份 C++ 代码。
+
+## 独立 CPU 参考
+
+<CanonicalCode exampleId="EX18" range="cpu-reference" />
+
+头文件保留本站原创 EX15 输入生成器和参考计算逻辑，但不依赖 EX15 项目。A、B 先存为 `float`，计算时转成 `double` 做乘法和串行累加；初始 C 与 alpha/beta 也参与独立参考计算。预期输出不是用 cuBLAS 结果构造的。
+
+| 测试输入，按 M,K,N 排列 | alpha | beta | 检查目的 |
+| --- | --- | --- | --- |
+| `2,3,2` | 1 | 0 | A、B 都按顺序存放 1 到 6，C 初始为零；手算行主序（row-major）结果为 `22,28,49,64` |
+| `33,31,35` | 0.75 | 0.25 | 非方形尺寸，以及可观察的初始 C 贡献 |
+| `32,32,32` | 1 | 0 | 与 EX15 相同的对齐测试输入 |
+
+后两组的 A 重复 `(i%7-3)/8`，B 重复 `(i%5-2)/7`，C 重复 `(i%3-1)/5`，采用有符号减法和 float 除法。每个输出都必须有限，并满足 `abs(gpu-cpu) <= 1e-4 + 2e-5 * abs(cpu)`。通过条件覆盖完整矩阵，不能用抽样或校验和代替；失败时报告首个不匹配的行列。容差在运行前固定，不意味着逐位相等或跨 GPU 可复现。
+
+## 行主序 GEMM 映射
+
+<CanonicalCode exampleId="EX18" range="gemm-call" />
+
+输入合同是行主序 `C[M,N] = alpha*A[M,K]*B[K,N] + beta*C[M,N]`。相同字节可以解释为列主序（column-major）的转置矩阵，因此计算 `C^T = alpha*B^T*A^T + beta*C^T`。先传 B、再传 A，交换 M 与 N，并取 `(lda,ldb,ldc)=(N,K,N)`。两个操作参数都是 `CUBLAS_OP_N`：转置已由内存解释表达，不需要再加转置标志或数据转换内核。
+
+三个矩阵的数据类型（data type）都是 `CUDA_R_32F`。计算类型（compute type）`CUBLAS_COMPUTE_32F_PEDANTIC` 显式选择单精度算术；单独设置 `CUBLAS_DEFAULT_MATH` 并不能构成精度合同。程序不请求 FAST_TF32、低精度转换或模拟计算模式，并使用 `CUBLAS_GEMM_DEFAULT`，而不是特定架构算法。这是正确性基线，不保证是最快的库配置。
+
+## 流与资源生命周期
+
+<CanonicalCode exampleId="EX18" range="stream-lifecycle" />
+
+三个测试共用一个句柄和一个 `cudaStreamNonBlocking` 流。`cublasSetPointerMode(..., CUBLAS_POINTER_MODE_HOST)` 明确 alpha/beta 是主机地址。`cublasSetStream` 在提交工作前调用，并将工作区（workspace）重置到库的默认池。EX18 没有安装用户工作区，不能据此称为零工作区操作。
+
+每组先恢复初始 C，在同一流依次提交 A/B/C 的 H2D 拷贝、GEMM、C 的 D2H 拷贝，再检查 `cudaStreamSynchronize`，之后才验证结果或复用缓冲区。提交成功不等于执行完成。主机向量使用可分页内存，`cudaMemcpyAsync` 这个名称本身不能证明传输重叠。
+
+资源获取即初始化（RAII）清理在释放句柄、设备缓冲区和流之前再次同步，也覆盖部分分配或提交失败的路径。各项释放不会因先前错误而短路，清理失败会让进程返回失败。主机存储先于资源所有者构造，存活到清理结束之后。正常路径的三次完成检查和最终清理边界都不是计时结果。
+
+## 独立版本配置
+
+| 配置 ID | Toolkit | cuBLAS | 头文件 MAJOR,MINOR,PATCH,BUILD |
+| --- | --- | --- | --- |
+| `cuda-11-8-bundled-cublas-11-11-3-6` | 11.8.0 | 11.11.3.6 | 11,11,3,6 |
+| `cuda-12-9-bundled-cublas-12-9-2-10` | 12.9.2 | 12.9.2.10 | 12,9,2,10 |
+| `cuda-13-3-bundled-cublas-13-6-0-2` | 13.3.1 | 13.6.0.2 | 13,6,0,2 |
+
+每个组件坐标都独立取自 NVIDIA 对应的精确再分发清单，不由 Toolkit 版本推算。`EXPECTED_CUBLAS_VERSION` 转成四个 `EX18_EXPECTED_CUBLAS_*` 定义，预处理阶段检查所选头文件的 `CUBLAS_VER_MAJOR`、`CUBLAS_VER_MINOR`、`CUBLAS_VER_PATCH` 与 `CUBLAS_VER_BUILD`。
+
+GEMM 之前，经状态检查的 `cublasGetProperty` 查询报告实际加载库的 `MAJOR_VERSION`、`MINOR_VERSION` 和 `PATCH_LEVEL`，并要求它们与头文件三元组一致。程序还单独打印 `cublasGetVersion` 的原始值及头文件的四段版本。这些 API 不暴露实际加载库的 build 号。完整二进制身份需要环境清单（Environment Manifest）中的库解析路径、包身份和文件哈希，不能把头文件 build 号拼到加载库三元组后就称为观察结果。
+
+## 构建与运行
+
+CPU 测试不需要 CUDA 头文件或 GPU：
+
+```sh
+make host-test DIALECT=c++17
+```
+
+它检查手算 GEMM 结果、alpha/beta、相消输入下的 double 累加、所有生成输入值、容差边界、末元素损坏、非有限输出以及无效尺寸/计数。`host-reference: pass` 只证明主机合同。
+
+在匹配的 11.8.0 开发镜像中显式执行 CUDA 构建阶段：
+
+```sh
+make preprocess DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+make compile DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+make link DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+make inspect DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+```
+
+也可以让脚本执行 clean、四个构建阶段和 host-test；脚本绝不执行 CUDA 二进制：
+
+```sh
+bash scripts/compile-check.sh c++17 cuda-11-8-bundled-cublas-11-11-3-6 artifacts/ex18-11-8
+```
+
+其他通道使用各自配置 ID。链接显式包含 `-lcublas`。产物检查保留 `readelf -d` 与 `ldd` 报告，要求存在并解析 cuBLAS 共享库依赖，且拒绝缺失库。EX18 没有定义设备内核，因此不要求找到属于 EX18 的 cubin 或 PTX。编译架构参数也不能证明库内部采用哪条分派路径。
+
+只有满足运行门槛后才执行：
+
+```sh
+./build/ex18-cublas-gemm
+```
+
+程序选择可见设备 0，报告头文件/加载库的 cuBLAS 坐标、设备及驱动/runtime 版本、精度策略与三个正确性判定。这是在说明输出合同，并非保留的实际运行输出。
+
+## 兼容性
+
+| 工具包通道（Toolkit Lane） | 操作系统 / 架构 | 按摘要固定的开发镜像 |
+| --- | --- | --- |
+| `cuda-11.8` | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` |
+| `cuda-12.9` | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` |
+| `cuda-13.3` | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` |
+
+三条通道使用同一 C++17 实现。受支持环境（Supported Environment）仅为 Native Linux；运行需要一张选定的、计算能力（compute capability）7.5 或更新的 CUDA GPU。矩阵缓冲区共预留 `4*(1024+1085+1155) = 13,056` 设备字节并重复使用。库内部资源和默认工作区另计。总问题内存必须落在基础 GPU 能力层级（Baseline GPU Capability Tier）的 8,000,000,000 字节门槛内，分配失败即退出。固定矩阵字节数不是测得的库内存占用或访存流量。
+
+## 证据边界
+
+编译证据为空，因此没有通道获得编译已检查（Compile-Checked）状态。运行证据状态（Evidence Status）是待硬件验证（Pending Hardware Verification），观察记录为空。不声明本地 CUDA 构建或 GPU 执行成功。CPU 测试通过、构建 dry run、源码可获取、官方 API 审查和镜像固定都不会升级这两条证据轴。本页没有计时、加速比或库胜出结论。
+
+后续记录必须保留源码/配置、完整环境清单、实际库身份、命令、退出状态、原始输出和所有正确性判定。LAB12 补充测量协议，不会把本正确性程序变成已经存在的基准测试结果。
+
+## 预期观察
+
+1. 三组 EX15 兼容输入都应通过独立 double 参考的完整有限值容差检查，包括手算结果与非零 beta 情况。
+2. 行主序映射应交换操作数与尺寸，显式采用 FP32 严格计算、主机标量，并在 CPU 验证前确认完成。
+3. 四个头文件版本宏应匹配选定组件配置；GEMM 之前报告的加载库 major/minor/patch 应匹配这些头文件。
+
+这三项是清单中的验收方向，不是已观察到的构建或运行结果。
+
+## 来源与复核
+
+- [CUDA 11.8.0 归档 cuBLAS 参考](https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html)
+- [CUDA 12.9.2 归档 cuBLAS 参考](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html)
+- [当前 cuBLAS 官方参考](https://docs.nvidia.com/cuda/cublas/index.html)
+- [CUDA Runtime 流管理](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)
+- [CUDA 11.8.0 再分发清单](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)
+- [CUDA 12.9.2 再分发清单](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)
+- [CUDA 13.3.1 再分发清单](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json)
+
+复核日期为 **2026-09-06**。当日官方 13.3.1 cuBLAS 归档 URL 返回 404，因此其精确组件坐标来自再分发清单，API 审查使用当前官方参考和可获取的旧版归档。该缺口不能当作已验证构建。清单 SHA-256 是官方声明的获取坐标，不是本地下载 SDK 的实测哈希。本页没有复制官方示例、大段文字、图、表或基准测试。

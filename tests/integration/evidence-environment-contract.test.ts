@@ -411,7 +411,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes seventy-two complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes seventy-four complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -437,6 +437,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
       'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
       'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006',
+      'PB-R4-007', 'PB-R4-008',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
@@ -501,6 +502,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R4-004': 'libraries/cub-warp-block-primitives',
       'PB-R4-005': 'libraries/libcu-plus-plus-synchronization',
       'PB-R4-006': 'libraries/libcu-plus-plus-synchronization',
+      'PB-R4-007': 'libraries/cublas-gemm',
+      'PB-R4-008': 'libraries/cublaslt-matmul',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -675,6 +678,24 @@ describe('Exercises and Practice Bank contract', () => {
         'toolchain/cpp-dialect-boundaries',
         'libraries/libcu-plus-plus-synchronization',
       ],
+      'PB-R4-007': [
+        'algorithms/tiled-gemm-correctness',
+        'correctness/cpu-references-tolerances-invariants',
+        'libraries/cublas-gemm',
+        'libraries/cublaslt-matmul',
+        'examples/tiled-gemm',
+        'examples/cublas-gemm',
+        'labs/compare-gemm-with-cublas',
+        'visuals/gemm-tiling-hierarchy',
+      ],
+      'PB-R4-008': [
+        'libraries/cublas-gemm',
+        'correctness/timing-asynchronous-gpu-work',
+        'libraries/cublaslt-matmul',
+        'examples/cublas-gemm',
+        'labs/compare-gemm-with-cublas',
+        'visuals/gemm-tiling-hierarchy',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -724,10 +745,12 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[1-6]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[1-8]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R4-00[3-6]$/.test(entryId)
+        const sourceDate = /^PB-R4-00[78]$/.test(entryId)
+          ? '2026-09-06'
+          : /^PB-R4-00[3-6]$/.test(entryId)
           ? '2026-09-05'
           : /^PB-R4-00[12]$|^PB-R3-01[5-6]$/.test(entryId)
           ? '2026-09-04'

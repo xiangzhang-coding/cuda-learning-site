@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 186 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 188 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-05'
+factCheckDate: '2026-09-06'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -14,6 +14,8 @@ structure:
   - entry-term-184
   - entry-term-185
   - entry-term-186
+  - entry-term-187
+  - entry-term-188
   - maintenance
 head:
   - tag: meta
@@ -23,7 +25,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-05'
+      content: '2026-09-06'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -31,7 +33,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1726,6 +1728,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [M05](/memory/synchronization-scopes/)、[M13](/memory/asynchronous-copy-pipelines/)、[L05](/libraries/libcu-plus-plus-synchronization/)和 [PB-R4-006](/practice/#pb-r4-006)。
 - **版本说明：** 2026-09-05 按 [SRC-CUDA-065](/sources-and-versions/#src-cuda-065) 中选定的 CCCL/libcu++ v3.4.2 复核。`arrive_and_drop` 同时减少当前阶段的剩余计数（countdown）与未来阶段的预期计数（expected count），不是省略调用。[SRC-CUDA-066](/sources-and-versions/#src-cuda-066) 记录 P2588R3 放宽完成要求（relaxed completion）的工作仍待完成，不能假设实时更新的标准草案已经适用于该版本。检查上游测试源码，不等于观察到了屏障的实际运行行为。
 
+<span id="term-187" class="resource-target" aria-hidden="true"></span>
+
+### Leading Dimension · 主维度
+
+- **定义：** 主维度（leading dimension，`ld`）是普通稠密矩阵中相邻物理列或行起点之间的元素间距。零起点坐标 `(i,j)` 在列主序（column-major）下的元素偏移为 `i+j*ld`，在行主序（row-major）下为 `i*ld+j`。间距可以包含填充（padding）；子矩阵通常只改变起始指针，仍保留父矩阵的物理间距。
+- **避免使用：** 字节数、矩阵总大小、永远等于逻辑行数、转置标志会重新排列存储的保证。
+- **相关资源：** [L06](/libraries/cublas-gemm/)、[L07](/libraries/cublaslt-matmul/)、[EX18](/examples/cublas-gemm/)、[LAB12](/labs/compare-gemm-with-cublas/)和 [PB-R4-007](/practice/#pb-r4-007)。
+- **版本说明：** 2026-09-06 按 [SRC-CUDA-067](/sources-and-versions/#src-cuda-067)的 Toolkit 12.9.2 归档复核。普通正维度布局要求列主序 `ld` 至少覆盖未转置的存储行数，行主序则至少覆盖存储列数；分配范围与整数溢出还须另证。这里不推广到 cuBLASLt 的特殊打包格式。EX18/LAB12 的固定连续行主序映射不代表已覆盖所有填充、子矩阵或转置情况。
+
+<span id="term-188" class="resource-target" aria-hidden="true"></span>
+
+### Epilogue · 收尾操作
+
+- **定义：** 收尾操作（epilogue）是矩阵乘加之后按调用合同施加的偏置（bias）、激活等输出处理。cuBLASLt 的普通偏置向量长度匹配所描述 D 的行数，并向每列广播；`RELU_BIAS` 先加偏置再应用 ReLU。它是完整数值问题的一部分，回退（fallback）不能悄悄省略。
+- **避免使用：** 任意形状都可融合、一次 API 调用必定只有一个内核、按框架输出特征方向自动加偏置、无需实测的加速保证。
+- **相关资源：** [L06](/libraries/cublas-gemm/)、[L07](/libraries/cublaslt-matmul/)、[EX18](/examples/cublas-gemm/)、[LAB12](/labs/compare-gemm-with-cublas/)和 [PB-R4-008](/practice/#pb-r4-008)。
+- **版本说明：** 2026-09-06 按 [SRC-CUDA-068](/sources-and-versions/#src-cuda-068)复核：12.9.2 的 Matmul 注 8 排除行主序 D 的 ReLU、dReLU、GELU、dGELU 与 Bias 收尾。当前 13.3 文档措辞不同，不能向旧版回填许可。类型、布局、偏置方向与候选支持仍须逐项核对。EX18/LAB12 仅提供传统 FP32 基线，不实现 Lt 收尾；本词条没有融合、内核数量、流量或速度观察。
+
 ## 维护规则
 
-TERM-001 至 TERM-184 保留各自逐项复核记录；新增 TERM-185/186 与完整 186 项 Publication Pair、metadata projection、直接链接和静态定义在 **2026-09-05** 与英文对应内容同步复核。每个词条都包含规范英文、首选中文、定义、避免别名、相关资源和版本说明；定义与组合是项目原创文字，只引用并改写 public owner documentation，不复制 source prose、table、figure、example、artifact、diagnostic、performance result 或 private material。新增词条区分 memory order 与 scope、barrier phase 与 pipeline stage；未运行 CUDA 或 libcu++，且不声明 local API availability、output、synchronization observation、traffic、timing、speedup 或任何 Evidence Status。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-186 保留各自逐项复核日期。新增 TERM-187/188 与完整 188 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-06** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分物理步长与逻辑形状、收尾语义与实测融合收益；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。

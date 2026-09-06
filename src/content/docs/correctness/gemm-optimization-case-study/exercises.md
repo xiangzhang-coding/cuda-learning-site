@@ -96,7 +96,7 @@ head:
 
 **目标：** 审查一份摘要：它只有 friendly labels 与一个 occupancy percentage，没有 exact compiler resources、GPU、compute capability、metric query、permission、replay、report/hash、Environment Manifest、raw unprofiled samples 或 correctness result，却断言 coarsened tile 总是最快、使用了 Tensor Core，而且 educational kernel 可以取代 cuBLAS。
 
-**约束：** 要求每个 stage 声明 matrix shapes、A/B/C 与 accumulation types、exact compute capability、workload/bytes、C restoration、warm-up、checked synchronization、retained statistics、profiler method/permissions、完整 Environment Manifest、EX15 tolerance result 与 bounded interpretation。分开 source requested-byte estimates、queried path traffic、compiler resources、theoretical occupancy、achieved occupancy 与 unprofiled elapsed samples。明确 L06/LAB12 尚未发布，不发明 cuBLAS API、Tensor Core path 或 result。
+**约束：** 要求每个 stage 声明 matrix shapes、A/B/C 与 accumulation types、exact compute capability、workload/bytes、C restoration、warm-up、checked synchronization、retained statistics、profiler method/permissions、完整 Environment Manifest、EX15 tolerance result 与 bounded interpretation。分开 source requested-byte estimates、queried path traffic、compiler resources、theoretical occupancy、achieved occupancy 与 unprofiled elapsed samples。生产库合同与比较流程分别见 [L06](/libraries/cublas-gemm/) 和 [LAB12](/labs/compare-gemm-with-cublas/)；不能据此发明 cuBLAS 或 Tensor Core 实测结果。
 
 **预期证据：** Claim-by-claim verdict、missing-coordinate register、exact-GPU query-first repair plan、四份未填写 stage records、source/compiler/profiler/timing boundary table，以及至少五个 competing explanations。
 

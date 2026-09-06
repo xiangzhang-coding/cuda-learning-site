@@ -1,0 +1,249 @@
+---
+title: 'L06：把矩阵乘法正确交给 cuBLAS'
+description: 从列主序地址和所有转置组合推导 GEMM 参数，区分数据、计算与标量类型，并建立显式流生命周期和独立 CPU 参考。
+pairId: l06
+counterpart: /en/libraries/cublas-gemm/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, equation, layout, transpose, row-major, types, lifecycle, correctness, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L06
+prerequisites: [A08, Q01]
+relatedUnits: [L07, EX15, EX18, LAB12, VIS12]
+hardwareGate: none
+estimatedMinutes: 25
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuBLAS 12.9 archived API contract'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html'
+    version: 'Toolkit 12.9.2 archive; guide label 12.9'
+    platform: 'Native Linux; GEMM semantics and host API review, not execution'
+    accessDate: '2026-09-06'
+  - title: 'cuBLAS 11.8 historical API'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html'
+    version: 'Toolkit 11.8.0 archive'
+    platform: 'Historical layout and explicit-context contract'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'Toolkit 11.8.0; libcublas 11.11.3.6'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'Toolkit 12.9.2; libcublas 12.9.2.10'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; libcublas 13.6.0.2'
+    platform: 'Linux x86_64 package identity only; not an API compatibility claim'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cublas-11.8.0'
+    version: 'Toolkit 11.8.0; cuBLAS Release 11.8 section'
+    platform: 'H100 workspace recommendation, not a universal requirement'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9 Update 2 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2'
+    version: 'Toolkit 12.9.2; includes Update 1 alignment enforcement history'
+    platform: 'Narrow fixes and version boundaries, not local validation'
+    accessDate: '2026-09-06'
+  - title: 'Current CUDA 13.3 Update 1 release notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1'
+    version: 'Live guide label 13.3 Update 1, accessed 2026-09-06; component 13.6.0.2'
+    platform: 'Version comparison only; exact 13.3.1 archive returned 404'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 EULA and Toolkit supplement'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html'
+    version: 'Archived EULA; last updated 2025-01-07'
+    platform: 'Documentation and redistribution boundary; no upstream code adapted'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l06 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/cublas-gemm/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,equation,layout,transpose,row-major,types,lifecycle,correctness,versions,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,Q01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L07,EX15,EX18,LAB12,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cublas-gemm/" lang="en">Read the English counterpart</a>
+
+写出正确的分块矩阵乘法后，下一步不是默认它已经值得优化，而是为同一个问题建立一个可信的库实现对照。cuBLAS 不知道指针背后是几行几列；它只知道你声明的形状、步长和运算。参数合法但解释错误，仍可能得到一个尺寸正常、数值错误的结果。
+
+## 学习目标
+
+用约 25 分钟完成正文、纸面检查和检索问题。你应能从存储图推导调用参数，而不是背下一组 `m,n,k`：解释句柄（handle）的状态，处理全部转置组合，分开精度与标量位置，并说明何时可以读取或释放结果。外部实验时间另计。
+
+## 前置知识
+
+严格只依赖 [A08：正确的分块矩阵乘法](/algorithms/tiled-gemm-correctness/)和 [Q01：CPU 参考、容差与不变量](/correctness/cpu-references-tolerances-invariants/)，顺序为 `A08, Q01`。后面的 EX15、EX18、LAB12 和 VIS12 是相关资源，不增加前置依赖。
+
+## 为什么还保留列主序接口
+
+基础线性代数子程序（Basic Linear Algebra Subprograms，BLAS）把常用运算与实现分开。矩阵乘矩阵属于第三级运算，能在大量算术中重复使用同一数据。cuBLAS 在 GPU 上提供这些运算，同时保留方便 Fortran 程序接入的列主序（column-major）约定。
+
+CUDA 4.0 引入的显式句柄接口让设备、流和标量传递状态不再藏在旧式全局接口中。本单元使用 `cublas_v2.h`，不使用已弃用的 `cublas.h` 接口。`cublasSgemm` 是同型 FP32 的专用入口；`cublasGemmEx` 可以分别声明存储与计算类型。库可能改变内核实现，所以库名不是特定指令、性能或逐位结果的证明。
+
+## 先写清数学问题
+
+通用矩阵乘法（General Matrix Multiplication，GEMM）的合同是 `C_out = alpha * op(A) * op(B) + beta * C_in`。`op(A)` 为 `m x k`，`op(B)` 为 `k x n`，C 为 `m x n`。`m,n,k` 描述**运算之后**的形状，不总是分配时 A、B 的行列数。
+
+`CUBLAS_OP_N` 不变换，`CUBLAS_OP_T` 作转置（transpose），`CUBLAS_OP_C` 作共轭转置（conjugate transpose）。实数中 T 与 C 数值等价；复数中不能混为一谈。转置标志改变读取方式，不搬运数据，不修改物理步长。
+
+`beta != 0` 时必须保留并正确初始化 `C_in`。`beta == 0` 时不要求旧 C 是有效输入，但 C 仍必须提供足够的可写输出空间。不要把“无需读取旧值”理解成“可传空输出指针”。本单元采用正维度、合法整数范围和互不重叠的 A、B、C 存储，避免把退化问题与别名规则混入第一份调用证明。
+
+## 地址与主维度
+
+主维度（leading dimension，`ld`）是相邻物理列或行起点之间的**元素数**，不是字节数。对零起点坐标 `(i,j)`，列主序元素偏移为 `i + j*ld`；行主序（row-major）为 `i*ld + j`。分配字节数还需要乘元素大小，并检查乘法溢出。
+
+考虑列主序 `3 x 2` 矩阵，`ld=5`。第一列有效元素在偏移 0、1、2，第二列在 5、6、7；3、4 是填充（padding）。`(2,1)` 的偏移为 7，不是 5。若截取较大矩阵的子矩阵，只移动起始指针，仍使用原分配的列间距；把 `ld` 改成子矩阵行数会读到别的元素。
+
+NVIDIA 文档所说的 BLAS 一起点索引，不意味着 C++ 指针前要空出一个元素。GEMM 接收的是存储起点，本单元主机端计算一直使用零起点。相反，`cublasIsamax` 等**返回位置**的 BLAS 例程使用一起点结果；在合法非空向量、正 `incx` 下，返回位置 p 对应的零起点元素偏移为 `(p-1)*incx`。应在接口边界转换位置，而不是对每个 GEMM 地址加一。
+
+## 从转置推导所有主维度
+
+下面是列主序下的推导表，不是性能推荐。为缩短表格，`M=max(1,m)`、`N=max(1,n)`、`K=max(1,k)`；形状是**未变换的存储形状**。每一行都要求 `ldc >= M`，C 分配覆盖 `ldc*n` 个元素。
+
+| `transa,transb` | A 存储形状 | B 存储形状 | `lda` 下界 | `ldb` 下界 |
+| --- | --- | --- | --- | --- |
+| N,N | `m x k` | `k x n` | M | K |
+| N,T | `m x k` | `n x k` | M | N |
+| N,C | `m x k` | `n x k` | M | N |
+| T,N | `k x m` | `k x n` | K | K |
+| T,T | `k x m` | `n x k` | K | N |
+| T,C | `k x m` | `n x k` | K | N |
+| C,N | `k x m` | `k x n` | K | K |
+| C,T | `k x m` | `n x k` | K | N |
+| C,C | `k x m` | `n x k` | K | N |
+
+A 的分配覆盖 N 情况的 `lda*k` 或 T/C 情况的 `lda*m`；B 则覆盖 N 情况的 `ldb*n` 或 T/C 情况的 `ldb*k`。下界合法不代表分配足够，更不代表数值正确。检查最后一个有效元素和全部分配范围，是与 API 参数检查分开的责任。
+
+纸面检查：`m=3,n=5,k=2`，A 使用 T，B 使用 N。A 的存储为 `2 x 3`，不是 `3 x 2`；可取 `lda=4`。B 为 `2 x 5`，可取 `ldb=3`。选择 `ldc=6` 时，三份完整存储分别覆盖 12、15、30 个元素。只观察方阵或紧密布局，容易漏掉这类错误。
+
+## 行主序不一定需要搬运
+
+设应用真正需要行主序 `C = A*B`，A 为 `m x k`、B 为 `k x n`。同一块行主序 A 的字节，可解释成列主序 `A^T`。对等式作普通转置得到 `C^T = B^T*A^T`，因此交换操作数，调用尺寸改为 `n,m,k`，输出字节就仍是应用需要的行主序 C。
+
+对于带填充、行步长分别为 `ra,rb,rc` 的 N,N 问题，cuBLAS 的第一个矩阵是 B，`lda=rb`；第二个矩阵是 A，`ldb=ra`；输出 `ldc=rc`。两项操作仍为 N。紧密布局时分别为 `n,k,n`。EX18 固定的 FP32 路径使用这一解释，不是在调用前偷偷转置数据。
+
+更一般地，行主序目标 `op_a(A)*op_b(B)` 转成列主序调用时，交换 A/B、交换 `m/n`，并把标志顺序从 `op_a,op_b` 改成 `op_b,op_a`。保持各自物理行步长不变，再按上表审核交换后的调用。对于复数，外层使用普通转置而不是共轭转置，因此不要额外共轭 `alpha`、`beta`。这是一条代数映射，不是允许任意混合行列布局的捷径。
+
+[VIS12：矩阵乘法的分块层次](/visuals/gemm-tiling-hierarchy/)可以帮助你指出一个输出元素沿 K 方向需要哪些输入。把视图上的逻辑坐标代入地址式即可；它既不展示 cuBLAS 的内部算法，也不证明本次调用会选用某个分块。
+
+## 三种类型与两种标量位置
+
+`GemmEx` 的存储类型说明如何解释 A、B、C 的字节；计算类型（compute type）说明运算精度政策；缩放标量类型（scale type）决定 `alpha`、`beta` 指针指向什么。它们必须组成官方支持表中的一行，不能自由拼接。
+
+| 本单元审核的组合 | A/B/C 存储 | 计算类型 | `alpha,beta` 对象 |
+| --- | --- | --- | --- |
+| EX18 固定对照 | 全部 `CUDA_R_32F` | `CUBLAS_COMPUTE_32F_PEDANTIC` | `float` |
+| 混合精度的静态对照 | A/B 为 `CUDA_R_16F`，C 为 `CUDA_R_32F` | `CUBLAS_COMPUTE_32F` | `float`，不是半精度 |
+
+第二行只是阅读合同，不扩大 EX18。`CUBLAS_COMPUTE_32F_FAST_TF32` 允许使用 TF32 计算，而不是把存储自动改成新的数组类型；它也不是固定 FP32 对照的同义词。Pedantic 模式约束计算政策，但不保证与 CPU 串行累加顺序相同，也不授予任意数据规模的误差上界。
+
+指针模式（pointer mode）与精度独立。主机模式 `CUBLAS_POINTER_MODE_HOST` 下，普通 GEMM 输入标量值在调用时被取用，标量对象可在返回后结束生命；矩阵工作仍可能异步。设备模式 `CUBLAS_POINTER_MODE_DEVICE` 下，标量必须可由设备访问，保持有效且不被改写直到计算完成。不能传 `double*` 冒充 `float*`，也不能用主机地址满足设备模式。输出标量例程的主机阻塞规则不要误套到 GEMM。
+
+## 显式流与资源生命周期
+
+流（stream）决定提交顺序；句柄保存流、指针模式和数学模式等可变状态。先选设备，再创建 `cublasHandle_t`，并在后续使用中保持对应 CUDA 上下文有效和当前。句柄不随一次 `cudaSetDevice` 自动迁移；不同设备需要对应句柄。多个主机线程同时改同一个句柄，可能让别人的下一次调用读到你的配置。
+
+为第一份对照选择一个明确命名的非默认流和一个专用句柄，按下列顺序审核。表格是生命周期计划，不是运行日志。
+
+| 阶段 | 必须成立的条件 |
+| --- | --- |
+| 准备 | 创建流和句柄；分配 A、B、C；在主机上保留输入与独立参考所需数据 |
+| 配置 | `cublasSetStream` 绑定该流；显式设主机指针模式和所选数学政策；逐项检查状态 |
+| 初始化 | 输入复制与需要的 C 初始化排在该流的 GEMM 之前；异步主机缓冲区在复制完成前保持有效 |
+| 提交 | 调用 GEMM，检查 `cublasStatus_t`；成功返回不等于主机已能读结果 |
+| 观察 | 在同一流提交结果复制，显式等待该流完成并检查 CUDA 返回值，然后作 CPU 比较 |
+| 回收 | 确认所有使用者完成后释放缓冲区、销毁句柄、销毁流；部分初始化失败时只回收已创建资源 |
+
+若后续消费者在另一条流上，增加事件记录与等待边；仅在主机上“先调用生产者，再调用消费者”不足以建立跨流依赖。既要检查库调用状态，也要检查复制和同步边界暴露的异步错误。发生执行错误后，不得把旧输出当成本轮结果。
+
+工作区（workspace）是额外临时存储。传统 cuBLAS 可以使用其默认池；若自行设置，先 `cublasSetStream`，再 `cublasSetWorkspace`，因为前者**无条件重置**用户工作区配置。用户工作区须满足文档规定的 256 字节对齐并保持到使用结束。不要把销毁当成计时终点：12.9 文档说明 `cublasDestroy` 内部会触发设备同步，频繁创建与销毁也会把设置开销混入比较。
+
+## 库结果仍需独立参考
+
+库实现不是测试预言机（test oracle）的替代品。先从应用的逻辑坐标计算双精度 CPU 参考，不要复用待验证的 cuBLAS 参数变换来解释同一份错误。对每个逻辑输出检查有限性，并检查 `abs(got-ref) <= 1e-4 + 2e-5*abs(ref)`；这里的 `atol=1e-4, rtol=2e-5` 是 EX18 有界 FP32 测试数据的合同，不是 NVIDIA 对 GEMM 的普遍承诺。
+
+[EX18](/examples/cublas-gemm/)是本单元库对照的规范可运行示例（Runnable Example），固定 FP32 pedantic、行主序交换操作数和双精度参考，并沿用 [EX15](/examples/tiled-gemm/)的测试数据，其中包括非零 beta 情况。不要手抄第二份 CUDA 实现到学习单元。一般带 `beta` 的练习必须把原始 C 保留下来；EX18 的固定行为以其项目文件为准，不能从本页的推广推导它已经覆盖所有转置、填充或混合精度情况。
+
+小型非方阵、可辨识行列的输入、K 尾部和填充布局各能揭露不同错误。恒等矩阵和全零输入有用途，但单独使用容易掩盖交换与步长错误。首个失败应记录逻辑坐标、参考值、所得值、阈值和环境；不能通过放宽容差消除布局错误。
+
+[LAB12](/labs/compare-gemm-with-cublas/)再把正确结果带入外部计时。与手写内核比较前，必须对齐输入、输出语义、精度、重复次数和计时范围；不能把一边的内核时间与另一边含分配、复制和句柄创建的时间比较。没有原始测量就不写“库更快”或加速比。
+
+## 版本与已知问题的边界
+
+API 推导以 **Toolkit 12.9.2 归档**为准。组件独立编号，下表来自 NVIDIA 分发清单，不表示在这些环境中编译或运行过。
+
+| Toolkit | `libcublas` 组件 | 本页用途 |
+| --- | --- | --- |
+| 11.8.0 | 11.11.3.6 | 历史布局、句柄与版本对照 |
+| 12.9.2 | 12.9.2.10 | 本单元教学合同 |
+| 13.3.1 | 13.6.0.2 | 当前版本差异检查，不自动继承全部 API 结论 |
+
+11.8 发布说明建议 H100 场景提供至少 32 MiB 工作区，这是该版本和硬件的建议，不是每个 GEMM 的最低需求。12.9 Update 1 说明开始强制检查 256 字节工作区对齐；Update 2 修复了特定 Lt 算法 66 的问题，具体条件见 [L07](/libraries/cublaslt-matmul/)，不能据此宣布所有 GEMM 都无问题。
+
+13.3.1 的精确 API 与发布说明归档在本次访问均返回 404。当前发布说明自标 13.3 Update 1，组件清单为 13.6.0.2；例如它仍记录 `M` 或 `N` 为 1 的某些 Lt/GEMV 形状与工作区组合返回不支持，起于 Toolkit 13.3、cuBLAS 13.5.1。不能用“更新版本”推断候选一定存在。新式 `ForStream` 接口、仿真计算、分组乘法与 FP4 都不是本单元前置知识。
+
+## 证据边界
+
+正文没有规范代码导入，四个证据数组全部为空，不授予证据状态（Evidence Status）。阅读文档、完成地址推导、网页通过检查都不等于编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）。EX18 与 LAB12 的证据由各自记录负责。原生 Linux 是唯一受支持环境（Supported Environment）；本页不要求 GPU，也不在浏览器运行 CUDA。
+
+## 检索检查
+
+1. 为什么列主序 `3 x 2, ld=5` 的 `(2,1)` 在偏移 7？截取子矩阵为什么通常不改 `ld`？
+2. A 使用 C、B 使用 T 时，存储形状与 `lda,ldb` 下界分别是什么？实数与复数有何不同？
+3. 行主序 N,N GEMM 为什么交换操作数和 `m,n`，却不把两个标志改成 T？
+4. FP16 输入、FP32 输出与 FP32 计算时，标量是什么类型？设备指针模式还增加什么生命周期要求？
+5. 为什么 GEMM 返回成功、设置工作区、得到库结果，分别不能替代同步、分配证明和独立 CPU 参考？
+
+## 继续练习
+
+- 完成 [L06 的三道练习](/libraries/cublas-gemm/exercises/)，再看[独立解答](/libraries/cublas-gemm/solutions/)。
+- 审核 [PB-R4-007](/practice/#pb-r4-007)，将纸面调用合同与 [EX18](/examples/cublas-gemm/)和 [LAB12](/labs/compare-gemm-with-cublas/)的实际范围分开。
+- 进入 [L07](/libraries/cublaslt-matmul/)前补齐其另一项前置知识 Q05；VIS12 仅复用[现有分块讲解](/visuals/gemm-tiling-hierarchy/)。
+
+## 来源与许可
+
+[SRC-CUDA-067](/sources-and-versions/#src-cuda-067)汇总本页核查。12.9.2 的精确坐标包括 [Data Layout](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#data-layout)、[cuBLAS Context](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublas-context)、[Scalar Parameters](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#scalar-parameters)、[GemmEx](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasgemmex)、[Compute Type](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublascomputetype-t)、[Isamax 系列](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasi-t-amax)、[SetStream](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublassetstream)、[SetWorkspace](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublassetworkspace)和 [Destroy](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasdestroy)。
+
+已审阅归档 [EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html)的许可、分发要求、权利保留与 Toolkit 补充条款，以及 API 文档的 [Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices)。NVIDIA 文档和库不因引用而转为本站许可；本页以原创文字、原创推导和表格转述事实，没有复制或改编上游代码、图示、样例或测试输出。Context7 仅用于检索交叉检查，精确归档和发布说明决定版本结论。
+
+**事实核查与来源访问日期：2026-09-06。**

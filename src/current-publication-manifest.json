@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-05",
+  "reviewDate": "2026-09-06",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 249,
-    "sourceRoutes": 498,
-    "exerciseSetPublicationPairs": 66,
-    "solutionSetPublicationPairs": 66,
+    "publicationPairs": 257,
+    "sourceRoutes": 514,
+    "exerciseSetPublicationPairs": 68,
+    "solutionSetPublicationPairs": 68,
     "learningUnits": [
       "O01",
       "O02",
@@ -82,10 +82,12 @@
       "L02",
       "L03",
       "L04",
-      "L05"
+      "L05",
+      "L06",
+      "L07"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18"],
+    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12"],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -107,7 +109,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 72,
+    "practiceBankEntries": 74,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -120,8 +122,8 @@
       "PB-R3-011",
       "PB-R3-012"
     ],
-    "glossaryTerms": 186,
-    "sourceRecords": 82
+    "glossaryTerms": 188,
+    "sourceRecords": 84
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -202,6 +204,19 @@
         "toolkitLanes": ["cuda-12.9", "cuda-13.3"],
         "excludedToolkitLanes": ["cuda-11.8"],
         "excludedLaneRequires": "separately reviewed library versions"
+      },
+      "cublas": {
+        "bundled": [
+          { "toolkitLane": "cuda-11.8", "version": "11.11.3.6" },
+          { "toolkitLane": "cuda-12.9", "version": "12.9.2.10" },
+          { "toolkitLane": "cuda-13.3", "version": "13.6.0.2" }
+        ],
+        "apiTeachingBaseline": "Toolkit 12.9.2 archived cuBLAS guide, label 12.9",
+        "currentApiComparison": "Live cuBLAS guide label 13.3, accessed 2026-09-06",
+        "currentReleaseNotes": "Live CUDA 13.3 Update 1 release notes, accessed 2026-09-06",
+        "exact1331Archive": "unavailable: API and release-note archives returned HTTP 404",
+        "exampleToolkitLanes": ["cuda-11.8", "cuda-12.9", "cuda-13.3"],
+        "labToolkitLanes": ["cuda-13.3"]
       },
       "cub": {
         "bundled": [
@@ -285,6 +300,7 @@
       "EX15",
       "EX16",
       "EX17",
+      "EX18",
       "LAB01",
       "LAB03",
       "LAB04",
@@ -294,7 +310,8 @@
       "LAB08",
       "LAB09",
       "LAB10",
-      "LAB11"
+      "LAB11",
+      "LAB12"
     ],
     "pendingHardwareVerification": [
       "EX01",
@@ -313,6 +330,7 @@
       "EX15",
       "EX16",
       "EX17",
+      "EX18",
       "LAB01",
       "LAB02",
       "LAB03",
@@ -323,7 +341,8 @@
       "LAB08",
       "LAB09",
       "LAB10",
-      "LAB11"
+      "LAB11",
+      "LAB12"
     ],
     "runtimeNotApplicable": ["EX10"],
     "communityObserved": [],
@@ -331,7 +350,7 @@
     "referenceEnvironments": [],
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
-    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05"],
+    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -349,19 +368,21 @@
     "No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.",
     "EX02, EX10, and LAB02 have retained Compile-Checked evidence; every other R3 CUDA compile job is a non-evidentiary build gate.",
     "EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.",
-    "EX11 through EX17 have empty compilation evidence and remain Pending Hardware Verification.",
+    "EX11 through EX18 have empty compilation evidence and remain Pending Hardware Verification.",
     "R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.",
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
     "Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.",
-    "L01-L05 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.",
+    "L01-L07 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
     "The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.",
     "Profiler collection requires the exact tool, CUPTI, driver, GPU, metric availability, filter, replay, workload, command, permission, report-custody, and Environment Manifest coordinates. Performance-counter access must be administrator-approved for a non-admin user; denial or an unavailable metric blocks collection and must be recorded without sudo, privilege escalation, or policy bypass.",
     "Q11 summarizes linked EX14 and LAB10 subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS11, static material, browser models, and the expected-only plan grant no timing, profiler metric, speedup, bottleneck, or winner.",
     "Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.",
     "Q13 summarizes linked EX15, which retains empty compilation and recorded observations and remains Pending Hardware Verification; the runner gate, VIS12, and expected-only plan add no runtime or performance evidence, cuBLAS comparison, or Tensor Core result.",
     "A10-A14 publish finite host arithmetic and static logical traffic, matrix, storage, and contribution ledgers only. VIS18 and the A12/A13 sparse composition execute no CUDA, query no GPU, and record no backend, workspace, preprocessing, determinism, structured sparsity, actual traffic, timing, speedup, or winner.",
-    "L03 and LAB11, L06 and LAB12, and L13 and EX20 have no R3 public destination. LAB11 waits for L03, LAB12 waits for L06, and EX20 waits for L13's exact cuSPARSE API contract.",
+    "L03/LAB11 and L06/LAB12 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03 and LAB12 requires Q13/L06; L13 and EX20 remain unpublished pending the exact cuSPARSE API contract.",
     "EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.",
-    "L01-L05 are published in the rolling R4 surface; L06-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
+    "EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.",
+    "L06/L07 use the 12.9.2 archived API teaching baseline. Exact 13.3.1 API and release-note archives were unavailable; live 13.3 API and 13.3 Update 1 release notes are explicitly dated comparisons, not archived or executed evidence.",
+    "L01-L07 are published in the rolling R4 surface; L08-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
   ]
 }

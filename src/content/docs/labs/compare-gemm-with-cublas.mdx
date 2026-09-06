@@ -1,0 +1,343 @@
+---
+title: 'LAB12：对比教学 GEMM 与 cuBLAS'
+description: '让 EX15 与 EX18 使用完全相同的 FP32 矩阵，逐次验证结果，保留 CUDA 事件计时原始样本，并在不编造加速比的前提下评估维护成本。'
+pairId: lab12
+counterpart: /en/labs/compare-gemm-with-cublas/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical
+  - workload
+  - prepare
+  - measure
+  - manifest
+  - profiler
+  - maintenance
+  - observations
+  - acceptance
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB12
+prerequisites:
+  - Q13
+  - L06
+relatedUnits:
+  - L07
+  - EX15
+  - EX18
+  - VIS12
+exampleIds:
+  - EX15
+  - EX18
+canonicalExample: EX18
+canonicalRanges:
+  - cpu-reference
+  - gemm-call
+  - stream-lifecycle
+hardwareGate: 'Native Linux; one selected CUDA GPU with CC >= 7.5; problems fit within 8 GB; C++17; Toolkit 13.3.1 with its cuBLAS component; optional profiling requires approved counter access; precision-specific extensions have separate gates'
+estimatedMinutes: 90
+difficulty: advanced
+toolkitLanes:
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Execute a host C++ compiler, NVCC, canonical examples, and the LAB12 runner on one selected CUDA GPU; read version and file-hash information'
+  - 'Create and remove learner-owned build and log files; publish only sanitized derivatives'
+  - 'Optional profiler counters require administrator-approved non-admin access; no sudo, policy change, or bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'Both candidates should pass the independent double oracle on the same three fixtures, with non-finite rejection and atol=1e-4, rtol=2e-5.'
+    - 'Resetting initial C before every operation should preserve the nonzero-beta contract; warm-ups should be excluded and every sample checked.'
+    - 'Ten unprofiled event samples per fixture and candidate should support only a matched min/median/max comparison, not a general production winner.'
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA cuBLAS API Reference'
+    url: 'https://docs.nvidia.com/cuda/cublas/index.html'
+    version: 'cuBLAS documentation v13.3'
+    platform: 'Native Linux; column-major GemmEx, pedantic FP32, host scalars, stream and workspace contracts'
+    accessDate: '2026-09-06'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3.1; cuBLAS 13.6.0.2'
+    platform: 'Native Linux; separately versioned components and scoped cuBLAS known issues'
+    accessDate: '2026-09-06'
+  - title: 'CUDA Runtime API Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1'
+    platform: 'Event recording, completion, elapsed milliseconds, and timing resolution'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/labs/compare-gemm-with-cublas/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical,workload,prepare,measure,manifest,profiler,maintenance,observations,acceptance,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q13,L06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L07,EX15,EX18,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: 'EX15,EX18' }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,gemm-call,stream-lifecycle' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux; one CC 7.5+ GPU; problems fit 8 GB; C++17; Toolkit 13.3.1; optional approved counters; precision extensions separate' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '90' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: cuda-13.3 }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA GPU; compiler/example/runner/version/hash access; learner-owned files; optional approved counters; no sudo or bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,13.6.0.2' }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/compare-gemm-with-cublas/" lang="en">Read the English counterpart</a>
+
+本实验（Lab）在**网站之外**对比教学用的 EX15 内核与 EX18 cuBLAS 基准实现。这里提供可执行的测量步骤，不发布跑分。编译证据为空；运行仍为**待硬件验证（Pending Hardware Verification）**；实际观察记录为空。
+
+## 实验约定
+
+工具链已安装时，预计用时 **60–90 分钟**：源码与环境检查约 15 分钟，正确性检查约 20 分钟，测量约 20 分钟，解释与整理约 15–30 分钟。受支持环境（Supported Environment）仅限原生 Linux（Native Linux）。选择一张计算能力（compute capability，CC）不低于 7.5 的 GPU，问题内存预算不超过 8 GB；不要求张量核心（Tensor Core）。
+
+必做对比采用行主序（row-major）FP32 `C = alpha*A*B + beta*C`，只覆盖三组小矩阵，不代表生产环境的全部 GEMM 工作负载。最大用例的设备端 A/B/C 共需 `4*(33*31 + 31*35 + 33*35) = 13,052` 字节。这是根据源码计算的容量，不包括 CUDA 上下文及库管理的工作区（workspace）；后两项应单独记录，内存不足时停止。问题规模适合 8 GB 预算，不等于已经测得进程内存占用。
+
+## 前置学习与相关资源
+
+严格按顺序完成 [Q13：GEMM 优化案例](/correctness/gemm-optimization-case-study/) 和 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)，前置关系恰好为这两项。开始前应能解释不完整分块、double 参考计算，以及为什么一个更小的时间值还不足以支持优化结论。
+
+[L07](/libraries/cublaslt-matmul/)、[EX15](/examples/tiled-gemm/)、[EX18](/examples/cublas-gemm/) 和 [VIS12](/visuals/gemm-tiling-hierarchy/) 是相关资源，不增加前置要求。可以用 VIS12 可视化讲解（Visual Explainer）追踪一个 K 分块中的数据归属与复用，但它不执行 GEMM，也不展示 cuBLAS 内部实现，不能提供计时或 Tensor Core 证据。
+
+## 固定规范源码
+
+使用[固定版本的 EX15 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm)及其[同版本归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip)。EX18 使用自己的[源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm)与[同版本归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip)。保留两者解析后的提交号、获取 URL、文件哈希以及本地改动。分支名不能代替固定提交。
+
+ZIP 链接用于检查源码和构建独立示例。**以下 LAB12 命令要求使用固定提交的 Git 工作副本，不能直接用于 ZIP 解压目录或不相关的上层仓库。** 创建新的工作副本；此版本包含 EX18、比较程序，以及与 EX15 固定源码版本相同的构建输入：
+
+```bash
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git cuda-learning-site-lab12
+git -C cuda-learning-site-lab12 checkout --detach fb94c6c1fe972afeac9b5b30db995595c4dc5021
+```
+
+按以下顺序阅读 EX18 的 CPU 参考计算、GEMM 适配函数和资源生命周期：
+
+<CanonicalCode exampleId="EX18" range="cpu-reference" />
+
+<CanonicalCode exampleId="EX18" range="gemm-call" />
+
+<CanonicalCode exampleId="EX18" range="stream-lifecycle" />
+
+原创 Apache-2.0 解答程序 [lab12-gemm-comparison.cu](/assets/exercise-solutions/lab12-gemm-comparison.cu) 位于 `public/assets/exercise-solutions/lab12-gemm-comparison.cu`。它重命名入口后直接包含规范翻译单元，在显式流（stream）中启动包含进来的 EX15 内核，并复用 EX18 的资源生命周期。由于规范 GEMM 调用位于 EX18 入口内部，构建步骤将其标记的 `gemm-call` 范围提取为生成的包含文件，放入辅助程序的计时分支。程序没有复制 GEMM 内核，没有另行维护一份 API 调用，也没有复制 NVIDIA 实现。这份测量辅助代码不是新的可运行示例（Runnable Example）。编译前将它与两份源码树、生成的范围文件一起计算哈希；单独下载辅助文件并不会同时获得这些源码树。
+
+## 对齐完整的数值问题
+
+形状顺序为 **M,K,N**：`A[M,K] * B[K,N] -> C[M,N]`。三者均连续、行主序存储，数学问题本身不包含转置操作。
+
+| 用例 | M,K,N | alpha | beta | 检查目的 |
+| --- | --- | --- | --- | --- |
+| `2x3x2-hand` | `2,3,2` | `1` | `0` | 手算索引与操作数顺序 |
+| `33x31x35-partial` | `33,31,35` | `0.75` | `0.25` | M/N/K 不完整分块与初始 C |
+| `32x32x32-aligned` | `32,32,32` | `1` | `0` | 对齐对照组，不是推荐工作负载 |
+
+使用 EX15 的生成器，不另换随机种子。手算用例的 A、B 展平后均为 `[1,2,3,4,5,6]`，初始 C 全零，数学结果为 `[22,28,49,64]`。这是**手算参考值，不是已记录的 GPU 输出**。另外两组使用 `A[i]=(int(i%7)-3)/8.0F`、`B[i]=(int(i%5)-2)/7.0F`，初始 `C[i]=(int(i%3)-1)/5.0F`。只有形状一致还不够：运行前要与 EX18 逐字节核对全部 A/B/初始 C，并核对标量。随后两个候选共享同一份设备 A/B，每次操作前都恢复相同的初始 C。
+
+cuBLAS 按列主序（column-major）解释这些字节。适配函数不实际搬动数据，而是计算 `C^T = alpha*B^T*A^T + beta*C^T`：`cublasGemmEx` 使用 `(transa,transb)=(CUBLAS_OP_N,CUBLAS_OP_N)`、维度 `(N,M,K)`、第一操作数 `(B,lda=N)`、第二操作数 `(A,ldb=K)`，以及 `(C,ldc=N)`。A/B/C 类型保持 `CUDA_R_32F`，计算类型为 `CUBLAS_COMPUTE_32F_PEDANTIC`，句柄（handle）数学模式为 `CUBLAS_DEFAULT_MATH`，算法为 `CUBLAS_GEMM_DEFAULT`。alpha/beta 是驻留主机的 FP32 标量，使用 `CUBLAS_POINTER_MODE_HOST`。仅设置默认数学模式并不能固定计算精度，显式 pedantic 计算类型不可省略。
+
+对**每份完整输出矩阵独立验证**：CPU 以 double 累加，逐元素要求 `abs(actual-reference) <= 1e-4 + 2e-5*abs(reference)`。输入、参考值或输出出现非有限值时均拒绝。两个候选相互一致不能替代参考计算；容差通过也不保证逐位相同或跨库版本可复现。预热期间也必须恢复初始 C。beta 非零时，把上次结果当作下一次 C 会悄悄改变问题。
+
+## 准备与编译
+
+本步骤选择 Toolkit **13.3.1**、C++17，以及独立编号的配套 cuBLAS **13.6.0.2**。示例声明的其他工具包通道（Toolkit Lane）不自动成为 LAB12 的测量结论。核对实际解析到的编译器、头文件、链接库和加载库是否来自所选安装；`nvidia-smi` 中的 CUDA 标签不是已安装 Toolkit 的版本。继续前先核实驱动兼容性。
+
+在 Bash 中从该 `cuda-learning-site-lab12` 工作副本的根目录执行。最前面的检查会在记录来源之前拒绝错误目录或提交。执行前选择有权使用的物理 GPU 序号。每次使用新的运行目录，失败日志也要保留：
+
+```bash
+set -euo pipefail
+test "$(git rev-parse --show-toplevel)" = "$(pwd -P)"
+test "$(git rev-parse HEAD)" = fb94c6c1fe972afeac9b5b30db995595c4dc5021
+export CUDA_VISIBLE_DEVICES="${LAB12_GPU_ORDINAL:?select one authorized GPU ordinal}"
+mkdir -p build
+run_dir=$(mktemp -d ./build/lab12.XXXXXX)
+nvidia-smi > "$run_dir/gpu-before.txt"
+nvcc --version > "$run_dir/nvcc.txt"
+c++ --version > "$run_dir/host-compiler.txt"
+git rev-parse HEAD > "$run_dir/site-commit.txt"
+git diff -- examples/ex15-tiled-gemm examples/ex18-cublas-gemm \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu > "$run_dir/source.diff"
+sha256sum examples/ex15-tiled-gemm/{src/*.cu,include/*.hpp} \
+  examples/ex18-cublas-gemm/{src/*.cu,include/*.hpp} \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu > "$run_dir/sources.sha256"
+make -C examples/ex15-tiled-gemm host-test all 2>&1 | tee "$run_dir/ex15-build.txt"
+make -C examples/ex18-cublas-gemm host-test all EXPECTED_CUBLAS_VERSION=13.6.0.2 \
+  2>&1 | tee "$run_dir/ex18-build.txt"
+sed -n '/\[ex18-gemm-call-start\]/,/\[ex18-gemm-call-end\]/p' \
+  examples/ex18-cublas-gemm/src/cublas_gemm.cu > "$run_dir/lab12-ex18-gemm-call.inc"
+test -s "$run_dir/lab12-ex18-gemm-call.inc"
+sha256sum "$run_dir/lab12-ex18-gemm-call.inc" > "$run_dir/generated-range.sha256"
+nvcc --std=c++17 \
+  --generate-code=arch=compute_75,code=sm_75 \
+  --generate-code=arch=compute_75,code=compute_75 \
+  -DEX18_EXPECTED_CUBLAS_MAJOR=13 -DEX18_EXPECTED_CUBLAS_MINOR=6 \
+  -DEX18_EXPECTED_CUBLAS_PATCH=0 -DEX18_EXPECTED_CUBLAS_BUILD=2 \
+  -I . -I "$run_dir" -I examples/ex15-tiled-gemm/include -I examples/ex18-cublas-gemm/include \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu \
+  -lcublas -o "$run_dir/lab12-gemm-comparison" 2>&1 | tee "$run_dir/runner-build.txt"
+sha256sum "$run_dir/lab12-gemm-comparison" > "$run_dir/binary.sha256"
+```
+
+不要为了通过检查而添加 `--use_fast_math`、只对一个候选修改乘加融合选项，或悄悄更换精度。保留展开后的命令、头文件搜索路径或包含追踪、实际 `cublas_v2.h` 与 `cublas_api.h` 的路径和哈希、链接解析结果，以及加载库的路径和哈希。辅助程序会打印 CUDA runtime/driver API 版本、cuBLAS 头文件宏及加载库版本查询值，但这些探针不能代替软件包与构建来源记录，也不能证明意外混装是兼容的。
+
+## 逐次测量并验证
+
+独立示例只打印正确性，不打印时间。不要用 `time` 测量这些进程，再与事件时间作比较。先按 EX15/EX18 页面说明运行规范可执行文件，然后运行辅助程序：
+
+```bash
+date -u +%FT%TZ > "$run_dir/start-utc.txt"
+set +e
+"$run_dir/lab12-gemm-comparison" > "$run_dir/samples.txt" 2> "$run_dir/errors.txt"
+status=$?
+set -e
+printf '%s\n' "$status" > "$run_dir/exit-status.txt"
+date -u +%FT%TZ > "$run_dir/end-utc.txt"
+nvidia-smi > "$run_dir/gpu-after.txt"
+sha256sum "$run_dir"/*.txt > "$run_dir/logs.sha256"
+test "$status" -eq 0
+```
+
+每组用例都先分配 A/B/C，创建一个显式 `cudaStreamNonBlocking` 流，并在采样前将一个 cuBLAS 句柄绑定到它。程序运行**三轮不计入统计的预热对**，随后运行**十轮测量对**：测量轮次为奇数时先 EX15 后 EX18，偶数时先 EX18 后 EX15。每次操作都等待完成并验证，预热也不例外。每组用例的 A/B 只上传一次；每次候选执行前均重置 C。
+
+| 边界 | 必须执行的顺序 |
+| --- | --- |
+| 计时外 | 在所选流中将初始 C 复制到已有设备分配，开始前检查 `cudaStreamSynchronize` |
+| 事件区间 | 在该流记录 start；启动一次 EX15 GEMM 或调用一次 EX18 适配函数；检查立即返回的状态；在同一流记录 stop |
+| 完成检查 | 检查 `cudaEventSynchronize(stop)`，再调用 `cudaEventElapsedTime`；事件必须启用计时 |
+| 计时外 | 在同一流回传完整 C，检查完成状态，执行 double 参考比较，保留该候选的结果状态 |
+
+程序逐条输出以**毫秒**为单位的原始样本，保留用例、候选、轮次和顺序。每个用例与候选分别汇总 count=10、最小值、中位数（排序后第 5 与第 6 个值的均值）及最大值。预热行没有时间值。任何 API、完成、清理或数值检查失败都会导致非零退出；保留失败记录，不使用不完整汇总。修正后开始新运行，不删慢样本，也不拼接不同运行。
+
+这里测量的是**未挂分析器的 GPU 事件区间**，不是 CPU 调用延迟、进程墙钟时间、含传输的延迟，也不是把报告中各内核耗时相加。cuBLAS 可能启动多个内核；主机提交间隙和其他 GPU 工作会影响区间。官方 API 给出的事件分辨率约为 0.5 微秒，这些小矩阵未必足以分辨有意义的差距。实际测到零时保留原值，但不能除以零，更不能凭分辨率受限的数据选赢家。本程序不输出包含初始化的计时系列：句柄创建、分配、H2D/重置、D2H、验证与资源释放均被排除。以后若要测量这些成本，需为两个候选另建边界完全相同的主机时钟实验。
+
+## 填写环境清单
+
+解释结果前，每次运行都要有一份环境清单（Environment Manifest）。下表观察栏初始均为**未填写**。原始记录私下保留，只发布带来源说明的脱敏副本，不公开主机身份、私有绝对路径、凭据或 GPU UUID。
+
+| 类别 | 必填记录 | 初始值 |
+| --- | --- | --- |
+| 身份 | 运行编号、观察者、UTC 起止时间、来源访问日期 | `unfilled` |
+| GPU | 精确型号、查询得到的 CC、物理设备选择、可见与使用 GPU 数、可用与总内存；使用数=1 | `unfilled` |
+| 驱动与系统 | 加载驱动、driver API 版本、兼容性判断、原生 Linux 发行版/内核/架构，适用时的容器或 VM 镜像 | `unfilled` |
+| 工具链 | 精确 Toolkit、runtime、NVCC、主机编译器版本，C++ 标准，展开的构建选项和命令，退出状态与日志 | `unfilled` |
+| cuBLAS | 获取的软件包与构建版本；实际头文件路径与哈希；`CUBLAS_VER_MAJOR/MINOR/PATCH/BUILD`；链接库身份；加载库的 `cublasGetVersion`、`cublasGetProperty` 查询值、路径与哈希 | `unfilled` |
+| 源码来源 | EX15/EX18 提交、URL、实际源码路径/哈希、工作树及改动；辅助程序版本/哈希、生成的 GEMM 范围/哈希；实际执行文件路径/哈希 | `unfilled` |
+| 数值问题 | M,K,N、完整 A/B/初始 C 身份、生成器版本、alpha/beta、行主序与 leading dimensions、输入/输出/计算类型、数学模式、算法、标量模式、参考计算与容差 | `unfilled` |
+| 流与工作区 | 所选设备、非阻塞流和句柄归属、同步边界、库管理工作区策略、没有用户工作区、有效 `CUBLAS_WORKSPACE_CONFIG` 及 cuBLAS/CUDA 覆盖变量 | `unfilled` |
+| 内存 | A/B/C 字节数、初始化前后实际可用内存、单独记录的上下文/库开销；未知工作区容量不写成零，也不当作流量 | `unfilled` |
+| 运行条件 | 时钟与功耗策略/限制、前后温度与降频情况、同时运行的 CPU/GPU 负载、MIG/MPS 状态、模块加载策略 | `unfilled` |
+| 权限 | 设备与文件权限；可选计数器授权/查询结果，或未尝试分析；无提权绕过 | `unfilled` |
+| 采样 | 预热次数/状态、成对顺序、事件边界及单位、全部原始样本、每次正确性结果、完整输出或诊断的保管位置、最小/中位/最大值及拒绝原因 | `unfilled` |
+| 可选分析 | 精确工具/CUPTI 版本、官方手册、指标查询/定义/单位、逻辑调用与实际 launch 对应、重放/过滤/缓存/时钟策略、原始报告与派生文件哈希 | `unfilled` |
+| 结论 | 适用范围、未排除的解释、维护责任人、证据链接、复核日期、脱敏副本到原件的哈希映射 | `unfilled` |
+
+## 可选性能分析与精度扩展
+
+性能分析**不是**完成这份 60–90 分钟实验的必要条件。如果计时留下了机制问题，在**独立运行**中遵循 [Q13 的分析边界](/correctness/gemm-optimization-case-study/)及对应版本官方手册。查询实际 GPU 可用的指标，取得合法计数器访问权限，识别实际 cuBLAS launch，并保留原始报告与哈希。不要假设一次库调用等于一个内核，不编造 cuBLAS 内核名、占用率、流量指标或 Tensor Core 结果。分析器时间不能替代原始、未挂分析器的事件样本。计数器拒绝访问时记录分析阻塞，不填零，也不使用 `sudo` 或修改安全策略。
+
+TF32、FP16、BF16、FP8、FP4、浮点仿真、Tensor Core 路径、cuBLASLt 启发式选择、工作区调优、融合及更大形状均属于**独立实验**，各自需要硬件/版本门槛、回退路径、数值约定和匹配基线。CC 7.5 的 FP32 门槛不自动授权这些路径。L07 是进一步控制库行为的学习入口，不是悄悄替换本实验 API 的理由。
+
+## 给出有条件的维护判断
+
+| 问题 | 教学 EX15 的责任 | EX18/cuBLAS 的责任 |
+| --- | --- | --- |
+| 谁负责正确性？ | 索引、尾部、屏障、累加及后处理，还要覆盖部署测试 | 布局/leading dimensions、精度、标量/句柄/流生命周期、错误处理，以及同样的应用参考测试 |
+| 谁负责升级？ | 内核、编译器与架构回归检查 | 集成代码、精确头文件/库版本、发布说明检查及重测；库实现由 NVIDIA 维护 |
+| 谁处理故障？ | 源码级诊断、调优和回退责任 | 携带完整清单复现，区分适配层与库问题，向上游报告并维护回退 |
+| 何时值得多维护代码？ | 库约定无法满足且已测得的应用需求，并有明确测试和维护投入 | 库约定匹配、集成成本可接受，而不只是因为库名熟悉 |
+
+记录两者真实的维护成本；表格只给问题，不预填分数。如果两者均通过，且可分辨的时间差在声明环境中重复出现，结论也只能是某一方**在这些用例、这个事件边界下**更快。结果重叠或受到分辨率限制时，写“未分辨出赢家”。局部自定义内核胜出不足以支持替换生产库；cuBLAS 胜出也不意味着可以省去布局、精度或升级测试。
+
+## 预期现象与空记录
+
+仅作预期：两个候选应通过参考比较；重置 C 应保留不完整用例的 beta 项；不同形状可能呈现不同的调用开销与复用平衡。这些预期都不提供实测值，也不预测赢家。
+
+| 记录 | 当前值 |
+| --- | --- |
+| GPU 输出与每次操作的正确性观察 | `[]` |
+| 预热、原始事件样本与汇总 | `[]` |
+| 实际采集的分析报告及内核/流量观察 | `[]` |
+| 实测维护评估、加速比与赢家 | `[]` |
+
+本实验没有发布 CUDA 编译或执行证据。CPU 输出检查、网站构建或浏览器测试不能把它升级为编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）。经复核的学习者报告可以提供社区已观察（Community-Observed）证据；只有满足要求的基准环境（Reference Environment）才能建立 Runtime-Verified 状态。
+
+## 验收标准与阻塞
+
+1. 解释 `(N,M,K; B,N; A,K; C,N)` 操作数映射，保留全部三组用例，包括初始 C 和各自 alpha/beta。
+2. 对两个候选保留预热期间及每次计时操作后的独立参考检查成功记录，拒绝非有限值，不改变容差。
+3. 提交完整清单、源码/构建/库身份、每组用例三轮排除的预热对及十轮交替测量对、所有原始毫秒值、最小/中位/最大值、日志和实际退出状态。
+4. 区分事件区间、端到端延迟和分析器指标，给出有条件的维护结论，并指出至少一个尚未排除的其他解释。
+5. 硬件/系统不受支持、库来源混乱或未核实、分配/API/完成失败、输出非有限或不匹配、样本缺失、条件漂移、清单不完整时，停止比较并提交阻塞，不补写结果。计数器拒绝访问只阻塞可选分析。
+
+自行编写测量程序时，仍须保持上述边界并复用规范代码，不能复制内核。链接的辅助程序是测量任务的完整解答；其 CPU-only 模式可在不使用 CUDA 的情况下，通过相同参考计算检查行主序输出文件：
+
+```bash
+c++ -std=c++17 -DLAB12_HOST_ONLY -x c++ \
+  -I examples/ex15-tiled-gemm/include -I examples/ex18-cublas-gemm/include \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu -o "$run_dir/lab12-host"
+"$run_dir/lab12-host" --check-fixtures
+"$run_dir/lab12-host" --check-output 33x31x35-partial < matrix.txt
+```
+
+这里的 `matrix.txt` 必须恰好包含该用例输出的 1,155 个行主序 FP32 值。这个模式只检查给定数值，不执行或模拟 GPU。
+
+## 清理
+
+辅助程序在正常结束时检查资源释放。移除自己创建的 `run_dir` 和示例构建目录之前，先保留哈希、错误与原始记录。不要删除共享 Toolkit、修改 GPU 功耗/时钟策略，或清除其他人的产物。失败运行也是记录的一部分。
+
+## 来源与复核
+
+- [cuBLAS v13.3 API Reference](https://docs.nvidia.com/cuda/cublas/index.html) 中的数据布局、`cublasGemmEx`、计算类型、标量参数、流、工作区和版本查询定义了库约定。默认工作区由库管理，其容量不是实测流量。
+- [Toolkit 13.3 Update 1 发布说明](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) 分别标明 cuBLAS 13.6.0.2 与 Toolkit 13.3.1。按精确触发条件检查已知问题：本基线不使用 grouped/strided batch、由设备 PDL 生产的标量、图捕获或 cuBLASLt 启发式查询。这种范围排除不等于笼统宣称 cuBLAS 没有缺陷。
+- [Runtime API v13.3.1 事件管理](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html) 定义了启用计时的事件、完成、毫秒耗时、分辨率及干扰边界。
+
+Context7 `/websites/nvidia_cuda_cublas` 仅用于发现与交叉核对；上面直接检查的 NVIDIA 官方文档是权威依据。正文为原创 CC BY 4.0，测量代码为原创 Apache-2.0；没有复制 NVIDIA 示例代码、图、表或跑分结果。**全部来源访问与事实复核日期：2026-09-06。**

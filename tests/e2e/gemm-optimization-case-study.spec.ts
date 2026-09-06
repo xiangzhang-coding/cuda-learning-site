@@ -24,7 +24,7 @@ const routePairs = [
   },
 ] as const;
 
-test('Q13 exposes bilingual evidence-bounded browser contracts without LAB12', async ({ page }) => {
+test('Q13 links to LAB12 in both locales without claiming comparison evidence', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
 
@@ -38,7 +38,9 @@ test('Q13 exposes bilingual evidence-bounded browser contracts without LAB12', a
 
       await expect(page.locator('main h1')).toContainText(publication.unitId.split('-')[0]);
       await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', publication.unitId);
+      await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute('content', 'none');
       await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
+      await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute('content', 'none');
       await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
       await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', counterpart);
 
@@ -56,7 +58,9 @@ test('Q13 exposes bilingual evidence-bounded browser contracts without LAB12', a
         await expect(firstHint).toHaveJSProperty('open', true);
       }
 
-      await expect(page.locator('main a[href*="/labs/"]')).toHaveCount(0);
+      const labLinks = page.locator('main a[href*="/labs/"]');
+      await expect(labLinks).toHaveCount(1);
+      await expect(labLinks).toHaveAttribute('href', `${localePrefix}labs/compare-gemm-with-cublas/`);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
     }
   }

@@ -1,0 +1,275 @@
+---
+title: 'EX18: cuBLAS GEMM Reference Runnable Example'
+description: Map EX15 row-major inputs to cuBLAS GEMM, explicitly select FP32 pedantic computation, and verify every output against an independent double CPU oracle.
+pairId: ex18
+counterpart: /examples/cublas-gemm/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - purpose
+  - project
+  - cpu-reference
+  - gemm-call
+  - stream-lifecycle
+  - version-profiles
+  - build
+  - compatibility
+  - evidence
+  - expected-observations
+  - sources
+resourceKind: runnable-example
+unitId: EX18
+prerequisites:
+  - L06
+relatedUnits:
+  - L07
+  - EX15
+  - LAB12
+exampleIds:
+  - EX18
+canonicalExample: EX18
+canonicalRanges:
+  - cpu-reference
+  - gemm-call
+  - stream-lifecycle
+hardwareGate: 'Build: x86-64 C++17 host and selected CUDA Toolkit/cuBLAS profile; runtime: Native Linux, one selected CC 7.5+ GPU; 13,056 fixed device matrix bytes plus library-owned resources must fit within 8,000,000,000 bytes'
+toolkitLanes:
+  - cuda-11.8
+  - cuda-12.9
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read the selected Toolkit cuBLAS headers and shared libraries'
+  - 'Access one selected CUDA device and execute NVCC, C++ compiler, make, bash, readelf, ldd, the host test, and the CUDA binary'
+  - 'Create and remove files in EX18 build, result, and learner-owned evidence directories'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'All three EX15-compatible fixtures should pass a finite full-output tolerance check against the independent double CPU oracle, including the literal hand result and nonzero beta case.'
+    - 'The row-major mapping should use swapped operands and dimensions with explicit FP32 pedantic computation, host scalars, and completion before CPU validation.'
+    - 'The four header version macros should match the selected component profile, and the reported loaded major/minor/patch should match those headers before GEMM.'
+  recordedObservations: []
+sources:
+  - title: 'cuBLAS reference archived with CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html'
+    version: 'CUDA 11.8.0 archive; cuBLAS 11.11.3.6 manifest coordinate'
+    platform: 'Linux; GEMM, pedantic computation, pointer modes, streams, version queries'
+    accessDate: '2026-09-06'
+  - title: 'cuBLAS reference archived with CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html'
+    version: 'CUDA 12.9.2 archive; cuBLAS 12.9.2.10 manifest coordinate'
+    platform: 'Linux; GEMM and helper API contracts'
+    accessDate: '2026-09-06'
+  - title: 'Current cuBLAS owner reference'
+    url: 'https://docs.nvidia.com/cuda/cublas/index.html'
+    version: 'Current owner reference reviewed 2026-09-06; CUDA 13.3.1 cuBLAS archive unavailable'
+    platform: 'Linux; GEMM precision, emulation, workspace, and version query boundaries'
+    accessDate: '2026-09-06'
+  - title: 'CUDA Runtime stream management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html'
+    version: 'Current owner Runtime API reviewed 2026-09-06'
+    platform: 'Nonblocking streams, synchronization, and destruction'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcublas 11.11.3.6; linux-x86_64 SHA-256 045e6455c9f8789b1c7ced19957c7904d23c221f4d1d75bb574a2c856aebae98'
+    platform: 'Owner-declared Linux x86-64 acquisition coordinate; archive not downloaded locally'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcublas 12.9.2.10; linux-x86_64 SHA-256 c80a724aafa1ee49110b0d3385316ea54d418b03e796e91e8f0b47d52f8022fd'
+    platform: 'Owner-declared Linux x86-64 acquisition coordinate; archive not downloaded locally'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcublas 13.6.0.2; linux-x86_64 SHA-256 1794edb653adf48f5fa02d86bb738ed75888dd355aa39dadb6202d84d554c0dc'
+    platform: 'Owner-declared Linux x86-64 acquisition coordinate; archive not downloaded locally'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: ex18 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/examples/cublas-gemm/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,gemm-call,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: runnable-example }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: L06 }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L07,EX15,LAB12' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,gemm-call,stream-lifecycle' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host and selected CUDA Toolkit/cuBLAS profile; runtime: Native Linux, one selected CC 7.5+ GPU; 13,056 fixed device matrix bytes plus library-owned resources must fit within 8,000,000,000 bytes' }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'read Toolkit/cuBLAS; one CUDA device; compiler, make, bash, readelf, ldd, host-test, and CUDA-binary execution; EX18 build/result/evidence-directory write/delete' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'cuBLAS-11.11.3.6,cuBLAS-12.9.2.10,cuBLAS-13.6.0.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1,current-owner-reference' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/cublas-gemm/" lang="zh-CN">阅读中文对应页</a>
+
+EX18 is an original standalone C++17 cuBLAS GEMM Runnable Example. It checks correctness, not speed. CUDA runs only in an external environment, never in this Learning Site.
+
+## Purpose
+
+Complete [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/) first. EX18 makes layout, leading dimensions, precision, handle state, and stream completion explicit in one buildable project. [L07: cuBLASLt Matmul](/en/libraries/cublaslt-matmul/), [EX15: Tiled GEMM](/en/examples/tiled-gemm/), and [LAB12: Compare GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) are related resources, not additional prerequisites.
+
+## Canonical Project
+
+[View the fixed EX18 source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm), or [download the same source revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip). After extraction, enter `examples/ex18-cublas-gemm/`. Its manifest, README, Makefile, host-only header, CUDA source, host test, compile-check script, and evidence note form the standalone project.
+
+Project code is original Apache-2.0 work. This page is original CC-BY-4.0 prose. cuBLAS is an external dependency under its own terms; no NVIDIA sample, implementation, or SDK header is republished. Both locales import these same three canonical ranges rather than maintaining C++ copies.
+
+## Independent CPU Reference
+
+<CanonicalCode exampleId="EX18" range="cpu-reference" />
+
+The header preserves this site's original EX15 input generator and oracle logic without an EX15 dependency. A and B are stored as `float`, then converted to `double` for multiplication and serial accumulation. Initial C and alpha/beta are included in that independent calculation. No cuBLAS result is used to construct expected output.
+
+| Fixture, in M,K,N order | alpha | beta | What it checks |
+| --- | --- | --- | --- |
+| `2,3,2` | 1 | 0 | A and B each contain 1 through 6, C starts at zero; literal row-major result `22,28,49,64` |
+| `33,31,35` | 0.75 | 0.25 | Non-square extents and an observable initial-C contribution |
+| `32,32,32` | 1 | 0 | The same aligned fixture used by EX15 |
+
+For the latter two fixtures, A repeats `(i%7-3)/8`, B repeats `(i%5-2)/7`, and C repeats `(i%3-1)/5`, using signed subtraction and float division. Every output must be finite and satisfy `abs(gpu-cpu) <= 1e-4 + 2e-5 * abs(cpu)`. Passing requires checking the full matrix, not a sample or checksum. A failure reports the first mismatching row and column. Tolerance is fixed before execution; it does not imply bitwise equality or cross-GPU reproducibility.
+
+## Row-Major GEMM Mapping
+
+<CanonicalCode exampleId="EX18" range="gemm-call" />
+
+The input contract is row-major `C[M,N] = alpha*A[M,K]*B[K,N] + beta*C[M,N]`. The same bytes are column-major transposes, so compute `C^T = alpha*B^T*A^T + beta*C^T`. Pass B first and A second, swap M and N, and use `(lda,ldb,ldc)=(N,K,N)`. Both operations are `CUBLAS_OP_N`: the transpose is already represented by the memory interpretation, not by an extra transpose flag or a data-conversion kernel.
+
+All three matrix data types are `CUDA_R_32F`. `CUBLAS_COMPUTE_32F_PEDANTIC` explicitly selects single-precision arithmetic; `CUBLAS_DEFAULT_MATH` alone is not the precision contract. The program requests neither FAST_TF32 nor lower-precision/emulated computation and uses `CUBLAS_GEMM_DEFAULT` rather than an architecture-specific algorithm. This correctness baseline is not a promise about the fastest library configuration.
+
+## Stream And Resource Lifetime
+
+<CanonicalCode exampleId="EX18" range="stream-lifecycle" />
+
+One handle and one `cudaStreamNonBlocking` stream are reused across all three cases. `cublasSetPointerMode(..., CUBLAS_POINTER_MODE_HOST)` gives host alpha/beta addresses their intended meaning. `cublasSetStream` runs before work and resets the library workspace to its default pool. EX18 installs no user workspace; do not treat it as a zero-workspace operation.
+
+Each case restores initial C, enqueues A/B/C H2D copies, GEMM, and the C D2H copy on that same stream, then checks `cudaStreamSynchronize` before validation or buffer reuse. Submission success is not completion. Host vectors are pageable, so `cudaMemcpyAsync` does not establish transfer overlap.
+
+RAII cleanup synchronizes again before releasing the handle, device buffers, and stream, including after partial allocation or submission failure. Every release is attempted without short-circuiting; a cleanup failure makes the process fail. Host storage is constructed before the owner and outlives cleanup. The three normal completion boundaries and final cleanup boundary are not timings.
+
+## Independent Version Profiles
+
+| Profile ID | Toolkit | cuBLAS | Header MAJOR,MINOR,PATCH,BUILD |
+| --- | --- | --- | --- |
+| `cuda-11-8-bundled-cublas-11-11-3-6` | 11.8.0 | 11.11.3.6 | 11,11,3,6 |
+| `cuda-12-9-bundled-cublas-12-9-2-10` | 12.9.2 | 12.9.2.10 | 12,9,2,10 |
+| `cuda-13-3-bundled-cublas-13-6-0-2` | 13.3.1 | 13.6.0.2 | 13,6,0,2 |
+
+Each coordinate comes independently from NVIDIA's exact redistribution manifest, not from the Toolkit number. `EXPECTED_CUBLAS_VERSION` becomes four `EX18_EXPECTED_CUBLAS_*` definitions. Preprocessing checks `CUBLAS_VER_MAJOR`, `CUBLAS_VER_MINOR`, `CUBLAS_VER_PATCH`, and `CUBLAS_VER_BUILD` from the selected headers.
+
+Before GEMM, checked `cublasGetProperty` queries report the loaded library's `MAJOR_VERSION`, `MINOR_VERSION`, and `PATCH_LEVEL`, and require equality with the header triplet. The raw `cublasGetVersion` value is also printed, separately from the four header components. These APIs do not expose a loaded build number. Full binary identity requires resolved library paths, package identity, and file hashes in the Environment Manifest; do not append the header build number to the loaded triplet and call it observed.
+
+## Build And Run
+
+The CPU test needs no CUDA headers or GPU:
+
+```sh
+make host-test DIALECT=c++17
+```
+
+It checks literal GEMM results, alpha/beta, double accumulation under cancellation, all fixture values, tolerance boundaries, final-element corruption, nonfinite output, and invalid extents/counts. `host-reference: pass` establishes only the host contract.
+
+In the matching 11.8.0 development image, run the CUDA stages explicitly:
+
+```sh
+make preprocess DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+make compile DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+make link DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+make inspect DIALECT=c++17 EXPECTED_CUBLAS_VERSION=11.11.3.6
+```
+
+Alternatively, the wrapper runs clean, all four stages, and host-test, but never the CUDA binary:
+
+```sh
+bash scripts/compile-check.sh c++17 cuda-11-8-bundled-cublas-11-11-3-6 artifacts/ex18-11-8
+```
+
+Use the corresponding profile ID in each other lane. Link explicitly uses `-lcublas`. Inspection retains `readelf -d` and `ldd` reports, requires a cuBLAS shared-library dependency and resolution, and rejects missing libraries. Because EX18 defines no device kernel, inspection does not require an EX18-owned cubin or PTX. The compiler architecture flags do not establish the library's internal dispatch.
+
+Only after satisfying the runtime gate:
+
+```sh
+./build/ex18-cublas-gemm
+```
+
+The executable selects visible device 0 and reports header/loaded cuBLAS coordinates, device and driver/runtime versions, precision policy, and three correctness verdicts. This is a description of the reporting contract, not retained execution output.
+
+## Compatibility
+
+| Toolkit Lane | OS / architecture | Digest-pinned development image |
+| --- | --- | --- |
+| `cuda-11.8` | Ubuntu 22.04 x86-64 | `nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f` |
+| `cuda-12.9` | Ubuntu 24.04 x86-64 | `nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5` |
+| `cuda-13.3` | Ubuntu 24.04 x86-64 | `nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87` |
+
+All lanes use this one C++17 implementation. Native Linux is the only Supported Environment; runtime requires one selected CUDA GPU with compute capability 7.5 or newer. Matrix buffers reserve `4*(1024+1085+1155) = 13,056` device bytes and are reused. Library internal resources and default workspace are additional. Total problem memory must fit within the Baseline GPU Capability Tier's 8,000,000,000-byte gate, and allocation failure is fatal. The fixed matrix count is not a measured library footprint or memory-traffic result.
+
+## Evidence Boundary
+
+Compilation is empty, so no lane is **Compile-Checked**. Runtime is **Pending Hardware Verification**, with no recorded observations. No local CUDA build or GPU execution is claimed. CPU test success, build dry runs, source availability, owner API review, and pinned images do not upgrade either evidence axis. There are no timing, speedup, or library-winner claims.
+
+Future records must retain the source/profile, complete Environment Manifest, actual library identity, commands, exit statuses, raw output, and all correctness verdicts. LAB12 adds a measurement protocol; it does not turn this correctness executable into an existing benchmark result.
+
+## Expected Observations
+
+1. All three EX15-compatible fixtures should pass the finite full-output check against the independent double oracle, including the literal hand result and nonzero beta case.
+2. The row-major mapping should use swapped operands/dimensions, explicit FP32 pedantic computation, host scalars, and completion before CPU validation.
+3. The four header macros should match the selected component profile; the reported loaded major/minor/patch should match those headers before GEMM.
+
+These are the manifest's three acceptance directions, not observed build or runtime results.
+
+## Sources And Review
+
+- [cuBLAS reference archived with CUDA 11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html)
+- [cuBLAS reference archived with CUDA 12.9.2](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html)
+- [Current cuBLAS owner reference](https://docs.nvidia.com/cuda/cublas/index.html)
+- [CUDA Runtime stream management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__STREAM.html)
+- [CUDA 11.8.0 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)
+- [CUDA 12.9.2 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)
+- [CUDA 13.3.1 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json)
+
+Reviewed **2026-09-06**. The owner 13.3.1 cuBLAS archive URL returned 404 on that date. Its exact component pin therefore comes from the redistribution manifest; API review uses the current owner reference and available older archives. This gap remains distinct from a verified build. Manifest SHA-256 values are owner-declared acquisition coordinates, not hashes of locally downloaded SDKs. No owner sample, substantial prose, figure, table, or benchmark is copied.
