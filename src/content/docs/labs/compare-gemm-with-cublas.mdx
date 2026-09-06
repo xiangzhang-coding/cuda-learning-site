@@ -154,6 +154,13 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 使用[固定版本的 EX15 项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm)及其[同版本归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip)。EX18 使用自己的[源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm)与[同版本归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip)。保留两者解析后的提交号、获取 URL、文件哈希以及本地改动。分支名不能代替固定提交。
 
+ZIP 链接用于检查源码和构建独立示例。**以下 LAB12 命令要求使用固定提交的 Git 工作副本，不能直接用于 ZIP 解压目录或不相关的上层仓库。** 创建新的工作副本；此版本包含 EX18、比较程序，以及与 EX15 固定源码版本相同的构建输入：
+
+```bash
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git cuda-learning-site-lab12
+git -C cuda-learning-site-lab12 checkout --detach fb94c6c1fe972afeac9b5b30db995595c4dc5021
+```
+
 按以下顺序阅读 EX18 的 CPU 参考计算、GEMM 适配函数和资源生命周期：
 
 <CanonicalCode exampleId="EX18" range="cpu-reference" />
@@ -184,10 +191,12 @@ cuBLAS 按列主序（column-major）解释这些字节。适配函数不实际�
 
 本步骤选择 Toolkit **13.3.1**、C++17，以及独立编号的配套 cuBLAS **13.6.0.2**。示例声明的其他工具包通道（Toolkit Lane）不自动成为 LAB12 的测量结论。核对实际解析到的编译器、头文件、链接库和加载库是否来自所选安装；`nvidia-smi` 中的 CUDA 标签不是已安装 Toolkit 的版本。继续前先核实驱动兼容性。
 
-在公开源码根目录用 Bash 执行，第一条命令前先选择有权使用的物理 GPU 序号。每次使用新的运行目录，失败日志也要保留：
+在 Bash 中从该 `cuda-learning-site-lab12` 工作副本的根目录执行。最前面的检查会在记录来源之前拒绝错误目录或提交。执行前选择有权使用的物理 GPU 序号。每次使用新的运行目录，失败日志也要保留：
 
 ```bash
 set -euo pipefail
+test "$(git rev-parse --show-toplevel)" = "$(pwd -P)"
+test "$(git rev-parse HEAD)" = fb94c6c1fe972afeac9b5b30db995595c4dc5021
 export CUDA_VISIBLE_DEVICES="${LAB12_GPU_ORDINAL:?select one authorized GPU ordinal}"
 mkdir -p build
 run_dir=$(mktemp -d ./build/lab12.XXXXXX)

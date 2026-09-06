@@ -154,6 +154,13 @@ Complete exactly [Q13: GEMM Optimization Case Study](/en/correctness/gemm-optimi
 
 Use the [immutable EX15 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm) and its [matching archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip). EX18 has its own [source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm) and [matching archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip). Retain both resolved commits, acquisition URLs, file hashes, and any local diff. A branch name is not a source pin.
 
+The ZIP links support source inspection and the standalone examples. **The LAB12 commands below require a pinned Git checkout, not an extracted ZIP or an unrelated parent repository.** Create a fresh checkout; this revision contains EX18, the runner, and EX15 build inputs identical to its source pin:
+
+```bash
+git clone https://github.com/xiangzhang-coding/cuda-learning-site.git cuda-learning-site-lab12
+git -C cuda-learning-site-lab12 checkout --detach fb94c6c1fe972afeac9b5b30db995595c4dc5021
+```
+
 Read the EX18 oracle, GEMM adapter, and lifetime boundary in that order:
 
 <CanonicalCode exampleId="EX18" range="cpu-reference" />
@@ -184,10 +191,12 @@ Verify **each full output matrix independently** against double CPU accumulation
 
 This procedure selects Toolkit **13.3.1**, C++17, and its separately versioned cuBLAS component **13.6.0.2**. The examples' other Toolkit Lanes are not additional LAB12 measurement claims. Confirm the resolved compiler, headers, linked and loaded libraries against the selected installation; `nvidia-smi`'s CUDA label is not the installed Toolkit version. Check driver compatibility before proceeding.
 
-Run from the public source root in Bash. Choose your authorized physical GPU ordinal before the first command. Keep a fresh run directory and preserve failed logs too:
+Run from the root of that `cuda-learning-site-lab12` checkout in Bash. The first checks reject another directory or commit before collecting provenance. Choose your authorized physical GPU ordinal before the commands. Keep a fresh run directory and preserve failed logs too:
 
 ```bash
 set -euo pipefail
+test "$(git rev-parse --show-toplevel)" = "$(pwd -P)"
+test "$(git rev-parse HEAD)" = fb94c6c1fe972afeac9b5b30db995595c4dc5021
 export CUDA_VISIBLE_DEVICES="${LAB12_GPU_ORDINAL:?select one authorized GPU ordinal}"
 mkdir -p build
 run_dir=$(mktemp -d ./build/lab12.XXXXXX)

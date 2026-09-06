@@ -128,7 +128,7 @@ cuBLASLt 自 CUDA 10.1 提供面向 GEMM 的灵活接口。描述符（descripto
 | --- | --- | --- |
 | 库句柄 | `cublasLtCreate` | 库资源，不是流完成凭证 |
 | 运算描述 | `cublasLtMatmulDescCreate`，再 `cublasLtMatmulDescSetAttribute` | 创建时指定 `computeType,scaleType`；设置 `TRANSA`、`TRANSB`、`POINTER_MODE`、`EPILOGUE` 等 |
-| A/B/C/D 布局 | 各自 `cublasLtMatrixLayoutCreate`，再 `cublasLtMatrixLayoutSetAttribute` | 类型、未变换的行列数、主维度与 `CUBLASLT_MATRIX_LAYOUT_ORDER` |
+| A/B/C/D 布局 | 各自 `cublasLtMatrixLayoutCreate`，再 `cublasLtMatrixLayoutSetAttribute` | 类型、未变换的行列数、主维度（leading dimension）与 `CUBLASLT_MATRIX_LAYOUT_ORDER` |
 | 搜索偏好 | `cublasLtMatmulPreferenceCreate`，再 `cublasLtMatmulPreferenceSetAttribute` | 工作区预算、实际能保证的各矩阵指针对齐等 |
 
 `SetAttribute` 接收属性值所在缓冲区与其字节数，不是无类型的整数槽。枚举、`uint32_t` 对齐值、`uint64_t` 工作区预算和指针属性必须各按文档类型提供。设置偏置指针时传递的是**保存设备指针值的主机变量的地址**，不是让属性接口读取设备向量的头几个字节。设备向量仍由应用分配与保活。
@@ -232,7 +232,7 @@ Toolkit 11.8.0、12.9.2、13.3.1 的清单分别给出 `libcublas 11.11.3.6`、`
 
 ## 证据边界
 
-本页和练习均为静态 API 推导，没有规范 CUDA 代码导入，没有查询候选或观察运行。四个证据数组全部为空，不授予编译、运行、利用率、融合内核数量或加速比证据。原生 Linux 是唯一受支持环境；外部实现、编译和验证应由各自规范示例与实验承担，浏览器只呈现学习材料。
+本页和练习均为静态 API 推导，没有规范 CUDA 代码导入，没有查询候选或观察运行。四个证据数组全部为空，不授予编译、运行、利用率、融合内核数量或加速比证据。原生 Linux 是唯一受支持环境（Supported Environment）；外部实现、编译和验证应由各自规范示例与实验承担，浏览器只呈现学习材料。
 
 ## 检索检查
 
