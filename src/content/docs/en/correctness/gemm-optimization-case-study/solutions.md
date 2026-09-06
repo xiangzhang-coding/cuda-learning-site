@@ -96,7 +96,7 @@ Reject all four conclusions. A friendly occupancy label without compiled registe
 
 The source contains ordinary FP32 multiplication/addition, shared arrays, and block barriers; it has no Tensor Core, WMMA, MMA, or architecture-specific branch. Do not infer emitted instructions from a source-level multiply-accumulate panel. Each repaired stage record repeats `1024x1024x1024`, FP32 inputs/output/device accumulation, double CPU reference, exact compute capability, C restoration, three excluded warm-ups, checked completion, ten retained attempts with median/min/max, query-first profiler method, permission, complete Environment Manifest, EX15 tolerance result, and a named bounded interpretation. Source estimates, compiler resources, theoretical occupancy, achieved occupancy, queried path traffic, and unprofiled elapsed samples remain separate.
 
-L06 and LAB12 are unpublished. The educational kernel omits production-library contracts and cannot replace cuBLAS. No API or comparison is supplied to repair that claim.
+The educational kernel omits production-library contracts and cannot replace cuBLAS. [L06](/en/libraries/cublas-gemm/) and [LAB12](/en/labs/compare-gemm-with-cublas/) provide library-call contracts and a matched comparison protocol, but no measured result to repair that claim.
 
 **Review:** Pass. Unsupported universal, causal, architecture, and production statements are rejected; missing evidence remains expected and unrecorded rather than zero or guessed.
 
@@ -119,6 +119,6 @@ L06 and LAB12 are unpublished. The educational kernel omits production-library c
 - Changing precision, fast-math, target architecture, or compiler flags inside a tile comparison without starting a new edge.
 - Inferring Tensor Core or FMA/MMA instructions from source syntax or VIS12.
 - Retaining only a ratio or screenshot instead of raw attempts, query output, report, command, status, and hashes.
-- Publishing a cuBLAS API/result or LAB12 before L06 exists, or calling the educational kernel a production replacement.
+- Skipping the contracts and measurement requirements in L06/LAB12, or calling the educational kernel a production replacement.
 
 Reviewed on **2026-09-03**. Continue with [PB-R3-011](/en/practice/#pb-r3-011) and [PB-R3-012](/en/practice/#pb-r3-012).

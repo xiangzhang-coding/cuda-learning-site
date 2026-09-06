@@ -12,6 +12,11 @@
       "sourceCommit": "b848390aeb6b28065a3421ab4c8b82758c8b114c",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/b848390aeb6b28065a3421ab4c8b82758c8b114c/examples/ex17-cub-device-reduction-scan",
       "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/b848390aeb6b28065a3421ab4c8b82758c8b114c.zip"
+    },
+    "EX18": {
+      "sourceCommit": "fb94c6c1fe972afeac9b5b30db995595c4dc5021",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip"
     }
   }
 }

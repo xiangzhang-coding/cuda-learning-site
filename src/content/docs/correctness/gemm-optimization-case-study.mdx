@@ -261,7 +261,7 @@ VIS12 不执行 EX15、不查询 compiler/GPU，也不建模 register allocation
 
 EX15-shaped educational kernel 用于暴露 indexing、reuse、barrier、precision 与 evidence design，不是 production replacement。它没有覆盖 production GEMM choice 所需的 layout、transpose、precision、algorithm selection、workspace、stream、determinism、heuristic、epilogue 或 maintenance contracts。
 
-L06 尚未发布，因此 future cuBLAS contract 不可用。LAB12 同时依赖 Q13 与 L06，本 ticket 不发布 LAB12。Q13 不发明 cuBLAS API、comparison、result、Tensor Core result 或 production recommendation。未来 library comparison 必须重新建立 matched shapes、semantics、precision、correctness、hardware、toolchain 与 measurement custody，不能把 educational winner 当作 production baseline。
+[L06：把矩阵乘法正确交给 cuBLAS](/libraries/cublas-gemm/)补齐库调用合同。[LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)依赖 Q13 与 L06，并重新建立匹配的形状、语义、精度、正确性、硬件、工具链与测量记录。Q13 不提供实测 cuBLAS 对比、Tensor Core 结果或生产选型结论；教学内核的胜出条件不能直接成为生产基线。
 
 ## 证据边界
 

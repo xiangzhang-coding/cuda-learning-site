@@ -173,7 +173,9 @@ EX15 maintains one canonical implementation. The pure-host `cpu-reference` prece
 
 ## Production boundary
 
-EX15 is a correctness and tiling mental model, not a production replacement. Later L06, L07, and L09 own exact-version cuBLAS, cuBLASLt, and CUTLASS layout, precision, workspace, heuristic, and architecture contracts. [Q13](/en/correctness/gemm-optimization-case-study/) is now published, but LAB12 still depends on unpublished L06, so neither A08 nor the current ticket publishes LAB12.
+EX15 teaches correctness and tiling, not a production-library replacement. Continue with the published [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/) and [L07: cuBLASLt Matmul](/en/libraries/cublaslt-matmul/) for their version-specific library contracts; L09's CUTLASS material remains unpublished. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) is also published, with exactly [Q13](/en/correctness/gemm-optimization-case-study/) and L06 as direct prerequisites, comparing EX15 with [EX18](/en/examples/cublas-gemm/) outside the site. These onward links add no A08 prerequisite. EX18/LAB12 retain empty compilation evidence and recorded observations and Pending Hardware Verification runtime, with no production-replacement or performance-winner conclusion.
+
+**Onward resource links updated: 2026-09-06.** Only publication status and navigation changed; A08's API facts, technical sources, and source access dates remain unchanged.
 
 ## Evidence boundary
 

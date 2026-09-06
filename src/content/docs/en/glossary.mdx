@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred eighty-six published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred eighty-eight published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-05'
+factCheckDate: '2026-09-06'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -14,6 +14,8 @@ structure:
   - entry-term-184
   - entry-term-185
   - entry-term-186
+  - entry-term-187
+  - entry-term-188
   - maintenance
 head:
   - tag: meta
@@ -23,7 +25,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-05'
+      content: '2026-09-06'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -31,7 +33,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1726,6 +1728,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [M05](/en/memory/synchronization-scopes/), [M13](/en/memory/asynchronous-copy-pipelines/), [L05](/en/libraries/libcu-plus-plus-synchronization/), and [PB-R4-006](/en/practice/#pb-r4-006).
 - **Version note:** Reviewed 2026-09-05 against selected CCCL/libcu++ v3.4.2 in [SRC-CUDA-065](/en/sources-and-versions/#src-cuda-065). `arrive_and_drop` reduces both the current countdown and future expected count; it is not an omitted call. [SRC-CUDA-066](/en/sources-and-versions/#src-cuda-066) records pending P2588R3 relaxed-completion work rather than assuming the live standard draft applies. Owner test inspection supplies no observed barrier behavior.
 
+<span id="term-187" class="resource-target" aria-hidden="true"></span>
+
+### Leading Dimension · 主维度
+
+- **Definition:** Leading dimension (`ld`) is the element spacing between starts of adjacent physical columns or rows in an ordinary dense matrix. Zero-based coordinate `(i,j)` has element offset `i+j*ld` in column-major storage and `i*ld+j` in row-major storage. Spacing may include padding; a submatrix usually changes the starting pointer while retaining the parent's physical spacing.
+- **Avoid:** Byte count; total matrix size; always the logical row count; a promise that transpose flags rearrange storage.
+- **Related resources:** [L06](/en/libraries/cublas-gemm/), [L07](/en/libraries/cublaslt-matmul/), [EX18](/en/examples/cublas-gemm/), [LAB12](/en/labs/compare-gemm-with-cublas/), and [PB-R4-007](/en/practice/#pb-r4-007).
+- **Version note:** Reviewed 2026-09-06 against the Toolkit 12.9.2 archive in [SRC-CUDA-067](/en/sources-and-versions/#src-cuda-067). Ordinary positive-dimensional column-major layouts require `ld` to cover stored, untransposed rows; row-major layouts require stored columns. Allocation bounds and integer overflow need separate proofs. This definition does not generalize to cuBLASLt's specialized packed formats. EX18/LAB12's fixed contiguous row-major mapping does not establish coverage for every padded layout, submatrix, or transpose.
+
+<span id="term-188" class="resource-target" aria-hidden="true"></span>
+
+### Epilogue · 收尾操作
+
+- **Definition:** An epilogue applies contracted output processing, such as bias or activation, after matrix multiplication and accumulation. Ordinary cuBLASLt bias length matches the described D rows and broadcasts across columns; `RELU_BIAS` adds bias before applying ReLU. It is part of the complete numerical problem and cannot silently disappear in a fallback.
+- **Avoid:** Fusion for arbitrary shapes; exactly one kernel per API call; automatic framework feature-axis bias; speedup without measurement.
+- **Related resources:** [L06](/en/libraries/cublas-gemm/), [L07](/en/libraries/cublaslt-matmul/), [EX18](/en/examples/cublas-gemm/), [LAB12](/en/labs/compare-gemm-with-cublas/), and [PB-R4-008](/en/practice/#pb-r4-008).
+- **Version note:** Reviewed 2026-09-06 in [SRC-CUDA-068](/en/sources-and-versions/#src-cuda-068): 12.9.2 Matmul footnote 8 excludes ReLU, dReLU, GELU, dGELU, and Bias epilogues with row-major D. Current 13.3 wording differs and cannot authorize the older contract. Types, layouts, bias orientation, and candidate support still require individual checks. EX18/LAB12 supply only a traditional FP32 baseline, not Lt epilogues. This entry records no fusion, kernel count, traffic, or speed observation.
+
 ## Maintenance rule
 
-TERM-001 through TERM-184 retain their item-level review records. New TERM-185/186 and the complete 186-term Publication Pair, metadata projections, direct links, and static definitions were reviewed with the Chinese counterpart on **2026-09-05**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and composition are original project prose that cites and paraphrases public owner documentation without copying source prose, tables, figures, examples, artifacts, diagnostics, performance results, or private material. The new entries distinguish memory order from scope and barrier phases from pipeline stages. No CUDA or libcu++ execution occurred, and no local API availability, output, synchronization observation, traffic, timing, speedup, or Evidence Status is claimed. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-186 retain their item-level review dates. New TERM-187/188 and the complete 188-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-06**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish physical stride from logical shape and epilogue semantics from measured fusion benefits; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.

@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(498);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(249);
+  expect(routes).toHaveLength(514);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(257);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -107,6 +107,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/libraries/cub-warp-block-primitives/', en: '/en/libraries/cub-warp-block-primitives/' },
     { zh: '/libraries/cub-warp-block-primitives/exercises/', en: '/en/libraries/cub-warp-block-primitives/exercises/' },
     { zh: '/libraries/cub-warp-block-primitives/solutions/', en: '/en/libraries/cub-warp-block-primitives/solutions/' },
+    { zh: '/libraries/cublas-gemm/', en: '/en/libraries/cublas-gemm/' },
+    { zh: '/libraries/cublas-gemm/exercises/', en: '/en/libraries/cublas-gemm/exercises/' },
+    { zh: '/libraries/cublas-gemm/solutions/', en: '/en/libraries/cublas-gemm/solutions/' },
+    { zh: '/libraries/cublaslt-matmul/', en: '/en/libraries/cublaslt-matmul/' },
+    { zh: '/libraries/cublaslt-matmul/exercises/', en: '/en/libraries/cublaslt-matmul/exercises/' },
+    { zh: '/libraries/cublaslt-matmul/solutions/', en: '/en/libraries/cublaslt-matmul/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -160,6 +166,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/examples/privatized-histogram/', en: '/en/examples/privatized-histogram/' },
     { zh: '/examples/sanitizer-defect-suite/', en: '/en/examples/sanitizer-defect-suite/' },
     { zh: '/examples/cub-device-reduction-scan/', en: '/en/examples/cub-device-reduction-scan/' },
+    { zh: '/examples/cublas-gemm/', en: '/en/examples/cublas-gemm/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
     { zh: '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
@@ -171,6 +178,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/labs/build-original-roofline/', en: '/en/labs/build-original-roofline/' },
     { zh: '/labs/optimize-canonical-transpose/', en: '/en/labs/optimize-canonical-transpose/' },
     { zh: '/labs/compare-custom-reduction-with-cub/', en: '/en/labs/compare-custom-reduction-with-cub/' },
+    { zh: '/labs/compare-gemm-with-cublas/', en: '/en/labs/compare-gemm-with-cublas/' },
     { zh: '/visuals/', en: '/en/visuals/' },
     { zh: '/visuals/kernel-journey/', en: '/en/visuals/kernel-journey/' },
     { zh: '/visuals/indexing/', en: '/en/visuals/indexing/' },
@@ -488,6 +496,18 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/libraries/cub-warp-block-primitives/exercises/',
     '/libraries/cub-warp-block-primitives/solutions/',
     '/en/libraries/cub-warp-block-primitives/solutions/',
+    '/libraries/cublas-gemm/',
+    '/en/libraries/cublas-gemm/',
+    '/libraries/cublas-gemm/exercises/',
+    '/en/libraries/cublas-gemm/exercises/',
+    '/libraries/cublas-gemm/solutions/',
+    '/en/libraries/cublas-gemm/solutions/',
+    '/libraries/cublaslt-matmul/',
+    '/en/libraries/cublaslt-matmul/',
+    '/libraries/cublaslt-matmul/exercises/',
+    '/en/libraries/cublaslt-matmul/exercises/',
+    '/libraries/cublaslt-matmul/solutions/',
+    '/en/libraries/cublaslt-matmul/solutions/',
     '/algorithms/elementwise-map/',
     '/en/algorithms/elementwise-map/',
     '/algorithms/elementwise-map/exercises/',
@@ -592,6 +612,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/examples/sanitizer-defect-suite/',
     '/examples/cub-device-reduction-scan/',
     '/en/examples/cub-device-reduction-scan/',
+    '/examples/cublas-gemm/',
+    '/en/examples/cublas-gemm/',
     '/labs/',
     '/en/labs/',
     '/labs/vector-addition/',
@@ -612,6 +634,8 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/labs/optimize-canonical-transpose/',
     '/labs/compare-custom-reduction-with-cub/',
     '/en/labs/compare-custom-reduction-with-cub/',
+    '/labs/compare-gemm-with-cublas/',
+    '/en/labs/compare-gemm-with-cublas/',
     '/visuals/',
     '/en/visuals/',
     '/visuals/kernel-journey/',

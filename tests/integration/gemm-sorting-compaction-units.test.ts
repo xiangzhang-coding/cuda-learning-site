@@ -92,7 +92,7 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
       expect([...page.matchAll(/<CanonicalCode exampleId="EX15" range="([^"]+)" \/>/g)]
         .map((match) => match[1])).toEqual(['cpu-reference', 'tiled-gemm']);
       expect(page).toContain('/visuals/gemm-tiling-hierarchy/');
-      expect(page).toMatch(/not.*production replacement|不是.*production/i);
+      expect(page).toMatch(/not.*production(?:-library)? replacement|不是生产库的替代品/i);
     }
   });
 
@@ -114,7 +114,7 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
     }
   });
 
-  it('publishes Q13 while keeping LAB12 unpublished', async () => {
+  it('connects the educational GEMM to Q13 and the library comparison after L06', async () => {
     const [practice, glossary, sources, sidebar] = await Promise.all([
       readFile(path.join(docsRoot, 'en/practice.mdx'), 'utf8'),
       readFile(path.join(docsRoot, 'en/glossary.mdx'), 'utf8'),
@@ -124,8 +124,8 @@ describe('A08-A09 GEMM, sorting, selection, and compaction publication', () => {
     for (const id of ['PB-R2-020', 'PB-R2-021']) expect(practice).toContain(`## ${id}:`);
     for (let id = 147; id <= 151; id += 1) expect(glossary).toContain(`id="term-${id}"`);
     for (const id of ['044', '045']) expect(sources).toContain(`id="src-cuda-${id}"`);
-    for (const id of ['A08', 'A09', 'Q13', 'EX15', 'VIS12']) expect(PUBLISHED_DESTINATIONS).toHaveProperty(id);
-    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB12');
-    expect(sidebar).not.toContain('LAB12');
+    for (const id of ['A08', 'A09', 'Q13', 'L06', 'L07', 'EX15', 'EX18', 'LAB12', 'VIS12']) expect(PUBLISHED_DESTINATIONS).toHaveProperty(id);
+    expect(PUBLISHED_DESTINATIONS.LAB12.prerequisites).toEqual(['Q13', 'L06']);
+    expect(sidebar).toContain("{ slug: 'labs/compare-gemm-with-cublas' }");
   });
 });

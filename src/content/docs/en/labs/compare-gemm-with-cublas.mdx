@@ -1,0 +1,334 @@
+---
+title: 'LAB12: Compare an Educational GEMM with cuBLAS'
+description: 'Run EX15 and EX18 on identical FP32 matrices, verify every operation, retain CUDA-event samples, and make a conditional maintenance decision without inventing a speedup.'
+pairId: lab12
+counterpart: /labs/compare-gemm-with-cublas/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure:
+  - contract
+  - prerequisites
+  - canonical
+  - workload
+  - prepare
+  - measure
+  - manifest
+  - profiler
+  - maintenance
+  - observations
+  - acceptance
+  - cleanup
+  - sources
+resourceKind: lab
+unitId: LAB12
+prerequisites:
+  - Q13
+  - L06
+relatedUnits:
+  - L07
+  - EX15
+  - EX18
+  - VIS12
+exampleIds:
+  - EX15
+  - EX18
+canonicalExample: EX18
+canonicalRanges:
+  - cpu-reference
+  - gemm-call
+  - stream-lifecycle
+hardwareGate: 'Native Linux; one selected CUDA GPU with CC >= 7.5; problems fit within 8 GB; C++17; Toolkit 13.3.1 with its cuBLAS component; optional profiling requires approved counter access; precision-specific extensions have separate gates'
+estimatedMinutes: 90
+difficulty: advanced
+toolkitLanes:
+  - cuda-13.3
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Execute a host C++ compiler, NVCC, canonical examples, and the LAB12 runner on one selected CUDA GPU; read version and file-hash information'
+  - 'Create and remove learner-owned build and log files; publish only sanitized derivatives'
+  - 'Optional profiler counters require administrator-approved non-admin access; no sudo, policy change, or bypass'
+evidence:
+  compilation: []
+  runtime:
+    - Pending Hardware Verification
+  expectedObservations:
+    - 'Both candidates should pass the independent double oracle on the same three fixtures, with non-finite rejection and atol=1e-4, rtol=2e-5.'
+    - 'Resetting initial C before every operation should preserve the nonzero-beta contract; warm-ups should be excluded and every sample checked.'
+    - 'Ten unprofiled event samples per fixture and candidate should support only a matched min/median/max comparison, not a general production winner.'
+  recordedObservations: []
+sources:
+  - title: 'NVIDIA cuBLAS API Reference'
+    url: 'https://docs.nvidia.com/cuda/cublas/index.html'
+    version: 'cuBLAS documentation v13.3'
+    platform: 'Native Linux; column-major GemmEx, pedantic FP32, host scalars, stream and workspace contracts'
+    accessDate: '2026-09-06'
+  - title: 'CUDA Toolkit 13.3 Update 1 Release Notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3.1; cuBLAS 13.6.0.2'
+    platform: 'Native Linux; separately versioned components and scoped cuBLAS known issues'
+    accessDate: '2026-09-06'
+  - title: 'CUDA Runtime API Event Management'
+    url: 'https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html'
+    version: 'CUDA Runtime API v13.3.1'
+    platform: 'Event recording, completion, elapsed milliseconds, and timing resolution'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: lab12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/labs/compare-gemm-with-cublas/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'contract,prerequisites,canonical,workload,prepare,measure,manifest,profiler,maintenance,observations,acceptance,cleanup,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: lab }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: LAB12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q13,L06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L07,EX15,EX18,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:example-ids', content: 'EX15,EX18' }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-example', content: EX18 }
+  - tag: meta
+    attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,gemm-call,stream-lifecycle' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: 'Native Linux; one CC 7.5+ GPU; problems fit 8 GB; C++17; Toolkit 13.3.1; optional approved counters; precision extensions separate' }
+  - tag: meta
+    attrs: { name: 'cuda:estimated-minutes', content: '90' }
+  - tag: meta
+    attrs: { name: 'cuda:difficulty', content: advanced }
+  - tag: meta
+    attrs: { name: 'cuda:toolkit-lanes', content: cuda-13.3 }
+  - tag: meta
+    attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' }
+  - tag: meta
+    attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' }
+  - tag: meta
+    attrs: { name: 'cuda:gpu-count', content: '1' }
+  - tag: meta
+    attrs: { name: 'cuda:permissions', content: 'one CUDA GPU; compiler/example/runner/version/hash access; learner-owned files; optional approved counters; no sudo or bypass' }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '3' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,13.3.1,13.6.0.2' }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/labs/compare-gemm-with-cublas/" lang="zh-CN">阅读中文对应页</a>
+
+This Lab compares the educational EX15 kernel with the EX18 cuBLAS reference **outside the website**. It supplies an executable measurement procedure, not a benchmark result. Compilation evidence is empty; runtime remains **Pending Hardware Verification**; recorded observations are empty.
+
+## Lab contract
+
+Allow **60–90 minutes** with the toolchain already installed: 15 minutes for source and environment checks, 20 for correctness, 20 for measurement, and 15–30 for interpretation. Native Linux is the only Supported Environment. Use one selected GPU with compute capability (CC) at least 7.5 and a problem-memory budget of 8 GB. Tensor Cores are not required.
+
+The required comparison is row-major FP32 `C = alpha*A*B + beta*C`. It covers three small fixtures, not the full production GEMM workload space. The largest fixture needs only `4*(33*31 + 31*35 + 33*35) = 13,052` bytes for device A/B/C. This source-derived capacity excludes the CUDA context and library-managed workspace; record those separately and stop on insufficient memory. The problem fits within 8 GB without claiming a measured process footprint.
+
+## Prerequisites and related resources
+
+Complete exactly [Q13: GEMM Optimization Case Study](/en/correctness/gemm-optimization-case-study/) and [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/), in order. You should be able to explain a partial tile, the double oracle, and why a faster value is not yet an optimization conclusion.
+
+[L07](/en/libraries/cublaslt-matmul/), [EX15](/en/examples/tiled-gemm/), [EX18](/en/examples/cublas-gemm/), and [VIS12](/en/visuals/gemm-tiling-hierarchy/) are related resources, not additional prerequisites. Use VIS12 to trace ownership and reuse in one K tile. It does not execute GEMM, expose cuBLAS internals, or supply timing or Tensor Core evidence.
+
+## Freeze the canonical sources
+
+Use the [immutable EX15 project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70/examples/ex15-tiled-gemm) and its [matching archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/d03ff3b27294f77b5f5a0a3b594bebf20a89cf70.zip). EX18 has its own [source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/fb94c6c1fe972afeac9b5b30db995595c4dc5021/examples/ex18-cublas-gemm) and [matching archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/fb94c6c1fe972afeac9b5b30db995595c4dc5021.zip). Retain both resolved commits, acquisition URLs, file hashes, and any local diff. A branch name is not a source pin.
+
+Read the EX18 oracle, GEMM adapter, and lifetime boundary in that order:
+
+<CanonicalCode exampleId="EX18" range="cpu-reference" />
+
+<CanonicalCode exampleId="EX18" range="gemm-call" />
+
+<CanonicalCode exampleId="EX18" range="stream-lifecycle" />
+
+The original Apache-2.0 solution runner [lab12-gemm-comparison.cu](/assets/exercise-solutions/lab12-gemm-comparison.cu), at `public/assets/exercise-solutions/lab12-gemm-comparison.cu`, includes the canonical translation units with renamed entry points. It launches the included EX15 kernel on an explicit stream and reuses EX18's resource lifecycle. The build extracts EX18's marked `gemm-call` range into a generated include inside the runner's timed branch, because that canonical call lives inside EX18's entry point. It contains no cloned GEMM kernel, maintained copy of the API call, or copied NVIDIA implementation. This instrumentation asset is not another Runnable Example. Hash it together with both included source trees and the generated range before building; downloads alone do not include those trees.
+
+## Match the entire numerical problem
+
+Shape order is **M,K,N**: `A[M,K] * B[K,N] -> C[M,N]`, with contiguous row-major storage and no transpose operation in the mathematical problem.
+
+| Fixture | M,K,N | alpha | beta | Purpose |
+| --- | --- | --- | --- | --- |
+| `2x3x2-hand` | `2,3,2` | `1` | `0` | Hand-check indexing and operand order |
+| `33x31x35-partial` | `33,31,35` | `0.75` | `0.25` | Partial M/N/K tiles and initial C |
+| `32x32x32-aligned` | `32,32,32` | `1` | `0` | Aligned control, not a preferred workload |
+
+Use the EX15 generator, not a new random seed. The hand case has A and B flattened as `[1,2,3,4,5,6]` and initial C all zero. Its mathematical result is `[22,28,49,64]`, **a worked oracle value, not recorded GPU output**. The other fixtures use `A[i]=(int(i%7)-3)/8.0F`, `B[i]=(int(i%5)-2)/7.0F`, and initial `C[i]=(int(i%3)-1)/5.0F`. Shape equality alone is insufficient: compare all A/B/initial-C bytes and scalars with EX18 before executing. Both candidates then consume the same device A/B and receive the same initial C before each operation.
+
+cuBLAS interprets those bytes column-major. The adapter computes `C^T = alpha*B^T*A^T + beta*C^T` without materializing transposes: `cublasGemmEx` uses `(transa,transb)=(CUBLAS_OP_N,CUBLAS_OP_N)`, dimensions `(N,M,K)`, first operand `(B,lda=N)`, second `(A,ldb=K)`, and `(C,ldc=N)`. Keep A/B/C `CUDA_R_32F`, compute type `CUBLAS_COMPUTE_32F_PEDANTIC`, handle math mode `CUBLAS_DEFAULT_MATH`, algorithm `CUBLAS_GEMM_DEFAULT`, and host-resident FP32 alpha/beta in `CUBLAS_POINTER_MODE_HOST`. Default math mode alone does not freeze the compute precision; the explicit pedantic compute type matters.
+
+Verify **each full output matrix independently** against double CPU accumulation using `abs(actual-reference) <= 1e-4 + 2e-5*abs(reference)`. Reject non-finite input, reference, or output. A cross-candidate match cannot replace the oracle; a tolerance pass does not promise bitwise identity or reproducibility across library versions. Restore initial C even during warm-up. With nonzero beta, feeding a previous result back as C silently changes the problem.
+
+## Prepare and build
+
+This procedure selects Toolkit **13.3.1**, C++17, and its separately versioned cuBLAS component **13.6.0.2**. The examples' other Toolkit Lanes are not additional LAB12 measurement claims. Confirm the resolved compiler, headers, linked and loaded libraries against the selected installation; `nvidia-smi`'s CUDA label is not the installed Toolkit version. Check driver compatibility before proceeding.
+
+Run from the public source root in Bash. Choose your authorized physical GPU ordinal before the first command. Keep a fresh run directory and preserve failed logs too:
+
+```bash
+set -euo pipefail
+export CUDA_VISIBLE_DEVICES="${LAB12_GPU_ORDINAL:?select one authorized GPU ordinal}"
+mkdir -p build
+run_dir=$(mktemp -d ./build/lab12.XXXXXX)
+nvidia-smi > "$run_dir/gpu-before.txt"
+nvcc --version > "$run_dir/nvcc.txt"
+c++ --version > "$run_dir/host-compiler.txt"
+git rev-parse HEAD > "$run_dir/site-commit.txt"
+git diff -- examples/ex15-tiled-gemm examples/ex18-cublas-gemm \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu > "$run_dir/source.diff"
+sha256sum examples/ex15-tiled-gemm/{src/*.cu,include/*.hpp} \
+  examples/ex18-cublas-gemm/{src/*.cu,include/*.hpp} \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu > "$run_dir/sources.sha256"
+make -C examples/ex15-tiled-gemm host-test all 2>&1 | tee "$run_dir/ex15-build.txt"
+make -C examples/ex18-cublas-gemm host-test all EXPECTED_CUBLAS_VERSION=13.6.0.2 \
+  2>&1 | tee "$run_dir/ex18-build.txt"
+sed -n '/\[ex18-gemm-call-start\]/,/\[ex18-gemm-call-end\]/p' \
+  examples/ex18-cublas-gemm/src/cublas_gemm.cu > "$run_dir/lab12-ex18-gemm-call.inc"
+test -s "$run_dir/lab12-ex18-gemm-call.inc"
+sha256sum "$run_dir/lab12-ex18-gemm-call.inc" > "$run_dir/generated-range.sha256"
+nvcc --std=c++17 \
+  --generate-code=arch=compute_75,code=sm_75 \
+  --generate-code=arch=compute_75,code=compute_75 \
+  -DEX18_EXPECTED_CUBLAS_MAJOR=13 -DEX18_EXPECTED_CUBLAS_MINOR=6 \
+  -DEX18_EXPECTED_CUBLAS_PATCH=0 -DEX18_EXPECTED_CUBLAS_BUILD=2 \
+  -I . -I "$run_dir" -I examples/ex15-tiled-gemm/include -I examples/ex18-cublas-gemm/include \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu \
+  -lcublas -o "$run_dir/lab12-gemm-comparison" 2>&1 | tee "$run_dir/runner-build.txt"
+sha256sum "$run_dir/lab12-gemm-comparison" > "$run_dir/binary.sha256"
+```
+
+Do not add `--use_fast_math`, change contraction flags for just one candidate, or silently switch precision to obtain a pass. Retain the expanded command, include search/trace, actual `cublas_v2.h` and `cublas_api.h` paths and hashes, link resolution, and loaded library paths/hashes. The runner prints CUDA runtime/driver API versions, cuBLAS header macros and loaded-library version queries, but these probes do not replace package/build provenance or prove that an unexpected mixture is compatible.
+
+## Measure and verify every operation
+
+The standalone examples print correctness, not timing. Do not time those processes with `time` and compare the result to events. First run their canonical executables as directed on EX15/EX18, then use the runner:
+
+```bash
+date -u +%FT%TZ > "$run_dir/start-utc.txt"
+set +e
+"$run_dir/lab12-gemm-comparison" > "$run_dir/samples.txt" 2> "$run_dir/errors.txt"
+status=$?
+set -e
+printf '%s\n' "$status" > "$run_dir/exit-status.txt"
+date -u +%FT%TZ > "$run_dir/end-utc.txt"
+nvidia-smi > "$run_dir/gpu-after.txt"
+sha256sum "$run_dir"/*.txt > "$run_dir/logs.sha256"
+test "$status" -eq 0
+```
+
+For each fixture the runner preallocates A/B/C, creates one explicit `cudaStreamNonBlocking` stream, and binds one cuBLAS handle to it before acquisition. It runs **three excluded warm-up pairs**, then **ten measured pairs**: odd measured pairs EX15 then EX18, even pairs EX18 then EX15. It completes and verifies every operation, including warm-ups. A/B are uploaded once per fixture; C is reset before every candidate.
+
+| Boundary | Required sequence |
+| --- | --- |
+| Outside timing | Copy original C to the existing device allocation on the selected stream; check `cudaStreamSynchronize` before starting |
+| Event interval | Record start on that stream; launch one EX15 GEMM or call one EX18 GEMM adapter; check immediate status; record stop on the same stream |
+| Completion | Check `cudaEventSynchronize(stop)`, then `cudaEventElapsedTime`; event creation uses timing-enabled events |
+| Outside timing | Copy all C back on the same stream, check completion, run the double oracle comparator, retain the candidate's result status |
+
+The runner emits each raw sample in **milliseconds**, preserving fixture, candidate, pair and order. Summaries use count=10, minimum, median (mean of the sorted fifth and sixth values), and maximum, separately for each fixture/candidate. Warm-up lines carry no elapsed value. A failed API, completion, cleanup, or numerical check makes the run nonzero; retain the failed run and do not use partial summaries. Start a new run after correction, never delete a slow sample or combine runs.
+
+These are **unprofiled GPU event intervals**, not CPU call latency, process wall time, transfer-inclusive latency, or a sum of individually reported kernel durations. cuBLAS may dispatch multiple kernels. Host submission gaps and competing GPU work can affect the interval. The owner API describes roughly 0.5-microsecond event resolution, so these tiny shapes may not resolve a meaningful difference. Keep zeros if actually observed, but do not divide by zero or claim a winner from resolution-limited data. This runner reports no setup-inclusive family: handle creation, allocation, H2D/reset, D2H, verification, and teardown are excluded. Measuring those later requires a separate, identically bounded host-clock experiment for both candidates.
+
+## Fill the Environment Manifest
+
+Create one Environment Manifest per run before interpreting results. Every observation cell below starts **unfilled**. Retain original records privately; publish only sanitized derivatives with provenance, never host identities, private absolute paths, credentials, or GPU UUIDs.
+
+| Area | Required record | Initial value |
+| --- | --- | --- |
+| Identity | Run ID, observer, UTC start/end, source-access dates | `unfilled` |
+| GPU | Exact model, queried CC, physical selection, visible/used GPU count, available/total memory; used count=1 | `unfilled` |
+| Driver and OS | Loaded driver, driver API version, compatibility decision, Native Linux distribution/kernel/architecture, container or VM image if applicable | `unfilled` |
+| Toolchain | Exact Toolkit, runtime, NVCC and host compiler versions, C++ dialect, expanded build flags and commands, exit status and logs | `unfilled` |
+| cuBLAS | Acquisition/package/build version; resolved header paths and hashes; `CUBLAS_VER_MAJOR/MINOR/PATCH/BUILD`; link-time library identity; loaded-library `cublasGetVersion` and `cublasGetProperty` values, paths and hashes | `unfilled` |
+| Source provenance | EX15/EX18 commits, URLs, actual source paths/hashes, clean/diff state; runner revision/hash, generated GEMM range/hash; executed binary path/hash | `unfilled` |
+| Numerical problem | M,K,N, complete A/B/initial-C identity, generator revision, alpha/beta, row-major leading dimensions, input/output/compute types, math mode, algorithm, scalar mode, oracle and tolerances | `unfilled` |
+| Stream and workspace | Selected device, nonblocking stream and handle ownership, synchronization boundaries, library-managed workspace policy, user workspace absent, effective `CUBLAS_WORKSPACE_CONFIG` and any cuBLAS/CUDA override variables | `unfilled` |
+| Memory | A/B/C bytes, actual free memory before/after setup, context/library overhead separately; unknown workspace capacity is not zero or traffic | `unfilled` |
+| Operating conditions | Clock and power policy/limits, temperature/throttling before/after, concurrent CPU/GPU load, MIG/MPS state, module loading policy | `unfilled` |
+| Permissions | Device and file access; optional counter authorization/query result, or profiling not attempted; no privilege bypass | `unfilled` |
+| Acquisition | Warm-up counts/statuses, pair order, event boundaries and unit, every raw sample, every correctness result, complete output or diagnostic custody, min/median/max and rejected-run reason | `unfilled` |
+| Optional profile | Exact tool/CUPTI versions, owner manual, metric query/definitions/units, logical-call to launch mapping, replay/filter/cache/clock policy, original report and derivative hashes | `unfilled` |
+| Conclusion | Scope, unresolved alternatives, maintenance owner, evidence links, review date, sanitized-to-original hash mapping | `unfilled` |
+
+## Optional profiling and precision extensions
+
+Profiling is **not required** to finish the 60–90-minute lab. If timing leaves a mechanism question, follow [Q13's profiling boundary](/en/correctness/gemm-optimization-case-study/) and the matching owner manual in a **separate run**. Query available fields on the actual GPU, obtain authorized counter access, discover actual cuBLAS launches, and preserve the original report plus hashes. Never assume one library call is one kernel or invent a cuBLAS kernel name, occupancy, traffic metric, or Tensor Core result. Profiler durations cannot replace the raw unprofiled event samples. A denied counter is a profiling blocker, not zero; do not use `sudo` or change security policy.
+
+TF32, FP16, BF16, FP8, FP4, emulation, Tensor Core paths, cuBLASLt heuristics, workspace tuning, fusion, and larger shapes are **separate experiments**. Each requires its own hardware/version gate, fallback, numerical contract and matched baseline. The CC 7.5 FP32 gate does not authorize them. L07 is a follow-on for library control, not permission to silently substitute another API here.
+
+## Make a conditional maintenance decision
+
+| Question | Educational EX15 responsibility | EX18/cuBLAS responsibility |
+| --- | --- | --- |
+| Who owns correctness? | Indexing, tails, barriers, accumulation and epilogue, plus deployment tests | Layout/leading dimensions, precision, scalar/handle/stream lifetime, errors, and the same application oracle tests |
+| Who owns upgrades? | Kernel, compiler and architecture regression review | Integration plus exact header/library pins, release-note review and retesting; NVIDIA owns library implementation |
+| Who handles incidents? | Source-level diagnosis, tuning and fallback ownership | Reproduce with complete manifest, separate adapter from library issues, upstream escalation and fallback ownership |
+| When is extra code justified? | A measured application need that the library contract cannot satisfy, with a funded test/maintenance plan | A matching library contract and acceptable integration cost, not merely a recognizable library name |
+
+Record both candidates' actual ownership costs; the table supplies questions, not scores. If both pass and a resolved timing difference repeats in the declared environment, conclude only that one is faster **for those fixtures under this event boundary**. If results overlap or are resolution-limited, report no resolved winner. Even a local custom-kernel win does not justify replacing a production library, and a cuBLAS win does not make layout, precision or upgrade tests optional.
+
+## Expected observations and empty records
+
+Expected only: both candidates should pass the oracle; resetting C should preserve the partial fixture's beta term; different shapes may expose different overhead/reuse balances. None of these expectations supplies a measured value or predicted winner.
+
+| Record | Current value |
+| --- | --- |
+| GPU outputs and per-operation correctness observations | `[]` |
+| Warm-ups, raw event samples and summaries | `[]` |
+| Captured profiler reports and kernel/traffic observations | `[]` |
+| Measured maintenance assessment, speedup and winner | `[]` |
+
+No CUDA build or execution evidence is published for this Lab. A CPU output check, successful web build, or browser test cannot make it Compile-Checked or Runtime-Verified. A reviewed learner report may supply Community-Observed evidence; only a qualifying Reference Environment can establish Runtime-Verified status.
+
+## Acceptance criteria and blockers
+
+1. Explain the `(N,M,K; B,N; A,K; C,N)` operand mapping and preserve all three fixtures, including initial C and per-fixture alpha/beta.
+2. Retain successful independent oracle checks for both candidates during warm-up and after every timed operation, with non-finite rejection and unchanged tolerances.
+3. Submit the complete manifest, source/build/library identities, three excluded warm-up pairs and ten alternating measured pairs per fixture, all raw milliseconds, min/median/max, logs and actual exit status.
+4. Distinguish event intervals from end-to-end latency and profiler metrics, and give a conditional maintenance conclusion with at least one unresolved alternative explanation.
+5. On unsupported hardware/OS, mixed or unverified library provenance, allocation/API/completion failure, non-finite or mismatched output, missing samples, drift, or an incomplete manifest, stop the comparison and submit the blocker rather than filling a result. Counter denial only blocks the optional profile.
+
+For a learner-written alternative, preserve these boundaries and reuse canonical code instead of copying a kernel. The linked runner is a complete solution to the instrumentation task. Its CPU-only mode checks a row-major output file through the same oracle without CUDA:
+
+```bash
+c++ -std=c++17 -DLAB12_HOST_ONLY -x c++ \
+  -I examples/ex15-tiled-gemm/include -I examples/ex18-cublas-gemm/include \
+  public/assets/exercise-solutions/lab12-gemm-comparison.cu -o "$run_dir/lab12-host"
+"$run_dir/lab12-host" --check-fixtures
+"$run_dir/lab12-host" --check-output 33x31x35-partial < matrix.txt
+```
+
+Here `matrix.txt` must contain exactly 1,155 row-major FP32 values from that fixture's output. This verifies supplied values only; it does not execute or simulate a GPU.
+
+## Cleanup
+
+The runner checks resource release on normal completion. Preserve hashes, errors and raw records before removing only the learner-owned `run_dir` and any example build directories you created. Do not delete a shared Toolkit, change GPU power/clock policy, or remove another user's artifacts. Failed runs remain part of the record.
+
+## Sources and review
+
+- [cuBLAS v13.3 API Reference](https://docs.nvidia.com/cuda/cublas/index.html), especially data layout, `cublasGemmEx`, compute types, scalar parameters, streams, workspace and version queries, defines the library contract. Default workspace is library-managed; its capacity is not observed traffic.
+- [Toolkit 13.3 Update 1 release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) identify cuBLAS 13.6.0.2 separately from Toolkit 13.3.1. Recheck exact issue predicates: this baseline uses no grouped/strided batch, device-scalar PDL producer, graph capture or cuBLASLt heuristic query. That scoping is not a blanket claim that cuBLAS has no bugs.
+- [Runtime API v13.3.1 event management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html) defines timing-enabled events, completion, elapsed milliseconds, resolution and interference caveats.
+
+Context7 `/websites/nvidia_cuda_cublas` provided discovery and cross-checking; the directly checked NVIDIA owner documents above are authoritative. Prose is original CC BY 4.0; runner instrumentation is original Apache-2.0; no NVIDIA sample listing, figure, table, or benchmark result is copied. **All sources accessed and facts reviewed: 2026-09-06.**

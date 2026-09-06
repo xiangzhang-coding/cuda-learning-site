@@ -1,0 +1,249 @@
+---
+title: 'L06: Hand Matrix Multiplication to cuBLAS Correctly'
+description: Derive GEMM arguments from column-major addresses and every transpose combination, separate data, compute, and scalar types, and establish an explicit stream lifecycle and independent CPU reference.
+pairId: l06
+counterpart: /libraries/cublas-gemm/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, equation, layout, transpose, row-major, types, lifecycle, correctness, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L06
+prerequisites: [A08, Q01]
+relatedUnits: [L07, EX15, EX18, LAB12, VIS12]
+hardwareGate: none
+estimatedMinutes: 25
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuBLAS 12.9 archived API contract'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html'
+    version: 'Toolkit 12.9.2 archive; guide label 12.9'
+    platform: 'Native Linux; GEMM semantics and host API review, not execution'
+    accessDate: '2026-09-06'
+  - title: 'cuBLAS 11.8 historical API'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html'
+    version: 'Toolkit 11.8.0 archive'
+    platform: 'Historical layout and explicit-context contract'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'Toolkit 11.8.0; libcublas 11.11.3.6'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'Toolkit 12.9.2; libcublas 12.9.2.10'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; libcublas 13.6.0.2'
+    platform: 'Linux x86_64 package identity only; not an API compatibility claim'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cublas-11.8.0'
+    version: 'Toolkit 11.8.0; cuBLAS Release 11.8 section'
+    platform: 'H100 workspace recommendation, not a universal requirement'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9 Update 2 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2'
+    version: 'Toolkit 12.9.2; includes Update 1 alignment enforcement history'
+    platform: 'Narrow fixes and version boundaries, not local validation'
+    accessDate: '2026-09-06'
+  - title: 'Current CUDA 13.3 Update 1 release notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1'
+    version: 'Live guide label 13.3 Update 1, accessed 2026-09-06; component 13.6.0.2'
+    platform: 'Version comparison only; exact 13.3.1 archive returned 404'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 EULA and Toolkit supplement'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html'
+    version: 'Archived EULA; last updated 2025-01-07'
+    platform: 'Documentation and redistribution boundary; no upstream code adapted'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l06 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/cublas-gemm/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,equation,layout,transpose,row-major,types,lifecycle,correctness,versions,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L06 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,Q01' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L07,EX15,EX18,LAB12,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/cublas-gemm/" lang="zh-CN">阅读中文对应页</a>
+
+After writing a correct tiled matrix multiplication, the next step is not to assume it deserves optimization. Establish a trustworthy library comparison for the same problem first. cuBLAS cannot discover the rows and columns behind a pointer. It knows only the shapes, strides, and operations you declare. Legal arguments with the wrong interpretation can still produce a correctly sized, numerically wrong result.
+
+## Learning goals
+
+Allow about 25 minutes for the unit, paper checks, and retrieval questions. You should be able to derive arguments from a storage diagram rather than memorize a tuple of `m,n,k`: explain handle state, cover every transpose combination, separate precision from scalar location, and identify when results can be read or released. External Lab time is additional.
+
+## Prerequisites
+
+The exact prerequisites are [A08: Correct Tiled GEMM](/en/algorithms/tiled-gemm-correctness/) and [Q01: CPU References, Tolerances, and Invariants](/en/correctness/cpu-references-tolerances-invariants/), in the order `A08, Q01`. EX15, EX18, LAB12, and VIS12 below are related resources, not additional prerequisite edges.
+
+## Why retain a column-major interface?
+
+Basic Linear Algebra Subprograms (BLAS) separates common operations from their implementations. Matrix-matrix multiplication is a Level-3 operation that can reuse data across substantial arithmetic. cuBLAS provides these operations on GPUs while retaining the column-major convention familiar to Fortran callers.
+
+The explicit-handle interface introduced in CUDA 4.0 exposes device, stream, and scalar-passing state instead of hiding it in the legacy global interface. This unit uses `cublas_v2.h`, not the deprecated `cublas.h` interface. `cublasSgemm` is the specialized homogeneous FP32 entry point; `cublasGemmEx` lets callers declare storage and computation types separately. Library implementations can change, so the library name proves neither a particular instruction nor performance or bitwise results.
+
+## Write the mathematical problem first
+
+General Matrix Multiplication (GEMM) specifies `C_out = alpha * op(A) * op(B) + beta * C_in`. `op(A)` has shape `m x k`, `op(B)` has shape `k x n`, and C has shape `m x n`. Thus `m,n,k` describe the shapes **after the operations**, not necessarily the allocated rows and columns of A and B.
+
+`CUBLAS_OP_N` leaves a matrix unchanged, `CUBLAS_OP_T` transposes it, and `CUBLAS_OP_C` applies a conjugate transpose. T and C are numerically equivalent for real data, but not for complex data. An operation flag changes how values are read; it does not move data or change the physical stride.
+
+With `beta != 0`, preserve and initialize `C_in` correctly. With `beta == 0`, the old C need not be valid input, but C must still supply enough writable output storage. "No old-value read required" does not mean "a null output pointer is valid." This unit uses positive dimensions, valid integer ranges, and disjoint A, B, and C storage, keeping degenerate problems and alias rules out of the first call proof.
+
+## Addresses and leading dimensions
+
+The leading dimension, `ld`, is the distance between adjacent physical column or row starts **in elements**, not bytes. For zero-based coordinates `(i,j)`, the column-major element offset is `i + j*ld`; the row-major offset is `i*ld + j`. Allocation sizes additionally multiply by element size and require overflow checks.
+
+Consider a column-major `3 x 2` matrix with `ld=5`. Its first column uses offsets 0, 1, and 2; its second uses 5, 6, and 7. Offsets 3 and 4 are padding. Element `(2,1)` is at offset 7, not 5. A submatrix of a larger allocation moves the starting pointer but keeps the parent allocation's column spacing. Replacing `ld` with the submatrix's row count would read different elements.
+
+The BLAS one-based indexing convention in NVIDIA's guide does not require an unused element before a C++ pointer. GEMM takes the start of storage; host address calculations here remain zero-based. In contrast, BLAS routines that **return a position**, such as `cublasIsamax`, return a one-based position. For a valid nonempty vector and positive `incx`, returned position p maps to zero-based element offset `(p-1)*incx`. Convert a returned position at the boundary rather than adding one to every GEMM address.
+
+## Derive leading dimensions for every transpose
+
+This is a column-major derivation table, not a performance recommendation. Abbreviate `M=max(1,m)`, `N=max(1,n)`, and `K=max(1,k)`. Shapes below are the **untransformed storage shapes**. Every row requires `ldc >= M`, with C storage covering `ldc*n` elements.
+
+| `transa,transb` | A storage shape | B storage shape | Minimum `lda` | Minimum `ldb` |
+| --- | --- | --- | --- | --- |
+| N,N | `m x k` | `k x n` | M | K |
+| N,T | `m x k` | `n x k` | M | N |
+| N,C | `m x k` | `n x k` | M | N |
+| T,N | `k x m` | `k x n` | K | K |
+| T,T | `k x m` | `n x k` | K | N |
+| T,C | `k x m` | `n x k` | K | N |
+| C,N | `k x m` | `k x n` | K | K |
+| C,T | `k x m` | `n x k` | K | N |
+| C,C | `k x m` | `n x k` | K | N |
+
+A storage covers `lda*k` for N or `lda*m` for T/C. B storage covers `ldb*n` for N or `ldb*k` for T/C. A legal lower bound proves neither sufficient allocation nor correct values. Checking the last logical element and the complete allocation extent is separate from API argument checking.
+
+Paper check: choose `m=3,n=5,k=2`, with T for A and N for B. A is stored as `2 x 3`, not `3 x 2`; `lda=4` is legal. B is `2 x 5`; `ldb=3` is legal. With `ldc=6`, the three complete storage extents cover 12, 15, and 30 elements. Square or tightly packed cases alone can hide these mistakes.
+
+## Row-major need not require a copy
+
+Suppose the application needs row-major `C = A*B`, with A shaped `m x k` and B shaped `k x n`. The bytes of row-major A can be interpreted as column-major `A^T`. Ordinary transposition gives `C^T = B^T*A^T`: swap operands and change the call dimensions to `n,m,k`. The resulting bytes still represent the application's row-major C.
+
+For an N,N problem with padded row strides `ra,rb,rc`, the first cuBLAS matrix is B with `lda=rb`; the second is A with `ldb=ra`; the output has `ldc=rc`. Both operations remain N. For tightly packed matrices, those strides are `n,k,n`. EX18's fixed FP32 path uses this interpretation, not a hidden data-transposition pass before the call.
+
+More generally, map the row-major target `op_a(A)*op_b(B)` into a column-major call by swapping A/B and `m/n`, and changing the flag order from `op_a,op_b` to `op_b,op_a`. Keep each allocation's physical row stride, then audit the swapped call against the table. For complex data, the outer transformation is an ordinary transpose, not a conjugate transpose: do not additionally conjugate `alpha` or `beta`. This is an algebraic mapping, not permission to mix arbitrary row and column layouts.
+
+[VIS12: GEMM Tiling Hierarchy](/en/visuals/gemm-tiling-hierarchy/) helps identify which inputs along K contribute to an output element. Substitute its logical coordinates into the address formula. It neither exposes cuBLAS's internal algorithm nor proves that a call will use a particular tile.
+
+## Three types and two scalar locations
+
+`GemmEx` storage types describe how to interpret A, B, and C bytes. The compute type declares the computation-precision policy. The scale type determines what `alpha` and `beta` point to. These must form a supported row in the owner table; they are not independently interchangeable choices.
+
+| Combination reviewed here | A/B/C storage | Compute type | `alpha,beta` objects |
+| --- | --- | --- | --- |
+| EX18 fixed comparison | All `CUDA_R_32F` | `CUBLAS_COMPUTE_32F_PEDANTIC` | `float` |
+| Static mixed-precision comparison | A/B `CUDA_R_16F`, C `CUDA_R_32F` | `CUBLAS_COMPUTE_32F` | `float`, not half precision |
+
+The second row is contract reading, not an extension of EX18. `CUBLAS_COMPUTE_32F_FAST_TF32` permits TF32 computation without changing the stored arrays into another data type; it is not another name for the fixed FP32 comparison. Pedantic mode constrains computation policy but promises neither the CPU's serial accumulation order nor an error bound for arbitrary problem sizes.
+
+Pointer mode is independent of precision. With `CUBLAS_POINTER_MODE_HOST`, ordinary GEMM input scalar values are consumed at the call, so their objects may expire after return even while matrix work remains asynchronous. With `CUBLAS_POINTER_MODE_DEVICE`, scalars must be device-accessible, remain alive, and remain unmodified until the computation finishes. A `double*` cannot masquerade as a `float*`, and a host address does not satisfy device mode. Do not transfer host-blocking rules for scalar-output routines to GEMM.
+
+## Explicit streams and resource lifetime
+
+A stream determines submission order. A handle stores mutable stream, pointer-mode, and math-mode state. Select the device before creating `cublasHandle_t`, and keep the associated CUDA context alive and current during use. A handle does not migrate when `cudaSetDevice` changes the device; another device needs its corresponding handle. Concurrent host threads mutating one handle can change the configuration another thread's next call observes.
+
+For the first comparison, choose a named non-default stream and a dedicated handle. Audit the following order. This is a lifecycle plan, not a runtime log.
+
+| Phase | Required condition |
+| --- | --- |
+| Prepare | Create stream and handle; allocate A, B, and C; retain host inputs and data needed by the independent reference |
+| Configure | Bind the stream with `cublasSetStream`; explicitly set host pointer mode and the chosen math policy; check every status |
+| Initialize | Order input copies and any required C initialization before GEMM in that stream; keep asynchronous host buffers alive through copy completion |
+| Submit | Call GEMM and check `cublasStatus_t`; successful return does not make the result host-readable |
+| Observe | Submit result copying in the same stream, explicitly wait for stream completion and check CUDA status, then compare on the CPU |
+| Release | After every user finishes, free buffers, destroy the handle, and destroy the stream; on partial initialization failure, release only resources actually created |
+
+If a later consumer uses another stream, add an event record/wait edge. Calling producer and consumer sequentially on the host does not establish a cross-stream dependency. Check both library status and asynchronous errors exposed by copy or synchronization boundaries. After an execution error, an old output is not this invocation's result.
+
+Workspace is extra temporary storage. Traditional cuBLAS can use its default pool. If supplying your own, call `cublasSetStream` before `cublasSetWorkspace`, because setting the stream **unconditionally resets** the user-workspace configuration. User workspace must satisfy the documented 256-byte alignment and remain valid through use. Do not use destruction as the timing endpoint: the 12.9 guide documents an internal device synchronization in `cublasDestroy`, and frequent creation/destruction mixes setup overhead into the comparison.
+
+## Library output still needs an independent reference
+
+A library implementation does not replace a test oracle. Compute a double-precision CPU reference from the application's logical coordinates. Do not reuse the unverified cuBLAS argument transformation to interpret the same mistake. Check every logical output for finiteness and `abs(got-ref) <= 1e-4 + 2e-5*abs(ref)`. The `atol=1e-4, rtol=2e-5` rule belongs to EX18's bounded FP32 fixtures; it is not NVIDIA's universal GEMM guarantee.
+
+[EX18](/en/examples/cublas-gemm/) is this unit's canonical library-comparison Runnable Example: fixed FP32 pedantic computation, row-major swapped operands, a double-precision reference, and the fixtures from [EX15](/en/examples/tiled-gemm/), including a nonzero-beta case. Do not hand-copy a second CUDA implementation into the Learning Unit. General exercises involving `beta` must preserve original C. EX18's project files govern its fixed behavior; the generalization here does not establish coverage of every transpose, padded layout, or mixed-precision case.
+
+Small nonsquare matrices, inputs that distinguish rows from columns, K tails, and padded layouts reveal different errors. Identity and zero inputs are useful but can hide operand and stride mistakes when used alone. Record the first failure's logical coordinate, reference, result, threshold, and environment. Increasing tolerance is not a repair for a layout error.
+
+[LAB12](/en/labs/compare-gemm-with-cublas/) takes correct results into external timing. Before comparing with a handwritten kernel, match inputs, output semantics, precision, repetitions, and timing boundaries. Do not compare one side's kernel time with the other side's allocation, transfer, handle-creation, and execution time. Without retained measurements, report neither a library winner nor a speedup.
+
+## Versions and narrow issue boundaries
+
+API derivations use the **Toolkit 12.9.2 archive**. Components are versioned independently. These coordinates come from NVIDIA's redistribution manifests, not builds or runs in these environments.
+
+| Toolkit | `libcublas` component | Use here |
+| --- | --- | --- |
+| 11.8.0 | 11.11.3.6 | Historical layout, handles, and version comparison |
+| 12.9.2 | 12.9.2.10 | This unit's teaching contract |
+| 13.3.1 | 13.6.0.2 | Current-version comparison, not automatic transfer of every API conclusion |
+
+The 11.8 release notes recommend at least 32 MiB of workspace on H100. That is a version/hardware recommendation, not a minimum for every GEMM. The 12.9 Update 1 notes record enforcement of 256-byte workspace alignment. Update 2 fixes particular Lt algorithm-66 issues, whose conditions appear in [L07](/en/libraries/cublaslt-matmul/); this is not an all-clear for every GEMM.
+
+The exact 13.3.1 API and release-note archive URLs both returned 404 during review. Current release notes identify themselves as 13.3 Update 1, with component 13.6.0.2. For example, they still list unsupported Lt/GEMV cases with `M` or `N` equal to 1 under particular shape/workspace combinations, introduced in Toolkit 13.3, cuBLAS 13.5.1. "Newer" does not imply that a candidate must exist. New `ForStream` interfaces, emulation, grouped multiplication, and FP4 are not prerequisites here.
+
+## Evidence boundary
+
+There are no canonical code imports in this unit. All four evidence arrays are empty and no Evidence Status is assigned. Documentation review, address derivations, and successful web checks establish neither Compile-Checked nor Runtime-Verified status. EX18 and LAB12 own their evidence records. Native Linux is the only Supported Environment; this page requires no GPU and runs no CUDA in the browser.
+
+## Retrieval check
+
+1. Why is `(2,1)` at offset 7 in column-major `3 x 2, ld=5`, and why does taking a submatrix normally retain `ld`?
+2. With C for A and T for B, what are the storage shapes and `lda,ldb` lower bounds? What differs between real and complex values?
+3. Why does a row-major N,N GEMM swap operands and `m,n` without changing both flags to T?
+4. With FP16 inputs, FP32 output, and FP32 compute, what type are the scalars? What lifetime obligation does device pointer mode add?
+5. Why do successful GEMM return, setting workspace, and obtaining library output not replace synchronization, allocation proof, and an independent CPU reference respectively?
+
+## Continue with practice
+
+- Complete the [three L06 Exercises](/en/libraries/cublas-gemm/exercises/) before opening the [separate solutions](/en/libraries/cublas-gemm/solutions/).
+- Audit [PB-R4-007](/en/practice/#pb-r4-007), keeping the written call contract separate from the actual scope of [EX18](/en/examples/cublas-gemm/) and [LAB12](/en/labs/compare-gemm-with-cublas/).
+- Complete the other prerequisite, Q05, before entering [L07](/en/libraries/cublaslt-matmul/); VIS12 reuses only the [existing tiling explanation](/en/visuals/gemm-tiling-hierarchy/).
+
+## Sources and licensing
+
+[SRC-CUDA-067](/en/sources-and-versions/#src-cuda-067) groups this review. Exact 12.9.2 coordinates include [Data Layout](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#data-layout), [cuBLAS Context](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublas-context), [Scalar Parameters](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#scalar-parameters), [GemmEx](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasgemmex), [Compute Type](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublascomputetype-t), [Isamax family](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasi-t-amax), [SetStream](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublassetstream), [SetWorkspace](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublassetworkspace), and [Destroy](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasdestroy).
+
+Review covered the archived [EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) license, distribution requirements, reservation of rights, Toolkit supplement, and API [Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices). Citation does not relicense NVIDIA documentation or libraries under the site's license. This unit uses original prose, derivations, and tables, with no copied or adapted upstream code, figures, samples, or test output. Context7 supplied discovery cross-checks; exact archives and release notes govern version conclusions.
+
+**Facts checked and sources accessed: 2026-09-06.**

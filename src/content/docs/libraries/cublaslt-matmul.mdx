@@ -1,0 +1,257 @@
+---
+title: 'L07：用 cuBLASLt 描述、筛选与复用矩阵乘法'
+description: 以 12.9.2 合同审核矩阵布局、收尾操作、工作区和启发式候选，区分可行性、实测选择与缓存复用，保留版本限制和正确回退。
+pairId: l07
+counterpart: /en/libraries/cublaslt-matmul/
+factCheckDate: '2026-09-06'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, descriptors, layouts, workspace, selection, epilogues, reuse, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L07
+prerequisites: [L06, Q05]
+relatedUnits: [EX18, LAB12, VIS12]
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuBLASLt 12.9 archived API contract'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#using-the-cublaslt-api'
+    version: 'Toolkit 12.9.2 archive; guide label 12.9'
+    platform: 'Native Linux; ordinary single-matmul teaching contract, not execution'
+    accessDate: '2026-09-06'
+  - title: 'Current cuBLASLt API comparison'
+    url: 'https://docs.nvidia.com/cuda/cublas/index.html#cublasltmatmul'
+    version: 'Live guide label 13.3; footer 2026-06-25; accessed 2026-09-06'
+    platform: 'Changed epilogue wording and ForStream comparison only; not the 12.9.2 contract'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'Toolkit 11.8.0; libcublas 11.11.3.6'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'Toolkit 12.9.2; libcublas 12.9.2.10'
+    platform: 'Linux x86_64 package identity only'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; libcublas 13.6.0.2'
+    platform: 'Linux x86_64 package identity only; no algorithm portability claim'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 11.8 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#cublas-11.8.0'
+    version: 'Toolkit 11.8.0; cuBLAS Release 11.8 section'
+    platform: 'Heuristics-cache introduction and historical preference deprecations'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9 Update 2 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cublas-release-12-9-update-2'
+    version: 'Toolkit 12.9.2; includes 12.8 and 12.9 issue history'
+    platform: 'Algorithm 66 fixes, bias and layout restrictions; not local reproduction'
+    accessDate: '2026-09-06'
+  - title: 'Current CUDA 13.3 Update 1 cuBLAS release notes'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cublas-release-13-3-update-1'
+    version: 'Live guide label 13.3 Update 1, accessed 2026-09-06; component 13.6.0.2'
+    platform: 'Narrow capture and GEMV-like issue ledger; exact 13.3.1 archive returned 404'
+    accessDate: '2026-09-06'
+  - title: 'CUDA 12.9.2 EULA and Toolkit supplement'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html'
+    version: 'Archived EULA; last updated 2025-01-07'
+    platform: 'Documentation and redistribution boundary; no upstream code adapted'
+    accessDate: '2026-09-06'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l07 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/cublaslt-matmul/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,descriptors,layouts,workspace,selection,epilogues,reuse,measurement,versions,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L07 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'L06,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'EX18,LAB12,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cublaslt-matmul/" lang="en">Read the English counterpart</a>
+
+L06 把一个矩阵乘法交给库选择实现。现在问题变成：应用需要控制布局、临时内存或偏置（bias）融合时，怎样告诉库哪些实现可以考虑，又怎样避免把“被推荐”误认为“已验证最快”？cuBLASLt 把这些条件拆成可检查的对象。
+
+## 学习目标
+
+用约 30 分钟完成正文、布局推导和检索检查。你将为一次普通矩阵乘法写出完整描述，拒绝不满足工作区、对齐或收尾操作（epilogue）要求的候选，并制定带失效条件的复用策略。本页教选择过程，不发布某个 GPU 上的最优算法。
+
+## 前置知识
+
+严格依赖 [L06：把矩阵乘法正确交给 cuBLAS](/libraries/cublas-gemm/)和 [Q05：异步 GPU 工作的计时](/correctness/timing-asynchronous-gpu-work/)，顺序为 `L06, Q05`。前者提供形状、步长与数值合同，后者区分主机开销和设备完成。相关 EX18、LAB12、VIS12 不增加前置依赖。
+
+## 从一次调用到可复用描述
+
+cuBLASLt 自 CUDA 10.1 提供面向 GEMM 的灵活接口。描述符（descriptor）记录“要算什么”，布局记录“字节怎样解释”，偏好（preference）限制“允许使用什么资源”，算法对象记录一个具体实现配置。它不是必须先做昂贵训练的模型，也不是自动优化整张计算图的编译器。
+
+本页固定 **Toolkit 12.9.2 归档的普通、单次、实数矩阵乘法合同**，起点为 FP32 存储、`CUBLAS_COMPUTE_32F_PEDANTIC`、FP32 缩放标量、主机指针模式和默认收尾操作（epilogue）。数学问题为 `D = alpha*op(A)*op(B) + beta*C`。C 是输入，D 是输出，不能沿用传统 GEMM 中“C 永远被覆盖”的直觉。后续收尾练习只作静态推导，不扩展 EX18 的执行范围。
+
+## 创建对象后再设置属性
+
+使用 `cublasLt.h` 的显式对象接口。每一步创建和设置都检查返回状态；创建成功只是得到了描述对象，不表示 GPU 已运行。
+
+| 对象 | 创建与设置 | 负责的事实 |
+| --- | --- | --- |
+| 库句柄 | `cublasLtCreate` | 库资源，不是流完成凭证 |
+| 运算描述 | `cublasLtMatmulDescCreate`，再 `cublasLtMatmulDescSetAttribute` | 创建时指定 `computeType,scaleType`；设置 `TRANSA`、`TRANSB`、`POINTER_MODE`、`EPILOGUE` 等 |
+| A/B/C/D 布局 | 各自 `cublasLtMatrixLayoutCreate`，再 `cublasLtMatrixLayoutSetAttribute` | 类型、未变换的行列数、主维度与 `CUBLASLT_MATRIX_LAYOUT_ORDER` |
+| 搜索偏好 | `cublasLtMatmulPreferenceCreate`，再 `cublasLtMatmulPreferenceSetAttribute` | 工作区预算、实际能保证的各矩阵指针对齐等 |
+
+`SetAttribute` 接收属性值所在缓冲区与其字节数，不是无类型的整数槽。枚举、`uint32_t` 对齐值、`uint64_t` 工作区预算和指针属性必须各按文档类型提供。设置偏置指针时传递的是**保存设备指针值的主机变量的地址**，不是让属性接口读取设备向量的头几个字节。设备向量仍由应用分配与保活。
+
+12.9.2 中 `TRANSA`、`TRANSB` 默认 N，`TRANSC` 只支持 N，布局默认列主序；把相关选择写明更易审核。`cublasLtMatmul` 本身接收流参数，不需要借传统句柄的 `cublasSetStream` 配置。为本单元保守地将描述对象保留到工作结束，再调用各自匹配的 `Destroy`；矩阵和工作区更必须活到最后一次设备使用完成。错误清理同样按已经成功创建的资源回收。
+
+## 布局不是转置操作
+
+行主序（row-major）与列主序（column-major）说明存储；转置说明数学运算。创建布局时填的是变换前形状。例如目标 `op(A):3 x 2`，A 选择 T，则 A 布局必须是 `2 x 3`。将行主序 A 标为 `CUBLASLT_ORDER_ROW` 后，仍需保留 T，不能因为“已经设过布局”删掉它。
+
+对正维度普通布局，行主序 `ld >= stored_cols`，列主序 `ld >= stored_rows`，单位都是元素。将这一规则与 L06 的 N/T/C 存储形状表组合，就能得到所有普通转置情况下的主维度，不必再背另一套口诀。本页实数中 T/C 数值相同，但不承诺所有混合布局的复数共轭情形；归档对行布局结合共轭操作另有限制。
+
+| 目标与标志 | 实际存储形状 | 行主序主维度下界 | 列主序主维度下界 |
+| --- | --- | --- | --- |
+| `op(A):m x k`，N | `m x k` | k | m |
+| `op(A):m x k`，T | `k x m` | m | k |
+| `op(B):k x n`，N | `k x n` | n | k |
+| `op(B):k x n`，T | `n x k` | k | n |
+| C/D，N | `m x n` | n | m |
+
+普通非原位情况采用不重叠 C、D，它们具有相同的数据类型、行列数、批大小和内存顺序，主维度可以不同。原位（in-place）必须同时满足 `C == D` 和 `Cdesc == Ddesc`，不能仅创建两个“属性看起来一样”的描述符。本页不使用 `ldc=0` 广播或空描述符捷径。
+
+一个具体检查：A 为行主序 `2 x 3, ld=4` 且 T，B 为行主序 `2 x 5, ld=7` 且 N，C/D 为行主序 `3 x 5`、主维度分别 6 和 8。它表达 `3 x 2` 乘 `2 x 5`，默认收尾下无需 L06 的交换操作数技巧。写清逻辑形状是第一层检查；设备、类型、算法是否支持这个完整组合仍需后续查询。
+
+## 预算不会分配工作区
+
+工作区（workspace）偏好 `CUBLASLT_MATMUL_PREF_MAX_WORKSPACE_BYTES` 是搜索允许的**最大字节数**，默认 0。设为 4 MiB 不会分配 4 MiB，也不保证每个候选都恰好需要 4 MiB。实际需求来自成功候选的 `workspaceSize`；执行时必须同时传真实设备指针和真实容量。
+
+可先确定预算、查询，再为筛选后所需大小分配；也可先有一块受控缓冲区，再用其容量作为预算。无论顺序如何，都要证明需求不超过预算且不超过实际分配，工作区地址至少 256 字节对齐，并且直到完成都没有被其他无序工作复用。需求为零时可使用空工作区与零容量；零预算不承诺一定有候选。
+
+对 A/B/C/D 的最小对齐偏好默认都是 256 字节。这里填的是你能对**实际传入地址**保证的对齐，不是希望库帮你对齐。基地址 256 字节对齐的 FP32 分配，偏移一个元素后通常只能保证 4 字节。若继续宣称 256，查询可能保留实际指针不能运行的算法。预算与布局确定后仍应保留显存余量：启发式（heuristic）查询可能通过驱动装载内核，并不是完全不接触设备资源的纯数学函数。
+
+## 候选筛选必须逐层通过
+
+启发式（heuristic）是根据问题和设备条件估计适合实现的规则，不是一次测量。`cublasLtMatmulAlgoGetHeuristic` 按估计计算时间递增返回候选；`requestedAlgoCount` 是数组容量和数量上限，`returnAlgoCount` 才是实际写入数量。
+
+1. 检查查询本身的 `cublasStatus_t`。失败时记录问题配置与错误，不读取未建立的结果。
+2. 检查 `returnAlgoCount`。零个候选是必须处理的分支；只能遍历实际返回的范围，不能盲读结果 0。
+3. 对每项先检查 `state == CUBLAS_STATUS_SUCCESS`。只有成功项的其他字段才可使用。
+4. 比较 `workspaceSize` 与预算、实际容量，检查矩阵地址和子视图对齐及相关算法限制。
+5. 对复用或修改过的配置调用 `cublasLtMatmulAlgoCheck` 复核当前设备与描述符兼容性，并重查需求。它通过仍不保证实际指针对齐或执行正确。
+6. 在外部验证中检查 `cublasLtMatmul` 返回、流完成状态和独立参考；只有数值验收通过的候选才进入同一计时边界下的比较。
+
+结果里的 `wavesCount` 是算法的设备利用估计指标，不是采集到的占用率或耗时。查询得到“第一项”不等于找到了实测冠军。本页不提供算法编号推荐，也没有返回候选、分配或运行的观察记录。
+
+回退（fallback）也要保持原问题。可在资源许可时重新查询另一个预算、恢复默认收尾后用独立后处理，或对普通 FP32 乘法回到 L06 的 cuBLAS 对照。不能悄悄改精度、丢掉 `beta*C`、偏置或激活。`algo=nullptr` 会触发默认偏好的隐式查询，不是“保证可用”的万能回退。遇到设备执行错误则停止并诊断，不在可能已出错的上下文中盲试下一项。
+
+## 收尾操作与偏置方向
+
+收尾操作（epilogue）在乘加结果上继续施加偏置（bias）或激活等处理。它可减少独立后处理所需的步骤，但不能在没有测量时承诺减少了多少流量、只发射一个内核或一定更快。
+
+对本页普通 FP32 情形，先用 `CUBLASLT_EPILOGUE_DEFAULT` 建立对照。选择 `CUBLASLT_EPILOGUE_BIAS` 或 `CUBLASLT_EPILOGUE_RELU_BIAS` 时，通过 `CUBLASLT_MATMUL_DESC_EPILOGUE` 指定模式，并设置设备端 `CUBLASLT_MATMUL_DESC_BIAS_POINTER`。ReLU 偏置路径先加偏置，再作 `max(x,0)`。偏置类型也要匹配支持表；本页全 FP32 时为 FP32。
+
+**12.9.2 归档 `cublasLtMatmul` 的注 8 明确说明：D 使用 `CUBLASLT_ORDER_ROW` 时，不支持 ReLU、dReLU、GELU、dGELU 与 Bias 收尾模式。** 因此本合同不能直接把行主序 D 与单独偏置或偏置激活模式拼起来。枚举存在、属性设置成功或某一实现碰巧接受，都不能越过文档限制。当前 13.3 文档把措辞改为“激活与 Bias 的组合”，这不是向 12.9.2 回填许可的依据。
+
+偏置向量长度匹配**所描述 D 的行数**，元素紧密排列，向每一列广播。列主序 `D:3 x 5` 的偏置只有 3 个元素，数学含义为 `D[i,j] = product[i,j] + bias[i]`，并不是许多框架中按输出特征列添加的 `bias[j]`。
+
+若应用的行主序输出为 `Y:3 x 5`，真正需要 5 个输出特征偏置，可重新推导为列主序 `D=Y^T:5 x 3`。交换乘法操作数并正确重建输入布局，使偏置的 5 个元素对 D 的行广播，就对应原 Y 的列。这个方案改变了**整个运算描述**，不只是把 D 的顺序枚举从 ROW 改成 COL。若目标确实是原 Y 的行偏置，不能沿用该技巧添加长度 3 的向量；使用合法列主序中间结果与显式布局转换，或单独的正确后处理。
+
+本单元不教梯度与辅助缓冲区（auxiliary buffer）实现。它们另有缓冲区类型、主维度、对齐和输入/输出角色约束；选择带 AUX 的枚举却不提供这些对象不是有效配置。12.9.2 中指针数组批模式只支持默认收尾，也不能由单次 FP32 合同推导所有类型、布局与批模式都能融合。
+
+## 复用选择不等于内部缓存
+
+应用复用的是自己保存的算法配置及其验收条件。只把 `m,n,k` 当键会把不同问题混在一起。为本单元建立保守键，并保存选择来源是“启发式建议”还是“已在指定环境中验证和测量”。
+
+| 键的部分 | 应记录的条件 |
+| --- | --- |
+| 执行环境 | GPU 身份/架构、可用资源配置、实际 cuBLAS 组件版本；测量环境变化还需重新评价性能 |
+| 运算 | 所有转置、计算与缩放类型、指针模式、收尾、所用偏置或辅助属性、必要的标量语义分类 |
+| 存储 | A/B/C/D 类型、行列数、主维度、内存顺序、批属性和 C/D 别名关系 |
+| 资源 | 工作区预算、实际可用容量、矩阵及附加缓冲区的对齐保证、搜索过滤与数值政策 |
+
+改变尺寸、转置、主维度、输出布局、收尾、类型、设备或库版本，先使旧选择失效。缩小工作区或降低地址对齐保证，也必须重查。若仅更换同一合同下的数据内容，可以复用配置，但仍重新绑定本次指针、证明其范围/对齐/生命周期，并检查执行结果。错误不能因为“缓存命中”被忽略。归档允许算法对象在**同一库版本**下序列化和恢复，不构成跨版本、跨设备通用格式承诺。
+
+库内部的启发式缓存（heuristics cache）则是问题到历史推荐内核的映射：11.8 发布说明记录其引入；12.9 文档描述线程安全、类似 LRU 的淘汰策略，默认容量 8192 项，可由 `CUBLASLT_HEURISTICS_CACHE_CAPACITY` 或优先级更高的 `cublasLtHeuristicsCacheSetCapacity` 调整，容量零关闭缓存。这能影响查询开销，却不分配应用工作区、不保存数值验收，也不替应用维护上述失效规则。不要把它称为实测赢家数据库。
+
+## 正确性与计时分别记录
+
+计时前先验证原始乘积，再验证带收尾结果。CPU 参考独立处理逻辑行列、`alpha,beta` 与偏置方向；用小型非方阵和不同偏置值揭露方向错误。若多次试算会覆盖 C，尤其原位且 `beta != 0`，每次都恢复相同输入，否则候选处理的已不是同一问题。
+
+Q05 的设备事件区间适合回答已准备好数据和配置后的设备执行时间；主机墙钟区间可另外回答描述创建、启发式查询、分配和端到端成本。预热、重复、同步与计时位置要统一，查询开销不能被偷算到某一候选，恢复输入也不能无说明地只算到一边。需要多少查询才能摊薄设置成本必须由工作负载决定，不从文档中的一般建议制造数字。
+
+完整证据包应包含环境清单（Environment Manifest）、组件版本、规范源码身份、描述与偏好、实际指针对齐、候选状态和工作区、数值判据、原始测量与回退原因。没有真实数据时这些栏位标为未执行，不填虚构结果。[EX18](/examples/cublas-gemm/)和 [LAB12](/labs/compare-gemm-with-cublas/)提供传统 FP32 基线，不表示已实现或验证 Lt 搜索；[VIS12](/visuals/gemm-tiling-hierarchy/)仍只是逻辑分块模型。
+
+## 版本与窄范围问题清单
+
+Toolkit 11.8.0、12.9.2、13.3.1 的清单分别给出 `libcublas 11.11.3.6`、`12.9.2.10`、`13.6.0.2`。文档标签 13.3 不是组件版本 13.3。13.3.1 的精确 API 与发布说明归档返回 404，所以下列最新条目来自 **2026-09-06 访问的当前 13.3 Update 1 发布说明**，不是未访问归档的结论。
+
+| 来源与状态 | 精确条件 | 对本单元的影响 |
+| --- | --- | --- |
+| 12.8 已修复，4910924 | `BGRADA/B` 曾允许行主序输出而算错梯度；改为禁止该布局 | 不把梯度模式当成普通偏置模式；保留输出布局限制 |
+| 12.8 Update 1 已修复，5104822 | Lt 的 `m` 或 `n` 为 1，使用 BIAS 时可能算错 | 测试矩阵应含退化形状，但本页未复现 |
+| 12.9 Update 2 已修复，5807900/5943783 | 算法 ID 66，CC 10.x/11.x，与使用 Tensor Memory 的内核并发；自 12.8 存在 | 不把历史条件扩大到所有算法或所有 GPU |
+| 12.9 Update 2 已修复，CUB-9572 | ID 66，CC 9.0/10.x/11.0，元素字节数乘主维度超过有符号 32 位范围；自 12.6 Update 2 存在 | 主维度数值合法与地址计算安全分开审核 |
+| 12.9 Update 2 已修复，CUB-9627 | ID 66，CC 9.0，FP8、`beta != 0` 且 `scale_C=0` 会挂起 | 不将 FP8 缩放纳入普通 FP32 前置合同 |
+| 当前 13.3 Update 1 已知，6288786 | 非默认阻塞流正在捕获时调用启发式查询返回内部错误；始于 Toolkit 13.3 / cuBLAS 13.5.1 | 本页选择过程放在普通执行、非捕获阶段 |
+| 当前 13.3 Update 1 已知 | `M` 或 `N` 为 1 的某些 GEMV/Lt 形状及工作区配置返回不支持；始于 Toolkit 13.3 / cuBLAS 13.5.1 | 零候选或不支持必须有明确路径 |
+| 当前 13.3 Update 1 已知，CUB-10445 | GEMV 类操作，CC 12.0/12.1，矩阵转置、非累加维度大于 3145680、`beta != 0`；始于 Toolkit 13.3 Update 1 / cuBLAS 13.6.0 | 不能用最新组件替代独立数值验收 |
+
+这是有明确来源和条件的少量条目，不是完整缺陷目录，也不是本地观察。当前 `ForStream` 查询/检查接口会考虑流关联执行上下文的资源，不能把其签名或保证套入本页 12.9.2 的传统查询。仿真、分组 GEMM、FP4、Green Context 与图捕获的新增能力不成为稳定课程（Stable Curriculum）前置要求；迁移时要重新读目标版本的合同与问题清单。
+
+## 证据边界
+
+本页和练习均为静态 API 推导，没有规范 CUDA 代码导入，没有查询候选或观察运行。四个证据数组全部为空，不授予编译、运行、利用率、融合内核数量或加速比证据。原生 Linux 是唯一受支持环境；外部实现、编译和验证应由各自规范示例与实验承担，浏览器只呈现学习材料。
+
+## 检索检查
+
+1. 布局的行列数为什么在转置前定义？运算描述的计算类型与布局的数据类型有什么不同？
+2. 把最大工作区设为 4 MiB 后，还有哪三类容量、对齐或生命周期事实需要证明？
+3. 查询成功为什么还要检查返回数量与每项状态？`AlgoCheck` 为什么不是一次数值验证？
+4. 12.9.2 下为什么不能直接给行主序 `3 x 5` 的 D 加五元素偏置？重新描述为 `Y^T` 会改变哪些条件？
+5. 应用保存的算法选择与内部启发式缓存有什么区别？降低指针对齐、更换库版本后能否直接命中旧选择？
+
+## 继续练习
+
+- 完成 [L07 的三道练习](/libraries/cublaslt-matmul/exercises/)，再查看[独立解答](/libraries/cublaslt-matmul/solutions/)。
+- 审核 [PB-R4-008](/practice/#pb-r4-008)，把筛选过程与 [LAB12](/labs/compare-gemm-with-cublas/)的传统基线证据分开。
+- 用 [VIS12](/visuals/gemm-tiling-hierarchy/)复习逻辑数据需求，不从模型推断库算法选择。
+
+## 来源与许可
+
+[SRC-CUDA-068](/sources-and-versions/#src-cuda-068)汇总本次核查。12.9.2 的精确坐标为 [Matmul](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmul)（类型表、注 8、别名与工作区）、[DescCreate](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmuldesccreate)、[运算属性](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmuldescattributes-t)、[LayoutCreate](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatrixlayoutcreate)、[布局属性](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatrixlayoutattribute-t)、[偏好属性](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulpreferenceattributes-t)、[GetHeuristic](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgogetheuristic)、[候选结果](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulheuristicresult-t)、[AlgoCheck](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgocheck)、[Epilogue](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltepilogue-t)、[算法对象](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#cublasltmatmulalgo-t)和[启发式缓存](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#heuristics-cache)。
+
+已阅读归档 [EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html)与 [Notices](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices)，当前文档也保留 NVIDIA 版权所有通知。本页文字、推导、表格与练习是原创内容，只链接和转述事实；不复制或改编官方示例、源代码、图表或测量结果，不将库重新许可为 CC BY 4.0。两次限定主题的 Context7 查询用于发现来源，其中收尾检索混入了 cuBLASDx 内容，未将其作为 Lt 依据。
+
+**事实核查与来源访问日期：2026-09-06。**
