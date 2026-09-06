@@ -140,7 +140,7 @@ describe('CUDA compile evidence workflow', () => {
     expect(workflow).toContain('EX16_BUILD_RESULT: ${{ needs.ex16-build.result }}');
     expect(workflow).toContain('EX17_BUILD_RESULT: ${{ needs.ex17-build.result }}');
     expect(workflow).toContain(
-      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build, ex17-build]',
+      'needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build, ex17-build, ex18-build]',
     );
     expect(workflow).toContain('EX10_COMPILE_RESULT: ${{ needs.ex10-compile.result }}');
     expect(workflow).toContain('if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi');
@@ -297,7 +297,7 @@ describe('CUDA compile evidence workflow', () => {
       readProjectFile('examples/ex17-cub-device-reduction-scan/scripts/compile-check.sh'),
       readProjectFile('scripts/check-lab11-runner-build.sh'),
     ]);
-    const ex17Build = workflow.match(/^  ex17-build:\n[\s\S]*?(?=^  cuda-compile-gate:)/m)?.[0] ?? '';
+    const ex17Build = workflow.match(/^  ex17-build:\n[\s\S]*?(?=^  ex18-build:)/m)?.[0] ?? '';
     const checkoutPin = '3d3c42e5aac5ba805825da76410c181273ba90b1';
     const ccclCommit = 'd36012203ef73ac7f966e848dd88482273e91e02';
     const profiles = [...ex17Build.matchAll(
