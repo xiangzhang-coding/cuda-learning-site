@@ -1,0 +1,250 @@
+---
+title: 'L09：读懂 CUTLASS C++ GEMM 层次'
+description: 沿固定版本的 C++ GEMM，从主机参数追踪到分块、布局、流水线、指令及收尾操作，区分源码契约、拟议工具链与执行证据。
+pairId: l09
+counterpart: /en/libraries/cutlass-cpp-gemm-structure/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, hierarchy, layouts, tile-reasoning, pipeline, collectives, toolchain, tests, known-issues, alternative, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L09
+prerequisites: [A08, L06, M17]
+relatedUnits: [L08, VIS12]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: advanced
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUTLASS retained 2.x-style GEMM API'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api.md'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'Conceptual hierarchy and loop nest; no instantiation or execution'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS 3.x GEMM API comparison'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api_3x.md'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'Bounded collective vocabulary comparison; no Python DSL'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS device GEMM source'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/device/gemm.h'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'Host-facing arguments, workspace, initialization, launch, and status'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS release build configuration'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CMakeLists.txt'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'CMake, compiler, dialect, and target gates; not a successful build'
+    accessDate: '2026-09-07'
+  - title: 'CUDA Linux host compiler support policy'
+    url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'Live CUDA 13.3 guide, accessed 2026-09-07; not a 13.3.1 archive'
+    platform: 'Native Linux x86-64 host eligibility for a proposed target'
+    accessDate: '2026-09-07'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; NVCC 13.3.73; Runtime 13.3.29'
+    platform: 'Independent component identities; no compilation evidence'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS license and Python DSL exception'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/LICENSE.txt'
+    version: 'v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'BSD-3-Clause scope; exact per-file review in SRC-CUDA-070'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/cutlass-cpp-gemm-structure/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,hierarchy,layouts,tile-reasoning,pipeline,collectives,toolchain,tests,known-issues,alternative,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,L06,M17' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L08,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '4.7.0,11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cutlass-cpp-gemm-structure/" lang="en">Read the English counterpart</a>
+
+通用矩阵乘法（general matrix multiplication，GEMM）的模板里，也可能藏着与手写内核（kernel）相同的输出归属（output ownership）和同步（synchronization）错误。读类型时，要看它选择了由谁负责输出、操作数如何到达、部分和何时写成最终结果，而不是把类型本身当作正确性或速度的保证。
+
+## 学习目标
+
+预留约 40 分钟阅读源码、完成纸面推导与检索检查。你将沿一条保留至今的 C++ 层次追踪职责，区分三个层面的布局（layout），重建两阶段依赖时间线，并说清未来的构建必须证实什么。本学习单元（Learning Unit）不要求 GPU，也不要求安装 CUTLASS。
+
+## 前置知识
+
+前置依赖严格按 `A08, L06, M17` 排列：[A08：分块 GEMM 正确性](/algorithms/tiled-gemm-correctness/)提供输出归属与 K 维归约（reduction）不变量；[L06：cuBLAS GEMM](/libraries/cublas-gemm/)提供形状、主维度（leading dimension）和数值类型；[M17：选择编译器架构目标](/toolchain/compiler-architecture-targets/)区分源码架构标签、编译器目标与产物（artifact）。L08 和 VIS12 是相关资源，不是额外的前置依赖。
+
+## 为什么这套层次跨越了 API 代际
+
+库调用通常隐藏实现，CUTLASS 则把可复用的 C++ 构件暴露出来。保留的 2.x 风格按设备（device）、内核、线程块（thread block）、线程束（warp）和指令（instruction）组织工作。单指令多线程（single instruction, multiple threads，SIMT）与张量核心（Tensor Core）实现遵循同一 GEMM 公式，但需要不同的运算策略和数据搬运策略。随着协作方式与架构专用调度变得更复杂，较新的 3.x API 显式引入了集体协作（collective）主循环（mainloop）与收尾操作（epilogue）；它并不是给旧层次逐层改名。
+
+本单元固定使用 **CUTLASS C++ v4.7.0**，提交为 **`dcf215af68a2d08d305076c152a06f201728cd53`**，阅读的是**该版本内保留的 2.x 风格 API**，不是另加一个 2.x 依赖。[提交](https://github.com/NVIDIA/cutlass/commit/dcf215af68a2d08d305076c152a06f201728cd53)日期为 `2026-08-06T14:31:22Z`；[版本](https://github.com/NVIDIA/cutlass/releases/tag/v4.7.0)发布于 `2026-08-13T09:43:47Z`。变更日志条目标注的是 2026-08-04，这是另一个日期。版本宏给出 4/7/0；未经生成、值为空的修订宏不能替代 SHA。
+
+## 沿职责追踪，不只看目录名
+
+先记录模板的元素与布局类型、累加器类型（Accumulator Type）、运算类别（operator class）、架构标签（architecture tag）、线程块/线程束/指令形状、收尾操作和阶段数。这些是编译期选择。运行时参数另外提供应用的 `M,N,K`、张量地址与步长（stride），以及缩放参数；分块（tile）形状不是整个矩阵的形状。
+
+| 层次 | 它回答的问题 | 固定版本的阅读坐标 |
+| --- | --- | --- |
+| 设备（Device） | 主机（host）怎样描述、初始化并启动运算？`device::Gemm` 不是从 GPU 线程中发起的调用 | [`device/gemm.h`，175-284 和 360-515](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/device/gemm.h#L175-L284) |
+| 内核（Kernel） | 哪个输出分块归当前线程块负责，主循环与收尾操作怎样组合？ | [`kernel/gemm.h`，203-351](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/kernel/gemm.h#L203-L351) |
+| 线程块（Threadblock） | K 维切片（K slice）怎样暂存到共享内存（shared memory），并由协作的线程束复用？ | [`threadblock/mma_pipelined.h`，219-378](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/threadblock/mma_pipelined.h#L219-L277) |
+| 线程束（Warp） | 寄存器片段（register fragment）与重复运算怎样组织？其策略提供 `ArchMmaOperator` | [`warp/mma_tensor_op.h`，167-206 和 287-350](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/warp/mma_tensor_op.h#L167-L206) |
+| 指令（Instruction） | 封装请求了哪一种具体的乘加（multiply-accumulate）运算？ | [`arch/mma_sm75.h`，142-200](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/arch/mma_sm75.h#L142-L200) |
+
+选定的 FP16/FP32 SM75 封装包含 `mma.sync.aligned.m16n8k8.row.col.f32.f16.f16.f32`。这是源码可见的内联 PTX 请求，几何形状为 `16x8x8`，不是经过检查的 SASS，也不是 C++ 线程束矩阵乘加（warp matrix multiply-accumulate，WMMA）的 `16x16x16` 接口。SIMT 则包含逐线程的标量工作；采用同一层次不代表会使用 Tensor Core 指令。
+
+在主机端，先检查 `can_implement`，确定并提供工作区（workspace），初始化，再启动并检查状态。固定版本的[内核检查，151-198 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/kernel/gemm.h#L151-L198)检查的是依赖布局的张量引用对齐。与较旧的 Doxygen 摘录不同，这里没有对所有情况统一适用的 M/N/K 整除检查。检查成功既不能证明分配范围足够，也不能证明数值正确、使用了原生加速或执行已经完成。有效存储、生命周期、适用的尾部处理（tail handling），以及外部完成检查，仍由调用者负责。
+
+## 布局与收尾操作是不同的契约
+
+全局内存布局（global layout）把逻辑坐标映射为元素偏移。[`cutlass::layout::RowMajor`](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/layout/matrix.h#L57-L110)采用行主序（row-major），公式为 `row*stride+column`；步长不自动等于逻辑列数。共享内存布局可能为访问模式重新组织暂存的操作数，寄存器片段也有自己的线程/值组织方式。全局 RowMajor 声明不提供这两种内部映射中的任何一种。CUTLASS 布局类型不是 cuBLAS 转置标志。
+
+[线性组合收尾操作（linear-combination epilogue）](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/epilogue/thread/linear_combination.h#L219-L249)在累加后处理缩放、源矩阵 C 与目标类型转换。要分别记录累加器、计算/标量、源和输出类型。为存储重排累加器数据也是收尾工作，不是再遍历一遍 K。即使采用 FP32 累加和输出，A/B 转成 FP16 时仍可能丢失输入信息；[L08](/libraries/tensor-core-precision-contracts/)进一步讨论这一数值契约。
+
+## 推导一个尺寸不整齐的原创分块模型
+
+考虑 `D=0.5*A*B+C`，其中 `M=150,N=90,K=40`。A/B 为 FP16；C/D、累加与收尾计算均为 FP32。所有全局矩阵都采用 RowMajor：A 的步长为 48，B/C/D 的步长为 96，分配范围覆盖完整的物理行。拟定线程块分块为 `64x64x16`、线程束分块为 `32x32x16`，并以 SM75 的 `16x8x8` 作指令层比较。这是原创的几何模型，不是复制的测试、已实例化的模板，也不是已证明合法的特化。
+
+| 推导 | 结果 | 它不能证实什么 |
+| --- | --- | --- |
+| 输出网格（grid） | `ceil(150/64)*ceil(90/64)=3*2=6` 个线程块 | 不是 18 个独立线程块：K 在各输出线程块内部归约 |
+| K 维遍历 | 每个线程块有 `ceil(40/16)=3` 个切片 | 不是三个各自覆写 D 的独立收尾操作 |
+| 输出的线程束分块 | `(64/32)*(64/32)=4` 个线程束分块，不沿 K 划分 | 不是观察到的调度或占用率（occupancy） |
+| 右下角输出分块 | 起点为 `(128,64)`，有效范围为 `22x26` | 不允许边缘线程在必要的同步之前退出 |
+| 最后一个归约切片 | `k=32..39`，有八个有效位置 | 不允许越界读取剩余八个位置 |
+| 指令层覆盖 | 每个线程束分块在每个完整 K 切片中有 `(32/16)*(32/8)*(16/8)=16` 次几何意义上的运算 | 不是实际生成或执行的指令计数 |
+
+对有效输出 `(i,j)`，A08 的不变量是：累加器包含此前所有已完成 K 切片的贡献，不含任何后续切片的贡献。第三个切片完成后，**只执行一次** `0.5*acc+C[i,j]`。[API 循环嵌套](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api.md#L8-L63)表达的是外层 M/N 网格的并发，而不是设备端的串行循环。若采用 Split-K，就需要另一套合并证明，以及 C 恰好计入一次的证明。
+
+沿用 L06 的步长推理，A 的偏移为 `i*48+k`，B 为 `k*96+j`，C/D 为 `i*96+j`。D 的最后一个逻辑元素位于 `149*96+89=14393`，在 `150*96=14400` 个元素的范围内。使用 `i*90+j` 会忽略填充（padding）。每个操作数的分配范围与子视图（subview）对齐都要独立证明；这些算术推导不能证明它满足模板的对齐要求。
+
+一个理想化的 FP16 暂存槽位容纳 `(64*16+16*64)*2=4096` 字节的 A/B 有效载荷（payload）；两个槽位共 8192 字节。这没有计入布局填充及内核的其他存储，因此既不是内核的共享内存分配量，也不是占用率估计。暂存过程必须检查边界，或通过显式填充提供合法、完整的操作数；最终存储只能选取有效输出。
+
+## 流水线需要两种不同的许可
+
+选定的 `MmaPipelined` 继承自一个**两阶段**基类。流水线（pipeline）中的阶段（pipeline stage）是可复用的存储槽位，并不意味着所有 CUTLASS 内核都采用双缓冲（double buffering）。下面的原创时间线规定的是依赖关系，不是实测的执行重叠，也不是逐条指令的实际调度。
+
+| 切片 | 槽位内容 | 必须满足的顺序 |
+| --- | --- | --- |
+| 第一个 | 阶段 0 接收 `k=0..15` | 消费者（consumer）读取之前，必须完成并发布写入 |
+| 第二个 | 阶段 1 接收 `k=16..31` | 消费之前，必须独立确认该阶段已就绪 |
+| 第三个 | 阶段 0 接收 `k=32..39`，其余补零 | 覆写之前，等待上一轮阶段 0 的所有消费者完成，再发布新内容 |
+
+“可以读取”和“可以安全覆写”是两件不同的事。分配了两个缓冲区并不能证明其中任何一件。边缘处没有有效数据的线程仍须参加必要的同步。[高效 GEMM 讨论](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/efficient_gemm.md#L110-L151)说明了采用缓冲与收尾重排的动机，但不保证本模型能够隐藏延迟、达到某种占用率或获得加速。这次源码阅读也不能证明使用了 L05 中单独标注版本的 `cuda::pipeline` API。
+
+[VIS12](/visuals/gemm-tiling-hierarchy/)串联矩阵、分块、线程块与线程束。它的指令面板仍是**源码层的标量 `1x1x1` 槽位**，不是 FMA、MMA、WMMA、SASS，也不是实测的 CUTLASS 执行。进一步的指令与流水线推理应使用本单元另行标明的几何模型和时间线，不要更改现有可视化所表达的含义。
+
+## 限定 3.x 比较的范围
+
+[3.x 阅读路径](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api_3x.md#L83-L195)是 **Device -> Kernel -> Collective -> Tiled MMA/Copy -> Atom**。Collective 为主循环或收尾操作协调协作线程及其数据依赖。生产者（producer）线程束与消费者线程束可以承担不同角色。Tiled MMA/Copy 表达分块后的线程/值工作，原子构件（atom）描述基础操作（primitive operation）。“collective = warp”和“atom = thread”都不是有效的对应关系。
+
+内核组合 collective 主循环与收尾操作；[`device::GemmUniversalAdapter`](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/device/gemm_universal_adapter.h#L123-L137)仍是面向主机的接口。[代际兼容性说明](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/cutlass_3x_backwards_compatibility.md#L11-L49)解释的是如何共存，不是说配置类型可以互换。列出的 Hopper 3.x 内核要求 SM90a 和 CUDA 12.0+，但这不代表每个 3.x 概念都只能用于 Hopper。CuTe **C++** 不是 CuTe **Python DSL**；这里不需要领域专用语言（domain-specific language，DSL）。
+
+## 核对工具链，不虚构构建结果
+
+主要目标的拟议配置精确为：**原生 Linux x86-64、Ubuntu 24.04、CUDA Toolkit 13.3.1、NVCC 13.3.73、GCC 13.3.0，显式使用 C++17**；FP32 SIMT 基线与选定的 FP16 SM75 路径均使用普通 **`sm_75`**。这套配置**只是提案，尚未验证**。SM80 数值扩展需要单独设置门槛。这条可选的 CUTLASS 学习路径不会自动纳入学习站（Learning Site）的三路核心编译矩阵。
+
+| 已核对的契约 | 它实际说明了什么 | 本单元如何处理 |
+| --- | --- | --- |
+| [版本标签下的 README，129-151 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/README.md#L129-L151) | 最低要求为 CUDA 11.4、C++17、计算能力（compute capability，CC）7.0；列出 11.4-11.8 与所有 12.x，推荐 12.8；Ubuntu/GCC 配对为 18.04/7.5.0、20.04/10.3.0、22.04/11.2.0 | 发布说明不为每项功能或所有环境组合逐一背书 |
+| [快速入门](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/quickstart.md#L5-L11)与 [CMake 源码](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CMakeLists.txt#L29-L108) | 快速入门写的是 CMake 3.18+、g++ 7.5.0，推荐 CUDA 12.0；实际配置要求 CMake 3.19、C++17，并拒绝低于 7.3 的 GNU 编译器 | 采用实际的 **3.19** 下限与符合支持要求的现代编译器，不取最宽松的一项检查 |
+| [变更日志](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CHANGELOG.md#L5-L39) | C++ 部分为获得最佳代码生成效果而推荐 CUDA 13.3 | 这是上游建议，不是本地测得的代码质量 |
+| [功能说明](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/functionality.md#L29-L66)与[目标门槛](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CMakeLists.txt#L174-L208) | 保留的功能子集列出 CUDA 11.4+；75/80/86/87 从 11.4 起，70/72 仅限 CUDA 13 之前，89/90 从 11.8 起，90a 从 12.0 起 | 对功能子集、Toolkit、编译器与架构要求取交集；历史标签不能恢复已移除的目标 |
+
+[11.8.0 Linux 归档](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-installation-guide-linux/index.html#system-requirements)列出 Ubuntu 22.04/GCC 11.2.0；其 GCC-11 支持策略使 GCC 11.4 可以作为历史比较候选，但这不是构建结果。[12.9.2 主机编译器策略](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#host-compiler-support-policy)列出 GCC 6-14 和 Clang 7-19；当前 13.3 列出 GCC 6-15 和 Clang 7-21。GCC 13.3.0 落在后两者的 GCC 范围内，但还须满足 CUTLASS 要求。继续显式使用 C++17，不改用 C++23，也不绕过不受支持的主机编译器检查。
+
+13.3.1 清单区分了 NVCC **13.3.73** 与 CUDA Runtime **13.3.29**。在线指南的 13.3 标签不是不可变的 13.3.1 归档。M17 仍要求记录实际的虚拟/真实目标（virtual/real target）与产物内容：仅有 C++ 的 `Sm75` 标签，无法证实其中任何一项。普通 SM75 MMA 不需要 `a` 后缀；架构专用的 `90a` PTX 不是通用的未来 GPU 回退方案。
+
+## 把上游测试读作源码规格
+
+这些固定版本的测试展示的是已声明的配置，不是成功运行的测试结果，也不意味着可以复制其实现。指令形状是在选定运算层面的 `M x N x K`，不是整个应用通用的整除规则。
+
+| 固定版本的测试 | 源码声明的类型与运算 | 边界 |
+| --- | --- | --- |
+| [SIMT SGEMM，57-80 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/simt_sgemm_nt_sm50.cu#L57-L80) | 全部为 FP32，`OpClassSimt`、`Sm50`、`1x1x1`，两个阶段 | 实现标签 `Sm50` 不是 CUDA 13 的 `sm_50` 编译目标 |
+| [FP16 SM75，51-84 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_f16n_f16t_f32t_tensor_op_f32_sm75.cu#L51-L84) | FP16 A/B，FP32 累加器/输出，`OpClassTensorOp`、`16x8x8` | 要检查编译器支持的条件守卫（guard），不能只看文件名 |
+| [BF16 SM80，53-69 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_bf16t_bf16t_bf16t_tensor_op_f32_sm80.cu#L53-L69) | BF16 输入/输出，FP32 累加器，`16x8x16`，三个阶段 | 输出精度与阶段数均不同于选定路径 |
+| [TF32 SM80，55-84 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_tf32n_tf32t_f32t_tensor_op_f32_sm80.cu#L55-L84) | `tfloat32_t`，FP32 累加器/输出，`16x8x8` | 不是 C++ WMMA 的 `16x16x8` 接口 |
+| [FP64 SM80，52-81 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_f64n_f64t_f64t_tensor_op_f64_sm80.cu#L52-L81) | 全部为 double，TensorOp、`8x8x4` | 不能证明每个更高 CC 都有原生 FP64 Tensor Core |
+| [INT8 WMMA，56-83 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_s8t_s8n_s8t_wmma_tensor_op_s32_sm72.cu#L56-L83) | 文件名虽含 `sm72`，测试名称/标签却是 SM75/`Sm75`；INT32 累加，收尾时限幅为 INT8 | 整数 WMMA 实际的 API 最低要求是 SM72；仅凭文件名无法证明这两种契约中的任何一种 |
+
+[测试框架，256-347 行](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/testbed.h#L256-L347)包含主机 GEMM 参考实现，并且可以在共享内存不足时以返回 true 的方式豁免测试。即使未来出现测试通过的汇总，也仍要核对环境、条件守卫和豁免情况。本单元没有执行任何上游测试。
+
+## 严格限定已知问题的范围
+
+以下三个 issue 的状态均于 **2026-09-07** 核对。Open 表示问题跟踪器中的未关闭状态，不表示已在 v4.7.0 上复现；本地没有复现其中任何一个。
+
+| Issue | 已确认的范围 | 对学习安排的影响 |
+| --- | --- | --- |
+| [#3179](https://github.com/NVIDIA/cutlass/issues/3179)，Open | 仅静态构建完整 profiler 的问题报告，最初来自 aarch64 v4.3.5/main；固定版本的 CMake 只在共享库构建时创建 `cutlass_lib`，却在 profiler 中无条件链接它 | 这是源码确认的构建系统隐患，不是 GEMM 数值缺陷；不要求静态构建完整 profiler |
+| [#3516](https://github.com/NVIDIA/cutlass/issues/3516)，Open | 固定大小的 `cutlass::Matrix` 4x1 只有四个元素，但检查到的索引公式 `i*4+j` 会把 `(3,0)` 映射到偏移 12 | 这一源码缺陷不涉及 `cutlass::layout::RowMajor`；验证非方阵时避开该辅助类 |
+| [#2152](https://github.com/NVIDIA/cutlass/issues/2152)，Open | 历史上的 SM90a BF16 ping-pong/TMA 收尾操作挂起报告，条件为 beta 非零且线程块集群（cluster）大小不为 1；没有已验证的当前版本修复 | 不属于 SM75 两阶段路径；既不能推断所有 BF16 都有问题，也不是已确认的 v4.7.0 复现 |
+
+版本标签下的 README 还警告了 [4.x Windows 构建](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/README.md#L80-L83)与 [GCC 8.5.0 折叠表达式/重载运算符编译](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/README.md#L151)问题。这两条警告没有查明对应的 issue 编号。原生 Linux/GCC 13.3 避开了警告所指的目标，但不能据此证明拟议构建会成功。精确源码坐标与带日期的问题跟踪信息见 SRC-CUDA-070。
+
+## 保留普通 FP32 替代路径
+
+保留一条不使用 Tensor Core 的 FP32 SIMT GEMM，A/B/C/D、累加器与收尾计算全部采用 FP32。无论实现标签有多旧，它在学习站的硬件基线都是 CC 7.5 或更新，且问题规模受限、内存需求小于 8 GB。布局、尾部处理与 `alpha,beta` 语义都要明确。把 FP16 乘数换成 FP32 会改变数值算法；它既不是逐位等价的回退，也不是精确实数运算的判定基准。L08 解释了独立的更高精度参考与针对具体测试数据（fixture）的容差。性能比较要求数值结果已通过验收，且测量边界一致，不能从分块大小预测加速比。
+
+## 证据边界
+
+本单元只有原创推理与源码引用：没有导入规范 CUDA 源文件，没有 CUTLASS 实例化、构建、PTX/SASS 产物检查、GPU 输出或计时。四个证据数组全部为空；不授予任何证据状态（Evidence Status），也不从 A08、L06、上游测试或链接的示例继承状态。原生 Linux 是唯一的受支持环境（Supported Environment），浏览器从不执行 CUDA。
+
+未来的编译记录需要精确源码 SHA、操作系统/编译器/组件版本、语言方言与目标标志、命令、产物哈希、诊断信息和退出状态。未来的运行记录还需要环境清单（Environment Manifest）、完成/错误检查、独立数值参考、验收标准，以及在已声明的基准环境（Reference Environment）中的实际结果。拟议的兼容性与源码可见的指令封装，都不能替代这些记录。
+
+## 检索检查
+
+1. 为什么 `device::Gemm` 面向主机？`can_implement` 检查成功后，调用者还承担哪些责任？
+2. 为什么推导模型有六个输出线程块，而不是十八个？C 在什么时候加入？
+3. 推导右下角的有效范围与 D 的最后一个偏移。每个公式描述的是哪一层布局？
+4. 阶段 0 接收第三个 K 切片之前，除了它的第一批内容曾经就绪，还必须满足什么？
+5. 为什么源码的 `16x8x8` 几何形状、WMMA 分块与 VIS12 的标量槽位是不同的声明？
+6. 为什么 3.x collective 不能简单等同于 2.x warp？为什么 CuTe C++ 不意味着依赖 Python DSL？
+7. 读过 CMake 门槛、SM80 测试或 CUDA 13.3 推荐之后，仍缺少哪些证据？
+
+## 继续练习
+
+- 先完成 [L09 练习（Exercises）](/libraries/cutlass-cpp-gemm-structure/exercises/)，再打开[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
+- 在 [PB-R4-010](/practice/#pb-r4-010) 中重建另一个尺寸不整齐的 GEMM，保留输出归属与阶段复用的证明。
+- 回看 [VIS12](/visuals/gemm-tiling-hierarchy/) 理解空间关系，回看 [L08](/libraries/tensor-core-precision-contracts/) 区分精度与原生能力。
+
+## 来源与许可
+
+[SRC-CUDA-070](/sources-and-versions/#src-cuda-070)列出了固定 SHA 下**逐一核对的 19 个文件**，包括层次头文件、适配器、WMMA 条件守卫、固定大小的 Matrix 辅助类、六个测试与 `testbed.h`。每个文件的 1-30 行都包含 `SPDX-License-Identifier: BSD-3-Clause` 及完整条件/免责声明。其中十八个标有 `Copyright (c) 2017 - 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.`；例外是 `include/cutlass/gemm/kernel/gemm_universal.hpp`，其年份为 **2023 - 2026**。未来任何经授权的改编都必须保留各文件的原始声明，不能统一年份或改用学习站的许可。
+
+固定版本的 [BSD-3-Clause 许可](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/LICENSE.txt)要求：源码再分发保留版权、条件与免责声明，二进制再分发在文档/随附资料中重现这些内容，未经许可不得借权利人或贡献者名义背书。这次核对不是对整个仓库或依赖的审计。许可中明确的 `python/CuTeDSL` 例外不能忽略：[独立的 Python DSL 协议](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/pythonDSL/license.rst)日期为 **2025 年 5 月 8 日**，采用 NVIDIA 软件许可协议（NVIDIA Software License Agreement），不是 BSD；其中包含有限授权、再分发限制、NVIDIA GPU 用途限制，以及其他许可条款。**DSL 实现、示例、软件包和产物均排除在本单元之外。**
+
+所有上游资料仅供参考。本单元的文字、表格、分块算术与依赖时间线均为原创，没有复制或改编上游实现、示例、测试、图示或基准测试。公开来源保留各自许可。经 Context7 发现的资料已与一手文档及这个不可变 SHA 交叉核对；未固定版本的 main/Doxygen 摘录不作为该发布版本的权威依据。
+
+**事实核对与来源访问日期：2026-09-07。**

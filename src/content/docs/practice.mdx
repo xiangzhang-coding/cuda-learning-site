@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 74 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 76 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-09-06'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -83,6 +83,8 @@ structure:
   - entry-pb-r4-006
   - entry-pb-r4-007
   - entry-pb-r4-008
+  - entry-pb-r4-009
+  - entry-pb-r4-010
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -155,6 +157,8 @@ prerequisites:
   - L05
   - L06
   - L07
+  - L08
+  - L09
 relatedUnits:
   - O02
   - O03
@@ -224,6 +228,8 @@ relatedUnits:
   - L05
   - L06
   - L07
+  - L08
+  - L09
   - EX15
   - EX17
   - EX18
@@ -248,19 +254,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-06' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,EX15,EX17,EX18,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,EX15,EX17,EX18,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -279,13 +285,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 74 个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 76 个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 74 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 76 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
@@ -3346,6 +3352,106 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 **来源日期：** 2026-09-06。
 
+<span id="pb-r4-009" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-009：审查残差信号的输入、累加、输出与架构合同
+
+- **ID 与双语发布对：** PB-R4-009；属于 `practice-bank` 双语发布对。
+- **类型与难度：** 正确性与调试；进阶。
+- **直接先修：** [L08](/libraries/tensor-core-precision-contracts/)，精确先修集合为 `[L08]`。
+- **硬件门槛：** 无；只做静态数值推导。未来执行须原生 Linux、CC 7.5+；BF16/TF32 与原生 FP64 能力另行检查。
+- **版本门槛：** 2026-09-07 复核的 CUDA v13.3、12.9.2 归档 WMMA 与 PTX 合同；原生类型表不能替代实际编译产物检查。
+- **相关学习单元与资源：** [Q02](/correctness/floating-point-order-reproducibility/)、[L06](/libraries/cublas-gemm/)、[F06](/foundations/compute-capability/)和 [L08](/libraries/tensor-core-precision-contracts/)。
+- **最后复核：** 2026-09-07。
+
+**题目：** 一个残差检测器要计算 `D=A*B+C`，其中 `M=17,N=19,K=18`，原始 A/B/C 是有限 FP32，C 初始为零。某个输出只含两个非零乘积：A 对应项为 `[1+2^-12,-1]`，B 对应项为 `[1,1]`。应用要求保留该微小残差信号。审查材料把 A/B 按就近舍入、偶数优先转换为 FP16，选择 FP32 累加器类型（Accumulator Type），却将 float 片段直接存入 half 指针，再转成 FP32 文件，声称这就是“完整 FP32 精度”。这是人为构造的设计，没有运行日志。
+
+另一个范围检查输入包含 `70000`，作者因最终乘积 `70000*2^-10` 不大而跳过转换检查。迁移表拟在 CC 7.5 上直接换 BF16/TF32，在 CC 8.6 上仅凭“高于 8.0”宣布原生 FP64 张量核心（Tensor Core）加速。边缘处理让没有有效输出的线程提前退出，其余线程使用 WMMA；一个 32 字节对齐基址偏移一个 half 后继续加载，`ldm=18`，并把 `fragment.x[i]` 当矩阵第 i 个元素。
+
+**目标：** 把输入信息丢失、累加误差、输出转换、API 合法性、原生架构能力和观测证据拆开，给出不能隐藏残差信号消失的验收计划。
+
+**约束：** 不改变原始数值问题，不用更大容差掩盖量化（quantization）损失。保留非张量核心 FP32 SIMT 基线作为比较算法，而不是精确实数参考。不得预填 GPU 输出、指令、耗时或加速比。
+
+**预期证据：** 六列精度账本（原值、存储输入、乘数精度、累加、收尾、存储输出）；两种独立参考的推导；架构迁移判定；完整瓦片、地址、步长和参与者修复；按测试输入分别声明的容差政策。
+
+**验收条件：** 在声明的 FP16 转换模型下证明残差信号在输入阶段已丢失；不能靠较宽累加或输出格式恢复。区分 BF16 的范围与有效位数，拒绝无依据的架构迁移和不合法的片段存储。未来实际输出只有经过完成检查和独立数值验证才可记录。
+
+<details><summary>提示 1：在乘法之前检查差别</summary>1 附近的 FP16 间距为 2^-10。先把两个 A 元素逐个转换，再比较原输入问题和已转换输入问题；不要先把点积算完再舍入。</details>
+
+<details><summary>提示 2：分别审查三个门槛</summary>API 可用、原生类型加速、实际生成指令不是同一个判定。边缘瓦片还须同时满足完整参与、有效存储、起点对齐和以元素计的步长。</details>
+
+<details>
+<summary>独立参考解答：完成作答后展开</summary>
+
+**参考解答：** 原输入点积为 `2^-12 = 0.000244140625`。它距 1 小于半个 FP16 间距，所以声明的输入转换把 `1+2^-12` 变成 1；已舍入输入的数学点积为 `1-1=0`。两者的差是输入转换损失，不是 GPU 实测误差。保留原 FP32 A/B/C 的 double 参考 `R_original`，再由实际转换值独立建立 `R_rounded`；不能让参考复用被审查实现的索引或累加顺序。double 也只是有限精度参考。
+
+六列账本为：原 FP32 值；FP16 A/B；FP16 乘数精度及 PTX 规定的至少单精度乘法；FP32 累加；单独声明的收尾计算；单独声明的 D 存储。将 float 累加器片段先存入合法的 float 存储，再按明确政策进行可选 half 转换，不能直接传 half 指针。若应用坚持保留原残差，单纯增加累加精度不足以挽救该 FP16 输入路径；原 FP32 SIMT 路径是待验证的替代。输出文件采用 FP32 不会撤销较早的 half 转换。
+
+为这个特定残差检查可预先要求 `abs(got-R_original) <= 2^-14 + 2^-10*abs(R_original)`；零值与原参考的差为 `2^-12`，超过约 `0.0000612736` 的阈值，因此该政策不会把完全丢失信号当成通过。这是应用为该输入选择的验收标准，不是整个 GEMM 的误差保证。对 `R_rounded` 的单独检查用于定位后续累加/输出问题，不能替代原问题验收。其他输入另行覆盖抵消、长 K、尾部、溢出、下溢和近零值，推导各自绝对加相对容差并先拒绝非有限值。
+
+`70000` 超过 FP16 最大有限值 65504；即使理想乘积仅为 `68.359375`，也必须先拒绝该输入路径或明确改变数值合同。BF16 具有更大的指数范围，但 1 附近间距为 `2^-7`，在同样的就近舍入模型下仍丢失本题残差。BF16/TF32 WMMA 的 API 起点为 SM80，不能移到 CC 7.5；TF32 还要显式 `__float_to_tf32` 转换，float 存储不是普通 FP32 乘数语义。当前类型表未在 CC 8.6 列出原生 FP64 张量核心加速，不能由双精度 WMMA 的 `sm_80` 起点推出该结论，更不能猜测未检查的编译器降级方式。
+
+一个合法的设计方向是把 FP16 WMMA 的逻辑问题显式补齐到 `32x32x32`，选择完整 `16x16x16` 瓦片；填充区置零，只回写有效 `17x19` 输出。新的暂存区必须覆盖所有访问，起点满足 32 字节对齐，half 的 `ldm=32` 满足 8 元素倍数，float 的步长满足 4 元素倍数。原偏移地址只有余数 2，原 `ldm=18` 也不合法。所有线程束成员统一参与，数据无效不等于可以退出；另证块内生产/消费与存储复用同步。不要把片段的 `x[i]` 映射为可移植矩阵坐标。上述修复是静态设计，不是实现通过或 GPU 输出声明。
+
+**有效替代与常见错误：** 可以明确拒绝低精度路径并保留原问题的 FP32 比较实现；不能默默重定义输入、把单位舍入误差当全矩阵容差、把 FP64 API 资格当原生加速，或用输出格式掩盖输入量化。
+
+</details>
+
+**来源依据：** 原创情景与推导；[L08](/libraries/tensor-core-precision-contracts/)、[TERM-189](/glossary/#term-189)、[TERM-190](/glossary/#term-190)和 [SRC-CUDA-069](/sources-and-versions/#src-cuda-069)。没有复制上游样例或测试；既有 EX/Lab 证据不变。
+
+**来源日期：** 2026-09-07。
+
+<span id="pb-r4-010" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-010：重建非整齐 GEMM 的层级、布局与阶段复用证明
+
+- **ID 与双语发布对：** PB-R4-010；属于 `practice-bank` 双语发布对。
+- **类型与难度：** 概念与实现；进阶。
+- **直接先修：** [L09](/libraries/cutlass-cpp-gemm-structure/)，精确先修集合为 `[L09]`。
+- **硬件门槛：** 无；只审查设计，不实例化、编译或执行 CUTLASS。普通 SM75 路径不要求 `a` 后缀。
+- **版本门槛：** CUTLASS C++ v4.7.0，提交 `dcf215af68a2d08d305076c152a06f201728cd53`；保留的 2.x 风格 API、选定两阶段路径与有界 3.x 对照，不使用 Python DSL。
+- **相关学习单元与资源：** [A08](/algorithms/tiled-gemm-correctness/)、[L06](/libraries/cublas-gemm/)、[M17](/toolchain/compiler-architecture-targets/)、[L09](/libraries/cutlass-cpp-gemm-structure/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)。
+- **最后复核：** 2026-09-07。
+
+**题目：** 一份未实现的设计要计算 `D=0.5*A*B+C`，`M=130,N=70,K=33`。A/B 为 FP16，C/D、累加及收尾计算为 FP32。四个全局矩阵均为行主序（RowMajor），A 的步长为 40，B/C/D 为 80，分配覆盖完整物理行。候选几何是线程块（threadblock）瓦片 `64x32x16`、线程束（warp）瓦片 `32x32x16`，并对照 SM75 的 `16x8x8` 指令包装层。几何只用于推导，不表示已有合法模板实例。
+
+作者将网格（grid）写成 `3*3*3=27` 个块，每块只处理一个 K 切片却各自覆盖 D；把所有 RowMajor 地址写成 `row*70+col`；并让边缘线程在同步前退出。流水线（pipeline）使用两个共享存储阶段，在阶段 0 的最后消费者读完之前，就用第三个 K 切片覆写它。作者又把 2.x 的 warp 直接改名为 3.x collective，认为主机端 `device::Gemm` 是设备线程调用，且 `can_implement` 成功便能证明分配足够、全部尺寸为 16 的倍数、原生加速和完成。没有真实调用结果。
+
+**目标：** 重建输出归属、完整 K 归约、三层布局与两阶段复用证明；把源码中可见的合同与未来实例化及执行义务分开。
+
+**约束：** 保留非 split-K 的映射、原方程和逻辑尺寸；不把三维几何自动当成模板受支持的证明。不能复制上游测试，不引入 DSL，也不能给 VIS12 的标量槽位重新贴上 MMA/SASS 标签。
+
+**预期证据：** 块/线程束数量及边缘范围；全局偏移证明；三个 K 切片的阶段所有权时间线；Device/Kernel/Threadblock/Warp/Instruction 职责表；3.x 对照及未来证据清单。
+
+**验收条件：** 每个输出只有一个块负责，完整遍历三个 K 切片后才施加一次 `0.5*acc+C`。全局布局与共享/寄存器组织不能混同；发布后才能消费，消费完才能覆写。没有把模型数量、源码包装操作或检查函数返回写成实测结果。
+
+<details><summary>提示 1：先确定谁拥有 D</summary>M/N 决定输出块数量，K 切片属于每个块内部的归约。对右下角块先写合法行列范围，再独立检查最后一个 D 元素的物理偏移。</details>
+
+<details><summary>提示 2：给每个阶段标注最后读取者</summary>三个 K 切片只有两个槽位。阶段 0 的再次写入必须排在第一批所有消费者的最后一次读取之后；“数据已写入”只解决首次消费，不解决复用。</details>
+
+<details>
+<summary>独立参考解答：完成作答后展开</summary>
+
+**参考解答：** 输出网格为 `ceil(130/64)*ceil(70/32)=3*3=9` 个块；每块内部遍历 `ceil(33/16)=3` 个 K 切片，不能把它们相乘当独立输出块。按声明的几何，每块有 `2*1=2` 个输出线程束瓦片。右下角起点为 `(128,64)`，有效范围只有 `2x6`；最后 K 切片仅含 `k=32`。这既不证明实际模板可实例化，也不证明生成指令数量或线程调度。
+
+全局 A/B/C/D 偏移分别为 `i*40+k`、`k*80+j`、`i*80+j`、`i*80+j`。D 的最后有效元素偏移是 `129*80+69=10389`，小于完整 `130*80=10400` 元素分配；`row*70+col` 则错误地忽略填充。共享存储可以有单独布局，寄存器片段又由另一套线程/值映射组织，不能把同一个全局公式用于三者。固定大小 `cutlass::Matrix` 与 `cutlass::layout::RowMajor` 不是同一工具，不能用前者已知非方阵缺陷否定后者的步长公式。
+
+阶段账本为：阶段 0 装入 `k=0..15`，完成并发布后消费；阶段 1 装入 `k=16..31`，完成并发布后消费；只有第一批全部消费者读完，阶段 0 才能装入 `k=32` 和显式零填充。输入边缘通过带边界判断的暂存或明确补齐形成有效数据；无数据线程仍参与需要的同步。最后一个 K 切片完成后才执行一次收尾操作（epilogue）`0.5*acc+C` 并只存合法 D；不能每个切片都重复加 C。该时间线说明依赖，不保证复制与计算重叠。
+
+Device 层是主机端带类型句柄，负责参数、工作区、初始化、启动和状态；Kernel 组合块级主循环与收尾；Threadblock 遍历 K 并协调共享存储复用；Warp 把瓦片划分为寄存器片段及操作序列；Instruction 包装层请求具体操作。所选 SM75 包装的内联 PTX 是 `mma.sync.aligned.m16n8k8.row.col.f32.f16.f16.f32`，不是 C++ WMMA `16x16x16`，也不是已观察 SASS。保留全 FP32 `OpClassSimt` 比较基线；其 `1x1x1` 形状不是张量核心操作，也不是精确实数参考。
+
+3.x 的对应阅读路径为 Device、Kernel、Collective、Tiled MMA/Copy、Atom。Collective 编排合作线程与数据依赖，不能逐词替换 2.x 的 warp；CuTe C++ 不等于 CuTe Python DSL。VIS12 原来的指令面板仍是源级标量 `1x1x1` 槽位。选定 `MmaPipelined` 继承两阶段基类，不代表所有 CUTLASS 内核都双缓冲，也不表示其实现用了 L05 的 `cuda::pipeline`。
+
+在固定源码中，`can_implement` 检查与布局有关的张量引用对齐，并不含通用 M/N/K 整除检查，也不能确认分配范围、数值、原生加速或完成。未来先证明具体模板及其布局/对齐/尾部政策适用，再保留精确 SHA、工具链、目标、命令、产物哈希、诊断和退出码；若要确认实际指令，还须检查产物。另行完成与独立参考核验后才可能形成运行证据。选择普通 `sm_75` 不从源码 `Sm75` 标签自动获得编译结果，更不能使用 `90a` PTX 作为通用未来回退。
+
+**有效替代与常见错误：** 显式补齐存储或经逐项证明的边界迭代器都可保留同一方程；改成 split-K 必须新增合并和 C 只用一次的证明，不满足本题主解约束。切片数不是块数，阶段数不是同步证明，模板别名不是正确性证明，源码存在不是性能结论。
+
+</details>
+
+**来源依据：** 原创推导；[L09](/libraries/cutlass-cpp-gemm-structure/)、[TERM-190](/glossary/#term-190)和 [SRC-CUDA-070](/sources-and-versions/#src-cuda-070)中的固定头文件、测试与许可记录。全部上游材料仅供引用；既有 EX/Lab 证据不变。
+
+**来源日期：** 2026-09-07。
+
 ## 复核记录
 
-既有条目保留各自复核记录。Issue #32 在 **2026-09-04** 的不可变 R3 聚合复核固定 66 个条目和精确 10 项 Nsight 报告分析清单。PB-R4-001 至 PB-R4-006 保留 2026-09-04/05 记录，其中 PB-R4-006 仍属于 L05。PB-R4-007/008 将当前完整双语发布对扩展到 **74** 个条目；元数据、链接、分层提示与独立解答于 **2026-09-06** 同步复核。新情景分别审查子矩阵地址/生命周期，以及 Lt 描述、资源、缓存和收尾合同。全部题目与解答均为原创，只引用并转述上游文档，不复制或改编上游题目、代码、正文、表格、图示或结果。静态候选材料和地址算术不是 GPU 观察；没有新增编译、运行、流量、计时、Tensor Core、加速比、赢家或证据状态。
+既有条目保留各自复核记录。Issue #32 在 **2026-09-04** 的不可变 R3 聚合复核固定 66 个条目和精确 10 项 Nsight 报告分析清单。PB-R4-001 至 PB-R4-008 保留 2026-09-04/05/06 记录，其中 PB-R4-006 仍属于 L05。PB-R4-009/010 将当前完整双语发布对扩展到 **76** 个条目；元数据、链接、各两层默认关闭提示与单独展开的解答于 **2026-09-07** 同步复核。新情景分别审查精度/架构和 CUTLASS 层级/布局/流水线，直接先修精确为 `[L08]` 与 `[L09]`。全部题目与解答均为原创，只引用并转述上游文档，不复制或改编上游题目、代码、正文、表格、图示或结果。静态数值和所有权推导不是 GPU 观察；没有新增编译、运行、流量、计时、Tensor Core、加速比、赢家或证据状态。

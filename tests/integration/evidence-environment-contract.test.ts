@@ -411,7 +411,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes seventy-four complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes seventy-six complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -437,10 +437,10 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
       'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
       'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006',
-      'PB-R4-007', 'PB-R4-008',
+      'PB-R4-007', 'PB-R4-008', 'PB-R4-009', 'PB-R4-010',
     ];
     const entrySections = [...source.matchAll(
-      /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|\Z)/gm,
+      /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
     )].map(([, id, content]) => ({ id, content }));
     const focusedPrerequisitePaths: Readonly<Record<string, string>> = {
       'PB-R1-009': 'foundations/asynchronous-errors',
@@ -504,6 +504,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R4-006': 'libraries/libcu-plus-plus-synchronization',
       'PB-R4-007': 'libraries/cublas-gemm',
       'PB-R4-008': 'libraries/cublaslt-matmul',
+      'PB-R4-009': 'libraries/tensor-core-precision-contracts',
+      'PB-R4-010': 'libraries/cutlass-cpp-gemm-structure',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R3-001': [
@@ -694,6 +696,19 @@ describe('Exercises and Practice Bank contract', () => {
         'libraries/cublaslt-matmul',
         'examples/cublas-gemm',
         'labs/compare-gemm-with-cublas',
+        'visuals/gemm-tiling-hierarchy',
+      ],
+      'PB-R4-009': [
+        'correctness/floating-point-order-reproducibility',
+        'libraries/cublas-gemm',
+        'foundations/compute-capability',
+        'libraries/tensor-core-precision-contracts',
+      ],
+      'PB-R4-010': [
+        'algorithms/tiled-gemm-correctness',
+        'libraries/cublas-gemm',
+        'toolchain/compiler-architecture-targets',
+        'libraries/cutlass-cpp-gemm-structure',
         'visuals/gemm-tiling-hierarchy',
       ],
     };

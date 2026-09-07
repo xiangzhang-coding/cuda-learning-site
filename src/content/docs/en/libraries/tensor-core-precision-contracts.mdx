@@ -1,0 +1,228 @@
+---
+title: 'L08: Tensor Core Precision and Architecture Contracts'
+description: Separate input rounding, accumulation, and output conversion; audit WMMA types, shapes, architecture gates, and collective safety before defining numerical acceptance for GEMM.
+pairId: l08
+counterpart: /libraries/tensor-core-precision-contracts/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, numerical-chain, wmma-contract, architecture, rounding, safety, validation, alternative, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L08
+prerequisites: [Q02, L06, F06]
+relatedUnits: [L09, VIS12]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Warp Matrix Functions'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-matrix-functions'
+    version: 'Live CUDA Programming Guide 13.3; sections 5.4.11.1-5.4.11.6'
+    platform: 'C++ WMMA contract review; no compilation or GPU execution'
+    accessDate: '2026-09-07'
+  - title: 'Archived CUDA C++ Warp Matrix Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-c-programming-guide/index.html#warp-matrix-functions'
+    version: 'Toolkit 12.9.2 archive path; section 10.24'
+    platform: 'Alternate-type and shape comparison; no hardware-feature backport'
+    accessDate: '2026-09-07'
+  - title: 'PTX WMMA matrix multiply-accumulate'
+    url: 'https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-instructions-wmma-mma'
+    version: 'Current PTX ISA; section 9.7.15.4.5, accessed 2026-09-07'
+    platform: 'Target minima and numerical guarantees; not emitted PTX or SASS'
+    accessDate: '2026-09-07'
+  - title: 'Native Tensor Core data types by compute capability'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#compute-capabilities-table-tensor-core-data-types-per-compute-capability'
+    version: 'Live CUDA Programming Guide 13.3; Table 33'
+    platform: 'Dated native hardware feature table; no measured acceleration'
+    accessDate: '2026-09-07'
+  - title: 'CUDA floating-point data types and properties'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-data-types'
+    version: 'Live CUDA Programming Guide 13.3; Tables 44-45'
+    platform: 'Representation properties, not matrix error bounds'
+    accessDate: '2026-09-07'
+  - title: 'NVIDIA floating-point operations and accuracy'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy'
+    version: 'Current numerical guidance, accessed 2026-09-07'
+    platform: 'Rounding, reduction, and FMA principles; no historical benchmark reuse'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/tensor-core-precision-contracts/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,numerical-chain,wmma-contract,architecture,rounding,safety,validation,alternative,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q02,L06,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L09,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.2' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/tensor-core-precision-contracts/" lang="zh-CN">阅读中文对应页</a>
+
+Do not shorten "FP16 inputs, FP32 accumulation" to "FP32 accuracy." Input conversion may have already discarded the small quantity that determines the answer, and the final output conversion may round again. Deciding whether a matrix multiplication fits an application requires following every representation along that path.
+
+## Learning goals
+
+Allow about 35 minutes for the unit, paper derivations, and retrieval check. You should be able to identify a WMMA configuration's input and accumulator types, tile shape, and target gate; reject an unsafe warp call; and design acceptance checks that separate input-conversion error from computation error. The Exercises require no GPU.
+
+## Prerequisites
+
+The exact ordered prerequisites are `Q02, L06, F06`: [Q02: Floating-Point Order and Reproducibility](/en/correctness/floating-point-order-reproducibility/), [L06: Hand Matrix Multiplication to cuBLAS Correctly](/en/libraries/cublas-gemm/), and [F06: Compute Capability](/en/foundations/compute-capability/). Q02 supplies rounding and reduction order, L06 supplies GEMM shapes and storage/compute types, and F06 supplies compute capability (CC). L09 and VIS12 are related resources, not additional prerequisite edges.
+
+## Why matrix operations need a precision contract
+
+A [Tensor Core](/en/glossary/#term-189) is a hardware unit for particular matrix multiply-accumulate operations, not another name for arbitrary `float` arithmetic. Early FP16 WMMA starts at `sm_70`; later interfaces add integer, BF16, TF32, and double combinations. Types and shapes evolve with the interface and architecture, so "supports Tensor Cores" does not settle a particular combination.
+
+Warp matrix multiply-accumulate (WMMA) gives a matrix tile to a cooperating warp. Fragments distribute the tile among participating threads, but the C++ interface does not expose a portable element-to-register ownership map. It lets a program express matrix work without manually assigning every register coordinate. The caller must still satisfy the collective operation's conditions.
+
+## Write the complete numerical chain
+
+An application's GEMM may be `D = alpha*A*B + beta*C`. WMMA's `mma_sync` expresses only the tile operation `D = A*B + C`; general scaling, bias, and output conversion need separate handling. We use the existing [epilogue](/en/glossary/#term-188) terminology for that output work.
+
+| Point on the data path | Question to record | Distinction that is easy to miss |
+| --- | --- | --- |
+| Original application inputs | Which values define the original problem? | Original FP32 values may differ from their stored FP16 versions |
+| A/B storage and multiplicands | What do the bytes represent, and what precision reaches multiplication? | TF32 uses `float` storage without ordinary FP32 multiplicand precision |
+| Accumulation | Which type holds partial sums? | [Accumulator Type](/en/glossary/#term-190) does not determine input precision |
+| Epilogue computation | Which types participate in `alpha,beta,C` arithmetic? | Narrow computation may follow a wide accumulator |
+| D storage | How does final conversion round, truncate, or clamp? | FP32 storage cannot prove earlier FP32 multiplication |
+
+Original mathematical derivation: take row `a=[1+2^-12, 1]` and column `b=[1, -1]`. Their exact dot product is `2^-12`. Explicitly assume round-to-nearest-even when converting A/B to FP16 in this example. FP16 spacing near 1 is `2^-10`, so the first value becomes 1. The exact dot product of the converted inputs is zero. Even ideal exact accumulation cannot recover the lost `2^-12` from two ones. This is representation and algebra, not a WMMA runtime result, and it specifies no TF32 conversion rounding mode.
+
+## C++ WMMA types, tiles, and gates
+
+The interface is `nvcuda::wmma` in `<mma.h>`; FP16 and BF16 types involve `<cuda_fp16.h>` and `<cuda_bf16.h>` respectively. The table organizes the reviewed C++ contract by numerical path. Shapes always mean **WMMA warp tiles in `M x N x K` order**, not every underlying matrix-instruction shape or a divisibility requirement for the entire application matrix.
+
+| Path | C++ fragment element types for A and B | C/D accumulator fragment type | Available WMMA tiles | Minimum API/PTX target |
+| --- | --- | --- | --- | --- |
+| FP16 | Both `__half` | `float` or `__half` | `16x16x16`, `32x8x16`, `8x32x16` | `sm_70` |
+| BF16 | Both `__nv_bfloat16` | Only `float` | `16x16x16`, `32x8x16`, `8x32x16` | `sm_80` |
+| TF32 | Both `nvcuda::wmma::precision::tf32` | Only `float` | Only `16x16x8` | `sm_80` |
+| FP64 | Both `double` | `double` | Only `8x8x4` | `sm_80` |
+| INT8 | Both `signed char`, or both `unsigned char` | `int` | `16x16x16`, `32x8x16`, `8x32x16` | `sm_72` |
+
+INT8 signedness must match; do not guess whether plain `char` is signed. Integer WMMA does not directly produce an INT8 array. That requires explicit conversion or the selected GEMM epilogue. Quantization scales, zero points, rounding, and clamping belong to the application contract.
+
+TF32 inputs require manual conversion with `__float_to_tf32`. Its argument, result, and memory storage remain `float`, while the `precision::tf32` fragment declares TF32 multiplicands. The guide leaves the internal layout implementation-defined and promises at least 10 fractional bits. This does not define a universal "19-bit packed C++ type" or justify inventing a conversion rounding mode.
+
+The destination pointer of `store_matrix_sync` must match the fragment's element type. A `float` accumulator fragment does not automatically write to `__half*`; store into valid FP32 storage before explicitly converting output. Some operand combinations expressible in PTX are not available through the C++ templates.
+
+## An API minimum is not a native hardware whitelist
+
+Separate interface target eligibility, targets currently accepted by the compiler, native GPU capabilities, and what the actual program generated and executed. Even the first three together do not constitute an observation of the fourth.
+
+| Hardware-table fact reviewed on 2026-09-07 | Appropriate use | Unsupported inference |
+| --- | --- | --- |
+| Among listed CCs, 7.5 and every later listed row include FP16 and INT8 acceleration | Check candidate types for the site's Baseline GPU Capability Tier | Every future CC, every shape, or any program receives acceleration |
+| BF16 and TF32 start at CC 8.0 in the table | Gate these numerical extensions separately | CC 7.5 can execute TF32 WMMA because it can store `float` |
+| Native FP64 Tensor Cores are listed at CC **8.0, 9.0, 10.0** | Check native FP64 capability against explicitly listed CCs | `sm_80 or higher` automatically covers every higher CC |
+
+The current table does not list native FP64 Tensor Core acceleration at 7.5, 8.6, 8.7, 8.9, 10.3, 11.0, or 12.x. In particular, 8.6 is not eligible merely because its number exceeds 8.0. This supplies no conclusion about compiler lowering or measured performance on an uninspected target.
+
+The historical integer WMMA API minimum really is `sm_72`, not uniformly `sm_75`. It is below the site's CC 7.5 baseline and is not a CUDA 13 compilation target. Reading this page has no hardware gate. A future implementation must separately select valid compiler targets, devices, and bounded problems on Native Linux rather than substituting a historical minimum for current environment checks.
+
+## Read rounding guarantees at the right level
+
+Start with representation. FP16's largest finite value is 65504; its smallest positive normal is `2^-14`, and its smallest positive subnormal is `2^-24`. BF16 has an FP32-like exponent range but coarser spacing near 1.
+
+| Type | Spacing epsilon near 1 | Consequence for selection |
+| --- | --- | --- |
+| FP16 | `2^-10` | Narrower range; finer spacing near 1 than BF16 |
+| BF16 | `2^-7` | Wider range does not make every small difference more accurate |
+| FP32 | `2^-23` | Useful ordinary floating-point comparison, still subject to reduction rounding |
+| FP64 | `2^-52` | Useful higher-precision reference, not exact real arithmetic |
+
+Epsilon is local spacing, not a GEMM relative-error bound. The [PTX WMMA contract](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-instructions-wmma-mma) further distinguishes these rules:
+
+- FP16 WMMA multiplication uses at least single precision. Accumulation is at least single precision when C or D is FP32, and at least half precision when both are half.
+- BF16/TF32 multiply at their specified input precision and accumulate at least at single precision. Accumulation order, rounding, and subnormal-input handling are unspecified for these floating paths. Do not call the entire dot product one correctly rounded scalar fused multiply-add (FMA) or promise bitwise agreement with a serial FP32 loop.
+- C++ double `mma_sync` uses `.rn`, round-to-nearest-even. Other PTX double rounding modifiers are not extra C++ WMMA arguments.
+- PTX integer WMMA wraps on signed 32-bit overflow without `.satfinite`; with that modifier it clamps to signed 32-bit extrema. First prove that introductory integer fixtures do not overflow and use a wider integer CPU reference.
+
+C++ floating `satf` defaults to false. When true, it maps positive/negative infinity to the corresponding maximum normal finite value and NaN to positive zero. This changes non-finite semantics rather than generally "improving precision." PTX removed floating `.satfinite` from `wmma.mma`; do not mechanically translate the C++ flag to that suffix or conflate it with integer clamping.
+
+## Both the warp and memory must be safe
+
+All warp lanes must participate in the same operation with matching operation and template parameters, and none may have exited. A branch around WMMA must be warp-uniform. A per-thread "return if my output is out of bounds" can leave the remaining lanes in an invalid collective call.
+
+`load_matrix_sync` requires the actual pointer to be **256-bit, or 32-byte, aligned**. Leading dimension `ldm` is in elements: the documented half stride is a multiple of 8, and the float stride a multiple of 4, each a 16-byte stride granularity. A 32-byte pointer requirement and 16-byte stride granularity are different conditions. The inspected paragraph does not give an equally explicit stride table for every other type; do not silently reuse the half/float rules.
+
+Original address derivation: advancing one element from an aligned half-array base moves just two bytes and generally breaks 32-byte alignment. Even with a valid base, `ldm=18` fails the half stride rule. Passing the byte count 36 as `ldm` is also wrong: the interface interprets it as 36 elements.
+
+Make edge tiles into complete valid storage first. For example, copy valid elements under boundary predicates into aligned staging storage, zero-fill out-of-range multiplicands, and let the full warp load complete tiles. Store output to a complete staging tile before copying only valid coordinates. WMMA is not an arbitrary masked edge-load API. If other warps produce shared memory, block-scope publication and reuse synchronization remain necessary. WMMA's warp synchronization proves neither block-wide publication nor host completion.
+
+A fragment's `x[i]` is not a portable matrix coordinate. The guide permits appropriately uniform elementwise fragment operations, but i cannot be assumed to identify a particular row and column. Separately compiled objects for different architectures may be link-compatible without being safe places to pass fragments; the guide specifically warns about combinations such as SM70/SM75. At external interfaces, store to ordinary memory and let the recipient load under its own contract.
+
+## Locate error with two references
+
+Retain two independent references for each test: `R_original` evaluates the original application A/B, and `R_stored` evaluates the actual converted A/B. Compute both on the CPU at higher precision, preserving the same `alpha,beta,C` and declared output semantics. `R_stored-R_original` describes input-conversion effects. Differences between the actual result and `R_stored` then direct attention to multiplication, accumulation, epilogue, and output conversion. A double reference remains finite precision; difficult fixtures also require checking the reference itself.
+
+For ordinary finite values, use `abs(got-ref) <= atol + rtol*abs(ref)`, with `atol,rtol` derived from value ranges, K, cancellation, and output type. Near zero the absolute term dominates. Classify non-finite values separately rather than relying on an accidental failed NaN comparison. Do not copy L06/EX18's bounded FP32 tolerance to every Tensor Core path.
+
+A test plan should distinguish ordinary finite values, overflow/underflow, cancellation, conversion boundaries, and M/N/K tails. For INT8, first derive a wide-integer bound `K*max_abs(A)*max_abs(B)+max_abs(C)` before deciding output conversion and quantization acceptance. Zero and identity fixtures alone cannot adequately expose layout and precision mistakes. There is no universal per-problem error ranking `FP64 < FP32 < TF32 < FP16`; wider accumulation need not reduce every individual final output error.
+
+## Keep an ordinary FP32 path
+
+A portable alternative is ordinary non-Tensor-Core FP32 SIMT GEMM: FP32 A/B/C/D, accumulator, and epilogue computation, with explicit logical coordinates, boundary handling, and scaling semantics. The site's hardware scope for this comparison remains CC 7.5 or newer with problem memory below 8 GB. "Portable" does not mean every device and toolchain supports it.
+
+This retains an option for applications that do not want low-precision multiplicands and helps isolate conversion error. Moving from the low-precision path to FP32 changes the numerical algorithm, however; it is not a bitwise or rounding-semantics-equivalent fallback. If the application requires particular quantization behavior, an alternative must explicitly retain and validate that requirement. Ordinary FP32 is not an exact real-arithmetic oracle either. Any speed comparison must first declare the numerical contracts, then measure the same workload under matched timing boundaries. This page makes no universal speed or speedup claim.
+
+## Evidence boundary
+
+This unit and its Exercises contain original derivations and source reading only. There are no CUDA implementation imports, builds, instruction inspections, or GPU runs. All four evidence arrays are empty; no Evidence Status is granted or inherited from L06 or an owner test. Native Linux is the only Supported Environment. The browser does not execute CUDA.
+
+[VIS12](/en/visuals/gemm-tiling-hierarchy/) can refresh the relationships between matrices, tiles, threadblocks, and warps. Its instruction panel is a source-level scalar `1x1x1` slot, not Tensor Core, MMA, WMMA, or observed SASS. The type table above is not an execution configuration for that visual.
+
+## Retrieval check
+
+1. Why can neither FP32 accumulation nor FP32 output recover information lost during A/B conversion? What do the two CPU references answer?
+2. What are TF32's storage type, fragment type, and WMMA shape? Why not define a universal 19-bit C++ array?
+3. What is integer WMMA's minimum API target, and why is it not a suggested CUDA 13 build target for this site?
+4. Why does `sm_80 or higher` not prove native FP64 Tensor Core acceleration on CC 8.6?
+5. After advancing a 32-byte-aligned half pointer by one element, which conditions remain and which guarantee is lost? In what units is half `ldm` checked?
+6. Why cannot tail threads exit independently before WMMA? How does fragment `x[i]` differ from an ordinary matrix coordinate?
+7. Which numerical, acceptance, and performance conclusions need rebuilding when replacing low-precision multiplication with FP32 SIMT?
+
+## Continue with practice
+
+- Complete the [three L08 Exercises](/en/libraries/tensor-core-precision-contracts/exercises/) before opening the [separate solutions](/en/libraries/tensor-core-precision-contracts/solutions/).
+- Review precision and architecture contracts in [PB-R4-009](/en/practice/#pb-r4-009); a paper review is not runtime evidence.
+- [L09](/en/libraries/cutlass-cpp-gemm-structure/) explains another C++ GEMM hierarchy. Check its A08, L06, and M17 prerequisites before entering; related links do not create extra prerequisite edges here.
+
+## Sources and licensing
+
+[SRC-CUDA-069](/en/sources-and-versions/#src-cuda-069) provides the source record. Types and collective rules are cross-checked between [current WMMA](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-matrix-functions) and the [12.9.2-path archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-c-programming-guide/index.html#warp-matrix-functions). Minimum targets and numerical guarantees use [PTX WMMA](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-instructions-wmma-mma); native capabilities use the separate [hardware type table](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#compute-capabilities-table-tensor-core-data-types-per-compute-capability).
+
+Representation properties come from the [floating-point type tables](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-data-types). The distinction between a reduction and one FMA is developed in [NVIDIA's floating-point guidance](https://docs.nvidia.com/cuda/floating-point/index.html#the-fused-multiply-add-fma); cross-architecture fragment limits appear in [Restrictions](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#restrictions). These public materials retain their own licenses and notices. The site's prose, organization, mathematical fixtures, and Exercises are original, without copied or adapted owner source, samples, figures, or test output. Citation does not relicense NVIDIA material as CC BY 4.0.
+
+**Facts checked and sources accessed: 2026-09-07.**

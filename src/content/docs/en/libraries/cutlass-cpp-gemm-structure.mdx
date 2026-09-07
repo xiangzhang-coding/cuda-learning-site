@@ -1,0 +1,250 @@
+---
+title: 'L09: Read the CUTLASS C++ GEMM Hierarchy'
+description: Trace a pinned C++ GEMM from host arguments through tiles, layouts, pipelines, instructions, and epilogues, separating source contracts and proposed toolchains from execution evidence.
+pairId: l09
+counterpart: /libraries/cutlass-cpp-gemm-structure/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, hierarchy, layouts, tile-reasoning, pipeline, collectives, toolchain, tests, known-issues, alternative, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L09
+prerequisites: [A08, L06, M17]
+relatedUnits: [L08, VIS12]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: advanced
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUTLASS retained 2.x-style GEMM API'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api.md'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'Conceptual hierarchy and loop nest; no instantiation or execution'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS 3.x GEMM API comparison'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api_3x.md'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'Bounded collective vocabulary comparison; no Python DSL'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS device GEMM source'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/device/gemm.h'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'Host-facing arguments, workspace, initialization, launch, and status'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS release build configuration'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CMakeLists.txt'
+    version: 'C++ v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'CMake, compiler, dialect, and target gates; not a successful build'
+    accessDate: '2026-09-07'
+  - title: 'CUDA Linux host compiler support policy'
+    url: 'https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#host-compiler-support-policy'
+    version: 'Live CUDA 13.3 guide, accessed 2026-09-07; not a 13.3.1 archive'
+    platform: 'Native Linux x86-64 host eligibility for a proposed target'
+    accessDate: '2026-09-07'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; NVCC 13.3.73; Runtime 13.3.29'
+    platform: 'Independent component identities; no compilation evidence'
+    accessDate: '2026-09-07'
+  - title: 'CUTLASS license and Python DSL exception'
+    url: 'https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/LICENSE.txt'
+    version: 'v4.7.0; dcf215af68a2d08d305076c152a06f201728cd53'
+    platform: 'BSD-3-Clause scope; exact per-file review in SRC-CUDA-070'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l09 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/cutlass-cpp-gemm-structure/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,hierarchy,layouts,tile-reasoning,pipeline,collectives,toolchain,tests,known-issues,alternative,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L09 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A08,L06,M17' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L08,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '7' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '4.7.0,11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/cutlass-cpp-gemm-structure/" lang="zh-CN">阅读中文对应页</a>
+
+A GEMM template can hide the same ownership and synchronization mistakes as a handwritten kernel. Read its types as choices about who owns an output, how operands arrive, and when partial sums become stored results, not as a guarantee that those choices are correct or fast.
+
+## Learning goals
+
+Allow about 40 minutes for source reading, paper derivations, and retrieval. You will trace one retained C++ hierarchy, distinguish three layout layers, reconstruct a two-stage dependency timeline, and state what a future build must establish. This Learning Unit requires no GPU or CUTLASS installation.
+
+## Prerequisites
+
+The exact ordered prerequisites are `A08, L06, M17`: [A08: Tiled GEMM Correctness](/en/algorithms/tiled-gemm-correctness/) supplies output ownership and the K-reduction invariant; [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/) supplies shapes, leading dimensions, and numerical types; [M17: Choosing Compiler Architecture Targets](/en/toolchain/compiler-architecture-targets/) separates source architecture tags from compiler targets and artifacts. L08 and VIS12 are related resources, not additional prerequisites.
+
+## Why the hierarchy outlived its API generation
+
+CUTLASS exposes reusable C++ building blocks where a library call normally hides implementation. The retained 2.x-style organization follows device, kernel, threadblock, warp, and instruction work. SIMT and Tensor Core implementations share the GEMM equation but need different operation and data-movement policies. Newer 3.x APIs make collective mainloops and epilogues explicit as cooperation and architecture-specific schedules become more complex; they do not simply rename each older level.
+
+This unit pins **CUTLASS C++ v4.7.0**, commit **`dcf215af68a2d08d305076c152a06f201728cd53`**, and reads the **retained 2.x-style API inside that release**, not a separate 2.x dependency. The [commit](https://github.com/NVIDIA/cutlass/commit/dcf215af68a2d08d305076c152a06f201728cd53) is dated `2026-08-06T14:31:22Z`; the [release](https://github.com/NVIDIA/cutlass/releases/tag/v4.7.0) was published `2026-08-13T09:43:47Z`. Its changelog entry says 2026-08-04, a different date. Version macros report 4/7/0; the empty ungenerated revision macro cannot replace the SHA.
+
+## Follow responsibilities, not directory names alone
+
+First record the template's element/layout types, accumulator type, operator class, architecture tag, threadblock/warp/instruction shapes, epilogue, and stage count. These are compile-time choices. Runtime arguments separately provide the application `M,N,K`, tensor addresses and strides, and scaling parameters; a tile shape is not the whole matrix shape.
+
+| Level | Question it answers | Pinned reading coordinate |
+| --- | --- | --- |
+| Device | How does the host describe, initialize, and launch the operation? `device::Gemm` is not a call from a GPU thread | [`device/gemm.h`, 175-284 and 360-515](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/device/gemm.h#L175-L284) |
+| Kernel | Which output tile belongs to this block, and how are mainloop and epilogue composed? | [`kernel/gemm.h`, 203-351](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/kernel/gemm.h#L203-L351) |
+| Threadblock | How are K slices staged in shared memory and reused by cooperating warps? | [`threadblock/mma_pipelined.h`, 219-378](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/threadblock/mma_pipelined.h#L219-L277) |
+| Warp | How are register fragments and repeated operations arranged? Its policy supplies `ArchMmaOperator` | [`warp/mma_tensor_op.h`, 167-206 and 287-350](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/warp/mma_tensor_op.h#L167-L206) |
+| Instruction | Which concrete multiply-accumulate operation does the wrapper request? | [`arch/mma_sm75.h`, 142-200](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/arch/mma_sm75.h#L142-L200) |
+
+The selected FP16/FP32 SM75 wrapper contains `mma.sync.aligned.m16n8k8.row.col.f32.f16.f16.f32`. That is a source-visible inline PTX request with `16x8x8` geometry, not inspected SASS and not the C++ WMMA `16x16x16` interface. SIMT instead includes per-thread scalar work; the same hierarchy does not imply Tensor Core instructions.
+
+On the host, inspect `can_implement`, determine and supply workspace, initialize, then launch and check status. The pinned [kernel check at 151-198](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/kernel/gemm.h#L151-L198) tests layout-dependent tensor-reference alignment. Unlike older Doxygen excerpts, it contains no universal M/N/K divisibility checks. Success proves neither allocation extent nor numerical correctness, native acceleration, or completion. The caller still owns valid storage, lifetimes, applicable tail handling, and external completion checks.
+
+## Layout and epilogue are separate contracts
+
+Global layout maps logical coordinates to element offsets. [`cutlass::layout::RowMajor`](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/layout/matrix.h#L57-L110) uses `row*stride+column`; stride is not automatically the logical column count. Shared-memory layout may reorganize staged operands for access patterns, while register fragments have their own thread/value organization. A global RowMajor declaration supplies neither of those internal maps. CUTLASS layout types are not cuBLAS transpose flags.
+
+The [linear-combination epilogue](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/epilogue/thread/linear_combination.h#L219-L249) handles scaling, source C, and destination conversion after accumulation. Record accumulator, compute/scalar, source, and output types separately. Rearranging accumulator data for stores is also epilogue work, not another pass over K. FP16 A/B conversion can lose input information despite FP32 accumulation and output; [L08](/en/libraries/tensor-core-precision-contracts/) develops that numerical contract further.
+
+## Work an original uneven-tile model
+
+Consider `D=0.5*A*B+C` with `M=150,N=90,K=40`. A/B are FP16; C/D, accumulation, and epilogue computation are FP32. All global matrices use RowMajor: A stride 48, B/C/D stride 96, with allocations covering complete physical rows. Propose threadblock tiles `64x64x16`, warp tiles `32x32x16`, and an SM75 `16x8x8` instruction-level comparison. This is original geometry, not a copied test, instantiated template, or demonstrated legal specialization.
+
+| Derivation | Result | What it does not establish |
+| --- | --- | --- |
+| Output grid | `ceil(150/64)*ceil(90/64)=3*2=6` blocks | Not 18 independent blocks: K is reduced within each output block |
+| K traversal | `ceil(40/16)=3` slices per block | Not three independent epilogues overwriting D |
+| Output warp tiling | `(64/32)*(64/32)=4` warp tiles, with no K partition | Not observed scheduling or occupancy |
+| Bottom-right output tile | Origin `(128,64)`, valid extent `22x26` | Not permission for edge threads to exit before required synchronization |
+| Last reduction slice | `k=32..39`, eight valid positions | Not permission to read the remaining eight positions out of bounds |
+| Instruction-level coverage | `(32/16)*(32/8)*(16/8)=16` geometric operations per warp tile per full K slice | Not an emitted or executed instruction count |
+
+For a valid output `(i,j)`, A08's invariant is that the accumulator contains contributions from all previously completed K slices and none from future slices. After the third slice, apply `0.5*acc+C[i,j]` **once**. The [API loop nest](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api.md#L8-L63) represents outer M/N grid concurrency, not serial device loops. Split-K would require a different merge and exactly-once-C proof.
+
+L06's stride reasoning gives A offset `i*48+k`, B offset `k*96+j`, and C/D offset `i*96+j`. D's last logical element is at `149*96+89=14393`, within `150*96=14400` elements. Using `i*90+j` would ignore padding. Prove each operand's allocation and subview alignment independently; this arithmetic does not establish template alignment eligibility.
+
+One idealized FP16 staging slot holds `(64*16+16*64)*2=4096` bytes of A/B payload; two slots hold 8192 bytes. This excludes layout padding and other kernel storage, so it is not the kernel's shared-memory allocation or an occupancy estimate. Bounds-aware staging or explicit padding must supply valid complete operands, and final stores must select only valid outputs.
+
+## A pipeline needs two different permissions
+
+The selected `MmaPipelined` inherits a **two-stage** base. A stage is a reusable storage slot, not a promise that all CUTLASS kernels are double-buffered. The original timeline below specifies dependencies, not measured overlap or a literal instruction schedule.
+
+| Slice | Slot contents | Required ordering |
+| --- | --- | --- |
+| First | Stage 0 receives `k=0..15` | Finish and publish writes before consumers read |
+| Second | Stage 1 receives `k=16..31` | Independently establish readiness before consumption |
+| Third | Stage 0 receives `k=32..39` plus zero padding | Wait for every previous stage-0 consumer to finish before overwrite, then publish the new contents |
+
+"Ready to read" and "safe to overwrite" are different facts. Two allocated buffers prove neither. Threads with no valid edge data must still participate in required synchronization. The [efficient-GEMM discussion](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/efficient_gemm.md#L110-L151) motivates buffering and epilogue rearrangement, but guarantees no latency hiding, occupancy, or speedup for this model. Nor does this source reading establish use of L05's separately versioned `cuda::pipeline` API.
+
+[VIS12](/en/visuals/gemm-tiling-hierarchy/) connects matrices, tiles, threadblocks, and warps. Its instruction panel remains a **source-level scalar `1x1x1` slot**, not FMA, MMA, WMMA, SASS, or measured CUTLASS execution. Use this unit's separately labeled geometry and timeline for the additional instruction/pipeline reasoning; do not relabel the existing visual.
+
+## Bound the 3.x comparison
+
+The [3.x reading path](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/gemm_api_3x.md#L83-L195) is **Device -> Kernel -> Collective -> Tiled MMA/Copy -> Atom**. A collective coordinates cooperating threads and their data dependencies for a mainloop or epilogue. Producer and consumer warps can have different roles. Tiled MMA/Copy expresses tiled thread/value work; atoms describe primitive operations. Neither "collective = warp" nor "atom = thread" is a valid translation.
+
+The kernel composes collective mainloop and epilogue; [`device::GemmUniversalAdapter`](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/include/cutlass/gemm/device/gemm_universal_adapter.h#L123-L137) remains host-facing. [Generation compatibility](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/cutlass_3x_backwards_compatibility.md#L11-L49) explains coexistence, not interchangeable configuration types. Listed Hopper 3.x kernels require SM90a and CUDA 12.0+, but that does not make every 3.x concept Hopper-only. CuTe **C++** is not CuTe **Python DSL**; no DSL is needed here.
+
+## Review the toolchain without inventing a build
+
+The exact **proposed, unverified** primary target is **Native Linux x86-64, Ubuntu 24.04, CUDA Toolkit 13.3.1, NVCC 13.3.73, GCC 13.3.0, explicit C++17**, using ordinary **`sm_75`** for the FP32 SIMT baseline and selected FP16 SM75 path. SM80 numerical extensions require separate gates. This optional CUTLASS track does not automatically join the site's three-way core compile matrix.
+
+| Reviewed contract | What it actually says | Resolution for this unit |
+| --- | --- | --- |
+| [Tagged README, 129-151](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/README.md#L129-L151) | CUDA 11.4, C++17, CC 7.0 minima; lists 11.4-11.8 and all 12.x, recommends 12.8; Ubuntu/GCC pairs 18.04/7.5.0, 20.04/10.3.0, 22.04/11.2.0 | Release prose does not certify every feature or cross-product of environments |
+| [Quickstart](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/quickstart.md#L5-L11) versus [CMake source](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CMakeLists.txt#L29-L108) | Quickstart says CMake 3.18+, g++ 7.5.0, CUDA 12.0 recommended; actual configuration requires CMake 3.19, C++17, rejects GNU below 7.3 | Use the actual **3.19** floor and a modern eligible compiler, not the weakest check |
+| [Changelog](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CHANGELOG.md#L5-L39) | C++ section recommends CUDA 13.3 for optimal code generation | An owner recommendation, not locally measured code quality |
+| [Functionality](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/cpp/functionality.md#L29-L66) and [target gates](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/CMakeLists.txt#L174-L208) | Retained subset lists CUDA 11.4+; 75/80/86/87 from 11.4, 70/72 only before CUDA 13, 89/90 from 11.8, 90a from 12.0 | Intersect subset, Toolkit, compiler, and architecture requirements; historical tags do not restore removed targets |
+
+The [11.8.0 Linux archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-installation-guide-linux/index.html#system-requirements) lists Ubuntu 22.04/GCC 11.2.0; its GCC-11 policy makes GCC 11.4 a historical comparison candidate, not a build result. [12.9.2 host policy](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-installation-guide-linux/index.html#host-compiler-support-policy) lists GCC 6-14 and Clang 7-19; current 13.3 lists GCC 6-15 and Clang 7-21. GCC 13.3.0 fits the latter two GCC ranges, subject also to CUTLASS requirements. Keep explicit C++17, not C++23 or unsupported-host bypasses.
+
+The 13.3.1 manifest distinguishes NVCC **13.3.73** from CUDA Runtime **13.3.29**. The live guide's 13.3 label is not an immutable 13.3.1 archive. M17 still requires actual virtual/real targets and artifact contents to be recorded: a C++ `Sm75` tag alone establishes none of them. Ordinary SM75 MMA needs no `a` suffix; architecture-specific `90a` PTX is not a general future-GPU fallback.
+
+## Read owner tests as source specifications
+
+These pinned tests demonstrate declared configurations, not successful test runs or permission to copy their implementations. Instruction shapes are `M x N x K` at the selected operation layer, not universal application divisibility rules.
+
+| Pinned test | Types and operation declared in source | Boundary |
+| --- | --- | --- |
+| [SIMT SGEMM, 57-80](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/simt_sgemm_nt_sm50.cu#L57-L80) | All FP32, `OpClassSimt`, `Sm50`, `1x1x1`, two stages | Implementation tag `Sm50` is not a CUDA 13 `sm_50` compilation target |
+| [FP16 SM75, 51-84](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_f16n_f16t_f32t_tensor_op_f32_sm75.cu#L51-L84) | FP16 A/B, FP32 accumulator/output, `OpClassTensorOp`, `16x8x8` | Inspect its compiler-support guard, not just the filename |
+| [BF16 SM80, 53-69](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_bf16t_bf16t_bf16t_tensor_op_f32_sm80.cu#L53-L69) | BF16 input/output, FP32 accumulator, `16x8x16`, three stages | Output precision and stage count differ from the selected path |
+| [TF32 SM80, 55-84](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_tf32n_tf32t_f32t_tensor_op_f32_sm80.cu#L55-L84) | `tfloat32_t`, FP32 accumulator/output, `16x8x8` | Not C++ WMMA's `16x16x8` interface |
+| [FP64 SM80, 52-81](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_f64n_f64t_f64t_tensor_op_f64_sm80.cu#L52-L81) | All double, TensorOp, `8x8x4` | Not proof of native FP64 Tensor Cores at every later CC |
+| [INT8 WMMA, 56-83](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/gemm_s8t_s8n_s8t_wmma_tensor_op_s32_sm72.cu#L56-L83) | Despite `sm72` filename, test name/tag is SM75/`Sm75`; INT32 accumulation, INT8 clamping epilogue | Integer WMMA's actual API minimum is SM72; filename alone proves neither contract |
+
+The [testbed, 256-347](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/test/unit/gemm/device/testbed.h#L256-L347) contains a host GEMM reference and can waive a test with a true return when shared memory is insufficient. Even a future passing summary needs environment, guard, and waiver review. No owner test was executed for this unit.
+
+## Keep known issues narrow
+
+All three issue states were checked on **2026-09-07**. Open means tracker state, not reproduction on v4.7.0; none was reproduced locally.
+
+| Issue | Established scope | Teaching consequence |
+| --- | --- | --- |
+| [#3179](https://github.com/NVIDIA/cutlass/issues/3179), Open | Static-only full-profiler report, originally aarch64 v4.3.5/main; pinned CMake creates `cutlass_lib` only for shared builds but links it unconditionally in the profiler | Source-confirmed build-system hazard, not a GEMM numerical defect; do not require a static full-profiler build |
+| [#3516](https://github.com/NVIDIA/cutlass/issues/3516), Open | Fixed-size `cutlass::Matrix` 4x1 has four elements but its inspected `i*4+j` indexing makes `(3,0)` offset 12 | This source defect does not implicate `cutlass::layout::RowMajor`; avoid the helper for non-square validation |
+| [#2152](https://github.com/NVIDIA/cutlass/issues/2152), Open | Historical SM90a BF16 ping-pong/TMA-epilogue hang report with nonzero beta and non-unity clusters; no verified current-release fix | Outside the SM75 two-stage path; neither all BF16 broken nor a confirmed v4.7.0 reproduction |
+
+The tagged README also warns about [4.x Windows builds](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/README.md#L80-L83) and [GCC 8.5.0 fold-expression/overloaded-operator compilation](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/README.md#L151). No issue IDs were established for those warnings. Native Linux/GCC 13.3 avoids their stated targets without proving the proposed build succeeds. Exact source coordinates and dated tracker details are in SRC-CUDA-070.
+
+## Preserve an ordinary FP32 alternative
+
+Retain a non-Tensor-Core FP32 SIMT GEMM with FP32 A/B/C/D, accumulator, and epilogue computation. Its site hardware baseline is CC 7.5 or newer with bounded problems below 8 GB, regardless of older implementation tags. Keep layout, tails, and `alpha,beta` semantics explicit. Replacing FP16 multiplicands with FP32 changes the numerical algorithm; it is neither a bitwise-equivalent fallback nor an exact real-arithmetic oracle. L08 explains independent higher-precision references and fixture-specific tolerances. Performance comparisons require accepted numerics and matched measured boundaries, not a predicted speedup from tile sizes.
+
+## Evidence boundary
+
+This unit contains original reasoning and source references only: no canonical CUDA import, CUTLASS instantiation, build, PTX/SASS artifact inspection, GPU output, or timing. All four evidence arrays are empty; no Evidence Status is granted or inherited from A08, L06, owner tests, or linked examples. Native Linux is the only Supported Environment, and the browser never executes CUDA.
+
+A future compile record needs exact source SHA, OS/compiler/component versions, dialect and target flags, commands, artifact hashes, diagnostics, and exit status. A future runtime record additionally needs an Environment Manifest, completion/error checks, independent numerical references, acceptance criteria, and actual results in a declared Reference Environment. Neither proposed compatibility nor source-visible instruction wrappers substitute for those records.
+
+## Retrieval check
+
+1. Why is `device::Gemm` host-facing, and which obligations survive a successful `can_implement` check?
+2. Why does the worked model have six output blocks rather than eighteen? When is C added?
+3. Derive its bottom-right valid extent and last D offset. Which layout does each formula describe?
+4. Before stage 0 receives the third K slice, what must hold beyond its first contents having been ready?
+5. Why are `16x8x8` source geometry, WMMA tiles, and VIS12's scalar slot different claims?
+6. Why is a 3.x collective not simply a 2.x warp, and why does CuTe C++ imply no Python DSL dependency?
+7. Which evidence is missing after reading the CMake gates, SM80 tests, or CUDA 13.3 recommendation?
+
+## Continue with practice
+
+- Complete the [L09 Exercises](/en/libraries/cutlass-cpp-gemm-structure/exercises/) before opening the [separate solutions](/en/libraries/cutlass-cpp-gemm-structure/solutions/).
+- Reconstruct a different uneven GEMM in [PB-R4-010](/en/practice/#pb-r4-010), preserving output ownership and stage-reuse proofs.
+- Revisit [VIS12](/en/visuals/gemm-tiling-hierarchy/) for spatial relationships and [L08](/en/libraries/tensor-core-precision-contracts/) for precision and native-capability distinctions.
+
+## Sources and licensing
+
+[SRC-CUDA-070](/en/sources-and-versions/#src-cuda-070) lists the **19 exact reviewed files** at the pinned SHA, including hierarchy headers, adapters, WMMA guards, the fixed-size Matrix helper, six tests, and `testbed.h`. Each carries `SPDX-License-Identifier: BSD-3-Clause` and full conditions/disclaimer at lines 1-30. Eighteen carry `Copyright (c) 2017 - 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.` The exception, `include/cutlass/gemm/kernel/gemm_universal.hpp`, uses **2023 - 2026**. Any future authorized adaptation must preserve its exact per-file notice, not normalize years or substitute the site's license.
+
+The pinned [BSD-3-Clause license](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/LICENSE.txt) requires retention of copyright, conditions, and disclaimer in source redistribution, reproduction in binary-distribution documentation/materials, and no holder/contributor-name endorsement without permission. This review is not an audit of the entire repository or dependencies. Its explicit `python/CuTeDSL` exception matters: the [separate Python DSL agreement](https://github.com/NVIDIA/cutlass/blob/dcf215af68a2d08d305076c152a06f201728cd53/media/docs/pythonDSL/license.rst), dated **May 8, 2025**, is an NVIDIA Software License Agreement, not BSD, with limited grants, redistribution and NVIDIA-GPU-purpose restrictions, and other-license provisions. **DSL implementation, examples, packages, and artifacts are excluded.**
+
+All owner material is reference-only. Prose, tables, tile arithmetic, and the dependency timeline here are original; no owner implementation, sample, test, figure, or benchmark is copied or adapted. Public sources retain their own licenses. Context7 discovery was checked against primary documentation and this immutable SHA; unversioned main/Doxygen excerpts are not release authority.
+
+**Facts checked and sources accessed: 2026-09-07.**

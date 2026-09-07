@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 188 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 190 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-06'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -16,6 +16,8 @@ structure:
   - entry-term-186
   - entry-term-187
   - entry-term-188
+  - entry-term-189
+  - entry-term-190
   - maintenance
 head:
   - tag: meta
@@ -25,7 +27,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-06'
+      content: '2026-09-07'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -33,7 +35,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1746,6 +1748,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [L06](/libraries/cublas-gemm/)、[L07](/libraries/cublaslt-matmul/)、[EX18](/examples/cublas-gemm/)、[LAB12](/labs/compare-gemm-with-cublas/)和 [PB-R4-008](/practice/#pb-r4-008)。
 - **版本说明：** 2026-09-06 按 [SRC-CUDA-068](/sources-and-versions/#src-cuda-068)复核：12.9.2 的 Matmul 注 8 排除行主序 D 的 ReLU、dReLU、GELU、dGELU 与 Bias 收尾。当前 13.3 文档措辞不同，不能向旧版回填许可。类型、布局、偏置方向与候选支持仍须逐项核对。EX18/LAB12 仅提供传统 FP32 基线，不实现 Lt 收尾；本词条没有融合、内核数量、流量或速度观察。
 
+<span id="term-189" class="resource-target" aria-hidden="true"></span>
+
+### Tensor Core · 张量核心
+
+- **定义：** 张量核心（Tensor Core）是为指定类型与形状的矩阵乘加提供原生硬件运算的执行单元。源程序中的矩阵 API、编译器目标与芯片的原生类型能力共同约束可选路径，但只有检查实际产物才能确认生成了什么指令；输出采用 FP32 存储并不证明乘数采用 FP32 精度。
+- **避免使用：** 所有矩阵乘法的同义词、WMMA 固定形状就是全部硬件指令形状、更高计算能力必定包含全部旧类型加速、无需测量的速度保证。
+- **相关资源：** [F06](/foundations/compute-capability/)、[L08](/libraries/tensor-core-precision-contracts/)、[L09](/libraries/cutlass-cpp-gemm-structure/)和 [PB-R4-009](/practice/#pb-r4-009)。
+- **版本说明：** 2026-09-07 按 [SRC-CUDA-069](/sources-and-versions/#src-cuda-069)复核。当前原生类型表仅在 CC 8.0、9.0、10.0 列出 FP64 张量核心加速；C++/PTX 双精度 WMMA 的 `sm_80` 起点不能扩展成每个更高 CC 都有原生 FP64 加速。所选 CUTLASS SM75 `16x8x8` 包装操作与 C++ FP16 WMMA 的 `16x16x16` 瓦片不是同一层级。本词条没有指令检查、运行或加速观察。
+
+<span id="term-190" class="resource-target" aria-hidden="true"></span>
+
+### Accumulator Type · 累加器类型
+
+- **定义：** 累加器类型（Accumulator Type）是归约过程中保存部分和所采用的数值类型。它必须与原始输入、输入存储、实际乘数精度、收尾计算（epilogue computation）和最终输出存储分别记录。例如 FP16 输入配 FP32 累加仍在输入转换时失去信息；最终再存 FP16 还会引入另一次转换。
+- **避免使用：** 输入类型的别名、输出类型的别名、FP32 累加就是完整 FP32 GEMM、较宽累加保证每个最终误差都更小。
+- **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)、[L06](/libraries/cublas-gemm/)、[L08](/libraries/tensor-core-precision-contracts/)、[L09](/libraries/cutlass-cpp-gemm-structure/)、[PB-R4-009](/practice/#pb-r4-009)和 [PB-R4-010](/practice/#pb-r4-010)。
+- **版本说明：** 2026-09-07 按 [SRC-CUDA-069](/sources-and-versions/#src-cuda-069)与 [SRC-CUDA-070](/sources-and-versions/#src-cuda-070)复核。C++ BF16/TF32 WMMA 使用 float 累加器片段（fragment）；`store_matrix_sync` 不把 float 片段自动缩窄到 half 指针。固定 CUTLASS v4.7.0 的 BF16 测试声明 BF16 输出与 FP32 累加，说明二者可不同；测试存在不等于测试已运行。原输入与已舍入输入需要各自独立的高精度参考，且 double 参考不是精确实数运算。
+
 ## 维护规则
 
-TERM-001 至 TERM-186 保留各自逐项复核日期。新增 TERM-187/188 与完整 188 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-06** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分物理步长与逻辑形状、收尾语义与实测融合收益；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-188 保留各自逐项复核日期。新增 TERM-189/190 与完整 190 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-07** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分原生硬件能力与 API 资格、累加器类型与输入及输出精度；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。

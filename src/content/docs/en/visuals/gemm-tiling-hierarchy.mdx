@@ -3,7 +3,7 @@ title: 'GEMM Tiling Hierarchy: Matrix to Instruction'
 description: Use deterministic matrix and tile fixtures to separate matrix, tile, thread block, warp, and source-level instruction-slot levels while retaining complete static hierarchy panels.
 pairId: vis12
 counterpart: /visuals/gemm-tiling-hierarchy/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -53,7 +53,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/visuals/gemm-tiling-hierarchy/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -114,7 +114,13 @@ Both tile shapes use a modeled `32x32x16` warp subtile. `64x64x16` displays four
 4. **Warp:** a modeled subtile within the thread-block footprint, without an issue-order prediction.
 5. **Instruction:** a `1x1x1` source-level scalar multiply-accumulate slot, not a claim about compiler-emitted FMA, MMA, WMMA, or SASS.
 
-The hierarchy explains ownership and nesting, not occupancy, register allocation, Tensor Core eligibility, pipelines, latency, throughput, or speedup. Architecture-specific instruction hierarchies belong to the later version-gated L09 unit.
+The hierarchy explains ownership and nesting, not occupancy, register allocation, Tensor Core eligibility, pipelines, latency, throughput, or speedup. VIS12's model and scalar instruction panel remain unchanged and do not represent a real Tensor Core instruction.
+
+Continue with the published [L08: Tensor Core Precision and Architecture Contracts](/en/libraries/tensor-core-precision-contracts/) and [L09: CUTLASS C++ GEMM Structure](/en/libraries/cutlass-cpp-gemm-structure/). L08 has exactly `[Q02,L06,F06]` as ordered direct prerequisites, and L09 has exactly `[A08,L06,M17]`; these onward links add no VIS12 prerequisite. L08 separates input conversion, accumulation, output conversion, and WMMA architecture contracts. L09 reads structure at pinned CUTLASS C++ v4.7.0 commit `dcf215af68a2d08d305076c152a06f201728cd53`, not a promise of DSL or executable support. Both units retain four empty evidence arrays and grant no Evidence Status, CUDA result, or performance result.
+
+Both have new Exercises and separate reviewed solutions: [L08 Exercises](/en/libraries/tensor-core-precision-contracts/exercises/) and [solutions](/en/libraries/tensor-core-precision-contracts/solutions/), plus [L09 Exercises](/en/libraries/cutlass-cpp-gemm-structure/exercises/) and [solutions](/en/libraries/cutlass-cpp-gemm-structure/solutions/).
+
+**Onward resource links updated: 2026-09-07.** The page date covers only this publication-inventory and navigation update; the model, API facts, and existing technical-source dates remain unchanged.
 
 ## Static fallback
 

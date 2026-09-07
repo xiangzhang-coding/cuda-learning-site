@@ -3,7 +3,7 @@ title: 'A08: From Correct Naive GEMM to Shared-Memory Tiling'
 description: Freeze a row-major GEMM and numerical-acceptance contract, then derive partial-safe shared-memory tiling, uniform barriers, and an independent CPU reference from a one-output-per-thread naive baseline.
 pairId: a08
 counterpart: /algorithms/tiled-gemm-correctness/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -69,7 +69,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/algorithms/tiled-gemm-correctness/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -119,7 +119,7 @@ import CanonicalCode from '../../../../components/CanonicalCode.astro';
 - Derive the load, barrier, compute, barrier, and reuse phases of shared-memory tiling.
 - Write separate guards for partial M, N, and K tiles while proving full block participation at barriers.
 - Check FP32 output against an independent double CPU reference with a non-finite policy and absolute-plus-relative tolerance.
-- Separate a teaching kernel, future cuBLAS/CUTLASS comparison, and actual performance evidence.
+- Separate a teaching kernel, version-pinned cuBLAS/CUTLASS contracts, and actual performance evidence.
 
 ## Prerequisites
 
@@ -173,9 +173,11 @@ EX15 maintains one canonical implementation. The pure-host `cpu-reference` prece
 
 ## Production boundary
 
-EX15 teaches correctness and tiling, not a production-library replacement. Continue with the published [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/) and [L07: cuBLASLt Matmul](/en/libraries/cublaslt-matmul/) for their version-specific library contracts; L09's CUTLASS material remains unpublished. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) is also published, with exactly [Q13](/en/correctness/gemm-optimization-case-study/) and L06 as direct prerequisites, comparing EX15 with [EX18](/en/examples/cublas-gemm/) outside the site. These onward links add no A08 prerequisite. EX18/LAB12 retain empty compilation evidence and recorded observations and Pending Hardware Verification runtime, with no production-replacement or performance-winner conclusion.
+EX15 teaches correctness and tiling, not a production-library replacement. Continue with the published [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/) and [L07: cuBLASLt Matmul](/en/libraries/cublaslt-matmul/) for their version-specific library contracts. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) is also published, with exactly [Q13](/en/correctness/gemm-optimization-case-study/) and L06 as direct prerequisites, comparing EX15 with [EX18](/en/examples/cublas-gemm/) outside the site. These onward links add no A08 prerequisite. EX18/LAB12 retain empty compilation evidence and recorded observations and Pending Hardware Verification runtime, with no production-replacement or performance-winner conclusion.
 
-**Onward resource links updated: 2026-09-06.** Only publication status and navigation changed; A08's API facts, technical sources, and source access dates remain unchanged.
+[Issue #37](https://github.com/xiangzhang-coding/cuda-learning-site/issues/37) adds [L08: Tensor Core Precision and Architecture Contracts](/en/libraries/tensor-core-precision-contracts/) with exactly `[Q02,L06,F06]` as ordered direct prerequisites, and [L09: CUTLASS C++ GEMM Structure](/en/libraries/cutlass-cpp-gemm-structure/) with exactly `[A08,L06,M17]`. L08 separates input conversion, accumulation, output conversion, and WMMA architecture contracts. L09's structural reading is pinned to CUTLASS C++ v4.7.0 commit `dcf215af68a2d08d305076c152a06f201728cd53`, not a promise of DSL or executable support. The new [L08 Exercises](/en/libraries/tensor-core-precision-contracts/exercises/) and [separate solutions](/en/libraries/tensor-core-precision-contracts/solutions/), plus [L09 Exercises](/en/libraries/cutlass-cpp-gemm-structure/exercises/) and [separate solutions](/en/libraries/cutlass-cpp-gemm-structure/solutions/), extend the learning path without adding A08 prerequisites. Both units retain four empty evidence arrays and grant no Evidence Status, CUDA result, or performance result. VIS12's scalar panel is unchanged and does not represent a real Tensor Core instruction.
+
+**Onward resource links updated: 2026-09-07.** The page date covers only this publication-inventory and navigation update; A08's API facts, technical sources, and source access dates remain unchanged.
 
 ## Evidence boundary
 
