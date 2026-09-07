@@ -82,7 +82,7 @@ The seven slots in the top row and the leftmost slot in each of the remaining fo
 
 The ordered packet first pins a `cuDNN library + cuDNN Frontend + Toolkit + driver + GPU + build` component matrix, then fixes NCHW/KCRS/NKPQ shapes, strides, types, cross-correlation, padding, stride, and dilation. It next records graph validation, operation-graph build, heuristic candidates, filters, the selected execution plan, workspace bytes/alignment/allocation/lifetime, the CPU-oracle and tolerance verdict, and a same-scope determinism policy. Only then does it leave a measurement template.
 
-Each failure has its own class: descriptor or validation failure, build/support failure, no eligible plan, workspace budget/lifetime failure, numerical mismatch, and determinism failure are not kernel timing. cuDNN Frontend v1.27.0 is only a future coordinate for cuDNN 9.24.0 and later; a later, unpublished cuDNN library unit pins the production matrix. Every build, plan, workspace, output, timing, and speedup cell remains `unrecorded`, so there is no hand-written winner.
+Each failure has its own class: descriptor or validation failure, build/support failure, no eligible plan, workspace budget/lifetime failure, numerical mismatch, and determinism failure are not kernel timing. [L10](/en/libraries/cudnn-graphs-and-plans/) supplies the published, separately dated component and graph/plan continuation without refreshing this page's 2026-08-30 facts or establishing a complete local environment or execution. Every build, plan, workspace, output, timing, and speedup cell remains `unrecorded`, so there is no hand-written winner.
 
 ## Valid alternatives
 
@@ -98,6 +98,6 @@ Each failure has its own class: descriptor or validation failure, build/support 
 - Forgetting that stride 2 moves adjacent output origins, or treating 54 logical taps as 54 unique staged values.
 - Letting a thread with no output skip cooperative loading or the barrier.
 - Treating a heuristic candidate as the selected plan, or a workspace query as allocation and lifetime proof.
-- Declaring either a custom kernel or cuDNN the winner before the later cuDNN library unit pins a component matrix, correctness parity, and a measurement record.
+- Mistaking L10's source pins for a local component matrix, correctness parity, and measurement record, then declaring a custom kernel or cuDNN the winner.
 
 Reviewed: **2026-08-30**. All four evidence arrays remain empty.

@@ -42,6 +42,8 @@ test('VIS18 native controls update IO state and Reset restores focus and default
   await expect(visual).toHaveAttribute('data-materialized-bytes', '8192');
   await expect(visual).toHaveAttribute('data-tiled-bytes', '3072');
   await expect(visual).toHaveAttribute('data-analysis-difference-bytes', '5120');
+  await expect(visual.locator('[data-live-materialized-total] + span')).toHaveText('2048 elements');
+  await expect(visual.locator('[data-live-tiled-total] + span')).toHaveText('768 elements');
   await expect(visual.locator('[data-live-materialized-stage-bytes]')).toHaveText('4096 B');
   await expect(visual.locator('[data-live-tiled-stage-bytes]')).toHaveText('0 B');
   await expect(visual.locator('[data-live-stage="normalize"]')).toHaveAttribute('aria-current', 'step');
@@ -55,6 +57,8 @@ test('VIS18 native controls update IO state and Reset restores focus and default
   await expect(stage).toHaveValue('score');
   await expect(visual).toHaveAttribute('data-materialized-bytes', '2048');
   await expect(visual).toHaveAttribute('data-tiled-bytes', '768');
+  await expect(visual.locator('[data-live-materialized-total] + span')).toHaveText('512 elements');
+  await expect(visual.locator('[data-live-tiled-total] + span')).toHaveText('192 elements');
   expect(await page.evaluate(() => ({
     local: Object.keys(localStorage).sort(),
     session: Object.keys(sessionStorage).sort(),

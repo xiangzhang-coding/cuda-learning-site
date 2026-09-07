@@ -1,6 +1,6 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L09、LAB01-LAB12、EX01-EX18、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L11、LAB01-LAB12、EX01-EX18、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
 factCheckDate: '2026-09-07'
@@ -18,6 +18,8 @@ structure:
   - entry-src-cuda-068
   - entry-src-cuda-069
   - entry-src-cuda-070
+  - entry-src-cuda-071
+  - entry-src-cuda-072
   - content-sources
   - review-record
 head:
@@ -36,18 +38,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L09、LAB01-LAB12、十八个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L11、LAB01-LAB12、十八个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-本页覆盖 Home、71 个学习单元（Learning Unit）、其练习与独立参考解答、18 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、76 个练习题库（Practice Bank）条目和 190 个术语表（Glossary）词条，以及既有静态发布与可视化界面。当前资源目录恰好包含 **383** 条记录：12 个 Lab、76 个 Practice Bank 条目、19 个 Visual Explainer、190 个 Glossary 词条和 86 个来源记录。L08/L09 及各自练习、解答增加六个双语发布对（Publication Pair），形成 263 对和 526 条源路由，包含 70 组练习与 70 组独立参考解答。新增 `SRC-CUDA-069/070` 于 2026-09-07 访问并复核；旧记录保留原日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+本页覆盖 Home、73 个学习单元（Learning Unit）、其练习与独立参考解答、18 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、78 个练习题库（Practice Bank）条目和 192 个术语表（Glossary）词条，以及既有静态发布与可视化界面。当前目录恰好包含 **389** 条记录：12 个 Lab、78 个 Practice Bank 条目、19 个 Visual Explainer、192 个 Glossary 词条和 88 条来源记录。L10/L11 及各自练习、解答增加六个双语发布对（Publication Pair），形成 269 对和 538 条源路由，包含 72 组练习与 72 组独立参考解答。新增 `SRC-CUDA-071/072` 于 2026-09-07 访问并复核；旧记录保留日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -154,7 +156,7 @@ Context7 libraries `/websites/nvidia_cuda`（2026-08-29 至 2026-09-04）、`/we
 
 **`SRC-CUDA-063` bundled-header authority。** 对 bundled rows，权威合同是从 Linux x86-64 redistribution archives 内检查的 `cub/device/device_reduce.cuh`、`cub/device/device_scan.cuh` 与 `cub/version.cuh`；三个 archives 的 SHA-256 分别为 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`、`8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`和 `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`。这些 headers 为 bundled CUB 1.15.1、2.8.2、3.3.4 的传统 pseudo-associative `DeviceReduce` 都记录带 cross-compute-capability caveat 的 same-GPU run-to-run determinism。Bundled CUB 1.15.1 `DeviceScan` 记录相同 scoped guarantee，bundled 2.8.2 与 3.3.4 则记录 possible pseudo-associative run-to-run variation。Selected 3.4.2 由 exact tagged headers 负责：reduction 保留该 scoped guarantee，scan 允许 variation。Context7 没有检查或验证这些 archives。Header review 不建立本站 compilation、runtime、output、determinism observation 或 performance evidence。
 
-VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，L06/EX18/LAB12 与 L07 使用 `SRC-CUDA-067/068`。L08/L09 新增 `SRC-CUDA-069/070`，使当前目录包含 86 条来源记录。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
+VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，L06/EX18/LAB12 与 L07 使用 `SRC-CUDA-067/068`，L08/L09 使用 `SRC-CUDA-069/070`。L10/L11 新增 `SRC-CUDA-071/072`，使当前目录包含 88 条来源记录。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
 
 CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、PTX ISA、Binary Utilities、cuBLAS 等 component、paired driver 和 compatibility floor 都不能合并成一个“CUDA 版本”。本站把 Toolkit 13.3.1 下 current page label v13.3、`archive/12.9.2` 下 NVCC v12.9/PTX ISA 8.8、`archive/11.8.0` 下 PTX ISA 7.8，以及既有 `archive/12.9.2` Runtime API 自标 v12.9.1 的差异原样保留；current PTX ISA 9.3 也只绑定 selected 13.3.1 Lane。CUDA 13.3.1 Linux 指南与 Programming Guide 列出 C++23，而同版本 NVCC `--std` 参考仍只列到 C++20。GCC 13.3/NVCC 13.3.73 的 exact-image `unsupported` result 保持 immutable R1 history；run 33275734951 另行保留 EX10 + NVCC 13.3.73 + GCC 14.2.0 的 narrow `C++23-Dialect-Probe` pass。两者都不是 ordinary EX10 C++23 support。
 
@@ -344,19 +346,99 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 所有文件只作来源引用，未采用、复制或改编源码、测试、样例、图表或基准。Context7 用于发现与交叉核对，当前 main/Doxygen 摘录不覆盖固定 SHA 的合同。上游测试只检查源码、未运行；没有 CUTLASS 实例化、构建、PTX/SASS 产物检查、GPU 输出、加速、吞吐量或计时。L08/L09 不授予证据状态，不继承 A08/L06 或 EX/Lab 的证据。后续编译与运行须分别记录精确源、环境、命令、产物、退出码和验收结果。
 
+<span id="src-cuda-071" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-071：cuDNN 后端支持、问题与 SDK 条款
+
+**相关 ID：** A07、L10、L11、PB-R4-011/012、TERM-191/192。**访问与复核日期：** 2026-09-07。独立固定 **cuDNN backend 9.24.0**。[精确发布章节](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0)与[支持矩阵](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/support-matrix.html)明确标为 9.24.0；发布页脚为 2026-07-02。未检查二进制包或其哈希。Frontend 1.27.0 是另一独立源码版本，不是后端版本，也不从 Toolkit 捆绑关系推导。当前 Context7 发现结果不覆盖固定上游来源。
+
+| 边界 | 上游合同与教学限制 |
+| --- | --- |
+| CUDA 12.x 包 | 列出 12.0、12.1、12.2、12.3、12.4、12.5、12.6、12.8、12.9；Linux 驱动至少 525.60.13。Blackwell 另需 CUDA 至少 12.8、Linux 驱动至少 570.26。静态链接目标为 12.9，不是每个动态兼容版本 |
+| CUDA 13.x 包 | 列出 13.0-13.3；Linux 驱动至少 580.65.06。静态链接目标为 13.3。这些是上游兼容性事实，不是编译已检查（Compile-Checked）的工具包通道（Toolkit Lane） |
+| 原生硬件与 OS | 列出 CC 7.5、8.0、8.6、8.9、9.0、10.0、10.3、12.0、12.1；Linux 包含 x86_64 与 SBSA 上 Ubuntu 22.04/24.04/26.04 等。厂商 Windows 支持不扩大本站仅原生 Linux 的受支持环境（Supported Environment）；无 macOS 运行声明 |
+| L11 更窄的 SDPA 合同 | 稠密、固定形状、单 GPU 前向/推理；Q/K/V 头数相等、序列长度相等且大于一、头维度相等并选 64 或 128；Q/K/V/O 全 FP16 或全 BF16；中间/计算类型 FP32、显式 `1/sqrt(d)`、`generate_stats=false`；无 dropout、偏置、掩码、不规则偏移、分页、FP8、反向或形状覆盖。要求原生列入支持矩阵的 SM80+ 设备及逐特性门槛，不保证任意未来架构 |
+
+[启发式枚举](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendheurmode-t)区分 A 的低 CPU 查询延迟、B 以更多 CPU 开销争取更高的一般准确性并可能回退 A，以及 FALLBACK 不承诺最优性能的功能替代。INSTANT 是已弃用的 A 等价旧名。这些不是实测排名。[数值说明](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendnumericalnote-t)暴露 Tensor Core、降精度、低精度归约和非确定性属性；Tensor Core 不等于非确定性。[可复现性](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/developer/misc.html#reproducibility-determinism)具有版本/架构范围和例外，不承诺跨架构位相等或相对参考的精度。[计划描述符](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnn-backend-execution-plan-descriptor)与[状态枚举](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnstatus-t)规定序列化和模式不匹配边界。
+
+下表当前已知问题只取自 **9.24.0 章节**；并不宣称选定范围没有缺陷。
+
+| 精确范围 | 后果与边界 |
+| --- | --- |
+| SDPA decode、因果掩码、Q 与 K/V 头数不等 | 可能不匹配或出现 NaN；上游建议不用因果掩码，以 padding mask 传实际长度。不在 L11 等头数、非 decode、无掩码范围 |
+| SDPA 反向，K/V 序列长度为一 | 不受支持的反向组合，不是所有稠密前向失败 |
+| NCHW_VECT_C 张量序列化 | 序列化 vectDim 可能错误并阻止恢复后 finalization；避免此布局序列化，而不是禁止所有布局 |
+| GEMM 主循环融合、全局引擎索引 11、A/B batch 维度不等且需要广播 | 此引擎/输入合同可能产生错误结果。较早的引擎 11 非 fully-packed 张量问题已列为 9.24 修复 |
+| 仅逐点运算的全局引擎索引 3 | MOD 使用 floor；浮点转整数采用截断而不是 RNE；Boolean 存储不同；CONCAT 要求拼接轴范围相等。这些都是有界引擎注意事项 |
+| 旧 normalization 缓存误命中 | 小行数显式调优反向和大行数/奇数隐藏维度情况列为 9.23.0 已修复，不是未解决的 9.24 问题 |
+
+可访问的 [9.25.0 页面](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.25.0/release-notes.html#cudnn-9-25-0-developer-preview)明确写 **9.25.0 Developer Preview**，警告不要用于生产、认证、基准测试或发布预览性能数据。不是标签缺失，且不在本合同内。前端为混合序列长度形式或 ordered-dQ 确定性反向设置的 9.25 门槛，不会变成 9.24 特性。
+
+**许可：** 版本化 [SDK EULA 与 cuDNN 补充条款](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/eula.html)管理后端并包含文档。补充条款只将 `.so`/`.dll` 运行库列为通常可在条件内分发的文件。前端 Apache/MIT 许可不授权镜像后端二进制、手册或图示。本站链接并原创转述上游资料，没有复制代码、资产、二进制或上游表格；未记录编译、GPU 执行、工作区查询、数值结果或基准测试。
+
+<span id="src-cuda-072" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-072：cuDNN 前端源码、路由、测试与许可
+
+**相关 ID：** L10、L11、VIS18、PB-R4-011/012、TERM-191/192。**访问与复核日期：** 2026-09-07。独立 **frontend v1.27.0** [发布](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0)时间为 `2026-08-06T22:48:15Z`，非草稿、非预发布。标签直接解析为 **`f77fbc3d21be3f24cd0286b9b368105f7c518b8a`**，提交时间 `2026-08-06T22:46:59Z`，树 `59d09b1dec7edfcf9be0c176e6485b021f7a0012`；版本头文件也独立写明 1.27.0。下列仓库链接均使用此 SHA。推荐搭配 backend 9.24.0 及以后，不保证所有前端特性都能在 9.24.0 使用。
+
+版本化 [Graphs](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/graph-api.html) 与 [Supported Products](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/reference/support-matrix.html) 页脚为 2026-08-07，是已发布文档而非内容寻址产物。全库后端下限为 8.5.0，不是 SDPA 下限。CMakeLists.txt 要求 CMake 至少 3.23、C++17；[pyproject.toml](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/pyproject.toml)要求 Python 至少 3.9。这些不是安装或构建报告。
+
+| 已审查源码/测试 | 合同，不是执行观察 |
+| --- | --- |
+| graph_interface.h 3014-3029、2867-2932；plans.h 517-598、632-668 | 验证、将运算图转换为后端表示（lowering）、发现配置、支持检查、构建；`create_execution_plans` 在后续构建前收集配置。支持检查停于可接受配置；HEURISTICS_CHOICE 停于首个成功构建，ALL 尝试更多项但不做基准测试。此处拒绝多线程构建 |
+| graph_interface.h 1129-1135、1232-1238、2419-2422；fp16_fwd.cpp | 最终工作区包含后端计划与前端节点工作区；后端排除筛选不是总内存上限。优先使用返回错误状态的大小查询；便利重载可能记录失败后返回初始值。调用者存储与 UID 绑定须持续到完成 |
+| fp16_cached.cpp；graph_interface.h 347-358、2491-2515；test/cpp/serialize.cpp | 缓存由应用持有；键含上下文和前端/后端版本，不含完整机器/选择政策，动态模式省略维度/步幅。重新验证精确构建、设备、语义、张量合同与数值/工作区政策，哈希本身不足以保证复用 |
+| serialization.cpp 295-306；test/cpp/serialize.cpp 665-760 | 图 JSON 与选中计划 UBJSON 不同；非零源计划索引恢复为索引零的单计划。测试定义结构、工作区和按值参数往返，不保证原候选列表，也不表示本站测试通过 |
+| graph_properties.h；sdpa_support_surface.h；attention node | AUTO 在后端发现前先检查 UNIFIED 特性支持，再试 COMPOSITE。四维形状/步幅与输入 embedding 步幅一很重要；FP16/BF16 维度为八的倍数，拒绝 SM80 之前架构。UNIFIED 排除 FLOAT 端口且要求编译/加载后端至少 9.13.1；COMPOSITE 允许 FLOAT，但仍不证明后端计划存在 |
+| test_mhas.py；test_sdpa_fp32_rejected.py | 测试定义用 FP32 参考与容差比较输出/统计，拒绝 UNIFIED 的 FP32/FP64 及 COMPOSITE 的 FP64 端口，并允许在有引擎时接受 COMPOSITE/AUTO FP32，带引擎可用性跳过条件。不是本地通过、通用容差或类型基准 |
+| router.py 41-77；_pygraph.py 1117-1139、1346-1475；test_engine_router.py | Python 原生 `cudnn.pygraph` 排序 Python/后端候选；未固定规划在 `NotImplementedError`/`cudnnGraphNotSupportedError` 后继续，不处理任意运行失败。`select_plan(i)` 为严格固定，拒绝时报错。Python 已编译计划的工作区在可查询后检查。CPU 测试定义覆盖排序、固定失败与上限，不证明 GPU 引擎选择 |
+| experimental/sm100_sdpa_prefill_engine.h；fe_api/sdpa/test_sdpa_fwd.py | 指定的 C++ SM100 SDPA prefill 引擎要求精确 SM100，不是所有 SM10x 或 B300/SM103；这不是全部 OPENSOURCE 引擎的限制，[图接口](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L515-L526)还包含独立的 SM90 引擎路径。另一个 SM100 Python OSS API 测试不是该 C++ 引擎，也不证明框架分派 |
+
+[Attention.md](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/operations/Attention.md)说明 `[O, Stats]`、`generate_stats`、已弃用的反向含义参数 `is_inference`，以及无统计量时的 nullptr。其全局矩阵仍标后端 **9.18.1**，而各节讨论更新版本；不能将整表改称 9.24.0，也不能把没有前端拒绝当作后端支持。[Python 设计文档](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/python_graph_and_execution_backends.md)解释规划/冻结；精确路由以源码为准。这里没有独立固定框架分派器，算法引用与图名都不确认分派器。
+
+[动态内核缓存文档](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/dynamic-kernel-cache.md)要求按实际覆盖形状/步幅查询工作区；后端运行时查询门槛为 9.23.0。Graphs 指南中的后端内核缓存（9.22 引入）存储 CUBIN，不是应用计划：默认按设备 ordinal 共享、100 MB、LRU；`CUDNN_ENABLE_DEFAULT_KERNEL_CACHE=0` 禁用默认而非用户缓存，`CUDNN_KERNEL_CACHE_SIZE_MB` 控制上限。文档中的结构键情况未必需要动态形状；自定义缓存不自动继承默认大小/LRU。[前向兼容性](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/forward-compatibility.html#forward-compatibility-and-the-graph-api)要求序列化计划使用匹配硬件，并将专门融合注意力排除在一般承诺之外。带 handle 的反序列化默认可能执行 warmup；Python 序列化透传 C++ 格式，不提供任意 Python 引擎持久化。
+
+**逐文件许可复核：** 下列 **20** 个文件均在此 SHA 检查。权利人为 **NVIDIA CORPORATION & AFFILIATES**。年份是各文件 SPDX 版权年份，不是推断的仓库统一范围。这里只引用，不采用源码。
+
+| 精确文件 | SPDX 许可 | 版权年份 |
+| --- | --- | --- |
+| [`include/cudnn_frontend.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend.h) | Apache-2.0 | 2021 |
+| [`include/cudnn_frontend_version.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend_version.h) | Apache-2.0 | 2026 |
+| [`include/cudnn_frontend/graph_interface.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h) | Apache-2.0 | 2023 |
+| [`include/cudnn_frontend/graph_properties.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_properties.h) | MIT | 2023 |
+| [`include/cudnn_frontend/plans.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h) | Apache-2.0 | 2023 |
+| [`include/cudnn_frontend/node/scaled_dot_product_flash_attention.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/scaled_dot_product_flash_attention.h) | Apache-2.0 | 2023 |
+| [`include/cudnn_frontend/node/sdpa_support_surface.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h) | Apache-2.0 | 2025 |
+| [`include/cudnn_frontend/experimental/sm100_sdpa_prefill_engine.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/experimental/sm100_sdpa_prefill_engine.h) | Apache-2.0 | 2025 |
+| [`samples/cpp/sdpa/fp16_fwd.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_fwd.cpp) | MIT | 2023 |
+| [`samples/cpp/sdpa/fp16_cached.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_cached.cpp) | MIT | 2023 |
+| [`samples/cpp/misc/serialization.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/misc/serialization.cpp) | MIT | 2024 |
+| [`samples/cpp/utils/helpers.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/utils/helpers.h) | Apache-2.0 | 2024 |
+| [`test/cpp/serialize.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/cpp/serialize.cpp) | Apache-2.0 | 2023 |
+| [`test/python/test_mhas.py`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_mhas.py) | Apache-2.0 | 2024 |
+| [`test/python/test_sdpa_fp32_rejected.py`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_sdpa_fp32_rejected.py) | Apache-2.0 | 2026 |
+| [`test/python/fe_api/sdpa/test_sdpa_fwd.py`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/fe_api/sdpa/test_sdpa_fwd.py) | Apache-2.0 | 2026 |
+| [`python/cudnn/engines/router.py`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/engines/router.py) | Apache-2.0 | 2026 |
+| [`python/cudnn/_pygraph.py`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/_pygraph.py) | Apache-2.0 | 2026 |
+| [`test/python/test_engine_router.py`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_engine_router.py) | Apache-2.0 | 2026 |
+| [`CMakeLists.txt`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/CMakeLists.txt) | MIT | 2021 |
+
+[LICENSING.md](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSING.md)解释保留外部贡献导致的 MIT 例外。另审查 [LICENSE.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE.txt)（Apache-2.0）、[LICENSE-MIT.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE-MIT.txt)、[NOTICE](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/NOTICE)与 [THIRD_PARTY_LICENSES.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/THIRD_PARTY_LICENSES.txt)；根声明年份为 2020-2026，包元数据为 `Apache-2.0 AND MIT`。已检查的 Markdown 文档和 pyproject.toml 开头没有逐文件 SPDX；仅链接/转述，不复制，也不推断文件许可。未来实质复用须处理适用许可、版权/归属及 Apache NOTICE/修改说明。没有复制或改编实现、样例、测试、图示、二进制或大段文字；原创教学正文/表格仍为 CC BY 4.0。上游测试只读未运行，不提供本站编译或运行证据。
+
 ## 内容与素材来源
 
-- Home、71 个 Learning Units、18 个 Runnable Examples、12 个 Labs、76 个 Practice Bank 条目、190 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、73 个 Learning Units、18 个 Runnable Examples、12 个 Labs、78 个 Practice Bank 条目、192 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
 
 ## 复核记录
 
-**复核日期：2026-09-07。** 既有来源保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的不可变 R3 聚合复核。`SRC-CUDA-061` 至 `SRC-CUDA-068` 保留 2026-09-04/05/06 记录。Issue #37 新增并复核 L08 的 `SRC-CUDA-069` 与 L09 的 `SRC-CUDA-070`，均于 2026-09-07 访问；不扩展为 R4 聚合验收。
+**复核日期：2026-09-07。** 既有来源保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的不可变 R3 聚合复核。`SRC-CUDA-061` 至 `SRC-CUDA-070` 保留逐项日期。Issue #38 为 L10/L11 新增独立后端 `SRC-CUDA-071` 与前端 `SRC-CUDA-072`，均于 2026-09-07 访问；不扩展为 R4 聚合验收。旧 A07 来源记录仍为历史记录；当前固定图/计划审查见 L10 单独标日期的后续阅读。
 
 2026-09-04 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成 R3 聚合来源复核；[issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)随后固定 L01/L02 的 CCCL/Thrust 边界。[Issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)于 2026-09-05 通过 Context7 `/nvidia/cccl` discovery 交叉核对 current device/warp/block contracts，并以 exact v3.4.2 release/commit、tagged docs/source/tests、NVIDIA manifests、hash-addressed archives、issues 与逐文件 license review 为权威。Current hosted/main-branch material 不作为 immutable v3.4.2 snapshot，也不证明 bundled archive 内容。
 
 R3 是最近一次已完成的聚合发布复核；不可变 `src/r3-release-manifest.json` 固定 62 个 Learning Units、10 个 Labs、19 个 Visual Explainers、66 个 Practice Bank 条目（其中 10 个 Nsight report-analysis 条目）、176 个 Glossary 词条、76 条 source records、347 条 catalog records、232 个 Publication Pairs 和 464 条 source routes。R1/R2 继续作为历史发布坐标。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保存最终 CI、Cloudflare Preview/production 与 smoke 的动态验收记录；R4 聚合复核仍待完成。
 
-F01/LAB02 的既有规范导入和保留的编译记录保持不变。新增 L08/L09 只发布静态教学合同，四个证据数组为空；EX18/LAB12 的编译与实际观察为空，运行状态仍为 Pending Hardware Verification。六份既有 expected-only profiler plans 的环境清单未填写，十九项浏览器 Visual Explainer 不授予 CUDA Evidence Status。L01-L09 属于当前滚动 R4 发布，不属于不可变 R3；L10-L13 尚未发布。没有新增 GPU 输出、工作区、性能分析、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明。
+F01/LAB02 的既有规范导入和保留的编译记录保持不变。新增 L10/L11 只发布静态教学合同，四个证据数组为空；EX18/LAB12 的编译与实际观察为空，运行状态仍为 Pending Hardware Verification。六份既有 expected-only profiler plans 的环境清单未填写，十九项浏览器 Visual Explainer 不授予 CUDA Evidence Status。L01-L11 属于滚动 R4，不属于不可变 R3；L12-L13 尚未发布。没有新增 GPU 输出、工作区、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明。

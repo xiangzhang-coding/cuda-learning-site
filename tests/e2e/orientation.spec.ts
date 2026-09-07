@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(526);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(263);
+  expect(routes).toHaveLength(538);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(269);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -119,6 +119,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/libraries/cutlass-cpp-gemm-structure/', en: '/en/libraries/cutlass-cpp-gemm-structure/' },
     { zh: '/libraries/cutlass-cpp-gemm-structure/exercises/', en: '/en/libraries/cutlass-cpp-gemm-structure/exercises/' },
     { zh: '/libraries/cutlass-cpp-gemm-structure/solutions/', en: '/en/libraries/cutlass-cpp-gemm-structure/solutions/' },
+    { zh: '/libraries/cudnn-graphs-and-plans/', en: '/en/libraries/cudnn-graphs-and-plans/' },
+    { zh: '/libraries/cudnn-graphs-and-plans/exercises/', en: '/en/libraries/cudnn-graphs-and-plans/exercises/' },
+    { zh: '/libraries/cudnn-graphs-and-plans/solutions/', en: '/en/libraries/cudnn-graphs-and-plans/solutions/' },
+    { zh: '/libraries/attention-backend-dispatch/', en: '/en/libraries/attention-backend-dispatch/' },
+    { zh: '/libraries/attention-backend-dispatch/exercises/', en: '/en/libraries/attention-backend-dispatch/exercises/' },
+    { zh: '/libraries/attention-backend-dispatch/solutions/', en: '/en/libraries/attention-backend-dispatch/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -526,6 +532,18 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/libraries/cutlass-cpp-gemm-structure/exercises/',
     '/libraries/cutlass-cpp-gemm-structure/solutions/',
     '/en/libraries/cutlass-cpp-gemm-structure/solutions/',
+    '/libraries/cudnn-graphs-and-plans/',
+    '/en/libraries/cudnn-graphs-and-plans/',
+    '/libraries/cudnn-graphs-and-plans/exercises/',
+    '/en/libraries/cudnn-graphs-and-plans/exercises/',
+    '/libraries/cudnn-graphs-and-plans/solutions/',
+    '/en/libraries/cudnn-graphs-and-plans/solutions/',
+    '/libraries/attention-backend-dispatch/',
+    '/en/libraries/attention-backend-dispatch/',
+    '/libraries/attention-backend-dispatch/exercises/',
+    '/en/libraries/attention-backend-dispatch/exercises/',
+    '/libraries/attention-backend-dispatch/solutions/',
+    '/en/libraries/attention-backend-dispatch/solutions/',
     '/algorithms/elementwise-map/',
     '/en/algorithms/elementwise-map/',
     '/algorithms/elementwise-map/exercises/',

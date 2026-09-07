@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all seventy-six bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all seventy-eight bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(76);
+    expect(practiceIds).toHaveLength(78);
 
     const localeContracts = [
       {
@@ -128,7 +128,7 @@ describe('published resource indexes', () => {
         source: await readFile(path.join(projectRoot, 'src/content/docs/practice.mdx'), 'utf8'),
         prerequisite: /- \*\*(?:直接先修(?:条件)?|先修条件)：\*\*[^\n]*\]\(\//,
         hardwareGate: /- \*\*硬件门槛(?:（Hardware gate）)?：\*\*[^\n]+/,
-        reviewDate: /- \*\*最后复核(?:（Last reviewed）)?：\*\* \d{4}-\d{2}-\d{2}。/,
+        reviewDate: /- \*\*(?:最后|最近)复核(?:（Last reviewed）)?：\*\* \d{4}-\d{2}-\d{2}。/,
         expectedEvidence: /\*\*预期证据：\*\*[^\n]+/,
         acceptanceCriteria: /\*\*验收条件：\*\*/,
         hint: /<details><summary>提示 [^<]+<\/summary>/g,
@@ -175,7 +175,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(76);
+      expect(prompts.size).toBe(78);
     }
   });
 
@@ -183,8 +183,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 12, practice: 76, visuals: 19, glossary: 190, sources: 86 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(383);
+    expect(counts).toEqual({ labs: 12, practice: 78, visuals: 19, glossary: 192, sources: 88 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(389);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -192,7 +192,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['L10', 'LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['L12', 'LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -331,6 +331,8 @@ describe('published resource indexes', () => {
     for (const planningId of [
       'PB-R4-009', 'PB-R4-010',
       'TERM-189', 'TERM-190', 'SRC-CUDA-069', 'SRC-CUDA-070',
+      'PB-R4-011', 'PB-R4-012',
+      'TERM-191', 'TERM-192', 'SRC-CUDA-071', 'SRC-CUDA-072',
     ]) {
       expect(indexedIds, planningId).toContain(planningId);
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);

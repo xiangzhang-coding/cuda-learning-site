@@ -46,15 +46,19 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)在滚动 R4 发布中新增 [L01](/libraries/library-primitive-dsl-custom-kernel/)与 [L02](/libraries/thrust-algorithm-vocabulary/)；[issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)发布 [L03：CUB Device Primitives](/libraries/cub-device-primitives/)、[L04：CUB Warp 与 Block Primitives](/libraries/cub-warp-block-primitives/)、[EX17：CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)和 [LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)，随后发布严格依赖 M05、M13 与 M19 的 [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)。[Issue #36](https://github.com/xiangzhang-coding/cuda-learning-site/issues/36)新增 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)`<-[A08,Q01]`、[L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)`<-[L06,Q05]`、[EX18](/examples/cublas-gemm/)`<-[L06]`与 [LAB12](/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`。
 
-[Issue #37](https://github.com/xiangzhang-coding/cuda-learning-site/issues/37)新增 [L08：张量核心（Tensor Core）精度与架构合同](/libraries/tensor-core-precision-contracts/)`<-[Q02,L06,F06]`和 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)`<-[A08,L06,M17]`，以上分别是两者完整的有序直接先修项。新发布的 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)、[L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)均可直接进入。L10-L13 仍待发布。
+[Issue #37](https://github.com/xiangzhang-coding/cuda-learning-site/issues/37)新增 [L08：张量核心（Tensor Core）精度与架构合同](/libraries/tensor-core-precision-contracts/)`<-[Q02,L06,F06]`和 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)`<-[A08,L06,M17]`，以上分别是两者完整的有序直接先修项。[L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)、[L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)均可直接进入。
 
-当前滚动发布有 71 个学习单元、18 个可运行示例（EX01-EX18）、12 个实验（LAB01-LAB12）、19 项可视化讲解（独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22）、76 个[练习题库](/practice/)条目、190 项[术语表](/glossary/)词条和 86 项[来源记录](/sources-and-versions/)，共 383 条资源目录记录；公开源文件形成 263 个双语发布对（Publication Pair）和 526 条源路由，包含 70 组练习与 70 组独立参考解答。
+[Issue #38](https://github.com/xiangzhang-coding/cuda-learning-site/issues/38)新增 [L10：cuDNN 图与计划](/libraries/cudnn-graphs-and-plans/)`<-[A07,L01,Q05]`和 [L11：注意力后端分派](/libraries/attention-backend-dispatch/)`<-[A11,L10,L08]`，分别关联 L11 与 VIS18，不改变旧先修。[L10 练习](/libraries/cudnn-graphs-and-plans/exercises/)与[独立解答](/libraries/cudnn-graphs-and-plans/solutions/)、[L11 练习](/libraries/attention-backend-dispatch/exercises/)与[独立解答](/libraries/attention-backend-dispatch/solutions/)同步发布。L12-L13 仍待发布。
+
+当前滚动发布有 73 个学习单元、18 个可运行示例（EX01-EX18）、12 个实验（LAB01-LAB12）、19 项可视化讲解（独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22）、78 个[练习题库](/practice/)条目、192 项[术语表](/glossary/)词条和 88 项[来源记录](/sources-and-versions/)，共 389 条资源目录记录；公开源文件形成 269 个双语发布对（Publication Pair）和 538 条源路由，包含 72 组练习与 72 组独立参考解答。
 
 **发布清单与导航更新：2026-09-07。** 页面日期仅对应本次发布清单更新，不重新核查既有 CUDA API 事实；技术来源保留各自访问与复核日期。
 
-Q06-Q13、A10-A14 与 L01-L09 的四个证据数组均为空，不授予证据状态（Evidence Status）。L03-L05 只链接和复述精确的上游源码及测试合同；API 存在与上游测试不是本站编译或运行证据。EX17/LAB11 与 EX18/LAB12 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）；没有计时、加速比或赢家记录，L07 的发布也不提供 Lt 选择的运行证据。选定的 CCCL v3.4.2 坐标独立于 Toolkit 标签，只用于 12.9.2/13.3.1 评估，并排除 11.8。19 项可视化讲解仍是无 CUDA 证据的浏览器模型。
+Q06-Q13、A10-A14 与 L01-L11 的四个证据数组均为空，不授予证据状态（Evidence Status）。L03-L05 只链接和复述精确的上游源码及测试合同；API 存在与上游测试不是本站编译或运行证据。EX17/LAB11 与 EX18/LAB12 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）；没有计时、加速比或赢家记录，L07 的发布也不提供 Lt 选择的运行证据。选定的 CCCL v3.4.2 坐标独立于 Toolkit 标签，只用于 12.9.2/13.3.1 评估，并排除 11.8。19 项可视化讲解仍是无 CUDA 证据的浏览器模型。
 
 L08 区分输入转换、累加、输出转换与 WMMA 架构合同；L09 的结构阅读固定为 CUTLASS C++ v4.7.0、提交 `dcf215af68a2d08d305076c152a06f201728cd53`，不承诺 DSL 或可执行支持。两者没有本地编译、真实指令观察、CUDA 运行或性能结果。VIS12 模型保持不变，其 instruction panel 仍是源码层标量运算位置，不是真实 Tensor Core 指令。
+
+L10/L11 独立固定 cuDNN backend 9.24.0 与 frontend 1.27.0、提交 `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`，只作来源阅读。后端 EULA 与前端逐文件 Apache/MIT 许可分开记录，没有复制实现或资产；源码/测试审查不形成编译、GPU、实际分派、类型或基准证据。
 
 ## 作者
 

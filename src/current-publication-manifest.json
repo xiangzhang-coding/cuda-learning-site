@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 263,
-    "sourceRoutes": 526,
-    "exerciseSetPublicationPairs": 70,
-    "solutionSetPublicationPairs": 70,
+    "publicationPairs": 269,
+    "sourceRoutes": 538,
+    "exerciseSetPublicationPairs": 72,
+    "solutionSetPublicationPairs": 72,
     "learningUnits": [
       "O01",
       "O02",
@@ -86,7 +86,9 @@
       "L06",
       "L07",
       "L08",
-      "L09"
+      "L09",
+      "L10",
+      "L11"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12"],
@@ -111,7 +113,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 76,
+    "practiceBankEntries": 78,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -124,8 +126,8 @@
       "PB-R3-011",
       "PB-R3-012"
     ],
-    "glossaryTerms": 190,
-    "sourceRecords": 86
+    "glossaryTerms": 192,
+    "sourceRecords": 88
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -198,6 +200,20 @@
       }
     ],
     "componentBoundaries": {
+      "cudnn": {
+        "version": "9.24.0",
+        "selection": "independent-reference-only",
+        "reviewedOn": "2026-09-07",
+        "compileCheckedToolkitLanes": []
+      },
+      "cudnnFrontend": {
+        "version": "1.27.0",
+        "selection": "independent-reference-only",
+        "commit": "f77fbc3d21be3f24cd0286b9b368105f7c518b8a",
+        "releasedOn": "2026-08-06",
+        "reviewedOn": "2026-09-07",
+        "compileCheckedToolkitLanes": []
+      },
       "cutlassCpp": {
         "version": "4.7.0",
         "selection": "independent-reference-only",
@@ -370,7 +386,7 @@
     "referenceEnvironments": [],
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
-    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09"],
+    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -392,7 +408,7 @@
     "R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.",
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
     "Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.",
-    "L01-L09 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
+    "L01-L11 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
     "The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.",
     "Profiler collection requires the exact tool, CUPTI, driver, GPU, metric availability, filter, replay, workload, command, permission, report-custody, and Environment Manifest coordinates. Performance-counter access must be administrator-approved for a non-admin user; denial or an unavailable metric blocks collection and must be recorded without sudo, privilege escalation, or policy bypass.",
     "Q11 summarizes linked EX14 and LAB10 subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS11, static material, browser models, and the expected-only plan grant no timing, profiler metric, speedup, bottleneck, or winner.",
@@ -405,6 +421,7 @@
     "L06/L07 use the 12.9.2 archived API teaching baseline. Exact 13.3.1 API and release-note archives were unavailable; live 13.3 API and 13.3 Update 1 release notes are explicitly dated comparisons, not archived or executed evidence.",
     "L08 separates WMMA input, accumulation, output, numerical, API-target, and native-hardware contracts; an API minimum is not a native FP64 Tensor Core whitelist or a measured acceleration claim.",
     "L09 references CUTLASS C++ v4.7.0 at an immutable commit and proposes, but has not built, one CUDA 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17 SM75 target. Reviewed source and owner tests grant no generated-code, runtime, pipeline, or speedup evidence. Python DSL material is excluded under its separate terms; no owner sample is copied.",
-    "L01-L09 are published in the rolling R4 surface; L10-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
+    "L10/L11 independently reference cuDNN backend 9.24.0 and frontend 1.27.0 at commit f77fbc3d21be3f24cd0286b9b368105f7c518b8a; no binary, compilation, GPU execution, selected engine, workspace query, dtype result, or benchmark is recorded. Backend 9.25.0 Developer Preview is outside this contract.",
+    "L01-L11 are published in the rolling R4 surface; L12-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
   ]
 }

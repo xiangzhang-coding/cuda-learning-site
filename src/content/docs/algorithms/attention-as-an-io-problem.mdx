@@ -29,6 +29,7 @@ prerequisites:
   - A10
 relatedUnits:
   - VIS18
+  - L11
 hardwareGate: none
 evidence:
   compilation: []
@@ -76,7 +77,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'A08,A10' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: VIS18 }
+    attrs: { name: 'cuda:related-units', content: 'VIS18,L11' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -199,7 +200,7 @@ Query-outer schedule 保留每个 Q tile并扫过全部 K/V tiles：
 
 ## Production boundary
 
-A11 没有 framework、cuDNN 或 Triton API。后续单位会各自核对 exact software version、dtype、mask、workspace、dispatch、compilation 与 hardware gates，并复用 VIS18 的算法层 visual，而不是把 paper idea 当成 current backend availability。A11 也不选择“最佳”tile 或 backend。
+A11 没有 framework、cuDNN 或 Triton API。可选后续阅读 [L11：注意力后端分派](/libraries/attention-backend-dispatch/)单独核对软件版本、类型、工作区与分派边界，并复用 VIS18 的算法层模型，不把论文思想当作当前后端可用性。先满足 L11 自己的先修 `[A11,L10,L08]`；该链接不改变 A11 的 `[A08,A10]` 或 2026-09-03 事实复核日期。A11 不选择“最佳”tile 或 backend，L11 的来源阅读也不是执行证据。
 
 ## 证据边界
 

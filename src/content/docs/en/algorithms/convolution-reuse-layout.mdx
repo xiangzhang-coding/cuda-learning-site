@@ -23,6 +23,8 @@ unitId: A07
 prerequisites:
   - A06
   - M03
+relatedUnits:
+  - L10
 hardwareGate: none
 evidence:
   compilation: []
@@ -79,6 +81,8 @@ head:
     attrs: { name: 'cuda:unit-id', content: A07 }
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'A06,M03' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L10 }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -176,7 +180,7 @@ Future work includes at least these gates:
 
 The [cuDNN Frontend v1.27.0 release](https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0) was published on 2026-08-06 and is recommended by that release for cuDNN 9.24.0 and later. It is only a current future-comparison coordinate, not an A07 dependency, compatibility proof, or execution record.
 
-A later, unpublished cuDNN library unit will pin the production component matrix. Current A07 does not teach cuDNN API programming and does not build, validate, or execute a cuDNN graph. This checklist defines future comparison responsibilities only; no evidence here supports claiming that a hand-written kernel beats a cuDNN plan.
+The published continuation [L10: cuDNN Graphs and Plans](/en/libraries/cudnn-graphs-and-plans/) supplies a separately dated component and graph/plan review, not an added A07 prerequisite or an execution record. A07 retains its 2026-08-30 fact review, teaches no cuDNN API programming, and does not build, validate, or execute a cuDNN graph. This checklist defines responsibilities for a future actual comparison; the complete local environment, correctness, and measurements still need separate records. No evidence here supports claiming that a hand-written kernel beats a cuDNN plan.
 
 ## Evidence boundary
 
@@ -201,7 +205,7 @@ Compilation, runtime, expected observations, and recorded observations are all e
 
 - Complete the [A07 Exercises](/en/algorithms/convolution-reuse-layout/exercises/), then inspect the separate [reviewed solutions](/en/algorithms/convolution-reuse-layout/solutions/).
 - Audit [Practice Bank PB-R2-019](/en/practice/#pb-r2-019), requiring a tensor contract, asymmetric-filter oracle, reuse ledger, and production decision gates.
-- Revisit [TERM-145 convolution](/en/glossary/#term-145) and [TERM-146 cross-correlation](/en/glossary/#term-146), while leaving the component pin and execution to a later, unpublished cuDNN library unit.
+- Revisit [TERM-145 convolution](/en/glossary/#term-145) and [TERM-146 cross-correlation](/en/glossary/#term-146), then follow [L10](/en/libraries/cudnn-graphs-and-plans/) after its direct prerequisites for graph/plan reading; actual execution still needs separate verification.
 
 ## Sources and review
 

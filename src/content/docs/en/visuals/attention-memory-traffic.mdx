@@ -21,6 +21,7 @@ prerequisites:
   - A11
 relatedUnits:
   - A10
+  - L11
 hardwareGate: 'None: deterministic browser model; no CUDA-capable system required'
 evidence:
   compilation: []
@@ -68,7 +69,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: A11 }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: A10 }
+    attrs: { name: 'cuda:related-units', content: 'A10,L11' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: 'None: deterministic browser model; no CUDA-capable system required' }
   - tag: meta

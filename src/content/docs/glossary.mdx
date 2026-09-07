@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 190 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 192 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-09-07'
@@ -18,6 +18,8 @@ structure:
   - entry-term-188
   - entry-term-189
   - entry-term-190
+  - entry-term-191
+  - entry-term-192
   - maintenance
 head:
   - tag: meta
@@ -35,7 +37,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1766,6 +1768,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)、[L06](/libraries/cublas-gemm/)、[L08](/libraries/tensor-core-precision-contracts/)、[L09](/libraries/cutlass-cpp-gemm-structure/)、[PB-R4-009](/practice/#pb-r4-009)和 [PB-R4-010](/practice/#pb-r4-010)。
 - **版本说明：** 2026-09-07 按 [SRC-CUDA-069](/sources-and-versions/#src-cuda-069)与 [SRC-CUDA-070](/sources-and-versions/#src-cuda-070)复核。C++ BF16/TF32 WMMA 使用 float 累加器片段（fragment）；`store_matrix_sync` 不把 float 片段自动缩窄到 half 指针。固定 CUTLASS v4.7.0 的 BF16 测试声明 BF16 输出与 FP32 累加，说明二者可不同；测试存在不等于测试已运行。原输入与已舍入输入需要各自独立的高精度参考，且 double 参考不是精确实数运算。
 
+<span id="term-191" class="resource-target" aria-hidden="true"></span>
+
+### Operation Graph · 运算图
+
+- **定义：** 运算图（Operation Graph）描述张量之间的数学操作和数据依赖，包括形状、步幅与类型等语义。它说明要计算什么，不预先指定由哪个引擎或内核实现；符合给定图的引擎可能为零、一个或多个。
+- **避免使用：** CUDA Graph 启动捕获；已选内核；已构建计划；融合或加速保证。
+- **相关资源：** [A07](/algorithms/convolution-reuse-layout/)、[L10](/libraries/cudnn-graphs-and-plans/)、[L11](/libraries/attention-backend-dispatch/)和 [PB-R4-011](/practice/#pb-r4-011)。
+- **版本说明：** 2026-09-07 按独立 cuDNN backend 9.24.0 与 frontend 1.27.0 固定提交复核，见 [SRC-CUDA-071](/sources-and-versions/#src-cuda-071)和 [SRC-CUDA-072](/sources-and-versions/#src-cuda-072)。验证、降为后端图、发现候选、检查支持和构建计划是不同阶段；不是 M14 的 CUDA Graph 捕获/重放，也不提供执行证据。
+
+<span id="term-192" class="resource-target" aria-hidden="true"></span>
+
+### Execution Plan · 执行计划
+
+- **定义：** 执行计划（Execution Plan）是在指定后端、设备与图合同下，从引擎配置构建出的可执行实现描述。应用仍须核对最终工作区、绑定张量存储、保持生命周期并另行验证完成和数值结果；计划不是结果记录。
+- **避免使用：** 启发式候选；最快内核；跨设备永久缓存；成功构建等于正确输出。
+- **相关资源：** [L10](/libraries/cudnn-graphs-and-plans/)、[L11](/libraries/attention-backend-dispatch/)、[PB-R4-011](/practice/#pb-r4-011)和 [PB-R4-012](/practice/#pb-r4-012)。
+- **版本说明：** 2026-09-07 复核的 [SRC-CUDA-072](/sources-and-versions/#src-cuda-072)中，`create_execution_plans` 先收集配置，默认 `HEURISTICS_CHOICE` 才在构建时按顺序停于首个成功项；`ALL` 不是基准测试。后端工作区筛选不一定包含前端节点工作区。序列化图结构与序列化选中计划不同，恢复仍受精确版本/硬件与政策约束；不保证跨架构位相等或性能。
+
 ## 维护规则
 
-TERM-001 至 TERM-188 保留各自逐项复核日期。新增 TERM-189/190 与完整 190 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-07** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分原生硬件能力与 API 资格、累加器类型与输入及输出精度；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-190 保留各自逐项复核日期。新增 TERM-191/192 与完整 192 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-07** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分运算图、引擎候选与执行计划；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。

@@ -96,7 +96,7 @@ State tensor shape/layout and the operation convention before doing arithmetic. 
 
 **Goal:** Write a production-comparison checklist for the same direct teaching operation and a future cuDNN Frontend/API path, covering component pinning, semantic parity, graph validation/build, heuristics/plan selection, workspace, correctness, tolerance, and determinism.
 
-**Constraints:** State that a later, unpublished cuDNN library unit, not A07, pins the component matrix; current A07 neither teaches nor executes cuDNN; record cuDNN Frontend v1.27.0 only as a future coordinate for cuDNN 9.24.0+; every build, plan, workspace, output, timing, and speedup field remains `unrecorded`.
+**Constraints:** [L10](/en/libraries/cudnn-graphs-and-plans/) is the published, separately dated component and graph/plan continuation, not an added prerequisite or execution evidence for this Exercise. A07 still neither teaches nor executes cuDNN. Retain this page's 2026-08-30 source date and do not equate a version reference with a complete local environment; every build, plan, workspace, output, timing, and speedup field remains `unrecorded`.
 
 **Expected evidence:** An ordered gate table, failure classification, workspace-lifetime diagram, correctness/determinism acceptance contract, and an unfilled measurement-record template.
 

@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: One hundred ninety published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: 192 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-09-07'
@@ -18,6 +18,8 @@ structure:
   - entry-term-188
   - entry-term-189
   - entry-term-190
+  - entry-term-191
+  - entry-term-192
   - maintenance
 head:
   - tag: meta
@@ -35,7 +37,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1766,6 +1768,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/), [L06](/en/libraries/cublas-gemm/), [L08](/en/libraries/tensor-core-precision-contracts/), [L09](/en/libraries/cutlass-cpp-gemm-structure/), [PB-R4-009](/en/practice/#pb-r4-009), and [PB-R4-010](/en/practice/#pb-r4-010).
 - **Version note:** Reviewed 2026-09-07 in [SRC-CUDA-069](/en/sources-and-versions/#src-cuda-069) and [SRC-CUDA-070](/en/sources-and-versions/#src-cuda-070). C++ BF16/TF32 WMMA uses float accumulator fragments; `store_matrix_sync` does not automatically narrow a float fragment into a half pointer. The pinned CUTLASS v4.7.0 BF16 test declares BF16 output with FP32 accumulation, demonstrating that these types can differ, not that the test ran. Original and already-rounded inputs need separate independent higher-precision references, and a double reference is not exact real arithmetic.
 
+<span id="term-191" class="resource-target" aria-hidden="true"></span>
+
+### Operation Graph · 运算图
+
+- **Definition:** An Operation Graph specifies mathematical operations and data dependencies between tensors, including semantics such as shapes, strides, and types. It states what to compute without choosing an implementing engine or kernel; a graph can have zero, one, or multiple eligible engines.
+- **Avoid:** CUDA Graph launch capture; selected kernel; built plan; guaranteed fusion or speedup.
+- **Related resources:** [A07](/en/algorithms/convolution-reuse-layout/), [L10](/en/libraries/cudnn-graphs-and-plans/), [L11](/en/libraries/attention-backend-dispatch/), and [PB-R4-011](/en/practice/#pb-r4-011).
+- **Version note:** Reviewed 2026-09-07 against independent cuDNN backend 9.24.0 and the pinned frontend 1.27.0 commit in [SRC-CUDA-071](/en/sources-and-versions/#src-cuda-071) and [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072). Validation, backend-graph lowering, candidate discovery, support checking, and plan construction are distinct stages. This is not M14's CUDA Graph capture/replay and grants no execution evidence.
+
+<span id="term-192" class="resource-target" aria-hidden="true"></span>
+
+### Execution Plan · 执行计划
+
+- **Definition:** An Execution Plan is an executable implementation description built from an engine configuration under a specified backend, device, and graph contract. The application must still check final workspace, bind tensor storage, preserve lifetimes, and independently verify completion and numerical results; a plan is not a result record.
+- **Avoid:** Heuristic candidate; fastest kernel; permanent cross-device cache; successful build as correct output.
+- **Related resources:** [L10](/en/libraries/cudnn-graphs-and-plans/), [L11](/en/libraries/attention-backend-dispatch/), [PB-R4-011](/en/practice/#pb-r4-011), and [PB-R4-012](/en/practice/#pb-r4-012).
+- **Version note:** In [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072), reviewed 2026-09-07, `create_execution_plans` first collects configurations; default `HEURISTICS_CHOICE` stops at the first successful candidate during the later build. `ALL` is not benchmarking. The backend workspace filter need not include frontend-node workspace. Graph-structure serialization differs from selected-plan serialization; restoration remains constrained by exact version/hardware and policy, without cross-architecture bitwise or performance guarantees.
+
 ## Maintenance rule
 
-TERM-001 through TERM-188 retain their item-level review dates. New TERM-189/190 and the complete 190-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-07**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish native hardware capability from API eligibility and accumulator type from input and output precision; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-190 retain their item-level review dates. New TERM-191/192 and the complete 192-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-07**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish operation graphs, engine candidates, and execution plans; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.

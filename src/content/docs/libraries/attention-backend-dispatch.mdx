@@ -1,0 +1,231 @@
+---
+title: 'L11：注意力后端契约与分派'
+description: 通过有界 cuDNN 前向契约和原创描述符审计，区分注意力语义、IO 算法、前端表示、后端计划与实际分派证据。
+pairId: l11
+counterpart: /en/libraries/attention-backend-dispatch/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, descriptors, representations, plans, dispatch, known-issues, visual-explainer, numerical-policy, fallback, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L11
+prerequisites: [A11, L10, L08]
+relatedUnits: [VIS18]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: advanced
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'SRC-CUDA-071: cuDNN backend release notes'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0'
+    version: 'Backend 9.24.0'
+    platform: 'Native Linux policy; versioned support and known issues, not runtime evidence'
+    accessDate: '2026-09-07'
+  - title: 'SRC-CUDA-072: cuDNN frontend release and immutable source'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Pinned SDPA descriptors, representation gates, plans, and Python routing; source inspection only'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/attention-backend-dispatch/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,descriptors,representations,plans,dispatch,known-issues,visual-explainer,numerical-policy,fallback,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A11,L10,L08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS18 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '9.24.0,1.27.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/attention-backend-dispatch/" lang="en">Read the English counterpart</a>
+
+名为 `flash_attention` 的图（graph）不能告诉你实际运行了哪个实现。讨论后端（backend）之前，先确定操作语义（semantics）、描述符（descriptor）背后的真实字节、具有资格的前端表示（frontend representation）与执行计划（execution plan），以及识别一次实际执行所需的证据。
+
+## 学习目标
+
+预留约 40 分钟，审计稠密前向契约、推导 BHSD 寻址、判断构造的分派（dispatch）案例，并在候选被拒绝时保留参考计算。本学习单元（Learning Unit）不要求 GPU、安装、编译或执行，产出是源码阅读与决策记录，不是可运行示例（Runnable Example）或实验（Lab）。
+
+## 前置知识
+
+严格有序先修为 `A11, L10, L08`：[A11：作为 IO 问题的注意力](/algorithms/attention-as-an-io-problem/)提供公式与分块递推；[L10：cuDNN 图与计划](/libraries/cudnn-graphs-and-plans/)提供图、引擎配置（engine configuration）、执行计划和工作区（workspace）的责任划分；[L08：张量核心（Tensor Core）精度契约](/libraries/tensor-core-precision-contracts/)提供存储、计算与数值验收的区别。[VIS18](/visuals/attention-memory-traffic/) 是相关资源，不增加先修项。
+
+## 注意力名称背后的五个层次
+
+A11 引用的原始 Transformer 与 FlashAttention 论文解释注意力语义及 IO 感知精确分块（IO-aware exact tiling）的历史。减少完整中间量物化（materialization）推动了算法设计，但没有产生一个通用的库实现或分派器（dispatcher）。这些论文不支持当下 cuDNN 的资格或性能声明。
+
+| 层次 | 要回答的问题 | 答案不能证明什么 |
+| --- | --- | --- |
+| 语义（semantics） | 操作是否为 `O = softmax_row(QK^T * scale)V`，其注意力头（attention head）、掩码（mask）和输出是什么？ | 存储布局（layout）或运算精度 |
+| IO 算法（IO algorithm） | 哪些值驻留，哪些中间量被物化或重复读取？ | 某个库的具体流量或内核（kernel） |
+| 前端表示（frontend representation） | `UNIFIED`、`COMPOSITE` 或 `AUTO` 如何描述这次 SDPA 请求并将其转换为后端表示（lowering）？ | 存在合格后端引擎或已构建计划 |
+| 后端计划（backend plans） | 哪些引擎配置通过特性、工作区与数值策略筛选，并且能构建？ | 已执行、输出正确或实测优先级 |
+| 已观察分派（observed dispatch） | 哪个有明确身份的计划在该环境中执行了这次调用？ | 另一次调用的分派或整个框架的规则 |
+
+本单元分别固定 **backend 9.24.0** 与 **frontend 1.27.0**，后者的标签解析到 **`f77fbc3d21be3f24cd0286b9b368105f7c518b8a`**。前端发布说明建议搭配 backend 9.24.0 及以后版本，不代表源码中的全部特性都可用于 9.24.0。复核日期为 **2026-09-07**。框架层真实 API 分派留给后续单元，本单元不声明 PyTorch 版本或确切框架行为。
+
+## 固定一个狭窄的前向契约
+
+这里的缩放点积注意力（scaled dot-product attention，SDPA）限定为稠密、固定形状、单 GPU 的前向推理（forward inference）。每个批次与注意力头独立使用 A11 公式，沿键维进行逐行 softmax，明确设置 `scale = 1/sqrt(D)`，并使用稳定归一化。审查资格之前先固定以下选择：
+
+| 字段 | L11 教学契约 |
+| --- | --- |
+| 头数与长度 | Q/K/V 头数相等；查询和 KV 序列长度相等且 `S > 1`；不包含解码（decode） |
+| 头维度（head dimension） | Q/K 与 V 深度相等，`D` 只选 64 或 128 |
+| 存储 | Q/K/V/O 全部真实存为 FP16，或全部真实存为 BF16；不混用端口类型，不重解释 FP32 字节 |
+| 运算 | 明确请求 FP32 计算与中间类型；这不能恢复输入或输出转换丢失的信息 |
+| 布局（layout） | 四维逻辑 BHSD 描述符，对应各自独立的连续缓冲区；嵌入维步长为一 |
+| 统计量（statistics） | `generate_stats=false`；不请求 Stats 输出绑定或分配 |
+| 排除项 | 不含掩码（mask）、偏置（bias）、dropout、分页（paging）、不规则偏移（ragged offsets）、反向（backward）、FP8 或动态形状覆盖 |
+
+这有意比 cuDNN 全部支持范围更窄，不表示排除项普遍不受支持。固定提交的[支持面检查](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L347-L369)拒绝 SM80 之前的 SDPA。[Backend 9.24.0 矩阵](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/support-matrix.html)包含更广泛的 SM75 库支持，但不使这条注意力路径能在 SM75 上使用。必须选择原生支持列表中的硬件，再叠加 SDPA 条件，不能假设未来所有高于 SM80 的架构都适用。[硬件前向兼容（hardware forward compatibility）](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/forward-compatibility.html#forward-compatibility-and-the-graph-api)的一般承诺排除了特化的融合注意力模式。
+
+源码还检查头数整除关系及 FP16/BF16 头维度是否为八的倍数。相等头数和 D=64/128 满足这些特定条件，不代表通过全部支持或构建检查。原生 Linux 是唯一受支持环境（Supported Environment）；在其他主机上阅读不建立该主机的 CUDA 运行声明。
+
+## 先推导描述符，再讨论计划
+
+采用原创描述符例子 **`B=1,H=2,S=128,D=64`**。Q、K、V、O 的逻辑形状各为 **`[1,2,128,64]`**。BHSD 依次表示批次、头、序列、深度；连续元素步长（element stride）为 **`[16384,8192,64,1]`**，由 `[H*S*D,S*D,D,1]` 得到。这是元素步长，不是字节步长。
+
+| 量 | 确切推导值 |
+| --- | --- |
+| 元素偏移 | `b*16384 + h*8192 + s*64 + d` |
+| 最后逻辑元素 | `(0,1,127,63)` 对应 `8192+8128+63=16383` |
+| 每个张量的元素数 | `1*2*128*64=16384` |
+| 每个张量的字节数 | FP16 或 BF16：`16384*2=32768 B` |
+| 字节步长 | `[32768,16384,128,2]` |
+| 最后元素的字节范围 | 各自 32768 字节分配内的 `32766..32767` |
+| Q/K/V/O 四份独立分配 | `4*32768=131072 B`，不含任何工作区或其他存储 |
+| 显式缩放系数 | `1/sqrt(64)=1/8=0.125` |
+
+例如，`(0,1,0,0)` 应位于元素偏移 8192。若为同一份 BHSD 字节声明 `[16384,64,128,1]`，就会将该位置解释为偏移 64。这组步长可以描述另一种物理 BSHD 排列，但**不能**描述当前缓冲区。分配范围检查可能通过，值的映射却已经错误。应修正描述符使其匹配分配，或显式重新打包数据并审查新表示；不能只改存储标签以通过支持检查。
+
+前端的[四维张量检查](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/scaled_dot_product_flash_attention.h#L265-L311)和[前向示例](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_fwd.cpp#L32-L104)说明逻辑 Q/K/V/O 约定。K 按 `[B,H,S,D]` 提供，不采用旧式分解后端的 K 转置描述符；公式中的 `K^T` 不要求交换这个前端描述符。输出布局也必须有效。分配算术不证明地址对齐资格或存储生命周期；调用者仍需提供正确对齐的真实缓冲区、绑定正确张量，并让存储存活至执行完成。
+
+## 表示选择不是引擎选择
+
+固定提交的 [AUTO 选择逻辑](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_properties.h#L2298-L2312)先检查 UNIFIED 的特性支持，再检查 COMPOSITE。UNIFIED 用统一操作表示 SDPA，COMPOSITE 将其分解为图。后端启发式（heuristics）与计划构建是后续独立步骤。AUTO 不是基准测试，也不保证后续构建或执行失败时在所有实现之间运行时回退（runtime fallback）。
+
+有一个数据类型（dtype）区别值得解释，尽管它位于 L11 接受的输入契约之外。在此 SHA 上，[允许类型列表](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L435-L481)将 FLOAT 排除在 UNIFIED 的 Q/K/V/O 之外，但 COMPOSITE 允许 FLOAT。UNIFIED 还要求编译时与加载的后端版本均至少为 9.13.1。[上游测试定义](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_sdpa_fp32_rejected.py#L87-L143)覆盖 UNIFIED 各端口拒绝 FP32/FP64、COMPOSITE 拒绝 FP64，以及 COMPOSITE/AUTO 接受 FP32 的情况；没有支持引擎时会跳过相关测试。因此，**UNIFIED 拒绝 FP32 不等于所有 cuDNN SDPA 表示都拒绝 FP32**。类型获准仍不证明存在计划。这些测试只被阅读，没有运行。
+
+固定提交的 [`Attention.md` 矩阵](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/operations/Attention.md#L16)仍标注 backend **9.18.1**。当前文档检索，包括 Context7 的 SDPA 前向与反向资料，不能作为将旧矩阵应用到全部 9.24.0 的依据。本单元以精确源码条件、测试及当前后端说明限定范围。前端没有拒绝，不是后端支持的正面证据。
+
+## 后端计划与 Python 路由是不同路径
+
+C++ 后端路径仍采用 L10 的 `validate -> build_operation_graph -> create_execution_plans -> check_support -> build_plans`。在固定提交的[图接口](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L2867-L2932)中，`create_execution_plans` 发现并排入引擎配置，而不是完成计划构建。在支持与构建检查之前应用工作区和数值策略。[计划集合](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h#L517-L668)可以确认至少一个候选可接受，但不认证所有候选。构建全部候选不等于测量它们。
+
+Frontend 1.27.0 的 Python 原生 `cudnn.pygraph` 增加了一层可以独立阅读的路由（routing）。这里是**基于源码标签的对照（source-tag-based comparison）**，不是在本地运行 Python 程序，也不是与 C++ 后端启发式相同的接口：
+
+| 固定提交中的 Python 行为 | 解读 |
+| --- | --- |
+| [`router.py:41-77`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/engines/router.py#L41-L77)收集 Python 提案与后端条目，再调用 `heuristics_sort` | 排名位置不是 `engine_id`；候选的位置不能标识它的实现 |
+| [`_pygraph.py:1346-1403`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/_pygraph.py#L1346-L1403)在未固定计划时，遇到 `NotImplementedError` / `cudnnGraphNotSupportedError` 会继续遍历 | 这是明确声明的构建拒绝，不允许吞掉任意失败，也不授权执行错误后重试 |
+| 可选的严格 [`select_plan(i)`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/_pygraph.py#L1117-L1139)固定一个列表位置 | 已固定候选拒绝时抛错，不静默尝试后项；固定选择不证明支持、正确性或实测优胜 |
+| 已编译 Python 计划的工作区在大小已知后检查 | 提案不足以构成分配契约；必须保留所选计划真实的大小要求 |
+
+[路由测试](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_engine_router.py#L395-L455)只是路由策略的源码定义，不是已观察的 GPU 选择。C++ `HeurMode_t::OPENSOURCE` 是另一个显式接口，不是普通后端模式的隐含属性。其 [SM100 SDPA prefill 引擎](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/experimental/sm100_sdpa_prefill_engine.h#L36-L41)要求**恰好 SM100**，不涵盖全部 Blackwell GPU 或 SM103。不要把该 C++ 引擎与独立的 Python SM100 API 测试混为一谈。
+
+## 构造的分派决策表
+
+下列各行是相互独立的假设审计案例，**不是日志、运行、引擎结果或基准测试**。除非该行另有说明，每行均从既定契约出发。表中的行动是应用决策，不代表 cuDNN 会自动采用该回退。
+
+| 情形 | 声称执行之前的决策 | 对参考与证据的影响 |
+| --- | --- | --- |
+| SM80 之前，包括 SM75 | 即使后端库整体支持，也拒绝此 SDPA 候选 | 保留原始参考；没有观察到 GPU 选择 |
+| BHSD 字节配上 `[16384,64,128,1]` 步长 | 即使维度与分配范围通过，也拒绝不匹配的描述符 | 修正映射或显式重新打包；不改变数学判定基准（oracle） |
+| FP32 Q/K/V/O 显式选择 UNIFIED | UNIFIED 拒绝 FLOAT；COMPOSITE/AUTO 可能允许，但仍受引擎支持约束 | 位于 L11 的 FP16/BF16 契约之外；不推断普遍拒绝 FP32，也不静默降低精度 |
+| 增加掩码、偏置、dropout、分页、不规则数据、反向、FP8、不等头数或解码 | 位于已审查子集之外；不能删除不支持的请求特性来获得资格 | 在另行具备能力的参考中保留完整请求语义，否则报告不支持 |
+| 候选工作区超过策略，或最终总工作区超过可用分配 | 在该预算下拒绝；审查其他合格候选或选择显式应用替代路径 | 工作区上限不是分配，也不授权不安全执行 |
+| 要求可重复性，但候选带 `NONDETERMINISTIC` | 过滤该候选并重新评估剩余项 | 确定性（determinism）不等于数值准确性；不能仅为获得计划而放宽容差 |
+| 未固定的 Python 构建候选返回声明的拒绝 | 固定版本的路由策略可以考虑后续排名候选 | 这是构建路由，不是任意运行错误的自动恢复 |
+| 可选严格 Python `select_plan(i)` 固定了一个会拒绝的候选 | 抛错，而非静默尝试其他计划 | 请求的严格选择必须以失败形式保持可见 |
+| 图验证、支持检查或计划构建成功 | 若确实发生，只记录该阶段，不推断框架后端或调用完成 | 本单元仍缺少实际计划身份、执行完成和数值验收 |
+
+内存策略方面，L10 的 `deselect_workspace_greater_than` 限制后端计划的候选工作区，而不是全部 GPU 内存。前端最终工作区查询包含**后端计划工作区加前端节点工作区**（[源码](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L1129-L1135)）。应使用可检查错误的最终大小查询，落实应用的总临时存储预算，分配并绑定有效存储，让生命周期延续至完成。例子中的 `131072 B` 只是 Q/K/V/O 容量，不提供工作区数字。
+
+## 限定已知问题与预览条件
+
+以下陈述来自[后端发布说明](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0)的 **9.24.0 小节**，不是把历史上看似未解决的条目累加起来。本地没有复现任何问题。
+
+| 上游报告的范围 | 对 L11 的影响 |
+| --- | --- |
+| SDPA 解码同时使用因果掩码（causal mask）及不相等的 Q 与 K/V 头数，可能产生不匹配或 NaN | 相等头数、`S > 1` 和无掩码排除了该组合。上游对受影响情况建议避免因果掩码，并通过填充掩码（padding mask）提供实际长度；这不允许从任意注意力请求中删除必需掩码 |
+| K/V 序列长度为一的 SDPA 反向不受支持 | 前向限定排除了它；不能把反向限制改写成所有稠密前向不受支持 |
+
+已检查的 [9.25.0 发布页](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.25.0/release-notes.html#cudnn-9-25-0-developer-preview)明确标为**开发者预览（Developer Preview）**，不是正式发布（GA）。前端源码要求混合逐批次与累积序列长度形式的有效后端版本至少为 9.25（[支持面](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L515-L520)）；Hopper ordered-dQ 确定性反向在[注意力节点](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/scaled_dot_product_flash_attention.h#L1613)中也受 9.25 条件控制。两者均不进入本单元的 9.24 前向契约。历史上的 9.10.0/9.10.1 FP16/BF16 保护条件和特定 9.14.0 滑动窗口保护条件不是新增的 9.24 缺陷。本狭窄子集也不被宣称为无缺陷。
+
+## 复用 VIS18，保持账本不变
+
+打开独立的 [VIS18：注意力内存流量](/visuals/attention-memory-traffic/)。它保持原有 FP32 模型，按**每个逻辑元素 4 字节**计数。在 `N=8,d=4,Br=Bc=4` 时，物化调度计 **512 elements = 2048 B**，查询外层分块调度计 **192 elements = 768 B**，静态差值为 **1280 B**。归一化的 `0 B` 表示没有跨既定边界的传输，不表示没有归一化计算。
+
+用这个可视化讲解（Visual Explainer）追问 IO 算法避免了哪些中间量物化。**不要**将两条轨道重标为 UNIFIED/COMPOSITE、Python/C++ 或所选 cuDNN 引擎。小型教学输入不是本单元 D=64/128 的描述符例子，也不证明其资格。该账本不是 cuDNN 流量、cuDNN 数据类型计数、工作区、后端轨迹或运行时分派器。L11 的两字节 FP16/BF16 存储不允许把 VIS18 总数减半：混合运算类型、实现调度和实际传输需要独立核算。图融合或计划构建成功均不能证明采用了 VIS18 的调度。本单元只链接既有教学资源，不复制或内嵌其实现。
+
+## 数值策略不是后端名称
+
+请求 FP32 计算与中间类型不能撤销 FP16/BF16 输入舍入或输出转换，也不保证唯一的归约顺序。保留固定的独立参考计算（independent reference），使用稳定逐行归一化、相同缩放系数、形状及完整请求语义。明确记录输入来源和舍入、转换策略；全精度输入参考与将低精度输入提升后计算的参考回答不同问题。
+
+未来比较之前，为具体教学输入预先定义绝对与相对容差（tolerance）、非有限值策略及输出比较边界。不能把上游测试容差当作通用误差界。[上游注意力测试](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_mhas.py#L910-L969)说明如何组织比较，不是本地已经验收的结果。
+
+[后端数值说明](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendnumericalnote-t)暴露 `NONDETERMINISTIC`、`DOWN_CONVERT_INPUTS`、`REDUCED_PRECISION_REDUCTION` 等属性。应检查相关候选说明，不能由张量核心（Tensor Core）标签推导这些属性。[可重复性说明](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/developer/misc.html#reproducibility-determinism)不承诺跨架构逐位相等。过滤非确定性候选属于重复性策略，不证明准确性、与 FP32 参考相等，或跨版本与计划相等。本单元不作性能比较。
+
+## 候选失败时保留参考
+
+保留普通的稳定 FP32 注意力分解，作为语义与参考替代方案，明确存储、缩放、归一化及输出策略。它不是精确实数运算，也不自动与低精度实现逐位等价。若替代方案没有实现请求的某个特性，应报告不支持，而不是删掉特性。参考无需使用这条 SDPA 后端，因此 SM80 之前的候选被拒绝，不等于注意力公式被拒绝。
+
+拒绝不能成为重写参考输入、缩放系数、掩码语义或验收容差来制造成功的理由。显式表示变更或正确描述的数据转换是需要重新审查的候选，不是对判定基准的隐蔽修改。保留原始输入供比较。计划构建拒绝后，可以选择另一个符合策略的候选或上述显式应用替代方案；执行错误则需要诊断和安全状态处理，不能盲目在可能未完成的输出上重试。本单元不新增参考实现或运行时回退。
+
+## 证据边界
+
+四个证据数组全部为空。原创描述符算术、构造的决策表、上游源码与测试阅读以及链接的浏览器可视化不授予证据状态（Evidence Status）。没有编译 cuDNN 程序，没有运行上游测试，也不报告 CUDA 运行、所选引擎、输出、计时或加速比。源码层路由行为不是已观察的分派结果。
+
+未来运行记录需要环境清单（Environment Manifest）、精确前端与后端及组件身份、设备和架构、张量形状与步长及类型和分配契约、特性与缩放及统计量配置、工作区与数值策略，以及实际所选计划身份。还需检查启动与完成、进行独立参考比较，并在声明的基准环境（Reference Environment）中记录验收结果。仅成功构建图不提供这些执行证据，也不识别框架实际 API 分派。
+
+## 检索练习
+
+1. 图名称能识别五个层次中的哪些内容？为什么 IO 算法不能标识所选引擎？
+2. 推导例子的 BHSD 步长、最后偏移、各张量字节数与缩放系数。为什么步长不匹配仍可能没有越过分配边界？
+3. 为什么显式 UNIFIED 可能拒绝 FP32，而 COMPOSITE/AUTO 可能允许？为什么类型获准或仅达到 SM80 都不证明存在计划？
+4. 普通 C++ 规划、未固定 Python 计划的构建拒绝，以及可选严格 `select_plan(i)` 有何区别？计划构建后仍缺少什么？
+5. 为什么 VIS18 必须保留四字节逻辑账本？为什么确定性过滤或候选失败不能改变数值参考？
+
+## 继续练习
+
+- 先完成 [L11 练习（Exercises）](/libraries/attention-backend-dispatch/exercises/)，再打开[独立解答](/libraries/attention-backend-dispatch/solutions/)。
+- 在练习题库（Practice Bank）[PB-R4-012](/practice/#pb-r4-012) 中审计另一个有界分派契约。
+- 回到 [A11](/algorithms/attention-as-an-io-problem/) 复习递推、[L10](/libraries/cudnn-graphs-and-plans/) 复习计划所有权、[L08](/libraries/tensor-core-precision-contracts/) 复习数值参考。
+
+## 来源与许可
+
+[SRC-CUDA-071](/sources-and-versions/#src-cuda-071) 记录 backend **9.24.0** 文档、支持、数值策略及限定范围的发布问题。[SRC-CUDA-072](/sources-and-versions/#src-cuda-072) 记录 frontend **1.27.0** 的 **`f77fbc3d21be3f24cd0286b9b368105f7c518b8a`** 提交及精确的逐文件权利。已检查的前端并非统一许可：`graph_properties.h` 和 `samples/cpp/sdpa/fp16_fwd.cpp` 为 MIT；注意力与支持头文件、图与计划头文件、Python router、`_pygraph.py` 及引用的测试各自带有 Apache-2.0 文件头。未来若确有获授权的改编需求，应保留每个文件真实的版权与声明；仓库徽章或本页 CC BY 4.0 不能替代它们。
+
+后端文档受独立的 [SDK 协议](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/eula.html)约束，不继承前端 Apache/MIT 权限。上游文档、源码、示例与测试仅链接并转述，没有复制或改编上游程序清单、图、支持表或实现；课程文字、描述符算术与决策情景均为原创。A11 的既有论文只支持算法历史，不支持后端资格。Context7 检索受到固定版本原始来源的约束，不能把旧矩阵或预览接口提升为稳定课程（Stable Curriculum）的依赖。
+
+**事实核对与来源访问日期：2026-09-07。**
