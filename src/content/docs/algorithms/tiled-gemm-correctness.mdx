@@ -3,7 +3,7 @@ title: 'A08：从正确 Naive GEMM 到 Shared-Memory Tiling'
 description: 先冻结 row-major GEMM 与数值验收合同，再从每输出一线程的 naive baseline 推导 partial-safe shared-memory tiling、统一 barrier 与独立 CPU reference。
 pairId: a08
 counterpart: /en/algorithms/tiled-gemm-correctness/
-factCheckDate: '2026-09-03'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -69,7 +69,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/algorithms/tiled-gemm-correctness/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-03' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -119,7 +119,7 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 - 推导 shared-memory tiling 的 load、barrier、compute、barrier、reuse phases。
 - 对 partial M、N、K tiles 分别写 guard，并证明所有 block threads 参加 barrier。
 - 用 independent double CPU reference、非有限值策略与绝对加相对容差检查 FP32 output。
-- 把教学 kernel、未来 cuBLAS/CUTLASS comparison 与实际 performance evidence 分开。
+- 把教学 kernel、版本固定的 cuBLAS/CUTLASS 合同与实际性能证据分开。
 
 ## 先修关系
 
@@ -173,9 +173,11 @@ EX15 只维护一份 canonical implementation。先导入 pure-host `cpu-referen
 
 ## Production boundary
 
-EX15 用于理解正确性与分块，不是生产库的替代品。现在可以继续学习 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)和 [L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)，由它们说明各自版本下的库合同；CUTLASS 的 L09 仍待发布。[LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)也已发布，直接先修恰好为 [Q13](/correctness/gemm-optimization-case-study/)与 L06，在站外比较 EX15 和 [EX18](/examples/cublas-gemm/)。这些是后续学习入口，不增加 A08 的先修要求；EX18/LAB12 的编译证据和实际观察记录仍为空，运行状态为待硬件验证（Pending Hardware Verification），没有生产替代或性能胜出的结论。
+EX15 用于理解正确性与分块，不是生产库的替代品。现在可以继续学习 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)和 [L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)，由它们说明各自版本下的库合同。[LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)也已发布，直接先修恰好为 [Q13](/correctness/gemm-optimization-case-study/)与 L06，在站外比较 EX15 和 [EX18](/examples/cublas-gemm/)。这些是后续学习入口，不增加 A08 的先修要求；EX18/LAB12 的编译证据和实际观察记录仍为空，运行状态为待硬件验证（Pending Hardware Verification），没有生产替代或性能胜出的结论。
 
-**后续资源链接更新：2026-09-06。** 本次只更新发布状态与导航，A08 的 API 事实、技术来源及其访问日期不变。
+[Issue #37](https://github.com/xiangzhang-coding/cuda-learning-site/issues/37)新增 [L08：张量核心（Tensor Core）精度与架构合同](/libraries/tensor-core-precision-contracts/)，有序直接先修项恰好为 `[Q02,L06,F06]`，以及 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)，有序直接先修项恰好为 `[A08,L06,M17]`。L08 区分输入转换、累加、输出转换与 WMMA 架构合同；L09 的结构阅读固定为 CUTLASS C++ v4.7.0、提交 `dcf215af68a2d08d305076c152a06f201728cd53`，不承诺 DSL 或可执行支持。新发布的 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)、[L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)延伸这条学习路线，不增加 A08 的先修要求。两者的四个证据数组均为空，不授予证据状态，也没有 CUDA 或性能结果；VIS12 的标量面板不变，不表示真实 Tensor Core 指令。
+
+**后续资源链接更新：2026-09-07。** 页面日期仅对应本次发布清单与导航更新；A08 的 API 事实、技术来源及其访问日期不变。
 
 ## 证据边界
 

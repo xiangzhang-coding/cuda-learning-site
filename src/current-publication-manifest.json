@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-06",
+  "reviewDate": "2026-09-07",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 257,
-    "sourceRoutes": 514,
-    "exerciseSetPublicationPairs": 68,
-    "solutionSetPublicationPairs": 68,
+    "publicationPairs": 263,
+    "sourceRoutes": 526,
+    "exerciseSetPublicationPairs": 70,
+    "solutionSetPublicationPairs": 70,
     "learningUnits": [
       "O01",
       "O02",
@@ -84,7 +84,9 @@
       "L04",
       "L05",
       "L06",
-      "L07"
+      "L07",
+      "L08",
+      "L09"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12"],
@@ -109,7 +111,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 74,
+    "practiceBankEntries": 76,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -122,8 +124,8 @@
       "PB-R3-011",
       "PB-R3-012"
     ],
-    "glossaryTerms": 188,
-    "sourceRecords": 84
+    "glossaryTerms": 190,
+    "sourceRecords": 86
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -196,6 +198,24 @@
       }
     ],
     "componentBoundaries": {
+      "cutlassCpp": {
+        "version": "4.7.0",
+        "selection": "independent-reference-only",
+        "commit": "dcf215af68a2d08d305076c152a06f201728cd53",
+        "releasedOn": "2026-08-13",
+        "apiTeachingBaseline": "Retained 2.x-style C++ GEMM API with a bounded 3.x collective comparison",
+        "proposedBuildTarget": {
+          "toolkit": "13.3.1",
+          "nvcc": "13.3.73",
+          "host": "Ubuntu 24.04 x86-64",
+          "hostCompiler": "GCC 13.3.0",
+          "dialect": "c++17",
+          "architecture": "sm_75",
+          "status": "not-built"
+        },
+        "compileCheckedToolkitLanes": [],
+        "pythonDslIncluded": false
+      },
       "cccl": {
         "version": "3.4.2",
         "selection": "independent",
@@ -350,7 +370,7 @@
     "referenceEnvironments": [],
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
-    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07"],
+    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -372,7 +392,7 @@
     "R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.",
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
     "Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.",
-    "L01-L07 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
+    "L01-L09 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
     "The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.",
     "Profiler collection requires the exact tool, CUPTI, driver, GPU, metric availability, filter, replay, workload, command, permission, report-custody, and Environment Manifest coordinates. Performance-counter access must be administrator-approved for a non-admin user; denial or an unavailable metric blocks collection and must be recorded without sudo, privilege escalation, or policy bypass.",
     "Q11 summarizes linked EX14 and LAB10 subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS11, static material, browser models, and the expected-only plan grant no timing, profiler metric, speedup, bottleneck, or winner.",
@@ -383,6 +403,8 @@
     "EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.",
     "EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.",
     "L06/L07 use the 12.9.2 archived API teaching baseline. Exact 13.3.1 API and release-note archives were unavailable; live 13.3 API and 13.3 Update 1 release notes are explicitly dated comparisons, not archived or executed evidence.",
-    "L01-L07 are published in the rolling R4 surface; L08-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
+    "L08 separates WMMA input, accumulation, output, numerical, API-target, and native-hardware contracts; an API minimum is not a native FP64 Tensor Core whitelist or a measured acceleration claim.",
+    "L09 references CUTLASS C++ v4.7.0 at an immutable commit and proposes, but has not built, one CUDA 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17 SM75 target. Reviewed source and owner tests grant no generated-code, runtime, pipeline, or speedup evidence. Python DSL material is excluded under its separate terms; no owner sample is copied.",
+    "L01-L09 are published in the rolling R4 surface; L10-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
   ]
 }

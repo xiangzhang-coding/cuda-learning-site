@@ -16,7 +16,7 @@ const units = [
     prerequisites: ['A05', 'M03', 'M04', 'A02'],
     terms: ['TERM-147', 'TERM-148'],
     practice: 'PB-R2-020',
-    factCheckDate: '2026-09-03',
+    factCheckDate: '2026-09-07',
   },
   {
     id: 'A09',

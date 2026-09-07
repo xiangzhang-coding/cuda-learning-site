@@ -159,6 +159,8 @@ export default defineConfig({
             { slug: 'libraries/libcu-plus-plus-synchronization' },
             { slug: 'libraries/cublas-gemm' },
             { slug: 'libraries/cublaslt-matmul' },
+            { slug: 'libraries/tensor-core-precision-contracts' },
+            { slug: 'libraries/cutlass-cpp-gemm-structure' },
           ],
         },
         {

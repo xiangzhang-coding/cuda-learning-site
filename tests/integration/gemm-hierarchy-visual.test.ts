@@ -47,7 +47,7 @@ describe('VIS12 GEMM hierarchy Visual Explainer', () => {
       expect(page).toContain('unitId: VIS12');
       expect(page).toMatch(/prerequisites:\n  - A08/);
       expect(page).toMatch(/relatedUnits:\n  - EX15/);
-      expect(page).toContain("factCheckDate: '2026-08-31'");
+      expect(page).toContain("factCheckDate: '2026-09-07'");
       expect(page).toMatch(/evidence:\n  compilation: \[\]\n  runtime: \[\]\n  expectedObservations: \[\]\n  recordedObservations: \[\]/);
       expect(page).toMatch(/no autoplay|没有 autoplay/i);
       expect(page).toMatch(/20 panels|20 panels|20 个.*panels/i);

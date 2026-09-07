@@ -96,14 +96,14 @@ const learningUnits = [
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
-const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05'] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
-const currentRunnableExampleIds = [...runnableExampleIds, 'EX17'] as const;
+const currentRunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
-const currentLabs = [...r3Labs, 'LAB11'] as const;
+const currentLabs = [...r3Labs, 'LAB11', 'LAB12'] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -133,24 +133,25 @@ const currentProfilerReportPlans = [
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18',
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 11 },
-  { suffix: 'practice/', count: 72 },
+  { suffix: 'labs/', count: 12 },
+  { suffix: 'practice/', count: 76 },
   { suffix: 'visuals/', count: 19 },
-  { suffix: 'glossary/', count: 186 },
-  { suffix: 'sources-and-versions/', count: 82 },
+  { suffix: 'glossary/', count: 190 },
+  { suffix: 'sources-and-versions/', count: 86 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
   'cub-device-reduction-scan',
+  'cublas-gemm',
   'environment-report',
   'error-handling-lifecycle',
   'graph-capture',
@@ -260,7 +261,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-05',
+    reviewDate: '2026-09-07',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -308,28 +309,29 @@ test('serves the exact R3 release and current publication with production canoni
     knownLimitations: expect.arrayContaining([
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
-      'EX11 through EX17 have empty compilation evidence and remain Pending Hardware Verification.',
+      'EX11 through EX18 have empty compilation evidence and remain Pending Hardware Verification.',
       'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'L01-L05 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and primitive contracts provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L09 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
       'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
-      'L01-L05 are published in the rolling R4 surface; L06-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+      'EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.',
+      'L01-L09 are published in the rolling R4 surface; L10-L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 249,
-    sourceRoutes: 498,
-    exerciseSetPublicationPairs: 66,
-    solutionSetPublicationPairs: 66,
+    publicationPairs: 263,
+    sourceRoutes: 526,
+    exerciseSetPublicationPairs: 70,
+    solutionSetPublicationPairs: 70,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 72,
+    practiceBankEntries: 76,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
-    glossaryTerms: 186,
-    sourceRecords: 82,
+    glossaryTerms: 190,
+    sourceRecords: 86,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -341,7 +343,7 @@ test('serves the exact R3 release and current publication with production canoni
     referenceEnvironments: [],
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
-    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05'],
+    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
@@ -352,8 +354,8 @@ test('serves the exact R3 release and current publication with production canoni
     'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
   );
   expect(publication.knownLimitations.filter((limitation: string) =>
-    limitation.includes('no R3 public destination'))).toEqual([
-    "L03 and LAB11, L06 and LAB12, and L13 and EX20 have no R3 public destination. LAB11 waits for L03, LAB12 waits for L06, and EX20 waits for L13's exact cuSPARSE API contract.",
+    limitation.includes('not immutable R3 destinations'))).toEqual([
+    'L03/LAB11 and L06/LAB12 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03 and LAB12 requires Q13/L06; L13 and EX20 remain unpublished pending the exact cuSPARSE API contract.',
   ]);
 
   for (const { fixtureName, reviewDate } of [
@@ -454,7 +456,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(498);
+  expect(publishedRoutes).toHaveLength(526);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -465,8 +467,8 @@ test('serves the exact R3 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/249.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/498.*source routes/);
+    await expect(page.locator('main')).toContainText(prefix ? '263 Publication Pairs' : '263 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '526 source routes' : '526 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -478,15 +480,21 @@ test('serves the exact R3 release and current publication with production canoni
       'libraries/cub-device-primitives/',
       'libraries/cub-warp-block-primitives/',
       'libraries/libcu-plus-plus-synchronization/',
+      'libraries/cublas-gemm/',
+      'libraries/cublaslt-matmul/',
+      'libraries/tensor-core-precision-contracts/',
+      'libraries/cutlass-cpp-gemm-structure/',
       'examples/cub-device-reduction-scan/',
+      'examples/cublas-gemm/',
       'labs/compare-custom-reduction-with-cub/',
+      'labs/compare-gemm-with-cublas/',
     ]) {
       const href = `${prefix}/${suffix}`;
       await expect(navigation.locator(`a[href="${href}"]`), href).toHaveCount(1);
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(370);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(383);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -497,7 +505,7 @@ test('serves the exact R3 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(11);
+    await expect(labCards).toHaveCount(12);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -510,6 +518,7 @@ test('serves the exact R3 release and current publication with production canoni
       'LAB09',
       'LAB10',
       'LAB11',
+      'LAB12',
     ]);
   }
 
@@ -606,6 +615,18 @@ test('serves the exact R3 release and current publication with production canoni
     { suffix: 'libraries/libcu-plus-plus-synchronization/', unitId: 'L05', prerequisites: 'M05,M13,M19' },
     { suffix: 'libraries/libcu-plus-plus-synchronization/exercises/', unitId: 'L05-EXERCISES', prerequisites: 'L05' },
     { suffix: 'libraries/libcu-plus-plus-synchronization/solutions/', unitId: 'L05-SOLUTIONS', prerequisites: 'L05-EXERCISES' },
+    { suffix: 'libraries/cublas-gemm/', unitId: 'L06', prerequisites: 'A08,Q01' },
+    { suffix: 'libraries/cublas-gemm/exercises/', unitId: 'L06-EXERCISES', prerequisites: 'L06' },
+    { suffix: 'libraries/cublas-gemm/solutions/', unitId: 'L06-SOLUTIONS', prerequisites: 'L06-EXERCISES' },
+    { suffix: 'libraries/cublaslt-matmul/', unitId: 'L07', prerequisites: 'L06,Q05' },
+    { suffix: 'libraries/cublaslt-matmul/exercises/', unitId: 'L07-EXERCISES', prerequisites: 'L07' },
+    { suffix: 'libraries/cublaslt-matmul/solutions/', unitId: 'L07-SOLUTIONS', prerequisites: 'L07-EXERCISES' },
+    { suffix: 'libraries/tensor-core-precision-contracts/', unitId: 'L08', prerequisites: 'Q02,L06,F06' },
+    { suffix: 'libraries/tensor-core-precision-contracts/exercises/', unitId: 'L08-EXERCISES', prerequisites: 'L08' },
+    { suffix: 'libraries/tensor-core-precision-contracts/solutions/', unitId: 'L08-SOLUTIONS', prerequisites: 'L08-EXERCISES' },
+    { suffix: 'libraries/cutlass-cpp-gemm-structure/', unitId: 'L09', prerequisites: 'A08,L06,M17' },
+    { suffix: 'libraries/cutlass-cpp-gemm-structure/exercises/', unitId: 'L09-EXERCISES', prerequisites: 'L09' },
+    { suffix: 'libraries/cutlass-cpp-gemm-structure/solutions/', unitId: 'L09-SOLUTIONS', prerequisites: 'L09-EXERCISES' },
     { suffix: 'visuals/attention-memory-traffic/', unitId: 'VIS18', prerequisites: 'A11' },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {

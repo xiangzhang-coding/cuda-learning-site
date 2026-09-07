@@ -1533,6 +1533,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-06',
     keywords: localized('cuBLASLt epilogue 收尾操作 bias 偏置 启发式 工作区 对齐 缓存 失效 回退', 'cuBLASLt epilogue bias heuristic workspace alignment cache invalidation fallback'),
   },
+  {
+    planningId: 'PB-R4-009',
+    group: 'practice',
+    title: localized('审查残差信号的输入、累加、输出与架构合同', 'Audit a residual signal across input, accumulation, output, and architecture contracts'),
+    href: localized('/practice/#pb-r4-009', '/en/practice/#pb-r4-009'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['L08'],
+    relatedUnits: ['Q02', 'L06', 'F06', 'L08'],
+    hardwareGate: localized('无；静态数值推导，不运行 CUDA。未来执行须原生 Linux、CC 7.5+；BF16/TF32 与 FP64 原生能力另设门槛。', 'None; static numerical derivation without CUDA execution. Future execution requires native Linux and CC 7.5+; BF16/TF32 and native FP64 capability are separately gated.'),
+    versionGate: localized('2026-09-07 复核的 CUDA v13.3 与 12.9.2 归档 WMMA 合同、PTX 数值边界和原生类型表；FP32 输出不证明 FP32 乘法。', 'CUDA v13.3 and 12.9.2 archived WMMA contracts, PTX numerical limits, and the native-type table reviewed 2026-09-07; FP32 output does not prove FP32 multiplication.'),
+    reviewedOn: '2026-09-07',
+    keywords: localized('张量核心 Tensor Core 累加器类型 Accumulator Type FP16 BF16 TF32 FP64 WMMA 量化 抵消 架构 双参考', 'Tensor Core Accumulator Type FP16 BF16 TF32 FP64 WMMA quantization cancellation architecture dual reference'),
+  },
+  {
+    planningId: 'PB-R4-010',
+    group: 'practice',
+    title: localized('重建非整齐 GEMM 的层级、布局与阶段复用证明', 'Rebuild hierarchy, layout, and stage-reuse proofs for an uneven GEMM'),
+    href: localized('/practice/#pb-r4-010', '/en/practice/#pb-r4-010'),
+    resourceType: 'concepts-implementation',
+    difficulty: 'advanced',
+    prerequisites: ['L09'],
+    relatedUnits: ['A08', 'L06', 'M17', 'L09', 'VIS12'],
+    hardwareGate: localized('无；只审查原创静态设计，不实例化、编译或执行 CUTLASS；普通 SM75 路径不要求 a 后缀。', 'None; review an original static design without CUTLASS instantiation, compilation, or execution; the ordinary SM75 path needs no a suffix.'),
+    versionGate: localized('CUTLASS C++ v4.7.0，提交 dcf215af68a2d08d305076c152a06f201728cd53；保留的 2.x 风格 API、选定两阶段路径与有界 3.x 对照，不含 Python DSL。', 'CUTLASS C++ v4.7.0 commit dcf215af68a2d08d305076c152a06f201728cd53; retained 2.x-style API, selected two-stage path, and bounded 3.x comparison, without Python DSL.'),
+    reviewedOn: '2026-09-07',
+    keywords: localized('CUTLASS GEMM device kernel threadblock warp instruction 布局 RowMajor 流水线 阶段 复用 can_implement', 'CUTLASS GEMM device kernel threadblock warp instruction layout RowMajor pipeline stage reuse can_implement'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -2025,6 +2053,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-186', 'Barrier Phase · 屏障阶段', 'kernel-vocabulary', ['M05', 'M13', 'L05'], 'CCCL/libcu++ v3.4.2 的屏障阶段（Barrier Phase）合同：参与前先初始化并发布；arrive 不等待，arrive_and_drop 同时减少当前与未来计数；消费和复用前须等待相应阶段完成，不假设尚未落实的 P2588R3 完成语义已适用。', 'CCCL/libcu++ v3.4.2; initialize and publish before participation, arrive does not wait, and arrive_and_drop reduces current and future counts; consumption and reuse require the appropriate phase wait, without assuming pending P2588R3 completion semantics.', '2026-09-05'),
   glossaryRecord('TERM-187', 'Leading Dimension · 主维度', 'kernel-vocabulary', ['L06', 'L07', 'EX18', 'LAB12'], 'Toolkit 12.9.2 归档：普通行/列主序中的物理步长，以元素为单位；转置和子矩阵视图不重排底层存储，不自动缩短主维度。', 'Toolkit 12.9.2 archive: physical stride in elements for ordinary row/column-major storage; transposition and submatrix views do not rearrange storage or automatically shorten its leading dimension.', '2026-09-06'),
   glossaryRecord('TERM-188', 'Epilogue · 收尾操作', 'kernel-vocabulary', ['L06', 'L07', 'EX18', 'LAB12'], '12.9.2 cuBLASLt Matmul 的偏置/激活合同及行主序 D 限制；EX18/LAB12 仅提供传统 FP32 基线，没有 Lt 融合实现或实测收益。', '12.9.2 cuBLASLt Matmul bias/activation contract and row-major D restriction; EX18/LAB12 provide only a traditional FP32 baseline, not Lt fusion implementation or measured benefit.', '2026-09-06'),
+  glossaryRecord('TERM-189', 'Tensor Core · 张量核心', 'kernel-vocabulary', ['F06', 'L08', 'L09'], '张量核心（Tensor Core）的原生类型支持、WMMA/PTX API 资格和实际生成指令是三类事实；2026-09-07 的类型表只在 CC 8.0/9.0/10.0 列出原生 FP64 加速，不从更高 CC 或 FP32 输出推断。', 'Native Tensor Core type support, WMMA/PTX API eligibility, and emitted instructions are distinct facts; the table reviewed 2026-09-07 lists native FP64 acceleration only at CC 8.0/9.0/10.0, not by inference from a higher CC or FP32 output.', '2026-09-07'),
+  glossaryRecord('TERM-190', 'Accumulator Type · 累加器类型', 'kernel-vocabulary', ['Q02', 'L06', 'L08', 'L09'], '累加器类型（Accumulator Type）与输入存储、实际乘法精度、收尾计算及输出存储分开；FP32 累加不能恢复输入转换已丢失的信息。CUDA WMMA 与固定 CUTLASS v4.7.0 合同于 2026-09-07 复核，无运行结论。', 'Accumulator Type is separate from input storage, multiplicand precision, epilogue computation, and output storage; FP32 accumulation cannot restore information lost on input conversion. CUDA WMMA and pinned CUTLASS v4.7.0 contracts reviewed 2026-09-07, with no runtime conclusion.', '2026-09-07'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2878,6 +2908,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-06',
     '2026-09-06',
+  ),
+  sourceRecord(
+    'SRC-CUDA-069',
+    localized('L08 张量核心的精度、WMMA 与架构边界', 'L08 Tensor Core precision, WMMA, and architecture boundaries'),
+    'cuda-version-record',
+    ['Q02', 'L06', 'F06', 'L08'],
+    localized(
+      'CUDA Programming Guide v13.3 5.4.11、12.9.2 归档 10.24、PTX 9.7.15.4.5 与原生类型表 33；区分输入/乘法/累加/收尾/输出、WMMA 形状与硬件能力，保留整数 sm_72 下限和原生 FP64 非单调门槛。只引用和原创转述，不复制样例，不提供构建或运行证据。',
+      'CUDA Programming Guide v13.3 5.4.11, 12.9.2 archive 10.24, PTX 9.7.15.4.5, and native-type Table 33; separate input, multiplication, accumulation, epilogue, and output, WMMA shapes and hardware capability, retaining the integer sm_72 minimum and non-monotonic native FP64 gate. References and original paraphrases only, without copied samples or build/runtime evidence.',
+    ),
+    '2026-09-07',
+    '2026-09-07',
+  ),
+  sourceRecord(
+    'SRC-CUDA-070',
+    localized('L09 CUTLASS C++ 层级、版本、测试与逐文件许可', 'L09 CUTLASS C++ hierarchy, version, tests, and file-level licenses'),
+    'cuda-version-record',
+    ['A08', 'L06', 'M17', 'L09', 'VIS12'],
+    localized(
+      'CUTLASS v4.7.0 提交 dcf215af68a2d08d305076c152a06f201728cd53，2026-08-13 发布；保留 2.x 风格 C++ GEMM、两阶段路径、3.x 对照与六项上游测试。19 个文件逐项核对 BSD-3-Clause；gemm_universal.hpp 为 2023-2026，其余为 2017-2026。#3179/#3516/#2152 按范围记录；13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17 仅为拟议目标，无构建、测试执行或 DSL 采用。',
+      'CUTLASS v4.7.0 commit dcf215af68a2d08d305076c152a06f201728cd53, released 2026-08-13; retained 2.x-style C++ GEMM, two-stage path, 3.x comparison, and six owner tests. BSD-3-Clause reviewed in 19 files; gemm_universal.hpp uses 2023-2026, the others 2017-2026. Scoped #3179/#3516/#2152 review; 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17 is a proposed target only, without a build, test execution, or DSL adoption.',
+    ),
+    '2026-09-07',
+    '2026-09-07',
   ),
 ];
 

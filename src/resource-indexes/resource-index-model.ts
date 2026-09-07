@@ -418,6 +418,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L07：用 cuBLASLt 描述、筛选与复用矩阵乘法', en: 'L07: Describe, Select, and Reuse cuBLASLt Matmul' },
     prerequisites: ['L06', 'Q05'],
   },
+  L08: {
+    href: { 'zh-CN': '/libraries/tensor-core-precision-contracts/', en: '/en/libraries/tensor-core-precision-contracts/' },
+    title: { 'zh-CN': 'L08：Tensor Core 精度与架构契约', en: 'L08: Tensor Core Precision and Architecture Contracts' },
+    prerequisites: ['Q02', 'L06', 'F06'],
+  },
+  L09: {
+    href: { 'zh-CN': '/libraries/cutlass-cpp-gemm-structure/', en: '/en/libraries/cutlass-cpp-gemm-structure/' },
+    title: { 'zh-CN': 'L09：读懂 CUTLASS C++ GEMM 层次', en: 'L09: Read the CUTLASS C++ GEMM Hierarchy' },
+    prerequisites: ['A08', 'L06', 'M17'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },

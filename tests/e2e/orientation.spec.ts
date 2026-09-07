@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(514);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(257);
+  expect(routes).toHaveLength(526);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(263);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -113,6 +113,12 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/libraries/cublaslt-matmul/', en: '/en/libraries/cublaslt-matmul/' },
     { zh: '/libraries/cublaslt-matmul/exercises/', en: '/en/libraries/cublaslt-matmul/exercises/' },
     { zh: '/libraries/cublaslt-matmul/solutions/', en: '/en/libraries/cublaslt-matmul/solutions/' },
+    { zh: '/libraries/tensor-core-precision-contracts/', en: '/en/libraries/tensor-core-precision-contracts/' },
+    { zh: '/libraries/tensor-core-precision-contracts/exercises/', en: '/en/libraries/tensor-core-precision-contracts/exercises/' },
+    { zh: '/libraries/tensor-core-precision-contracts/solutions/', en: '/en/libraries/tensor-core-precision-contracts/solutions/' },
+    { zh: '/libraries/cutlass-cpp-gemm-structure/', en: '/en/libraries/cutlass-cpp-gemm-structure/' },
+    { zh: '/libraries/cutlass-cpp-gemm-structure/exercises/', en: '/en/libraries/cutlass-cpp-gemm-structure/exercises/' },
+    { zh: '/libraries/cutlass-cpp-gemm-structure/solutions/', en: '/en/libraries/cutlass-cpp-gemm-structure/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -508,6 +514,18 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/libraries/cublaslt-matmul/exercises/',
     '/libraries/cublaslt-matmul/solutions/',
     '/en/libraries/cublaslt-matmul/solutions/',
+    '/libraries/tensor-core-precision-contracts/',
+    '/en/libraries/tensor-core-precision-contracts/',
+    '/libraries/tensor-core-precision-contracts/exercises/',
+    '/en/libraries/tensor-core-precision-contracts/exercises/',
+    '/libraries/tensor-core-precision-contracts/solutions/',
+    '/en/libraries/tensor-core-precision-contracts/solutions/',
+    '/libraries/cutlass-cpp-gemm-structure/',
+    '/en/libraries/cutlass-cpp-gemm-structure/',
+    '/libraries/cutlass-cpp-gemm-structure/exercises/',
+    '/en/libraries/cutlass-cpp-gemm-structure/exercises/',
+    '/libraries/cutlass-cpp-gemm-structure/solutions/',
+    '/en/libraries/cutlass-cpp-gemm-structure/solutions/',
     '/algorithms/elementwise-map/',
     '/en/algorithms/elementwise-map/',
     '/algorithms/elementwise-map/exercises/',

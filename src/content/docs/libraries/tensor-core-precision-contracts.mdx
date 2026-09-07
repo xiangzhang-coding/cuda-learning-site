@@ -1,0 +1,228 @@
+---
+title: 'L08：Tensor Core 精度与架构契约'
+description: 分开输入舍入、累加和输出转换，核对 WMMA 类型、形状、架构与集体操作约束，再为矩阵乘法制定数值验收。
+pairId: l08
+counterpart: /en/libraries/tensor-core-precision-contracts/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, numerical-chain, wmma-contract, architecture, rounding, safety, validation, alternative, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L08
+prerequisites: [Q02, L06, F06]
+relatedUnits: [L09, VIS12]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'CUDA C++ Warp Matrix Functions'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-matrix-functions'
+    version: 'Live CUDA Programming Guide 13.3; sections 5.4.11.1-5.4.11.6'
+    platform: 'C++ WMMA contract review; no compilation or GPU execution'
+    accessDate: '2026-09-07'
+  - title: 'Archived CUDA C++ Warp Matrix Functions'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-c-programming-guide/index.html#warp-matrix-functions'
+    version: 'Toolkit 12.9.2 archive path; section 10.24'
+    platform: 'Alternate-type and shape comparison; no hardware-feature backport'
+    accessDate: '2026-09-07'
+  - title: 'PTX WMMA matrix multiply-accumulate'
+    url: 'https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-instructions-wmma-mma'
+    version: 'Current PTX ISA; section 9.7.15.4.5, accessed 2026-09-07'
+    platform: 'Target minima and numerical guarantees; not emitted PTX or SASS'
+    accessDate: '2026-09-07'
+  - title: 'Native Tensor Core data types by compute capability'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#compute-capabilities-table-tensor-core-data-types-per-compute-capability'
+    version: 'Live CUDA Programming Guide 13.3; Table 33'
+    platform: 'Dated native hardware feature table; no measured acceleration'
+    accessDate: '2026-09-07'
+  - title: 'CUDA floating-point data types and properties'
+    url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-data-types'
+    version: 'Live CUDA Programming Guide 13.3; Tables 44-45'
+    platform: 'Representation properties, not matrix error bounds'
+    accessDate: '2026-09-07'
+  - title: 'NVIDIA floating-point operations and accuracy'
+    url: 'https://docs.nvidia.com/cuda/floating-point/index.html#operations-and-accuracy'
+    version: 'Current numerical guidance, accessed 2026-09-07'
+    platform: 'Rounding, reduction, and FMA principles; no historical benchmark reuse'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l08 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/tensor-core-precision-contracts/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,numerical-chain,wmma-contract,architecture,rounding,safety,validation,alternative,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L08 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q02,L06,F06' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: 'L09,VIS12' }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '6' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '13.3,12.9.2' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/tensor-core-precision-contracts/" lang="en">Read the English counterpart</a>
+
+看到“FP16 输入、FP32 累加”，先别把它缩写成“FP32 精度”。输入可能已经丢掉了决定答案的小量，最后一次输出转换还可能再次舍入。要判断一个矩阵乘法是否适用，得沿着数据经过的每种表示逐段检查。
+
+## 学习目标
+
+用约 35 分钟完成正文、纸面推导与检索检查。你应能读出一条 WMMA 配置的输入类型、累加器类型（Accumulator Type）、分块形状与目标门槛，识别非法的线程束（warp）调用，并设计能区分输入转换误差和计算误差的验收。练习不要求 GPU。
+
+## 前置知识
+
+严格按 `Q02, L06, F06` 依赖 [Q02：浮点顺序与可复现性](/correctness/floating-point-order-reproducibility/)、[L06：把矩阵乘法正确交给 cuBLAS](/libraries/cublas-gemm/)和 [F06：计算能力](/foundations/compute-capability/)。Q02 提供舍入与归约顺序，L06 提供 GEMM 形状及存储/计算类型，F06 提供计算能力（compute capability，CC）的读法。L09 与 VIS12 是相关资源，不增加前置依赖。
+
+## 为什么矩阵操作要单独约定精度
+
+[张量核心（Tensor Core）](/glossary/#term-189)是执行特定矩阵乘加的硬件单元，不是任意 `float` 运算的另一个名字。早期 WMMA 的 FP16 路径以 `sm_70` 为起点；后续接口加入整数、BF16、TF32 和双精度组合。类型与形状随接口和架构演进，因此“支持 Tensor Core”没有说明某个具体组合是否成立。
+
+线程束矩阵乘加（warp matrix multiply-accumulate，WMMA）把一个矩阵分块交给整个线程束合作处理。矩阵片段（fragment）分布在参与线程中，但 C++ 接口不公开可移植的逐元素寄存器归属。它让程序表达矩阵工作，而不必手写每个线程的寄存器坐标；代价是调用者必须遵守集体操作的条件。
+
+## 把数值链写完整
+
+应用的 GEMM 可以写成 `D = alpha*A*B + beta*C`。WMMA 的 `mma_sync` 只表达分块 `D = A*B + C`；一般的缩放、偏置和输出转换需要另外安排。这里沿用已有的[收尾操作（epilogue）](/glossary/#term-188)术语。
+
+| 数据经过的位置 | 要记录的问题 | 容易漏掉的区别 |
+| --- | --- | --- |
+| 应用原始输入 | 原问题中的值是什么？ | 原始 FP32 值与存成 FP16 后的值可能不同 |
+| A/B 存储与乘法输入 | 字节类型是什么，实际乘数保留多少精度？ | TF32 用 `float` 存储，乘数却不是普通 FP32 精度 |
+| 累加 | 部分和用什么类型保存？ | [累加器类型（Accumulator Type）](/glossary/#term-190)不决定输入精度 |
+| 收尾计算 | `alpha,beta,C` 用什么类型参与计算？ | 宽累加器之后仍可能发生窄类型运算 |
+| D 存储 | 最终转换怎样舍入、截断或限幅？ | FP32 存储不能证明此前进行了 FP32 乘法 |
+
+原创数学推导：取一行 `a=[1+2^-12, 1]` 和一列 `b=[1, -1]`，精确点积为 `2^-12`。本例明确假设 A/B 转为 FP16 时采用最近偶数舍入；在 1 附近，FP16 间距为 `2^-10`，所以第一个数变成 1。转换后输入的精确点积为 0。即使之后使用理想的精确累加，也无法从两个 1 找回丢掉的 `2^-12`。这是表示与代数推导，不是 WMMA 运行结果，也没有规定 TF32 转换的舍入模式。
+
+## C++ WMMA 的类型、分块与门槛
+
+接口来自 `<mma.h>` 的 `nvcuda::wmma`；FP16 和 BF16 类型分别涉及 `<cuda_fp16.h>`、`<cuda_bf16.h>`。下表重新按数值路径整理已核对的 C++ 合同。形状始终是 **WMMA 线程束分块的 `M x N x K`**，不是所有底层矩阵指令形状，也不要求整个应用矩阵恰好整除这些数。
+
+| 路径 | A 与 B 的 C++ fragment 元素类型 | C/D 累加 fragment 类型 | 可用 WMMA 分块 | API/PTX 最低目标 |
+| --- | --- | --- | --- | --- |
+| FP16 | 两者均为 `__half` | `float` 或 `__half` | `16x16x16`、`32x8x16`、`8x32x16` | `sm_70` |
+| BF16 | 两者均为 `__nv_bfloat16` | 仅 `float` | `16x16x16`、`32x8x16`、`8x32x16` | `sm_80` |
+| TF32 | 两者均为 `nvcuda::wmma::precision::tf32` | 仅 `float` | 仅 `16x16x8` | `sm_80` |
+| FP64 | 两者均为 `double` | `double` | 仅 `8x8x4` | `sm_80` |
+| INT8 | 两者均为 `signed char`，或两者均为 `unsigned char` | `int` | `16x16x16`、`32x8x16`、`8x32x16` | `sm_72` |
+
+INT8 的有符号性必须匹配；普通 `char` 是否有符号不能靠猜。整数 WMMA 不是“直接产出 INT8”：若最终需要 INT8 数组，要显式转换，或由所选 GEMM 收尾处理。量化的比例、零点、舍入和限幅都属于应用合同。
+
+TF32 输入必须先用 `__float_to_tf32` 手动转换。其参数、结果和内存存储仍是 `float`，但 `precision::tf32` fragment 声明的是 TF32 乘数。指南将内部布局留给实现，并承诺至少 10 位小数精度；不能据此定义一个通用的“19 位 C++ 打包类型”，也不能凭名字补出转换舍入模式。
+
+`store_matrix_sync` 的输出指针须匹配 fragment 元素类型。`float` 累加 fragment 不会自动写进 `__half*`；可以先存到合法 FP32 存储，再明确转换输出。PTX 能表达的某些操作数组合不等于 C++ 模板也允许。
+
+## 接口最低目标不等于原生硬件白名单
+
+逐项区分：接口允许的目标、编译器当前接受的目标、GPU 的原生能力，以及实际程序生成和执行了什么。仅有前三项，也还没有第四项的观察。
+
+| 2026-09-07 核对的硬件表事实 | 可以怎样使用 | 不能推出什么 |
+| --- | --- | --- |
+| 当前表列出的 CC 中，7.5 及之后各行列有 FP16、INT8 加速 | 检查本站基础 GPU 能力层级（Baseline GPU Capability Tier）的候选类型 | 所有未来 CC、全部形状或任意程序都获加速 |
+| BF16、TF32 从表中的 CC 8.0 开始 | 对这两类数值扩展另设门槛 | CC 7.5 因为能存 `float` 就能做 TF32 WMMA |
+| 原生 FP64 Tensor Core 列于 CC **8.0、9.0、10.0** | 用明确列出的 CC 检查原生 FP64 能力 | `sm_80 or higher` 自动覆盖每个更高 CC |
+
+当前表没有在 7.5、8.6、8.7、8.9、10.3、11.0 或 12.x 列出原生 FP64 Tensor Core 加速。尤其不能把 CC 8.6 当成“数值大于 8.0，所以一定有”。这不提供未检查目标上的编译器降级方式或实测性能结论。
+
+整数 WMMA 的历史 API 最低目标确实是 `sm_72`，不是统一的 `sm_75`。但它低于本站 CC 7.5 的基础门槛，也不是 CUDA 13 的编译目标。本页的阅读没有硬件门槛；未来实现需在原生 Linux 上另行选择有效编译目标、设备与有界问题，不能拿历史最低值代替当前环境检查。
+
+## 舍入保证应读到哪一层
+
+先比较表示能力。FP16 最大有限值为 65504，最小正规正数为 `2^-14`，最小次正规正数为 `2^-24`。BF16 有类似 FP32 的指数范围，却在 1 附近更稀疏。
+
+| 类型 | 1 附近的间距 epsilon | 对选择的提示 |
+| --- | --- | --- |
+| FP16 | `2^-10` | 范围较窄；在 1 附近比 BF16 更细 |
+| BF16 | `2^-7` | 范围较宽不意味着每个小差值更准确 |
+| FP32 | `2^-23` | 可作普通浮点对照，仍有归约舍入 |
+| FP64 | `2^-52` | 可作更高精度参考，但不是精确实数 |
+
+epsilon 是局部间距，不是 GEMM 相对误差上限。[PTX WMMA 合同](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-instructions-wmma-mma)还区分如下规则：
+
+- FP16 WMMA 乘法至少使用单精度；C 或 D 为 FP32 时至少单精度累加，两者都是 half 时至少半精度累加。
+- BF16/TF32 按各自输入精度相乘，至少单精度累加。这些浮点路径的累加顺序、舍入和次正规输入处理未指定，不能将整个点积说成一次正确舍入的标量融合乘加（FMA），也不能承诺与串行 FP32 循环逐位一致。
+- C++ 双精度 `mma_sync` 使用 `.rn`，即最近偶数舍入。PTX 的其他双精度舍入修饰符不是额外的 C++ WMMA 参数。
+- PTX 整数 WMMA 在没有 `.satfinite` 时发生有符号 32 位溢出会回绕；有该修饰符时钳位到有符号 32 位极值。第一份整数夹具应先证明不溢出，并用更宽的整数 CPU 参考。
+
+C++ 浮点 `satf` 默认 false。设为 true 时，正负无穷映射成同号最大正规有限值，NaN 映射成正零。这会改变非有限值的语义，不能当作一般的“提高精度”。PTX 已移除浮点 `wmma.mma` 的 `.satfinite`，不要机械地把 C++ 标志翻译成这个后缀，更不要与整数限幅混为一谈。
+
+## 线程束与内存都必须安全
+
+所有线程束通道（lane）必须参与同一次操作，采用匹配的操作和模板参数；不能已有线程退出。包围 WMMA 的分支必须对整个线程束一致。逐线程判断“我的输出坐标越界就 return”可能使剩余线程进入非法的集体调用。
+
+`load_matrix_sync` 要求实际指针 **256 位，即 32 字节对齐**。主维度（Leading Dimension）`ldm` 的单位是元素：文档明确要求 half 步长为 8 的倍数、float 步长为 4 的倍数，均对应 16 字节步长粒度。32 字节指针对齐和 16 字节步长粒度是不同条件。已核对的段落没有为其他每种类型给出同样明确的步长表，不应直接套用 half/float 规则。
+
+原创地址推导：对齐基地址上的 half 数组向后移一个元素，仅移动 2 字节，通常破坏 32 字节对齐。即使基地址正确，`ldm=18` 也不满足 half 的步长规则。把字节数 36 填进 `ldm` 同样不对，它会被解释为 36 个元素。
+
+边界分块应先变成完整有效存储。例如把有效元素按边界条件搬入对齐的暂存区（staging storage），对乘积中越界的输入填零，再由完整线程束加载完整分块；输出可先存到完整暂存区，再只复制合法坐标。WMMA 不是任意边缘分块的掩码加载接口。若其他线程束生产共享内存，仍需线程块范围的发布与复用同步；WMMA 自己的线程束同步不表示整块已发布，也不表示主机可以读取结果。
+
+fragment 的 `x[i]` 不是可移植的矩阵坐标。文档允许按要求对 fragment 元素做一致的逐元素操作，但不能假定某个 i 就是第几行第几列。不同架构分别编译的对象即使可链接，也不能随意跨接口传 fragment；指南特别警告 SM70/SM75 这类组合。外部接口先存成普通内存表示，再由接收方按自己的合同加载。
+
+## 用两个参考定位误差
+
+为同一测试保留两份独立参考：`R_original` 按应用原始 A/B 求值，`R_stored` 按实际转换后的 A/B 求值。两者都在 CPU 上用更高精度计算，并保留同样的 `alpha,beta,C` 与已声明的输出语义。`R_stored-R_original` 描述输入转换影响；实际结果相对 `R_stored` 的差异才继续追查乘法、累加、收尾和输出转换。double 参考仍是有限精度，应对难例再检查参考本身。
+
+正常有限值可使用 `abs(got-ref) <= atol + rtol*abs(ref)`，但要从数据范围、K、消去程度与输出类型制定 `atol,rtol`。接近零时主要由绝对项决定；非有限值单独分类，不能依靠 NaN 比较偶然失败。不要把 L06/EX18 的有界 FP32 容差复制到每种 Tensor Core 路径。
+
+测试计划至少应区分普通有限值、上溢/下溢、消去、输入转换临界值和 M/N/K 尾部。对 INT8 先用宽整数推导 `K*max_abs(A)*max_abs(B)+max_abs(C)` 的界，再决定输出转换和量化验收。仅靠全零或恒等矩阵无法充分揭露布局与精度错误。也不存在对每个问题都成立的 `FP64 < FP32 < TF32 < FP16` 误差排名；更宽累加器不保证每个单独输出的最终误差都更小。
+
+## 保留普通 FP32 路径
+
+可移植替代是普通的非 Tensor Core FP32 SIMT GEMM：A/B/C/D、累加器和收尾计算都用 FP32，逻辑坐标、边界处理与缩放语义明确。本站这条对照的硬件范围仍是 CC 7.5 或更新、问题内存小于 8 GB；“可移植”不表示任何设备与工具链都支持。
+
+它为不采用低精度乘数的应用保留选择，也便于定位转换误差。但从低精度路径换到 FP32 改变了数值算法，不能称为逐位或舍入语义等价的回退。若应用要求某种量化行为，替代方案也必须明确保留并验证那项要求。普通 FP32 本身不是精确实数预言机。任何速度比较都要先声明数值合同，再在同一工作负载和计时范围内实际测量；本页没有通用速度或加速比结论。
+
+## 证据边界
+
+本页与练习只有原创推导和来源阅读，没有 CUDA 实现导入、编译、指令检查或 GPU 运行。四个证据数组为空，不授予证据状态（Evidence Status），也不继承 L06 或任何上游测试的状态。原生 Linux 是唯一受支持环境（Supported Environment）；浏览器不执行 CUDA。
+
+[VIS12](/visuals/gemm-tiling-hierarchy/)可复习矩阵、分块、线程块和线程束之间的关系。它的 instruction 面板是源码级标量 `1x1x1` 操作槽，不是 Tensor Core、MMA、WMMA 或已观察的 SASS，不能将上面的类型表当作该可视化的执行配置。
+
+## 检索检查
+
+1. FP32 累加和 FP32 输出为什么都不能恢复 A/B 转换时丢失的信息？两个 CPU 参考分别回答什么？
+2. TF32 的存储类型、fragment 类型与 WMMA 形状是什么？为什么不定义一个通用的 19 位 C++ 数组？
+3. INT8 WMMA 的最低 API 目标是什么？为什么它不是本站 CUDA 13 编译目标的建议？
+4. CC 8.6 为什么不能只靠 `sm_80 or higher` 推出原生 FP64 Tensor Core 加速？
+5. 32 字节对齐的 half 基址加一元素后，还满足什么、不再保证什么？half 的 `ldm` 又以什么单位检查？
+6. 尾部线程为何不能在 WMMA 前各自退出？fragment `x[i]` 与普通矩阵坐标有什么不同？
+7. 把低精度乘法换成 FP32 SIMT 时，哪些数值、验收和性能结论必须重新建立？
+
+## 继续练习
+
+- 完成 [L08 的三道练习](/libraries/tensor-core-precision-contracts/exercises/)，再查看[独立解答](/libraries/tensor-core-precision-contracts/solutions/)。
+- 用 [PB-R4-009](/practice/#pb-r4-009)复核精度与架构合同，不把纸面通过记成运行证据。
+- [L09](/libraries/cutlass-cpp-gemm-structure/)解释另一套 C++ GEMM 层次；进入前按该单元检查 A08、L06、M17，不把相关链接当作新增的前置边。
+
+## 来源与许可
+
+[SRC-CUDA-069](/sources-and-versions/#src-cuda-069)提供来源记录。类型与集体操作依据[当前 WMMA](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-matrix-functions)及 [12.9.2 路径归档](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-c-programming-guide/index.html#warp-matrix-functions)交叉核对；最低目标和数值保证依据 [PTX WMMA](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#warp-level-matrix-instructions-wmma-mma)，原生能力另查[硬件类型表](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html#compute-capabilities-table-tensor-core-data-types-per-compute-capability)。
+
+表示性质见[浮点类型表](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/mathematical-functions.html#floating-point-data-types)，归约与单次 FMA 的区别见 [NVIDIA 浮点说明](https://docs.nvidia.com/cuda/floating-point/index.html#the-fused-multiply-add-fma)，跨架构 fragment 限制见 [Restrictions](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#restrictions)。这些公共资料仍受各自许可与通知约束。本站文字、组织方式、数学夹具及练习为原创，没有复制或改编上游源码、样例、图示或测试输出；引用不会把 NVIDIA 资料重新许可为 CC BY 4.0。
+
+**事实核查与来源访问日期：2026-09-07。**

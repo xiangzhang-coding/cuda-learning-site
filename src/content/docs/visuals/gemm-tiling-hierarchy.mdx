@@ -3,7 +3,7 @@ title: 'GEMM Tiling Hierarchy：从 Matrix 到 Instruction'
 description: 用确定性 matrix/tile fixtures 分开呈现 matrix、tile、thread block、warp 与 source-level instruction slot，并保留完整静态层级 panels。
 pairId: vis12
 counterpart: /en/visuals/gemm-tiling-hierarchy/
-factCheckDate: '2026-08-31'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -53,7 +53,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:counterpart', content: '/en/visuals/gemm-tiling-hierarchy/' }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-08-31' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -114,7 +114,13 @@ Shape notation 固定为 `M x N x K`。Matrix 表示完整 `A[M,K]`、`B[K,N]`�
 4. **Warp**：thread-block footprint 内的 modeled subtile，不预测 issue order。
 5. **Instruction**：`1x1x1` source-level scalar multiply-accumulate slot；不声称 compiler emitted FMA、MMA、WMMA 或 SASS。
 
-因此 hierarchy 解释 ownership 与 nesting，不解释 occupancy、register allocation、Tensor Core eligibility、pipeline、latency、throughput 或 speedup。Architecture-specific instruction hierarchy 留给后续 version-gated L09。
+因此 hierarchy 解释 ownership 与 nesting，不解释 occupancy、register allocation、张量核心（Tensor Core）适用条件、pipeline、latency、throughput 或 speedup。VIS12 的模型和标量 instruction panel 保持不变，不是真实 Tensor Core 指令。
+
+现在可继续学习 [L08：Tensor Core 精度与架构合同](/libraries/tensor-core-precision-contracts/)和 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)。L08 的有序直接先修项恰好为 `[Q02,L06,F06]`，L09 的恰好为 `[A08,L06,M17]`；这些后续链接不增加 VIS12 的先修要求。L08 区分输入转换、累加、输出转换与 WMMA 架构合同；L09 以固定的 CUTLASS C++ v4.7.0、提交 `dcf215af68a2d08d305076c152a06f201728cd53` 阅读结构，不承诺 DSL 或可执行支持。两者的四个证据数组均为空，不授予证据状态，也不提供 CUDA 或性能结果。
+
+两者都有新发布的练习与独立解答：[L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[解答](/libraries/tensor-core-precision-contracts/solutions/)、[L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
+
+**后续资源链接更新：2026-09-07。** 页面日期仅对应本次发布清单与导航更新；模型、API 事实及既有技术来源日期不变。
 
 ## 静态回退
 

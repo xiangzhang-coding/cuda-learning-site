@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: One hundred eighty-eight published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: One hundred ninety published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-06'
+factCheckDate: '2026-09-07'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -16,6 +16,8 @@ structure:
   - entry-term-186
   - entry-term-187
   - entry-term-188
+  - entry-term-189
+  - entry-term-190
   - maintenance
 head:
   - tag: meta
@@ -25,7 +27,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-06'
+      content: '2026-09-07'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -33,7 +35,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1746,6 +1748,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [L06](/en/libraries/cublas-gemm/), [L07](/en/libraries/cublaslt-matmul/), [EX18](/en/examples/cublas-gemm/), [LAB12](/en/labs/compare-gemm-with-cublas/), and [PB-R4-008](/en/practice/#pb-r4-008).
 - **Version note:** Reviewed 2026-09-06 in [SRC-CUDA-068](/en/sources-and-versions/#src-cuda-068): 12.9.2 Matmul footnote 8 excludes ReLU, dReLU, GELU, dGELU, and Bias epilogues with row-major D. Current 13.3 wording differs and cannot authorize the older contract. Types, layouts, bias orientation, and candidate support still require individual checks. EX18/LAB12 supply only a traditional FP32 baseline, not Lt epilogues. This entry records no fusion, kernel count, traffic, or speed observation.
 
+<span id="term-189" class="resource-target" aria-hidden="true"></span>
+
+### Tensor Core · 张量核心
+
+- **Definition:** A Tensor Core is an execution unit providing native matrix multiply-accumulate operations for specified types and shapes. The source-level matrix API, compiler target, and chip's native type capabilities jointly constrain possible paths, but emitted instructions require actual artifact inspection; FP32 output storage does not establish FP32 multiplicand precision.
+- **Avoid:** Synonym for every matrix multiplication; a WMMA tile shape as the entire hardware instruction set; every higher compute capability necessarily retaining every older accelerated type; an unmeasured speed guarantee.
+- **Related resources:** [F06](/en/foundations/compute-capability/), [L08](/en/libraries/tensor-core-precision-contracts/), [L09](/en/libraries/cutlass-cpp-gemm-structure/), and [PB-R4-009](/en/practice/#pb-r4-009).
+- **Version note:** Reviewed 2026-09-07 in [SRC-CUDA-069](/en/sources-and-versions/#src-cuda-069). The current native-type table lists FP64 Tensor Core acceleration only at CC 8.0, 9.0, and 10.0; the C++/PTX double-WMMA `sm_80` floor does not establish native FP64 acceleration at every higher CC. The selected CUTLASS SM75 `16x8x8` wrapper operation and C++ FP16 WMMA `16x16x16` tile are different abstraction levels. This entry records no instruction inspection, execution, or acceleration observation.
+
+<span id="term-190" class="resource-target" aria-hidden="true"></span>
+
+### Accumulator Type · 累加器类型
+
+- **Definition:** Accumulator Type is the numerical type used to retain partial sums during a reduction. Record it separately from original inputs, input storage, actual multiplicand precision, epilogue computation, and final output storage. FP16 inputs with FP32 accumulation can still lose information at input conversion; a final FP16 store introduces another conversion.
+- **Avoid:** Alias for input type; alias for output type; FP32 accumulation as a complete FP32 GEMM; wider accumulation guaranteeing a smaller error in every final result.
+- **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/), [L06](/en/libraries/cublas-gemm/), [L08](/en/libraries/tensor-core-precision-contracts/), [L09](/en/libraries/cutlass-cpp-gemm-structure/), [PB-R4-009](/en/practice/#pb-r4-009), and [PB-R4-010](/en/practice/#pb-r4-010).
+- **Version note:** Reviewed 2026-09-07 in [SRC-CUDA-069](/en/sources-and-versions/#src-cuda-069) and [SRC-CUDA-070](/en/sources-and-versions/#src-cuda-070). C++ BF16/TF32 WMMA uses float accumulator fragments; `store_matrix_sync` does not automatically narrow a float fragment into a half pointer. The pinned CUTLASS v4.7.0 BF16 test declares BF16 output with FP32 accumulation, demonstrating that these types can differ, not that the test ran. Original and already-rounded inputs need separate independent higher-precision references, and a double reference is not exact real arithmetic.
+
 ## Maintenance rule
 
-TERM-001 through TERM-186 retain their item-level review dates. New TERM-187/188 and the complete 188-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-06**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish physical stride from logical shape and epilogue semantics from measured fusion benefits; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-188 retain their item-level review dates. New TERM-189/190 and the complete 190-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-07**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish native hardware capability from API eligibility and accumulator type from input and output precision; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.
