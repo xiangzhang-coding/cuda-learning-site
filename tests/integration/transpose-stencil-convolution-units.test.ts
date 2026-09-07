@@ -98,7 +98,7 @@ describe('A05-A07 transpose, stencil, and convolution publication', () => {
     }
   });
 
-  it('develops 1D/2D stencil halos and keeps direct convolution a future-library teaching comparison', async () => {
+  it('develops 1D/2D stencil halos and links direct convolution to L10 without adding prerequisites or execution evidence', async () => {
     const [a06zh, a06en, a07zh, a07en] = await Promise.all([
       readUnit('zh-CN', 'stencil-neighborhood-reuse'),
       readUnit('en', 'stencil-neighborhood-reuse'),
@@ -118,7 +118,10 @@ describe('A05-A07 transpose, stencil, and convolution publication', () => {
       expect(source).toContain('cuDNN 9.24.0');
       expect(source).toMatch(/graph validation/i);
       expect(source).toMatch(/workspace/i);
-      expect(source).toMatch(/later, unpublished cuDNN library unit|尚未发布的后续 cuDNN library 单元/i);
+      expect(source).toMatch(/^relatedUnits:\n  - L10$/m);
+      expect(source).toContain('/libraries/cudnn-graphs-and-plans/');
+      expect(declaredPrerequisites(source)).toEqual(['A06', 'M03']);
+      expect(source).not.toMatch(/later, unpublished cuDNN library unit|尚未发布的后续 cuDNN library 单元/i);
       expect(source).toMatch(/does not build, validate, or execute|不构建、验证或执行/);
     }
   });

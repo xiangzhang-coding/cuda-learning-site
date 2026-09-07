@@ -161,6 +161,8 @@ export default defineConfig({
             { slug: 'libraries/cublaslt-matmul' },
             { slug: 'libraries/tensor-core-precision-contracts' },
             { slug: 'libraries/cutlass-cpp-gemm-structure' },
+            { slug: 'libraries/cudnn-graphs-and-plans' },
+            { slug: 'libraries/attention-backend-dispatch' },
           ],
         },
         {

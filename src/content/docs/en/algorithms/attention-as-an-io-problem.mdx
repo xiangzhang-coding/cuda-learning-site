@@ -29,6 +29,7 @@ prerequisites:
   - A10
 relatedUnits:
   - VIS18
+  - L11
 hardwareGate: none
 evidence:
   compilation: []
@@ -76,7 +77,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:prerequisites', content: 'A08,A10' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: VIS18 }
+    attrs: { name: 'cuda:related-units', content: 'VIS18,L11' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -199,7 +200,7 @@ This is not a FlashAttention traffic number. The paper's concrete pseudocode, lo
 
 ## Production boundary
 
-A11 contains no framework, cuDNN, or Triton API. Later units separately review exact software versions, dtypes, masks, workspaces, dispatch, compilation, and hardware gates. They can reuse VIS18's algorithm-level visual instead of treating a paper idea as current backend availability. A11 chooses no “best” tile or backend.
+A11 contains no framework, cuDNN, or Triton API. Optional continuation [L11: Attention Backend Dispatch](/en/libraries/attention-backend-dispatch/) separately reviews software versions, dtypes, workspace, and dispatch boundaries, reusing VIS18's algorithm-level model without treating a paper idea as current backend availability. First satisfy L11's own prerequisites `[A11,L10,L08]`; this link changes neither A11's `[A08,A10]` nor its 2026-09-03 fact-review date. A11 chooses no “best” tile or backend, and L11's source reading is not execution evidence.
 
 ## Evidence boundary
 

@@ -1136,11 +1136,11 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'evidence-review',
     difficulty: 'advanced',
     prerequisites: ['A07'],
-    relatedUnits: ['A06', 'M03', 'A07'],
-    hardwareGate: localized('无；只审查静态 tensor、operation、reuse 与 future-library gates，不执行 CUDA 或 cuDNN。', 'None; review static tensor, operation, reuse, and future-library gates without executing CUDA or cuDNN.'),
+    relatedUnits: ['A06', 'M03', 'A07', 'L10'],
+    hardwareGate: localized('无；只审查静态 tensor、operation、reuse 与库合同，不执行 CUDA 或 cuDNN。', 'None; review static tensor, operation, reuse, and library contracts without executing CUDA or cuDNN.'),
     versionGate: localized(
-      'CUDA Programming Guide v13.3 与 11.8.0/12.9.1 owner guides；cuDNN current docs（2026-08-07）与 Frontend v1.27.0 future coordinate。',
-      'CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; current cuDNN docs dated 2026-08-07 and the Frontend v1.27.0 future coordinate.',
+      '保留 2026-08-30 的 CUDA/cuDNN 来源审查；L10 提供单独标日期的图与计划后续阅读，不升级旧事实或执行证据。',
+      'Retains the 2026-08-30 CUDA/cuDNN source review; L10 supplies a separately dated graph/plan continuation without refreshing old facts or execution evidence.',
     ),
     reviewedOn: '2026-08-30',
     keywords: localized('convolution cross-correlation NCHW stride dilation padding cuDNN graph plan workspace determinism', 'convolution cross-correlation NCHW stride dilation padding cuDNN graph plan workspace determinism'),
@@ -1561,6 +1561,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-07',
     keywords: localized('CUTLASS GEMM device kernel threadblock warp instruction 布局 RowMajor 流水线 阶段 复用 can_implement', 'CUTLASS GEMM device kernel threadblock warp instruction layout RowMajor pipeline stage reuse can_implement'),
   },
+  {
+    planningId: 'PB-R4-011',
+    group: 'practice',
+    title: localized('审查引擎候选、总工作区与缓存政策变更', 'Audit engine candidates, total workspace, and a cache-policy change'),
+    href: localized('/practice/#pb-r4-011', '/en/practice/#pb-r4-011'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L10'],
+    relatedUnits: ['A07', 'L01', 'Q05', 'L10', 'L11'],
+    hardwareGate: localized('无；原创假设候选表的静态审查，不查询、构建或执行计划。', 'None; static review of an original hypothetical candidate table, without querying, building, or executing plans.'),
+    versionGate: localized('独立固定 cuDNN backend 9.24.0 与 frontend 1.27.0，提交 f77fbc3d21be3f24cd0286b9b368105f7c518b8a；启发式不是测量，筛选预算不是总内存上限。', 'Independently pinned cuDNN backend 9.24.0 and frontend 1.27.0 commit f77fbc3d21be3f24cd0286b9b368105f7c518b8a; heuristics are not measurements and a filter budget is not a total-memory cap.'),
+    reviewedOn: '2026-09-07',
+    keywords: localized('cuDNN 运算图 执行计划 引擎配置 启发式 工作区 确定性 缓存 序列化', 'cuDNN operation graph execution plan engine configuration heuristics workspace determinism cache serialization'),
+  },
+  {
+    planningId: 'PB-R4-012',
+    group: 'practice',
+    title: localized('区分注意力表示、路由顺序与严格固定失败', 'Separate attention representation, router order, and strict-pin failure'),
+    href: localized('/practice/#pb-r4-012', '/en/practice/#pb-r4-012'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L11'],
+    relatedUnits: ['A11', 'L10', 'L08', 'L11', 'VIS18'],
+    hardwareGate: localized('无；只审查假设的分派记录。未来窄范围 SDPA 执行要求原生 Linux、原生列入支持矩阵的 SM80+ 设备及逐特性门槛。', 'None; review hypothetical dispatch records only. Future narrow SDPA execution requires native Linux, natively listed SM80+ hardware, and per-feature gates.'),
+    versionGate: localized('cuDNN backend 9.24.0；frontend 1.27.0 提交 f77fbc3d21be3f24cd0286b9b368105f7c518b8a；FP16/BF16 窄范围前向合同，Python 路由不等于框架分派或实测引擎。', 'cuDNN backend 9.24.0; frontend 1.27.0 commit f77fbc3d21be3f24cd0286b9b368105f7c518b8a; narrow FP16/BF16 forward contract, with Python routing distinct from framework dispatch or an observed engine.'),
+    reviewedOn: '2026-09-07',
+    keywords: localized('attention SDPA AUTO UNIFIED COMPOSITE Python router select_plan pinned fallback dtype engine', 'attention SDPA AUTO UNIFIED COMPOSITE Python router select_plan pinned fallback dtype engine'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -1789,7 +1817,7 @@ const visuals: readonly ResourceIndexRecord[] = [
     href: vis18Destination.href,
     resourceType: 'mental-model',
     prerequisites: vis18Destination.prerequisites,
-    relatedUnits: ['A10'],
+    relatedUnits: ['A10', 'L11'],
     hardwareGate: noCudaHardware,
     versionGate: localized(
       'Vaswani 等 2017、Milakov/Gimelshein 2018、Dao 等 2022 与 CUDA Best Practices Guide v13.3；browser ledger 是 static analysis，不是 GPU evidence。',
@@ -2055,6 +2083,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-188', 'Epilogue · 收尾操作', 'kernel-vocabulary', ['L06', 'L07', 'EX18', 'LAB12'], '12.9.2 cuBLASLt Matmul 的偏置/激活合同及行主序 D 限制；EX18/LAB12 仅提供传统 FP32 基线，没有 Lt 融合实现或实测收益。', '12.9.2 cuBLASLt Matmul bias/activation contract and row-major D restriction; EX18/LAB12 provide only a traditional FP32 baseline, not Lt fusion implementation or measured benefit.', '2026-09-06'),
   glossaryRecord('TERM-189', 'Tensor Core · 张量核心', 'kernel-vocabulary', ['F06', 'L08', 'L09'], '张量核心（Tensor Core）的原生类型支持、WMMA/PTX API 资格和实际生成指令是三类事实；2026-09-07 的类型表只在 CC 8.0/9.0/10.0 列出原生 FP64 加速，不从更高 CC 或 FP32 输出推断。', 'Native Tensor Core type support, WMMA/PTX API eligibility, and emitted instructions are distinct facts; the table reviewed 2026-09-07 lists native FP64 acceleration only at CC 8.0/9.0/10.0, not by inference from a higher CC or FP32 output.', '2026-09-07'),
   glossaryRecord('TERM-190', 'Accumulator Type · 累加器类型', 'kernel-vocabulary', ['Q02', 'L06', 'L08', 'L09'], '累加器类型（Accumulator Type）与输入存储、实际乘法精度、收尾计算及输出存储分开；FP32 累加不能恢复输入转换已丢失的信息。CUDA WMMA 与固定 CUTLASS v4.7.0 合同于 2026-09-07 复核，无运行结论。', 'Accumulator Type is separate from input storage, multiplicand precision, epilogue computation, and output storage; FP32 accumulation cannot restore information lost on input conversion. CUDA WMMA and pinned CUTLASS v4.7.0 contracts reviewed 2026-09-07, with no runtime conclusion.', '2026-09-07'),
+  glossaryRecord('TERM-191', 'Operation Graph · 运算图', 'kernel-vocabulary', ['A07', 'L10', 'L11'], 'cuDNN backend 9.24.0 与 frontend 1.27.0：张量运算与数据依赖的规格，不是 CUDA Graph 启动捕获、已选内核或执行证据。', 'cuDNN backend 9.24.0 and frontend 1.27.0: a specification of tensor operations and data dependencies, not CUDA Graph launch capture, a selected kernel, or execution evidence.', '2026-09-07'),
+  glossaryRecord('TERM-192', 'Execution Plan · 执行计划', 'kernel-vocabulary', ['L10', 'L11'], '固定 cuDNN 合同中从引擎配置构建的实现描述；启发式候选不等于计划，构建不等于正确输出、最快实现或跨设备可移植性。', 'An implementation description built from an engine configuration under the pinned cuDNN contract; a heuristic candidate is not a plan, and building proves neither correct output, fastest implementation, nor cross-device portability.', '2026-09-07'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -2929,6 +2959,30 @@ const sources: readonly ResourceIndexRecord[] = [
     localized(
       'CUTLASS v4.7.0 提交 dcf215af68a2d08d305076c152a06f201728cd53，2026-08-13 发布；保留 2.x 风格 C++ GEMM、两阶段路径、3.x 对照与六项上游测试。19 个文件逐项核对 BSD-3-Clause；gemm_universal.hpp 为 2023-2026，其余为 2017-2026。#3179/#3516/#2152 按范围记录；13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17 仅为拟议目标，无构建、测试执行或 DSL 采用。',
       'CUTLASS v4.7.0 commit dcf215af68a2d08d305076c152a06f201728cd53, released 2026-08-13; retained 2.x-style C++ GEMM, two-stage path, 3.x comparison, and six owner tests. BSD-3-Clause reviewed in 19 files; gemm_universal.hpp uses 2023-2026, the others 2017-2026. Scoped #3179/#3516/#2152 review; 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17 is a proposed target only, without a build, test execution, or DSL adoption.',
+    ),
+    '2026-09-07',
+    '2026-09-07',
+  ),
+  sourceRecord(
+    'SRC-CUDA-071',
+    localized('cuDNN backend 9.24.0 图、支持矩阵、已知问题与 EULA', 'cuDNN backend 9.24.0 graphs, support matrix, known issues, and EULA'),
+    'cuda-version-record',
+    ['A07', 'L10', 'L11'],
+    localized(
+      '独立参考版本 9.24.0；精确发布说明、12.x/13.x 包与驱动/静态链接门槛、逐范围已知问题及 SDK EULA。9.25.0 页面明确为 Developer Preview，排除在本合同外；无二进制、编译或 GPU 证据。',
+      'Independent reference version 9.24.0; exact release notes, 12.x/13.x packages and driver/static-link gates, scoped known issues, and SDK EULA. The 9.25.0 page explicitly identifies Developer Preview and is outside this contract; no binary, compilation, or GPU evidence.',
+    ),
+    '2026-09-07',
+    '2026-09-07',
+  ),
+  sourceRecord(
+    'SRC-CUDA-072',
+    localized('cuDNN frontend 1.27.0 固定源码、路由、测试与逐文件许可', 'cuDNN frontend 1.27.0 pinned source, routing, tests, and file-level licenses'),
+    'cuda-version-record',
+    ['L10', 'L11', 'VIS18'],
+    localized(
+      '独立版本 1.27.0，提交 f77fbc3d21be3f24cd0286b9b368105f7c518b8a，2026-08-06 发布；20 个文件逐项核对 Apache-2.0/MIT 与年份，含 CMakeLists.txt。Markdown 无开头逐文件 SPDX，仅引用；上游测试未在本站运行，无代码或资产复制。',
+      'Independent version 1.27.0, commit f77fbc3d21be3f24cd0286b9b368105f7c518b8a, released 2026-08-06; Apache-2.0/MIT and years reviewed in 20 files including CMakeLists.txt. Markdown lacks opening per-file SPDX headers and is reference-only; owner tests were not run here and no code or assets were copied.',
     ),
     '2026-09-07',
     '2026-09-07',

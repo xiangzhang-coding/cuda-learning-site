@@ -428,6 +428,16 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L09：读懂 CUTLASS C++ GEMM 层次', en: 'L09: Read the CUTLASS C++ GEMM Hierarchy' },
     prerequisites: ['A08', 'L06', 'M17'],
   },
+  L10: {
+    href: { 'zh-CN': '/libraries/cudnn-graphs-and-plans/', en: '/en/libraries/cudnn-graphs-and-plans/' },
+    title: { 'zh-CN': 'L10：cuDNN 运算图与执行计划', en: 'L10: cuDNN Operation Graphs and Execution Plans' },
+    prerequisites: ['A07', 'L01', 'Q05'],
+  },
+  L11: {
+    href: { 'zh-CN': '/libraries/attention-backend-dispatch/', en: '/en/libraries/attention-backend-dispatch/' },
+    title: { 'zh-CN': 'L11：注意力后端分派', en: 'L11: Attention Backend Dispatch' },
+    prerequisites: ['A11', 'L10', 'L08'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },

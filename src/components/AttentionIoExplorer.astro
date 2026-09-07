@@ -140,7 +140,7 @@ const initialStatus = formatAttentionIoCopy(copy.statusReady, {
           <p data-live-materialized-description>{copy.stages[initialView.stage].materialized}</p>
           <dl>
             <div><dt>{copy.stageTraffic}</dt><dd><strong data-live-materialized-stage-bytes>{initialView.selectedStage.materializedBytes} B</strong><span data-live-materialized-stage-elements>{initialView.selectedStage.materializedElements} {copy.elements}</span></dd></div>
-            <div><dt>{copy.totalTraffic}</dt><dd><strong data-live-materialized-total>{initialView.materialized.bytes} B</strong><span>{initialView.materialized.elements} {copy.elements}</span></dd></div>
+            <div><dt>{copy.totalTraffic}</dt><dd><strong data-live-materialized-total>{initialView.materialized.bytes} B</strong><span data-live-materialized-total-elements>{initialView.materialized.elements} {copy.elements}</span></dd></div>
           </dl>
         </article>
         <article class="attention-path attention-path-tiled" data-live-tiled-path>
@@ -148,7 +148,7 @@ const initialStatus = formatAttentionIoCopy(copy.statusReady, {
           <p data-live-tiled-description>{copy.stages[initialView.stage].tiled}</p>
           <dl>
             <div><dt>{copy.stageTraffic}</dt><dd><strong data-live-tiled-stage-bytes>{initialView.selectedStage.tiledBytes} B</strong><span data-live-tiled-stage-elements>{initialView.selectedStage.tiledElements} {copy.elements}</span></dd></div>
-            <div><dt>{copy.totalTraffic}</dt><dd><strong data-live-tiled-total>{initialView.tiled.bytes} B</strong><span>{initialView.tiled.elements} {copy.elements}</span></dd></div>
+            <div><dt>{copy.totalTraffic}</dt><dd><strong data-live-tiled-total>{initialView.tiled.bytes} B</strong><span data-live-tiled-total-elements>{initialView.tiled.elements} {copy.elements}</span></dd></div>
           </dl>
         </article>
       </div>
@@ -381,7 +381,9 @@ const initialStatus = formatAttentionIoCopy(copy.statusReady, {
       this.setText('[data-live-tiled-stage-bytes]', `${view.selectedStage.tiledBytes} B`);
       this.setText('[data-live-tiled-stage-elements]', `${view.selectedStage.tiledElements} ${this.copy().elements}`);
       this.setText('[data-live-materialized-total]', `${view.materialized.bytes} B`);
+      this.setText('[data-live-materialized-total-elements]', `${view.materialized.elements} ${this.copy().elements}`);
       this.setText('[data-live-tiled-total]', `${view.tiled.bytes} B`);
+      this.setText('[data-live-tiled-total-elements]', `${view.tiled.elements} ${this.copy().elements}`);
       this.setText('[data-live-analysis-difference]', `${view.analysisDifference.bytes} B`);
       this.setText('[data-live-stage-boundary]', stageCopy.boundary);
 

@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。已完成的 R3 聚合发布复核保持为不可变快照，固定为 232 个双语发布对（Publication Pair）、464 条 source routes 与 347 条 catalog records。滚动 R4 发布通过 issue #33 新增 L01/L02，通过 [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)发布 [L03](/libraries/cub-device-primitives/)、[L04](/libraries/cub-warp-block-primitives/)、[EX17](/examples/cub-device-reduction-scan/)与 [LAB11](/labs/compare-custom-reduction-with-cub/)，随后发布 [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)。[Issue #36](https://github.com/xiangzhang-coding/cuda-learning-site/issues/36)新增 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)、[L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)、[EX18](/examples/cublas-gemm/)与 [LAB12](/labs/compare-gemm-with-cublas/)；[issue #37](https://github.com/xiangzhang-coding/cuda-learning-site/issues/37)再新增 [L08：张量核心（Tensor Core）精度与架构合同](/libraries/tensor-core-precision-contracts/)和 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)。当前范围为 71 个学习单元、263 个双语发布对、526 条源路由与 383 条资源目录记录；R4 聚合复核仍待完成。
+稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。不可变快照固定为 232 个双语发布对（Publication Pair）、464 条源路由与 347 条资源目录记录。滚动 R4 已扩展到 L01-L11、EX17/EX18 与 LAB11/LAB12；[issue #38](https://github.com/xiangzhang-coding/cuda-learning-site/issues/38)新增 [L10：cuDNN 图与计划](/libraries/cudnn-graphs-and-plans/)和 [L11：注意力后端分派](/libraries/attention-backend-dispatch/)。当前范围为 73 个学习单元、269 个双语发布对、538 条源路由与 389 条资源目录记录；R4 聚合复核仍待完成。
 
 **发布清单与导航更新：2026-09-07。** 页面日期仅对应本次发布清单与入口更新，不重新核查既有 CUDA API 事实；技术来源保留各自访问与复核日期。
 
@@ -63,6 +63,8 @@ head:
 [L01 在生产库、可复用原语、DSL 与自定义内核之间做选择](/libraries/library-primitive-dsl-custom-kernel/)严格依赖 A02、A03、A08 与 Q06；[L02 把 Thrust 作为算法词汇](/libraries/thrust-algorithm-vocabulary/)严格依赖 A01、A03 与 A09；[L03 用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)严格依赖 A02、A03、M07 与 L01；[L04 用 CUB Warp 与 Block Primitives 组合内核](/libraries/cub-warp-block-primitives/)严格依赖 F02、M03、M05、A02、A03 与 L03；[L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)严格依赖 M05、M13 与 M19；[L06：cuBLAS GEMM](/libraries/cublas-gemm/)严格依赖 A08 与 Q01；[L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)严格依赖 L06 与 Q05；[L08](/libraries/tensor-core-precision-contracts/)的有序直接先修项恰好为 `[Q02,L06,F06]`；[L09](/libraries/cutlass-cpp-gemm-structure/)的有序直接先修项恰好为 `[A08,L06,M17]`。九者都发布完整练习（Exercise）和独立解答。学习单元中的静态库合同不授予证据状态（Evidence Status）；示例与实验的证据须查看各自记录。
 
 L08 区分输入转换、累加、输出转换与 WMMA 架构合同。L09 以固定的 CUTLASS C++ v4.7.0、提交 `dcf215af68a2d08d305076c152a06f201728cd53` 阅读 GEMM 结构，不承诺 DSL 或可执行支持。两者都不提供 CUDA 结果；VIS12 模型不变，其 instruction panel 仍只是源码层标量运算位置，不是真实 Tensor Core 指令。
+
+[L10](/libraries/cudnn-graphs-and-plans/)精确有序先修为 `[A07,L01,Q05]`，相关单元为 L11；[L11](/libraries/attention-backend-dispatch/)精确有序先修为 `[A11,L10,L08]`，相关资源为 VIS18。两者独立固定 cuDNN backend 9.24.0 与 frontend 1.27.0、提交 `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`，仅作参考阅读，不承诺编译、GPU、分派、类型或性能结果。[L10 练习](/libraries/cudnn-graphs-and-plans/exercises/)与[独立解答](/libraries/cudnn-graphs-and-plans/solutions/)、[L11 练习](/libraries/attention-backend-dispatch/exercises/)与[独立解答](/libraries/attention-backend-dispatch/solutions/)均完整发布。VIS18 仍仅依赖 A11，不是实际后端轨迹。
 
 F01-F08 都提供完整练习（Exercise）和独立参考解答：[F01 练习](/foundations/first-cuda-kernel/exercises/)与[解答](/foundations/first-cuda-kernel/solutions/)、[F02 练习](/foundations/execution-hierarchy/exercises/)与[解答](/foundations/execution-hierarchy/solutions/)、[F03 练习](/foundations/multidimensional-indexing/exercises/)与[解答](/foundations/multidimensional-indexing/solutions/)、[F04 练习](/foundations/host-device-lifecycle/exercises/)与[解答](/foundations/host-device-lifecycle/solutions/)、[F05 练习](/foundations/asynchronous-errors/exercises/)与[解答](/foundations/asynchronous-errors/solutions/)、[F06 练习](/foundations/compute-capability/exercises/)与[解答](/foundations/compute-capability/solutions/)、[F07 练习](/foundations/runtime-driver-api/exercises/)与[解答](/foundations/runtime-driver-api/solutions/)、[F08 练习](/foundations/launch-geometry/exercises/)与[解答](/foundations/launch-geometry/solutions/)。
 
@@ -86,13 +88,13 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
 
 EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component matrix 只是声明的 non-evidentiary build gate；本站不声称 CI 已运行。EX17 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，runtime 为 Pending Hardware Verification。
 
-当前 12 个实验（Lab）是 LAB01-LAB12。[LAB10 优化 canonical transpose](/labs/optimize-canonical-transpose/)严格依赖 Q11；[LAB11 比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)严格依赖 Q12 与 L03，并比较不可变 EX11 和 EX17；[LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)严格依赖 Q13 与 L06，比较 EX15 与 EX18。三者均无实际观察记录。LAB12 已有完整双语步骤，但运行仍待硬件验证；L10-L13 尚未发布。
+当前 12 个实验（Lab）是 LAB01-LAB12。[LAB10 优化 canonical transpose](/labs/optimize-canonical-transpose/)严格依赖 Q11；[LAB11 比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)严格依赖 Q12 与 L03，并比较不可变 EX11 和 EX17；[LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)严格依赖 Q13 与 L06，比较 EX15 与 EX18。三者均无实际观察记录。LAB12 已有完整双语步骤，但运行仍待硬件验证；L12-L13 尚未发布。
 
 正式 Visual Explainer 共 19 项：独立 VIS01-VIS14 与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)，加上内嵌 VIS19-VIS22。VIS18 严格依赖 A11，提供 deterministic shape/stage/IO ledger 与 purpose-built static SVG；它不是 GPU traffic 或 performance evidence。
 
-A10-A14、Q06-Q13、L01-L09、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11 与 EX18/LAB12 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
+A10-A14、Q06-Q13、L01-L11、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11 与 EX18/LAB12 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS、cuDNN 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
 
-Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录。当前滚动资源目录为 12 个 Lab、76 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、190 个术语表（Glossary）词条和 86 条来源记录，共 383 条记录；当前源文件形成 263 个双语发布对，即 526 条源路由，包含 70 组练习与 70 组独立参考解答。R3 精确 10 项 Nsight report-analysis inventory 不变；R4 聚合复核仍待完成。
+Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录。当前滚动资源目录为 12 个 Lab、78 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、192 个术语表（Glossary）词条和 88 条来源记录，共 389 条记录；当前源文件形成 269 个双语发布对，即 538 条源路由，包含 72 组练习与 72 组独立参考解答。R3 精确 10 项 Nsight report-analysis inventory 不变；R4 聚合复核仍待完成。
 
 ## 边界先说清
 
@@ -446,6 +448,16 @@ Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visua
     <strong>阅读 CUTLASS C++ GEMM 结构</strong>
     <small>沿固定版本追踪分块、主循环与收尾结构，不把源码合同当作运行证据。</small>
   </a>
+  <a className="route-card" href="/libraries/cudnn-graphs-and-plans/">
+    <span>L10 · CUDNN GRAPHS AND PLANS</span>
+    <strong>cuDNN 运算图与执行计划</strong>
+    <small>分开图语义、候选、构建、工作区与缓存，不把启发式当作测量。</small>
+  </a>
+  <a className="route-card" href="/libraries/attention-backend-dispatch/">
+    <span>L11 · ATTENTION DISPATCH</span>
+    <strong>注意力后端分派</strong>
+    <small>在窄范围前向合同下区分前端表示、引擎路由与实际框架选择。</small>
+  </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>环境报告可运行示例</strong>
@@ -684,17 +696,17 @@ Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visua
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 76 道原创题练习证据、环境、架构、内核、内存、算法、库、工具链与正确性判断。</small>
+    <small>用 78 道原创题练习证据、环境、架构、内核、内存、算法、库、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 190 个中英文规范术语。</small>
+    <small>核对本站使用的 192 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 86 条接口与上游来源记录，以及各自复核日期。</small>
+    <small>查看当前发布依据的 88 条接口与上游来源记录，以及各自复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

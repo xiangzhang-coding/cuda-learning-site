@@ -96,7 +96,7 @@ head:
 
 **目标：** 为同一 direct teaching operation 与未来 cuDNN Frontend/API path 写一份 production comparison checklist，覆盖 component pin、semantic parity、graph validation/build、heuristics/plan selection、workspace、correctness、tolerance 与 determinism。
 
-**约束：** 明确说明尚未发布的后续 cuDNN library 单元才固定 component matrix；A07 当前不教授或执行 cuDNN；记录 cuDNN Frontend v1.27.0 只是 cuDNN 9.24.0+ future coordinate；所有 build、plan、workspace、output、timing 与 speedup fields 必须保持 `unrecorded`。
+**约束：** [L10](/libraries/cudnn-graphs-and-plans/)是已发布、单独标日期的组件与图/计划后续阅读，不是本练习的新增先修或执行证据；A07 仍不教授或执行 cuDNN。保留本页 2026-08-30 来源日期，不把版本引用当作本地完整环境；所有 build、plan、workspace、output、timing 与 speedup fields 必须保持 `unrecorded`。
 
 **预期证据：** 一张 ordered gate table、失败分类、workspace lifetime diagram、correctness/determinism acceptance contract，以及未填写的 measurement record template。
 

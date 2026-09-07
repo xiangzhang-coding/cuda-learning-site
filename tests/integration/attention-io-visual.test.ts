@@ -129,7 +129,7 @@ describe('VIS18 attention IO Visual Explainer', () => {
     expect(metadata(document, 'cuda:pair-id')).toBe('vis18');
     expect(metadata(document, 'cuda:unit-id')).toBe('VIS18');
     expect(metadata(document, 'cuda:prerequisites')).toBe('A11');
-    expect(metadata(document, 'cuda:related-units')).toBe('A10');
+    expect(metadata(document, 'cuda:related-units')).toBe('A10,L11');
     for (const name of [
       'cuda:evidence-compilation',
       'cuda:evidence-runtime',

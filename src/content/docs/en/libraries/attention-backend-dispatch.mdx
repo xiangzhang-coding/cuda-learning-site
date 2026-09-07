@@ -1,0 +1,231 @@
+---
+title: 'L11: Attention Backend Contracts and Dispatch'
+description: Separate attention semantics, IO algorithms, frontend representations, backend plans, and observed dispatch through a bounded cuDNN forward contract and original descriptor audit.
+pairId: l11
+counterpart: /libraries/attention-backend-dispatch/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, descriptors, representations, plans, dispatch, known-issues, visual-explainer, numerical-policy, fallback, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L11
+prerequisites: [A11, L10, L08]
+relatedUnits: [VIS18]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: advanced
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'SRC-CUDA-071: cuDNN backend release notes'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0'
+    version: 'Backend 9.24.0'
+    platform: 'Native Linux policy; versioned support and known issues, not runtime evidence'
+    accessDate: '2026-09-07'
+  - title: 'SRC-CUDA-072: cuDNN frontend release and immutable source'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Pinned SDPA descriptors, representation gates, plans, and Python routing; source inspection only'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l11 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/attention-backend-dispatch/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,descriptors,representations,plans,dispatch,known-issues,visual-explainer,numerical-policy,fallback,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L11 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A11,L10,L08' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: VIS18 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '2' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '9.24.0,1.27.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/attention-backend-dispatch/" lang="zh-CN">阅读中文对应页</a>
+
+A graph named `flash_attention` does not tell you which implementation ran. Before asking about a backend, establish the operation, the bytes behind its descriptors, the eligible representations and plans, and the evidence that would identify an actual execution.
+
+## Learning goals
+
+Allow about 40 minutes to audit a dense forward contract, derive BHSD addressing, classify constructed dispatch decisions, and preserve a reference when a candidate is rejected. This Learning Unit requires no GPU, installation, compilation, or execution. Its product is a source-reading and decision record, not a Runnable Example or Lab.
+
+## Prerequisites
+
+The exact ordered prerequisites are `A11, L10, L08`: [A11: Attention as an IO Problem](/en/algorithms/attention-as-an-io-problem/) supplies the equation and tiled recurrence; [L10: cuDNN Graphs and Plans](/en/libraries/cudnn-graphs-and-plans/) supplies graph, engine-configuration, plan, and workspace responsibilities; [L08: Tensor Core Precision Contracts](/en/libraries/tensor-core-precision-contracts/) supplies storage, computation, and numerical acceptance distinctions. [VIS18](/en/visuals/attention-memory-traffic/) is related, not another prerequisite.
+
+## Five layers behind an attention label
+
+A11's original Transformer and FlashAttention references explain attention semantics and the history of IO-aware exact tiling. Reducing full intermediate materialization motivated algorithm design; it did not create one universal library implementation or dispatcher. Those papers supply no present-day cuDNN eligibility or performance claim.
+
+| Layer | Question to answer | What its answer does not prove |
+| --- | --- | --- |
+| Semantics | Is the operation `O = softmax_row(QK^T * scale)V`, and what are its heads, masks, and outputs? | Storage layout or arithmetic precision |
+| IO algorithm | Which values remain resident, and which intermediates are materialized or reread? | A library's concrete traffic or kernel |
+| Frontend representation | Does `UNIFIED`, `COMPOSITE`, or `AUTO` describe/lower this SDPA request? | An eligible backend engine or a built plan |
+| Backend plans | Which engine configurations survive feature, workspace, and numerical policy and can be built? | Execution, correct output, or measured preference |
+| Observed dispatch | Which identified plan actually executed for this call in this environment? | Another call's dispatch or a framework-wide rule |
+
+This unit independently pins **backend 9.24.0** and **frontend 1.27.0**, whose tag resolves to **`f77fbc3d21be3f24cd0286b9b368105f7c518b8a`**. Frontend release advice for backend 9.24.0 and later is not a promise that all source features work on 9.24.0. The review date is **2026-09-07**. Framework-level actual API dispatch belongs to a later unit: no PyTorch version or exact framework behavior is asserted here.
+
+## Freeze a narrow forward contract
+
+Scaled dot-product attention (SDPA) here means dense, fixed-shape, single-GPU forward inference. For each batch and head, use the A11 equation with row softmax over keys, explicit `scale = 1/sqrt(D)`, and stable normalization. Freeze these choices before reviewing eligibility:
+
+| Field | L11 teaching contract |
+| --- | --- |
+| Heads and lengths | Equal Q/K/V head counts; equal query and KV sequence lengths `S > 1`; no decode case |
+| Head dimensions | Equal Q/K and V depths, with `D` chosen as 64 or 128 |
+| Storage | All Q/K/V/O genuinely FP16, or all genuinely BF16; no mixed ports or reinterpretation of FP32 bytes |
+| Arithmetic | FP32 compute and intermediate types explicitly requested; this does not restore information lost in input/output conversion |
+| Layout | Four-dimensional logical BHSD descriptors over separate contiguous buffers; embedding stride one |
+| Statistics | `generate_stats=false`; no Stats output binding or allocation is requested |
+| Exclusions | No mask, bias, dropout, paging, ragged offsets, backward, FP8, or dynamic shape overrides |
+
+This is deliberately narrower than all cuDNN support, not a declaration that excluded features are universally unsupported. The pinned [support surface](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L347-L369) rejects pre-SM80 SDPA. The [backend 9.24.0 matrix](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/support-matrix.html) includes broader SM75 library support; that does not admit this attention path on SM75. Use natively listed supported hardware with the additional SDPA gates, not an assumption that every future SM above 80 works. [Forward compatibility](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/forward-compatibility.html#forward-compatibility-and-the-graph-api) excludes specialized fused attention patterns from its general promise.
+
+The source also checks head-count divisibility and FP16/BF16 head dimensions in multiples of eight. Equal heads and D=64/128 satisfy those particular conditions, not all support/build checks. Native Linux is the only Supported Environment; reading on another host does not establish a CUDA runtime there.
+
+## Work the descriptor before the plan
+
+Use the original descriptor example **`B=1,H=2,S=128,D=64`**. Q, K, V, and O each have logical shape **`[1,2,128,64]`**. BHSD means batch, head, sequence, depth; contiguous element strides are **`[16384,8192,64,1]`**, derived as `[H*S*D,S*D,D,1]`. These are element strides, not byte strides.
+
+| Quantity | Exact worked value |
+| --- | --- |
+| Element offset | `b*16384 + h*8192 + s*64 + d` |
+| Last logical element | `(0,1,127,63)` gives `8192+8128+63=16383` |
+| Elements per tensor | `1*2*128*64=16384` |
+| Bytes per tensor | FP16 or BF16: `16384*2=32768 B` |
+| Byte strides | `[32768,16384,128,2]` |
+| Last element byte range | Bytes `32766..32767` within its own 32768-byte allocation |
+| Four separate Q/K/V/O allocations | `4*32768=131072 B`, excluding all workspace and other storage |
+| Explicit scale | `1/sqrt(64)=1/8=0.125` |
+
+For example, `(0,1,0,0)` belongs at element offset 8192. Describing the same BHSD bytes with `[16384,64,128,1]` instead claims offset 64. Those strides can describe a different physical BSHD packing, but do **not** describe these buffers. An extent check can pass while values are mapped incorrectly. Fix the descriptor to match the allocation, or explicitly repack the data and review the new representation; never just relabel storage to make a support check pass.
+
+The frontend's [four-dimensional tensor checks](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/scaled_dot_product_flash_attention.h#L265-L311) and [forward sample](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_fwd.cpp#L32-L104) establish the logical Q/K/V/O convention. K is supplied as `[B,H,S,D]`, not the older decomposed backend K-transpose descriptor: `K^T` in the equation is not an instruction to swap this frontend descriptor. Output layout must also be valid. Allocation arithmetic proves neither address alignment eligibility nor storage lifetime; the caller must supply correctly aligned actual buffers, bind the right tensors, and keep storage alive through completion.
+
+## Representation selection is not engine selection
+
+The pinned [AUTO selection logic](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_properties.h#L2298-L2312) first checks UNIFIED feature support, then COMPOSITE. UNIFIED represents SDPA through the unified operation; COMPOSITE decomposes it into a graph. Backend heuristics and plan building are separate later work. AUTO is not a benchmark and does not promise runtime fallback among every implementation when a later build or execution fails.
+
+A dtype distinction matters even though it lies outside L11's accepted input contract. At this SHA, [the allowlists](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L435-L481) exclude FLOAT from UNIFIED's Q/K/V/O but allow FLOAT on COMPOSITE. UNIFIED also requires both compiled and loaded backend versions at least 9.13.1. [Owner test definitions](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_sdpa_fp32_rejected.py#L87-L143) cover per-port FP32/FP64 rejection for UNIFIED, FP64 rejection for COMPOSITE, and FP32 COMPOSITE/AUTO acceptance with skips if no supporting engine exists. Thus, **UNIFIED rejecting FP32 does not mean every cuDNN SDPA representation rejects FP32**. Dtype acceptance still does not prove a plan exists. These tests were read, not run.
+
+The pinned [`Attention.md` matrix](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/operations/Attention.md#L16) still labels itself backend **9.18.1**. Current-document discovery, including Context7's SDPA forward/backward material, is not authority to apply that older matrix to all of 9.24.0. Exact source gates, tests, and current backend notes bound this lesson. Absence of a frontend rejection is not positive backend support evidence.
+
+## Backend plans and Python routing are different paths
+
+For the C++ backend path, L10's sequence remains `validate -> build_operation_graph -> create_execution_plans -> check_support -> build_plans`. In the pinned [graph interface](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L2867-L2932), `create_execution_plans` discovers/enqueues engine configurations rather than completing plan construction. Apply workspace and numerical policy before support/build. The [plan collection](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h#L517-L668) can establish that at least one candidate is acceptable; it does not certify every candidate. Building all candidates does not measure them.
+
+Frontend 1.27.0's Python-native `cudnn.pygraph` adds a separately inspectable routing layer. This is a **source-tag-based comparison**, not a Python program run here and not the same interface as C++ backend heuristics:
+
+| Pinned Python behavior | Interpretation |
+| --- | --- |
+| [`router.py:41-77`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/engines/router.py#L41-L77) gathers Python proposals and backend entries, then calls `heuristics_sort` | Ranked list position is not `engine_id`; a candidate's position does not identify its implementation |
+| [`_pygraph.py:1346-1403`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/_pygraph.py#L1346-L1403) walks an unpinned list on `NotImplementedError` / `cudnnGraphNotSupportedError` | These are declared build declines, not permission to swallow arbitrary failures or retry after an execution error |
+| Optional strict [`select_plan(i)`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/python/cudnn/_pygraph.py#L1117-L1139) pins a list position | A pinned decline raises rather than silently falling through; pinning is not evidence of support, correctness, or a measured winner |
+| Compiled Python-plan workspace is checked after its size becomes known | A proposal is not a sufficient allocation contract; retain the selected plan's actual size requirement |
+
+The [router tests](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_engine_router.py#L395-L455) are source definitions for routing policy, not observed GPU selection. C++ `HeurMode_t::OPENSOURCE` is another explicit surface, not an implicit property of ordinary backend modes. Its [SM100 SDPA prefill engine](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/experimental/sm100_sdpa_prefill_engine.h#L36-L41) requires **SM100 exactly**, not all Blackwell GPUs or SM103. Do not conflate that C++ engine with separate Python SM100 API tests.
+
+## A constructed dispatch decision table
+
+The following rows are independent, hypothetical audit cases, **not a log, run, engine result, or benchmark**. Start each row from the stated contract unless the row says otherwise. The action is an application decision, not an assertion that cuDNN automatically takes that fallback.
+
+| Case | Decision before claiming execution | Reference and evidence consequence |
+| --- | --- | --- |
+| Pre-SM80, including SM75 | Reject this SDPA candidate despite general backend support | Preserve the original reference; no GPU selection was observed |
+| BHSD bytes with strides `[16384,64,128,1]` | Reject the mismatched descriptor even if dimensions and allocation extent pass | Correct the mapping or explicitly repack; do not change the mathematical oracle |
+| FP32 Q/K/V/O with explicit UNIFIED | UNIFIED rejects FLOAT; COMPOSITE/AUTO may allow it, subject to engine support | Outside L11's FP16/BF16 contract; do not infer universal FP32 rejection or silently downcast |
+| Added mask, bias, dropout, paging, ragged data, backward, FP8, unequal heads, or decode | Outside this reviewed subset; an unsupported requested feature must not be dropped to gain eligibility | Preserve the full requested semantics in a separately capable reference, or report unsupported |
+| Candidate workspace exceeds policy, or final total workspace exceeds available allocation | Reject under that budget; inspect another eligible candidate or choose an explicit application alternative | A workspace cap is not an allocation and does not authorize unsafe execution |
+| Candidate carries `NONDETERMINISTIC` while repeatability is required | Filter it and re-evaluate the remaining candidates | Determinism is separate from numerical accuracy; no tolerances may be relaxed merely to obtain a plan |
+| Unpinned Python build candidate returns a declared decline | The pinned router policy can consider a later ranked candidate | This is build routing, not automatic recovery from arbitrary runtime errors |
+| Optional strict Python `select_plan(i)` selects a declining candidate | Raise instead of silently trying another plan | The requested strict selection must remain visible as a failure |
+| Graph validates, support check succeeds, or a plan builds | Record only that stage if it actually happened; do not infer a framework backend or completed call | Actual selected-plan identity, execution completion, and numerical acceptance remain missing here |
+
+For memory policy, L10's `deselect_workspace_greater_than` limits backend-plan workspace candidates, not all GPU memory. The frontend's final workspace query includes **backend plan workspace plus frontend node workspace** ([source](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L1129-L1135)). Use a checked final size query, enforce the application's total scratch budget, allocate and bind valid storage, and preserve lifetimes through completion. The worked `131072 B` is only Q/K/V/O capacity; it supplies no workspace number.
+
+## Keep known issues and preview gates bounded
+
+These statements come from the **9.24.0 section** of the [backend release notes](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0), not an accumulation of unresolved-looking historical entries. No issue was reproduced here.
+
+| Owner-reported scope | Consequence for L11 |
+| --- | --- |
+| SDPA decode with a causal mask and unequal Q versus K/V head counts may produce mismatches or NaNs | Excluded by equal heads, `S > 1`, and no mask. Owner advice is to avoid the causal mask and supply actual lengths via padding mask for that affected case; this is not permission to remove a required mask from arbitrary attention |
+| SDPA backward with K/V sequence length one is unsupported | Excluded by forward-only scope; do not turn a backward limitation into a claim that all dense forward is unsupported |
+
+The inspected [9.25.0 release page](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.25.0/release-notes.html#cudnn-9-25-0-developer-preview) explicitly says **Developer Preview**, not GA. Frontend source gates mixed per-batch/cumulative sequence-length forms on effective backend 9.25 or newer ([support surface](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L515-L520)); Hopper ordered-dQ deterministic backward also has a 9.25 gate in the [attention node](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/scaled_dot_product_flash_attention.h#L1613). Neither enters this 9.24 forward contract. Historical 9.10.0/9.10.1 FP16/BF16 guards and the specific 9.14.0 sliding-window guard are not new 9.24 bugs. This narrow subset is not asserted bug-free.
+
+## Reuse VIS18 without changing its ledger
+
+Open the standalone [VIS18: Attention Memory Traffic](/en/visuals/attention-memory-traffic/). Its unchanged FP32 model counts **4 bytes per logical element**. For `N=8,d=4,Br=Bc=4`, the materialized schedule counts **512 elements = 2048 B**, and the query-outer tiled schedule counts **192 elements = 768 B**, a **1280 B** static difference. Its normalization `0 B` means no transfer across the stipulated boundary, not no normalization computation.
+
+Use the visual to ask which intermediate materialization an IO algorithm avoids. Do **not** relabel its tracks as UNIFIED/COMPOSITE, Python/C++, or selected cuDNN engines. Its small fixture is not this unit's D=64/128 descriptor example or evidence of its eligibility. The ledger is not cuDNN traffic, cuDNN dtype accounting, workspace, a backend trace, or a runtime dispatcher. L11's two-byte FP16/BF16 storage does not authorize halving VIS18's totals: mixed arithmetic types, implementation schedules, and actual transfers need separate accounting. Neither graph fusion nor a built plan proves VIS18's schedule was used. The visual remains an existing linked teaching resource, with no duplicated or embedded implementation.
+
+## Numerical policy is not a backend name
+
+An FP32 compute/intermediate request does not undo FP16/BF16 input rounding or output conversion, and it does not promise one reduction order. Keep a fixed independent reference with stable row normalization, the same scale, shapes, and full requested semantics. Record input provenance and the rounding/conversion policy explicitly; a full-precision-input reference and a reference computed from promoted low-precision inputs answer different questions.
+
+Before any future comparison, define fixture-specific absolute/relative tolerances, an explicit non-finite policy, and the output comparison boundary. Do not import an owner test tolerance as a universal error bound. The [owner attention tests](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/python/test_mhas.py#L910-L969) illustrate comparisons, not locally accepted results.
+
+The [backend numerical notes](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendnumericalnote-t) expose properties including `NONDETERMINISTIC`, `DOWN_CONVERT_INPUTS`, and `REDUCED_PRECISION_REDUCTION`. Inspect relevant candidate notes rather than deriving them from a Tensor Core label. [Reproducibility guidance](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/developer/misc.html#reproducibility-determinism) does not promise cross-architecture bitwise equality. Filtering nondeterministic candidates is a repeatability policy, not proof of accuracy, equality to an FP32 reference, or equality across versions/plans. No performance comparison is made.
+
+## Preserve the reference when a candidate fails
+
+Keep an ordinary stable FP32 attention decomposition as a semantic/reference alternative, with explicit storage, scale, normalization, and output policy. It is not exact real arithmetic or automatically bitwise equivalent to a low-precision implementation. If that alternative does not implement a requested feature, report unsupported instead of dropping the feature. A reference need not use this SDPA backend, so pre-SM80 rejection is not rejection of the attention equation.
+
+Rejection must not rewrite the reference inputs, scale, mask semantics, or acceptance tolerances to manufacture success. An explicit representation change or correctly specified data conversion is a new reviewed candidate, not a hidden modification of the oracle. Preserve original inputs for comparison. A plan-build decline can lead to another policy-eligible candidate or this explicit application alternative; an execution error needs diagnosis and safe state handling, not blind retry on possibly incomplete outputs. No reference implementation or runtime fallback is added by this unit.
+
+## Evidence boundary
+
+All four evidence arrays are empty. Original descriptor arithmetic, a constructed decision table, owner-source/test reading, and the linked browser visual grant no Evidence Status. No cuDNN program was compiled, no owner test was run, and no CUDA runtime, selected engine, output, timing, or speedup is reported. Source-level routing behavior is not an observed dispatch result.
+
+A future runtime record would need an Environment Manifest, exact frontend/backend and component identities, device/architecture, tensor shapes/strides/dtypes and allocation contracts, features/scale/stats, workspace and numerical policy, and actual selected-plan identity. It would also need checked launch/completion, independent reference comparisons, and recorded acceptance results in a declared Reference Environment. A successful graph construction alone supplies none of that execution evidence, and does not identify a framework's actual API dispatch.
+
+## Retrieval check
+
+1. Which of the five layers can a graph name identify, and why does an IO algorithm not identify a selected engine?
+2. Derive the worked BHSD strides, last offset, per-tensor bytes, and scale. Why can a stride mismatch stay within allocated bounds?
+3. Why can explicit UNIFIED reject FP32 while COMPOSITE/AUTO may allow it, and why does neither dtype acceptance nor SM80 alone prove a plan exists?
+4. How do ordinary C++ planning, unpinned Python build declines, and optional strict `select_plan(i)` differ? What stays missing after a plan builds?
+5. Why must VIS18 remain a four-byte logical ledger, and why do a determinism filter or failed candidate leave the numerical reference unchanged?
+
+## Continue with practice
+
+- Complete the [L11 Exercises](/en/libraries/attention-backend-dispatch/exercises/) before opening the [separate solutions](/en/libraries/attention-backend-dispatch/solutions/).
+- Audit another bounded dispatch contract in [PB-R4-012](/en/practice/#pb-r4-012).
+- Revisit [A11](/en/algorithms/attention-as-an-io-problem/) for the recurrence, [L10](/en/libraries/cudnn-graphs-and-plans/) for plan ownership, and [L08](/en/libraries/tensor-core-precision-contracts/) for numerical references.
+
+## Sources and licensing
+
+[SRC-CUDA-071](/en/sources-and-versions/#src-cuda-071) records backend **9.24.0** documentation, support, numerical policy, and bounded release-note issues. [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072) records frontend **1.27.0** at **`f77fbc3d21be3f24cd0286b9b368105f7c518b8a`**, including exact per-file rights. The inspected frontend is not uniformly licensed: `graph_properties.h` and `samples/cpp/sdpa/fp16_fwd.cpp` are MIT; the attention/support headers, graph/plan headers, Python router, `_pygraph.py`, and cited tests carry their own Apache-2.0 headers. Preserve each file's actual copyright and notices if an authorized future adaptation is needed; a repository badge or this page's CC BY 4.0 cannot replace them.
+
+Backend documentation is under its separate [SDK agreement](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/eula.html), not frontend Apache/MIT permissions. Owner documents, source, samples, and tests are linked and paraphrased only. No upstream listing, diagram, support table, or implementation is copied or adapted; the lesson, descriptor arithmetic, and decision scenarios are original. A11's existing papers support algorithm history only, not backend eligibility. Context7 discovery was bounded by the pinned primary sources, not used to promote a stale table or preview interface into the Stable Curriculum.
+
+**Facts checked and sources accessed: 2026-09-07.**

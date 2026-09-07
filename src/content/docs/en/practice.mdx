@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: 76 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 78 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-09-07'
@@ -85,6 +85,8 @@ structure:
   - entry-pb-r4-008
   - entry-pb-r4-009
   - entry-pb-r4-010
+  - entry-pb-r4-011
+  - entry-pb-r4-012
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -159,6 +161,8 @@ prerequisites:
   - L07
   - L08
   - L09
+  - L10
+  - L11
 relatedUnits:
   - O02
   - O03
@@ -230,6 +234,8 @@ relatedUnits:
   - L07
   - L08
   - L09
+  - L10
+  - L11
   - EX15
   - EX17
   - EX18
@@ -258,15 +264,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,EX15,EX17,EX18,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,EX15,EX17,EX18,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -285,13 +291,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 76 complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 78 complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 76 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 78 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
@@ -2262,9 +2268,9 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - **ID and Publication Pair:** PB-R2-019 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Convolution and library evidence review; advanced.
 - **Direct prerequisite:** [A07: Direct 2D Convolution, Neighborhood Reuse, and Layout Contracts](/en/algorithms/convolution-reuse-layout/).
-- **Hardware gate:** None; review static tensor, operation, reuse, and future-library gates without executing CUDA or cuDNN.
-- **Version gate:** CUDA Programming Guide v13.3 and the 11.8.0/12.9.1 owner guides; current cuDNN docs dated 2026-08-07 and the Frontend v1.27.0 future coordinate.
-- **Related Learning Units and resources:** [A06](/en/algorithms/stencil-neighborhood-reuse/), [M03](/en/memory/shared-memory-tiling/), and [A07](/en/algorithms/convolution-reuse-layout/).
+- **Hardware gate:** None; review static tensor, operation, reuse, and library contracts without executing CUDA or cuDNN.
+- **Version gate:** Retains the 2026-08-30 CUDA/cuDNN source review; L10 supplies a separately dated graph/plan continuation without refreshing old facts or execution evidence.
+- **Related Learning Units and resources:** [A06](/en/algorithms/stencil-neighborhood-reuse/), [M03](/en/memory/shared-memory-tiling/), [A07](/en/algorithms/convolution-reuse-layout/), and optional [L10](/en/libraries/cudnn-graphs-and-plans/).
 - **Last reviewed:** 2026-08-30.
 
 **Prompt:** A custom direct-convolution proposal states no NCHW strides, filter orientation, stride, dilation, padding, or accumulation policy and tests only a symmetric filter on square input. It treats one cuDNN heuristic candidate as a selected plan and claims both “the library is optimized” and “shared reuse” prove their respective path is faster. Repair its semantics, correctness, and production-decision packet.
@@ -2273,7 +2279,7 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 - Declare dense addresses for `X[N,C,H,W]`, `F[K,C,R,S]`, and `Y[N,K,P,Q]`, use unflipped cross-correlation, and state the output-shape formula.
 - Include asymmetric-filter, rectangular-input, edge-padding, stride/dilation, and multi-channel fixtures, plus predeclared accumulation, tolerance, and non-finite policy.
-- Record future cuDNN component pin, graph validation/build, heuristic candidates, selected plan, workspace, correctness, and determinism separately. Run no comparison before a later, unpublished cuDNN library unit.
+- Record future cuDNN component pin, graph validation/build, heuristic candidates, selected plan, workspace, correctness, and determinism separately. [L10](/en/libraries/cudnn-graphs-and-plans/) is the published continuation; this task still runs no comparison and adds no prerequisite.
 
 **Expected evidence:** A tensor/operation contract, asymmetric-filter oracle, staged-patch ledger, ordered production-gate table, failure taxonomy, and blank measurement template.
 
@@ -2282,13 +2288,13 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 - CPU, custom, and future-library paths share shape, layout, cross-correlation, stride, dilation, padding, data/compute types, and numerical acceptance.
 - An asymmetric fixture distinguishes unflipped correlation from flipped mathematical convolution; every out-of-domain tap generates 0 without an out-of-bounds read.
 - Graph validation, build/support, candidate filtering, plan selection, and workspace allocation/lifetime are independent gates; a failure is not disguised as performance.
-- cuDNN Frontend v1.27.0 is only a future coordinate for cuDNN 9.24.0+. Without a pinned matrix from a later cuDNN library unit and a retained measurement, there is no winner.
+- L10's independent version references do not establish a complete local component matrix. Without correctness-qualified retained measurements, there is no winner.
 
 <details><summary>Hint 1</summary>Use one asymmetric `2x2` filter to write separate correlation and flipped-convolution outputs.</details>
 
 <details><summary>Hint 2</summary>Give separate verdicts to “API accepts graph,” “candidate exists,” “workspace is available,” “numerics pass,” and “timing result.”</details>
 
-**Reviewed solution:** The repaired packet first fixes dense NCHW/KCRS/NKPQ addresses, the unflipped cross-correlation equation, output extents, and a zero-padding accessor, then gives CPU, custom, and future cuDNN paths the same semantics. The fixture matrix covers asymmetry, rectangular extents, edges, stride, dilation, and channels; the floating-point comparator fixes accumulation, `atol/rtol`, and non-finite policy before output. Only after a later, unpublished cuDNN library unit pins the full component matrix can the production table enter graph validation/build, heuristics, selected plan, workspace, and repeated correctness/determinism. A07 executes no cuDNN, every plan/output/timing field is `unrecorded`, and neither path has a performance verdict.
+**Reviewed solution:** The repaired packet first fixes dense NCHW/KCRS/NKPQ addresses, the unflipped cross-correlation equation, output extents, and a zero-padding accessor, then gives CPU, custom, and future cuDNN paths the same semantics. The fixture matrix covers asymmetry, rectangular extents, edges, stride, dilation, and channels; the floating-point comparator fixes accumulation, `atol/rtol`, and non-finite policy before output. L10 now supplies separately dated component and graph/plan reading; the actual production table still needs a complete local component matrix before graph validation/build, heuristics, selected plan, workspace, and repeated correctness/determinism. A07 executes no cuDNN, every plan/output/timing field is `unrecorded`, and neither path has a performance verdict. This continuation link does not refresh the entry's 2026-08-30 facts.
 
 **Valid alternative:** A framework-managed cuDNN backend can be the production baseline if its component and algorithm selection can be recorded. An integer fixture may exact-compare but does not replace floating-point application acceptance.
 
@@ -3452,6 +3458,103 @@ At the pinned source, `can_implement` checks layout-dependent tensor-reference a
 
 **Source date:** 2026-09-07.
 
+<span id="pb-r4-011" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-011: Audit engine candidates, total workspace, and a cache-policy change
+
+- **ID and Publication Pair:** PB-R4-011 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [L10](/en/libraries/cudnn-graphs-and-plans/), exactly `[L10]`.
+- **Hardware gate:** None; an original hypothetical table, not a query, build, or execution.
+- **Version gate:** Independent cuDNN backend 9.24.0 and frontend 1.27.0 commit `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`.
+- **Related Learning Units and resources:** [A07](/en/algorithms/convolution-reuse-layout/), [L01](/en/libraries/library-primitive-dsl-custom-kernel/), [Q05](/en/correctness/timing-asynchronous-gpu-work/), [L10](/en/libraries/cudnn-graphs-and-plans/), and [L11](/en/libraries/attention-backend-dispatch/).
+- **Last reviewed:** 2026-09-07.
+
+**Prompt:** A deployment review changes its scratch budget to 6 MiB and excludes `NONDETERMINISTIC` and `DOWN_CONVERT_INPUTS`. A hypothetical heuristic list is ordered as below. All sizes and outcomes are invented task inputs, not library results. The application sets the backend workspace filter to 6 MiB, declares all remaining rows supported after one successful support check, and caches the first list entry using only `graph->key()`.
+
+| Ordered candidate | Numerical notes | Backend workspace | Frontend-node workspace | Hypothetical later build |
+| --- | --- | --- | --- | --- |
+| P | NONDETERMINISTIC | 1 MiB | 1 MiB | Not attempted |
+| Q | DOWN_CONVERT_INPUTS | 2 MiB | 1 MiB | Not attempted |
+| R | Neither excluded note | 6 MiB | 1 MiB | Succeeds |
+| S | Neither excluded note | 3 MiB | 1 MiB | Fails |
+| T | Neither excluded note | 4 MiB | 1 MiB | Succeeds |
+
+**Goal:** Produce a policy/build/allocation decision ledger and repair reuse after the budget change without identifying a measured winner.
+
+**Constraints:** Keep discovery order, distinguish backend filtering from final total scratch, and preserve a separate numerical-tolerance contract. A prior cache entry was built under a 12 MiB budget with down-conversion allowed. Inputs, outputs, and kernel-cache allocations are outside this scratch budget and still need their own memory accounting.
+
+**Expected evidence:** A five-row rejection ledger, a build-policy comparison, a final workspace/lifetime checklist, and a cache-revalidation decision.
+
+**Acceptance criteria:** Reject P/Q on policy, R on total scratch, and S on the given build failure. T is only the provisional admissible row under the supplied facts; 5 MiB is arithmetic from the hypothetical table, not a queried size. Neither `ALL` nor support success proves a fastest or numerically correct plan.
+
+<details><summary>Hint 1: Add at the correct boundary</summary>The backend filter sees 6 MiB for R, but the application's total scratch condition sees 7 MiB. Filtering alone cannot implement the application budget.</details>
+
+<details><summary>Hint 2: Separate identity from policy</summary>A graph key does not encode a complete machine identity or every selection policy. Does the old policy permit something the new policy forbids?</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** P/Q fail the numerical policy before support/build. R passes the backend-only cap but `6+1=7 MiB` exceeds total scratch. S fits `3+1=4 MiB` but the supplied later build fails. T fits `4+1=5 MiB` and is the sole provisional admissible row. Default `HEURISTICS_CHOICE` can stop at R's first successful build before the application's final-total check rejects it; do not assume the library automatically continues to T after that application rejection. Explicitly resume candidate handling or use an `ALL` policy and then apply final acceptance to the successfully built plans. `ALL` only attempts builds, not timing. `check_support` stops at an acceptable configuration and does not certify every row or guarantee later build success.
+
+Invalidate or revalidate the old cache entry against the new budget and numerical exclusions. Namespace/recheck exact backend/frontend/build, device, graph semantics, dtype/layout/shape/alignment, and policy; a graph hash alone is insufficient. Query final workspace through the error-returning overload, allocate only after success, bind correct tensor UIDs, and retain exclusive scratch until completion. Separate graph JSON, selected-plan serialization, and backend CUBIN caching; none grants permanent cross-device validity. Excluding nondeterminism does not prove FP32-reference accuracy or cross-architecture bits. Local queries, builds, output, timing, and selected engine remain unrecorded.
+
+**Valid alternatives and common errors:** A stricter preliminary cap can reduce candidates, but still needs the final total and may exclude useful plans. Do not silently relax numerical policy, reuse a rejected plan, allocate from an unchecked size query, or relabel the hypothetical T row as a real cuDNN engine.
+
+</details>
+
+**Source basis:** Original scenario, labels, table, and solution; [L10](/en/libraries/cudnn-graphs-and-plans/), [SRC-CUDA-071](/en/sources-and-versions/#src-cuda-071), and the immutable graph/plans source and tests in [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072). No owner question, code, asset, or result is copied.
+
+**Source date:** 2026-09-07.
+
+<span id="pb-r4-012" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-012: Separate attention representation, router order, and strict-pin failure
+
+- **ID and Publication Pair:** PB-R4-012 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [L11](/en/libraries/attention-backend-dispatch/), exactly `[L11]`.
+- **Hardware gate:** None; hypothetical dispatch review only. Future narrow SDPA execution needs native Linux, natively listed SM80+ hardware, and per-feature gates.
+- **Version gate:** Independent cuDNN backend 9.24.0 and frontend 1.27.0 commit `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`; narrow FP16/BF16 forward scope.
+- **Related Learning Units and resources:** [A11](/en/algorithms/attention-as-an-io-problem/), [L10](/en/libraries/cudnn-graphs-and-plans/), [L08](/en/libraries/tensor-core-precision-contracts/), [L11](/en/libraries/attention-backend-dispatch/), and [VIS18](/en/visuals/attention-memory-traffic/).
+- **Last reviewed:** 2026-09-07.
+
+**Prompt:** Review four independent, hypothetical planning records for dense forward attention: equal Q/K/V heads, BHSD contiguous storage, equal sequence lengths greater than one, head dimension 64, all Q/K/V/O BF16, FP32 intermediate/compute, scale `1/sqrt(64)`, `generate_stats=false`, and no mask/dropout/bias/backward/paging. No row describes a GPU run.
+
+| Record | Supplied planning fact | Proposed conclusion |
+| --- | --- | --- |
+| A | Frontend AUTO chooses UNIFIED representation | A framework has selected the fastest fused kernel |
+| B | Python ranked list `[proposal X, backend Y]`; unpinned X raises `NotImplementedError` during build | Any runtime exception may fall through to Y |
+| C | Same list, explicit `select_plan(0)`; X declines | Strict pin silently selects Y |
+| D | Two Python proposals build far enough to report 9 MiB and 3 MiB; cap is 4 MiB | Position zero proves engine identity and wins before checking workspace |
+
+**Goal:** Repair each conclusion and specify what a future dispatch record must capture.
+
+**Constraints:** Keep frontend representation, Python router ranking, backend engine configuration, and framework dispatch separate. Do not infer real engine IDs, emitted instructions, dtype accuracy, or timing from list positions, graph names, or owner test definitions.
+
+**Expected evidence:** A four-row verdict, strict versus unpinned failure rules, final workspace acceptance, and a missing-evidence checklist.
+
+**Acceptance criteria:** A proves only representation choice. B can continue on the named planning decline, not arbitrary execution failures. C raises instead of falling through. D rejects 9 MiB under the cap; 3 MiB only passes that one hypothetical condition. No actual engine or framework selection is recorded.
+
+<details><summary>Hint 1: Name the layer</summary>A graph's AUTO implementation choice happens before ordinary backend heuristic discovery. A Python plan index is neither an engine ID nor an observation of framework dispatch.</details>
+
+<details><summary>Hint 2: Read the failure contract</summary>Unpinned planning handles specific decline exceptions. An explicit pin deliberately removes that fallback; neither is a recovery promise for arbitrary GPU faults.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** A records frontend feature-support selection of UNIFIED before backend candidate discovery/build. It identifies no final engine, framework choice, or performance. B may try Y after X's supplied `NotImplementedError`; the pinned source also handles `cudnnGraphNotSupportedError` during unpinned planning, not arbitrary runtime errors. C must report the pinned decline, not conceal a switch. D must check the Python compiled plan's reported workspace against 4 MiB: 9 MiB fails and 3 MiB passes only the budget test. Ranking and engine identity require separate fields, and correctness still needs independent acceptance.
+
+Record exact frontend SHA/backend/build identity, device and software environment, graph semantics and tensor strides/types, requested policy, representation, ranked entries, selected identity, decline/build diagnostics, final workspace, binding and completion, independent numerical checks, and separately scoped measurements. Until those observations exist, leave outcome fields unrecorded. FP32 acceptance in COMPOSITE/AUTO does not authorize FP32 UNIFIED ports; it also does not prove a backend plan exists. The BF16 teaching restriction is a chosen narrow scope, not a blanket rejection of all other cuDNN types. VIS18's logical IO cannot fill a dispatch field. No framework dispatcher is independently pinned by this exercise.
+
+**Valid alternatives and common errors:** Reject a failed strict pin and ask for a new explicit policy, or use an unpinned policy from the start. Do not reinterpret a pin as a preference, conflate source tests with their execution, or use a GPU family label to authorize the separate exact-SM100 C++ open-source path.
+
+</details>
+
+**Source basis:** Original records and solution; [L11](/en/libraries/attention-backend-dispatch/), [SRC-CUDA-071](/en/sources-and-versions/#src-cuda-071), and pinned `router.py`, `_pygraph.py`, support-surface and owner tests in [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072). No upstream code, question, asset, or result is copied or executed.
+
+**Source date:** 2026-09-07.
+
 ## Review record
 
-Existing entries retain their item-level records. Issue #32's immutable **2026-09-04** R3 review fixes 66 entries and the exact ten-entry Nsight report-analysis inventory. PB-R4-001 through PB-R4-008 retain their 2026-09-04/05/06 records, with PB-R4-006 still belonging to L05. PB-R4-009/010 bring the complete current Publication Pair to **76** entries; metadata, links, two initially closed layered hints per entry, and separately expandable solutions were reviewed together on **2026-09-07**. The new scenarios examine precision/architecture and CUTLASS hierarchy/layout/pipelines, with exact direct prerequisites `[L08]` and `[L09]`. All prompts and solutions are original, citing and paraphrasing owner documents without copying or adapting upstream questions, code, prose, tables, figures, or results. Static numerical and ownership derivations are not GPU observations. No compilation, runtime, traffic, timing, Tensor Core, speedup, winner, or Evidence Status is added.
+Existing entries retain their item-level records. Issue #32's immutable **2026-09-04** R3 review fixes 66 entries and the exact ten-entry Nsight report-analysis inventory. PB-R4-001 through PB-R4-010 retain their dates. PB-R4-011/012 bring the complete current Publication Pair to **78** entries; their metadata, links, two initially closed hints each, and separate expandable solutions were reviewed on **2026-09-07**. These original engine-policy and dispatch scenarios directly require exactly `[L10]` and `[L11]`. PB-R2-019 gains an optional L10 continuation without refreshing its older facts. No upstream questions, code, prose, tables, figures, or results are copied or adapted. Hypothetical planning facts are not GPU observations and add no compilation, runtime, traffic, timing, dtype result, speedup, winner, or Evidence Status.

@@ -411,7 +411,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes seventy-six complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes seventy-eight complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -437,7 +437,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R3-007', 'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
       'PB-R3-013', 'PB-R3-014', 'PB-R3-015', 'PB-R3-016',
       'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006',
-      'PB-R4-007', 'PB-R4-008', 'PB-R4-009', 'PB-R4-010',
+      'PB-R4-007', 'PB-R4-008', 'PB-R4-009', 'PB-R4-010', 'PB-R4-011', 'PB-R4-012',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -506,8 +506,16 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R4-008': 'libraries/cublaslt-matmul',
       'PB-R4-009': 'libraries/tensor-core-precision-contracts',
       'PB-R4-010': 'libraries/cutlass-cpp-gemm-structure',
+      'PB-R4-011': 'libraries/cudnn-graphs-and-plans',
+      'PB-R4-012': 'libraries/attention-backend-dispatch',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
+      'PB-R2-019': [
+        'algorithms/stencil-neighborhood-reuse',
+        'memory/shared-memory-tiling',
+        'algorithms/convolution-reuse-layout',
+        'libraries/cudnn-graphs-and-plans',
+      ],
       'PB-R3-001': [
         'correctness/timing-asynchronous-gpu-work',
         'correctness/apod-optimization-loop',
@@ -711,6 +719,20 @@ describe('Exercises and Practice Bank contract', () => {
         'libraries/cutlass-cpp-gemm-structure',
         'visuals/gemm-tiling-hierarchy',
       ],
+      'PB-R4-011': [
+        'algorithms/convolution-reuse-layout',
+        'libraries/library-primitive-dsl-custom-kernel',
+        'correctness/timing-asynchronous-gpu-work',
+        'libraries/cudnn-graphs-and-plans',
+        'libraries/attention-backend-dispatch',
+      ],
+      'PB-R4-012': [
+        'algorithms/attention-as-an-io-problem',
+        'libraries/cudnn-graphs-and-plans',
+        'libraries/tensor-core-precision-contracts',
+        'libraries/attention-backend-dispatch',
+        'visuals/attention-memory-traffic',
+      ],
     };
 
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
@@ -760,10 +782,12 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-00[1-8]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-(?:00[1-9]|01[0-2])$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R4-00[78]$/.test(entryId)
+        const sourceDate = /^PB-R4-(?:009|01[0-2])$/.test(entryId)
+          ? '2026-09-07'
+          : /^PB-R4-00[78]$/.test(entryId)
           ? '2026-09-06'
           : /^PB-R4-00[3-6]$/.test(entryId)
           ? '2026-09-05'
@@ -798,7 +822,7 @@ describe('Exercises and Practice Bank contract', () => {
     for (const unitId of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18', 'M19']) expect(text).toContain(unitId);
     for (const unitId of ['A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07', 'A08', 'A09', 'A14']) expect(text).toContain(unitId);
     for (const unitId of ['Q01', 'Q02', 'Q03', 'Q04', 'Q05', 'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13']) expect(text).toContain(unitId);
-    for (const unitId of ['L01', 'L02', 'L03', 'L04', 'L05']) expect(text).toContain(unitId);
+    for (const unitId of ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11']) expect(text).toContain(unitId);
     expect(text).toContain('EX17');
     expect(text).toContain('LAB11');
     expect(text).toMatch(/Hardware gate|硬件门槛/);

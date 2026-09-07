@@ -24,20 +24,20 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 describe('resource index catalog', () => {
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(383);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(389);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 12, practice: 76, visuals: 19, glossary: 190, sources: 86 });
-    for (const absentId of ['L10', 'LAB13']) {
+    ).toEqual({ labs: 12, practice: 78, visuals: 19, glossary: 192, sources: 88 });
+    for (const absentId of ['L12', 'LAB13']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
 
     expect(Object.fromEntries(
-      ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'EX17', 'EX18', 'LAB11', 'LAB12'].map((planningId) => [
+      ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'EX17', 'EX18', 'LAB11', 'LAB12'].map((planningId) => [
         planningId,
         {
           href: PUBLISHED_DESTINATIONS[planningId].href.en,
@@ -52,6 +52,8 @@ describe('resource index catalog', () => {
       L07: { href: '/en/libraries/cublaslt-matmul/', prerequisites: ['L06', 'Q05'] },
       L08: { href: '/en/libraries/tensor-core-precision-contracts/', prerequisites: ['Q02', 'L06', 'F06'] },
       L09: { href: '/en/libraries/cutlass-cpp-gemm-structure/', prerequisites: ['A08', 'L06', 'M17'] },
+      L10: { href: '/en/libraries/cudnn-graphs-and-plans/', prerequisites: ['A07', 'L01', 'Q05'] },
+      L11: { href: '/en/libraries/attention-backend-dispatch/', prerequisites: ['A11', 'L10', 'L08'] },
       EX17: { href: '/en/examples/cub-device-reduction-scan/', prerequisites: ['L03'] },
       EX18: { href: '/en/examples/cublas-gemm/', prerequisites: ['L06'] },
       LAB11: { href: '/en/labs/compare-custom-reduction-with-cub/', prerequisites: ['Q12', 'L03'] },
@@ -223,7 +225,7 @@ describe('resource index catalog', () => {
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R4-/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006', 'PB-R4-007', 'PB-R4-008',
-      'PB-R4-009', 'PB-R4-010',
+      'PB-R4-009', 'PB-R4-010', 'PB-R4-011', 'PB-R4-012',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
@@ -271,6 +273,13 @@ describe('resource index catalog', () => {
       { planningId: 'TERM-190', group: 'glossary', prerequisites: [], relatedUnits: ['Q02', 'L06', 'L08', 'L09'] },
       { planningId: 'SRC-CUDA-069', group: 'sources', prerequisites: [], relatedUnits: ['Q02', 'L06', 'F06', 'L08'] },
       { planningId: 'SRC-CUDA-070', group: 'sources', prerequisites: [], relatedUnits: ['A08', 'L06', 'M17', 'L09', 'VIS12'] },
+      { planningId: 'PB-R2-019', group: 'practice', prerequisites: ['A07'], relatedUnits: ['A06', 'M03', 'A07', 'L10'] },
+      { planningId: 'PB-R4-011', group: 'practice', prerequisites: ['L10'], relatedUnits: ['A07', 'L01', 'Q05', 'L10', 'L11'] },
+      { planningId: 'PB-R4-012', group: 'practice', prerequisites: ['L11'], relatedUnits: ['A11', 'L10', 'L08', 'L11', 'VIS18'] },
+      { planningId: 'TERM-191', group: 'glossary', prerequisites: [], relatedUnits: ['A07', 'L10', 'L11'] },
+      { planningId: 'TERM-192', group: 'glossary', prerequisites: [], relatedUnits: ['L10', 'L11'] },
+      { planningId: 'SRC-CUDA-071', group: 'sources', prerequisites: [], relatedUnits: ['A07', 'L10', 'L11'] },
+      { planningId: 'SRC-CUDA-072', group: 'sources', prerequisites: [], relatedUnits: ['L10', 'L11', 'VIS18'] },
     ]) {
       const record = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === expected.planningId);
       expect(record, expected.planningId).toMatchObject({
@@ -662,7 +671,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(215);
+    expect(projected).toHaveLength(217);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

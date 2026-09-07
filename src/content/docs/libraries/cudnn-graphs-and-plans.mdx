@@ -1,0 +1,269 @@
+---
+title: 'L10：分清 cuDNN 计算图、候选配置与执行计划'
+description: 描述张量语义，按数值策略和总工作区预算审查启发式候选，并在独立固定的 cuDNN 版本下区分计划复用、内核缓存、序列化与实测验收。
+pairId: l10
+counterpart: /en/libraries/cudnn-graphs-and-plans/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, semantics, lifecycle, heuristics, policy, workspace, candidate-table, caches, serialization, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L10
+prerequisites: [A07, L01, Q05]
+relatedUnits: [L11]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuDNN backend 9.24.0 release notes'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0'
+    version: 'Backend 9.24.0; current issues scoped to its own section'
+    platform: 'Owner release contract; no local reproduction'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN backend 9.24.0 support matrix'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/support-matrix.html'
+    version: 'Backend 9.24.0; CUDA 13.x package'
+    platform: 'Proposed Native Linux compatibility; not an executed environment'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN backend graph API'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html'
+    version: 'Backend 9.24.0'
+    platform: 'Heuristic modes, numerical notes, execution-plan descriptors, and status contracts'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN reproducibility and determinism'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/developer/misc.html#reproducibility-determinism'
+    version: 'Backend 9.24.0'
+    platform: 'Same-version and architecture boundaries; not numerical acceptance'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN frontend independent release'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Release identity separate from backend 9.24.0'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN frontend graph guide'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/graph-api.html'
+    version: 'Frontend 1.27.0'
+    platform: 'Graph semantics, heuristic recommendations, and default/custom kernel caches'
+    accessDate: '2026-09-07'
+  - title: 'Pinned frontend graph interface'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'C++ lifecycle, total workspace, graph keys, and serialization'
+    accessDate: '2026-09-07'
+  - title: 'Pinned frontend plan collection'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Existential support checking, backend workspace cap, and build policy'
+    accessDate: '2026-09-07'
+  - title: 'Pinned frontend serialization tests'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/cpp/serialize.cpp'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Owner test definitions inspected, not executed'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN frontend hardware forward compatibility'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/forward-compatibility.html#forward-compatibility-and-the-graph-api'
+    version: 'Frontend 1.27.0'
+    platform: 'Matching-hardware serialization boundary and fresh target-device heuristics'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/en/libraries/cudnn-graphs-and-plans/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,semantics,lifecycle,heuristics,policy,workspace,candidate-table,caches,serialization,measurement,versions,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A07,L01,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L11 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'backend-9.24.0,frontend-1.27.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cudnn-graphs-and-plans/" lang="en">Read the English counterpart</a>
+
+卷积之后加偏置、再做激活，描述的是要完成的计算，并没有指定实现。cuDNN 允许应用先描述计算，再选择执行方式。学习这套接口的关键，是知道每个规划步骤已经证明了什么，还有什么尚未证明。
+
+## 学习成果
+
+阅读、候选审查和检索检查约需 35 分钟；独立练习页提供更深入的书面复核。你将分清数学意图与内存布局，排除不符合条件的候选，计算完整的执行临时空间，并写出复用和验证的边界。无需安装软件，也不需要 GPU。
+
+## 先修关系
+
+先修项按 `A07, L01, Q05` 的顺序固定：[A07：卷积复用与布局](/algorithms/convolution-reuse-layout/)提供卷积坐标知识；[L01：库、原语、DSL 还是自定义内核](/libraries/library-primitive-dsl-custom-kernel/)帮助选择抽象层；[Q05：异步 GPU 工作的计时](/correctness/timing-asynchronous-gpu-work/)提供完成条件和计时边界。[L11：Attention 后端分派](/libraries/attention-backend-dispatch/)是相关学习单元（Learning Unit），**不是先修项**。
+
+## 从单个操作到计算图
+
+cuDNN 8.0 引入图接口，使操作组合与融合更灵活。**运算图（operation graph）** 是数学数据流的描述，通常对应网络的一部分，而非整个模型。**引擎（engine）** 实现一种受支持的计算模式；**引擎配置（engine configuration）** 包含该引擎的调节参数；构建完成的 **执行计划（execution plan）** 则为执行某个配置做好准备。一个图可能没有、只有一个或有多个符合条件的引擎。图中有多个操作，不意味着它们一定合成一个 GPU 内核。
+
+这不是 **CUDA Graph**。后者记录 CUDA 工作及其依赖，用于提交和重放；cuDNN 运算图在选择引擎之前描述张量计算。CUDA Graph 集成是另一套接口，`build_operation_graph` 构建的不是它，捕获和重放也不能替代语义或数值验证。
+
+本单元分别固定**后端（backend）9.24.0**与**前端（frontend）1.27.0**，前端提交为 `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`。前端发布说明推荐这一搭配，但不表示源码中的每项功能都能用于后端 9.24.0。这里也没有确认后端二进制包的具体构建标识或哈希。
+
+## 描述操作、张量与实际字节
+
+对于 `Y = ReLU(Conv(X,W) + bias)`，应记录卷积还是互相关（cross-correlation）、填充、空间步长、膨胀、分组、偏置广播轴、激活函数和输出类型。张量的 **维度（dimensions）** 定义逻辑坐标；以元素为单位的 **步幅（strides）** 把坐标映射到地址。修改布局名称或步幅，都不会搬动已有字节。
+
+例如，逻辑形状 `X:[N,C,H,W]=[1,2,2,3]` 配合步幅 `[12,1,6,2]`，表示通道变化最快的存储。`X[0,1,0,2]` 的元素偏移为 `0*12+1*1+0*6+2*2=5`；若存储类型是 FP16，字节偏移就是 10。紧密排列的 NCHW 步幅 `[12,6,3,1]` 却会得到元素偏移 8。因此，形状相同不代表读到的操作数相同。
+
+要分别声明输入输出存储类型、中间张量类型和操作计算类型。FP16 输入输出、FP32 中间值与计算是一份数值约定，不允许把实际 FP32 缓冲区交给 FP16 描述符。**虚拟张量（virtual tensor）** 是图内部的边，不是调用者绑定的输出，也不证明临时空间为零。需要观察的结果应正确标为输出。执行时按张量 UID 绑定当前缓冲区；范围、对齐、设备、别名和生命周期仍要单独证明，不能由描述符验证代劳。练习采用一个小型 1x1 互相关描述，不承诺完整组合存在受支持的引擎。
+
+## 逐步读懂生命周期
+
+固定版本的 C++ 便捷接口 `build` 按 [`graph_interface.h` 第 3014-3029 行](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L3014-L3029)中的顺序工作：
+
+| 阶段 | 已经建立的条件 | 尚未建立的条件 |
+| --- | --- | --- |
+| `validate` | 图符合前端自身的验证规则 | 后端支持或缓冲区正确 |
+| `build_operation_graph` | 转换为后端张量和操作，包括展开复合节点 | 已选定可执行实现 |
+| `create_execution_plans` | 发现启发式引擎配置并查询属性 | 名称虽含 plans，但此时尚未完成计划构建 |
+| 应用自己的筛选策略 | 允许的数值/行为属性，以及后端工作区上限 | 实际分配或数值正确性 |
+| `check_support` | 若成功，至少存在一个可接受配置 | 每个候选都受支持，或之后构建必定成功 |
+| `build_plans` | 按构建策略成功构建计划 | GPU 已完成、数值准确或实测最优 |
+
+需要在支持检查和构建之前插入筛选时，应使用分阶段接口，而不是把便捷调用当成策略配置。检查每一步的状态，并保留对应阶段的诊断。在此版本中，若编译所用后端和实际加载后端都至少为 9.2，[`plans.h` 第 517-598 行](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h#L517-L598)会检查配置属性，在找到第一个可接受配置时停止；更老的分支可能在支持检查期间构建计划。**`check_support` 是存在性检查**，不是完整的逐候选报告。
+
+默认 `HEURISTICS_CHOICE` 按列表顺序尝试构建，在第一个成功处停止。`ALL` 继续尝试其他候选，但不会为它们做基准测试。这个实现不接受多线程计划构建。支持检查成功，后续构建仍然可能失败。
+
+## 启发式给出建议，不给出测量
+
+| 模式 | 预期取舍 | 如何理解结果 |
+| --- | --- | --- |
+| A | 较低的 CPU 查询开销，覆盖常见图模式 | 估计排序，不是耗时记录 |
+| B | 希望给出更普遍准确的建议，代价是更高的 CPU 查询开销；可能回退到 A | 并非处处更好，也不保证执行更快 |
+| FALLBACK | 寻找功能性替代，不以最优性能为目标 | 是另一次搜索，不保证一定找到实现 |
+
+旧名称 `INSTANT` 与 A 等价，已被视为弃用。不要把后端文档中适用于狭窄范围的实现说明推广到所有图和 GPU。C++ `OPENSOURCE` 候选发现和 Python 引擎路由是额外接口，不是 A/B/FALLBACK 隐含的行为；L11 会单独讨论分派。
+
+## 数值策略不等于数值验收
+
+发现候选后，在支持检查和构建之前选择或排除数值/行为标记。相关数值标记包括 `NONDETERMINISTIC`、`DOWN_CONVERT_INPUTS`、`REDUCED_PRECISION_REDUCTION` 和 `TENSOR_CORE`。应用需要明确哪些允许、哪些不允许。使用 Tensor Core 不等于非确定性；排除非确定性实现，并不要求排除所有 Tensor Core 实现。
+
+**确定性（determinism）** 关注在声明的条件下重复计算能否重现结果；**准确性（accuracy）** 关注结果与独立参考之间的误差。排除 `NONDETERMINISTIC` 既不能证明结果等于 FP32 算术，也不能保证跨计划、库版本或架构的逐位一致。后端的可重现性约定有具体例程的例外，并不承诺跨架构逐位一致。容差和非有限值处理必须另行规定。
+
+## 预算、分配与生命周期是三项责任
+
+`deselect_workspace_greater_than` 只是把上限传给后端计划集合，不会分配内存。在此版本中，它比较的是**后端工作区（workspace）**；带错误返回的前端大小查询给出的则是**后端计划工作区 + 前端节点工作区**。若应用对执行临时空间设硬上限，必须同时满足 `total_required <= budget` 和 `total_required <= actual_capacity`。输入、输出、已缓存的 CUBIN 以及其他分配还需要独立余量；这里的预算不是 GPU 总内存上限。
+
+对实际要执行的计划，使用带错误返回的 `get_workspace_size` 重载。返回整数的便捷重载可能只记录错误，然后返回初始化值；查询失败时得到零，不能当成无需内存的证据。调用者要分配真正的设备存储、检查分配成功、绑定指针，并让工作区及所需张量活到执行完成。没有顺序约束的并发执行不能写同一块临时空间。官方 [`fp16_fwd.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_fwd.cpp#L172-L178)展示的是所有权安排，不是本站执行过的记录。
+
+使用形状覆盖（shape override）时，要用实际覆盖的 UID、形状和步幅查询工作区，且必须在分配之前查询，不能沿用缓存形状的大小。固定源码中的运行时形状工作区查询要求后端至少为 9.23.0。形状覆盖本身仍取决于完整图和引擎的支持；本单元的推导保持固定形状。
+
+## 审查一份假设候选列表
+
+下面是**原创教学输入，不是真实引擎查询输出**。C0-C4 只是作业中的局部标签，不是引擎标识。设执行临时空间总预算为 8 MiB，后端筛选上限也是 8 MiB，排除 `NONDETERMINISTIC`，已有实际分配为 6 MiB。同一个图还需要 2 MiB 前端临时空间。`1 MiB = 1,048,576 bytes`。
+
+| 候选 | 后端 MiB | 前端 MiB | 总计 MiB | 题设属性或结果 | 决策 |
+| --- | --- | --- | --- | --- | --- |
+| C0 | 2 | 2 | 4 | `NONDETERMINISTIC` | 按数值策略排除 |
+| C1 | 9 | 2 | 11 | 没有被排除的数值标记 | 超过后端上限，也超过总预算 |
+| C2 | 7 | 2 | 9 | 没有被排除的数值标记 | 通过后端上限，但超过总预算 |
+| C3 | 4 | 2 | 6 | 没有被排除的数值标记；假设支持检查可接受，随后构建失败 | 保留构建诊断；这次尝试没有得到可执行计划 |
+| C4 | 5 | 2 | 7 | 没有被排除的数值标记；尚未尝试支持检查和构建 | 符合预算，但超过实际分配；只可继续调查 |
+
+这里的大小和失败都是**题设事实**，不是声称候选发现阶段必定能给出这些值，也不是 `check_support` 返回的完整报告。真正实现时，必须在合适阶段取得成功的大小查询和状态检查。C4 **不是已观察到的成功**：至少 7 MiB 的合法实际分配、支持检查、构建、执行完成和数值验收都尚未建立。列表位置或小于 C2 的临时空间，也不能预测速度。
+
+若没有候选留下，应保留描述和拒绝原因，然后在相同策略下尝试 FALLBACK、采用另行验证且保留操作顺序和类型的分解路径，或明确返回不支持。不能偷偷省掉偏置、修改精度或放松确定性要求。构建失败不同于设备执行失败：执行或同步报错后，应停止并诊断，而不是在可能已出错的上下文中盲目重试。
+
+## 三种缓存各自负责什么
+
+| 缓存 | 保存的内容与所有者 | 命中不能证明什么 |
+| --- | --- | --- |
+| 应用图/计划缓存 | 应用保存已构建图及其选择、验收记录，见 [`fp16_cached.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_cached.cpp#L68-L81) | 当前策略仍允许、指针有效或执行最快 |
+| 后端默认内核缓存 | 后端 9.22 起提供；按 CUDA 设备序号在句柄/计划间共享已编译 CUBIN | 应用选定的计划可直接复用，或数值已经验证 |
+| 显式自定义内核缓存 | 调用者创建并附加缓存对象，可在兼容的图之间共享已编译内核 | 自动继承默认缓存的容量和 LRU 策略 |
+
+后两者是后端已编译内核缓存的不同所有权策略，不是两种“实测计划数据库”。默认容量为 100 MB，采用 LRU；`CUDNN_KERNEL_CACHE_SIZE_MB` 控制容量。`CUDNN_ENABLE_DEFAULT_KERNEL_CACHE=0` 关闭默认缓存，不会关闭显式提供的缓存。许多运行时编译引擎需要动态形状才能匹配缓存，但文档列出的 C1K1 卷积、归一化和 Tensor IR 情形也可在非动态形状下按问题结构匹配。不能把较早工具页的“仅限动态形状图”推广为所有内核缓存的规则。
+
+`graph->key()` 对包含前端/后端版本的图描述求哈希，但没有完整表达机器或策略身份。动态形状模式还会有意省略维度和步幅。官方序列化测试检查的是这些性质，不是一套通用失效服务。保守的应用策略应按精确库版本/构建标识、目标硬件、图语义、类型/形状/步幅/对齐、工作区和数值策略划分缓存并重新核验；驱动或 Toolkit 改变也要记录和复核。这是应用自己的策略，不是厂商的可移植性保证。哈希相同本身不够。
+
+## 序列化不会取消兼容性检查
+
+图结构 JSON v2 恢复的是描述，不是已选定的可执行引擎。执行序列化则用 UBJSON 保存**选中的计划**及执行元数据；`serialize_structure=false` 可以省略结构。带句柄的恢复接口重建一个计划，不会恢复原候选列表。官方 [`serialization.cpp` 示例](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/misc/serialization.cpp#L295-L306)检查了非零源索引的选中计划恢复为唯一计划、索引变为零的情况。索引不是持久的引擎身份。
+
+磁盘上的产物缓存是应用持久化机制，不会自动处理失效。官方兼容性指南要求计划序列化和反序列化使用匹配的硬件；模式不匹配也可能使产物无效。API 二进制兼容不等于序列化计划可以跨版本或跨设备移植。应优先在目标设备重新查询启发式，而不是沿用旧设备调出的配置。恢复时仍要重新绑定缓冲区、检查工作区和策略。带句柄的反序列化默认 `run_warmup=true`，因此它不一定只是 JSON 解析，也不一定没有 GPU 工作。
+
+## 分开测量冷启动、热执行与正确性
+
+先从逻辑坐标推导独立参考。对于 1x1 练习，主机参考可以读取实际存储的 FP16 值，提升类型后独立用 FP64 累加，加上正确通道的偏置，再做 ReLU，并考虑 FP16 输出舍入；不能再调用同一个 cuDNN 计划充当参考。查看结果之前，应写明绝对/相对容差、误差报告方式、有限值要求，以及独立的重复运行确定性检查。非方形尺寸和各通道不同的数据有助于暴露布局或广播错误。
+
+将来在外部环境比较时，应分开以下计时边界：
+
+- **冷启动主机/端到端成本：** 验证、转换、启发式查询、计划构建/运行时编译、分配、恢复时可能发生的预热，以及首次完成的工作。明确包含哪些步骤，哪些缓存确实处于冷状态。
+- **热执行成本：** 已经通过验收的计划、准备好的输入和实际分配，明确预热与重复次数，在执行流上放置设备事件区间，并检查完成状态。
+- **应用复用成本：** 分别报告图/计划缓存、默认或自定义内核缓存、序列化产物的命中与未命中条件。内核缓存命中不等于计划缓存命中。
+
+各候选使用相同输入和计时边界；可变状态恢复要么都在区间外，要么一致地算入区间。保留环境清单（Environment Manifest）、描述与策略、分阶段诊断、实际容量、独立参考误差和原始测量。本页没有预测耗时、摊销交叉点、选中引擎标识或实测优胜者。
+
+## 版本、硬件与少量已知问题门槛
+
+拟议软件目标是 **Native Linux、后端 9.24.0 的 CUDA 13.x 包、Linux 驱动至少 580.65.06**，前端独立固定为 1.27.0。支持矩阵为该包列出 CUDA 13.0-13.3；静态链接目标是 13.3，并非所有列出的动态兼容 Toolkit。前端 C++ 构建配置要求 CMake 至少 3.23 和 C++17。库整体的后端版本下限 8.5.0 不是每项功能的下限。这些只是兼容性提案，**不是已执行的安装**，不构成基准环境（Reference Environment），也不会自动加入任何工具包通道（Toolkit Lane）。
+
+后端 9.24.0 原生列出的计算能力（compute capability）为 `7.5, 8.0, 8.6, 8.9, 9.0, 10.0, 10.3, 12.0, 12.1`。具体操作或引擎还会加上更窄的门槛：L11 的缩放点积注意力（scaled dot-product attention，SDPA）路径[排除 SM80 之前的硬件](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L347-L369)；[C++ 开源 prefill 引擎](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/experimental/sm100_sdpa_prefill_engine.h#L36-L41)要求**恰好 SM100**，不是所有 SM10x。架构家族名称或未来更高的计算能力都不能证明支持。本页不承诺 macOS 运行，也不扩大受支持环境（Supported Environment）的范围。
+
+下面只选择 **9.24.0 自身章节**中与学习目标有关的问题，不是发布说明汇总：
+
+| 当前问题范围 | 官方给出的边界 | 审查中的处理 |
+| --- | --- | --- |
+| `NCHW_VECT_C` 张量序列化 | 序列化后的 `vectDim` 可能错误，使恢复后的最终化失败 | 避免对这种布局做序列化，不是禁止所有布局 |
+| GEMM mainloop 融合，引擎全局索引 11 | A/B 批维度不同、需要广播时可能产生错误结果 | 检查确切的融合/引擎/输入组合，不扩大到所有 GEMM 或 attention |
+| 纯逐元素操作引擎，全局索引 3 | MOD 采用 floor 而非截断；浮点转整数采用截断而非 RNE；布尔存储有差异；CONCAT 要求拼接轴长度相等 | 审查具体操作的数值和存储语义，不能只相信操作名称 |
+
+这些引擎编号标识的是**官方问题范围**，不是本站选中的引擎。较早的引擎 11 非完全紧密排列张量问题已在 9.24 修复；指定的归一化缓存误命中问题已在 9.23 修复。不要把它们写成 9.24 尚未解决的缺陷。Attention 专属问题应结合 L11 的精确输入约定阅读。可访问的 [9.25.0 页面](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.25.0/release-notes.html#cudnn-9-25-0-developer-preview)明确标为 **Developer Preview**，不是正式发布；其版本门控功能不进入这里的稳定课程（Stable Curriculum）约定。
+
+## 证据边界
+
+本学习单元及其练习（Exercise）只做静态推理。这里没有新增 CUDA 示例源码、规范可执行项目或实验（Lab），也没有执行查询、构建、内存分配、官方测试或 GPU 工作。四个证据数组全部为空。源码阅读和假设决策表不授予任何证据状态（Evidence Status），不构成运行、融合内核数量或性能主张。浏览器只展示学习材料。
+
+## 检索检查
+
+1. cuDNN 运算图、引擎配置、执行计划和 CUDA Graph 分别描述什么？
+2. 为什么张量维度正确仍可能读错字节？为什么计算类型不是输入输出存储类型？
+3. `create_execution_plans`、存在性的 `check_support` 和 `build_plans(ALL)` 分别还没有证明什么？A/B/FALLBACK 有何区别？
+4. 为什么候选能通过 8 MiB 后端上限，却违反 8 MiB 总临时空间预算？实际分配和生命周期还留下哪些责任？
+5. 为什么缓存命中、恢复成功或排除非确定性，都不能证明数值准确或热执行实测最优？
+
+## 继续练习
+
+- 先完成 [L10 的三道练习](/libraries/cudnn-graphs-and-plans/exercises/)，再阅读[独立解答](/libraries/cudnn-graphs-and-plans/solutions/)。
+- 在[练习题库（Practice Bank）PB-R4-011](/practice/#pb-r4-011)中再次区分策略、支持与构建。
+- 继续阅读相关的 [L11：Attention 后端分派](/libraries/attention-backend-dispatch/)；它不是本页新增的先修项。
+
+## 来源与许可
+
+[SRC-CUDA-071](/sources-and-versions/#src-cuda-071)记录后端 9.24.0；[SRC-CUDA-072](/sources-and-versions/#src-cuda-072)记录前端 1.27.0 及精确的逐文件审查。后端坐标包括[启发式模式](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendheurmode-t)、[数值标记](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendnumericalnote-t)、[执行计划描述符](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnn-backend-execution-plan-descriptor)和[状态/模式错误](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnstatus-t)。前端细节还参考固定提交的[形状覆盖说明](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/dynamic-kernel-cache.md)、[CMake 配置](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/CMakeLists.txt)和[受支持产品说明](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/reference/support-matrix.html)。
+
+固定版本的 `graph_interface.h`、`plans.h` 和 `test/cpp/serialize.cpp` 文件头标为 Apache-2.0。[`graph_properties.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_properties.h)、已链接的 `fp16_fwd.cpp`、`fp16_cached.cpp`、`serialization.cpp` 和 `CMakeLists.txt` 则标为 MIT。NVIDIA CORPORATION & AFFILIATES 保留版权。[LICENSING.md](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSING.md)、[Apache 许可证](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE.txt)、[MIT 许可证](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE-MIT.txt)、[NOTICE](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/NOTICE)和[第三方声明](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/THIRD_PARTY_LICENSES.txt)都是独立的归属审查输入。今后如需改编，必须按文件处理声明、适用许可证、NOTICE 和修改说明，不能只看仓库徽章。
+
+[后端 SDK EULA](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/eula.html)是另一套条款，也涵盖文档。前端的 Apache/MIT 许可不授权镜像后端二进制、手册或图示。本页正文、表格和练习是原创 CC BY 4.0 内容；没有复制或改编官方代码、测试、图示或大段文档。读过官方测试不表示它们已在这里通过。
+
+本次 Context7 检索用于发现生命周期及数值/工作区筛选资料。其摘要已对照固定版本的官方源码核验；候选发现、存在性支持检查、仅后端工作区筛选等细节以源码为准。Context7 是发现资料的辅助工具，**不是版本权威**。
+
+**事实核对和来源访问日期：2026-09-07。**

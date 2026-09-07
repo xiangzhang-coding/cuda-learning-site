@@ -1,0 +1,269 @@
+---
+title: 'L10: Separate cuDNN Graphs, Candidates, and Execution Plans'
+description: Describe tensor semantics, audit heuristic candidates against numerical and total-workspace policy, and distinguish plan reuse, kernel caching, serialization, and measured acceptance at independent cuDNN pins.
+pairId: l10
+counterpart: /libraries/cudnn-graphs-and-plans/
+factCheckDate: '2026-09-07'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, semantics, lifecycle, heuristics, policy, workspace, candidate-table, caches, serialization, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L10
+prerequisites: [A07, L01, Q05]
+relatedUnits: [L11]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
+sources:
+  - title: 'cuDNN backend 9.24.0 release notes'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html#cudnn-9-24-0'
+    version: 'Backend 9.24.0; current issues scoped to its own section'
+    platform: 'Owner release contract; no local reproduction'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN backend 9.24.0 support matrix'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/support-matrix.html'
+    version: 'Backend 9.24.0; CUDA 13.x package'
+    platform: 'Proposed Native Linux compatibility; not an executed environment'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN backend graph API'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html'
+    version: 'Backend 9.24.0'
+    platform: 'Heuristic modes, numerical notes, execution-plan descriptors, and status contracts'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN reproducibility and determinism'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/developer/misc.html#reproducibility-determinism'
+    version: 'Backend 9.24.0'
+    platform: 'Same-version and architecture boundaries; not numerical acceptance'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN frontend independent release'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/releases/tag/v1.27.0'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Release identity separate from backend 9.24.0'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN frontend graph guide'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/graph-api.html'
+    version: 'Frontend 1.27.0'
+    platform: 'Graph semantics, heuristic recommendations, and default/custom kernel caches'
+    accessDate: '2026-09-07'
+  - title: 'Pinned frontend graph interface'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'C++ lifecycle, total workspace, graph keys, and serialization'
+    accessDate: '2026-09-07'
+  - title: 'Pinned frontend plan collection'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Existential support checking, backend workspace cap, and build policy'
+    accessDate: '2026-09-07'
+  - title: 'Pinned frontend serialization tests'
+    url: 'https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/test/cpp/serialize.cpp'
+    version: 'Frontend 1.27.0; f77fbc3d21be3f24cd0286b9b368105f7c518b8a'
+    platform: 'Owner test definitions inspected, not executed'
+    accessDate: '2026-09-07'
+  - title: 'cuDNN frontend hardware forward compatibility'
+    url: 'https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/developer/forward-compatibility.html#forward-compatibility-and-the-graph-api'
+    version: 'Frontend 1.27.0'
+    platform: 'Matching-hardware serialization boundary and fresh target-device heuristics'
+    accessDate: '2026-09-07'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l10 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/cudnn-graphs-and-plans/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-07' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,semantics,lifecycle,heuristics,policy,workspace,candidate-table,caches,serialization,measurement,versions,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L10 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'A07,L01,Q05' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: L11 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '10' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: 'backend-9.24.0,frontend-1.27.0' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/cudnn-graphs-and-plans/" lang="zh-CN">阅读中文对应页</a>
+
+A convolution followed by bias and activation describes work, not its implementation. cuDNN lets an application describe that work before choosing how to execute it. The important skill is recognizing what each planning step has established, and what remains unproved.
+
+## Learning goals
+
+Allow about 35 minutes for reading, the candidate audit, and retrieval; use the separate Exercises for a deeper written review. You will distinguish mathematical intent from memory layout, reject inadmissible candidates, account for all execution scratch, and define safe reuse and validation boundaries. No installation or GPU is needed.
+
+## Prerequisites
+
+The exact ordered prerequisites are `A07, L01, Q05`: [A07: Convolution Reuse and Layout](/en/algorithms/convolution-reuse-layout/) supplies convolution coordinates; [L01: Library, Primitive, DSL, or Custom Kernel](/en/libraries/library-primitive-dsl-custom-kernel/) supplies the abstraction choice; [Q05: Timing Asynchronous GPU Work](/en/correctness/timing-asynchronous-gpu-work/) supplies completion and timing boundaries. [L11: Attention Backend Dispatch](/en/libraries/attention-backend-dispatch/) is related, **not a prerequisite**.
+
+## From individual operations to a graph
+
+The graph API arrived in cuDNN 8.0 to make operation composition and fusion more flexible. An **operation graph** is a mathematical dataflow specification, commonly a network fragment rather than the whole model. An **engine** implements a supported pattern; an **engine configuration** includes its knobs; a built **execution plan** prepares a particular configuration for execution. A graph can have zero, one, or several eligible engines. Multiple graph operations do not imply exactly one GPU kernel.
+
+This is not a **CUDA Graph**, which represents CUDA work and dependencies for launch/replay. A cuDNN graph describes tensor computation before engine selection. CUDA Graph integration is another interface, not what `build_operation_graph` constructs, and capture/replay cannot replace semantic or numerical validation.
+
+We independently pin **backend 9.24.0** and **frontend 1.27.0**, commit `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`. The frontend release recommends this pairing; that does not make all features in its source available on backend 9.24.0. Backend package build/hash identity has not been established here.
+
+## Describe operations, tensors, and bytes
+
+For `Y = ReLU(Conv(X,W) + bias)`, record convolution versus cross-correlation, padding, spatial stride, dilation, groups, bias broadcast axes, activation, and output type. Tensor **dimensions** name logical coordinates; tensor **strides**, in elements, map those coordinates to addresses. Neither changing a layout label nor changing strides moves bytes.
+
+For example, logical `X:[N,C,H,W]=[1,2,2,3]` with strides `[12,1,6,2]` is channel-fast storage. `X[0,1,0,2]` has element offset `0*12+1*1+0*6+2*2=5`, or byte offset 10 for FP16. Packed NCHW strides `[12,6,3,1]` would instead give element offset 8. Equal shapes can therefore describe different operands.
+
+Keep I/O storage type, intermediate tensor type, and operation compute type separate. FP16 I/O with FP32 intermediates/compute is a requested numerical contract, not permission to pass FP32 buffers under FP16 descriptors. A **virtual tensor** is an internal graph edge, not a caller-bound output or proof of zero scratch. Mark observable outputs appropriately. At execution, bind current buffers to tensor UIDs, proving extent, alignment, device, aliasing, and lifetime independently of descriptor validation. The Exercises use a small 1x1 cross-correlation description; they do not assert that a supporting engine exists for that complete combination.
+
+## Read the lifecycle literally
+
+The pinned C++ convenience `build` follows this order in [`graph_interface.h`, lines 3014-3029](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_interface.h#L3014-L3029):
+
+| Stage | What it establishes | What it does not establish |
+| --- | --- | --- |
+| `validate` | Frontend graph consistency under its validation rules | Backend support or correct buffers |
+| `build_operation_graph` | Lowering into backend tensors and operations, including composite-node expansion | A chosen executable implementation |
+| `create_execution_plans` | Heuristic engine-configuration discovery and property queries | Despite the name, completed plan builds |
+| Apply application filters | Permitted numerical/behavior properties and backend workspace cap | Allocation or numerical correctness |
+| `check_support` | At least one acceptable configuration, if successful | Support for every candidate or guaranteed later build success |
+| `build_plans` | Successful plan construction under the build policy | GPU completion, accuracy, or a measured winner |
+
+Use the staged interface when filters must be inserted before support/build, rather than treating the convenience call as policy configuration. Check every status and keep stage-specific diagnostics. At this pin, with both compiled and loaded backend at least 9.2, [`plans.h`, lines 517-598](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/plans.h#L517-L598) checks configuration properties and stops at the first acceptable one. Older branches can build during support checking. **`check_support` is existential**, not a complete per-candidate report.
+
+Default `HEURISTICS_CHOICE` builds in list order until the first successful build. `ALL` continues attempting candidates; it does not benchmark them. This implementation rejects multithreaded plan builds. A support check can succeed and a subsequent build still fail.
+
+## Heuristics recommend; they do not measure
+
+| Mode | Intended tradeoff | Reading the result |
+| --- | --- | --- |
+| A | Low CPU query latency, coverage of common graph patterns | Estimated ranking, not elapsed time |
+| B | More generally accurate recommendations with higher CPU query overhead; may fall back to A | Neither universally better nor guaranteed faster execution |
+| FALLBACK | Functional alternatives without an optimal-performance expectation | Another search, not a guaranteed implementation |
+
+The old `INSTANT` name is A-equivalent and considered deprecated. Do not turn narrowly scoped backend implementation descriptions into rules for every graph/GPU. C++ `OPENSOURCE` discovery and Python engine routing are additional surfaces, not implicit behavior of A/B/FALLBACK; L11 examines dispatch separately.
+
+## Numerical policy is not numerical acceptance
+
+After discovery, select or deselect numerical/behavior notes before support/build. Relevant numerical notes include `NONDETERMINISTIC`, `DOWN_CONVERT_INPUTS`, `REDUCED_PRECISION_REDUCTION`, and `TENSOR_CORE`. State which are permitted. Tensor Core use is not synonymous with nondeterminism; an application can exclude nondeterminism without excluding every Tensor Core implementation.
+
+**Determinism** asks whether repeated computations reproduce results under stated conditions. **Accuracy** asks how those results compare with an independent reference. Filtering `NONDETERMINISTIC` proves neither equality to FP32 arithmetic nor bitwise agreement across plans, library versions, or architectures. The backend reproducibility contract has routine-specific exceptions and no cross-architecture bitwise guarantee. Specify tolerances and handling of nonfinite values separately.
+
+## Budget, allocation, and lifetime are different obligations
+
+`deselect_workspace_greater_than` forwards a cap to the backend plan collection; it allocates nothing. At this pin its comparison covers **backend workspace**, while the checked frontend size query reports **backend plan workspace + frontend node workspace**. For a hard execution-scratch budget, require `total_required <= budget` and `total_required <= actual_capacity`. Inputs, outputs, cached CUBINs, and other allocations require separate memory headroom; this is not a total GPU-memory cap.
+
+Use the error-returning `get_workspace_size` overload for the plan to execute. The integer convenience overload can log a failure and return its initialized value; zero is not safe evidence that a failed query needs no memory. Allocate real device storage, check allocation success, bind its pointer, and keep it and all required tensors alive until completion. Unordered concurrent executions cannot write the same scratch region. The owner [`fp16_fwd.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_fwd.cpp#L172-L178) illustrates ownership, not a run performed here.
+
+For shape overrides, query workspace using actual override UIDs, shapes, and strides **before allocation**, not the cache shape's size. The pinned runtime shape-workspace query is gated on backend 9.23.0. Shape override support still depends on the complete graph and engine; this unit keeps its worked problem fixed-shape.
+
+## Audit a hypothetical candidate list
+
+This is an **original teaching input, not real engine-query output**. Labels C0-C4 are local worksheet labels, not engine identifiers. Assume an 8 MiB execution-scratch budget, an 8 MiB backend filter, exclusion of `NONDETERMINISTIC`, and an existing 6 MiB allocation. The same graph contributes 2 MiB of frontend scratch. `1 MiB = 1,048,576 bytes`.
+
+| Candidate | Backend MiB | Frontend MiB | Total MiB | Stipulated property or outcome | Decision |
+| --- | --- | --- | --- | --- | --- |
+| C0 | 2 | 2 | 4 | `NONDETERMINISTIC` | Exclude by numerical policy |
+| C1 | 9 | 2 | 11 | No excluded numerical note | Exclude by backend cap; also over total budget |
+| C2 | 7 | 2 | 9 | No excluded numerical note | Backend cap passes, total budget fails |
+| C3 | 4 | 2 | 6 | No excluded numerical note; hypothetical support acceptance, then build failure | Retain build diagnostic; no executable plan from this attempt |
+| C4 | 5 | 2 | 7 | No excluded numerical note; support/build not yet attempted | Fits budget, exceeds allocation; only a candidate for further investigation |
+
+The supplied sizes and failure are facts **of the exercise**, not values promised to be available from discovery or a full report returned by `check_support`. In an implementation, obtain successful size/status queries at the appropriate stages. C4 is **not an observed success**: a legal allocation of at least 7 MiB, support/build, completion, and numerical acceptance remain unestablished. Neither its position nor its smaller scratch than C2 predicts speed.
+
+If no candidates remain, retain the description and reasons, then try FALLBACK under the same policy, a separately validated decomposition preserving operation order/types, or an explicit unsupported result. Do not silently drop bias, change precision, or relax determinism. A build failure is not a device execution failure: after execution/synchronization errors, stop and diagnose rather than blindly retrying in a potentially failed context.
+
+## Three caches with different responsibilities
+
+| Cache | Stored state and ownership | What a hit does not prove |
+| --- | --- | --- |
+| Application graph/plan cache | Application retains a built graph and its selection/acceptance record, as in [`fp16_cached.cpp`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/sdpa/fp16_cached.cpp#L68-L81) | Current policy eligibility, pointer validity, or fastest execution |
+| Default backend kernel cache | Since backend 9.22; compiled CUBINs shared by handles/plans per CUDA device ordinal | Reuse of the application's chosen plan or numerical validation |
+| Explicit custom kernel cache | Caller creates/attaches a kernel-cache object, potentially sharing compiled kernels across compatible graphs | Automatic inheritance of default-cache capacity/LRU policy |
+
+The last two are alternative ownership policies for backend compiled-kernel caching, not two kinds of measured plan database. The default is 100 MB with LRU; `CUDNN_KERNEL_CACHE_SIZE_MB` controls its bound. `CUDNN_ENABLE_DEFAULT_KERNEL_CACHE=0` disables the default, not an explicitly provided cache. Many runtime-compilation engines need dynamic shapes for cache matching, but documented C1K1 convolution, normalization, and Tensor IR cases can use problem-structure keys without them. Do not generalize the older utility page's “only dynamic shape graphs” sentence to all kernel caching.
+
+`graph->key()` hashes a graph description including frontend/backend versions, but is not a complete machine or policy identity. Dynamic-shape mode intentionally omits dimensions/strides. The owner serialization tests check these properties, not a universal invalidation service. Conservatively namespace/revalidate application entries by exact library/build identities, target hardware, graph semantics, dtype/shape/stride/alignment, workspace and numerical policy. Record driver/Toolkit changes and re-review. This is an application policy, not a vendor portability guarantee. A matching hash alone is insufficient.
+
+## Serialization does not remove compatibility checks
+
+Graph-structure JSON v2 reconstructs a description, not a selected executable engine. Execution serialization instead stores the **selected plan** and execution metadata in UBJSON; `serialize_structure=false` can omit structure. Handle-based restore rebuilds one plan, not the original candidate list. The [`serialization.cpp` sample](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/samples/cpp/misc/serialization.cpp#L295-L306) checks a nonzero selected source index becoming the sole restored plan at index zero. An index is not persistent engine identity.
+
+A disk artifact cache is application persistence, not automatic invalidation. The owner compatibility guide requires matching hardware for plan serialization/deserialization; schema mismatch can invalidate an artifact. Binary API compatibility does not promise cross-version or cross-device plan portability. Prefer fresh target-device heuristics rather than carrying an old-device tuned choice forward. Rebind buffers and recheck workspace/policy on restore. Handle-based deserialize defaults `run_warmup=true`, so it is not necessarily pure JSON parsing or free of GPU work.
+
+## Measure cold cost, warm cost, and correctness separately
+
+First derive an independent reference from logical coordinates. For the 1x1 exercise, a host reference can promote the actual stored FP16 values, accumulate independently in FP64, add the correct channel bias, apply ReLU, and account for FP16 output rounding. It is not a second call through the same cuDNN plan. Before looking at results, state absolute/relative tolerances, error reporting, finite-value requirements, and the separate repeated-run determinism check. Include non-square shapes and distinct channel data to expose layout/broadcast mistakes.
+
+For a future external comparison, separate these timing boundaries:
+
+- **Cold host/end-to-end:** validation, lowering, heuristics, plan build/runtime compilation, allocation, any restore warmup, and first completed work. State which are included and which caches were actually cold.
+- **Warm execution:** accepted plan, prepared inputs and allocation, explicit warmup and repetitions, device-event interval on the execution stream with completion checked.
+- **Application reuse:** report graph/plan, default/custom kernel-cache, and serialized-artifact hit/miss conditions independently. A kernel-cache hit does not mean a plan-cache hit.
+
+Use identical inputs and timing boundaries across candidates, restoring mutable state outside or consistently inside the interval. Retain an Environment Manifest, descriptions/policies, stage diagnostics, actual capacities, independent-reference errors, and raw measurements. There are no predicted timings, crossover counts, chosen engine identifiers, or measured winners here.
+
+## Version, hardware, and bounded issue gates
+
+The proposed software target is **Native Linux, backend 9.24.0 CUDA 13.x package, Linux driver at least 580.65.06**, with independently pinned frontend 1.27.0. The matrix lists CUDA 13.0-13.3 for that package; its static-link target is 13.3, not every listed dynamic-compatible Toolkit. Frontend C++ build configuration specifies CMake at least 3.23 and C++17. The library-wide backend floor of 8.5.0 is not every feature's floor. These are compatibility proposals, **not executed setup**, a Reference Environment, or automatic inclusion in any Toolkit Lane.
+
+Backend 9.24.0 natively lists compute capabilities `7.5, 8.0, 8.6, 8.9, 9.0, 10.0, 10.3, 12.0, 12.1`. An operation/engine adds narrower gates: L11's scaled dot-product attention (SDPA) path [excludes pre-SM80 hardware](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/node/sdpa_support_surface.h#L347-L369), and the [C++ open-source prefill engine](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/experimental/sm100_sdpa_prefill_engine.h#L36-L41) checks **SM100 exactly**, not all SM10x. Neither a family name nor a future higher capability proves support. No macOS runtime or broader Supported Environment is claimed.
+
+The following are narrowly selected **9.24.0-section** issues, not a release-note inventory:
+
+| Current scope | Owner-stated boundary | Review consequence |
+| --- | --- | --- |
+| `NCHW_VECT_C` tensor serialization | Incorrect serialized `vectDim` can prevent finalization on restore | Avoid serialization for that layout, not all layouts |
+| GEMM mainloop fusion, engine global index 11 | Mismatched A/B batch dimensions requiring broadcasting may yield incorrect results | Check the exact fusion/engine/input contract, not all GEMM or attention |
+| Pointwise-only engine global index 3 | MOD uses floor rather than truncation; floating-to-integer conversion truncates rather than RNE; Boolean storage differs; CONCAT requires equal concatenation-axis extents | Audit operation-specific numerical/storage semantics rather than trusting an operator name |
+
+Those engine numbers identify **owner issue scopes**, not engines selected here. The older engine-11 non-fully-packed-tensor issue is fixed in 9.24; specified normalization cache false hits are fixed in 9.23. Do not report them as unresolved 9.24 defects. Attention-specific issues belong with L11's exact input contract. The available [9.25.0 page](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.25.0/release-notes.html#cudnn-9-25-0-developer-preview) is explicitly **Developer Preview**, not GA; its gated features do not enter this Stable Curriculum contract.
+
+## Evidence boundary
+
+This Learning Unit and its Exercises are static reasoning. There are no CUDA samples, canonical executables, or Labs added here; no query, build, allocation, owner test, or GPU execution was performed. All four evidence arrays are empty. Source inspection and a hypothetical decision table grant no Evidence Status and no runtime, fusion-count, or performance claim. The browser only presents learning material.
+
+## Retrieval check
+
+1. How do a cuDNN operation graph, an engine configuration, an execution plan, and a CUDA Graph differ?
+2. Why can correct tensor dimensions still read the wrong bytes? Why is compute type not I/O storage type?
+3. What do `create_execution_plans`, existential `check_support`, and `build_plans(ALL)` leave unproved? How do A/B/FALLBACK differ?
+4. Why can a candidate pass an 8 MiB backend cap yet violate an 8 MiB total-scratch budget? Which allocation and lifetime obligations remain?
+5. Why do a cache hit, successful restore, or nondeterminism exclusion establish neither numerical accuracy nor a warm measured winner?
+
+## Continue with practice
+
+- Complete the [three L10 Exercises](/en/libraries/cudnn-graphs-and-plans/exercises/) before the [separate solutions](/en/libraries/cudnn-graphs-and-plans/solutions/).
+- Use [PB-R4-011](/en/practice/#pb-r4-011) to repeat the policy/support/build distinction.
+- Continue to related [L11: Attention Backend Dispatch](/en/libraries/attention-backend-dispatch/); it adds no prerequisite to this page.
+
+## Sources and licensing
+
+[SRC-CUDA-071](/en/sources-and-versions/#src-cuda-071) records backend 9.24.0; [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072) records frontend 1.27.0 and the exact per-file review. Backend coordinates include [heuristics](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendheurmode-t), [numerical notes](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnbackendnumericalnote-t), [execution-plan descriptors](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnn-backend-execution-plan-descriptor), and [status/schema errors](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/api/cudnn-graph-library.html#cudnnstatus-t). Frontend details also come from pinned [shape-override guidance](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/docs/dynamic-kernel-cache.md), [CMake configuration](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/CMakeLists.txt), and [Supported Products](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/reference/support-matrix.html).
+
+The pinned `graph_interface.h`, `plans.h`, and `test/cpp/serialize.cpp` have Apache-2.0 headers. [`graph_properties.h`](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/include/cudnn_frontend/graph_properties.h), the linked `fp16_fwd.cpp`, `fp16_cached.cpp`, `serialization.cpp`, and `CMakeLists.txt` have MIT headers. NVIDIA CORPORATION & AFFILIATES retains copyright. [LICENSING.md](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSING.md), [Apache license](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE.txt), [MIT license](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE-MIT.txt), [NOTICE](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/NOTICE), and [third-party notices](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/THIRD_PARTY_LICENSES.txt) are separate attribution inputs. Future adaptations require per-file notices, applicable license/NOTICE handling, and change notices, not a repository-badge assumption.
+
+The [backend SDK EULA](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/reference/eula.html) is a different regime, including documentation. Frontend Apache/MIT permissions do not authorize mirroring backend binaries, manuals, or diagrams. This page's prose, tables, and Exercises are original CC BY 4.0 material; owner code, tests, figures, and substantial documentation were not copied or adapted. Reading owner tests does not establish that they passed here.
+
+Current Context7 discovery covered lifecycle and numerical/workspace filters. Its summaries were checked against exact pinned owner source, which takes precedence for candidate discovery, existential support, and backend-only workspace filtering. Context7 is a discovery aid, **not version authority**.
+
+**Facts checked and sources accessed: 2026-09-07.**
