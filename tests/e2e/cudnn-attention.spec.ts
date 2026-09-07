@@ -203,6 +203,8 @@ for (const locale of ['', 'en/']) {
       await page.locator(`main a[href="${practiceRoute}"]`).first().click();
       await expect(page).toHaveURL(`${baseURL}${practiceRoute}`);
       await page.waitForLoadState('networkidle');
+      // WebKit can report network idle before parsing the Practice Bank's final anchors.
+      await page.waitForLoadState('domcontentloaded');
       await expect(page.locator(`[id="${unit.practice.toLowerCase()}"]`)).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^${unit.practice}[:\\uff1a]`) })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
