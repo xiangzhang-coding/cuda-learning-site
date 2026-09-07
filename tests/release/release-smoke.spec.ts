@@ -467,8 +467,8 @@ test('serves the exact R3 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(/263.*Publication Pairs/);
-    await expect(page.locator('main')).toContainText(/526.*source routes/);
+    await expect(page.locator('main')).toContainText(prefix ? '263 Publication Pairs' : '263 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '526 source routes' : '526 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
