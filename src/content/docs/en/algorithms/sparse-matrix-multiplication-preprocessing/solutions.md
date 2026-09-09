@@ -88,4 +88,4 @@ The sequence is: freeze representation and call-level operation, compute type, a
 - Claim old preprocessing data remains active after changing indices or the active buffer.
 - Turn an owner performance note, static arithmetic, or repetition count into observed speedup or determinism.
 
-Review date: **2026-09-04**. All four evidence arrays remain empty; L13 and EX20 remain unpublished.
+Review date: **2026-09-04**. All four evidence arrays remain empty. Optional onward links updated 2026-09-09: the now-published [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) requires `[A12,A13,L01]`, and [EX20](/en/examples/cusparse-spmv/) requires `[L13]`. This navigation update does not re-review the solution's API facts or grant evidence. EX20 retains empty compilation and recorded observations and Pending Hardware Verification runtime; its SpMV example is not an SpMM performance result.

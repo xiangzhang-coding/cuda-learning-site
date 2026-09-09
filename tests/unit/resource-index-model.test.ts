@@ -37,19 +37,35 @@ describe('resource index catalog', () => {
       },
       prerequisites: ['L12'],
     });
-    expect(PUBLISHED_DESTINATIONS.L13).toBeUndefined();
+  });
+
+  it('publishes cuSPARSE with exact direct prerequisites and bilingual destinations', () => {
+    expect(PUBLISHED_DESTINATIONS.L13).toMatchObject({
+      href: {
+        'zh-CN': '/libraries/cusparse-descriptors-spmv-spmm/',
+        en: '/en/libraries/cusparse-descriptors-spmv-spmm/',
+      },
+      prerequisites: ['A12', 'A13', 'L01'],
+    });
+    expect(PUBLISHED_DESTINATIONS.EX20).toMatchObject({
+      href: {
+        'zh-CN': '/examples/cusparse-spmv/',
+        en: '/en/examples/cusparse-spmv/',
+      },
+      prerequisites: ['L13'],
+    });
   });
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(395);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(401);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 12, practice: 80, visuals: 19, glossary: 194, sources: 90 });
-    for (const absentId of ['L13', 'LAB13']) {
+    ).toEqual({ labs: 12, practice: 82, visuals: 19, glossary: 196, sources: 92 });
+    for (const absentId of ['LAB13']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -245,6 +261,7 @@ describe('resource index catalog', () => {
       'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006', 'PB-R4-007', 'PB-R4-008',
       'PB-R4-009', 'PB-R4-010', 'PB-R4-011', 'PB-R4-012',
       'PB-R4-013', 'PB-R4-014',
+      'PB-R4-015', 'PB-R4-016',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
@@ -360,6 +377,32 @@ describe('resource index catalog', () => {
       expect(versions).toContain(coordinate);
     }
     expect(versions).toMatch(/known.*LTO.*hazard/i);
+  });
+
+  it('projects exactly six fresh cuSPARSE records with explicit relationships and no invented evidence', () => {
+    const expected = [
+      { planningId: 'PB-R4-015', group: 'practice', prerequisites: ['L13'], relatedUnits: ['A12', 'L13', 'EX20'] },
+      { planningId: 'PB-R4-016', group: 'practice', prerequisites: ['L13'], relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'] },
+      { planningId: 'TERM-195', group: 'glossary', prerequisites: [], relatedUnits: ['A12', 'A13', 'L13', 'EX20'] },
+      { planningId: 'TERM-196', group: 'glossary', prerequisites: [], relatedUnits: ['A13', 'L13', 'EX20'] },
+      { planningId: 'SRC-CUDA-075', group: 'sources', prerequisites: [], relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'] },
+      { planningId: 'SRC-CUDA-076', group: 'sources', prerequisites: [], relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'] },
+    ] as const;
+    expect(RESOURCE_INDEX_RECORDS.filter(({ reviewedOn, relatedUnits }) => reviewedOn === '2026-09-09' && relatedUnits.includes('L13'))
+      .map(({ planningId }) => planningId)).toEqual(expected.map(({ planningId }) => planningId));
+    for (const item of expected) {
+      const record = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === item.planningId);
+      expect(record, item.planningId).toMatchObject(item);
+      expect(record?.evidence).toBeUndefined();
+      for (const locale of ['zh-CN', 'en'] as const) {
+        const projected = projectResourceIndex(RESOURCE_INDEX_RECORDS, item.group, locale, { asOf })
+          .find(({ planningId }) => planningId === item.planningId);
+        expect(projected?.prerequisites.map(({ id }) => id)).toEqual(item.prerequisites);
+        expect(projected?.relatedUnits.map(({ id }) => id)).toEqual(item.relatedUnits);
+        expect(projected?.href).toBe(`${locale === 'en' ? '/en' : ''}/${item.group === 'sources' ? 'sources-and-versions' : item.group}/#${item.planningId.toLowerCase()}`);
+      }
+      if (item.group === 'sources') expect(record?.sourceAccessDate).toBe('2026-09-09');
+    }
   });
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
@@ -721,7 +764,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(219);
+    expect(projected).toHaveLength(221);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

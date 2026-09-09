@@ -1,9 +1,9 @@
 ---
 title: Practice Bank
-description: 80 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 82 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-09-08'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -89,6 +89,8 @@ structure:
   - entry-pb-r4-012
   - entry-pb-r4-013
   - entry-pb-r4-014
+  - entry-pb-r4-015
+  - entry-pb-r4-016
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -166,6 +168,7 @@ prerequisites:
   - L10
   - L11
   - L12
+  - L13
 relatedUnits:
   - O02
   - O03
@@ -240,10 +243,12 @@ relatedUnits:
   - L10
   - L11
   - L12
+  - L13
   - EX15
   - EX17
   - EX18
   - EX19
+  - EX20
   - LAB06
   - LAB08
   - LAB09
@@ -265,19 +270,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-08' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,EX15,EX17,EX18,EX19,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -296,13 +301,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 80 complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 82 complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 80 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 82 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
@@ -3648,6 +3653,99 @@ The separate cost model yields `4+12+2+19*0.5=27.5 ms` for 20 requests and `27.5
 
 **Source date:** 2026-09-08.
 
+<span id="pb-r4-015" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-015: Audit CSR descriptors, index base, and ownership
+
+- **ID and Publication Pair:** PB-R4-015 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness debugging; advanced.
+- **Direct prerequisite:** [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), exactly `[L13]`.
+- **Hardware gate:** None; static descriptor and arithmetic review without CUDA execution. EX20 retains independent Pending Hardware Verification runtime.
+- **Version gate:** Exact Toolkit 12.9.2 Generic API baseline; ordinary FP32 NON_TRANSPOSE SpMV with `CUSPARSE_SPMV_CSR_ALG2`, not a cross-device determinism promise.
+- **Related Learning Units and resources:** [A12](/en/algorithms/sparse-formats-spmv/), [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), and [EX20](/en/examples/cusparse-spmv/).
+- **Last reviewed:** 2026-09-09.
+
+**Prompt:** A proposed `4x5` CSR matrix has six stored entries: offsets `[1,3,3,5,7]`, columns `[1,5,2,4,1,3]`, and values `[2,-1,3,4,-2,5]`. The two index arrays use signed 32-bit elements and values use FP32. An author selects ZERO base and 64-bit index types, gives X length 4 and Y length 5, and passes ordinary host arrays because the handle uses HOST pointer mode. They claim descriptor construction copies the data and fixes any duplicate coordinates. Compute the intended `y=2*A*x-y0` for `x=[1,2,3,4,5]`, `y0=[1,2,3,4]`, then repair the proposal.
+
+**Goal:** Produce a descriptor/call ledger, an independent mathematical reference, and an ownership sequence that rejects the invalid proposal before submission.
+
+**Constraints:** Preserve the intended matrix and its empty second row. Choose either consistent one-based arrays or an explicit conversion of both index arrays to zero base. Do not reinterpret 32-bit bytes as 64-bit elements. Use device storage for the sparse arrays and dense vectors; HOST mode applies to alpha/beta. No CUDA call, workspace query, or bitwise result has occurred.
+
+**Expected evidence:** Repaired index arrays/types/base and vector lengths; CSR payload and total data bytes excluding workspace; four output values; lifetime and duplicate-input rejection rules.
+
+**Acceptance criteria:** X has length 5, Y length 4, both FP32. CSR payload is 68 bytes and CSR plus X/Y is 104 bytes, excluding descriptors, padding, and workspace. Derive `A*x=[-3,0,22,13]` and `y=[-7,-2,41,22]`. Reject duplicate correctness guarantees and cross-CPU/GPU/version bitwise claims; retain caller-owned buffers through completion.
+
+<details><summary>Hint 1: Check endpoints before multiplication</summary>For base b, offsets start at b and end at `nnz+b`. Equal adjacent offsets mean an empty row. The enum must match the actual element width, not the host machine's pointer width.</details>
+
+<details><summary>Hint 2: Separate metadata from allocation</summary>A descriptor records pointers. HOST pointer mode does not move matrix or vector storage to the host, and a successful asynchronous host return does not establish device completion.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** Keep the arrays with `CUSPARSE_INDEX_BASE_ONE` and `CUSPARSE_INDEX_32I` for both index arrays, or subtract one from both to obtain offsets `[0,2,2,4,6]` and columns `[0,4,1,3,0,2]` with ZERO base. Offsets have length 5, are monotonic, and end at `nnz+base`; each column lies in the declared range. Row 1 is empty. Values and X/Y use `CUDA_R_32F`; the call separately chooses NON_TRANSPOSE, FP32 compute, alpha=2, beta=-1, and `CUSPARSE_SPMV_CSR_ALG2`.
+
+CSR data uses `5*4+6*4+6*4=68` bytes; X/Y add `(5+4)*4=36`, giving 104 bytes of problem data, not total device memory or queried workspace. Row products are `2*1-1*5=-3`, 0, `3*2+4*4=22`, and `-2*1+5*3=13`. Applying alpha/beta gives `[-7,-2,41,22]`; beta makes the empty row's output -2 rather than zero. These are exact paper results, not GPU outputs.
+
+Validate arrays and reject duplicate coordinates under this exercise's input policy before creating descriptors; cuSPARSE offers no blanket correctness guarantee for duplicates and construction is not a sanitizer. Allocate/copy device data, create Generic descriptors with matching types and lengths, bind the stream and scalar mode, query the exact call's workspace bytes, allocate if needed, submit with checked statuses, and observe completion before reading results or releasing resources. Destroy descriptors and free caller storage separately, including on failure after submission. A real run would compare against an independently implemented reference and declared tolerance. The selected NON_TRANSPOSE CSR_ALG2 contract is bounded run-to-run determinism under fixed conditions, not equality with a CPU reduction, other GPUs, or another library version.
+
+**Valid alternatives and common errors:** Either index base is valid with consistently converted arrays. Wider indices need newly represented arrays and a new payload ledger. Do not change only offsets, treat `nnz` as matrix dimensions, erase beta for an empty row, or infer an observed workspace size from 104 bytes.
+
+</details>
+
+**Source basis:** Original arrays, erroneous descriptor proposal, arithmetic, and solution; [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), [TERM-195](/en/glossary/#term-195), and [SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075). No owner sample, header, question, or output is copied or executed.
+
+**Source date:** 2026-09-09.
+
+<span id="pb-r4-016" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-016: Audit format choice and active preprocessing buffer lifetime
+
+- **ID and Publication Pair:** PB-R4-016 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), exactly `[L13]`.
+- **Hardware gate:** None; hypothetical format and lifecycle review. Future EX20 execution needs native Linux and CC 7.5+; structured sparsity and narrow precision remain separately gated.
+- **Version gate:** Toolkit 12.9.2 baseline with exact 11.8.0/13.3.1 comparisons; SpMV and SpMM preprocessing have different introduction and algorithm contracts.
+- **Related Learning Units and resources:** [A12](/en/algorithms/sparse-formats-spmv/), [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/), [L01](/en/libraries/library-primitive-dsl-custom-kernel/), [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), and [EX20](/en/examples/cusparse-spmv/).
+- **Last reviewed:** 2026-09-09.
+
+**Prompt:** A hypothetical service reuses PB-R4-015's `4x5`, six-entry pattern for SpMV and separately for SpMM with three dense right-hand sides. It declares CSR fastest from payload alone. On Toolkit 11.8 it plans to call `cusparseSpMV_preprocess`. On 12.9.2 it preprocesses descriptor D with buffer P, later preprocesses the same D with Q, then treats both as active for concurrent requests. It overwrites P as unrelated scratch, edits an index, and frees Q on host return. Its SpMM branch selects `CUSPARSE_SPMM_CSR_ALG2` and assumes preprocessing accelerates it. Finally, it calls ordinary CSR a cuSPARSELt structured Tensor Core input. Audit each claim; no request has run.
+
+**Goal:** Build a representation ledger, a valid active-buffer lifecycle, a permitted-change table, and a version/algorithm rejection list without selecting a performance winner.
+
+**Constraints:** FP32 values and 32-bit indices each occupy four bytes. Dense matrices are ordinary contiguous row-major with NON_TRANSPOSE operations. Buffer capacities are deliberately unspecified: derive no workspace size from `nnz`. Separate SpMV's X/Y from SpMM's B/C, and do not treat one operation's preprocessing as the other's state.
+
+**Expected evidence:** Dense/COO/CSR payloads, B/C shape and leading dimensions, six lifecycle verdicts, and allowed-versus-invalidating changes for the 12.9.2 SpMV path.
+
+**Acceptance criteria:** Dense/COO/CSR payloads are `80/72/68` bytes, not a speed ranking. B is `5x3`, C is `4x3`, both `ld=3`. Reject SpMV preprocessing on 11.8, the two-active-buffer claim, index edits without renewed preparation, early release, the SpMM ALG2 acceleration claim, and arbitrary-CSR structured-sparsity eligibility.
+
+<details><summary>Hint 1: Compare the complete workload</summary>COO pays for two indices per entry; CSR pays for one plus row offsets. Small payload differences cannot predict irregular loads, conversion, preprocessing, repeated execution, or dense GEMM time.</details>
+
+<details><summary>Hint 2: An allocation is not active state</summary>Preprocessing D with Q makes P inactive for D. Legal value changes differ from index/configuration changes; no permitted change authorizes racing with in-flight work.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** Dense A uses `4*5*4=80` bytes, COO `6*(4+4+4)=72`, and CSR `5*4+6*(4+4)=68`. These exclude vectors, descriptors, workspace, conversion, and physical traffic. SpMM needs B `5x3` and C `4x3`, each with row-major `ld=3`; last logical offsets are 14 and 11. BSR additionally requires a declared block shape, block occupancy/padding, and exact operation support; a format name or stored-entry count cannot establish a winner against CSR, COO, or matched dense GEMM.
+
+| Proposed action | Repaired contract |
+| --- | --- |
+| Call SpMV preprocessing on 11.8 | Reject the unavailable symbol; use supported SpMV without preprocessing. `cusparseSpMV_preprocess` starts at 12.4 and remains optional. |
+| Keep P and Q active on D | Only Q is active after the second preprocessing. Settle prior work before reconfiguration. For independent prepared states, use separate descriptors and separately owned buffers; shared unchanged matrix arrays do not make writable workspace shareable. |
+| Overwrite scratch or edit an index | Active-buffer contents and matrix indices must remain unchanged. An inactive P may be repurposed only after its last use completes. Index or configuration changes require revalidation and renewed preparation if acceleration is desired. |
+| Free Q after host return | Preserve the active buffer and referenced data until the relevant stream work completes; check completion and clean up safely on success or failure. |
+| Accelerate SpMM CSR_ALG2 by preprocessing | `cusparseSpMM_preprocess` exists in 11.8 and helps CSR_ALG1/ALG3, not CSR_ALG2. Do not transfer SpMV's algorithm enums or introduction date to SpMM. |
+| Treat arbitrary CSR as cuSPARSELt input | Reject. The independent cuSPARSELt reference needs supported structured patterns, pruning/checking and compression, types, layouts, device, and version gates; density alone supplies none of them. |
+
+For 12.9.2 SpMV active-state reuse, the documented exceptions permit changed alpha/beta, X/Y, and matrix values while preserving matrix indices, active-buffer contents, and the remaining configuration. Preserve compatible dimensions/types and order updates after earlier reads/writes; these exceptions are not permission for races. Changing operation, compute type, algorithm, or structure requires a fresh contract check and appropriate size query/preprocessing. Query workspace for each exact call and keep returned bytes separate from observed runtime cost. A supported no-preprocess path is valid and carries no implied performance penalty here.
+
+**Valid alternatives and common errors:** Serialize requests with explicit completion edges, or use independent prepared descriptors/buffers with safe data ownership. A future comparison must include representation/conversion, preparation amortization, workspace, correctness, and scoped repeated timing. Do not infer a sparse winner, structured Tensor Core execution, or EX20 runtime evidence from this static review.
+
+</details>
+
+**Source basis:** Original service proposal, payload ledger, and solution; [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), [TERM-196](/en/glossary/#term-196), [SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075), and [SRC-CUDA-076](/en/sources-and-versions/#src-cuda-076). No upstream question, code, figure, or benchmark is copied or executed.
+
+**Source date:** 2026-09-09.
+
 ## Review record
 
-Existing entries retain their item-level records. Issue #32's immutable **2026-09-04** R3 review fixes 66 entries and the exact ten-entry Nsight report-analysis inventory. PB-R4-001 through PB-R4-012 retain their dates. PB-R4-013/014 bring the complete current Publication Pair to **80** entries; their metadata, links, two initially closed hints each, and separate expandable solutions were reviewed on **2026-09-08**. These original layout and lifecycle/startup audits each directly require exactly `[L12]`. The rolling library path covers L01-L12; only L13 remains unpublished, and R4 aggregate acceptance remains pending. No upstream questions, code, prose, tables, figures, or results are copied or adapted. Hypothetical planning facts and worked arithmetic are not GPU observations and add no compilation, runtime, traffic, timing, dtype result, speedup, winner, or Evidence Status.
+Existing entries retain their item-level records. Issue #32's immutable **2026-09-04** R3 review fixes 66 entries and the exact ten-entry Nsight report-analysis inventory. PB-R4-001 through PB-R4-014 retain their dates. PB-R4-015/016 bring the complete current Publication Pair to **82** entries; their metadata, links, two initially closed hints each, and separate expandable solutions were reviewed on **2026-09-09**. These original descriptor and format/preprocessing lifecycle audits each directly require exactly `[L13]`. The rolling library path covers L01-L13; R4 aggregate acceptance remains pending. No upstream questions, code, prose, tables, figures, or results are copied or adapted. All four evidence arrays remain empty. Hypothetical proposals and paper arithmetic supply no queried workspace, determinism outcome, GPU output, or performance winner; EX20 retains independent Pending Hardware Verification runtime.

@@ -1,6 +1,6 @@
 ---
 title: Sources and Version Record
-description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L12, LAB01-LAB12, EX01-EX19, visuals, and practice resources.
+description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, LAB01-LAB12, EX01-EX20, visuals, and practice resources.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
 factCheckDate: '2026-09-09'
@@ -22,8 +22,15 @@ structure:
   - entry-src-cuda-072
   - entry-src-cuda-073
   - entry-src-cuda-074
+  - entry-src-cuda-075
+  - entry-src-cuda-076
   - content-sources
   - review-record
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
 head:
   - tag: meta
     attrs:
@@ -40,18 +47,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L12, LAB01-LAB12, the nineteen current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
+This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, LAB01-LAB12, the twenty current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers Home, 74 Learning Units, their Exercises and separate reviewed solutions, 19 Runnable Examples, 12 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 80 Practice Bank entries, 194 Glossary terms, and existing static publishing and visual interfaces. The current catalog has exactly **395** records: 12 Labs, 80 Practice Bank entries, 19 Visual Explainers, 194 Glossary terms, and 90 source records. L12, its Exercises and solutions, and EX19 add four Publication Pairs, bringing the total to 273 pairs and 546 source routes, including 73 Exercise sets and 73 separate reviewed-solution sets. New `SRC-CUDA-073/074` were accessed and reviewed 2026-09-08; older records retain their dates. Website builds use Node.js 24.19.0 and npm 11.17.0.
+This page covers Home, 75 Learning Units, their Exercises and separate reviewed solutions, 20 Runnable Examples, 12 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 82 Practice Bank entries, 196 Glossary terms, and existing static publishing and visual interfaces. The current catalog has exactly **401** records: 12 Labs, 82 Practice Bank entries, 19 Visual Explainers, 196 Glossary terms, and 92 source records. L13, its Exercises and solutions, and EX20 add four Publication Pairs, bringing the total to 277 pairs and 554 source routes, including 74 Exercise sets and 74 separate reviewed-solution sets. New `SRC-CUDA-075/076` were accessed and reviewed 2026-09-09; older records retain their dates. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -160,7 +167,7 @@ Context7 libraries `/websites/nvidia_cuda` (2026-08-29 through 2026-09-04), `/we
 
 **`SRC-CUDA-063` bundled-header authority.** For the bundled rows, the authoritative contracts are the `cub/device/device_reduce.cuh`, `cub/device/device_scan.cuh`, and `cub/version.cuh` files inspected inside the Linux x86-64 redistribution archives addressed by SHA-256 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`, `8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`, and `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`. Those headers document same-GPU run-to-run determinism with a cross-compute-capability caveat for traditional pseudo-associative `DeviceReduce` in bundled CUB 1.15.1, 2.8.2, and 3.3.4. Bundled CUB 1.15.1 `DeviceScan` documents the same scoped guarantee, while bundled 2.8.2 and 3.3.4 document possible pseudo-associative run-to-run variation. Exact tagged headers govern selected 3.4.2: reduction retains the scoped guarantee and scan permits variation. Context7 did not inspect or verify these archives. Header review establishes no Learning Site compilation, runtime, output, determinism observation, or performance evidence.
 
-VIS19 and VIS21 reuse `SRC-CUDA-015`, while VIS20 and VIS22 reuse `SRC-CUDA-016`. Existing CUDA records remain unchanged. A10/A11/VIS18 use `SRC-CUDA-057/058`, A12/A13 use `SRC-CUDA-059/060`, L01/L02 use `SRC-CUDA-061/062`, L03/EX17/LAB11 use `SRC-CUDA-063`, L04 uses `SRC-CUDA-064`, L05 uses `SRC-CUDA-065/066`, L06/EX18/LAB12 and L07 use `SRC-CUDA-067/068`, and L08/L09 use `SRC-CUDA-069/070`. L10/L11 use `SRC-CUDA-071/072`; L12/EX19 add `SRC-CUDA-073/074`, bringing the current catalog to 90 source records. All nineteen Visual Explainers remain evidence-neutral browser teaching models. No new record turns static contracts or source/test inspection into CUDA build, execution, observed synchronization, traffic, timing, or speedup evidence.
+VIS19 and VIS21 reuse `SRC-CUDA-015`, while VIS20 and VIS22 reuse `SRC-CUDA-016`. Existing CUDA records remain unchanged. A10/A11/VIS18 use `SRC-CUDA-057/058`, A12/A13 use `SRC-CUDA-059/060`, L01/L02 use `SRC-CUDA-061/062`, L03/EX17/LAB11 use `SRC-CUDA-063`, L04 uses `SRC-CUDA-064`, L05 uses `SRC-CUDA-065/066`, L06/EX18/LAB12 and L07 use `SRC-CUDA-067/068`, and L08/L09 use `SRC-CUDA-069/070`. L10/L11 use `SRC-CUDA-071/072`; L12/EX19 use `SRC-CUDA-073/074`; L13/EX20 add `SRC-CUDA-075/076`, bringing the current catalog to 92 source records. All nineteen Visual Explainers remain evidence-neutral browser teaching models. No new record turns static contracts or source/test inspection into CUDA build, execution, observed synchronization, traffic, timing, or speedup evidence.
 
 Toolkit components have been independently versioned since CUDA 11, so Toolkit, NVCC, PTX ISA, Binary Utilities, a component such as cuBLAS, paired driver, and compatibility floor cannot collapse into one “CUDA version.” The site preserves the current v13.3 page labels under Toolkit 13.3.1, NVCC v12.9 and PTX ISA 8.8 under `archive/12.9.2`, PTX ISA 7.8 under `archive/11.8.0`, and the existing Runtime API v12.9.1 self-label under `archive/12.9.2`; current PTX ISA 9.3 binds only to the selected 13.3.1 Lane. The CUDA 13.3.1 Linux guide and Programming Guide list C++23 while the same-version NVCC `--std` reference still stops at C++20. The exact-image GCC 13.3/NVCC 13.3.73 `unsupported` result remains immutable R1 history. Run 33275734951 separately retains a narrow EX10 + NVCC 13.3.73 + GCC 14.2.0 `C++23-Dialect-Probe` pass. Neither result is ordinary EX10 C++23 support.
 
@@ -484,19 +491,82 @@ The original example `16256=2^7*127` satisfies the FP32 size/parity/factor condi
 
 **Discovery and provenance:** The current Context7 lookup on 2026-09-08 returned cuFFTDx rather than cuFFT and an older `/websites/nvidia_cuda_archive_11_0_ga` collection. cuFFTDx was not substituted. The older collection was used only to discover `cufftMakePlanMany`; the exact archived guides, versioned manifests, and explicitly dated live sources above govern the published facts. Context7 did not verify a 13.3.1 archive, binary, or execution. Owner documentation is linked and paraphrased only; no owner source, sample, test, diagram, table, or substantial prose is copied or adapted. Original learning prose, scenarios, and tables use CC BY 4.0; EX19's original source uses Apache-2.0. No CUDA build, runtime output, workspace query, cache hit, timing, callback validation, low-precision result, multi-GPU observation, or performance winner is recorded.
 
+<span id="src-cuda-075" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-075: cuSPARSE Generic API descriptors, SpMV/SpMM, and ownership contracts
+
+**Related IDs:** A12, A13, L01, L13, EX20. **Accessed and reviewed:** 2026-09-09. This record supports [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), its [Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) and [reviewed solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/), [EX20](/en/examples/cusparse-spmv/), [PB-R4-015/016](/en/practice/#pb-r4-015), and [TERM-195/196](/en/glossary/#term-195). L13 directly requires exactly `[A12,A13,L01]`; EX20 and each new Practice Bank entry require `[L13]`.
+
+| Exact owner coordinate | Scope of this review |
+| --- | --- |
+| [11.8.0 cuSPARSE guide](https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html) | Historical Generic descriptors, SpMV, and SpMM; SpMM preprocessing exists, SpMV preprocessing does not |
+| [12.9.2 cuSPARSE guide](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html) | Exact teaching baseline for representation, ownership, call-level configuration, workspace, preprocessing, and bounded determinism |
+| [13.3.1 cuSPARSE guide](https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html) | Exact newer archive for differences and exclusions, not a substitute for the baseline or execution evidence |
+
+All three guide archives returned HTTP 200 on the access date. Their Toolkit URL coordinates are not cuSPARSE package version numbers. The corresponding release archives also returned 200, as recorded below; the older cuFFT archive-availability record in SRC-CUDA-074 does not apply to this cuSPARSE review.
+
+**Representation and ownership:** The baseline [Generic APIs](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparse-generic-apis), [CSR format](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#compressed-sparse-row-csr), and [`cusparseCreateCsr`](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsecreatecsr) distinguish descriptor metadata from caller-owned arrays. A Generic sparse descriptor records format, shape, stored-entry count, index types/base, value type, and pointers; it neither copies the arrays nor owns their allocation. `cusparseCreateDnVec` and `cusparseCreateDnMat` describe dense vectors/matrices, including matrix order and leading dimension. Legacy `cusparseMatDescr_t` is not an interchangeable Generic sparse object. Constructor success is not proof of valid matrix contents.
+
+For base b, CSR has `rows+1` offsets, `nnz` column indices and values, first offset b, final offset `nnz+b`, monotonic offsets, and columns in the base-adjusted range. Equal adjacent offsets represent empty rows. The owner allows specified unsorted representations but does not guarantee correctness for duplicate coordinates; the original EX20/PB input policy rejects duplicates rather than assuming coalescing. COO/CSR/CSC/BSR describe different storage, and a format's existence does not imply support by every operation/algorithm. Stored bytes alone cannot choose a format or establish physical traffic or performance.
+
+**Operation calls:** Baseline [SpMV](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmv) computes `y=alpha*op(A)*x+beta*y`; [SpMM](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmm) computes sparse-times-dense `C=alpha*op(A)*op(B)+beta*C`, not sparse-output SpGEMM. Operation flags, compute type, algorithm, scalar placement, and stream are separate from storage metadata. Input/output storage types do not alone determine computation precision. The ordinary FP32 baseline excludes mixed precision, experimental operators, and structured Tensor Core claims.
+
+**Workspace and completion:** Check each exact `cusparseSpMV_bufferSize` or `cusparseSpMM_bufferSize` result and status. Returned bytes are a configuration-specific requirement, not a universal formula from `nnz`, a measured cost, or a GPU observation in this record. Allocate device workspace when nonzero, retain its required contents and ownership, and distinguish matrix/vector storage from workspace. Bind the handle stream; HOST pointer mode places alpha/beta scalars on the host, not the sparse arrays or dense operands. Asynchronous host return does not prove completion. Preserve descriptors, referenced device storage, and workspace until the relevant work completes; check the completion boundary before reading results, reconfiguration, or cleanup, including failure after submission. Destroying a descriptor does not free caller arrays.
+
+**Preprocessing is operation-specific:** `cusparseSpMV_preprocess` is optional and was introduced in CUDA 12.4; it is absent from the 11.8 header/API surface. Under the 12.9.2 SpMV contract, there is one active buffer per sparse matrix descriptor. Preprocessing with another buffer makes the previous buffer inactive. Repeated accelerated calls preserve the active buffer's contents, matrix indices, and other configuration; documented exceptions allow changed alpha/beta, X/Y, and matrix values. Those changes still need compatible shapes/types and proper ordering after in-flight use. Independent prepared states can use separate descriptors and buffers while sharing safely unchanged matrix arrays. An inactive buffer can still be used for supported unaccelerated calls, not as proof that two active states coexist. This is not permission to overwrite workspace still in use.
+
+`cusparseSpMM_preprocess` already exists in 11.8. It helps `CUSPARSE_SPMM_CSR_ALG1` and `CUSPARSE_SPMM_CSR_ALG3`, not `CUSPARSE_SPMM_CSR_ALG2`; call-level reuse constraints must be read from SpMM rather than inferred from SpMV. Changes to representation, operation, compute type, algorithm, or indices require a fresh contract check and appropriate size query/preparation. A supported no-preprocess path remains valid; no speedup or penalty is inferred here.
+
+**Determinism boundary:** The selected NON_TRANSPOSE `CUSPARSE_SPMV_CSR_ALG2` path has a bounded run-to-run deterministic contract under fixed conditions. It does not promise bitwise agreement with a differently ordered CPU reduction, another GPU, a different operation, or another library version. Do not transfer that statement to every SpMV/SpMM algorithm. SpMM ALG3's documented determinism also needs the release-issue check in SRC-CUDA-076. Independent correctness criteria and observed reproducibility are separate from a documentation guarantee; neither has been executed here.
+
+<span id="src-cuda-076" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-076: cuSPARSE independent components, release hazards, architecture, and structured-sparsity gates
+
+**Related IDs:** A12, A13, L01, L13, EX20. **Accessed and reviewed:** 2026-09-09. Independent package pins come from the versioned redistribution manifests, not Toolkit or document labels. The hashes below are the manifests' Linux x86-64 archive SHA-256 coordinates, not hashes of generated site artifacts or evidence of a CUDA build.
+
+| Toolkit / manifest | cuSPARSE component | Linux x86-64 archive SHA-256 |
+| --- | --- | --- |
+| [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json) | 11.7.5.86 | `9250fe539d4bd6a378581dc0b528e8cfc418b57f28545bf39d70cae762075df7` |
+| [12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json) | 12.5.10.65 | `a83415dcd3e1183afe363d4740f9f0309cfe560c6c08016c2a61468304f4b848` |
+| [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) | 12.8.2.51 | `291ed8fe182ef19774363ea8194a760098fd24ffd39dae06145f06b5f237d2e2` |
+
+The corresponding archive files are [11.7.5.86](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/linux-x86_64/libcusparse-linux-x86_64-11.7.5.86-archive.tar.xz), [12.5.10.65](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/linux-x86_64/libcusparse-linux-x86_64-12.5.10.65-archive.tar.xz), and [12.8.2.51](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/linux-x86_64/libcusparse-linux-x86_64-12.8.2.51-archive.tar.xz). Research inspected their cuSPARSE header members, including version macros and API availability; no header or package is redistributed by the Learning Site. Header macros expose the four-part component coordinate, including build. Runtime `cusparseGetProperty` exposes only major/minor/patch; it cannot independently report the fourth package component. Header inspection is not NVCC compilation, linking, runtime loading, or execution.
+
+The exact [11.8.0 release archive](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html), [12.9.2 release archive](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html), and [13.3.1 release archive](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html) all returned HTTP 200. Preserve the version named by each cuSPARSE release section rather than treating every older note in an archive as a new change in that Toolkit patch.
+
+| Release boundary | Consequence for the teaching contract |
+| --- | --- |
+| Legacy deprecations and CUDA 12.0 removals | Deprecation/removal is selective, not a claim that all Legacy APIs disappeared or all Generic APIs are permanent. Inspect the exact symbol before migration; the baseline uses Generic descriptors and SpMV/SpMM. |
+| CUDA 12.4 | Introduced optional SpMV preprocessing; it is not an 11.8 API. SpMM preprocessing has its own earlier availability and algorithm scope. |
+| CUDA 12.9 known issue CUSPARSE-2349 | Mixed-precision SpMV and SpMM may produce incorrect results. The ordinary FP32 baseline does not validate those paths or prove a general mixed-precision fix. |
+| CUDA 13.0 | Dropped pre-Turing architecture support. This site still supports native Linux only and starts at CC 7.5, with problem sizes fitting within 8 GB; this does not authorize every precision or feature. |
+| CUDA 13.0 SpMM CSR_ALG3 / CUDA 13.1 CUSPARSE-2612 | 13.0 lists nondeterminism despite the API documentation; 13.1 records the determinism fix. Do not label the 13.0 defect fixed in 13.0 or infer an observed outcome on another version. |
+| CUDA 13.0 Update 1 / 13.1 Update 1, CUSPARSE-2349 | Separate fixes for mixed-precision CSR/COO SpMV and mixed-precision CSR/COO SpMM respectively; neither erases the older 12.9 warning. |
+| CUDA 13.2 Update 1 | Deprecated Generic `SpMMOp` and `SpGEMMreuse`. Generic membership alone does not establish a durable interface; experimental `SpMVOp` is excluded from the Stable Curriculum prerequisite contract. |
+| CUDA 13.3 Update 1, 5975307 | Fixed a rare issue in CSC and transposed-CSR SpMV. That scope is not EX20's NON_TRANSPOSE CSR result record. Very-large-matrix BSR SDDMM incorrect results remain a known issue, not a fixed issue or an SpMV observation. |
+
+**Structured sparsity is a separate reference:** [cuSPARSELt 0.9.0 release notes](https://docs.nvidia.com/cuda/cusparselt/release_notes.html#cusparselt-v0-9-0), [types](https://docs.nvidia.com/cuda/cusparselt/types.html), and [functions](https://docs.nvidia.com/cuda/cusparselt/functions.html) describe an independently versioned library. The selected 0.9.0 release explicitly drops CUDA 12.9 support; older [getting-started](https://docs.nvidia.com/cuda/cusparselt/getting_started.html) wording is not authority to restore it. The live release page also lists 0.9.1; this record deliberately retains 0.9.0 as its reference-only coordinate, not a latest-version claim. No cuSPARSELt dependency is added to EX20.
+
+Arbitrary COO/CSR sparsity is not a supported structured Tensor Core input merely because many values are zero. A cuSPARSELt path independently needs the supported structured pattern, shape/layout/alignment, input/compute/output precision combination, exact device and software support, pruning/checking policy, and compression plus workspace lifecycle. Pruning can change the mathematical problem and needs separate correctness acceptance. Neither general CC 7.5 site eligibility nor successful ordinary FP32 cuSPARSE setup satisfies those gates. No structured kernel, narrow-precision result, or speedup is recorded.
+
+**Discovery and attribution:** Context7 on 2026-09-09 resolved only the older `/websites/nvidia_cuda_archive_11_0_ga` collection. Initial discovery returned Legacy material; follow-up discovery also exposed Generic descriptor vocabulary. Neither authorizes 12.9.2/13.3.1 facts. Exact owner archives, package coordinates, and release sections above govern the publication.
+
+The inspected NVIDIA cuSPARSE header notices are proprietary, with 1993-2022 or 1993-2023 copyright ranges in the reviewed members, not Apache-2.0. The linked [libcusparse LICENSE.txt](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/LICENSE.txt) contains the NVIDIA Software License Agreement and CUDA supplement; its component/third-party provisions do not relicense every header. Only links and original paraphrases are published. No owner header, sample, figure, table, test, or substantial prose is copied or adapted, and no archive is distributed. Original teaching prose and Practice Bank scenarios use CC BY 4.0; original EX20 source uses Apache-2.0, not a license grant over NVIDIA material. These source records and the linked static learning resources keep all four evidence arrays empty; EX20 has independent Pending Hardware Verification runtime. No NVCC, GPU execution, measured workspace cost, determinism outcome, or performance comparison is claimed.
+
 ## Content and asset sources
 
-- Home, 74 Learning Units, 19 Runnable Examples, 12 Labs, 80 Practice Bank entries, 194 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
+- Home, 75 Learning Units, 20 Runnable Examples, 12 Labs, 82 Practice Bank entries, 196 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
 
 ## Review record
 
-**Reviewed: 2026-09-08.** Existing sources retain their original access dates; issue #32 performed the immutable R3 aggregate review through `SRC-CUDA-060`. Records `SRC-CUDA-061` through `SRC-CUDA-072` retain their item dates. Issue #39 adds `SRC-CUDA-073/074` for L12/EX19, both accessed 2026-09-08, without claiming aggregate R4 acceptance. The older A07 record remains historical; use L10's separately dated continuation for its pinned graph/plan review.
+**Reviewed: 2026-09-09.** Existing sources retain their original access dates; issue #32 performed the immutable R3 aggregate review through `SRC-CUDA-060`. Records `SRC-CUDA-061` through `SRC-CUDA-074` retain their item dates. Issue #40 adds `SRC-CUDA-075/076` for L13/EX20, both accessed 2026-09-09, without claiming aggregate R4 acceptance. The older A07 and A12/A13 records remain historical; use L10's separately dated continuation for graph/plan review and L13's for Generic API/component contracts.
 
 On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) completed the R3 aggregate source review, and [issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33) then fixed the L01/L02 CCCL and Thrust boundaries. On 2026-09-05, [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34) cross-checked current device, warp, and block contracts through Context7 `/nvidia/cccl` for discovery, while the exact v3.4.2 release and commit, tagged docs, source and tests, NVIDIA manifests, hash-addressed archives, issues, and per-file license review remain authoritative. Current hosted or main-branch material is neither the immutable v3.4.2 snapshot nor evidence of bundled archive contents.
 
 R3 is the latest completed aggregate release review. Immutable `src/r3-release-manifest.json` fixes 62 Learning Units, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 232 Publication Pairs, and 464 source routes. R1 and R2 remain historical release coordinates. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains the dynamic acceptance record for final CI, Cloudflare Preview and production, and smoke. The R4 aggregate review remains pending.
 
-Existing F01/LAB02 canonical imports and retained compile runs remain unchanged. L01-L12 publish static teaching contracts with all four evidence arrays empty; EX19, EX18/LAB12, and EX17/LAB11 have empty compilation and recorded observations and Pending Hardware Verification runtime. Six existing expected-only profiler plans retain unfilled Environment Manifests, and nineteen browser Visual Explainers grant no CUDA Evidence Status. L01-L12 belong to rolling R4, not immutable R3; only L13 remains unpublished in that library sequence, and R4 aggregate acceptance is pending. No GPU output, workspace query, profiler, dispatch, dtype, traffic, timing, Tensor Core, or speedup record is added. Automated results do not establish WCAG conformance.
+Existing F01/LAB02 canonical imports and retained compile runs remain unchanged. L01-L13 publish static teaching contracts with all four evidence arrays empty; EX20, EX19, EX18/LAB12, and EX17/LAB11 have empty compilation and recorded observations and Pending Hardware Verification runtime. Six existing expected-only profiler plans retain unfilled Environment Manifests, and nineteen browser Visual Explainers grant no CUDA Evidence Status. L01-L13 belong to rolling R4, not immutable R3; R4 aggregate acceptance remains pending. No GPU output, workspace query, profiler, dispatch, dtype, traffic, timing, Tensor Core, or speedup record is added. Automated results do not establish WCAG conformance.

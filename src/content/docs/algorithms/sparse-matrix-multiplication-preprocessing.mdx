@@ -140,7 +140,7 @@ A13 复用 A12 的 `4 x 5`、`nnz=6` 矩阵 A，并取：
 
 cuSPARSE v13.3 的 Generic API 以 descriptors 记录 sparse/dense objects 的 shape、storage format、index base/type、stored value type、dense layout 与 pointers。Descriptor 不是 values 的第二份 copy；它是 host-side metadata 对 caller-owned device arrays 的引用。Operation/transposition、compute type、algorithm 和 scalar/output semantics 是分开的 call-level 参数；所有 dimensions 与 types 必须相容。
 
-这解释了为什么“我有一个指向 values 的 pointer”还不够。相同 bytes 在 COO 与 CSR 中有不同解释；零基与一基改变 index meaning；row-major 与 column-major 改变 dense address mapping；32-bit 与 64-bit indices 改变 storage 和 accepted range。L13 将负责 exact constructors、destruction、stream、scalar location、status 与 error handling。
+这解释了为什么“我有一个指向 values 的 pointer”还不够。相同 bytes 在 COO 与 CSR 中有不同解释；零基与一基改变 index meaning；row-major 与 column-major 改变 dense address mapping；32-bit 与 64-bit indices 改变 storage 和 accepted range。[L13](/libraries/cusparse-descriptors-spmv-spmm/)负责 exact constructors、destruction、stream、scalar location、status 与 error handling。
 
 ## Workspace 与 preprocessing 生命周期
 
@@ -169,7 +169,7 @@ cuSPARSE v13.3 明确提供 optional SpMM preprocessing。当前 owner 文档只
 
 ## Production boundary
 
-A13 只建立 backend-independent SpMM、representation 与 preparation mental model。L13 才发布 current Generic API code 和 exact component compatibility；EX20 才是 canonical cuSPARSE SpMV Runnable Example。Structured sparsity、cuSPARSELt、architecture-specific support、API determinism matrix 与 measured workspace/performance 都不在本票据范围内。
+A13 只建立 backend-independent SpMM、representation 与 preparation mental model。已发布的 [L13](/libraries/cusparse-descriptors-spmv-spmm/)提供 Generic API 与精确组件合同，有序先修为 `[A12,A13,L01]`；[EX20](/examples/cusparse-spmv/)是规范 cuSPARSE SpMV 可运行示例（Runnable Example），依赖 `[L13]`。L13 的四个证据数组为空；EX20 的编译证据和实际观察为空，运行仍待硬件验证（Pending Hardware Verification）。Structured sparsity、cuSPARSELt、architecture-specific support、API determinism matrix 与 measured workspace/performance 仍不在 A13 范围内。后续链接更新于 2026-09-09，不改变 A13 的 API 复核、先修或证据。
 
 ## 证据边界
 
@@ -188,7 +188,7 @@ A13 的四个 evidence arrays 全为空。共享矩阵、12/40 contribution coun
 
 - 完成 [A13 Exercises](/algorithms/sparse-matrix-multiplication-preprocessing/exercises/)，再查看[独立解答](/algorithms/sparse-matrix-multiplication-preprocessing/solutions/)。
 - 在[练习题库（Practice Bank）PB-R3-016](/practice/#pb-r3-016)审查一个 sparse-vs-dense 与 preprocessing proposal。
-- 复习 [TERM-174](/glossary/#term-174)、[TERM-175](/glossary/#term-175)与 [TERM-176](/glossary/#term-176)。L13 与 EX20 仍明确延后。
+- 复习 [TERM-174](/glossary/#term-174)、[TERM-175](/glossary/#term-175)与 [TERM-176](/glossary/#term-176)，补齐 L13 的先修后，继续阅读 [L13](/libraries/cusparse-descriptors-spmv-spmm/)与 [EX20](/examples/cusparse-spmv/)。
 
 ## 来源与复核
 

@@ -1,0 +1,240 @@
+---
+title: 'L13：调用 cuSPARSE 前，先描述稀疏数据'
+description: 为 SpMV 与 SpMM 选择表示，审查描述符和工作区的所有权，并区分可选预处理、确定性算法、版本支持与实测结果。
+pairId: l13
+counterpart: /en/libraries/cusparse-descriptors-spmv-spmm/
+factCheckDate: '2026-09-09'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, formats, descriptors, spmv, spmm, workspace, preprocessing, lifecycle, selection, versions, precision, issues, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L13
+prerequisites: [A12, A13, L01]
+relatedUnits: [EX20]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'cuSPARSE archived API reference, CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html'
+    version: 'Toolkit 11.8.0; cuSPARSE 11.7.5.86'
+    platform: 'Historical Generic API and preprocessing contract; no execution'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE archived API reference, CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html'
+    version: 'Toolkit 12.9.2; cuSPARSE 12.5.10.65'
+    platform: 'Baseline descriptors, SpMV, SpMM, ownership and algorithm contract'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE archived API reference, CUDA 13.3.1'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html'
+    version: 'Toolkit 13.3.1; cuSPARSE 12.8.2.51'
+    platform: 'Exact archive comparison; not backported to the baseline'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 11.8.0 release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 11.8.0'
+    platform: 'cuSPARSE history and first-use SM90 PTX overhead'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 12.9.2 release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 12.9.2'
+    platform: 'cuSPARSE preprocessing history and scoped known issues'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 13.3.1 release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3 Update 1'
+    platform: 'Architecture removals, deprecations and issue history'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcusparse 11.7.5.86'
+    platform: 'Linux x86-64 acquisition identity, not loaded-library evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcusparse 12.5.10.65'
+    platform: 'Linux x86-64 acquisition identity, not loaded-library evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcusparse 12.8.2.51'
+    platform: 'Linux x86-64 acquisition identity, not loaded-library evidence'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSELt owner reference'
+    url: 'https://docs.nvidia.com/cuda/cusparselt/index.html'
+    version: 'Separate cuSPARSELt 0.9.0 reference, accessed 2026-09-09'
+    platform: 'Structured sparsity and type-specific reference gates only'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSELt release notes'
+    url: 'https://docs.nvidia.com/cuda/cusparselt/release_notes.html'
+    version: 'cuSPARSELt 0.9.0'
+    platform: 'Separate library compatibility; CUDA 12.9 support dropped'
+    accessDate: '2026-09-09'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: l13 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/libraries/cusparse-descriptors-spmv-spmm/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,formats,descriptors,spmv,spmm,workspace,preprocessing,lifecycle,selection,versions,precision,issues,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: L13 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'A12,A13,L01' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '11' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,cuSPARSELt-0.9.0' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/libraries/cusparse-descriptors-spmv-spmm/" lang="en">Read the English counterpart</a>
+
+稀疏描述符（sparse descriptor）的形状正确，指向的字节却可能不是声明的表示。库调用成功返回时，缓冲区也可能还不能复用。cuSPARSE 让我们不必自行实现每种稀疏核函数，但没有免除证明这些契约的责任。
+
+## 学习目标
+
+阅读与检索约需 35 分钟，三道纸面练习另计。你将描述稀疏与稠密操作数，依据工作负载结构选择格式，并保护工作区（workspace）和预处理（preprocessing）状态直到设备执行完成。区分文档中的确定性模式、数值验证与性能实测。阅读本单元不需要 GPU。
+
+## 前置知识
+
+精确且有序的前置为 `A12, A13, L01`：[A12：稀疏格式与 SpMV](/algorithms/sparse-formats-spmv/) 提供表示与行负载不均衡知识；[A13：稀疏矩阵乘法与预处理](/algorithms/sparse-matrix-multiplication-preprocessing/) 提供复用与准备成本模型；[L01：库、原语、DSL 还是自定义核函数](/libraries/library-primitive-dsl-custom-kernel/) 提供选型边界。相关的 [EX20](/examples/cusparse-spmv/) 不增加前置边。
+
+## 从按类型命名的函数到 Generic API 对象
+
+较早的传统接口（Legacy API）常把精度编码在函数名中，并分别传入数组。通用接口（Generic API）则分离存储描述符、操作标志、计算类型、算法与外部工作区。这样更容易审查契约，但并不表示所有组合都受支持。本单元以 **12.9.2 归档契约**为基准，对照精确的 11.8.0 和 13.3.1 归档。
+
+不要把 Legacy 理解成“全部已弃用”。CUDA 12.0 删除了在 11.x 中已经弃用的 API，并没有删除整个 Legacy API。CUDA 13.0 Update 1 增加 Generic BSR SpMV，同时弃用对应的 Legacy 例程。CUDA 13.2 Update 1 弃用 `cusparseSpMMOp` 与 `cusparseSpGEMMreuse`。实验性的 `cusparseSpMVOp` 不在本单元范围内。应按目标符号和版本核对，而不是只看接口家族名称。
+
+## 选择数据表示，而不是核函数招牌
+
+FP32 数值与 32 位索引下，坐标格式（COO）约需 `12*nnz` 字节，压缩稀疏行格式（CSR）约需 `8*nnz+4*(rows+1)` 字节；向量、临时空间和库资源另计。存储字节更少，并不能单独证明执行更快。
+
+| 格式 | 记录什么 | 工作负载问题与边界 |
+| --- | --- | --- |
+| COO | 每个存储项的行、列、值 | 适合组装；分组和重复项归约可能增加转换工作 |
+| CSR | 行偏移、列索引、值 | 自然对应非转置 SpMV 的逐行遍历；仍要检查行长不均衡 |
+| CSC | 压缩稀疏列格式（CSC）的列偏移、行索引、值 | 适合按列处理；有描述符不代表每个操作都支持 |
+| BSR | 块稀疏行格式（BSR）中稠密块的稀疏位置 | 真实块占用可能抵消块内填充；Generic BSR SpMV 不是 12.9.2 基准功能 |
+| SELL | 切片 ELL 格式（SELL） | 同一切片内行长接近时可减少填充；特别长的行会浪费空间 |
+| Blocked-ELL | 每个块行固定数量的块槽位 | 规则块结构可能适合受支持的 SpMM 路径；仍有填充和块大小、类型限制 |
+
+按操作检查其**格式、索引、存储/计算类型、转置、布局、算法与架构支持表**。例如，有 `cusparseCreateCsc` 不代表可以任意执行 CSC SpMM。基准 SpMM 从 CSR 开始；COO 和 Blocked-ELL 只能在各自限制内作为替代方案。普通 CSR 不是结构化稀疏张量核心（Sparse Tensor Core）表示。
+
+本单元采用零基 CSR，每行列索引有序且唯一。行偏移有 `rows+1` 项，从零开始、不递减、末项为 `nnz`；空行重复其偏移。列索引必须在范围内。有些文档指定的模式接受未排序索引，但重复坐标没有通用正确性保证。绑定描述符之前，应明确规范化并合并重复项，保持原本的求和含义与数值策略。
+
+## 描述符描述已有分配
+
+| 对象 | 接口 | 调用方责任 |
+| --- | --- | --- |
+| 库句柄（handle） | `cusparseCreate`、`cusparseSetStream`、`cusparseSetPointerMode` | 所选设备/上下文、显式流与标量指针策略 |
+| 稀疏矩阵 | `cusparseCreateCsr` 创建 `cusparseSpMatDescr_t` | 行数、列数、nnz、分别声明的偏移/索引类型、基数、数值类型及设备指针 |
+| 稠密向量 | `cusparseCreateDnVec` 创建 `cusparseDnVecDescr_t` | 逻辑长度、数值类型与设备分配 |
+| 稠密矩阵 | `cusparseCreateDnMat` 创建 `cusparseDnMatDescr_t` | 存储形状、以元素计的主维度（leading dimension）、存储顺序、数值类型与设备分配 |
+
+创建描述符**不会分配或传输操作数，也不会转换格式**。`cusparseSpMatSetValues` 这样的指针设置接口只重新绑定数值，并不上传它们。对应的销毁接口释放描述符，不释放调用方数组。错误的索引类型会改变字节的解释，而不会改变其表示。使用对象之前必须检查每次创建的状态。
+
+## SpMV：先定义数学输出
+
+稀疏矩阵向量乘法（SpMV）计算 `Y = alpha*op(A)*X + beta*Y`。非转置 `A:m x n` 对应 n 个 X 元素与 m 个 Y 元素；转置时交换向量长度。实数转置与复数共轭转置通常不能混为一谈。beta 非零时，Y 同时是输入与输出。重复试验要恢复原本的初始 Y，不要无意中计算递推序列。
+
+EX20 固定 FP32 矩阵/向量存储、FP32 计算与标量、32 位零基索引、`CUSPARSE_OPERATION_NON_TRANSPOSE`、`CUSPARSE_SPMV_CSR_ALG2` 和 `CUSPARSE_POINTER_MODE_HOST`。主机指针模式（host pointer mode）只涉及 **alpha 和 beta**：描述符数据与外部工作区仍位于设备分配中。非零 beta 和空行用例能暴露单次全一向量乘法漏掉的错误。
+
+文档对 CSR ALG2 的逐位确定性（bitwise determinism）保证仅适用于 `NON_TRANSPOSE`。它不表示与 CPU 归约逐位相等，也不保证跨库版本、算法或 GPU 相等。即使枚举不变，转置也可能失去该保证。仍需独立、拒绝非有限值的数值验收；这里并未观察 EX20 的所选算法运行。
+
+## SpMM：稠密布局也是问题的一部分
+
+稀疏矩阵与稠密矩阵乘法（SpMM）计算 `C = alpha*op(A)*op(B) + beta*C`，A 稀疏，B/C 稠密。非转置 `A:4 x 5` 与 `B:5 x 3` 要求 `C:4 x 3`。行主序（row-major）B 需要 `ld >= 3`，列主序（column-major）B 需要 `ld >= 5`；C 分别需要 `ld >= 3` 或 `ld >= 4`。主维度以元素而非字节计，描述符描述转置前的存储形状。改变操作标志时，必须重新推导存储尺寸。
+
+多个右端项可能让稀疏索引在稠密列间复用，但循环执行 SpMV 与一次 SpMM 不保证采用相同核函数、算术顺序、临时空间或性能。比较时保持精度、初始 C、验收规则和计时边界相同。改变稠密顺序枚举不会重排内存。
+
+算法规则属于各自操作：CSR `CUSPARSE_SPMM_CSR_ALG3` 要求 A 非转置，不允许 B 共轭转置，也不支持批处理（batching）。它的文档确定性还必须结合下方版本问题记录阅读。SpMV 的算法编号或支持规则，不能用于推断 SpMM 中同编号的含义。
+
+## 查询大小不是分配内存
+
+常规顺序是调用 `cusparseSpMV_bufferSize` 或 `cusparseSpMM_bufferSize`，由调用方分配设备内存，按支持范围选择是否预处理，再使用有效外部缓冲区执行。查询返回的是**字节数**，不是元素数。检查查询状态、容量、对齐和分配状态；不要从矩阵尺寸编造固定工作区需求。零字节需求无需设备分配；空指针使用仍应遵循所选操作的契约。
+
+查询与执行须使用同一操作/配置。尺寸、格式、类型、算法或布局变化后重新检查。总存储包括操作数、外部工作区与额外库资源。预算允许或查询成功，都不证明实际分配能成功。除非有明确安全契约，否则工作区不能用于重叠执行；这里的常规方案为每个重叠操作提供独占临时空间。
+
+## 预处理是可选状态，不是格式转换
+
+`cusparseSpMV_preprocess` 在 CUDA 12.4 引入，11.8 中不存在。它可选，仅可能加速 **CSR ALG1/ALG2**；其他算法不会因此获得加速。EX20 特意不调用它，以便三个版本配置共用一条常规 SpMV 路径。
+
+预处理后，传入缓冲区成为 matA 的**活动缓冲区（active buffer）**。其内容必须保持不变，矩阵索引与操作配置也必须保留。后续兼容调用可以改变 alpha、beta、X、Y 和矩阵数值。这不允许改变形状、索引内容、格式或算法。更新数值指针后仍须保证分配有效，并建立完成依赖。
+
+每个 matA 描述符**只有一个活动预处理缓冲区**。对第二个缓冲区预处理，会使后者成为活动缓冲区。SpMV 可以接收另一个有效但非活动的缓冲区，只是不获得该预处理加速；这不是激活第二份缓存状态。如需独立的活动状态，应创建不同稀疏描述符；它们可以引用同一组不可变索引，但工作区与可写操作数需要分别管理。不要并发修改共享描述符状态。
+
+`cusparseSpMM_preprocess` 在 11.8 已存在，不能把 SpMV 的引入日期套到它身上。其加速只适用于 **CSR ALG1/ALG3**。保持兼容的稀疏结构与稠密形状/布局；数值内容可以改变，标量与操作数更新遵循对应版本契约。实际操作数是 **B 和 C**，不是 SpMV 的 X/Y；不要把新版文字中的 `matX/matY` 笔误写进实现。13.3.1 指南明确将预处理限定为 CSR，并要求在图捕获（graph capture）之前预处理。基准版的图支持措辞不同，不要反向套用新版措辞。图、可执行 SpMM 与预处理均不属于 EX20。
+
+## 主机返回不等于设备完成
+
+用 `cusparseSetStream` 将库工作放入预期的流（stream）。H2D 初始化、执行和 D2H 结果需要顺序关系。同一流提供提交顺序；跨流需事件/等待，或经过检查的主机完成边界。主机 API 返回，包括成功返回，都不表示可以检查异步结果或释放数组。
+
+设备索引、数值、X/Y 或 B/C、外部工作区以及主机传输存储，都要活到最后一次使用完成。本课程还保守地让描述符与句柄保持到完成之后。活动预处理存储必须覆盖所有依赖它的调用。句柄的流/指针模式是共享可变状态，不是并发控制工具。
+
+部分提交后失败时，停止新工作，保留原始错误，尽可能等待已提交工作结束，只清理已成功取得的资源。检查完成与清理错误；不能把等待失败变成验证成功，也不能按正常成功路径的假设释放主机传输存储。销毁描述符本身不证明所有设备使用者都已完成。
+
+## 把准备成本与复用计入选型
+
+在同一工作负载下比较 `conversion + preprocess + R*execution`，而不只比较预热后的核函数区间。若每轮稀疏模式都变化，原本能摊销的准备工作可能重复发生。若只变数值，兼容预处理可能可复用，但这本身不证明有加速。记录行长分布、块占用、稠密列数、转置、精度、复用次数、内存预算和可接受数值误差。
+
+主机初始化与首次使用开销应和预热后的设备事件区间分开。非零 beta 时恢复 Y/C 的成本也要一致处理。文档推荐只提供候选方案，不提供实测赢家。填零的计时、编造的盈亏平衡点、未执行的缓冲区大小都不是证据。
+
+## 版本身份与架构
+
+| Toolkit 归档/配置 | 再分发清单中的 cuSPARSE 组件 | 边界 |
+| --- | --- | --- |
+| 11.8.0 | 11.7.5.86 | Generic SpMV/SpMM；有 SpMM 预处理，没有 SpMV 预处理 |
+| 12.9.2 | 12.5.10.65 | 基准契约；提供 SpMV 预处理 |
+| 13.3.1 | 12.8.2.51 | 精确归档对照；包含后续格式与捕获规则 |
+
+Toolkit 版本、指南标签、头文件宏、原始 API 版本与实际加载的组件/软件包身份是不同记录。清单标识获取的软件包，并不能证明加载器解析到了哪个二进制文件。在环境清单（Environment Manifest）中保留实际头文件与加载库身份，不要拼接未观察到的构建后缀。
+
+CUDA 13.0 删除了 Turing 之前的架构支持。本站跨配置运行下限仍为 **原生 Linux、单张 CC 7.5+ GPU**，基础问题规模符合基础 GPU 能力层级（Baseline GPU Capability Tier）。阅读静态页面无需 GPU。该下限不能授权所有低精度、块格式、张量核心或多 GPU 模式。
+
+## 窄精度与结构化稀疏单独设限
+
+只改 `CUDA_R_32F` 不等于完成低精度实现。应组合检查操作数存储、计算与标量类型、索引宽度、对齐、所选算法、转置/布局及目标架构。FP16、BF16、INT8、FP8 等窄格式有各自门槛；12.9 的混合精度问题也说明不能从枚举存在推断许可。EX20 全部使用 FP32，不是混合精度测试。
+
+**cuSPARSELt 是独立的库**，不是任意 CSR 的加速开关。结构化模式、压缩/验证步骤、类型、形状、对齐与 GPU 支持必须同时满足。当前参考对 FP16/BF16/INT8/FP8 描述 2:4 稀疏，对 float 描述 1:2，对 E2M1 描述成对的 4:8 规则。这些是按类型区分的参考规则，不是 EX20 门槛，也不允许在保持问题不变的名义下随意剪枝。Blocked-ELL 同样不自动等于 cuSPARSELt 表示。
+
+cuSPARSELt 0.9.0 发布说明已删除 CUDA 12.9 支持，较旧的入门文字却仍提及它。应以当前版本明确的兼容声明为准；不要把 cuSPARSE 的三个配置直接继承给这个独立依赖。这里不声明结构化稀疏吞吐量或稀疏张量核心执行结果。
+
+## 带条件的问题记录
+
+| 来源/状态 | 限定条件 | 含义 |
+| --- | --- | --- |
+| 11.8 已知问题 | SM90 上首次使用 cuSPARSE 可能有 PTX 即时编译（JIT）开销 | 区分首次使用与预热执行；没有本地开销实测 |
+| 12.9 已知问题，CUSPARSE-2349 | 混合精度 SpMV/SpMM 可能产生错误结果 | 保持 EX20 全 FP32 契约；不宣称整个版本无问题 |
+| 12.9 已知问题，CUSPARSE-2319 | `cusparseCsr2cscEx2` 在 m=0 或 n=0 时可能产生错误结果 | 零维转换不等于非空矩阵中有一条空行 |
+| 13.0 引入，13.1 修复，CUSPARSE-2612 | SpMM CSR ALG3 的确定性缺陷 | 枚举的一般保证不能消除版本缺陷 |
+| 13.3 Update 1 修复，5975307 | 极少数 CSC 或转置 CSR SpMV 结果错误 | 保留操作/格式条件；EX20 使用非转置 CSR |
+| 13.3 Update 1 修复 | 混合精度 SELL SpMV 问题 | 不是普通 FP32 CSR 的已观察结果 |
+| 13.3 Update 1 已知问题 | 超大 BSR 采样稠密矩阵乘法（SDDMM）工作负载 | 属于另一操作和规模，不是对 SpMV 的普遍禁令 |
+
+SpMV 参考还提示，beta 为零时可能出现 Compute Sanitizer 的竞争误报。应调查具体诊断并核对文档条件。这不允许忽略真实竞争、释放后使用、越界，或其他操作/配置下的错误。保留日志与独立正确性检查。
+
+## 证据边界
+
+本学习单元及练习是静态推理，四个证据数组均为空。唯一的规范可执行对应资源是 [EX20](/examples/cusparse-spmv/)，其编译状态独立，运行仍为**待硬件验证（Pending Hardware Verification）**。这里没有记录算法结果、工作区大小、预处理收益、确定性运行、计时或性能比较。浏览器从不执行 CUDA。
+
+## 检索自测
+
+1. 创建 CSR 描述符后，还有哪些分配和传输责任？重复的行偏移表示什么？
+2. 转置如何改变向量长度？为何主机指针模式不表示矩阵数据驻留在主机？
+3. 11.8 缺少哪个预处理 API？哪些 SpMV 与 SpMM 算法可能受益，哪些状态必须保留？
+4. 为何主机成功返回不允许跨流立即复用工作区？错误清理如何遵守同一规则？
+5. 确定性的 CSR ALG2、与 CPU 参考一致、跨 GPU 可重复，为何是三种不同声明？
+
+## 继续练习
+
+先完成[三道练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)，再读[独立解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)。[PB-R4-015](/practice/#pb-r4-015) 用于描述符/格式推理，[PB-R4-016](/practice/#pb-r4-016) 用于预处理/生命周期审查。[EX20](/examples/cusparse-spmv/) 持有实际代码与验收标准，本页不维护第二份源码。
+
+## 来源与许可
+
+[SRC-CUDA-075](/sources-and-versions/#src-cuda-075) 记录描述符、格式、SpMV 与 SpMM；[SRC-CUDA-076](/sources-and-versions/#src-cuda-076) 记录版本、预处理、架构、精度与问题边界。基准坐标包括 [CreateCsr](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsecreatecsr)、[SpMV](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmv) 和 [SpMM](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmm)。本次核查中，精确 13.3.1 API 与发布说明归档返回 HTTP 200，并非使用实时指南替代。
+
+Context7 发现结果只解析到较旧的 CUDA 11.0 归档，并返回 Legacy API 材料，不能作为这里 Generic API 事实的权威依据。上列所有者归档、发布说明、再分发清单和独立 cuSPARSELt 参考才是来源基础。正文、表格、推导与练习均为原创转述，没有复制示例。核查包括 [12.9.2 EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) 与所有者声明；页面许可不重新授权 NVIDIA 软件或文档。**事实核查与来源访问日期：2026-09-09。**

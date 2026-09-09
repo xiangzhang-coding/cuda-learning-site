@@ -2,6 +2,11 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "examples": {
+    "EX20": {
+      "sourceCommit": "e27b4f425400721a2d91c4bbb601a6385dae39c0",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/e27b4f425400721a2d91c4bbb601a6385dae39c0/examples/ex20-cusparse-spmv",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/e27b4f425400721a2d91c4bbb601a6385dae39c0.zip"
+    },
     "EX10": {
       "sourceCommit": "904c6da03800ed3012baacb861494377c0fa01f2",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/904c6da03800ed3012baacb861494377c0fa01f2/examples/ex10-ptx-fatbinary-inspection",

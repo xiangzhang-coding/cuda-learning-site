@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: 194 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: 196 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-08'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -22,7 +22,14 @@ structure:
   - entry-term-192
   - entry-term-193
   - entry-term-194
+  - entry-term-195
+  - entry-term-196
   - maintenance
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
 head:
   - tag: meta
     attrs:
@@ -31,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-08'
+      content: '2026-09-09'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -39,7 +46,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1806,6 +1813,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [L12](/en/libraries/cufft-plans-layouts-startup/).
 - **Version note:** Reviewed 2026-09-08 in [SRC-CUDA-073](/en/sources-and-versions/#src-cuda-073). C2R requires a Hermitian spectrum and the documented complex-type alignment; violating the mathematical input contract has undefined behavior. For N=10, K=6 and the in-place row has 12 real slots, not 10. Multidimensional symmetry reverses every frequency coordinate, not just the stored last coordinate. [PB-R4-013](/en/practice/#pb-r4-013) works through a two-dimensional layout; out-of-place C2R may still destroy the complex input. No real-transform execution is claimed.
 
+<span id="term-195" class="resource-target" aria-hidden="true"></span>
+
+### Sparse Matrix Descriptor · 稀疏矩阵描述符
+
+- **Definition:** A Sparse Matrix Descriptor records how to interpret caller-owned sparse storage: format, dimensions, stored-entry count, index types/base, value type, and array pointers. For Generic CSR, `cusparseCreateCsr` describes row offsets, column indices, and values; it does not copy those arrays or take ownership of their allocation. Operation, compute type, and algorithm belong to the operation call, not to a promise inferred from the descriptor.
+- **Avoid:** Matrix data copy; owning allocation; automatically validated CSR; selected execution plan; Legacy `cusparseMatDescr_t` as an interchangeable Generic descriptor.
+- **Related resources:** [A12](/en/algorithms/sparse-formats-spmv/), [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/), [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), and [EX20](/en/examples/cusparse-spmv/).
+- **Version note:** Reviewed 2026-09-09 against the exact Toolkit 12.9.2 baseline in [SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075). CSR needs `rows+1` offsets, `nnz` columns/values, consistent base/endpoints, monotonic offsets, and in-range columns; duplicate coordinates have no blanket correctness guarantee. Descriptor destruction and caller-buffer release are separate after completion. Host pointer mode locates scalars, not sparse arrays. [PB-R4-015](/en/practice/#pb-r4-015) audits this contract without execution.
+
+<span id="term-196" class="resource-target" aria-hidden="true"></span>
+
+### Active Preprocessing Buffer · 活动预处理缓冲区
+
+- **Definition:** An Active Preprocessing Buffer is caller-owned external workspace currently associated with a sparse descriptor's optional acceleration state. In the selected SpMV contract, only one buffer is active per sparse matrix descriptor. Preprocessing again with another buffer makes the old buffer inactive, even if the caller still owns its allocation. This is state associated with a descriptor, not another name for all external workspace.
+- **Avoid:** Permanent cache for every operation; arbitrary scratch that may be overwritten; shared active state across descriptors; preprocess once after which any index or algorithm may change.
+- **Related resources:** [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/), [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), and [EX20](/en/examples/cusparse-spmv/).
+- **Version note:** Reviewed 2026-09-09 in [SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075) and [SRC-CUDA-076](/en/sources-and-versions/#src-cuda-076). `cusparseSpMV_preprocess` is optional from CUDA 12.4 and absent in 11.8. The 12.9.2 active-buffer contract preserves buffer contents, matrix indices, and other configuration while allowing documented changes to alpha/beta, X/Y, and matrix values, with correct completion ordering. `cusparseSpMM_preprocess` already exists in 11.8 and helps CSR_ALG1/ALG3, not CSR_ALG2; its reuse contract must be checked separately. [PB-R4-016](/en/practice/#pb-r4-016) records no queried bytes or runtime outcome.
+
 ## Maintenance rule
 
-TERM-001 through TERM-192 retain their item-level review dates. New TERM-193/194 and the complete 194-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-08**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish DFT mathematics, normalization, and Hermitian storage constraints; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-194 retain their item-level review dates. New TERM-195/196 and the complete 196-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-09**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish a descriptor's borrowed representation from active preprocessing state without duplicating existing CSR, preprocessing, or external-workspace terms. All four evidence arrays remain empty; EX20 retains independent Pending Hardware Verification runtime. The [Chinese counterpart](/glossary/) is complete at the same time.

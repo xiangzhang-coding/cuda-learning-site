@@ -1,0 +1,224 @@
+---
+title: 'EX20：cuSPARSE CSR 矩阵向量乘法'
+description: 用双精度 CPU 参考与字面结果检查两组 FP32 CSR 乘法，显式管理描述符、标量指针模式、查询工作区和流完成边界。
+pairId: ex20
+counterpart: /en/examples/cusparse-spmv/
+factCheckDate: '2026-09-09'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, cpu-reference, descriptors-workspace, stream-lifecycle, version-profiles, build, compatibility, evidence, expected-observations, sources]
+resourceKind: runnable-example
+unitId: EX20
+prerequisites: [L13]
+relatedUnits: []
+exampleIds: [EX20]
+canonicalExample: EX20
+canonicalRanges:
+  - cpu-reference
+  - descriptors-workspace
+  - stream-lifecycle
+hardwareGate: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuSPARSE profile; runtime: Native Linux, one CC 7.5+ GPU; 112 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget'
+toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read selected Toolkit/cuSPARSE headers and shared libraries'
+  - 'Access one CUDA device; execute compiler, make, bash, readelf, ldd, host test, and CUDA binary'
+  - 'Write and remove EX20 build, result, and learner-owned evidence files'
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - 'The double CPU reference should agree with both literal results; all four completed GPU outputs per fixture should pass finite tolerance checks, including the empty row and nonzero beta.'
+    - 'The actual SpMV contracts should provide workspace sizes within the declared budget; zero-size requests should skip allocation. No workspace cost has been observed here.'
+    - 'Headers should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuSPARSE and CUDA API levels reported separately from package identity.'
+  recordedObservations: []
+sources:
+  - title: 'cuSPARSE reference archived with CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html'
+    version: 'Toolkit 11.8.0; cuSPARSE 11.7.5.86'
+    platform: 'Native Linux; Generic CSR SpMV, mutable descriptors, workspace, streams, version queries'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE reference archived with CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html'
+    version: 'Toolkit 12.9.2; cuSPARSE 12.5.10.65'
+    platform: 'Native Linux; baseline Generic API contract, not execution'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE reference archived with CUDA 13.3.1'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html'
+    version: 'Toolkit 13.3.1; cuSPARSE 12.8.2.51'
+    platform: 'Native Linux; exact archive comparison, not execution'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcusparse 11.7.5.86'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcusparse 12.5.10.65'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcusparse 12.8.2.51'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-09'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex20 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/examples/cusparse-spmv/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,descriptors-workspace,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: L13 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,descriptors-workspace,stream-lifecycle' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuSPARSE profile; runtime: Native Linux, one CC 7.5+ GPU; 112 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:permissions', content: 'read Toolkit/cuSPARSE; one CUDA device; compiler, make, bash, readelf, ldd, host-test, CUDA-binary execution; EX20 build/result/evidence write/delete' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '6' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuSPARSE-11.7.5.86,cuSPARSE-12.5.10.65,cuSPARSE-12.8.2.51,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1' } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/cusparse-spmv/" lang="en">Read the English counterpart</a>
+
+## 目的
+
+先完成 [L13](/libraries/cusparse-descriptors-spmv-spmm/)。EX20 是独立的原创 C++17 正确性项目，计算 `y = alpha*A*x + beta*y_initial`：两组 FP32 压缩稀疏行（compressed sparse row，CSR）输入，显式管理描述符（descriptor）与资源所有权。CUDA 仅在外部环境执行，学习站（Learning Site）内不运行 CUDA。程序不含计时器。
+
+## 规范项目
+
+[查看固定源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/e27b4f425400721a2d91c4bbb601a6385dae39c0/examples/ex20-cusparse-spmv)或[下载同一版本](https://github.com/xiangzhang-coding/cuda-learning-site/archive/e27b4f425400721a2d91c4bbb601a6385dae39c0.zip)。
+
+上方源码树与下载链接和规范注册表一致，指向同一个不可变版本。从归档中提取 `examples/ex20-cusparse-spmv/`。八个文件分别是清单、README、Makefile、主机头文件、CUDA 源码、主机测试、编译脚本和证据说明。未来记录结果时应保留解析后的源码版本，不能只写页面路由或移动分支。
+
+原创项目软件采用 Apache-2.0，本教学页面采用 CC BY 4.0。cuSPARSE 是遵循 NVIDIA 自身条款的外部依赖。未再分发上游示例、SDK 头文件或库二进制。中英文导入下列同一组三个源码范围。
+
+## 独立 CPU 参考
+
+<CanonicalCode exampleId="EX20" range="cpu-reference" />
+
+两个矩阵均为 4 行、5 列、7 个存储项。零基、32 位行偏移（row offsets）为 `[0,2,2,4,7]`，列索引（column indices）为 `[0,3,1,4,0,2,4]`，各行内有序且唯一。重复偏移表示第 1 行为空行。全部测试输入都能由 FP32 精确表示。下表是原创输入与独立字面预期，不是 GPU 运行观察：
+
+| 测试输入 | CSR 数值 | x | 初始 y | alpha | beta | 字面输出 |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | `[2,-1,3,4,-2,5,1]` | `[1,2,-1,3,2]` | `[4,-2,1,3]` | 1 | 0 | `[-1,0,14,-5]` |
+| B | `[-1,2,0.5,-3,4,-2,1]` | `[2,-1,3,0.5,-2]` | `[1,-4,2,0]` | 2 | -0.5 | `[-2.5,2,10,0]` |
+
+独立 CPU 参考在索引访问前验证长度、CSR 偏移、列索引范围与有序唯一性，以及输入有限性。乘法、累加与 alpha/beta 运算均使用双精度。提交 GPU 工作前，CPU 结果必须与字面输出一致。完成后的四个 GPU 输出及对应参考值都必须有限，并逐个满足 `abs(gpu-cpu) <= 1e-4 + 2e-5*abs(cpu)`。该包含边界的容差只适用于这些小输入，不适用于任意稀疏工作负载。
+
+空点积不意味着可以跳过写入 y：第 1 行在 A 中为零，在 B 中却为 `(-0.5)*(-4)=2`。检查全部行和两种 beta，可暴露只有非空行、beta 为零的单组输入可能遗漏的错误。
+
+## 描述符与工作区
+
+<CanonicalCode exampleId="EX20" range="descriptors-workspace" />
+
+共同契约使用可变 `cusparseSpMatDescr_t` 和 `cusparseDnVecDescr_t` 对象，通过 `cusparseCreateCsr`、`cusparseCreateDnVec` 创建。它们描述调用者拥有的设备分配，创建操作既不上传数据，也不转换格式。两个索引数组均使用 `CUSPARSE_INDEX_32I`，索引基准为 `CUSPARSE_INDEX_BASE_ZERO`。矩阵数值、向量、标量与计算均为 FP32（`CUDA_R_32F`）。操作为 `CUSPARSE_OPERATION_NON_TRANSPOSE`，算法为 `CUSPARSE_SPMV_CSR_ALG2`。
+
+主机指针模式（host pointer mode）`CUSPARSE_POINTER_MODE_HOST` 只作用于 alpha 和 beta。CSR 数组、x/y 与非零工作区（workspace）仍位于设备上。每组输入完成传输后，`cusparseSpMV_bufferSize` 使用实际执行的描述符、标量、操作、计算类型和算法查询需求。结果以字节计，不是元素数，也不是从 nnz 推算的大小。
+
+零字节请求跳过分配并传入空指针。需求改变时，只能在完成后替换上一份调用者分配；需求不变时可顺序复用。固定数组与查询到的工作区合计接受预算检查，分配失败必须终止。目前没有已观察的工作区大小。
+
+程序**不调用 `cusparseSpMV_preprocess`**，因为 CUDA 11.8 中不存在该 API。同一条普通 SpMV 路径适用于三个配置，也不要求较新的常量描述符创建接口。[L13](/libraries/cusparse-descriptors-spmv-spmm/) 单独讲解版本受限的预处理（preprocessing）与 SpMM。`make preprocess` 中的编译器预处理不是稀疏库预处理。
+
+## 流与资源生命周期
+
+<CanonicalCode exampleId="EX20" range="stream-lifecycle" />
+
+一个非默认 `cudaStreamNonBlocking` 流（stream）和一个句柄（handle）依次服务两组输入，保留同一组描述符与调用者数组。每次执行都上传 CSR 数组和 x，并从该组初始 y 重置设备 y，**包括 beta 为零的情况**。改用上一次输出会改变数学问题。
+
+H2D、SpMV 与 D2H 调用均检查状态并使用同一流。输入完成后查询工作区；输出完成后才能进行 CPU 验证、复用、工作区替换和正常清理。主机返回不等于设备完成。可分页主机向量和 `Async` API 名称不能证明传输与计算重叠。
+
+部分提交失败时，清理会尝试等待流完成，此时测试输入、标量和主机输出存储仍然存活。随后销毁已取得的描述符与句柄、释放调用者分配并销毁流。每项释放都会尝试；完成或释放错误使进程失败，不能产生验证成功的结论。销毁操作不会把调用者数组的所有权转交给库。
+
+## 独立版本配置
+
+| 配置 | Toolkit | cuSPARSE 组件 | 头文件 MAJOR,MINOR,PATCH,BUILD |
+| --- | --- | --- | --- |
+| `cuda-11-8-bundled-cusparse-11-7-5-86` | 11.8.0 | 11.7.5.86 | 11,7,5,86 |
+| `cuda-12-9-bundled-cusparse-12-5-10-65` | 12.9.2 | 12.5.10.65 | 12,5,10,65 |
+| `cuda-13-3-bundled-cusparse-12-8-2-51` | 13.3.1 | 12.8.2.51 | 12,8,2,51 |
+
+`EXPECTED_CUSPARSE_VERSION` 选择四个 `EX20_EXPECTED_CUSPARSE_*` 定义，与 `CUSPARSE_VER_MAJOR`、`CUSPARSE_VER_MINOR`、`CUSPARSE_VER_PATCH`、`CUSPARSE_VER_BUILD` 比较。未知或缺失配置会失败。聚合版本检查为 `CUSPARSE_VERSION = major*1000 + minor*100 + patch`，不含构建号。这些是组件头文件身份，不是 Toolkit 补丁版本身份。
+
+检查 `cusparseGetProperty` 查询的返回状态，并要求已加载主次补丁版本与头文件三元组相同。`cusparseGetVersion(handle, ...)` 单独原样报告。两个 API 都不暴露已加载构建号：应在环境清单（Environment Manifest）中保留实际解析的库路径、包身份和文件哈希。CUDA 驱动与 Runtime 的 API 级别以及 `CUDART_VERSION` 不是安装的驱动、Toolkit 包或 cuSPARSE 组件版本。
+
+## 构建与运行
+
+在独立目录中执行主机测试，不需要 CUDA 头文件或 GPU：
+
+```sh
+make host-test DIALECT=c++17 BUILD_DIR=build
+```
+
+测试覆盖两组字面结果、空行与 beta 贡献、无效 CSR 和长度、非有限数据与标量、每个输出位置的破坏，以及包含边界的容差规则。成功只说明主机契约成立。
+
+在匹配的 11.8.0 开发镜像中，按清单阶段构建并检查，不执行 CUDA：
+
+```sh
+make preprocess DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+make compile DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+make link DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+make inspect DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+```
+
+也可使用包装脚本：它先清理，再执行这些阶段并传递失败状态，运行时只执行主机测试。**下列每条命令都应在各自匹配的 Toolkit 镜像中运行**，不能在同一次安装中执行三个配置：
+
+```sh
+bash scripts/compile-check.sh c++17 cuda-11-8-bundled-cusparse-11-7-5-86 artifacts/ex20-11-8
+bash scripts/compile-check.sh c++17 cuda-12-9-bundled-cusparse-12-5-10-65 artifacts/ex20-12-9
+bash scripts/compile-check.sh c++17 cuda-13-3-bundled-cusparse-12-8-2-51 artifacts/ex20-13-3
+```
+
+结果路径加引号后可含空格，但不能位于包装脚本会清理的 `build` 内。GNU Make 要求 `BUILD_DIR` 不含空格。链接使用 `-lcusparse`；`readelf -d` 必须显示 cuSPARSE 依赖，`ldd` 必须解析全部依赖且没有缺失库。EX20 未定义设备内核，因此不要求 EX20 自有 cubin/PTX。SM75 目标参数不证明 cuSPARSE 内部派发行为。包装脚本与 CI 绝不执行 CUDA 二进制。
+
+仅在满足运行门槛之后执行：
+
+```sh
+./build/ex20-cusparse-spmv
+```
+
+程序选择可见设备 0。预期报告包含头文件与已加载版本的粒度、GPU 与 CUDA API 级别、每组输入的配置和查询工作区字节数，以及逐组检查全部四个输出后的两个正确性结论。这是未来输出的约定，不是已保留的运行记录。
+
+## 兼容性
+
+三种配置都使用 C++17 和清单中摘要固定的 x86-64 开发镜像：11.8.0 对应 Ubuntu 22.04，12.9.2 和 13.3.1 对应 Ubuntu 24.04。原生 Linux 是唯一受支持环境（Supported Environment）。运行要求一个 CC 7.5+ GPU，属于基础 GPU 能力层级（Baseline GPU Capability Tier）。使用与 Toolkit 适当匹配或更新的驱动；仅达到较低的家族次版本兼容下限，不能保证 PTX JIT 可用。
+
+固定调用者数组包含 `(5+7)*4=48` 个索引字节及 `(7+5+4)*4=64` 个 FP32 字节，共 **112 字节**。固定数组与查询工作区合计必须符合 8,000,000,000 字节问题预算。库内部资源、初始化需求和实际空闲显存是额外约束。这是静态分配计算，不是测得的总占用量，也不是零临时空间承诺。
+
+范围不包括 SpMM、格式转换、转置、窄精度、结构化稀疏与 cuSPARSELt、图捕获、多 GPU、预处理执行或计时。有序且唯一的 CSR 是 EX20 的契约，不是对所有 cuSPARSE 操作的统一限制。文档中非转置 CSR ALG2 的确定性保证不能证明与 CPU 逐位相等、跨版本可重复，或已经观察到确定性运行。[L13](/libraries/cusparse-descriptors-spmv-spmm/) 讲解这些边界与版本问题清单；EX20 不对整个版本的正确性或性能作保证。
+
+## 证据边界
+
+编译数组为空，不授予保留记录意义上的编译已检查（Compile-Checked）。运行仍为待硬件验证（Pending Hardware Verification），没有已记录观察。主机测试、源码审核、规范源码导入和构建命令测试不能提供 GPU 正确性、工作区成本、预处理收益、确定性运行、耗时或加速比证据。
+
+合格的未来记录需要源码与配置身份、阶段日志、完整环境清单、实际加载的组件身份、原始输出和两组全输出正确性结论。预期与已记录观察必须分开。本程序没有基准测试结果。
+
+## 预期观察
+
+1. 双精度 CPU 参考应与两组字面结果一致；每组完成后的全部四个 GPU 输出应通过有限性与容差检查，包括空行和非零 beta。
+2. 实际 SpMV 契约查询到的工作区大小应在声明预算内；零大小请求应跳过分配。目前没有已观察的工作区成本。
+3. 头文件应匹配四段组件配置，已加载主次补丁版本应匹配头文件；原始 cuSPARSE 版本和 CUDA API 级别应与包身份分开报告。
+
+## 来源与核查
+
+- cuSPARSE API 归档：[11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html)、[12.9.2](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html)、[13.3.1](https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html)。
+- 独立组件清单：[11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)、[12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)、[13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json)。
+- [SRC-CUDA-075](/sources-and-versions/#src-cuda-075) 与 [SRC-CUDA-076](/sources-and-versions/#src-cuda-076) 保留描述符、预处理、所有权、版本与发布风险边界。
+
+核查于 **2026-09-09**。清单中的官方归档哈希是获取坐标，不表示已下载完整包或对实际加载二进制进行哈希验证。未改编上游实现或示例。
