@@ -1,0 +1,135 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX19",
+  "title": "cuFFT Batched Transform",
+  "purpose": "Check two FP32 out-of-place C2C batches against an independent double CPU DFT with explicit strides, caller workspace, sequential plan reuse, and inverse normalization.",
+  "root": "examples/ex19-cufft-batched-transform",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": ["include/cufft_batched_reference.hpp", "src/cufft_batched_transform.cu"],
+    "hostTestInputs": ["include/cufft_batched_reference.hpp", "tests/host_reference_test.cpp"],
+    "contractFiles": ["Makefile", "scripts/compile-check.sh"],
+    "stages": ["preprocess", "compile", "link", "inspect"],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build EXPECTED_CUFFT_VERSION={expectedCufftVersion}",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build EXPECTED_CUFFT_VERSION={expectedCufftVersion}",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build EXPECTED_CUFFT_VERSION={expectedCufftVersion}",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build EXPECTED_CUFFT_VERSION={expectedCufftVersion}",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": ["build/cufft_batched_transform.ii", "build/cufft_batched_transform.o", "build/ex19-cufft-batched-transform", "build/dynamic-section.txt", "build/dynamic-linkage.txt"]
+  },
+  "correctness": {
+    "cpuReference": "include/cufft_batched_reference.hpp",
+    "inputType": "cufftComplex",
+    "referenceType": "std::complex<double>",
+    "transformType": "CUFFT_C2C",
+    "precision": "FP32",
+    "placement": "out-of-place",
+    "rank": 1,
+    "length": 4,
+    "batch": 2,
+    "inputLayout": {"stride": 2, "distance": 11, "embedding": [4], "allocationElements": 22},
+    "outputLayout": {"stride": 3, "distance": 16, "embedding": [4], "allocationElements": 32},
+    "layoutUnits": "complex elements, not bytes",
+    "forwardSign": -1,
+    "inverseSign": 1,
+    "normalization": "cuFFT is unnormalized in both directions; inverse(forward(x)) = 4*x; divide the completed inverse output by 4 on the host",
+    "planReuse": "One plan and workspace execute forward/inverse for both fixtures sequentially; completed forward output is explicitly host-repacked from stride 3/distance 16 into stride 2/distance 11 before inverse, never pointer-swapped",
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.00002,
+    "comparisonRule": "Every logical complex output must be finite and abs(gpu-cpu) <= 1e-4 + 2e-5*abs(cpu), using complex magnitude; padding is not a transform output",
+    "fixtures": [
+      {
+        "id": "signed-impulse",
+        "input": [[1,1],[2,-1],[-1,2],[3,0],[0,0],[2,-1],[0,0],[0,0]],
+        "literalForward": [[5,2],[1,0],[-5,4],[3,-2],[2,-1],[-1,-2],[-2,1],[1,2]]
+      },
+      {
+        "id": "opposite-tones",
+        "input": [[1,0],[0,1],[-1,0],[0,-1],[2,0],[0,-2],[-2,0],[0,2]],
+        "literalForward": [[0,0],[4,0],[0,0],[0,0],[0,0],[0,0],[0,0],[8,0]]
+      }
+    ]
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "fixedDeviceMemoryBytes": 432,
+    "maximumProblemMemoryBytes": 8000000000,
+    "temporaryStorage": "Caller-owned contiguous workspace sized by cufftGetSize after planning/stream association; zero bytes skips allocation; fixed buffers plus workspace are budget-checked; library internal resources are additional",
+    "target": ["sm_75", "compute_75"],
+    "versionGate": {
+      "header": "cufft.h",
+      "macros": ["CUFFT_VER_MAJOR", "CUFFT_VER_MINOR", "CUFFT_VER_PATCH", "CUFFT_VER_BUILD"],
+      "makeVariable": "EXPECTED_CUFFT_VERSION",
+      "compileDefinitions": ["EX19_EXPECTED_CUFFT_MAJOR", "EX19_EXPECTED_CUFFT_MINOR", "EX19_EXPECTED_CUFFT_PATCH", "EX19_EXPECTED_CUFFT_BUILD"],
+      "runtime": "cufftGetProperty MAJOR_VERSION/MINOR_VERSION/PATCH_LEVEL must match header major/minor/patch; cufftGetVersion raw value is reported separately; loaded build is not exposed by these APIs"
+    },
+    "lanes": [
+      {
+        "id": "cuda-11.8", "toolkit": "11.8.0", "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": ["c++17"]
+      },
+      {
+        "id": "cuda-12.9", "toolkit": "12.9.2", "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": ["c++17"]
+      },
+      {
+        "id": "cuda-13.3", "toolkit": "13.3.1", "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": ["c++17"]
+      }
+    ],
+    "checks": [
+      {
+        "id": "cuda-11-8-bundled-cufft-10-9-0-58", "toolkitLane": "cuda-11.8", "dialect": "c++17", "kind": "ex19",
+        "dependencyMode": "bundled", "component": "cuFFT", "componentVersion": "10.9.0.58", "expectedCufftVersion": "10.9.0.58",
+        "sourceCoordinate": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json",
+        "archiveSha256": "eadca0b30a4a2c1f741fde88d6dd611604e488fdb51c676861eabc08d2c4612f",
+        "includeRoots": ["/usr/local/cuda/include"], "allowedResults": ["pass"]
+      },
+      {
+        "id": "cuda-12-9-bundled-cufft-11-4-1-4", "toolkitLane": "cuda-12.9", "dialect": "c++17", "kind": "ex19",
+        "dependencyMode": "bundled", "component": "cuFFT", "componentVersion": "11.4.1.4", "expectedCufftVersion": "11.4.1.4",
+        "sourceCoordinate": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json",
+        "archiveSha256": "b0e65af59b0c2f6c8ed9f5552a9b375890855b7926ae2c0404d15dcf2565bda4",
+        "includeRoots": ["/usr/local/cuda/include"], "allowedResults": ["pass"]
+      },
+      {
+        "id": "cuda-13-3-bundled-cufft-12-3-0-29", "toolkitLane": "cuda-13.3", "dialect": "c++17", "kind": "ex19",
+        "dependencyMode": "bundled", "component": "cuFFT", "componentVersion": "12.3.0.29", "expectedCufftVersion": "12.3.0.29",
+        "sourceCoordinate": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json",
+        "archiveSha256": "b2404952a5d630fbbc13e12d36975ef87a9c05c71c321c2cb5b3820789e47462",
+        "includeRoots": ["/usr/local/cuda/include"], "allowedResults": ["pass"]
+      }
+    ]
+  },
+  "ranges": {
+    "cpu-reference": {"file": "include/cufft_batched_reference.hpp", "startMarker": "// [ex19-cpu-reference-start]", "endMarker": "// [ex19-cpu-reference-end]", "language": "cpp"},
+    "plan-layout": {"file": "src/cufft_batched_transform.cu", "startMarker": "// [ex19-plan-layout-start]", "endMarker": "// [ex19-plan-layout-end]", "language": "cpp"},
+    "stream-lifecycle": {"file": "src/cufft_batched_transform.cu", "startMarker": "// [ex19-stream-lifecycle-start]", "endMarker": "// [ex19-stream-lifecycle-end]", "language": "cpp"}
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "Both fixtures should pass finite full-output complex-magnitude tolerance against the double DFT and literal spectra with distinct batches and nontrivial input/output layouts.",
+      "The same plan and caller workspace should execute both directions on both inputs sequentially; repacking before inverse should preserve layout and explicit host scaling by 1/4 should recover the original input.",
+      "The header version should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuFFT and CUDA API levels reported separately from package identity."
+    ],
+    "recordedObservations": []
+  }
+}

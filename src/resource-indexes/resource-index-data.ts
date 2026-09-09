@@ -1589,6 +1589,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-07',
     keywords: localized('attention SDPA AUTO UNIFIED COMPOSITE Python router select_plan pinned fallback dtype engine', 'attention SDPA AUTO UNIFIED COMPOSITE Python router select_plan pinned fallback dtype engine'),
   },
+  {
+    planningId: 'PB-R4-013',
+    group: 'practice',
+    title: localized('修复批量实数 FFT 的逐行填充与类型化距离', 'Repair row padding and typed distances in a batched real FFT'),
+    href: localized('/practice/#pb-r4-013', '/en/practice/#pb-r4-013'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['L12'],
+    relatedUnits: ['L12', 'EX19'],
+    hardwareGate: localized('无；原创静态地址与数值审查，不运行 CUDA。EX19 仅为普通单 GPU FP32 C2C，不实现本题实数变换。', 'None; original static address and numerical audit without CUDA execution. EX19 is ordinary single-GPU FP32 C2C only, not this real-transform scenario.'),
+    versionGate: localized('Toolkit 11.8.0/12.9.2/13.3.1 的 cuFFT 10.9.0.58/11.4.1.4/12.3.0.29；非 NULL embeddings、按类型计量的元素距离、逐内行 2K 实数填充、Hermitian 与破坏性 C2R。', 'cuFFT 10.9.0.58/11.4.1.4/12.3.0.29 in Toolkit 11.8.0/12.9.2/13.3.1; non-NULL embeddings, element distances per type, 2K real padding per inner row, Hermitian symmetry, and destructive C2R.'),
+    reviewedOn: '2026-09-08',
+    keywords: localized('cuFFT DFT R2C C2R Hermitian 实数 复数 批量 布局 填充 stride distance embedding 对齐 归一化', 'cuFFT DFT R2C C2R Hermitian real complex batch layout padding stride distance embedding alignment normalization'),
+  },
+  {
+    planningId: 'PB-R4-014',
+    group: 'practice',
+    title: localized('审查 cuFFT 工作区所有权与冷启动摊销', 'Audit cuFFT workspace ownership and cold-start amortization'),
+    href: localized('/practice/#pb-r4-014', '/en/practice/#pb-r4-014'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L12'],
+    relatedUnits: ['Q05', 'M07', 'L12', 'EX19'],
+    hardwareGate: localized('无；假设生命周期与成本账本，不查询工作区或计时。未来 EX19 执行要求原生 Linux、CC 7.5+，不含回调或低精度。', 'None; hypothetical lifecycle and cost ledger without workspace queries or timing. Future EX19 execution requires native Linux and CC 7.5+, without callbacks or low precision.'),
+    versionGate: localized('Toolkit 11.8.0/12.9.2/13.3.1；cuFFT 10.9.0.58/11.4.1.4/12.3.0.29。先关闭自动分配再 make-plan；区分 12.0 起 PTX JIT、12.4 LTO、12.6 Update 2 LTO callbacks、13.2 NVRTC 与 13.3 Update 1 已知正确性风险。', 'Toolkit 11.8.0/12.9.2/13.3.1; cuFFT 10.9.0.58/11.4.1.4/12.3.0.29. Disable autoallocation before make-plan; distinguish PTX JIT since 12.0, LTO since 12.4, LTO callbacks since 12.6 Update 2, NVRTC since 13.2, and the 13.3 Update 1 known correctness hazard.'),
+    reviewedOn: '2026-09-08',
+    keywords: localized('cuFFT plan 生命周期 工作区 stream 完成 startup JIT PTX driver cache LTO callback NVRTC hazard 摊销', 'cuFFT plan lifecycle workspace stream completion startup JIT PTX driver cache LTO callback NVRTC hazard amortization'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -2085,10 +2113,12 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-190', 'Accumulator Type · 累加器类型', 'kernel-vocabulary', ['Q02', 'L06', 'L08', 'L09'], '累加器类型（Accumulator Type）与输入存储、实际乘法精度、收尾计算及输出存储分开；FP32 累加不能恢复输入转换已丢失的信息。CUDA WMMA 与固定 CUTLASS v4.7.0 合同于 2026-09-07 复核，无运行结论。', 'Accumulator Type is separate from input storage, multiplicand precision, epilogue computation, and output storage; FP32 accumulation cannot restore information lost on input conversion. CUDA WMMA and pinned CUTLASS v4.7.0 contracts reviewed 2026-09-07, with no runtime conclusion.', '2026-09-07'),
   glossaryRecord('TERM-191', 'Operation Graph · 运算图', 'kernel-vocabulary', ['A07', 'L10', 'L11'], 'cuDNN backend 9.24.0 与 frontend 1.27.0：张量运算与数据依赖的规格，不是 CUDA Graph 启动捕获、已选内核或执行证据。', 'cuDNN backend 9.24.0 and frontend 1.27.0: a specification of tensor operations and data dependencies, not CUDA Graph launch capture, a selected kernel, or execution evidence.', '2026-09-07'),
   glossaryRecord('TERM-192', 'Execution Plan · 执行计划', 'kernel-vocabulary', ['L10', 'L11'], '固定 cuDNN 合同中从引擎配置构建的实现描述；启发式候选不等于计划，构建不等于正确输出、最快实现或跨设备可移植性。', 'An implementation description built from an engine configuration under the pinned cuDNN contract; a heuristic candidate is not a plan, and building proves neither correct output, fastest implementation, nor cross-device portability.', '2026-09-07'),
+  glossaryRecord('TERM-193', 'DFT · 离散傅里叶变换', 'kernel-vocabulary', ['L12', 'EX19'], 'cuFFT 前向 DFT 指数为负号；正反变换均不自动归一化，往返缩放为变换逻辑尺寸乘积，不乘批次数。FFT 是计算 DFT 的算法族。', 'cuFFT forward DFT uses a negative exponent sign; neither direction normalizes automatically, so a round trip scales by the product of logical transform dimensions, not by batch count. FFT names algorithms for computing the DFT.', '2026-09-08'),
+  glossaryRecord('TERM-194', 'Hermitian Symmetry · 厄米共轭对称', 'kernel-vocabulary', ['L12'], '实数输入频谱在反转全部频率坐标后互为共轭；最后一维仅存 K=floor(N/2)+1 个复数，原位存储每条内行需 2K 个实数。C2R 输入必须满足对称与对齐合同。', 'A real-input spectrum equals the conjugate at all negated frequency coordinates; the last dimension stores K=floor(N/2)+1 complex values, requiring 2K real slots per inner row in-place. C2R input must satisfy symmetry and alignment contracts.', '2026-09-08'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
-  sourceRecord('SRC-WEB-001', same('Astro'), 'publishing-interface', ['O01'], same('Astro 7.2.4; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })'), '2026-08-25'),
+  sourceRecord('SRC-WEB-001', same('Astro'), 'publishing-interface', ['O01'], same('Astro 7.2.8; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })'), '2026-09-09'),
   sourceRecord('SRC-WEB-002', same('Starlight'), 'publishing-interface', ['O01'], same('Starlight 0.41.7'), '2026-08-25'),
   sourceRecord('SRC-WEB-003', same('Pagefind'), 'publishing-interface', ['O01'], same('Pagefind 1.5.2'), '2026-08-25'),
   sourceRecord(
@@ -2986,6 +3016,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-07',
     '2026-09-07',
+  ),
+  sourceRecord(
+    'SRC-CUDA-073',
+    localized('cuFFT DFT、布局、计划与工作区合同', 'cuFFT DFT, layouts, plans, and workspace contracts'),
+    'cuda-version-record',
+    ['L12', 'EX19'],
+    localized(
+      'cuFFT 11.8.0/12.9.2 归档指南与实时 v13.3 指南（页脚 2026-06-25）；非归一化 DFT、逐行实数填充、Hermitian/对齐、破坏性 C2R、非 NULL embeddings、类型化 stride/distance、计划/工作区/stream 完成合同。无编译或运行证据。',
+      'Archived 11.8.0/12.9.2 cuFFT guides and live v13.3 guide (footer 2026-06-25); unnormalized DFT, per-row real padding, Hermitian/alignment, destructive C2R, non-NULL embeddings, typed strides/distances, and plan/workspace/stream completion contracts. No compilation or runtime evidence.',
+    ),
+    '2026-09-08',
+    '2026-09-08',
+  ),
+  sourceRecord(
+    'SRC-CUDA-074',
+    localized('cuFFT 独立组件、JIT、回调、精度与已知风险', 'cuFFT independent components, JIT, callbacks, precision, and known hazards'),
+    'cuda-version-record',
+    ['Q05', 'M07', 'L12', 'EX19'],
+    localized(
+      '版本化 redistribution manifests：Toolkit 11.8.0 -> cuFFT 10.9.0.58，12.9.2 -> 11.4.1.4，13.3.1 -> 12.3.0.29；实时 release notes 页脚 2026-08-26，精确 13.3.1 发布归档 404。PTX JIT、LTO/NVRTC、逐版本精度门槛与 13.3 Update 1 已知 LTO 实数侧回调正确性风险，未标为修复。',
+      'Versioned redistribution manifests: Toolkit 11.8.0 -> cuFFT 10.9.0.58, 12.9.2 -> 11.4.1.4, 13.3.1 -> 12.3.0.29; live release-notes footer 2026-08-26 and exact 13.3.1 release archive 404. PTX JIT, LTO/NVRTC, version-specific precision gates, and the 13.3 Update 1 known LTO real-side callback correctness hazard, not a fixed issue.',
+    ),
+    '2026-09-08',
+    '2026-09-08',
   ),
 ];
 

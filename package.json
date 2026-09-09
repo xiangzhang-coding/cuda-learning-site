@@ -38,8 +38,11 @@
     "@astrojs/markdown-remark": "7.2.4",
     "@astrojs/mdx": "7.0.7",
     "@astrojs/starlight": "0.41.7",
-    "astro": "7.2.4",
+    "astro": "7.2.8",
     "pagefind": "1.5.2"
+  },
+  "overrides": {
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

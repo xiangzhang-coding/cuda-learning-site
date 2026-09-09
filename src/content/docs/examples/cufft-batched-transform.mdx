@@ -1,0 +1,212 @@
+---
+title: 'EX19：cuFFT 批量复数变换'
+description: 用双精度 CPU DFT 检查带步长的 FP32 复数批次，显式管理工作区、顺序复用计划并对逆变换归一化。
+pairId: ex19
+counterpart: /en/examples/cufft-batched-transform/
+factCheckDate: '2026-09-08'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, cpu-reference, plan-layout, stream-lifecycle, version-profiles, build, compatibility, evidence, expected-observations, sources]
+resourceKind: runnable-example
+unitId: EX19
+prerequisites: [L12]
+relatedUnits: []
+exampleIds: [EX19]
+canonicalExample: EX19
+canonicalRanges:
+  - cpu-reference
+  - plan-layout
+  - stream-lifecycle
+hardwareGate: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuFFT profile; runtime: Native Linux, one CC 7.5+ GPU; 432 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget'
+toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read selected Toolkit/cuFFT headers and shared libraries'
+  - 'Access one CUDA device; execute compiler, make, bash, readelf, ldd, host test, and CUDA binary'
+  - 'Write and remove EX19 build, result, and learner-owned evidence files'
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - 'Both fixtures should pass finite full-output complex-magnitude tolerance against the double DFT and literal spectra with distinct batches and nontrivial input/output layouts.'
+    - 'The same plan and caller workspace should execute both directions on both inputs sequentially; repacking before inverse should preserve layout and explicit host scaling by 1/4 should recover the original input.'
+    - 'The header version should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuFFT and CUDA API levels reported separately from package identity.'
+  recordedObservations: []
+sources:
+  - title: 'cuFFT reference archived with CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html'
+    version: 'Toolkit 11.8.0; cuFFT 10.9.0.58'
+    platform: 'Native Linux; C2C, plans, strides, workspace, streams, version queries'
+    accessDate: '2026-09-08'
+  - title: 'cuFFT reference archived with CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html'
+    version: 'Toolkit 12.9.2; cuFFT 11.4.1.4'
+    platform: 'Native Linux; C2C and helper API contracts'
+    accessDate: '2026-09-08'
+  - title: 'Current cuFFT owner reference'
+    url: 'https://docs.nvidia.com/cuda/cufft/index.html'
+    version: 'Live guide label 13.3, updated 2026-06-25; not an immutable 13.3.1 archive'
+    platform: 'Native Linux; current API comparison, not execution'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcufft 10.9.0.58'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcufft 11.4.1.4'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcufft 12.3.0.29'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-08'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex19 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/examples/cufft-batched-transform/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-08' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,plan-layout,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX19 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: L12 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX19 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX19 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,plan-layout,stream-lifecycle' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuFFT profile; runtime: Native Linux, one CC 7.5+ GPU; 432 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:permissions', content: 'read Toolkit/cuFFT; one CUDA device; compiler, make, bash, readelf, ldd, host-test, CUDA-binary execution; EX19 build/result/evidence write/delete' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '6' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuFFT-10.9.0.58,cuFFT-11.4.1.4,cuFFT-12.3.0.29,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1' } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/cufft-batched-transform/" lang="en">Read the English counterpart</a>
+
+## 目的
+
+先完成 [L12](/libraries/cufft-plans-layouts-startup/)。EX19 是独立的原创 C++17 正确性项目：两个 FP32 复数批次、带步长的非原位（out-of-place）C2C 计划（plan），以及显式资源所有权。CUDA 仅在外部环境执行，学习站（Learning Site）内不运行 CUDA。程序不含计时器。
+
+## 规范项目
+
+[查看固定源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a090417a1f3d7cc873afa3c9452d8afe005e2bbc/examples/ex19-cufft-batched-transform)或[下载同一版本](https://github.com/xiangzhang-coding/cuda-learning-site/archive/a090417a1f3d7cc873afa3c9452d8afe005e2bbc.zip)。独立目录为 `examples/ex19-cufft-batched-transform/`，八个文件分别是清单、README、Makefile、主机头文件、CUDA 源码、主机测试、编译脚本和证据说明。
+
+原创项目软件采用 Apache-2.0，本教学页面采用 CC BY 4.0。cuFFT 是遵循 NVIDIA 自身条款的外部依赖。未再分发上游示例、SDK 头文件或库二进制。中英文导入下列同一组源码范围。
+
+## 独立 CPU 参考
+
+<CanonicalCode exampleId="EX19" range="cpu-reference" />
+
+参考算法按逻辑批次顺序处理 `std::complex<double>` 样本，不依赖 cuFFT 的物理地址映射。正向使用负指数，逆向使用正指数，两者均不归一化。下表中的四个字面频谱是数学预期，不是 GPU 运行观察：
+
+| 测试输入 / 批次 | 输入 | 正向频谱 |
+| --- | --- | --- |
+| `signed-impulse` / 0 | `1+i, 2-i, -1+2i, 3` | `5+2i, 1, -5+4i, 3-2i` |
+| `signed-impulse` / 1 | `0, 2-i, 0, 0` | `2-i, -1-2i, -2+i, 1+2i` |
+| `opposite-tones` / 0 | `1, i, -1, -i` | `0, 4, 0, 0` |
+| `opposite-tones` / 1 | `2, -2i, -2, 2i` | `0, 0, 0, 8` |
+
+每个逻辑复数输出的实虚部都必须有限，并按复数模长满足 `abs(gpu-cpu) <= 1e-4 + 2e-5*abs(cpu)`。容差只适用于这些小输入，不适用于任意 FFT 长度。程序分别检查正向和未缩放逆向，再在主机上将已完成逆向输出除以 4，与原输入比较。往返检查是补充，不是唯一参考。填充不属于变换输出。
+
+## 计划与物理布局
+
+<CanonicalCode exampleId="EX19" range="plan-layout" />
+
+秩为 1，N 为 4，批次数为 2。非空嵌入数组（embedding）`{4}` 启用高级步长契约。下表所有数值以复数元素计数，不是字节：
+
+| 一侧 | 步长 | 批间距 | 分配元素数 | 按批次排列的逻辑偏移 |
+| --- | --- | --- | --- | --- |
+| 输入 | 2 | 11 | 22 | `0,2,4,6; 11,13,15,17` |
+| 输出 | 3 | 16 | 32 | `0,3,6,9; 16,19,22,25` |
+
+非逻辑输入槽位填入 `123-321i`，用于暴露错误的连续读取。每次执行前输出初始化为 NaN，未写入的逻辑值因此无法通过检查。不承诺未使用的填充保持不变。规划前关闭自动工作区（workspace）分配；查询最终大小，检查预算，分配并绑定。如果需求为零字节，则跳过分配并绑定空指针。库内部资源另计。
+
+## 流与资源生命周期
+
+<CanonicalCode exampleId="EX19" range="stream-lifecycle" />
+
+一个非默认 `cudaStreamNonBlocking` 流、一个计划和一份调用者工作区依次服务四次执行：每组测试输入各做一次正向和逆向。H2D 初始化、FFT 和 D2H 位于同一流，检查完成之后才能在 CPU 上读取或复用。可分页主机向量不构成传输重叠证据。
+
+逆变换时，同一个计划仍要求输入步长 2、批间距 11。程序提取已完成的 GPU 正向频谱，**在主机上按该输入布局重新打包**，而不是交换设备指针。随后检查不归一化逆向结果和主机 `1/4` 缩放，不对已完成规划的句柄再次规划。即便发生异常，主机传输缓冲区也比清理活得更久。清理会等待部分提交，销毁已取得的资源，尝试全部释放，并让释放错误导致进程失败。
+
+## 独立版本配置
+
+| 配置 | Toolkit | cuFFT 组件 | 头文件 MAJOR,MINOR,PATCH,BUILD |
+| --- | --- | --- | --- |
+| `cuda-11-8-bundled-cufft-10-9-0-58` | 11.8.0 | 10.9.0.58 | 10,9,0,58 |
+| `cuda-12-9-bundled-cufft-11-4-1-4` | 12.9.2 | 11.4.1.4 | 11,4,1,4 |
+| `cuda-13-3-bundled-cufft-12-3-0-29` | 13.3.1 | 12.3.0.29 | 12,3,0,29 |
+
+`EXPECTED_CUFFT_VERSION` 转换为四个 `EX19_EXPECTED_CUFFT_*` 定义，与 `CUFFT_VER_MAJOR`、`CUFFT_VER_MINOR`、`CUFFT_VER_PATCH`、`CUFFT_VER_BUILD` 比较。未知或缺失配置会失败。固定版本来自独立组件清单，不是从 Toolkit 标签推算的。
+
+检查 `cufftGetProperty` 返回状态，并要求已加载主次补丁版本与头文件三元组相同；另外原样报告 `cufftGetVersion`。这些 API 不暴露已加载构建号，完整身份需要另记实际解析的库与包信息和文件哈希。CUDA 驱动与 Runtime 的 API 级别以及 `CUDART_VERSION` 不是安装的驱动或 Toolkit 包版本。头文件身份不证明实际加载了哪个完整二进制。
+
+## 构建与运行
+
+在独立目录中执行主机测试，不需要 CUDA 头文件或 GPU：
+
+```sh
+make host-test DIALECT=c++17
+```
+
+测试覆盖字面频谱与独立逆向值、符号、不同批次输入、布局偏移、归一化、每个输出位置的破坏、非有限数、无效长度与方向，以及包含边界的容差规则。成功只说明主机契约成立。
+
+在匹配的 11.8.0 开发镜像中构建并检查，不执行 CUDA：
+
+```sh
+make preprocess compile link inspect DIALECT=c++17 EXPECTED_CUFFT_VERSION=10.9.0.58
+bash scripts/compile-check.sh c++17 cuda-11-8-bundled-cufft-10-9-0-58 artifacts/ex19-11-8
+```
+
+包装脚本还会清理并执行主机测试。其他通道各自在匹配环境选择对应配置，不是在一次安装中切换三个标签。脚本传递阶段失败状态，绝不执行 CUDA 二进制。链接使用 `-lcufft`；`readelf -d` 必须显示 cuFFT 依赖，`ldd` 必须成功解析且没有缺失库。EX19 未定义设备内核，因此不要求 EX19 自有 cubin/PTX。编译目标参数不证明 cuFFT 内部派发或规划时 JIT 行为。
+
+仅在满足运行门槛之后执行：
+
+```sh
+./build/ex19-cufft-batched-transform
+```
+
+程序选择可见设备 0。预期报告包含版本粒度、GPU 与 API 级别、规划及绑定工作区字节数，以及每次检查八个复数输出的四个正确性结论。这是未来输出的约定，不是已保留的运行记录。
+
+## 兼容性
+
+三种配置都使用 C++17 和清单中摘要固定的 x86-64 开发镜像：11.8.0 对应 Ubuntu 22.04，12.9.2 和 13.3.1 对应 Ubuntu 24.04。原生 Linux 是唯一受支持环境（Supported Environment）。运行需要一个选定的 CC 7.5+ GPU。使用与 Toolkit 适当匹配或更新的驱动；仅达到较低的家族次版本兼容下限，不能保证 PTX JIT 可用。
+
+输入输出缓冲区共 `(22+32)*8=432` 字节。固定缓冲区与查询到的工作区合计接受 8,000,000,000 字节预算检查；库内部资源和空闲显存要求另计，分配失败必须终止。这是问题显存预算，不是测得的占用量，也不是零临时空间承诺。
+
+范围不包括 R2C/C2R、原位变换、低精度、回调、多 GPU、图、计时和 patient-JIT/LTO 主动启用。13.3 Update 1 的实数侧 LTO 回调已知问题因此不描述此无回调 C2C 路径，但这不是对整个版本正确性的保证。[L12](/libraries/cufft-plans-layouts-startup/) 讲解更广泛的门槛，不声称本例执行过那些模式。
+
+## 证据边界
+
+编译数组为空，不授予保留记录意义上的编译已检查（Compile-Checked）。运行仍为待硬件验证（Pending Hardware Verification），没有已记录观察。主机测试、构建门槛、来源审核和规范源码导入不能提供 GPU 正确性、工作区、启动、变换耗时或加速比证据。
+
+合格的未来记录需要源码与配置身份、阶段日志、完整环境清单（Environment Manifest）、实际加载的组件身份、原始输出和全部正确性结论。未来启动与热执行测量应分开记录；本程序没有基准测试结果。
+
+## 预期观察
+
+1. 两组输入应在批次不同、输入输出布局非平凡的条件下，通过对双精度 DFT 和字面频谱的有限性、全输出复数模长容差检查。
+2. 同一计划与调用者工作区应依次对两组输入执行两个方向；逆向前重新打包保持布局，主机显式乘以 1/4 后应恢复原输入。
+3. 头文件版本应匹配四段组件配置，已加载主次补丁版本应匹配头文件；原始 cuFFT 版本和 CUDA API 级别应与包身份分开报告。
+
+## 来源与核查
+
+- [11.8.0 cuFFT API 归档](https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html)与 [12.9.2 API 归档](https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html)。
+- [当前 cuFFT API](https://docs.nvidia.com/cuda/cufft/index.html)，指南标签为 13.3，不是不可变的 13.3.1 归档。
+- 独立组件清单：[11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)、[12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)、[13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json)。
+- [SRC-CUDA-073](/sources-and-versions/#src-cuda-073) 与 [SRC-CUDA-074](/sources-and-versions/#src-cuda-074) 保留来源、权利、JIT 和版本风险边界。
+
+核查于 **2026-09-08**。清单中的官方归档哈希是获取坐标，不表示已对实际加载库进行哈希验证。未改编上游实现或示例。

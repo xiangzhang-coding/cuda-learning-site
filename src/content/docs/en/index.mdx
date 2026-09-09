@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-09-07'
+factCheckDate: '2026-09-08'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-07'
+      content: '2026-09-08'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,9 +46,9 @@ head:
 
 ## The route published today
 
-The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. Its immutable snapshot retains 232 Publication Pairs, 464 source routes, and 347 catalog records. Rolling R4 now extends through L01-L11, EX17/EX18, and LAB11/LAB12; [issue #38](https://github.com/xiangzhang-coding/cuda-learning-site/issues/38) adds [L10: cuDNN Graphs and Plans](/en/libraries/cudnn-graphs-and-plans/) and [L11: Attention Backend Dispatch](/en/libraries/attention-backend-dispatch/). Current scope is 73 Learning Units, 269 Publication Pairs, 538 source routes, and 389 catalog records while the R4 aggregate review remains pending.
+The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. Its immutable snapshot retains 232 Publication Pairs, 464 source routes, and 347 catalog records. Rolling R4 now extends through L01-L12, EX17/EX18/EX19, and LAB11/LAB12; [issue #39](https://github.com/xiangzhang-coding/cuda-learning-site/issues/39) adds [L12: cuFFT Plans, Layouts, and Startup](/en/libraries/cufft-plans-layouts-startup/) and [EX19: cuFFT Batched Transform](/en/examples/cufft-batched-transform/). Current scope is 74 Learning Units, 273 Publication Pairs, 546 source routes, and 395 catalog records while the R4 aggregate review remains pending.
 
-**Publication inventory and navigation updated: 2026-09-07.** The page date covers only this inventory and entry-point update, not a new review of existing CUDA API facts; technical sources retain their individual access and review dates.
+**Publication inventory and navigation updated: 2026-09-08.** The page date covers only this inventory and entry-point update, not a new review of existing CUDA API facts; technical sources retain their individual access and review dates.
 
 The strict prerequisite graph enters O01 from Home. O02, O03, O04, O05, and O06 all depend directly on O01; O07 depends on O06; and O08 requires O02, O03, and O05. The kernel route enters [F01](/en/foundations/first-cuda-kernel/) from O03. [F02 Execution Hierarchy](/en/foundations/execution-hierarchy/) depends on F01, [F03 Multidimensional Indexing](/en/foundations/multidimensional-indexing/) depends on F02, and [F04 Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) also depends on F01. [F05 Asynchronous Errors](/en/foundations/asynchronous-errors/) depends only on F04; [F06 Compute Capability](/en/foundations/compute-capability/) requires F02 and O03; [F07 Runtime/Driver API Boundary](/en/foundations/runtime-driver-api/) requires F04 and F05; and [F08 Launch Geometry](/en/foundations/launch-geometry/) requires F02, F03, and F06.
 
@@ -82,19 +82,21 @@ Q06-Q13 also publish complete Exercises and separate reviewed solutions, includi
 
 L01-L09 publish [L01 Exercises](/en/libraries/library-primitive-dsl-custom-kernel/exercises/) and [solutions](/en/libraries/library-primitive-dsl-custom-kernel/solutions/), [L02 Exercises](/en/libraries/thrust-algorithm-vocabulary/exercises/) and [solutions](/en/libraries/thrust-algorithm-vocabulary/solutions/), [L03 Exercises](/en/libraries/cub-device-primitives/exercises/) and [solutions](/en/libraries/cub-device-primitives/solutions/), [L04 Exercises](/en/libraries/cub-warp-block-primitives/exercises/) and [solutions](/en/libraries/cub-warp-block-primitives/solutions/), [L05 Exercises](/en/libraries/libcu-plus-plus-synchronization/exercises/) and [solutions](/en/libraries/libcu-plus-plus-synchronization/solutions/), [L06 Exercises](/en/libraries/cublas-gemm/exercises/) and [solutions](/en/libraries/cublas-gemm/solutions/), plus [L07 Exercises](/en/libraries/cublaslt-matmul/exercises/) and [solutions](/en/libraries/cublaslt-matmul/solutions/). This increment adds [L08 Exercises](/en/libraries/tensor-core-precision-contracts/exercises/) and [separate solutions](/en/libraries/tensor-core-precision-contracts/solutions/), plus [L09 Exercises](/en/libraries/cutlass-cpp-gemm-structure/exercises/) and [separate solutions](/en/libraries/cutlass-cpp-gemm-structure/solutions/).
 
-The site has 18 Runnable Examples, EX01-EX18. [EX18: cuBLAS GEMM](/en/examples/cublas-gemm/) strictly requires L06; [EX17 CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/) strictly requires L03; EX15 requires A08, EX14 requires A05, and EX16 requires Q03/Q04.
+The site has 19 Runnable Examples, EX01-EX19. [EX19: cuFFT Batched Transform](/en/examples/cufft-batched-transform/) strictly requires L12; [EX18: cuBLAS GEMM](/en/examples/cublas-gemm/) strictly requires L06; [EX17 CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/) strictly requires L03; EX15 requires A08, EX14 requires A05, and EX16 requires Q03/Q04. EX19 declares C++17 only on the same three pinned Toolkit Lanes, with bundled cuFFT 10.9.0.58 / 11.4.1.4 / 12.3.0.29. Its FP32 C2C contract excludes callbacks, low precision, multi-GPU execution, and timing.
 
 Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1. It has empty compilation evidence, Pending Hardware Verification runtime, and empty recorded observations. A host utility establishes no GPU correctness. The site has not run EX15 and publishes no output, timing, speedup, or other performance number.
 
 EX17's five bundled CUB 1.15.1/2.8.2/3.3.4 and selected CCCL 3.4.2 component rows are only a declared non-evidentiary build gate; the site does not claim CI ran. EX17 has empty compilation evidence and recorded observations, no observed runtime evidence, and Pending Hardware Verification runtime.
 
-The current 12 Labs are LAB01-LAB12. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11. [LAB11 Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/) strictly requires Q12 and L03 and compares immutable EX11 with EX17. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) strictly requires Q13 and L06 and compares EX15 with EX18. All three have no recorded observations. LAB12 has complete bilingual instructions, but runtime remains Pending Hardware Verification; L12-L13 remain unpublished.
+The current 12 Labs are LAB01-LAB12. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11. [LAB11 Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/) strictly requires Q12 and L03 and compares immutable EX11 with EX17. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) strictly requires Q13 and L06 and compares EX15 with EX18. All three have no recorded observations. LAB12 has complete bilingual instructions, but runtime remains Pending Hardware Verification; L13 remains unpublished.
 
 The site has 19 formal Visual Explainers: standalone VIS01-VIS14 and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/) plus embedded VIS19-VIS22. VIS18 strictly requires A11 and provides a deterministic shape, stage, and IO ledger with a purpose-built static SVG. It is not GPU-traffic or performance evidence.
 
-A10-A14, Q06-Q13, L01-L11, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11 and EX18/LAB12 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
+A10-A14, Q06-Q13, L01-L12, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, and EX19 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The immutable R3 catalog contains 10 Labs, 66 Practice Bank entries, 19 Visual Explainers, 176 Glossary terms, and 76 source records, for 347 records total. The rolling current catalog contains 12 Labs, 78 Practice Bank entries, 19 Visual Explainers, 192 Glossary terms, and 88 source records, for 389 records total. Current source files form 269 Publication Pairs, or 538 source routes, including 72 Exercise sets and 72 separate reviewed-solution sets. R3's exact 10-entry Nsight report-analysis inventory is unchanged, and the R4 aggregate review remains pending.
+The immutable R3 catalog contains 10 Labs, 66 Practice Bank entries, 19 Visual Explainers, 176 Glossary terms, and 76 source records, for 347 records total. The rolling current catalog contains 12 Labs, 80 Practice Bank entries, 19 Visual Explainers, 194 Glossary terms, and 90 source records, for 395 records total. Current source files form 273 Publication Pairs, or 546 source routes, including 73 Exercise sets and 73 separate reviewed-solution sets. R3's exact 10-entry Nsight report-analysis inventory is unchanged, and the R4 aggregate review remains pending.
+
+[L12](/en/libraries/cufft-plans-layouts-startup/) has exactly `[Q05,M07]` as ordered prerequisites. [L12 Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) require `[L12]`; [separate solutions](/en/libraries/cufft-plans-layouts-startup/solutions/) require `[L12-EXERCISES]`. L12's four evidence arrays remain empty. The archived 12.9.2 cuFFT guide is the teaching baseline; the live 13.3 reference was accessed 2026-09-08 because exact 13.3.1 API and release-note archives were unavailable.
 
 ## Boundaries first
 
@@ -458,6 +460,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <strong>Attention Backend Dispatch</strong>
     <small>Distinguish frontend representation, engine routing, and actual framework selection under a narrow forward contract.</small>
   </a>
+  <a className="route-card" href="/en/libraries/cufft-plans-layouts-startup/">
+    <span>L12 · CUFFT PLANS AND LAYOUTS</span>
+    <strong>Separate cuFFT Mathematics, Storage, and Startup</strong>
+    <small>Derive transform layouts and plan lifetimes without treating startup models as measurements.</small>
+  </a>
   <a className="route-card" href="/en/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>Environment Report Runnable Example</strong>
@@ -547,6 +554,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
     <span>EX18 · CUBLAS REFERENCE</span>
     <strong>cuBLAS GEMM Reference Runnable Example</strong>
     <small>Check against an independent CPU reference; compilation evidence is empty and runtime remains pending.</small>
+  </a>
+  <a className="route-card" href="/en/examples/cufft-batched-transform/">
+    <span>EX19 · BATCHED CUFFT</span>
+    <strong>cuFFT Batched Transform Runnable Example</strong>
+    <small>Check strided C2C batches against a CPU DFT; compilation evidence is empty and runtime remains pending.</small>
   </a>
   <a className="route-card" href="/en/labs/record-cuda-environment/">
     <span>LAB01 · CAPTURE</span>
@@ -696,17 +708,17 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, environment, architecture, kernel, memory, algorithm, library, toolchain, and correctness reasoning through 78 original problems.</small>
+    <small>Practice evidence, environment, architecture, kernel, memory, algorithm, library, toolchain, and correctness reasoning through 80 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 192-term canonical bilingual vocabulary.</small>
+    <small>Check the 194-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 88 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 90 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

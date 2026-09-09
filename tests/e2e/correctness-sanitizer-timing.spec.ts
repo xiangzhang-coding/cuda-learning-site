@@ -150,6 +150,7 @@ const exampleSlugs = [
   'sanitizer-defect-suite',
   'cub-device-reduction-scan',
   'cublas-gemm',
+  'cufft-batched-transform',
 ] as const;
 const labSlugs = [
   'record-cuda-environment',
@@ -171,8 +172,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(538);
-  expect(publishedRoutes.length / 2).toBe(269);
+  expect(publishedRoutes).toHaveLength(546);
+  expect(publishedRoutes.length / 2).toBe(273);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

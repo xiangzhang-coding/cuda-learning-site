@@ -1,0 +1,212 @@
+---
+title: 'EX19: Batched Complex Transforms with cuFFT'
+description: Check strided FP32 complex batches against a double CPU DFT, with caller-owned workspace, sequential plan reuse, and explicit inverse normalization.
+pairId: ex19
+counterpart: /examples/cufft-batched-transform/
+factCheckDate: '2026-09-08'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, cpu-reference, plan-layout, stream-lifecycle, version-profiles, build, compatibility, evidence, expected-observations, sources]
+resourceKind: runnable-example
+unitId: EX19
+prerequisites: [L12]
+relatedUnits: []
+exampleIds: [EX19]
+canonicalExample: EX19
+canonicalRanges:
+  - cpu-reference
+  - plan-layout
+  - stream-lifecycle
+hardwareGate: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuFFT profile; runtime: Native Linux, one CC 7.5+ GPU; 432 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget'
+toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read selected Toolkit/cuFFT headers and shared libraries'
+  - 'Access one CUDA device; execute compiler, make, bash, readelf, ldd, host test, and CUDA binary'
+  - 'Write and remove EX19 build, result, and learner-owned evidence files'
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - 'Both fixtures should pass finite full-output complex-magnitude tolerance against the double DFT and literal spectra with distinct batches and nontrivial input/output layouts.'
+    - 'The same plan and caller workspace should execute both directions on both inputs sequentially; repacking before inverse should preserve layout and explicit host scaling by 1/4 should recover the original input.'
+    - 'The header version should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuFFT and CUDA API levels reported separately from package identity.'
+  recordedObservations: []
+sources:
+  - title: 'cuFFT reference archived with CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html'
+    version: 'Toolkit 11.8.0; cuFFT 10.9.0.58'
+    platform: 'Native Linux; C2C, plans, strides, workspace, streams, version queries'
+    accessDate: '2026-09-08'
+  - title: 'cuFFT reference archived with CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html'
+    version: 'Toolkit 12.9.2; cuFFT 11.4.1.4'
+    platform: 'Native Linux; C2C and helper API contracts'
+    accessDate: '2026-09-08'
+  - title: 'Current cuFFT owner reference'
+    url: 'https://docs.nvidia.com/cuda/cufft/index.html'
+    version: 'Live guide label 13.3, updated 2026-06-25; not an immutable 13.3.1 archive'
+    platform: 'Native Linux; current API comparison, not execution'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcufft 10.9.0.58'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcufft 11.4.1.4'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcufft 12.3.0.29'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-08'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex19 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/examples/cufft-batched-transform/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-08' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,plan-layout,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX19 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: L12 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX19 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX19 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,plan-layout,stream-lifecycle' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuFFT profile; runtime: Native Linux, one CC 7.5+ GPU; 432 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:permissions', content: 'read Toolkit/cuFFT; one CUDA device; compiler, make, bash, readelf, ldd, host-test, CUDA-binary execution; EX19 build/result/evidence write/delete' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '6' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuFFT-10.9.0.58,cuFFT-11.4.1.4,cuFFT-12.3.0.29,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/cufft-batched-transform/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+Complete [L12](/en/libraries/cufft-plans-layouts-startup/) first. EX19 is a standalone original C++17 correctness project: two FP32 complex batches, a strided out-of-place C2C plan, and explicit resource ownership. It executes CUDA only in an external environment, never in this Learning Site. It contains no timer.
+
+## Canonical Project
+
+[Inspect the fixed source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a090417a1f3d7cc873afa3c9452d8afe005e2bbc/examples/ex19-cufft-batched-transform) or [download the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/a090417a1f3d7cc873afa3c9452d8afe005e2bbc.zip). The standalone directory is `examples/ex19-cufft-batched-transform/`. Its eight files comprise the manifest, README, Makefile, host header, CUDA source, host test, compile script, and evidence note.
+
+Original project software is Apache-2.0; this instructional page is CC BY 4.0. cuFFT remains an external dependency under NVIDIA's terms. No owner sample, SDK header, or library binary is redistributed. Both locales import the same source ranges below.
+
+## Independent CPU Reference
+
+<CanonicalCode exampleId="EX19" range="cpu-reference" />
+
+The oracle operates on logical batch-major `std::complex<double>` samples, independently of cuFFT's physical address mapping. Forward uses the negative exponent, inverse the positive exponent; neither direction normalizes. These four literal spectra are mathematical expectations, not recorded GPU output:
+
+| Fixture / batch | Input | Forward spectrum |
+| --- | --- | --- |
+| `signed-impulse` / 0 | `1+i, 2-i, -1+2i, 3` | `5+2i, 1, -5+4i, 3-2i` |
+| `signed-impulse` / 1 | `0, 2-i, 0, 0` | `2-i, -1-2i, -2+i, 1+2i` |
+| `opposite-tones` / 0 | `1, i, -1, -i` | `0, 4, 0, 0` |
+| `opposite-tones` / 1 | `2, -2i, -2, 2i` | `0, 0, 0, 8` |
+
+Every logical complex output must have finite components and satisfy `abs(gpu-cpu) <= 1e-4 + 2e-5*abs(cpu)`, using complex magnitude. The tolerance belongs to these small fixtures, not arbitrary FFT sizes. Both forward and unscaled inverse are checked; the completed inverse is then divided by 4 on the host and compared with the original input. A round trip is additional validation, not the only oracle. Padding is not transform output.
+
+## Plan And Physical Layout
+
+<CanonicalCode exampleId="EX19" range="plan-layout" />
+
+Rank is 1, N is 4, batch count is 2. Non-null embeddings `{4}` enable the advanced stride contract. Every number below counts complex elements, not bytes:
+
+| Side | Stride | Batch distance | Allocation | Logical offsets by batch |
+| --- | --- | --- | --- | --- |
+| Input | 2 | 11 | 22 | `0,2,4,6; 11,13,15,17` |
+| Output | 3 | 16 | 32 | `0,3,6,9; 16,19,22,25` |
+
+Nonlogical input slots contain `123-321i` to expose accidental contiguous reads. Output starts as NaNs before each execution so an unwritten logical value fails validation. No claim is made about preservation of unused padding. Automatic workspace allocation is disabled before planning; the final size is queried, budget-checked, allocated, and attached. A zero-byte requirement skips allocation and attaches null. Library internal resources are additional.
+
+## Stream And Resource Lifetime
+
+<CanonicalCode exampleId="EX19" range="stream-lifecycle" />
+
+One non-default `cudaStreamNonBlocking` stream, one plan, and one caller-owned workspace serve four sequential executions: forward/inverse for each of two fixtures. H2D initialization, FFT and D2H share the stream; checked completion precedes CPU inspection or reuse. Pageable host vectors do not establish transfer overlap.
+
+The same plan still expects input stride 2/distance 11 during inverse. The program extracts the completed forward GPU spectrum and **host-repacks it into that input layout**, rather than swapping device pointers. It then checks the unnormalized inverse and host scale `1/4`. It never remakes the finalized plan. Host transfer buffers outlive cleanup, including exceptions. Cleanup drains partial submissions, destroys only acquired resources, attempts every release, and makes release errors fail the process.
+
+## Independent Version Profiles
+
+| Profile | Toolkit | cuFFT component | Header MAJOR,MINOR,PATCH,BUILD |
+| --- | --- | --- | --- |
+| `cuda-11-8-bundled-cufft-10-9-0-58` | 11.8.0 | 10.9.0.58 | 10,9,0,58 |
+| `cuda-12-9-bundled-cufft-11-4-1-4` | 12.9.2 | 11.4.1.4 | 11,4,1,4 |
+| `cuda-13-3-bundled-cufft-12-3-0-29` | 13.3.1 | 12.3.0.29 | 12,3,0,29 |
+
+`EXPECTED_CUFFT_VERSION` becomes four `EX19_EXPECTED_CUFFT_*` definitions checked against `CUFFT_VER_MAJOR`, `CUFFT_VER_MINOR`, `CUFFT_VER_PATCH`, and `CUFFT_VER_BUILD`. Unknown or missing profiles fail. These pins come from independent component manifests, not the Toolkit label.
+
+Checked `cufftGetProperty` queries require loaded major/minor/patch to match the header triple; `cufftGetVersion` is reported raw. These APIs expose no loaded build suffix. Record actual resolved library/package identity and file hashes separately. CUDA driver/runtime API levels and `CUDART_VERSION` are not installed driver or Toolkit package versions. Header identity is not proof of which full binary was loaded.
+
+## Build And Run
+
+From the standalone directory, the host test requires no CUDA headers or GPU:
+
+```sh
+make host-test DIALECT=c++17
+```
+
+It checks literal spectra and an independent inverse, signs, batch-distinct inputs, layout offsets, normalization, every-output corruption, nonfinite values, invalid extents/directions, and inclusive tolerance boundaries. Success establishes the host contract only.
+
+In the matching 11.8.0 development image, build and inspect without executing CUDA:
+
+```sh
+make preprocess compile link inspect DIALECT=c++17 EXPECTED_CUFFT_VERSION=10.9.0.58
+bash scripts/compile-check.sh c++17 cuda-11-8-bundled-cufft-10-9-0-58 artifacts/ex19-11-8
+```
+
+The wrapper additionally cleans and runs the host test. Choose the corresponding profile in each other lane, not three profiles in one installation. It propagates failed stages and never executes the CUDA binary. Link uses `-lcufft`; `readelf -d` must show a cuFFT dependency and `ldd` must resolve it with no missing libraries. EX19 defines no device kernel, so it does not require an EX19-owned cubin/PTX. Compiler target flags do not certify cuFFT's internal dispatch or plan-time JIT.
+
+Only after meeting the runtime gate:
+
+```sh
+./build/ex19-cufft-batched-transform
+```
+
+The program selects visible device 0. Expected reporting includes version granularity, GPU/API levels, planned/attached workspace bytes, and four correctness verdicts checking eight complex outputs each. This describes future output, not a retained run.
+
+## Compatibility
+
+All three profiles use C++17 and the manifest's digest-pinned x86-64 development images: Ubuntu 22.04 for 11.8.0; Ubuntu 24.04 for 12.9.2 and 13.3.1. Native Linux is the only Supported Environment. Runtime requires a selected CC 7.5+ GPU. Use a suitably Toolkit-matched or newer driver; a lower family minor-compatibility floor alone does not guarantee PTX JIT support.
+
+Input/output buffers total `(22+32)*8=432` bytes. Fixed buffers plus queried workspace are checked against 8,000,000,000 bytes; internal library resources and free-memory requirements are additional and allocation failures remain fatal. This is a problem-memory budget, not a measured footprint or a promise of zero scratch.
+
+R2C/C2R, in-place transforms, low precision, callbacks, multi-GPU, graphs, timing and patient-JIT/LTO opt-in are excluded. The real-side LTO callback known issue in 13.3 Update 1 therefore does not describe this C2C-without-callbacks path. That exclusion is not a general release all-clear. [L12](/en/libraries/cufft-plans-layouts-startup/) teaches the broader gates without claiming they were executed here.
+
+## Evidence Boundary
+
+Compilation is empty; no retained **Compile-Checked** status is granted. Runtime remains **Pending Hardware Verification**, with no recorded observations. Host tests, build gates, source review and canonical imports do not supply GPU correctness, workspace, startup, transform-time or speedup evidence.
+
+A qualifying future record needs source/profile identity, stage logs, a complete Environment Manifest, actual loaded component identity, raw output and all correctness verdicts. Separate any future startup and warmed execution measurements; this executable has no benchmark result.
+
+## Expected Observations
+
+1. Both fixtures should pass finite full-output complex-magnitude tolerance against the double DFT and literal spectra with distinct batches and nontrivial input/output layouts.
+2. The same plan and caller workspace should execute both directions on both inputs sequentially; repacking before inverse should preserve layout and explicit host scaling by 1/4 should recover the original input.
+3. The header version should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuFFT and CUDA API levels reported separately from package identity.
+
+## Sources And Review
+
+- [Archived 11.8.0 cuFFT API](https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html) and [archived 12.9.2 API](https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html).
+- [Live cuFFT API](https://docs.nvidia.com/cuda/cufft/index.html), guide label 13.3, not an immutable 13.3.1 archive.
+- Independent component manifests: [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json), [12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json), [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json).
+- [SRC-CUDA-073](/en/sources-and-versions/#src-cuda-073) and [SRC-CUDA-074](/en/sources-and-versions/#src-cuda-074) retain source, rights, JIT and release-hazard boundaries.
+
+Checked **2026-09-08**. Owner archive hashes in the manifest are acquisition coordinates, not a claim that a loaded library was hash-verified. No upstream implementation or sample is adapted.

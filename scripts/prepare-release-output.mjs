@@ -38,7 +38,7 @@ await Promise.all(
     ['NOTICE', 'PROJECT-NOTICE.txt'],
     ['CONTENT_LICENSES.md', 'CONTENT_LICENSES.md'],
     ['THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.md'],
-    ['node_modules/astro/LICENSE', 'astro-7.2.4-MIT.txt'],
+    ['node_modules/astro/LICENSE', 'astro-7.2.8-MIT.txt'],
     ['node_modules/@astrojs/starlight/LICENSE', 'starlight-0.41.7-MIT.txt'],
     ['node_modules/pagefind/LICENSE/LICENSE', 'pagefind-1.5.2-MIT.txt'],
     ['node_modules/pagefind/LICENSE/LICENSE-vscode-ripgrep', 'pagefind-vscode-ripgrep-MIT.txt'],

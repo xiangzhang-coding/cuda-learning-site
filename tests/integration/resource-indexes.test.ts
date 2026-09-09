@@ -14,7 +14,7 @@ import {
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-09-07T12:00:00Z');
+const asOf = new Date('2026-09-09T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all seventy-eight bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all eighty bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(78);
+    expect(practiceIds).toHaveLength(80);
 
     const localeContracts = [
       {
@@ -175,7 +175,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(78);
+      expect(prompts.size).toBe(80);
     }
   });
 
@@ -183,8 +183,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 12, practice: 78, visuals: 19, glossary: 192, sources: 88 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(389);
+    expect(counts).toEqual({ labs: 12, practice: 80, visuals: 19, glossary: 194, sources: 90 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(395);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -192,7 +192,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['L12', 'LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['L13', 'LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -338,6 +338,46 @@ describe('published resource indexes', () => {
       const record = RESOURCE_INDEX_RECORDS.find((candidate) => candidate.planningId === planningId);
       expect(record?.reviewedOn, planningId).toBe('2026-09-07');
       if (planningId.startsWith('SRC-')) expect(record?.sourceAccessDate, planningId).toBe('2026-09-07');
+    }
+  });
+
+  it('publishes distinct bilingual cuFFT audits with worked arithmetic and independently closed solutions', async () => {
+    for (const locale of INDEX_LOCALES) {
+      const prefix = locale === 'en' ? 'en/' : '';
+      const practice = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8');
+      for (const [planningId, relatedUnits, arithmetic] of [
+        ['PB-R4-013', ['L12', 'EX19'], ['288', '276', '280', '30']],
+        ['PB-R4-014', ['Q05', 'M07', 'L12', 'EX19'], ['8 MiB', '5 MiB', '27.5', '1.375', '16256', '127']],
+      ] as const) {
+        const section = detailSection(practice, planningId);
+        expect(declaredRelationships(practice, planningId, 'practice', locale)).toEqual({
+          prerequisites: ['L12'], relatedUnits,
+        });
+        const details = [...parseHTML(section).document.querySelectorAll('details')];
+        expect(details, `${locale} ${planningId}`).toHaveLength(3);
+        expect(details.every((detail) => !detail.hasAttribute('open'))).toBe(true);
+        expect(details[2].querySelector('summary')?.textContent).toMatch(/Separate reviewed solution|独立参考解答/);
+        for (const value of arithmetic) expect(details[2].textContent, `${planningId} ${value}`).toContain(value);
+        expect(section).toContain(`/${prefix}sources-and-versions/#src-cuda-07${planningId.endsWith('013') ? '3' : '4'}`);
+        expect(section).toContain('2026-09-08');
+      }
+      const glossary = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'glossary.mdx'), 'utf8');
+      for (const [id, term] of [['TERM-193', 'DFT'], ['TERM-194', 'Hermitian Symmetry']]) {
+        expect(detailSection(glossary, id)).toContain(term);
+        expect(detailSection(glossary, id)).toContain('2026-09-08');
+      }
+      const sources = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'sources-and-versions.mdx'), 'utf8');
+      const layouts = detailSection(sources, 'SRC-CUDA-073');
+      const versions = detailSection(sources, 'SRC-CUDA-074');
+      expect(layouts).toContain('https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html');
+      expect(layouts).toContain('https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html');
+      expect(layouts).toContain('https://docs.nvidia.com/cuda/cufft/index.html');
+      for (const version of ['11.8.0', '12.9.2', '13.3.1']) {
+        expect(versions).toContain(`https://developer.download.nvidia.com/compute/cuda/redist/redistrib_${version}.json`);
+      }
+      for (const value of ['10.9.0.58', '11.4.1.4', '12.3.0.29', '404', '2026-08-26', '8192', '4096', '127', 'NVRTC']) {
+        expect(versions, `${locale} ${value}`).toContain(value);
+      }
     }
   });
 

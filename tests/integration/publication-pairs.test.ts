@@ -48,14 +48,14 @@ type PublicationPair = {
 const publicationPairs: readonly PublicationPair[] = [
   {
     pairId: 'home',
-    factCheckDate: '2026-09-07',
+    factCheckDate: '2026-09-08',
     structure: 'purpose,current-route,boundaries,destinations',
     zh: '/',
     en: '/en/',
   },
   {
     pairId: 'o01',
-    factCheckDate: '2026-09-07',
+    factCheckDate: '2026-09-08',
     structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
     resourceKind: 'learning-unit',
     unitId: 'O01',
@@ -2916,6 +2916,54 @@ const publicationPairs: readonly PublicationPair[] = [
     en: '/en/libraries/attention-backend-dispatch/solutions/',
   },
   {
+    pairId: 'l12',
+    factCheckDate: '2026-09-08',
+    structure: 'outcome,prerequisites,history,dft,storage,strides,lifecycle,ownership,startup,versions,precision,callbacks,multi-gpu,evidence,retrieval,practice,sources',
+    resourceKind: 'learning-unit',
+    unitId: 'L12',
+    prerequisites: 'Q05,M07',
+    relatedUnits: 'EX19',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    sourceCount: '9',
+    sourceVersions: '11.8.0,12.9.2,13.3.1',
+    zh: '/libraries/cufft-plans-layouts-startup/',
+    en: '/en/libraries/cufft-plans-layouts-startup/',
+  },
+  {
+    pairId: 'l12-exercises',
+    factCheckDate: '2026-09-08',
+    structure: 'prerequisites,instructions,exercise-1,exercise-2,exercise-3,next',
+    resourceKind: 'exercise-set',
+    unitId: 'L12-EXERCISES',
+    prerequisites: 'L12',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    zh: '/libraries/cufft-plans-layouts-startup/exercises/',
+    en: '/en/libraries/cufft-plans-layouts-startup/exercises/',
+  },
+  {
+    pairId: 'l12-solutions',
+    factCheckDate: '2026-09-08',
+    structure: 'review,solution-1,solution-2,solution-3,valid-alternatives,common-errors',
+    resourceKind: 'solution-set',
+    unitId: 'L12-SOLUTIONS',
+    prerequisites: 'L12-EXERCISES',
+    hardwareGate: 'none',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'none',
+    expectedObservations: 'none',
+    recordedObservations: 'none',
+    zh: '/libraries/cufft-plans-layouts-startup/solutions/',
+    en: '/en/libraries/cufft-plans-layouts-startup/solutions/',
+  },
+  {
     pairId: 'ex01',
     factCheckDate: '2026-08-26',
     structure: 'purpose,project,report-contract,build,hardware,compatibility,evidence,expected-observations,sources',
@@ -3295,6 +3343,27 @@ const publicationPairs: readonly PublicationPair[] = [
     sourceVersions: 'cuBLAS-11.11.3.6,cuBLAS-12.9.2.10,cuBLAS-13.6.0.2,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1,current-owner-reference',
     zh: '/examples/cublas-gemm/',
     en: '/en/examples/cublas-gemm/',
+  },
+  {
+    pairId: 'ex19',
+    factCheckDate: '2026-09-08',
+    structure: 'purpose,project,cpu-reference,plan-layout,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources',
+    resourceKind: 'runnable-example',
+    unitId: 'EX19',
+    prerequisites: 'L12',
+    exampleIds: 'EX19',
+    canonicalExample: 'EX19',
+    canonicalRanges: 'cpu-reference,plan-layout,stream-lifecycle',
+    toolkitLanes: 'cuda-11.8,cuda-12.9,cuda-13.3',
+    minimumComputeCapability: '7.5',
+    maximumProblemMemoryBytes: '8000000000',
+    gpuCount: '1',
+    evidenceCompilation: 'none',
+    evidenceRuntime: 'Pending Hardware Verification',
+    expectedObservations: '3 declared expectations',
+    recordedObservations: 'none',
+    zh: '/examples/cufft-batched-transform/',
+    en: '/en/examples/cufft-batched-transform/',
   },
   {
     pairId: 'labs-index',
@@ -3884,32 +3953,32 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'practice-bank',
-    factCheckDate: '2026-09-07',
-    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,review',
+    factCheckDate: '2026-09-08',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11',
-    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,EX15,EX17,EX18,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18',
+    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12',
+    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,EX15,EX17,EX18,EX19,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18',
     zh: '/practice/',
     en: '/en/practice/',
   },
   {
     pairId: 'glossary',
-    factCheckDate: '2026-09-07',
-    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,maintenance',
+    factCheckDate: '2026-09-08',
+    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,maintenance',
     zh: '/glossary/',
     en: '/en/glossary/',
   },
   {
     pairId: 'sources-and-versions',
-    factCheckDate: '2026-09-07',
-    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,content-sources,review-record',
+    factCheckDate: '2026-09-09',
+    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',
   },
   {
     pairId: 'about',
-    factCheckDate: '2026-09-07',
+    factCheckDate: '2026-09-08',
     structure: 'purpose,scope,author,feedback',
     zh: '/about/',
     en: '/en/about/',
@@ -4001,14 +4070,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(269);
-    expect(sourceRoutes.size).toBe(538);
+    expect(publicationPairs).toHaveLength(273);
+    expect(sourceRoutes.size).toBe(546);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
-    for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'EX17', 'EX18', 'LAB11', 'LAB12']) {
+    for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'EX17', 'EX18', 'EX19', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['L12', 'LAB13', 'L13', 'EX20']) {
+    for (const absentUnitId of ['LAB13', 'L13', 'EX20']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
@@ -4136,6 +4205,9 @@ describe('Publication Pairs', () => {
       ['L11', ['A11', 'L10', 'L08']],
       ['L11-EXERCISES', ['L11']],
       ['L11-SOLUTIONS', ['L11-EXERCISES']],
+      ['L12', ['Q05', 'M07']],
+      ['L12-EXERCISES', ['L12']],
+      ['L12-SOLUTIONS', ['L12-EXERCISES']],
       ['LAB01', ['O03', 'O08']],
       ['LAB02', ['O03', 'F01']],
       ['LAB03', ['F03', 'F05']],
@@ -4166,6 +4238,7 @@ describe('Publication Pairs', () => {
       ['EX16', ['Q03', 'Q04']],
       ['EX17', ['L03']],
       ['EX18', ['L06']],
+      ['EX19', ['L12']],
       ['VIS01', []],
       ['VIS02', []],
       ['VIS03', []],
