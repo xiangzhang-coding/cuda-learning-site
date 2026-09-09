@@ -1,0 +1,132 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX20",
+  "title": "cuSPARSE SpMV",
+  "purpose": "Check two original FP32 CSR matrix-vector products against a double CPU reference and literal results with explicit descriptors, scalars, workspace, stream completion, and component versions.",
+  "root": "examples/ex20-cusparse-spmv",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": ["include/cusparse_spmv_reference.hpp", "src/cusparse_spmv.cu"],
+    "hostTestInputs": ["include/cusparse_spmv_reference.hpp", "tests/host_reference_test.cpp"],
+    "contractFiles": ["Makefile", "scripts/compile-check.sh"],
+    "stages": ["preprocess", "compile", "link", "inspect"],
+    "commands": {
+      "preprocess": "make preprocess DIALECT={dialect} BUILD_DIR=build EXPECTED_CUSPARSE_VERSION={expectedCusparseVersion}",
+      "compile": "make compile DIALECT={dialect} BUILD_DIR=build EXPECTED_CUSPARSE_VERSION={expectedCusparseVersion}",
+      "link": "make link DIALECT={dialect} BUILD_DIR=build EXPECTED_CUSPARSE_VERSION={expectedCusparseVersion}",
+      "inspect": "make inspect DIALECT={dialect} BUILD_DIR=build EXPECTED_CUSPARSE_VERSION={expectedCusparseVersion}",
+      "hostTest": "make host-test DIALECT={dialect} BUILD_DIR=build"
+    },
+    "artifacts": ["build/cusparse_spmv.ii", "build/cusparse_spmv.o", "build/ex20-cusparse-spmv", "build/dynamic-section.txt", "build/dynamic-linkage.txt"]
+  },
+  "correctness": {
+    "cpuReference": "include/cusparse_spmv_reference.hpp",
+    "inputType": "float",
+    "referenceType": "double",
+    "precision": "FP32",
+    "computeType": "CUDA_R_32F",
+    "format": "CSR",
+    "rows": 4,
+    "columns": 5,
+    "nnz": 7,
+    "indexBase": 0,
+    "indexType": "CUSPARSE_INDEX_32I",
+    "rowOffsets": [0, 2, 2, 4, 7],
+    "columnIndices": [0, 3, 1, 4, 0, 2, 4],
+    "representation": "Zero-based 32-bit row offsets and column indices; columns are sorted and unique within each row; row 1 is empty",
+    "operation": "CUSPARSE_OPERATION_NON_TRANSPOSE",
+    "algorithm": "CUSPARSE_SPMV_CSR_ALG2",
+    "pointerMode": "CUSPARSE_POINTER_MODE_HOST",
+    "descriptorPolicy": "Mutable CSR and dense-vector descriptors reference caller-owned device arrays reused sequentially for both fixtures; all three lanes use the same API calls",
+    "preprocessing": "No cusparseSpMV_preprocess call; the CUDA 11.8 lane does not provide it",
+    "resetPolicy": "Reset device y from each fixture's initialY before every SpMV, including beta=0; never accumulate from a previous result",
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.00002,
+    "comparisonRule": "All four outputs and reference values must be finite and abs(gpu-cpu) <= 1e-4 + 2e-5*abs(cpu); the double CPU reference must also match the independent literal output",
+    "fixtures": [
+      {"id": "A", "values": [2,-1,3,4,-2,5,1], "x": [1,2,-1,3,2], "initialY": [4,-2,1,3], "alpha": 1, "beta": 0, "literalOutput": [-1,0,14,-5]},
+      {"id": "B", "values": [-1,2,0.5,-3,4,-2,1], "x": [2,-1,3,0.5,-2], "initialY": [1,-4,2,0], "alpha": 2, "beta": -0.5, "literalOutput": [-2.5,2,10,0]}
+    ]
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "fixedDeviceMemoryBytes": 112,
+    "maximumProblemMemoryBytes": 8000000000,
+    "temporaryStorage": "Query cusparseSpMV_bufferSize for each actual descriptor/scalar/operation/compute-type/algorithm contract; zero bytes skips allocation; caller arrays plus workspace are budget-checked; library internal resources are additional",
+    "target": ["sm_75", "compute_75"],
+    "versionGate": {
+      "header": "cusparse.h",
+      "macros": ["CUSPARSE_VER_MAJOR", "CUSPARSE_VER_MINOR", "CUSPARSE_VER_PATCH", "CUSPARSE_VER_BUILD"],
+      "aggregateMacro": "CUSPARSE_VERSION = major*1000 + minor*100 + patch",
+      "makeVariable": "EXPECTED_CUSPARSE_VERSION",
+      "compileDefinitions": ["EX20_EXPECTED_CUSPARSE_MAJOR", "EX20_EXPECTED_CUSPARSE_MINOR", "EX20_EXPECTED_CUSPARSE_PATCH", "EX20_EXPECTED_CUSPARSE_BUILD"],
+      "runtime": "cusparseGetProperty MAJOR_VERSION/MINOR_VERSION/PATCH_LEVEL must match header major/minor/patch; cusparseGetVersion(handle, ...) raw value is reported separately; loaded build is not exposed by these APIs"
+    },
+    "lanes": [
+      {
+        "id": "cuda-11.8", "toolkit": "11.8.0", "operatingSystem": "Ubuntu 22.04 x86-64",
+        "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "manifestDigest": "sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f",
+        "amd64Digest": "sha256:60eda04ab6790aa76d73bf0df245b361eabc6d8f7b6f6cf9846c70f399b9a1eb",
+        "dialects": ["c++17"]
+      },
+      {
+        "id": "cuda-12.9", "toolkit": "12.9.2", "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "manifestDigest": "sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5",
+        "amd64Digest": "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+        "dialects": ["c++17"]
+      },
+      {
+        "id": "cuda-13.3", "toolkit": "13.3.1", "operatingSystem": "Ubuntu 24.04 x86-64",
+        "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+        "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+        "dialects": ["c++17"]
+      }
+    ],
+    "checks": [
+      {
+        "id": "cuda-11-8-bundled-cusparse-11-7-5-86", "toolkitLane": "cuda-11.8", "dialect": "c++17", "kind": "ex20",
+        "dependencyMode": "bundled", "component": "cuSPARSE", "componentVersion": "11.7.5.86", "expectedCusparseVersion": "11.7.5.86",
+        "sourceCoordinate": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json",
+        "archiveSha256": "9250fe539d4bd6a378581dc0b528e8cfc418b57f28545bf39d70cae762075df7",
+        "includeRoots": ["/usr/local/cuda/include"], "allowedResults": ["pass"]
+      },
+      {
+        "id": "cuda-12-9-bundled-cusparse-12-5-10-65", "toolkitLane": "cuda-12.9", "dialect": "c++17", "kind": "ex20",
+        "dependencyMode": "bundled", "component": "cuSPARSE", "componentVersion": "12.5.10.65", "expectedCusparseVersion": "12.5.10.65",
+        "sourceCoordinate": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json",
+        "archiveSha256": "a83415dcd3e1183afe363d4740f9f0309cfe560c6c08016c2a61468304f4b848",
+        "includeRoots": ["/usr/local/cuda/include"], "allowedResults": ["pass"]
+      },
+      {
+        "id": "cuda-13-3-bundled-cusparse-12-8-2-51", "toolkitLane": "cuda-13.3", "dialect": "c++17", "kind": "ex20",
+        "dependencyMode": "bundled", "component": "cuSPARSE", "componentVersion": "12.8.2.51", "expectedCusparseVersion": "12.8.2.51",
+        "sourceCoordinate": "https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json",
+        "archiveSha256": "291ed8fe182ef19774363ea8194a760098fd24ffd39dae06145f06b5f237d2e2",
+        "includeRoots": ["/usr/local/cuda/include"], "allowedResults": ["pass"]
+      }
+    ]
+  },
+  "ranges": {
+    "cpu-reference": {"file": "include/cusparse_spmv_reference.hpp", "startMarker": "// [ex20-cpu-reference-start]", "endMarker": "// [ex20-cpu-reference-end]", "language": "cpp"},
+    "descriptors-workspace": {"file": "src/cusparse_spmv.cu", "startMarker": "// [ex20-descriptors-workspace-start]", "endMarker": "// [ex20-descriptors-workspace-end]", "language": "cpp"},
+    "stream-lifecycle": {"file": "src/cusparse_spmv.cu", "startMarker": "// [ex20-stream-lifecycle-start]", "endMarker": "// [ex20-stream-lifecycle-end]", "language": "cpp"}
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "The double CPU reference should agree with both literal results; all four completed GPU outputs per fixture should pass finite tolerance checks, including the empty row and nonzero beta.",
+      "The actual SpMV contracts should provide workspace sizes within the declared budget; zero-size requests should skip allocation. No workspace cost has been observed here.",
+      "Headers should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuSPARSE and CUDA API levels reported separately from package identity."
+    ],
+    "recordedObservations": []
+  }
+}
