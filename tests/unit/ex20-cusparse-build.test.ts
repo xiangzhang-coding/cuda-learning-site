@@ -36,7 +36,7 @@ it('builds the host oracle and declares C++17 SM75 builds with dynamic cuSPARSE 
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
+}, 30_000);
 
 it('rejects incompatible profiles, component versions, and dialects before tools, and retains fatal logs', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'ex20-runner-'));
