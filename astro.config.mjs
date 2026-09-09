@@ -163,6 +163,7 @@ export default defineConfig({
             { slug: 'libraries/cutlass-cpp-gemm-structure' },
             { slug: 'libraries/cudnn-graphs-and-plans' },
             { slug: 'libraries/attention-backend-dispatch' },
+            { slug: 'libraries/cufft-plans-layouts-startup' },
           ],
         },
         {
@@ -187,6 +188,7 @@ export default defineConfig({
             { slug: 'examples/sanitizer-defect-suite' },
             { slug: 'examples/cub-device-reduction-scan' },
             { slug: 'examples/cublas-gemm' },
+            { slug: 'examples/cufft-batched-transform' },
           ],
         },
         {

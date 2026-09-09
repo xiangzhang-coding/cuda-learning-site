@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: 192 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: 194 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-07'
+factCheckDate: '2026-09-08'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,6 +20,8 @@ structure:
   - entry-term-190
   - entry-term-191
   - entry-term-192
+  - entry-term-193
+  - entry-term-194
   - maintenance
 head:
   - tag: meta
@@ -29,7 +31,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-07'
+      content: '2026-09-08'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -37,7 +39,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1786,6 +1788,24 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [L10](/en/libraries/cudnn-graphs-and-plans/), [L11](/en/libraries/attention-backend-dispatch/), [PB-R4-011](/en/practice/#pb-r4-011), and [PB-R4-012](/en/practice/#pb-r4-012).
 - **Version note:** In [SRC-CUDA-072](/en/sources-and-versions/#src-cuda-072), reviewed 2026-09-07, `create_execution_plans` first collects configurations; default `HEURISTICS_CHOICE` stops at the first successful candidate during the later build. `ALL` is not benchmarking. The backend workspace filter need not include frontend-node workspace. Graph-structure serialization differs from selected-plan serialization; restoration remains constrained by exact version/hardware and policy, without cross-architecture bitwise or performance guarantees.
 
+<span id="term-193" class="resource-target" aria-hidden="true"></span>
+
+### DFT · 离散傅里叶变换
+
+- **Definition:** The Discrete Fourier Transform (DFT) maps a finite sequence into discrete frequency coefficients. Under cuFFT's forward convention, `X[k]=sum_n x[n]*exp(-2*pi*i*n*k/N)`; the inverse uses the positive sign. Neither cuFFT direction includes normalization, so inverse-after-forward gives N times the input in one dimension, or the product of logical dimensions in multiple dimensions. Batch count is not part of that scale. FFT names efficient algorithms for computing the DFT, not a different mathematical transform.
+- **Avoid:** Automatically normalized inverse; batch-scaled inverse; FFT as a different transform; exact floating-point round trip.
+- **Related resources:** [L12](/en/libraries/cufft-plans-layouts-startup/) and [EX19](/en/examples/cufft-batched-transform/).
+- **Version note:** Reviewed 2026-09-08 against the archived 11.8.0/12.9.2 and live v13.3 guides in [SRC-CUDA-073](/en/sources-and-versions/#src-cuda-073). For `x=[0,1,0,0]`, the mathematical forward result is `[1,-i,-1,i]`; the unnormalized inverse returns `[0,4,0,0]`. This derivation is not a cuFFT output record. EX19 only covers modest ordinary FP32 C2C with empty compilation evidence and Pending Hardware Verification runtime.
+
+<span id="term-194" class="resource-target" aria-hidden="true"></span>
+
+### Hermitian Symmetry · 厄米共轭对称
+
+- **Definition:** For real input, a DFT coefficient equals the complex conjugate of the coefficient at the negated frequency coordinates, modulo each dimension's length. In one dimension, `X[k]=conj(X[(-k) mod N])`. R2C stores only `K=floor(N/2)+1` complex values along the last dimension; in-place storage therefore needs `2K` real slots in every innermost row. Self-conjugate frequency points must have zero imaginary part: DC and, for even one-dimensional N, Nyquist.
+- **Avoid:** Symmetric real parts alone; every multidimensional boundary-column value is real; padding only at the allocation's end; shape-correct C2R input is automatically valid.
+- **Related resources:** [L12](/en/libraries/cufft-plans-layouts-startup/).
+- **Version note:** Reviewed 2026-09-08 in [SRC-CUDA-073](/en/sources-and-versions/#src-cuda-073). C2R requires a Hermitian spectrum and the documented complex-type alignment; violating the mathematical input contract has undefined behavior. For N=10, K=6 and the in-place row has 12 real slots, not 10. Multidimensional symmetry reverses every frequency coordinate, not just the stored last coordinate. [PB-R4-013](/en/practice/#pb-r4-013) works through a two-dimensional layout; out-of-place C2R may still destroy the complex input. No real-transform execution is claimed.
+
 ## Maintenance rule
 
-TERM-001 through TERM-190 retain their item-level review dates. New TERM-191/192 and the complete 192-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-07**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish operation graphs, engine candidates, and execution plans; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.
+TERM-001 through TERM-192 retain their item-level review dates. New TERM-193/194 and the complete 194-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-08**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish DFT mathematics, normalization, and Hermitian storage constraints; neither grants compilation or runtime Evidence Status. The [Chinese counterpart](/glossary/) is complete at the same time.

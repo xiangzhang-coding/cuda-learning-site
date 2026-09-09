@@ -1,9 +1,9 @@
 ---
 title: Sources and Version Record
-description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L11, LAB01-LAB12, EX01-EX18, visuals, and practice resources.
+description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L12, LAB01-LAB12, EX01-EX19, visuals, and practice resources.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-07'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,6 +20,8 @@ structure:
   - entry-src-cuda-070
   - entry-src-cuda-071
   - entry-src-cuda-072
+  - entry-src-cuda-073
+  - entry-src-cuda-074
   - content-sources
   - review-record
 head:
@@ -30,7 +32,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-07'
+      content: '2026-09-09'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -38,18 +40,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L11, LAB01-LAB12, the eighteen current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
+This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L12, LAB01-LAB12, the nineteen current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers Home, 73 Learning Units, their Exercises and separate reviewed solutions, 18 Runnable Examples, 12 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 78 Practice Bank entries, 192 Glossary terms, and existing static publishing and visual interfaces. The current catalog has exactly **389** records: 12 Labs, 78 Practice Bank entries, 19 Visual Explainers, 192 Glossary terms, and 88 source records. L10/L11 and their Exercises and solutions add six Publication Pairs, bringing the total to 269 pairs and 538 source routes, including 72 Exercise sets and 72 separate reviewed-solution sets. New `SRC-CUDA-071/072` were accessed and reviewed 2026-09-07; older records retain their dates. Website builds use Node.js 24.19.0 and npm 11.17.0.
+This page covers Home, 74 Learning Units, their Exercises and separate reviewed solutions, 19 Runnable Examples, 12 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 80 Practice Bank entries, 194 Glossary terms, and existing static publishing and visual interfaces. The current catalog has exactly **395** records: 12 Labs, 80 Practice Bank entries, 19 Visual Explainers, 194 Glossary terms, and 90 source records. L12, its Exercises and solutions, and EX19 add four Publication Pairs, bringing the total to 273 pairs and 546 source routes, including 73 Exercise sets and 73 separate reviewed-solution sets. New `SRC-CUDA-073/074` were accessed and reviewed 2026-09-08; older records retain their dates. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -59,9 +61,11 @@ This page covers Home, 73 Learning Units, their Exercises and separate reviewed 
 
 ## Verified publishing interfaces
 
+Security refresh **2026-09-09**: Astro 7.2.8 and Sharp 0.35.4 address [the AVIF advisory](https://github.com/advisories/GHSA-26w7-cxv4-gfx2) and [Sharp's libheif advisory](https://github.com/advisories/GHSA-rgj7-g3m4-5g8c); js-yaml 4.3.2 addresses [merge-source resource exhaustion](https://github.com/advisories/GHSA-2883-xcg3-v3hh); SVGO 4.1.0 addresses [script-removal bypasses](https://github.com/svg/svgo/releases/tag/v4.1.0). An exact Sharp override also replaces Miniflare's pinned 0.35.2 without upgrading Wrangler. Earlier Visual Explainer interface reviews and immutable release records retain their historical 7.2.4 coordinate; the current build uses 7.2.8. These patches do not change CUDA evidence.
+
 | Interface | Exact version | What was checked | Context7 | Owner sources |
 | --- | --- | --- | --- | --- |
-| <span id="src-web-001" class="resource-target" aria-hidden="true"></span>Astro | Astro 7.2.4; `@astrojs/markdown-remark` 7.2.4 | Static output and build-time content, Astro components in MDX, processed/bundled/deduplicated TypeScript client scripts, light-DOM custom elements, pre-paint `is:inline` scripts, and static focusable Markdown tables through `markdown.processor: unified({ rehypePlugins })` | `/withastro/docs` | [Astro npm manifest](https://registry.npmjs.org/astro/7.2.4), [`@astrojs/markdown-remark` 7.2.4 manifest](https://registry.npmjs.org/%40astrojs%2Fmarkdown-remark/7.2.4), [7.2.4 owner release](https://github.com/withastro/astro/releases/tag/%40astrojs%2Fmarkdown-remark%407.2.4), [tagged `unified` processor source](https://github.com/withastro/astro/blob/%40astrojs%2Fmarkdown-remark%407.2.4/packages/markdown/remark/src/processor.ts), [content collections](https://docs.astro.build/en/guides/content-collections/), [client scripts and custom elements](https://docs.astro.build/en/guides/client-side-scripts/), [MDX components](https://docs.astro.build/en/guides/integrations-guide/mdx/) |
+| <span id="src-web-001" class="resource-target" aria-hidden="true"></span>Astro | Astro 7.2.8; `@astrojs/markdown-remark` 7.2.4 | Static output and build-time content, Astro components in MDX, processed/bundled/deduplicated TypeScript client scripts, light-DOM custom elements, pre-paint `is:inline` scripts, and static focusable Markdown tables through `markdown.processor: unified({ rehypePlugins })` | `/withastro/docs` | [Astro npm manifest](https://registry.npmjs.org/astro/7.2.8), [`@astrojs/markdown-remark` 7.2.4 manifest](https://registry.npmjs.org/%40astrojs%2Fmarkdown-remark/7.2.4), [7.2.4 owner release](https://github.com/withastro/astro/releases/tag/%40astrojs%2Fmarkdown-remark%407.2.4), [tagged `unified` processor source](https://github.com/withastro/astro/blob/%40astrojs%2Fmarkdown-remark%407.2.4/packages/markdown/remark/src/processor.ts), [content collections](https://docs.astro.build/en/guides/content-collections/), [client scripts and custom elements](https://docs.astro.build/en/guides/client-side-scripts/), [MDX components](https://docs.astro.build/en/guides/integrations-guide/mdx/) |
 | <span id="src-web-002" class="resource-target" aria-hidden="true"></span>Starlight | 0.41.7 | Root locale, localized title, explicit sidebars, MDX components, custom CSS, built-in Pagefind, and the existing component overrides | `/withastro/starlight` | [npm manifest](https://registry.npmjs.org/%40astrojs%2Fstarlight/0.41.7), [sidebar and localized slugs](https://starlight.astro.build/guides/sidebar/), [components in MDX](https://starlight.astro.build/components/using-components/), [CSS and styling](https://starlight.astro.build/guides/css-and-tailwind/), [internationalization](https://starlight.astro.build/guides/i18n/#use-a-root-locale), [site search](https://starlight.astro.build/guides/site-search/) |
 | <span id="src-web-003" class="resource-target" aria-hidden="true"></span>Pagefind | 1.5.2 | Language indexes selected from `<html lang>`, extended Chinese segmentation, `data-pagefind-body`/`data-pagefind-ignore` boundaries, and static deployment assets; local custom elements filter multi-record pages instead of misusing page-level facets as card-level facets | `/websites/pagefind_app` | [npm manifest](https://registry.npmjs.org/pagefind/1.5.2), [multilingual search](https://pagefind.app/docs/multilingual/), [indexing controls](https://pagefind.app/docs/indexing/), [static indexing](https://pagefind.app/docs/running-pagefind/) |
 | <span id="src-web-004" class="resource-target" aria-hidden="true"></span>Cloudflare static release | Wrangler 4.125.0; compatibility date 2026-08-24 | Pinned Wrangler deployment from a clean `main`; Workers Builds production/preview behavior reviewed but account automation disabled for R3; Static Assets with no Worker script or binding; version uploads and public Preview URLs; the production `workers.dev` route, 404, version, and rollback boundaries | Cloudflare owner documentation | [Wrangler release](https://github.com/cloudflare/workers-sdk/releases/tag/wrangler%404.125.0), [Astro static deployment](https://developers.cloudflare.com/workers/framework-guides/web-apps/astro/), [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/), [Static Assets](https://developers.cloudflare.com/workers/static-assets/), [Preview URLs](https://developers.cloudflare.com/workers/versions-and-deployments/preview-urls/), [`workers.dev`](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/), [rollbacks](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/) |
@@ -156,7 +160,7 @@ Context7 libraries `/websites/nvidia_cuda` (2026-08-29 through 2026-09-04), `/we
 
 **`SRC-CUDA-063` bundled-header authority.** For the bundled rows, the authoritative contracts are the `cub/device/device_reduce.cuh`, `cub/device/device_scan.cuh`, and `cub/version.cuh` files inspected inside the Linux x86-64 redistribution archives addressed by SHA-256 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`, `8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`, and `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`. Those headers document same-GPU run-to-run determinism with a cross-compute-capability caveat for traditional pseudo-associative `DeviceReduce` in bundled CUB 1.15.1, 2.8.2, and 3.3.4. Bundled CUB 1.15.1 `DeviceScan` documents the same scoped guarantee, while bundled 2.8.2 and 3.3.4 document possible pseudo-associative run-to-run variation. Exact tagged headers govern selected 3.4.2: reduction retains the scoped guarantee and scan permits variation. Context7 did not inspect or verify these archives. Header review establishes no Learning Site compilation, runtime, output, determinism observation, or performance evidence.
 
-VIS19 and VIS21 reuse `SRC-CUDA-015`, while VIS20 and VIS22 reuse `SRC-CUDA-016`. Existing CUDA records remain unchanged. A10/A11/VIS18 use `SRC-CUDA-057/058`, A12/A13 use `SRC-CUDA-059/060`, L01/L02 use `SRC-CUDA-061/062`, L03/EX17/LAB11 use `SRC-CUDA-063`, L04 uses `SRC-CUDA-064`, L05 uses `SRC-CUDA-065/066`, L06/EX18/LAB12 and L07 use `SRC-CUDA-067/068`, and L08/L09 use `SRC-CUDA-069/070`. L10/L11 add `SRC-CUDA-071/072`, bringing the current catalog to 88 source records. All nineteen Visual Explainers remain evidence-neutral browser teaching models. No new record turns static contracts or source/test inspection into CUDA build, execution, observed synchronization, traffic, timing, or speedup evidence.
+VIS19 and VIS21 reuse `SRC-CUDA-015`, while VIS20 and VIS22 reuse `SRC-CUDA-016`. Existing CUDA records remain unchanged. A10/A11/VIS18 use `SRC-CUDA-057/058`, A12/A13 use `SRC-CUDA-059/060`, L01/L02 use `SRC-CUDA-061/062`, L03/EX17/LAB11 use `SRC-CUDA-063`, L04 uses `SRC-CUDA-064`, L05 uses `SRC-CUDA-065/066`, L06/EX18/LAB12 and L07 use `SRC-CUDA-067/068`, and L08/L09 use `SRC-CUDA-069/070`. L10/L11 use `SRC-CUDA-071/072`; L12/EX19 add `SRC-CUDA-073/074`, bringing the current catalog to 90 source records. All nineteen Visual Explainers remain evidence-neutral browser teaching models. No new record turns static contracts or source/test inspection into CUDA build, execution, observed synchronization, traffic, timing, or speedup evidence.
 
 Toolkit components have been independently versioned since CUDA 11, so Toolkit, NVCC, PTX ISA, Binary Utilities, a component such as cuBLAS, paired driver, and compatibility floor cannot collapse into one “CUDA version.” The site preserves the current v13.3 page labels under Toolkit 13.3.1, NVCC v12.9 and PTX ISA 8.8 under `archive/12.9.2`, PTX ISA 7.8 under `archive/11.8.0`, and the existing Runtime API v12.9.1 self-label under `archive/12.9.2`; current PTX ISA 9.3 binds only to the selected 13.3.1 Lane. The CUDA 13.3.1 Linux guide and Programming Guide list C++23 while the same-version NVCC `--std` reference still stops at C++20. The exact-image GCC 13.3/NVCC 13.3.73 `unsupported` result remains immutable R1 history. Run 33275734951 separately retains a narrow EX10 + NVCC 13.3.73 + GCC 14.2.0 `C++23-Dialect-Probe` pass. Neither result is ordinary EX10 C++23 support.
 
@@ -426,19 +430,73 @@ Versioned [Graphs](https://docs.nvidia.com/deeplearning/cudnn/frontend/v1.27.0/d
 
 [LICENSING.md](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSING.md) explains surviving external contributions behind MIT exceptions. Review also includes [LICENSE.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE.txt) (Apache-2.0), [LICENSE-MIT.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE-MIT.txt), [NOTICE](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/NOTICE), and [THIRD_PARTY_LICENSES.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/THIRD_PARTY_LICENSES.txt); root notices use 2020-2026 and package metadata says `Apache-2.0 AND MIT`. Inspected Markdown docs and pyproject.toml lack opening per-file SPDX headers; they are linked/paraphrased only, not copied or assigned an inferred file license. Substantial future reuse requires applicable licenses, copyright/attribution, and Apache NOTICE/change handling. No implementation, sample, test, diagram, binary, or substantial prose is copied or adapted; original teaching prose/tables remain CC BY 4.0. Owner tests were inspected, not run, and grant no local compilation or runtime evidence.
 
+<span id="src-cuda-073" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-073: cuFFT DFT, layouts, plans, and workspace contracts
+
+**Related IDs:** L12, EX19. **Accessed and reviewed:** 2026-09-08. This record supports [L12](/en/libraries/cufft-plans-layouts-startup/), [EX19](/en/examples/cufft-batched-transform/), [PB-R4-013](/en/practice/#pb-r4-013), and [TERM-193/194](/en/glossary/#term-193). L12's direct prerequisites are exactly `[Q05,M07]`; EX19's are `[L12]`.
+
+| Owner coordinate | Authority and limitation |
+| --- | --- |
+| [CUDA 11.8.0 cuFFT archive](https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html) | Historical plan, transform, data-layout, API, and precision contracts for that Toolkit coordinate; independent component mapping is in SRC-CUDA-074 |
+| [CUDA 12.9.2 cuFFT archive](https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html) | Later archived plan/layout contracts, including version-gated JIT and callback discussion; not a 13.3.1 snapshot |
+| [Live cuFFT guide](https://docs.nvidia.com/cuda/cufft/index.html) | Guide label **13.3**, footer **2026-06-25**, accessed 2026-09-08; current document, not an exact immutable 13.3.1 guide or evidence of execution |
+
+The reviewed guide sections cover cuFFT plans, plan initialization time, transform types, data layout, advanced data layout, `cufftCreate`, `cufftSetAutoAllocation`, `cufftMakePlanMany`, `cufftSetWorkArea`, `cufftSetStream`, execution, and destruction. The following contract summary and arithmetic are original, not reproduced owner tables or example code.
+
+| Teaching boundary | Reviewed fact |
+| --- | --- |
+| DFT sign and normalization | Forward uses the negative exponent sign. Neither forward nor inverse normalizes; a round trip scales by the product of logical transform dimensions, not batch count. FFT is an algorithm family for that DFT |
+| C2C, R2C, C2R | C2C stores full complex input/output; real transforms exploit Hermitian symmetry. C2R input must satisfy that symmetry, including real-valued self-conjugate frequency points, and documented complex-type alignment |
+| In-place real storage | Last logical dimension N stores `K=floor(N/2)+1` complex values; every innermost row requires `2K` real slots. Padding only at the final allocation boundary is insufficient for multiple rows |
+| Destructive inverse | Out-of-place C2R still overwrites its complex input. Make a separate copy if subsequent work needs the spectrum; distinct output storage is not an input-preservation contract |
+| Advanced layout | Strides and batch distances use elements of the respective input/output type, not bytes. Keep both embeddings non-NULL when specifying an advanced layout; NULL embeddings select default-layout behavior that ignores the other advanced parameters |
+| Plan and workspace ownership | With caller-managed scratch, disable autoallocation after create and **before** make-plan. Check planning success and workspace size before allocation/binding; each concurrent execution needs exclusive scratch until completion. A returned host call is not a completion fence |
+| Scope of EX19 | Modest ordinary single-GPU FP32 C2C only, without real transforms, callbacks, low precision, multi-GPU, or timing. Compilation evidence is empty and runtime is Pending Hardware Verification. Reading an API contract grants neither status |
+
+For the original PB-R4-013 `batch=2`, `n=[3,10]` audit, K=6 yields 12 real slots per row, 36 real or 18 complex slots per batch, and `2*36*4=288` allocation bytes. This is storage arithmetic, not measured workspace, actual traffic, or a cuFFT output. Native Linux remains the only Supported Environment; historical library minima do not expand the site's CC 7.5+ baseline.
+
+<span id="src-cuda-074" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-074: cuFFT independent components, JIT, callbacks, precision, and known hazards
+
+**Related IDs:** Q05, M07, L12, EX19. **Accessed and reviewed:** 2026-09-08. This record supports [PB-R4-014](/en/practice/#pb-r4-014) and L12's version/startup audit; these facts are not EX19 build or runtime evidence.
+
+| Toolkit manifest | Independent `libcufft` component | General historical/current SM floor | FP16 SM floor | BF16 SM floor |
+| --- | --- | --- | --- | --- |
+| [11.8.0 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json) | 10.9.0.58 | SM35 | SM53 | SM80 |
+| [12.9.2 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json) | 11.4.1.4 | SM50 | SM53 | SM80 |
+| [13.3.1 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) | 12.3.0.29 | SM75 | SM75 | SM80 |
+
+Manifest versions identify components independently of Toolkit versions. The SM floors come from the corresponding archived/current guides in SRC-CUDA-073, not from manifest version strings. Historical SM35/SM50 and FP16 SM53 are library facts, not new Supported Environments or a lowered site baseline. FP16/BF16 transforms require power-of-two sizes; both exclude real-side strides, multi-GPU transforms, and transforms larger than four billion elements. BF16's SM80 floor applies in all three rows. General SM support does not imply support for every precision, size, layout, callback, or architecture-specific feature.
+
+The [live CUDA release notes, cuFFT 13.3 Update 1 section](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cufft-release-13-3-update-1) have footer **2026-08-26**. The exact requested [13.3.1 release-note archive](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html) returned **404** at review. The live guide is labeled 13.3 with footer 2026-06-25; neither live URL is relabeled as an exact patch archive. Component identity uses the versioned manifest, current issue status uses the live release section as accessed, and older API claims use their real archives.
+
+| Version boundary | Bounded interpretation |
+| --- | --- |
+| CUDA 12.0 onward | More cuFFT kernels ship as PTX and JIT compilation can occur during plan initialization. The driver cache may avoid repeat compilation; distinguish cold cache, populated cache, first plan, first execution, and reused-plan execution rather than asserting a universal startup time |
+| CUDA 12.4 onward | LTO kernels add a distinct planning/compilation path; this is not the introduction date of PTX JIT |
+| CUDA 12.6 Update 2 onward | LTO callbacks are available under their specific API, build, link, size, and platform requirements. Do not merge legacy callbacks with LTO callbacks or assume this interface on 11.8 |
+| CUDA 13.2 onward | NVRTC becomes an additional cuFFT dependency. Record the actual installed component/dependency set rather than deriving every library version from the Toolkit label |
+| CUDA 13.3 Update 1 **known issue, not fixed** | Real-side LTO callbacks have a correctness hazard when **all** conditions hold: N is even; N is at least **8192 for FP32** or **4096 for FP64**; and N's largest prime factor is at least **127**. Keep callback side, precision, size, and factorization in the finding; do not turn a conjunctive warning into a blanket statement about every FFT |
+
+The original example `16256=2^7*127` satisfies the FP32 size/parity/factor conditions when coupled with the specified real-side LTO callback. `8192=2^13` lacks the prime-factor condition; that counterexample does not establish a fix or general callback safety. Excluding callbacks from EX19 avoids teaching that path, but does not create correctness evidence for any configuration. PB-R4-014's hypothetical `4+12+2+19*0.5=27.5 ms` and 1.375 ms/request ledger is a declared cost model, not recorded timing, a cache observation, or a speedup.
+
+**Discovery and provenance:** The current Context7 lookup on 2026-09-08 returned cuFFTDx rather than cuFFT and an older `/websites/nvidia_cuda_archive_11_0_ga` collection. cuFFTDx was not substituted. The older collection was used only to discover `cufftMakePlanMany`; the exact archived guides, versioned manifests, and explicitly dated live sources above govern the published facts. Context7 did not verify a 13.3.1 archive, binary, or execution. Owner documentation is linked and paraphrased only; no owner source, sample, test, diagram, table, or substantial prose is copied or adapted. Original learning prose, scenarios, and tables use CC BY 4.0; EX19's original source uses Apache-2.0. No CUDA build, runtime output, workspace query, cache hit, timing, callback validation, low-precision result, multi-GPU observation, or performance winner is recorded.
+
 ## Content and asset sources
 
-- Home, 73 Learning Units, 18 Runnable Examples, 12 Labs, 78 Practice Bank entries, 192 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
+- Home, 74 Learning Units, 19 Runnable Examples, 12 Labs, 80 Practice Bank entries, 194 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
 
 ## Review record
 
-**Reviewed: 2026-09-07.** Existing sources retain their original access dates; issue #32 performed the immutable R3 aggregate review through `SRC-CUDA-060`. Records `SRC-CUDA-061` through `SRC-CUDA-070` retain their item dates. Issue #38 adds independent backend `SRC-CUDA-071` and frontend `SRC-CUDA-072` records for L10/L11, both accessed 2026-09-07, without claiming aggregate R4 acceptance. The older A07 record remains historical; use L10's separately dated continuation for the current pinned graph/plan review.
+**Reviewed: 2026-09-08.** Existing sources retain their original access dates; issue #32 performed the immutable R3 aggregate review through `SRC-CUDA-060`. Records `SRC-CUDA-061` through `SRC-CUDA-072` retain their item dates. Issue #39 adds `SRC-CUDA-073/074` for L12/EX19, both accessed 2026-09-08, without claiming aggregate R4 acceptance. The older A07 record remains historical; use L10's separately dated continuation for its pinned graph/plan review.
 
 On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) completed the R3 aggregate source review, and [issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33) then fixed the L01/L02 CCCL and Thrust boundaries. On 2026-09-05, [issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34) cross-checked current device, warp, and block contracts through Context7 `/nvidia/cccl` for discovery, while the exact v3.4.2 release and commit, tagged docs, source and tests, NVIDIA manifests, hash-addressed archives, issues, and per-file license review remain authoritative. Current hosted or main-branch material is neither the immutable v3.4.2 snapshot nor evidence of bundled archive contents.
 
 R3 is the latest completed aggregate release review. Immutable `src/r3-release-manifest.json` fixes 62 Learning Units, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including 10 Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 232 Publication Pairs, and 464 source routes. R1 and R2 remain historical release coordinates. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains the dynamic acceptance record for final CI, Cloudflare Preview and production, and smoke. The R4 aggregate review remains pending.
 
-Existing F01/LAB02 canonical imports and retained compile runs remain unchanged. New L10/L11 publish only static teaching contracts with all four evidence arrays empty; EX18/LAB12 have empty compilation and recorded observations and Pending Hardware Verification runtime. Six existing expected-only profiler plans retain unfilled Environment Manifests, and nineteen browser Visual Explainers grant no CUDA Evidence Status. L01-L11 belong to rolling R4, not immutable R3; L12-L13 remain unpublished. No GPU output, workspace, profiler, dispatch, dtype, traffic, timing, Tensor Core, or speedup record is added. Automated results do not establish WCAG conformance.
+Existing F01/LAB02 canonical imports and retained compile runs remain unchanged. L01-L12 publish static teaching contracts with all four evidence arrays empty; EX19, EX18/LAB12, and EX17/LAB11 have empty compilation and recorded observations and Pending Hardware Verification runtime. Six existing expected-only profiler plans retain unfilled Environment Manifests, and nineteen browser Visual Explainers grant no CUDA Evidence Status. L01-L12 belong to rolling R4, not immutable R3; only L13 remains unpublished in that library sequence, and R4 aggregate acceptance is pending. No GPU output, workspace query, profiler, dispatch, dtype, traffic, timing, Tensor Core, or speedup record is added. Automated results do not establish WCAG conformance.

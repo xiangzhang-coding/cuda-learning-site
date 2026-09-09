@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 192 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 194 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-07'
+factCheckDate: '2026-09-08'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,6 +20,8 @@ structure:
   - entry-term-190
   - entry-term-191
   - entry-term-192
+  - entry-term-193
+  - entry-term-194
   - maintenance
 head:
   - tag: meta
@@ -29,7 +31,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-07'
+      content: '2026-09-08'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -37,7 +39,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1786,6 +1788,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [L10](/libraries/cudnn-graphs-and-plans/)、[L11](/libraries/attention-backend-dispatch/)、[PB-R4-011](/practice/#pb-r4-011)和 [PB-R4-012](/practice/#pb-r4-012)。
 - **版本说明：** 2026-09-07 复核的 [SRC-CUDA-072](/sources-and-versions/#src-cuda-072)中，`create_execution_plans` 先收集配置，默认 `HEURISTICS_CHOICE` 才在构建时按顺序停于首个成功项；`ALL` 不是基准测试。后端工作区筛选不一定包含前端节点工作区。序列化图结构与序列化选中计划不同，恢复仍受精确版本/硬件与政策约束；不保证跨架构位相等或性能。
 
+<span id="term-193" class="resource-target" aria-hidden="true"></span>
+
+### DFT · 离散傅里叶变换
+
+- **定义：** 离散傅里叶变换（Discrete Fourier Transform，DFT）将有限序列映射为离散频率系数。cuFFT 的前向约定为 `X[k]=sum_n x[n]*exp(-2*pi*i*n*k/N)`，逆向使用正号。cuFFT 两个方向都不包含归一化，因此先正后逆在一维时得到输入的 N 倍，多维时得到逻辑尺寸乘积倍；batch 数量不属于该缩放。FFT 是高效计算 DFT 的算法族，不是另一种数学变换。
+- **避免使用：** 自动归一化逆变换；按 batch 数缩放逆变换；FFT 是另一种变换；浮点往返精确相等。
+- **相关资源：** [L12](/libraries/cufft-plans-layouts-startup/)和 [EX19](/examples/cufft-batched-transform/)。
+- **版本说明：** 2026-09-08 按 [SRC-CUDA-073](/sources-and-versions/#src-cuda-073)的 11.8.0/12.9.2 归档与实时 v13.3 指南复核。`x=[0,1,0,0]` 的数学前向结果为 `[1,-i,-1,i]`，未归一化逆向返回 `[0,4,0,0]`。该推导不是 cuFFT 输出记录。EX19 仅覆盖小规模普通 FP32 C2C，编译证据为空，运行仍待硬件验证（Pending Hardware Verification）。
+
+<span id="term-194" class="resource-target" aria-hidden="true"></span>
+
+### Hermitian Symmetry · 厄米共轭对称
+
+- **定义：** 实数输入的 DFT 系数等于反转全部频率坐标后对应系数的复共轭，各坐标对该维长度取模。一维时为 `X[k]=conj(X[(-k) mod N])`。R2C 沿最后一维只存 `K=floor(N/2)+1` 个复数，因此原位存储每条最内行都需要 `2K` 个实数槽。自共轭频率点的虚部必须为零：一维中包括 DC，以及偶数 N 时的 Nyquist 点。
+- **避免使用：** 仅实部对称；多维边界列中每个值都为实数；只在分配末尾填充；形状正确的 C2R 输入自动有效。
+- **相关资源：** [L12](/libraries/cufft-plans-layouts-startup/)。
+- **版本说明：** 2026-09-08 在 [SRC-CUDA-073](/sources-and-versions/#src-cuda-073)复核。C2R 要求厄米共轭对称（Hermitian Symmetry）频谱及文档规定的复数类型对齐；违反数学输入合同会产生未定义行为。N=10 时 K=6，原位行需要 12 个实数槽，而不是 10 个。多维对称反转每个频率坐标，不只反转被压缩的最后坐标。[PB-R4-013](/practice/#pb-r4-013)提供二维布局推导；非原位 C2R 仍可能破坏复数输入。不声称执行过实数变换。
+
 ## 维护规则
 
-TERM-001 至 TERM-190 保留各自逐项复核日期。新增 TERM-191/192 与完整 192 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-07** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分运算图、引擎候选与执行计划；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-192 保留各自逐项复核日期。新增 TERM-193/194 与完整 194 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-08** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分 DFT 数学、归一化与 Hermitian 存储约束；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。

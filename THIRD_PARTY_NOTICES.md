@@ -6,7 +6,7 @@ This project installs third-party packages to build and test the Learning Site. 
 
 | Package | Exact version | Declared license | Owner source | Use in this release |
 | --- | --- | --- | --- | --- |
-| `astro` | 7.2.4 | MIT | <https://github.com/withastro/astro> | Static site generator |
+| `astro` | 7.2.8 | MIT | <https://github.com/withastro/astro> | Static site generator; AVIF security patch |
 | `@astrojs/starlight` | 0.41.7 | MIT | <https://github.com/withastro/starlight> | Documentation layout, localization, navigation, UI icons, and search integration |
 | `pagefind` | 1.5.2 | MIT | <https://github.com/Pagefind/pagefind> | Static multilingual search index |
 | `@astrojs/mdx` | 7.0.7 | MIT | <https://github.com/withastro/astro> | Home-page composition |
@@ -30,6 +30,12 @@ Reviewed 2026-09-06. EX18 and the LAB12 measurement helper are original Apache-2
 The independently recorded components are cuBLAS 11.11.3.6 with Toolkit 11.8.0, 12.9.2.10 with Toolkit 12.9.2, and 13.6.0.2 with Toolkit 13.3.1. EX18 declares those three build profiles; LAB12 uses only the last measurement profile. These coordinates are not a new npm dependency, redistributed library, or successful-build claim.
 
 NVIDIA Corporation & Affiliates retains the upstream rights. The [12.9.2 CUDA EULA and Toolkit supplement](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html), including its associated-documentation and redistribution conditions, and API Notices for [11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cublas/index.html#notices), [12.9.2](https://docs.nvidia.com/cuda/archive/12.9.2/cublas/index.html#notices), and the [current guide](https://docs.nvidia.com/cuda/cublas/index.html#notices) remain separate from project licenses. No project license replaces the terms applicable to a learner's installation. The [reference-only rights ledger](CONTENT_LICENSES.md#cublas-reference-only-review) records exact document coordinates and the explicitly dated current-document fallback for unavailable 13.3.1 archives. There is no upstream code adaptation requiring an added project `NOTICE` entry.
+
+## External cuFFT dependency, not bundled
+
+Reviewed 2026-09-08 for issue #39. EX19 is original Apache-2.0 software calling cuFFT through an external CUDA installation; L12 and its related publication prose, Exercises, solutions, PB-R4-013/014, TERM-193/194, and `SRC-CUDA-073/074` are original CC BY 4.0 material. No NVIDIA SDK header, library, implementation, sample, dataset, diagram, or documentation copy is bundled or adapted. The three declared C++17 profiles independently pair Toolkit 11.8.0 / 12.9.2 / 13.3.1 with cuFFT 10.9.0.58 / 11.4.1.4 / 12.3.0.29; they are not installed site dependencies or successful-build claims.
+
+NVIDIA Corporation & affiliates retains upstream rights. The [cuFFT reference-only rights ledger](CONTENT_LICENSES.md#cufft-reference-only-review) links the individually inspected 11.8.0, 12.9.2, and live 13.3 API Notices, archived 12.9.2 CUDA EULA/Toolkit supplement and CUDA FFT Library redistribution entries, and dated live release notes. Project licenses do not replace the terms applicable to a learner's installation. No upstream adaptation requires an added project `NOTICE` entry. Source review and host/build gates grant no CUDA compilation or runtime evidence; EX19 retains empty compilation and recorded observations and Pending Hardware Verification runtime.
 
 ## cuDNN references, not bundled
 

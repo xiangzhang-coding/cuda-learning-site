@@ -438,6 +438,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L11：注意力后端分派', en: 'L11: Attention Backend Dispatch' },
     prerequisites: ['A11', 'L10', 'L08'],
   },
+  L12: {
+    href: { 'zh-CN': '/libraries/cufft-plans-layouts-startup/', en: '/en/libraries/cufft-plans-layouts-startup/' },
+    title: { 'zh-CN': 'L12：分清 cuFFT 的数学、存储与启动成本', en: 'L12: Separate cuFFT Mathematics, Storage, and Startup' },
+    prerequisites: ['Q05', 'M07'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -527,6 +532,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/cublas-gemm/', en: '/en/examples/cublas-gemm/' },
     title: { 'zh-CN': 'EX18：cuBLAS GEMM 参考可运行示例', en: 'EX18: cuBLAS GEMM Reference Runnable Example' },
     prerequisites: ['L06'],
+  },
+  EX19: {
+    href: { 'zh-CN': '/examples/cufft-batched-transform/', en: '/en/examples/cufft-batched-transform/' },
+    title: { 'zh-CN': 'EX19：cuFFT 批量变换可运行示例', en: 'EX19: cuFFT Batched Transform Runnable Example' },
+    prerequisites: ['L12'],
   },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },

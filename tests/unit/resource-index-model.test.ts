@@ -13,7 +13,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-09-07T12:00:00Z');
+const asOf = new Date('2026-09-09T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -22,16 +22,34 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 }
 
 describe('resource index catalog', () => {
+  it('publishes the cuFFT unit and example with only their exact direct prerequisites', () => {
+    expect(PUBLISHED_DESTINATIONS.L12).toMatchObject({
+      href: {
+        'zh-CN': '/libraries/cufft-plans-layouts-startup/',
+        en: '/en/libraries/cufft-plans-layouts-startup/',
+      },
+      prerequisites: ['Q05', 'M07'],
+    });
+    expect(PUBLISHED_DESTINATIONS.EX19).toMatchObject({
+      href: {
+        'zh-CN': '/examples/cufft-batched-transform/',
+        en: '/en/examples/cufft-batched-transform/',
+      },
+      prerequisites: ['L12'],
+    });
+    expect(PUBLISHED_DESTINATIONS.L13).toBeUndefined();
+  });
+
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(389);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(395);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 12, practice: 78, visuals: 19, glossary: 192, sources: 88 });
-    for (const absentId of ['L12', 'LAB13']) {
+    ).toEqual({ labs: 12, practice: 80, visuals: 19, glossary: 194, sources: 90 });
+    for (const absentId of ['L13', 'LAB13']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }
@@ -226,6 +244,7 @@ describe('resource index catalog', () => {
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R4-/.test(planningId)).map(({ planningId }) => planningId)).toEqual([
       'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-005', 'PB-R4-006', 'PB-R4-007', 'PB-R4-008',
       'PB-R4-009', 'PB-R4-010', 'PB-R4-011', 'PB-R4-012',
+      'PB-R4-013', 'PB-R4-014',
     ]);
     expect(RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^TERM-(?:09[6-9]|1(?:[0-4]\d|5[01]))$/.test(planningId)).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 56 }, (_, index) => `TERM-${String(96 + index).padStart(3, '0')}`),
@@ -289,7 +308,7 @@ describe('resource index catalog', () => {
       });
     }
     expect(RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === 'SRC-WEB-001')?.versionGate.en)
-      .toBe('Astro 7.2.4; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })');
+      .toBe('Astro 7.2.8; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })');
 
     const toolchainPractice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R2-0(?:0[7-9]|1[01])$/.test(planningId));
     for (const record of toolchainPractice) {
@@ -312,13 +331,44 @@ describe('resource index catalog', () => {
     }
   });
 
+  it('projects exactly six fresh cuFFT records with bilingual links and no invented CUDA evidence', () => {
+    const expected = [
+      { planningId: 'PB-R4-013', group: 'practice', prerequisites: ['L12'], relatedUnits: ['L12', 'EX19'] },
+      { planningId: 'PB-R4-014', group: 'practice', prerequisites: ['L12'], relatedUnits: ['Q05', 'M07', 'L12', 'EX19'] },
+      { planningId: 'TERM-193', group: 'glossary', prerequisites: [], relatedUnits: ['L12', 'EX19'] },
+      { planningId: 'TERM-194', group: 'glossary', prerequisites: [], relatedUnits: ['L12'] },
+      { planningId: 'SRC-CUDA-073', group: 'sources', prerequisites: [], relatedUnits: ['L12', 'EX19'] },
+      { planningId: 'SRC-CUDA-074', group: 'sources', prerequisites: [], relatedUnits: ['Q05', 'M07', 'L12', 'EX19'] },
+    ] as const;
+    expect(RESOURCE_INDEX_RECORDS.filter(({ reviewedOn }) => reviewedOn === '2026-09-08')
+      .map(({ planningId }) => planningId)).toEqual(expected.map(({ planningId }) => planningId));
+    for (const item of expected) {
+      const record = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === item.planningId);
+      expect(record, item.planningId).toMatchObject(item);
+      expect(record?.evidence).toBeUndefined();
+      for (const locale of ['zh-CN', 'en'] as const) {
+        const projected = projectResourceIndex(RESOURCE_INDEX_RECORDS, item.group, locale, { asOf })
+          .find(({ planningId }) => planningId === item.planningId);
+        expect(projected?.prerequisites.map(({ id }) => id)).toEqual(item.prerequisites);
+        expect(projected?.relatedUnits.map(({ id }) => id)).toEqual(item.relatedUnits);
+        expect(projected?.href).toBe(`${locale === 'en' ? '/en' : ''}/${item.group === 'sources' ? 'sources-and-versions' : item.group}/#${item.planningId.toLowerCase()}`);
+      }
+      if (item.group === 'sources') expect(record?.sourceAccessDate).toBe('2026-09-08');
+    }
+    const versions = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === 'SRC-CUDA-074')?.versionGate.en;
+    for (const coordinate of ['11.8.0', '10.9.0.58', '12.9.2', '11.4.1.4', '13.3.1', '12.3.0.29']) {
+      expect(versions).toContain(coordinate);
+    }
+    expect(versions).toMatch(/known.*LTO.*hazard/i);
+  });
+
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-09-06T16:00:00Z'),
+      asOf: new Date('2026-09-08T16:00:00Z'),
     })).not.toThrow();
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
-      asOf: new Date('2026-09-06T15:59:59Z'),
+      asOf: new Date('2026-09-08T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
 
@@ -671,7 +721,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(217);
+    expect(projected).toHaveLength(219);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
     );

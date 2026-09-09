@@ -1,9 +1,9 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L11、LAB01-LAB12、EX01-EX18、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L12、LAB01-LAB12、EX01-EX19、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
-factCheckDate: '2026-09-07'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,6 +20,8 @@ structure:
   - entry-src-cuda-070
   - entry-src-cuda-071
   - entry-src-cuda-072
+  - entry-src-cuda-073
+  - entry-src-cuda-074
   - content-sources
   - review-record
 head:
@@ -30,7 +32,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-07'
+      content: '2026-09-09'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -38,18 +40,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L11、LAB01-LAB12、十八个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L12、LAB01-LAB12、十九个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-本页覆盖 Home、73 个学习单元（Learning Unit）、其练习与独立参考解答、18 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、78 个练习题库（Practice Bank）条目和 192 个术语表（Glossary）词条，以及既有静态发布与可视化界面。当前目录恰好包含 **389** 条记录：12 个 Lab、78 个 Practice Bank 条目、19 个 Visual Explainer、192 个 Glossary 词条和 88 条来源记录。L10/L11 及各自练习、解答增加六个双语发布对（Publication Pair），形成 269 对和 538 条源路由，包含 72 组练习与 72 组独立参考解答。新增 `SRC-CUDA-071/072` 于 2026-09-07 访问并复核；旧记录保留日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+本页覆盖 Home、74 个学习单元（Learning Unit）、其练习与独立参考解答、19 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、80 个练习题库（Practice Bank）条目和 194 个术语表（Glossary）词条，以及既有静态发布与可视化界面。当前目录恰好包含 **395** 条记录：12 个 Lab、80 个 Practice Bank 条目、19 个 Visual Explainer、194 个 Glossary 词条和 90 条来源记录。L12、其练习与解答及 EX19 增加四个双语发布对（Publication Pair），形成 273 对和 546 条源路由，包含 73 组练习与 73 组独立参考解答。新增 `SRC-CUDA-073/074` 于 2026-09-08 访问并复核；旧记录保留日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -59,9 +61,11 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 已核对的发布接口
 
+**2026-09-09 安全更新：** Astro 7.2.8 和 Sharp 0.35.4 修复 [AVIF 公告](https://github.com/advisories/GHSA-26w7-cxv4-gfx2)与 [Sharp 的 libheif 公告](https://github.com/advisories/GHSA-rgj7-g3m4-5g8c)；js-yaml 4.3.2 修复[合并源资源耗尽问题](https://github.com/advisories/GHSA-2883-xcg3-v3hh)；SVGO 4.1.0 修复[脚本移除绕过问题](https://github.com/svg/svgo/releases/tag/v4.1.0)。精确 Sharp override 也替换 Miniflare 固定的 0.35.2，不升级 Wrangler。早期可视化讲解接口审核和不可变发布记录保留历史 7.2.4 坐标，当前构建使用 7.2.8。这些补丁不改变 CUDA 证据。
+
 | 接口 | 精确版本 | 核对内容 | Context7 | 上游资料 |
 | --- | --- | --- | --- | --- |
-| <span id="src-web-001" class="resource-target" aria-hidden="true"></span>Astro | Astro 7.2.4；`@astrojs/markdown-remark` 7.2.4 | 静态输出与 build-time content；MDX 中的 Astro component；经处理、打包和去重的 TypeScript client script；light-DOM custom element；首屏前 `is:inline` 脚本；通过 `markdown.processor: unified({ rehypePlugins })` 生成可聚焦的静态 Markdown 表格 | `/withastro/docs` | [Astro npm 清单](https://registry.npmjs.org/astro/7.2.4)、[`@astrojs/markdown-remark` 7.2.4 清单](https://registry.npmjs.org/%40astrojs%2Fmarkdown-remark/7.2.4)、[7.2.4 owner release](https://github.com/withastro/astro/releases/tag/%40astrojs%2Fmarkdown-remark%407.2.4)、[tagged `unified` processor source](https://github.com/withastro/astro/blob/%40astrojs%2Fmarkdown-remark%407.2.4/packages/markdown/remark/src/processor.ts)、[content collections](https://docs.astro.build/en/guides/content-collections/)、[客户端脚本与 custom elements](https://docs.astro.build/en/guides/client-side-scripts/)、[MDX components](https://docs.astro.build/en/guides/integrations-guide/mdx/) |
+| <span id="src-web-001" class="resource-target" aria-hidden="true"></span>Astro | Astro 7.2.8；`@astrojs/markdown-remark` 7.2.4 | 静态输出与 build-time content；MDX 中的 Astro component；经处理、打包和去重的 TypeScript client script；light-DOM custom element；首屏前 `is:inline` 脚本；通过 `markdown.processor: unified({ rehypePlugins })` 生成可聚焦的静态 Markdown 表格 | `/withastro/docs` | [Astro npm 清单](https://registry.npmjs.org/astro/7.2.8)、[`@astrojs/markdown-remark` 7.2.4 清单](https://registry.npmjs.org/%40astrojs%2Fmarkdown-remark/7.2.4)、[7.2.4 owner release](https://github.com/withastro/astro/releases/tag/%40astrojs%2Fmarkdown-remark%407.2.4)、[tagged `unified` processor source](https://github.com/withastro/astro/blob/%40astrojs%2Fmarkdown-remark%407.2.4/packages/markdown/remark/src/processor.ts)、[content collections](https://docs.astro.build/en/guides/content-collections/)、[客户端脚本与 custom elements](https://docs.astro.build/en/guides/client-side-scripts/)、[MDX components](https://docs.astro.build/en/guides/integrations-guide/mdx/) |
 | <span id="src-web-002" class="resource-target" aria-hidden="true"></span>Starlight | 0.41.7 | 根语言、本地化标题、显式侧边栏、MDX component、自定义 CSS、内置 Pagefind 与现有组件覆写 | `/withastro/starlight` | [npm 清单](https://registry.npmjs.org/%40astrojs%2Fstarlight/0.41.7)、[侧边栏与本地化 slug](https://starlight.astro.build/guides/sidebar/)、[在 MDX 中使用 component](https://starlight.astro.build/components/using-components/)、[CSS 与样式](https://starlight.astro.build/guides/css-and-tailwind/)、[国际化](https://starlight.astro.build/guides/i18n/#use-a-root-locale)、[站点搜索](https://starlight.astro.build/guides/site-search/) |
 | <span id="src-web-003" class="resource-target" aria-hidden="true"></span>Pagefind | 1.5.2 | 根据 `<html lang>` 生成语言分区索引、扩展版中文分词、`data-pagefind-body`/`data-pagefind-ignore` 索引边界与静态部署资源；多条目页的筛选由本地 custom element 完成，不把 page-level facet 误当 card-level facet | `/websites/pagefind_app` | [npm 清单](https://registry.npmjs.org/pagefind/1.5.2)、[多语言搜索](https://pagefind.app/docs/multilingual/)、[索引内容控制](https://pagefind.app/docs/indexing/)、[静态索引](https://pagefind.app/docs/running-pagefind/) |
 | <span id="src-web-004" class="resource-target" aria-hidden="true"></span>Cloudflare 静态发布 | Wrangler 4.125.0；compatibility date 2026-08-24 | 固定 Wrangler 从干净 `main` 发布，Workers Builds 的 production/preview 行为已核对但 R3 未启用其账户自动化；Static Assets 配置没有 Worker script 或 binding；version upload 生成公开预览 URL（Preview URL）；`workers.dev` 生产路由、404、版本与 rollback 边界 | Cloudflare owner documentation | [Wrangler release](https://github.com/cloudflare/workers-sdk/releases/tag/wrangler%404.125.0)、[Astro 静态发布](https://developers.cloudflare.com/workers/framework-guides/web-apps/astro/)、[Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)、[Static Assets](https://developers.cloudflare.com/workers/static-assets/)、[Preview URLs](https://developers.cloudflare.com/workers/versions-and-deployments/preview-urls/)、[`workers.dev`](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)、[rollback](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/) |
@@ -156,7 +160,7 @@ Context7 libraries `/websites/nvidia_cuda`（2026-08-29 至 2026-09-04）、`/we
 
 **`SRC-CUDA-063` bundled-header authority。** 对 bundled rows，权威合同是从 Linux x86-64 redistribution archives 内检查的 `cub/device/device_reduce.cuh`、`cub/device/device_scan.cuh` 与 `cub/version.cuh`；三个 archives 的 SHA-256 分别为 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`、`8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`和 `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`。这些 headers 为 bundled CUB 1.15.1、2.8.2、3.3.4 的传统 pseudo-associative `DeviceReduce` 都记录带 cross-compute-capability caveat 的 same-GPU run-to-run determinism。Bundled CUB 1.15.1 `DeviceScan` 记录相同 scoped guarantee，bundled 2.8.2 与 3.3.4 则记录 possible pseudo-associative run-to-run variation。Selected 3.4.2 由 exact tagged headers 负责：reduction 保留该 scoped guarantee，scan 允许 variation。Context7 没有检查或验证这些 archives。Header review 不建立本站 compilation、runtime、output、determinism observation 或 performance evidence。
 
-VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，L06/EX18/LAB12 与 L07 使用 `SRC-CUDA-067/068`，L08/L09 使用 `SRC-CUDA-069/070`。L10/L11 新增 `SRC-CUDA-071/072`，使当前目录包含 88 条来源记录。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
+VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，L06/EX18/LAB12 与 L07 使用 `SRC-CUDA-067/068`，L08/L09 使用 `SRC-CUDA-069/070`。L10/L11 使用 `SRC-CUDA-071/072`；L12/EX19 新增 `SRC-CUDA-073/074`，使当前目录包含 90 条来源记录。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
 
 CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、PTX ISA、Binary Utilities、cuBLAS 等 component、paired driver 和 compatibility floor 都不能合并成一个“CUDA 版本”。本站把 Toolkit 13.3.1 下 current page label v13.3、`archive/12.9.2` 下 NVCC v12.9/PTX ISA 8.8、`archive/11.8.0` 下 PTX ISA 7.8，以及既有 `archive/12.9.2` Runtime API 自标 v12.9.1 的差异原样保留；current PTX ISA 9.3 也只绑定 selected 13.3.1 Lane。CUDA 13.3.1 Linux 指南与 Programming Guide 列出 C++23，而同版本 NVCC `--std` 参考仍只列到 C++20。GCC 13.3/NVCC 13.3.73 的 exact-image `unsupported` result 保持 immutable R1 history；run 33275734951 另行保留 EX10 + NVCC 13.3.73 + GCC 14.2.0 的 narrow `C++23-Dialect-Probe` pass。两者都不是 ordinary EX10 C++23 support。
 
@@ -426,19 +430,73 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 [LICENSING.md](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSING.md)解释保留外部贡献导致的 MIT 例外。另审查 [LICENSE.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE.txt)（Apache-2.0）、[LICENSE-MIT.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/LICENSE-MIT.txt)、[NOTICE](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/NOTICE)与 [THIRD_PARTY_LICENSES.txt](https://github.com/NVIDIA/cudnn-frontend/blob/f77fbc3d21be3f24cd0286b9b368105f7c518b8a/THIRD_PARTY_LICENSES.txt)；根声明年份为 2020-2026，包元数据为 `Apache-2.0 AND MIT`。已检查的 Markdown 文档和 pyproject.toml 开头没有逐文件 SPDX；仅链接/转述，不复制，也不推断文件许可。未来实质复用须处理适用许可、版权/归属及 Apache NOTICE/修改说明。没有复制或改编实现、样例、测试、图示、二进制或大段文字；原创教学正文/表格仍为 CC BY 4.0。上游测试只读未运行，不提供本站编译或运行证据。
 
+<span id="src-cuda-073" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-073：cuFFT DFT、布局、计划与工作区合同
+
+**相关 ID：** L12、EX19。**访问与复核日期：** 2026-09-08。本记录支撑 [L12](/libraries/cufft-plans-layouts-startup/)、[EX19](/examples/cufft-batched-transform/)、[PB-R4-013](/practice/#pb-r4-013)和 [TERM-193/194](/glossary/#term-193)。L12 的直接先修精确为 `[Q05,M07]`；EX19 为 `[L12]`。
+
+| 上游坐标 | 权威范围与限制 |
+| --- | --- |
+| [CUDA 11.8.0 cuFFT 归档](https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html) | 该 Toolkit 坐标的历史计划、变换、数据布局、API 与精度合同；独立组件映射见 SRC-CUDA-074 |
+| [CUDA 12.9.2 cuFFT 归档](https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html) | 较新的归档计划/布局合同，含带版本门槛的 JIT 与回调说明；不是 13.3.1 快照 |
+| [实时 cuFFT 指南](https://docs.nvidia.com/cuda/cufft/index.html) | 指南标为 **13.3**，页脚为 **2026-06-25**，访问于 2026-09-08；是当前文档，不是精确不可变 13.3.1 指南，也不是执行证据 |
+
+复核章节覆盖 cuFFT plans、plan initialization time、transform types、data layout、advanced data layout、`cufftCreate`、`cufftSetAutoAllocation`、`cufftMakePlanMany`、`cufftSetWorkArea`、`cufftSetStream`、执行与销毁。下面的合同摘要及算术均为原创，不复制上游表格或示例代码。
+
+| 教学边界 | 已复核事实 |
+| --- | --- |
+| DFT 符号与归一化 | 前向指数使用负号，正反两个方向都不归一化；往返缩放为逻辑变换尺寸乘积，不乘 batch 数量。FFT 是计算该 DFT 的算法族 |
+| C2C、R2C、C2R | C2C 存完整复数输入输出；实数变换利用厄米共轭对称（Hermitian Symmetry）。C2R 输入必须满足该对称，自共轭频率点为实数，并满足文档规定的复数类型对齐 |
+| 原位实数存储 | 最后逻辑维 N 存 `K=floor(N/2)+1` 个复数；每条最内行需要 `2K` 个实数槽。多行时只在整个分配末尾填充不够 |
+| 破坏性逆变换 | 非原位 C2R 仍会覆盖复数输入。后续需要频谱时另行复制；输出分开存储不等于承诺保留输入 |
+| 高级布局 | 步幅（stride）和批距离（distance）以各自输入/输出类型的元素为单位，不是字节。指定高级布局时两侧嵌入维度（embeddings）均保持非 NULL；NULL embeddings 选择默认布局行为，忽略其他高级参数 |
+| 计划与工作区所有权 | 调用者管理工作区时，在 create 之后、make-plan **之前**关闭自动分配。确认计划成功和工作区大小后才分配/绑定；并发执行各自需要独占工作区直到完成。主机调用返回不是完成栅栏 |
+| EX19 范围 | 小规模普通单 GPU FP32 C2C，不含实数变换、回调、低精度、多 GPU 或计时。编译证据为空，运行待硬件验证（Pending Hardware Verification）。阅读 API 合同不授予任何此类状态 |
+
+原创 PB-R4-013 的 `batch=2`、`n=[3,10]` 审查中，K=6 得到每行 12 个实数槽，每个 batch 36 个实数或 18 个复数槽，总分配 `2*36*4=288` 字节。这是存储算术，不是查询到的工作区、实际流量或 cuFFT 输出。原生 Linux 仍是唯一受支持环境（Supported Environment）；历史库下限不扩展本站 CC 7.5+ 基线。
+
+<span id="src-cuda-074" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-074：cuFFT 独立组件、JIT、回调、精度与已知风险
+
+**相关 ID：** Q05、M07、L12、EX19。**访问与复核日期：** 2026-09-08。本记录支撑 [PB-R4-014](/practice/#pb-r4-014)和 L12 的版本/启动成本审查；这些事实不是 EX19 构建或运行证据。
+
+| Toolkit 清单 | 独立 `libcufft` 组件 | 普通历史/当前 SM 下限 | FP16 SM 下限 | BF16 SM 下限 |
+| --- | --- | --- | --- | --- |
+| [11.8.0 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json) | 10.9.0.58 | SM35 | SM53 | SM80 |
+| [12.9.2 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json) | 11.4.1.4 | SM50 | SM53 | SM80 |
+| [13.3.1 redistribution manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) | 12.3.0.29 | SM75 | SM75 | SM80 |
+
+清单版本在 Toolkit 之外独立标识组件。SM 下限来自 SRC-CUDA-073 对应归档/当前指南，不来自清单版本字符串。历史 SM35/SM50 与 FP16 SM53 是库事实，不是新的受支持环境，也不降低本站基线。FP16/BF16 变换要求二的幂尺寸；两者都不支持实数侧步幅、多 GPU 变换或超过四十亿元素的变换。BF16 在三行中都要求 SM80。普通 SM 支持不表示每种精度、尺寸、布局、回调或架构专属功能都受支持。
+
+[实时 CUDA 发布说明的 cuFFT 13.3 Update 1 章节](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cufft-release-13-3-update-1)页脚为 **2026-08-26**。请求的精确 [13.3.1 发布说明归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html)在复核时返回 **404**。实时指南标为 13.3、页脚为 2026-06-25；不把任一实时 URL 重标成精确补丁归档。组件身份以版本化清单为准，当前问题状态以访问时的实时发布章节为准，历史 API 主张使用真实归档。
+
+| 版本边界 | 限定解释 |
+| --- | --- |
+| CUDA 12.0 起 | 更多 cuFFT 内核以 PTX 提供，计划初始化阶段可能进行即时编译（JIT Compilation）。驱动缓存可能避免重复编译；区分空缓存、已填充缓存、首次计划、首次执行与复用计划执行，不断言通用启动时间 |
+| CUDA 12.4 起 | LTO kernels 增加独立的计划/编译路径；这不是 PTX JIT 的引入日期 |
+| CUDA 12.6 Update 2 起 | LTO callbacks 在各自 API、构建、链接、尺寸与平台条件下可用。不要混淆旧式 callbacks 与 LTO callbacks，也不要假设 11.8 有该接口 |
+| CUDA 13.2 起 | NVRTC 成为 cuFFT 的额外依赖。记录实际安装的组件/依赖集合，不要从 Toolkit 标签推导每个库版本 |
+| CUDA 13.3 Update 1 **已知问题，未修复** | 实数侧 LTO callbacks 在以下条件**全部**满足时有正确性风险：N 为偶数；**FP32 的 N 不小于 8192**，或 **FP64 的 N 不小于 4096**；N 的最大质因子不小于 **127**。保留回调侧、精度、尺寸与因数分解，不把合取警告泛化为每个 FFT 都有问题 |
+
+原创示例 `16256=2^7*127` 在指定实数侧 LTO callback 前提下满足 FP32 尺寸、奇偶与质因子条件。`8192=2^13` 不满足质因子条件，但该反例不证明已修复或回调普遍安全。EX19 排除回调意味着不教授该执行路径，不为任何配置产生正确性证据。PB-R4-014 的假设 `4+12+2+19*0.5=27.5 ms` 和每请求 1.375 ms 账本是声明的成本模型，不是记录的计时、缓存观察或加速比。
+
+**发现过程与来源：** 2026-09-08 的当前 Context7 查询返回了 cuFFTDx，而不是 cuFFT，并找到较旧的 `/websites/nvidia_cuda_archive_11_0_ga` 集合。没有以 cuFFTDx 替代 cuFFT。旧集合仅用于发现 `cufftMakePlanMany`；发布事实以上述精确归档指南、版本化清单与明确标日期的实时来源为准。Context7 没有验证 13.3.1 归档、二进制或执行。仅链接并转述上游文档，不复制或改编上游源码、示例、测试、图示、表格或大段正文。原创教学文字、情景与表格采用 CC BY 4.0，EX19 原创源码采用 Apache-2.0。不记录 CUDA 构建、运行输出、工作区查询、缓存命中、计时、回调验证、低精度结果、多 GPU 观察或性能赢家。
+
 ## 内容与素材来源
 
-- Home、73 个 Learning Units、18 个 Runnable Examples、12 个 Labs、78 个 Practice Bank 条目、192 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、74 个 Learning Units、19 个 Runnable Examples、12 个 Labs、80 个 Practice Bank 条目、194 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
 
 ## 复核记录
 
-**复核日期：2026-09-07。** 既有来源保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的不可变 R3 聚合复核。`SRC-CUDA-061` 至 `SRC-CUDA-070` 保留逐项日期。Issue #38 为 L10/L11 新增独立后端 `SRC-CUDA-071` 与前端 `SRC-CUDA-072`，均于 2026-09-07 访问；不扩展为 R4 聚合验收。旧 A07 来源记录仍为历史记录；当前固定图/计划审查见 L10 单独标日期的后续阅读。
+**复核日期：2026-09-08。** 既有来源保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的不可变 R3 聚合复核。`SRC-CUDA-061` 至 `SRC-CUDA-072` 保留逐项日期。Issue #39 为 L12/EX19 新增 `SRC-CUDA-073/074`，均于 2026-09-08 访问；不扩展为 R4 聚合验收。旧 A07 来源记录仍为历史记录；其固定图/计划审查见 L10 单独标日期的后续阅读。
 
 2026-09-04 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成 R3 聚合来源复核；[issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)随后固定 L01/L02 的 CCCL/Thrust 边界。[Issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)于 2026-09-05 通过 Context7 `/nvidia/cccl` discovery 交叉核对 current device/warp/block contracts，并以 exact v3.4.2 release/commit、tagged docs/source/tests、NVIDIA manifests、hash-addressed archives、issues 与逐文件 license review 为权威。Current hosted/main-branch material 不作为 immutable v3.4.2 snapshot，也不证明 bundled archive 内容。
 
 R3 是最近一次已完成的聚合发布复核；不可变 `src/r3-release-manifest.json` 固定 62 个 Learning Units、10 个 Labs、19 个 Visual Explainers、66 个 Practice Bank 条目（其中 10 个 Nsight report-analysis 条目）、176 个 Glossary 词条、76 条 source records、347 条 catalog records、232 个 Publication Pairs 和 464 条 source routes。R1/R2 继续作为历史发布坐标。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保存最终 CI、Cloudflare Preview/production 与 smoke 的动态验收记录；R4 聚合复核仍待完成。
 
-F01/LAB02 的既有规范导入和保留的编译记录保持不变。新增 L10/L11 只发布静态教学合同，四个证据数组为空；EX18/LAB12 的编译与实际观察为空，运行状态仍为 Pending Hardware Verification。六份既有 expected-only profiler plans 的环境清单未填写，十九项浏览器 Visual Explainer 不授予 CUDA Evidence Status。L01-L11 属于滚动 R4，不属于不可变 R3；L12-L13 尚未发布。没有新增 GPU 输出、工作区、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明。
+F01/LAB02 的既有规范导入和保留的编译记录保持不变。L01-L12 发布静态教学合同，四个证据数组为空；EX19、EX18/LAB12 与 EX17/LAB11 的编译与实际观察为空，运行状态仍为 Pending Hardware Verification。六份既有 expected-only profiler plans 的环境清单未填写，十九项浏览器 Visual Explainer 不授予 CUDA Evidence Status。L01-L12 属于滚动 R4，不属于不可变 R3；该库课程序列中仅 L13 尚未发布，R4 聚合验收仍待完成。没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明。

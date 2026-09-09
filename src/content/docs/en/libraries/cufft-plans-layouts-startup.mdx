@@ -1,0 +1,249 @@
+---
+title: 'L12: Separate cuFFT Mathematics, Storage, and Startup'
+description: Derive batched FFT addresses, real-transform padding, plan and workspace lifetimes, and honest startup measurements without extending a small C2C example to unsupported modes.
+pairId: l12
+counterpart: /libraries/cufft-plans-layouts-startup/
+factCheckDate: '2026-09-08'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, dft, storage, strides, lifecycle, ownership, startup, versions, precision, callbacks, multi-gpu, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L12
+prerequisites: [Q05, M07]
+relatedUnits: [EX19]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'cuFFT 11.8 archived API reference'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cufft/index.html'
+    version: 'Toolkit 11.8.0; cuFFT 10.9.0.58; document updated 2022-10-03'
+    platform: 'Owner API contract; no local GPU execution'
+    accessDate: '2026-09-08'
+  - title: 'cuFFT 12.9 archived API reference'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cufft/index.html'
+    version: 'Toolkit 12.9.2; cuFFT 11.4.1.4; document updated 2025-05-31'
+    platform: 'Owner API contract; no local GPU execution'
+    accessDate: '2026-09-08'
+  - title: 'Current cuFFT API reference'
+    url: 'https://docs.nvidia.com/cuda/cufft/index.html'
+    version: 'Live guide label 13.3; cuFFT 12.3.0.29; document updated 2026-06-25'
+    platform: 'Current owner contract, not an immutable 13.3.1 archive'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 11.8 cuFFT release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html#title-cufft-library'
+    version: 'Toolkit 11.8.0; document updated 2022-10-06'
+    platform: 'Component identity and historical issues'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 12.9 Update 2 cuFFT release history'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html#cufft'
+    version: 'Toolkit 12.9.2; document updated 2026-08-13'
+    platform: 'Current lane and release-specific fixes; not measured acceptance'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 13.3 Update 1 cuFFT known issue'
+    url: 'https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cufft-release-13-3-update-1'
+    version: 'Toolkit 13.3.1; document updated 2026-08-26'
+    platform: 'Live owner warning for large real-side LTO callbacks'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'Toolkit 11.8.0; libcufft 10.9.0.58; release_date 2022-10-03'
+    platform: 'Component identity only; no SDK downloaded'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'Toolkit 12.9.2; libcufft 11.4.1.4; release_date 2026-05-14'
+    platform: 'Component identity only; no SDK downloaded'
+    accessDate: '2026-09-08'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'Toolkit 13.3.1; libcufft 12.3.0.29; release_date 2026-06-29'
+    platform: 'Component identity only; no SDK downloaded'
+    accessDate: '2026-09-08'
+head:
+  - tag: meta
+    attrs: { name: 'cuda:pair-id', content: l12 }
+  - tag: meta
+    attrs: { name: 'cuda:counterpart', content: '/libraries/cufft-plans-layouts-startup/' }
+  - tag: meta
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-08' }
+  - tag: meta
+    attrs: { name: 'cuda:license', content: CC-BY-4.0 }
+  - tag: meta
+    attrs: { name: 'cuda:provenance', content: original }
+  - tag: meta
+    attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,dft,storage,strides,lifecycle,ownership,startup,versions,precision,callbacks,multi-gpu,evidence,retrieval,practice,sources' }
+  - tag: meta
+    attrs: { name: 'cuda:resource-kind', content: learning-unit }
+  - tag: meta
+    attrs: { name: 'cuda:unit-id', content: L12 }
+  - tag: meta
+    attrs: { name: 'cuda:prerequisites', content: 'Q05,M07' }
+  - tag: meta
+    attrs: { name: 'cuda:related-units', content: EX19 }
+  - tag: meta
+    attrs: { name: 'cuda:hardware-gate', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-compilation', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:evidence-runtime', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:expected-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:recorded-observations', content: none }
+  - tag: meta
+    attrs: { name: 'cuda:source-count', content: '9' }
+  - tag: meta
+    attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1' }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/cufft-plans-layouts-startup/" lang="zh-CN">阅读中文对应页</a>
+
+A spectrum can have the right allocation size and still describe the wrong signal. cuFFT sees the lengths, types, and strides you declare, not the intended meaning of the samples behind a pointer. A second mistake is calling a first-use latency an FFT execution time. This unit separates those two contracts before asking whether a library call is fast.
+
+## Learning goals
+
+Allow about 35 minutes for reading and retrieval, with additional time for the three paper Exercises. Derive transform signs, normalization, physical extents, batch addresses, and safe plan/workspace lifetimes. Explain startup without inventing measurements. No GPU is required to read this unit.
+
+## Prerequisites
+
+The exact ordered prerequisites are `Q05, M07`: [Q05: Timing Asynchronous GPU Work](/en/correctness/timing-asynchronous-gpu-work/) supplies measurement boundaries; [M07: Stream Ordering](/en/memory/stream-ordering/) supplies per-stream order and explicit completion dependencies. [EX19: Batched cuFFT Transform](/en/examples/cufft-batched-transform/) is the related Runnable Example, not another prerequisite.
+
+## Why plans precede execution
+
+A discrete Fourier transform (DFT) expresses a signal as weighted frequencies. The fast Fourier transform (FFT) is a family of algorithms for evaluating that transform, not a different mathematical operation. Cooley-Tukey factorization breaks the work into smaller transforms; cuFFT also uses other algorithms for difficult factorizations. Powers of small primes often enable efficient implementations, but a factorization is not a speed measurement.
+
+cuFFT models its plan interface after FFTW. A **plan** prepares a particular transform configuration for the selected GPU: algorithm decisions, kernel modules, and temporary memory may be involved. Retaining a plan amortizes that setup across compatible datasets. The history matters: CUDA 12.0 increased PTX-delivered kernels, CUDA 12.4 added opt-in LTO kernels, and CUDA 12.6 Update 2 introduced LTO callbacks. These are distinct changes, not properties of every historical plan.
+
+## Define the transform before the buffer
+
+For `n,k = 0..N-1`, the forward transform is `X[k] = sum_n x[n] * exp(-2*pi*i*k*n/N)`: the exponent has a **negative sign**. C2C inverse uses the positive sign. cuFFT applies **no normalization** in either direction, so inverse(forward(x)) is `N*x` in 1D and `product(n)*x` in multiple dimensions. Apply the reciprocal logical-size scale once, not the reciprocal allocation size or batch count.
+
+For example, `N=4`, `x=[0,1,0,0]` gives forward `X=[1,-i,-1,i]`; the unnormalized inverse is `[0,4,0,0]`. A round trip alone can hide paired sign or layout mistakes. EX19 compares each forward coefficient with an independently accumulated CPU DFT on the logical samples, uses bounded batch-distinct inputs, rejects nonfinite results, and declares tolerances rather than demanding cross-implementation bitwise equality. Its actual executable contract and acceptance criteria live only on the EX19 page.
+
+## Logical shape is not physical storage
+
+Let `K=floor(N/2)+1` for a 1D real transform. Hermitian symmetry means `X[k]=conj(X[(N-k) mod N])` for real input; only the nonredundant half needs storage. It does not mean all stored coefficients are real.
+
+| Type | Logical input | Logical output | Direction |
+| --- | --- | --- | --- |
+| `C2C` | `N` complex | `N` complex | `CUFFT_FORWARD` or `CUFFT_INVERSE` |
+| `R2C` | `N` real | `K` complex | Forward |
+| `C2R` | `K` Hermitian complex | `N` real | Inverse |
+
+Out-of-place real transforms use separate arrays with those extents. In-place real transforms instead require storage for `2*K` reals, equivalently `K` complex elements: `N+2` reals for even N and `N+1` for odd N. This is storage padding, **not a change to N or zero-padding the mathematical signal**. For multidimensional row-major data, compress/pad only the final, fastest-changing dimension of every row. Shape `[N1,N2,N3]` produces `N1*N2*(floor(N3/2)+1)` complex values, not half of every axis.
+
+C2R requires Hermitian input. In 1D, DC and the Nyquist bin for even N have zero imaginary part. In higher dimensions enforce the full conjugate-coordinate relationship; not every point of a DC plane is individually real. R2C/C2R pointers, including real-typed pointers, must satisfy the corresponding complex-type alignment requirement. Allocation size alone cannot prove alignment of an offset pointer.
+
+**Out-of-place C2R overwrites its input buffer.** Preserve or restore a separate spectrum before reuse. In-place C2R with non-unit strides can also overwrite arbitrary imaginary input-point values. Do not use untouched gaps or preserved spectra as a general real-transform promise. These are [owner storage rules](https://docs.nvidia.com/cuda/cufft/index.html#data-layout), not modes exercised by EX19.
+
+## Derive strides and batch distances
+
+`cufftPlanMany` and `cufftMakePlanMany` separate logical dimensions from storage embeddings. `istride`/`ostride` advance one innermost element; `idist`/`odist` advance to the next transform in the batch. All are in **elements of the respective input/output type**, not bytes. In 1D, addresses are `b*idist+x*istride` and `b*odist+x*ostride`. In 2D the input mapping is `b*idist+(x*inembed[1]+y)*istride`; in 3D it is `b*idist+((x*inembed[1]+y)*inembed[2]+z)*istride`.
+
+Embedding arrays describe physical storage in those element units, including padding. The outermost embedding entry does not replace batch distance. In an in-place batched R2C transform, equal byte starts can require unequal numeric distances: `idist=2*K` real elements and `odist=K` complex elements. For C2R, reverse those roles.
+
+**Null embeddings select default layout behavior and advanced strides are ignored.** Do not pass null embeddings while expecting a custom `istride` to survive. Supply both embedding arrays and every advanced parameter correctly. For positive strides, a 1D touched extent is `1+(batch-1)*dist+(N-1)*stride`; independently prove no unintended overlap and correct coordinate mapping. A large enough allocation can still contain the wrong samples. See [Advanced Data Layout](https://docs.nvidia.com/cuda/cufft/index.html#advanced-data-layout).
+
+## Build once, reuse deliberately
+
+The caller-owned workspace path separates stages:
+
+| Stage | Responsibility |
+| --- | --- |
+| `cufftCreate` | Create the handle on the intended device/context; check status |
+| `cufftSetAutoAllocation(plan, 0)` | Disable automatic scratch allocation before planning |
+| `cufftMakePlanMany` | Fix type, rank, lengths, embeddings, strides, and batch; obtain required scratch size |
+| `cufftGetSize` | Obtain actual requirement after planning, and again after changes that can alter it |
+| `cufftSetWorkArea` | Attach a valid, sufficiently large caller-owned work area |
+| `cufftSetStream` | Associate the execution stream; association persists until changed |
+| `cufftExecC2C` | Submit the configured transform with valid current I/O pointers |
+| `cufftDestroy` | Release plan-owned resources after required completion; not caller-owned buffers |
+
+Reuse on different data pointers is valid only when type/layout/extents, device/context, and lifetimes still satisfy the plan. A changed logical configuration requires a new plan, not another make-plan call on an already finalized handle. Check every allocation, plan, execution, and completion status; stop after failures, retain stage diagnostics, and release only resources actually acquired. Newer `CUFFT_PLAN_NULL` is a CUDA 13.0 addition, not a portable 11.8 identifier. EX19 owns all canonical source; this unit supplies no parallel listing.
+
+## Workspace ownership follows completion
+
+By default each plan allocates its own work area. `cufftSetWorkArea` replaces that pointer and frees any automatically allocated area. The attached caller allocation remains the caller's responsibility. A size query does not allocate, and an unsuccessful query must not be read as zero scratch. Keep input, output, and scratch alive until execution completes; check completion before host inspection, reuse, or free.
+
+The same sufficiently large workspace can serve **sequential** plans. Every **concurrent** execution requires exclusive workspace, including overlapping executions using one handle. Different host threads have a documented safety contract for different plans and disjoint outputs, not uncoordinated mutation of a shared handle. Prefer one plan/stream/workspace set per concurrent worker; explicit completion dependencies can instead serialize reuse. cuFFT may use private streams, but only ordering relative to the user-associated stream is guaranteed. No association means stream `0`, not a universal ordering proof. Sources: [stream execution](https://docs.nvidia.com/cuda/cufft/index.html#streamed-cufft-transforms), [workspace ownership](https://docs.nvidia.com/cuda/cufft/index.html#caller-allocated-work-area-support), and [thread safety](https://docs.nvidia.com/cuda/cufft/index.html#thread-safety).
+
+## Separate startup from steady execution
+
+Planning includes host heuristics, module loads, allocation, and possibly JIT compilation. Since CUDA 12.0, more cuFFT kernels arrive as PTX and are compiled by the driver during plan initialization. This does not mean 11.8 could never JIT. Initialize cuFFT with adequate free memory; its first call can initialize kernels and fail before the application's large allocations.
+
+| Ledger | Timing boundary | Record rather than assume |
+| --- | --- | --- |
+| Host setup | Host clock around the declared create/plan/allocation stages | Device/context initialization included or excluded |
+| Cold-cache condition | Controlled cache state, separate from a process restart | Driver, path, capacity, and cache controls |
+| First execution | First completed execution on the prepared plan | Transfers and warmup included or excluded |
+| Warm execution | Device events on the execution stream after explicit warmup | Repetitions, completion checks, input restoration, and raw results |
+
+The driver caches generated binaries; a new process may reuse them. Upgrading the driver invalidates its compute cache; disabling caching or eviction can also trigger recompilation. Record `CUDA_CACHE_PATH`, `CUDA_CACHE_MAXSIZE`, and `CUDA_CACHE_DISABLE` when relevant. nvJitLink's runtime-LTO cache is a separate responsibility, not an application plan cache. No elapsed times, speedups, guaranteed warm advantage, or crossover counts are supplied here. Sources: [cuFFT startup](https://docs.nvidia.com/cuda/cufft/index.html#plan-initialization-time) and [driver JIT/cache behavior](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-c-programming-guide/index.html#just-in-time-compilation).
+
+## Pin components, not just Toolkit labels
+
+| Toolkit Lane | cuFFT component | General floor | FP16 floor | Bfloat16 floor | Manifest release date |
+| --- | --- | --- | --- | --- | --- |
+| `11.8.0` | `10.9.0.58` | `SM35` | `SM53` | `SM80` | `2022-10-03` |
+| `12.9.2` | `11.4.1.4` | `SM50` | `SM53` | `SM80` | `2026-05-14` |
+| `13.3.1` | `12.3.0.29` | `SM75` | `SM75` | `SM80` | `2026-06-29` |
+
+These component pins match both owner release tables and redistribution manifests. CUDA 12.9 deprecates Maxwell/Pascal/Volta; 13.0 removes them. A minimum architecture is not a promise that an old Toolkit supports every future GPU. The Learning Site retains its SM75 Baseline GPU Capability Tier rather than lowering it to a historical library floor. Native Linux remains the only Supported Environment.
+
+`cufftGetProperty` queries `MAJOR_VERSION`, `MINOR_VERSION`, and `PATCH_LEVEL` of the dynamically linked library: `10.9.0`, `11.4.1`, or `12.3.0`. There is no documented fourth build-field property. `cufftGetVersion` supplies an integer, not proof of the full package suffix. Record complete installed/loaded component identity separately. `cudaRuntimeGetVersion` encodes `1000*major+10*minor`, yielding `11080`, `12090`, `13030`; it cannot identify Toolkit update numbers. Since CUDA 12.0 it returns a compile-time constant without initializing CUDA. `cudaDriverGetVersion` reports supported CUDA version, not the driver's package number. See [library properties](https://docs.nvidia.com/cuda/cufft/index.html#cufftgetproperty) and [runtime version management](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART____VERSION.html).
+
+Release tables associate Linux drivers `520.61.05`, `575.57.08`, and `610.43.02` with these lanes respectively. Lower family minor-compatibility floors alone do not establish PTX JIT support; use a suitably matched or newer driver and record it in the Environment Manifest. [NVIDIA's compatibility guidance](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html) explicitly warns about PTX on older drivers. Compilation evidence and runtime evidence remain separate.
+
+## Keep low precision outside the executable scope
+
+FP16 and bfloat16 require power-of-two sizes, no strides on the real-valued side of R2C/C2R, one GPU, and no transforms spanning more than 4 billion elements. The current reference explicitly counts real-side lengths in real elements. Bfloat16 uses a combination of FP32 and bfloat16 arithmetic internally; that does not authorize arbitrary mixed input/output/execution types in `cufftXtMakePlanMany`. FP16 DC sums can overflow even for finite inputs. These restrictions are paper reasoning, not tested EX19 modes.
+
+The 12.9.2 release history says FP16 size-1 transforms with `istride/ostride > 1` have a memory issue in 12.1 or earlier and are rejected with `CUFFT_INVALID_SIZE` in 12.2 or later. A separate FP16/bfloat16 size-1 strided R2C/C2R correctness issue in 13.0 was **fixed in 13.1**, not still unresolved in 13.3.1. The out-of-place R2C custom-output-stride overwrite bug was fixed in 12.4; this is not proof of arbitrary strided-real correctness on 11.8. The common executable therefore stays C2C.
+
+## Callbacks have build and correctness gates
+
+Legacy callbacks use separately compiled device code, device linking, static cuFFT plus its `libculibos` dependency, and 64-bit Linux. They are deprecated since CUDA 11.4 but not replaced retroactively in 11.8. Register with `cufftXtSetCallback` after planning. Architecture choices must match the library's supplied code; the 12.9.2 release history retains the SM120 legacy-callback PTX-only requirement introduced in 12.8.
+
+LTO callbacks arrived in CUDA 12.6 Update 2, work with shared cuFFT on Linux/Windows and static cuFFT where available, and require callback LTO-IR generated by NVCC/NVRTC. Register with `cufftXtSetJITCallback` after create but **before planning**; removing an LTO callback requires a new plan. nvJitLink must be from the same Toolkit major as cuFFT and the same or a newer Toolkit version; NVRTC must be in that major and no newer than nvJitLink. The 12.9 reference explains NVRTC's callback-symbol wrapper role. Since 13.2, NVRTC is required for cuFFT LTO kernels generally. Rebuild LTO-IR across Toolkit majors; the linker must be at least as new as its inputs. Sources: [LTO requirements](https://docs.nvidia.com/cuda/cufft/index.html#lto-load-and-store-callback-routines) and [nvJitLink compatibility](https://docs.nvidia.com/cuda/nvjitlink/index.html#compatibility).
+
+Callbacks cover FP32/FP64, not a low-precision callback API. LTO offsets use `unsigned long long`, legacy offsets `size_t`. LTO C2R load callbacks can run more than once per input element, so avoid once-only side effects. Do not depend on block order, shrink output capacity because of callback filtering, or overwrite another element from an in-place store callback. `__syncthreads()` has a documented safe-size restriction to factors 2/3/5/7 and still needs converged control flow. Legacy out-of-place load callbacks cannot be captured in CUDA Graphs since 11.8; LTO callbacks remove that particular limitation from 12.6 Update 2.
+
+**CUDA 13.3 Update 1 still lists a known correctness issue**, identified in 13.3: real-side LTO callbacks on R2C/C2R, an **even length**, **FP32 length at least 8192 or FP64 length at least 4096**, and a **largest prime factor at least 127**. All conditions matter. Real-side means the R2C real load or C2R real store side. It is not a warning against every large FFT or all callbacks. No fixed release was identified; pinning 13.3.1 does not remove the issue. The Exercises classify this conjunction without attempting affected kernels.
+
+The current generic callback overview still states the older prime-factor restriction. The explicit [13.3 LTO coverage note](https://docs.nvidia.com/cuda/cufft/index.html#cufft-link-time-optimized-kernels) and release notes expand single-GPU FP32/FP64 LTO coverage, including larger primes. Use those version-specific statements together with the known issue; do not extend them to 12.9, legacy callbacks, or multi-GPU. EX19 contains no callbacks, LTO opt-in, or graph capture.
+
+## Bound the multi-GPU discussion
+
+cuFFT Xt distributes work across GPUs attached to one host in one process; multi-node cuFFTMp is a separate scope. The documented limit is 16 GPUs, with NVLink required above eight. Devices must share the CUDA architecture level and support UVA. Strided I/O and low precision are excluded; LTO callbacks are unsupported. Single-batch distributed transforms are in-place only. Single-batch 1D real transforms are unsupported; 1D C2C requires power-of-two lengths and 2/4/8/16 GPUs, with respective minimum lengths 64/64/128/1024.
+
+A distributed single transform can leave permuted results on GPUs; descriptor-aware copies restore the documented natural order, including host output. `cufftXtMemcpy` remains synchronous across participating GPUs despite stream association. Communication can make more GPUs slower. The 11.8 reference excludes Driver API applications for multi-GPU; newer references permit primary contexts, and CUDA 12.2 relaxes which GPU context may supply the associated stream. The 2D/3D descriptor/size tables also differ across versions. Do not claim one unqualified multi-GPU contract across all lanes. See [current restrictions](https://docs.nvidia.com/cuda/cufft/index.html#supported-functionality). No multi-GPU Lab is added here.
+
+## Executable and evidence boundary
+
+[EX19](/en/examples/cufft-batched-transform/) is deliberately **modest FP32, single GPU, batched out-of-place C2C with custom element stride and batch distance, checked against a CPU DFT**. It does not execute R2C/C2R, in-place real padding, low precision, callbacks, multi-GPU, or the hazardous LTO cases. Those topics remain explanation and paper Exercises. Canonical code appears only on EX19's page, not here.
+
+This Learning Unit, its Exercises, and its Solutions have four empty evidence arrays. No new Lab or Visual Explainer is introduced; the browser presents learning material and never runs CUDA. Owner-source verification and worked arithmetic grant no Compile-Checked or Runtime-Verified status. Consult EX19's own evidence instead of importing a status into these pages.
+
+## Retrieval check
+
+1. Why is an FFT algorithm not a different DFT, and what signs and scale should an independent forward reference use?
+2. Why do Hermitian storage, per-row in-place padding, complex alignment, and destructive C2R change allocation and reuse rules?
+3. How can a null embedding or a legal-but-wrong batch distance transform the wrong signal without an out-of-bounds access?
+4. Which completion edges protect I/O and workspace, and why are a reusable handle, reusable workspace, and cache hit different claims?
+5. Which conjunction triggers the 13.3 real-side LTO warning, and why do neither a Toolkit version query nor EX19's C2C result establish acceptance of that mode?
+
+## Continue with practice
+
+- Complete the [three Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) before opening the [separate Solutions](/en/libraries/cufft-plans-layouts-startup/solutions/).
+- Use [PB-R4-013](/en/practice/#pb-r4-013) and [PB-R4-014](/en/practice/#pb-r4-014) for repeated layout and lifecycle/startup reasoning.
+- Inspect [EX19](/en/examples/cufft-batched-transform/) for the canonical C2C source and its own acceptance/evidence boundary.
+
+## Sources and licensing
+
+[SRC-CUDA-073](/en/sources-and-versions/#src-cuda-073) and [SRC-CUDA-074](/en/sources-and-versions/#src-cuda-074) coordinate the owner references and release boundaries. The versioned manifests fix full components; the live 13.3 manual and Update 1 notes are identified as live because the attempted exact 13.3.1 release-note archive returned 404. Source update dates, manifest release dates, and the access date are distinct.
+
+Context7 resolution had no direct cuFFT collection. cuFFTDx is not a substitute; the old CUDA 11.0 GA collection was used only for discovery of MakePlanMany/auto-allocation concepts, not as authority for these lanes. The exact owner sources above govern. This prose, arithmetic, and exercise design are original CC BY 4.0 material. No owner sample, implementation, diagram, SDK, PDF, or substantial documentation is copied or adapted; NVIDIA documentation/binary terms are not this page's content license.
+
+**Facts checked and sources accessed: 2026-09-08.**
