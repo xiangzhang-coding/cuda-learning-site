@@ -150,6 +150,7 @@ const exampleSlugs = [
   'sanitizer-defect-suite',
   'cub-device-reduction-scan',
   'cublas-gemm',
+  'cufft-batched-transform',
 ] as const;
 const labSlugs = [
   'record-cuda-environment',

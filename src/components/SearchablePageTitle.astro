@@ -3,13 +3,26 @@
 import PageTitle from '@astrojs/starlight/components/PageTitle.astro';
 
 const { entry, lang } = Astro.locals.starlightRoute;
-// Pagefind's indexer and browser can disagree on Chinese compound boundaries.
-const searchTitle = lang.startsWith('zh')
-  ? Array.from(new Intl.Segmenter(lang, { granularity: 'word' }).segment(entry.data.title))
+let searchTitle: string | undefined;
+if (lang.startsWith('zh')) {
+  const terms = new Set(
+    Array.from(new Intl.Segmenter(lang, { granularity: 'word' }).segment(entry.data.title))
       .filter(({ isWordLike }) => isWordLike)
-      .map(({ segment }) => segment)
-      .join(' ')
-  : undefined;
+      .map(({ segment }) => segment),
+  );
+  // ICU dictionaries differ between Node and browsers. Supplement the index with
+  // contiguous Han title substrings; Pagefind still applies its own tokenizer.
+  // Restrict expansion to titles, not the complete curriculum body.
+  for (const [run] of entry.data.title.matchAll(/\p{Script=Han}+/gu)) {
+    const characters = Array.from(run);
+    for (let start = 0; start < characters.length; start += 1) {
+      for (let end = start + 1; end <= characters.length; end += 1) {
+        terms.add(characters.slice(start, end).join(''));
+      }
+    }
+  }
+  searchTitle = Array.from(terms).join(' ');
+}
 ---
 
 <PageTitle />
