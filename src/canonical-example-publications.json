@@ -3,9 +3,9 @@
   "schemaVersion": 1,
   "examples": {
     "EX20": {
-      "sourceCommit": "e27b4f425400721a2d91c4bbb601a6385dae39c0",
-      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/e27b4f425400721a2d91c4bbb601a6385dae39c0/examples/ex20-cusparse-spmv",
-      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/e27b4f425400721a2d91c4bbb601a6385dae39c0.zip"
+      "sourceCommit": "a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f/examples/ex20-cusparse-spmv",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f.zip"
     },
     "EX10": {
       "sourceCommit": "904c6da03800ed3012baacb861494377c0fa01f2",
