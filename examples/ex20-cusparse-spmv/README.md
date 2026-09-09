@@ -161,7 +161,7 @@ API and component authorities checked on 2026-09-09:
 
 - [Archived CUDA 11.8.0 cuSPARSE API](https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html)
 - [Archived CUDA 12.9.2 cuSPARSE API](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html)
-- [Archived CUDA 13.3.1 cuSPARSE SpMV API](https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/generic-api/generic-api-functions.html#cusparsespmv)
+- [Archived CUDA 13.3.1 cuSPARSE SpMV API](https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html#cusparsespmv)
 - [CUDA 11.8.0 redistributable manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json)
 - [CUDA 12.9.2 redistributable manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json)
 - [CUDA 13.3.1 redistributable manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json)
