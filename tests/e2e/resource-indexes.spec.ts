@@ -618,6 +618,8 @@ test('cuFFT practice filters in both locales and reveals each solution independe
 });
 
 test('cuSPARSE filters resolve L13 and EX20 and keep solutions independent of hints in both locales', async ({ page }) => {
+  // This journey loads three full indexes and revisits practice in both locales.
+  test.setTimeout(120_000);
   for (const locale of INDEX_LOCALES) {
     const prefix = locale === 'en' ? '/en' : '';
     for (const group of ['practice', 'glossary', 'sources'] as const) {
