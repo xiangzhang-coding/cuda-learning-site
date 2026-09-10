@@ -11,7 +11,7 @@ const ranges = ['cpu-reference', 'descriptors-workspace', 'stream-lifecycle'];
 for (const slug of slugs) {
   test(`${slug} has direct locale navigation and independent evidence`, async ({ page, baseURL }) => {
     const failures = collectBrowserFailures(page, baseURL!);
-    await page.goto(`/${slug}/`);
+    await page.goto(`/${slug}/`, { waitUntil: 'networkidle' });
     for (const locale of ['', 'en/']) {
       await expect(page.locator('main h1')).toContainText(slug === example ? 'EX20' : 'L13');
       await expect(page.locator('meta[name="cuda:fact-check-date"]')).toHaveAttribute('content', '2026-09-09');
@@ -28,7 +28,8 @@ for (const slug of slugs) {
       await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', counterpart);
       await page.locator('[data-locale-counterpart]').click();
       await expect(page).toHaveURL(`${baseURL}${counterpart}`);
-      await page.waitForLoadState('domcontentloaded');
+      // Let resources and hover prefetches finish before navigating again.
+      await page.waitForLoadState('networkidle');
     }
     expect(failures).toEqual([]);
   });

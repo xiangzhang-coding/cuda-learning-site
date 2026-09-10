@@ -123,7 +123,10 @@ jobs:
           path: dist
 
       - name: Install pinned Chromium and host dependencies
-        run: npx playwright install --with-deps chromium
+        run: |
+          # Playwright downloads pinned browsers; the runner's Chrome apt feed is unused.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources
+          npx playwright install --with-deps chromium
 
       - name: Run Chromium built-output checks
         run: npm run test:e2e:chromium
@@ -183,7 +186,10 @@ jobs:
           path: dist
 
       - name: Install pinned Firefox, WebKit, and host dependencies
-        run: npx playwright install --with-deps firefox webkit
+        run: |
+          # Keep unrelated Chrome index failures out of the Ubuntu dependency install.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources
+          npx playwright install --with-deps firefox webkit
 
       - name: Run Firefox, WebKit, and Mobile Safari emulation
         run: npm run test:e2e:cross-browser -- --shard=${{ matrix.shard }}/2
@@ -236,7 +242,10 @@ jobs:
           path: dist
 
       - name: Install pinned Chromium and host dependencies
-        run: npx playwright install --with-deps chromium
+        run: |
+          # Keep unrelated Chrome index failures out of the Ubuntu dependency install.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources
+          npx playwright install --with-deps chromium
 
       - name: Run automated accessibility checks
         run: npm run test:e2e:accessibility
