@@ -3,7 +3,7 @@ title: Practice Bank
 description: 82 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-10'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -270,7 +270,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-10' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -310,6 +310,19 @@ Review the linked prerequisite, then produce your own artifact before reading th
 A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 82 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
+
+The **2026-09-10 R4 aggregate static review** qualifies eight library-and-algorithm-choice entries alongside that unchanged R3 subset. These are classifications within the existing 82 entries, not new questions. They require a reasoned selection or rejection under semantics, version, resource, lifetime, and evidence constraints rather than ranking libraries by name.
+
+| Qualifying entry | Distinct decision |
+| --- | --- |
+| [PB-R4-001](#pb-r4-001) | Library, primitive, DSL, or custom kernel, including ownership cost and a revisit trigger |
+| [PB-R4-002](#pb-r4-002) | Thrust algorithm, iterator, and stream composition with valid ranges and completion |
+| [PB-R4-003](#pb-r4-003) | CUB device reduction versus inclusive/exclusive scan, with per-version storage and determinism contracts |
+| [PB-R4-004](#pb-r4-004) | Warp/block reduction or scan, participant scope, scratch reuse, and algorithm exclusions |
+| [PB-R4-008](#pb-r4-008) | cuBLASLt candidate rejection, cache invalidation, and a semantics-preserving fallback |
+| [PB-R4-011](#pb-r4-011) | cuDNN engine candidates under numerical policy, total workspace, and build constraints |
+| [PB-R4-012](#pb-r4-012) | Attention representation, router ordering, and strict-pin failure versus permitted fallback |
+| [PB-R4-016](#pb-r4-016) | Sparse format and operation-specific preprocessing choices, including active-buffer lifetime |
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -3748,4 +3761,6 @@ For 12.9.2 SpMV active-state reuse, the documented exceptions permit changed alp
 
 ## Review record
 
-Existing entries retain their item-level records. Issue #32's immutable **2026-09-04** R3 review fixes 66 entries and the exact ten-entry Nsight report-analysis inventory. PB-R4-001 through PB-R4-014 retain their dates. PB-R4-015/016 bring the complete current Publication Pair to **82** entries; their metadata, links, two initially closed hints each, and separate expandable solutions were reviewed on **2026-09-09**. These original descriptor and format/preprocessing lifecycle audits each directly require exactly `[L13]`. The rolling library path covers L01-L13; R4 aggregate acceptance remains pending. No upstream questions, code, prose, tables, figures, or results are copied or adapted. All four evidence arrays remain empty. Hypothetical proposals and paper arithmetic supply no queried workspace, determinism outcome, GPU output, or performance winner; EX20 retains independent Pending Hardware Verification runtime.
+The **2026-09-10** R4 aggregate static review records all **82** existing entries and the eight qualifying choices above alongside the immutable R3 ten-entry report-analysis subset. R4 is the latest completed static review; R5 is next with its aggregate review pending. No entry, prerequisite, hint, solution, source, or item-level date is changed by this classification. The September 4-9 records remain attached to their original entries, including PB-R4-015/016's September 9 review and direct `[L13]` prerequisites. R1-R3 history remains unchanged.
+
+[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records dynamic acceptance only after CI, Preview, production, and smoke results exist. This review neither certifies those results nor claims framework or Triton track completion. No owner questions, code, prose, tables, figures, or results are copied or adapted. All four page evidence arrays remain empty. Only EX02, EX10, and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. The other 19 examples and all 12 Labs remain Pending Hardware Verification, 31 subjects total, with zero Runtime-Verified or Community-Observed subjects, Reference Environments, and performance observations. All six profiler plans remain expected-only. Hypothetical proposals and paper arithmetic are not GPU evidence.

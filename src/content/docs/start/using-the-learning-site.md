@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-10'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-09'
+      content: '2026-09-10'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -96,11 +96,11 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-[issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成复核的 R3 稳定课程已完整双语发布 62 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14，以及 Q01-Q13。滚动 R4 已扩展到 L01-L13、EX17-EX20 与 LAB11/LAB12；[issue #39](https://github.com/xiangzhang-coding/cuda-learning-site/issues/39)新增 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)，[issue #40](https://github.com/xiangzhang-coding/cuda-learning-site/issues/40)新增 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)，当前共有 75 个学习单元。下面列出当前完整发布的严格先修关系。
+稳定课程（Stable Curriculum）最近完成的聚合静态复核是 2026-09-10 的 R4。它完整双语覆盖 75 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13 与 L01-L13。可复用库路线已到达 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)，并配有 [EX19](/examples/cufft-batched-transform/)与 [EX20](/examples/cusparse-spmv/)。下面列出当前完整发布的严格先修关系。
 
-已完成的 R3 聚合发布复核是不可变快照，固定为 232 个 Publication Pairs、464 条 source routes 与 347 条 catalog records；它还明确清点 61 组 Exercises、61 组独立 reviewed solutions 和 10 个 Nsight report-analysis Practice Bank 条目。当前滚动发布有 277 个双语发布对、554 条源路由、74 组练习、74 组独立参考解答与 401 条资源目录记录。R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
+模式版本 5 的 `src/r4-release-manifest.json` 生成 `/release.json`，包含 277 个双语发布对、554 条源路由、74 组练习、74 组独立参考解答和 401 条资源目录记录。`/publication.json` 当前具有相同清单，记录最近完成 R4、下一阶段 R5，其聚合复核待完成。R1-R3 保留精确历史快照；R3 仍包含 232 个发布对、464 条路由、347 条目录记录、61 组练习、61 组解答和十道 Nsight 报告分析题。
 
-**发布清单与导航更新：2026-09-09。** 页面日期仅对应本次发布清单更新，不重新核查既有 CUDA API 事实；技术来源及其访问、复核日期不变。
+**聚合静态复核：2026-09-10。** 本次提升不增加页面或资源条目，也不表示框架或 Triton 路线已完成。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。技术来源保留逐项日期，新检索有单独的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)。
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -134,7 +134,9 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 可复用库路线可进入 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)、[L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)、[L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)与[解答](/libraries/libcu-plus-plus-synchronization/solutions/)、[L06 练习](/libraries/cublas-gemm/exercises/)与[解答](/libraries/cublas-gemm/solutions/)，以及 [L07 练习](/libraries/cublaslt-matmul/exercises/)与[解答](/libraries/cublaslt-matmul/solutions/)。本次新增 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)，以及 [L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
 
-[实验索引](/labs/)列出 12 个实验（LAB01-LAB12）。[可视化讲解索引](/visuals/)列出 19 项讲解：独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22。Immutable R3 保留 66 个 Practice Bank 条目、176 个 Glossary terms、76 条 source records 与 347 条 catalog records。当前滚动目录有 82 个[练习题库](/practice/)条目、196 项[术语表](/glossary/)和 92 项[来源记录](/sources-and-versions/)，共 401 条记录；当前内容形成 277 个双语发布对和 554 条源路由。R4 聚合复核仍待完成。
+[实验索引](/labs/)列出 12 个实验（LAB01-LAB12）。[可视化讲解索引](/visuals/)列出 19 项讲解：独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22。R4 与当前目录均有 82 个[练习题库](/practice/)条目、196 项[术语表](/glossary/)词条和 92 项[来源记录](/sources-and-versions/)，共 401 条记录；内容形成 277 个双语发布对和 554 条源路由。R3 十道 Nsight 报告分析题保持不变；另有八道题符合 R4 库与算法选择分类：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。
+
+只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 19 个示例和全部 12 个实验共 31 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。来源复核不是 GPU 证据。
 
 Q06-Q13、A10-A14 与 L01-L13 的四个证据数组均为空，不授予证据状态（Evidence Status）。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。LAB12 已发布可执行的比较步骤，但没有记录输出、计时、加速比或赢家；L07 的发布也不表示 EX18/LAB12 实现了 Lt 选择。EX17 的五项组件矩阵是非证据性的构建检查，不表示 CI 已运行。当前六份分析器测试材料都是预期计划，不是采集报告；当前发布不声明基准环境（Reference Environment）或 `performanceObservations`。
 
@@ -184,4 +186,4 @@ L13 使用归档的 12.9.2 cuSPARSE 教学基线；[SRC-CUDA-075/076 复核](/so
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**发布清单核对日期：2026-09-09。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**聚合发布摘要核对日期：2026-09-10。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

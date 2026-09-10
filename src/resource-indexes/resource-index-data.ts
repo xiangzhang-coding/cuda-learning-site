@@ -24,6 +24,17 @@ export const R3_NSIGHT_REPORT_ANALYSIS_PRACTICE_IDS = [
   'PB-R3-012',
 ] as const;
 
+export const R4_LIBRARY_ALGORITHM_CHOICE_PRACTICE_IDS = [
+  'PB-R4-001',
+  'PB-R4-002',
+  'PB-R4-003',
+  'PB-R4-004',
+  'PB-R4-008',
+  'PB-R4-011',
+  'PB-R4-012',
+  'PB-R4-016',
+] as const;
+
 function glossaryRecord(
   planningId: string,
   title: string,

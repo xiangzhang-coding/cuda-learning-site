@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-10'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-09'
+      content: '2026-09-10'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -96,11 +96,11 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 ## The published route
 
-The R3 Stable Curriculum reviewed in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) completely publishes 62 Learning Units in both languages: O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13. Rolling R4 extends through L01-L13, EX17-EX20, and LAB11/LAB12; [issue #39](https://github.com/xiangzhang-coding/cuda-learning-site/issues/39) adds [L12: cuFFT Plans, Layouts, and Startup](/en/libraries/cufft-plans-layouts-startup/) and [EX19: cuFFT Batched Transform](/en/examples/cufft-batched-transform/), and [issue #40](https://github.com/xiangzhang-coding/cuda-learning-site/issues/40) adds [L13: cuSPARSE Descriptors, SpMV, and SpMM](/en/libraries/cusparse-descriptors-spmv-spmm/) and [EX20: cuSPARSE SpMV](/en/examples/cusparse-spmv/), bringing the current total to 75 Learning Units. The complete strict prerequisite graph currently published follows.
+R4 is the latest completed aggregate static review of the Stable Curriculum, dated 2026-09-10. It covers 75 Learning Units in both languages: O01-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, and L01-L13. The reusable-library path reaches [L12: cuFFT Plans, Layouts, and Startup](/en/libraries/cufft-plans-layouts-startup/) and [L13: cuSPARSE Descriptors, SpMV, and SpMM](/en/libraries/cusparse-descriptors-spmv-spmm/), with [EX19](/en/examples/cufft-batched-transform/) and [EX20](/en/examples/cusparse-spmv/). The complete strict prerequisite graph currently published follows.
 
-The completed R3 aggregate release review is an immutable snapshot fixed at 232 Publication Pairs, 464 source routes, and 347 catalog records. It also inventories 61 Exercise sets, 61 separate reviewed-solution sets, and 10 Nsight report-analysis Practice Bank entries. The rolling current publication has 277 Publication Pairs, 554 source routes, 74 Exercise sets, 74 separate reviewed-solution sets, and 401 catalog records. R1 and R2 remain historical coordinates, and the R4 aggregate review remains pending.
+Schema 5 `src/r4-release-manifest.json` supplies `/release.json`: 277 Publication Pairs, 554 source routes, 74 Exercise sets, 74 separate reviewed-solution sets, and 401 catalog records. `/publication.json` currently has the same inventory and records R4 as latest completed and R5 as next, with its aggregate review pending. R1-R3 remain exact historical snapshots; R3 retains 232 pairs, 464 routes, 347 catalog records, 61 Exercise sets, 61 solution sets, and ten Nsight report-analysis Practice Bank entries.
 
-**Publication inventory and navigation updated: 2026-09-09.** The page date covers only this inventory update, not a new review of existing CUDA API facts; technical sources retain their access and review dates.
+**Aggregate static review: 2026-09-10.** This promotion adds no pages or inventory and does not imply completion of framework or Triton tracks. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records CI, Preview, production, and smoke acceptance only after those results exist. Technical sources retain their item-level dates; fresh retrievals have a separate [aggregate disposition](/en/sources-and-versions/#r4-aggregate-review).
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
@@ -134,7 +134,9 @@ The algorithms route links to Exercises and separate solutions for A01-A14, incl
 
 The reusable-library route links to [L01 Exercises](/en/libraries/library-primitive-dsl-custom-kernel/exercises/) and [solutions](/en/libraries/library-primitive-dsl-custom-kernel/solutions/), [L02 Exercises](/en/libraries/thrust-algorithm-vocabulary/exercises/) and [solutions](/en/libraries/thrust-algorithm-vocabulary/solutions/), [L03 Exercises](/en/libraries/cub-device-primitives/exercises/) and [solutions](/en/libraries/cub-device-primitives/solutions/), [L04 Exercises](/en/libraries/cub-warp-block-primitives/exercises/) and [solutions](/en/libraries/cub-warp-block-primitives/solutions/), [L05 Exercises](/en/libraries/libcu-plus-plus-synchronization/exercises/) and [solutions](/en/libraries/libcu-plus-plus-synchronization/solutions/), [L06 Exercises](/en/libraries/cublas-gemm/exercises/) and [solutions](/en/libraries/cublas-gemm/solutions/), plus [L07 Exercises](/en/libraries/cublaslt-matmul/exercises/) and [solutions](/en/libraries/cublaslt-matmul/solutions/). This increment adds [L08 Exercises](/en/libraries/tensor-core-precision-contracts/exercises/) and [separate solutions](/en/libraries/tensor-core-precision-contracts/solutions/), plus [L09 Exercises](/en/libraries/cutlass-cpp-gemm-structure/exercises/) and [separate solutions](/en/libraries/cutlass-cpp-gemm-structure/solutions/).
 
-The [Lab Index](/en/labs/) lists 12 Labs, LAB01-LAB12. The [Visual Explainer Index](/en/visuals/) lists 19 explainers: standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. Immutable R3 retains 66 Practice Bank entries, 176 Glossary terms, 76 source records, and 347 catalog records. The rolling current catalog has 82 [Practice Bank](/en/practice/) entries, 196 [Glossary](/en/glossary/) terms, and 92 [source records](/en/sources-and-versions/), for 401 records total; current content forms 277 Publication Pairs and 554 source routes. The R4 aggregate review remains pending.
+The [Lab Index](/en/labs/) lists 12 Labs, LAB01-LAB12. The [Visual Explainer Index](/en/visuals/) lists 19 explainers: standalone VIS01-VIS14/VIS18 plus embedded VIS19-VIS22. R4 and the current catalog have 82 [Practice Bank](/en/practice/) entries, 196 [Glossary](/en/glossary/) terms, and 92 [source records](/en/sources-and-versions/), for 401 records total; content forms 277 Publication Pairs and 554 source routes. Alongside the unchanged ten R3 Nsight report-analysis entries, eight qualify for R4 library-and-algorithm choice: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`.
+
+Only EX02, EX10, and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 19 examples and all 12 Labs remain Pending Hardware Verification, 31 subjects total. Runtime-Verified, Community-Observed, Reference Environment, and performance-observation counts remain zero. Source review is not GPU evidence.
 
 Q06-Q13, A10-A14, and L01-L13 have all four evidence arrays empty and grant no Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. LAB12 publishes executable comparison steps, not recorded outputs, times, speedups, or a winner; publishing L07 does not mean EX18/LAB12 implement Lt selection. EX17's five component-matrix rows are a non-evidentiary build gate and do not state that CI ran. All six current profiler fixtures are expected-only plans, not captured reports. The current publication declares no Reference Environment or `performanceObservations`.
 
@@ -184,4 +186,4 @@ You are ready to move on when you can answer these five questions:
 4. How does the theme control fall back when scripts or persistence are unavailable?
 5. Why does publishing a page not grant CUDA evidence?
 
-**Publication inventory checked: 2026-09-09.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.
+**Aggregate release summary checked: 2026-09-10.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources reviewed for this release.

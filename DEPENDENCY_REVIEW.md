@@ -2,11 +2,13 @@
 
 # Dependency Review
 
-- Review date: 2026-09-04
+- Lockfile inventory rechecked: 2026-09-10; earlier interface and security reviews retain their dates
 - Runtime: Node.js 24.19.0, npm 11.17.0
 - Lock format: npm lockfile version 3
-- Reviewed lock package records: 698, including optional platform packages
+- Reviewed lock package records: 665, including optional platform packages
 - Bundled package records: 0
+
+`npm run quality:dependencies` on 2026-09-10 confirmed 665 package records, zero bundled records, and the license expressions and six install-script entries below. No dependency or lockfile was upgraded in the R4 aggregate review. This structural check is not a new vulnerability audit or deployment acceptance result.
 
 Every non-root lock entry has an exact version, an npm registry tarball source, package integrity, and a declared license. Local links, mutable Git dependencies, non-registry tarballs, missing integrity, unknown licenses, and unreviewed install scripts fail `npm run quality:dependencies`.
 
@@ -42,7 +44,7 @@ Only these exact lock entries declare install scripts:
 - `wrangler/node_modules/esbuild@0.28.1`
 - `wrangler/node_modules/fsevents@2.3.3`
 
-The committed `.npmrc`, local Wrangler release flow, and GitHub Actions set `ignore-scripts=true`, so these lifecycle scripts are reviewed but not executed during installation. Any future Workers Builds configuration must preserve that install boundary before it can replace the R3 authority. `workerd` and both esbuild records would otherwise select or validate platform binaries; both fsevents records are optional macOS file watchers. Any version or install-script set change requires a new source, license, and script review before the lockfile can pass.
+The committed `.npmrc` and documented installation flow set `ignore-scripts=true`; installation commands must preserve that boundary. Running Wrangler to validate or upload assets is a separate action, not an npm install lifecycle script. Any future Workers Builds configuration must preserve the install boundary before replacing repository-pinned Wrangler as the deployment authority. `workerd` and both esbuild records would otherwise select or validate platform binaries; all three fsevents records are optional macOS file watchers. Any version or install-script set change requires a new source, license, and script review before the lockfile can pass.
 
 ## Packaged assets and binaries
 

@@ -3,7 +3,7 @@ title: 练习题库
 description: 当前已发布的 82 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-10'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -270,7 +270,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-10' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -310,6 +310,19 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 82 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
+
+**2026-09-10 的 R4 聚合静态复核**在保留上述 R3 子集的同时，明确列出八道符合库与算法选择分类的题目。这只是既有 82 个条目中的分类，不增加新题。作答必须依据语义、版本、资源、生命周期与证据限制说明选择或拒绝的理由，不能只按库名排名。
+
+| 符合分类的条目 | 不同的决策任务 |
+| --- | --- |
+| [PB-R4-001](#pb-r4-001) | 选择库、原语、DSL 或自定义内核，同时考虑维护责任成本和重新评估的触发条件 |
+| [PB-R4-002](#pb-r4-002) | 组合 Thrust 算法、迭代器与流，保证区间有效并等待完成 |
+| [PB-R4-003](#pb-r4-003) | 区分 CUB 设备归约、包含式扫描与排除式扫描，保留各版本存储和确定性合同 |
+| [PB-R4-004](#pb-r4-004) | 选择线程束或线程块归约与扫描，明确参与范围、临时存储复用及算法排除条件 |
+| [PB-R4-008](#pb-r4-008) | 拒绝不合格 cuBLASLt 候选、使过期缓存失效，并设计保持语义的回退路径 |
+| [PB-R4-011](#pb-r4-011) | 按数值策略、总工作区与构建条件筛选 cuDNN 引擎候选 |
+| [PB-R4-012](#pb-r4-012) | 区分注意力表示、路由顺序，以及严格固定计划失败和允许回退的边界 |
+| [PB-R4-016](#pb-r4-016) | 选择稀疏格式与特定操作的预处理路径，明确活动缓冲区生命周期 |
 
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
@@ -3748,4 +3761,6 @@ CSR 数据占 `5*4+6*4+6*4=68` 字节，X/Y 增加 `(5+4)*4=36`，合计 104 字
 
 ## 复核记录
 
-既有条目保留各自复核记录。Issue #32 在 **2026-09-04** 的不可变 R3 聚合复核固定 66 个条目和精确 10 项 Nsight 报告分析清单。PB-R4-001 至 PB-R4-014 保留各自日期。PB-R4-015/016 将完整当前双语发布对扩展到 **82** 个条目；其元数据、链接、各两层默认关闭提示与独立展开的解答于 **2026-09-09** 复核。原创描述符与格式/预处理生命周期审查的直接先修均精确为 `[L13]`。滚动库课程覆盖 L01-L13；R4 聚合验收仍待完成。没有复制或改编上游题目、代码、正文、表格、图示或结果。四个证据数组均保持为空。假设提案与纸面算术不提供查询工作区、确定性结果、GPU 输出或性能赢家；EX20 仍独立处于待硬件验证（Pending Hardware Verification）。
+**2026-09-10** 的 R4 聚合静态复核记录全部 **82** 个既有条目及上述八道选择题，并保留不可变的 R3 十道报告分析题子集。R4 是最近完成的静态复核；下一阶段是 R5，其聚合复核待完成。本次分类不改动题目、先修、提示、解答、来源或逐项日期。9 月 4 日至 9 日的记录仍属于原条目，包括 PB-R4-015/016 的 9 月 9 日复核与直接先修 `[L13]`。R1-R3 历史保持不变。
+
+[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。本次既不预先认证这些结果，也不声称框架或 Triton 路线完成。没有复制或改编上游题目、代码、正文、表格、图示或结果。本页四个证据数组仍为空。只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。其余 19 个示例和全部 12 个实验共 31 个主体仍待硬件验证（Pending Hardware Verification），运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；假设提案与纸面算术不是 GPU 证据。
