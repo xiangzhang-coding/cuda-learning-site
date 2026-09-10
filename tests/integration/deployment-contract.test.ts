@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFile } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
@@ -9,6 +10,39 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 
 describe('Cloudflare assets-only deployment contract', () => {
+  it('accepts matching R4 release inputs and rejects stale R3 metadata before upload', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'r4-release-source-'));
+    const sourceCommit = '0000000000000000000000000000000000000041';
+    try {
+      await Promise.all(['src', 'dist', 'bin'].map((directory) => mkdir(path.join(root, directory))));
+      await cp(path.join(projectRoot, 'scripts'), path.join(root, 'scripts'), { recursive: true });
+      const historical = JSON.parse(await readFile(path.join(projectRoot, 'src/r3-release-manifest.json'), 'utf8'));
+      const reviewed = { ...historical, releaseId: 'R4', schemaVersion: 5, reviewDate: '2026-09-10' };
+      const current = {
+        ...JSON.parse(await readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8')),
+        releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
+      };
+      await Promise.all([
+        writeFile(path.join(root, 'src/r3-release-manifest.json'), JSON.stringify(historical)),
+        writeFile(path.join(root, 'src/r4-release-manifest.json'), JSON.stringify(reviewed)),
+        writeFile(path.join(root, 'src/current-publication-manifest.json'), JSON.stringify(current)),
+        writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...reviewed, sourceCommit })),
+        writeFile(path.join(root, 'dist/publication.json'), JSON.stringify({ ...current, sourceCommit })),
+        // Control only the external Git boundary; exercise the real upload guard and artifact scan.
+        writeFile(path.join(root, 'bin/git'), `#!/bin/sh\ncase "$1" in\nstatus) exit 0 ;;\nrev-parse) printf '%s\\n' '${sourceCommit}' ;;\nbranch) printf '%s\\n' main ;;\n*) exit 1 ;;\nesac\n`, { mode: 0o755 }),
+      ]);
+      const check = () => execFileAsync(process.execPath, [path.join(root, 'scripts/check-release-source.mjs'), '--require-main'], {
+        cwd: root,
+        env: { ...process.env, PATH: `${path.join(root, 'bin')}${path.delimiter}${process.env.PATH}` },
+      });
+      await expect(check()).resolves.toMatchObject({ stdout: expect.stringContaining('Release and publication source passed for main') });
+      await writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...historical, sourceCommit }));
+      await expect(check()).rejects.toMatchObject({ stderr: expect.stringContaining('Built release metadata does not match the reviewed source manifest.') });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it('pins Wrangler and declares only static assets for workers.dev production and previews', async () => {
     const [manifest, rawConfig, astroConfig] = await Promise.all([
       readFile(path.join(projectRoot, 'package.json'), 'utf8').then(JSON.parse),
@@ -44,7 +78,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("['status', '--porcelain=v1', '--untracked-files=all']");
     expect(guard).toContain("['rev-parse', 'HEAD']");
     expect(guard).toContain("['branch', '--show-current']");
-    expect(guard).toContain("'src/r3-release-manifest.json'");
+    expect(guard).toContain("'src/r4-release-manifest.json'");
     expect(guard).toContain("'src/current-publication-manifest.json'");
     expect(guard).toContain("'dist/publication.json'");
     expect(guard).toContain("scanDirectory(path.join(projectRoot, 'dist'))");
@@ -70,7 +104,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     const [release, publication, sourceManifest, currentSourceManifest] = await Promise.all([
       readFile(path.join(projectRoot, 'dist/release.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8').then(JSON.parse),
-      readFile(path.join(projectRoot, 'src/r3-release-manifest.json'), 'utf8').then(JSON.parse),
+      readFile(path.join(projectRoot, 'src/r4-release-manifest.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8').then(JSON.parse),
     ]);
     const builtFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true })).map((file) =>
@@ -99,20 +133,24 @@ describe('Cloudflare assets-only deployment contract', () => {
     });
     expect(publication.sourceCommit).toBe(release.sourceCommit);
     expect(release).toMatchObject({
-      releaseId: 'R3',
+      releaseId: 'R4',
+      schemaVersion: 5,
+      reviewDate: '2026-09-10',
       scope: {
-        publicationPairs: 232,
-        sourceRoutes: 464,
-        exerciseSetPublicationPairs: 61,
-        solutionSetPublicationPairs: 61,
-        practiceBankEntries: 66,
+        publicationPairs: 277,
+        sourceRoutes: 554,
+        exerciseSetPublicationPairs: 74,
+        solutionSetPublicationPairs: 74,
+        practiceBankEntries: 82,
         nsightReportAnalysisPracticeEntries: expect.arrayContaining(['PB-R3-002', 'PB-R3-012']),
-        glossaryTerms: 176,
-        sourceRecords: 76,
+        libraryAlgorithmChoicePracticeEntries: ['PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-008', 'PB-R4-011', 'PB-R4-012', 'PB-R4-016'],
+        glossaryTerms: 196,
+        sourceRecords: 92,
       },
     });
-    expect(release.scope.learningUnits).toHaveLength(62);
-    expect(release.scope.labs).toHaveLength(10);
+    expect(release.scope.learningUnits).toHaveLength(75);
+    expect(release.scope.runnableExamples).toHaveLength(20);
+    expect(release.scope.labs).toHaveLength(12);
     expect(release.scope.visualExplainers).toHaveLength(19);
     expect(
       release.scope.labs.length +
@@ -120,11 +158,12 @@ describe('Cloudflare assets-only deployment contract', () => {
       release.scope.visualExplainers.length +
       release.scope.glossaryTerms +
       release.scope.sourceRecords,
-    ).toBe(347);
+    ).toBe(401);
     expect(publication).toMatchObject({
       publicationId: 'current',
-      reviewDate: '2026-09-09',
-      releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
+      schemaVersion: 1,
+      reviewDate: '2026-09-10',
+      releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: {
         publicationPairs: 277,
         sourceRoutes: 554,
@@ -222,23 +261,27 @@ describe('Cloudflare assets-only deployment contract', () => {
       publication.scope.sourceRecords,
     ).toBe(401);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
-      'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
+      'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'L01-L13 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
-      'L03/LAB11, L06/LAB12, and L13/EX20 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03, LAB12 requires Q13/L06, L13 requires A12/A13/L01, and EX20 requires L13.',
+      'L03/LAB11, L06/LAB12, and L13/EX20 have reviewed R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03, LAB12 requires Q13/L06, L13 requires A12/A13/L01, and EX20 requires L13.',
       'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
       'EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.',
       'EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.',
       'L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.',
       'EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.',
-      'L01-L13 are published in the rolling R4 surface; the R4 aggregate review remains pending and outside the latest completed R3 release.',
+      'R5 framework-integration and Triton Learning Units, Labs, Runnable Examples, and all later curriculum material are outside this release; library-selection comparisons grant no framework or Triton destination, compilation, runtime, or performance evidence.',
     ]));
     expect(publication.knownLimitations).not.toContain(
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
     );
     expect(publication.knownLimitations).not.toContain('LAB06 has no current public destination.');
+    expect(release.scope).toEqual(publication.scope);
+    expect(release.compatibility).toEqual(publication.compatibility);
+    expect(release.evidence).toEqual(publication.evidence);
+    expect(release.knownLimitations).toEqual(publication.knownLimitations);
     expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
     expect(builtFiles).not.toContain('_worker.js');
     expect(builtFiles.some((file) => /(?:^|\/)server(?:\/|$)/.test(file))).toBe(false);
@@ -260,9 +303,9 @@ describe('Cloudflare assets-only deployment contract', () => {
       readFile(path.join(projectRoot, 'src/content/docs/en/sources-and-versions.mdx'), 'utf8'),
     ]);
 
-    expect(deployment).toContain('Cloudflare Workers Builds');
+    expect(deployment).toContain('Workers Builds');
     expect(deployment).toContain('only deployment authority');
-    expect(deployment).toContain('Workers Builds: reviewed, disabled for R3');
+    expect(deployment).toContain('Workers Builds: disabled in the retained infrastructure record; no new account-state claim');
     expect(deployment).toContain('Source branch: clean, protected `main`');
     expect(deployment).toContain('Build command: `npm run build:release`');
     expect(deployment).toContain('Production deploy command: `npm run deploy`');
@@ -282,23 +325,27 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('401 catalog records');
     expect(deployment).toContain('277 Publication Pairs, and 554 source routes');
     expect(deployment).toContain('74 Exercise-set and 74 solution-set Publication Pairs');
-    expect(deployment).toContain('10 Nsight report-analysis Practice Bank entries');
+    expect(deployment).toContain('ten-entry Nsight report-analysis subset');
+    expect(deployment).toContain('eight library-and-algorithm-choice entries');
     expect(deployment).toContain('Q01-Q13');
     expect(deployment).toContain('LAB09-LAB12 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification.');
     expect(deployment).toContain('Q06-Q13, A10-A14, and current L01-L13');
     expect(deployment).toContain('It grants no Evidence Status and summarizes the linked EX14/LAB10 subjects, whose compilation and recorded-observation arrays are empty and whose runtime remains Pending Hardware Verification.');
     expect(deployment).toContain('VIS13');
-    expect(deployment).toMatch(/LAB12 requiring Q13 and L06/i);
+    expect(deployment).toMatch(/LAB12 directly requires Q13 and L06/i);
     expect(deployment).not.toMatch(/LAB12 still waits for L06/i);
     expect(deployment).toContain('EX10 is Runtime-Not-Applicable');
     expect(deployment).toMatch(/EX10.*Runtime-Not-Applicable/i);
     expect(deployment).toMatch(/EX11-EX20.*empty compilation evidence/i);
     expect(deployment).toMatch(/bundled\/selected component matrix/i);
     expect(deployment).toMatch(/No Reference Environment.*performance observation/i);
-    expect(deployment).toMatch(/R3.*latest completed aggregate review/i);
-    expect(deployment).toContain('L01-L13 are published and the R4 aggregate review remains pending.');
-    expect(deployment).toContain('Rolling issue #36 publishes L06/L07/EX18/LAB12, with LAB12 requiring Q13 and L06; it does not expand the R3 snapshot.');
-    expect(deployment).toContain('232 Publication Pairs and 464 source routes');
+    expect(deployment).toMatch(/R4.*latest completed aggregate static review/i);
+    expect(deployment).toContain('schema 5 R4 contract');
+    expect(deployment).toContain('releaseReview.next: R5');
+    expect(deployment).toContain('releaseReview.status: pending');
+    expect(deployment).not.toMatch(/R4 aggregate review remains pending/i);
+    expect(deployment).toContain('framework or Triton track completion');
+    expect(deployment).toContain('232 Publication Pairs, and 464 source routes');
     expect(deployment).toContain('347 catalog records');
     expect(deployment).toMatch(/issue #32/i);
     expect(deployment).toMatch(/issue #26/i);
@@ -310,13 +357,14 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/issue #33/i);
     expect(deployment).toMatch(/issue #34/i);
     expect(deployment).toMatch(/issue #36/i);
+    expect(deployment).toMatch(/issue #41/i);
     expect(deployment).toMatch(/administrator-approved non-admin performance-counter access/i);
     expect(deployment).toMatch(/denied or unavailable metric/i);
     expect(deployment).toContain('npm run test:release-smoke');
     expect(deployment).toContain('wrangler rollback');
     expect(deployment).toContain('No Worker application code or runtime binding');
     expect(readme).toContain('Repository-pinned Wrangler deploys static output from a clean `main` checkout');
-    expect(readme).toContain('Workers Builds behavior is reviewed but its account automation remains disabled');
+    expect(readme).toMatch(/Workers Builds.*(?:disabled|historical|retained)/i);
 
     for (const sourceRecord of [maintenanceSources, chineseSources, englishSources]) {
       expect(sourceRecord).toContain('4.125.0');

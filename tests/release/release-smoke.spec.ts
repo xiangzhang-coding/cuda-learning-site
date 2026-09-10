@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -17,10 +17,14 @@ import ex14Project from '../../examples/ex14-tiled-transpose/project.json' with 
 import ex15Project from '../../examples/ex15-tiled-gemm/project.json' with { type: 'json' };
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import ex17Project from '../../examples/ex17-cub-device-reduction-scan/project.json' with { type: 'json' };
+import ex18Project from '../../examples/ex18-cublas-gemm/project.json' with { type: 'json' };
 import ex19Project from '../../examples/ex19-cufft-batched-transform/project.json' with { type: 'json' };
 import ex20Project from '../../examples/ex20-cusparse-spmv/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
-import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
+import currentPublicationManifest from '../../src/current-publication-manifest.json' with { type: 'json' };
+import r3ReleaseManifest from '../../src/r3-release-manifest.json' with { type: 'json' };
+import r4ReleaseManifest from '../../src/r4-release-manifest.json' with { type: 'json' };
+import { hashCanonicalBuildContract, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
 import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
@@ -52,6 +56,10 @@ const reviewedSolutionAssets = [
     publicPath: '/assets/exercise-solutions/lab11-reduction-comparison.cu',
     sha256: '755a4c4653399299fba80ca12e5fd40d35f992ff18f36d8bece5602c52b16e0c',
   },
+  {
+    publicPath: '/assets/exercise-solutions/lab12-gemm-comparison.cu',
+    sha256: '912ed0d4a8859fca9e3118212713bf75360f022f3231654a4f1076e9a514667d',
+  },
 ] as const;
 const downloadUrl =
   'https://github.com/xiangzhang-coding/cuda-learning-site/archive/d69f7131acff7f8b1dfcd780b494426b5948735b.zip';
@@ -71,6 +79,10 @@ const ex10PublishedProject = {
 const ex17PublishedProject = {
   ...ex17Project,
   ...canonicalExamplePublications.examples.EX17,
+};
+const ex18PublishedProject = {
+  ...ex18Project,
+  ...canonicalExamplePublications.examples.EX18,
 };
 const ex19PublishedProject = {
   ...ex19Project,
@@ -94,6 +106,7 @@ const projectExamples = [
   { suffix: 'examples/tiled-gemm/', project: ex15Project },
   { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
   { suffix: 'examples/cub-device-reduction-scan/', project: ex17PublishedProject },
+  { suffix: 'examples/cublas-gemm/', project: ex18PublishedProject },
   { suffix: 'examples/cufft-batched-transform/', project: ex19PublishedProject },
   { suffix: 'examples/cusparse-spmv/', project: ex20PublishedProject },
 ] as const;
@@ -127,6 +140,10 @@ const r3EvidenceNeutralLearningUnits = [
 const nsightReportAnalysisPracticeIds = [
   'PB-R3-002', 'PB-R3-003', 'PB-R3-004', 'PB-R3-005', 'PB-R3-007',
   'PB-R3-008', 'PB-R3-009', 'PB-R3-010', 'PB-R3-011', 'PB-R3-012',
+] as const;
+const libraryAlgorithmChoicePracticeIds = [
+  'PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004',
+  'PB-R4-008', 'PB-R4-011', 'PB-R4-012', 'PB-R4-016',
 ] as const;
 const r3ProfilerReportPlans = [
   '/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json',
@@ -192,7 +209,27 @@ function expectCleanArchive(archive: Buffer, label: string) {
   expect(scanArtifactBuffer(archive, label), `${label} passes the complete artifact policy`).toEqual([]);
 }
 
-test('serves the exact R3 release and current publication with production canonicals', async ({ page, request }) => {
+async function expectCanonicalRanges(page: Page, project: { id: string; sourceUrl: string }, ranges: readonly string[]) {
+  await expect(page.locator('meta[name="cuda:canonical-example"]')).toHaveAttribute('content', project.id);
+  await expect(page.locator('meta[name="cuda:canonical-ranges"]')).toHaveAttribute('content', ranges.join(','));
+  const figures = page.locator('[data-canonical-example]');
+  await expect(figures).toHaveCount(ranges.length);
+  for (const [index, range] of ranges.entries()) {
+    const excerpt = await readCanonicalRange(projectRoot, project.id, range);
+    const figure = figures.nth(index);
+    await expect(figure).toHaveAttribute('data-canonical-example', project.id);
+    await expect(figure).toHaveAttribute('data-canonical-range', range);
+    await expect(figure).toHaveAttribute('data-canonical-file', excerpt.file);
+    await expect(figure).toHaveAttribute('data-canonical-lines', `${excerpt.startLine}-${excerpt.endLine}`);
+    expect(await figure.locator('pre code').textContent(), `${project.id}: ${range}`).toBe(excerpt.code);
+    await expect(figure.locator('figcaption a')).toHaveAttribute(
+      'href', `${project.sourceUrl.replace('/tree/', '/blob/')}/${excerpt.file}#L${excerpt.startLine}-L${excerpt.endLine}`,
+    );
+    await expect(figure.locator('pre')).toHaveAttribute('tabindex', '0');
+  }
+}
+
+test('serves the exact R4 release and current publication with production canonicals', async ({ page, request }) => {
   test.setTimeout(600_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
@@ -200,10 +237,11 @@ test('serves the exact R3 release and current publication with production canoni
   const releaseBody = await releaseResponse.body();
   expect(scanArtifactBuffer(releaseBody, 'release.json')).toEqual([]);
   const release = JSON.parse(releaseBody.toString('utf8'));
+  expect(release).toEqual({ ...r4ReleaseManifest, sourceCommit: expectedSourceCommit });
   expect(release).toMatchObject({
-    schemaVersion: 4,
-    releaseId: 'R3',
-    reviewDate: '2026-09-04',
+    schemaVersion: 5,
+    releaseId: 'R4',
+    reviewDate: '2026-09-10',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -236,16 +274,28 @@ test('serves the exact R3 release and current publication with production canoni
       runtimeVerified: [],
       referenceEnvironments: [],
       performanceObservations: [],
-      expectedOnlyProfilerReportPlans: r3ProfilerReportPlans,
+      expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
       capturedProfilerReports: [],
     },
     knownLimitations: expect.arrayContaining([
-      'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
+      'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
+      'R4 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
+      'R5 framework-integration and Triton Learning Units, Labs, Runnable Examples, and all later curriculum material are outside this release; library-selection comparisons grant no framework or Triton destination, compilation, runtime, or performance evidence.',
+    ]),
+  });
+  // R4 advances the active contract without rewriting the completed R3 snapshot.
+  expect(r3ReleaseManifest).toMatchObject({
+    schemaVersion: 4,
+    releaseId: 'R3',
+    reviewDate: '2026-09-04',
+    evidence: { expectedOnlyProfilerReportPlans: r3ProfilerReportPlans },
+    knownLimitations: expect.arrayContaining([
+      'No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.',
       'L01-L13 production-library Learning Units and all R4 or later curriculum material are outside this release.',
     ]),
   });
-  expect(release.scope).toEqual({
+  expect(r3ReleaseManifest.scope).toEqual({
     publicationPairs: 232,
     sourceRoutes: 464,
     exerciseSetPublicationPairs: 61,
@@ -260,11 +310,11 @@ test('serves the exact R3 release and current publication with production canoni
     sourceRecords: 76,
   });
   expect(
-    release.scope.labs.length +
-    release.scope.practiceBankEntries +
-    release.scope.visualExplainers.length +
-    release.scope.glossaryTerms +
-    release.scope.sourceRecords,
+    r3ReleaseManifest.scope.labs.length +
+    r3ReleaseManifest.scope.practiceBankEntries +
+    r3ReleaseManifest.scope.visualExplainers.length +
+    r3ReleaseManifest.scope.glossaryTerms +
+    r3ReleaseManifest.scope.sourceRecords,
   ).toBe(347);
 
   const publicationResponse = await request.get('/publication.json');
@@ -272,16 +322,63 @@ test('serves the exact R3 release and current publication with production canoni
   const publicationBody = await publicationResponse.body();
   expect(scanArtifactBuffer(publicationBody, 'publication.json')).toEqual([]);
   const publication = JSON.parse(publicationBody.toString('utf8'));
+  expect(publication).toEqual({ ...currentPublicationManifest, sourceCommit: expectedSourceCommit });
+  expect(release.compatibility).toEqual(publication.compatibility);
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-09',
+    reviewDate: '2026-09-10',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    releaseReview: { latestCompleted: 'R3', next: 'R4', status: 'pending' },
+    releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
     compatibility: {
       componentBoundaries: {
+        cudnn: {
+          version: '9.24.0',
+          selection: 'independent-reference-only',
+          reviewedOn: '2026-09-07',
+          compileCheckedToolkitLanes: [],
+        },
+        cudnnFrontend: {
+          version: '1.27.0',
+          selection: 'independent-reference-only',
+          commit: 'f77fbc3d21be3f24cd0286b9b368105f7c518b8a',
+          releasedOn: '2026-08-06',
+          reviewedOn: '2026-09-07',
+          compileCheckedToolkitLanes: [],
+        },
+        cutlassCpp: {
+          version: '4.7.0',
+          selection: 'independent-reference-only',
+          commit: 'dcf215af68a2d08d305076c152a06f201728cd53',
+          releasedOn: '2026-08-13',
+          apiTeachingBaseline: 'Retained 2.x-style C++ GEMM API with a bounded 3.x collective comparison',
+          proposedBuildTarget: {
+            toolkit: '13.3.1',
+            nvcc: '13.3.73',
+            host: 'Ubuntu 24.04 x86-64',
+            hostCompiler: 'GCC 13.3.0',
+            dialect: 'c++17',
+            architecture: 'sm_75',
+            status: 'not-built',
+          },
+          compileCheckedToolkitLanes: [],
+          pythonDslIncluded: false,
+        },
+        cublas: {
+          bundled: [
+            { toolkitLane: 'cuda-11.8', version: '11.11.3.6' },
+            { toolkitLane: 'cuda-12.9', version: '12.9.2.10' },
+            { toolkitLane: 'cuda-13.3', version: '13.6.0.2' },
+          ],
+          apiTeachingBaseline: 'Toolkit 12.9.2 archived cuBLAS guide, label 12.9',
+          currentApiComparison: 'Live cuBLAS guide label 13.3, accessed 2026-09-06',
+          currentReleaseNotes: 'Live CUDA 13.3 Update 1 release notes, accessed 2026-09-06',
+          exact1331Archive: 'API and release-note archives returned HTTP 404 on 2026-09-06; both returned HTTP 200 on 2026-09-10. The earlier live comparison remains historical.',
+          exampleToolkitLanes: ['cuda-11.8', 'cuda-12.9', 'cuda-13.3'],
+          labToolkitLanes: ['cuda-13.3'],
+        },
         cufft: {
           bundled: [
             { toolkitLane: 'cuda-11.8', version: '10.9.0.58' },
@@ -291,7 +388,7 @@ test('serves the exact R3 release and current publication with production canoni
           apiTeachingBaseline: 'Toolkit 12.9.2 archived cuFFT guide, label 12.9',
           currentApiComparison: 'Live cuFFT guide label 13.3, accessed 2026-09-08',
           currentReleaseNotes: 'Live CUDA 13.3 Update 1 release notes, accessed 2026-09-08',
-          exact1331Archive: 'unavailable: API and release-note archives returned HTTP 404',
+          exact1331Archive: 'API and release-note archives returned HTTP 404 on 2026-09-08; both returned HTTP 200 on 2026-09-10. The earlier live comparison remains historical.',
           exampleToolkitLanes: ['cuda-11.8', 'cuda-12.9', 'cuda-13.3'],
           exampleDialects: ['c++17'],
         },
@@ -350,7 +447,6 @@ test('serves the exact R3 release and current publication with production canoni
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
       'EX11 through EX20 have empty compilation evidence and remain Pending Hardware Verification.',
-      'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
       'L01-L13 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
@@ -359,9 +455,9 @@ test('serves the exact R3 release and current publication with production canoni
       'EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.',
       'L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.',
       'EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.',
-      'L01-L13 are published in the rolling R4 surface; the R4 aggregate review remains pending and outside the latest completed R3 release.',
     ]),
   });
+  expect(release.scope).toEqual(publication.scope);
   expect(publication.scope).toEqual({
     publicationPairs: 277,
     sourceRoutes: 554,
@@ -373,9 +469,11 @@ test('serves the exact R3 release and current publication with production canoni
     visualExplainers: currentVisualExplainers,
     practiceBankEntries: 82,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
+    libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     glossaryTerms: 196,
     sourceRecords: 92,
   });
+  expect(release.evidence).toEqual(publication.evidence);
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
     noCompileCheckedClaim: currentNoCompileCheckedClaim,
@@ -396,9 +494,10 @@ test('serves the exact R3 release and current publication with production canoni
   expect(publication.knownLimitations).not.toContain(
     'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
   );
+  expect(publication.knownLimitations.join('\n')).not.toMatch(/R4 aggregate review remains pending/);
   expect(publication.knownLimitations.filter((limitation: string) =>
     limitation.includes('not immutable R3 destinations'))).toEqual([
-    'L03/LAB11, L06/LAB12, and L13/EX20 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03, LAB12 requires Q13/L06, L13 requires A12/A13/L01, and EX20 requires L13.',
+    'L03/LAB11, L06/LAB12, and L13/EX20 have reviewed R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03, LAB12 requires Q13/L06, L13 requires A12/A13/L01, and EX20 requires L13.',
   ]);
 
   for (const { fixtureName, reviewDate } of [
@@ -617,6 +716,15 @@ test('serves the exact R3 release and current publication with production canoni
       exampleSuffix: 'examples/cub-device-reduction-scan/',
       visualSuffix: 'visuals/reduction-stages/',
     },
+    {
+      suffix: 'labs/compare-gemm-with-cublas/',
+      unitId: 'LAB12',
+      prerequisites: 'Q13,L06',
+      runtimeEvidence: 'Pending Hardware Verification',
+      expectedObservations: '3 declared expectations',
+      exampleSuffix: 'examples/cublas-gemm/',
+      visualSuffix: 'visuals/gemm-tiling-hierarchy/',
+    },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -649,6 +757,39 @@ test('serves the exact R3 release and current publication with production canoni
       const prefix = route.startsWith('/en/') ? '/en/' : '/';
       await expect(page.locator(`main a[href="${prefix}${exampleSuffix}"]`).first()).toBeVisible();
       await expect(page.locator(`main a[href="${prefix}${visualSuffix}"]`).first()).toBeVisible();
+      if (unitId === 'LAB12') {
+        await expect(page.locator('meta[name="cuda:example-ids"]')).toHaveAttribute('content', 'EX15,EX18');
+        await expect(page.locator('meta[name="cuda:related-units"]')).toHaveAttribute('content', 'L07,EX15,EX18,VIS12');
+        await expect(page.locator('meta[name="cuda:toolkit-lanes"]')).toHaveAttribute('content', 'cuda-13.3');
+        await expect(page.locator('meta[name="cuda:hardware-gate"]')).toHaveAttribute(
+          'content', /Native Linux[\s\S]*CC 7\.5\+[\s\S]*C\+\+17; Toolkit 13\.3\.1/,
+        );
+        await expect(page.locator('meta[name="cuda:permissions"]')).toHaveAttribute(
+          'content', /optional approved counters; no sudo or bypass/,
+        );
+        for (const prerequisite of ['correctness/gemm-optimization-case-study/', 'libraries/cublas-gemm/']) {
+          await expect(page.locator(`main a[href="${prefix}${prerequisite}"]`).first()).toBeVisible();
+        }
+        await expect(page.locator(`main a[href="${prefix}examples/tiled-gemm/"]`).first()).toBeVisible();
+        for (const project of [ex15Project, ex18PublishedProject]) {
+          await expect(page.locator(`main a[href="${project.sourceUrl}"]`)).toBeVisible();
+          await expect(page.locator(`main a[href="${project.downloadUrl}"]`)).toBeVisible();
+        }
+        await expect(page.locator('main a[href="/assets/exercise-solutions/lab12-gemm-comparison.cu"]')).toBeVisible();
+        await expectCanonicalRanges(page, ex18PublishedProject, ['cpu-reference', 'gemm-call', 'stream-lifecycle']);
+        const records = page.getByRole('table').filter({ has: page.getByRole('columnheader', {
+          name: prefix === '/en/' ? 'Current value' : '\u5f53\u524d\u503c', exact: true,
+        }) });
+        await expect(records).toBeVisible();
+        await expect(records.locator('tbody tr td:last-child')).toHaveText(['[]', '[]', '[]', '[]']);
+        const manifest = page.getByRole('table').filter({ has: page.getByRole('columnheader', {
+          name: prefix === '/en/' ? 'Initial value' : '\u521d\u59cb\u503c', exact: true,
+        }) });
+        await expect(manifest).toBeVisible();
+        const cells = manifest.locator('tbody tr td:last-child');
+        expect(await cells.count()).toBeGreaterThan(0);
+        for (const cell of await cells.all()) await expect(cell).toHaveText('unfilled');
+      }
     }
   }
 
@@ -698,6 +839,14 @@ test('serves the exact R3 release and current publication with production canoni
       await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
       await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute('content', 'none');
       await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
+      if (unitId === 'L05' || unitId === 'L07') {
+        await expect(page.locator('meta[name="cuda:fact-check-date"]')).toHaveAttribute(
+          'content', unitId === 'L05' ? '2026-09-05' : '2026-09-06',
+        );
+        await expect(page.locator('meta[name="cuda:source-versions"]')).toHaveAttribute(
+          'content', unitId === 'L05' ? 'CCCL-v3.4.2,12.9.1,13.3.1' : '11.8.0,12.9.2,13.3.1',
+        );
+      }
       if (unitId === 'VIS18') {
         const visual = page.locator('cuda-attention-io-explorer[data-visual-id="VIS18"]');
         await expect(visual).toHaveAttribute('data-ready', 'true');
@@ -754,6 +903,14 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
 
   for (const prefix of ['/', '/en/']) {
     for (const suffix of [
+      'libraries/cublas-gemm/',
+      'libraries/cublas-gemm/exercises/',
+      'libraries/cublas-gemm/solutions/',
+      'libraries/cublaslt-matmul/',
+      'libraries/cublaslt-matmul/exercises/',
+      'libraries/cublaslt-matmul/solutions/',
+      'examples/cublas-gemm/',
+      'labs/compare-gemm-with-cublas/',
       'libraries/cufft-plans-layouts-startup/',
       'libraries/cufft-plans-layouts-startup/exercises/',
       'libraries/cufft-plans-layouts-startup/solutions/',
@@ -1444,6 +1601,8 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/labs/optimize-canonical-transpose/',
     '/labs/compare-custom-reduction-with-cub/',
     '/en/labs/compare-custom-reduction-with-cub/',
+    ...localizedRoutes('examples/cublas-gemm/'),
+    ...localizedRoutes('labs/compare-gemm-with-cublas/'),
   ]) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
@@ -1590,10 +1749,10 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       expect(project.evidence.compilation).toEqual([]);
     }
     expect(project.evidence.recordedObservations).toEqual([]);
-    if (project.id === 'EX19' || project.id === 'EX20') {
+    if (project.id === 'EX18' || project.id === 'EX19' || project.id === 'EX20') {
       expect(project.evidence.runtime).toBe('Pending Hardware Verification');
       expect(project.build.standard).toBe('c++17');
-      const manifest = project.id === 'EX19' ? ex19Project : ex20Project;
+      const manifest = project.id === 'EX18' ? ex18Project : project.id === 'EX19' ? ex19Project : ex20Project;
       expect(manifest.compatibility.lanes.map(({ id, dialects }) => ({ id, dialects }))).toEqual([
         { id: 'cuda-11.8', dialects: ['c++17'] },
         { id: 'cuda-12.9', dialects: ['c++17'] },
@@ -1606,9 +1765,11 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       await page.goto(publicationRoute);
       await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
       await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
-      if (project.id === 'EX19' || project.id === 'EX20') {
+      if (project.id === 'EX18' || project.id === 'EX19' || project.id === 'EX20') {
         await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', project.id);
-        await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute('content', project.id === 'EX19' ? 'L12' : 'L13');
+        await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute(
+          'content', project.id === 'EX18' ? 'L06' : project.id === 'EX19' ? 'L12' : 'L13',
+        );
       }
       await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
         'content',
@@ -1627,6 +1788,11 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       await expect(canonicalCode).toHaveCount(canonicalRanges.length);
       expect(await canonicalCode.evaluateAll((figures) => figures.map((figure) => figure.getAttribute('data-canonical-range'))))
         .toEqual(canonicalRanges);
+      if (project.id === 'EX15' || project.id === 'EX18') {
+        await expectCanonicalRanges(page, project, project.id === 'EX15'
+          ? ['cpu-reference', 'tiled-gemm']
+          : ['cpu-reference', 'gemm-call', 'stream-lifecycle']);
+      }
     }
   }
 
@@ -1692,12 +1858,14 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       }
     }
 
-    if (project.id === 'EX17' || project.id === 'EX19' || project.id === 'EX20') {
+    if (project.id === 'EX17' || project.id === 'EX18' || project.id === 'EX19' || project.id === 'EX20') {
       const archivedBytes = findEntry('project.json').content;
       const localBytes = await readFile(path.join(projectRoot, project.root, 'project.json'));
       expect(archivedBytes.equals(localBytes), `${project.id} archive matches project.json bytes`).toBe(true);
       const archivedManifest = JSON.parse(archivedBytes.toString('utf8'));
-      expect(archivedManifest).toEqual(project.id === 'EX17' ? ex17Project : project.id === 'EX19' ? ex19Project : ex20Project);
+      expect(archivedManifest).toEqual(
+        project.id === 'EX17' ? ex17Project : project.id === 'EX18' ? ex18Project : project.id === 'EX19' ? ex19Project : ex20Project,
+      );
       expect(archivedManifest).not.toHaveProperty('sourceCommit');
       expect(archivedManifest).not.toHaveProperty('sourceUrl');
       expect(archivedManifest).not.toHaveProperty('downloadUrl');

@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-10'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-09'
+      content: '2026-09-10'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,9 +46,9 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 与 Q01-Q13，共 62 个学习单元（Learning Unit）。不可变快照固定为 232 个双语发布对（Publication Pair）、464 条源路由与 347 条资源目录记录。滚动 R4 已扩展到 L01-L13、EX17-EX20 与 LAB11/LAB12；[issue #39](https://github.com/xiangzhang-coding/cuda-learning-site/issues/39)新增 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)，[issue #40](https://github.com/xiangzhang-coding/cuda-learning-site/issues/40)新增 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)。当前范围为 75 个学习单元、277 个双语发布对、554 条源路由与 401 条资源目录记录；R4 聚合复核仍待完成。
+稳定课程（Stable Curriculum）最近完成的聚合静态复核是 **2026-09-10** 的 R4。它覆盖 O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13 与 L01-L13，共 75 个学习单元（Learning Unit）、277 个双语发布对（Publication Pair）、554 条源路由和 401 条资源目录记录。可复用库路线已到达 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)，并配有 [EX19](/examples/cufft-batched-transform/)与 [EX20](/examples/cusparse-spmv/)。R1-R3 仍是未改动的历史发布；R3 保留 62 个单元、232 个发布对、464 条路由与 347 条目录记录。
 
-**发布清单与导航更新：2026-09-09。** 页面日期仅对应本次发布清单与入口更新，不重新核查既有 CUDA API 事实；技术来源保留各自访问与复核日期。
+**聚合静态复核：2026-09-10。** 模式版本 5 的 `src/r4-release-manifest.json` 生成 `/release.json`；`/publication.json` 记录最近完成 R4、下一阶段 R5，其聚合复核待完成。本次不增加页面，也不表示框架或 Triton 路线已完成。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。技术来源保留逐项日期；新检索单独记录在[聚合来源复核结论](/sources-and-versions/#r4-aggregate-review)中。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -94,7 +94,9 @@ EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component
 
 A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS、cuDNN、cuFFT 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
 
-Immutable R3 catalog 为 10 个 Lab、66 个 Practice Bank 条目、19 项 Visual Explainer、176 个 Glossary 词条和 76 条 source record，共 347 条记录。当前滚动资源目录为 12 个 Lab、82 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、196 个术语表（Glossary）词条和 92 条来源记录，共 401 条记录；当前源文件形成 277 个双语发布对，即 554 条源路由，包含 74 组练习与 74 组独立参考解答。R3 精确 10 项 Nsight report-analysis inventory 不变；R4 聚合复核仍待完成。
+R4 与当前资源目录均包含 12 个实验、82 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、196 个术语表（Glossary）词条和 92 条来源记录，共 401 条记录。源文件形成 277 个双语发布对，即 554 条源路由，包含 74 组练习与 74 组独立参考解答。在保留 R3 十道 Nsight 报告分析题的同时，R4 明确将八道题列入库与算法选择子集：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。两个子集均在[练习题库](/practice/)中列明。
+
+只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 19 个示例和全部 12 个实验共 31 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
 
 [L12](/libraries/cufft-plans-layouts-startup/)完整有序先修为 `[Q05,M07]`。[L12 练习](/libraries/cufft-plans-layouts-startup/exercises/)依赖 `[L12]`，[独立解答](/libraries/cufft-plans-layouts-startup/solutions/)依赖 `[L12-EXERCISES]`。L12 的四个证据数组仍为空；归档的 12.9.2 cuFFT 指南是教学基线，当前 13.3 参考访问于 2026-09-08，因为精确的 13.3.1 API 与发布说明归档不可用。
 
