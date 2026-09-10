@@ -103,9 +103,10 @@ describe('GitHub Actions quality contract', () => {
   });
 
   it('runs the full accessibility scan without competing browser workers', async () => {
-    const [manifestSource, workflow] = await Promise.all([
+    const [manifestSource, workflow, accessibility] = await Promise.all([
       readProjectFile('package.json'),
       readProjectFile('.github/workflows/web-quality.yml'),
+      readProjectFile('tests/e2e/accessibility.spec.ts'),
     ]);
     const manifest = JSON.parse(manifestSource) as { scripts: Record<string, string> };
 
@@ -119,8 +120,11 @@ describe('GitHub Actions quality contract', () => {
       'playwright test --project=firefox --project=webkit --project=mobile-safari --grep-invert "@accessibility|@visual" --workers=1',
     );
     expect(workflow).toMatch(
-      /accessibility-automated:[\s\S]*?runs-on: ubuntu-24\.04\s+timeout-minutes: 30/,
+      /accessibility-automated:[\s\S]*?runs-on: ubuntu-24\.04\s+timeout-minutes: 45/,
     );
+    expect(accessibility).toMatch(/axe detects no tagged violations across every[\s\S]*?test\.setTimeout\(900_000\)/);
+    expect(accessibility).toContain('for (const route of routes)');
+    expect(accessibility).toContain('await expectNoAxeViolations(page, `${theme}: ${route}`)');
   });
 
   it('isolates pinned browser installation from the unused runner Chrome apt feed without weakening verification', async () => {
