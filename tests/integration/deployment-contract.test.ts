@@ -394,9 +394,9 @@ describe('Cloudflare assets-only deployment contract', () => {
         RELEASE_BASE_URL: 'https://r1-cuda-learning-site.hmzhangxiang.workers.dev',
         RELEASE_KIND: 'preview',
       }),
-    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 5 tests') });
+    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 198 tests') });
     await expect(
       listTests({ RELEASE_BASE_URL: 'http://127.0.0.1:4321', RELEASE_KIND: 'local' }),
-    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 5 tests') });
+    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 198 tests') });
   }, 20_000);
 });

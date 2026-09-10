@@ -32,11 +32,11 @@ if (releaseKind === 'local' && !['127.0.0.1', 'localhost'].includes(releaseURL.h
 
 export default defineConfig({
   testDir: './tests/release',
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: true,
   maxFailures: 1,
   retries: 0,
-  workers: 1,
+  workers: 2,
   reporter: 'list',
   webServer: releaseKind === 'local'
     ? {
