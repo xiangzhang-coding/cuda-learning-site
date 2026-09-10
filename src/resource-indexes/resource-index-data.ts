@@ -1617,6 +1617,34 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-08',
     keywords: localized('cuFFT plan 生命周期 工作区 stream 完成 startup JIT PTX driver cache LTO callback NVRTC hazard 摊销', 'cuFFT plan lifecycle workspace stream completion startup JIT PTX driver cache LTO callback NVRTC hazard amortization'),
   },
+  {
+    planningId: 'PB-R4-015',
+    group: 'practice',
+    title: localized('审查 CSR 描述符、索引基与所有权', 'Audit CSR descriptors, index base, and ownership'),
+    href: localized('/practice/#pb-r4-015', '/en/practice/#pb-r4-015'),
+    resourceType: 'correctness-debugging',
+    difficulty: 'advanced',
+    prerequisites: ['L13'],
+    relatedUnits: ['A12', 'L13', 'EX20'],
+    hardwareGate: localized('无；原创静态描述符与算术审查，不运行 CUDA。EX20 的独立运行状态仍为待硬件验证。', 'None; original static descriptor and arithmetic audit without CUDA execution. EX20 retains independent Pending Hardware Verification runtime.'),
+    versionGate: localized('精确 Toolkit 12.9.2 cuSPARSE Generic API 教学基线；CSR 数组、索引基与类型、设备指针所有权、NON_TRANSPOSE FP32 CSR_ALG2 的有界确定性合同。', 'Exact Toolkit 12.9.2 cuSPARSE Generic API teaching baseline; CSR arrays, index base and types, device-pointer ownership, and bounded NON_TRANSPOSE FP32 CSR_ALG2 determinism contract.'),
+    reviewedOn: '2026-09-09',
+    keywords: localized('cuSPARSE CSR descriptor 描述符 index base nnz duplicate SpMV FP32 ownership pointer mode determinism', 'cuSPARSE CSR descriptor index base nnz duplicate SpMV FP32 ownership pointer mode determinism'),
+  },
+  {
+    planningId: 'PB-R4-016',
+    group: 'practice',
+    title: localized('审查格式选择与活动预处理缓冲区生命周期', 'Audit format choice and active preprocessing buffer lifetime'),
+    href: localized('/practice/#pb-r4-016', '/en/practice/#pb-r4-016'),
+    resourceType: 'evidence-review',
+    difficulty: 'advanced',
+    prerequisites: ['L13'],
+    relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'],
+    hardwareGate: localized('无；假设的格式与生命周期审查。未来 EX20 执行仅限原生 Linux、CC 7.5+；结构化稀疏与窄精度另行设门槛。', 'None; hypothetical format and lifecycle audit. Future EX20 execution requires native Linux and CC 7.5+; structured sparsity and narrow precision have separate gates.'),
+    versionGate: localized('Toolkit 12.9.2 基线，对照 11.8.0/13.3.1；SpMV_preprocess 自 12.4 起可选，SpMM_preprocess 在 11.8 已有，帮助 CSR_ALG1/ALG3 而非 ALG2；不得混用两者的合同。', 'Toolkit 12.9.2 baseline with 11.8.0/13.3.1 comparisons; optional SpMV_preprocess starts at 12.4, while SpMM_preprocess exists in 11.8 and helps CSR_ALG1/ALG3 rather than ALG2; their contracts are distinct.'),
+    reviewedOn: '2026-09-09',
+    keywords: localized('cuSPARSE COO CSR BSR SpMV SpMM preprocess active buffer format lifecycle workspace completion cuSPARSELt', 'cuSPARSE COO CSR BSR SpMV SpMM preprocess active buffer format lifecycle workspace completion cuSPARSELt'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -2115,6 +2143,8 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-192', 'Execution Plan · 执行计划', 'kernel-vocabulary', ['L10', 'L11'], '固定 cuDNN 合同中从引擎配置构建的实现描述；启发式候选不等于计划，构建不等于正确输出、最快实现或跨设备可移植性。', 'An implementation description built from an engine configuration under the pinned cuDNN contract; a heuristic candidate is not a plan, and building proves neither correct output, fastest implementation, nor cross-device portability.', '2026-09-07'),
   glossaryRecord('TERM-193', 'DFT · 离散傅里叶变换', 'kernel-vocabulary', ['L12', 'EX19'], 'cuFFT 前向 DFT 指数为负号；正反变换均不自动归一化，往返缩放为变换逻辑尺寸乘积，不乘批次数。FFT 是计算 DFT 的算法族。', 'cuFFT forward DFT uses a negative exponent sign; neither direction normalizes automatically, so a round trip scales by the product of logical transform dimensions, not by batch count. FFT names algorithms for computing the DFT.', '2026-09-08'),
   glossaryRecord('TERM-194', 'Hermitian Symmetry · 厄米共轭对称', 'kernel-vocabulary', ['L12'], '实数输入频谱在反转全部频率坐标后互为共轭；最后一维仅存 K=floor(N/2)+1 个复数，原位存储每条内行需 2K 个实数。C2R 输入必须满足对称与对齐合同。', 'A real-input spectrum equals the conjugate at all negated frequency coordinates; the last dimension stores K=floor(N/2)+1 complex values, requiring 2K real slots per inner row in-place. C2R input must satisfy symmetry and alignment contracts.', '2026-09-08'),
+  glossaryRecord('TERM-195', 'Sparse Matrix Descriptor · 稀疏矩阵描述符', 'kernel-vocabulary', ['A12', 'A13', 'L13', 'EX20'], '精确 Toolkit 12.9.2 Generic API 基线；描述符保存格式、形状、索引基/类型、值类型与指针，不复制或接管调用者数组，不自动选择算法或证明 CSR 合法。', 'Exact Toolkit 12.9.2 Generic API baseline; a descriptor records format, shape, index base/types, value type, and pointers without copying or owning caller arrays, selecting an algorithm, or proving CSR validity.', '2026-09-09'),
+  glossaryRecord('TERM-196', 'Active Preprocessing Buffer · 活动预处理缓冲区', 'kernel-vocabulary', ['A13', 'L13', 'EX20'], '12.9.2 SpMV 可选预处理每个稀疏描述符仅有一个活动缓冲区；保留缓冲区内容、索引与配置，允许文档列出的 alpha/beta、X/Y 与矩阵值变化。SpMM 合同与算法另行核对；11.8 没有 SpMV_preprocess。', '12.9.2 optional SpMV preprocessing has one active buffer per sparse descriptor; preserve buffer contents, indices, and configuration, with documented alpha/beta, X/Y, and matrix-value changes allowed. Check SpMM contracts and algorithms separately; 11.8 lacks SpMV_preprocess.', '2026-09-09'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -3040,6 +3070,30 @@ const sources: readonly ResourceIndexRecord[] = [
     ),
     '2026-09-08',
     '2026-09-08',
+  ),
+  sourceRecord(
+    'SRC-CUDA-075',
+    localized('cuSPARSE Generic API 描述符、SpMV/SpMM 与所有权合同', 'cuSPARSE Generic API descriptors, SpMV/SpMM, and ownership contracts'),
+    'cuda-version-record',
+    ['A12', 'A13', 'L01', 'L13', 'EX20'],
+    localized(
+      '精确 12.9.2 教学基线；11.8.0/12.9.2/13.3.1 cuSPARSE 归档可用。CSR 不变量与重复项边界、借用指针、调用级类型/算法、查询工作区、SpMV 与 SpMM 各自的预处理及有界确定性；没有编译、查询值或 GPU 观察。',
+      'Exact 12.9.2 teaching baseline; 11.8.0/12.9.2/13.3.1 cuSPARSE archives available. CSR invariants and duplicate caveats, borrowed pointers, call-level types/algorithms, queried workspace, distinct SpMV/SpMM preprocessing, and bounded determinism; no compilation, queried values, or GPU observations.',
+    ),
+    '2026-09-09',
+    '2026-09-09',
+  ),
+  sourceRecord(
+    'SRC-CUDA-076',
+    localized('cuSPARSE 独立组件、发布风险、架构与结构化稀疏门槛', 'cuSPARSE independent components, release hazards, architecture, and structured-sparsity gates'),
+    'cuda-version-record',
+    ['A12', 'A13', 'L01', 'L13', 'EX20'],
+    localized(
+      'Toolkit 11.8.0/12.9.2/13.3.1 分别含 cuSPARSE 11.7.5.86/12.5.10.65/12.8.2.51；精确归档、manifest SHA-256、选择性弃用/移除、逐版本已知问题。cuSPARSELt 0.9.0 独立且只作参考；专有 NVIDIA 头文件不采用本站 Apache-2.0，无复制或执行。',
+      'Toolkit 11.8.0/12.9.2/13.3.1 contains cuSPARSE 11.7.5.86/12.5.10.65/12.8.2.51 respectively; exact archives, manifest SHA-256, selective deprecation/removal, and version-scoped issues. cuSPARSELt 0.9.0 is independent and reference-only; proprietary NVIDIA headers are not under the site Apache-2.0 license, with no copying or execution.',
+    ),
+    '2026-09-09',
+    '2026-09-09',
   ),
 ];
 

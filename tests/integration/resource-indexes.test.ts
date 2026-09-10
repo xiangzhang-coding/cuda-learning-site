@@ -44,8 +44,8 @@ function declaredRelationships(
   locale: (typeof INDEX_LOCALES)[number],
 ) {
   if (group === 'sources') {
-    const row = detailSection(source, planningId).split('\n')[0];
-    const related = locale === 'en' ? row.match(/Related IDs: ([^.]+)\./) : row.match(/相关 ID：([^。]+)。/);
+    const section = detailSection(source, planningId).replaceAll('**', '');
+    const related = locale === 'en' ? section.match(/Related IDs: ([^.]+)\./) : section.match(/相关 ID：\s*([^。]+)。/);
     return { prerequisites: [], relatedUnits: related?.[1].split(/,\s*|、/).map((id) => id.trim()) ?? [] };
   }
 
@@ -116,11 +116,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all eighty bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all eighty-two bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(80);
+    expect(practiceIds).toHaveLength(82);
 
     const localeContracts = [
       {
@@ -175,7 +175,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(80);
+      expect(prompts.size).toBe(82);
     }
   });
 
@@ -183,8 +183,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 12, practice: 80, visuals: 19, glossary: 194, sources: 90 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(395);
+    expect(counts).toEqual({ labs: 12, practice: 82, visuals: 19, glossary: 196, sources: 92 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(401);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -192,7 +192,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['L13', 'LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -377,6 +377,52 @@ describe('published resource indexes', () => {
       }
       for (const value of ['10.9.0.58', '11.4.1.4', '12.3.0.29', '404', '2026-08-26', '8192', '4096', '127', 'NVRTC']) {
         expect(versions, `${locale} ${value}`).toContain(value);
+      }
+    }
+  });
+
+  it('matches cuSPARSE detail relationships, dates, and independent reviewed solutions in both locales', async () => {
+    const expected = [
+      { planningId: 'PB-R4-015', group: 'practice', prerequisites: ['L13'], relatedUnits: ['A12', 'L13', 'EX20'] },
+      { planningId: 'PB-R4-016', group: 'practice', prerequisites: ['L13'], relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'] },
+      { planningId: 'TERM-195', group: 'glossary', prerequisites: [], relatedUnits: ['A12', 'A13', 'L13', 'EX20'] },
+      { planningId: 'TERM-196', group: 'glossary', prerequisites: [], relatedUnits: ['A13', 'L13', 'EX20'] },
+      { planningId: 'SRC-CUDA-075', group: 'sources', prerequisites: [], relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'] },
+      { planningId: 'SRC-CUDA-076', group: 'sources', prerequisites: [], relatedUnits: ['A12', 'A13', 'L01', 'L13', 'EX20'] },
+    ] as const;
+    for (const locale of INDEX_LOCALES) {
+      const prefix = locale === 'en' ? 'en/' : '';
+      const sources = {
+        practice: await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8'),
+        glossary: await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'glossary.mdx'), 'utf8'),
+        sources: await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'sources-and-versions.mdx'), 'utf8'),
+      };
+      for (const item of expected) {
+        expect(declaredRelationships(sources[item.group], item.planningId, item.group, locale), `${locale} ${item.planningId}`).toEqual({
+          prerequisites: item.prerequisites, relatedUnits: item.relatedUnits,
+        });
+        expect(detailSection(sources[item.group], item.planningId)).toContain('2026-09-09');
+        expect(RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === item.planningId)).toMatchObject({
+          ...item, reviewedOn: '2026-09-09',
+        });
+      }
+      for (const [id, arithmetic] of [
+        ['PB-R4-015', ['68', '104', '[-7,-2,41,22]']],
+        ['PB-R4-016', ['80', '72', '68', '5x3', '4x3']],
+      ] as const) {
+        const section = detailSection(sources.practice, id);
+        const details = [...parseHTML(section).document.querySelectorAll('details')];
+        expect(details).toHaveLength(3);
+        expect(details.every((detail) => !detail.hasAttribute('open'))).toBe(true);
+        expect(details[2].querySelector('summary')?.textContent).toMatch(/Separate reviewed solution|独立参考解答/);
+        for (const value of arithmetic) expect(details[2].textContent, `${locale} ${id} ${value}`).toContain(value);
+        expect(section).toContain(`/${prefix}sources-and-versions/#src-cuda-075`);
+      }
+      expect(detailSection(sources.glossary, 'TERM-195')).toContain('Sparse Matrix Descriptor');
+      expect(detailSection(sources.glossary, 'TERM-196')).toContain('Active Preprocessing Buffer');
+      for (const version of ['11.8.0', '12.9.2', '13.3.1']) {
+        expect(detailSection(sources.sources, 'SRC-CUDA-075')).toContain(`https://docs.nvidia.com/cuda/archive/${version}/cusparse/index.html`);
+        expect(detailSection(sources.sources, 'SRC-CUDA-076')).toContain(`https://developer.download.nvidia.com/compute/cuda/redist/redistrib_${version}.json`);
       }
     }
   });

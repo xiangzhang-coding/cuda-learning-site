@@ -164,6 +164,7 @@ export default defineConfig({
             { slug: 'libraries/cudnn-graphs-and-plans' },
             { slug: 'libraries/attention-backend-dispatch' },
             { slug: 'libraries/cufft-plans-layouts-startup' },
+            { slug: 'libraries/cusparse-descriptors-spmv-spmm' },
           ],
         },
         {
@@ -189,6 +190,7 @@ export default defineConfig({
             { slug: 'examples/cub-device-reduction-scan' },
             { slug: 'examples/cublas-gemm' },
             { slug: 'examples/cufft-batched-transform' },
+            { slug: 'examples/cusparse-spmv' },
           ],
         },
         {

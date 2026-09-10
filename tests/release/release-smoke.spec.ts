@@ -18,6 +18,7 @@ import ex15Project from '../../examples/ex15-tiled-gemm/project.json' with { typ
 import ex16Project from '../../examples/ex16-sanitizer-defect-suite/project.json' with { type: 'json' };
 import ex17Project from '../../examples/ex17-cub-device-reduction-scan/project.json' with { type: 'json' };
 import ex19Project from '../../examples/ex19-cufft-batched-transform/project.json' with { type: 'json' };
+import ex20Project from '../../examples/ex20-cusparse-spmv/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import { hashCanonicalBuildContract } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
@@ -75,6 +76,10 @@ const ex19PublishedProject = {
   ...ex19Project,
   ...canonicalExamplePublications.examples.EX19,
 };
+const ex20PublishedProject = {
+  ...ex20Project,
+  ...canonicalExamplePublications.examples.EX20,
+};
 const projectExamples = [
   { suffix: 'examples/coalesced-strided-access/', project: ex05Project },
   { suffix: 'examples/shared-memory-tile-bank-padding/', project: ex06Project },
@@ -90,6 +95,7 @@ const projectExamples = [
   { suffix: 'examples/sanitizer-defect-suite/', project: ex16Project },
   { suffix: 'examples/cub-device-reduction-scan/', project: ex17PublishedProject },
   { suffix: 'examples/cufft-batched-transform/', project: ex19PublishedProject },
+  { suffix: 'examples/cusparse-spmv/', project: ex20PublishedProject },
 ] as const;
 const learningUnits = [
   'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
@@ -102,12 +108,12 @@ const learningUnits = [
   'Q01', 'Q02', 'Q03', 'Q04', 'Q05',
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
-const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12'] as const;
+const currentLearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
-const currentRunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19'] as const;
+const currentRunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX20'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const currentLabs = [...r3Labs, 'LAB11', 'LAB12'] as const;
 const currentVisualExplainers = [
@@ -139,26 +145,27 @@ const currentProfilerReportPlans = [
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20',
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 12 },
-  { suffix: 'practice/', count: 80 },
+  { suffix: 'practice/', count: 82 },
   { suffix: 'visuals/', count: 19 },
-  { suffix: 'glossary/', count: 194 },
-  { suffix: 'sources-and-versions/', count: 90 },
+  { suffix: 'glossary/', count: 196 },
+  { suffix: 'sources-and-versions/', count: 92 },
 ] as const;
 const exampleRouteSlugs = [
   'coalesced-strided-access',
   'cub-device-reduction-scan',
   'cublas-gemm',
   'cufft-batched-transform',
+  'cusparse-spmv',
   'environment-report',
   'error-handling-lifecycle',
   'graph-capture',
@@ -268,7 +275,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-08',
+    reviewDate: '2026-09-09',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -287,6 +294,19 @@ test('serves the exact R3 release and current publication with production canoni
           exact1331Archive: 'unavailable: API and release-note archives returned HTTP 404',
           exampleToolkitLanes: ['cuda-11.8', 'cuda-12.9', 'cuda-13.3'],
           exampleDialects: ['c++17'],
+        },
+        cusparse: {
+          bundled: [
+            { toolkitLane: 'cuda-11.8', version: '11.7.5.86' },
+            { toolkitLane: 'cuda-12.9', version: '12.5.10.65' },
+            { toolkitLane: 'cuda-13.3', version: '12.8.2.51' },
+          ],
+          apiTeachingBaseline: 'Toolkit 12.9.2 archived cuSPARSE guide',
+          currentApiComparison: 'Exact Toolkit 13.3.1 archived cuSPARSE guide, accessed 2026-09-09',
+          currentReleaseNotes: 'Exact CUDA 13.3 Update 1 archived release notes, accessed 2026-09-09',
+          exampleToolkitLanes: ['cuda-11.8', 'cuda-12.9', 'cuda-13.3'],
+          exampleDialects: ['c++17'],
+          examplePreprocessing: 'not used; SpMV preprocessing is absent in the 11.8 lane',
         },
         cccl: {
           version: '3.4.2',
@@ -329,30 +349,32 @@ test('serves the exact R3 release and current publication with production canoni
     knownLimitations: expect.arrayContaining([
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.',
-      'EX11 through EX19 have empty compilation evidence and remain Pending Hardware Verification.',
+      'EX11 through EX20 have empty compilation evidence and remain Pending Hardware Verification.',
       'R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
       'EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.',
-      'L01-L12 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.',
+      'L01-L13 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.',
       'Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.',
       'EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.',
       'EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.',
       'EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.',
-      'L01-L12 are published in the rolling R4 surface; L13 and the R4 aggregate review remain pending and outside the latest completed R3 release.',
+      'L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.',
+      'EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.',
+      'L01-L13 are published in the rolling R4 surface; the R4 aggregate review remains pending and outside the latest completed R3 release.',
     ]),
   });
   expect(publication.scope).toEqual({
-    publicationPairs: 273,
-    sourceRoutes: 546,
-    exerciseSetPublicationPairs: 73,
-    solutionSetPublicationPairs: 73,
+    publicationPairs: 277,
+    sourceRoutes: 554,
+    exerciseSetPublicationPairs: 74,
+    solutionSetPublicationPairs: 74,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 80,
+    practiceBankEntries: 82,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
-    glossaryTerms: 194,
-    sourceRecords: 90,
+    glossaryTerms: 196,
+    sourceRecords: 92,
   });
   expect(publication.evidence).toEqual({
     compileChecked: ['EX02', 'EX10', 'LAB02'],
@@ -364,7 +386,7 @@ test('serves the exact R3 release and current publication with production canoni
     referenceEnvironments: [],
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
-    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12'],
+    r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
@@ -376,7 +398,7 @@ test('serves the exact R3 release and current publication with production canoni
   );
   expect(publication.knownLimitations.filter((limitation: string) =>
     limitation.includes('not immutable R3 destinations'))).toEqual([
-    'L03/LAB11 and L06/LAB12 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03 and LAB12 requires Q13/L06; L13 and EX20 remain unpublished pending the exact cuSPARSE API contract.',
+    'L03/LAB11, L06/LAB12, and L13/EX20 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03, LAB12 requires Q13/L06, L13 requires A12/A13/L01, and EX20 requires L13.',
   ]);
 
   for (const { fixtureName, reviewDate } of [
@@ -477,7 +499,7 @@ test('serves the exact R3 release and current publication with production canoni
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(546);
+  expect(publishedRoutes).toHaveLength(554);
   for (const route of publishedRoutes) {
     const response = await page.goto(route);
     expect(response?.ok(), route).toBe(true);
@@ -488,8 +510,8 @@ test('serves the exact R3 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '273 Publication Pairs' : '273 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '546 source routes' : '546 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '277 Publication Pairs' : '277 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '554 source routes' : '554 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -508,9 +530,11 @@ test('serves the exact R3 release and current publication with production canoni
       'libraries/cudnn-graphs-and-plans/',
       'libraries/attention-backend-dispatch/',
       'libraries/cufft-plans-layouts-startup/',
+      'libraries/cusparse-descriptors-spmv-spmm/',
       'examples/cub-device-reduction-scan/',
       'examples/cublas-gemm/',
       'examples/cufft-batched-transform/',
+      'examples/cusparse-spmv/',
       'labs/compare-custom-reduction-with-cub/',
       'labs/compare-gemm-with-cublas/',
     ]) {
@@ -519,7 +543,7 @@ test('serves the exact R3 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(395);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(401);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -661,6 +685,9 @@ test('serves the exact R3 release and current publication with production canoni
     { suffix: 'libraries/cufft-plans-layouts-startup/', unitId: 'L12', prerequisites: 'Q05,M07' },
     { suffix: 'libraries/cufft-plans-layouts-startup/exercises/', unitId: 'L12-EXERCISES', prerequisites: 'L12' },
     { suffix: 'libraries/cufft-plans-layouts-startup/solutions/', unitId: 'L12-SOLUTIONS', prerequisites: 'L12-EXERCISES' },
+    { suffix: 'libraries/cusparse-descriptors-spmv-spmm/', unitId: 'L13', prerequisites: 'A12,A13,L01' },
+    { suffix: 'libraries/cusparse-descriptors-spmv-spmm/exercises/', unitId: 'L13-EXERCISES', prerequisites: 'L13' },
+    { suffix: 'libraries/cusparse-descriptors-spmv-spmm/solutions/', unitId: 'L13-SOLUTIONS', prerequisites: 'L13-EXERCISES' },
     { suffix: 'visuals/attention-memory-traffic/', unitId: 'VIS18', prerequisites: 'A11' },
   ] as const) {
     for (const route of localizedRoutes(suffix)) {
@@ -731,6 +758,10 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       'libraries/cufft-plans-layouts-startup/exercises/',
       'libraries/cufft-plans-layouts-startup/solutions/',
       'examples/cufft-batched-transform/',
+      'libraries/cusparse-descriptors-spmv-spmm/',
+      'libraries/cusparse-descriptors-spmv-spmm/exercises/',
+      'libraries/cusparse-descriptors-spmv-spmm/solutions/',
+      'examples/cusparse-spmv/',
     ]) {
       const route = `${prefix}${suffix}`;
       await page.goto(route);
@@ -1559,10 +1590,11 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       expect(project.evidence.compilation).toEqual([]);
     }
     expect(project.evidence.recordedObservations).toEqual([]);
-    if (project.id === 'EX19') {
+    if (project.id === 'EX19' || project.id === 'EX20') {
       expect(project.evidence.runtime).toBe('Pending Hardware Verification');
       expect(project.build.standard).toBe('c++17');
-      expect(ex19Project.compatibility.lanes.map(({ id, dialects }) => ({ id, dialects }))).toEqual([
+      const manifest = project.id === 'EX19' ? ex19Project : ex20Project;
+      expect(manifest.compatibility.lanes.map(({ id, dialects }) => ({ id, dialects }))).toEqual([
         { id: 'cuda-11.8', dialects: ['c++17'] },
         { id: 'cuda-12.9', dialects: ['c++17'] },
         { id: 'cuda-13.3', dialects: ['c++17'] },
@@ -1574,9 +1606,9 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       await page.goto(publicationRoute);
       await expect(page.locator(`a[href="${project.sourceUrl}"]`)).toBeVisible();
       await expect(page.locator(`a[href="${project.downloadUrl}"]`)).toBeVisible();
-      if (project.id === 'EX19') {
-        await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', 'EX19');
-        await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute('content', 'L12');
+      if (project.id === 'EX19' || project.id === 'EX20') {
+        await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', project.id);
+        await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute('content', project.id === 'EX19' ? 'L12' : 'L13');
       }
       await expect(page.locator('meta[name="cuda:evidence-compilation"]')).toHaveAttribute(
         'content',
@@ -1660,12 +1692,12 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       }
     }
 
-    if (project.id === 'EX17' || project.id === 'EX19') {
+    if (project.id === 'EX17' || project.id === 'EX19' || project.id === 'EX20') {
       const archivedBytes = findEntry('project.json').content;
       const localBytes = await readFile(path.join(projectRoot, project.root, 'project.json'));
       expect(archivedBytes.equals(localBytes), `${project.id} archive matches project.json bytes`).toBe(true);
       const archivedManifest = JSON.parse(archivedBytes.toString('utf8'));
-      expect(archivedManifest).toEqual(project.id === 'EX17' ? ex17Project : ex19Project);
+      expect(archivedManifest).toEqual(project.id === 'EX17' ? ex17Project : project.id === 'EX19' ? ex19Project : ex20Project);
       expect(archivedManifest).not.toHaveProperty('sourceCommit');
       expect(archivedManifest).not.toHaveProperty('sourceUrl');
       expect(archivedManifest).not.toHaveProperty('downloadUrl');

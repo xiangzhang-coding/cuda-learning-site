@@ -37,6 +37,12 @@ Reviewed 2026-09-08 for issue #39. EX19 is original Apache-2.0 software calling 
 
 NVIDIA Corporation & affiliates retains upstream rights. The [cuFFT reference-only rights ledger](CONTENT_LICENSES.md#cufft-reference-only-review) links the individually inspected 11.8.0, 12.9.2, and live 13.3 API Notices, archived 12.9.2 CUDA EULA/Toolkit supplement and CUDA FFT Library redistribution entries, and dated live release notes. Project licenses do not replace the terms applicable to a learner's installation. No upstream adaptation requires an added project `NOTICE` entry. Source review and host/build gates grant no CUDA compilation or runtime evidence; EX19 retains empty compilation and recorded observations and Pending Hardware Verification runtime.
 
+## External cuSPARSE dependency, not bundled
+
+Reviewed 2026-09-09 for issue #40. EX20 is original Apache-2.0 software calling an external cuSPARSE installation. L13, its Exercises and solutions, EX20 publication prose, PB-R4-015/016, TERM-195/196, and `SRC-CUDA-075/076` are original CC BY 4.0 teaching material. No NVIDIA SDK header, binary, implementation, sample, figure, or documentation copy is bundled or adapted.
+
+The three C++17 profiles independently pair Toolkit 11.8.0 / 12.9.2 / 13.3.1 with cuSPARSE 11.7.5.86 / 12.5.10.65 / 12.8.2.51. NVIDIA retains its proprietary header and library rights under the [cuSPARSE license](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/LICENSE.txt). The [reference-only rights ledger](CONTENT_LICENSES.md#cusparse-reference-only-review) records exact archive coordinates and notice boundaries. Project licenses do not replace installation or redistribution terms; no upstream adaptation requires an added project `NOTICE` entry. Build gates grant no retained compilation or runtime evidence. EX20 remains Pending Hardware Verification.
+
 ## cuDNN references, not bundled
 
 Reviewed 2026-09-07 for issue #38. cuDNN backend **9.24.0** and frontend **1.27.0**, commit **`f77fbc3d21be3f24cd0286b9b368105f7c518b8a`**, are independent external reading references, not installed dependencies, redistributed binaries, or successful-build claims. L10/L11, PB-R4-011/012, and TERM-191/192 use original prose, scenarios, tables, and solutions; no source, sample, test, diagram, or result is copied or adapted.

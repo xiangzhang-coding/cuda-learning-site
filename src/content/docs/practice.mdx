@@ -1,9 +1,9 @@
 ---
 title: 练习题库
-description: 当前已发布的 80 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 82 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
-factCheckDate: '2026-09-08'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -89,6 +89,8 @@ structure:
   - entry-pb-r4-012
   - entry-pb-r4-013
   - entry-pb-r4-014
+  - entry-pb-r4-015
+  - entry-pb-r4-016
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -166,6 +168,7 @@ prerequisites:
   - L10
   - L11
   - L12
+  - L13
 relatedUnits:
   - O02
   - O03
@@ -240,10 +243,12 @@ relatedUnits:
   - L10
   - L11
   - L12
+  - L13
   - EX15
   - EX17
   - EX18
   - EX19
+  - EX20
   - LAB06
   - LAB08
   - LAB09
@@ -265,19 +270,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-08' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,EX15,EX17,EX18,EX19,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -296,13 +301,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 80 个完整条目，不用空白题目预告未来内容。
+先按条目的先修链接复习，再不看参考解答完成自己的产物。提示按层展开；参考解答用于复核边界，不替代作答。当前页面只发布下面 82 个完整条目，不用空白题目预告未来内容。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 80 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 82 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
@@ -3648,6 +3653,99 @@ Device 层是主机端带类型句柄，负责参数、工作区、初始化、�
 
 **来源日期：** 2026-09-08。
 
+<span id="pb-r4-015" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-015：审查 CSR 描述符、索引基与所有权
+
+- **ID 与双语发布对：** PB-R4-015，属于 `practice-bank` 双语发布对。
+- **类型与难度：** 正确性调试；进阶。
+- **直接先修条件：** [L13](/libraries/cusparse-descriptors-spmv-spmm/)，精确为 `[L13]`。
+- **硬件门槛：** 无；静态描述符与算术审查，不执行 CUDA。EX20 的独立运行状态仍为待硬件验证（Pending Hardware Verification）。
+- **版本门槛：** 精确 Toolkit 12.9.2 Generic API 基线；普通 FP32 NON_TRANSPOSE SpMV，使用 `CUSPARSE_SPMV_CSR_ALG2`，不承诺跨设备确定性。
+- **相关学习单元与资源：** [A12](/algorithms/sparse-formats-spmv/)、[L13](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20](/examples/cusparse-spmv/)。
+- **最后复核：** 2026-09-09。
+
+**题目：** 一个拟议 `4x5` CSR 矩阵有六个存储项：偏移 `[1,3,3,5,7]`、列索引 `[1,5,2,4,1,3]`、值 `[2,-1,3,4,-2,5]`。两个索引数组的元素均为有符号 32 位整数，值为 FP32。作者选择 ZERO 索引基与 64 位索引类型，把 X 长度设为 4、Y 长度设为 5，并因句柄使用 HOST 指针模式而传入普通主机数组。他声称构建描述符会复制数据并修复任何重复坐标。先按 `x=[1,2,3,4,5]`、`y0=[1,2,3,4]` 计算原意中的 `y=2*A*x-y0`，再修复提案。
+
+**目标：** 给出描述符/调用账本、独立数学参考和所有权顺序，在提交前拒绝无效提案。
+
+**约束：** 保留原矩阵及其空的第二行。可以保留一致的一基数组，也可以显式把两个索引数组都转换为零基；不能把 32 位字节重新解释为 64 位元素。稀疏数组与稠密向量使用设备存储；HOST 模式适用于 alpha/beta。没有执行 CUDA 调用、工作区查询或位相等验证。
+
+**预期证据：** 修复后的索引数组/类型/基与向量长度；不含工作区的 CSR 载荷及总数据字节数；四个输出值；生命周期与重复输入拒绝规则。
+
+**验收条件：** X 长度为 5、Y 为 4，均为 FP32。CSR 载荷为 68 字节，CSR 加 X/Y 为 104 字节，不含描述符、填充或工作区。推导 `A*x=[-3,0,22,13]` 和 `y=[-7,-2,41,22]`。拒绝重复项正确性保证以及跨 CPU/GPU/版本的位相等承诺；调用者缓冲区必须保留到完成。
+
+<details><summary>提示 1：乘法前先检查端点</summary>索引基为 b 时，偏移从 b 开始，以 `nnz+b` 结束。相邻偏移相等表示空行。枚举必须匹配真实元素宽度，而非主机指针宽度。</details>
+
+<details><summary>提示 2：把元数据与分配分开</summary>描述符记录指针。HOST 指针模式不会把矩阵或向量存储迁到主机；异步主机调用成功返回也不代表设备完成。</details>
+
+<details>
+<summary>独立参考解答：完成尝试后再展开</summary>
+
+**参考解答（Reviewed solution）：** 保留原数组并使用 `CUSPARSE_INDEX_BASE_ONE`，两个索引类型都设为 `CUSPARSE_INDEX_32I`；或者两个数组都减一，得到偏移 `[0,2,2,4,6]`、列索引 `[0,4,1,3,0,2]`，再选择 ZERO。偏移长度为 5、单调不减、末项为 `nnz+base`，每个列索引在声明范围内。第 1 行为空。值和 X/Y 使用 `CUDA_R_32F`；调用另行选择 NON_TRANSPOSE、FP32 计算、alpha=2、beta=-1 和 `CUSPARSE_SPMV_CSR_ALG2`。
+
+CSR 数据占 `5*4+6*4+6*4=68` 字节，X/Y 增加 `(5+4)*4=36`，合计 104 字节问题数据，不是总设备内存或查询工作区。逐行乘积为 `2*1-1*5=-3`、0、`3*2+4*4=22` 和 `-2*1+5*3=13`。应用 alpha/beta 后得到 `[-7,-2,41,22]`；beta 使空行输出为 -2 而非零。这些是精确纸面结果，不是 GPU 输出。
+
+创建描述符前检查数组，并按本题输入政策拒绝重复坐标；cuSPARSE 不为重复坐标提供笼统正确性保证，构建描述符也不是 sanitizer。分配/复制设备数据，创建类型和长度匹配的 Generic 描述符，绑定流与标量模式，查询精确调用的工作区字节数，按需分配，检查状态后提交，再观察完成，之后才能读取结果或释放资源。描述符销毁和调用者存储释放分别处理，提交后出错也不能跳过完成边界。真实运行还需独立实现的参考与预先声明的容差。选定 NON_TRANSPOSE CSR_ALG2 的确定性合同只约束固定条件下重复运行，不保证等于 CPU 归约、其他 GPU 或另一库版本。
+
+**有效替代与常见错误：** 两种索引基都可行，前提是数组一致转换。更宽索引需要重新表示数组和重算载荷。不要只改偏移、把 `nnz` 当成矩阵维度、清除空行的 beta 项，或把 104 字节写成已观察的工作区大小。
+
+</details>
+
+**来源依据：** 原创数组、错误描述符提案、算术和解答；[L13](/libraries/cusparse-descriptors-spmv-spmm/)、[TERM-195](/glossary/#term-195)和 [SRC-CUDA-075](/sources-and-versions/#src-cuda-075)。没有复制或执行上游示例、头文件、题目或输出。
+
+**来源日期：** 2026-09-09。
+
+<span id="pb-r4-016" class="resource-target" aria-hidden="true"></span>
+
+## PB-R4-016：审查格式选择与活动预处理缓冲区生命周期
+
+- **ID 与双语发布对：** PB-R4-016，属于 `practice-bank` 双语发布对。
+- **类型与难度：** 证据审查；进阶。
+- **直接先修条件：** [L13](/libraries/cusparse-descriptors-spmv-spmm/)，精确为 `[L13]`。
+- **硬件门槛：** 无；假设格式与生命周期审查。未来 EX20 执行要求原生 Linux 和 CC 7.5+；结构化稀疏与窄精度另有门槛。
+- **版本门槛：** Toolkit 12.9.2 基线，对照精确 11.8.0/13.3.1；SpMV 与 SpMM 预处理的引入版本和算法合同不同。
+- **相关学习单元与资源：** [A12](/algorithms/sparse-formats-spmv/)、[A13](/algorithms/sparse-matrix-multiplication-preprocessing/)、[L01](/libraries/library-primitive-dsl-custom-kernel/)、[L13](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20](/examples/cusparse-spmv/)。
+- **最后复核：** 2026-09-09。
+
+**题目：** 一个假设服务复用 PB-R4-015 的 `4x5`、六存储项模式来做 SpMV，另用三个稠密右端项做 SpMM。它只凭载荷就宣称 CSR 最快。在 Toolkit 11.8 上，它计划调用 `cusparseSpMV_preprocess`；在 12.9.2 上，它先以缓冲区 P 预处理描述符 D，再以 Q 预处理同一个 D，然后把 P/Q 都视为并发请求的活动缓冲区。它将 P 覆盖成无关临时区、修改一个索引，并在主机返回时释放 Q。SpMM 分支选择 `CUSPARSE_SPMM_CSR_ALG2`，假设预处理能加速它。最后，它把普通 CSR 称作 cuSPARSELt 结构化张量核心输入。逐项审查；没有请求实际运行。
+
+**目标：** 建立表示账本、合法活动缓冲区生命周期、允许变更表和版本/算法拒绝清单，不选性能赢家。
+
+**约束：** FP32 值和 32 位索引各占四字节。稠密矩阵采用普通连续行主序，运算为 NON_TRANSPOSE。刻意不给缓冲区容量，不能从 `nnz` 推导工作区大小。区分 SpMV 的 X/Y 与 SpMM 的 B/C，不能把一个运算的预处理当成另一个的状态。
+
+**预期证据：** dense/COO/CSR 载荷、B/C 形状与主维度（leading dimension）、六项生命周期判定，以及 12.9.2 SpMV 路径中允许与失效变更的区分。
+
+**验收条件：** dense/COO/CSR 载荷分别为 `80/72/68` 字节，不是速度排名。B 为 `5x3`、C 为 `4x3`，均为 `ld=3`。拒绝 11.8 SpMV 预处理、双活动缓冲区、修改索引却不重新准备、过早释放、SpMM ALG2 预处理加速和任意 CSR 的结构化稀疏资格。
+
+<details><summary>提示 1：比较完整工作负载</summary>COO 每项付出两个索引，CSR 每项一个索引再加行偏移。微小载荷差不能预测不规则加载、转换、预处理、重复执行或稠密 GEMM 时间。</details>
+
+<details><summary>提示 2：分配不等于活动状态</summary>用 Q 预处理 D 后，P 对 D 失活。合法的值变更与索引/配置变更不同；任何允许变更都不授权与尚未完成的工作竞态。</details>
+
+<details>
+<summary>独立参考解答：完成尝试后再展开</summary>
+
+**参考解答（Reviewed solution）：** dense A 占 `4*5*4=80` 字节，COO 占 `6*(4+4+4)=72`，CSR 占 `5*4+6*(4+4)=68`。它们不含向量、描述符、工作区、转换或实际流量。SpMM 需要 B `5x3`、C `4x3`，行主序 `ld=3`，最后逻辑元素偏移分别为 14 和 11。BSR 还需要声明块形状、块占用/填充和精确运算支持；格式名或存储项数不能证明它胜过 CSR、COO 或匹配的稠密 GEMM。
+
+| 拟议动作 | 修复后的合同 |
+| --- | --- |
+| 11.8 调用 SpMV 预处理 | 拒绝不存在的符号；使用受支持的不预处理 SpMV。`cusparseSpMV_preprocess` 自 12.4 起提供，仍为可选。 |
+| D 同时保留活动 P/Q | 第二次预处理后只有 Q 活动。重新配置前先等待既有工作完成。独立准备状态使用各自描述符和各自拥有的缓冲区；共享未变矩阵数组不意味着可共享可写工作区。 |
+| 覆盖临时区或修改索引 | 活动缓冲区内容和矩阵索引必须不变。失活 P 只有在最后一次使用完成后才能另作他用。索引或配置变化需要重新验证，若要加速则重新准备。 |
+| 主机返回后释放 Q | 活动缓冲区和引用数据保留到相关流工作完成；成功或失败都要检查完成并安全清理。 |
+| 预处理加速 SpMM CSR_ALG2 | `cusparseSpMM_preprocess` 在 11.8 已有，帮助 CSR_ALG1/ALG3，不帮助 CSR_ALG2。不能把 SpMV 的算法枚举或引入版本移植给 SpMM。 |
+| 任意 CSR 作为 cuSPARSELt 输入 | 拒绝。独立 cuSPARSELt 参考需要受支持的结构化模式、剪枝/检查与压缩、类型、布局、设备和版本门槛；稀疏率不提供这些条件。 |
+
+对于 12.9.2 SpMV 活动状态复用，文档例外允许 alpha/beta、X/Y 与矩阵值变化，同时保持矩阵索引、活动缓冲区内容及其余配置。仍须保持维度/类型兼容，并把更新排在此前读写完成之后；这些例外不是竞态许可。操作、计算类型、算法或结构变化需要重新核对合同，并进行相应大小查询/预处理。逐精确调用查询工作区，将返回字节数与观察到的运行成本分开。不预处理的受支持路径同样合法，本题不暗示它有性能劣势。
+
+**有效替代与常见错误：** 用显式完成依赖串行请求，或用独立准备的描述符/缓冲区并保证数据所有权安全。未来比较必须包括表示/转换、准备摊销、工作区、正确性和有范围的重复计时。不要从静态审查推断稀疏赢家、结构化张量核心执行或 EX20 运行证据。
+
+</details>
+
+**来源依据：** 原创服务提案、载荷账本和解答；[L13](/libraries/cusparse-descriptors-spmv-spmm/)、[TERM-196](/glossary/#term-196)、[SRC-CUDA-075](/sources-and-versions/#src-cuda-075)和 [SRC-CUDA-076](/sources-and-versions/#src-cuda-076)。没有复制或执行上游题目、代码、图示或基准测试。
+
+**来源日期：** 2026-09-09。
+
 ## 复核记录
 
-既有条目保留各自复核记录。Issue #32 在 **2026-09-04** 的不可变 R3 聚合复核固定 66 个条目和精确 10 项 Nsight 报告分析清单。PB-R4-001 至 PB-R4-012 保留各自日期。PB-R4-013/014 将完整当前双语发布对扩展到 **80** 个条目；其元数据、链接、各两层默认关闭提示与独立展开的解答于 **2026-09-08** 复核。原创布局与生命周期/启动成本审查的直接先修均精确为 `[L12]`。滚动库课程已覆盖 L01-L12，仅 L13 尚未发布；R4 聚合验收仍待完成。没有复制或改编上游题目、代码、正文、表格、图示或结果。假设规划事实与算术推导不是 GPU 观察，不新增编译、运行、流量、计时、类型结果、加速比、赢家或证据状态。
+既有条目保留各自复核记录。Issue #32 在 **2026-09-04** 的不可变 R3 聚合复核固定 66 个条目和精确 10 项 Nsight 报告分析清单。PB-R4-001 至 PB-R4-014 保留各自日期。PB-R4-015/016 将完整当前双语发布对扩展到 **82** 个条目；其元数据、链接、各两层默认关闭提示与独立展开的解答于 **2026-09-09** 复核。原创描述符与格式/预处理生命周期审查的直接先修均精确为 `[L13]`。滚动库课程覆盖 L01-L13；R4 聚合验收仍待完成。没有复制或改编上游题目、代码、正文、表格、图示或结果。四个证据数组均保持为空。假设提案与纸面算术不提供查询工作区、确定性结果、GPU 输出或性能赢家；EX20 仍独立处于待硬件验证（Pending Hardware Verification）。

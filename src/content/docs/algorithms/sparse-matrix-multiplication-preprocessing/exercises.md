@@ -108,4 +108,4 @@ head:
 
 ## 下一步
 
-查看[复核解答](/algorithms/sparse-matrix-multiplication-preprocessing/solutions/)，再完成 [PB-R3-016](/practice/#pb-r3-016)。L13 与 EX20 仍延后。
+查看[复核解答](/algorithms/sparse-matrix-multiplication-preprocessing/solutions/)，再完成 [PB-R3-016](/practice/#pb-r3-016)。已发布的 [L13](/libraries/cusparse-descriptors-spmv-spmm/)依赖 `[A12,A13,L01]`；[EX20](/examples/cusparse-spmv/)依赖 `[L13]`。这些可选后续链接更新于 2026-09-09；练习复核日期、先修和空证据数组不变。EX20 的编译证据和实际观察仍为空，运行仍待硬件验证（Pending Hardware Verification）。

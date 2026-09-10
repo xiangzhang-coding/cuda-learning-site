@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-08",
+  "reviewDate": "2026-09-09",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 273,
-    "sourceRoutes": 546,
-    "exerciseSetPublicationPairs": 73,
-    "solutionSetPublicationPairs": 73,
+    "publicationPairs": 277,
+    "sourceRoutes": 554,
+    "exerciseSetPublicationPairs": 74,
+    "solutionSetPublicationPairs": 74,
     "learningUnits": [
       "O01",
       "O02",
@@ -89,9 +89,10 @@
       "L09",
       "L10",
       "L11",
-      "L12"
+      "L12",
+      "L13"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12"],
     "visualExplainers": [
       "VIS01",
@@ -114,7 +115,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 80,
+    "practiceBankEntries": 82,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -127,8 +128,8 @@
       "PB-R3-011",
       "PB-R3-012"
     ],
-    "glossaryTerms": 194,
-    "sourceRecords": 90
+    "glossaryTerms": 196,
+    "sourceRecords": 92
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -268,6 +269,19 @@
         "exampleToolkitLanes": ["cuda-11.8", "cuda-12.9", "cuda-13.3"],
         "exampleDialects": ["c++17"]
       },
+      "cusparse": {
+        "bundled": [
+          { "toolkitLane": "cuda-11.8", "version": "11.7.5.86" },
+          { "toolkitLane": "cuda-12.9", "version": "12.5.10.65" },
+          { "toolkitLane": "cuda-13.3", "version": "12.8.2.51" }
+        ],
+        "apiTeachingBaseline": "Toolkit 12.9.2 archived cuSPARSE guide",
+        "currentApiComparison": "Exact Toolkit 13.3.1 archived cuSPARSE guide, accessed 2026-09-09",
+        "currentReleaseNotes": "Exact CUDA 13.3 Update 1 archived release notes, accessed 2026-09-09",
+        "exampleToolkitLanes": ["cuda-11.8", "cuda-12.9", "cuda-13.3"],
+        "exampleDialects": ["c++17"],
+        "examplePreprocessing": "not used; SpMV preprocessing is absent in the 11.8 lane"
+      },
       "cub": {
         "bundled": [
           {
@@ -352,6 +366,7 @@
       "EX17",
       "EX18",
       "EX19",
+      "EX20",
       "LAB01",
       "LAB03",
       "LAB04",
@@ -383,6 +398,7 @@
       "EX17",
       "EX18",
       "EX19",
+      "EX20",
       "LAB01",
       "LAB02",
       "LAB03",
@@ -402,7 +418,7 @@
     "referenceEnvironments": [],
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
-    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12"],
+    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -420,18 +436,18 @@
     "No Reference Environment, Community-Observed subject, or Runtime-Verified R3 subject is declared.",
     "EX02, EX10, and LAB02 have retained Compile-Checked evidence; every other R3 CUDA compile job is a non-evidentiary build gate.",
     "EX10 is Runtime-Not-Applicable; its narrow GCC 14.2.0 C++23 probe does not grant ordinary C++23 Toolkit Lane support.",
-    "EX11 through EX19 have empty compilation evidence and remain Pending Hardware Verification.",
+    "EX11 through EX20 have empty compilation evidence and remain Pending Hardware Verification.",
     "R3 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.",
     "CCCL 3.4.2 is reviewed only for the CUDA 12.9 and 13.3 Toolkit Lanes; CUDA 11.8 requires separately reviewed library versions.",
     "Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.",
-    "L01-L12 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
+    "L01-L13 are R4 Learning Units with all four evidence arrays empty and grant no Evidence Status; API presence, owner tests, static decisions, and library contracts provide no local compilation, runtime, synchronization, or performance evidence.",
     "The six profiler report fixtures are expected-only plans with unfilled Environment Manifests and empty recorded observations; they are not captured reports.",
     "Profiler collection requires the exact tool, CUPTI, driver, GPU, metric availability, filter, replay, workload, command, permission, report-custody, and Environment Manifest coordinates. Performance-counter access must be administrator-approved for a non-admin user; denial or an unavailable metric blocks collection and must be recorded without sudo, privilege escalation, or policy bypass.",
     "Q11 summarizes linked EX14 and LAB10 subjects. EX14 and LAB10 have empty compilation and recorded observations and remain Pending Hardware Verification; immutable source, VIS11, static material, browser models, and the expected-only plan grant no timing, profiler metric, speedup, bottleneck, or winner.",
     "Q12 summarizes linked EX11 and now leads to LAB11; EX11, EX17, and LAB11 retain empty compilation and recorded observations and remain Pending Hardware Verification, while their build gates, VIS10, canonical imports, and expected-only plans add no runtime or performance evidence.",
     "Q13 summarizes linked EX15, which retains empty compilation and recorded observations and remains Pending Hardware Verification; the runner gate, VIS12, and expected-only plan add no runtime or performance evidence, cuBLAS comparison, or Tensor Core result.",
     "A10-A14 publish finite host arithmetic and static logical traffic, matrix, storage, and contribution ledgers only. VIS18 and the A12/A13 sparse composition execute no CUDA, query no GPU, and record no backend, workspace, preprocessing, determinism, structured sparsity, actual traffic, timing, speedup, or winner.",
-    "L03/LAB11 and L06/LAB12 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03 and LAB12 requires Q13/L06; L13 and EX20 remain unpublished pending the exact cuSPARSE API contract.",
+    "L03/LAB11, L06/LAB12, and L13/EX20 have rolling R4 destinations, not immutable R3 destinations. LAB11 requires Q12/L03, LAB12 requires Q13/L06, L13 requires A12/A13/L01, and EX20 requires L13.",
     "EX17 and LAB11 have five declared bundled-or-selected CUB build profiles, but no retained compilation record, queried temporary-storage value, GPU output, timing, traffic, kernel mapping, maintenance result, speedup, or winner.",
     "EX18 and LAB12 have empty compilation and recorded observations and remain Pending Hardware Verification. Their fixed traditional FP32 pedantic comparison grants no cuBLASLt candidate, workspace, epilogue, timing, Tensor Core, speedup, or winner observation.",
     "L06/L07 use the 12.9.2 archived API teaching baseline. Exact 13.3.1 API and release-note archives were unavailable; live 13.3 API and 13.3 Update 1 release notes are explicitly dated comparisons, not archived or executed evidence.",
@@ -440,6 +456,8 @@
     "L10/L11 independently reference cuDNN backend 9.24.0 and frontend 1.27.0 at commit f77fbc3d21be3f24cd0286b9b368105f7c518b8a; no binary, compilation, GPU execution, selected engine, workspace query, dtype result, or benchmark is recorded. Backend 9.25.0 Developer Preview is outside this contract.",
     "L12 uses the 12.9.2 archived cuFFT API teaching baseline and a live 13.3 reference accessed 2026-09-08; exact 13.3.1 API and release-note archives were unavailable. Source review grants no plan, workspace, JIT, startup, or execution observation.",
     "EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.",
-    "L01-L12 are published in the rolling R4 surface; L13 and the R4 aggregate review remain pending and outside the latest completed R3 release."
+    "L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.",
+    "EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.",
+    "L01-L13 are published in the rolling R4 surface; the R4 aggregate review remains pending and outside the latest completed R3 release."
   ]
 }

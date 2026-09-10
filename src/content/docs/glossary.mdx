@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 194 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 196 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-08'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -22,7 +22,14 @@ structure:
   - entry-term-192
   - entry-term-193
   - entry-term-194
+  - entry-term-195
+  - entry-term-196
   - maintenance
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
 head:
   - tag: meta
     attrs:
@@ -31,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-08'
+      content: '2026-09-09'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -39,7 +46,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1806,6 +1813,24 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [L12](/libraries/cufft-plans-layouts-startup/)。
 - **版本说明：** 2026-09-08 在 [SRC-CUDA-073](/sources-and-versions/#src-cuda-073)复核。C2R 要求厄米共轭对称（Hermitian Symmetry）频谱及文档规定的复数类型对齐；违反数学输入合同会产生未定义行为。N=10 时 K=6，原位行需要 12 个实数槽，而不是 10 个。多维对称反转每个频率坐标，不只反转被压缩的最后坐标。[PB-R4-013](/practice/#pb-r4-013)提供二维布局推导；非原位 C2R 仍可能破坏复数输入。不声称执行过实数变换。
 
+<span id="term-195" class="resource-target" aria-hidden="true"></span>
+
+### Sparse Matrix Descriptor · 稀疏矩阵描述符
+
+- **定义：** 稀疏矩阵描述符（Sparse Matrix Descriptor）记录如何解释调用者拥有的稀疏存储：格式、维度、存储项数、索引类型/基、值类型和数组指针。Generic CSR 的 `cusparseCreateCsr` 描述行偏移、列索引和值，不复制这些数组，也不接管其分配。操作、计算类型和算法属于运算调用，不能从描述符推断这些承诺。
+- **避免使用：** 矩阵数据副本；拥有分配；自动验证过的 CSR；选定执行计划；Legacy `cusparseMatDescr_t` 可与 Generic 描述符互换。
+- **相关资源：** [A12](/algorithms/sparse-formats-spmv/)、[A13](/algorithms/sparse-matrix-multiplication-preprocessing/)、[L13](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20](/examples/cusparse-spmv/)。
+- **版本说明：** 2026-09-09 按 [SRC-CUDA-075](/sources-and-versions/#src-cuda-075)的精确 Toolkit 12.9.2 基线复核。CSR 需要 `rows+1` 个偏移、`nnz` 个列索引/值、一致的索引基与端点、单调偏移和合法列范围；重复坐标没有笼统的正确性保证。完成后销毁描述符与释放调用者缓冲区是两项独立责任。主机指针模式（host pointer mode）指定标量位置，不指定稀疏数组位置。[PB-R4-015](/practice/#pb-r4-015)只审查合同，不执行。
+
+<span id="term-196" class="resource-target" aria-hidden="true"></span>
+
+### Active Preprocessing Buffer · 活动预处理缓冲区
+
+- **定义：** 活动预处理缓冲区（Active Preprocessing Buffer）是当前与稀疏描述符的可选加速状态关联、由调用者拥有的外部工作区。在选定 SpMV 合同中，每个稀疏矩阵描述符只能有一个活动缓冲区。用另一个缓冲区再次预处理会使旧缓冲区失活，即使调用者仍拥有旧分配。这是与描述符关联的状态，不是所有外部工作区的别名。
+- **避免使用：** 适用于全部运算的永久缓存；可任意覆盖的临时区；描述符间共享活动状态；预处理一次后可随意改变索引或算法。
+- **相关资源：** [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)、[L13](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20](/examples/cusparse-spmv/)。
+- **版本说明：** 2026-09-09 在 [SRC-CUDA-075](/sources-and-versions/#src-cuda-075)和 [SRC-CUDA-076](/sources-and-versions/#src-cuda-076)复核。`cusparseSpMV_preprocess` 从 CUDA 12.4 起可选，11.8 中不存在。12.9.2 活动缓冲区合同保持缓冲区内容、矩阵索引和其余配置不变，同时允许文档列出的 alpha/beta、X/Y 与矩阵值变化，仍需正确的完成顺序。`cusparseSpMM_preprocess` 在 11.8 已存在，帮助 CSR_ALG1/ALG3 而非 CSR_ALG2；必须另查其复用合同。[PB-R4-016](/practice/#pb-r4-016)不记录查询字节数或运行结果。
+
 ## 维护规则
 
-TERM-001 至 TERM-192 保留各自逐项复核日期。新增 TERM-193/194 与完整 194 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-08** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分 DFT 数学、归一化与 Hermitian 存储约束；不授予编译或运行证据状态（Evidence Status）。对应的[英文页](/en/glossary/)同时完整发布。
+TERM-001 至 TERM-194 保留各自逐项复核日期。新增 TERM-195/196 与完整 196 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-09** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分描述符借用的表示与活动预处理状态，不重复已有 CSR、预处理或外部工作区词条。四个证据数组均保持为空；EX20 仍独立处于待硬件验证（Pending Hardware Verification）。对应的[英文页](/en/glossary/)同时完整发布。

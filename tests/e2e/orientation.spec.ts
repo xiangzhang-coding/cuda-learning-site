@@ -9,8 +9,8 @@ test('all published routes load without browser errors', async ({ page }) => {
   test.setTimeout(410_000);
   const errors = collectBrowserFailures(page, 'http://127.0.0.1:4321');
   const routes = await discoverPublishedRoutes();
-  expect(routes).toHaveLength(546);
-  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(273);
+  expect(routes).toHaveLength(554);
+  expect(routes.filter((route) => !route.startsWith('/en/'))).toHaveLength(277);
 
   for (const route of routes) {
     const response = await page.goto(route);
@@ -128,6 +128,9 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/libraries/cufft-plans-layouts-startup/', en: '/en/libraries/cufft-plans-layouts-startup/' },
     { zh: '/libraries/cufft-plans-layouts-startup/exercises/', en: '/en/libraries/cufft-plans-layouts-startup/exercises/' },
     { zh: '/libraries/cufft-plans-layouts-startup/solutions/', en: '/en/libraries/cufft-plans-layouts-startup/solutions/' },
+    { zh: '/libraries/cusparse-descriptors-spmv-spmm/', en: '/en/libraries/cusparse-descriptors-spmv-spmm/' },
+    { zh: '/libraries/cusparse-descriptors-spmv-spmm/exercises/', en: '/en/libraries/cusparse-descriptors-spmv-spmm/exercises/' },
+    { zh: '/libraries/cusparse-descriptors-spmv-spmm/solutions/', en: '/en/libraries/cusparse-descriptors-spmv-spmm/solutions/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/', en: '/en/correctness/cpu-references-tolerances-invariants/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/exercises/', en: '/en/correctness/cpu-references-tolerances-invariants/exercises/' },
     { zh: '/correctness/cpu-references-tolerances-invariants/solutions/', en: '/en/correctness/cpu-references-tolerances-invariants/solutions/' },
@@ -183,6 +186,7 @@ test('locale controls keep the learner on the counterpart page', async ({ page }
     { zh: '/examples/cub-device-reduction-scan/', en: '/en/examples/cub-device-reduction-scan/' },
     { zh: '/examples/cublas-gemm/', en: '/en/examples/cublas-gemm/' },
     { zh: '/examples/cufft-batched-transform/', en: '/en/examples/cufft-batched-transform/' },
+    { zh: '/examples/cusparse-spmv/', en: '/en/examples/cusparse-spmv/' },
     { zh: '/labs/', en: '/en/labs/' },
     { zh: '/labs/vector-addition/', en: '/en/labs/vector-addition/' },
     { zh: '/labs/break-and-repair-indexing/', en: '/en/labs/break-and-repair-indexing/' },
@@ -249,13 +253,18 @@ test('M13 title and identifier searches retain the unit in each locale', async (
   }
 });
 
-test('L12 and EX19 title searches retain their locale and complete publication route', async ({ page }) => {
+test('L12/EX19 and L13/EX20 title searches retain their locale and complete publication route', async ({ page }) => {
+  test.setTimeout(90_000);
   for (const prefix of ['/', '/en/']) {
     for (const suffix of [
       'libraries/cufft-plans-layouts-startup/',
       'libraries/cufft-plans-layouts-startup/exercises/',
       'libraries/cufft-plans-layouts-startup/solutions/',
       'examples/cufft-batched-transform/',
+      'libraries/cusparse-descriptors-spmv-spmm/',
+      'libraries/cusparse-descriptors-spmv-spmm/exercises/',
+      'libraries/cusparse-descriptors-spmv-spmm/solutions/',
+      'examples/cusparse-spmv/',
     ]) {
       const route = `${prefix}${suffix}`;
       await page.goto(route);
@@ -684,6 +693,14 @@ test('navigation remains usable without horizontal overflow', async ({ page }, t
     '/en/libraries/cufft-plans-layouts-startup/solutions/',
     '/examples/cufft-batched-transform/',
     '/en/examples/cufft-batched-transform/',
+    '/libraries/cusparse-descriptors-spmv-spmm/',
+    '/en/libraries/cusparse-descriptors-spmv-spmm/',
+    '/libraries/cusparse-descriptors-spmv-spmm/exercises/',
+    '/en/libraries/cusparse-descriptors-spmv-spmm/exercises/',
+    '/libraries/cusparse-descriptors-spmv-spmm/solutions/',
+    '/en/libraries/cusparse-descriptors-spmv-spmm/solutions/',
+    '/examples/cusparse-spmv/',
+    '/en/examples/cusparse-spmv/',
     '/labs/',
     '/en/labs/',
     '/labs/vector-addition/',

@@ -88,4 +88,4 @@ Sequence 是：冻结 representation 与 call-level operation/compute type/algor
 - 更换 indices 或 active buffer 后继续声称旧 preprocessing data 有效。
 - 把 owner performance note、static arithmetic 或重复次数写成 observed speedup/determinism。
 
-复核日期：**2026-09-04**。四个 evidence arrays 保持为空；L13 与 EX20 仍未发布。
+复核日期：**2026-09-04**。四个 evidence arrays 保持为空。可选后续链接更新于 2026-09-09：已发布的 [L13](/libraries/cusparse-descriptors-spmv-spmm/)依赖 `[A12,A13,L01]`，[EX20](/examples/cusparse-spmv/)依赖 `[L13]`。导航更新不重新复核解答中的 API 事实，也不授予证据。EX20 的编译证据和实际观察仍为空，运行仍待硬件验证（Pending Hardware Verification）；其 SpMV 示例不是 SpMM 性能结果。

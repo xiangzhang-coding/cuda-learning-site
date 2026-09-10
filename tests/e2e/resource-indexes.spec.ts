@@ -146,6 +146,9 @@ const issue38SourceIds = ['SRC-CUDA-071', 'SRC-CUDA-072'] as const;
 const issue39PracticeIds = ['PB-R4-013', 'PB-R4-014'] as const;
 const issue39GlossaryIds = ['TERM-193', 'TERM-194'] as const;
 const issue39SourceIds = ['SRC-CUDA-073', 'SRC-CUDA-074'] as const;
+const issue40PracticeIds = ['PB-R4-015', 'PB-R4-016'] as const;
+const issue40GlossaryIds = ['TERM-195', 'TERM-196'] as const;
+const issue40SourceIds = ['SRC-CUDA-075', 'SRC-CUDA-076'] as const;
 const issue17Ids = new Set<string>([
   ...releaseLabIds,
   'PB-R1-021', 'PB-R1-022', 'PB-R1-023', 'PB-R1-024',
@@ -231,6 +234,9 @@ const currentCatalogIds = new Set<string>([
   ...issue39PracticeIds,
   ...issue39GlossaryIds,
   ...issue39SourceIds,
+  ...issue40PracticeIds,
+  ...issue40GlossaryIds,
+  ...issue40SourceIds,
 ]);
 const issue26CatalogIds = new Set<string>([
   ...issue26LabIds,
@@ -297,15 +303,20 @@ const issue38CatalogIds = new Set<string>([
 ]);
 const terminalResourceIds: Partial<Record<(typeof INDEX_GROUPS)[number], string>> = {
   labs: 'LAB12',
-  practice: 'PB-R4-014',
+  practice: 'PB-R4-016',
   visuals: 'VIS18',
-  glossary: 'TERM-194',
-  sources: 'SRC-CUDA-074',
+  glossary: 'TERM-196',
+  sources: 'SRC-CUDA-076',
 };
 const issue39CatalogIds = new Set<string>([
   ...issue39PracticeIds,
   ...issue39GlossaryIds,
   ...issue39SourceIds,
+]);
+const issue40CatalogIds = new Set<string>([
+  ...issue40PracticeIds,
+  ...issue40GlossaryIds,
+  ...issue40SourceIds,
 ]);
 
 test('both locales combine text, type, and related-resource filters without persistence', async ({ page }) => {
@@ -392,11 +403,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(12);
-  expect(counts.practice).toBe(80);
+  expect(counts.practice).toBe(82);
   expect(counts.visuals).toBe(19);
-  expect(counts.glossary).toBe(194);
-  expect(counts.sources).toBe(90);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(395);
+  expect(counts.glossary).toBe(196);
+  expect(counts.sources).toBe(92);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(401);
 
   const expectedIds = [
     ...releaseLabIds,
@@ -429,6 +440,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue37PracticeIds,
     ...issue38PracticeIds,
     ...issue39PracticeIds,
+    ...issue40PracticeIds,
     ...releaseGlossaryIds,
     ...issue19GlossaryIds,
     ...toolchainGlossaryIds,
@@ -446,6 +458,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue37GlossaryIds,
     ...issue38GlossaryIds,
     ...issue39GlossaryIds,
+    ...issue40GlossaryIds,
     ...releaseSourceIds,
     ...issue19SourceIds,
     ...toolchainSourceIds,
@@ -466,6 +479,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     ...issue37SourceIds,
     ...issue38SourceIds,
     ...issue39SourceIds,
+    ...issue40SourceIds,
     'VIS10',
     'VIS11',
     'VIS12',
@@ -498,7 +512,9 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     if (record.group === 'sources') expect(record.sourceAccessDate, record.planningId).toBe('2026-08-31');
   }
   for (const record of records.filter(({ planningId }) => currentCatalogIds.has(planningId))) {
-    const expectedDate = issue39CatalogIds.has(record.planningId)
+    const expectedDate = issue40CatalogIds.has(record.planningId)
+      ? '2026-09-09'
+      : issue39CatalogIds.has(record.planningId)
       ? '2026-09-08'
       : issue37CatalogIds.has(record.planningId) || issue38CatalogIds.has(record.planningId)
       ? '2026-09-07'
@@ -543,7 +559,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
       const card = index.locator(`[data-resource-id="${record.planningId}"]`);
       await expect(card, record.planningId).toHaveCount(1);
       await expect(card.locator('h3 a')).toHaveAttribute('href', record.href.en);
-      if (issue27CatalogIds.has(record.planningId) || issue28CatalogIds.has(record.planningId) || issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId) || issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId) || issue34CatalogIds.has(record.planningId) || l05CatalogIds.has(record.planningId) || issue36CatalogIds.has(record.planningId) || issue37CatalogIds.has(record.planningId) || issue38CatalogIds.has(record.planningId) || issue39CatalogIds.has(record.planningId)) {
+      if (issue27CatalogIds.has(record.planningId) || issue28CatalogIds.has(record.planningId) || issue29CatalogIds.has(record.planningId) || issue30CatalogIds.has(record.planningId) || issue31CatalogIds.has(record.planningId) || issue33CatalogIds.has(record.planningId) || issue34CatalogIds.has(record.planningId) || l05CatalogIds.has(record.planningId) || issue36CatalogIds.has(record.planningId) || issue37CatalogIds.has(record.planningId) || issue38CatalogIds.has(record.planningId) || issue39CatalogIds.has(record.planningId) || issue40CatalogIds.has(record.planningId)) {
         await index.locator('[data-resource-query]').fill(record.planningId);
         await expect(card, `${record.planningId} is searchable`).toBeVisible();
         await index.locator('[data-resource-query]').fill('');
@@ -597,6 +613,54 @@ test('cuFFT practice filters in both locales and reveals each solution independe
       await expect(solution).toHaveAttribute('open', '');
       await expect(solution).toContainText(answer);
       await expect(secondHint).not.toHaveAttribute('open', '');
+    }
+  }
+});
+
+test('cuSPARSE filters resolve L13 and EX20 and keep solutions independent of hints in both locales', async ({ page }) => {
+  // This journey loads three full indexes and revisits practice in both locales.
+  test.setTimeout(120_000);
+  for (const locale of INDEX_LOCALES) {
+    const prefix = locale === 'en' ? '/en' : '';
+    for (const group of ['practice', 'glossary', 'sources'] as const) {
+      await page.goto(INDEX_ROUTES[group][locale]);
+      const index = page.locator('cuda-resource-index');
+      await expect(index).toHaveAttribute('data-ready', 'true');
+      for (const relation of ['L13', 'EX20']) {
+        await index.locator('[data-resource-filter="relation"]').selectOption(relation);
+        await expect(index.locator('[data-resource-card]:visible')).toHaveCount(2);
+        for (const id of group === 'practice' ? issue40PracticeIds : group === 'glossary' ? issue40GlossaryIds : issue40SourceIds) {
+          const card = index.locator(`[data-resource-id="${id}"]`);
+          await expect(card).toBeVisible();
+          const unitLinks = card.getByRole('link', { name: 'L13', exact: true });
+          await expect(unitLinks).toHaveCount(group === 'practice' ? 2 : 1);
+          for (const link of await unitLinks.all()) {
+            await expect(link).toHaveAttribute('href', `${prefix}/libraries/cusparse-descriptors-spmv-spmm/`);
+          }
+          await expect(card.getByRole('link', { name: 'EX20', exact: true })).toHaveAttribute('href', `${prefix}/examples/cusparse-spmv/`);
+        }
+      }
+    }
+    await page.goto(INDEX_ROUTES.practice[locale]);
+    const index = page.locator('cuda-resource-index');
+    await expect(index).toHaveAttribute('data-ready', 'true');
+    await index.locator('[data-resource-filter="relation"]').selectOption('L13');
+    for (const [id, answer] of [['PB-R4-015', '104'], ['PB-R4-016', '68']]) {
+      await index.locator('[data-resource-query]').fill(id);
+      const card = index.locator('[data-resource-card]:visible');
+      await expect(card).toHaveAttribute('data-resource-id', id);
+      await card.locator('h3 a').click();
+      await expect(page).toHaveURL(new RegExp(`#${id.toLowerCase()}$`));
+      const heading = page.getByRole('heading', { name: new RegExp(`^${id}`) });
+      const details = heading.locator('xpath=..').locator('xpath=following-sibling::details');
+      for (const position of [0, 1, 2]) await expect(details.nth(position)).not.toHaveAttribute('open', '');
+      await details.nth(0).locator('summary').click();
+      await expect(details.nth(0)).toHaveAttribute('open', '');
+      await expect(details.nth(2)).not.toHaveAttribute('open', '');
+      await details.nth(2).locator('summary').click();
+      await expect(details.nth(2)).toHaveAttribute('open', '');
+      await expect(details.nth(2)).toContainText(answer);
+      await expect(details.nth(1)).not.toHaveAttribute('open', '');
     }
   }
 });

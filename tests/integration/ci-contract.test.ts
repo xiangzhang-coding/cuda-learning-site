@@ -123,6 +123,18 @@ describe('GitHub Actions quality contract', () => {
     );
   });
 
+  it('isolates pinned browser installation from the unused runner Chrome apt feed without weakening verification', async () => {
+    const workflow = await readProjectFile('.github/workflows/web-quality.yml');
+    const installations = [...workflow.matchAll(/- name: Install pinned [^\n]+\n\s+run: \|\n([^]*?)(?=\n      - name:)/g)];
+    expect(installations).toHaveLength(3);
+    for (const [, commands] of installations) {
+      expect(commands).toContain('sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources');
+      expect(commands).toMatch(/npx playwright install --with-deps (?:chromium|firefox webkit)/);
+      expect(commands.indexOf('sudo rm')).toBeLessThan(commands.indexOf('npx playwright'));
+      expect(commands).not.toMatch(/allow-unauthenticated|AllowInsecure|trusted=yes|continue-on-error|\|\| true/);
+    }
+  });
+
   it('provides an owner-dispatched remote release smoke gate without becoming a deploy authority', async () => {
     const workflow = await readProjectFile('.github/workflows/release-smoke.yml');
 

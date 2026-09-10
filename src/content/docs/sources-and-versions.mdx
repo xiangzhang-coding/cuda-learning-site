@@ -1,6 +1,6 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L12、LAB01-LAB12、EX01-EX19、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、LAB01-LAB12、EX01-EX20、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
 factCheckDate: '2026-09-09'
@@ -22,8 +22,15 @@ structure:
   - entry-src-cuda-072
   - entry-src-cuda-073
   - entry-src-cuda-074
+  - entry-src-cuda-075
+  - entry-src-cuda-076
   - content-sources
   - review-record
+evidence:
+  compilation: []
+  runtime: []
+  expectedObservations: []
+  recordedObservations: []
 head:
   - tag: meta
     attrs:
@@ -40,18 +47,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L12、LAB01-LAB12、十九个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、LAB01-LAB12、二十个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-本页覆盖 Home、74 个学习单元（Learning Unit）、其练习与独立参考解答、19 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、80 个练习题库（Practice Bank）条目和 194 个术语表（Glossary）词条，以及既有静态发布与可视化界面。当前目录恰好包含 **395** 条记录：12 个 Lab、80 个 Practice Bank 条目、19 个 Visual Explainer、194 个 Glossary 词条和 90 条来源记录。L12、其练习与解答及 EX19 增加四个双语发布对（Publication Pair），形成 273 对和 546 条源路由，包含 73 组练习与 73 组独立参考解答。新增 `SRC-CUDA-073/074` 于 2026-09-08 访问并复核；旧记录保留日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+本页覆盖 Home、75 个学习单元（Learning Unit）、其练习与独立参考解答、20 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、82 个练习题库（Practice Bank）条目和 196 个术语表（Glossary）词条，以及既有静态发布与可视化界面。当前目录恰好包含 **401** 条记录：12 个 Lab、82 个 Practice Bank 条目、19 个 Visual Explainer、196 个 Glossary 词条和 92 条来源记录。L13、其练习与解答及 EX20 增加四个双语发布对（Publication Pair），形成 277 对和 554 条源路由，包含 74 组练习与 74 组独立参考解答。新增 `SRC-CUDA-075/076` 于 2026-09-09 访问并复核；旧记录保留日期。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -160,7 +167,7 @@ Context7 libraries `/websites/nvidia_cuda`（2026-08-29 至 2026-09-04）、`/we
 
 **`SRC-CUDA-063` bundled-header authority。** 对 bundled rows，权威合同是从 Linux x86-64 redistribution archives 内检查的 `cub/device/device_reduce.cuh`、`cub/device/device_scan.cuh` 与 `cub/version.cuh`；三个 archives 的 SHA-256 分别为 `99d77d9e4c75d5e4663e473577f1871e65bca4ea0b9023f544a3556f0c1776c7`、`8b1a5095669e94f2f9afd7715533314d418179e9452be61e2fde4c82a3e542aa`和 `26957cede74f9341174ecaf0372f3f886e7c46ceccb98d6dc775fe2b68d19268`。这些 headers 为 bundled CUB 1.15.1、2.8.2、3.3.4 的传统 pseudo-associative `DeviceReduce` 都记录带 cross-compute-capability caveat 的 same-GPU run-to-run determinism。Bundled CUB 1.15.1 `DeviceScan` 记录相同 scoped guarantee，bundled 2.8.2 与 3.3.4 则记录 possible pseudo-associative run-to-run variation。Selected 3.4.2 由 exact tagged headers 负责：reduction 保留该 scoped guarantee，scan 允许 variation。Context7 没有检查或验证这些 archives。Header review 不建立本站 compilation、runtime、output、determinism observation 或 performance evidence。
 
-VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，L06/EX18/LAB12 与 L07 使用 `SRC-CUDA-067/068`，L08/L09 使用 `SRC-CUDA-069/070`。L10/L11 使用 `SRC-CUDA-071/072`；L12/EX19 新增 `SRC-CUDA-073/074`，使当前目录包含 90 条来源记录。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
+VIS19 与 VIS21 复用 `SRC-CUDA-015`，VIS20 与 VIS22 复用 `SRC-CUDA-016`。既有 CUDA records 保持不变；A10/A11/VIS18 使用 `SRC-CUDA-057/058`，A12/A13 使用 `SRC-CUDA-059/060`，L01/L02 使用 `SRC-CUDA-061/062`，L03/EX17/LAB11 使用 `SRC-CUDA-063`，L04 使用 `SRC-CUDA-064`，L05 使用 `SRC-CUDA-065/066`，L06/EX18/LAB12 与 L07 使用 `SRC-CUDA-067/068`，L08/L09 使用 `SRC-CUDA-069/070`。L10/L11 使用 `SRC-CUDA-071/072`；L12/EX19 使用 `SRC-CUDA-073/074`；L13/EX20 新增 `SRC-CUDA-075/076`，使当前目录包含 92 条来源记录。十九项 Visual Explainer 都保持 evidence-neutral browser teaching model；新增记录不会把 static contracts 或 source/test inspection 改写成 CUDA build、execution、synchronization observation、traffic、timing 或 speedup evidence。
 
 CUDA 11 起 Toolkit 组件独立版本化，因此 Toolkit、NVCC、PTX ISA、Binary Utilities、cuBLAS 等 component、paired driver 和 compatibility floor 都不能合并成一个“CUDA 版本”。本站把 Toolkit 13.3.1 下 current page label v13.3、`archive/12.9.2` 下 NVCC v12.9/PTX ISA 8.8、`archive/11.8.0` 下 PTX ISA 7.8，以及既有 `archive/12.9.2` Runtime API 自标 v12.9.1 的差异原样保留；current PTX ISA 9.3 也只绑定 selected 13.3.1 Lane。CUDA 13.3.1 Linux 指南与 Programming Guide 列出 C++23，而同版本 NVCC `--std` 参考仍只列到 C++20。GCC 13.3/NVCC 13.3.73 的 exact-image `unsupported` result 保持 immutable R1 history；run 33275734951 另行保留 EX10 + NVCC 13.3.73 + GCC 14.2.0 的 narrow `C++23-Dialect-Probe` pass。两者都不是 ordinary EX10 C++23 support。
 
@@ -484,19 +491,82 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 **发现过程与来源：** 2026-09-08 的当前 Context7 查询返回了 cuFFTDx，而不是 cuFFT，并找到较旧的 `/websites/nvidia_cuda_archive_11_0_ga` 集合。没有以 cuFFTDx 替代 cuFFT。旧集合仅用于发现 `cufftMakePlanMany`；发布事实以上述精确归档指南、版本化清单与明确标日期的实时来源为准。Context7 没有验证 13.3.1 归档、二进制或执行。仅链接并转述上游文档，不复制或改编上游源码、示例、测试、图示、表格或大段正文。原创教学文字、情景与表格采用 CC BY 4.0，EX19 原创源码采用 Apache-2.0。不记录 CUDA 构建、运行输出、工作区查询、缓存命中、计时、回调验证、低精度结果、多 GPU 观察或性能赢家。
 
+<span id="src-cuda-075" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-075：cuSPARSE Generic API 描述符、SpMV/SpMM 与所有权合同
+
+**相关 ID：** A12、A13、L01、L13、EX20。**访问与复核日期：** 2026-09-09。本记录支持 [L13](/libraries/cusparse-descriptors-spmv-spmm/)、其[练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)与[参考解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)、[EX20](/examples/cusparse-spmv/)、[PB-R4-015/016](/practice/#pb-r4-015)和 [TERM-195/196](/glossary/#term-195)。L13 的直接先修精确为 `[A12,A13,L01]`；EX20 和两道新增练习题库条目的先修均为 `[L13]`。
+
+| 精确上游坐标 | 本次复核范围 |
+| --- | --- |
+| [11.8.0 cuSPARSE 指南](https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html) | 历史 Generic 描述符、SpMV 和 SpMM；已有 SpMM 预处理，没有 SpMV 预处理 |
+| [12.9.2 cuSPARSE 指南](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html) | 表示、所有权、调用级配置、工作区、预处理和有界确定性的精确教学基线 |
+| [13.3.1 cuSPARSE 指南](https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html) | 对照差异与排除项的精确新版归档，不替代教学基线，也不是执行证据 |
+
+访问当天三个指南归档均返回 HTTP 200。URL 的 Toolkit 坐标不是 cuSPARSE 包版本号。对应发布说明归档也返回 200，见下文；SRC-CUDA-074 的旧 cuFFT 归档可用性记录不适用于本次 cuSPARSE 复核。
+
+**表示与所有权：** 基线 [Generic APIs](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparse-generic-apis)、[CSR 格式](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#compressed-sparse-row-csr)与 [`cusparseCreateCsr`](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsecreatecsr)区分描述符元数据和调用者拥有的数组。Generic 稀疏描述符记录格式、形状、存储项数、索引类型/基、值类型和指针，既不复制数组，也不拥有其分配。`cusparseCreateDnVec` 与 `cusparseCreateDnMat` 描述稠密向量/矩阵，包括矩阵顺序与主维度（leading dimension）。Legacy `cusparseMatDescr_t` 不能与 Generic 稀疏对象互换。构建成功不证明矩阵内容合法。
+
+索引基为 b 时，CSR 有 `rows+1` 个偏移、`nnz` 个列索引和值，首偏移为 b、末偏移为 `nnz+b`，偏移单调不减，列索引在按基调整后的范围内。相邻偏移相等表示空行。上游允许特定未排序表示，但不保证重复坐标的正确性；原创 EX20/PB 输入政策拒绝重复项，不假设自动合并。COO/CSR/CSC/BSR 描述不同存储，格式存在不表示每种运算/算法都支持它。存储字节数不能独自决定格式或证明实际流量和性能。
+
+**运算调用：** 基线 [SpMV](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmv)计算 `y=alpha*op(A)*x+beta*y`；[SpMM](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmm)计算稀疏乘稠密的 `C=alpha*op(A)*op(B)+beta*C`，不是稀疏输出 SpGEMM。操作标志、计算类型、算法、标量位置和流与存储元数据分别记录。输入/输出存储类型不能独自决定计算精度。普通 FP32 基线排除混合精度、实验性算子和结构化张量核心声明。
+
+**工作区与完成：** 检查每次精确 `cusparseSpMV_bufferSize` 或 `cusparseSpMM_bufferSize` 的结果与状态。返回字节数是该配置的需求，不是由 `nnz` 得到的通用公式、实测成本或本记录中的 GPU 观察。非零时分配设备工作区，保持所需内容与所有权，并区分矩阵/向量存储和工作区。绑定句柄的流；HOST 指针模式让 alpha/beta 标量位于主机，不让稀疏数组或稠密操作数位于主机。异步主机返回不证明完成。描述符、被引用的设备存储和工作区保留到相关工作完成；读取结果、重新配置或清理前检查完成边界，提交后失败也如此。销毁描述符不会释放调用者数组。
+
+**预处理按运算区分：** `cusparseSpMV_preprocess` 为可选步骤，在 CUDA 12.4 引入，11.8 头文件/API 中没有该接口。按 12.9.2 SpMV 合同，每个稀疏矩阵描述符只有一个活动缓冲区。用另一个缓冲区预处理会使前一个失活。重复加速调用保持活动缓冲区内容、矩阵索引和其余配置不变；文档例外允许 alpha/beta、X/Y 与矩阵值变化。这些变化仍需维度/类型兼容，并在尚未完成的使用之后正确排序。独立准备状态可使用各自描述符和缓冲区，同时安全共享未变矩阵数组。失活缓冲区仍可用于受支持的不加速调用，但不能据此说存在两个活动状态；也不能覆盖仍在使用的工作区。
+
+`cusparseSpMM_preprocess` 在 11.8 已有，帮助 `CUSPARSE_SPMM_CSR_ALG1` 与 `CUSPARSE_SPMM_CSR_ALG3`，不帮助 `CUSPARSE_SPMM_CSR_ALG2`；调用级复用约束必须查 SpMM，不能从 SpMV 推断。表示、操作、计算类型、算法或索引变化，需要重新核对合同并进行相应大小查询/准备。受支持的不预处理路径仍合法；这里不推断加速或性能惩罚。
+
+**确定性边界：** 选定 NON_TRANSPOSE `CUSPARSE_SPMV_CSR_ALG2` 路径在固定条件下有有界的重复运行确定性合同，不承诺与不同顺序的 CPU 归约、另一 GPU、其他操作或另一库版本逐位一致。不能推广到全部 SpMV/SpMM 算法。SpMM ALG3 的文档确定性还需要 SRC-CUDA-076 的发布问题核对。独立正确性标准、观察到的可复现性与文档保证是三件事；这里没有执行验证。
+
+<span id="src-cuda-076" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-076：cuSPARSE 独立组件、发布风险、架构与结构化稀疏门槛
+
+**相关 ID：** A12、A13、L01、L13、EX20。**访问与复核日期：** 2026-09-09。独立包版本固定来自版本化分发清单（redistribution manifest），不是 Toolkit 或文档标签。下列哈希是清单中的 Linux x86-64 归档 SHA-256 坐标，不是生成的网站产物哈希，也不是 CUDA 构建证据。
+
+| Toolkit / 清单 | cuSPARSE 组件 | Linux x86-64 归档 SHA-256 |
+| --- | --- | --- |
+| [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json) | 11.7.5.86 | `9250fe539d4bd6a378581dc0b528e8cfc418b57f28545bf39d70cae762075df7` |
+| [12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json) | 12.5.10.65 | `a83415dcd3e1183afe363d4740f9f0309cfe560c6c08016c2a61468304f4b848` |
+| [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json) | 12.8.2.51 | `291ed8fe182ef19774363ea8194a760098fd24ffd39dae06145f06b5f237d2e2` |
+
+对应归档文件为 [11.7.5.86](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/linux-x86_64/libcusparse-linux-x86_64-11.7.5.86-archive.tar.xz)、[12.5.10.65](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/linux-x86_64/libcusparse-linux-x86_64-12.5.10.65-archive.tar.xz)与 [12.8.2.51](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/linux-x86_64/libcusparse-linux-x86_64-12.8.2.51-archive.tar.xz)。研究检查了归档中的 cuSPARSE 头文件成员，包括版本宏和 API 可用性；学习站不再分发头文件或包。头文件宏给出包含 build 的四段组件坐标；运行时 `cusparseGetProperty` 只暴露 major/minor/patch，不能独立报告第四段包版本。头文件检查不是 NVCC 编译、链接、运行时加载或执行。
+
+精确 [11.8.0 发布归档](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html)、[12.9.2 发布归档](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html)和 [13.3.1 发布归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html)均返回 HTTP 200。保留各 cuSPARSE 发布章节实际命名的版本，不能把归档里的所有旧说明都当成该 Toolkit 补丁的新变更。
+
+| 发布边界 | 对教学合同的影响 |
+| --- | --- |
+| Legacy 弃用与 CUDA 12.0 移除 | 弃用/移除是选择性的，不表示全部 Legacy API 已消失或全部 Generic API 永久稳定。迁移前检查精确符号；基线使用 Generic 描述符与 SpMV/SpMM。 |
+| CUDA 12.4 | 引入可选 SpMV 预处理，不是 11.8 API。SpMM 预处理有更早的可用性和自己的算法范围。 |
+| CUDA 12.9 已知问题 CUSPARSE-2349 | 混合精度 SpMV 与 SpMM 可能产生错误结果。普通 FP32 基线不验证这些路径，也不证明一般混合精度修复。 |
+| CUDA 13.0 | 移除 Turing 之前的架构支持。本站仍仅支持原生 Linux，从 CC 7.5 起，问题规模需能放入 8 GB；这不授权全部精度或特性。 |
+| CUDA 13.0 SpMM CSR_ALG3 / CUDA 13.1 CUSPARSE-2612 | 13.0 列出与 API 文档相矛盾的非确定性；13.1 记录确定性修复。不能说 13.0 缺陷已在 13.0 修复，也不能推断其他版本的实际观察。 |
+| CUDA 13.0 Update 1 / 13.1 Update 1，CUSPARSE-2349 | 分别修复混合精度 CSR/COO SpMV 和混合精度 CSR/COO SpMM；都不抹去旧 12.9 警告。 |
+| CUDA 13.2 Update 1 | 弃用 Generic `SpMMOp` 与 `SpGEMMreuse`。归属 Generic 不足以证明接口耐久；实验性 `SpMVOp` 排除在稳定课程先修合同之外。 |
+| CUDA 13.3 Update 1，5975307 | 修复 CSC 与转置 CSR SpMV 的罕见问题，该范围不是 EX20 的 NON_TRANSPOSE CSR 结果记录。超大矩阵 BSR SDDMM 的错误结果仍为已知问题，不是已修复项或 SpMV 观察。 |
+
+**结构化稀疏是独立参考：** [cuSPARSELt 0.9.0 发布说明](https://docs.nvidia.com/cuda/cusparselt/release_notes.html#cusparselt-v0-9-0)、[类型](https://docs.nvidia.com/cuda/cusparselt/types.html)与[函数](https://docs.nvidia.com/cuda/cusparselt/functions.html)描述独立版本库。选定 0.9.0 发布明确移除 CUDA 12.9 支持；旧[入门页](https://docs.nvidia.com/cuda/cusparselt/getting_started.html)措辞不能恢复该支持。实时发布页也列出 0.9.1；本记录明确保留 0.9.0 作为仅供参考的坐标，不声称它是最新版。EX20 不新增 cuSPARSELt 依赖。
+
+任意 COO/CSR 稀疏矩阵不会因为许多值为零就成为受支持的结构化张量核心输入。cuSPARSELt 路径需独立满足结构化模式、形状/布局/对齐、输入/计算/输出精度组合、精确设备和软件支持、剪枝/检查政策，以及压缩和工作区生命周期。剪枝可能改变数学问题，需要独立正确性验收。本站一般 CC 7.5 资格或普通 FP32 cuSPARSE 设置成功都不能满足这些门槛。没有结构化内核、窄精度结果或加速比记录。
+
+**发现与来源归属：** 2026-09-09 的 Context7 只解析到旧 `/websites/nvidia_cuda_archive_11_0_ga` 集合。初次发现返回 Legacy 资料，后续发现也给出 Generic 描述符词汇；两者都不授权 12.9.2/13.3.1 事实。上面的精确上游归档、包坐标与发布章节才是发布依据。
+
+检查过的 NVIDIA cuSPARSE 头文件声明为专有许可，所审成员有 1993-2022 或 1993-2023 版权年份范围，不是 Apache-2.0。链接的 [libcusparse LICENSE.txt](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/LICENSE.txt)包含 NVIDIA Software License Agreement 与 CUDA supplement；其中组件/第三方条款不会重新许可每个头文件。公开内容只有链接与原创转述，没有复制或改编上游头文件、示例、图示、表格、测试或大段正文，不分发归档。原创教学文字与题库情景使用 CC BY 4.0；原创 EX20 源码使用 Apache-2.0，不是对 NVIDIA 资料的许可授予。这些来源记录与链接的静态学习资源保持四个证据数组为空；EX20 的运行仍独立待硬件验证（Pending Hardware Verification）。不声称 NVCC、GPU 执行、实测工作区成本、确定性结果或性能比较。
+
 ## 内容与素材来源
 
-- Home、74 个 Learning Units、19 个 Runnable Examples、12 个 Labs、80 个 Practice Bank 条目、194 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、75 个 Learning Units、20 个 Runnable Examples、12 个 Labs、82 个 Practice Bank 条目、196 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
 
 ## 复核记录
 
-**复核日期：2026-09-08。** 既有来源保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的不可变 R3 聚合复核。`SRC-CUDA-061` 至 `SRC-CUDA-072` 保留逐项日期。Issue #39 为 L12/EX19 新增 `SRC-CUDA-073/074`，均于 2026-09-08 访问；不扩展为 R4 聚合验收。旧 A07 来源记录仍为历史记录；其固定图/计划审查见 L10 单独标日期的后续阅读。
+**复核日期：2026-09-09。** 既有来源保留原访问日期；issue #32 完成截至 `SRC-CUDA-060` 的不可变 R3 聚合复核。`SRC-CUDA-061` 至 `SRC-CUDA-074` 保留逐项日期。Issue #40 为 L13/EX20 新增 `SRC-CUDA-075/076`，均于 2026-09-09 访问；不扩展为 R4 聚合验收。旧 A07 和 A12/A13 来源记录仍为历史记录；图/计划审查见 L10 单独标日期的后续阅读，Generic API/组件合同见 L13 后续记录。
 
 2026-09-04 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成 R3 聚合来源复核；[issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)随后固定 L01/L02 的 CCCL/Thrust 边界。[Issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)于 2026-09-05 通过 Context7 `/nvidia/cccl` discovery 交叉核对 current device/warp/block contracts，并以 exact v3.4.2 release/commit、tagged docs/source/tests、NVIDIA manifests、hash-addressed archives、issues 与逐文件 license review 为权威。Current hosted/main-branch material 不作为 immutable v3.4.2 snapshot，也不证明 bundled archive 内容。
 
 R3 是最近一次已完成的聚合发布复核；不可变 `src/r3-release-manifest.json` 固定 62 个 Learning Units、10 个 Labs、19 个 Visual Explainers、66 个 Practice Bank 条目（其中 10 个 Nsight report-analysis 条目）、176 个 Glossary 词条、76 条 source records、347 条 catalog records、232 个 Publication Pairs 和 464 条 source routes。R1/R2 继续作为历史发布坐标。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保存最终 CI、Cloudflare Preview/production 与 smoke 的动态验收记录；R4 聚合复核仍待完成。
 
-F01/LAB02 的既有规范导入和保留的编译记录保持不变。L01-L12 发布静态教学合同，四个证据数组为空；EX19、EX18/LAB12 与 EX17/LAB11 的编译与实际观察为空，运行状态仍为 Pending Hardware Verification。六份既有 expected-only profiler plans 的环境清单未填写，十九项浏览器 Visual Explainer 不授予 CUDA Evidence Status。L01-L12 属于滚动 R4，不属于不可变 R3；该库课程序列中仅 L13 尚未发布，R4 聚合验收仍待完成。没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明。
+F01/LAB02 的既有规范导入和保留的编译记录保持不变。L01-L13 发布静态教学合同，四个证据数组为空；EX20、EX19、EX18/LAB12 与 EX17/LAB11 的编译与实际观察为空，运行状态仍为 Pending Hardware Verification。六份既有 expected-only profiler plans 的环境清单未填写，十九项浏览器 Visual Explainer 不授予 CUDA Evidence Status。L01-L13 属于滚动 R4，不属于不可变 R3；R4 聚合验收仍待完成。没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明。

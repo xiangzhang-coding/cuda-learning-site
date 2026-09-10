@@ -140,7 +140,7 @@ They omit B/C traffic, row offsets beyond the stated payload, control around ind
 
 The cuSPARSE 13.3 Generic API uses descriptors to record shape, sparse storage format, index base and type, stored value type, dense layout, and pointers. A descriptor is not a second copy of values. It is host-side metadata that references caller-owned device arrays. Operation and transposition, compute type, algorithm, and scalar or output semantics are separate call-level parameters, and all dimensions and types must be compatible.
 
-That explains why “I have a pointer to values” is insufficient. Identical bytes mean different things in COO and CSR. Zero- and one-based indices change index meaning. Row-major and column-major layouts change dense address mapping. 32- and 64-bit indices change storage and accepted range. L13 owns exact constructors and destruction, streams, scalar location, status, and error handling.
+That explains why “I have a pointer to values” is insufficient. Identical bytes mean different things in COO and CSR. Zero- and one-based indices change index meaning. Row-major and column-major layouts change dense address mapping. 32- and 64-bit indices change storage and accepted range. [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) owns exact constructors and destruction, streams, scalar location, status, and error handling.
 
 ## Workspace and preprocessing lifetimes
 
@@ -169,7 +169,7 @@ The output should be a falsifiable candidate such as “for a fixed CSR pattern 
 
 ## Production boundary
 
-A13 establishes only a backend-independent SpMM, representation, and preparation mental model. L13 will publish current Generic API code and exact component compatibility. EX20 will be the canonical cuSPARSE SpMV Runnable Example. Structured sparsity, cuSPARSELt, architecture-specific support, the API determinism matrix, and measured workspace or performance all remain outside this ticket.
+A13 establishes only a backend-independent SpMM, representation, and preparation mental model. The now-published [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) supplies Generic API and exact component contracts with ordered prerequisites `[A12,A13,L01]`; [EX20](/en/examples/cusparse-spmv/) is the canonical cuSPARSE SpMV Runnable Example and requires `[L13]`. L13 retains four empty evidence arrays; EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Structured sparsity, cuSPARSELt, architecture-specific support, the API determinism matrix, and measured workspace or performance remain outside A13. These onward links were updated 2026-09-09 without changing A13's API review, prerequisites, or evidence.
 
 ## Evidence boundary
 
@@ -188,7 +188,7 @@ All four A13 evidence arrays are empty. The shared matrices, 12/40 contribution 
 
 - Complete the [A13 Exercises](/en/algorithms/sparse-matrix-multiplication-preprocessing/exercises/), then inspect the [separate solutions](/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/).
 - Audit a sparse-versus-dense and preprocessing proposal in [Practice Bank PB-R3-016](/en/practice/#pb-r3-016).
-- Revisit [TERM-174](/en/glossary/#term-174), [TERM-175](/en/glossary/#term-175), and [TERM-176](/en/glossary/#term-176). L13 and EX20 remain explicitly deferred.
+- Revisit [TERM-174](/en/glossary/#term-174), [TERM-175](/en/glossary/#term-175), and [TERM-176](/en/glossary/#term-176), then complete L13's prerequisites before continuing to [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) and [EX20](/en/examples/cusparse-spmv/).
 
 ## Sources and review
 

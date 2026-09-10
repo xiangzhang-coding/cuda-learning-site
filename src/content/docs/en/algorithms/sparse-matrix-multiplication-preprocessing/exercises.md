@@ -108,4 +108,4 @@ Write the representation and operation contract first, perform arithmetic second
 
 ## Next
 
-Open the [reviewed solutions](/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/), then complete [PB-R3-016](/en/practice/#pb-r3-016). L13 and EX20 remain deferred.
+Open the [reviewed solutions](/en/algorithms/sparse-matrix-multiplication-preprocessing/solutions/), then complete [PB-R3-016](/en/practice/#pb-r3-016). The now-published [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) requires `[A12,A13,L01]`; [EX20](/en/examples/cusparse-spmv/) requires `[L13]`. These optional onward links were updated 2026-09-09; the Exercise review date, prerequisites, and empty evidence arrays are unchanged. EX20 retains empty compilation and recorded observations and Pending Hardware Verification runtime.

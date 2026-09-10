@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-08'
+factCheckDate: '2026-09-09'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-08'
+      content: '2026-09-09'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -96,11 +96,11 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-[issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成复核的 R3 稳定课程已完整双语发布 62 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14，以及 Q01-Q13。滚动 R4 已扩展到 L01-L12、EX17/EX18/EX19 与 LAB11/LAB12；[issue #39](https://github.com/xiangzhang-coding/cuda-learning-site/issues/39)新增 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)，当前共有 74 个学习单元。下面列出当前完整发布的严格先修关系。
+[issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完成复核的 R3 稳定课程已完整双语发布 62 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14，以及 Q01-Q13。滚动 R4 已扩展到 L01-L13、EX17-EX20 与 LAB11/LAB12；[issue #39](https://github.com/xiangzhang-coding/cuda-learning-site/issues/39)新增 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)，[issue #40](https://github.com/xiangzhang-coding/cuda-learning-site/issues/40)新增 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)，当前共有 75 个学习单元。下面列出当前完整发布的严格先修关系。
 
-已完成的 R3 聚合发布复核是不可变快照，固定为 232 个 Publication Pairs、464 条 source routes 与 347 条 catalog records；它还明确清点 61 组 Exercises、61 组独立 reviewed solutions 和 10 个 Nsight report-analysis Practice Bank 条目。当前滚动发布有 273 个双语发布对、546 条源路由、73 组练习、73 组独立参考解答与 395 条资源目录记录。R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
+已完成的 R3 聚合发布复核是不可变快照，固定为 232 个 Publication Pairs、464 条 source routes 与 347 条 catalog records；它还明确清点 61 组 Exercises、61 组独立 reviewed solutions 和 10 个 Nsight report-analysis Practice Bank 条目。当前滚动发布有 277 个双语发布对、554 条源路由、74 组练习、74 组独立参考解答与 401 条资源目录记录。R1/R2 继续作为历史坐标，R4 聚合复核仍待完成。
 
-**发布清单与导航更新：2026-09-08。** 页面日期仅对应本次发布清单更新，不重新核查既有 CUDA API 事实；技术来源及其访问、复核日期不变。
+**发布清单与导航更新：2026-09-09。** 页面日期仅对应本次发布清单更新，不重新核查既有 CUDA API 事实；技术来源及其访问、复核日期不变。
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -117,13 +117,14 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 13. 正确性与质量路线保留 Q01-Q08，并加入 [Q09：用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)`<-[Q08,F08]`、[Q10：从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)`<-[Q05,A14]`、[Q11：用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)`<-[A05,Q06,Q08,Q10]`、[Q12：用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)`<-[A02,Q02,Q06,Q08]`与 [Q13：用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)`<-[A08,Q06,Q08,Q10]`。Q13 从 immutable [EX15](/examples/tiled-gemm/)开始，并复用 evidence-neutral [VIS12](/visuals/gemm-tiling-hierarchy/)。
 14. 可复用库路线包含 [L01：在生产库、可复用原语、DSL 与自定义内核之间做选择](/libraries/library-primitive-dsl-custom-kernel/)`<-[A02,A03,A08,Q06]`、[L02：把 Thrust 作为算法词汇](/libraries/thrust-algorithm-vocabulary/)`<-[A01,A03,A09]`、[L03：用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)`<-[A02,A03,M07,L01]`、[L04：用 CUB Warp 与 Block Primitives 组合内核](/libraries/cub-warp-block-primitives/)`<-[F02,M03,M05,A02,A03,L03]`、[L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)`<-[M05,M13,M19]`、[L06：cuBLAS GEMM](/libraries/cublas-gemm/)`<-[A08,Q01]`和 [L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)`<-[L06,Q05]`。
 15. 库路线继续到 [L08：Tensor Core 精度与架构合同](/libraries/tensor-core-precision-contracts/)`<-[Q02,L06,F06]`和 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)`<-[A08,L06,M17]`；以上分别是两者完整的有序直接先修项，L08 不是 L09 的额外先修项。
-16. 可运行示例集合是 EX01-EX19，最新项目为 [EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)`<-[L12]`；[EX18：cuBLAS GEMM](/examples/cublas-gemm/)仍依赖 `[L06]`。实验集合是 LAB01-LAB12，最新活动为 [LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`。可视化路线保留 [VIS18：Attention Memory Traffic](/visuals/attention-memory-traffic/)`<-[A11]`；L13 与 EX20 仍待发布。
+16. 当前有 20 个可运行示例，集合是 EX01-EX20，最新项目为 [EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)`<-[L13]`；[EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)仍依赖 `[L12]`，[EX18：cuBLAS GEMM](/examples/cublas-gemm/)仍依赖 `[L06]`。实验集合是 LAB01-LAB12，最新活动为 [LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`。可视化路线保留 [VIS18：Attention Memory Traffic](/visuals/attention-memory-traffic/)`<-[A11]`；L13/EX20 不增加实验。
 17. 库路线继续到 [L10：cuDNN 图与计划](/libraries/cudnn-graphs-and-plans/)`<-[A07,L01,Q05]`和 [L11：注意力后端分派](/libraries/attention-backend-dispatch/)`<-[A11,L10,L08]`。这是完整有序直接先修；相关边分别为 L11 与 VIS18，不添加旧单元先修。
 18. [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)完整有序先修为 `[Q05,M07]`，相关资源为 EX19。[L12 练习](/libraries/cufft-plans-layouts-startup/exercises/)依赖 `[L12]`，[独立参考解答](/libraries/cufft-plans-layouts-startup/solutions/)依赖 `[L12-EXERCISES]`。
+19. [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)完整有序先修为 `[A12,A13,L01]`，相关资源为 EX20。[L13 练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)依赖 `[L13]`，[独立参考解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)依赖 `[L13-EXERCISES]`。
 
 下一步应按自己的缺口选择。O04 的 C++17 复习可在阅读 F01-F08 和所有已发布 Runnable Example 时使用，但不会成为它们的新先修条件。Linux 记录路线必须合并 O02、O03 和 O05 后才进入 O08；EX01 可直接查阅，LAB01 则必须同时满足 O03 和 O08。架构路线按 O06、O07 的顺序学习，再把这些模型用于基础课程。F05 从 F04 继续错误生命周期；F06 汇合 F02/O03；F07 汇合 F04/F05；F08 汇合 F02/F03/F06。内存路线从 F04/F06 汇入 M01，经 M02-M04 建立 memory access/layout，再分别进入 M05/M06 的同步与 warp 推理，以及由 F05/M01 汇入 M07、再到 M08 的 stream/event 路线。
 
-完成这些基础后，算法路线从 A02/M02/M03 汇入 A10，再由 A08/A10 汇入 A11；M01/M02 汇入 A12，A12/A08 再汇入 A13；A14 继续由 A01/A02/A05/A08 汇入。A02/A03/A08/Q06 汇入 L01，A01/A03/A09 汇入 L02，A02/A03/M07/L01 汇入 L03，F02/M03/M05/A02/A03/L03 汇入 L04，M05/M13/M19 汇入 L05，A08/Q01 汇入 L06，L06/Q05 汇入 L07，Q02/L06/F06 汇入 L08，A08/L06/M17 汇入 L09，A07/L01/Q05 汇入 L10，A11/L10/L08 汇入 L11，Q05/M07 汇入 L12。Q12/L03 汇入 LAB11，EX17 提供其规范 CUB 实现；Q13/L06 汇入 LAB12，由 EX15 与 EX18 提供对比实现。VIS18 严格依赖 A11。L13 与 EX20 不进入当前图。
+完成这些基础后，算法路线从 A02/M02/M03 汇入 A10，再由 A08/A10 汇入 A11；M01/M02 汇入 A12，A12/A08 再汇入 A13；A14 继续由 A01/A02/A05/A08 汇入。A02/A03/A08/Q06 汇入 L01，A01/A03/A09 汇入 L02，A02/A03/M07/L01 汇入 L03，F02/M03/M05/A02/A03/L03 汇入 L04，M05/M13/M19 汇入 L05，A08/Q01 汇入 L06，L06/Q05 汇入 L07，Q02/L06/F06 汇入 L08，A08/L06/M17 汇入 L09，A07/L01/Q05 汇入 L10，A11/L10/L08 汇入 L11，Q05/M07 汇入 L12，A12/A13/L01 汇入 L13。Q12/L03 汇入 LAB11，EX17 提供其规范 CUB 实现；Q13/L06 汇入 LAB12，由 EX15 与 EX18 提供对比实现。VIS18 严格依赖 A11，EX20 严格依赖 L13。
 
 O02-O08、F01-F08、M01-M19 与 Q01-Q05 都有直接练习和独立参考解答。内存路线可按顺序进入 [M09 练习](/memory/pinned-memory-transfer-overlap/exercises/)与[解答](/memory/pinned-memory-transfer-overlap/solutions/)、[M10 练习](/memory/unified-memory-page-migration/exercises/)与[解答](/memory/unified-memory-page-migration/solutions/)、[M11 练习](/memory/stream-ordered-allocation-memory-pools/exercises/)与[解答](/memory/stream-ordered-allocation-memory-pools/solutions/)、[M12 练习](/memory/cooperative-groups/exercises/)与[解答](/memory/cooperative-groups/solutions/)、[M13 练习](/memory/asynchronous-copy-pipelines/exercises/)与[解答](/memory/asynchronous-copy-pipelines/solutions/)、[M14 练习](/memory/cuda-graphs/exercises/)与[解答](/memory/cuda-graphs/solutions/)。工具链路线可进入 [M15 练习](/toolchain/nvcc-compilation-flow/exercises/)与[解答](/toolchain/nvcc-compilation-flow/solutions/)、[M16 练习](/toolchain/ptx-cubin-fatbinary/exercises/)与[解答](/toolchain/ptx-cubin-fatbinary/solutions/)、[M17 练习](/toolchain/compiler-architecture-targets/exercises/)与[解答](/toolchain/compiler-architecture-targets/solutions/)、[M18 练习](/toolchain/separate-compilation-device-linking/exercises/)与[解答](/toolchain/separate-compilation-device-linking/solutions/)、[M19 练习](/toolchain/cpp-dialect-boundaries/exercises/)与[解答](/toolchain/cpp-dialect-boundaries/solutions/)。正确性路线可直接进入 [Q01 练习](/correctness/cpu-references-tolerances-invariants/exercises/)与[解答](/correctness/cpu-references-tolerances-invariants/solutions/)、[Q02 练习](/correctness/floating-point-order-reproducibility/exercises/)与[解答](/correctness/floating-point-order-reproducibility/solutions/)、[Q03 练习](/correctness/memcheck-invalid-memory-access/exercises/)与[解答](/correctness/memcheck-invalid-memory-access/solutions/)、[Q04 练习](/correctness/racecheck-initcheck-synccheck/exercises/)与[解答](/correctness/racecheck-initcheck-synccheck/solutions/)、[Q05 练习](/correctness/timing-asynchronous-gpu-work/exercises/)与[解答](/correctness/timing-asynchronous-gpu-work/solutions/)；既有单元仍可通过上方严格先修图直接访问。
 
@@ -133,15 +134,17 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 可复用库路线可进入 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)、[L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)、[L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)与[解答](/libraries/libcu-plus-plus-synchronization/solutions/)、[L06 练习](/libraries/cublas-gemm/exercises/)与[解答](/libraries/cublas-gemm/solutions/)，以及 [L07 练习](/libraries/cublaslt-matmul/exercises/)与[解答](/libraries/cublaslt-matmul/solutions/)。本次新增 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)，以及 [L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
 
-[实验索引](/labs/)列出 12 个实验（LAB01-LAB12）。[可视化讲解索引](/visuals/)列出 19 项讲解：独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22。Immutable R3 保留 66 个 Practice Bank 条目、176 个 Glossary terms、76 条 source records 与 347 条 catalog records。当前滚动目录有 80 个[练习题库](/practice/)条目、194 项[术语表](/glossary/)和 90 项[来源记录](/sources-and-versions/)，共 395 条记录；当前内容形成 273 个双语发布对和 546 条源路由。R4 聚合复核仍待完成。
+[实验索引](/labs/)列出 12 个实验（LAB01-LAB12）。[可视化讲解索引](/visuals/)列出 19 项讲解：独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22。Immutable R3 保留 66 个 Practice Bank 条目、176 个 Glossary terms、76 条 source records 与 347 条 catalog records。当前滚动目录有 82 个[练习题库](/practice/)条目、196 项[术语表](/glossary/)和 92 项[来源记录](/sources-and-versions/)，共 401 条记录；当前内容形成 277 个双语发布对和 554 条源路由。R4 聚合复核仍待完成。
 
-Q06-Q13、A10-A14 与 L01-L12 的四个证据数组均为空，不授予证据状态（Evidence Status）。EX17/LAB11、EX18/LAB12 与 EX19 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。LAB12 已发布可执行的比较步骤，但没有记录输出、计时、加速比或赢家；L07 的发布也不表示 EX18/LAB12 实现了 Lt 选择。EX17 的五项组件矩阵是非证据性的构建检查，不表示 CI 已运行。当前六份分析器测试材料都是预期计划，不是采集报告；当前发布不声明基准环境（Reference Environment）或 `performanceObservations`。
+Q06-Q13、A10-A14 与 L01-L13 的四个证据数组均为空，不授予证据状态（Evidence Status）。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。LAB12 已发布可执行的比较步骤，但没有记录输出、计时、加速比或赢家；L07 的发布也不表示 EX18/LAB12 实现了 Lt 选择。EX17 的五项组件矩阵是非证据性的构建检查，不表示 CI 已运行。当前六份分析器测试材料都是预期计划，不是采集报告；当前发布不声明基准环境（Reference Environment）或 `performanceObservations`。
 
 L08 区分输入转换、累加、输出转换与 WMMA 架构合同；L09 以固定的 CUTLASS C++ v4.7.0、提交 `dcf215af68a2d08d305076c152a06f201728cd53` 阅读 GEMM 结构，不承诺 DSL 或可执行支持。两者都没有本地编译、真实指令观察、CUDA 运行或性能结果。VIS12 的模型与标量 instruction panel 不变，不能把它读成真实 Tensor Core 指令。
 
 [L10 练习](/libraries/cudnn-graphs-and-plans/exercises/)与[独立解答](/libraries/cudnn-graphs-and-plans/solutions/)、[L11 练习](/libraries/attention-backend-dispatch/exercises/)与[独立解答](/libraries/attention-backend-dispatch/solutions/)进一步检查图/计划和分派边界。两单元独立固定 cuDNN backend 9.24.0 与 frontend 1.27.0、提交 `f77fbc3d21be3f24cd0286b9b368105f7c518b8a`，只作参考阅读，不复制上游代码/资产，不建立编译、GPU、实际引擎、类型或性能证据。
 
 L12 使用归档的 12.9.2 cuFFT 教学基线和访问于 2026-09-08 的当前 13.3 参考；精确的 13.3.1 API 与发布说明归档不可用。EX19 声明同样三条固定工具包通道（Toolkit Lane），仅使用 C++17，分别搭配捆绑的 cuFFT 10.9.0.58 / 11.4.1.4 / 12.3.0.29。其 FP32 C2C 合同不包含回调（callback）、低精度、多 GPU 执行或计时；不可变源码和构建检查不形成 GPU 证据。
+
+L13 使用归档的 12.9.2 cuSPARSE 教学基线；[SRC-CUDA-075/076 复核](/sources-and-versions/#src-cuda-075)于 2026-09-09 记录了可访问的精确归档，包括 13.3.1，与上述 cuFFT 历史访问记录分开。EX20 的三项 C++17 非执行构建门槛固定 Toolkit/cuSPARSE 组合为 11.8.0/11.7.5.86、12.9.2/12.5.10.65 与 13.3.1/12.8.2.51；来源审查与构建门槛不是 GPU 证据。
 
 ## 三种视觉主题，一套内容
 
@@ -181,4 +184,4 @@ L12 使用归档的 12.9.2 cuFFT 教学基线和访问于 2026-09-08 的当前 1
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**发布清单核对日期：2026-09-08。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**发布清单核对日期：2026-09-09。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

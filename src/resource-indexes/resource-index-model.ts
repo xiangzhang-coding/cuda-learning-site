@@ -443,6 +443,21 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L12：分清 cuFFT 的数学、存储与启动成本', en: 'L12: Separate cuFFT Mathematics, Storage, and Startup' },
     prerequisites: ['Q05', 'M07'],
   },
+  L13: {
+    href: { 'zh-CN': '/libraries/cusparse-descriptors-spmv-spmm/', en: '/en/libraries/cusparse-descriptors-spmv-spmm/' },
+    title: { 'zh-CN': 'L13：cuSPARSE 描述符、SpMV 与 SpMM', en: 'L13: cuSPARSE Descriptors, SpMV, and SpMM' },
+    prerequisites: ['A12', 'A13', 'L01'],
+  },
+  'L13-EXERCISES': {
+    href: { 'zh-CN': '/libraries/cusparse-descriptors-spmv-spmm/exercises/', en: '/en/libraries/cusparse-descriptors-spmv-spmm/exercises/' },
+    title: { 'zh-CN': 'L13 练习', en: 'L13 Exercises' },
+    prerequisites: ['L13'],
+  },
+  'L13-SOLUTIONS': {
+    href: { 'zh-CN': '/libraries/cusparse-descriptors-spmv-spmm/solutions/', en: '/en/libraries/cusparse-descriptors-spmv-spmm/solutions/' },
+    title: { 'zh-CN': 'L13 参考解答', en: 'L13 Reviewed Solutions' },
+    prerequisites: ['L13-EXERCISES'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -537,6 +552,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/cufft-batched-transform/', en: '/en/examples/cufft-batched-transform/' },
     title: { 'zh-CN': 'EX19：cuFFT 批量变换可运行示例', en: 'EX19: cuFFT Batched Transform Runnable Example' },
     prerequisites: ['L12'],
+  },
+  EX20: {
+    href: { 'zh-CN': '/examples/cusparse-spmv/', en: '/en/examples/cusparse-spmv/' },
+    title: { 'zh-CN': 'EX20：cuSPARSE SpMV 可运行示例', en: 'EX20: cuSPARSE SpMV Runnable Example' },
+    prerequisites: ['L13'],
   },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },

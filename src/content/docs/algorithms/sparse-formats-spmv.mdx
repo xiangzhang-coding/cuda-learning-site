@@ -164,7 +164,7 @@ Row `r` 使用 half-open range `[row_offsets[r], row_offsets[r+1])`。因此 row
 
 cuSPARSE v13.3 的 Generic API 把 format、shape、index base/type、stored data type 和 arrays 放入 descriptors；operation、compute type 与 algorithm 是分开的 call-level contract。Caller 按 exact combination 查询 external device workspace，并只在返回大小非零时分配 buffer。当前 SpMV 文档还给出可选 preprocessing 和 algorithm-specific determinism/performance 取舍；这些都是 current owner facts，不是本页运行结果。
 
-A12 只要求学习者能解释为何 library 需要完整表示 metadata，以及为何 repeated sparsity pattern 可能让 preprocessing 有意义。Exact descriptor constructors、buffer-size query、algorithm enums、lifetime/error handling 与 Runnable Example EX20 全部延后到 L13。不要从 A12 推断固定 workspace bytes、某个 algorithm 最快、observed determinism、structured-sparsity support 或当前 hardware winner。
+A12 只要求学习者能解释为何 library 需要完整表示 metadata，以及为何 repeated sparsity pattern 可能让 preprocessing 有意义。现可继续阅读已发布的 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)，学习精确的描述符构造、工作区大小查询、算法枚举、生命周期和错误处理，再进入规范可运行示例（Runnable Example）[EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)。L13 依赖 `[A12,A13,L01]`；EX20 依赖 `[L13]`，编译证据与实际观察为空，运行仍待硬件验证（Pending Hardware Verification）。后续链接更新于 2026-09-09，不改变 A12 的 API 复核或证据。不要从 A12 推断固定 workspace bytes、某个 algorithm 最快、observed determinism、structured-sparsity support 或当前 hardware winner。
 
 ## 证据边界
 

@@ -1,0 +1,240 @@
+---
+title: 'L13: Describe Sparse Data Before Calling cuSPARSE'
+description: Choose representations for SpMV and SpMM, audit descriptor and workspace ownership, and distinguish optional preprocessing, deterministic algorithms, and version-specific support from measured results.
+pairId: l13
+counterpart: /libraries/cusparse-descriptors-spmv-spmm/
+factCheckDate: '2026-09-09'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, formats, descriptors, spmv, spmm, workspace, preprocessing, lifecycle, selection, versions, precision, issues, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: L13
+prerequisites: [A12, A13, L01]
+relatedUnits: [EX20]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'cuSPARSE archived API reference, CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html'
+    version: 'Toolkit 11.8.0; cuSPARSE 11.7.5.86'
+    platform: 'Historical Generic API and preprocessing contract; no execution'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE archived API reference, CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html'
+    version: 'Toolkit 12.9.2; cuSPARSE 12.5.10.65'
+    platform: 'Baseline descriptors, SpMV, SpMM, ownership and algorithm contract'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE archived API reference, CUDA 13.3.1'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html'
+    version: 'Toolkit 13.3.1; cuSPARSE 12.8.2.51'
+    platform: 'Exact archive comparison; not backported to the baseline'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 11.8.0 release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 11.8.0'
+    platform: 'cuSPARSE history and first-use SM90 PTX overhead'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 12.9.2 release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 12.9.2'
+    platform: 'cuSPARSE preprocessing history and scoped known issues'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 13.3.1 release notes'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3 Update 1'
+    platform: 'Architecture removals, deprecations and issue history'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcusparse 11.7.5.86'
+    platform: 'Linux x86-64 acquisition identity, not loaded-library evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcusparse 12.5.10.65'
+    platform: 'Linux x86-64 acquisition identity, not loaded-library evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcusparse 12.8.2.51'
+    platform: 'Linux x86-64 acquisition identity, not loaded-library evidence'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSELt owner reference'
+    url: 'https://docs.nvidia.com/cuda/cusparselt/index.html'
+    version: 'Separate cuSPARSELt 0.9.0 reference, accessed 2026-09-09'
+    platform: 'Structured sparsity and type-specific reference gates only'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSELt release notes'
+    url: 'https://docs.nvidia.com/cuda/cusparselt/release_notes.html'
+    version: 'cuSPARSELt 0.9.0'
+    platform: 'Separate library compatibility; CUDA 12.9 support dropped'
+    accessDate: '2026-09-09'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: l13 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/libraries/cusparse-descriptors-spmv-spmm/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,formats,descriptors,spmv,spmm,workspace,preprocessing,lifecycle,selection,versions,precision,issues,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: L13 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'A12,A13,L01' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '11' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '11.8.0,12.9.2,13.3.1,cuSPARSELt-0.9.0' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/libraries/cusparse-descriptors-spmv-spmm/" lang="zh-CN">阅读中文对应页</a>
+
+A sparse descriptor can have the right shape and still point to the wrong representation. A successful library call can return before its buffers are safe to reuse. cuSPARSE removes the need to implement every sparse kernel, not the need to prove these contracts.
+
+## Learning goals
+
+Allow about 35 minutes for reading and retrieval, plus the three paper Exercises. Describe sparse and dense operands, choose a format from workload structure, and protect workspace and preprocessing state through device completion. Separate a documented deterministic mode from numerical validation and measured performance. No GPU is needed for this unit.
+
+## Prerequisites
+
+The exact ordered prerequisites are `A12, A13, L01`: [A12: Sparse Formats and SpMV](/en/algorithms/sparse-formats-spmv/) supplies representation and row imbalance; [A13: Sparse Matrix Multiplication and Preprocessing](/en/algorithms/sparse-matrix-multiplication-preprocessing/) supplies reuse and setup costs; [L01: Library, Primitive, DSL, or Custom Kernel](/en/libraries/library-primitive-dsl-custom-kernel/) supplies the selection boundary. Related [EX20](/en/examples/cusparse-spmv/) adds no prerequisite edge.
+
+## From typed routines to Generic API objects
+
+Older Legacy APIs often encode precision in function names and pass separate arrays. The Generic API separates storage descriptors, operation flags, compute types, algorithms, and external workspace. That makes contracts inspectable; it does not make every combination supported. This unit uses the **12.9.2 archived contract** as its baseline and compares exact 11.8.0 and 13.3.1 archives.
+
+Do not translate “Legacy” into “all deprecated.” CUDA 12.0 removed APIs already deprecated in 11.x; that was not removal of the entire Legacy API. CUDA 13.0 Update 1 added Generic BSR SpMV and deprecated the corresponding Legacy routines. CUDA 13.2 Update 1 deprecated `cusparseSpMMOp` and `cusparseSpGEMMreuse`. Experimental `cusparseSpMVOp` is excluded here. Check the target symbol and release rather than replacing an entire family by name.
+
+## Choose a representation, not a brand of kernel
+
+For FP32 values and 32-bit indices, COO needs about `12*nnz` bytes and CSR needs `8*nnz+4*(rows+1)` bytes before vectors, scratch, and library resources. Fewer stored bytes alone do not establish a faster operation.
+
+| Format | What it records | Workload question and boundary |
+| --- | --- | --- |
+| COO | Row, column, value per stored entry | Useful for assembly; grouping and duplicate reduction may add conversion work |
+| CSR | Row offsets, column indices, values | Natural row traversal for non-transposed SpMV; inspect row-length imbalance |
+| CSC | Column offsets, row indices, values | Useful for column-oriented work; descriptor availability is not support for every operation |
+| BSR | Sparse positions of dense blocks | Real block occupancy may repay inner-block padding; Generic BSR SpMV is not a 12.9.2 baseline feature |
+| SELL | Sliced ELL-style storage | Similar row lengths within a slice can limit padding; long outliers can waste space |
+| Blocked-ELL | Fixed block slots per block row | Regular block structure may help supported SpMM paths; padding and block/type restrictions still apply |
+
+Consult each operation's **format, index, value/compute type, transpose, layout, algorithm, and architecture tables**. The existence of `cusparseCreateCsc`, for example, does not authorize arbitrary CSC SpMM. The baseline SpMM discussion starts with CSR; COO and Blocked-ELL are alternatives only under their own restrictions. Ordinary CSR is not a structured Sparse Tensor Core representation.
+
+This teaching contract uses zero-based CSR with sorted, unique column indices in each row. Row offsets have `rows+1` entries, start at zero, never decrease, and end at `nnz`; an empty row repeats its offset. Columns must be in range. Some documented modes accept unsorted indices, but duplicate coordinates do not carry a general correctness guarantee. Normalize and combine duplicates deliberately before binding descriptors, preserving the intended sum and numerical policy.
+
+## A descriptor describes existing allocations
+
+| Object | Interface | Caller responsibility |
+| --- | --- | --- |
+| Library handle | `cusparseCreate`, `cusparseSetStream`, `cusparseSetPointerMode` | Selected device/context, explicit stream and scalar-pointer policy |
+| Sparse matrix | `cusparseCreateCsr` into `cusparseSpMatDescr_t` | Rows, columns, nnz, separate offset/index types, base, value type, and device pointers |
+| Dense vector | `cusparseCreateDnVec` into `cusparseDnVecDescr_t` | Logical length, value type, and device allocation |
+| Dense matrix | `cusparseCreateDnMat` into `cusparseDnMatDescr_t` | Stored shape, leading dimension in elements, order, value type, and device allocation |
+
+Creation **does not allocate or transfer operand data and does not convert formats**. A pointer setter such as `cusparseSpMatSetValues` rebinds values; it does not upload them. Matching destruction routines release descriptors, not caller-owned arrays. A wrong index type changes the interpretation of bytes, not their representation. Check every status before using the resulting object.
+
+## SpMV: define the mathematical output first
+
+`Y = alpha*op(A)*X + beta*Y`. With non-transposed `A:m x n`, X has n elements and Y has m. With transpose, reverse those vector lengths; real transpose and complex conjugate transpose are not interchangeable in general. Y is both an input and an output when beta is nonzero. Restore the intended initial Y for repeated trials rather than silently computing a recurrence.
+
+EX20 fixes FP32 matrix/vector storage, FP32 computation and scalars, 32-bit zero-based indices, `CUSPARSE_OPERATION_NON_TRANSPOSE`, `CUSPARSE_SPMV_CSR_ALG2`, and `CUSPARSE_POINTER_MODE_HOST`. Host pointer mode concerns **alpha and beta only**: descriptor data and external workspace are still device allocations. Nonzero-beta and empty-row fixtures expose bugs that a single all-ones product misses.
+
+The documented bitwise-deterministic CSR ALG2 guarantee applies only to `NON_TRANSPOSE`. It is not a claim of equality with a CPU reduction or across library versions, algorithms, or GPUs. Transpose can lose that guarantee even with the same enum. Use an independent finite numerical acceptance test; EX20's selected algorithm has not been observed running here.
+
+## SpMM: dense layout is part of the problem
+
+`C = alpha*op(A)*op(B) + beta*C`, with sparse A, dense B, and dense C. Non-transposed `A:4 x 5` and `B:5 x 3` require `C:4 x 3`. A row-major B needs `ld >= 3`, while column-major B needs `ld >= 5`; C respectively needs `ld >= 3` or `ld >= 4`. Leading dimensions are in elements, not bytes, and descriptors describe storage before transposition. Re-derive the stored dimensions when changing an operation flag.
+
+Several right-hand sides can reuse sparse indices across dense columns, but a loop of SpMV and a SpMM call are not guaranteed to share a kernel, arithmetic order, scratch requirement, or performance. Keep precision, initial C, result acceptance and timing boundaries identical when comparing them. Do not assume changing a dense order enum rearranges memory.
+
+Algorithm rules are operation-specific: CSR `CUSPARSE_SPMM_CSR_ALG3` restricts A to non-transpose, excludes conjugate-transpose B, and does not support batching. Its documented determinism must also be read with the release-specific issue ledger below. A SpMV algorithm number or support rule says nothing about the same number in SpMM.
+
+## A size query is not an allocation
+
+The ordinary sequence is `cusparseSpMV_bufferSize` or `cusparseSpMM_bufferSize`, caller device allocation, optional supported preprocessing, then execution with a valid external buffer. The query reports **bytes**, not elements. Check query status, capacity, alignment and allocation status; do not invent a fixed workspace requirement from matrix size. A zero-byte requirement needs no device allocation; follow the selected operation's null-buffer contract.
+
+Use the same operation/configuration when querying and executing. Recheck after changes to dimensions, format, types, algorithm, or layout. Total storage includes operands, external workspace, and additional library resources. Neither a budget nor a query success proves allocation will succeed. Workspace cannot serve overlapping executions without a documented safe arrangement; ordinary use here gives each overlapping operation exclusive scratch.
+
+## Preprocessing is optional state, not format conversion
+
+`cusparseSpMV_preprocess` was introduced in CUDA 12.4 and is absent in 11.8. It is optional and can help **CSR ALG1/ALG2 only**; other algorithms do not gain acceleration from this step. EX20 deliberately does not call it, preserving one ordinary SpMV path across all three profiles.
+
+After preprocessing, the supplied buffer becomes matA's **active buffer**. Its contents must remain unmodified; preserve matrix indices and the configured operation. Subsequent compatible calls may change alpha, beta, X, Y, and matrix numerical values. That allowance does not authorize changing shape, index contents, format, or algorithm. A value-pointer update still requires a valid allocation and completion dependencies.
+
+There is only **one active preprocessing buffer per matA descriptor**. Preprocessing a second buffer makes that one active. Passing another valid inactive buffer is allowed for SpMV without the preprocessing acceleration; it does not activate a second cached state. For independent active states, create separate sparse descriptors, which may reference the same immutable indices, and separately manage their workspaces and writable operands. Do not concurrently mutate shared descriptor state.
+
+`cusparseSpMM_preprocess` already exists in 11.8, so SpMV's introduction date must not be applied to it. Its acceleration applies only to **CSR ALG1/ALG3**. Preserve the compatible sparse structure and dense shape/layout; numerical contents may change, and scalar/operand updates must follow that version's contract. Actual operands are **B and C**, not SpMV's X/Y; do not copy the newer prose's `matX/matY` typo into an implementation. The 13.3.1 guide explicitly describes CSR-only preprocessing and requires preprocessing before graph capture. Baseline graph-support wording differs: do not project that wording backward. Graphs and executable SpMM/preprocessing are outside EX20.
+
+## Host return is not device completion
+
+Use `cusparseSetStream` to place library work in the intended stream. H2D initialization, execution, and D2H results need ordering. One stream provides submission order; different streams need an event/wait or a checked host completion boundary. A host API return, including success, is not permission to inspect an asynchronous result or free its arrays.
+
+Keep device indices, values, X/Y or B/C, external workspace, and host transfer storage alive until their final uses complete. This curriculum conservatively retains descriptors and handles through completion too. Active preprocessing storage must survive all calls that rely on it. Handle stream/pointer-mode changes are shared mutable state, not a concurrency primitive.
+
+On failure after partial submission, stop new work, retain the original error, drain submitted work where possible, and attempt cleanup of only acquired resources. Check completion and cleanup errors; do not turn a failed drain into successful validation or release host transfer storage through normal success assumptions. Destroying a descriptor does not itself establish that all device users have finished.
+
+## Choose with setup and reuse in the accounting
+
+Compare `conversion + preprocess + R*execution` under the same workload, not only the warmed kernel interval. If the sparsity pattern changes each iteration, previously amortized work may recur. If only values change, compatible preprocessing may be reusable, but that alone proves no speedup. Record row-length distribution, block occupancy, number of dense columns, transpose, precision, reuse count, memory budget, and accepted numerical error.
+
+Keep host initialization and first-use overhead separate from warmed device-event intervals. Restoration of Y/C with nonzero beta must be treated consistently. A documented recommendation supplies candidates, not a measured winner. Zero timings, fabricated break-even points, and unexecuted buffer sizes are not evidence.
+
+## Version identity and architecture
+
+| Toolkit archive/profile | cuSPARSE component from redistribution manifest | Boundary |
+| --- | --- | --- |
+| 11.8.0 | 11.7.5.86 | Generic SpMV/SpMM; SpMM preprocessing exists, SpMV preprocessing does not |
+| 12.9.2 | 12.5.10.65 | Baseline contract; SpMV preprocessing available |
+| 13.3.1 | 12.8.2.51 | Exact archived comparison; includes later format and capture rules |
+
+Toolkit version, guide label, header macros, raw API version, and loaded component/package identity are different records. A manifest identifies an acquisition package; it does not prove which binary the loader resolved. Preserve actual header and loaded-library identity in an Environment Manifest rather than appending an unobserved build suffix.
+
+CUDA 13.0 removed pre-Turing support. The site's cross-profile runtime floor remains **Native Linux, one CC 7.5+ GPU**, with fundamentals sized for the Baseline GPU Capability Tier. Reading static pages needs no GPU. This floor does not authorize every low-precision, blocked, Tensor Core, or multi-GPU mode.
+
+## Narrow precision and structured sparsity stay separate
+
+Changing only `CUDA_R_32F` is not a low-precision implementation. Check operand storage, compute and scalar types, index widths, alignment, selected algorithm, transpose/layout, and target architecture as a combination. FP16, BF16, INT8, FP8 and other narrow formats have separate gates; 12.9's mixed-precision issue is another reason not to infer permission from an enum. EX20 is all-FP32, not a mixed-precision test.
+
+**cuSPARSELt is a separate library**, not an acceleration flag for arbitrary CSR. Its structured pattern, compression/validation steps, types, shapes, alignment and GPU support must all hold. The current reference describes 2:4 sparsity for FP16/BF16/INT8/FP8, 1:2 for float, and paired 4:8 rules for E2M1. These are type-specific reference rules, not EX20 gates or a license to prune data without changing the problem. Blocked-ELL also is not automatically the same representation as cuSPARSELt.
+
+cuSPARSELt 0.9.0 release notes drop CUDA 12.9 support despite older getting-started wording that still mentions it. Prefer the current release-specific compatibility statement; do not inherit cuSPARSE's three profiles for that separate dependency. No structured-sparsity throughput or Sparse Tensor Core execution is claimed here.
+
+## A conditional issue ledger
+
+| Source/state | Narrow condition | Consequence |
+| --- | --- | --- |
+| 11.8 known issue | First cuSPARSE use on SM90 can incur PTX JIT overhead | Separate first use from warmed execution; no local overhead measured |
+| 12.9 known issue, CUSPARSE-2349 | Mixed-precision SpMV/SpMM may give incorrect results | Keep the all-FP32 EX20 contract narrow; do not claim a universal release all-clear |
+| 12.9 known issue, CUSPARSE-2319 | `cusparseCsr2cscEx2` with m=0 or n=0 can give incorrect results | Zero-dimensional conversion is not the same as an empty row in a nonempty matrix |
+| Introduced in 13.0, fixed in 13.1, CUSPARSE-2612 | SpMM CSR ALG3 determinism defect | An enum's general guarantee does not erase version-specific defects |
+| Fixed in 13.3 Update 1, 5975307 | Rare incorrect CSC or transposed-CSR SpMV results | Preserve operation/format qualifiers; EX20 uses non-transposed CSR |
+| Fixed in 13.3 Update 1 | Mixed-precision SELL SpMV issue | Not an observed result for ordinary FP32 CSR |
+| 13.3 Update 1 known issue | Very large BSR SDDMM workloads | Another operation and scale; not a blanket prohibition on SpMV |
+
+The SpMV reference also notes a possible Compute Sanitizer false race report with beta zero. Investigate the exact diagnostic and match the documented condition. This is not permission to dismiss real races, use-after-free, out-of-bounds access, or errors with other operations/configurations. Preserve logs and independent correctness checks.
+
+## Evidence boundary
+
+This Learning Unit and its Exercises are static reasoning; all four evidence arrays are empty. The only canonical executable counterpart is [EX20](/en/examples/cusparse-spmv/), whose compilation status is independent and whose runtime remains **Pending Hardware Verification**. No algorithm outcome, workspace size, preprocessing benefit, deterministic run, timing, or performance comparison is recorded here. The browser never executes CUDA.
+
+## Retrieval check
+
+1. What allocations and transfers remain after creating a CSR descriptor? What does a repeated row offset mean?
+2. How do vector lengths change under transpose, and why does host pointer mode not make matrix data host-resident?
+3. Which preprocessing API is absent in 11.8? Which SpMV and SpMM algorithms can benefit, and what state must survive?
+4. Why does a successful host return not permit workspace reuse across streams? How does cleanup preserve the same rule?
+5. Why are deterministic CSR ALG2, agreement with a CPU reference, and repeatability across GPUs three different claims?
+
+## Continue with practice
+
+Complete the [three Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) before reading the [separate solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/). Use [PB-R4-015](/en/practice/#pb-r4-015) for descriptor/format reasoning and [PB-R4-016](/en/practice/#pb-r4-016) for preprocessing/lifetime review. [EX20](/en/examples/cusparse-spmv/) owns the actual code and acceptance criteria, not a second listing on this page.
+
+## Sources and licensing
+
+[SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075) records descriptors, formats, SpMV and SpMM; [SRC-CUDA-076](/en/sources-and-versions/#src-cuda-076) records version, preprocessing, architecture, precision and issue boundaries. Baseline coordinates include [CreateCsr](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsecreatecsr), [SpMV](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmv), and [SpMM](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html#cusparsespmm). Exact 13.3.1 API and release-note archives were available with HTTP 200 during this review; they are not a live-guide fallback.
+
+The Context7 discovery result resolved only an older CUDA 11.0 archive and returned Legacy API material. It is not authority for these Generic API facts. The owner archives, release notes, redistribution manifests and separate cuSPARSELt reference above are the source basis. Prose, tables, derivations, and Exercises are original paraphrases, not copied samples. Review includes the [12.9.2 EULA](https://docs.nvidia.com/cuda/archive/12.9.2/eula/index.html) and owner notices; page licensing does not relicense NVIDIA software or documentation. **Facts checked and sources accessed: 2026-09-09.**

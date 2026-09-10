@@ -1,0 +1,224 @@
+---
+title: 'EX20: CSR Matrix-Vector Products with cuSPARSE'
+description: Check two FP32 CSR products against a double CPU reference and literal results, with explicit descriptors, scalar pointer mode, queried workspace, and stream completion.
+pairId: ex20
+counterpart: /examples/cusparse-spmv/
+factCheckDate: '2026-09-09'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, cpu-reference, descriptors-workspace, stream-lifecycle, version-profiles, build, compatibility, evidence, expected-observations, sources]
+resourceKind: runnable-example
+unitId: EX20
+prerequisites: [L13]
+relatedUnits: []
+exampleIds: [EX20]
+canonicalExample: EX20
+canonicalRanges:
+  - cpu-reference
+  - descriptors-workspace
+  - stream-lifecycle
+hardwareGate: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuSPARSE profile; runtime: Native Linux, one CC 7.5+ GPU; 112 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget'
+toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read selected Toolkit/cuSPARSE headers and shared libraries'
+  - 'Access one CUDA device; execute compiler, make, bash, readelf, ldd, host test, and CUDA binary'
+  - 'Write and remove EX20 build, result, and learner-owned evidence files'
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - 'The double CPU reference should agree with both literal results; all four completed GPU outputs per fixture should pass finite tolerance checks, including the empty row and nonzero beta.'
+    - 'The actual SpMV contracts should provide workspace sizes within the declared budget; zero-size requests should skip allocation. No workspace cost has been observed here.'
+    - 'Headers should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuSPARSE and CUDA API levels reported separately from package identity.'
+  recordedObservations: []
+sources:
+  - title: 'cuSPARSE reference archived with CUDA 11.8.0'
+    url: 'https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html'
+    version: 'Toolkit 11.8.0; cuSPARSE 11.7.5.86'
+    platform: 'Native Linux; Generic CSR SpMV, mutable descriptors, workspace, streams, version queries'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE reference archived with CUDA 12.9.2'
+    url: 'https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html'
+    version: 'Toolkit 12.9.2; cuSPARSE 12.5.10.65'
+    platform: 'Native Linux; baseline Generic API contract, not execution'
+    accessDate: '2026-09-09'
+  - title: 'cuSPARSE reference archived with CUDA 13.3.1'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html'
+    version: 'Toolkit 13.3.1; cuSPARSE 12.8.2.51'
+    platform: 'Native Linux; exact archive comparison, not execution'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 11.8.0 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json'
+    version: 'libcusparse 11.7.5.86'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 12.9.2 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json'
+    version: 'libcusparse 12.5.10.65'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-09'
+  - title: 'CUDA 13.3.1 redistribution manifest'
+    url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json'
+    version: 'libcusparse 12.8.2.51'
+    platform: 'Owner Linux x86-64 acquisition identity, not loaded binary evidence'
+    accessDate: '2026-09-09'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex20 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/examples/cusparse-spmv/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-09' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,descriptors-workspace,stream-lifecycle,version-profiles,build,compatibility,evidence,expected-observations,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: L13 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX20 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,descriptors-workspace,stream-lifecycle' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: x86-64 C++17 host and declared CUDA Toolkit/cuSPARSE profile; runtime: Native Linux, one CC 7.5+ GPU; 112 fixed device bytes plus queried workspace and library resources within the 8,000,000,000-byte problem budget' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: 'cuda-11.8,cuda-12.9,cuda-13.3' } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:permissions', content: 'read Toolkit/cuSPARSE; one CUDA device; compiler, make, bash, readelf, ldd, host-test, CUDA-binary execution; EX20 build/result/evidence write/delete' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '6' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuSPARSE-11.7.5.86,cuSPARSE-12.5.10.65,cuSPARSE-12.8.2.51,CUDA-11.8.0,CUDA-12.9.2,CUDA-13.3.1' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/cusparse-spmv/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+Complete [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) first. EX20 is a standalone original C++17 correctness project for `y = alpha*A*x + beta*y_initial`: two FP32 compressed sparse row (CSR) fixtures with explicit descriptors and resource ownership. CUDA executes only in an external environment, never in this Learning Site. The program contains no timer.
+
+## Canonical Project
+
+[Inspect the fixed source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f/examples/ex20-cusparse-spmv) or [download the same revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f.zip).
+
+The source-tree and download links match the canonical registry and identify the same immutable revision. Extract `examples/ex20-cusparse-spmv/` from that archive. Its eight files comprise the manifest, README, Makefile, host header, CUDA source, host test, compile script, and evidence note. Record the resolved source revision with any future results, not just the page route or a moving branch.
+
+Original project software is Apache-2.0; this instructional page is CC BY 4.0. cuSPARSE remains an external dependency under NVIDIA's terms. No owner sample, SDK header, or library binary is redistributed. Both locales import the same three source ranges below.
+
+## Independent CPU Reference
+
+<CanonicalCode exampleId="EX20" range="cpu-reference" />
+
+Both matrices have 4 rows, 5 columns, and 7 stored entries. Zero-based 32-bit row offsets are `[0,2,2,4,7]`; column indices are `[0,3,1,4,0,2,4]`, sorted and unique within each row. Repeated offsets make row 1 empty. All fixture inputs are exactly representable in FP32. These are original inputs and independent literal expectations, not recorded GPU output:
+
+| Fixture | CSR values | x | Initial y | alpha | beta | Literal output |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | `[2,-1,3,4,-2,5,1]` | `[1,2,-1,3,2]` | `[4,-2,1,3]` | 1 | 0 | `[-1,0,14,-5]` |
+| B | `[-1,2,0.5,-3,4,-2,1]` | `[2,-1,3,0.5,-2]` | `[1,-4,2,0]` | 2 | -0.5 | `[-2.5,2,10,0]` |
+
+The independent CPU reference validates extents, CSR offsets, column bounds/order/uniqueness, and finite inputs before indexing. Multiplication, accumulation, and application of alpha/beta use double precision. The CPU result must agree with the literal output before GPU submission. Every one of the four completed GPU outputs and reference values must be finite and satisfy `abs(gpu-cpu) <= 1e-4 + 2e-5*abs(cpu)`. The inclusive tolerance belongs to these small fixtures, not arbitrary sparse workloads.
+
+An empty dot product is not permission to skip writing y: row 1 is zero in A but `(-0.5)*(-4)=2` in B. Checking all rows and both beta values catches an error that a single nonempty, beta-zero fixture could hide.
+
+## Descriptors And Workspace
+
+<CanonicalCode exampleId="EX20" range="descriptors-workspace" />
+
+The common contract uses mutable `cusparseSpMatDescr_t` and `cusparseDnVecDescr_t` objects created by `cusparseCreateCsr` and `cusparseCreateDnVec`. They describe caller-owned device allocations; creation neither uploads data nor converts formats. Both index arrays use `CUSPARSE_INDEX_32I` and `CUSPARSE_INDEX_BASE_ZERO`. Matrix values, vectors, scalars, and computation are FP32 (`CUDA_R_32F`). The operation is `CUSPARSE_OPERATION_NON_TRANSPOSE`, with `CUSPARSE_SPMV_CSR_ALG2`.
+
+`CUSPARSE_POINTER_MODE_HOST` applies to alpha and beta only. CSR arrays, x/y, and nonzero workspace still reside on the device. After each fixture's inputs complete, `cusparseSpMV_bufferSize` queries the actual descriptors, scalars, operation, compute type, and algorithm used for execution. Its result is bytes, not elements or a size inferred from nnz.
+
+A zero-byte request skips allocation and supplies null. A changed requirement replaces the previous caller allocation only after completion; an unchanged requirement permits sequential reuse. The fixed arrays plus queried workspace are budget-checked, and allocation failures are fatal. No workspace size has been observed here.
+
+There is **no `cusparseSpMV_preprocess` call**: that API is absent in CUDA 11.8. The same ordinary SpMV path serves all three profiles without newer const-descriptor creation APIs. [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) teaches version-gated preprocessing and SpMM separately. Compiler preprocessing in `make preprocess` is not sparse-library preprocessing.
+
+## Stream And Resource Lifetime
+
+<CanonicalCode exampleId="EX20" range="stream-lifecycle" />
+
+One non-default `cudaStreamNonBlocking` stream and one handle serve both fixtures sequentially, retaining the same descriptors and caller arrays. Each execution uploads the CSR arrays and x, and resets device y from that fixture's initial y, **including when beta is zero**. Reusing a prior output instead would change the mathematical problem.
+
+Checked H2D, SpMV, and D2H calls use that stream. Input completion precedes the workspace query; output completion precedes CPU validation, reuse, workspace replacement, and normal cleanup. Host return alone is not device completion. Pageable host vectors and `Async` API names do not establish transfer/compute overlap.
+
+On partial submission failure, cleanup attempts to drain the stream while fixtures, scalars, and host output storage remain alive. It destroys acquired descriptors and the handle, frees caller allocations, and destroys the stream. Every release is attempted; completion or release errors make the process fail rather than yield a successful validation claim. Destruction does not transfer ownership of caller arrays to the library.
+
+## Independent Version Profiles
+
+| Profile | Toolkit | cuSPARSE component | Header MAJOR,MINOR,PATCH,BUILD |
+| --- | --- | --- | --- |
+| `cuda-11-8-bundled-cusparse-11-7-5-86` | 11.8.0 | 11.7.5.86 | 11,7,5,86 |
+| `cuda-12-9-bundled-cusparse-12-5-10-65` | 12.9.2 | 12.5.10.65 | 12,5,10,65 |
+| `cuda-13-3-bundled-cusparse-12-8-2-51` | 13.3.1 | 12.8.2.51 | 12,8,2,51 |
+
+`EXPECTED_CUSPARSE_VERSION` selects four `EX20_EXPECTED_CUSPARSE_*` definitions checked against `CUSPARSE_VER_MAJOR`, `CUSPARSE_VER_MINOR`, `CUSPARSE_VER_PATCH`, and `CUSPARSE_VER_BUILD`. Unknown or missing profiles fail. The aggregate check is `CUSPARSE_VERSION = major*1000 + minor*100 + patch`, without build. These are component header identities, not Toolkit patch identities.
+
+Checked `cusparseGetProperty` queries require loaded major/minor/patch to match the header triple. `cusparseGetVersion(handle, ...)` is reported raw and separately. Neither API exposes a loaded build suffix: record actual resolved library paths, package identity, and file hashes in the Environment Manifest. CUDA driver/runtime API levels and `CUDART_VERSION` are not installed driver, Toolkit package, or cuSPARSE component versions.
+
+## Build And Run
+
+From the standalone directory, the host test needs no CUDA headers or GPU:
+
+```sh
+make host-test DIALECT=c++17 BUILD_DIR=build
+```
+
+It checks both literal results, the empty row and beta contribution, malformed CSR and extents, nonfinite data/scalars, corruption at every output position, and inclusive tolerance boundaries. Success establishes the host contract only.
+
+In the matching 11.8.0 development image, the manifest's stages build and inspect without executing CUDA:
+
+```sh
+make preprocess DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+make compile DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+make link DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+make inspect DIALECT=c++17 BUILD_DIR=build EXPECTED_CUSPARSE_VERSION=11.7.5.86
+```
+
+Alternatively, the wrapper cleans, runs those stages with failure propagation, and runs only the host test. **Run each following command in its own matching Toolkit image**, not all three against one installation:
+
+```sh
+bash scripts/compile-check.sh c++17 cuda-11-8-bundled-cusparse-11-7-5-86 artifacts/ex20-11-8
+bash scripts/compile-check.sh c++17 cuda-12-9-bundled-cusparse-12-5-10-65 artifacts/ex20-12-9
+bash scripts/compile-check.sh c++17 cuda-13-3-bundled-cusparse-12-8-2-51 artifacts/ex20-13-3
+```
+
+The results path may contain spaces when quoted, but must not be inside `build`, which the wrapper cleans. GNU Make requires a space-free `BUILD_DIR`. Link uses `-lcusparse`; `readelf -d` must show a cuSPARSE dependency and `ldd` must resolve all dependencies without missing libraries. EX20 defines no device kernel, so inspection does not require EX20-owned cubin/PTX. SM75 target flags do not certify cuSPARSE's internal dispatch. The wrapper and CI never execute the CUDA binary.
+
+Only after meeting the runtime gate:
+
+```sh
+./build/ex20-cusparse-spmv
+```
+
+The program selects visible device 0. Expected reporting includes header/loaded version granularity, GPU and CUDA API levels, each fixture's configuration and queried workspace bytes, and two correctness verdicts after checking all four outputs per fixture. This describes future output, not a retained run.
+
+## Compatibility
+
+All three profiles use C++17 and the manifest's digest-pinned x86-64 development images: Ubuntu 22.04 for 11.8.0; Ubuntu 24.04 for 12.9.2 and 13.3.1. Native Linux is the only Supported Environment. Runtime requires one CC 7.5+ GPU, within the Baseline GPU Capability Tier. Use a suitably Toolkit-matched or newer driver; a lower family minor-compatibility floor alone does not guarantee PTX JIT support.
+
+Fixed caller arrays total `(5+7)*4=48` index bytes plus `(7+5+4)*4=64` FP32 bytes, hence **112 bytes**. Fixed arrays plus queried workspace must fit the 8,000,000,000-byte problem budget. Library internal resources, initialization needs, and actual free memory are additional constraints. This is a static allocation calculation, not a measured total footprint or a promise of zero scratch.
+
+SpMM, format conversion, transpose, narrow precision, structured sparsity/cuSPARSELt, graph capture, multi-GPU, preprocessing execution, and timing are excluded. Sorted, unique CSR is EX20's contract, not a blanket restriction on every cuSPARSE operation. The documented non-transposed CSR ALG2 determinism guarantee does not establish CPU bitwise equality, cross-version repeatability, or an observed deterministic run. [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) teaches those boundaries and the release-specific issue ledger; EX20 is no release-wide correctness or performance claim.
+
+## Evidence Boundary
+
+Compilation is empty; no retained **Compile-Checked** status is granted. Runtime remains **Pending Hardware Verification**, with no recorded observations. Host tests, source review, canonical imports, and build-command tests do not supply GPU correctness, workspace cost, preprocessing benefit, deterministic-run, timing, or speedup evidence.
+
+A qualifying future record needs source/profile identity, stage logs, a complete Environment Manifest, actual loaded component identity, raw output, and both full-output correctness verdicts. Keep expectations separate from recorded observations. This executable contains no benchmark result.
+
+## Expected Observations
+
+1. The double CPU reference should agree with both literal results; all four completed GPU outputs per fixture should pass finite tolerance checks, including the empty row and nonzero beta.
+2. The actual SpMV contracts should provide workspace sizes within the declared budget; zero-size requests should skip allocation. No workspace cost has been observed here.
+3. Headers should match the four-part component profile; the loaded major/minor/patch should match the headers, with raw cuSPARSE and CUDA API levels reported separately from package identity.
+
+## Sources And Review
+
+- Archived cuSPARSE API references: [11.8.0](https://docs.nvidia.com/cuda/archive/11.8.0/cusparse/index.html), [12.9.2](https://docs.nvidia.com/cuda/archive/12.9.2/cusparse/index.html), [13.3.1](https://docs.nvidia.com/cuda/archive/13.3.1/cusparse/index.html).
+- Independent component manifests: [11.8.0](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_11.8.0.json), [12.9.2](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.9.2.json), [13.3.1](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_13.3.1.json).
+- [SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075) and [SRC-CUDA-076](/en/sources-and-versions/#src-cuda-076) retain descriptor, preprocessing, ownership, version, and release-hazard boundaries.
+
+Checked **2026-09-09**. Owner archive hashes in the manifest are acquisition coordinates, not a claim that the full packages were downloaded or loaded binaries hash-verified. No upstream implementation or sample is adapted.
