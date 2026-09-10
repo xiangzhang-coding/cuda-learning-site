@@ -16,3 +16,15 @@ export async function discoverPublishedRoutes() {
     })
     .sort((left, right) => left.localeCompare(right, 'en'));
 }
+
+export async function publishedRouteBatches() {
+  const routes = await discoverPublishedRoutes();
+  return (['zh', 'en'] as const).flatMap((locale) => {
+    const localized = routes.filter((route) => route.startsWith('/en/') === (locale === 'en'));
+    return Array.from({ length: Math.ceil(localized.length / 12) }, (_, index) => ({
+      locale,
+      batch: index + 1,
+      routes: localized.slice(index * 12, (index + 1) * 12),
+    }));
+  });
+}

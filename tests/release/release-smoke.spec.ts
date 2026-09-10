@@ -27,9 +27,10 @@ import r4ReleaseManifest from '../../src/r4-release-manifest.json' with { type: 
 import { hashCanonicalBuildContract, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
-import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
-import { discoverPublishedRoutes } from '../helpers/publication-routes';
+import { collectBrowserFailures, expectRankedSearchResult, type SearchScenario } from '../helpers/browser-contract';
+import { discoverPublishedRoutes, publishedRouteBatches } from '../helpers/publication-routes';
 
+const routeBatches = await publishedRouteBatches();
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 const canonicalOrigin = 'https://cuda-learning-site.hmzhangxiang.workers.dev';
 const releaseOrigin = new URL(process.env.RELEASE_BASE_URL as string).origin;
@@ -597,16 +598,6 @@ test('serves the exact R4 release and current publication with production canoni
   expect(scanArtifactBuffer(legalBody, 'legal/THIRD_PARTY_NOTICES.md')).toEqual([]);
   expect(legalBody.toString('utf8')).toContain('`wrangler` | 4.125.0');
 
-  const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(554);
-  for (const route of publishedRoutes) {
-    const response = await page.goto(route);
-    expect(response?.ok(), route).toBe(true);
-    expect(scanArtifactBuffer(await response!.body(), `${route}index.html`), route).toEqual([]);
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${canonicalOrigin}${route}`);
-  }
-
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
     await expect(page.locator('main')).toContainText(prefix ? '277 Publication Pairs' : '277 个双语发布对');
@@ -878,8 +869,47 @@ test('serves the exact R4 release and current publication with production canoni
   expect(failures).toEqual([]);
 });
 
-test('supports direct locale navigation, keyboard flow, and relevant bilingual search', async ({ page }) => {
-  test.setTimeout(240_000);
+test.describe('published route batches', () => {
+  test.describe.configure({ timeout: 60_000 });
+
+  test.beforeAll(async () => {
+    const routes = routeBatches.flatMap((batch) => batch.routes);
+    expect(routes).toHaveLength(554);
+    expect(new Set(routes).size).toBe(554);
+    expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
+    expect(routeBatches).toHaveLength(48);
+    for (const locale of ['zh', 'en']) {
+      const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
+      expect(localized).toHaveLength(277);
+      expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
+      expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
+    }
+    for (const { routes } of routeBatches) {
+      expect(routes.length).toBeGreaterThan(0);
+      expect(routes.length).toBeLessThanOrEqual(12);
+    }
+  });
+
+  for (const { locale, batch, routes } of routeBatches) {
+    test(`${locale} batch ${batch} (${routes.length} routes)`, async ({ page }) => {
+      const failures = collectBrowserFailures(page, releaseOrigin);
+      for (const route of routes) {
+        await test.step(route, async () => {
+          const response = await page.goto(route, { waitUntil: 'load' });
+          expect(response?.ok(), route).toBe(true);
+          expect(scanArtifactBuffer(await response!.body(), `${route}index.html`), route).toEqual([]);
+          await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
+          await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${canonicalOrigin}${route}`);
+          expect(failures, route).toEqual([]);
+        });
+      }
+      expect(failures).toEqual([]);
+    });
+  }
+});
+
+test('supports direct locale navigation, keyboard flow, glossary links, and index filters', async ({ page }) => {
+  test.setTimeout(60_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   await page.goto('/en/start/using-the-learning-site/');
   await page.keyboard.press('Tab');
@@ -901,6 +931,27 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
   await expect(page).toHaveURL(/\/en\/start\/using-the-learning-site\/$/);
   await page.waitForLoadState('networkidle');
 
+  await page.goto('/en/practice/');
+  const index = page.locator('cuda-resource-index');
+  await index.locator('[data-resource-query]').fill('manifest');
+  await index.locator('[data-resource-filter="type"]').selectOption('correctness-debugging');
+  await index.locator('[data-resource-filter="relation"]').selectOption('O03');
+  await expect(index.locator('[data-resource-card]:visible')).toHaveCount(1);
+  await expect(index.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'PB-R0-002');
+  expect(failures).toEqual([]);
+});
+
+test.describe('release search', () => {
+  test.describe.configure({ timeout: 60_000 });
+
+  function registerScenario(scenario: SearchScenario) {
+    test(`query ${scenario.route === '/' ? 'zh' : 'en'}: ${scenario.query}`, async ({ page }) => {
+      const failures = collectBrowserFailures(page, releaseOrigin);
+      await expectRankedSearchResult(page, scenario);
+      expect(failures).toEqual([]);
+    });
+  }
+
   for (const prefix of ['/', '/en/']) {
     for (const suffix of [
       'libraries/cublas-gemm/',
@@ -921,49 +972,48 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       'examples/cusparse-spmv/',
     ]) {
       const route = `${prefix}${suffix}`;
-      await page.goto(route);
-      const title = await page.locator('main h1').innerText();
-      await expectRankedSearchResult(page, {
-        route: prefix,
-        button: prefix === '/' ? /搜索/ : /Search/,
-        query: title,
-        localePrefix: prefix,
-        expectedHrefs: [route],
+      test(`title: ${route}`, async ({ page }) => {
+        const failures = collectBrowserFailures(page, releaseOrigin);
+        await page.goto(route);
+        const title = await page.locator('main h1').innerText();
+        await expectRankedSearchResult(page, {
+          route: prefix,
+          button: prefix === '/' ? /搜索/ : /Search/,
+          query: title,
+          localePrefix: prefix,
+          expectedHrefs: [route],
+        });
+        expect(failures).toEqual([]);
       });
     }
   }
 
-  await expectRankedSearchResult(page, {
+  for (const scenario of [{
     route: '/',
     button: /搜索/,
     query: '运行并验证向量加法',
     expectedHrefs: ['/labs/vector-addition/'],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/en/',
     button: /Search/,
     query: 'row-major data index',
     expectedHrefs: ['/en/visuals/indexing/', '/en/foundations/multidimensional-indexing/'],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/',
     button: /搜索/,
     query: '显式 host-device 资源生命周期',
     expectedHrefs: ['/foundations/host-device-lifecycle/'],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/en/',
     button: /Search/,
     query: 'Understanding the CUDA Execution Hierarchy',
     expectedHrefs: ['/en/foundations/execution-hierarchy/'],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/en/',
     button: /Search/,
     query: 'SRC-WEB-003 Pagefind 1.5.2',
     expectedHrefs: ['/en/sources-and-versions/'],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/en/',
     button: /Search/,
     query: 'Reference Environment candidate',
@@ -973,8 +1023,7 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       '/en/start/reference-environment-candidate/solutions/',
       '/en/labs/record-cuda-environment/',
     ],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/',
     button: /搜索/,
     query: 'CUDA 错误为何常常延后暴露',
@@ -983,8 +1032,7 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       '/foundations/asynchronous-errors/exercises/',
       '/foundations/asynchronous-errors/solutions/',
     ],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/en/',
     button: /Search/,
     query: 'Compute Capability Is a Feature Contract',
@@ -993,19 +1041,20 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       '/en/foundations/compute-capability/exercises/',
       '/en/foundations/compute-capability/solutions/',
     ],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/',
     button: /搜索/,
     query: '破坏并修复索引',
     expectedHrefs: ['/labs/break-and-repair-indexing/'],
-  });
-  await expectRankedSearchResult(page, {
+  }, {
     route: '/en/',
     button: /Search/,
     query: 'Error Handling Lifecycle Runnable Example',
     expectedHrefs: ['/en/examples/error-handling-lifecycle/'],
-  });
+  }] satisfies SearchScenario[]) {
+    registerScenario(scenario);
+  }
+
   for (const scenario of [
     {
       query: 'Q11 Hypothesis ledger',
@@ -1064,7 +1113,7 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/correctness/gemm-optimization-case-study/solutions/'],
     },
   ] as const) {
-    await expectRankedSearchResult(page, { route: '/', button: /搜索/, ...scenario });
+    registerScenario({ route: '/', button: /搜索/, ...scenario });
   }
   for (const scenario of [
     {
@@ -1376,21 +1425,12 @@ test('supports direct locale navigation, keyboard flow, and relevant bilingual s
       expectedHrefs: ['/en/visuals/nsight-systems-versus-nsight-compute/'],
     },
   ] as const) {
-    await expectRankedSearchResult(page, {
+    registerScenario({
       route: '/en/',
       button: /Search/,
       ...scenario,
     });
   }
-
-  await page.goto('/en/practice/');
-  const index = page.locator('cuda-resource-index');
-  await index.locator('[data-resource-query]').fill('manifest');
-  await index.locator('[data-resource-filter="type"]').selectOption('correctness-debugging');
-  await index.locator('[data-resource-filter="relation"]').selectOption('O03');
-  await expect(index.locator('[data-resource-card]:visible')).toHaveCount(1);
-  await expect(index.locator('[data-resource-card]:visible')).toHaveAttribute('data-resource-id', 'PB-R0-002');
-  expect(failures).toEqual([]);
 });
 
 test('persists all three themes and preserves reduced-motion and print fallbacks', async ({ page }) => {
@@ -1444,11 +1484,9 @@ test('persists all three themes and preserves reduced-motion and print fallbacks
   expect(failures).toEqual([]);
 });
 
-test('keeps mobile pages and no-script teaching fallbacks complete', async ({ browser, page }) => {
-  test.setTimeout(120_000);
-  const failures = collectBrowserFailures(page, releaseOrigin);
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const route of [
+test.describe('release mobile routes', () => {
+  test.describe.configure({ timeout: 60_000 });
+  const routes = [
     '/labs/record-cuda-environment/',
     '/en/labs/record-cuda-environment/',
     '/labs/vector-addition/',
@@ -1603,13 +1641,26 @@ test('keeps mobile pages and no-script teaching fallbacks complete', async ({ br
     '/en/labs/compare-custom-reduction-with-cub/',
     ...localizedRoutes('examples/cublas-gemm/'),
     ...localizedRoutes('labs/compare-gemm-with-cublas/'),
-  ]) {
-    await page.goto(route);
-    await page.waitForLoadState('networkidle');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
+  ];
+  for (let start = 0; start < routes.length; start += 12) {
+    const batch = routes.slice(start, start + 12);
+    test(`batch ${start / 12 + 1} (${batch.length} routes)`, async ({ page }) => {
+      const failures = collectBrowserFailures(page, releaseOrigin);
+      await page.setViewportSize({ width: 390, height: 844 });
+      for (const route of batch) {
+        await test.step(route, async () => {
+          await page.goto(route);
+          await page.waitForLoadState('networkidle');
+          expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
+        });
+      }
+      expect(failures).toEqual([]);
+    });
   }
-  expect(failures).toEqual([]);
+});
 
+test('keeps no-script teaching fallbacks complete', async ({ browser }) => {
+  test.setTimeout(120_000);
   const staticContext = await browser.newContext({
     baseURL: process.env.RELEASE_BASE_URL,
     javaScriptEnabled: false,
