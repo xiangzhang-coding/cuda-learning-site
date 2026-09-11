@@ -4621,7 +4621,7 @@ describe('published navigation', () => {
     for (const href of expected) expect(hrefs).toContain(href);
   });
 
-  it('contains no empty destinations or broken internal page and fragment links', async () => {
+  it.each(['zh', 'en'] as const)('contains no empty destinations or broken internal page and fragment links (%s)', async (locale) => {
     const publishedRoutes = new Set(publicationPairs.flatMap(({ zh, en }) => [zh, en]));
     const documents = new Map<string, Document>();
     const destinationDocument = async (route: string) => {
@@ -4632,7 +4632,7 @@ describe('published navigation', () => {
       return document;
     };
 
-    for (const route of publishedRoutes) {
+    for (const route of publicationPairs.map((pair) => pair[locale])) {
       const document = await destinationDocument(route);
       const links = [...document.querySelectorAll('a[href]')].map((link) => link.getAttribute('href') ?? '');
 
@@ -4647,7 +4647,7 @@ describe('published navigation', () => {
           await expect(readFile(asset), `${route} links to missing ${destination.pathname}`).resolves.toBeInstanceOf(Buffer);
           continue;
         }
-        expect(publishedRoutes, `${route} links to ${destination.pathname}`).toContain(destination.pathname);
+        expect(publishedRoutes.has(destination.pathname), `${route} links to ${destination.pathname}`).toBe(true);
         if (!destination.hash) continue;
 
         const fragment = decodeURIComponent(destination.hash.slice(1));
@@ -4657,8 +4657,8 @@ describe('published navigation', () => {
     }
   }, 30_000);
 
-  it('uses valid HTTPS URLs for every external content link', async () => {
-    for (const route of publicationPairs.flatMap(({ zh, en }) => [zh, en])) {
+  it.each(['zh', 'en'] as const)('uses valid HTTPS URLs for every external content link (%s)', async (locale) => {
+    for (const route of publicationPairs.map((pair) => pair[locale])) {
       const document = await readRoute(route);
       const externalLinks = [...document.querySelectorAll('a[href]')]
         .map((link) => link.getAttribute('href'))
@@ -4672,8 +4672,8 @@ describe('published navigation', () => {
     }
   }, 15_000);
 
-  it('resolves every built page asset and metadata link', async () => {
-    for (const route of publicationPairs.flatMap(({ zh, en }) => [zh, en])) {
+  it.each(['zh', 'en'] as const)('resolves every built page asset and metadata link (%s)', async (locale) => {
+    for (const route of publicationPairs.map((pair) => pair[locale])) {
       const document = await readRoute(route);
       const assetLinks = [
         ...document.querySelectorAll('script[src], link[href]'),
