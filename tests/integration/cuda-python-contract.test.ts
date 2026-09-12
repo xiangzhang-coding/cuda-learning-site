@@ -137,6 +137,39 @@ describe('issue #42 CUDA Python publication contract', () => {
     }
   });
 
+  it('static: P02 maps C++ lifecycle responsibilities to core and exercises that transfer', async () => {
+    const mappings = [
+      ['cudaSetDevice', 'dev.set_current()'],
+      ['cuDevicePrimaryCtxRetain', 'dev.context'],
+      ['cudaMalloc', 'dev.allocate'],
+      ['cudaMallocAsync', 'dev.allocate'],
+      ['cudaMallocHost', 'LegacyPinnedMemoryResource'],
+      ['cudaMemcpyAsync', 'copy_from'],
+      ['cudaStreamCreateWithFlags', 'create_stream'],
+      ['cuModuleGetFunction', 'get_kernel'],
+      ['cuLaunchKernel', 'launch('],
+      ['cudaStreamSynchronize', 's.sync()'],
+      ['cudaFree', 'buffer.close'],
+      ['cudaStreamDestroy', 's.close()'],
+    ];
+    for (const locale of locales) {
+      const lesson = await source(locale, 'python/devices-contexts-launches');
+      const rows = lesson.raw.split('\n').filter((line) => line.startsWith('|'));
+      for (const [cpp, python] of mappings) {
+        expect(rows.some((row) => row.includes(cpp) && row.includes(python)),
+          `${locale}P02: ${cpp} -> ${python}`).toBe(true);
+      }
+      const exercises = await source(locale, 'python/devices-contexts-launches/exercises', 'md');
+      expect(exercises.raw).toContain(locale ? '**Transfer task:**' : '**迁移任务：**');
+      for (const api of ['cudaMalloc', 'cudaMemcpyAsync', 'cudaStreamSynchronize']) {
+        expect(exercises.raw).toContain(api);
+      }
+      const solutions = await source(locale, 'python/devices-contexts-launches/solutions', 'md');
+      expect(solutions.raw.split('\n').some((line) => line.startsWith('|')
+        && line.includes('cudaMemcpyAsync') && line.includes('copy_from'))).toBe(true);
+    }
+  });
+
   it('static: gives each Python Practice Bank entry and source record a published prerequisite destination', async () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-12T12:00:00Z') })).not.toThrow();
     const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => planningId.startsWith('PB-R5-'));

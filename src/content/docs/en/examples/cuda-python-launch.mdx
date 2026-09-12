@@ -19,15 +19,15 @@ canonicalRanges:
   - runtime-compile
   - kernel
   - canonical-imports
-hardwareGate: 'Build: selected native Linux x86-64 Python profile, NVRTC/nvJitLink, real libcuda userspace and cuobjdump; no GPU or cuInit. Run: one compiler-supported CC 7.5+ GPU, matching driver kernel/userspace, small problems within 8 GB.'
+hardwareGate: 'Build: selected NVIDIA-deb Ubuntu 24.04 x86-64 Python profile, installed package inventory, NVRTC/nvJitLink, real libcuda userspace and cuobjdump; no GPU or cuInit. Run: one compiler-supported CC 7.5+ GPU, matching driver kernel/userspace, small problems within 8 GB.'
 toolkitLanes: []
 minimumComputeCapability: '7.5'
 maximumProblemMemoryBytes: 8000000000
 gpuCount: 1
 permissions:
-  - 'Read the selected Toolkit, native libraries and driver identity'
+  - 'Read the NVIDIA deb package inventory, native-file ownership, selected libraries and driver identity'
   - 'Install hash-locked Python wheels in the example-local virtual environment'
-  - 'Execute Python, bash and cuobjdump; access one CUDA device only for run'
+  - 'Execute Python, bash, dpkg-query and cuobjdump; access one CUDA device only for run'
   - 'Write fresh EX21 build, run and learner-owned evidence files'
 evidence:
   compilation: []
@@ -59,6 +59,11 @@ sources:
     version: 'cuda-core 1.2.0'
     platform: 'PTX compilation requires real driver userspace without cuInit'
     accessDate: '2026-09-12'
+  - title: 'NVIDIA Ubuntu Debian package index'
+    url: 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz'
+    version: 'Toolkit anchors 13.3.1-1; NVRTC/nvJitLink 13.3.33-1; cuobjdump 13.3.73-1'
+    platform: 'NVIDIA Ubuntu 24.04 amd64 deb profile; package metadata is not import/build evidence'
+    accessDate: '2026-09-12'
 head:
   - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex21 } }
   - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/examples/cuda-python-launch/' } }
@@ -73,7 +78,7 @@ head:
   - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX21 } }
   - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX21 } }
   - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,python-lifecycle,runtime-compile,kernel,canonical-imports' } }
-  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: selected native Linux x86-64 Python profile, NVRTC/nvJitLink, real libcuda userspace and cuobjdump; no GPU or cuInit. Run: one compiler-supported CC 7.5+ GPU, matching driver kernel/userspace, small problems within 8 GB.' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: selected NVIDIA-deb Ubuntu 24.04 x86-64 Python profile, installed package inventory, NVRTC/nvJitLink, real libcuda userspace and cuobjdump; no GPU or cuInit. Run: one compiler-supported CC 7.5+ GPU, matching driver kernel/userspace, small problems within 8 GB.' } }
   - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
   - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' } }
   - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
@@ -82,7 +87,7 @@ head:
   - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
   - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '4 declared expectations' } }
   - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
-  - { tag: meta, attrs: { name: 'cuda:source-count', content: '4' } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '5' } }
   - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'CPython-3.14.7,cuda-core-1.2.0,cuda-bindings-13.4.1,cuda-pathfinder-1.8.1,numpy-2.5.3,CUDA-13.3.1,NVRTC-nvJitLink-13.3.33' } }
 ---
 
@@ -96,9 +101,9 @@ Complete [P02](/en/python/devices-contexts-launches/) first. EX21 is an original
 
 ## Canonical project
 
-[Inspect the project source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch) or [download the repository archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip), then use `examples/ex21-cuda-python-launch/` as the standalone root. Both links pin source commit `c3dd1067d1632560098fa42bada30d9930aec7ad`, the immutable revision used by the canonical imports. Retain that source identity with any future evidence submission; it does not itself establish a successful build or run.
+[Inspect the project source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch) or [download the repository archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip), then use `examples/ex21-cuda-python-launch/` as the standalone root. Both links pin source commit `55486357d87671e64277dfb4c09a5eef8ed1a3cd`, the immutable revision used by the canonical imports. Retain that source identity with any future evidence submission; it does not itself establish a successful build or run.
 
-The project contains `ex21.py`, `kernel.cu`, `scripts/setup.sh`, `requirements.lock`, `project.json`, the blank `environment-manifest.json`, README, and evidence instructions. Both locales import the same five ranges below. Original software is Apache-2.0 and this page is CC BY 4.0. No upstream sample, wheel, Toolkit header, or native binary is redistributed.
+The project contains `ex21.py`, `kernel.cu`, `scripts/setup.sh`, `requirements.lock`, `native-profile.json`, `project.json`, the blank `environment-manifest.json`, README, and evidence instructions. `native-profile.json` declares package/file requirements; the blank manifest is for future actual observations, not another filled profile. Both locales import the same five ranges below. Original software is Apache-2.0 and this page is CC BY 4.0. No upstream sample, wheel, Toolkit header, or native binary is redistributed.
 
 ## Independent CPU reference
 
@@ -116,6 +121,12 @@ The run path selects visible device 0, calls `dev.set_current()`, and creates an
 
 `stream.sync()` must succeed before output inspection. Every result is checked for finiteness and equality, retaining first mismatch and total count. Normal cleanup stops view use, closes Buffers on the same stream, drains queued frees with another checked sync, then closes the stream. Failure cleanup preserves the first exception and reports secondary errors/warnings; stderr may contain native cleanup diagnostics. Kernel/ObjectCode have no public close, Device has no close, and the shared primary context is not reset or destroyed.
 
+Each explicit cleanup action uses `cleanup_step` to capture both Python `sys.stderr` and native FD 2, then restore both in finally. This includes the explicit Kernel/ObjectCode reference drop, not an invented close call. Exceptions and capture/replay failures are retained in `cleanupErrors`; `cleanupWarnings` retains all nonempty captured stderr, including warnings, native destructor/callback output and whitespace. Captured output conservatively prevents a successful command verdict even if a later sync succeeds; an earlier operation's exception and stage remain primary.
+
+The helper reads at most 16,384 diagnostic bytes plus one byte to detect truncation, retains no more than 16,384 decoded characters of payload per action, and adds labels/truncation indication. Exception text is also bounded. This limits report/replay payload, not the temporary spool's disk usage. A capture setup failure is itself fatal but does not skip the release attempt. Capture changes process-global stderr and warning state, so this is a single-threaded standalone-process facility, not concurrent-library infrastructure.
+
+Only diagnostics emitted during those explicit actions enter this cleanup verdict. Destruction delayed by another owner, later garbage collection, native output flushed after capture, and interpreter-shutdown destructors after the verdict are outside it. A clean per-step capture does not certify all eventual teardown. Retain the external process stderr alongside JSON and keep completion checks separate from release attempts.
+
 ## Runtime compilation and linking
 
 <CanonicalCode exampleId="EX21" range="runtime-compile" />
@@ -123,6 +134,8 @@ The run path selects visible device 0, calls `dev.set_current()`, and creates an
 Program compiles C++17 source with a virtual `compute_...` target and relocatable device code to PTX. `Linker(ptx, options=LinkerOptions(arch="sm_..."))` explicitly links it to cubin. The CLI refuses driver-linker fallback. Inspection checks the PTX entry/target and ELF cubin, then uses the selected Toolkit's `cuobjdump --dump-sass` to check the kernel and real target. No artifact size or SASS instruction listing is claimed before execution.
 
 The no-GPU build uses explicit arch 75. It does not call Device, `set_current()`, `get_kernel()`, `launch()`, or `cuInit`. **It still needs real `libcuda` userspace:** core 1.2.0's PTX compilation queries `cuDriverGetVersion()`. A Toolkit stub, fake driver, or skipped stage is not a substitute. No NVCC invocation is needed. Loading occurs later at `linked.get_kernel("ex21_vector_add")`, not during cubin reconstruction or an invented `ObjectCode.load()` step.
+
+That no-initialization contract also depends on disabling native caching: EX21 sets `CUDA_CACHE_DISABLE=1` before CUDA imports and uses `ProgramOptions(no_cache=True)` / `LinkerOptions(no_cache=True)`, recording `cachePolicy: "disabled"`. The [NVRTC caching contract](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#caching-cuda-12-9) says default caching invokes `cuInit()` on the first compile from CUDA 12.9 onward. Merely omitting Device construction would not exclude that path. This is the implemented configuration, not a claim that native import/build validation has passed.
 
 ## Kernel and argument contract
 
@@ -145,34 +158,48 @@ Core owns the launch path; bindings expose native version/error contracts; pathf
 | Host | Native Linux x86-64, Ubuntu 24.04 LTS, glibc 2.39 |
 | Interpreter | Ordinary GIL CPython 3.14.7, `cp314-cp314`, not free-threaded |
 | Python lock | core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3 |
-| Native toolchain | System/local Toolkit 13.3.1; NVRTC and nvJitLink 13.3.33; matching cuobjdump |
-| Driver | Target 610.43.02; real userspace required for build, matching kernel/userspace packages at or above that version for run |
+| Native toolchain | NVIDIA Ubuntu deb Toolkit 13.3.1; NVRTC and nvJitLink 13.3.33; cuobjdump 13.3.73 |
+| Driver | Pinned real userspace `cuda-compat-13-3=610.43.02-1ubuntu1`; the current run gate requires a matching 610.43.02 kernel driver, not an arbitrary newer package |
 | GPU for run | One visible CC 7.5+ GPU whose plain numeric target is supported by the loaded NVRTC |
 
 Ubuntu 24.04.4, kernel 6.17.0-19 and GCC 14.3.0 are the owner's qualification row, not this project's observed machine. Record actual packages. The selected API subset is documented-compatible; wheel availability is not import, build, or runtime proof. No CUDA 12/11.8, macOS, WSL, ARM, or container-only runtime profile is added.
 
-NVRTC/nvJitLink version APIs report 13.3, not patch 33. The CLI also checks Toolkit `version.json`, resolved `libnvrtc.so.13.3.33` and `libnvJitLink.so.13.3.33` under `CUDA_PATH`, and records file hashes. File names and local hashes alone do not authenticate the upstream patch: retain package/installer provenance and loaded builtins identity. Driver API level is not driver package version. The profile does not inherit the site's C++ Toolkit Lane matrix.
+`native-profile.json`, ID `nvidia-deb-ubuntu2404-cuda1331`, declares the following five Toolkit packages plus the independent driver-userspace package, with exact status `install ok installed` and `amd64` architecture. [NVIDIA's Ubuntu 24.04 package index](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz) supplies package acquisition coordinates; publisher metadata is not a successful local installation or build report.
+
+| Required installed package | Exact Debian version | Role |
+| --- | --- | --- |
+| `cuda-compiler-13-3` | `13.3.1-1` | Toolkit release anchor for compiler packages |
+| `cuda-command-line-tools-13-3` | `13.3.1-1` | Toolkit release anchor for command-line tools |
+| `cuda-nvrtc-13-3` | `13.3.33-1` | NVRTC native library |
+| `libnvjitlink-13-3` | `13.3.33-1` | nvJitLink native library |
+| `cuda-cuobjdump-13-3` | `13.3.73-1` | Artifact-inspection executable |
+| `cuda-compat-13-3` | `610.43.02-1ubuntu1` | Separately pinned real driver userspace; not a GPU/kernel-driver installation |
+
+`check_native_packages` reads the real dpkg database through `/usr/bin/dpkg-query`; `inspect_native_file` checks exclusive package ownership of each resolved native file and records its path, package version, binary SHA-256 and file identity in `environment.nativeFiles`. No required `version.json` is read or fabricated; the official Debian-based devel image does not supply it, and there is no runfile fallback. Missing/wrong package versions, status, architecture or file ownership are profile failures. NVRTC/nvJitLink API queries still expose only 13.3, not patch 33; the configured `libnvrtc.so.13.3.33` and `libnvJitLink.so.13.3.33` names and binary hashes are separate checks. Actual discovery of NVRTC, nvJitLink and libcuda must match their inspected package-owned files. The driver API level is not its Debian package version. The profile does not inherit the site's C++ Toolkit Lane matrix.
+
+Disk and loaded-library records are deliberately different. The package-only phase records `environment.nativeFiles.nvrtcBuiltins` on disk but creates no `nativeLibraries` record. On entering native-library validation, `environment.nativeLibraries.nvrtcBuiltins` starts as null. Only after NVRTC compilation can `observe_nvrtc_builtins` record a successful `/proc/self/maps` match with the expected path, backing-file inode/device identity, ownership and hash. A preflight does not invent that mapping, and no loaded-builtins observation is claimed here. Preserve acquisition provenance as well as local records; package-database and hash agreement is not a general authenticity guarantee for a tampered machine.
 
 ## Setup and GPU-free build
 
-Provision the exact interpreter, selected Toolkit, real driver userspace library, and cuobjdump first. From a fresh standalone working copy, `CUDA_PATH` defaults to `/usr/local/cuda-13.3`; if set, `CUDA_HOME` must resolve to the same root. Setup creates `.venv`, refuses to overwrite an existing one, and installs the exact four-wheel closure using `--require-hashes --only-binary=:all:`. It installs neither native CUDA extras nor the system interpreter/driver.
+Provision the exact interpreter, selected NVIDIA Ubuntu deb packages, real driver userspace library, and cuobjdump first. `/usr/bin/dpkg-query` and `/var/lib/dpkg` must be available. The profile fixes the root at `/usr/local/cuda-13.3`; `CUDA_PATH` and optional `CUDA_HOME` must resolve to that same root, not relocate it. Those variables do not replace installed-package/ownership checks. Setup creates `.venv`, refuses to overwrite an existing one, and installs the exact four-wheel closure using `--require-hashes --only-binary=:all:`. It installs neither native CUDA packages nor the system interpreter/driver, and does not support a runfile installation.
 
 ```sh
 bash scripts/setup.sh
 .venv/bin/python ex21.py host-test
+.venv/bin/python ex21.py check-environment --phase native-packages
 .venv/bin/python ex21.py check-environment
 .venv/bin/python ex21.py build --arch 75
 ```
 
-On a prepared copy, omit setup. The default native environment check validates packages/imports/native libraries and supported architecture queries without device initialization. The build then compiles, links, and inspects without a GPU. Missing real driver userspace or an unsupported target is a failure, not permission to bypass a check.
+On a prepared copy, omit setup. The `native-packages` phase checks installed packages and disk-file ownership/hashes before importing CUDA. It does not prove that driver userspace loads. The default native phase additionally checks canonical imports, actually discovered libraries and API queries without device initialization; its builtins-loaded field remains null until compilation and the mapping check. The build is designed to compile, link and inspect without a GPU. These later stages still require validation; a passed package-only preflight is not a passing build. Missing real driver userspace or an unsupported target is a failure, not permission to bypass a check.
 
-For a development machine without CUDA packages, the separate CPU-logic check can use a local Python 3.10+ interpreter from the same project directory:
+For a development machine without CUDA packages, the separate CPU-logic check can use a local CPython 3.10+ interpreter from the same project directory:
 
 ```sh
 python3 -I -S ex21.py host-test
 ```
 
-This mode neither imports CUDA nor validates the selected profile. It tests original input/reference/validator logic with stdlib ctypes storage and independent literals, not simulated device buffers. The interpreter exception applies only to `host-test`; setup, environment, build and run retain the exact CPython 3.14.7 profile.
+This mode neither imports CUDA nor validates the selected profile. It tests original input/reference/validator logic with stdlib ctypes storage and independent literals, not simulated device buffers. Its separate `cleanupChecks` exercise diagnostic capture, restoration, truncation and first-error preservation and deliberately replay labeled expected diagnostics to stderr. Host-test acceptance is their correct classification, not empty stderr; these diagnostic self-tests are not run as part of `run`'s CPU correctness checks. The interpreter exception applies only to `host-test`; setup, environment, build and run retain the exact CPython 3.14.7 profile.
 
 Build outputs default to `build/compile`: `report.json`, `ex21.ptx`, `ex21.cubin`, `nvrtc.log`, `link-info.log`, `link-error.log`, and `sass.txt`. Existing result files are rejected. For another attempt, choose a fresh `--output-dir`, such as `build/compile-second`; do not overwrite an earlier verdict. Retain actual exit status and stderr with JSON reports. No successful build is asserted on this page.
 
@@ -196,6 +223,8 @@ Run uses the selected GPU's exact supported target, rebuilds through the same PT
 
 Reports distinguish profile, library discovery, compilation, linking, artifact inspection, allocation, lazy lookup, launch, copy, sync, correctness and cleanup. An attempted launch with failed completion is not successful execution. An empty `nvrtc.log` on compile failure may coexist with the compiler log attached to the exception. Retain the first exception and subsequent log/cleanup errors separately. Failed work must exit nonzero, never fall back to comparing stale host output.
 
+Package failures use `native-packages` or `native-package-files`, before `canonical-imports` and `native-libraries`. `inspect-nvrtc-builtins` occurs after compilation but before PTX persistence/linking; a failure there must not be mislabeled as a successful complete build or diagnosed solely from a missing artifact file. Use the reported stage and actual diagnostics, not an assumed installation layout.
+
 In the actual JSON contract, `launchAttempted` records submission intent, and `gpuExecuted` becomes `null` before submission because completion is unknown if launch, copy or sync fails. It becomes `true` only after the checked stream sync; a later correctness or cleanup failure still leaves `result: "fail"`. None of these fields alone is a maintainer Runtime-Verified claim. Retain both stdout JSON and stderr diagnostics.
 
 The program supplies no timer. First-use compilation/loading, allocations, copies and CPU checking cannot be silently excluded from an end-to-end performance claim. Nonblocking stream or pinned-memory use alone is not an overlap measurement.
@@ -203,6 +232,8 @@ The program supplies no timer. First-use compilation/loading, allocations, copie
 ## Evidence boundary
 
 Compilation and recorded observations are empty. Runtime remains **Pending Hardware Verification**. No Linux install, CUDA build, GPU correctness, cleanup behavior, timing, or speedup is claimed from this publication work. Source/tests inspection and CPU tests do not upgrade evidence. Build mode does not make the whole example Runtime-Not-Applicable, because its acceptance includes GPU output.
+
+The initial real EX21 CI attempt failed because it required `version.json` from an official NVIDIA Debian installation that does not provide it. Replacing that incorrect prerequisite with installed-package and ownership checks is not a passing rerun. Driver userspace/import validation and the native build remain pending; no success log or loaded-library observation is invented here.
 
 ## Expected observations
 

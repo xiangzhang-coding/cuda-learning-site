@@ -36,6 +36,16 @@ sources:
     version: 'CPython 3.14.7'
     platform: 'Ordinary GIL CPython, native Linux x86-64'
     accessDate: '2026-09-12'
+  - title: 'CUDA C++ Runtime lifecycle API reference'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Native Linux; device, allocation, transfer, stream and completion responsibilities'
+    accessDate: '2026-09-12'
+  - title: 'CUDA C++ Driver lifecycle API reference'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Native Linux; primary-context retain/current state, module/function handles and launch'
+    accessDate: '2026-09-12'
 head:
   - { tag: meta, attrs: { name: 'cuda:pair-id', content: p02 } }
   - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/python/devices-contexts-launches/' } }
@@ -55,8 +65,8 @@ head:
   - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
   - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
   - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
-  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
-  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,CPython-3.14.7' } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '5' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,CPython-3.14.7,CUDA-13.3.1' } }
 ---
 
 import CanonicalCode from '../../../components/CanonicalCode.astro';
@@ -74,6 +84,25 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 ## 对象语法仍保留 Driver API 模型
 
 Runtime API 常让上下文设置看起来是隐式完成的；Driver API 则更直接地暴露上下文选择和句柄。Python 对象接口让这一模型更容易表达，但没有消除它。core 1.2.0 基于具有共享所有权的原生 CUDA 对象，并为部分对象提供清理方法；它不是一套所有对象都像文件一样有 `close()` 的协议。理解这个区别，比背构造函数名单更有用。
+
+用下面的生命周期对照表，将 [F04](/foundations/host-device-lifecycle/)、[F07](/foundations/runtime-driver-api/)及 [M07](/memory/stream-ordering/)教过的**责任**迁移到 Python 方案。两列在概念上对应，**不是一对一调用转发，也不表示所有权可以互换**。表中 C++ 指主机侧 Runtime 或 Driver API，不是另一种 GPU 执行模型；`s` 表示自己拥有的 Python 流。
+
+| 责任 | CUDA C++ API 或句柄 | core 1.2.0 方案 | 调用者仍需负责什么 |
+| --- | --- | --- | --- |
+| 选择执行设备 | `cudaSetDevice(0)`；Driver 代码在 `cuInit` 后取得 `CUdevice` | `dev = Device(0)`，随后 `dev.set_current()` | Toolkit 13.3.1 的 cudaSetDevice 绑定并初始化该设备的 Runtime 主上下文状态，但不等待工作完成。只构造 Device 不建立所需当前上下文；两条路径都不计算结果。 |
+| 持有上下文并设为当前 | `cuDevicePrimaryCtxRetain(&ctx, device)` 得到 `CUcontext`；`cuCtxSetCurrent(ctx)` 将其绑定到调用线程 | 默认 `dev.set_current()` 持有并选择共享主上下文；通过 `dev.context` 查看 | Driver retain 本身不把上下文设为当前。C++ 持有者按上下文/生命周期规则用 `cuDevicePrimaryCtxRelease` 平衡自己的 retain；core 的借用者不能释放 core 的 retain 或重置共享状态。 |
+| 分配设备字节 | `cudaMalloc` 或按流排序的 `cudaMallocAsync`；设备指针值存于主机变量 | `dev.allocate(nbytes, stream=s)` 返回 Buffer | 计算字节数，保留位置与最后使用边界。core 选择关联内存资源，可能用池，也可能回退到同步路径；不保证调用 cudaMallocAsync，更不证明分配重叠。 |
+| 分配主机传输存储 | `cudaMallocHost` 提供调用者拥有的主机存储，`cudaFreeHost` 释放 | `LegacyPinnedMemoryResource().allocate(nbytes, stream=s)` 提供主机可访问 Buffer | 旧式资源采用同步 `cuMemAllocHost`，不是异步分配。ctypes 数组视图借用 Buffer，不是 C++ 自有容器或数据副本。 |
+| 创建排序域 | `cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking)` 得到 `cudaStream_t` | `dev.create_stream(options=StreamOptions(nonblocking=True))` 得到自有 Stream | 流必须关联正确上下文。nonblocking 去掉旧式 NULL 流的隐式依赖，不取消主机读取前的等待要求，也不证明重叠。 |
+| 传输已初始化输入与结果 | `cudaMemcpyAsync(dst, src, nbytes, kind, stream)` 指定字节数、方向和流 | H2D：`d.copy_from(h, stream=s)`；D2H：`d.copy_to(h, stream=s)` | core 普通整 Buffer 复制要求范围相等，并根据指针推断方向。显式给出主机目标；省略目标会从源内存资源分配。传输使用期间保持主机内容稳定。 |
+| 取得可执行代码与核函数 | 传统 Runtime 启动使用已注册核函数符号及托管模块；显式 Driver 路径使用 `cuModuleLoadData` / `CUmodule`，再用 `cuModuleGetFunction` / `CUfunction` | cubin ObjectCode 通过 `linked.get_kernel("ex21_vector_add")` 提供 Kernel | 这是延迟加载/查找边界，不是编译或执行。core 的 ObjectCode 原生句柄是 Driver `CUlibrary`，不能视为 Runtime 托管所有权，也不是可手动卸载的 `CUmodule`。 |
+| 提交带配置的启动 | `kernel<<<grid, block, 0, stream>>>(...)`，或以显式参数存储调用 `cuLaunchKernel` | `launch(s, config, kernel, d_a, d_b, d_c, ctypes.c_uint32(n))`，配置为 `LaunchConfig(grid=grid, block=block)` | 对齐 grid/block、EX21 的零动态共享内存、指针生命周期和标量 ABI。C++ 参数有类型，不代表 Python int 就是 32 位无符号数；core 不推断核函数签名。 |
+| 检查前确认完成 | 检查 `cudaStreamSynchronize(stream)`；F04 的 `cudaDeviceSynchronize()` 范围更广 | 检查 `s.sync()`；`dev.sync()` 范围更广 | 异步路径在等待前提交 D2H，之后才检查全部输出。提交成功、源码先后或流的析构都不能替代完成检查。 |
+| 最后使用后只释放自有资源 | 显式或由 RAII 管理 `cudaFree` / `cudaFreeAsync`、`cudaFreeHost`，再 `cudaStreamDestroy`；独立拥有的 Driver 上下文/模块另按其规则平衡释放 | `buffer.close(stream=s)`，以 `s.sync()` 等待排队释放，再 `s.close()` | 持有资源到工作完成。Kernel/ObjectCode 没有公开 close；Device 和共享主上下文不是私有清理目标。清理诊断不等于结果成功。 |
+
+F04 的规范 C++ 示例特意先检查 `cudaDeviceSynchronize()`，再执行阻塞式 D2H `cudaMemcpy`。EX21 则在显式流上排队异步 D2H，再检查 `s.sync()`。两者都在 CPU 验收前建立完成边界，但若照抄 F04 的行顺序到异步复制方案，会漏掉后续复制的完成边界。M07 的流内顺序解释了 EX21 为何无需在每两步之间都增加设备级等待。
+
+错误处理也迁移责任，而非照搬拼写。F04 检查 `cudaError_t`，并在 C++ 启动表达式之后检查 `cudaGetLastError`；Driver 路径检查 `cuLaunchKernel` 的 `CUresult`。core 用 Python 异常报告启动调用失败，之后仍需独立检查同步以发现延迟错误。不能附加一个 Runtime 最后错误查询就认为它验证了基于 Driver 的 core 启动，也不能因提交未抛异常就省掉完成检查。
 
 ## 先选设备，再建立当前上下文
 
@@ -130,7 +159,11 @@ H2D 输入使用 `d.copy_from(h, stream=s)`，D2H 输出使用 `d.copy_to(h, str
 
 `Kernel` 保留库的所有权。`ObjectCode.handle` 是 `CUlibrary`，不是旧式 `CUmodule`；不能传给 `cuModuleUnload`，也不能手动卸载仍由 core 拥有的库。释放一条 Python 引用，不等于在所有情况下都立即销毁底层对象。
 
-发生错误后，停止提交，保留首个错误，尝试检查完成并清理已取得的资源，将后续错误分开报告。销毁流不能替代完成检查。旧式页锁定释放会先同步其流；Buffer 的 RAII 清理可能以警告报告问题，不保证每个释放错误都抛出异常。保留警告、stderr 和显式同步错误，绝不能再通过原生绑定重复释放。若异步故障使队列无法正常完成，应以失败终止，而不是继续验收或声称上下文可以健康复用。
+发生错误后，停止提交，保留首个错误，尝试检查完成并清理已取得的资源，将后续错误分开报告。销毁流不能替代完成检查。旧式页锁定释放会先同步其流。EX21 的 `cleanup_step` 在每次显式清理动作期间同时捕获 Python `sys.stderr` 与原生文件描述符 2，之后恢复两者。异常/捕获失败进入 `cleanupErrors`；全部捕获的 stderr 进入 `cleanupWarnings`，不只限于 Python 警告。任何非空捕获输出，包括纯空白，都阻止命令判为成功；之后同步成功也不抹掉它。不能通过原生绑定重复释放，也不能把失败等待叫作验收成功。
+
+该助手每次动作最多保留 16,384 字节诊断载荷，多读一字节判断截断，解码文本也限制为 16,384 字符，再附动作标签与截断标记。异常文本同样受限；报告/回放边界不限制临时文件的磁盘占用。捕获或回放失败本身是清理失败，捕获准备失败也不能成为跳过释放尝试的理由。原操作异常及所在阶段仍是主要诊断。
+
+显式放弃 Kernel/ObjectCode 引用也经过该助手，不虚构 close 方法。判定只覆盖这些显式动作期间发出的诊断，不覆盖因其他持有者延后的析构、之后的 GC、稍后才输出的原生缓冲内容，或判定之后的解释器关闭。捕获会修改进程全局 stderr 与警告状态，因此仅适合这个单线程独立进程。JSON 之外仍要保留外部 stderr；有界捕获干净不证明最终所有原生清理均成功。
 
 ## 找到最早被破坏的合同
 
@@ -144,7 +177,7 @@ H2D 输入使用 `d.copy_from(h, stream=s)`，D2H 输出使用 `d.copy_to(h, str
 
 ## 引导实践：画出并检查完整生命周期
 
-1. 将所有权表写到工作纸上，标出六个 Buffer、各主机视图、流和核函数/库引用的持有者。在执行前预测 1003 个元素的启动几何和字节数。
+1. 在 CUDA C++ / core 对照表中标出六个 Buffer、各主机视图、流和核函数/库引用的持有者与最后使用。指出哪些责任保持不变，哪些所有权或调用语义不同。在执行前预测 1003 个元素的启动几何和字节数。
 2. 使用 P01 中匹配的外部 Linux 配置，进入独立 EX21 目录。若尚未准备，先运行安装脚本，再检查环境：
 
 ```sh
@@ -152,7 +185,7 @@ bash scripts/setup.sh
 .venv/bin/python ex21.py check-environment
 ```
 
-3. 将实际包身份与固定配置对照，将原生库身份与 NVRTC/nvJitLink 13.3.33 对照。设备访问、驱动和目标支持是另行检查的条件。任何必要门槛失败时，记录阻塞并停止。
+3. 将实际 Python 固定版本和 NVIDIA Ubuntu deb 清单与配置对照，再检查 NVRTC/nvJitLink 13.3.33 原生文件身份及所属包。这种安装方式不要求 Toolkit `version.json`。设备访问、驱动用户态验证和目标支持仍须分别检查；这里不声明它们已经通过。任何必要门槛失败时，记录阻塞并停止。
 4. 只有满足运行门槛后，才执行规范正确性路径：
 
 ```sh
@@ -181,6 +214,8 @@ bash scripts/setup.sh
 
 ## 来源与许可
 
-可在[规范 EX21 源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch)中跟踪所有权顺序，或[下载同一不可变仓库修订](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip)，打开 `examples/ex21-cuda-python-launch/`。这就是导入的生命周期与核函数片段所用源码，不是运行观察。
+表中 C++ 一侧核对于 Toolkit 13.3.1 [设备 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__DEVICE.html)、[内存 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__MEMORY.html)、[按流排序的分配](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html)、[流 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__STREAM.html)，以及 Driver [主上下文 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__PRIMARY__CTX.html)、[当前上下文 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__CTX.html)、[模块 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__MODULE.html)与[启动 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__EXEC.html)，访问日期 **2026-09-12**。F04/F07/M07 保留原示例与日期；本对照不改写它们，也不提供另一份可执行实现。
+
+可在[规范 EX21 源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch)中跟踪所有权顺序，或[下载同一不可变仓库修订](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip)，打开 `examples/ex21-cuda-python-launch/`。这就是导入的生命周期与核函数片段所用源码，不是运行观察。
 
 复核日期 **2026-09-12**。[SRC-CUDA-077](/sources-and-versions/#src-cuda-077)保留 Buffer、上下文、启动器、旧式页锁定资源和共享库所有权的精确源码/测试坐标；[SRC-CUDA-079](/sources-and-versions/#src-cuda-079)保留唯一配置。参阅[主上下文](/glossary/#term-198)、[核函数参数封送](/glossary/#term-199)与[借用视图](/glossary/#term-200)。原创讲解和练习采用 CC BY 4.0，导入的原创源码采用 Apache-2.0。上游测试只作参考，不是已执行证据，也没有复制其示例。

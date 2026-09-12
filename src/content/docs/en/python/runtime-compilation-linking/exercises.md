@@ -58,6 +58,10 @@ Submit artifact and error-flow tables before reading the [solutions](/en/python/
 
 **Constraints:** A build worker has the selected Python packages and native compiler/linker libraries but no GPU. Its proposed plan queries `Device(0).arch`, compiles source with `compute_75`, extracts a cubin directly from that virtual-target compilation, calls `ObjectCode.load()`, and marks EX21 Runtime-Not-Applicable because no kernel was launched. A second proposal compiles directly to cubin with `sm_75`, names that step “explicit nvJitLink,” and caches the result under only the entry-point name.
 
+The native libraries come from the selected NVIDIA Ubuntu deb installation, which has no Toolkit `version.json`. Add a profile-identity stage based on EX21's five Toolkit packages, its independently pinned driver-userspace package, and file ownership rather than fabricating that file or introducing a runfile fallback. The supplied scenario does not establish successful driver userspace loading or imports.
+
+Carry over EX21's cache-disabled configuration as well: default NVRTC caching can invoke `cuInit()` independently of Device construction. State where `CUDA_CACHE_DISABLE=1` is set and which core options disable caching; do not infer no initialization solely from the absence of a GPU launch.
+
 **Expected evidence:** Rewrite the first plan as a stage/inputs/outputs table compatible with `build --arch 75`; identify every rejected step and separate later runtime obligations. Contrast the direct-cubin alternative without mislabelling it. Define minimum identity fields for a hypothetical artifact cache and show why changing source while preserving the function name must invalidate the old entry.
 
 **Acceptance criteria:** The build target is explicit, not device-derived. PTX compilation uses a virtual target and relocatable device code; `Linker(ptx, options=...)` links for the real target and verifies the nvJitLink backend. No lookup, device initialization, launch, or sync is added to the build. Nonempty artifact checks do not prove load or correctness. A cache design grants no unmeasured speedup or blanket cross-device compatibility.
@@ -73,6 +77,8 @@ Submit artifact and error-flow tables before reading the [solutions](/en/python/
 **Constraints:** A proposed generic wrapper always unpacks `(status, value)`. It calls `nvrtcCreateProgram(source)` with one argument, uses immutable `bytes(size)` for nvJitLink output, and destroys the linker before trying to read an error log. Review three hypothetical cases: A, NVRTC compilation returns `NVRTC_ERROR_COMPILATION` and log-size retrieval also fails; B, nvJitLink create raises before returning a handle; C, create succeeds, complete raises, the error-log size query succeeds with 17 bytes, log retrieval succeeds, and destroy also raises. No exact diagnostic text is supplied.
 
 **Expected evidence:** Correct creation signatures and return shapes for both APIs, success-output paths, a per-case primary/secondary diagnostic ledger, and which cleanup/log calls are legal. Explain successful core compilation logs versus exception-carried diagnostics after failed core compilation.
+
+For the canonical CLI's explicit cleanup, also distinguish Python stderr/FD 2 capture from eventual destructor coverage. A bounded retained diagnostic payload is not a temporary-disk bound or a guarantee to observe output emitted by later GC/shutdown after the verdict.
 
 **Acceptance criteria:** Check every NVRTC status; do not treat nvJitLink values as status tuples. A valid linker uses queried-size `bytearray` output and is destroyed once in a finally path. Case B cannot query logs or destroy an unacquired handle; case C preserves complete failure as primary even when cleanup fails. Missing libraries and Python argument errors remain distinct. Do not invent log contents or import private core error classes.
 

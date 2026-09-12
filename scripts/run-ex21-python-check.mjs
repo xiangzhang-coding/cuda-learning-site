@@ -5,7 +5,7 @@
 // https://docs.python.org/release/3.14.7/using/unix.html#building-python
 // dpkg-deb --extract unpacks data only; no package installation scripts are run.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { lstat, mkdir, mkdtemp, open, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -15,8 +15,6 @@ import { scanArtifactBuffer } from './lib/quality-policy.mjs';
 const image = 'nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87';
 const pythonUrl = 'https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz';
 const pythonSha256 = '3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81';
-const driverUrl = 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-compat-13-3_610.43.02-1ubuntu1_amd64.deb';
-const driverSha256 = '4d3b3bfe6e6a53b2153383b2f74f139339c7e5ffbf657d6af7c3967b8b670386';
 const wheels = {
   'cuda-core': ['1.2.0', 'e138be12af795c69c1cb61e38562ea70e5a38616b2753e2a265231f1941394ef'],
   'cuda-bindings': ['13.4.1', '62df23df11074e9833bf348bbcf0b8eec2fcbded4f305c6fbaa3ed067433e97d'],
@@ -24,6 +22,11 @@ const wheels = {
   numpy: ['2.5.3', 'b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b'],
 };
 const root = path.resolve(import.meta.dirname, '..');
+const nativeProfileBytes = await readFile(path.join(root, 'examples/ex21-cuda-python-launch/native-profile.json'));
+const nativeProfile = JSON.parse(nativeProfileBytes);
+const driverUrl = nativeProfile.archives['cuda-compat-13-3'].url;
+const driverSha256 = nativeProfile.archives['cuda-compat-13-3'].sha256;
+const packageFormat = '${Package}\\t${Status}\\t${Version}\\t${Architecture}\\n';
 const artifactPath = 'artifacts/cuda-ex21/ex21-cpython-3-14-7-cuda-13-3-1-sm75';
 // Nothing is recursively copied from the project, interpreter, downloads or build tree.
 const allowedReports = [
@@ -32,6 +35,9 @@ const allowedReports = [
   'environment.json', 'environment.log', 'build.json', 'build.log', 'nvrtc.log',
   'link-info.log', 'link-error.log', 'sass.txt', 'invalid.json', 'invalid.log',
   'stale.json', 'stale.log', 'checks.json',
+  'native-packages.json', 'native-packages.log', 'compiler-missing.json', 'compiler-missing.log',
+  'compiler-unpacked.json', 'compiler-unpacked.log', 'native-packages-restored.json',
+  'native-packages-restored.log', 'package-mutation.log', 'unowned-library.json', 'unowned-library.log',
 ];
 
 const containerScript = String.raw`
@@ -45,7 +51,7 @@ apt-get update
 apt-get install -y --no-install-recommends build-essential ca-certificates curl xz-utils \
   libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev \
   liblzma-dev libzstd-dev libncurses-dev libgdbm-dev uuid-dev pkg-config
-dpkg-query -W > /reports/packages.txt
+LC_ALL=C /usr/bin/dpkg-query --admindir=/var/lib/dpkg --showformat='${packageFormat}' --show > /reports/packages.txt
 mkdir -p /work /opt/ex21-driver
 cd /work
 download() {
@@ -55,11 +61,14 @@ download() {
 }
 download '${pythonUrl}' '${pythonSha256}' python.tar.xz
 download '${driverUrl}' '${driverSha256}' compat.deb
+download '${nativeProfile.archives['cuda-compiler-13-3'].url}' '${nativeProfile.archives['cuda-compiler-13-3'].sha256}' compiler.deb
 test "$(dpkg-deb --field compat.deb Package)" = cuda-compat-13-3
 test "$(dpkg-deb --field compat.deb Version)" = 610.43.02-1ubuntu1
 test "$(dpkg-deb --field compat.deb Architecture)" = amd64
 dpkg-deb --extract compat.deb /opt/ex21-driver
 test -f /opt/ex21-driver/usr/local/cuda-13.3/compat/libcuda.so.610.43.02
+cmp /opt/ex21-driver/usr/local/cuda-13.3/compat/libcuda.so.610.43.02 \
+  /usr/local/cuda-13.3/compat/libcuda.so.610.43.02
 tar --extract --xz --file python.tar.xz
 cd /work/Python-3.14.7
 ./configure --prefix=/opt/ex21-python --with-ensurepip=install
@@ -68,10 +77,11 @@ make altinstall
 export PATH=/opt/ex21-python/bin:$PATH
 export CUDA_PATH=/usr/local/cuda-13.3
 export CUDA_HOME=/usr/local/cuda-13.3
-export LD_LIBRARY_PATH=/opt/ex21-driver/usr/local/cuda-13.3/compat:/usr/local/cuda-13.3/lib64
+export CUDA_CACHE_DISABLE=1
+export LD_LIBRARY_PATH=/usr/local/cuda-13.3/compat:/usr/local/cuda-13.3/lib64
 mkdir -p /work/project/scripts
 cp /source/ex21.py /source/kernel.cu /source/project.json /source/requirements.lock \
-  /source/environment-manifest.json /work/project/
+  /source/environment-manifest.json /source/native-profile.json /work/project/
 cp /source/scripts/setup.sh /work/project/scripts/
 cd /work/project
 bash scripts/setup.sh > /reports/setup.log 2>&1
@@ -82,8 +92,8 @@ bash scripts/setup.sh > /reports/setup.log 2>&1
   /usr/local/cuda-13.3/bin/cuobjdump --version
 } > /reports/native-tools.txt 2>&1
 sha256sum /opt/ex21-python/bin/python3.14 \
-  /opt/ex21-driver/usr/local/cuda-13.3/compat/libcuda.so.610.43.02 \
-  /usr/local/cuda-13.3/version.json > /reports/file-hashes.txt
+  /usr/local/cuda-13.3/compat/libcuda.so.610.43.02 \
+  /work/project/native-profile.json /reports/packages.txt > /reports/file-hashes.txt
 .venv/bin/python -I - <<'PY'
 import hashlib
 import json
@@ -99,7 +109,8 @@ expected_wheels = json.loads('${JSON.stringify(wheels)}')
 installation = json.loads((project / 'build/setup-install.json').read_text())
 installed = {}
 for item in installation['install']:
-    installed[item['metadata']['name']] = [item['metadata']['version'],
+    name = re.sub(r'[-_.]+', '-', item['metadata']['name']).lower()
+    installed[name] = [item['metadata']['version'],
         item['download_info']['archive_info']['hashes']['sha256']]
 if installed != expected_wheels or len(installation['install']) != 4:
     raise RuntimeError('Installed artifacts do not match the four hash-pinned wheels')
@@ -123,14 +134,56 @@ def cli(name, entry, arguments, expected_status=0):
 
 try:
     cli('host-test', project / 'ex21.py', ['host-test'])
+    native = cli('native-packages', project / 'ex21.py', ['check-environment', '--phase', 'native-packages'])
+    # These are real dpkg operations inside this disposable container, before loading CUDA.
+    with (reports / 'package-mutation.log').open('w') as mutation_log:
+        try:
+            subprocess.run(['/usr/bin/dpkg', '--force-depends', '--remove', 'cuda-compiler-13-3'],
+                           check=True, stdout=mutation_log, stderr=subprocess.STDOUT)
+            missing = cli('compiler-missing', project / 'ex21.py', ['check-environment', '--phase', 'native-packages'], 1)
+            if missing['stage'] != 'native-packages' or 'cuda-compiler-13-3' not in missing['error']['message']:
+                raise RuntimeError('Missing compiler metapackage was not rejected')
+            subprocess.run(['/usr/bin/dpkg', '--unpack', '/work/compiler.deb'],
+                           check=True, stdout=mutation_log, stderr=subprocess.STDOUT)
+            unpacked = cli('compiler-unpacked', project / 'ex21.py', ['check-environment', '--phase', 'native-packages'], 1)
+            if unpacked['stage'] != 'native-packages' or 'install ok unpacked' not in unpacked['error']['message']:
+                raise RuntimeError('An unpacked but unconfigured compiler package was accepted')
+        finally:
+            subprocess.run(['/usr/bin/dpkg', '--install', '/work/compiler.deb'],
+                           check=True, stdout=mutation_log, stderr=subprocess.STDOUT)
+    original = Path(native['environment']['nativeFiles']['nvrtc']['path'])
+    backup = original.with_name(original.name + '.ex21-backup')
+    unowned = original.parent / 'ex21-unowned' / original.name
+    unowned.parent.mkdir()
+    shutil.copyfile(original, unowned)
+    original.rename(backup)
+    try:
+        original.symlink_to(unowned)
+        unowned_result = cli('unowned-library', project / 'ex21.py', ['check-environment', '--phase', 'native-packages'], 1)
+        if unowned_result['stage'] != 'native-package-files' or 'package ownership mismatch' not in unowned_result['error']['message']:
+            raise RuntimeError('An unowned copy of the real NVRTC library was accepted')
+    finally:
+        original.unlink(missing_ok=True)
+        backup.rename(original)
+        unowned.unlink()
+        unowned.parent.rmdir()
+    restored = cli('native-packages-restored', project / 'ex21.py', ['check-environment', '--phase', 'native-packages'])
+    if restored['environment']['nativeFiles'] != native['environment']['nativeFiles'] or \
+            restored['environment']['toolkit']['packages'] != native['environment']['toolkit']['packages']:
+        raise RuntimeError('Native package/file inspection was not restored')
     env = cli('environment', project / 'ex21.py', ['check-environment'])
     driver = env['environment']['nativeLibraries']['cuda']
     if driver['binaryCoordinate'] != '610.43.02' or driver['path'] != \
-            '/opt/ex21-driver/usr/local/cuda-13.3/compat/libcuda.so.610.43.02':
+            '/usr/local/cuda-13.3/compat/libcuda.so.610.43.02':
         raise RuntimeError('The selected real driver library was not loaded')
     build = cli('build', project / 'ex21.py', ['build', '--arch', '75'])
-    if build['backend'] != 'nvJitLink' or build['arch'] != '75':
+    if build['backend'] != 'nvJitLink' or build['arch'] != '75' or build['cachePolicy'] != 'disabled':
         raise RuntimeError('Unexpected compiler target or linker backend')
+    builtins = build['environment']['nativeLibraries']['nvrtcBuiltins']
+    if builtins['observedVia'] != '/proc/self/maps after NVRTC compilation' or \
+            builtins['package'] != 'cuda-nvrtc-13-3' or builtins['packageVersion'] != '13.3.33-1' or \
+            builtins['sha256'] != native['environment']['nativeFiles']['nvrtcBuiltins']['sha256']:
+        raise RuntimeError('Loaded NVRTC-builtins was not observed and package-checked')
     build_dir = project / 'build/compile'
     for artifact in build['artifacts']:
         data = (build_dir / artifact['path']).read_bytes()
@@ -152,6 +205,7 @@ try:
     invalid = Path('/work/invalid')
     invalid.mkdir()
     shutil.copyfile(project / 'ex21.py', invalid / 'ex21.py')
+    shutil.copyfile(project / 'native-profile.json', invalid / 'native-profile.json')
     (invalid / 'kernel.cu').write_text('#error EX21_EXPECTED_NVRTC_FAILURE\n')
     failure = cli('invalid', invalid / 'ex21.py', ['build', '--arch', '75'], 1)
     if failure['stage'] != 'compile-ptx' or failure['error']['type'] != 'NVRTCError' or \
@@ -160,6 +214,10 @@ try:
     (reports / 'checks.json').write_text(json.dumps({
         'result': 'pass', 'hostTest': 'pass', 'canonicalImports': 'pass',
         'ptxCubinInspection': 'pass', 'invalidNvrtcRejected': True,
+        'missingCompilerRejected': True, 'unpackedCompilerRejected': True,
+        'unownedLibraryRejected': True, 'nativePackageStateRestored': True,
+        'nvrtcBuiltinsObserved': True,
+        'compilerAndLinkerCacheDisabled': True,
         'staleOutputRejectedAndUnchanged': True, 'gpuExecuted': False,
         'driverInitialized': False, 'runtimeEvidence': 'Pending Hardware Verification',
     }, indent=2))
@@ -195,6 +253,9 @@ async function main() {
     kind: 'python-build-gate', result: 'fail', image,
     pythonSource: { url: pythonUrl, sha256: pythonSha256 },
     userspaceDriver: { url: driverUrl, sha256: driverSha256, version: '610.43.02-1ubuntu1' },
+    compilerMetapackage: nativeProfile.archives['cuda-compiler-13-3'],
+    nativeProfile: nativeProfile.id,
+    nativeProfileSha256: createHash('sha256').update(nativeProfileBytes).digest('hex'),
     expectedWheels: wheels, stages: {}, gpuExecuted: false,
     checkedAt: new Date().toISOString(),
     runtimeEvidence: 'Pending Hardware Verification',
@@ -221,6 +282,10 @@ async function main() {
         cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
       }).trim();
       record.buildContractSha256 = await hashCanonicalBuildContract(root, 'EX21');
+      record.runnerInputs = {};
+      for (const input of ['scripts/run-ex21-python-check.mjs', 'scripts/lib/canonical-examples.mjs', 'scripts/lib/quality-policy.mjs']) {
+        record.runnerInputs[input] = createHash('sha256').update(await readFile(path.join(root, input))).digest('hex');
+      }
       await docker(['pull', '--platform', 'linux/amd64', image], 'pull.log');
       await docker(['image', 'inspect', '--format',
         '{"id":"{{.Id}}","architecture":"{{.Architecture}}","os":"{{.Os}}"}', image], 'image.json');

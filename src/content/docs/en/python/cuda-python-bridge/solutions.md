@@ -61,6 +61,8 @@ The repaired profile uses native Linux x86-64 Ubuntu 24.04, ordinary GIL CPython
 
 Use exact base distributions and their reviewed wheel hashes, without extras that can select a different native Toolkit family/minor. NumPy remains required by core even without an EX21 NumPy import. A lock does not prove import success or loaded native identities, nor freeze the interpreter, driver, OS packages, or GPU. Record resolved native paths, versions and package identities separately; the same major-family support policy still has API-specific limits.
 
+The native installation is the single NVIDIA Ubuntu deb profile: `cuda-compiler-13-3` and `cuda-command-line-tools-13-3` are each `13.3.1-1`; `cuda-nvrtc-13-3` and `libnvjitlink-13-3` are each `13.3.33-1`; `cuda-cuobjdump-13-3` is `13.3.73-1`. `native-profile.json` independently pins `cuda-compat-13-3=610.43.02-1ubuntu1` for real driver userspace; the current run gate requires a matching kernel driver. Check installed amd64 records and ownership of resolved native files, retain NVRTC/nvJitLink patch-bearing filenames and binary hashes, and do not confuse cuobjdump's package version with its plain executable filename. Missing/mismatched required packages fail the profile; absence of `version.json` does not. A fabricated file asserts a label, not package provenance. API queries expose major/minor, not the full package revision. Disk-file records do not establish loaded-builtins observations or successful imports/builds; no runfile fallback is accepted.
+
 | Evidence obtained | What remains unproven |
 | --- | --- |
 | Source/policy and artifact hash review | Import, native compilation/linking, load, execution, correctness |

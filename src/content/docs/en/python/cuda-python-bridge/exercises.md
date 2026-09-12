@@ -69,6 +69,8 @@ Submit a layer/ownership diagram, independent arithmetic, a profile audit, and a
 
 **Expected evidence:** An exact interpreter/package/native-component/driver ledger; the boundary of a hashed wheel lock; evidence still missing after host tests and after native compilation/linking; the first integer reuse count giving strict improvement; the result if setup repeats for every request.
 
+For the native ledger, use EX21's five pinned NVIDIA Ubuntu Toolkit deb records, its separate driver-userspace package record, and ownership of the resolved compiler/linker files. Explain why a missing Toolkit `version.json` is not a reason to reject this installation family or create a replacement file. Distinguish installed package versions, API major/minor queries and actual library hashes; no runfile alternative or successful import is supplied by the scenario.
+
 **Acceptance criteria:** Keep core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3, native NVRTC/nvJitLink 13.3.33, Toolkit 13.3.1, Ubuntu 24.04, and driver target 610.43.02 separate. Require actual loaded-library identities. Distinguish a policy-supported API subset from every binding being compatible. Do not convert the cost inequality or any non-GPU check into a measured speedup or Runtime-Verified status.
 
 <details><summary>Hint 1: A package version is not a loader trace</summary>Wheel pins and hashes identify Python artifacts. They do not freeze the system driver, interpreter build, native library search result, or GPU.</details>

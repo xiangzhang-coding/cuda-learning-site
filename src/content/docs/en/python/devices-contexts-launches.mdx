@@ -36,6 +36,16 @@ sources:
     version: 'CPython 3.14.7'
     platform: 'Ordinary GIL CPython, native Linux x86-64'
     accessDate: '2026-09-12'
+  - title: 'CUDA C++ Runtime lifecycle API reference'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Native Linux; device, allocation, transfer, stream and completion responsibilities'
+    accessDate: '2026-09-12'
+  - title: 'CUDA C++ Driver lifecycle API reference'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/index.html'
+    version: 'CUDA Toolkit 13.3.1'
+    platform: 'Native Linux; primary-context retain/current state, module/function handles and launch'
+    accessDate: '2026-09-12'
 head:
   - { tag: meta, attrs: { name: 'cuda:pair-id', content: p02 } }
   - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/python/devices-contexts-launches/' } }
@@ -55,8 +65,8 @@ head:
   - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
   - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
   - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
-  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
-  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,CPython-3.14.7' } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '5' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,CPython-3.14.7,CUDA-13.3.1' } }
 ---
 
 import CanonicalCode from '../../../../components/CanonicalCode.astro';
@@ -74,6 +84,25 @@ Complete [P01](/en/python/cuda-python-bridge/) and [F07: Runtime and Driver APIs
 ## Object syntax retains the Driver API model
 
 The Runtime API can make context setup appear implicit; the Driver API exposes context selection and handles more directly. Python object APIs make that model easier to express but do not erase it. Core 1.2.0 builds on native CUDA objects with shared ownership and selected cleanup methods, not a uniform file-like `close()` protocol. Understanding that distinction is more durable than memorizing a list of constructors.
+
+Use this matched lifecycle table to transfer the **responsibilities** taught in [F04](/en/foundations/host-device-lifecycle/), [F07](/en/foundations/runtime-driver-api/) and [M07](/en/memory/stream-ordering/) to the Python plan. The columns are conceptual counterparts, **not one-to-one call forwarding or interchangeable ownership**. C++ below means host-side Runtime or Driver API use, not a different GPU execution model; `s` denotes the owned Python stream.
+
+| Responsibility | CUDA C++ API or handle | Core 1.2.0 plan | What remains the caller's responsibility |
+| --- | --- | --- | --- |
+| Select the execution device | `cudaSetDevice(0)`; Driver code identifies a `CUdevice` after `cuInit` | `dev = Device(0)` followed by `dev.set_current()` | In Toolkit 13.3.1, cudaSetDevice binds and initializes that device's Runtime primary-context state without synchronizing work. Constructing Device alone does not establish the intended current context; neither path computes a result. |
+| Retain and make a context current | `cuDevicePrimaryCtxRetain(&ctx, device)` yields `CUcontext`; `cuCtxSetCurrent(ctx)` binds it to the calling thread | Default `dev.set_current()` retains/selects the shared primary context; inspect `dev.context` | A Driver retain alone does not make the context current. A C++ owner balances its own retain with `cuDevicePrimaryCtxRelease` under the context/lifetime rules; a core borrower must not release core's retain or reset shared state. |
+| Allocate device bytes | `cudaMalloc` or stream-ordered `cudaMallocAsync`, with a device pointer stored in a host variable | `dev.allocate(nbytes, stream=s)` returns a Buffer | Calculate bytes, preserve location and last use. Core selects its associated memory resource, with a pool or synchronous fallback; it is not a promise to call cudaMallocAsync or to overlap allocation. |
+| Allocate host transfer storage | `cudaMallocHost` gives caller-owned host storage; `cudaFreeHost` releases it | `LegacyPinnedMemoryResource().allocate(nbytes, stream=s)` gives a host-accessible Buffer | The legacy resource uses synchronous `cuMemAllocHost`, not an async allocation. A ctypes array view borrows that Buffer; it is not a C++ owning container or a copy of the data. |
+| Create an ordering domain | `cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking)` gives `cudaStream_t` | `dev.create_stream(options=StreamOptions(nonblocking=True))` gives an owned Stream | Keep the stream associated with the right context. Nonblocking removes the legacy NULL-stream implicit dependency, not the requirement to wait before host reads; it proves no overlap. |
+| Transfer initialized inputs and results | `cudaMemcpyAsync(dst, src, nbytes, kind, stream)` specifies bytes, direction and stream | H2D: `d.copy_from(h, stream=s)`; D2H: `d.copy_to(h, stream=s)` | Core's ordinary whole-Buffer copies require equal extents and infer direction from pointers. Explicitly supply the host destination; omitting it allocates from the source resource. Keep host contents stable while transfers use them. |
+| Obtain executable code and a kernel | Traditional Runtime launch uses a registered kernel symbol and managed modules; the explicit Driver path uses `cuModuleLoadData` / `CUmodule`, then `cuModuleGetFunction` / `CUfunction` | Cubin-backed ObjectCode provides `linked.get_kernel("ex21_vector_add")` and a Kernel | Lookup is a lazy load/lookup boundary, not compilation or execution. Core's native ObjectCode handle is Driver `CUlibrary`, not Runtime-managed ownership or a `CUmodule` to unload manually. |
+| Submit a configured launch | `kernel<<<grid, block, 0, stream>>>(...)` or `cuLaunchKernel` with explicit parameter storage | `launch(s, config, kernel, d_a, d_b, d_c, ctypes.c_uint32(n))` with `LaunchConfig(grid=grid, block=block)` | Match grid/block, zero dynamic shared memory for EX21, pointer lifetimes and scalar ABI. C++ typed parameters do not make a Python int an unsigned 32-bit scalar; core does not infer the kernel signature. |
+| Establish completion before inspection | Check `cudaStreamSynchronize(stream)`; `cudaDeviceSynchronize()` is the broader F04 boundary | Check `s.sync()`; `dev.sync()` is broader | For the async path, queue D2H before this wait, then inspect every output. Successful submission, source order or a stream destructor cannot replace checked completion. |
+| Release only owned resources after last use | Explicit or RAII-managed `cudaFree` / `cudaFreeAsync`, `cudaFreeHost`, then `cudaStreamDestroy`; balance independently owned Driver context/module resources separately | `buffer.close(stream=s)`, drain queued frees with `s.sync()`, then `s.close()` | Preserve owners until work finishes. Kernel/ObjectCode have no public close; Device and the shared primary context are not private cleanup targets. A cleanup diagnostic is not a successful result. |
+
+F04's canonical C++ example deliberately checks `cudaDeviceSynchronize()` before a blocking D2H `cudaMemcpy`. EX21 instead queues async D2H on its explicit stream and then checks `s.sync()`. Both establish completion before CPU validation, but copying the exact F04 line order into an asynchronous transfer plan would miss the later copy's completion boundary. M07's per-stream ordering explains why the EX21 sequence is sufficient without adding a device-wide wait between every operation.
+
+Error handling also transfers by responsibility, not spelling. F04 checks `cudaError_t` and `cudaGetLastError` after the C++ launch expression; the Driver path checks `CUresult` from `cuLaunchKernel`. Core reports its launch-call failures through Python exceptions, followed by the separate checked sync for deferred errors. Do not append a Runtime last-error query and assume it validates a Driver-backed core launch, or stop checking completion because submission did not raise.
 
 ## Select a device, then establish its context
 
@@ -130,7 +159,11 @@ Correctness requires checked completion, finite values, and comparison of all 10
 
 `Kernel` retains library ownership. `ObjectCode.handle` is a `CUlibrary`, not a legacy `CUmodule`; never pass it to `cuModuleUnload` or manually unload a library still owned by core. Releasing a Python reference is not a universal promise of immediate destruction.
 
-On failure, stop submitting work, retain the first error, attempt checked completion and cleanup of acquired resources, and report subsequent errors separately. Stream destruction does not replace checked completion. Legacy pinned deallocation synchronizes its stream before freeing; Buffer RAII cleanup may report warnings rather than raise every deallocation error. Keep warnings/stderr and explicit sync errors, and never double-free via raw bindings. If an asynchronous fault prevents a clean drain, terminate with failure instead of validating or claiming a healthy reusable context.
+On failure, stop submitting work, retain the first error, attempt checked completion and cleanup of acquired resources, and report subsequent errors separately. Stream destruction does not replace checked completion. Legacy pinned deallocation synchronizes its stream before freeing. EX21's `cleanup_step` captures Python `sys.stderr` and native file descriptor 2 during each explicit cleanup action and restores both afterward. Exceptions/capture failures enter `cleanupErrors`; all captured stderr enters `cleanupWarnings`, not only Python warnings. Any nonempty captured output, even whitespace, prevents a successful command verdict; a later successful sync does not erase it. Never double-free via raw bindings or call a failed drain successful validation.
+
+The helper retains up to 16,384 bytes of diagnostic payload per action, reads one extra byte to detect truncation, and caps decoded text at 16,384 characters before adding the action label and truncation marker. Exception text is bounded too; report/replay bounds do not cap the temporary-file spool's disk usage. Capture/replay failure is itself a cleanup failure, and capture setup failure does not excuse skipping the release attempt. The original operation's exception and stage remain primary.
+
+Explicit Kernel/ObjectCode reference release also goes through this helper, without invented close methods. Its verdict covers diagnostics emitted during those explicit actions, not destruction postponed by another owner, later GC, buffered native output emitted afterward, or interpreter shutdown after the verdict. Because capture changes process-global stderr and warning state, it belongs only to this single-threaded standalone process. Preserve external stderr with JSON; a clean bounded capture is not a claim that all eventual native teardown succeeded.
 
 ## Find the earliest broken contract
 
@@ -144,7 +177,7 @@ One explicit stream makes the dependency chain inspectable, not concurrent. Nonb
 
 ## Guided practice: Draw and inspect a complete lifecycle
 
-1. Copy the ownership table onto a worksheet and mark the owner of each of the six Buffers, each host view, the stream, and kernel/library references. Predict the 1003-element geometry and byte counts before execution.
+1. Annotate the matched CUDA C++ / core table with the owner and last use of each of the six Buffers, each host view, the stream, and kernel/library references. Identify which responsibilities transfer unchanged and which ownership or call semantics differ. Predict the 1003-element geometry and byte counts before execution.
 2. In the matching external Linux profile from P01, use the standalone EX21 directory. If not prepared, run the setup script; then inspect the environment:
 
 ```sh
@@ -152,7 +185,7 @@ bash scripts/setup.sh
 .venv/bin/python ex21.py check-environment
 ```
 
-3. Compare actual package identities with the profile and native library identities with NVRTC/nvJitLink 13.3.33. Device access, the driver, and target support remain separate checks. Record a blocker and stop if a required gate fails.
+3. Compare actual Python pins and the NVIDIA Ubuntu deb inventory with the profile, then check native NVRTC/nvJitLink 13.3.33 file identities and their package ownership. A Toolkit `version.json` is not required by this installation family. Device access, driver userspace validation and target support remain separate checks; their success is not asserted here. Record a blocker and stop if a required gate fails.
 4. Only with the runtime gate satisfied, run the canonical correctness path:
 
 ```sh
@@ -181,6 +214,8 @@ Attempt the [two Exercises](/en/python/devices-contexts-launches/exercises/) and
 
 ## Sources and licensing
 
-Trace the ownership sequence in the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch), or [download the same immutable repository revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip) and open `examples/ex21-cuda-python-launch/`. This is the source used by the imported lifecycle and kernel ranges, not an observed run.
+The C++ side is checked against the Toolkit 13.3.1 [device API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__DEVICE.html), [memory API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__MEMORY.html), [stream-ordered allocation](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html), [stream API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__STREAM.html), Driver [primary-context API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__PRIMARY__CTX.html), [current-context API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__CTX.html), [module API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__MODULE.html), and [launch API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-driver-api/group__CUDA__EXEC.html), accessed **2026-09-12**. F04/F07/M07 retain their original examples and dates; this comparison does not rewrite them or supply another executable implementation.
+
+Trace the ownership sequence in the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch), or [download the same immutable repository revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip) and open `examples/ex21-cuda-python-launch/`. This is the source used by the imported lifecycle and kernel ranges, not an observed run.
 
 Reviewed **2026-09-12**. [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077) retains exact Buffer, context, launcher, legacy pinned-resource, and shared-library ownership source/tests; [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) retains the one profile. See [Primary Context](/en/glossary/#term-198), [Kernel Argument Marshalling](/en/glossary/#term-199), and [Borrowed View](/en/glossary/#term-200). Original explanation and exercises use CC BY 4.0; imported original source uses Apache-2.0. Owner tests are references, not executed evidence or copied examples.

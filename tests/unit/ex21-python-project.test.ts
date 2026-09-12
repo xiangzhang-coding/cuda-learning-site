@@ -34,6 +34,30 @@ it('host-test rejects wrong extents and every nonfinite or mismatching output, i
   });
 });
 
+it('host-test rejects real cleanup diagnostics, preserves the primary error and restores both stderr sinks', () => {
+  const run = spawnSync(python, ['-I', '-S', path.join(root, 'ex21.py'), 'host-test'], {
+    encoding: 'utf8',
+  });
+  expect(run.status, run.stdout + run.stderr).toBe(0);
+  expect(JSON.parse(run.stdout).cleanupChecks).toEqual({
+    quiet: true,
+    pythonStderr: true,
+    nativeStderr: true,
+    warning: true,
+    exception: true,
+    combined: true,
+    primaryExceptionPreserved: true,
+    boundedDiagnostics: true,
+    referenceRelease: true,
+    stderrRestored: true,
+  });
+  for (const marker of ['expected Python stderr', 'expected fd2 stderr', 'expected cleanup warning',
+    'expected cleanup exception', 'expected release stderr', 'cleanup diagnostics truncated',
+    'self-test Python stderr restored', 'self-test fd2 restored']) {
+    expect(run.stderr).toContain(marker);
+  }
+});
+
 it.each([
   ['run', '--size', '0', 'size must be'],
   ['run', '--size', '-1', 'size must be'],
@@ -53,6 +77,7 @@ it.each([
 
 it.each([
   ['check-environment'],
+  ['check-environment', '--phase', 'native-packages'],
   ['build', '--arch', '75'],
   ['run', '--size', '1003'],
 ])('fails closed at the profile gate for %s without the selected Python packages', (...args) => {
@@ -79,6 +104,32 @@ it('exposes setup help and rejects unknown setup arguments before creating an en
 // Opt in only with the real selected Linux interpreter, hashed wheels and native libraries.
 // No CUDA mocks, driver stubs, emulation or GPU resources are supplied by these tests.
 const profilePython = process.env.EX21_PROFILE_PYTHON;
+it.runIf(Boolean(profilePython))('inspects real installed NVIDIA Debian packages and file ownership without CUDA imports', () => {
+  const check = spawnSync(profilePython!, [path.join(root, 'ex21.py'), 'check-environment',
+    '--phase', 'native-packages'], { encoding: 'utf8', timeout: 30_000 });
+  expect(check.status, check.stdout + check.stderr).toBe(0);
+  const report = JSON.parse(check.stdout);
+  expect(report).toMatchObject({ result: 'pass', gpuExecuted: false, driverInitialized: false });
+  expect(report.environment.checkedPhase).toBe('native-packages');
+  expect(report.environment.toolkit).toMatchObject({
+    installationMode: 'nvidia-deb', version: '13.3.1',
+    packages: {
+      'cuda-compiler-13-3': { status: 'install ok installed', version: '13.3.1-1', architecture: 'amd64' },
+      'cuda-command-line-tools-13-3': { status: 'install ok installed', version: '13.3.1-1' },
+      'cuda-nvrtc-13-3': { status: 'install ok installed', version: '13.3.33-1' },
+      'libnvjitlink-13-3': { status: 'install ok installed', version: '13.3.33-1' },
+      'cuda-cuobjdump-13-3': { status: 'install ok installed', version: '13.3.73-1' },
+      'cuda-compat-13-3': { status: 'install ok installed', version: '610.43.02-1ubuntu1' },
+    },
+  });
+  expect(report.environment.nativeFiles.nvrtcBuiltins).toMatchObject({
+    package: 'cuda-nvrtc-13-3', packageVersion: '13.3.33-1',
+    path: '/usr/local/cuda-13.3/targets/x86_64-linux/lib/libnvrtc-builtins.so.13.3.33',
+  });
+  expect(report.environment.nativeFiles.nvrtcBuiltins.sha256).toMatch(/^[a-f0-9]{64}$/);
+  expect(report.environment.nativeLibraries).toBeUndefined();
+});
+
 it.runIf(Boolean(profilePython))('builds and inspects PTX and cubin through the GPU-free CLI', async () => {
   const output = await mkdtemp(path.join(tmpdir(), 'ex21-build-'));
   try {
@@ -87,7 +138,7 @@ it.runIf(Boolean(profilePython))('builds and inspects PTX and cubin through the 
     expect(build.status, build.stdout + build.stderr).toBe(0);
     expect(JSON.parse(build.stdout)).toMatchObject({
       command: 'build', result: 'pass', gpuExecuted: false, driverInitialized: false,
-      arch: '75', backend: 'nvJitLink',
+      arch: '75', backend: 'nvJitLink', cachePolicy: 'disabled',
     });
     expect(await readFile(path.join(output, 'ex21.ptx'), 'utf8')).toMatch(/\.entry\s+ex21_vector_add/);
     const cubin = await readFile(path.join(output, 'ex21.cubin'));
@@ -95,6 +146,14 @@ it.runIf(Boolean(profilePython))('builds and inspects PTX and cubin through the 
     expect(await readFile(path.join(output, 'sass.txt'), 'utf8')).toContain('ex21_vector_add');
     const report = JSON.parse(await readFile(path.join(output, 'report.json'), 'utf8'));
     expect(report.result).toBe('pass');
+    expect(report.environment.nativeLibraries.nvrtcBuiltins).toMatchObject({
+      package: 'cuda-nvrtc-13-3', packageVersion: '13.3.33-1',
+      observedVia: '/proc/self/maps after NVRTC compilation',
+      path: '/usr/local/cuda-13.3/targets/x86_64-linux/lib/libnvrtc-builtins.so.13.3.33',
+    });
+    expect(report.environment.nativeLibraries.nvrtcBuiltins.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(report.environment.nativeLibraries.nvrtcBuiltins.mappingIdentity)
+      .toEqual(report.environment.nativeLibraries.nvrtcBuiltins.fileIdentity);
     expect(report.artifacts.map((item: { path: string }) => item.path)).toEqual(['ex21.ptx', 'ex21.cubin']);
   } finally {
     await rm(output, { recursive: true, force: true });

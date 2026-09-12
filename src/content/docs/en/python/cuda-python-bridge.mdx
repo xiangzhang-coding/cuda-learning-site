@@ -104,14 +104,16 @@ Core is useful when its public objects express the needed operation. A low-level
 | Platform | Native Linux x86-64, Ubuntu 24.04 LTS |
 | Interpreter | CPython 3.14.7, ordinary GIL build, `cp314-cp314` ABI |
 | Python distributions | `cuda-core==1.2.0`, `cuda-bindings==13.4.1`, `cuda-pathfinder==1.8.1`, `numpy==2.5.3` |
-| External Toolkit | 13.3.1, system/local installation |
+| External Toolkit | 13.3.1, NVIDIA Ubuntu Debian packages (deb), not a runfile installation |
 | Native compilation and linking | NVRTC 13.3.33 and nvJitLink 13.3.33 |
-| Driver target | Linux 610.43.02; record any actual newer compatible driver separately |
+| Pinned driver userspace | `cuda-compat-13-3=610.43.02-1ubuntu1`; the current run contract also requires a matching 610.43.02 kernel driver |
 | Future runtime gate | One GPU with compute capability at least 7.5, target supported by the selected compiler, small problems fitting within 8 GB |
 
 The bindings wheel's 13.4.1 does not mean the Toolkit is 13.4.1. The versioned core and bindings policies support the selected subset with Toolkit 13.x; API-specific availability still matters. This is not permission to use every 13.4 binding against 13.3 native libraries or to replace them with Toolkit 12. The compiler and linker are separately pinned to avoid feeding newer compiler output to an older linker.
 
 Use the project's exact, hash-checked base-distribution lock. Do not add `[cu13]` or `[all]` extras, an unpinned `cuda-python` metapackage, or `--no-deps` as a supposed NumPy-removal mechanism. The lock fixes Python distributions, not the driver, OS image, interpreter installation, or resolved native library files. [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) records these boundaries. No second platform or historical Toolkit profile is part of EX21.
+
+The native profile is specifically NVIDIA's deb installation on Ubuntu 24.04. `native-profile.json` lists the five Toolkit packages in [EX21's profile](/en/examples/cuda-python-launch/#one-independently-pinned-profile), the separately pinned driver-userspace package, and the native files whose ownership is checked. Do not require or manufacture `/usr/local/cuda-13.3/version.json`: that file is absent from the selected official Debian-based devel image. Package inventory, resolved library names and binary hashes are distinct checks; none alone proves imports or compilation succeeded. There is no runfile fallback, and general newer-driver compatibility does not override this exact example profile.
 
 ## A Python reference is not necessarily an owner
 
@@ -167,6 +169,7 @@ bash scripts/setup.sh
 ```
 
 4. Compare your byte counts, four-block prediction, and four hand-derived values with the source and host-test contract. Keep the actual exit status and diagnostics if you run it; no sample transcript is supplied here.
+   Host-test deliberately exercises and replays labeled cleanup diagnostics; correct classification and the host-test result, not empty stderr, determine this CPU-only check's success.
 5. Mark the last use of each allocation and the owner that must survive it. Before moving to P02, explain why a host-test pass proves neither native compilation nor GPU correctness.
 
 **Acceptance:** Submit the layer table, profile differences, ownership arrows, and predictions. Host-test execution is optional for this reading unit; a blocker is an honest outcome. EX21's full environment, build, and run steps remain on its own page.
@@ -189,6 +192,6 @@ Complete the [two Exercises](/en/python/cuda-python-bridge/exercises/) before op
 
 ## Sources and licensing
 
-Read the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch) or [download its repository revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip), then use `examples/ex21-cuda-python-launch/` as the standalone root. Both links identify the immutable source behind this unit's imported code; source identity does not establish compilation or GPU execution.
+Read the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch) or [download its repository revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip), then use `examples/ex21-cuda-python-launch/` as the standalone root. Both links identify the immutable source behind this unit's imported code; source identity does not establish compilation or GPU execution.
 
 [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077) records core 1.2.0 API and ownership facts; [SRC-CUDA-078](/en/sources-and-versions/#src-cuda-078) records bindings error contracts; [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) records profile, artifacts, and licenses. Reuse the existing [stream](/en/glossary/#term-083), [page-locked host memory](/en/glossary/#term-096), and [PTX](/en/glossary/#term-118) terms alongside [CUDA Python](/en/glossary/#term-197). Facts and source access: **2026-09-12**. Prose and exercises are original CC BY 4.0; canonical project code is original Apache-2.0. External packages and native CUDA retain their own terms.

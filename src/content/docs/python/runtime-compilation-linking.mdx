@@ -98,13 +98,17 @@ PTX 的虚拟目标和 cubin 的实际目标用途不同。产物存在，不证
 
 <CanonicalCode exampleId="EX21" range="runtime-compile" />
 
-通过 `Program(source, code_type="c++", options=opts)` 创建程序，选项为 `ProgramOptions(std="c++17", arch=f"compute_{arch}", relocatable_device_code=True, name="ex21_vector_add.cu")`。源码是 Python 字符串，这个简单核函数不需要 Toolkit 头文件。`program.compile("ptx", logs=io.StringIO())` 返回 ObjectCode，其 `.code` 为字节。
+通过 `Program(source, code_type="c++", options=opts)` 创建程序，选项为 `ProgramOptions(std="c++17", arch=f"compute_{arch}", relocatable_device_code=True, name="ex21_vector_add.cu", no_cache=True)`。源码是 Python 字符串，这个简单核函数不需要 Toolkit 头文件。`program.compile("ptx", logs=io.StringIO())` 返回 ObjectCode，其 `.code` 为字节。
 
-真正的链接调用是 `Linker(ptx, options=LinkerOptions(arch=f"sm_{arch}"))`，随后 `linker.link("cubin")`。对象输入在前，options 用关键字；不要照抄生成文档中容易误读的类头顺序。检查 `Linker.which_backend()`：本配置要求 **nvJitLink**。发出警告并回退到驱动链接器，不算完成固定路径。原生 NVRTC 与 nvJitLink 都固定为 Toolkit 13.3.1 中的 13.3.33；通过 extras 安装更新的原生编译器可能破坏输入与链接器的兼容假设。
+真正的链接调用是 `Linker(ptx, options=LinkerOptions(arch=f"sm_{arch}", no_cache=True))`，随后 `linker.link("cubin")`。对象输入在前，options 用关键字；不要照抄生成文档中容易误读的类头顺序。检查 `Linker.which_backend()`：本配置要求 **nvJitLink**。发出警告并回退到驱动链接器，不算完成固定路径。原生 NVRTC 与 nvJitLink 都固定为 Toolkit 13.3.1 中的 13.3.33；通过 extras 安装更新的原生编译器可能破坏输入与链接器的兼容假设。
 
 不需要 GPU 的构建中，arch 来自显式 CLI 参数 `75`，而不是 `Device(0)` 查询结果。运行时才根据所选 GPU 推导目标并检查编译器支持。如果构建命令仅为选目标就查询设备，便破坏了它“不需要 GPU”的合同。
 
 不需要 GPU，不等于不需要驱动库：core 1.2.0 编译 PTX 时会查询 `cuDriverGetVersion()`。必须提供真实 `libcuda` 用户态库，不能用 Toolkit stub 或模拟驱动代替。该查询不调用 `cuInit`，也不创建设备/上下文。EX21 还需要所选 Toolkit 的 `cuobjdump` 检查产物。无 GPU 构建机可以提供这些主机库与工具，但不因此声称发生 GPU 运行，或新增仅容器运行的受支持环境。
+
+[NVRTC 原生缓存](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#caching-cuda-12-9)是另一条路径：默认启用缓存时，首次编译会加载驱动并调用 `cuInit()`。EX21 在导入前显式设置 `CUDA_CACHE_DISABLE=1`，并在 ProgramOptions 和 LinkerOptions 中都传 `no_cache=True`。构建配置应保留 `cachePolicy: "disabled"`。显式架构和没有 `Device()` 不足以证明原生编译不初始化；还须满足缓存条件，实际构建也仍待验证。
+
+原生安装具体限定为 [EX21](/examples/cuda-python-launch/) 的 NVIDIA Ubuntu deb 配置，不是任意本地/runfile Toolkit。使用已安装包清单及解析后 NVRTC/nvJitLink/cuobjdump 文件的所属包；不能要求这种 Debian 安装不提供的 Toolkit `version.json`。包版本、编译器/链接器补丁文件名、二进制哈希与 API 主/次版本对是不同坐标。纠正元数据假设不证明驱动用户态导入或编译/链接成功；这些验证阶段仍待完成。
 
 ## 加载在链接之后
 
@@ -147,6 +151,8 @@ core Program 将 NVRTC 失败转换成附带编译日志的异常。它的 `logs
 
 最小有效失败记录包含阶段、输入身份、目标/选项、实际加载的原生组件身份、原始异常或状态、可取得的日志，以及单独的清理诊断。启动后“还没异常”不够：复制或 `sync()` 可能报告此前的异步错误。编译或链接失败后，不能在没有明确、已验证缓存语义的情况下偷偷使用旧产物继续运行。
 
+对显式 Program/Linker 清理和代码引用放弃，EX21 的 `cleanup_step` 同时捕获 Python stderr 与原生 FD 2。即使没有抛异常，捕获到非空输出也算失败；原操作错误仍是主要诊断。每动作保留内容限制为 16,384 字节、16,384 个解码字符，再附标签/截断说明，不限制临时文件磁盘占用。捕获/回放失败也使清理失败。显式动作之外的后续 GC、延迟原生刷新与解释器关闭析构不属于这次判定。该机制改变进程全局状态，仅用于单线程独立 CLI，仍须保留外部 stderr。
+
 ## 预测哪些阶段可以独立成功
 
 对 `build --arch 75`，应预测 `compute_75` PTX、`sm_75` cubin 与 nvJitLink 后端，不包含设备选择、核函数查找、启动或输出向量。产物必须非空，但执行前不知道精确大小与诊断内容。
@@ -168,7 +174,7 @@ bash scripts/setup.sh
 .venv/bin/python ex21.py build --arch 75
 ```
 
-2. 构建需要选定解释器、包、NVRTC、nvJitLink、真实驱动用户态库和 cuobjdump，但**不需要 GPU**。缺失原生库时记录阻塞。不要为了让编译测试“更完整”而加入设备初始化或启动。
+2. 构建需要选定解释器、Python 包、已安装 NVIDIA deb 清单、NVRTC、nvJitLink、真实驱动用户态库和 cuobjdump，但**不需要 GPU**。必需包缺失/版本错误、所属包不符或缺少原生库都记录为阻塞；本配置缺少 `version.json` 不属于阻塞。不要为了让编译测试“更完整”而加入设备初始化或启动。
 3. 检查 `build/compile` 中保留的构建产物与诊断，确认显式虚拟/实际目标、声明的后端，以及非空 PTX/cubin；记录实际身份，不猜测长度。结果不会被覆盖，再次尝试要指定新的 `--output-dir`。运行另有默认目录 `build/run`。没有真正查找入口，就不要报告产物已加载。
 4. 在纸上将 core 调用对应到低层 nvJitLink 的 create/add/complete/extract/destroy 链。分别说明 create 失败与 complete 失败后哪里能取得日志，以及哪项输出必须可写。
 5. 若具备运行硬件，再按 EX21 的独立运行门槛执行。不需要 GPU 的构建结果，不能变成向量加法正确性判定。
@@ -193,6 +199,6 @@ bash scripts/setup.sh
 
 ## 来源与许可
 
-可在[规范 EX21 源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch)中检查构建阶段，或[下载固定修订的仓库归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip)，以 `examples/ex21-cuda-python-launch/` 为根目录。不可变修订标识导入的编译片段；构建或运行声明仍需要独立的合格记录。
+可在[规范 EX21 源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch)中检查构建阶段，或[下载固定修订的仓库归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip)，以 `examples/ex21-cuda-python-launch/` 为根目录。不可变修订标识导入的编译片段；构建或运行声明仍需要独立的合格记录。
 
 [SRC-CUDA-077](/sources-and-versions/#src-cuda-077)记录 core 源码/测试；[SRC-CUDA-078](/sources-and-versions/#src-cuda-078)记录稳定 NVRTC/nvJitLink 合同；[SRC-CUDA-079](/sources-and-versions/#src-cuda-079)记录原生组件与许可身份。事实与访问核对日期 **2026-09-12**。这些原创表格解释公开 API，没有复制上游示例，也不声称执行了上游测试。既有 [PTX](/glossary/#term-118)与 [cubin](/glossary/#term-119)定义继续适用。

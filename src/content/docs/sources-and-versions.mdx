@@ -578,7 +578,11 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 已将渲染的 [Device](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Device.html)、[Buffer](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Buffer.html)、[Stream](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Stream.html)、[Program](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Program.html)、[Linker](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Linker.html)和 [launch](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.launch.html) API 与源码对照。源码/测试澄清生成的 Linker 类头中容易误读的参数顺序。同步方法为 `sync()`；默认 `set_current()` 返回 None，当前 Context 不能关闭。ctypes 主机视图不持有 Buffer。复制/启动提交不是完成，清理不能使失败结果通过验收。
 
-core 的 PTX 路径不调用 `cuInit`，但会查询 `cuDriverGetVersion()`。因此 EX21 无 GPU 构建仍需要真实用户态驱动库和所选 cuobjdump，虽然它不创建 Device、不查找核函数、不启动工作。编译抛异常时可能附带诊断，而成功编译专用的 `logs=` 流仍为空。原创 CLI 不需要导入 core 私有异常。这些源码事实不是本地编译、清理或运行观察。
+core 的 PTX 可加载性检查查询 `cuDriverGetVersion()`，该版本查询不调用 `cuInit`；NVRTC 内部缓存是下文单独处理的初始化路径。EX21 无 GPU 构建仍需要真实用户态驱动库和所选 cuobjdump，虽然它不创建 Device、不查找核函数、不启动工作。编译抛异常时可能附带诊断，而成功编译专用的 `logs=` 流仍为空。原创 CLI 不需要导入 core 私有异常。这些源码事实不是本地编译、清理或运行观察。
+
+2026-09-12 核对的精确 [NVRTC 13.3.1 缓存章节](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#caching-cuda-12-9)说明，CUDA 12.9+ 默认缓存会在首次编译时加载驱动并调用 `cuInit()`。因此 EX21 在 CUDA 导入前设置 `CUDA_CACHE_DISABLE=1`，向 ProgramOptions 与 LinkerOptions 传 `no_cache=True`，并记录 `cachePolicy: "disabled"`。不初始化的构建目标依赖该配置，不能只依据没有 Device/启动调用。这里不声明实际原生构建或初始化跟踪结果。
+
+EX21 原创的 `cleanup_step` 是项目代码，不是新 core API。每个显式清理动作周围，它捕获并恢复 Python `sys.stderr` 与原生 FD 2，将异常/捕获失败写入 `cleanupErrors`，全部非空捕获 stderr 写入 `cleanupWarnings`。非空输出包括空白，都会保守地使命令失败，同时保留先前操作错误。每动作最多保留 16,384 字节载荷和 16,384 个解码字符，多读一字节判断截断，之后附标签/标记；异常文本同样受限。这是报告/回放边界，不是临时文件磁盘上限。捕获/回放失败不能变为成功，也不能成为跳过尚未尝试释放的理由。显式代码引用放弃在范围内，后续 GC、其他持有者、延迟原生输出及判定后解释器关闭析构不在其中。助手修改进程全局 stderr/警告状态，只用于单线程独立进程。源码检查建立这些边界，不是原生清理运行观察。
 
 <span id="src-cuda-078" class="resource-target" aria-hidden="true"></span>
 
@@ -607,13 +611,13 @@ core 的 PTX 路径不调用 `cuInit`，但会查询 `cuDriverGetVersion()`。�
 
 | 坐标 | 选定身份与上游依据 |
 | --- | --- |
-| 解释器 | [CPython 3.14.7 发布](https://www.python.org/downloads/release/python-3147/)，普通 GIL `cp314-cp314`；[源码归档](https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz) SHA-256 `3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81` 已与下载字节核对；这里没有构建解释器 |
+| 解释器 | [CPython 3.14.7 发布](https://www.python.org/downloads/release/python-3147/)，普通 GIL `cp314-cp314`；[源码归档](https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz) SHA-256 `3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81` 已与下载字节核对；该产物审查没有构建解释器 |
 | Python 发行包 | [core 1.2.0](https://pypi.org/pypi/cuda-core/1.2.0/json)、[bindings 13.4.1](https://pypi.org/pypi/cuda-bindings/13.4.1/json)、[pathfinder 1.8.1](https://pypi.org/pypi/cuda-pathfinder/1.8.1/json)、[NumPy 2.5.3](https://pypi.org/pypi/numpy/2.5.3/json)；基础发行包，不加 extras |
-| 原生主机与 Toolkit | [13.3.1 Linux 归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html)：Ubuntu 24.04 x86-64、glibc 2.39。Ubuntu 24.04.4 / 内核 6.17.0-19 / GCC 14.3.0 的资格验证行是目标，不是机器观察 |
+| 原生主机与 Toolkit | 原生 Ubuntu 24.04 x86-64、glibc 2.39 上的 NVIDIA Ubuntu deb 安装，由 `native-profile.json`（`nvidia-deb-ubuntu2404-cuda1331`）选择，不提供 runfile 回退。[13.3.1 Linux 归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html)中的 Ubuntu 24.04.4 / 内核 6.17.0-19 / GCC 14.3.0 资格验证行是目标，不是机器观察 |
 | 原生组件与驱动 | [13.3.1 发布归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html)：NVRTC 13.3.33、nvJitLink 13.3.33；驱动目标 610.43.02。NVCC 13.3.73 与 Runtime 13.3.29 是独立组件，EX21 不直接调用 |
 | 兼容范围 | core 1.x 明确支持 12.x/13.x；bindings 13.4.1 明确允许 Toolkit 13.x 组件，但有逐 API 限制。本示例只选 13.3.1。[nvJitLink 兼容性](https://docs.nvidia.com/cuda/archive/13.3.1/nvjitlink/index.html#compatibility)要求链接器不旧于输入，不悄悄安装较新原生编译器 |
 
-下列四个未撤回的 Linux/GIL wheel 已下载，只用于哈希及 ZIP 元数据/许可检查，没有安装或执行。全部下载字节匹配 PyPI SHA-256。core/bindings 标签为 `manylinux_2_24_x86_64.manylinux_2_28_x86_64`，NumPy 为 `manylinux_2_27_x86_64.manylinux_2_28_x86_64`，pathfinder 与平台无关。标签适配选定 glibc 配置，不代表成功导入或 CUDA 构建。
+产物审查下载了下列四个未撤回 Linux/GIL wheel，用于哈希及 ZIP 元数据/许可检查；该次审查没有安装或执行它们。全部下载字节匹配 PyPI SHA-256。core/bindings 标签为 `manylinux_2_24_x86_64.manylinux_2_28_x86_64`，NumPy 为 `manylinux_2_27_x86_64.manylinux_2_28_x86_64`，pathfinder 与平台无关。标签适配选定 glibc 配置，不代表成功导入或 CUDA 构建。之后的 CI 尝试属于独立记录。
 
 | 发行包 / 精确 wheel 文件名 | SHA-256 |
 | --- | --- |
@@ -622,7 +626,20 @@ core 的 PTX 路径不调用 `cuInit`，但会查询 `cuDriverGetVersion()`。�
 | `cuda_pathfinder-1.8.1-py3-none-any.whl` | `ae0137ff9e56ea97499bcbf54f5f2778ec25f3266715ac86da192a795af982a8` |
 | `numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl` | `b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b` |
 
-即使原创 EX21 主机使用标准库 ctypes 数组，core 仍要求 NumPy 和 pathfinder。使用基础 core 包时，还必须显式安装 bindings。`requirements.lock` 标识 Python 产物，不固定系统 Toolkit、驱动、解释器安装或原生加载器结果。CLI 检查真实库路径、Toolkit version.json、编译器/链接器文件名坐标和 API 版本对，并保留哈希。两个 API 都不暴露补丁 33；仅文件名/本地哈希不能认证它。环境清单（Environment Manifest）还需附安装器来源及已加载 builtins 身份。运行另需一致的内核/用户态驱动包，以及一个编译器支持的 CC 7.5+ GPU；不声明第二个平台配置。
+即使原创 EX21 主机使用标准库 ctypes 数组，core 仍要求 NumPy 和 pathfinder，基础 core 包还必须显式安装 bindings。`requirements.lock` 标识 Python 产物；`native-profile.json` 单独标识唯一 NVIDIA Ubuntu deb 配置。首次真实 CI 失败暴露了错误的 `version.json` 必需文件假设：选定官方 Debian 系 devel 安装并不提供该文件。修正后检查已安装包数据库，不伪造文件，也不回退到 runfile。下列五个 Toolkit 坐标已在 **2026-09-12** 访问的 [NVIDIA Ubuntu 24.04 amd64 包索引](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz)中确认；包索引元数据不是本地安装或构建成功观察。
+
+| 已安装包 | 精确 Debian 版本 | 边界 |
+| --- | --- | --- |
+| `cuda-compiler-13-3` | `13.3.1-1` | Toolkit 编译器组发布坐标 |
+| `cuda-command-line-tools-13-3` | `13.3.1-1` | Toolkit 命令行工具发布坐标 |
+| `cuda-nvrtc-13-3` | `13.3.33-1` | NVRTC 及其包内 builtins 文件 |
+| `libnvjitlink-13-3` | `13.3.33-1` | 原生链接器 |
+| `cuda-cuobjdump-13-3` | `13.3.73-1` | 产物检查工具 |
+| `cuda-compat-13-3` | `610.43.02-1ubuntu1` | 当前原生配置独立固定的真实驱动用户态，不等于安装 GPU 或内核驱动 |
+
+`check_native_packages` 使用 `/usr/bin/dpkg-query` 查询 `/var/lib/dpkg`，要求 `install ok installed` 与 `amd64`，并从两个发布坐标取得 Toolkit 身份。Debian 根目录固定为 `/usr/local/cuda-13.3`；设置环境变量不代表允许重定位配置。`inspect_native_file` 解析每个配置文件，检查唯一所属包，将二进制 SHA-256 与文件身份记录在 `environment.nativeFiles`。之后实际库发现必须匹配这些已检查文件。NVRTC/nvJitLink API 仍只给出 13.3，不给补丁 33；已安装版本、文件所属包、`libnvrtc.so.13.3.33` / `libnvJitLink.so.13.3.33` 名称、哈希与 API 对仍是不同事实。保留真实取得来源；本地数据库、文件名与哈希一致，不是防御任意安装篡改的通用保证。
+
+已安装 builtins 不自动成为已加载 builtins。`environment.nativeFiles.nvrtcBuiltins` 是磁盘包文件记录；`environment.nativeLibraries.nvrtcBuiltins` 初始为 null，只有 `observe_nvrtc_builtins` 在 NVRTC 编译后成功检查 `/proc/self/maps`，并匹配映射背后的路径、inode/设备身份、所属包与哈希，才填入它。本来源记录不声明已观察到该映射。`check-environment --phase native-packages` 在 CUDA 导入之前停止；默认 native 阶段另查加载库、驱动 API 及编译器/链接器查询。纠正元数据后，驱动用户态/导入验证与原生构建仍待完成，不声称 CI 重跑通过。运行另需兼容 GPU 及精确配置要求的内核/用户态匹配；一般较新驱动兼容性不能覆盖此固定值。
 
 | 精确许可或声明位置 | SHA-256 与处置 |
 | --- | --- |

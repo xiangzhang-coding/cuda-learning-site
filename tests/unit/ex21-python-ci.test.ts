@@ -48,11 +48,15 @@ it('requires the EX21 Python build and a successful privacy scan, rejecting ever
 
 it('pins authentic acquisition and exercises the public CLI without GPU provisioning or evidence promotion', async () => {
   const runner = await readFile(path.join(root, 'scripts/run-ex21-python-check.mjs'), 'utf8');
+  const plan = spawnSync(process.execPath, ['scripts/run-ex21-python-check.mjs', '--print-container-script'], {
+    cwd: root, encoding: 'utf8',
+  });
+  expect(plan.status, plan.stderr).toBe(0);
   expect(runner).toContain('nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87');
   expect(runner).toContain('https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz');
   expect(runner).toContain('3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81');
-  expect(runner).toContain('cuda-compat-13-3_610.43.02-1ubuntu1_amd64.deb');
-  expect(runner).toContain('4d3b3bfe6e6a53b2153383b2f74f139339c7e5ffbf657d6af7c3967b8b670386');
+  expect(plan.stdout).toContain('cuda-compat-13-3_610.43.02-1ubuntu1_amd64.deb');
+  expect(plan.stdout).toContain('4d3b3bfe6e6a53b2153383b2f74f139339c7e5ffbf657d6af7c3967b8b670386');
   expect(runner).toContain('sha256sum --check --strict');
   expect(runner.indexOf('sha256sum --check --strict')).toBeLessThan(runner.indexOf('dpkg-deb --extract compat.deb'));
   expect(runner).toContain('make altinstall');
@@ -73,6 +77,30 @@ it('pins authentic acquisition and exercises the public CLI without GPU provisio
   });
   expect(help.status, help.stdout + help.stderr).toBe(0);
   expect(help.stdout).toContain('GPU-free');
+});
+
+it('uses the authoritative Debian profile and real package-state/ownership rejection checks before CUDA imports', async () => {
+  const plan = spawnSync(process.execPath, ['scripts/run-ex21-python-check.mjs', '--print-container-script'], {
+    cwd: root, encoding: 'utf8',
+  });
+  expect(plan.status, plan.stderr).toBe(0);
+  expect(plan.stdout.includes('version.json')).toBe(false);
+  for (const text of ['native-profile.json', 'native-packages', 'compiler-missing', 'compiler-unpacked',
+    'unowned-library', '/usr/bin/dpkg', '--remove', '--unpack', '--install',
+    'cuda-compiler-13-3_13.3.1-1_amd64.deb',
+    'c0f50a88d45da764f0f831ed979394ed835fe805a85896d36de61241887c2c24',
+    'LD_LIBRARY_PATH=/usr/local/cuda-13.3/compat:/usr/local/cuda-13.3/lib64',
+    'CUDA_CACHE_DISABLE=1',
+    '/proc/self/maps after NVRTC compilation']) {
+    expect(plan.stdout.includes(text), text).toBe(true);
+  }
+  expect(plan.stdout.indexOf("cli('native-packages'")).toBeLessThan(plan.stdout.indexOf("cli('environment'"));
+  const project = JSON.parse(await readFile(path.join(root, 'examples/ex21-cuda-python-launch/project.json'), 'utf8'));
+  expect(project.build.contractFiles).toContain('native-profile.json');
+  expect(project.build.commands.checkNativePackages).toBe('.venv/bin/python ex21.py check-environment --phase native-packages');
+  const runner = await readFile(path.join(root, 'scripts/run-ex21-python-check.mjs'), 'utf8');
+  expect(runner.includes('runnerInputs')).toBe(true);
+  expect(runner.includes('nativeProfileSha256')).toBe(true);
 });
 
 it('retains only allowlisted UTF-8 reports after scanning, handling native log terminators without accepting binaries', async () => {
@@ -109,5 +137,5 @@ it('offers a non-executing container plan whose shell and embedded Python parse 
       input: embedded![1], encoding: 'utf8',
     });
   expect(python.status, python.stderr).toBe(0);
-  expect(plan.stdout).not.toContain('${');
+  expect(plan.stdout).not.toMatch(/\$\{(?:pythonUrl|pythonSha256|driverUrl|driverSha256|nativeProfile|JSON\.)/);
 });

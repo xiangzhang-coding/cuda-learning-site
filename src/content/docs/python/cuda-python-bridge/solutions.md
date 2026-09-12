@@ -61,6 +61,8 @@ head:
 
 使用精确基础发行包与已复核 wheel 哈希，不加可能选择另一原生 Toolkit 主/次版本的 extras。即使 EX21 没有导入 NumPy，core 仍需要它。锁定文件不证明导入或实际原生库身份，也不固定解释器、驱动、OS 包或 GPU。分别记录解析到的原生路径、版本与包身份；同主版本家族的支持政策仍有逐 API 限制。
 
+原生安装只采用 NVIDIA Ubuntu deb 配置：`cuda-compiler-13-3` 与 `cuda-command-line-tools-13-3` 均为 `13.3.1-1`，`cuda-nvrtc-13-3` 与 `libnvjitlink-13-3` 均为 `13.3.33-1`，`cuda-cuobjdump-13-3` 为 `13.3.73-1`。`native-profile.json` 另用 `cuda-compat-13-3=610.43.02-1ubuntu1` 固定真实驱动用户态，当前运行门槛要求匹配的内核驱动。检查已安装 amd64 记录及解析后原生文件的所属包，保留 NVRTC/nvJitLink 带补丁号的文件名与二进制哈希，不混淆 cuobjdump 包版本与其普通可执行文件名。缺少必需包或版本不符使配置失败，没有 `version.json` 不会。伪造文件只声明标签，不建立包来源。API 查询给出主/次版本，不给完整包修订。磁盘文件记录不建立已加载 builtins 观察，也不证明导入/构建成功；不能接受 runfile 回退。
+
 | 已取得的依据 | 仍未证明什么 |
 | --- | --- |
 | 源码/政策与产物哈希审查 | 导入、原生编译/链接、加载、执行、正确性 |

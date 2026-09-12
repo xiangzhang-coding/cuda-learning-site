@@ -52,7 +52,7 @@ head:
 
 | 阶段 | 修复后的合同 |
 | --- | --- |
-| 环境 | 使用选定解释器/包、独立确认身份的 NVRTC/nvJitLink 13.3.33、供 core 查询 cuDriverGetVersion 的真实 libcuda 用户态库，以及 cuobjdump；记录加载器失败，不创建 Device 或调用 cuInit |
+| 环境 | 使用选定解释器/Python 包与 native-profile.json：五项 Toolkit deb 包加固定驱动用户态。检查原生文件所属包及身份，再验证供 core 查询 cuDriverGetVersion 的真实 libcuda。不要求 Toolkit version.json，也不需要 Device 或 cuInit |
 | 目标 | 读取显式 `--arch 75`，不枚举设备，推导 `compute_75` 与 `sm_75` |
 | 编译 | Program 指定 C++17、虚拟目标和可重定位设备代码，`compile("ptx")` 得到 PTX 字节 |
 | 链接 | `Linker(ptx, options=LinkerOptions(arch="sm_75"))`，要求 nvJitLink 后端，再 `link("cubin")` |
@@ -60,6 +60,12 @@ head:
 | 仅限之后运行 | 选择设备并设置上下文，选择设备支持目标，延迟查找取得 Kernel，提交带类型启动与复制，同步并验证所有结果 |
 
 拒绝 `Device(0).arch`，因为无需 GPU 的构建不需要设备推导目标。虚拟目标的 NVRTC 编译不直接提供 cubin，其 cubin 长度查询为零。没有公开 `ObjectCode.load()`。从 cubin 字节重建对象是可选步骤，不建立加载事实；`get_kernel` 才是延迟加载/查找点，应放在这个构建之外。
+
+此 deb 配置用 `cuda-compiler-13-3=13.3.1-1`、`cuda-command-line-tools-13-3=13.3.1-1` 作为两个 Toolkit 级包坐标；组件记录为 `cuda-nvrtc-13-3=13.3.33-1`、`libnvjitlink-13-3=13.3.33-1`、`cuda-cuobjdump-13-3=13.3.73-1`。已安装记录缺失/版本错误或文件所属包不符才是真正失败。没有 `version.json` 不是失败；伪造文件只会隐藏安装布局假设错误，并未检查真实包。分别保留解析后 NVRTC/nvJitLink 补丁文件名、二进制哈希与 API 版本对，不声明未观察到的传递库身份。驱动用户态导入和构建成功仍须独立验证。
+
+当前配置另行要求 `cuda-compat-13-3=610.43.02-1ubuntu1`。仅包检查可以检查其磁盘文件，但不证明能够加载或查询。类似地，`nvrtcBuiltins` 磁盘记录不是已加载记录：仅包检查不创建 `nativeLibraries` 对象，原生验证阶段将 `nativeLibraries.nvrtcBuiltins` 初始化为 null，直到编译后的映射/身份检查成功才填入观察。纸面表格和通过的仅包预检查都不提供该观察。
+
+CLI 在导入 CUDA 前设置 `CUDA_CACHE_DISABLE=1`，ProgramOptions 和 LinkerOptions 也指定 `no_cache=True`。这排除了默认 NVRTC 缓存的初始化路径，否则首次编译会调用 `cuInit()`。源码记录 `cachePolicy: "disabled"`，只是配置依据，不证明编译或后续 builtins 映射检查成功。只依据未构造 Device 来论证没有初始化并不完整。
 
 实际目标的直接 `Program(...).compile("cubin")` 是另一条合法生成路径，不证明显式 Linker 运行过。EX21 刻意保留 PTX 再 nvJitLink。链接器必须支持编译器输入；固定原生组件对避免了新编译器/旧链接器不匹配，但不承诺任意输入兼容。
 
@@ -82,6 +88,8 @@ nvJitLink 创建为 `nvjitlink.create(1, ["-arch=sm_75"])`，返回整数句柄�
 17 是题设长度，不是已知消息。不能编造内容，也不能用宽泛 strip 删除有意义空白。错误报告本身失败时，补充该诊断并保留原始异常。缺失库或 Python `ValueError`/`TypeError` 不是原生状态元组，可能发生在取得任何资源之前。
 
 core Program 的成功 `logs=` 输出与失败异常诊断不同。日志流在编译成功后写入；编译抛异常时，应检查保留的类型/消息/日志注释，不能把空 StringIO 当作无错证明。core 实现中的错误类是私有的，独立 CLI 无需导入它们也能报告异常。core Linker 成功日志可以缓存，但失败链接日志应在 close 前读取，不应假设之后仍可用。
+
+EX21 在显式 `cleanup_step` 动作周围捕获 Python stderr 与原生 FD 2，包括 Program/Linker 关闭和代码引用放弃。任何非空捕获 stderr 都保留在 `cleanupWarnings` 并阻止成功；异常/捕获失败另记为 `cleanupErrors`，不替换原始失败。每动作载荷的 16,384 字节/字符边界会标明截断，不限制临时文件磁盘使用，也不观察延迟析构。之后的 GC、动作结束后才刷出的原生输出及判定后的解释器关闭，都不属于该次判定。上述纸面情景不证明真实原生清理，助手也不是通用的并发安全库设施。
 
 ## 合法替代与取舍
 

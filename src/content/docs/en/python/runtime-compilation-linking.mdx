@@ -98,13 +98,17 @@ PTX's virtual target and cubin's real target have different purposes. Artifact e
 
 <CanonicalCode exampleId="EX21" range="runtime-compile" />
 
-Create `Program(source, code_type="c++", options=opts)` with `ProgramOptions(std="c++17", arch=f"compute_{arch}", relocatable_device_code=True, name="ex21_vector_add.cu")`. Source is a Python string; the simple kernel needs no Toolkit headers. `program.compile("ptx", logs=io.StringIO())` returns ObjectCode whose `.code` is bytes.
+Create `Program(source, code_type="c++", options=opts)` with `ProgramOptions(std="c++17", arch=f"compute_{arch}", relocatable_device_code=True, name="ex21_vector_add.cu", no_cache=True)`. Source is a Python string; the simple kernel needs no Toolkit headers. `program.compile("ptx", logs=io.StringIO())` returns ObjectCode whose `.code` is bytes.
 
-The actual linker call is `Linker(ptx, options=LinkerOptions(arch=f"sm_{arch}"))`, then `linker.link("cubin")`. Object inputs come first and options are a keyword; do not copy a misleading generated class-header ordering. Inspect `Linker.which_backend()`: this profile requires **nvJitLink**. A warning and fallback to the driver linker does not count as the pinned path. Native NVRTC and nvJitLink are both 13.3.33 from Toolkit 13.3.1; installing a newer native compiler through extras can break the linker/input compatibility assumption.
+The actual linker call is `Linker(ptx, options=LinkerOptions(arch=f"sm_{arch}", no_cache=True))`, then `linker.link("cubin")`. Object inputs come first and options are a keyword; do not copy a misleading generated class-header ordering. Inspect `Linker.which_backend()`: this profile requires **nvJitLink**. A warning and fallback to the driver linker does not count as the pinned path. Native NVRTC and nvJitLink are both 13.3.33 from Toolkit 13.3.1; installing a newer native compiler through extras can break the linker/input compatibility assumption.
 
 For the no-GPU build, arch is the explicit CLI target `75`, not a result of `Device(0)` enumeration. During run, derive the target from the selected GPU and check compiler support. A build command that consults a device just to choose the target would defeat its no-GPU contract.
 
 GPU-free does not mean driver-library-free: core 1.2.0's PTX compilation queries `cuDriverGetVersion()`. Supply real `libcuda` userspace, not a Toolkit stub or simulated driver. This query does not call `cuInit` or create a device/context. EX21 also needs the selected Toolkit's `cuobjdump` for artifact inspection. A GPU-free build worker can provide those host libraries/tools without claiming a GPU run or a supported container-only runtime environment.
+
+The [NVRTC native cache](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#caching-cuda-12-9) is another path: with default caching, its first compile loads the driver and invokes `cuInit()`. EX21 explicitly sets `CUDA_CACHE_DISABLE=1` before imports and supplies `no_cache=True` in both ProgramOptions and LinkerOptions. Retain `cachePolicy: "disabled"` with the build configuration. An explicit architecture and absence of `Device()` alone do not prove that native compilation avoids initialization; the cache condition must also hold, and the actual build still needs validation.
+
+The native installation is specifically the NVIDIA Ubuntu deb profile in [EX21](/en/examples/cuda-python-launch/), not an arbitrary local/runfile Toolkit. Use its installed package inventory and ownership of the resolved NVRTC/nvJitLink/cuobjdump files; do not require a Toolkit `version.json` that this Debian installation does not provide. Package versions, compiler/linker patch filenames, binary hashes and API major/minor pairs are separate coordinates. Correcting that metadata assumption does not establish driver userspace import or compilation/linking success; those validation stages remain pending.
 
 ## Loading belongs after linking
 
@@ -147,6 +151,8 @@ Core Program reports NVRTC failures as exceptions with the compilation log attac
 
 The minimum useful failure record is the stage, input identity, target/options, loaded native component identity, original exception or status, available log, and separate cleanup diagnostics. “No exception yet” after launch is insufficient: copies or `sync()` can report earlier asynchronous faults. Do not keep executing after a compiler or linker failure using an old artifact without explicit validated cache semantics.
 
+For explicit Program/Linker cleanup and code-reference release, EX21's `cleanup_step` captures both Python stderr and native FD 2. Captured nonempty output is a failure even without a raised exception; the first operation error remains primary. Retention is bounded per action to 16,384 bytes and 16,384 decoded characters plus labels/truncation indication, not a bound on temporary-spool disk usage. Capture/replay failures also fail cleanup. Later GC, delayed native flushes and interpreter-shutdown destructors outside the explicit action cannot be certified by this verdict. The mechanism changes process-global state and is restricted to the single-threaded standalone CLI; keep external stderr too.
+
 ## Predict which stages can succeed independently
 
 For `build --arch 75`, predict `compute_75` PTX, `sm_75` cubin, and the nvJitLink backend, with no device selection, kernel lookup, launch, or output vector. Nonempty artifacts are required, but their exact sizes and diagnostics are not known before execution.
@@ -168,7 +174,7 @@ bash scripts/setup.sh
 .venv/bin/python ex21.py build --arch 75
 ```
 
-2. The build needs the selected interpreter, packages, NVRTC, nvJitLink, real driver userspace and cuobjdump, but **no GPU**. Record missing native libraries as a blocker. Do not add device initialization or a launch to make the compiler test appear more complete.
+2. The build needs the selected interpreter, Python packages, installed NVIDIA deb inventory, NVRTC, nvJitLink, real driver userspace and cuobjdump, but **no GPU**. Record missing/wrong packages, ownership mismatches or missing native libraries as blockers; absence of `version.json` is not one for this profile. Do not add device initialization or a launch to make the compiler test appear more complete.
 3. Inspect the retained build artifacts and diagnostics in `build/compile`. Verify explicit virtual/real targets, the declared backend, and nonempty PTX/cubin; record their actual identities rather than guessing lengths. Results are not overwritten: a repeat needs a fresh `--output-dir`. Run has a separate `build/run` default. Do not report an artifact as loaded unless lookup actually occurred.
 4. On paper, map the core calls to the low-level nvJitLink create/add/complete/extract/destroy chain. Specify where logs can be retrieved after create failure versus complete failure, and which output must be writable.
 5. If runtime hardware is available, follow EX21's separately gated run instructions. Do not turn the no-GPU build result into a vector-add verdict.
@@ -193,6 +199,6 @@ Complete the [two Exercises](/en/python/runtime-compilation-linking/exercises/) 
 
 ## Sources and licensing
 
-Inspect the build stages in the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch), or [download the pinned repository archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip) and use `examples/ex21-cuda-python-launch/`. The immutable revision identifies the imported compilation range; a build or runtime claim still needs its own qualifying records.
+Inspect the build stages in the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch), or [download the pinned repository archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip) and use `examples/ex21-cuda-python-launch/`. The immutable revision identifies the imported compilation range; a build or runtime claim still needs its own qualifying records.
 
 [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077) records core source/tests; [SRC-CUDA-078](/en/sources-and-versions/#src-cuda-078) records stable NVRTC/nvJitLink contracts; [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) records native component and license identities. Facts and access checked **2026-09-12**. These original tables explain public APIs without copying an upstream sample or claiming owner-test execution. Existing [PTX](/en/glossary/#term-118) and [cubin](/en/glossary/#term-119) definitions remain applicable.
