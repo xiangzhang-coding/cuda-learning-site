@@ -310,33 +310,43 @@ async function main() {
       const file = path.join(scratch, name);
       let metadata;
       try { metadata = await lstat(file); }
-      catch (error) { if (error.code === 'ENOENT') continue; throw error; }
+      catch (error) { if (error.code === 'ENOENT') continue; throw new Error(`retention: ${name}: metadata read failed`); }
       if (!metadata.isFile() || metadata.isSymbolicLink() || metadata.size > 50 * 1024 * 1024) {
-        throw new Error('Unsafe report type or size; refusing retention');
+        throw new Error(`retention: ${name}: unsafe report type or raw size exceeds 50 MiB`);
       }
-      let text = new TextDecoder('utf-8', { fatal: true }).decode(await readFile(file));
-      // Core's native log getters can retain C-string terminators. Strip only trailing log NULs.
-      if (['nvrtc.log', 'link-info.log', 'link-error.log'].includes(name)) text = text.replace(/\0+$/, '');
-      if (text.includes('\0')) throw new Error('Binary content cannot be retained as a report');
+      const bytes = await readFile(file).catch(() => { throw new Error(`retention: ${name}: read failed`); });
+      let text;
+      try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+      catch { throw new Error(`retention: ${name}: invalid UTF-8`); }
+      // NVRTCError retains its C-string NUL inside tracebacks too; preserve it visibly in logs.
+      if (name.endsWith('.log')) text = text.replaceAll('\0', '\\0');
+      if (text.includes('\0')) throw new Error(`retention: ${name}: NUL in non-log report`);
       text = text.replaceAll(root, '/workspace').replaceAll(scratch, '/check-work');
       reports.set(name, text);
     }
     // Scan the complete candidate set before creating any uploadable files. Never print raw diagnostics.
     for (const [name, text] of reports) {
-      if (scanArtifactBuffer(Buffer.from(text), name).length !== 0) {
-        throw new Error('Report privacy scan failed; no uploadable files were created');
+      if (Buffer.byteLength(text, 'utf8') > 50 * 1024 * 1024) throw new Error(`retention: ${name}: encoded size exceeds 50 MiB`);
+      const violation = scanArtifactBuffer(Buffer.from(text), name)[0];
+      if (violation) {
+        throw new Error(`retention: ${name}: privacy rule ${violation.rule}`);
       }
     }
-    await mkdir(path.dirname(output), { recursive: true });
-    await mkdir(output);
-    for (const [name, text] of reports) await writeFile(path.join(output, name), text, { flag: 'wx' });
+    await mkdir(path.dirname(output), { recursive: true }).catch(() => { throw new Error('retention: gate.json: output parent creation failed'); });
+    await mkdir(output).catch(() => { throw new Error('retention: gate.json: output directory creation failed'); });
+    for (const [name, text] of reports) await writeFile(path.join(output, name), text, { flag: 'wx' }).catch(() => { throw new Error(`retention: ${name}: write failed`); });
     console.log(`EX21 ${record.result}: scanned text reports retained in ${artifactPath}. No evidence labels changed.`);
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }
 }
 
-main().catch(() => {
-  console.error('EX21 check could not finish safely; no unscanned diagnostics will be uploaded. Use --help for requirements.');
+main().catch((error) => {
+  const message = typeof error?.message === 'string' ? error.message : '';
+  const named = /^retention: ([a-z-]+\.(?:json|log|txt)): /.exec(message);
+  const safe = named && (named[1] === 'gate.json' || allowedReports.includes(named[1]))
+    && message.length <= 512 && !/[\u0000-\u001f\u007f]/.test(message)
+    && scanArtifactBuffer(Buffer.from(message), 'runner-error.log').length === 0;
+  console.error(safe ? message : 'EX21 check could not finish safely; no unscanned diagnostics will be uploaded. Use --help for requirements.');
   process.exitCode = 1;
 });

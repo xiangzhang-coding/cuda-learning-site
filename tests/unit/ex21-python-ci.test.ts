@@ -114,12 +114,19 @@ it('retains only allowlisted UTF-8 reports after scanning, handling native log t
   expect(names.every((name) => /^[a-z-]+\.(?:json|log|txt)$/.test(name))).toBe(true);
   expect(runner).toContain("new TextDecoder('utf-8', { fatal: true })");
   expect(runner).toContain('metadata.isSymbolicLink()');
-  expect(runner).toContain("text.replace(/\\0+$/, '')");
+  expect(runner).toContain("if (name.endsWith('.log')) text = text.replaceAll('\\0', '\\\\0')");
   expect(runner).toContain("text.includes('\\0')");
+  expect(runner).toContain("Buffer.byteLength(text, 'utf8') > 50 * 1024 * 1024");
   const scan = runner.indexOf('scanArtifactBuffer(Buffer.from(text), name)');
   expect(scan).toBeGreaterThan(-1);
   expect(scan).toBeLessThan(runner.indexOf('await mkdir(output)'));
-  expect(runner).toContain("throw new Error('Report privacy scan failed; no uploadable files were created')");
+  expect(runner).toContain('retention: ${name}: privacy rule ${violation.rule}');
+  expect(runner).toContain('retention: ${name}: invalid UTF-8');
+  expect(runner).toContain('retention: ${name}: read failed');
+  expect(runner).toContain('message.length <= 512');
+  expect(runner).toContain('allowedReports.includes(named[1])');
+  expect(runner).toContain("scanArtifactBuffer(Buffer.from(message), 'runner-error.log').length === 0");
+  expect(runner).not.toMatch(/console\.error\(error(?:\)|\.stack)/);
   expect(runner).not.toMatch(/cp\([^\n]*output|copyFile\([^\n]*output/);
 });
 
