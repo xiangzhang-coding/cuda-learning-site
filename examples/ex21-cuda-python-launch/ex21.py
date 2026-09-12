@@ -2,6 +2,7 @@
 """Standalone EX21 command line; host-test needs only the Python standard library."""
 
 import argparse
+from contextlib import redirect_stderr
 import ctypes
 import hashlib
 import importlib.metadata
@@ -15,6 +16,7 @@ import re
 import subprocess
 import sys
 import sysconfig
+import tempfile
 import traceback
 import warnings
 
@@ -22,6 +24,7 @@ PACKAGES = {"cuda-core": "1.2.0", "cuda-bindings": "13.4.1",
             "cuda-pathfinder": "1.8.1", "numpy": "2.5.3"}
 ROOT = Path(__file__).resolve().parent
 MAX_SIZE = 1_000_000
+CLEANUP_DIAGNOSTIC_LIMIT = 16_384
 
 
 def check_profile(report, phase="native"):
@@ -60,6 +63,105 @@ def check_profile(report, phase="native"):
     if failures:
         raise RuntimeError("unsupported EX21 profile: " + "; ".join(failures))
     environment["checkedPhase"] = "interpreter" if phase == "interpreter" else "packages"
+
+
+def dpkg_query(*arguments):
+    return subprocess.run(
+        ["/usr/bin/dpkg-query", "--admindir=/var/lib/dpkg", "--no-pager", *arguments],
+        capture_output=True, text=True, timeout=15,
+        env={**os.environ, "LC_ALL": "C", "LANGUAGE": "C", "DPKG_ROOT": "/"},
+    )
+
+
+def inspect_native_file(path, package, inventory):
+    actual = Path(path).resolve(strict=True)
+    if not actual.is_file():
+        raise RuntimeError(f"native artifact is not a regular file: {actual}")
+    ownership = dpkg_query("--search", str(actual))
+    owner = inventory[package]["binaryPackage"]
+    if ownership.returncode != 0 or ownership.stdout.splitlines() != [f"{owner}: {actual}"]:
+        raise RuntimeError(f"package ownership mismatch: {actual} must be owned only by {owner}")
+    with actual.open("rb") as binary:
+        digest = hashlib.file_digest(binary, "sha256").hexdigest()
+    return {"path": str(actual), "sha256": digest, "package": package,
+            "packageVersion": inventory[package]["version"], "owner": owner}
+
+
+def check_native_packages(report):
+    report["stage"] = "native-packages"
+    profile = json.loads((ROOT / "native-profile.json").read_text())
+    if profile["schemaVersion"] != 1 or profile["id"] != "nvidia-deb-ubuntu2404-cuda1331":
+        raise RuntimeError("unsupported EX21 native installation profile")
+    toolkit = Path(os.environ.get("CUDA_PATH", profile["toolkitRoot"])).resolve(strict=True)
+    if toolkit != Path(profile["toolkitRoot"]).resolve(strict=True):
+        raise RuntimeError("the NVIDIA Debian installation must be rooted at /usr/local/cuda-13.3")
+    if os.environ.get("CUDA_HOME") and Path(os.environ["CUDA_HOME"]).resolve() != toolkit:
+        raise RuntimeError("CUDA_HOME and CUDA_PATH must identify the same selected Toolkit")
+    os.environ["CUDA_PATH"] = str(toolkit)
+    inventory = {}
+    report["environment"]["toolkit"] = {
+        "root": str(toolkit), "targetVersion": profile["toolkit"], "version": None,
+        "installationMode": profile["installationMode"], "packages": inventory,
+        "versionSource": "installed cuda-compiler-13-3 and cuda-command-line-tools-13-3 package coordinates",
+    }
+    query = dpkg_query(
+        r"--showformat=${Package}\t${binary:Package}\t${Status}\t${Version}\t${Architecture}\n",
+        "--show", *profile["packages"],
+    )
+    for line in query.stdout.splitlines():
+        name, binary_name, status, version, architecture_name = line.split("\t")
+        if name in inventory:
+            raise RuntimeError(f"ambiguous installed package: {name}")
+        inventory[name] = {"binaryPackage": binary_name, "status": status,
+                           "version": version, "architecture": architecture_name}
+    for name, version in profile["packages"].items():
+        actual = inventory.get(name)
+        if (actual is None or actual["status"] != profile["installedStatus"]
+                or actual["version"] != version or actual["architecture"] != profile["architecture"]):
+            raise RuntimeError(f"unsupported NVIDIA Debian package profile: {name} requires "
+                               f"{profile['installedStatus']}, {version}, {profile['architecture']}; found {actual}")
+    if query.returncode != 0 or set(inventory) != set(profile["packages"]):
+        raise RuntimeError(f"NVIDIA package inventory query failed: {query.stderr.strip()}")
+    observed_version = inventory["cuda-compiler-13-3"]["version"].rsplit("-", 1)[0]
+    if (observed_version != profile["toolkit"]
+            or inventory["cuda-command-line-tools-13-3"]["version"].rsplit("-", 1)[0] != observed_version):
+        raise RuntimeError("the installed Toolkit metapackage coordinates disagree")
+    report["environment"]["toolkit"]["version"] = observed_version
+    report["stage"] = "native-package-files"
+    files = report["environment"]["nativeFiles"] = {}
+    for role, spec in profile["files"].items():
+        files[role] = inspect_native_file(toolkit / spec["path"], spec["package"], inventory)
+        if (not Path(files[role]["path"]).is_relative_to(toolkit)
+                or Path(files[role]["path"]).name != Path(spec["path"]).name):
+            raise RuntimeError(f"native package file has an unsupported path: {role}")
+    report["environment"]["checkedPhase"] = "native-packages"
+    return profile
+
+
+def observe_nvrtc_builtins(report, profile):
+    report["stage"] = "inspect-nvrtc-builtins"
+    mappings = set()
+    for line in Path("/proc/self/maps").read_text().splitlines():
+        fields = line.split(maxsplit=5)
+        if len(fields) != 6 or "libnvrtc-builtins.so" not in fields[5]:
+            continue
+        if fields[5].endswith(" (deleted)"):
+            raise RuntimeError("loaded NVRTC-builtins mapping was deleted")
+        major, minor = (int(value, 16) for value in fields[3].split(":"))
+        mappings.add((fields[5], int(fields[4]), major, minor))
+    if len(mappings) != 1:
+        raise RuntimeError("expected exactly one loaded NVRTC-builtins file after compilation")
+    path, inode, major, minor = next(iter(mappings))
+    expected = report["environment"]["nativeFiles"]["nvrtcBuiltins"]
+    if str(Path(path).resolve(strict=True)) != expected["path"]:
+        raise RuntimeError(f"loaded NVRTC-builtins path/patch mismatch: {path}")
+    observed = inspect_native_file(path, profile["files"]["nvrtcBuiltins"]["package"],
+                                   report["environment"]["toolkit"]["packages"])
+    if observed["sha256"] != expected["sha256"]:
+        raise RuntimeError("loaded NVRTC-builtins backing file changed from its package inspection")
+    observed["mappingIdentity"] = {"inode": inode, "deviceMajor": major, "deviceMinor": minor}
+    observed["observedVia"] = "/proc/self/maps after NVRTC compilation"
+    report["environment"]["nativeLibraries"]["nvrtcBuiltins"] = observed
 
 
 def architecture(value):
@@ -159,7 +261,139 @@ def host_test():
             "rejectedOutputCases": 15, "rejectedInputCases": 4, "rejectedSizeCases": 4}
 
 
-def cuda_command(args, report):
+def cleanup_step(label, action, report):
+    """Observe one explicit cleanup action in this single-threaded standalone process."""
+    errors = report.setdefault("cleanupErrors", [])
+    diagnostics = report.setdefault("cleanupWarnings", [])
+    failures = []
+    data = b""
+    attempted = False
+    try:
+        # Unbuffered backing storage keeps Python writes and native fd 2 writes on one file offset.
+        with tempfile.TemporaryFile(mode="w+b", buffering=0) as captured:
+            with io.TextIOWrapper(captured, encoding="utf-8", errors="backslashreplace",
+                                  write_through=True) as redirected:
+                sys.stderr.flush()
+                saved_fd = os.dup(2)
+                try:
+                    os.dup2(captured.fileno(), 2)
+                    with redirect_stderr(redirected), warnings.catch_warnings():
+                        warnings.simplefilter("always")
+                        attempted = True
+                        try:
+                            action()
+                        except Exception as error:
+                            failures.append(f"{type(error).__name__}: {error}"[:CLEANUP_DIAGNOSTIC_LIMIT])
+                finally:
+                    try:
+                        redirected.flush()
+                    finally:
+                        try:
+                            os.dup2(saved_fd, 2)
+                        finally:
+                            os.close(saved_fd)
+                captured.seek(0)
+                data = captured.read(CLEANUP_DIAGNOSTIC_LIMIT + 1)
+    except Exception as error:
+        failures.append(f"diagnostic capture: {type(error).__name__}: {error}"[:CLEANUP_DIAGNOSTIC_LIMIT])
+    if not attempted:
+        # Capture failure is already fatal, but must not prevent attempting the release itself.
+        try:
+            action()
+        except Exception as error:
+            failures.append(f"{type(error).__name__}: {error}"[:CLEANUP_DIAGNOSTIC_LIMIT])
+    messages = []
+    for failure in failures:
+        message = f"{label}: {failure}"
+        errors.append(message)
+        messages.append(message)
+    if data:
+        text = data[:CLEANUP_DIAGNOSTIC_LIMIT].decode("utf-8", errors="backslashreplace")
+        truncated = len(data) > CLEANUP_DIAGNOSTIC_LIMIT or len(text) > CLEANUP_DIAGNOSTIC_LIMIT
+        message = f"{label}: stderr: {text[:CLEANUP_DIAGNOSTIC_LIMIT]}"
+        if truncated:
+            message += "\n[cleanup diagnostics truncated]"
+        diagnostics.append(message)
+        messages.append(message)
+    for message in messages:
+        try:
+            print(f"cleanup diagnostic: {message}", file=sys.stderr, flush=True)
+        except Exception as error:
+            errors.append(f"{label}: diagnostic replay: {type(error).__name__}: {error}"[:CLEANUP_DIAGNOSTIC_LIMIT])
+
+
+def cleanup_self_test():
+    checks = {}
+    original_stderr = sys.stderr
+    original_fd = os.fstat(2)
+
+    def check(name, action, markers=()):
+        expected_stderr = sys.stderr
+        report = {}
+        cleanup_step(f"self-test {name}", action, report)
+        problems = report["cleanupErrors"] + report["cleanupWarnings"]
+        if bool(problems) != bool(markers) or any(marker not in "\n".join(problems) for marker in markers):
+            raise AssertionError(f"cleanup self-test did not classify {name} correctly")
+        cleanup_step("self-test later clean action", lambda: None, report)
+        if report["cleanupErrors"] + report["cleanupWarnings"] != problems:
+            raise AssertionError("a later clean action changed the recorded failure")
+        current_fd = os.fstat(2)
+        if sys.stderr is not expected_stderr or (current_fd.st_dev, current_fd.st_ino, current_fd.st_mode) != (
+                original_fd.st_dev, original_fd.st_ino, original_fd.st_mode):
+            raise AssertionError("cleanup did not restore both stderr sinks")
+        checks[name] = True
+        return report
+
+    def raises_error():
+        raise ValueError("expected cleanup exception")
+
+    def combined():
+        print("expected Python stderr", file=sys.stderr)
+        os.write(2, b"expected fd2 stderr\n")
+        warnings.warn("expected cleanup warning", RuntimeWarning)
+        raises_error()
+
+    check("quiet", lambda: None)
+    # A Python sink that is not fd 2 proves the two capture paths independently.
+    with redirect_stderr(io.StringIO()) as alternate_stderr:
+        check("pythonStderr", lambda: print("expected Python stderr", file=sys.stderr), ("expected Python stderr",))
+    print(alternate_stderr.getvalue(), file=original_stderr, end="")
+    check("nativeStderr", lambda: os.write(2, b"expected fd2 stderr\n"), ("expected fd2 stderr",))
+    check("nativeStderr", lambda: os.write(2, b" \n"), (" \n",))
+    check("warning", lambda: warnings.warn("expected cleanup warning", RuntimeWarning), ("expected cleanup warning",))
+    check("exception", raises_error, ("expected cleanup exception",))
+    check("combined", combined, ("expected Python stderr", "expected fd2 stderr",
+                                 "expected cleanup warning", "expected cleanup exception"))
+    primary = RuntimeError("expected primary exception")
+    try:
+        try:
+            raise primary
+        finally:
+            check("primaryExceptionPreserved", combined, ("expected cleanup exception", "expected fd2 stderr"))
+    except RuntimeError as error:
+        if error is not primary:
+            raise AssertionError("cleanup masked the primary exception") from error
+    report = check("boundedDiagnostics", lambda: os.write(2, b"x" * (CLEANUP_DIAGNOSTIC_LIMIT + 64)),
+                   ("cleanup diagnostics truncated",))
+    if any(len(message) > CLEANUP_DIAGNOSTIC_LIMIT + 128 for message in report["cleanupWarnings"]):
+        raise AssertionError("retained cleanup diagnostics exceeded the bound")
+
+    class DiagnosticOnRelease:
+        def __del__(self):
+            os.write(2, b"expected release stderr\n")
+
+    owner = [DiagnosticOnRelease()]
+    check("referenceRelease", owner.clear, ("expected release stderr",))
+    print("self-test Python stderr restored", file=sys.stderr)
+    os.write(2, b"self-test fd2 restored\n")
+    checks["stderrRestored"] = True
+    return checks
+
+
+def cuda_command(args, report, profile):
+    # NVRTC's default cache invokes cuInit(); this standalone compilation path must not.
+    os.environ["CUDA_CACHE_DISABLE"] = "1"
+    report["cachePolicy"] = "disabled"
     report["stage"] = "canonical-imports"
     # [ex21-canonical-imports-start]
     from cuda.core import (
@@ -171,34 +405,20 @@ def cuda_command(args, report):
     # [ex21-canonical-imports-end]
 
     report["stage"] = "native-libraries"
-    toolkit = Path(os.environ.get("CUDA_PATH", "/usr/local/cuda-13.3")).resolve(strict=True)
-    if os.environ.get("CUDA_HOME") and Path(os.environ["CUDA_HOME"]).resolve() != toolkit:
-        raise RuntimeError("CUDA_HOME and CUDA_PATH must identify the same selected Toolkit")
-    os.environ["CUDA_PATH"] = str(toolkit)
-    version_file = toolkit / "version.json"
-    toolkit_version = json.loads(version_file.read_text())["cuda"]["version"]
-    report["environment"]["toolkit"] = {"root": str(toolkit), "version": toolkit_version}
-    if toolkit_version != "13.3.1":
-        raise RuntimeError(f"requires Toolkit 13.3.1; version.json declares {toolkit_version}")
-    libraries = report["environment"]["nativeLibraries"] = {}
+    inventory = report["environment"]["toolkit"]["packages"]
+    libraries = report["environment"]["nativeLibraries"] = {"nvrtcBuiltins": None}
     for name in ("nvrtc", "nvJitLink", "cuda"):
         loaded = load_nvidia_dynamic_lib(name)
         if not loaded.abs_path:
             raise RuntimeError(f"cannot establish the loaded {name} library path")
-        library = Path(loaded.abs_path).resolve(strict=True)
-        with library.open("rb") as binary:
-            digest = hashlib.file_digest(binary, "sha256").hexdigest()
-        libraries[name] = {"path": str(library), "sha256": digest, "foundVia": loaded.found_via}
+        observed = inspect_native_file(loaded.abs_path, profile["files"][name]["package"], inventory)
+        expected = report["environment"]["nativeFiles"][name]
+        if observed["path"] != expected["path"] or observed["sha256"] != expected["sha256"]:
+            raise RuntimeError(f"loaded {name} does not match the inspected Debian package file")
+        libraries[name] = {**observed, "foundVia": loaded.found_via,
+                           "binaryCoordinate": observed["packageVersion"].rsplit("-", 1)[0]}
         if name != "cuda":
-            if not library.is_relative_to(toolkit) or library.name != f"lib{name}.so.13.3.33":
-                raise RuntimeError(f"requires native {name} 13.3.33 inside CUDA_PATH; loaded {library}")
-            libraries[name]["binaryCoordinate"] = "13.3.33"
             libraries[name]["patchVersionExposedByApi"] = False
-        else:
-            match = re.fullmatch(r"libcuda\.so\.(\d+\.\d+\.\d+)", library.name)
-            if not match or tuple(map(int, match[1].split("."))) < (610, 43, 2):
-                raise RuntimeError("requires real driver userspace library >=610.43.02; no stubs")
-            libraries[name]["binaryCoordinate"] = match[1]
     status, major, minor = nvrtc.nvrtcVersion()
     if status != nvrtc.nvrtcResult.NVRTC_SUCCESS:
         raise RuntimeError(f"nvrtcVersion failed: {status}")
@@ -248,20 +468,7 @@ def cuda_command(args, report):
     cleanup_warnings = report["cleanupWarnings"] = []
 
     def cleanup(label, action):
-        try:
-            with warnings.catch_warnings(record=True) as caught:
-                warnings.simplefilter("always")
-                try:
-                    action()
-                finally:
-                    for warning in caught:
-                        message = f"{label}: {warning.category.__name__}: {warning.message}"
-                        cleanup_warnings.append(message)
-                        print(f"cleanup warning: {message}", file=sys.stderr)
-        except Exception as error:
-            message = f"{label}: {type(error).__name__}: {error}"
-            cleanup_errors.append(message)
-            print(f"cleanup error: {message}", file=sys.stderr)
+        cleanup_step(label, action, report)
 
     try:
         if args.command == "run":
@@ -291,14 +498,15 @@ def cuda_command(args, report):
         source = (ROOT / "kernel.cu").read_text(encoding="utf-8")
         program = Program(source, code_type="c++", options=ProgramOptions(
             std="c++17", arch=f"compute_{arch}", relocatable_device_code=True,
-            name="ex21_vector_add.cu",
+            name="ex21_vector_add.cu", no_cache=True,
         ))
         ptx = program.compile("ptx", logs=compile_log)
+        observe_nvrtc_builtins(report, profile)
         ptx_bytes = bytes(ptx.code)
         with (output / "ex21.ptx").open("xb") as destination:
             destination.write(ptx_bytes)
         report["stage"] = "link-cubin"
-        linker = Linker(ptx, options=LinkerOptions(arch=f"sm_{arch}"))
+        linker = Linker(ptx, options=LinkerOptions(arch=f"sm_{arch}", no_cache=True))
         linked = linker.link("cubin")
         cubin_bytes = bytes(linked.code)
         with (output / "ex21.cubin").open("xb") as destination:
@@ -312,7 +520,7 @@ def cuda_command(args, report):
                 or len(cubin_bytes) < 64 or cubin_bytes[:4] != b"\x7fELF"):
             raise RuntimeError("expected a PTX entry/target and a nonempty ELF cubin")
         inspection = subprocess.run(
-            [str(toolkit / "bin/cuobjdump"), "--dump-sass", str(output / "ex21.cubin")],
+            [report["environment"]["nativeFiles"]["cuobjdump"]["path"], "--dump-sass", str(output / "ex21.cubin")],
             capture_output=True, text=True, timeout=60,
         )
         with (output / "sass.txt").open("x") as destination:
@@ -383,7 +591,11 @@ def cuda_command(args, report):
             cleanup("drain queued frees", stream.sync)
             cleanup("owned Stream.close", stream.close)
         # Kernel and ObjectCode have shared library ownership, not public close() methods.
-        kernel = linked = None
+        def release_code():
+            nonlocal kernel, linked
+            kernel = linked = None
+
+        cleanup("release Kernel/ObjectCode references", release_code)
         # Core retains the primary context; do not reset/destroy it or invent Device.close().
         # [ex21-python-lifecycle-end]
         cleanup("retain NVRTC log", lambda: (output / "nvrtc.log").write_text(compile_log.getvalue()))
@@ -402,7 +614,7 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("host-test", help="stdlib-only CPU logic checks; no CUDA evidence")
     check = commands.add_parser("check-environment", help="check the single selected profile")
-    check.add_argument("--phase", choices=("interpreter", "packages", "native"), default="native",
+    check.add_argument("--phase", choices=("interpreter", "packages", "native-packages", "native"), default="native",
                        help="setup preflights stop before packages or native CUDA libraries")
     build = commands.add_parser("build", help="GPU-free NVRTC PTX -> nvJitLink cubin")
     build.add_argument("--arch", required=True)
@@ -419,18 +631,22 @@ def main():
     except ValueError as error:
         parser.error(str(error))
     if args.command == "host-test":
-        print(json.dumps(host_test()))
+        report = host_test()
+        report["cleanupChecks"] = cleanup_self_test()
+        print(json.dumps(report))
         return 0
     report = {"command": args.command, "result": "fail", "gpuExecuted": False,
               "driverInitialized": False, "stage": "environment-profile"}
     try:
         phase = args.phase if args.command == "check-environment" else "native"
         check_profile(report, phase)
+        if phase in ("native-packages", "native"):
+            native_profile = check_native_packages(report)
         if args.command == "run":
             report["stage"] = "cpu-reference"
             report["cpuChecks"] = host_test()
         if phase == "native":
-            cuda_command(args, report)
+            cuda_command(args, report, native_profile)
         report["stage"] = "complete"
         report["result"] = "pass"
     except Exception as error:

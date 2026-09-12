@@ -12,12 +12,13 @@
     "standard": "c++17",
     "inputs": ["ex21.py", "kernel.cu"],
     "hostTestInputs": ["ex21.py"],
-    "contractFiles": ["scripts/setup.sh", "requirements.lock"],
+    "contractFiles": ["scripts/setup.sh", "requirements.lock", "native-profile.json"],
     "additionalContractInputs": ["environment-manifest.json"],
-    "stages": ["setup", "host-test", "check-environment", "compile-ptx", "link-cubin", "inspect-artifacts"],
+    "stages": ["setup", "host-test", "native-packages", "native-package-files", "check-environment", "compile-ptx", "inspect-nvrtc-builtins", "link-cubin", "inspect-artifacts"],
     "commands": {
       "setup": "bash scripts/setup.sh",
       "hostTest": ".venv/bin/python ex21.py host-test",
+      "checkNativePackages": ".venv/bin/python ex21.py check-environment --phase native-packages",
       "checkEnvironment": ".venv/bin/python ex21.py check-environment",
       "build": ".venv/bin/python ex21.py build --arch 75",
       "run": ".venv/bin/python ex21.py run --size 1003"
@@ -29,6 +30,7 @@
     ],
     "gpuExecutionInBuild": false,
     "driverInitializationInBuild": false,
+    "cachePolicy": "ProgramOptions.no_cache=True, LinkerOptions.no_cache=True and CUDA_CACHE_DISABLE=1. NVRTC's default cache invokes cuInit; it is disabled before imports/compilation.",
     "driverLibraryInBuild": "Core 1.2.0 Program.compile('ptx') queries cuDriverGetVersion without cuInit; a real userspace driver library is required even on a GPU-free compilation host."
   },
   "correctness": {
@@ -64,14 +66,16 @@
       "distributions": {"cuda-core": "1.2.0", "cuda-bindings": "13.4.1", "cuda-pathfinder": "1.8.1", "numpy": "2.5.3"},
       "lock": "requirements.lock",
       "extras": [],
-      "nativeDependencyMode": "system Toolkit; no native CUDA pip extras",
+      "nativeDependencyMode": "NVIDIA Debian packages on Ubuntu 24.04; no runfile or native CUDA pip installation profile",
+      "nativeProfile": "native-profile.json",
+      "packageGate": "All six declared packages must have exact installed status, amd64 architecture and pinned Debian versions, including cuda-compiler-13-3 and cuda-command-line-tools-13-3 at 13.3.1-1. Canonical resolved binary paths must be owned only by the declared packages.",
       "toolkit": "13.3.1",
       "nvrtc": "13.3.33",
       "nvJitLink": "13.3.33",
-      "nvcc": {"version": "13.3.73", "required": false},
+      "nvcc": {"version": "13.3.73", "required": false, "installationNote": "NVCC is not invoked by EX21, but the compiler metapackage and its installation dependencies are mandatory for this profile."},
       "runtime": {"version": "13.3.29", "directlyUsed": false},
-      "driver": {"target": "610.43.02", "minimum": "610.43.02", "newerCompatible": "Record actual package identity; run requires the kernel module and loaded userspace library versions to match."},
-      "versionBoundary": "NVRTC and nvJitLink APIs expose 13.3, not patch 33. Check Toolkit version.json, resolved 13.3.33 library filenames under CUDA_PATH and record binary SHA-256; installer/package evidence is still required to authenticate the patch coordinate. Driver API level is separate from driver package version.",
+      "driver": {"target": "610.43.02", "minimum": "610.43.02", "userspacePackage": "cuda-compat-13-3", "packageVersion": "610.43.02-1ubuntu1", "newerCompatible": "Other driver coordinates are outside this exact package profile. Run requires the kernel module to match the loaded 610.43.02 userspace library."},
+      "versionBoundary": "Installed NVIDIA Debian package status, versions and actual binary ownership establish the installation coordinate. NVRTC and nvJitLink APIs expose 13.3, not patch 33. After compilation, record NVRTC-builtins from /proc/self/maps and check its path, hash and ownership against cuda-nvrtc-13-3 13.3.33-1; never infer its loaded identity from NVRTC. Local package records and file hashes still require authenticated installation provenance. Driver API level is not driver package identity.",
       "reviewedOn": "2026-09-12"
     },
     "pythonChecks": [

@@ -21,9 +21,9 @@ Environment. Native Linux is the only Supported Environment.
 | OS / CPU / libc | Ubuntu 24.04 LTS, x86_64, glibc 2.39 |
 | Interpreter | Ordinary GIL CPython 3.14.7, release ABI `cp314-cp314` |
 | Python distributions | `cuda-core==1.2.0`, `cuda-bindings==13.4.1`, `cuda-pathfinder==1.8.1`, `numpy==2.5.3` |
-| System Toolkit | CUDA Toolkit 13.3.1 |
+| System Toolkit | NVIDIA Debian-package installation of CUDA Toolkit 13.3.1, under `/usr/local/cuda-13.3` |
 | Compiler / linker libraries | NVRTC 13.3.33 and nvJitLink 13.3.33, from that same Toolkit |
-| Driver target | Linux 610.43.02; newer compatible drivers require their actual version in the manifest |
+| Driver userspace | Installed `cuda-compat-13-3=610.43.02-1ubuntu1`; `run` also requires the matching 610.43.02 kernel module |
 | GPU for `run` | One visible CUDA GPU, CC >=7.5 and a plain numeric target supported by the loaded NVRTC |
 
 The owner's archived OS qualification target is Ubuntu 24.04.4, kernel
@@ -44,18 +44,45 @@ Python runtime closure for this interpreter, not a lock of the whole machine.
 CPython, the bundled pip bootstrap, OS packages, driver and Toolkit installers
 need their own provenance. NVCC 13.3.73 and CUDA Runtime 13.3.29 are independent
 Toolkit components; this path neither invokes NVCC nor directly uses the Runtime.
+The compiler metapackage is nevertheless mandatory for this installation profile.
+Its absence is not excused by finding working NVRTC libraries.
+
+`native-profile.json` is the authoritative, build-hashed installation contract.
+All six NVIDIA packages must be `amd64`, with exact status `install ok installed`
+and these full Debian versions:
+
+| Package | Version |
+| --- | --- |
+| `cuda-compiler-13-3` | `13.3.1-1` |
+| `cuda-command-line-tools-13-3` | `13.3.1-1` |
+| `cuda-nvrtc-13-3` | `13.3.33-1` |
+| `libnvjitlink-13-3` | `13.3.33-1` |
+| `cuda-cuobjdump-13-3` | `13.3.73-1` |
+| `cuda-compat-13-3` | `610.43.02-1ubuntu1` |
+
+Missing, unpacked, half-configured, differently versioned, held or wrong-architecture
+entries fail this deliberately exact profile. The installed package database is
+queried using `dpkg-query --showformat` for package name, binary package name,
+status, version and architecture. `dpkg-query --search` must identify exactly the
+declared owner of every resolved native binary path, including cuobjdump and the
+driver userspace library. A copied but unowned library does not qualify. There is
+no runfile, arbitrary-prefix or native pip-package fallback and no requirement for
+a `version.json` file. A newer driver coordinate needs a reviewed profile change;
+this profile does not promise cross-version forward compatibility on arbitrary GPUs.
 
 ## Commands
 
-Run from this example's directory. Provision the selected interpreter, system
-Toolkit and real driver userspace library first using their owner instructions.
-`CUDA_PATH` defaults to `/usr/local/cuda-13.3`; set it to the selected installation
-root if different. `CUDA_HOME`, if set, must resolve to that same root. The root
-must contain the installed `version.json`, libraries and `bin/cuobjdump`.
+Run from this example's directory. Provision the selected interpreter and the
+six NVIDIA packages from the owner's Ubuntu 24.04 repository first, using their
+exact versions above. `CUDA_PATH` defaults to `/usr/local/cuda-13.3`; any supplied
+alias and `CUDA_HOME` must resolve to that same Debian installation root. Select
+the registered compat userspace library before starting Python:
 
 ```sh
+export LD_LIBRARY_PATH=/usr/local/cuda-13.3/compat:/usr/local/cuda-13.3/lib64
 bash scripts/setup.sh
 .venv/bin/python ex21.py host-test
+.venv/bin/python ex21.py check-environment --phase native-packages
 .venv/bin/python ex21.py check-environment
 .venv/bin/python ex21.py build --arch 75
 .venv/bin/python ex21.py run --size 1003
@@ -70,15 +97,20 @@ installation report in `build/setup-install.json`. A failed install is not a
 usable selected profile.
 
 `check-environment --phase interpreter` is setup's host preflight;
-`--phase packages` adds distribution pins without importing CUDA. The default
-`--phase native` also imports the canonical public APIs, validates the native
-compiler/linker/driver libraries and reports NVRTC's supported architecture list.
-It does not enumerate GPUs, initialize a device/context, or establish runtime
-correctness. `run` additionally checks the kernel driver package before selecting
-visible device 0 and making its primary context current.
+`--phase packages` adds Python distribution pins. `--phase native-packages`
+additionally checks real installed Debian records and resolved file ownership/
+hashes without importing CUDA. These installed-file observations appear in
+`environment.nativeFiles`, not as loaded libraries. The default `--phase native`
+then imports the canonical public APIs, validates actual compiler/linker/driver
+library paths against those owned files, and reports NVRTC's supported targets.
+It does not enumerate GPUs or initialize a device/context. NVRTC-builtins is
+explicitly unobserved in `environment.nativeLibraries.nvrtcBuiltins` until a
+successful compilation; `check-environment` alone does not validate its loading.
+`run` additionally checks the matching kernel driver before selecting visible
+device 0 and making its primary context current.
 
 For independent CPU logic checks on a development machine without any CUDA
-packages, use a local Python 3.10+ interpreter:
+packages, use a local CPython 3.10+ interpreter:
 
 ```sh
 python3 -I -S ex21.py host-test
@@ -88,13 +120,27 @@ This exception is only for CPU logic, not an accepted CUDA profile. `host-test`
 uses stdlib ctypes storage and literal results; it does not fake GPU buffers or
 launches. It covers sizes 1, 255, 256, 257 and 1003, invalid sizes, wrong lengths,
 nonfinite inputs and outputs, first/middle/final-element mismatches and a
-multi-mismatch count. A host-test pass grants no CUDA Evidence Status.
+multi-mismatch count. Its `cleanupChecks` additionally exercises real Python
+stderr (including a non-fd sink), native fd 2 writes, warnings, exceptions,
+reference-release diagnostics, truncation, restoration and preservation of an
+earlier error. These diagnostic-plumbing checks deliberately replay labeled
+expected diagnostics to stderr; their successful classification, not an empty
+stderr log, is the host-test acceptance criterion. They import no CUDA and do
+not run as part of `run`'s CPU correctness checks. A host-test pass grants no
+CUDA Evidence Status.
 
 ## Compilation Without A GPU
 
 `build --arch 75` passes explicit `compute_75` and `sm_75` targets rather than
 asking a device for its architecture. NVRTC produces relocatable C++17 PTX;
-nvJitLink explicitly produces cubin. The CLI refuses core's Driver linker
+immediately afterward, the CLI inspects its own Linux `/proc/self/maps` for the
+actually mapped NVRTC-builtins file. It requires exactly one non-deleted mapped
+file at the declared `libnvrtc-builtins.so.13.3.33` path, owned by the installed
+`cuda-nvrtc-13-3=13.3.33-1` package, with the same hash as the inspected package
+file. The loaded path, SHA-256, owner, package version and mapping identity are
+recorded explicitly; missing, wrong-patch, unowned or multiple builtins fail.
+This identity is never inferred from `nvrtcVersion()`. Then nvJitLink explicitly
+produces cubin. The CLI refuses core's Driver linker
 fallback. It checks the PTX entry/target and ELF cubin, then invokes the selected
 Toolkit's `cuobjdump --dump-sass` to inspect the kernel and SM. It never calls
 `Device()`, `set_current()`, `get_kernel()` or `launch()` on this path.
@@ -104,6 +150,13 @@ GPU-free is **not driver-library-free** for the pinned core 1.2.0:
 loadability. That query does not call `cuInit` or create a context. A real driver
 userspace library must be discoverable; a missing driver library or Toolkit stub
 is a failure, not a reason to patch core, inject a fake driver or skip the stage.
+
+NVRTC's default native cache is a separate initialization path: since CUDA 12.9
+it calls `cuInit()` on the first compilation. EX21 sets `CUDA_CACHE_DISABLE=1`
+before CUDA imports and uses `ProgramOptions(no_cache=True)` and
+`LinkerOptions(no_cache=True)` so that path is disabled. `cachePolicy` records
+this configuration. Omitting device construction alone would not be enough to
+claim a no-initialization compilation path with default NVRTC caching.
 
 Compilation defaults to `build/compile`; GPU execution defaults to `build/run`.
 Both retain `report.json`, PTX, cubin, compiler/linker logs and `sass.txt`.
@@ -161,11 +214,31 @@ no public `close()`; core's shared ownership manages the loaded CUDA library.
 The standalone process does not reset/destroy a primary context, close a Device,
 or pass a CUlibrary handle to a legacy module-unload function.
 
-Cleanup errors/warnings are separate report fields and make the command fail.
-Core Buffer RAII may emit native stderr diagnostics instead of raising Python
-exceptions; retain stderr as well as JSON. Stream destruction is not a substitute
-for checked completion. A fatal asynchronous error does not establish a healthy
-context, even if some cleanup calls return successfully.
+Each explicit cleanup action captures both Python `sys.stderr` and native file
+descriptor 2, with both restored in `finally`. Raised exceptions are retained in
+`cleanupErrors`; `cleanupWarnings` retains all captured stderr, including Python
+warnings and direct callback/destructor diagnostics, regardless of their apparent
+severity. Any nonempty diagnostic, including whitespace, conservatively fails the
+command even if later synchronization succeeds. A prior operation's exception
+and stage remain primary; cleanup problems are additional diagnostics.
+
+Capture uses an unbuffered temporary-file spool. At most 16 KiB of its bytes are
+read as diagnostic payload, plus one byte to detect truncation; retained text is
+also capped at 16,384 characters, plus the action label and truncation marker.
+Exception messages are bounded too. Retained diagnostics are replayed to restored
+stderr. This bounds report/replay payloads, not the temporary file's disk usage.
+Capture or replay failure is itself a cleanup failure; inability to set up capture
+does not prevent attempting the release.
+
+Explicit Kernel/ObjectCode reference release uses the same capture helper,
+without invented public `close()` methods. Capture covers diagnostics actually
+emitted during those explicit actions, not delayed garbage collection, references
+retained elsewhere, buffered native output emitted later, or interpreter-shutdown
+destructors after the verdict. It changes process-global stderr and warning state
+and is only for this single-threaded standalone process, not a reusable process
+library or concurrent application. Retain stderr as well as JSON. Stream
+destruction is not a substitute for checked completion, and a fatal asynchronous
+error does not establish a healthy context merely because later cleanup returns.
 
 ## Reports And Evidence
 
@@ -178,14 +251,26 @@ An empty `nvrtc.log` on compilation failure is not absence of diagnostics: core
 attaches the compilation log to its exception, while `logs=` captures successful
 compilation logs.
 
-NVRTC and nvJitLink API version pairs must both be 13.3. Neither API exposes
-patch 33. The gate also checks Toolkit `version.json`, resolved library filenames
-`libnvrtc.so.13.3.33` / `libnvJitLink.so.13.3.33` inside `CUDA_PATH`, and records
-their file hashes. Filenames and local hashes do not independently authenticate
-an upstream patch; attach installer/package provenance and the loaded builtins
-identity to the Environment Manifest. The driver API level is not a driver
-package version. `run` requires matching kernel-module/userspace package versions
-at or above 610.43.02.
+NVRTC and nvJitLink API version pairs must both be 13.3. Neither exposes patch 33.
+`environment.toolkit.packages` records the installed Debian status, full version,
+architecture and binary package names; the two required metapackages establish
+the Toolkit 13.3.1 installation coordinate. `environment.nativeLibraries` records
+actual loaded paths, hashes and ownership. The after-compilation builtins entry
+also records `observedVia` and `mappingIdentity`, without exporting the process's
+other mappings or virtual addresses. Local package records and file hashes do
+not independently authenticate an upstream binary; retain the signed-repository
+or hash-pinned installer provenance from `native-profile.json` too. The driver
+API level is not a driver package version, and `run` requires the kernel module
+to match the exact 610.43.02 userspace package coordinate.
+
+The repository CI runner hashes the native profile, the canonical build inputs
+and its own runner/helper inputs. In its disposable container it checks real
+compiler-package removal, unpacked status and an unowned copy of the real NVRTC
+library, restores them, then runs the normal import/build/invalid-source/stale-
+output CLI checks. It verifies the installed driver bytes against the hash-pinned
+compat DEB, but loads the registered library, not the extracted comparison copy.
+Only scanned text reports are retained. No such gate automatically promotes
+compilation or runtime Evidence Status.
 
 `environment-manifest.json` is deliberately blank. Fill an external copy from
 actual observations; do not substitute the target profile or this template for
@@ -205,7 +290,10 @@ Owner APIs, signatures and support policy reviewed on 2026-09-12:
 - [Core 1.2.0 Device API](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Device.html), [Buffer](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Buffer.html), [LegacyPinnedMemoryResource](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.LegacyPinnedMemoryResource.html), [Stream](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Stream.html) and [launch](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.launch.html).
 - [Stable NVRTC bindings source](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/nvrtc.pyx) and [stable nvJitLink bindings source](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/nvjitlink.pyx). NVRTC uses checked status-first tuples; nvJitLink's version function returns a pair and failures raise exceptions.
 - [Toolkit 13.3.1 component/driver release notes](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html), [Linux installation guide](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html), and [nvJitLink compatibility](https://docs.nvidia.com/cuda/archive/13.3.1/nvjitlink/index.html#compatibility).
+- [NVIDIA Ubuntu 24.04 package index](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages), [Ubuntu dpkg-query machine formats and ownership queries](https://manpages.ubuntu.com/manpages/noble/en/man1/dpkg-query.1.html), [Linux process mappings](https://man7.org/linux/man-pages/man5/proc_pid_maps.5.html) and [NVRTC builtins versioning](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#nvrtc-builtins-library). Exact archive coordinates and hashes are in `native-profile.json`.
+- [NVRTC 13.3 caching and driver initialization](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#caching-cuda-12-9).
 - [CPython 3.14.7 release](https://www.python.org/downloads/release/python-3147/) and [ctypes ownership documentation](https://docs.python.org/release/3.14.7/library/ctypes.html#ctypes._CData.from_address).
+- CPython 3.14.7 [stderr redirection and its global-state limits](https://docs.python.org/release/3.14.7/library/contextlib.html#contextlib.redirect_stderr), [descriptor duplication](https://docs.python.org/release/3.14.7/library/os.html#os.dup2) and [temporary files](https://docs.python.org/release/3.14.7/library/tempfile.html#tempfile.TemporaryFile).
 - Exact wheel metadata: [core](https://pypi.org/pypi/cuda-core/1.2.0/json), [bindings](https://pypi.org/pypi/cuda-bindings/13.4.1/json), [pathfinder](https://pypi.org/pypi/cuda-pathfinder/1.8.1/json), [NumPy](https://pypi.org/pypi/numpy/2.5.3/json). `requirements.lock` identifies the four Linux/GIL artifacts by SHA-256.
 
 CUDA Python components retain their Apache-2.0 licenses and bundled notices:

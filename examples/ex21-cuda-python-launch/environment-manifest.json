@@ -8,18 +8,20 @@
   "supportedEnvironment": null,
   "sourceCommit": null,
   "buildContractSha256": null,
+  "nativeProfileSha256": null,
+  "runnerInputs": null,
   "operatingSystem": {"distribution": null, "release": null, "architecture": null, "kernel": null, "glibc": null, "gcc": null, "packageRevisions": null},
   "python": {"implementation": null, "version": null, "abi": null, "gilBuild": null, "executableSha256": null, "sourceOrInstaller": null, "installerSha256": null, "pipVersion": null},
   "distributions": {"cuda-core": null, "cuda-bindings": null, "cuda-pathfinder": null, "numpy": null, "wheelHashes": null, "installationReport": null},
-  "toolkit": {"version": null, "installationRoot": null, "versionJsonSha256": null, "installerOrPackageCoordinates": null, "cuobjdumpVersion": null},
+  "toolkit": {"version": null, "installationRoot": null, "installationMode": null, "packages": null, "packageInventorySha256": null, "fileOwnership": null, "installerOrPackageCoordinates": null, "cuobjdumpVersion": null},
   "nativeLibraries": {
-    "nvrtc": {"apiVersion": null, "packageVersion": null, "loadedPath": null, "sha256": null},
-    "nvrtcBuiltins": {"packageVersion": null, "loadedPath": null, "sha256": null},
-    "nvJitLink": {"apiVersion": null, "packageVersion": null, "loadedPath": null, "sha256": null},
-    "driver": {"apiVersion": null, "userspaceVersion": null, "kernelModuleVersion": null, "loadedPath": null, "sha256": null}
+    "nvrtc": {"apiVersion": null, "package": null, "packageVersion": null, "owner": null, "loadedPath": null, "sha256": null},
+    "nvrtcBuiltins": {"package": null, "packageVersion": null, "owner": null, "observedVia": null, "mappingIdentity": null, "loadedPath": null, "sha256": null},
+    "nvJitLink": {"apiVersion": null, "package": null, "packageVersion": null, "owner": null, "loadedPath": null, "sha256": null},
+    "driver": {"apiVersion": null, "userspaceVersion": null, "package": null, "packageVersion": null, "owner": null, "kernelModuleVersion": null, "loadedPath": null, "sha256": null}
   },
   "gpu": {"count": null, "selectedVisibleIndex": null, "name": null, "computeCapability": null, "memoryBytes": null, "visibilityConfiguration": null},
-  "compilation": {"command": null, "target": null, "backend": null, "exitStatus": null, "artifactHashes": null, "stdout": null, "stderr": null},
+  "compilation": {"command": null, "target": null, "backend": null, "cachePolicy": null, "exitStatus": null, "artifactHashes": null, "stdout": null, "stderr": null},
   "runtime": {"commands": null, "sizes": null, "checkedElements": null, "exitStatuses": null, "stdout": null, "stderr": null, "cleanupDiagnostics": null, "sanitizer": null},
   "measurement": {"timingMeasured": null, "method": null, "warmup": null, "repetitions": null, "clockAndPowerConditions": null},
   "limitations": null
