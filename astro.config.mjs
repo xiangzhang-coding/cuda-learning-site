@@ -177,6 +177,16 @@ export default defineConfig({
           ],
         },
         {
+          label: 'PyTorch CUDA 语义',
+          translations: { en: 'PyTorch CUDA Semantics' },
+          items: [
+            { slug: 'frameworks/queued-work-timing' },
+            { slug: 'frameworks/streams-and-storage-lifetime' },
+            { slug: 'frameworks/mixed-precision-contracts' },
+            { slug: 'frameworks/python-to-cuda-profiling' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [

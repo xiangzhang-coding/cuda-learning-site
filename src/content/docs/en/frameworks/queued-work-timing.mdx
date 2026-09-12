@@ -1,0 +1,167 @@
+---
+title: 'P04: Time Completed Work, Not Just Submission'
+description: Distinguish host submission, completed wall time, and CUDA event intervals, then audit both ends of a multi-stream measurement without inventing GPU observations.
+pairId: p04
+counterpart: /frameworks/queued-work-timing/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, worksheet, correctness, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P04
+prerequisites: [M07, Q05]
+relatedUnits: [P05, P06, P07]
+hardwareGate: none
+estimatedMinutes: 25
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch CUDA semantics'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Native Linux CUDA; asynchronous execution and streams'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch Stream and Event interfaces'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Event timing, completion, and call-time stream dependencies'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch device synchronization'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Selected-device synchronization scope'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p04 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/queued-work-timing/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,worksheet,correctness,measurement,versions,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P04 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'M07,Q05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P05,P06,P07' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'torch-2.11.0+cu128,CPython-3.12.14,CUDA-12.8,native' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/queued-work-timing/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+A Python tensor operation returns quickly, yet the next request stalls. Before calling the first operation fast or the second slow, ask which one submitted work and which one paid for its completion. Moving a wait can move the apparent cost without changing the computation.
+
+In about 25 minutes, you will label three different timing questions, prove the start and finish boundaries of an interval, and reject a misleading report even when it contains plausible numbers. This Learning Unit and its written Exercises require no installation or GPU. **GPU timing observations remain Pending Hardware Verification.**
+
+## Prerequisites
+
+The exact ordered prerequisites are `[M07, Q05]`: [M07: Stream Ordering](/en/memory/stream-ordering/) explains queue order; [Q05: Timing Asynchronous GPU Work](/en/correctness/timing-asynchronous-gpu-work/) explains completion and measurement scope. Bring those models into PyTorch rather than relearning CUDA from Python syntax.
+
+[P05: Streams and Storage Lifetime](/en/frameworks/streams-and-storage-lifetime/) is related, not a prerequisite. [P06](/en/frameworks/mixed-precision-contracts/) develops mixed-precision verification and [P07](/en/frameworks/python-to-cuda-profiling/) develops profiling; neither is needed to finish this worksheet.
+
+## Why a synchronous-looking expression can queue work
+
+CUDA separates host submission from device execution so the CPU can prepare later work while the GPU processes earlier work. PyTorch places tensor operations above that model: an eager Python expression can choose a native operation and enqueue CUDA work without waiting for the result. Eager dispatch does not mean device completion before Python continues.
+
+A host clock remains useful, but it answers a host question. CUDA events provide device progress markers when the question concerns a stream interval. Neither clock can infer the intended workload from an expression's name. The teaching target is **torch 2.11.0+cu128**, commit `70d99e998b4955e0049d13a98d77ae1b14db1f45`, under **CPython 3.12.14, native Linux x86_64, native allocator**. Later sections separate that software selection from an observed environment.
+
+## Three intervals, three contracts
+
+| Interval | Required boundary | Honest interpretation |
+| --- | --- | --- |
+| Unsynchronized host interval | Two `time.perf_counter` readings around the Python operation, with no explicit completion boundary | Host elapsed time, including submission and any incidental blocking; not completed GPU latency or pure kernel time |
+| Completed wall interval | Finish prior work on the selected device before the host start; finish all declared work on that device before the host stop | Completed end-to-end time for the declared region, including the host work and final wait inside it |
+| CUDA event interval | Timing-enabled start and end events on one explicit stream, ordered around the covered work; ending event completed before reading elapsed time | Device elapsed time between those markers, not automatically a sum of kernel execution times |
+
+`torch.cuda.synchronize(device)` waits across all streams on the **selected device**, not all GPUs. A clean start excludes that device's earlier backlog; it does not prevent another process or unrelated stream work from introducing contention during the trial. Identify and control that interference.
+
+For events, `enable_timing` defaults to `False`. Both endpoints must have timing enabled and must actually be recorded. `start.elapsed_time(end)` reports **milliseconds**. Waiting for the ending event with `end.synchronize()` supplies host completion only for the work covered by that event. It does not bring unrelated streams inside the interval. Recording without an explicit stream uses the current stream, which need not be the default stream.
+
+For one stream S, its order places start before the intended work and end after it. For a two-branch workload, coordinator C records start; each branch must depend on that start before its measured work; C must join both branch completions before recording end. Here a **join** means a dependency after every included branch's final work, not a host assumption that submission order also orders devices. Waits expressed with events or `wait_stream` must be positioned at the appropriate submission boundaries.
+
+## Predict and audit a static worksheet
+
+Before reading the decisions, cover the last column. Classify each row as a submission observation, a valid completed interval, or an invalid claim about the whole workload. State what remains unknown. T0-T5 are original worksheet labels, not measured trials. Every event mentioned below is timing-enabled and recorded, and its end is eventually completed; the defects are in coverage.
+
+| Case | Stipulated boundary | Decision |
+| --- | --- | --- |
+| T0 | Host clock surrounds enqueue only; no explicit completion wait | Host observation only; cannot claim completed workload latency |
+| T1 | Selected-device backlog finished before host start; declared work submitted; selected-device completion before host stop | Valid completed wall boundary for the stated region |
+| T2 | S contains start, all declared work, then end; host waits for end | Valid same-stream event boundary |
+| T3 | C starts both branches correctly, but records end without joining B; device synchronized afterward | Invalid whole-workload interval: B need not finish before end |
+| T4 | C joins both branches before end, but B has no dependency on start | Invalid whole-workload interval: B may begin before start |
+| T5 | Start reaches both branches before their work; both final completions reach C before end; host waits for end | Valid multi-stream event boundary |
+
+The worked answer for T3 has two different completion points: the event's position in C, and the later device-wide wait. The second proves that B eventually finished, but **does not move the recorded ending timestamp**. For T4, even a perfect completion join cannot recover the missing beginning of B's work. A late synchronize repairs neither a missing start dependency nor a missing join.
+
+T5 has two outgoing start dependencies and two incoming completion dependencies. All included work is ordered between the markers. This proves coverage, not overlap, a speedup, or a particular duration. Device scheduling, contention, and gaps caused by host submission can still affect the interval. There are no elapsed-time values to calculate from this table.
+
+## Correctness before interpreting duration
+
+A timing report needs both a correct result and a defensible interval. For a future small eager tensor workload, specify shapes, strides, dtype, device, input generation, and an independent reference before timing. Compare all relevant outputs after checked completion, with justified absolute/relative tolerances and explicit rejection of nonfinite values. Keep these comparisons outside the timed region unless validation is deliberately part of the question.
+
+| Failure | Why a plausible time cannot rescue it |
+| --- | --- |
+| Missing producer dependency | A consumer may use unfinished data; waiting afterward does not undo an earlier race |
+| Unrecorded or timing-disabled endpoint | The endpoint is not valid for elapsed-time measurement; a successful readiness query is not enough |
+| End marker before a side branch's join | The recorded timestamp excludes an unbounded part of the declared work |
+| Host scalar read or printed CUDA data inside only one variant | Hidden synchronization changes the measurement contract |
+| Error surfaces at synchronization | Completion exposed a failure; preserve the phase and diagnostic rather than report a successful benchmark |
+
+An unsynchronized host value is not guaranteed to be smaller than an event value. Dispatch, initialization, allocation, or incidental blocking may dominate it. A tiny valid event interval can be below useful resolution. Reject arbitrary requirements for a positive minimum duration, a CPU/GPU time ratio, or a universal speedup; require valid boundaries and finite nonnegative observations when real measurements exist.
+
+## Separate warmup, timing, and profiling
+
+Warm up the actual shape, dtype, operation path, allocator, and libraries outside the measured region. State whether this is steady-state timing or a separate cold-start question. Prepare inputs and reset mutable state consistently. Exclude `.item()`, output transfers for checking, printing CUDA data, and other host reads unless they belong to the declared workload.
+
+Keep workload warmup, timing runs, correctness runs, and profiling runs separately identified. Profiling can perturb execution and tensor lifetimes; its observations do not substitute for an uninstrumented timing distribution. `CUDA_LAUNCH_BLOCKING=1` is a debugging configuration that changes execution behavior, not the default benchmark mode. Record whether it and other relevant settings are absent or set.
+
+A future report must contain a full **Environment Manifest**, not just a torch version:
+
+| Field group | Required fields |
+| --- | --- |
+| Run identity | Date, workload/source revision, command or activity identity, seed/input construction, correctness reference and tolerance policy, raw records and failure diagnostics |
+| Hardware | GPU model and stable identity, compute capability, visible and used GPU counts, device mapping, total/free memory, CPU model, competing workloads, clocks/power policy and thermal conditions |
+| Host | Native Linux distribution/release, architecture, kernel, glibc, OS image/package provenance; container identity and GPU exposure if used |
+| Interpreter and build | Exact CPython version, executable/build provenance, interpreter compiler and flags, installer version; torch version/commit, wheel filename/index/hash, dependency versions and artifact hashes |
+| CUDA components | Installed driver version, torch build CUDA family, packaged Runtime/cuDNN/CUPTI and other used components, actually loaded library paths/identities after relevant operations; system Toolkit and `nvcc`/host compiler versions or explicitly absent/not used |
+| Execution policy | Allocator backend and configuration, stream/device assignments and dependency graph, dtype/shape/stride/layout, precision flags, launch-blocking and other relevant environment variables, allocation/transfer/initialization inclusion |
+| Measurement | Host clock or event method and units, start/end completion scope, warmup and repetition counts, batch size if timing groups, raw samples and distribution summary, profiler version/configuration or disabled, noise/outlier policy |
+
+Do not fill unobserved fields with the proposed target. Mark them unobserved; such a record is a design worksheet, not a complete runtime report. For grouped repetitions, division gives amortized time per operation under that batch policy, not isolated request latency.
+
+## Version and hardware scope
+
+[SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) records the environment selection: torch **2.11.0+cu128**, the exact commit above, CPython **3.12.14**, Linux x86_64 wheel tag `cp312-cp312-manylinux_2_28_x86_64`, and the selected dependency artifacts. Distinguish build CUDA **12.8**, metapackage **12.8.1**, packaged CUDA Runtime and CUPTI **12.8.90**, and cuDNN **9.19.0.56**. Package versions are not observations of loaded libraries.
+
+The proposed external target is Ubuntu 24.04 x86_64 with one GPU meeting the Modern Single-GPU Capability Tier: compute capability at least 8.0 and at least 8 GB, with small inputs below available memory. Use a maintained compatible driver, with **570.124.06 or newer** as the conservative CUDA 12.8 Update 1 baseline; the GPU or OS may require something newer. This is not an instantiated Reference Environment or a claim of tested hardware support.
+
+Select `PYTORCH_ALLOC_CONF=backend:native` before process startup and verify the active backend with `torch.cuda.memory.get_allocator_backend`. These eager tensor activities do not require a system Toolkit or `nvcc`; a Python package called `cuda-toolkit` does not establish that either was installed. This independent framework target does not inherit P01's Python/CUDA configuration or the curriculum's C++ Toolkit Lanes. No GPU is required for the written worksheet, hence the page's hardware gate is `none`.
+
+## Evidence boundary
+
+**Pending Hardware Verification:** no timing, GPU output, overlap, or profiler observation is supplied. All four evidence arrays are empty. The worksheet proves statements about its stipulated ordering, not about execution on a machine. Source review and browser checks confer neither Compile-Checked nor Runtime-Verified status. The browser displays static teaching material and never executes CUDA.
+
+## Retrieval check
+
+1. What does an unsynchronized `time.perf_counter` interval establish, and why is it not necessarily shorter than a GPU interval?
+2. Which waits exclude prior selected-device work and include completed work in a host wall interval? Does that cover every GPU?
+3. What are CUDA event timing's default, unit, recording requirement, and host completion requirement?
+4. Why are both a start dependency and a completion join needed for every branch, and why can a late synchronize repair neither?
+5. Why must correctness, workload warmup, timing, and profiling have distinct records and an Environment Manifest?
+
+## Continue with practice
+
+Complete the [three P04 Exercises](/en/frameworks/queued-work-timing/exercises/) before opening the [separate solutions](/en/frameworks/queued-work-timing/solutions/). Revisit [PB-R5-004](/en/practice/#pb-r5-004) for a measurement review. Continue to [P05](/en/frameworks/streams-and-storage-lifetime/) to separate data readiness from storage reuse; [P06](/en/frameworks/mixed-precision-contracts/) and [P07](/en/frameworks/python-to-cuda-profiling/) apply this timing contract to numerical verification and profiling.
+
+## Sources and licensing
+
+Read the exact-commit [CUDA semantics](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst), [Stream and Event interfaces](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py), and [device synchronization definition](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py). [SRC-CUDA-081](/en/sources-and-versions/#src-cuda-081) records timing and stream semantics; [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) records environment artifacts and license boundaries.
+
+Current Context7 discovery was checked against the immutable owner source, not accepted from a `main` snippet. This prose and the T0-T5 worksheet are original CC BY 4.0 content; no owner implementation, test body, figure, or substantial documentation was copied. The linked PyTorch source retains its BSD-3-Clause terms and applicable notices; that is not a blanket license for packaged CUDA libraries. **Facts checked and sources accessed: 2026-09-12.**

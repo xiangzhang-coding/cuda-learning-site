@@ -43,7 +43,11 @@ for (const locale of ['', 'en/']) {
     const group = page.locator('nav details').filter({ has: page.locator('summary', { hasText: locale ? 'Python Bridge' : 'Python 桥接' }) });
     await expect(group).toHaveCount(1);
     for (const { slug } of units) await expect(group.locator(`a[href="/${locale}${slug}/"]`)).toHaveCount(1);
-    await expect(page.locator('nav a[href*="/frameworks/"], nav a[href*="/triton/"]')).toHaveCount(0);
+    await expect(page.locator('nav a[href*="/triton/"]')).toHaveCount(0);
+    expect(await page.locator('nav a[href*="/frameworks/"]').evaluateAll((links) =>
+      links.map((link) => link.getAttribute('href')).sort())).toEqual([
+      'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',
+    ].map((slug) => `/${locale}frameworks/${slug}/`).sort());
     for (const { slug, id } of units.slice(1)) {
       await page.locator(`main a[href="/${locale}${slug}/"]`).first().click();
       await expect(page.locator('main h1')).toContainText(id);
