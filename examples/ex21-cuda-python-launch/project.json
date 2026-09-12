@@ -1,0 +1,99 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX21",
+  "title": "CUDA Python explicit launch",
+  "purpose": "Compile an original header-free CUDA C++ kernel to PTX, explicitly link cubin, launch from Python with owned buffers and a stream, and check every output against a CPU reference.",
+  "root": "examples/ex21-cuda-python-launch",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "hostLanguage": "python",
+    "standard": "c++17",
+    "inputs": ["ex21.py", "kernel.cu"],
+    "hostTestInputs": ["ex21.py"],
+    "contractFiles": ["scripts/setup.sh", "requirements.lock"],
+    "additionalContractInputs": ["environment-manifest.json"],
+    "stages": ["setup", "host-test", "check-environment", "compile-ptx", "link-cubin", "inspect-artifacts"],
+    "commands": {
+      "setup": "bash scripts/setup.sh",
+      "hostTest": ".venv/bin/python ex21.py host-test",
+      "checkEnvironment": ".venv/bin/python ex21.py check-environment",
+      "build": ".venv/bin/python ex21.py build --arch 75",
+      "run": ".venv/bin/python ex21.py run --size 1003"
+    },
+    "artifacts": [
+      "build/compile/ex21.ptx", "build/compile/ex21.cubin", "build/compile/sass.txt",
+      "build/compile/nvrtc.log", "build/compile/link-info.log", "build/compile/link-error.log",
+      "build/compile/report.json"
+    ],
+    "gpuExecutionInBuild": false,
+    "driverInitializationInBuild": false,
+    "driverLibraryInBuild": "Core 1.2.0 Program.compile('ptx') queries cuDriverGetVersion without cuInit; a real userspace driver library is required even on a GPU-free compilation host."
+  },
+  "correctness": {
+    "cpuReference": "ex21.py",
+    "inputType": "float32",
+    "referenceType": "Python float computed from stored ctypes.c_float input values",
+    "defaultSize": 1003,
+    "blockSize": 256,
+    "maximumSize": 1000000,
+    "sizePolicy": "Reject zero, negative, noninteger and over-budget sizes before CUDA imports; n is passed as ctypes.c_uint32.",
+    "inputs": ["a[i] = (i % 37) * 0.25", "b[i] = -(i % 19) * 0.5"],
+    "outputInitialization": "Copy a pinned-host NaN sentinel array to the device output before launch so missed writes cannot pass by chance.",
+    "comparisonRule": "After stream.sync(), check all n outputs; reject any nonfinite output/reference or exact inequality. Count every mismatch and report the first failing index. Exact equality is justified only for these binary-exact FP32 inputs and sums.",
+    "literalResults": {"0": 0, "1": -0.25, "18": -4.5, "19": 4.75, "36": 0.5, "37": -9, "38": 0.25, "255": 4.25, "256": 4, "257": 3.75, "702": 0, "1002": -6.25},
+    "hostTestSizes": [1, 255, 256, 257, 1003]
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier",
+    "minimumComputeCapability": "7.5",
+    "deviceBytesPerElement": 12,
+    "pinnedHostBytesPerElement": 12,
+    "maximumProblemMemoryBytes": 8000000000,
+    "target": ["compute_75", "sm_75"],
+    "architecturePolicy": "Plain numeric CC >=75 AND membership in the loaded NVRTC supported-architecture list; run selects device 0's exact architecture. Never silently retarget or use architecture suffixes.",
+    "lanes": [],
+    "pythonEnvironment": {
+      "id": "cpython-3-14-7-cuda-13-3-1",
+      "supportedEnvironment": "Native Linux",
+      "operatingSystem": "Ubuntu 24.04 x86_64",
+      "qualificationTarget": {"ubuntu": "24.04.4", "kernel": "6.17.0-19", "gcc": "14.3.0", "glibc": "2.39", "observed": false},
+      "python": {"implementation": "CPython", "version": "3.14.7", "gil": true, "abi": "cp314-cp314", "executable": "python3.14", "sourceUrl": "https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz", "sourceSha256": "3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81"},
+      "distributions": {"cuda-core": "1.2.0", "cuda-bindings": "13.4.1", "cuda-pathfinder": "1.8.1", "numpy": "2.5.3"},
+      "lock": "requirements.lock",
+      "extras": [],
+      "nativeDependencyMode": "system Toolkit; no native CUDA pip extras",
+      "toolkit": "13.3.1",
+      "nvrtc": "13.3.33",
+      "nvJitLink": "13.3.33",
+      "nvcc": {"version": "13.3.73", "required": false},
+      "runtime": {"version": "13.3.29", "directlyUsed": false},
+      "driver": {"target": "610.43.02", "minimum": "610.43.02", "newerCompatible": "Record actual package identity; run requires the kernel module and loaded userspace library versions to match."},
+      "versionBoundary": "NVRTC and nvJitLink APIs expose 13.3, not patch 33. Check Toolkit version.json, resolved 13.3.33 library filenames under CUDA_PATH and record binary SHA-256; installer/package evidence is still required to authenticate the patch coordinate. Driver API level is separate from driver package version.",
+      "reviewedOn": "2026-09-12"
+    },
+    "pythonChecks": [
+      {"id": "ex21-cpython-3-14-7-cuda-13-3-1-sm75", "environment": "cpython-3-14-7-cuda-13-3-1", "kind": "compilation-artifact-inspection", "command": ".venv/bin/python ex21.py build --arch 75", "gpuExecuted": false, "driverInitialized": false, "allowedResults": ["pass"]}
+    ]
+  },
+  "ranges": {
+    "cpu-reference": {"file": "ex21.py", "startMarker": "# [ex21-cpu-reference-start]", "endMarker": "# [ex21-cpu-reference-end]", "language": "python"},
+    "python-lifecycle": {"file": "ex21.py", "startMarker": "# [ex21-python-lifecycle-start]", "endMarker": "# [ex21-python-lifecycle-end]", "language": "python"},
+    "runtime-compile": {"file": "ex21.py", "startMarker": "# [ex21-runtime-compile-start]", "endMarker": "# [ex21-runtime-compile-end]", "language": "python"},
+    "kernel": {"file": "kernel.cu", "startMarker": "// [ex21-kernel-start]", "endMarker": "// [ex21-kernel-end]", "language": "cpp"},
+    "canonical-imports": {"file": "ex21.py", "startMarker": "# [ex21-canonical-imports-start]", "endMarker": "# [ex21-canonical-imports-end]", "language": "python"}
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": [
+      "The GPU-free build should produce PTX for compute_75 and a nonempty nvJitLink cubin with the original kernel's sm_75 SASS, without initializing a device/context or launching work.",
+      "The default run should submit four blocks of 256 threads for 1003 values; 21 tail threads should take the bounds guard.",
+      "After checked stream completion, every output should be finite and exactly equal to its CPU reference. CPU reference values should also match the independent literals.",
+      "Owned buffers should close on their submission stream before draining frees and closing that stream; logs and the first failure should survive cleanup attempts."
+    ],
+    "recordedObservations": []
+  }
+}
