@@ -1,0 +1,186 @@
+---
+title: 'P02：明确设备、存储与启动的所有权'
+description: 选择共享主上下文，分配字节缓冲区，以精确位宽传递标量，在读取或释放存储前检查显式流中的工作完成。
+pairId: p02
+counterpart: /en/python/devices-contexts-launches/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, context, buffers, copies, arguments, prediction, lifecycle, diagnostics, measurement, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P02
+prerequisites: [P01, F07]
+relatedUnits: [P03, EX21]
+exampleIds: [EX21]
+canonicalExample: EX21
+canonicalRanges:
+  - python-lifecycle
+  - kernel
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Core device and primary-context implementation'
+    url: 'https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_device.pyx'
+    version: 'cuda-core 1.2.0'
+    platform: 'Selected native Linux device, context and allocation contract'
+    accessDate: '2026-09-12'
+  - title: 'Core launch argument tests'
+    url: 'https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_launcher.py'
+    version: 'cuda-core 1.2.0'
+    platform: 'Buffer arguments and ctypes scalar widths; tests inspected, not executed here'
+    accessDate: '2026-09-12'
+  - title: 'ctypes views and storage'
+    url: 'https://docs.python.org/release/3.14.7/library/ctypes.html#ctypes._CData.from_address'
+    version: 'CPython 3.14.7'
+    platform: 'Ordinary GIL CPython, native Linux x86-64'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p02 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/python/devices-contexts-launches/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,context,buffers,copies,arguments,prediction,lifecycle,diagnostics,measurement,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P02 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P01,F07' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P03,EX21' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'python-lifecycle,kernel' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,CPython-3.14.7' } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/python/devices-contexts-launches/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+指针位置不对、借用视图失效、标量封送位宽错误，任何一项都能让正确的核函数得出无效结果。用约 30 分钟建立设备、上下文与存储的所有权表，推导启动几何和参数位宽，找出允许 CPU 读取结果的完成点。这个模型用于显式启动与集成调试，不是重置其他库 CUDA 状态的操作指南。
+
+## 前置知识
+
+先完成 [P01](/python/cuda-python-bridge/)与 [F07：Runtime 和 Driver API](/foundations/runtime-driver-api/)，严格为 `[P01, F07]`。P01 给出唯一环境配置；F07 解释显式上下文与原生句柄责任。可运行示例（Runnable Example）[EX21](/examples/cuda-python-launch/)是唯一可执行实现。相关的 [P03](/python/runtime-compilation-linking/)展开编译细节，不是本单元的额外前置。
+
+## 对象语法仍保留 Driver API 模型
+
+Runtime API 常让上下文设置看起来是隐式完成的；Driver API 则更直接地暴露上下文选择和句柄。Python 对象接口让这一模型更容易表达，但没有消除它。core 1.2.0 基于具有共享所有权的原生 CUDA 对象，并为部分对象提供清理方法；它不是一套所有对象都像文件一样有 `close()` 的协议。理解这个区别，比背构造函数名单更有用。
+
+## 先选设备，再建立当前上下文
+
+`Device.get_all_devices()` 枚举 CUDA 设备。`dev = Device(0)` 初始化驱动访问并标识可见设备 0，本身却不建立所需的当前上下文。创建资源前调用 `dev.set_current()`。默认路径会持有并选择该设备的主上下文（Primary Context），返回 `None`，上下文通过 `dev.context` 获取。不要把返回值当作上下文对象保存。
+
+设备状态是线程局部的。这个独立示例不是适用于现有应用的通用上下文切换助手。显式传入上下文的 `set_current(ctx)` 对先前上下文有不同的处理，也不是退出时自动恢复的上下文管理器。未来若要嵌入应用，应设计如何保留调用者的当前上下文，而不是退出时重置它。
+
+检查 `dev.device_id`、`dev.name`、`dev.compute_capability` 与 `dev.arch`；`arch` 是 `"75"` 这样的字符串，不是 `"sm_75"`。主上下文属于共享状态。不要销毁或重置它，不要执行不平衡的原生主上下文释放，也不要在它仍为当前上下文时调用 `Context.close()`。其共享生命周期由 core 管理。不存在 `Device.close()` 步骤。
+
+## 字节、主机视图与持有者
+
+用 `dev.create_stream(options=StreamOptions(nonblocking=True))` 创建自己拥有的流（stream）。nonblocking 指与旧式 NULL 流之间的同步关系，不代表主机会等待完成。用 `dev.allocate(nbytes, stream=s)` 分配设备字节，用 `LegacyPinnedMemoryResource().allocate(nbytes, stream=s)` 分配页锁定主机字节，并按需要保留内存资源与 Buffer。
+
+设备内存资源可能使用池，也可能回退到同步分配。旧式页锁定资源采用同步主机分配。因此，参数里出现 `stream=` 并不能证明分配是异步的，更不能证明发生了重叠。
+
+主机视图形如 `(ctypes.c_float * n).from_address(int(h.handle))`，其中 **h 必须是主机可访问的页锁定存储**。绝不能用于仅设备可访问的 Buffer。将句柄转为 `int` 只得到地址数值，不赋予 CPU 访问权限。视图借用内存，不会让 h 自动存活；h 必须活过每次视图访问与排队传输。字节容量必须匹配元素类型：n 个 float32 需要 `4*n` 字节。
+
+## 给复制指定明确目标
+
+H2D 输入使用 `d.copy_from(h, stream=s)`，D2H 输出使用 `d.copy_to(h, stream=s)`。两端都是字节容量相同的 Buffer；不能把任意 Python 列表当成等价存储传入。容量不同会抛出 `ValueError`，不是只复制较短一端。
+
+省略目标的 `d.copy_to(stream=s)` 是一个陷阱：新分配来自源的内存资源，返回的 Buffer 不一定是主机内存。把 Python 变量命名为 `host_output` 也不能改变位置。普通复制选项下，CUDA 根据指针推断方向；应用仍应明确两端的主机/设备属性和所有权。
+
+<CanonicalCode exampleId="EX21" range="python-lifecycle" />
+
+把规范片段当作所有权证明来读：初始化页锁定输入及 NaN 输出哨兵，上传两个输入和哨兵，启动，再将输出 D2H 复制到显式分配的页锁定目标，在 CPU 比较前调用 `s.sync()`。哨兵上传是第三次 H2D，不是数学输入；漏写会留下必须拒绝的非有限值。局部变量里的视图还活着，不能替代持有它背后的 Buffer。
+
+## 核函数参数有二进制合同
+
+<CanonicalCode exampleId="EX21" range="kernel" />
+
+入口接收三个 float 指针和一个 `unsigned int n`。指针参数直接传 core Buffer，n 传 `ctypes.c_uint32(n)`。core 1.2.0 将普通 Python `int` 按指针位宽打包，不会阅读核函数签名并推断它是 C `unsigned int`。同样，Python `float` 按 double 打包；若核函数标量为 `float`，应使用 `ctypes.c_float`。
+
+这就是核函数参数封送（Kernel Argument Marshalling）：把主机值转为设备代码要求的位宽与表示。某个小整数在某台机器上碰巧可用，不是 ABI 证明。构造 ctypes 标量前先检查范围，不能让非法计数经转换回绕后进入合法区间。不论提交时何时读取标量字节，指针指向的数据都必须活到执行完成。
+
+## 预测启动几何与精确结果
+
+`LaunchConfig(grid=(n + 255) // 256, block=256)` 为正 n 构造一维覆盖。n=1003 时，线程候选索引是 0 到 1023。末块有 235 个有效线程、21 个尾部无效线程；核函数必须在读取输入或写入输出之前判断逻辑边界。n=0 应由主机侧拒绝或按明确约定直接返回，不能提交零网格。EX21 的运行路径要求 size 为正。
+
+三个设备数组占 `12*n` 载荷字节，n=1003 时为 12036；等量的页锁定主机载荷、编译器内存和上下文/库资源另计。实际设备目标必须受 NVRTC 支持，并满足 EX21 的计算能力（compute capability）7.5 下限；架构数字更大，不自动代表编译器支持它。
+
+正确性要求经检查的完成、有限值，以及将全部 1003 个元素与独立 CPU 参考实现逐项比较。本例二进制分数输入允许精确相等。正确的尾部判断修不好标量位宽错误或缺失复制；每份合同都要分别证明。
+
+## 工作完成后再释放持有者
+
+| 资源 | 正常成功路径的释放边界 |
+| --- | --- |
+| Program 和 Linker | 取得独立输出字节后即可关闭 |
+| ctypes 主机视图 | D2H 完成并比较后停止使用、释放视图引用，再关闭主机 Buffer |
+| 设备和主机 Buffer | 最后一次使用后以 `buffer.close(stream=s)` 关闭；保留流以完成排队释放 |
+| 自己拥有的流 | 再调用 `s.sync()` 等待排队释放完成，随后 `s.close()` |
+| ObjectCode 和 Kernel | 没有公开 `close()`；持有至工作完成，再释放引用 |
+| 共享主上下文与 Device | 让 core 管理共享生命周期；不重置、不原生销毁、不虚构 Device close |
+
+`Kernel` 保留库的所有权。`ObjectCode.handle` 是 `CUlibrary`，不是旧式 `CUmodule`；不能传给 `cuModuleUnload`，也不能手动卸载仍由 core 拥有的库。释放一条 Python 引用，不等于在所有情况下都立即销毁底层对象。
+
+发生错误后，停止提交，保留首个错误，尝试检查完成并清理已取得的资源，将后续错误分开报告。销毁流不能替代完成检查。旧式页锁定释放会先同步其流；Buffer 的 RAII 清理可能以警告报告问题，不保证每个释放错误都抛出异常。保留警告、stderr 和显式同步错误，绝不能再通过原生绑定重复释放。若异步故障使队列无法正常完成，应以失败终止，而不是继续验收或声称上下文可以健康复用。
+
+## 找到最早被破坏的合同
+
+容量不匹配立即产生的 `ValueError`，与库加载、符号查找、启动提交和 `s.sync()` 失败不同。CUDA 复制调用可能报告之前的异步启动错误；观察到错误的行，不一定是造成错误的行。
+
+失败报告应保留阶段与异常、实际 Buffer 容量和位置、核函数参数类型、n/grid/block、设备/目标和流所有权。核对方法是 `sync()`，不是不存在的 `synchronize()`。不能通过在 CPU 上解引用设备内存来“修复”指针，也不能捕获异常后比较旧主机值并打印成功。
+
+## 不把正确性示例写成测量结论
+
+一条显式流使依赖链容易检查，不表示并发。nonblocking 流与页锁定内存也不证明传输重叠。CPU 初始化、分配、编译/链接、延迟加载、复制与清理都可能主导端到端时间。未来若测核函数时间，需要合适的设备计时边界与预热后重复执行；主机计时若声称覆盖已完成的工作，就必须包含完成检查。EX21 不记录时间或速度提升。
+
+## 引导实践：画出并检查完整生命周期
+
+1. 将所有权表写到工作纸上，标出六个 Buffer、各主机视图、流和核函数/库引用的持有者。在执行前预测 1003 个元素的启动几何和字节数。
+2. 使用 P01 中匹配的外部 Linux 配置，进入独立 EX21 目录。若尚未准备，先运行安装脚本，再检查环境：
+
+```sh
+bash scripts/setup.sh
+.venv/bin/python ex21.py check-environment
+```
+
+3. 将实际包身份与固定配置对照，将原生库身份与 NVRTC/nvJitLink 13.3.33 对照。设备访问、驱动和目标支持是另行检查的条件。任何必要门槛失败时，记录阻塞并停止。
+4. 只有满足运行门槛后，才执行规范正确性路径：
+
+```sh
+.venv/bin/python ex21.py run --size 1003
+```
+
+5. 保留真实的阶段诊断、全量输出判定、不匹配信息、退出状态、警告和环境清单（Environment Manifest）。在源码中找出首次完成检查，以及关闭流前的第二次等待。不要为诊断练习故意制造非法 GPU 内存访问。
+
+**验收：** 工作纸明确 H2D/D2H 目标、32 位无符号 n、尾部判断及持有者活到完成的规则。实际运行必须逐项通过，并成功退出，不能隐藏错误；GPU 不可用是阻塞，不是通过。本页没有展示观察到的运行输出。
+
+## 证据边界
+
+学习单元（Learning Unit）的四个证据数组均为空。静态工作纸不是实验（Lab）执行记录。EX21 在满足基准环境（Reference Environment）执行和验收标准前，保持待硬件验证（Pending Hardware Verification）。成功提交或导入源码片段均不提供编译、运行证据。
+
+## 提取式自测
+
+1. `dev.set_current()` 返回什么？为什么选中的主上下文不能由本程序独占处置？
+2. 为什么 ctypes 可以查看页锁定主机 Buffer，却不能查看仅设备可访问的 Buffer？
+3. `copy_to` 省略目标后可能发生什么？
+4. 即使 n 只有 1003，为什么仍需 `ctypes.c_uint32(n)`？
+5. 为什么 Buffer 要先于自己的流关闭？为什么 ObjectCode 和 Kernel 不能加入通用 close 循环？
+
+## 继续练习
+
+先完成[两道练习](/python/devices-contexts-launches/exercises/)，再看[独立参考解答](/python/devices-contexts-launches/solutions/)。[PB-R5-002](/practice/#pb-r5-002)审查位宽与过早释放缺陷。[P03](/python/runtime-compilation-linking/)拆解同一次启动背后的代码生成与加载阶段。
+
+## 来源与许可
+
+可在[规范 EX21 源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch)中跟踪所有权顺序，或[下载同一不可变仓库修订](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip)，打开 `examples/ex21-cuda-python-launch/`。这就是导入的生命周期与核函数片段所用源码，不是运行观察。
+
+复核日期 **2026-09-12**。[SRC-CUDA-077](/sources-and-versions/#src-cuda-077)保留 Buffer、上下文、启动器、旧式页锁定资源和共享库所有权的精确源码/测试坐标；[SRC-CUDA-079](/sources-and-versions/#src-cuda-079)保留唯一配置。参阅[主上下文](/glossary/#term-198)、[核函数参数封送](/glossary/#term-199)与[借用视图](/glossary/#term-200)。原创讲解和练习采用 CC BY 4.0，导入的原创源码采用 Apache-2.0。上游测试只作参考，不是已执行证据，也没有复制其示例。

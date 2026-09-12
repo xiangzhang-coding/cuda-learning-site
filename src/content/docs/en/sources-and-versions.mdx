@@ -1,9 +1,9 @@
 ---
 title: Sources and Version Record
-description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, LAB01-LAB12, EX01-EX20, visuals, and practice resources.
+description: Publishing interfaces, technical facts, content sources, and review dates for the current public routes, O04-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, P01-P03, LAB01-LAB12, EX01-EX21, visuals, and practice resources.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-10'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -24,6 +24,9 @@ structure:
   - entry-src-cuda-074
   - entry-src-cuda-075
   - entry-src-cuda-076
+  - entry-src-cuda-077
+  - entry-src-cuda-078
+  - entry-src-cuda-079
   - content-sources
   - review-record
 evidence:
@@ -39,7 +42,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-10'
+      content: '2026-09-12'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -47,18 +50,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, LAB01-LAB12, the twenty current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
+This record names the exact publishing, theme, and visual interfaces behind CUDA Learning Site and the owner sources for technical facts in O02-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, P01-P03, LAB01-LAB12, the twenty-one current Runnable Examples, and nineteen formal Visual Explainers: standalone VIS01-VIS14/VIS18 and embedded VIS19-VIS22. Tool versions, browser behavior, hardware capability, project support policy, and observed behavior remain separate.
 
 ## Scope of this record
 
-This page covers Home, 75 Learning Units including L01-L13, their Exercises and separate reviewed solutions, 20 Runnable Examples, 12 Labs, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, 82 Practice Bank entries, 196 Glossary terms, and existing static publishing and visual interfaces. R4 and the current catalog have exactly **401** records: 12 Labs, 82 Practice Bank entries, 19 Visual Explainers, 196 Glossary terms, and 92 source records. The schema 5 R4 static contract contains 277 Publication Pairs and 554 source routes, including 74 Exercise sets and 74 separate reviewed-solution sets. The **2026-09-10 aggregate review** adds no pages or source records; `SRC-CUDA-061` through `SRC-CUDA-076` retain their September 4-9 item-level dates. Fresh retrievals are recorded [separately below](#r4-aggregate-review). Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-12 current publication** covers Home, 78 Learning Units including P01-P03, 21 Runnable Examples, 12 Labs, 19 Visual Explainers, 77 Exercise-set and 77 separate solution-set Publication Pairs. It has **287 Publication Pairs / 574 source routes** and **411 catalog records**: 12 Labs, 85 Practice Bank entries, 19 Visual Explainers, 200 Glossary terms, and 95 source records. This increment adds only `SRC-CUDA-077/078/079`; prior item-level dates are unchanged. R4 remains the latest completed aggregate static review, with 277 pairs, 554 routes and 401 catalog records; R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains dated history, not a review of the new Python material. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -554,9 +557,86 @@ Arbitrary COO/CSR sparsity is not a supported structured Tensor Core input merel
 
 The inspected NVIDIA cuSPARSE header notices are proprietary, with 1993-2022 or 1993-2023 copyright ranges in the reviewed members, not Apache-2.0. The linked [libcusparse LICENSE.txt](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/LICENSE.txt) contains the NVIDIA Software License Agreement and CUDA supplement; its component/third-party provisions do not relicense every header. Only links and original paraphrases are published. No owner header, sample, figure, table, test, or substantial prose is copied or adapted, and no archive is distributed. Original teaching prose and Practice Bank scenarios use CC BY 4.0; original EX20 source uses Apache-2.0, not a license grant over NVIDIA material. These source records and the linked static learning resources keep all four evidence arrays empty; EX20 has independent Pending Hardware Verification runtime. No NVCC, GPU execution, measured workspace cost, determinism outcome, or performance comparison is claimed.
 
+<span id="src-cuda-077" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-077: CUDA core 1.2.0 APIs and resource ownership
+
+**Related IDs: P01, P02, P03, EX21.**
+
+**Version, purpose, platform and access:** `cuda-core` **1.2.0**, tag `cuda-core-v1.2.0`, commit **`53b43746e501f1a0b627f951604991636f77cd9c`**; native Linux x86-64, ordinary CPython 3.14.7. Supports [P01](/en/python/cuda-python-bridge/), [P02](/en/python/devices-contexts-launches/), [P03](/en/python/runtime-compilation-linking/) and [EX21](/en/examples/cuda-python-launch/). Sources accessed and facts checked **2026-09-12**. The [versioned install](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/install.html), [support policy](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/support.html) and [1.2.0 notes](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/release/1.2.0-notes.html) are distinct from executable evidence.
+
+| Exact file at the pinned core commit | Contract checked | File-level license disposition |
+| --- | --- | --- |
+| [`cuda_core/cuda/core/__init__.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/__init__.py) | Stable exports and bindings-major dispatch; no experimental namespace | NVIDIA copyright; Apache-2.0; reference only |
+| [`_device.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_device.pyx) and [`_context.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_context.pyx) | Device construction/driver access, default primary context, current-context close rejection, allocation fallback | NVIDIA copyright; each Apache-2.0; reference only |
+| [`_memory/_buffer.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_memory/_buffer.pyx) and [`_memory/_legacy.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_memory/_legacy.py) | Equal byte extents, explicit copy destination, borrowed owners, synchronous pinned allocation and stream-aware release | NVIDIA copyright; each Apache-2.0; reference only |
+| [`_kernel_arg_handler.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_kernel_arg_handler.pyx) | Buffer pointer packing, ctypes scalar widths, plain int/float handling, unconditional NumPy import | NVIDIA copyright; Apache-2.0; no code copied |
+| [`_program.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_program.pyx) and [`_linker.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_linker.pyx) | PTX compilation, `Linker(*object_codes, options=...)`, cubin extraction, backend selection, logs and supported close operations | NVIDIA copyright; each Apache-2.0; reference only |
+| [`_utils/version.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_utils/version.pyx) and [`_utils/cuda_utils.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_utils/cuda_utils.pyx) | PTX loadability's driver-version query and exception/log behavior; private implementation is a source, not an EX21 import | NVIDIA copyright; each Apache-2.0; reference only |
+| [`_module.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_module.pyx) and [`_cpp/resource_handles.hpp`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_cpp/resource_handles.hpp) | Lazy `get_kernel`, CUlibrary rather than CUmodule, shared ownership and no public Kernel/ObjectCode close | NVIDIA copyright; each Apache-2.0; reference only |
+| [`tests/test_memory.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_memory.py), [`test_launcher.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_launcher.py), [`test_context.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_context.py), [`test_linker.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_linker.py) | Size rejection, typed scalar/Buffer launches, context identity, correct linker call order and failure logs | NVIDIA copyright; each Apache-2.0; inspected, not executed or adapted |
+
+The rendered [Device](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Device.html), [Buffer](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Buffer.html), [Stream](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Stream.html), [Program](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Program.html), [Linker](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Linker.html) and [launch](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.launch.html) APIs were compared with source. Source/tests settle the generated Linker header's misleading argument order. Synchronization is `sync()`. Default `set_current()` returns None, and a current Context cannot be closed. A ctypes host view does not retain its Buffer owner. Copy/launch submission is not completion; cleanup cannot certify a failed result.
+
+Core's PTX path queries `cuDriverGetVersion()` without `cuInit`. EX21's GPU-free build therefore still requires a real userspace driver library and selected cuobjdump, even though it never creates a Device, looks up a kernel, or launches. Compilation can throw with its diagnostic attached while the successful-compilation `logs=` stream remains empty. No private core exception import is needed by the original CLI. These source facts are not local compilation, cleanup, or runtime observations.
+
+<span id="src-cuda-078" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-078: CUDA bindings 13.4.1 compiler and linker contracts
+
+**Related IDs: P02, P03, EX21.**
+
+**Version, purpose, platform and access:** `cuda-bindings` **13.4.1**, tag `v13.4.1`, commit **`0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa`**; selected native Linux Toolkit 13.3.1 API subset. Supports [P02](/en/python/devices-contexts-launches/), [P03](/en/python/runtime-compilation-linking/) and [EX21](/en/examples/cuda-python-launch/); checked and accessed **2026-09-12**. [Install](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/install.html), [support](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/support.html), and [release notes](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/release/13.4.1-notes.html) explicitly separate minor-version policy from individual API availability. Experimental `cuda.bindings._v2.nvrtc` is excluded.
+
+| Exact file at the pinned bindings commit | Checked boundary | File-level license disposition |
+| --- | --- | --- |
+| [`cuda_bindings/cuda/bindings/nvrtc.pyx`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/nvrtc.pyx) | Five required create arguments; status-first tuples; compile/log/extraction/destroy signatures; real versus virtual target for cubin | NVIDIA copyright; Apache-2.0; reference only |
+| [`cuda_bindings/cuda/bindings/nvjitlink.pyx`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/nvjitlink.pyx) | Integer handle, value returns, `nvJitLinkError.status`, writable outputs, log lifetime, destroy | NVIDIA copyright; Apache-2.0; reference only |
+| [`cuda_bindings/cuda/bindings/_internal/nvjitlink_linux.pyx`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/_internal/nvjitlink_linux.pyx) | Unversioned symbol lookup, not a mandatory 13.4-suffixed linker entry point; missing symbols remain failures | NVIDIA copyright; Apache-2.0; reference only, never imported by EX21 |
+| [`cuda_bindings/tests/test_nvjitlink.py`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/tests/test_nvjitlink.py) | Invalid option/arch exceptions, bytearray output, add/complete/extract/destroy lifecycle | NVIDIA copyright; Apache-2.0; inspected, not run or adapted |
+
+The [stable NVRTC reference](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/module/nvrtc.html) uses `(status, ...)`, including one-item compile/destruction returns. The [stable nvJitLink reference](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/module/nvjitlink.html) requires native nvJitLink >=12.3 and instead returns values or raises exceptions. Its output documentation says bytes, but source requests writable storage and owner tests use bytearray. Retrieve queried-size logs before destroying an acquired handle; creation failure grants no handle to query or destroy. These APIs cannot share an unconditional two-item status unpacker. Library discovery, Python argument conversion and native errors are separate failure surfaces.
+
+<span id="src-cuda-079" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-079: Independent profile, artifact locks and licenses
+
+**Related IDs: P01, P02, P03, EX21.**
+
+**Purpose and access:** Record the single [P01](/en/python/cuda-python-bridge/) through [P03](/en/python/runtime-compilation-linking/) / [EX21](/en/examples/cuda-python-launch/) profile, **2026-09-12**, not infer compatibility from matching package numbers. Current stable versions were selected independently through owner releases and exact PyPI metadata. Context7 resolved `/nvidia/cuda-python` with indexed `v13.3.1`; two versioned queries and one current query supplied discovery. Mixed `main` snippets and incomplete calls were not used as final authority; SRC-CUDA-077/078's exact source and tests govern.
+
+| Coordinate | Selected identity and owner evidence |
+| --- | --- |
+| Interpreter | [CPython 3.14.7 release](https://www.python.org/downloads/release/python-3147/), ordinary GIL `cp314-cp314`; [source archive](https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz) SHA-256 `3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81` verified against downloaded bytes; no interpreter built here |
+| Python distributions | [core 1.2.0](https://pypi.org/pypi/cuda-core/1.2.0/json), [bindings 13.4.1](https://pypi.org/pypi/cuda-bindings/13.4.1/json), [pathfinder 1.8.1](https://pypi.org/pypi/cuda-pathfinder/1.8.1/json), [NumPy 2.5.3](https://pypi.org/pypi/numpy/2.5.3/json); base distributions, no extras |
+| Native host and Toolkit | [13.3.1 Linux archive](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html): Ubuntu 24.04 x86-64, glibc 2.39. Its Ubuntu 24.04.4 / kernel 6.17.0-19 / GCC 14.3.0 qualification row is a target, not an observed machine |
+| Native components and driver | [13.3.1 release archive](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html): NVRTC 13.3.33, nvJitLink 13.3.33; driver target 610.43.02. NVCC 13.3.73 and Runtime 13.3.29 are independent and not directly invoked by EX21 |
+| Compatibility scope | Core 1.x explicitly supports 12.x/13.x; bindings 13.4.1 explicitly permits Toolkit 13.x components with API-specific limits. This example selects only 13.3.1. [nvJitLink compatibility](https://docs.nvidia.com/cuda/archive/13.3.1/nvjitlink/index.html#compatibility) requires a linker at least as new as its inputs; no newer native compiler is silently installed |
+
+The four non-yanked Linux/GIL wheels below were downloaded for hash and ZIP metadata/license inspection, not installed or executed. All downloaded bytes matched the PyPI SHA-256. Core/bindings use `manylinux_2_24_x86_64.manylinux_2_28_x86_64`; NumPy uses `manylinux_2_27_x86_64.manylinux_2_28_x86_64`; pathfinder is platform-independent. These artifact tags fit the selected glibc profile, not a claim of successful imports or CUDA builds.
+
+| Distribution / exact wheel suffix | SHA-256 |
+| --- | --- |
+| `cuda_core-1.2.0-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl` | `e138be12af795c69c1cb61e38562ea70e5a38616b2753e2a265231f1941394ef` |
+| `cuda_bindings-13.4.1-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl` | `62df23df11074e9833bf348bbcf0b8eec2fcbded4f305c6fbaa3ed067433e97d` |
+| `cuda_pathfinder-1.8.1-py3-none-any.whl` | `ae0137ff9e56ea97499bcbf54f5f2778ec25f3266715ac86da192a795af982a8` |
+| `numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl` | `b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b` |
+
+Core requires NumPy and pathfinder even though the original EX21 host uses stdlib ctypes arrays. Bindings must also be installed explicitly with the base core package. `requirements.lock` identifies Python artifacts; it does not fix the system Toolkit, driver, interpreter installation or native loader outcome. The CLI checks real library paths, Toolkit version.json, compiler/linker filename coordinates and API version pairs, and retains hashes. Neither API exposes patch 33; filenames/local hashes alone do not authenticate it. Attach installer provenance and loaded builtins identity to the Environment Manifest. Runtime additionally needs matching kernel/userspace driver packages and one compiler-supported CC 7.5+ GPU; no second platform profile is asserted.
+
+| Exact license or notice location | SHA-256 and disposition |
+| --- | --- |
+| [core `cuda_core/LICENSE`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/LICENSE), [bindings `cuda_bindings/LICENSE`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/LICENSE) | Each `dc94465a4d540f776490e4b7a73d717d09fffbb1d5a7a6eaab47a0ca6f6624ab`; Apache-2.0; wheel license members match |
+| [core `cuda_core/NOTICE`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/NOTICE) | `37206f13ff7d1695cda9a8ba873b19b984b20ab5d2fdf4bd9d8cd1d3c89519d2`; includes DLPack Apache-2.0 and PyTorch interface BSD-3-Clause notices |
+| [pathfinder `cuda_pathfinder/LICENSE`](https://github.com/NVIDIA/cuda-python/blob/e606d084ccfc502a29990f34fbb6ba7a91655c24/cuda_pathfinder/LICENSE) | `4aa88ec20f47537faaee4c183859506b1b03b807858262009c507c3b610dbad9`; Apache-2.0; exact 1.8.1 commit |
+| `numpy-2.5.3.dist-info/licenses/LICENSE.txt` inside the hash-identified wheel | `4860083caa0de2ac3292ca98bd074bd8f45d8b32624e37b1e70a240bff61e488`; retain complete bundled notices, not just the BSD project label |
+| [CPython `LICENSE`](https://github.com/python/cpython/blob/823f0323ee6ec1402088b73bce1a38473cac36dc/LICENSE) | `b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231`; PSF license stack and included-software terms |
+
+Original EX21 source calls public APIs rather than adapting NVIDIA's vector-add sample; P01-P03, six exercises with separate solutions, PB-R5-001/002/003 and TERM-197 through TERM-200 use original prose and derivations. Software is Apache-2.0; instruction is CC BY 4.0. External wheels and native CUDA are not bundled in the site or source. CUDA Python's Apache license does not relicense NVIDIA Toolkit documentation/libraries; NumPy's wheel retains its BSD-3-Clause, 0BSD, MIT, Zlib, CC0-1.0 and bundled-binary notices. Source/tests and artifact/license inspection grant no CUDA Evidence Status. EX21 retains empty compilation/recorded observations and Pending Hardware Verification runtime; the Learning Units remain evidence-neutral.
+
 ## Content and asset sources
 
-- Home, 75 Learning Units, 20 Runnable Examples, 12 Labs, 82 Practice Bank entries, 196 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
+- Home, 78 Learning Units, 21 Runnable Examples, 12 Labs, 85 Practice Bank entries, 200 term definitions, standalone VIS01-VIS14/VIS18, embedded VIS19-VIS22, and every teaching composition are original project work. Prose and teaching compositions use **CC BY 4.0**; example source, components, models, styles, tests, and tooling use **Apache-2.0**.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
@@ -565,7 +645,7 @@ The inspected NVIDIA cuSPARSE header notices are proprietary, with 1993-2022 or 
 
 <span id="r4-aggregate-review" class="resource-target" aria-hidden="true"></span>
 
-**Aggregate static review: 2026-09-10.** R4 is the latest completed aggregate static review. Schema 5 `src/r4-release-manifest.json` supplies `/release.json`; `src/current-publication-manifest.json` supplies `/publication.json` with `releaseReview.latestCompleted: R4`, `releaseReview.next: R5`, and `releaseReview.status: pending`. Both currently describe the same 277 pairs, 554 routes, and 401 catalog records. R1-R3 remain exact historical snapshots. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records dynamic CI, Preview, production, and smoke acceptance only after those results exist. No framework or Triton completion or placeholder destination is implied.
+**Aggregate static review: 2026-09-10.** R4 is the latest completed aggregate static review. Schema 5 `src/r4-release-manifest.json` supplies `/release.json`; `src/current-publication-manifest.json` supplies `/publication.json` with `releaseReview.latestCompleted: R4`, `releaseReview.next: R5`, and `releaseReview.status: pending`. At that review both described 277 pairs, 554 routes, and 401 catalog records. R1-R4 remain historical snapshots; September 12's current increment is counted above, not retroactively reviewed here. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) retains R4 dynamic acceptance separately. No CI, deployment, framework or Triton completion is asserted by this source record.
 
 Existing sources retain their original access dates. Issue #32 reviewed immutable R3 through `SRC-CUDA-060`; `SRC-CUDA-061` through `SRC-CUDA-076` retain their September 4-9 item-level reviews, including the earlier failed-archive findings. Older A07 and A12/A13 records remain historical; L10 and L13 provide separately dated graph/plan and Generic API continuations. This aggregate disposition retains their bounded claims rather than duplicating or redating the detailed ledgers.
 
@@ -590,4 +670,4 @@ On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-si
 
 Immutable `src/r3-release-manifest.json` retains 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including ten Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 61 Exercise sets, 61 solution sets, 232 Publication Pairs, and 464 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains its dynamic acceptance. R4 additionally qualifies eight existing library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. The R3 subset remains PB-R3-002 through PB-R3-005 and PB-R3-007 through PB-R3-012; both classifications are within the existing 82 entries.
 
-Existing canonical imports and retained compile records remain unchanged: only EX02, EX10, and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. The other 19 examples and all 12 Labs remain Pending Hardware Verification, 31 subjects total. Runtime-Verified, Community-Observed, Reference Environment, and performance-observation counts remain zero. L01-L13 retain four empty evidence arrays. Six expected-only profiler plans retain unfilled Environment Manifests and empty recorded observations; nineteen browser Visual Explainers grant no CUDA Evidence Status. Source review adds no GPU output, workspace query, profiler, dispatch, dtype, traffic, timing, Tensor Core, or speedup record. Automated results do not establish WCAG conformance, and dynamic R4 acceptance must be recorded separately in #41.
+Existing retained compile records remain unchanged: only EX02, EX10, and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. With EX21, the current 20 other examples and all 12 Labs remain Pending Hardware Verification, 32 subjects total. Runtime-Verified, Community-Observed, Reference Environment, and performance-observation counts remain zero. L01-L13 and P01-P03 retain four empty evidence arrays. Six expected-only profiler plans retain unfilled Environment Manifests and empty recorded observations; nineteen browser Visual Explainers grant no CUDA Evidence Status. Source review adds no GPU output, workspace query, profiler, dispatch, dtype, traffic, timing, Tensor Core, or speedup record. Automated results do not establish WCAG conformance; CI and dynamic acceptance remain separate from this review.

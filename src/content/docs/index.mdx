@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-09-10'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-10'
+      content: '2026-09-12'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,9 +46,11 @@ head:
 
 ## 当前发布路线
 
-稳定课程（Stable Curriculum）最近完成的聚合静态复核是 **2026-09-10** 的 R4。它覆盖 O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13 与 L01-L13，共 75 个学习单元（Learning Unit）、277 个双语发布对（Publication Pair）、554 条源路由和 401 条资源目录记录。可复用库路线已到达 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)，并配有 [EX19](/examples/cufft-batched-transform/)与 [EX20](/examples/cusparse-spmv/)。R1-R3 仍是未改动的历史发布；R3 保留 62 个单元、232 个发布对、464 条路由与 347 条目录记录。
+截至 **2026-09-12**，当前发布在 R4 基础上加入 CUDA Python 桥接路线，覆盖 O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P03，共 78 个学习单元（Learning Unit）、287 个双语发布对（Publication Pair）、574 条源路由和 411 条资源目录记录。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
 
-**聚合静态复核：2026-09-10。** 模式版本 5 的 `src/r4-release-manifest.json` 生成 `/release.json`；`/publication.json` 记录最近完成 R4、下一阶段 R5，其聚合复核待完成。本次不增加页面，也不表示框架或 Triton 路线已完成。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。技术来源保留逐项日期；新检索单独记录在[聚合来源复核结论](/sources-and-versions/#r4-aggregate-review)中。
+**最近完成的聚合静态复核仍是 2026-09-10 的 R4。** 模式版本 5 的 `src/r4-release-manifest.json` 继续生成冻结的 `/release.json`：75 个学习单元、277 个双语发布对、554 条源路由和 401 条目录记录。`/publication.json` 记录当前扩展后的清单，最近完成阶段仍为 R4，下一阶段 R5 的聚合复核待完成。R1-R3 历史发布不变；R3 保留 62 个单元、232 个发布对、464 条路由与 347 条目录记录。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 和[聚合来源复核结论](/sources-and-versions/#r4-aggregate-review)保留各自的历史日期；当前页面发布不预先证明 CI、Preview、生产部署或远程冒烟检查已通过，技术来源也保留逐项日期。
+
+[Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) 发布 [P01：CUDA Python 桥接](/python/cuda-python-bridge/)，有序直接先修为 `[F04,M07]`；[P02：设备、上下文与启动](/python/devices-contexts-launches/)为 `[P01,F07]`；[P03：运行时编译与链接](/python/runtime-compilation-linking/)为 `[P02,M15,M16]`。三者各有练习与独立解答，共用 [EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)，EX21 的唯一直接先修为 `[P02]`。EX21 独立固定 Python、包与原生 Toolkit 配置，不继承 C++ 工具包通道的编译证据，仍待硬件验证（Pending Hardware Verification）。本次不发布框架或 Triton 的占位入口。
 
 严格先修图从首页进入 O01：O02、O03、O04、O05 和 O06 都直接依赖 O01；O07 依赖 O06；O08 同时依赖 O02、O03 和 O05。Kernel 路线由 O03 进入 [F01](/foundations/first-cuda-kernel/)；[F02 执行层次](/foundations/execution-hierarchy/)依赖 F01，[F03 多维索引](/foundations/multidimensional-indexing/)依赖 F02，[F04 host-device 生命周期](/foundations/host-device-lifecycle/)也依赖 F01。[F05 异步错误](/foundations/asynchronous-errors/)仅依赖 F04；[F06 compute capability](/foundations/compute-capability/)同时依赖 F02 和 O03；[F07 Runtime/Driver API 边界](/foundations/runtime-driver-api/)同时依赖 F04 和 F05；[F08 launch geometry](/foundations/launch-geometry/)同时依赖 F02、F03 和 F06。
 
@@ -82,7 +84,7 @@ Q06-Q13 也提供完整练习与独立解答，包括 [Q09 练习](/correctness/
 
 L01-L09 发布 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)、[L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)、[L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)与[解答](/libraries/libcu-plus-plus-synchronization/solutions/)、[L06 练习](/libraries/cublas-gemm/exercises/)与[解答](/libraries/cublas-gemm/solutions/)，以及 [L07 练习](/libraries/cublaslt-matmul/exercises/)与[解答](/libraries/cublaslt-matmul/solutions/)。本次新增 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)，以及 [L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
 
-当前有 20 个可运行示例（Runnable Example）：EX01-EX20。[EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)严格依赖 L13；[EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)严格依赖 L12；[EX18：cuBLAS GEMM](/examples/cublas-gemm/)严格依赖 L06；[EX17 CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)严格依赖 L03；EX15 依赖 A08，EX14 依赖 A05，EX16 依赖 Q03/Q04。EX19 声明同样三条固定工具包通道（Toolkit Lane），仅使用 C++17，分别搭配捆绑的 cuFFT 10.9.0.58 / 11.4.1.4 / 12.3.0.29；其 FP32 C2C 合同不包含回调（callback）、低精度、多 GPU 执行或计时。
+当前有 21 个可运行示例（Runnable Example）：EX01-EX21。[EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)严格依赖 P02；[EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)严格依赖 L13；[EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)严格依赖 L12；[EX18：cuBLAS GEMM](/examples/cublas-gemm/)严格依赖 L06；[EX17 CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)严格依赖 L03；EX15 依赖 A08，EX14 依赖 A05，EX16 依赖 Q03/Q04。EX19 声明同样三条固定工具包通道（Toolkit Lane），仅使用 C++17，分别搭配捆绑的 cuFFT 10.9.0.58 / 11.4.1.4 / 12.3.0.29；其 FP32 C2C 合同不包含回调（callback）、低精度、多 GPU 执行或计时。
 
 EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane 使用同一原创 C++17 implementation；compilation evidence 为空，runtime 为 Pending Hardware Verification，recorded observations 为空。Host-only utility 不建立 GPU correctness，本站没有运行 EX15，也不发布实际 output、timing、speedup 或其他 performance number。
 
@@ -94,9 +96,9 @@ EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component
 
 A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS、cuDNN、cuFFT 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
 
-R4 与当前资源目录均包含 12 个实验、82 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、196 个术语表（Glossary）词条和 92 条来源记录，共 401 条记录。源文件形成 277 个双语发布对，即 554 条源路由，包含 74 组练习与 74 组独立参考解答。在保留 R3 十道 Nsight 报告分析题的同时，R4 明确将八道题列入库与算法选择子集：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。两个子集均在[练习题库](/practice/)中列明。
+当前资源目录包含 12 个实验、85 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、200 个术语表（Glossary）词条和 95 条来源记录，共 411 条资源目录记录。源文件形成 287 个双语发布对，即 574 条源路由，包含 77 组练习与 77 组独立参考解答。R4 历史目录仍为 82 道题、196 个词条、92 条来源与 401 条记录；当前新增 `PB-R5-001/002/003`，不改动 R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。两个历史子集仍在[练习题库](/practice/)中列明。
 
-只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 19 个示例和全部 12 个实验共 31 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
+只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。P01-P03 的四个证据数组均为空；EX21 的编译证据和实际观察记录为空，主机测试不证明 CUDA 编译或运行。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
 
 [L12](/libraries/cufft-plans-layouts-startup/)完整有序先修为 `[Q05,M07]`。[L12 练习](/libraries/cufft-plans-layouts-startup/exercises/)依赖 `[L12]`，[独立解答](/libraries/cufft-plans-layouts-startup/solutions/)依赖 `[L12-EXERCISES]`。L12 的四个证据数组仍为空；归档的 12.9.2 cuFFT 指南是教学基线，当前 13.3 参考访问于 2026-09-08，因为精确的 13.3.1 API 与发布说明归档不可用。
 
@@ -474,6 +476,11 @@ R4 与当前资源目录均包含 12 个实验、82 个练习题库（Practice B
     <strong>cuSPARSE 描述符、SpMV 与 SpMM</strong>
     <small>在精确版本合同下区分稀疏表示、调用者所有权、工作区和预处理。</small>
   </a>
+  <a className="route-card" href="/python/cuda-python-bridge/">
+    <span>P01 · PYTHON BRIDGE</span>
+    <strong>用 Python 编排，保留 CUDA 生命周期</strong>
+    <small>完成 F04 与 M07 后，连接设备、所有权、流与显式启动；不省略证据门槛。</small>
+  </a>
   <a className="route-card" href="/examples/environment-report/">
     <span>EX01 · ENVIRONMENT REPORT</span>
     <strong>环境报告可运行示例</strong>
@@ -722,17 +729,17 @@ R4 与当前资源目录均包含 12 个实验、82 个练习题库（Practice B
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 82 道原创题练习证据、环境、架构、内核、内存、算法、库、工具链与正确性判断。</small>
+    <small>用 85 道原创题练习证据、环境、架构、内核、内存、算法、库、Python 桥接、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 196 个中英文规范术语。</small>
+    <small>核对本站使用的 200 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 92 条接口与上游来源记录，以及各自复核日期。</small>
+    <small>查看当前发布依据的 95 条接口与上游来源记录，以及各自复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

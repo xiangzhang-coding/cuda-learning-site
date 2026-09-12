@@ -1,0 +1,216 @@
+---
+title: 'EX21: Launch a CUDA C++ Kernel from Python'
+description: Build PTX and explicitly linked cubin without a GPU, then run a separately gated, bounds-checked vector addition with typed arguments and full CPU comparison.
+pairId: ex21
+counterpart: /examples/cuda-python-launch/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, cpu-reference, python-lifecycle, runtime-compile, kernel, canonical-imports, profile, build, run, diagnostics, evidence, expected-observations, sources]
+resourceKind: runnable-example
+unitId: EX21
+prerequisites: [P02]
+relatedUnits: [P01, P03]
+exampleIds: [EX21]
+canonicalExample: EX21
+canonicalRanges:
+  - cpu-reference
+  - python-lifecycle
+  - runtime-compile
+  - kernel
+  - canonical-imports
+hardwareGate: 'Build: selected native Linux x86-64 Python profile, NVRTC/nvJitLink, real libcuda userspace and cuobjdump; no GPU or cuInit. Run: one compiler-supported CC 7.5+ GPU, matching driver kernel/userspace, small problems within 8 GB.'
+toolkitLanes: []
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Read the selected Toolkit, native libraries and driver identity'
+  - 'Install hash-locked Python wheels in the example-local virtual environment'
+  - 'Execute Python, bash and cuobjdump; access one CUDA device only for run'
+  - 'Write fresh EX21 build, run and learner-owned evidence files'
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - "The GPU-free build should produce PTX for compute_75 and a nonempty nvJitLink cubin with the original kernel's sm_75 SASS, without initializing a device/context or launching work."
+    - 'The default run should submit four blocks of 256 threads for 1003 values; 21 tail threads should take the bounds guard.'
+    - 'After checked stream completion, every output should be finite and exactly equal to its CPU reference. CPU reference values should also match the independent literals.'
+    - 'Owned buffers should close on their submission stream before draining frees and closing that stream; logs and the first failure should survive cleanup attempts.'
+  recordedObservations: []
+sources:
+  - title: 'CUDA core selected release'
+    url: 'https://nvidia.github.io/cuda-python/cuda-core/1.2.0/install.html'
+    version: 'cuda-core 1.2.0'
+    platform: 'Native Linux x86-64; ordinary CPython 3.14.7'
+    accessDate: '2026-09-12'
+  - title: 'CUDA bindings selected release'
+    url: 'https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/install.html'
+    version: 'cuda-bindings 13.4.1'
+    platform: 'Selected Toolkit 13.x API subset; no blanket compatibility claim'
+    accessDate: '2026-09-12'
+  - title: 'Toolkit component and driver identities'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3.1; NVRTC/nvJitLink 13.3.33; Linux driver 610.43.02'
+    platform: 'Profile targets, not an observed Reference Environment'
+    accessDate: '2026-09-12'
+  - title: 'Core PTX driver-version query'
+    url: 'https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_program.pyx'
+    version: 'cuda-core 1.2.0'
+    platform: 'PTX compilation requires real driver userspace without cuInit'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex21 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/examples/cuda-python-launch/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,cpu-reference,python-lifecycle,runtime-compile,kernel,canonical-imports,profile,build,run,diagnostics,evidence,expected-observations,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: P02 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P01,P03' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu-reference,python-lifecycle,runtime-compile,kernel,canonical-imports' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Build: selected native Linux x86-64 Python profile, NVRTC/nvJitLink, real libcuda userspace and cuobjdump; no GPU or cuInit. Run: one compiler-supported CC 7.5+ GPU, matching driver kernel/userspace, small problems within 8 GB.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '7.5' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '4 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '4' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'CPython-3.14.7,cuda-core-1.2.0,cuda-bindings-13.4.1,cuda-pathfinder-1.8.1,numpy-2.5.3,CUDA-13.3.1,NVRTC-nvJitLink-13.3.33' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/cuda-python-launch/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+Complete [P02](/en/python/devices-contexts-launches/) first. EX21 is an original standalone correctness project: Python orchestrates an explicit stream and owned buffers; a header-free CUDA C++ kernel computes `c[i]=a[i]+b[i]`. [P01](/en/python/cuda-python-bridge/) explains the bridge and [P03](/en/python/runtime-compilation-linking/) explains code production. No CUDA executes inside the Learning Site. This is not a benchmark or an array-framework operation.
+
+## Canonical project
+
+[Inspect the project source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch) or [download the repository archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip), then use `examples/ex21-cuda-python-launch/` as the standalone root. Both links pin source commit `c3dd1067d1632560098fa42bada30d9930aec7ad`, the immutable revision used by the canonical imports. Retain that source identity with any future evidence submission; it does not itself establish a successful build or run.
+
+The project contains `ex21.py`, `kernel.cu`, `scripts/setup.sh`, `requirements.lock`, `project.json`, the blank `environment-manifest.json`, README, and evidence instructions. Both locales import the same five ranges below. Original software is Apache-2.0 and this page is CC BY 4.0. No upstream sample, wheel, Toolkit header, or native binary is redistributed.
+
+## Independent CPU reference
+
+<CanonicalCode exampleId="EX21" range="cpu-reference" />
+
+Inputs are `a[i]=(i % 37)*0.25` and `b[i]=-(i % 19)*0.5`. The CPU reference reads stored `ctypes.c_float` inputs and adds them as Python floats. These small binary fractions and sums are exactly representable in float32, so require finite exact equality for **every** output. This is a fixture-specific rule, not a general floating-point policy.
+
+Independent literal checks include `i=0 -> 0`, `19 -> 4.75`, `37 -> -9`, `256 -> 4`, and `1002 -> -6.25`. They are derived expectations, not a GPU transcript. Host tests cover sizes 1, 255, 256, 257, 1003, invalid counts and lengths, non-finite values, corruption at different positions, and mismatch counts. A host-test pass validates CPU logic only.
+
+## Python lifecycle
+
+<CanonicalCode exampleId="EX21" range="python-lifecycle" />
+
+The run path selects visible device 0, calls `dev.set_current()`, and creates an owned nonblocking stream. Three device and three pinned host Buffers have equal byte extents. Only pinned host handles become ctypes views; those views borrow and do not retain their Buffer owners. The two input uploads and a NaN output-sentinel upload precede the kernel, so a missed store cannot accidentally match recycled memory. D2H has an explicit pinned host destination.
+
+`stream.sync()` must succeed before output inspection. Every result is checked for finiteness and equality, retaining first mismatch and total count. Normal cleanup stops view use, closes Buffers on the same stream, drains queued frees with another checked sync, then closes the stream. Failure cleanup preserves the first exception and reports secondary errors/warnings; stderr may contain native cleanup diagnostics. Kernel/ObjectCode have no public close, Device has no close, and the shared primary context is not reset or destroyed.
+
+## Runtime compilation and linking
+
+<CanonicalCode exampleId="EX21" range="runtime-compile" />
+
+Program compiles C++17 source with a virtual `compute_...` target and relocatable device code to PTX. `Linker(ptx, options=LinkerOptions(arch="sm_..."))` explicitly links it to cubin. The CLI refuses driver-linker fallback. Inspection checks the PTX entry/target and ELF cubin, then uses the selected Toolkit's `cuobjdump --dump-sass` to check the kernel and real target. No artifact size or SASS instruction listing is claimed before execution.
+
+The no-GPU build uses explicit arch 75. It does not call Device, `set_current()`, `get_kernel()`, `launch()`, or `cuInit`. **It still needs real `libcuda` userspace:** core 1.2.0's PTX compilation queries `cuDriverGetVersion()`. A Toolkit stub, fake driver, or skipped stage is not a substitute. No NVCC invocation is needed. Loading occurs later at `linked.get_kernel("ex21_vector_add")`, not during cubin reconstruction or an invented `ObjectCode.load()` step.
+
+## Kernel and argument contract
+
+<CanonicalCode exampleId="EX21" range="kernel" />
+
+The three pointer arguments are core Buffers; the final unsigned 32-bit count is `ctypes.c_uint32(n)`. Raw Python int packing is not signature inference. A 256-thread block and ceiling grid cover the input, with the bound checked before all array accesses. `run` accepts integers from 1 through 1000000; zero never submits a zero grid. The default n=1003 gives four blocks and 21 inactive tail threads.
+
+Caller device payload is `12*n` bytes, 12036 by default and 12 MB at the maximum, plus equal pinned host payload. CPU reference storage, context/library/compiler allocations and actual free memory are additional; the static count is not total memory usage or allocation-success evidence. These sizes stay inside the Baseline GPU Capability Tier's 8 GB problem boundary.
+
+## Canonical imports
+
+<CanonicalCode exampleId="EX21" range="canonical-imports" />
+
+Core owns the launch path; bindings expose native version/error contracts; pathfinder resolves native libraries. No legacy or experimental CUDA namespace is used. NVRTC calls return status-first tuples; stable nvJitLink returns values and raises exceptions. No second low-level implementation is shipped. NumPy is required by core despite EX21 not importing it or using its arrays.
+
+## One independently pinned profile
+
+| Coordinate | Required selection |
+| --- | --- |
+| Host | Native Linux x86-64, Ubuntu 24.04 LTS, glibc 2.39 |
+| Interpreter | Ordinary GIL CPython 3.14.7, `cp314-cp314`, not free-threaded |
+| Python lock | core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3 |
+| Native toolchain | System/local Toolkit 13.3.1; NVRTC and nvJitLink 13.3.33; matching cuobjdump |
+| Driver | Target 610.43.02; real userspace required for build, matching kernel/userspace packages at or above that version for run |
+| GPU for run | One visible CC 7.5+ GPU whose plain numeric target is supported by the loaded NVRTC |
+
+Ubuntu 24.04.4, kernel 6.17.0-19 and GCC 14.3.0 are the owner's qualification row, not this project's observed machine. Record actual packages. The selected API subset is documented-compatible; wheel availability is not import, build, or runtime proof. No CUDA 12/11.8, macOS, WSL, ARM, or container-only runtime profile is added.
+
+NVRTC/nvJitLink version APIs report 13.3, not patch 33. The CLI also checks Toolkit `version.json`, resolved `libnvrtc.so.13.3.33` and `libnvJitLink.so.13.3.33` under `CUDA_PATH`, and records file hashes. File names and local hashes alone do not authenticate the upstream patch: retain package/installer provenance and loaded builtins identity. Driver API level is not driver package version. The profile does not inherit the site's C++ Toolkit Lane matrix.
+
+## Setup and GPU-free build
+
+Provision the exact interpreter, selected Toolkit, real driver userspace library, and cuobjdump first. From a fresh standalone working copy, `CUDA_PATH` defaults to `/usr/local/cuda-13.3`; if set, `CUDA_HOME` must resolve to the same root. Setup creates `.venv`, refuses to overwrite an existing one, and installs the exact four-wheel closure using `--require-hashes --only-binary=:all:`. It installs neither native CUDA extras nor the system interpreter/driver.
+
+```sh
+bash scripts/setup.sh
+.venv/bin/python ex21.py host-test
+.venv/bin/python ex21.py check-environment
+.venv/bin/python ex21.py build --arch 75
+```
+
+On a prepared copy, omit setup. The default native environment check validates packages/imports/native libraries and supported architecture queries without device initialization. The build then compiles, links, and inspects without a GPU. Missing real driver userspace or an unsupported target is a failure, not permission to bypass a check.
+
+For a development machine without CUDA packages, the separate CPU-logic check can use a local Python 3.10+ interpreter from the same project directory:
+
+```sh
+python3 -I -S ex21.py host-test
+```
+
+This mode neither imports CUDA nor validates the selected profile. It tests original input/reference/validator logic with stdlib ctypes storage and independent literals, not simulated device buffers. The interpreter exception applies only to `host-test`; setup, environment, build and run retain the exact CPython 3.14.7 profile.
+
+Build outputs default to `build/compile`: `report.json`, `ex21.ptx`, `ex21.cubin`, `nvrtc.log`, `link-info.log`, `link-error.log`, and `sass.txt`. Existing result files are rejected. For another attempt, choose a fresh `--output-dir`, such as `build/compile-second`; do not overwrite an earlier verdict. Retain actual exit status and stderr with JSON reports. No successful build is asserted on this page.
+
+## Separately gated run
+
+Only after satisfying the runtime profile:
+
+```sh
+.venv/bin/python ex21.py run --size 1003
+```
+
+Run uses the selected GPU's exact supported target, rebuilds through the same PTX/link/inspection path, then loads, launches, copies and verifies. Results default to fresh `build/run`. To inspect a boundary size without overwriting that report:
+
+```sh
+.venv/bin/python ex21.py run --size 257 --output-dir build/run-257
+```
+
+**Acceptance:** Every output is finite and exactly equals its independently checked CPU reference; all submitted work completes before inspection and release; cleanup failures are not hidden. Keep source/profile identities, actual device and native-library records, stage diagnostics, artifact hashes, full-output verdict, warnings and exit status. Fill an external copy of the blank Environment Manifest with observations, not the target table. Review/redact sensitive paths before publishing any evidence.
+
+## Diagnose without erasing failure
+
+Reports distinguish profile, library discovery, compilation, linking, artifact inspection, allocation, lazy lookup, launch, copy, sync, correctness and cleanup. An attempted launch with failed completion is not successful execution. An empty `nvrtc.log` on compile failure may coexist with the compiler log attached to the exception. Retain the first exception and subsequent log/cleanup errors separately. Failed work must exit nonzero, never fall back to comparing stale host output.
+
+In the actual JSON contract, `launchAttempted` records submission intent, and `gpuExecuted` becomes `null` before submission because completion is unknown if launch, copy or sync fails. It becomes `true` only after the checked stream sync; a later correctness or cleanup failure still leaves `result: "fail"`. None of these fields alone is a maintainer Runtime-Verified claim. Retain both stdout JSON and stderr diagnostics.
+
+The program supplies no timer. First-use compilation/loading, allocations, copies and CPU checking cannot be silently excluded from an end-to-end performance claim. Nonblocking stream or pinned-memory use alone is not an overlap measurement.
+
+## Evidence boundary
+
+Compilation and recorded observations are empty. Runtime remains **Pending Hardware Verification**. No Linux install, CUDA build, GPU correctness, cleanup behavior, timing, or speedup is claimed from this publication work. Source/tests inspection and CPU tests do not upgrade evidence. Build mode does not make the whole example Runtime-Not-Applicable, because its acceptance includes GPU output.
+
+## Expected observations
+
+1. The GPU-free build should produce PTX for compute_75 and a nonempty nvJitLink cubin with the original kernel's sm_75 SASS, without initializing a device/context or launching work.
+2. The default run should submit four blocks of 256 threads for 1003 values; 21 tail threads should take the bounds guard.
+3. After checked stream completion, every output should be finite and exactly equal to its CPU reference. CPU reference values should also match the independent literals.
+4. Owned buffers should close on their submission stream before draining frees and closing that stream; logs and the first failure should survive cleanup attempts.
+
+## Sources and review
+
+[SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), [SRC-CUDA-078](/en/sources-and-versions/#src-cuda-078), and [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) retain exact release source/tests, library/version boundaries, reviewed wheel hashes, and license disposition. Facts and access checked **2026-09-12**. Code and prose are original, not adapted owner samples. CUDA Python component licenses do not relicense native CUDA libraries or NVIDIA documentation.

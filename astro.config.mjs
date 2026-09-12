@@ -168,6 +168,15 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Python 桥接',
+          translations: { en: 'Python Bridge' },
+          items: [
+            { slug: 'python/cuda-python-bridge' },
+            { slug: 'python/devices-contexts-launches' },
+            { slug: 'python/runtime-compilation-linking' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [
@@ -191,6 +200,7 @@ export default defineConfig({
             { slug: 'examples/cublas-gemm' },
             { slug: 'examples/cufft-batched-transform' },
             { slug: 'examples/cusparse-spmv' },
+            { slug: 'examples/cuda-python-launch' },
           ],
         },
         {

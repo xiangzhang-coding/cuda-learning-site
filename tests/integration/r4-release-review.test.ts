@@ -5,6 +5,7 @@ import { cp, mkdir, mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { parseFrontmatter } from '@astrojs/markdown-remark';
 import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
 
@@ -82,11 +83,49 @@ function expectExactMembers(actual: readonly string[], expected: readonly string
 }
 
 describe('R4 release review', () => {
-  it('keeps all R1-R3 manifest bytes identical to the fixed review baseline', async () => {
+  it.each(['', 'en/'])('static: distinguishes the current Python summary from frozen R4 history in %s', async (prefix) => {
+    for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md']) {
+      const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
+      const { frontmatter } = parseFrontmatter(raw);
+      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-12');
+      expect(frontmatter.head.find((entry: { attrs: { name: string } }) => entry.attrs.name === 'cuda:fact-check-date')?.attrs.content)
+        .toBe('2026-09-12');
+      const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
+      for (const count of [
+        /287 (?:Publication Pairs|个双语发布对)/, /574 (?:source routes|条源路由)/,
+        /78 (?:Learning Units|个学习单元)/, /21 (?:Runnable Examples|个可运行示例)/,
+        /77 (?:Exercise sets|组练习)/, /77 (?:separate reviewed-solution sets|组独立参考解答)/,
+        /85 (?:Practice Bank entries|个练习题库条目)/, /200 (?:Glossary terms|个术语表词条)/,
+        /95 (?:source records|条来源记录)/, /411 (?:catalog records|条资源目录记录)/, /32 (?:subjects|个主体)/,
+      ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
+      expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
+      expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
+      expect(prose).not.toMatch(/R4 and (?:the )?current catalog|R4 与当前[^。\n]*均|currently has the same inventory|当前具有相同清单/);
+      for (const slug of ['python/cuda-python-bridge', 'python/devices-contexts-launches', 'python/runtime-compilation-linking', 'examples/cuda-python-launch']) {
+        expect(raw, `${prefix}${file}`).toContain(`/${prefix}${slug}/`);
+      }
+      for (const edge of ['[F04,M07]', '[P01,F07]', '[P02,M15,M16]', '[P02]']) expect(raw).toContain(edge);
+      expect(prose).toMatch(/EX21[^\n]*Pending Hardware Verification|EX21[^\n]*待硬件验证/);
+      if (file === 'index.mdx') {
+        expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
+        const document = parseHTML(raw).document;
+        for (const [slug, count] of [['practice', '85'], ['glossary', '200'], ['sources-and-versions', '95']]) {
+          expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
+        }
+      }
+      if (file === 'start/using-the-learning-site.md') {
+        expect(frontmatter.prerequisites).toEqual([]);
+        expect(frontmatter.evidence).toEqual({ compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] });
+      }
+    }
+  });
+
+  it('keeps all R1-R4 manifest bytes identical to the fixed review baseline', async () => {
     for (const [id, sha256] of [
       ['r1', 'ad684a62d30402ed0a0fc9ba36c619f2897e6595c1d533b5241e789335e342e4'],
       ['r2', 'b58ad7072d04b1cb9b7cf613803f9aacb1e079b8cbfb7df75b0de8c64303620e'],
       ['r3', '9ec90ad5af973ebcb37b1439e7ebbe63f97738f7d38effed58f767ed5eee7dba'],
+      ['r4', '26b0897efbfed9d697570f475e25fd88dbd3442b13357581f9ff96b87c098df7'],
     ]) {
       const bytes = await readFile(path.join(projectRoot, `src/${id}-release-manifest.json`));
       expect(createHash('sha256').update(bytes).digest('hex'), id).toBe(sha256);
@@ -122,23 +161,29 @@ describe('R4 release review', () => {
     expect(current).toMatchObject({
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-10',
+      reviewDate: '2026-09-12',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
     const reviewed = await readJson('src/r4-release-manifest.json');
-    expect(reviewed).toEqual({
+    expect(reviewed).toMatchObject({
       'SPDX-License-Identifier': 'Apache-2.0',
       schemaVersion: 5,
       releaseId: 'R4',
       reviewDate: '2026-09-10',
       artifactType: 'static-assets',
       canonicalOrigin: 'https://cuda-learning-site.hmzhangxiang.workers.dev',
-      scope: current.scope,
-      compatibility: current.compatibility,
-      evidence: current.evidence,
-      knownLimitations: current.knownLimitations,
+      scope: {
+        publicationPairs: 277, sourceRoutes: 554, exerciseSetPublicationPairs: 74, solutionSetPublicationPairs: 74,
+        learningUnits, runnableExamples, labs, visualExplainers,
+        practiceBankEntries: 82, glossaryTerms: 196, sourceRecords: 92,
+        nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
+        libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
+      },
     });
+    for (const key of ['learningUnits', 'runnableExamples', 'labs', 'visualExplainers']) {
+      expect(current.scope[key]).toEqual(expect.arrayContaining(reviewed.scope[key]));
+    }
 
     const root = await mkdtemp(path.join(tmpdir(), 'r4-release-output-'));
     const sourceCommit = '0000000000000000000000000000000000000041';
@@ -241,9 +286,14 @@ describe('R4 release review', () => {
       r3EvidenceNeutralLearningUnits, r4EvidenceNeutralLearningUnits, evidenceNeutralVisualExplainers: visualExplainers,
       expectedOnlyProfilerReportPlans: profilerReportPlans, capturedProfilerReports: [], retainedCompileRuns: [32720214527, 33275734951],
     });
-    expect(current.compatibility).toEqual(reviewed.compatibility);
-    expect(current.evidence).toEqual(reviewed.evidence);
-    expect(current.knownLimitations).toEqual(reviewed.knownLimitations);
+    expect(current.compatibility).toMatchObject(reviewed.compatibility);
+    for (const field of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
+      'referenceEnvironments', 'performanceObservations', 'capturedProfilerReports', 'retainedCompileRuns']) {
+      expect(current.evidence[field], field).toEqual(reviewed.evidence[field]);
+    }
+    for (const field of ['noCompileCheckedClaim', 'pendingHardwareVerification']) {
+      expect(current.evidence[field], field).toEqual(expect.arrayContaining(reviewed.evidence[field]));
+    }
     expect(reviewed.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
@@ -324,7 +374,7 @@ describe('R4 release review', () => {
       glossaryTerms: 196,
       sourceRecords: 92,
     });
-    expect(publication.scope).toEqual(release.scope);
+    expect(publication.scope).toEqual(current.scope);
     for (const route of ['/practice/', '/en/practice/']) {
       const document = await readRoute(route);
       const table = document.querySelector('a[href="#pb-r4-001"]')?.closest('table');
@@ -400,10 +450,6 @@ describe('R4 release review', () => {
       expect(document).toMatch(/issue #41/i);
       expect(document).toMatch(/issue #32/i);
       expect(document).toMatch(/R5.*pending/i);
-      expect(document).toMatch(/277 (?:bilingual )?Publication Pairs/i);
-      expect(document).toContain('554 source routes');
-      expect(document).toMatch(/75 Learning Units/i);
-      expect(document).toMatch(/82 Practice Bank entries/i);
       expect(document).toMatch(/10 Nsight report-analysis|ten-entry (?:R3 )?Nsight report-analysis/i);
       expect(document).not.toMatch(/R4 aggregate review remains pending/i);
       for (const id of libraryAlgorithmChoicePracticeIds) expect(document).toContain(id);
@@ -426,7 +472,7 @@ describe('R4 release review', () => {
         expect(document).not.toMatch(/R4 aggregate review remains pending|R4 聚合复核仍待完成/i);
       }
       const practice = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8');
-      expect(practice).toMatch(/82 (?:complete entries|个完整条目|道完整题目)/i);
+      expect(practice).toMatch(/85 (?:complete entries|个完整条目|道完整题目)/i);
       expect(practice).not.toMatch(/68 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
       for (const id of ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016']) {
@@ -436,15 +482,15 @@ describe('R4 release review', () => {
   });
 
   it('counts the actual rendered bilingual inventories, closes the public graph, and preserves evidence', async () => {
+    const current = await readJson('src/current-publication-manifest.json');
     const files = (await readdir(path.join(projectRoot, 'dist'), { recursive: true }))
       .map((file) => file.split(path.sep).join('/'))
       .filter((file) => /(?:^|\/)index\.html$/.test(file));
     const routes = files.map((file) => `/${file.replace(/index\.html$/, '')}`);
-    expect(routes).toHaveLength(554);
-    expect(new Set(routes).size).toBe(554);
+    expect(routes).toHaveLength(current.scope.sourceRoutes);
+    expect(new Set(routes).size).toBe(current.scope.sourceRoutes);
     expectExactMembers(routes, await discoverPublishedRoutes());
     const pages = new Map(await Promise.all(routes.map(async (route) => [route, await readRoute(route)] as const)));
-    const reviewed = await readJson('src/r4-release-manifest.json');
     const pairs = new Map<string, string[]>();
     for (const [route, document] of pages) {
       const pairId = metadata(document, 'pair-id');
@@ -461,18 +507,18 @@ describe('R4 release review', () => {
       }
       expect(metadata(document, 'license'), route).toBe('CC-BY-4.0');
     }
-    expect(pairs.size).toBe(277);
+    expect(pairs.size).toBe(current.scope.publicationPairs);
     for (const members of pairs.values()) expect(members).toHaveLength(2);
 
     for (const locale of ['zh-CN', 'en'] as const) {
       const localPages = [...pages].filter(([route]) => route.startsWith('/en/') === (locale === 'en'));
       const idsOfKind = (kind: string) => localPages.filter(([, doc]) => metadata(doc, 'resource-kind') === kind)
         .map(([, doc]) => metadata(doc, 'unit-id')!);
-      expectExactMembers(idsOfKind('learning-unit'), learningUnits);
-      expectExactMembers(idsOfKind('runnable-example'), runnableExamples);
+      expectExactMembers(idsOfKind('learning-unit'), current.scope.learningUnits);
+      expectExactMembers(idsOfKind('runnable-example'), current.scope.runnableExamples);
       expectExactMembers(idsOfKind('lab'), labs);
-      expect(idsOfKind('exercise-set')).toHaveLength(74);
-      expect(idsOfKind('solution-set')).toHaveLength(74);
+      expect(idsOfKind('exercise-set')).toHaveLength(current.scope.exerciseSetPublicationPairs);
+      expect(idsOfKind('solution-set')).toHaveLength(current.scope.solutionSetPublicationPairs);
       const units = new Map(localPages.filter(([, doc]) => metadata(doc, 'unit-id'))
         .map(([route, doc]) => [metadata(doc, 'unit-id')!, { route, document: doc }]));
       const graph = new Map<string, string[]>();
@@ -492,7 +538,7 @@ describe('R4 release review', () => {
         EX17: ['L03'], EX18: ['L06'], EX19: ['L12'], EX20: ['L13'], LAB11: ['Q12', 'L03'], LAB12: ['Q13', 'L06'],
       };
       for (const [id, prerequisites] of Object.entries(requiredEdges)) expect(graph.get(id), id).toEqual(prerequisites);
-      for (const id of learningUnits.filter((id) => id !== 'O01')) {
+      for (const id of current.scope.learningUnits.filter((id: string) => id !== 'O01')) {
         expect(graph.get(`${id}-EXERCISES`), id).toEqual([id]);
         expect(graph.get(`${id}-SOLUTIONS`), id).toEqual([`${id}-EXERCISES`]);
       }
@@ -510,8 +556,8 @@ describe('R4 release review', () => {
 
       const catalogIds: string[] = [];
       for (const [slug, group, count] of [
-        ['labs', 'labs', 12], ['practice', 'practice', 82], ['visuals', 'visuals', 19],
-        ['glossary', 'glossary', 196], ['sources-and-versions', 'sources', 92],
+        ['labs', 'labs', 12], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 19],
+        ['glossary', 'glossary', current.scope.glossaryTerms], ['sources-and-versions', 'sources', current.scope.sourceRecords],
       ] as const) {
         const route = `${locale === 'en' ? '/en' : ''}/${slug}/`;
         const document = pages.get(route)!;
@@ -535,9 +581,9 @@ describe('R4 release review', () => {
           }
         }
       }
-      expect(catalogIds).toHaveLength(401);
-      expect(new Set(catalogIds).size).toBe(401);
-      for (const id of [...runnableExamples, ...labs]) {
+      expect(catalogIds).toHaveLength(RESOURCE_INDEX_RECORDS.length);
+      expect(new Set(catalogIds).size).toBe(RESOURCE_INDEX_RECORDS.length);
+      for (const id of [...current.scope.runnableExamples, ...labs]) {
         const document = units.get(id)!.document;
         expect(metadata(document, 'evidence-compilation'), id).toBe(['EX02', 'EX10', 'LAB02'].includes(id) ? 'Compile-Checked' : 'none');
         expect(metadata(document, 'evidence-runtime'), id).toBe(id === 'EX10' ? 'Runtime-Not-Applicable' : 'Pending Hardware Verification');
@@ -563,14 +609,16 @@ describe('R4 release review', () => {
       }
       const subjectsWith = (field: string, value: string) => [...units].filter(([id, { document }]) =>
         /^(?:EX|LAB)\d{2}$/.test(id) && metadata(document, field) === value).map(([id]) => id);
-      expectExactMembers(subjectsWith('evidence-compilation', 'Compile-Checked'), reviewed.evidence.compileChecked);
-      expectExactMembers(subjectsWith('evidence-compilation', 'none'), reviewed.evidence.noCompileCheckedClaim);
-      expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), reviewed.evidence.pendingHardwareVerification);
-      expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), reviewed.evidence.runtimeNotApplicable);
-      expect([...units.keys(), ...catalogIds].some((id) => /^(?:P|T)\d{2}|^PB-R[5-9]-|^LAB13$/.test(id))).toBe(false);
+      expectExactMembers(subjectsWith('evidence-compilation', 'Compile-Checked'), current.evidence.compileChecked);
+      expectExactMembers(subjectsWith('evidence-compilation', 'none'), current.evidence.noCompileCheckedClaim);
+      expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), current.evidence.pendingHardwareVerification);
+      expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
+      expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03']);
+      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T\d{2}|^PB-R[6-9]-|^LAB13$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/(?:frameworks?|triton)(?:\/|$)/i.test(route))).toBe(false);
-    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L)\d{2}$/.test(id)).sort()).toEqual([...learningUnits].sort());
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
     expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB13');
   }, 30_000);
 });

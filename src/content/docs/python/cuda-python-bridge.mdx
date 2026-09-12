@@ -1,0 +1,194 @@
+---
+title: 'P01：用 Python 编排，仍按 CUDA 模型推理'
+description: 区分 Python 编排与 GPU 执行，选择稳定的 CUDA Python 接口层，在运行 EX21 前审查所有权与唯一固定环境。
+pairId: p01
+counterpart: /en/python/cuda-python-bridge/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, interfaces, profile, ownership, prediction, correctness, diagnostics, measurement, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P01
+prerequisites: [F04, M07]
+relatedUnits: [P02, P03, EX21]
+exampleIds: [EX21]
+canonicalExample: EX21
+canonicalRanges:
+  - canonical-imports
+hardwareGate: none
+estimatedMinutes: 25
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'CUDA core installation and dependencies'
+    url: 'https://nvidia.github.io/cuda-python/cuda-core/1.2.0/install.html'
+    version: 'cuda-core 1.2.0'
+    platform: 'Selected native Linux x86-64 Python orchestration contract'
+    accessDate: '2026-09-12'
+  - title: 'CUDA bindings support policy'
+    url: 'https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/support.html'
+    version: 'cuda-bindings 13.4.1'
+    platform: 'Minor-version policy with API-specific availability limits'
+    accessDate: '2026-09-12'
+  - title: 'CUDA Toolkit release and component notes'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3.1; NVRTC and nvJitLink 13.3.33'
+    platform: 'Native Linux profile target, not an observed environment'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p01 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/python/cuda-python-bridge/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,interfaces,profile,ownership,prediction,correctness,diagnostics,measurement,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P01 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'F04,M07' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P02,P03,EX21' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: canonical-imports } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,cuda-bindings-13.4.1,CUDA-13.3.1' } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/python/cuda-python-bridge/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+把主机程序改成 Python，可以缩短控制流程，却不必改变核函数中的任何 GPU 指令。值得问的不是“Python 能否在 GPU 上运行”，而是“哪些工作跨过了 CUDA 边界，在工作完成前谁负责持有输入”。阅读、预测和仅主机实践约需 25 分钟；GPU 执行为可选步骤，另有环境门槛。
+
+学完后，你应能区分 Python 解释器、Python 包、原生 CUDA 库与 GPU 代码，说明 core 对象隐藏了什么、没有隐藏什么，并识别缺少证据的环境或正确性声明。这条显式启动路径适合学习集成、运行时生成核函数和资源调试。它不是数组框架，不会自动并行化 Python，也不保证很小的 GPU 工作负载快于 CPU 循环。
+
+## 前置知识
+
+有序前置为 [F04：主机与设备生命周期](/foundations/host-device-lifecycle/)及 [M07：流内顺序](/memory/stream-ordering/)，严格为 `[F04, M07]`。回想三个区别：指针不等于传输，提交不等于完成，资源必须活到最后一次使用结束。[P02](/python/devices-contexts-launches/)把这些规则对应到 API；[P03](/python/runtime-compilation-linking/)展开编译路径。它们共用同一个可运行示例（Runnable Example）[EX21](/examples/cuda-python-launch/)。
+
+## 从 C 调用到 Python 对象
+
+CUDA 将主机编排与已编译的设备工作分开。C++ 应用常在执行前完成主机和设备编译。Python 主机则可以通过绑定调用原生库，并在应用运行时让运行时编译器处理 CUDA C++ 源码。把编译推迟到运行时，改变的是启动和部署成本，而不是设备代码必须经过编译这一事实。
+
+CUDA Python 提供不同抽象层。低层绑定保留许多原生概念和调用约定；`cuda.core` 为设备、流、存储、程序和启动提供对象。旧资料可能使用 `from cuda import cuda` 或 `cuda.core.experimental`。本单元选择稳定的 `cuda.core` 1.2.0 与 `cuda.bindings` 13.4.1，不采用旧命名空间或预览 API。Python 调用变短了，原生资源和错误语义仍然存在。
+
+## 两类处理器，四类工作
+
+| 工作 | 在哪里执行 | 产生什么 |
+| --- | --- | --- |
+| 检查参数、初始化输入、计算参考值 | CPU 上的 Python 进程 | 主机数据与正确性标准 |
+| 编译 CUDA C++ 并链接设备代码 | 主机调用的原生编译器与链接器 | PTX 和 cubin 字节，不是算好的向量 |
+| 提交复制和带配置的启动 | 主机调用 CUDA | 流中的有序工作，不是已完成的结果 |
+| 执行核函数并传回结果 | GPU 和 CUDA 传输机制 | 经检查的完成点之后，CPU 才能读取的输出 |
+
+参考实现中的 Python `for` 循环仍是 CPU 循环。`extern "C" __global__` 函数才是编译后的设备代码，其线程按配置的网格执行。导入 CUDA 包或构造 Python 对象，都不会把任意 Python 运算搬到 GPU。浏览器只展示讲解与源码片段；CUDA 活动全部发生在外部环境。
+
+## 有目的地选择接口层
+
+<CanonicalCode exampleId="EX21" range="canonical-imports" />
+
+这里导入的是规范项目中的片段，不是第二份可执行代码。主机导入的标准库 `ctypes` 提供视图及显式指定位宽的标量参数。core 负责常规的设备、缓冲区、流和启动路径。`cuda.bindings.nvrtc` 与 `cuda.bindings.nvjitlink` 提供低层编译、链接合同，用于对照和诊断；pathfinder 标识实际加载的原生库，不负责分配 GPU 数组。不要推断所有绑定都返回状态元组；P03 会区分两者的错误接口。
+
+当 core 的公开对象足以表达操作时，优先用它组织流程；检查原生合同，或使用高层尚未表达的受支持 API 时，低层绑定才有明确用途。混合两层需要划定所有权边界：借到一个原生句柄，不代表可以销毁仍由 core 持有的对象。本路径不需要 CuPy、Numba 或 PyTorch。即使 EX21 不使用 NumPy 主机数组 API，选定 core 仍无条件依赖 NumPy。
+
+## 只选一个配置，不追求版本号相等
+
+| 坐标 | 选定目标 |
+| --- | --- |
+| 平台 | 原生 Linux x86-64，Ubuntu 24.04 LTS |
+| 解释器 | CPython 3.14.7，普通 GIL 构建，`cp314-cp314` ABI |
+| Python 发行包 | `cuda-core==1.2.0`、`cuda-bindings==13.4.1`、`cuda-pathfinder==1.8.1`、`numpy==2.5.3` |
+| 外部工具包 | CUDA Toolkit 13.3.1，系统或本地安装 |
+| 原生编译与链接 | NVRTC 13.3.33、nvJitLink 13.3.33 |
+| 驱动目标 | Linux 610.43.02；实际采用更高的兼容驱动时另行记录 |
+| 未来运行门槛 | 单 GPU，计算能力（compute capability）至少 7.5，目标受选定编译器支持，问题规模适配 8 GB |
+
+绑定 wheel 的 13.4.1 不代表 Toolkit 是 13.4.1。版本化的 core 和 bindings 支持政策允许选定 API 子集使用 Toolkit 13.x，但仍需逐 API 确认可用性。这既不允许把所有 13.4 绑定用于 13.3 原生库，也不允许换成 Toolkit 12。编译器和链接器分别固定，是为了避免把较新编译器的输出交给较旧链接器。
+
+使用项目中精确固定且校验哈希的基础发行包锁定文件。不要添加 `[cu13]`、`[all]` 额外依赖、未固定的 `cuda-python` 元包，也不要用 `--no-deps` 假装移除了 NumPy 需求。锁定文件只固定 Python 发行包，不固定驱动、OS 镜像、解释器安装或实际解析到的原生库文件。[SRC-CUDA-079](/sources-and-versions/#src-cuda-079)记录这些边界。EX21 不提供第二种平台或历史 Toolkit 配置。
+
+## Python 引用不一定拥有资源
+
+| 对象或值 | 必须持续存活的资源 | 它不能证明什么 |
+| --- | --- | --- |
+| 设备及其主上下文（Primary Context） | 工作所用、由 core 共享管理的上下文状态 | 调用者独占上下文，可以任意重置 |
+| 设备 Buffer | 最后一次复制或核函数使用结束前的分配 | CPU 可以解引用 |
+| 页锁定主机 Buffer | 异步传输及 CPU 检查所需的主机存储 | ctypes 数组类型的 `from_address` 视图会自动持有它 |
+| 借用视图（Borrowed View） | ctypes 视图及其背后的主机 Buffer | 视图拥有分配，或关闭 Buffer 后还能访问 |
+| 流和核函数/库的持有者 | 经检查的完成点之前的队列与代码 | 启动返回就已得到正确结果 |
+
+核心不变量是：**底层存储必须活过所有使用，包括已排队但尚未执行的使用**。垃圾回收依据引用关系；CUDA 还存在正在执行或排队的工作。显式持有资源，用同一条流（stream）给数据路径排序，在检查输出和正常释放前调用 `stream.sync()`。P02 会解释为何不能把共享主上下文和借用指针放进一个“全部关闭”的通用循环。
+
+## 打开终端前先预测
+
+EX21 对 `n=1003` 个 float 做逐元素加法，每块 256 个线程。应预测 4 个线程块、1024 个启动线程，以及不能访问数组的 21 个尾部线程。每个 float 数组需 `1003*4=4012` 字节。三个设备数组需 12036 字节；三个页锁定主机数组另需 12036 主机字节。这些是逻辑载荷，不是 GPU 总占用、库开销或传输测量。
+
+写出必要顺序：初始化主机输入，H2D 输入，启动核函数，D2H 输出，经检查的流完成，CPU 比较，释放。编译和链接在符号查找与执行前生成代码。若方案在启动后立即比较，即使 Python 变量都还在作用域中，也应指出它缺少 D2H 和完成依赖。
+
+## 让正确性独立于调用桥接
+
+原创输入使用可被二进制精确表示的小数：`a[i]=(i % 37)*0.25`、`b[i]=-(i % 19)*0.5`。CPU 参考实现（CPU reference）从实际存入的输入值计算。这些输入及其和都能由 float32 精确表示，所以本组数据可以要求有限值且精确相等；它不是通用的浮点 CUDA 比较规则。
+
+必须检查每个输出，不能只看开头几个数，也不能用可能抵消错误的校验和替代逐项检查。报告应保留首个不匹配位置和总数，并拒绝非有限值。对 `i=0,1,18,19`，先在纸上求得 `0,-0.25,-4.5,4.75`。这是预测，不是观察到的 GPU 输出。换成任意输入、归约或混合精度时，应重新制定数值验收标准。
+
+## 定位真正失败的层
+
+| 现象 | 首先区分什么 |
+| --- | --- |
+| 包安装被拒绝 | 解释器版本、普通或自由线程 ABI、平台标签、精确 wheel 与哈希 |
+| 导入或库发现失败 | Python 发行包存在与原生库解析是两件事；尚未证明任何 GPU 计算 |
+| 编译或链接失败 | 源码与选项、目标、实际加载的编译器/链接器身份，以及分阶段诊断 |
+| 启动返回但比较失败 | 参数位宽、字节数、启动几何、边界判断、复制目标、顺序与完成检查 |
+| 清理也失败 | 保留原始错误，另报清理错误，不能最终打印成功 |
+
+异常可能携带编译诊断，此时日志流为空不能证明编译没有问题。复制或同步失败也可能暴露此前的异步核函数错误。保留阶段、异常类型和消息以及可取得的日志，不要把所有失败归为“Python 开销”。
+
+## 测量边界，不测一个语言标签
+
+主机端到端时间可能包括解释器启动、导入、原生库发现、上下文初始化、运行时编译、链接、延迟加载代码、分配、复制、执行与检查。只包住启动提交的计时不包括完成。这两种时间都不自动等于核函数时间。
+
+未来设计基准测试时，应声明是否包含准备和传输，分开首次使用与预热后的重复执行，保持相同的输入/输出验收合同，并记录环境与同步边界。不要为这个正确性示例添加速度提升数字。小向量加法可能主要花时间在准备上，但这是待测假设，不是这里的实测结论。
+
+## 引导实践：先审查桥接，再执行
+
+1. 打开 [EX21](/examples/cuda-python-launch/)及其规范项目，在纸上把每一步归到四类工作表中。明确区分 Python CPU 参考实现与 CUDA C++ 核函数。
+2. 对照唯一配置，记录缺失的解释器、包、原生库或 GPU 访问权限。这些是阻塞项，不是检查通过。在不受支持的机器上可阅读源码或运行 EX21 隔离的纯标准库主机测试；该例外不建立受支持的 CUDA 配置。
+3. 在匹配外部 Linux 上的新独立副本 `examples/ex21-cuda-python-launch` 中准备环境，然后只运行主机合同。若已有选定 `.venv`，省略 setup，因为它拒绝覆盖：
+
+```sh
+bash scripts/setup.sh
+.venv/bin/python ex21.py host-test
+```
+
+4. 将字节账本、四块预测和四个手算值与源码及主机测试合同对照。若实际执行，保留退出状态与诊断；本页不提供虚构终端记录。
+5. 标出每项分配的最后一次使用，以及必须存活至此的持有者。进入 P02 前，解释主机测试通过为什么既不证明原生编译，也不证明 GPU 正确性。
+
+**验收：** 提交分层表、配置差异、所有权依赖箭头与预测。对于本阅读单元，主机测试可选；记录阻塞同样是诚实结果。EX21 完整的环境检查、构建和运行步骤保留在其独立页面。
+
+## 证据边界
+
+本学习单元（Learning Unit）及纸面练习的四个证据数组均为空。源码审查、包哈希与主机测试不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）状态。EX21 独立保持待硬件验证（Pending Hardware Verification）；这里不声明已记录的编译或运行观察。文档允许的配置还不是已完成运行验证的基准环境（Reference Environment）。
+
+## 提取式自测
+
+1. EX21 哪部分由 Python 在 CPU 上执行，哪部分生成 GPU 代码？
+2. 为什么 bindings 13.4.1 与 Toolkit 13.3.1 既不矛盾，也不构成全面兼容证明？
+3. 为什么仍然存在的 ctypes 视图可能指向已经失效的存储？
+4. 主机测试通过后、启动成功返回后，分别还有什么没有得到证明？
+5. 比较 Python 主机与 C++ 主机实现之前，必须声明哪些成本与完成边界？
+
+## 继续练习
+
+先完成[两道练习](/python/cuda-python-bridge/exercises/)，再打开[独立参考解答](/python/cuda-python-bridge/solutions/)。[PB-R5-001](/practice/#pb-r5-001)把所有权模型用于排队服务方案。然后进入 [P02](/python/devices-contexts-launches/)，学习设备、上下文、字节缓冲区与启动参数。
+
+## 来源与许可
+
+可阅读[规范 EX21 源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c3dd1067d1632560098fa42bada30d9930aec7ad/examples/ex21-cuda-python-launch)，或[下载该仓库修订](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c3dd1067d1632560098fa42bada30d9930aec7ad.zip)，以 `examples/ex21-cuda-python-launch/` 为独立根目录。两个链接固定本单元导入代码对应的不可变源码；源码身份不证明编译或 GPU 执行。
+
+[SRC-CUDA-077](/sources-and-versions/#src-cuda-077)记录 core 1.2.0 API 与所有权；[SRC-CUDA-078](/sources-and-versions/#src-cuda-078)记录 bindings 错误合同；[SRC-CUDA-079](/sources-and-versions/#src-cuda-079)记录配置、产物与许可。沿用既有[流](/glossary/#term-083)、[页锁定主机内存](/glossary/#term-096)、[PTX](/glossary/#term-118)词条，并参阅 [CUDA Python](/glossary/#term-197)。事实核对与来源访问日期：**2026-09-12**。正文和练习为原创 CC BY 4.0 内容，规范项目代码为原创 Apache-2.0 软件；外部包与原生 CUDA 保留各自条款。

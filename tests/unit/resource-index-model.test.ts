@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-index-data';
+import currentPublication from '../../src/current-publication-manifest.json';
 import {
   INDEX_GROUPS,
   PUBLISHED_DESTINATIONS,
@@ -13,7 +14,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-09-09T12:00:00Z');
+const asOf = new Date('2026-09-12T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -22,6 +23,34 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 }
 
 describe('resource index catalog', () => {
+  it('publishes only the Python bridge with exact direct prerequisites and separate practice destinations', () => {
+    for (const [id, slug, prerequisites] of [
+      ['P01', 'python/cuda-python-bridge', ['F04', 'M07']],
+      ['P02', 'python/devices-contexts-launches', ['P01', 'F07']],
+      ['P03', 'python/runtime-compilation-linking', ['P02', 'M15', 'M16']],
+      ['EX21', 'examples/cuda-python-launch', ['P02']],
+    ] as const) {
+      expect(PUBLISHED_DESTINATIONS[id], id).toMatchObject({
+        href: { 'zh-CN': `/${slug}/`, en: `/en/${slug}/` }, prerequisites,
+      });
+      if (id === 'EX21') continue;
+      for (const suffix of ['exercises', 'solutions']) {
+        expect(PUBLISHED_DESTINATIONS[`${id}-${suffix.toUpperCase()}`]).toMatchObject({
+          href: { 'zh-CN': `/${slug}/${suffix}/`, en: `/en/${slug}/${suffix}/` },
+          prerequisites: [suffix === 'exercises' ? id : `${id}-EXERCISES`],
+        });
+      }
+    }
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id))).toEqual(['P01', 'P02', 'P03']);
+    for (const id of ['P04', 'T01', 'EX22', 'LAB13']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
+    const destinations = Object.fromEntries(Object.entries(PUBLISHED_DESTINATIONS)
+      .map(([id, { indexGroup: _indexGroup, ...destination }]) => [id, destination]));
+    expect(() => validateResourceCatalog([], { requiredGroups: [], destinations })).not.toThrow();
+    expect(() => validateResourceCatalog([], { requiredGroups: [], destinations: {
+      ...destinations, P01: { ...destinations.P01, prerequisites: ['P03'] },
+    } })).toThrow(/prerequisite graph contains a cycle/);
+  });
+
   it('publishes the cuFFT unit and example with only their exact direct prerequisites', () => {
     expect(PUBLISHED_DESTINATIONS.L12).toMatchObject({
       href: {
@@ -58,13 +87,13 @@ describe('resource index catalog', () => {
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(401);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(211 + currentPublication.scope.glossaryTerms);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 12, practice: 82, visuals: 19, glossary: 196, sources: 92 });
+    ).toEqual({ labs: 12, practice: 85, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 95 });
     for (const absentId of ['LAB13']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
@@ -407,10 +436,13 @@ describe('resource index catalog', () => {
 
   it('interprets date-only review records in the declared maintainer review timezone', () => {
     expect(REVIEW_DATE_TIME_ZONE).toBe('Asia/Shanghai');
-    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
+    const records = RESOURCE_INDEX_RECORDS.map((record) => ({
+      ...record, reviewedOn: '2026-09-09', ...(record.sourceAccessDate ? { sourceAccessDate: '2026-09-09' } : {}),
+    }));
+    expect(() => validateResourceCatalog(records, {
       asOf: new Date('2026-09-08T16:00:00Z'),
     })).not.toThrow();
-    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, {
+    expect(() => validateResourceCatalog(records, {
       asOf: new Date('2026-09-08T15:59:59Z'),
     })).toThrow(/reviewedOn must not be in the future/);
   });
@@ -749,7 +781,7 @@ describe('resource index catalog', () => {
     const base = RESOURCE_INDEX_RECORDS.find(({ planningId }) => planningId === 'TERM-034');
     expect(base).toBeDefined();
     const growth = Array.from({ length: 25 }, (_, index) => {
-      const suffix = String(200 + (24 - index));
+      const suffix = String(900 + (24 - index));
       return {
         ...base,
         planningId: `TERM-${suffix}`,
@@ -764,9 +796,9 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(221);
+    expect(projected).toHaveLength(225);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
-      Array.from({ length: 25 }, (_, index) => `TERM-${200 + index}`),
+      Array.from({ length: 25 }, (_, index) => `TERM-${900 + index}`),
     );
   });
 

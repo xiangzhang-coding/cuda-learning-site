@@ -17,6 +17,8 @@ const ignoredDirectories = new Set([
   'node_modules',
   'playwright-report',
   'test-results',
+  '.venv',
+  '__pycache__',
 ]);
 
 const issue19UnitSlugs = [
@@ -184,7 +186,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(554);
+    expect(contentFiles).toHaveLength(574);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');

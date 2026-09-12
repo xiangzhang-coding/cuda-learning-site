@@ -2,6 +2,7 @@
 import { expect, test } from '@playwright/test';
 
 import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-index-data';
+import currentPublication from '../../src/current-publication-manifest.json' with { type: 'json' };
 import { INDEX_GROUPS, INDEX_LOCALES, INDEX_ROUTES } from '../../src/resource-indexes/resource-index-model';
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
 import { collectBrowserFailures } from '../helpers/browser-contract';
@@ -403,11 +404,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(12);
-  expect(counts.practice).toBe(82);
+  expect(counts.practice).toBe(85);
   expect(counts.visuals).toBe(19);
-  expect(counts.glossary).toBe(196);
-  expect(counts.sources).toBe(92);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(401);
+  expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
+  expect(counts.sources).toBe(95);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(211 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
     ...releaseLabIds,

@@ -10,14 +10,14 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 
 describe('Cloudflare assets-only deployment contract', () => {
-  it('accepts matching R4 release inputs and rejects stale R3 metadata before upload', async () => {
+  it('accepts frozen R4 plus current Python publication inputs and rejects stale metadata before upload', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'r4-release-source-'));
     const sourceCommit = '0000000000000000000000000000000000000041';
     try {
       await Promise.all(['src', 'dist', 'bin'].map((directory) => mkdir(path.join(root, directory))));
       await cp(path.join(projectRoot, 'scripts'), path.join(root, 'scripts'), { recursive: true });
       const historical = JSON.parse(await readFile(path.join(projectRoot, 'src/r3-release-manifest.json'), 'utf8'));
-      const reviewed = { ...historical, releaseId: 'R4', schemaVersion: 5, reviewDate: '2026-09-10' };
+      const reviewed = JSON.parse(await readFile(path.join(projectRoot, 'src/r4-release-manifest.json'), 'utf8'));
       const current = {
         ...JSON.parse(await readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8')),
         releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
@@ -38,6 +38,9 @@ describe('Cloudflare assets-only deployment contract', () => {
       await expect(check()).resolves.toMatchObject({ stdout: expect.stringContaining('Release and publication source passed for main') });
       await writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...historical, sourceCommit }));
       await expect(check()).rejects.toMatchObject({ stderr: expect.stringContaining('Built release metadata does not match the reviewed source manifest.') });
+      await writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...reviewed, sourceCommit }));
+      await writeFile(path.join(root, 'dist/publication.json'), JSON.stringify({ ...current, scope: reviewed.scope, sourceCommit }));
+      await expect(check()).rejects.toMatchObject({ stderr: expect.stringContaining('Built publication metadata does not match the current source manifest.') });
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -162,16 +165,16 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication).toMatchObject({
       publicationId: 'current',
       schemaVersion: 1,
-      reviewDate: '2026-09-10',
+      reviewDate: '2026-09-12',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: {
-        publicationPairs: 277,
-        sourceRoutes: 554,
-        exerciseSetPublicationPairs: 74,
-        solutionSetPublicationPairs: 74,
-        practiceBankEntries: 82,
-        glossaryTerms: 196,
-        sourceRecords: 92,
+        publicationPairs: 287,
+        sourceRoutes: 574,
+        exerciseSetPublicationPairs: 77,
+        solutionSetPublicationPairs: 77,
+        practiceBankEntries: 85,
+        glossaryTerms: 200,
+        sourceRecords: 95,
       },
       compatibility: {
         componentBoundaries: {
@@ -213,8 +216,8 @@ describe('Cloudflare assets-only deployment contract', () => {
         },
       },
       evidence: {
-        noCompileCheckedClaim: expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']),
-        pendingHardwareVerification: expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']),
+        noCompileCheckedClaim: expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']),
+        pendingHardwareVerification: expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']),
         communityObserved: [],
         runtimeVerified: [],
         referenceEnvironments: [],
@@ -226,6 +229,7 @@ describe('Cloudflare assets-only deployment contract', () => {
         ]),
         capturedProfilerReports: [],
         r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
+        r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03'],
       },
     });
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('Q11');
@@ -245,21 +249,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L12');
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('L13');
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L13');
-    expect(publication.scope.learningUnits).toHaveLength(75);
+    expect(publication.scope.learningUnits).toHaveLength(78);
+    expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['P01', 'P02', 'P03']));
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13']));
-    expect(publication.scope.runnableExamples).toHaveLength(20);
-    expect(publication.scope.runnableExamples).toEqual(expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20']));
+    expect(publication.scope.runnableExamples).toHaveLength(21);
+    expect(publication.scope.runnableExamples).toEqual(expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21']));
     expect(publication.scope.labs).toHaveLength(12);
     expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']));
     expect(publication.scope.visualExplainers).toHaveLength(19);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
-    expect(
-      publication.scope.labs.length +
-      publication.scope.practiceBankEntries +
-      publication.scope.visualExplainers.length +
-      publication.scope.glossaryTerms +
-      publication.scope.sourceRecords,
-    ).toBe(401);
+    expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(411);
+    expect(publication.evidence.pendingHardwareVerification).toHaveLength(32);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
@@ -272,16 +273,20 @@ describe('Cloudflare assets-only deployment contract', () => {
       'EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.',
       'L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.',
       'EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.',
-      'R5 framework-integration and Triton Learning Units, Labs, Runnable Examples, and all later curriculum material are outside this release; library-selection comparisons grant no framework or Triton destination, compilation, runtime, or performance evidence.',
+      'P01-P03 publish the CUDA Python bridge with all four evidence arrays empty and grant no Evidence Status. The R5 aggregate review remains pending; no downstream framework or Triton destination is published.',
     ]));
     expect(publication.knownLimitations).not.toContain(
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
     );
     expect(publication.knownLimitations).not.toContain('LAB06 has no current public destination.');
-    expect(release.scope).toEqual(publication.scope);
-    expect(release.compatibility).toEqual(publication.compatibility);
-    expect(release.evidence).toEqual(publication.evidence);
-    expect(release.knownLimitations).toEqual(publication.knownLimitations);
+    expect(publication.compatibility).toMatchObject(release.compatibility);
+    for (const key of ['learningUnits', 'runnableExamples', 'labs', 'visualExplainers']) {
+      expect(publication.scope[key]).toEqual(expect.arrayContaining(release.scope[key]));
+    }
+    for (const key of ['compileChecked', 'runtimeNotApplicable', 'runtimeVerified', 'communityObserved',
+      'referenceEnvironments', 'performanceObservations', 'capturedProfilerReports', 'retainedCompileRuns']) {
+      expect(publication.evidence[key], key).toEqual(release.evidence[key]);
+    }
     expect(builtFiles).toEqual(expect.arrayContaining(['release.json', 'publication.json']));
     expect(builtFiles).not.toContain('_worker.js');
     expect(builtFiles.some((file) => /(?:^|\/)server(?:\/|$)/.test(file))).toBe(false);
@@ -313,6 +318,35 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('reject tracked or untracked source changes');
     expect(deployment).toMatch(/production additionally requires the checked-out branch to be `main`/i);
     expect(deployment).toContain('dist/publication.json');
+    const historicalInventory = deployment.match(/^The frozen R4 inventory[^\n]+/m)?.[0] ?? '';
+    const currentInventory = deployment.match(/^The current publication[^\n]+/m)?.[0] ?? '';
+    for (const value of ['75 Learning Units', '20 Runnable Examples', '82 Practice Bank entries', '196 Glossary terms',
+      '92 source records', '401 catalog records', '277 Publication Pairs', '554 source routes']) {
+      expect(historicalInventory, `historical ${value}`).toContain(value);
+    }
+    for (const value of ['2026-09-12', '78 Learning Units', '21 Runnable Examples', '85 Practice Bank entries',
+      '200 Glossary terms', '95 source records', '411 catalog records', '287 Publication Pairs', '574 source routes',
+      '77 Exercise-set and 77 solution-set Publication Pairs']) {
+      expect(currentInventory, `current ${value}`).toContain(value);
+    }
+    expect(deployment).not.toMatch(/share the same inventory|both currently containing|currently has the same inventory/i);
+    expect(deployment).toMatch(/R4 dynamic acceptance is complete/i);
+    expect(deployment).toMatch(/closed \[issue #41\]/i);
+    expect(deployment).not.toMatch(/records those dynamic results later|Issue #41 must record R4 acceptance|not a claim that R4 has passed a remote gate/i);
+    expect(deployment).toContain('No new deployment or infrastructure inspection is claimed');
+    expect(deployment).toContain('32 Pending Hardware Verification subjects');
+    expect(deployment).toContain('historical R4 tally remains 31');
+    for (const pin of ['CPython 3.14.7', 'cuda-core 1.2.0', 'cuda-bindings 13.4.1', 'Toolkit 13.3.1',
+      'cuda-pathfinder 1.8.1', 'NumPy 2.5.3', 'NVRTC 13.3.33', 'nvJitLink 13.3.33',
+      'cuda-compat-13-3_610.43.02-1ubuntu1_amd64.deb', 'libcuda.so.610.43.02']) expect(deployment).toContain(pin);
+    expect(deployment).toContain('dpkg-deb --extract');
+    expect(deployment).toMatch(/no kernel module[^\n]*no GPU[^\n]*no `cuInit`/i);
+    expect(deployment).toMatch(/not a stub/i);
+    expect(deployment).toContain('scripts/run-ex21-python-check.mjs');
+    expect(deployment).toContain('EX21 remains Pending Hardware Verification');
+    expect(deployment).toContain('all 574 routes');
+    expect(deployment).toContain('P01-P03 and EX21');
+    expect(deployment).toMatch(/EX21[^\n]*archive[^\n]*requirements\.lock[^\n]*environment-manifest\.json/i);
     expect(deployment).toContain('62 Learning Units');
     expect(deployment).toContain('75 Learning Units');
     expect(deployment).toContain('sixteen Runnable Examples EX01-EX16');
@@ -329,14 +363,14 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('eight library-and-algorithm-choice entries');
     expect(deployment).toContain('Q01-Q13');
     expect(deployment).toContain('LAB09-LAB12 have empty compilation and recorded-observation arrays and remain Pending Hardware Verification.');
-    expect(deployment).toContain('Q06-Q13, A10-A14, and current L01-L13');
+    expect(deployment).toContain('Q06-Q13, A10-A14, L01-L13, and P01-P03');
     expect(deployment).toContain('It grants no Evidence Status and summarizes the linked EX14/LAB10 subjects, whose compilation and recorded-observation arrays are empty and whose runtime remains Pending Hardware Verification.');
     expect(deployment).toContain('VIS13');
     expect(deployment).toMatch(/LAB12 directly requires Q13 and L06/i);
     expect(deployment).not.toMatch(/LAB12 still waits for L06/i);
     expect(deployment).toContain('EX10 is Runtime-Not-Applicable');
     expect(deployment).toMatch(/EX10.*Runtime-Not-Applicable/i);
-    expect(deployment).toMatch(/EX11-EX20.*empty compilation evidence/i);
+    expect(deployment).toMatch(/EX11-EX21.*empty compilation evidence/i);
     expect(deployment).toMatch(/bundled\/selected component matrix/i);
     expect(deployment).toMatch(/No Reference Environment.*performance observation/i);
     expect(deployment).toMatch(/R4.*latest completed aggregate static review/i);
@@ -394,9 +428,9 @@ describe('Cloudflare assets-only deployment contract', () => {
         RELEASE_BASE_URL: 'https://r1-cuda-learning-site.hmzhangxiang.workers.dev',
         RELEASE_KIND: 'preview',
       }),
-    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 198 tests') });
+    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 201 tests') });
     await expect(
       listTests({ RELEASE_BASE_URL: 'http://127.0.0.1:4321', RELEASE_KIND: 'local' }),
-    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 198 tests') });
+    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 201 tests') });
   }, 20_000);
 });
