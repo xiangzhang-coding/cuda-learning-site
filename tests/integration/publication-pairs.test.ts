@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { parseFrontmatter } from '@astrojs/markdown-remark';
 import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
 
@@ -16,7 +17,7 @@ async function readRoute(route: string) {
 type PublicationPair = {
   pairId: string;
   factCheckDate?: string;
-  structure: string;
+  structure?: string;
   resourceKind?: string;
   unitId?: string;
   prerequisites?: string;
@@ -46,16 +47,37 @@ type PublicationPair = {
 };
 
 const publicationPairs: readonly PublicationPair[] = [
+  ...[
+    { id: 'P01', slug: 'python/cuda-python-bridge', prerequisites: 'F04,M07' },
+    { id: 'P02', slug: 'python/devices-contexts-launches', prerequisites: 'P01,F07' },
+    { id: 'P03', slug: 'python/runtime-compilation-linking', prerequisites: 'P02,M15,M16' },
+  ].flatMap(({ id, slug, prerequisites }) => [
+    { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
+      factCheckDate: '2026-09-12', expectedObservations: 'none', hardwareGate: 'none',
+      zh: `/${slug}/`, en: `/en/${slug}/` },
+    { pairId: `${id.toLowerCase()}-exercises`, unitId: `${id}-EXERCISES`, resourceKind: 'exercise-set', prerequisites: id,
+      factCheckDate: '2026-09-12', expectedObservations: 'none', hardwareGate: 'none',
+      zh: `/${slug}/exercises/`, en: `/en/${slug}/exercises/` },
+    { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`,
+      factCheckDate: '2026-09-12', expectedObservations: 'none', hardwareGate: 'none',
+      zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
+  ]),
+  {
+    pairId: 'ex21', unitId: 'EX21', resourceKind: 'runnable-example', prerequisites: 'P02',
+    factCheckDate: '2026-09-12', canonicalExample: 'EX21', exampleIds: 'EX21',
+    evidenceRuntime: 'Pending Hardware Verification', minimumComputeCapability: '7.5', gpuCount: '1',
+    zh: '/examples/cuda-python-launch/', en: '/en/examples/cuda-python-launch/',
+  },
   {
     pairId: 'home',
-    factCheckDate: '2026-09-10',
+    factCheckDate: '2026-09-12',
     structure: 'purpose,current-route,boundaries,destinations',
     zh: '/',
     en: '/en/',
   },
   {
     pairId: 'o01',
-    factCheckDate: '2026-09-10',
+    factCheckDate: '2026-09-12',
     structure: 'outcome,resource-types,published-route,themes,workflow,boundaries,check',
     resourceKind: 'learning-unit',
     unitId: 'O01',
@@ -4031,32 +4053,32 @@ const publicationPairs: readonly PublicationPair[] = [
   },
   {
     pairId: 'practice-bank',
-    factCheckDate: '2026-09-10',
-    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,review',
+    factCheckDate: '2026-09-12',
+    structure: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,review',
     resourceKind: 'practice-bank',
     unitId: 'PB-R0',
-    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13',
-    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18',
+    prerequisites: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03',
+    relatedUnits: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18',
     zh: '/practice/',
     en: '/en/practice/',
   },
   {
     pairId: 'glossary',
-    factCheckDate: '2026-09-09',
-    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,maintenance',
+    factCheckDate: '2026-09-12',
+    structure: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,maintenance',
     zh: '/glossary/',
     en: '/en/glossary/',
   },
   {
     pairId: 'sources-and-versions',
-    factCheckDate: '2026-09-10',
-    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,content-sources,review-record',
+    factCheckDate: '2026-09-12',
+    structure: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,content-sources,review-record',
     zh: '/sources-and-versions/',
     en: '/en/sources-and-versions/',
   },
   {
     pairId: 'about',
-    factCheckDate: '2026-09-10',
+    factCheckDate: '2026-09-12',
     structure: 'purpose,scope,author,feedback',
     zh: '/about/',
     en: '/en/about/',
@@ -4068,6 +4090,34 @@ function metadata(document: Document, name: string) {
 }
 
 describe('Publication Pairs', () => {
+  it.each([
+    { pairId: 'home', file: 'index.mdx' },
+    { pairId: 'o01', file: 'start/using-the-learning-site.md' },
+    { pairId: 'about', file: 'about.md' },
+    { pairId: 'practice-bank', file: 'practice.mdx' },
+    { pairId: 'glossary', file: 'glossary.mdx' },
+    { pairId: 'sources-and-versions', file: 'sources-and-versions.mdx' },
+  ])('static: keeps the current $pairId fixture aligned with both source counterparts', async ({ pairId, file }) => {
+    const pair = publicationPairs.find((candidate) => candidate.pairId === pairId)!;
+    for (const prefix of ['', 'en/']) {
+      const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
+      const { frontmatter: data } = parseFrontmatter(raw);
+      const head = Object.fromEntries(data.head.map((entry: { attrs: { name: string; content: string } }) => [entry.attrs.name, entry.attrs.content]));
+      expect(data.pairId).toBe(pairId);
+      expect(data.factCheckDate, `${prefix}${file}`).toBe(pair.factCheckDate);
+      expect(data.structure.join(',')).toBe(pair.structure);
+      expect(head).toMatchObject({ 'cuda:pair-id': pairId, 'cuda:fact-check-date': pair.factCheckDate, 'cuda:structure': pair.structure });
+      const counterpart = prefix ? pair.zh : pair.en;
+      expect(data.counterpart).toBe(counterpart);
+      expect(raw).toContain(`href="${counterpart}"`);
+      for (const [field, headField] of [['prerequisites', 'prerequisites'], ['relatedUnits', 'related-units']] as const) {
+        if (pair[field] === undefined) continue;
+        expect(data[field].join(',') || 'none', `${pairId} ${field}`).toBe(pair[field]);
+        expect(head[`cuda:${headField}`]).toBe(pair[field]);
+      }
+    }
+  });
+
   it.each(
     publicationPairs.flatMap(({ pairId, factCheckDate = '2026-08-24', structure, zh, en, hardwareGateEn, permissionsEn, ...contract }) => [
       { route: zh, lang: 'zh-CN', counterpart: en, pairId, factCheckDate, structure, ...contract },
@@ -4081,7 +4131,8 @@ describe('Publication Pairs', () => {
     expect(metadata(document, 'cuda:pair-id')).toBe(pairId);
     expect(metadata(document, 'cuda:fact-check-date')).toBe(factCheckDate);
     expect(metadata(document, 'cuda:license')).toBe('CC-BY-4.0');
-    expect(metadata(document, 'cuda:structure')).toBe(structure);
+    expect(metadata(document, 'cuda:structure')).toBeTruthy();
+    expect(metadata(document, 'cuda:structure')).toBe(structure ?? metadata(await readRoute(counterpart), 'cuda:structure'));
     if (resourceKind) expect(metadata(document, 'cuda:resource-kind')).toBe(resourceKind);
     if (unitId) expect(metadata(document, 'cuda:unit-id')).toBe(unitId);
     if (prerequisites) expect(metadata(document, 'cuda:prerequisites')).toBe(prerequisites);
@@ -4148,14 +4199,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(277);
-    expect(sourceRoutes.size).toBe(554);
+    expect(publicationPairs).toHaveLength(287);
+    expect(sourceRoutes.size).toBe(574);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
-    for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'EX17', 'EX18', 'EX19', 'EX20', 'LAB11', 'LAB12']) {
+    for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['LAB13']) {
+    for (const absentUnitId of ['P04', 'T01', 'EX22', 'LAB13']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
@@ -4289,6 +4340,15 @@ describe('Publication Pairs', () => {
       ['L13', ['A12', 'A13', 'L01']],
       ['L13-EXERCISES', ['L13']],
       ['L13-SOLUTIONS', ['L13-EXERCISES']],
+      ['P01', ['F04', 'M07']],
+      ['P01-EXERCISES', ['P01']],
+      ['P01-SOLUTIONS', ['P01-EXERCISES']],
+      ['P02', ['P01', 'F07']],
+      ['P02-EXERCISES', ['P02']],
+      ['P02-SOLUTIONS', ['P02-EXERCISES']],
+      ['P03', ['P02', 'M15', 'M16']],
+      ['P03-EXERCISES', ['P03']],
+      ['P03-SOLUTIONS', ['P03-EXERCISES']],
       ['LAB01', ['O03', 'O08']],
       ['LAB02', ['O03', 'F01']],
       ['LAB03', ['F03', 'F05']],
@@ -4321,6 +4381,7 @@ describe('Publication Pairs', () => {
       ['EX18', ['L06']],
       ['EX19', ['L12']],
       ['EX20', ['L13']],
+      ['EX21', ['P02']],
       ['VIS01', []],
       ['VIS02', []],
       ['VIS03', []],

@@ -1,9 +1,9 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、LAB01-LAB12、EX01-EX20、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P03、LAB01-LAB12、EX01-EX21、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
-factCheckDate: '2026-09-10'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -24,6 +24,9 @@ structure:
   - entry-src-cuda-074
   - entry-src-cuda-075
   - entry-src-cuda-076
+  - entry-src-cuda-077
+  - entry-src-cuda-078
+  - entry-src-cuda-079
   - content-sources
   - review-record
 evidence:
@@ -39,7 +42,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-10'
+      content: '2026-09-12'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -47,18 +50,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、LAB01-LAB12、二十个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P03、LAB01-LAB12、二十一个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-本页覆盖 Home、包含 L01-L13 在内的 75 个学习单元（Learning Unit）、其练习与独立参考解答、20 个可运行示例（Runnable Example）、12 个实验（Lab）、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22、82 个练习题库（Practice Bank）条目和 196 个术语表（Glossary）词条，以及既有静态发布与可视化界面。R4 与当前目录均恰好包含 **401** 条记录：12 个实验、82 个练习题库条目、19 项可视化讲解（Visual Explainer）、196 个术语表词条和 92 条来源记录。模式版本 5 的 R4 静态合同包含 277 个双语发布对（Publication Pair）、554 条源路由、74 组练习与 74 组独立参考解答。**2026-09-10 的聚合复核**不增加页面或来源记录；`SRC-CUDA-061` 至 `SRC-CUDA-076` 保留 9 月 4 日至 9 日的逐项日期。新检索[单独记录在下方](#r4-aggregate-review)。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+**2026-09-12 的当前发布范围**覆盖 Home、包含 P01-P03 的 78 个学习单元（Learning Unit）、21 个可运行示例（Runnable Example）、12 个实验（Lab）、19 项可视化讲解（Visual Explainer），以及 77 组练习和 77 组独立解答的双语发布对（Publication Pair）。共 **287 个发布对 / 574 条源路由**，**411 条目录记录**：12 个实验、85 个练习题库（Practice Bank）条目、19 项可视化讲解、200 个术语表（Glossary）词条和 95 条来源记录。本次只增加 `SRC-CUDA-077/078/079`，既有逐项日期不变。R4 仍是最近完成的聚合静态复核，保留 277 对、554 路由和 401 条目录记录；R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)仍是带日期的历史，不是新 Python 内容的复核。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -554,9 +557,103 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 检查过的 NVIDIA cuSPARSE 头文件声明为专有许可，所审成员有 1993-2022 或 1993-2023 版权年份范围，不是 Apache-2.0。链接的 [libcusparse LICENSE.txt](https://developer.download.nvidia.com/compute/cuda/redist/libcusparse/LICENSE.txt)包含 NVIDIA Software License Agreement 与 CUDA supplement；其中组件/第三方条款不会重新许可每个头文件。公开内容只有链接与原创转述，没有复制或改编上游头文件、示例、图示、表格、测试或大段正文，不分发归档。原创教学文字与题库情景使用 CC BY 4.0；原创 EX20 源码使用 Apache-2.0，不是对 NVIDIA 资料的许可授予。这些来源记录与链接的静态学习资源保持四个证据数组为空；EX20 的运行仍独立待硬件验证（Pending Hardware Verification）。不声称 NVCC、GPU 执行、实测工作区成本、确定性结果或性能比较。
 
+<span id="src-cuda-077" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-077：CUDA core 1.2.0 API 与资源所有权
+
+**相关 ID：P01、P02、P03、EX21。**
+
+**版本、用途、平台与访问：** `cuda-core` **1.2.0**，标签 `cuda-core-v1.2.0`，提交 **`53b43746e501f1a0b627f951604991636f77cd9c`**；原生 Linux x86-64、普通 CPython 3.14.7。支持 [P01](/python/cuda-python-bridge/)、[P02](/python/devices-contexts-launches/)、[P03](/python/runtime-compilation-linking/)与 [EX21](/examples/cuda-python-launch/)。来源访问与事实核对日期 **2026-09-12**。[版本化安装说明](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/install.html)、[支持政策](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/support.html)及 [1.2.0 发布说明](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/release/1.2.0-notes.html)与可执行证据分开。
+
+| 固定 core 提交中的精确文件 | 核对的合同 | 逐文件许可处置 |
+| --- | --- | --- |
+| [`cuda_core/cuda/core/__init__.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/__init__.py) | 稳定导出及按 bindings 主版本分派；不采用实验性命名空间 | NVIDIA 版权；Apache-2.0；仅作参考 |
+| [`_device.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_device.pyx) 与 [`_context.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_context.pyx) | Device 构造/驱动访问、默认主上下文、拒绝关闭当前上下文、分配回退 | NVIDIA 版权；每个文件均为 Apache-2.0；仅作参考 |
+| [`_memory/_buffer.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_memory/_buffer.pyx) 与 [`_memory/_legacy.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_memory/_legacy.py) | 相等字节范围、显式复制目标、借用持有者、同步页锁定分配与按流释放 | NVIDIA 版权；每个文件均为 Apache-2.0；仅作参考 |
+| [`_kernel_arg_handler.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_kernel_arg_handler.pyx) | Buffer 指针封送、ctypes 标量位宽、普通 int/float 处理、无条件导入 NumPy | NVIDIA 版权；Apache-2.0；不复制代码 |
+| [`_program.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_program.pyx) 与 [`_linker.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_linker.pyx) | PTX 编译、`Linker(*object_codes, options=...)`、cubin 提取、后端选择、日志与受支持的 close | NVIDIA 版权；每个文件均为 Apache-2.0；仅作参考 |
+| [`_utils/version.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_utils/version.pyx) 与 [`_utils/cuda_utils.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_utils/cuda_utils.pyx) | PTX 可加载性的驱动版本查询与异常/日志行为；私有实现是来源，不是 EX21 导入接口 | NVIDIA 版权；每个文件均为 Apache-2.0；仅作参考 |
+| [`_module.pyx`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_module.pyx) 与 [`_cpp/resource_handles.hpp`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/cuda/core/_cpp/resource_handles.hpp) | 延迟 `get_kernel`、CUlibrary 而非 CUmodule、共享所有权、Kernel/ObjectCode 没有公开 close | NVIDIA 版权；每个文件均为 Apache-2.0；仅作参考 |
+| [`tests/test_memory.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_memory.py)、[`test_launcher.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_launcher.py)、[`test_context.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_context.py)、[`test_linker.py`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/tests/test_linker.py) | 拒绝容量不符、带类型标量/Buffer 启动、上下文身份、正确链接调用顺序与失败日志 | NVIDIA 版权；每个文件均为 Apache-2.0；只检查，不执行或改编 |
+
+已将渲染的 [Device](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Device.html)、[Buffer](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Buffer.html)、[Stream](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Stream.html)、[Program](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Program.html)、[Linker](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.Linker.html)和 [launch](https://nvidia.github.io/cuda-python/cuda-core/1.2.0/generated/cuda.core.launch.html) API 与源码对照。源码/测试澄清生成的 Linker 类头中容易误读的参数顺序。同步方法为 `sync()`；默认 `set_current()` 返回 None，当前 Context 不能关闭。ctypes 主机视图不持有 Buffer。复制/启动提交不是完成，清理不能使失败结果通过验收。
+
+core 的 PTX 可加载性检查查询 `cuDriverGetVersion()`，该版本查询不调用 `cuInit`；NVRTC 内部缓存是下文单独处理的初始化路径。EX21 无 GPU 构建仍需要真实用户态驱动库和所选 cuobjdump，虽然它不创建 Device、不查找核函数、不启动工作。编译抛异常时可能附带诊断，而成功编译专用的 `logs=` 流仍为空。原创 CLI 不需要导入 core 私有异常。这些源码事实不是本地编译、清理或运行观察。
+
+2026-09-12 核对的精确 [NVRTC 13.3.1 缓存章节](https://docs.nvidia.com/cuda/archive/13.3.1/nvrtc/index.html#caching-cuda-12-9)说明，CUDA 12.9+ 默认缓存会在首次编译时加载驱动并调用 `cuInit()`。因此 EX21 在 CUDA 导入前设置 `CUDA_CACHE_DISABLE=1`，向 ProgramOptions 与 LinkerOptions 传 `no_cache=True`，并记录 `cachePolicy: "disabled"`。不初始化的构建目标依赖该配置，不能只依据没有 Device/启动调用。这里不声明实际原生构建或初始化跟踪结果。
+
+EX21 原创的 `cleanup_step` 是项目代码，不是新 core API。每个显式清理动作周围，它捕获并恢复 Python `sys.stderr` 与原生 FD 2，将异常/捕获失败写入 `cleanupErrors`，全部非空捕获 stderr 写入 `cleanupWarnings`。非空输出包括空白，都会保守地使命令失败，同时保留先前操作错误。每动作最多保留 16,384 字节载荷和 16,384 个解码字符，多读一字节判断截断，之后附标签/标记；异常文本同样受限。这是报告/回放边界，不是临时文件磁盘上限。捕获/回放失败不能变为成功，也不能成为跳过尚未尝试释放的理由。显式代码引用放弃在范围内，后续 GC、其他持有者、延迟原生输出及判定后解释器关闭析构不在其中。助手修改进程全局 stderr/警告状态，只用于单线程独立进程。源码检查建立这些边界，不是原生清理运行观察。
+
+<span id="src-cuda-078" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-078：CUDA bindings 13.4.1 编译与链接合同
+
+**相关 ID：P02、P03、EX21。**
+
+**版本、用途、平台与访问：** `cuda-bindings` **13.4.1**，标签 `v13.4.1`，提交 **`0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa`**；选定原生 Linux Toolkit 13.3.1 API 子集。支持 [P02](/python/devices-contexts-launches/)、[P03](/python/runtime-compilation-linking/)与 [EX21](/examples/cuda-python-launch/)，核对和访问日期 **2026-09-12**。[安装说明](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/install.html)、[支持政策](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/support.html)与[发布说明](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/release/13.4.1-notes.html)明确区分次版本兼容政策和逐 API 可用性。排除实验性 `cuda.bindings._v2.nvrtc`。
+
+| 固定 bindings 提交中的精确文件 | 核对边界 | 逐文件许可处置 |
+| --- | --- | --- |
+| [`cuda_bindings/cuda/bindings/nvrtc.pyx`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/nvrtc.pyx) | create 的五个必需参数、状态在前的元组、编译/日志/提取/销毁签名、生成 cubin 的实际与虚拟目标区别 | NVIDIA 版权；Apache-2.0；仅作参考 |
+| [`cuda_bindings/cuda/bindings/nvjitlink.pyx`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/nvjitlink.pyx) | 整数句柄、值返回、`nvJitLinkError.status`、可写输出、日志生命周期与销毁 | NVIDIA 版权；Apache-2.0；仅作参考 |
+| [`cuda_bindings/cuda/bindings/_internal/nvjitlink_linux.pyx`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/cuda/bindings/_internal/nvjitlink_linux.pyx) | 查找无版本后缀符号，不强制要求 13.4 后缀入口；缺失符号仍失败 | NVIDIA 版权；Apache-2.0；仅作参考，EX21 不导入它 |
+| [`cuda_bindings/tests/test_nvjitlink.py`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/tests/test_nvjitlink.py) | 非法选项/架构异常、bytearray 输出、add/complete/extract/destroy 生命周期 | NVIDIA 版权；Apache-2.0；只检查，不运行或改编 |
+
+[稳定 NVRTC 参考](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/module/nvrtc.html)采用 `(status, ...)`，包括单元素的编译/销毁返回。[稳定 nvJitLink 参考](https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/module/nvjitlink.html)要求原生 nvJitLink 至少 12.3，返回值或抛出异常。其输出文档写 bytes，但实现要求可写存储，上游测试使用 bytearray。销毁已取得句柄前查询长度并读取日志；创建失败不提供可查询或销毁的句柄。两套 API 不能共享无条件的双元素状态解包。库发现、Python 参数转换和原生错误是不同错误接口。
+
+<span id="src-cuda-079" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-079：独立配置、产物锁定与许可
+
+**相关 ID：P01、P02、P03、EX21。**
+
+**用途与访问：** 记录 **2026-09-12** 的唯一 [P01](/python/cuda-python-bridge/) 至 [P03](/python/runtime-compilation-linking/) / [EX21](/examples/cuda-python-launch/) 配置，不按包版本号相等来推断兼容性。当前稳定版本分别从上游发布与精确 PyPI 元数据选取。Context7 解析到 `/nvidia/cuda-python`，索引版本为 `v13.3.1`；两次版本化查询和一次当前查询用于发现。混入的 `main` 片段与参数不全的调用不作最终权威，以 SRC-CUDA-077/078 的精确源码和测试为准。
+
+| 坐标 | 选定身份与上游依据 |
+| --- | --- |
+| 解释器 | [CPython 3.14.7 发布](https://www.python.org/downloads/release/python-3147/)，普通 GIL `cp314-cp314`；[源码归档](https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz) SHA-256 `3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81` 已与下载字节核对；该产物审查没有构建解释器 |
+| Python 发行包 | [core 1.2.0](https://pypi.org/pypi/cuda-core/1.2.0/json)、[bindings 13.4.1](https://pypi.org/pypi/cuda-bindings/13.4.1/json)、[pathfinder 1.8.1](https://pypi.org/pypi/cuda-pathfinder/1.8.1/json)、[NumPy 2.5.3](https://pypi.org/pypi/numpy/2.5.3/json)；基础发行包，不加 extras |
+| 原生主机与 Toolkit | 原生 Ubuntu 24.04 x86-64、glibc 2.39 上的 NVIDIA Ubuntu deb 安装，由 `native-profile.json`（`nvidia-deb-ubuntu2404-cuda1331`）选择，不提供 runfile 回退。[13.3.1 Linux 归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html)中的 Ubuntu 24.04.4 / 内核 6.17.0-19 / GCC 14.3.0 资格验证行是目标，不是机器观察 |
+| 原生组件与驱动 | [13.3.1 发布归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html)：NVRTC 13.3.33、nvJitLink 13.3.33；驱动目标 610.43.02。NVCC 13.3.73 与 Runtime 13.3.29 是独立组件，EX21 不直接调用 |
+| 兼容范围 | core 1.x 明确支持 12.x/13.x；bindings 13.4.1 明确允许 Toolkit 13.x 组件，但有逐 API 限制。本示例只选 13.3.1。[nvJitLink 兼容性](https://docs.nvidia.com/cuda/archive/13.3.1/nvjitlink/index.html#compatibility)要求链接器不旧于输入，不悄悄安装较新原生编译器 |
+
+产物审查下载了下列四个未撤回 Linux/GIL wheel，用于哈希及 ZIP 元数据/许可检查；该次审查没有安装或执行它们。全部下载字节匹配 PyPI SHA-256。core/bindings 标签为 `manylinux_2_24_x86_64.manylinux_2_28_x86_64`，NumPy 为 `manylinux_2_27_x86_64.manylinux_2_28_x86_64`，pathfinder 与平台无关。标签适配选定 glibc 配置，不代表成功导入或 CUDA 构建。之后的 CI 尝试属于独立记录。
+
+| 发行包 / 精确 wheel 文件名 | SHA-256 |
+| --- | --- |
+| `cuda_core-1.2.0-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl` | `e138be12af795c69c1cb61e38562ea70e5a38616b2753e2a265231f1941394ef` |
+| `cuda_bindings-13.4.1-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl` | `62df23df11074e9833bf348bbcf0b8eec2fcbded4f305c6fbaa3ed067433e97d` |
+| `cuda_pathfinder-1.8.1-py3-none-any.whl` | `ae0137ff9e56ea97499bcbf54f5f2778ec25f3266715ac86da192a795af982a8` |
+| `numpy-2.5.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl` | `b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b` |
+
+即使原创 EX21 主机使用标准库 ctypes 数组，core 仍要求 NumPy 和 pathfinder，基础 core 包还必须显式安装 bindings。`requirements.lock` 标识 Python 产物；`native-profile.json` 单独标识唯一 NVIDIA Ubuntu deb 配置。首次真实 CI 失败暴露了错误的 `version.json` 必需文件假设：选定官方 Debian 系 devel 安装并不提供该文件。修正后检查已安装包数据库，不伪造文件，也不回退到 runfile。下列五个 Toolkit 坐标已在 **2026-09-12** 访问的 [NVIDIA Ubuntu 24.04 amd64 包索引](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz)中确认；包索引元数据不是本地安装或构建成功观察。
+
+| 已安装包 | 精确 Debian 版本 | 边界 |
+| --- | --- | --- |
+| `cuda-compiler-13-3` | `13.3.1-1` | Toolkit 编译器组发布坐标 |
+| `cuda-command-line-tools-13-3` | `13.3.1-1` | Toolkit 命令行工具发布坐标 |
+| `cuda-nvrtc-13-3` | `13.3.33-1` | NVRTC 及其包内 builtins 文件 |
+| `libnvjitlink-13-3` | `13.3.33-1` | 原生链接器 |
+| `cuda-cuobjdump-13-3` | `13.3.73-1` | 产物检查工具 |
+| `cuda-compat-13-3` | `610.43.02-1ubuntu1` | 当前原生配置独立固定的真实驱动用户态，不等于安装 GPU 或内核驱动 |
+
+`check_native_packages` 使用 `/usr/bin/dpkg-query` 查询 `/var/lib/dpkg`，要求 `install ok installed` 与 `amd64`，并从两个发布坐标取得 Toolkit 身份。Debian 根目录固定为 `/usr/local/cuda-13.3`；设置环境变量不代表允许重定位配置。`inspect_native_file` 解析每个配置文件，检查唯一所属包，将二进制 SHA-256 与文件身份记录在 `environment.nativeFiles`。之后实际库发现必须匹配这些已检查文件。NVRTC/nvJitLink API 仍只给出 13.3，不给补丁 33；已安装版本、文件所属包、`libnvrtc.so.13.3.33` / `libnvJitLink.so.13.3.33` 名称、哈希与 API 对仍是不同事实。保留真实取得来源；本地数据库、文件名与哈希一致，不是防御任意安装篡改的通用保证。
+
+已安装 builtins 不自动成为已加载 builtins。`environment.nativeFiles.nvrtcBuiltins` 是磁盘包文件记录；`environment.nativeLibraries.nvrtcBuiltins` 初始为 null，只有 `observe_nvrtc_builtins` 在 NVRTC 编译后成功检查 `/proc/self/maps`，并匹配映射背后的路径、inode/设备身份、所属包与哈希，才填入它。本来源记录不声明已观察到该映射。`check-environment --phase native-packages` 在 CUDA 导入之前停止；默认 native 阶段另查加载库、驱动 API 及编译器/链接器查询。纠正元数据后，驱动用户态/导入验证与原生构建仍待完成，不声称 CI 重跑通过。运行另需兼容 GPU 及精确配置要求的内核/用户态匹配；一般较新驱动兼容性不能覆盖此固定值。
+
+| 精确许可或声明位置 | SHA-256 与处置 |
+| --- | --- |
+| [core `cuda_core/LICENSE`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/LICENSE)、[bindings `cuda_bindings/LICENSE`](https://github.com/NVIDIA/cuda-python/blob/0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa/cuda_bindings/LICENSE) | 各为 `dc94465a4d540f776490e4b7a73d717d09fffbb1d5a7a6eaab47a0ca6f6624ab`；Apache-2.0；与 wheel 许可成员一致 |
+| [core `cuda_core/NOTICE`](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/NOTICE) | `37206f13ff7d1695cda9a8ba873b19b984b20ab5d2fdf4bd9d8cd1d3c89519d2`；包含 DLPack Apache-2.0 和 PyTorch 接口 BSD-3-Clause 声明 |
+| [pathfinder `cuda_pathfinder/LICENSE`](https://github.com/NVIDIA/cuda-python/blob/e606d084ccfc502a29990f34fbb6ba7a91655c24/cuda_pathfinder/LICENSE) | `4aa88ec20f47537faaee4c183859506b1b03b807858262009c507c3b610dbad9`；Apache-2.0；精确 1.8.1 提交 |
+| 哈希标识 wheel 内的 `numpy-2.5.3.dist-info/licenses/LICENSE.txt` | `4860083caa0de2ac3292ca98bd074bd8f45d8b32624e37b1e70a240bff61e488`；保留完整捆绑声明，不只看项目 BSD 标签 |
+| [CPython `LICENSE`](https://github.com/python/cpython/blob/823f0323ee6ec1402088b73bce1a38473cac36dc/LICENSE) | `b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231`；PSF 许可集合及包含软件条款 |
+
+原创 EX21 调用公开 API，没有改编 NVIDIA 向量加法示例；P01-P03、六道练习及独立解答、PB-R5-001/002/003、TERM-197 至 TERM-200 都采用原创文字与推导。软件为 Apache-2.0，教学内容为 CC BY 4.0。网站和源码不捆绑外部 wheel 或原生 CUDA。CUDA Python 的 Apache 许可不重新许可 NVIDIA Toolkit 文档/库；NumPy wheel 保留 BSD-3-Clause、0BSD、MIT、Zlib、CC0-1.0 及捆绑二进制声明。源码/测试与产物/许可检查不授予 CUDA 证据状态（Evidence Status）。EX21 编译和已记录观察为空，运行待硬件验证（Pending Hardware Verification）；学习单元仍不授予证据状态。
+
 ## 内容与素材来源
 
-- Home、75 个 Learning Units、20 个 Runnable Examples、12 个 Labs、82 个 Practice Bank 条目、196 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、78 个 Learning Units、21 个 Runnable Examples、12 个 Labs、85 个 Practice Bank 条目、200 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
@@ -565,7 +662,7 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 <span id="r4-aggregate-review" class="resource-target" aria-hidden="true"></span>
 
-**聚合静态复核：2026-09-10。** R4 是最近完成的聚合静态复核。模式版本 5 的 `src/r4-release-manifest.json` 生成 `/release.json`；`src/current-publication-manifest.json` 生成 `/publication.json`，其中 `releaseReview.latestCompleted: R4`、`releaseReview.next: R5`、`releaseReview.status: pending`。两者当前记录相同的 277 个发布对、554 条路由与 401 条目录记录。R1-R3 保留精确历史快照。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收；这不表示框架或 Triton 路线完成，也不增加占位入口。
+**聚合静态复核：2026-09-10。** R4 是最近完成的聚合静态复核。模式版本 5 的 `src/r4-release-manifest.json` 生成 `/release.json`；`src/current-publication-manifest.json` 生成 `/publication.json`，其中 `releaseReview.latestCompleted: R4`、`releaseReview.next: R5`、`releaseReview.status: pending`。该次复核时两者都记录 277 对、554 路由和 401 条目录记录。R1-R4 保留历史快照；9 月 12 日当前增量在上方计数，不倒填为本次已复核内容。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 单独保留 R4 动态验收。本来源记录不声明 CI、部署、框架或 Triton 完成。
 
 既有来源保留原访问日期。Issue #32 复核截至 `SRC-CUDA-060` 的不可变 R3；`SRC-CUDA-061` 至 `SRC-CUDA-076` 保留 9 月 4 日至 9 日的逐项复核，包括较早的归档访问失败记录。旧 A07 和 A12/A13 记录仍是历史记录；L10 和 L13 分别提供单独标日期的图/计划与 Generic API 后续资料。本次聚合结论保留这些有限定条件的事实，不复制逐文件清单，也不统一改写日期。
 
@@ -590,4 +687,4 @@ PTX 对 FP16 乘法规定至少单精度；有 FP32 C 或 D 时至少单精度�
 
 不可变 `src/r3-release-manifest.json` 保留 62 个学习单元、16 个可运行示例、10 个实验、19 项可视化讲解、66 个练习题库条目（其中十道 Nsight 报告分析题）、176 个术语表词条、76 条来源记录、347 条目录记录、61 组练习、61 组解答、232 个双语发布对和 464 条源路由。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保留其动态验收。R4 另将八道既有题目列为符合库与算法选择分类的条目：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。R3 子集仍为 PB-R3-002 至 PB-R3-005 和 PB-R3-007 至 PB-R3-012；两个分类均属于既有的 82 个条目。
 
-既有规范导入与保留的编译记录不变：只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。其余 19 个示例和全部 12 个实验共 31 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。L01-L13 保留四个空证据数组。六份仅有预期内容的分析器计划保留未填写的环境清单（Environment Manifest）和空的实际观察记录；十九项浏览器可视化讲解不授予 CUDA 证据状态（Evidence Status）。来源复核没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明，R4 动态验收须在 #41 中单独记录。
+既有保留的编译记录不变：只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。加上 EX21，当前其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。L01-L13 与 P01-P03 保留四个空证据数组。六份仅有预期内容的分析器计划保留未填写的环境清单（Environment Manifest）和空的实际观察记录；十九项浏览器可视化讲解不授予 CUDA 证据状态（Evidence Status）。来源复核没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明；CI 与动态验收仍独立于本次复核。

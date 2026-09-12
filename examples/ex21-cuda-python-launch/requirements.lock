@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Ordinary GIL CPython 3.14, Linux x86_64 wheels only. No native Toolkit extras.
+cuda-core==1.2.0 --hash=sha256:e138be12af795c69c1cb61e38562ea70e5a38616b2753e2a265231f1941394ef
+cuda-bindings==13.4.1 --hash=sha256:62df23df11074e9833bf348bbcf0b8eec2fcbded4f305c6fbaa3ed067433e97d
+cuda-pathfinder==1.8.1 --hash=sha256:ae0137ff9e56ea97499bcbf54f5f2778ec25f3266715ac86da192a795af982a8
+numpy==2.5.3 --hash=sha256:b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b

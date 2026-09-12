@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 196 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 200 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -24,6 +24,10 @@ structure:
   - entry-term-194
   - entry-term-195
   - entry-term-196
+  - entry-term-197
+  - entry-term-198
+  - entry-term-199
+  - entry-term-200
   - maintenance
 evidence:
   compilation: []
@@ -38,7 +42,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-09'
+      content: '2026-09-12'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +50,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1831,6 +1835,44 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [A13](/algorithms/sparse-matrix-multiplication-preprocessing/)、[L13](/libraries/cusparse-descriptors-spmv-spmm/)和 [EX20](/examples/cusparse-spmv/)。
 - **版本说明：** 2026-09-09 在 [SRC-CUDA-075](/sources-and-versions/#src-cuda-075)和 [SRC-CUDA-076](/sources-and-versions/#src-cuda-076)复核。`cusparseSpMV_preprocess` 从 CUDA 12.4 起可选，11.8 中不存在。12.9.2 活动缓冲区合同保持缓冲区内容、矩阵索引和其余配置不变，同时允许文档列出的 alpha/beta、X/Y 与矩阵值变化，仍需正确的完成顺序。`cusparseSpMM_preprocess` 在 11.8 已存在，帮助 CSR_ALG1/ALG3 而非 CSR_ALG2；必须另查其复用合同。[PB-R4-016](/practice/#pb-r4-016)不记录查询字节数或运行结果。
 
+<span id="term-197" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Python · CUDA Python 接口体系
+
+- **定义：** NVIDIA 面向 CUDA 的 Python 接口体系。选定 `cuda.core` 层用 Python 对象组织主机编排，`cuda.bindings` 暴露较低层原生合同。导入这些接口不会把任意 Python 函数变成 GPU 核函数；EX21 编译独立的 CUDA C++ 核函数。
+- **避免使用：** Python 自动在 GPU 执行；一个包版本标识全部原生 CUDA 组件；数组框架；把旧命名空间当成当前稳定合同。
+- **相关资源：** [P01](/python/cuda-python-bridge/)、[P02](/python/devices-contexts-launches/)、[P03](/python/runtime-compilation-linking/)与 [EX21](/examples/cuda-python-launch/)。
+- **版本说明：** core 1.2.0 与 bindings 13.4.1 独立固定，选定普通 CPython 3.14.7 环境还需要 pathfinder 1.8.1 与 NumPy 2.5.3。见 2026-09-12 复核的 [SRC-CUDA-079](/sources-and-versions/#src-cuda-079)。名称本身不构成全面兼容或执行声明。
+
+<span id="term-198" class="resource-target" aria-hidden="true"></span>
+
+### Primary Context · 主上下文
+
+- **定义：** CUDA 与设备关联的主上下文（Primary Context），可由进程内多个使用者共享，并非最近引用它的包装对象独占。core 默认 `dev.set_current()` 路径会持有它并为调用线程设为当前上下文；通过 `dev.context` 取得上下文包装对象。
+- **避免使用：** 每个 Device 对象都有一个可随意销毁的新上下文；`set_current()` 返回主上下文；每次辅助函数退出都重置；原生销毁借用的上下文。
+- **相关资源：** [F07](/foundations/runtime-driver-api/)、[P02](/python/devices-contexts-launches/)与 [EX21](/examples/cuda-python-launch/)。
+- **版本说明：** core 1.2.0 默认调用返回 None，关闭当前 Context 会被拒绝。EX21 让 core 管理共享主上下文生命周期，不重置或销毁它。[SRC-CUDA-077](/sources-and-versions/#src-cuda-077)复核于 2026-09-12；这是 API/生命周期合同，不是清理实测。
+
+<span id="term-199" class="resource-target" aria-hidden="true"></span>
+
+### Kernel Argument Marshalling · 核函数参数封送
+
+- **定义：** 核函数参数封送（Kernel Argument Marshalling）将主机参数值准备为核函数参数表所需的二进制位宽与表示。指针所有权、标量位宽/符号及数值是不同责任。主机语言的整数不会自动对应某个 CUDA C++ 整数类型。
+- **避免使用：** 从 Python 值推断核函数签名；数值小就不必考虑位宽；指针字节等于所指数据；数值转换修复了分配生命周期。
+- **相关资源：** [P02](/python/devices-contexts-launches/)、[P03](/python/runtime-compilation-linking/)与 [EX21](/examples/cuda-python-launch/)。
+- **版本说明：** core 1.2.0 将普通 Python int 按指针位宽、普通 float 按 double 封送。EX21 传 Buffer，并用 `ctypes.c_uint32(n)` 匹配 `unsigned int`；float 标量则需 `ctypes.c_float`。转换前先查范围。[SRC-CUDA-077](/sources-and-versions/#src-cuda-077)，2026-09-12 复核。
+
+<span id="term-200" class="resource-target" aria-hidden="true"></span>
+
+### Borrowed View · 借用视图
+
+- **定义：** 借用视图（Borrowed View）按指定类型访问既有存储，但不取得其分配所有权。EX21 在页锁定主机内存上的 ctypes 视图，要求背后的 Buffer 在全部 CPU 访问和排队传输期间有效。视图生命周期本身不建立存储生命周期或传输完成。
+- **避免使用：** 自有副本；自动保活 Buffer；任意整数地址均能被 CPU 访问；视图仍存在就能使用已释放存储。
+- **相关资源：** [F04](/foundations/host-device-lifecycle/)、[P01](/python/cuda-python-bridge/)、[P02](/python/devices-contexts-launches/)与 [EX21](/examples/cuda-python-launch/)。
+- **版本说明：** CPython 3.14.7 ctypes 数组类型的 `from_address` 方法与 core 1.2.0 Buffer 所有权记录于 2026-09-12 复核的 [SRC-CUDA-077](/sources-and-versions/#src-cuda-077)。只有主机可访问句柄可建 CPU 视图；结果读取前 `sync()`，Buffer 关闭前停止使用视图。沿用既有页锁定内存与流词条，不重复新增。
+
 ## 维护规则
+
+2026-09-12 增量只新增 TERM-197 至 TERM-200，当前共 **200** 个词条。既有词条及逐项日期不变。这四条原创定义补充 Python 接口、共享上下文、标量 ABI 和借用视图区别，不重复 PTX、cubin、流或页锁定主机内存。双语页面和目录记录使用相同的新复核日期，不改变证据状态（Evidence Status）。
 
 TERM-001 至 TERM-194 保留各自逐项复核日期。新增 TERM-195/196 与完整 196 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-09** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分描述符借用的表示与活动预处理状态，不重复已有 CSR、预处理或外部工作区词条。四个证据数组均保持为空；EX20 仍独立处于待硬件验证（Pending Hardware Verification）。对应的[英文页](/en/glossary/)同时完整发布。

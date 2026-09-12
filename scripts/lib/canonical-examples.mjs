@@ -173,6 +173,42 @@ export async function validateCanonicalExample(projectRoot, exampleId) {
   }
 
   const exampleRoot = path.join(projectRoot, example.root);
+  if (example.build?.hostLanguage === 'python' || exampleId === 'EX21') {
+    const profile = example.compatibility?.pythonEnvironment;
+    if (example.compatibility?.lanes?.length !== 0 || example.compatibility?.checks !== undefined) {
+      errors.push(`${exampleId} Python checks must not inherit C++ Toolkit Lanes`);
+    }
+    if (!profile?.id || !/^\d+\.\d+\.\d+$/.test(profile.python?.version ?? '') ||
+        profile.python?.implementation !== 'CPython' || profile.python?.gil !== true ||
+        !/^\d+\.\d+\.\d+$/.test(profile.toolkit ?? '') ||
+        !profile.distributions?.['cuda-core'] || !profile.distributions?.['cuda-bindings'] ||
+        !Array.isArray(profile.extras) || profile.extras.length !== 0 ||
+        !example.build.contractFiles?.includes(profile.lock)) {
+      errors.push(`${exampleId} requires an independent Python environment and hashed lock contract`);
+    } else {
+      try {
+        const lock = await readFile(resolveInside(exampleRoot, profile.lock), 'utf8');
+        const requirements = lock.split(/\r?\n/).map((line) => line.trim())
+          .filter((line) => line && !line.startsWith('#'));
+        const pins = requirements.map((line) =>
+          /^([a-z0-9-]+)==(\d+\.\d+\.\d+) --hash=sha256:[a-f0-9]{64}$/.exec(line));
+        if (pins.some((pin) => !pin) || pins.length !== Object.keys(profile.distributions).length ||
+            new Set(pins.map((pin) => pin?.[1])).size !== pins.length ||
+            pins.some((pin) => profile.distributions[pin?.[1]] !== pin?.[2])) {
+          errors.push(`${exampleId} Python lock does not match its independently pinned distributions`);
+        }
+      } catch {
+        errors.push(`${exampleId} Python lock is missing or outside the canonical project`);
+      }
+    }
+    const pythonChecks = example.compatibility?.pythonChecks;
+    if (!Array.isArray(pythonChecks) || pythonChecks.length === 0 || pythonChecks.some((check) =>
+      check.environment !== profile?.id || check.kind !== 'compilation-artifact-inspection' ||
+      check.command !== example.build.commands?.build || check.gpuExecuted !== false ||
+      check.driverInitialized !== false || !sameValues(check.allowedResults, ['pass']))) {
+      errors.push(`${exampleId} requires explicit GPU-free Python build checks`);
+    }
+  }
   for (const input of example.build?.inputs ?? []) {
     try {
       await access(resolveInside(exampleRoot, input));

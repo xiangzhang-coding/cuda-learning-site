@@ -1,9 +1,9 @@
 ---
 title: Practice Bank
-description: 82 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 85 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-09-10'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -91,6 +91,9 @@ structure:
   - entry-pb-r4-014
   - entry-pb-r4-015
   - entry-pb-r4-016
+  - entry-pb-r5-001
+  - entry-pb-r5-002
+  - entry-pb-r5-003
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -169,6 +172,9 @@ prerequisites:
   - L11
   - L12
   - L13
+  - P01
+  - P02
+  - P03
 relatedUnits:
   - O02
   - O03
@@ -249,6 +255,10 @@ relatedUnits:
   - EX18
   - EX19
   - EX20
+  - P01
+  - P02
+  - P03
+  - EX21
   - LAB06
   - LAB08
   - LAB09
@@ -270,19 +280,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-10' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -301,13 +311,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 82 complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 85 complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 82 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 85 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
@@ -3759,8 +3769,141 @@ For 12.9.2 SpMV active-state reuse, the documented exceptions permit changed alp
 
 **Source date:** 2026-09-09.
 
+<span id="pb-r5-001" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-001: Audit bridge ownership for queued requests
+
+- **ID and Publication Pair:** PB-R5-001 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness debugging; intermediate.
+- **Direct prerequisite:** [P01](/en/python/cuda-python-bridge/), exactly `[P01]`.
+- **Hardware gate:** None; original paper queue/ownership review, without CUDA execution.
+- **Version gate:** Ordinary CPython 3.14.7; core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3; the single native Linux Toolkit 13.3.1 profile.
+- **Related Learning Units and resources:** [F04](/en/foundations/host-device-lifecycle/), [M07](/en/memory/stream-ordering/), [P01](/en/python/cuda-python-bridge/), and [EX21](/en/examples/cuda-python-launch/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** A service keeps every Buffer, stream and kernel owner alive. Request A uses pinned `a=[1,2,3]` and `b=[0.5,-1,2]`. It computes a Python reference and queues H2D, addition and D2H on one stream. Before checking completion, the CPU overwrites that same pinned a with request B's `[4,5,6]` and queues B on the same stream. Both returned results are views of the same pinned output. The author says reference retention and stream ordering guarantee two independent request snapshots.
+
+**Goal:** Distinguish valid allocation lifetime from stable input contents, request identity, and result readiness.
+
+**Constraints:** Keep both mathematical requests unchanged, with b unchanged. No timing, transfer completion, or observed result is supplied. Do not predict a particular race outcome or invent a cancellation API. A solution may serialize reuse or retain independent per-request storage.
+
+**Expected evidence:** Derive both intended vectors; annotate CPU writes versus queued CUDA reads/writes; locate the reuse boundary for each input and output; state what a returned result owns and when it becomes readable.
+
+**Acceptance criteria:** The reference stays CPU work. Keeping an allocation alive does not freeze its bytes, and same-stream CUDA order does not order arbitrary CPU overwrites. Check completion before shared-slot reuse and copy out an independently owned result, or keep separate immutable-in-flight request storage and outputs. A failed completion yields no valid result or runtime evidence.
+
+<details><summary>Hint 1: Draw a second timeline for the CPU</summary>The host overwrite is not a CUDA operation enqueued after request A. Ask whether A's H2D has finished reading before that write begins.</details>
+
+<details><summary>Hint 2: A result can change after becoming ready</summary>Even a completed output is not a stable request snapshot if B later writes the same storage. Decide when values are copied out or who prevents reuse.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** A intends `[1.5,1,5]`; B intends `[4.5,4,8]`. These are exact arithmetic predictions. The actual result of the invalid schedule is unspecified here: the problem gives no evidence about when DMA reads happen. Retained references prevent one lifetime defect but do not stop the CPU from modifying data while a queued transfer reads it.
+
+The simplest design uses a single request slot: initialize A, submit its copies/kernel, check completion, compare and copy accepted output into an owned Python value, then initialize B. Do not return an unowned view and reuse its storage. Keeping six three-element float32 arrays consumes 36 device payload bytes and 36 pinned-host bytes, excluding other resources and owned result copies.
+
+An independent-storage design uses separate input and output Buffers per request and retains them through their transfers and result consumption. Neither input snapshot may be modified while it is in use; readiness still needs checked completion. Two complete six-array sets use 72 device and 72 pinned-host payload bytes. Keeping both requests on one stream still serializes their CUDA work and establishes no overlap or speedup. Abandoned results require an ownership/cleanup policy, not an invented safe-cancel operation.
+
+**Valid alternatives and common errors:** An explicit slot-lease protocol can also prevent reuse. Returning owned CPU values simplifies the caller contract but adds a copy; borrowed results can avoid that copy only while an owner prevents reuse. A future-like name, a live view, or successful launch submission provides neither a snapshot nor a completion proof.
+
+</details>
+
+**Source basis:** Original two-request scenario and derivations; [P01](/en/python/cuda-python-bridge/), [Borrowed View](/en/glossary/#term-200), [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), and [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079). No upstream exercise or observed result is copied.
+
+**Source date:** 2026-09-12.
+
+<span id="pb-r5-002" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-002: Audit scalar width and premature release
+
+- **ID and Publication Pair:** PB-R5-002 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness debugging; intermediate.
+- **Direct prerequisite:** [P02](/en/python/devices-contexts-launches/), exactly `[P02]`.
+- **Hardware gate:** None; paper ABI, capacity and lifetime audit. A real run separately needs native Linux and a compiler-supported CC 7.5+ GPU.
+- **Version gate:** Core 1.2.0 Buffer, ctypes scalar and shared-primary-context contracts; EX21's single Toolkit 13.3.1 profile.
+- **Related Learning Units and resources:** [F07](/en/foundations/runtime-driver-api/), [P02](/en/python/devices-contexts-launches/), and [EX21](/en/examples/cuda-python-launch/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** Review a proposed 513-element run of the EX21 kernel. The host allocates 513 bytes per float array, passes plain Python `513`, launches `grid=513//256`, names the result of `d_c.copy_to(stream=s)` `host_c`, and dereferences it with ctypes. It compares only the first 512 values, closes the stream, frees raw Buffer addresses, and resets the primary context. Independently suppose a corrected-size output has a NaN sentinel at index 512 because the last store was missed.
+
+**Goal:** Repair coverage, representation, copy location, complete validation, and teardown as independent contracts.
+
+**Constraints:** Use 256-thread blocks, an unsigned 32-bit n, float32 arrays, and the canonical EX21 input formula. No invalid pointer access should be executed. The NaN is a supplied diagnostic scenario, not an observed GPU result.
+
+**Expected evidence:** A byte ledger, grid and tail derivation, exact argument types, explicit copy destination, the reference at index 512, and normal/error release sequences.
+
+**Acceptance criteria:** Allocate 2052 bytes per array; require three blocks with 255 inactive tail threads; use `ctypes.c_uint32(n)` and Buffer pointer arguments. Inspect every finite result only after checked sync. Distinguish owned Buffers, borrowed host views, shared library ownership and primary-context state; no double-free or generic close loop.
+
+<details><summary>Hint 1: The first unchecked element is the interesting one</summary>Index 512 belongs to block 2, not either of the first two blocks. Count bytes separately from elements and derive its reference from both input periods.</details>
+
+<details><summary>Hint 2: Names do not move storage</summary>Omitted-destination copy allocates through the source memory resource. Only an explicit host-accessible Buffer supports the proposed CPU view, and its owner must survive the view.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** Each array needs `513*4=2052` bytes; three device arrays use 6156 bytes and three pinned host arrays another 6156. Ceiling division gives three blocks, 768 candidate threads and 255 inactive threads. The bounds guard protects reads and writes for indices 513 through 767. Raw Python int is pointer-width in this core, so use uint32 after checking the positive size/range policy.
+
+Use explicit pinned `h_c`, retain it, and queue `d_c.copy_to(h_c, stream=s)`. Do not infer host accessibility from the returned variable name. At index 512, `512 % 37=31` and `512 % 19=18`, giving `7.75-9=-1.25`. The supplied NaN must be rejected, even if the first 512 entries match. In the real project the output sentinel is uploaded before launch; full finite comparison catches a missed store instead of trusting recycled memory.
+
+On success, complete D2H, check `s.sync()`, compare all elements, stop using/drop views, close each Buffer on s, drain frees with another checked sync, then close s. On failure, stop submission, keep the first stage/error, attempt completion and all acquired-resource cleanup, retain secondary errors/warnings, and exit nonzero. Do not free raw addresses still owned by Buffers. Device has no public close; Kernel/ObjectCode use shared library ownership with no public close; the primary context is not private resettable state.
+
+**Valid alternatives and common errors:** A broader `dev.sync()` may establish completion but can wait for unrelated work. A different block size requires a new coverage proof, not a presumed speedup. A checksum, sampled comparison, Python reference pass, or silent exception handler cannot certify the missing final output.
+
+</details>
+
+**Source basis:** Original uneven-size and teardown proposal; [P02](/en/python/devices-contexts-launches/), [Kernel Argument Marshalling](/en/glossary/#term-199), and [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077). No CUDA run or upstream test result is represented.
+
+**Source date:** 2026-09-12.
+
+<span id="pb-r5-003" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-003: Separate compiler and linker error surfaces
+
+- **ID and Publication Pair:** PB-R5-003 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness debugging; intermediate.
+- **Direct prerequisite:** [P03](/en/python/runtime-compilation-linking/), exactly `[P03]`.
+- **Hardware gate:** None; paper error/artifact audit. Actual build requires real libcuda userspace and the selected native compiler/linker, but no GPU.
+- **Version gate:** Stable bindings 13.4.1 NVRTC status tuples versus nvJitLink exceptions; core 1.2.0, native NVRTC/nvJitLink 13.3.33.
+- **Related Learning Units and resources:** [M15](/en/toolchain/nvcc-compilation-flow/), [M16](/en/toolchain/ptx-cubin-fatbinary/), [P03](/en/python/runtime-compilation-linking/), and [EX21](/en/examples/cuda-python-launch/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** A build dashboard always unpacks a native result as `(status, value)` and marks nonzero status as a kernel failure. It reports three hypothetical attempts: A, real libcuda discovery fails before compilation; B, `nvjitlink.version()` returns `(13,3)` and the dashboard labels 13 an error; C, core Program raises during compilation, its StringIO is empty, and the dashboard therefore displays yesterday's cubin as today's successful result. In a separate low-level link attempt, `complete(handle)` raises and `destroy(handle)` also raises before the log is saved.
+
+**Goal:** Correct stage attribution, result-shape handling, artifact freshness, and preservation of diagnostic ownership.
+
+**Constraints:** Treat these as supplied scenarios, not collected logs. Keep GPU-free build free of `Device()`, `cuInit`, lookup and launch. Do not substitute stubs, fake libraries, private core exception imports, or another native Toolkit version.
+
+**Expected evidence:** A verdict table for A/B/C and the low-level failure; a correct NVRTC/nvJitLink return-shape ledger; a fresh-artifact policy; and the minimum provenance needed before recording a native build pass.
+
+**Acceptance criteria:** No case proves a kernel ran. Version 13 is not a status. Empty core success-log storage does not erase an exception's compiler diagnostic. Read a valid failed linker's log into queried-size writable storage before one destroy attempt; retain complete failure as primary. Stale artifacts cannot satisfy the failed attempt.
+
+<details><summary>Hint 1: Start with the producer of each value</summary>NVRTC compile returns a one-item status tuple, while nvJitLink version returns two version numbers and create returns an integer handle. Similar tuple shapes need not have the same meaning.</details>
+
+<details><summary>Hint 2: Evidence belongs to one attempt</summary>A cubin from yesterday has another production history. Preserve this attempt's original exception and any available logs before releasing the object that owns them.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** A is a native-library/profile blocker. Core 1.2.0 queries the driver version for PTX loadability without cuInit, so lack of GPU execution does not remove its real driver-library dependency. B is a dashboard interpretation defect: `(13,3)` is native nvJitLink major/minor, not `(status, value)` and not patch identity. C is compilation failure; preserve its exception type/message and attached log. The StringIO captures successful compilation logging and cannot overturn failure.
+
+NVRTC create returns `(status, program)`, compile/destroy return `(status,)`, and size queries return `(status, size)`; check every status. nvJitLink create returns a handle, complete/extraction/destroy return None, and native failures raise `nvJitLinkError` with `.status`. Successful native API return also does not establish a later stage. A Python buffer conversion error or missing symbol may precede any native resource acquisition.
+
+For the separate failed linker, keep the complete exception, query/read logs while the acquired handle remains valid using a correctly sized `bytearray`, then attempt destroy once in finally. Reporting or destruction failures are secondary. If create had failed, no valid handle would exist for either operation. Do not invent unavailable diagnostic text.
+
+Require a fresh result directory and associate source hash, options, explicit virtual/real target, exact interpreter/packages, actual native libraries, backend, PTX/cubin hashes, cuobjdump inspection, and exit status with the same attempt. Failed compilation/linking cannot reuse yesterday's success label. A retained qualifying build can support compilation only; it cannot establish lookup, GPU completion, vector correctness, or Runtime-Verified status.
+
+**Valid alternatives and common errors:** Separate typed adapters can normalize report fields after honoring each API contract; a universal two-item unpack cannot. A deliberately designed cache needs identity/integrity/compatibility checks, which EX21 avoids with fresh artifacts. Neither a filename extension nor an empty log proves any production stage succeeded.
+
+</details>
+
+**Source basis:** Original dashboard/failure scenarios; [P03](/en/python/runtime-compilation-linking/), [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), [SRC-CUDA-078](/en/sources-and-versions/#src-cuda-078), and [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079). No log transcript or performance value is fabricated.
+
+**Source date:** 2026-09-12.
+
 ## Review record
+
+The **2026-09-12** increment adds exactly PB-R5-001/002/003, with direct prerequisites `[P01]`, `[P02]`, and `[P03]`, bringing the current total to **85**. Their two closed hints and separate worked solutions are original static reasoning. Historical entry dates and the R3/R4 classifications below remain unchanged; R5 aggregate review is pending. EX21 adds one Pending Hardware Verification subject, giving 20 examples plus 12 Labs, **32** pending subjects, with no new compilation or recorded runtime evidence.
 
 The **2026-09-10** R4 aggregate static review records all **82** existing entries and the eight qualifying choices above alongside the immutable R3 ten-entry report-analysis subset. R4 is the latest completed static review; R5 is next with its aggregate review pending. No entry, prerequisite, hint, solution, source, or item-level date is changed by this classification. The September 4-9 records remain attached to their original entries, including PB-R4-015/016's September 9 review and direct `[L13]` prerequisites. R1-R3 history remains unchanged.
 
-[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records dynamic acceptance only after CI, Preview, production, and smoke results exist. This review neither certifies those results nor claims framework or Triton track completion. No owner questions, code, prose, tables, figures, or results are copied or adapted. All four page evidence arrays remain empty. Only EX02, EX10, and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. The other 19 examples and all 12 Labs remain Pending Hardware Verification, 31 subjects total, with zero Runtime-Verified or Community-Observed subjects, Reference Environments, and performance observations. All six profiler plans remain expected-only. Hypothetical proposals and paper arithmetic are not GPU evidence.
+[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) retains R4 dynamic acceptance separately from this content increment; no CI, Preview, production, or smoke result is certified here. No framework or Triton completion, copied owner material, or new CUDA evidence is implied. All four page evidence arrays remain empty. Only EX02, EX10, and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. Runtime-Verified and Community-Observed subjects, Reference Environments, and performance observations remain zero. All six profiler plans remain expected-only. Hypothetical proposals and paper arithmetic are not GPU evidence.

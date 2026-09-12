@@ -1,0 +1,35 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "nvidia-deb-ubuntu2404-cuda1331",
+  "installationMode": "nvidia-deb",
+  "toolkit": "13.3.1",
+  "toolkitRoot": "/usr/local/cuda-13.3",
+  "architecture": "amd64",
+  "installedStatus": "install ok installed",
+  "packages": {
+    "cuda-compiler-13-3": "13.3.1-1",
+    "cuda-command-line-tools-13-3": "13.3.1-1",
+    "cuda-nvrtc-13-3": "13.3.33-1",
+    "libnvjitlink-13-3": "13.3.33-1",
+    "cuda-cuobjdump-13-3": "13.3.73-1",
+    "cuda-compat-13-3": "610.43.02-1ubuntu1"
+  },
+  "files": {
+    "nvrtc": {"path": "targets/x86_64-linux/lib/libnvrtc.so.13.3.33", "package": "cuda-nvrtc-13-3"},
+    "nvrtcBuiltins": {"path": "targets/x86_64-linux/lib/libnvrtc-builtins.so.13.3.33", "package": "cuda-nvrtc-13-3"},
+    "nvJitLink": {"path": "targets/x86_64-linux/lib/libnvJitLink.so.13.3.33", "package": "libnvjitlink-13-3"},
+    "cuobjdump": {"path": "bin/cuobjdump", "package": "cuda-cuobjdump-13-3"},
+    "cuda": {"path": "compat/libcuda.so.610.43.02", "package": "cuda-compat-13-3"}
+  },
+  "archives": {
+    "cuda-compiler-13-3": {"url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-compiler-13-3_13.3.1-1_amd64.deb", "sha256": "c0f50a88d45da764f0f831ed979394ed835fe805a85896d36de61241887c2c24"},
+    "cuda-command-line-tools-13-3": {"url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-command-line-tools-13-3_13.3.1-1_amd64.deb", "sha256": "796f89c6644c81e4bac27f4fe1201ccf69fcd1ea5516fceadd5371640b48dd51"},
+    "cuda-nvrtc-13-3": {"url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-nvrtc-13-3_13.3.33-1_amd64.deb", "sha256": "2cba44ef4330d1cb7f9298e1bd0d91e023321168d08d6c2f330b158b5f0cf0f5"},
+    "libnvjitlink-13-3": {"url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/libnvjitlink-13-3_13.3.33-1_amd64.deb", "sha256": "e28b5f35b6b3b5a0d80eeb7e77a8c2066b9ec5849eacc316575767e55e5b683b"},
+    "cuda-cuobjdump-13-3": {"url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-cuobjdump-13-3_13.3.73-1_amd64.deb", "sha256": "10756e3b288389cf717a2cba4fe7cb5e161a943f507cf2defb991537cccaed6d"},
+    "cuda-compat-13-3": {"url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-compat-13-3_610.43.02-1ubuntu1_amd64.deb", "sha256": "4d3b3bfe6e6a53b2153383b2f74f139339c7e5ffbf657d6af7c3967b8b670386"}
+  },
+  "source": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages",
+  "reviewedOn": "2026-09-12"
+}

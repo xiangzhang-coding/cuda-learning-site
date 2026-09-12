@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: 196 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: 200 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-09'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -24,6 +24,10 @@ structure:
   - entry-term-194
   - entry-term-195
   - entry-term-196
+  - entry-term-197
+  - entry-term-198
+  - entry-term-199
+  - entry-term-200
   - maintenance
 evidence:
   compilation: []
@@ -38,7 +42,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-09'
+      content: '2026-09-12'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +50,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1831,6 +1835,44 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/), [L13](/en/libraries/cusparse-descriptors-spmv-spmm/), and [EX20](/en/examples/cusparse-spmv/).
 - **Version note:** Reviewed 2026-09-09 in [SRC-CUDA-075](/en/sources-and-versions/#src-cuda-075) and [SRC-CUDA-076](/en/sources-and-versions/#src-cuda-076). `cusparseSpMV_preprocess` is optional from CUDA 12.4 and absent in 11.8. The 12.9.2 active-buffer contract preserves buffer contents, matrix indices, and other configuration while allowing documented changes to alpha/beta, X/Y, and matrix values, with correct completion ordering. `cusparseSpMM_preprocess` already exists in 11.8 and helps CSR_ALG1/ALG3, not CSR_ALG2; its reuse contract must be checked separately. [PB-R4-016](/en/practice/#pb-r4-016) records no queried bytes or runtime outcome.
 
+<span id="term-197" class="resource-target" aria-hidden="true"></span>
+
+### CUDA Python · CUDA Python 接口体系
+
+- **Definition:** NVIDIA's Python interface family for CUDA. The selected `cuda.core` layer offers Python objects for host orchestration, while `cuda.bindings` exposes lower-level native contracts. Importing these interfaces does not turn arbitrary Python functions into GPU kernels; EX21 compiles a separate CUDA C++ kernel.
+- **Avoid:** Python automatically executes on the GPU; one package version identifies every native CUDA component; an array framework; the legacy namespace as the current stable contract.
+- **Related resources:** [P01](/en/python/cuda-python-bridge/), [P02](/en/python/devices-contexts-launches/), [P03](/en/python/runtime-compilation-linking/), and [EX21](/en/examples/cuda-python-launch/).
+- **Version note:** Core 1.2.0 and bindings 13.4.1 are independently pinned, with pathfinder 1.8.1 and NumPy 2.5.3 required in the selected ordinary CPython 3.14.7 environment. See [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079), reviewed 2026-09-12. No blanket compatibility or execution claim follows from the name.
+
+<span id="term-198" class="resource-target" aria-hidden="true"></span>
+
+### Primary Context · 主上下文
+
+- **Definition:** CUDA's device-associated primary context, which can be shared by users within a process rather than privately owned by the latest wrapper that refers to it. In core's default `dev.set_current()` path, core retains and selects it for the calling thread; `dev.context` exposes the context wrapper.
+- **Avoid:** A new disposable context for every Device object; `set_current()` returns the primary context; reset on every helper exit; raw destroy of a borrowed context.
+- **Related resources:** [F07](/en/foundations/runtime-driver-api/), [P02](/en/python/devices-contexts-launches/), and [EX21](/en/examples/cuda-python-launch/).
+- **Version note:** Core 1.2.0's default call returns None and closing a current Context is rejected. EX21 lets core manage shared primary-context lifetime and does not reset/destroy it. [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), reviewed 2026-09-12; this is an API/lifetime contract, not observed cleanup.
+
+<span id="term-199" class="resource-target" aria-hidden="true"></span>
+
+### Kernel Argument Marshalling · 核函数参数封送
+
+- **Definition:** Preparing host argument values in the binary widths and representations required by the kernel's parameter list. Pointer ownership, scalar width/sign, and numerical value are distinct obligations. A host language's integer does not automatically imply a CUDA C++ integer type.
+- **Avoid:** Kernel-signature inference from Python values; small values make width irrelevant; pointer bytes are the pointed-to data; a numerical cast fixes allocation lifetime.
+- **Related resources:** [P02](/en/python/devices-contexts-launches/), [P03](/en/python/runtime-compilation-linking/), and [EX21](/en/examples/cuda-python-launch/).
+- **Version note:** In core 1.2.0, raw Python int uses pointer width and raw float uses double. EX21 passes Buffers and `ctypes.c_uint32(n)` for its `unsigned int`; a float scalar would use `ctypes.c_float`. Check range before conversion. [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), reviewed 2026-09-12.
+
+<span id="term-200" class="resource-target" aria-hidden="true"></span>
+
+### Borrowed View · 借用视图
+
+- **Definition:** A typed way to access existing storage without taking ownership of its allocation. EX21's ctypes view over pinned host memory requires the backing Buffer to remain valid through every CPU access and queued transfer. View lifetime alone does not establish storage lifetime or transfer completion.
+- **Avoid:** Owning copy; automatic keepalive of a Buffer; any integer address is CPU-accessible; a live view makes freed storage valid.
+- **Related resources:** [F04](/en/foundations/host-device-lifecycle/), [P01](/en/python/cuda-python-bridge/), [P02](/en/python/devices-contexts-launches/), and [EX21](/en/examples/cuda-python-launch/).
+- **Version note:** CPython 3.14.7 ctypes array types' `from_address` method and core 1.2.0 Buffer ownership are reviewed in [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), 2026-09-12. Only host-accessible handles become CPU views; `sync()` precedes result reads, and view use ends before Buffer close. Existing page-locked-memory and stream terms are reused, not duplicated.
+
 ## Maintenance rule
+
+The 2026-09-12 increment adds only TERM-197 through TERM-200, bringing the current total to **200**. Prior terms and their item-level dates remain unchanged. These four original definitions add Python-interface, shared-context, scalar-ABI, and borrowed-view distinctions without duplicating PTX, cubin, stream, or page-locked host memory. Both locales and catalog records share the new review date; no Evidence Status changes.
 
 TERM-001 through TERM-194 retain their item-level review dates. New TERM-195/196 and the complete 196-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-09**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish a descriptor's borrowed representation from active preprocessing state without duplicating existing CSR, preprocessing, or external-workspace terms. All four evidence arrays remain empty; EX20 retains independent Pending Hardware Verification runtime. The [Chinese counterpart](/glossary/) is complete at the same time.

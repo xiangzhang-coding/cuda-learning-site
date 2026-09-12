@@ -3,7 +3,7 @@ title: 关于本站
 description: CUDA 学习站的目的、范围、作者和反馈渠道。
 pairId: about
 counterpart: /en/about/
-factCheckDate: '2026-09-10'
+factCheckDate: '2026-09-12'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-10'
+      content: '2026-09-12'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -42,7 +42,7 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 稳定课程的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 和 Q01-Q13，共 62 个学习单元（Learning Unit）。[A12](/algorithms/sparse-formats-spmv/)建立 COO/CSR、storage 与 SpMV 合同，[A13](/algorithms/sparse-matrix-multiplication-preprocessing/)建立 SpMM、descriptor、workspace 与 preprocessing 决策边界。
 
-最近完成的聚合静态发布复核是 2026-09-10 的 R4。模式版本 5 的 `src/r4-release-manifest.json` 生成 `/release.json`；`/publication.json` 记录最近完成 R4、下一阶段 R5，其聚合复核待完成。R1-R3 保留精确历史快照。R3 仍包含 232 个双语发布对（Publication Pair）、464 条源路由、347 条目录记录、61 组练习、61 组独立参考解答与十道 Nsight 报告分析题。
+最近完成的聚合静态发布复核仍是 2026-09-10 的 R4。模式版本 5 的 `src/r4-release-manifest.json` 继续生成冻结的 `/release.json`：75 个学习单元、277 个双语发布对（Publication Pair）、554 条源路由，以及包含 82 道题、196 个词条和 92 条来源的 401 条目录记录。`/publication.json` 则记录当前新增 Python 桥接后的清单，最近完成阶段仍为 R4，下一阶段 R5 的聚合复核待完成。R1-R3 保留精确历史快照；R3 仍包含 232 个发布对、464 条源路由、347 条目录记录、61 组练习、61 组独立参考解答与十道 Nsight 报告分析题。
 
 Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)在滚动 R4 发布中新增 [L01](/libraries/library-primitive-dsl-custom-kernel/)与 [L02](/libraries/thrust-algorithm-vocabulary/)；[issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)发布 [L03：CUB Device Primitives](/libraries/cub-device-primitives/)、[L04：CUB Warp 与 Block Primitives](/libraries/cub-warp-block-primitives/)、[EX17：CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)和 [LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)，随后发布严格依赖 M05、M13 与 M19 的 [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)。[Issue #36](https://github.com/xiangzhang-coding/cuda-learning-site/issues/36)新增 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)`<-[A08,Q01]`、[L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)`<-[L06,Q05]`、[EX18](/examples/cublas-gemm/)`<-[L06]`与 [LAB12](/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`。
 
@@ -54,11 +54,13 @@ Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](
 
 [Issue #40](https://github.com/xiangzhang-coding/cuda-learning-site/issues/40)新增 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)`<-[A12,A13,L01]`、[L13 练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)`<-[L13]`、[独立解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)`<-[L13-EXERCISES]`和 [EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)`<-[L13]`，再增加四个双语发布对、八条路由。L01-L13 均纳入 R4；聚合复核不再增加页面或资源条目。
 
-当前滚动发布有 75 个学习单元、20 个可运行示例（EX01-EX20）、12 个实验（LAB01-LAB12）、19 项可视化讲解（独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22）、82 个[练习题库](/practice/)条目、196 项[术语表](/glossary/)词条和 92 项[来源记录](/sources-and-versions/)，共 401 条资源目录记录；公开源文件形成 277 个双语发布对（Publication Pair）和 554 条源路由，包含 74 组练习与 74 组独立参考解答。
+[Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42)在当前发布中加入 [P01：CUDA Python 桥接](/python/cuda-python-bridge/)、[P02：设备、上下文与启动](/python/devices-contexts-launches/)和 [P03：运行时编译与链接](/python/runtime-compilation-linking/)，有序直接先修分别为 `[F04,M07]`、`[P01,F07]`和 `[P02,M15,M16]`。每个单元有练习和独立解答；共用的 [EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)仅依赖 `[P02]`，独立记录 Python、包与原生 Toolkit 配置，仍待硬件验证（Pending Hardware Verification）。本次增加十个发布对、二十条路由，不改写 R4 历史或发布框架、Triton 占位入口。
 
-**聚合静态复核：2026-09-10。** 技术来源保留各自访问与复核日期，新检索有单独的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。R4 不表示框架或 Triton 路线已完成，也不为它们发布占位入口。
+截至 **2026-09-12**，当前滚动发布有 78 个学习单元、21 个可运行示例（EX01-EX21）、12 个实验（LAB01-LAB12）、19 项可视化讲解（独立 VIS01-VIS14/VIS18，加上内嵌 VIS19-VIS22）、85 个[练习题库（Practice Bank）](/practice/)条目、200 个[术语表](/glossary/)词条和 95 条[来源记录](/sources-and-versions/)，共 411 条资源目录记录；公开源文件形成 287 个双语发布对和 574 条源路由，包含 77 组练习与 77 组独立参考解答。
 
-既有 82 道练习题库（Practice Bank）题目中，八道符合 R4 库与算法选择分类：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`；R3 十道 Nsight 报告分析题保持不变。只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。其余 19 个示例和全部 12 个实验共 31 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
+**R4 聚合静态复核：2026-09-10。** 技术来源保留各自访问与复核日期，当时的检索有单独的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)，不覆盖当前 Python 桥接增量。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。R4 不表示框架或 Triton 路线已完成，也不为它们发布占位入口。
+
+当前 85 道练习题库（Practice Bank）题目包含三道新增 Python 桥接题 `PB-R5-001/002/003`，并保留八道 R4 库与算法选择题：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`；R3 十道 Nsight 报告分析题保持不变。只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。P01-P03 的四个证据数组均为空；EX21 的编译证据和实际观察记录为空，Python 主机测试不授予 CUDA 编译或运行证据。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
 
 Q06-Q13、A10-A14 与 L01-L13 的四个证据数组均为空，不授予证据状态（Evidence Status）。L03-L05 只链接和复述精确的上游源码及测试合同；API 存在与上游测试不是本站编译或运行证据。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）；没有计时、加速比或赢家记录，L07 的发布也不提供 Lt 选择的运行证据。选定的 CCCL v3.4.2 坐标独立于 Toolkit 标签，只用于 12.9.2/13.3.1 评估，并排除 11.8。19 项可视化讲解仍是无 CUDA 证据的浏览器模型。
 
@@ -76,4 +78,4 @@ L13 使用归档的 12.9.2 cuSPARSE 教学基线，并与精确的 11.8.0 和 13
 
 ## 反馈
 
-发现事实、双语对齐、链接、无障碍或源码问题时，请在 [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) 提交可复现说明。页面聚合发布摘要核对日期为 **2026-09-10**。
+发现事实、双语对齐、链接、无障碍或源码问题时，请在 [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) 提交可复现说明。当前发布摘要核对日期为 **2026-09-12**；这不改变 R4 聚合复核和各项技术来源的历史日期。

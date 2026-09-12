@@ -2,6 +2,11 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "examples": {
+    "EX21": {
+      "sourceCommit": "55486357d87671e64277dfb4c09a5eef8ed1a3cd",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip"
+    },
     "EX20": {
       "sourceCommit": "a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/a1548e08b6bda44d92ccd7bcd01a6a16c3c7540f/examples/ex20-cusparse-spmv",

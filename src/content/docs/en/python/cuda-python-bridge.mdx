@@ -1,0 +1,197 @@
+---
+title: 'P01: Keep the CUDA Model When the Host Is Python'
+description: Separate Python orchestration from GPU execution, choose the stable CUDA Python layers, and audit ownership and the one pinned environment before running EX21.
+pairId: p01
+counterpart: /python/cuda-python-bridge/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, interfaces, profile, ownership, prediction, correctness, diagnostics, measurement, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P01
+prerequisites: [F04, M07]
+relatedUnits: [P02, P03, EX21]
+exampleIds: [EX21]
+canonicalExample: EX21
+canonicalRanges:
+  - canonical-imports
+hardwareGate: none
+estimatedMinutes: 25
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'CUDA core installation and dependencies'
+    url: 'https://nvidia.github.io/cuda-python/cuda-core/1.2.0/install.html'
+    version: 'cuda-core 1.2.0'
+    platform: 'Selected native Linux x86-64 Python orchestration contract'
+    accessDate: '2026-09-12'
+  - title: 'CUDA bindings support policy'
+    url: 'https://nvidia.github.io/cuda-python/cuda-bindings/13.4.1/support.html'
+    version: 'cuda-bindings 13.4.1'
+    platform: 'Minor-version policy with API-specific availability limits'
+    accessDate: '2026-09-12'
+  - title: 'CUDA Toolkit release and component notes'
+    url: 'https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html'
+    version: 'Toolkit 13.3.1; NVRTC and nvJitLink 13.3.33'
+    platform: 'Native Linux profile target, not an observed environment'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p01 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/python/cuda-python-bridge/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,interfaces,profile,ownership,prediction,correctness,diagnostics,measurement,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P01 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'F04,M07' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P02,P03,EX21' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX21 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: canonical-imports } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'cuda-core-1.2.0,cuda-bindings-13.4.1,CUDA-13.3.1' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/python/cuda-python-bridge/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Moving a host program to Python can shorten its control flow without changing a single GPU instruction in the kernel. The useful question is not “does Python run on the GPU?” but “which work crosses the CUDA boundary, and who owns its inputs until it finishes?” Allow about 25 minutes for reading, prediction, and the host-only practice; GPU execution is optional and separately gated.
+
+By the end, distinguish the Python interpreter, Python packages, native CUDA libraries, and GPU code; explain what core objects hide and what they do not; and reject an environment or correctness claim that lacks the necessary evidence. This explicit-launch path is useful for understanding integration, runtime-generated kernels, and resource debugging. It is not an array framework, automatic parallelization system, or promise that tiny GPU workloads beat a CPU loop.
+
+## Prerequisites
+
+The ordered prerequisites are [F04: Host-Device Lifecycle](/en/foundations/host-device-lifecycle/) and [M07: Stream Ordering](/en/memory/stream-ordering/), exactly `[F04, M07]`. Recall that a pointer is not a transfer, submission is not completion, and resources must survive their last use. [P02](/en/python/devices-contexts-launches/) applies those rules to the API; [P03](/en/python/runtime-compilation-linking/) develops the compiler path. Both refer to the same [EX21](/en/examples/cuda-python-launch/).
+
+## From C calls to Python objects
+
+CUDA separates host orchestration from compiled device work. A C++ application commonly performs both host compilation and device compilation ahead of execution. A Python host can instead call native libraries through bindings and ask a runtime compiler to compile CUDA C++ source when the application runs. Moving compilation later changes startup and deployment costs, not the need for compiled device code.
+
+CUDA Python exposes different abstraction levels. Low-level bindings preserve many native concepts and calling conventions; `cuda.core` supplies objects for devices, streams, storage, programs, and launches. Older material may use `from cuda import cuda` or `cuda.core.experimental`. This unit selects the stable `cuda.core` 1.2.0 contract and `cuda.bindings` 13.4.1, not those older namespaces or preview APIs. A shorter Python call still has native resource and error semantics.
+
+## Two processors, four kinds of work
+
+| Work | Runs where | What it produces |
+| --- | --- | --- |
+| Validate arguments, initialize inputs, compute the reference | Python process on the CPU | Host values and a correctness contract |
+| Compile CUDA C++ and link device code | Native compiler/linker called by the host | PTX and cubin bytes, not a computed vector |
+| Submit copies and a configured launch | Host calls into CUDA | Ordered work in a stream, not completed results |
+| Execute the kernel and transfer results | GPU and CUDA transfer machinery | Output that the CPU may inspect after checked completion |
+
+Python's `for` loop used for the reference remains a CPU loop. An `extern "C" __global__` function is compiled device code; its threads execute according to the configured grid. Neither importing a CUDA package nor constructing a Python object moves arbitrary Python operations onto the GPU. The browser renders explanations and source ranges only; all CUDA activity happens in an external environment.
+
+## Choose the API layer deliberately
+
+<CanonicalCode exampleId="EX21" range="canonical-imports" />
+
+This is an imported range from the canonical project, not a second executable listing. The host's stdlib `ctypes` import provides views and explicitly sized scalar arguments. Core handles the ordinary device/buffer/stream/launch path. `cuda.bindings.nvrtc` and `cuda.bindings.nvjitlink` expose lower-level compiler and linker contracts for comparison and diagnostics; pathfinder identifies the native libraries actually loaded, rather than allocating GPU arrays. Do not infer that every binding returns a status tuple: P03 distinguishes the two error surfaces.
+
+Core is useful when its public objects express the needed operation. A low-level binding is useful when inspecting a native contract or using a supported API not expressed by the higher layer. Mixing them requires an ownership boundary: borrowing a native handle does not authorize destroying the object still owned by core. No CuPy, Numba, or PyTorch dependency is needed here. NumPy is nevertheless an unconditional dependency of the selected core, even though EX21 needs no NumPy host-array API.
+
+## One declared profile, not matching version numbers
+
+| Coordinate | Selected target |
+| --- | --- |
+| Platform | Native Linux x86-64, Ubuntu 24.04 LTS |
+| Interpreter | CPython 3.14.7, ordinary GIL build, `cp314-cp314` ABI |
+| Python distributions | `cuda-core==1.2.0`, `cuda-bindings==13.4.1`, `cuda-pathfinder==1.8.1`, `numpy==2.5.3` |
+| External Toolkit | 13.3.1, NVIDIA Ubuntu Debian packages (deb), not a runfile installation |
+| Native compilation and linking | NVRTC 13.3.33 and nvJitLink 13.3.33 |
+| Pinned driver userspace | `cuda-compat-13-3=610.43.02-1ubuntu1`; the current run contract also requires a matching 610.43.02 kernel driver |
+| Future runtime gate | One GPU with compute capability at least 7.5, target supported by the selected compiler, small problems fitting within 8 GB |
+
+The bindings wheel's 13.4.1 does not mean the Toolkit is 13.4.1. The versioned core and bindings policies support the selected subset with Toolkit 13.x; API-specific availability still matters. This is not permission to use every 13.4 binding against 13.3 native libraries or to replace them with Toolkit 12. The compiler and linker are separately pinned to avoid feeding newer compiler output to an older linker.
+
+Use the project's exact, hash-checked base-distribution lock. Do not add `[cu13]` or `[all]` extras, an unpinned `cuda-python` metapackage, or `--no-deps` as a supposed NumPy-removal mechanism. The lock fixes Python distributions, not the driver, OS image, interpreter installation, or resolved native library files. [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) records these boundaries. No second platform or historical Toolkit profile is part of EX21.
+
+The native profile is specifically NVIDIA's deb installation on Ubuntu 24.04. `native-profile.json` lists the five Toolkit packages in [EX21's profile](/en/examples/cuda-python-launch/#one-independently-pinned-profile), the separately pinned driver-userspace package, and the native files whose ownership is checked. Do not require or manufacture `/usr/local/cuda-13.3/version.json`: that file is absent from the selected official Debian-based devel image. Package inventory, resolved library names and binary hashes are distinct checks; none alone proves imports or compilation succeeded. There is no runfile fallback, and general newer-driver compatibility does not override this exact example profile.
+
+## A Python reference is not necessarily an owner
+
+| Object or value | What must remain alive | What it does not establish |
+| --- | --- | --- |
+| Device and its primary context | Shared core-managed context state used by the work | Private ownership that permits a context reset |
+| Device Buffer | Allocation through the last copy or kernel use | CPU dereference permission |
+| Pinned host Buffer | Host storage through asynchronous transfers and CPU inspection | Automatic retention by a ctypes array type's `from_address` view |
+| Borrowed ctypes view | Its backing host Buffer as well as the view | Allocation ownership or safe access after Buffer closure |
+| Stream and kernel/library owners | Work queue and code through checked completion | A successful result merely because launch returned |
+
+The key invariant is **backing storage outlives every use, including queued uses**. Garbage collection reasons about references; CUDA also has work still in flight. Keep explicit owners, use the same stream to order the data path, and check `stream.sync()` before inspecting output or beginning normal release. P02 explains why a shared primary context and a borrowed pointer do not belong in a generic “close everything” loop.
+
+## Predict before opening a terminal
+
+EX21 computes elementwise float addition for `n=1003`, using block size 256. Predict four blocks, 1024 launched threads, and 21 tail threads that must not access the arrays. Each float array needs `1003*4=4012` bytes. Three device arrays need 12036 bytes; three pinned host arrays need another 12036 host bytes. Those are logical payload counts, not total GPU memory usage, library overhead, or transfer measurements.
+
+Write the required order: initialize host inputs, H2D inputs, kernel launch, D2H output, checked stream completion, CPU comparison, release. Compilation and linking produce code before symbol lookup and execution. If a proposed program compares immediately after launch, identify the missing D2H and completion edges even if its Python variables all remain in scope.
+
+## Make correctness independent of the bridge
+
+The original inputs use small binary-exact fractions, `a[i]=(i % 37)*0.25` and `b[i]=-(i % 19)*0.5`. Compute the CPU reference from the stored input values. These inputs and their sums fit exactly in float32, so finite exact equality is justified for this fixture; it is not a general rule for floating-point CUDA programs.
+
+Every output must be checked, not just the first few or a checksum that can hide paired errors. A report should retain the first mismatch and total mismatch count and fail for non-finite values. For `i=0,1,18,19`, derive `0,-0.25,-4.5,4.75` on paper. These are predictions, not observed GPU output. Changing to arbitrary data, reduction, or mixed precision requires a new numerical acceptance policy.
+
+## Diagnose the layer that actually failed
+
+| Symptom | First distinction to investigate |
+| --- | --- |
+| Package installation rejected | Interpreter version, ordinary versus free-threaded ABI, platform tag, exact wheel/hash |
+| Import or library discovery failed | Python distribution presence versus native library resolution; no GPU computation has been established |
+| Compilation or linking failed | Source/options, target, loaded compiler/linker identity, and stage-specific diagnostics |
+| Launch returned but comparison failed | Argument width, byte sizes, geometry, bounds, copy destination, ordering, and checked completion |
+| Cleanup also failed | Keep the original failure; report cleanup separately rather than replacing it with a success message |
+
+An empty compiler log stream is not proof of a clean compile when an exception carries the diagnostic. Likewise, a copy or synchronization failure can expose an earlier asynchronous kernel fault. Preserve the stage, exception type/message, and available logs rather than assigning every failure to “Python overhead.”
+
+## Measure a boundary, not a language label
+
+End-to-end host time can include interpreter startup, import, native library discovery, context initialization, runtime compilation, linking, lazy code loading, allocation, copies, execution, and checking. A timer around launch submission alone excludes completion. Neither quantity is automatically kernel time.
+
+For a future benchmark, state whether setup and transfers are included, separate first use from warmed repetitions, keep the same accepted input/output contract, and record the environment and synchronization boundary. Do not add a claimed speedup to this correctness example. The cost of a small vector addition may be dominated by setup, but that is a hypothesis to measure, not an observed result here.
+
+## Guided practice: Audit the bridge before execution
+
+1. Open [EX21](/en/examples/cuda-python-launch/) and its canonical project. On paper, assign every operation to a row of the four-work table. Keep the Python CPU reference separate from the CUDA C++ kernel.
+2. Compare your target with the single profile above. Record missing interpreter, packages, native libraries, or GPU access as blockers, not as successful checks. On an unsupported machine, continue with source reading or EX21's isolated stdlib-only host test; that exception does not establish a supported CUDA profile.
+3. In a fresh standalone `examples/ex21-cuda-python-launch` copy on matching external Linux, prepare the environment and run only the host contract. If the selected `.venv` already exists, omit setup, which refuses to overwrite it:
+
+```sh
+bash scripts/setup.sh
+.venv/bin/python ex21.py host-test
+```
+
+4. Compare your byte counts, four-block prediction, and four hand-derived values with the source and host-test contract. Keep the actual exit status and diagnostics if you run it; no sample transcript is supplied here.
+   Host-test deliberately exercises and replays labeled cleanup diagnostics; correct classification and the host-test result, not empty stderr, determine this CPU-only check's success.
+5. Mark the last use of each allocation and the owner that must survive it. Before moving to P02, explain why a host-test pass proves neither native compilation nor GPU correctness.
+
+**Acceptance:** Submit the layer table, profile differences, ownership arrows, and predictions. Host-test execution is optional for this reading unit; a blocker is an honest outcome. EX21's full environment, build, and run steps remain on its own page.
+
+## Evidence boundary
+
+This Learning Unit and its paper Exercises have four empty evidence arrays. Source review, package hashes, and host tests do not grant Compile-Checked or Runtime-Verified status. EX21 independently remains **Pending Hardware Verification**, with no recorded compilation or runtime observation asserted here. A declared compatible profile is not yet a Runtime-Verified Reference Environment.
+
+## Retrieval check
+
+1. Which part of EX21 is Python executing on the CPU, and which part becomes GPU code?
+2. Why are bindings 13.4.1 and Toolkit 13.3.1 not a version-number contradiction or blanket compatibility proof?
+3. Why can a live ctypes view refer to storage that is no longer valid?
+4. What is still unproven after a host-test pass and after a successful launch return?
+5. Which costs and completion boundary must be stated before comparing a Python-host and C++-host implementation?
+
+## Continue with practice
+
+Complete the [two Exercises](/en/python/cuda-python-bridge/exercises/) before opening the [separate solutions](/en/python/cuda-python-bridge/solutions/). [PB-R5-001](/en/practice/#pb-r5-001) applies the ownership model to a queued-service proposal. Continue to [P02](/en/python/devices-contexts-launches/) for devices, contexts, byte buffers, and launch arguments.
+
+## Sources and licensing
+
+Read the [canonical EX21 source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch) or [download its repository revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/55486357d87671e64277dfb4c09a5eef8ed1a3cd.zip), then use `examples/ex21-cuda-python-launch/` as the standalone root. Both links identify the immutable source behind this unit's imported code; source identity does not establish compilation or GPU execution.
+
+[SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077) records core 1.2.0 API and ownership facts; [SRC-CUDA-078](/en/sources-and-versions/#src-cuda-078) records bindings error contracts; [SRC-CUDA-079](/en/sources-and-versions/#src-cuda-079) records profile, artifacts, and licenses. Reuse the existing [stream](/en/glossary/#term-083), [page-locked host memory](/en/glossary/#term-096), and [PTX](/en/glossary/#term-118) terms alongside [CUDA Python](/en/glossary/#term-197). Facts and source access: **2026-09-12**. Prose and exercises are original CC BY 4.0; canonical project code is original Apache-2.0. External packages and native CUDA retain their own terms.

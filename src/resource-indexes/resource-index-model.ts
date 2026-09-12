@@ -458,6 +458,51 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'L13 参考解答', en: 'L13 Reviewed Solutions' },
     prerequisites: ['L13-EXERCISES'],
   },
+  P01: {
+    href: { 'zh-CN': '/python/cuda-python-bridge/', en: '/en/python/cuda-python-bridge/' },
+    title: { 'zh-CN': 'P01：CUDA Python 桥接', en: 'P01: The CUDA Python Bridge' },
+    prerequisites: ['F04', 'M07'],
+  },
+  'P01-EXERCISES': {
+    href: { 'zh-CN': '/python/cuda-python-bridge/exercises/', en: '/en/python/cuda-python-bridge/exercises/' },
+    title: { 'zh-CN': 'P01 练习', en: 'P01 Exercises' },
+    prerequisites: ['P01'],
+  },
+  'P01-SOLUTIONS': {
+    href: { 'zh-CN': '/python/cuda-python-bridge/solutions/', en: '/en/python/cuda-python-bridge/solutions/' },
+    title: { 'zh-CN': 'P01 参考解答', en: 'P01 Reviewed Solutions' },
+    prerequisites: ['P01-EXERCISES'],
+  },
+  P02: {
+    href: { 'zh-CN': '/python/devices-contexts-launches/', en: '/en/python/devices-contexts-launches/' },
+    title: { 'zh-CN': 'P02：设备、上下文与显式启动', en: 'P02: Devices, Contexts, and Explicit Launches' },
+    prerequisites: ['P01', 'F07'],
+  },
+  'P02-EXERCISES': {
+    href: { 'zh-CN': '/python/devices-contexts-launches/exercises/', en: '/en/python/devices-contexts-launches/exercises/' },
+    title: { 'zh-CN': 'P02 练习', en: 'P02 Exercises' },
+    prerequisites: ['P02'],
+  },
+  'P02-SOLUTIONS': {
+    href: { 'zh-CN': '/python/devices-contexts-launches/solutions/', en: '/en/python/devices-contexts-launches/solutions/' },
+    title: { 'zh-CN': 'P02 参考解答', en: 'P02 Reviewed Solutions' },
+    prerequisites: ['P02-EXERCISES'],
+  },
+  P03: {
+    href: { 'zh-CN': '/python/runtime-compilation-linking/', en: '/en/python/runtime-compilation-linking/' },
+    title: { 'zh-CN': 'P03：运行时编译与链接', en: 'P03: Runtime Compilation and Linking' },
+    prerequisites: ['P02', 'M15', 'M16'],
+  },
+  'P03-EXERCISES': {
+    href: { 'zh-CN': '/python/runtime-compilation-linking/exercises/', en: '/en/python/runtime-compilation-linking/exercises/' },
+    title: { 'zh-CN': 'P03 练习', en: 'P03 Exercises' },
+    prerequisites: ['P03'],
+  },
+  'P03-SOLUTIONS': {
+    href: { 'zh-CN': '/python/runtime-compilation-linking/solutions/', en: '/en/python/runtime-compilation-linking/solutions/' },
+    title: { 'zh-CN': 'P03 参考解答', en: 'P03 Reviewed Solutions' },
+    prerequisites: ['P03-EXERCISES'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },
@@ -557,6 +602,11 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/examples/cusparse-spmv/', en: '/en/examples/cusparse-spmv/' },
     title: { 'zh-CN': 'EX20：cuSPARSE SpMV 可运行示例', en: 'EX20: cuSPARSE SpMV Runnable Example' },
     prerequisites: ['L13'],
+  },
+  EX21: {
+    href: { 'zh-CN': '/examples/cuda-python-launch/', en: '/en/examples/cuda-python-launch/' },
+    title: { 'zh-CN': 'EX21：CUDA Python 显式启动可运行示例', en: 'EX21: CUDA Python Explicit Launch Runnable Example' },
+    prerequisites: ['P02'],
   },
   LAB01: {
     href: { 'zh-CN': '/labs/record-cuda-environment/', en: '/en/labs/record-cuda-environment/' },

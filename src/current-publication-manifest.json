@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-10",
+  "reviewDate": "2026-09-12",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 277,
-    "sourceRoutes": 554,
-    "exerciseSetPublicationPairs": 74,
-    "solutionSetPublicationPairs": 74,
+    "publicationPairs": 287,
+    "sourceRoutes": 574,
+    "exerciseSetPublicationPairs": 77,
+    "solutionSetPublicationPairs": 77,
     "learningUnits": [
       "O01",
       "O02",
@@ -90,9 +90,12 @@
       "L10",
       "L11",
       "L12",
-      "L13"
+      "L13",
+      "P01",
+      "P02",
+      "P03"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12"],
     "visualExplainers": [
       "VIS01",
@@ -115,7 +118,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 82,
+    "practiceBankEntries": 85,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -138,8 +141,8 @@
       "PB-R4-012",
       "PB-R4-016"
     ],
-    "glossaryTerms": 196,
-    "sourceRecords": 92
+    "glossaryTerms": 200,
+    "sourceRecords": 95
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -212,6 +215,25 @@
       }
     ],
     "componentBoundaries": {
+      "cudaPython": {
+        "selection": "independently-pinned",
+        "reviewedOn": "2026-09-12",
+        "core": { "version": "1.2.0", "commit": "53b43746e501f1a0b627f951604991636f77cd9c" },
+        "bindings": { "version": "13.4.1", "commit": "0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa" },
+        "python": { "version": "3.14.7", "abi": "cp314-cp314", "freeThreaded": false },
+        "runtimeDependencies": { "cuda-pathfinder": "1.8.1", "numpy": "2.5.3" },
+        "exampleProfile": {
+          "environmentId": "cpython-3-14-7-cuda-13-3-1",
+          "host": "Ubuntu 24.04 x86-64",
+          "toolkit": "13.3.1",
+          "driver": "610.43.02",
+          "nvrtc": "13.3.33",
+          "nvJitLink": "13.3.33",
+          "minimumComputeCapability": "7.5",
+          "gpuCount": 1
+        },
+        "compileCheckedToolkitLanes": []
+      },
       "cudnn": {
         "version": "9.24.0",
         "selection": "independent-reference-only",
@@ -377,6 +399,7 @@
       "EX18",
       "EX19",
       "EX20",
+      "EX21",
       "LAB01",
       "LAB03",
       "LAB04",
@@ -409,6 +432,7 @@
       "EX18",
       "EX19",
       "EX20",
+      "EX21",
       "LAB01",
       "LAB02",
       "LAB03",
@@ -429,6 +453,7 @@
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
     "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"],
+    "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -468,6 +493,8 @@
     "EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.",
     "L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.",
     "EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.",
-    "R5 framework-integration and Triton Learning Units, Labs, Runnable Examples, and all later curriculum material are outside this release; library-selection comparisons grant no framework or Triton destination, compilation, runtime, or performance evidence."
+    "P01-P03 publish the CUDA Python bridge with all four evidence arrays empty and grant no Evidence Status. The R5 aggregate review remains pending; no downstream framework or Triton destination is published.",
+    "EX21 has empty compilation and recorded observations and remains Pending Hardware Verification. Host tests, Python syntax checks, package installation, canonical imports, and browser rendering grant no CUDA compilation, linking, launch, correctness, or performance evidence.",
+    "EX21 selects ordinary CPython 3.14.7, cuda-core 1.2.0, cuda-bindings 13.4.1, cuda-pathfinder 1.8.1, and NumPy 2.5.3 independently from system Toolkit 13.3.1. Only the declared native Linux x86-64 profile is selected; no CUDA 11.8 or 12.9 combination is implied, and optional Toolkit extras are excluded. Actual loaded native libraries, driver, supported target, and GPU coordinates still require an Environment Manifest."
   ]
 }

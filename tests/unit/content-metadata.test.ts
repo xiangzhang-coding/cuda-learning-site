@@ -84,6 +84,20 @@ describe('Visual Explainer metadata', () => {
 });
 
 describe('Learning Unit and Lab metadata', () => {
+  it.each(['P01', 'P02', 'P03'].flatMap((id) => [id, `${id}-EXERCISES`, `${id}-SOLUTIONS`]))(
+    'accepts the Python bridge publication identifier %s',
+    (identifier) => {
+      expect(curriculumIdSchema.safeParse(identifier).success).toBe(true);
+    },
+  );
+
+  it.each(['P1', 'P001', 'p01', 'P01-exercises', 'P01-SOLUTIONS-extra'])(
+    'rejects malformed Python bridge identifier %s',
+    (identifier) => {
+      expect(curriculumIdSchema.safeParse(identifier).success).toBe(false);
+    },
+  );
+
   it.each([
     'F01', 'F01-EXERCISES', 'F01-SOLUTIONS',
     'M01', 'M05', 'M08', 'M01-EXERCISES', 'M01-SOLUTIONS', 'M08-EXERCISES', 'M08-SOLUTIONS',

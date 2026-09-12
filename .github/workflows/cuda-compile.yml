@@ -1146,10 +1146,44 @@ jobs:
           include-hidden-files: false
           retention-days: 7
 
+  ex21-python-build:
+    name: EX21 Python GPU-free build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out canonical public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up exact Node.js for the Python build runner
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Provision and check EX21 without granting Evidence Status
+        run: node scripts/run-ex21-python-check.mjs
+
+      - name: Scan EX21 text reports including failed stages
+        id: scan
+        if: ${{ !cancelled() }}
+        run: node scripts/check-artifacts.mjs "artifacts/cuda-ex21/ex21-cpython-3-14-7-cuda-13-3-1-sm75"
+
+      - name: Upload scanned EX21 Python build-gate reports
+        if: ${{ !cancelled() && steps.scan.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cuda-build-ex21-python
+          path: artifacts/cuda-ex21/ex21-cpython-3-14-7-cuda-13-3-1-sm75
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+
   cuda-compile-gate:
     name: cuda-compile-gate
     if: ${{ always() }}
-    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build, ex17-build, ex18-build, ex19-build, ex20-build]
+    needs: [cuda-compile, ex01-build, ex03-build, ex04-build, ex05-build, ex06-build, ex07-build, ex08-build, ex09-build, ex10-compile, ex11-build, ex12-build, ex13-build, ex14-build, ex15-build, ex16-build, ex17-build, ex18-build, ex19-build, ex20-build, ex21-python-build]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -1175,6 +1209,7 @@ jobs:
           EX18_BUILD_RESULT: ${{ needs.ex18-build.result }}
           EX19_BUILD_RESULT: ${{ needs.ex19-build.result }}
           EX20_BUILD_RESULT: ${{ needs.ex20-build.result }}
+          EX21_PYTHON_BUILD_RESULT: ${{ needs.ex21-python-build.result }}
         run: |
           if [ "$CUDA_EVIDENCE_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX01_BUILD_RESULT" != "success" ]; then exit 1; fi
@@ -1196,6 +1231,7 @@ jobs:
           if [ "$EX18_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX19_BUILD_RESULT" != "success" ]; then exit 1; fi
           if [ "$EX20_BUILD_RESULT" != "success" ]; then exit 1; fi
+          if [ "$EX21_PYTHON_BUILD_RESULT" != "success" ]; then exit 1; fi
           echo "Compile evidence does not grant CUDA runtime evidence."
 
   ex10-compile:

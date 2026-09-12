@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import path from 'node:path';
 import os from 'node:os';
-import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -169,6 +169,30 @@ async function passingEx17Record(checkId, root = projectRoot) {
 }
 
 describe('canonical Runnable Example resolver', () => {
+  it('validates the independently pinned Python profile rather than borrowing C++ lanes', async () => {
+    await expect(validateCanonicalExample(projectRoot, 'EX21')).resolves.toEqual([]);
+    const root = await mkdtemp(path.join(os.tmpdir(), 'canonical-python-'));
+    temporaryRoots.push(root);
+    const exampleRoot = path.join(root, 'examples/ex21-cuda-python-launch');
+    await cp(path.join(projectRoot, 'examples/ex21-cuda-python-launch'), exampleRoot, { recursive: true,
+      filter: (file) => !/\/(?:build|\.venv|__pycache__)(?:\/|$)/.test(file) });
+    const manifest = JSON.parse(await readFile(path.join(exampleRoot, 'project.json'), 'utf8'));
+    manifest.compatibility.lanes = [{ id: 'cuda-11.8', dialects: ['c++17'] }];
+    await writeFile(path.join(exampleRoot, 'project.json'), JSON.stringify(manifest));
+    expect(await validateCanonicalExample(root, 'EX21')).toContain('EX21 Python checks must not inherit C++ Toolkit Lanes');
+  });
+
+  it('rejects Python dependency drift even when the executable source is unchanged', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'canonical-python-lock-'));
+    temporaryRoots.push(root);
+    const exampleRoot = path.join(root, 'examples/ex21-cuda-python-launch');
+    await cp(path.join(projectRoot, 'examples/ex21-cuda-python-launch'), exampleRoot, { recursive: true,
+      filter: (file) => !/\/(?:build|\.venv|__pycache__)(?:\/|$)/.test(file) });
+    const lock = await readFile(path.join(exampleRoot, 'requirements.lock'), 'utf8');
+    await writeFile(path.join(exampleRoot, 'requirements.lock'), lock.replace('cuda-core==1.2.0', 'cuda-core==1.1.0'));
+    expect(await validateCanonicalExample(root, 'EX21')).toContain('EX21 Python lock does not match its independently pinned distributions');
+  });
+
   it('loads EX01 as one C++17 query project with no borrowed evidence', async () => {
     const example = await loadCanonicalExample(projectRoot, 'EX01');
 
