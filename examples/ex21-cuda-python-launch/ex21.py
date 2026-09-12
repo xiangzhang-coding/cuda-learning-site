@@ -82,9 +82,12 @@ def inspect_native_file(path, package, inventory):
     if ownership.returncode != 0 or ownership.stdout.splitlines() != [f"{owner}: {actual}"]:
         raise RuntimeError(f"package ownership mismatch: {actual} must be owned only by {owner}")
     with actual.open("rb") as binary:
+        identity = os.fstat(binary.fileno())
         digest = hashlib.file_digest(binary, "sha256").hexdigest()
     return {"path": str(actual), "sha256": digest, "package": package,
-            "packageVersion": inventory[package]["version"], "owner": owner}
+            "packageVersion": inventory[package]["version"], "owner": owner,
+            "fileIdentity": {"inode": identity.st_ino, "deviceMajor": os.major(identity.st_dev),
+                             "deviceMinor": os.minor(identity.st_dev)}}
 
 
 def check_native_packages(report):
@@ -159,7 +162,10 @@ def observe_nvrtc_builtins(report, profile):
                                    report["environment"]["toolkit"]["packages"])
     if observed["sha256"] != expected["sha256"]:
         raise RuntimeError("loaded NVRTC-builtins backing file changed from its package inspection")
-    observed["mappingIdentity"] = {"inode": inode, "deviceMajor": major, "deviceMinor": minor}
+    mapping_identity = {"inode": inode, "deviceMajor": major, "deviceMinor": minor}
+    if observed["fileIdentity"] != mapping_identity:
+        raise RuntimeError("hashed NVRTC-builtins file does not match the loaded mapping identity")
+    observed["mappingIdentity"] = mapping_identity
     observed["observedVia"] = "/proc/self/maps after NVRTC compilation"
     report["environment"]["nativeLibraries"]["nvrtcBuiltins"] = observed
 
