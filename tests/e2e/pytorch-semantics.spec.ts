@@ -32,25 +32,35 @@ async function expectPublication(page: Page, id: string, prerequisites: string) 
 for (const locale of ['', 'en/']) {
   const label = locale || 'zh-CN/';
 
-  test(`${label}PyTorch navigation reaches all four units and useful source/practice anchors`, async ({ page, baseURL }, info) => {
-    test.skip(info.project.name === 'mobile-safari', 'The narrow-screen journey owns mobile navigation.');
-    test.setTimeout(60_000);
-    const failures = collectBrowserFailures(page, baseURL!);
-    async function expectLoadedPage() {
-      // URL commit can precede late anchors and Starlight's idle-scheduled search import.
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page.locator('site-search .pagefind-ui__search-input')).toBeAttached();
-    }
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(`/${locale}${units[0].slug}/`, { waitUntil: 'networkidle' });
-    await expectLoadedPage();
-    const group = page.locator('nav details').filter({ has: page.locator('summary', { hasText: locale ? 'PyTorch CUDA Semantics' : 'PyTorch CUDA 语义' }) });
-    await expect(group).toHaveCount(1);
-    expect(await group.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
-      .toEqual(units.map(({ slug }) => `/${locale}${slug}/`));
-    for (const unit of units) {
+  for (const unit of units) {
+    test(`${label}${unit.id} navigation reaches its unit and exact source/practice anchors`, async ({ page, baseURL }, info) => {
+      test.skip(info.project.name === 'mobile-safari', 'The narrow-screen journey owns mobile navigation.');
+      test.setTimeout(30_000);
+      const failures = collectBrowserFailures(page, baseURL!);
+      async function expectLoadedPage() {
+        // A real result proves the focus-triggered search worker is ready before navigating away.
+        await page.waitForLoadState('domcontentloaded');
+        const name = locale ? 'Search' : '搜索';
+        await page.getByRole('banner').getByRole('button', { name, exact: true }).click();
+        const dialog = page.getByRole('dialog', { name, exact: true });
+        const input = dialog.getByRole('textbox', { name, exact: true });
+        await expect(input).toBeVisible();
+        await expect(input).toBeEditable();
+        await input.fill(unit.id);
+        await expect(dialog.locator(`a[href="/${locale}${unit.slug}/"]`).first()).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toBeVisible();
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(`/${locale}${units[0].slug}/`, { waitUntil: 'domcontentloaded' });
+      await expectLoadedPage();
+      const group = page.locator('nav details').filter({ has: page.locator('summary', { hasText: locale ? 'PyTorch CUDA Semantics' : 'PyTorch CUDA 语义' }) });
+      await expect(group).toHaveCount(1);
+      expect(await group.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
+        .toEqual(units.map(({ slug }) => `/${locale}${slug}/`));
       if (!(await group.evaluate((element) => element.hasAttribute('open')))) await group.locator('summary').click();
       await group.locator(`a[href="/${locale}${unit.slug}/"]`).click();
+      await expect(page).toHaveURL(`${baseURL}/${locale}${unit.slug}/`);
       await expectLoadedPage();
       await expectPublication(page, unit.id, unit.prerequisites);
       await page.locator(`main a[href="/${locale}practice/#${unit.practice}"]`).first().click();
@@ -59,25 +69,27 @@ for (const locale of ['', 'en/']) {
       await expect(page.locator(`main #${unit.practice}`)).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^${unit.practice.toUpperCase()}[:：]`) })).toBeVisible();
       await page.locator(`main a[href="/${locale}${unit.slug}/"]`).first().click();
+      await expect(page).toHaveURL(`${baseURL}/${locale}${unit.slug}/`);
       await expectLoadedPage();
       await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-${unit.source}"]`).first().click();
       await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-${unit.source}`);
       await expectLoadedPage();
       await expect(page.locator(`main #src-cuda-${unit.source}`)).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^SRC-CUDA-${unit.source}[:：]`) })).toBeVisible();
-    }
-    await page.goto(`/${locale}${units[3].slug}/`);
-    await expectLoadedPage();
-    await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-080"]`).first().click();
-    await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-080`);
-    await expectLoadedPage();
-    const artifact = 'https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl';
-    await expect(page.locator(`main a[href="${artifact}"]`)).toBeVisible();
-    await expect(page.locator('main a[href="https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/profile.json"]')).toBeVisible();
-    expect(failures).toEqual([]);
-  });
+      if (unit.id === 'P07') {
+        await page.goto(`/${locale}${unit.slug}/`, { waitUntil: 'domcontentloaded' });
+        await expectLoadedPage();
+        await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-080"]`).first().click();
+        await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-080`);
+        await expectLoadedPage();
+        await expect(page.locator('main #src-cuda-080')).toHaveCount(1);
+        const artifact = 'https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl';
+        await expect(page.locator(`main a[href="${artifact}"]`)).toBeVisible();
+        await expect(page.locator('main a[href="https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/profile.json"]')).toBeVisible();
+      }
+      expect(failures).toEqual([]);
+    });
 
-  for (const unit of units) {
     test(`${label}${unit.id} mobile worksheet, counterpart round trips, keyboard hints and separate printable solutions`, async ({ page, baseURL }, info) => {
       const failures = collectBrowserFailures(page, baseURL!);
       await page.setViewportSize({ width: 360, height: 800 });
