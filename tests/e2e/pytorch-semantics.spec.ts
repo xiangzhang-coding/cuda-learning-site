@@ -34,9 +34,16 @@ for (const locale of ['', 'en/']) {
 
   test(`${label}PyTorch navigation reaches all four units and useful source/practice anchors`, async ({ page, baseURL }, info) => {
     test.skip(info.project.name === 'mobile-safari', 'The narrow-screen journey owns mobile navigation.');
+    test.setTimeout(60_000);
     const failures = collectBrowserFailures(page, baseURL!);
+    async function expectLoadedPage() {
+      // URL commit can precede late anchors and Starlight's idle-scheduled search import.
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.locator('site-search .pagefind-ui__search-input')).toBeAttached();
+    }
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`/${locale}${units[0].slug}/`, { waitUntil: 'networkidle' });
+    await expectLoadedPage();
     const group = page.locator('nav details').filter({ has: page.locator('summary', { hasText: locale ? 'PyTorch CUDA Semantics' : 'PyTorch CUDA 语义' }) });
     await expect(group).toHaveCount(1);
     expect(await group.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
@@ -44,19 +51,26 @@ for (const locale of ['', 'en/']) {
     for (const unit of units) {
       if (!(await group.evaluate((element) => element.hasAttribute('open')))) await group.locator('summary').click();
       await group.locator(`a[href="/${locale}${unit.slug}/"]`).click();
+      await expectLoadedPage();
       await expectPublication(page, unit.id, unit.prerequisites);
       await page.locator(`main a[href="/${locale}practice/#${unit.practice}"]`).first().click();
       await expect(page).toHaveURL(`${baseURL}/${locale}practice/#${unit.practice}`);
+      await expectLoadedPage();
       await expect(page.locator(`main #${unit.practice}`)).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^${unit.practice.toUpperCase()}[:：]`) })).toBeVisible();
       await page.locator(`main a[href="/${locale}${unit.slug}/"]`).first().click();
+      await expectLoadedPage();
       await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-${unit.source}"]`).first().click();
       await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-${unit.source}`);
+      await expectLoadedPage();
       await expect(page.locator(`main #src-cuda-${unit.source}`)).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^SRC-CUDA-${unit.source}[:：]`) })).toBeVisible();
     }
     await page.goto(`/${locale}${units[3].slug}/`);
+    await expectLoadedPage();
     await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-080"]`).first().click();
+    await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-080`);
+    await expectLoadedPage();
     const artifact = 'https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl';
     await expect(page.locator(`main a[href="${artifact}"]`)).toBeVisible();
     await expect(page.locator('main a[href="https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/profile.json"]')).toBeVisible();
