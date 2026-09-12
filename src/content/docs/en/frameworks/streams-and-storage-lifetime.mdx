@@ -1,0 +1,177 @@
+---
+title: 'P05: Order Work and Protect Storage Separately'
+description: Track allocation origin, producer and consumer dependencies, and both directions of storage lifetime under the pinned native PyTorch caching allocator.
+pairId: p05
+counterpart: /frameworks/streams-and-storage-lifetime/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, worksheet, correctness, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P05
+prerequisites: [P04, M08]
+relatedUnits: [P04]
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch CUDA semantics'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Native allocator selection and write-only cross-stream hazards'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch Stream and Event interfaces'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Call-time wait_stream boundary'
+    accessDate: '2026-09-12'
+  - title: 'Pinned Tensor record_stream contract'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_tensor_docs.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Deallocation-time lifetime boundary and manual origin-stream return'
+    accessDate: '2026-09-12'
+  - title: 'Pinned native CUDA caching allocator'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDACachingAllocator.cpp'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Ordinary eager allocations; stream registration and events at free'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p05 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/streams-and-storage-lifetime/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,worksheet,correctness,measurement,versions,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P05 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P04,M08' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: P04 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '4' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'torch-2.11.0+cu128,CPython-3.12.14,CUDA-12.8,native' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/streams-and-storage-lifetime/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+A side stream can expose useful concurrency, but moving an operation into it also moves responsibility. Two questions now need separate answers: is the input ready when the operation uses it, and can its bytes be reassigned while the operation is still using them? A correct answer to either question does not imply the other.
+
+In about 30 minutes, you will audit allocation origins, repair a two-way input/result handoff, explain a write-only hazard, and distinguish call-time dependencies from deallocation-time lifetime protection. These are static Exercises requiring no GPU. **GPU allocator and stream observations remain Pending Hardware Verification.**
+
+## Prerequisites
+
+The exact ordered prerequisites are `[P04, M08]`: [P04: Queued Work Timing](/en/frameworks/queued-work-timing/) distinguishes submission from completion; [M08: Event Dependencies and Timing](/en/memory/event-dependencies-timing/) supplies event-based dependency reasoning. P04 is also the related unit for the eventual measurement protocol. No other unit is a prerequisite.
+
+## Why caching makes the lifetime question visible
+
+Python object lifetimes and GPU work advance on different schedules. A caching allocator avoids treating every short-lived tensor as a fresh driver allocation: it can retain released blocks for later tensors. Stream-associated reuse exploits ordering. On the allocation's origin stream, later accesses can follow earlier accesses safely even if the CPU has already handed out the block again before old GPU work physically finishes.
+
+This optimization explains why “Python released it” is not the same as “the GPU finished with it.” Once another stream uses the allocation, origin-stream order alone no longer describes all its users. The framework needs that extra lifetime information, or the application must return those uses to the origin's ordering chain. This is a dependency problem, not a request to disable caching or synchronize the entire device after every expression.
+
+The target is **torch 2.11.0+cu128**, commit `70d99e998b4955e0049d13a98d77ae1b14db1f45`, under **CPython 3.12.14, native Linux x86_64, native caching allocator**. The model is scoped to ordinary eager CUDA tensor storage, not external memory, custom allocators, or CUDA Graph pools.
+
+## Two obligations and two different boundaries
+
+Track **allocation origin**, producer, consumer, last use, and storage release separately. The last writer is not automatically the origin. Views share backing storage; deleting one name is not necessarily the final release. The lifetime obligation concerns the underlying allocation and all remaining aliases.
+
+| Mechanism | Establishes | Does not establish |
+| --- | --- | --- |
+| `consumer.wait_stream(producer)` | Future consumer work waits for producer work already submitted at the call boundary | A CPU wait, coverage of later producer submissions, or automatic storage-lifetime registration |
+| `tensor.record_stream(consumer)` | Registers non-origin stream use so the native allocator delays reuse when storage is released | Producer readiness, a copy, a host wait, ownership transfer, or protection from explicit in-place overwrites |
+| Return dependency to the true origin before release | Future origin-stream reuse work follows the non-origin uses covered by that dependency | Coverage of consumer uses submitted later than the return boundary |
+| Retain storage until checked consumer completion | The retained allocation cannot be reclaimed while those uses remain in flight | Automatic ordering between competing producers, readers, or writers |
+
+`wait_stream` records an event on the argument stream at the time of the call. Therefore a wait before the needed production, a reversed wait, or a wait after a conflicting consumer use has already been submitted does not establish the required ordering. It affects future work on the waiting stream, not the CPU's ability to proceed.
+
+`record_stream` has a different boundary. At this native implementation, registration adds a side stream to the allocation's use set. When the storage is deallocated, the allocator inserts events on registered streams and later checks their completion before reuse. It covers work queued on those streams **at deallocation**, not merely work queued when registration was called. It does not authorize launches after storage release. This event tracking has overhead and can make reuse timing nondeterministic.
+
+## Predict and solve a two-way handoff
+
+Before reading the protection column, identify each true origin and draw the readiness edge separately from the reuse edge. A and B are two streams on one GPU; x, y, and z are distinct ordinary native allocations. All references can disappear after submission, before GPU completion. This is an original static worksheet, not a trace or address-reuse experiment.
+
+| Storage | Origin and use | Required readiness | Lifetime protection before final release |
+| --- | --- | --- | --- |
+| x | Allocated and produced on A; read on B | B waits for the relevant A production before reading x | Register x on B, retain through B completion, or return B's final x use to origin A |
+| y | Allocated and produced on B; read on A | A waits for the relevant B production before reading y | Register y on A, retain through A completion, or return A's final y use to origin B |
+| z | Allocated by `torch.empty` on A; overwritten without reading old values on B | B waits for the allocation-origin A boundary before writing z | Register z on B, retain through B completion, or return B's final z use to origin A |
+
+For x, first order A's production before B's read. Handling only this edge leaves x's storage vulnerable to reuse while B still reads it. For y, the roles reverse: y originated on B, so protecting x says nothing about y's later A use. The result requires its own readiness and lifetime proof.
+
+For z, there is no initialized value to preserve, but the physical block may be recycled from an earlier tensor with A work still queued. An unordered B write can conflict with those earlier accesses. **Write-only does not remove the allocation-origin dependency.** Once z is written on B, its origin is still A.
+
+Now audit five proposed reviews of x and y; every stated wait is otherwise at the correct boundary:
+
+| Case | Proposed review | Decision |
+| --- | --- | --- |
+| S0 | Both readiness waits; only x's B use registered; y released after its A read is enqueued | Incomplete: y's non-origin A use lacks lifetime protection |
+| S1 | Both non-origin uses registered; no readiness waits | Incomplete: lifetime registration does not establish data readiness |
+| S2 | Both readiness waits; both names retained only until consumer submission | Incomplete: submission is not completion |
+| S3 | Both readiness waits and both non-origin registrations before final release; no conflicting mutation | Complete for the stipulated use graph, not runtime evidence |
+| S4 | Both readiness waits; all non-origin final uses joined back to each true origin before final release | Valid manual alternative for the stipulated use graph |
+
+Finally consider registration R while x is alive, B uses U1 and U2 submitted after R but before final storage release F, and an attempted U3 after F. The registered-stream deallocation boundary covers U1 and U2; U3 is not authorized. In contrast, a `wait_stream` boundary between U1 and U2 covers U1, not U2. These are ordering labels, not timestamps or executable instructions.
+
+## Failure cases are graph defects, not promised corruption
+
+Never require an unsafe variant to produce a particular wrong tensor, crash, or reused address. Scheduling and allocator state can hide a defect on many runs. Likewise, a different address does not prove the lifetime graph is correct. Do not execute deliberate races as a default learner activity; diagnose missing edges on paper.
+
+Keeping storage alive protects against reclamation, not mutation by the application. Even S3 becomes unsafe if A explicitly overwrites x concurrently with B's read. `record_stream` neither freezes values nor serializes those accesses. Add ordering around the conflicting accesses or use separate storage; preserving allocation ownership alone is insufficient.
+
+A manual return must go to the allocation's real origin after all relevant non-origin uses are submitted and before final release. For x it returns B uses to A; for y it returns A uses to B. Each `wait_stream` records a fresh event on the argument stream before enqueueing its wait. In this ordinary eager model, reciprocal stream directions alone do not create a cyclic device wait: each dependency points from already-submitted work to later work. Careless placement can instead miss required coverage or unnecessarily serialize work. Place each return after the relevant last submission and before release.
+
+In a future safe validation, compare the intended results with an independent reference after checked completion, cover the returned result as well as the input, and include alias/lifetime review. A successful numeric comparison supplements rather than proves the general ordering contract. Preserve asynchronous failure diagnostics rather than continue as though a failed synchronization completed successfully.
+
+## Measure only after the ownership proof
+
+Separate correctness, workload warmup, uninstrumented timing, and profiling. Use P04's completed wall or correctly bracketed event interval and join every included branch. Timing-enabled events and a completed end are required; elapsed-time units are milliseconds. Do not interpret an enqueue-only interval as consumer completion.
+
+Compare registration and manual-return policies only with identical workloads and the same input/result semantics. Record where each release and dependency is placed. A later return may permit more overlap but retain memory longer; registration adds allocator event work. Neither policy has a measured performance advantage here. Shape-recording profiling can retain tensors and change reference-sensitive allocation behavior, so it cannot certify unperturbed reuse or timing.
+
+A future **Environment Manifest** must retain all of these fields:
+
+| Field group | Required fields |
+| --- | --- |
+| Run and workload | Date, source/workload revision, command or activity identity, inputs/seed, shapes/strides/layout/dtypes, independent reference, tolerance and finiteness policy, logs and failure stage |
+| Hardware | GPU model/stable identity, compute capability, visible/used GPU counts and device mapping, total/free memory, CPU model, clocks/power/thermal conditions, competing work |
+| Host and Python | Native Linux distribution/release, architecture, kernel/glibc, OS image/package provenance and container/GPU exposure if used; exact CPython executable/build provenance, compiler/flags, installer version |
+| Framework and CUDA | Torch version/commit, exact wheel/index/hash, complete dependency versions/artifact hashes; installed driver, build CUDA family, packaged Runtime/cuDNN/CUPTI and used components, loaded library paths/identities after operations; system Toolkit, `nvcc`, host compiler or explicitly absent/not used |
+| Ownership and policy | Active allocator backend and configuration, launch-blocking and other relevant environment variables, precision flags, each allocation's origin, aliases/owners, producing/consuming streams, readiness waits, registrations/return joins, final uses and releases |
+| Measurement | Timing method/units, start/end coverage, transfers/allocations/initialization included or excluded, warmup/repetitions/batch policy, raw samples/distribution and noise policy, profiler version/configuration or disabled, separate correctness and trace artifacts |
+
+Unobserved values remain unobserved, not copied from the proposed target. Peak/reserved/allocated memory observations need their actual backend and sampling method; a pointer equality is not a portable reuse requirement. Leave timings, addresses, errors, and measured outcomes absent until real evidence exists.
+
+## Version and hardware scope
+
+The environment in [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) selects torch **2.11.0+cu128**, CPython **3.12.14**, Linux x86_64 tag `cp312-cp312-manylinux_2_28_x86_64`, build CUDA **12.8**, metapackage **12.8.1**, packaged Runtime/CUPTI **12.8.90**, and cuDNN **9.19.0.56**. This eager path needs the selected package libraries and a working driver, not a system Toolkit or `nvcc` installation.
+
+Set `PYTORCH_ALLOC_CONF=backend:native` before process startup and verify `torch.cuda.memory.get_allocator_backend` reports `native`. `native` is the default at this pin, but verification is better than inference. CUDA 12.8 does not automatically select `cudaMallocAsync`. That separate process-wide backend requires CUDA 11.4 or newer and is outside this worksheet's internal reuse/statistics claims. `PYTORCH_CUDA_ALLOC_CONF` is an alias; do not set conflicting aliases.
+
+The proposed external target is Ubuntu 24.04 x86_64, one GPU with compute capability at least 8.0 and at least 8 GB, and small inputs fitting available memory. Use a maintained compatible driver, conservatively **570.124.06 or newer**, subject to newer GPU/OS requirements. No actual GPU/driver configuration or Reference Environment is declared. Native Linux is the only Supported Environment; reading the worksheet needs no hardware, reflected by `hardwareGate: none`.
+
+## Evidence boundary
+
+**Pending Hardware Verification:** no allocator trace, tensor result, pointer reuse, overlap, or performance result has been observed here. All four evidence arrays are empty. Static graph reasoning and owner-source inspection confer neither Compile-Checked nor Runtime-Verified status. No CUDA executes in the browser.
+
+## Retrieval check
+
+1. What does `consumer.wait_stream(producer)` cover at call time, and why does it not wait on the CPU?
+2. What does `record_stream` protect at storage deallocation, and why does it not make a consumer's input ready?
+3. Why can a write-only B use of an A-origin `torch.empty` allocation still need an A-to-B dependency?
+4. When x travels from A to B and a separately allocated y returns from B to A, which lifetime obligation is easy to omit?
+5. Why do retaining a name until enqueue, observing a different address, and recording a still-live tensor each fail to prove general stream safety?
+
+## Continue with practice
+
+Complete the [three P05 Exercises](/en/frameworks/streams-and-storage-lifetime/exercises/) before reading the [separate solutions](/en/frameworks/streams-and-storage-lifetime/solutions/). Use [PB-R5-005](/en/practice/#pb-r5-005) to repeat the two-way ownership audit. Return to [P04](/en/frameworks/queued-work-timing/) when choosing a measurement boundary.
+
+## Sources and licensing
+
+The exact-commit [CUDA semantics](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst) explain write-only reuse and allocator selection. The [Stream and Event interfaces](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py) establish the call-time wait boundary. The [Tensor contract](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_tensor_docs.py) and [native allocator implementation](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDACachingAllocator.cpp) establish the deallocation boundary and manual alternative.
+
+[SRC-CUDA-081](/en/sources-and-versions/#src-cuda-081) records this semantic review; [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) records environment artifacts and licenses. Current Context7 discovery was checked against immutable owner source. This prose, storage ledger, and S0-S4 worksheet are original CC BY 4.0 content, not copied owner examples or tests. Linked PyTorch source retains BSD-3-Clause terms and applicable notices; packaged dependencies retain their own licenses. **Facts checked and sources accessed: 2026-09-12.**

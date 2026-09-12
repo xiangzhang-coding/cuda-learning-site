@@ -416,7 +416,7 @@ describe('Exercises and Practice Bank contract', () => {
     expect(exercises.querySelector(`a[href="${baseRoute}solutions/"]`)).not.toBeNull();
   });
 
-  it.each(['/practice/', '/en/practice/'])('publishes eighty-five complete Practice Bank entries in $route', async (route) => {
+  it.each(['/practice/', '/en/practice/'])('publishes eighty-nine complete Practice Bank entries in $route', async (route) => {
     const source = await readFile(
       path.join(projectRoot, 'src/content/docs', route.startsWith('/en/') ? 'en/practice.mdx' : 'practice.mdx'),
       'utf8',
@@ -446,6 +446,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R4-013', 'PB-R4-014',
       'PB-R4-015', 'PB-R4-016',
       'PB-R5-001', 'PB-R5-002', 'PB-R5-003',
+      'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -523,6 +524,10 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-001': 'python/cuda-python-bridge',
       'PB-R5-002': 'python/devices-contexts-launches',
       'PB-R5-003': 'python/runtime-compilation-linking',
+      'PB-R5-004': 'frameworks/queued-work-timing',
+      'PB-R5-005': 'frameworks/streams-and-storage-lifetime',
+      'PB-R5-006': 'frameworks/mixed-precision-contracts',
+      'PB-R5-007': 'frameworks/python-to-cuda-profiling',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -787,9 +792,13 @@ describe('Exercises and Practice Bank contract', () => {
         'python/runtime-compilation-linking',
         'examples/cuda-python-launch',
       ],
+      'PB-R5-004': ['memory/stream-ordering', 'correctness/timing-asynchronous-gpu-work', 'frameworks/queued-work-timing'],
+      'PB-R5-005': ['memory/event-dependencies-timing', 'frameworks/queued-work-timing', 'frameworks/streams-and-storage-lifetime'],
+      'PB-R5-006': ['correctness/floating-point-order-reproducibility', 'libraries/tensor-core-precision-contracts', 'frameworks/mixed-precision-contracts'],
+      'PB-R5-007': ['correctness/timeline-first-nsight-systems', 'correctness/kernel-first-nsight-compute', 'frameworks/python-to-cuda-profiling'],
     };
 
-    expect(entrySections).toHaveLength(85);
+    expect(entrySections).toHaveLength(89);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];
@@ -821,6 +830,8 @@ describe('Exercises and Practice Bank contract', () => {
             ? /\/(?:en\/)?libraries\//
           : prerequisitePath?.startsWith('python/')
             ? /\/(?:en\/)?python\//
+          : prerequisitePath?.startsWith('frameworks/')
+            ? /\/(?:en\/)?frameworks\//
         : /\/(?:en\/)?(?:start|foundations)\//;
       expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link))).toBe(true);
       if (prerequisitePath) {
@@ -839,10 +850,10 @@ describe('Exercises and Practice Bank contract', () => {
           ).toBe(true);
         }
       }
-      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-(?:00[1-9]|01[0-6])$|^PB-R5-00[1-3]$/.test(entryId)) {
+      if (/^PB-R1-02[1-4]$|^PB-R2-0(?:0[1-9]|1\d|2[01])$|^PB-R3-(?:00[1-9]|01[0-6])$|^PB-R4-(?:00[1-9]|01[0-6])$|^PB-R5-00[1-7]$/.test(entryId)) {
         expect(sectionText, `${route} ${entryId}`).toMatch(/Reviewed solution|参考解答/i);
         expect(sectionText, `${route} ${entryId}`).toMatch(/Source date|来源日期/);
-        const sourceDate = /^PB-R5-00[1-3]$/.test(entryId)
+        const sourceDate = /^PB-R5-00[1-7]$/.test(entryId)
           ? '2026-09-12'
           : /^PB-R4-01[56]$/.test(entryId)
           ? '2026-09-09'

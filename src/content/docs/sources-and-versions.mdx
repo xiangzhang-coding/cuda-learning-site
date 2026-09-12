@@ -1,6 +1,6 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P03、LAB01-LAB12、EX01-EX21、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P07、LAB01-LAB12、EX01-EX21、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
 factCheckDate: '2026-09-12'
@@ -27,6 +27,10 @@ structure:
   - entry-src-cuda-077
   - entry-src-cuda-078
   - entry-src-cuda-079
+  - entry-src-cuda-080
+  - entry-src-cuda-081
+  - entry-src-cuda-082
+  - entry-src-cuda-083
   - content-sources
   - review-record
 evidence:
@@ -50,18 +54,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P03、LAB01-LAB12、二十一个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P07、LAB01-LAB12、二十一个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
 
 ## 记录范围
 
-**2026-09-12 的当前发布范围**覆盖 Home、包含 P01-P03 的 78 个学习单元（Learning Unit）、21 个可运行示例（Runnable Example）、12 个实验（Lab）、19 项可视化讲解（Visual Explainer），以及 77 组练习和 77 组独立解答的双语发布对（Publication Pair）。共 **287 个发布对 / 574 条源路由**，**411 条目录记录**：12 个实验、85 个练习题库（Practice Bank）条目、19 项可视化讲解、200 个术语表（Glossary）词条和 95 条来源记录。本次只增加 `SRC-CUDA-077/078/079`，既有逐项日期不变。R4 仍是最近完成的聚合静态复核，保留 277 对、554 路由和 401 条目录记录；R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)仍是带日期的历史，不是新 Python 内容的复核。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+**2026-09-12 的当前发布范围**覆盖 Home、包含 P01-P07 的 82 个学习单元（Learning Unit）、21 个可运行示例（Runnable Example）、12 个实验（Lab）、19 项可视化讲解（Visual Explainer），以及 81 组练习和 81 组独立解答的双语发布对（Publication Pair）。共 **299 个发布对 / 598 条源路由**，**423 条目录记录**：12 个实验、89 个练习题库（Practice Bank）条目、19 项可视化讲解、204 个术语表（Glossary）词条和 99 条来源记录。Issue #43 增加 `SRC-CUDA-080/081/082/083`，既有逐项日期不变。R4 仍是最近完成的聚合静态复核，保留 277 对、554 路由和 401 条目录记录；R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)仍是带日期的历史，不是新 Python/PyTorch 内容的复核。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -651,9 +655,64 @@ EX21 原创的 `cleanup_step` 是项目代码，不是新 core API。每个显�
 
 原创 EX21 调用公开 API，没有改编 NVIDIA 向量加法示例；P01-P03、六道练习及独立解答、PB-R5-001/002/003、TERM-197 至 TERM-200 都采用原创文字与推导。软件为 Apache-2.0，教学内容为 CC BY 4.0。网站和源码不捆绑外部 wheel 或原生 CUDA。CUDA Python 的 Apache 许可不重新许可 NVIDIA Toolkit 文档/库；NumPy wheel 保留 BSD-3-Clause、0BSD、MIT、Zlib、CC0-1.0 及捆绑二进制声明。源码/测试与产物/许可检查不授予 CUDA 证据状态（Evidence Status）。EX21 编译和已记录观察为空，运行待硬件验证（Pending Hardware Verification）；学习单元仍不授予证据状态。
 
+<span id="src-cuda-080" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-080：PyTorch 环境产物、依赖与精确许可
+
+**相关 ID：P04、P05、P06、P07。** **访问与复核日期：2026-09-12。** 本记录选择外部原生 Linux x86-64 eager 环境，不是网站运行时或已实例化的基准环境（Reference Environment）。PyTorch [v2.11.0](https://github.com/pytorch/pytorch/releases/tag/v2.11.0) 对应 **70d99e998b4955e0049d13a98d77ae1b14db1f45**。[CUDA 12.8 索引](https://download.pytorch.org/whl/cu128/torch/)提供 CPython 3.12 wheel；[历史版本安装说明](https://pytorch.org/get-started/previous-versions/#v2110)证明发布通道，不证明它是最新版本。
+
+| 坐标 | 精确选择与边界 |
+| --- | --- |
+| 解释器 | [CPython 3.12.14](https://www.python.org/downloads/release/python-31214/)，仅源码安全发布，ABI cp312-cp312。[Python-3.12.14.tar.xz](https://www.python.org/ftp/python/3.12.14/Python-3.12.14.tar.xz) 上游 SHA-256 `5c8462af5790baf43a321a1559dbe0db06d1be4300fb85fb53c40060668e548a`；未独立完整重算归档哈希或构建 Linux 解释器 |
+| Torch 产物 | [torch-2.11.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl](https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl)，发布者 SHA-256 `d252cf975fb18c94a85336323ad425f473df56dab35a44b00399bd70c7a3b997`；Linux x86-64/glibc 2.28+，不是 macOS/MPS |
+| 元数据 | [Sidecar](https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl.metadata) 与包内 METADATA 的 SHA-256 均为 `de881a744ff66b27fffc338c1624660cf7c87d3019574ad71e3dda886b2a172b`；元数据相同不代表检查了完整产物哈希 |
+| CUDA 身份 | 构建家族 12.8；[cuda-toolkit 12.8.1](https://pypi.org/pypi/cuda-toolkit/12.8.1/json) 元包；[Runtime 12.8.90](https://pypi.org/pypi/nvidia-cuda-runtime-cu12/12.8.90/json)；[CUPTI 12.8.90](https://pypi.org/pypi/nvidia-cuda-cupti-cu12/12.8.90/json)；[cuDNN 9.19.0.56](https://pypi.org/pypi/nvidia-cudnn-cu12/9.19.0.56/json)。包路径、API 版本和实际加载库是不同事实 |
+| 依赖闭包 | [配置](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/profile.json)、[强制哈希锁](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/requirements.lock)和[检查器](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/check.py)。29 个选定发行包、34 条活动依赖边，元数据约束无未满足项。保留 Torch 的十一项 cuda-toolkit extras；不加 torchvision、torchaudio、NumPy、notebook 或测试 extras |
+| 运行提案 | Ubuntu 24.04 x86-64，一块现代单 GPU 能力层级（Modern Single-GPU Capability Tier）GPU，CC 8.0+、至少 8 GB；保守驱动基线 570.124.06 或更新，仍按 GPU/OS 要求调整。进程启动前设置 `PYTORCH_ALLOC_CONF=backend:native`，运行时另断言分配器 |
+
+该 wheel 的 cuda-bindings 12.9.4 不改变 CUDA 构建家族，也不继承 EX21 的 bindings 13.4.1/系统 Toolkit 配置。P04-P07 需要有效驱动和选定包库，不需要系统 nvcc 或系统 Toolkit。元包没有共享库，闭包不含 compiler/sanitizer/all extras。[CUDA 发布说明](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-toolkit-release-notes/index.html)分开列出驱动表，525.60.13 不是 profiler/JIT 的无条件保证。[cuDNN 矩阵](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.19.0/reference/support-matrix.html)包含 CUDA 12.8。cuBLAS 仍选 12.8.4.1，而非发布说明中的后续 12.8.5 修复；初始工作是小型 eager 稠密操作，不涵盖大 leading dimension、FP8 或 Blackwell 边界情景。
+
+[源码/逐文件权利账本](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/CONTENT_LICENSES.md#pytorch-reference-only-file-ledger)提供精确上游链接、已计算整文件哈希与许可继承关系。PyTorch 根 [LICENSE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE) 哈希为 `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43`；[NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE) 为 `c2cc7bf0caec7652c2b460a8a470bea1677f241e4ab8e431df34cf17f5a9fec0`。BSD-3-Clause 源码条款不能替代 wheel 组合许可成员（`a0d7abc10248a062a2f309bf12981524973f2a61aadccf4c5099d96d8c388cf4`）、NVIDIA 二进制条款或 CPython 历史 PSF 许可集合。[二进制/解释器账本](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/THIRD_PARTY_NOTICES.md#external-pytorch-environment-not-bundled)保留精确 wheel 成员路径与哈希，包括 runtime/CUPTI `ad6f5853fba0ca0d159d0f58d49ae49830c2f8c93f7a92648b9ce90adb4c6ccd`、cuDNN `49cf79bdb35734b52fe6203013b3bd759f81e998cd32aa2c65c51db9a88c61d2` 和 [CPython LICENSE](https://github.com/python/cpython/blob/2abcf904b8dac8c999d2b3aac76681abb333798a/LICENSE) `3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf`。依赖元数据为空不构成许可授权。
+
+记录的检查使用上游元数据、源码和选定 ZIP 成员，未完整下载 torch、安装、导入或运行 GPU。索引中的 download-r2 端点对研究客户端返回 403；download.pytorch.org 允许范围读取。未独立重算完整产物摘要。代表性操作后的实际加载路径、解释器来源、驱动/GPU 坐标、精确包清单及产物完整性仍需将来验收。不复制或捆绑任何上游代码，包括 wheel 中的 Python 成员。
+
+<span id="src-cuda-081" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-081：计时、流与 native 存储复用
+
+**相关 ID：P04、P05。** **访问与复核日期：2026-09-12。** PyTorch 2.11.0+cu128，使用上述精确提交，仅限普通 eager CUDA 张量与 native 分配器。[CUDA notes](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst)、[streams.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py)和 [CUDA 初始化/同步](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py)确定主机排队、开启计时且已完成的事件、选定设备同步及多流汇合。主机提交时间不是内核时长；后续同步不能修复错误的 end 时间戳位置。
+
+[张量文档](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_tensor_docs.py)、[分配器后端查询](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/memory.py)、[CUDACachingAllocator.cpp](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDACachingAllocator.cpp)和 [RecordStream.cu](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/cuda/RecordStream.cu)区分数据等待与存储生命周期跟踪（Storage lifetime tracking）。wait_stream 捕获已提交生产工作；record_stream 关心底层存储复用，native 分配器在释放时插入事件。两者都不防止应用显式并发覆盖。偏移视图共享存储原点，只写使用也可能需要原点依赖。
+
+[test/test_cuda.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cuda.py)包含事件就绪/无效端点及 record_stream/偏移视图检查；测试只读未运行。内部延迟 helper 和精确指针预期均不复制，也不成为公开验收要求。各文件受[逐项哈希账本](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/CONTENT_LICENSES.md#pytorch-reference-only-file-ledger)所述 PyTorch 根 BSD-3-Clause 继承关系约束；这些路径没有发现独立祖先许可。源码检查不是 native 分配器轨迹、计时结果或 cudaMallocAsync 内部机制证明。释放前手动汇合回真正分配原点，是有效替代方案。
+
+<span id="src-cuda-082" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-082：AMP、数值参考与优化器更新
+
+**相关 ID：L08、P06。** **访问与复核日期：2026-09-12。** 同一 PyTorch 2.11.0 源码固定值负责公开 torch.amp.autocast 和 torch.amp.GradScaler。[AMP 指南](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/amp.md)、[有效批次指导](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/amp_examples.rst)、[autocast 上下文](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/autocast_mode.py)与 [scaler 实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/grad_scaler.py)区分分派与缩放、前向与反向、有效批次内一致 scale、非有限跳过及不存在下限 1。缩放无法修复前向溢出或恢复丢失的输入信息。
+
+精确的 [CUDA 注册源码](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/autocast_mode.cpp)与[政策列表](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/autocast_mode.h)负责合格操作、in-place/out=/显式 dtype 例外及未列出操作的原生提升。[AmpKernels.cu](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/cuda/AmpKernels.cu)佐证回退不夹到 1。[数值准确性](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/numerical_accuracy.rst)、[Context.h](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/Context.h)和 [CUDABlas.cpp](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/cuda/CUDABlas.cpp)区分存储、乘法、累加/归约、输出和优化器精度。同一验收配置不能混用新 fp32_precision 控制与旧 allow_tf32 系列。
+
+上游测试是源码依据，不是通过记录：[test_cuda.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cuda.py)检查精度开关/BF16，[test_torch.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_torch.py)检查缩放/累积及 unscale 后失效，[autocast_test_lists.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/testing/_internal/autocast_test_lists.py)用于 dtype/转换对照，[test_linalg.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_linalg.py)包含溢出回归。[test_autocast.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_autocast.py)只用于发现测试类别。精确文件哈希及 PyTorch BSD-3-Clause 继承关系见[权利账本](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/CONTENT_LICENSES.md#pytorch-reference-only-file-ledger)；不复制实现或测试正文。
+
+原创练习要求量化前与量化后的 FP64 参考、有限输出、有理由的容差、梯度/更新检查，以及独立设门槛的原生 BF16 分支。输出 dtype 或数值接近不能确定累加器位宽或 Tensor Core 分派。形状记录不检查累加器；没有记录 CUDA 数值或优化器观察。
+
+<span id="src-cuda-083" class="resource-target" aria-hidden="true"></span>
+
+## SRC-CUDA-083：Profiler 调度与 CPU 到 CUDA 的关联
+
+**相关 ID：Q07、Q08、P07。** **访问与复核日期：2026-09-12。** PyTorch 2.11.0+cu128，Kineto gitlink **7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7**，包内 CUPTI **12.8.90**，CUPTI 文档归档 **12.8.1**（显示 v2025.1.1）。[公共 profiler 实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py)定义 schedule、step 边界、逐周期导出及 CUPTI 不可用时的计时回退。[Autograd 事件关联](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/autograd/profiler.py)将关联设备事件连接到 CPU 活动。[Kineto CuptiActivityProfiler.cpp](https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/libkineto/src/CuptiActivityProfiler.cpp)处理运行时/设备及外部关联，不是按名称或时间包含关系猜测。
+
+[test_profiler.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/profiler/test_profiler.py)检查范围涵盖回调次数、动作、累计及外部关联；[test_kineto.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/profiler/test_kineto.py)只作文件头/环境测试发现。两者均未运行。[逐文件账本](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/CONTENT_LICENSES.md#pytorch-reference-only-file-ledger)将 PyTorch 文件绑定到其根 BSD-3-Clause，Kineto 文件则属于独立 [BSD-3-Clause LICENSE](https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/LICENSE)，SHA-256 `6f3d59b9103e72e5c977eecf61b261c2e1546a9be2995847e3ee2d31021fd39b`。Kineto 实现摘要为 `296a4180f746812eb9811168881cf0607292423af4b1869b0d4e336c8ef5df11`。
+
+[CUPTI 使用文档](https://docs.nvidia.com/cupti/12.8.1/main/main.html)与[版权/许可](https://docs.nvidia.com/cupti/12.8.1/copyright-and-licenses/index.html)按 NVIDIA/第三方条款说明兼容性、初始化、外部关联和回调订阅者限制，不受 Kineto BSD 许可覆盖。请求 CPU/CUDA 活动后，还须要求实际运行时启动与内核事件；CUDA 时间表格可能只是回退。每个活动窗口在回调内保存。step 是逻辑迭代转换，不是 CUDA 屏障；key_averages 不是时间线。形状采集可能持有张量，不能认证未受扰动的分配或计时。其他 CUPTI 工具分开运行，缺失活动通过诊断处理，不升级权限，也不固定每个事件的 external ID 或内核名称。
+
+Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 main 片段，它们不是所选构建的权威。排除较新的 CUPTI monitor API、实验性内部接口、torch.compile 和 CUDA Graph capture。不复制上游源码、测试、正文或 trace，没有采集内核轨迹，也不授予 GPU 证据状态（Evidence Status）。
+
 ## 内容与素材来源
 
-- Home、78 个 Learning Units、21 个 Runnable Examples、12 个 Labs、85 个 Practice Bank 条目、200 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、82 个 Learning Units、21 个 Runnable Examples、12 个 Labs、89 个 Practice Bank 条目、204 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
@@ -687,4 +746,4 @@ EX21 原创的 `cleanup_step` 是项目代码，不是新 core API。每个显�
 
 不可变 `src/r3-release-manifest.json` 保留 62 个学习单元、16 个可运行示例、10 个实验、19 项可视化讲解、66 个练习题库条目（其中十道 Nsight 报告分析题）、176 个术语表词条、76 条来源记录、347 条目录记录、61 组练习、61 组解答、232 个双语发布对和 464 条源路由。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保留其动态验收。R4 另将八道既有题目列为符合库与算法选择分类的条目：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。R3 子集仍为 PB-R3-002 至 PB-R3-005 和 PB-R3-007 至 PB-R3-012；两个分类均属于既有的 82 个条目。
 
-既有保留的编译记录不变：只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。加上 EX21，当前其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。L01-L13 与 P01-P03 保留四个空证据数组。六份仅有预期内容的分析器计划保留未填写的环境清单（Environment Manifest）和空的实际观察记录；十九项浏览器可视化讲解不授予 CUDA 证据状态（Evidence Status）。来源复核没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明；CI 与动态验收仍独立于本次复核。
+既有保留的编译记录不变：只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。加上 EX21，当前其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。L01-L13 与 P01-P07 保留四个空证据数组。六份仅有预期内容的分析器计划保留未填写的环境清单（Environment Manifest）和空的实际观察记录；十九项浏览器可视化讲解不授予 CUDA 证据状态（Evidence Status）。来源复核没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明；CI 与动态验收仍独立于本次复核。

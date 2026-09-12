@@ -1,0 +1,207 @@
+---
+title: 'P07：从框架运算追到 CUDA 活动'
+description: 规划两个 profiler 窗口，区分 CUPTI 追踪与回退表格计时，通过关联追踪框架、运行时和设备工作，不匹配名称或虚构追踪。
+pairId: p07
+counterpart: /en/frameworks/python-to-cuda-profiling/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, profile, correlation, worksheet, availability, schedule, export, overhead, manifest, diagnostics, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P07
+prerequisites: [P04, Q07, Q08]
+relatedUnits: [P05, P06]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch profiler API and scheduling'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CPython 3.12.14; native Linux x86_64; no collected trace'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch profiler event association'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/autograd/profiler.py'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Linked CPU/runtime/device event source contract'
+    accessDate: '2026-09-12'
+  - title: 'Pinned Kineto external correlation'
+    url: 'https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/libkineto/src/CuptiActivityProfiler.cpp'
+    version: 'Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7'
+    platform: 'PyTorch release submodule source; no binary reproduction'
+    accessDate: '2026-09-12'
+  - title: 'CUPTI compatibility, activity, and subscriber contracts'
+    url: 'https://docs.nvidia.com/cupti/12.8.1/main/main.html'
+    version: 'CUPTI 12.8.1 documentation; selected package 12.8.90'
+    platform: 'Native Linux CUDA profiling requirements; not local availability'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p07 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/python-to-cuda-profiling/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,profile,correlation,worksheet,availability,schedule,export,overhead,manifest,diagnostics,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P07 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P04,Q07,Q08' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P05,P06' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '4' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'PyTorch-2.11.0+cu128,CUPTI-12.8.90,Kineto-7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/python-to-cuda-profiling/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+框架表格说某个运算消耗了 CUDA 时间，导出的时间线却没有核函数。另一份时间线中，核函数在 Python 调用返回后才执行。遇到这两种情况，不该通过补造工作或匹配最近的名称来“修复”。要学会判断哪些记录能建立启动关系，哪些问题必须另做测量。
+
+源码引导阅读与静态工作表约需 40 分钟，不需要安装包、GPU、追踪查看器或实现。**实际 CUDA 追踪、关联、分配器观察与计时保持待硬件验证（Pending Hardware Verification）。** 表格是原创题设关系与调度预测，不是实际追踪或 profiler 输出。
+
+## 前置知识
+
+有序直接先修项恰好为 `[P04, Q07, Q08]`：[P04](/frameworks/queued-work-timing/)提供考虑完成边界的计时，[Q07](/correctness/timeline-first-nsight-systems/)提供应用时间线推理，[Q08](/correctness/kernel-first-nsight-compute/)提供选定核函数与采集边界。相关 [P05](/frameworks/streams-and-storage-lifetime/)和 [P06](/frameworks/mixed-precision-contracts/)解释生命周期与精度问题，但不增加本页先修项。
+
+## 为什么运算表不是设备时间线
+
+框架层性能分析回答调用了哪些运算。CUDA 活动追踪（activity tracing）回答已提交设备工作何时执行，以及在哪个设备和流上执行。异步提交让两条时间线分离。现代 profiler 把框架事件与 Kineto、CUDA 性能分析工具接口（CUDA Profiling Tools Interface，CUPTI）结合起来，而不是把 Python 函数当成 GPU 核函数。
+
+`record_function` 范围给阶段添加可读名称。它不会重命名设备核函数、同步 GPU，或让每个运算恰好启动一个核函数。仅处理元数据的运算可能不启动任何核函数，库运算可能启动多个。`key_averages()` 聚合事件，丢失逐次发生的原始时间线。把重叠核函数时长或父子范围的包含时间相加，得不到应用墙钟延迟。
+
+## 一个固定的性能分析合同
+
+选定 **PyTorch 2.11.0+cu128**，提交 **`70d99e998b4955e0049d13a98d77ae1b14db1f45`**，**CPython 3.12.14**，原生 **Linux x86_64**。该版本固定 Kineto 源码为 **`7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7`**。[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)标识选定环境，[SRC-CUDA-083](/sources-and-versions/#src-cuda-083)记录 profiler 来源。稳定版本不代表私有接口或全部 JSON 字段永久不变。
+
+构建 CUDA 12.8、包提供的 CUDA Runtime 12.8.90、CUPTI 12.8.90 与 cuDNN 9.19.0.56 是不同版本。CUPTI 文档归档为 12.8.1，显示版本 v2025.1.1；两者都不是 Python wheel 的包版本。安装系统 Toolkit 不证明进程加载了预期 CUPTI。未来目标为原生 Linux 上一个计算能力（compute capability）至少 8.0、显存至少 8 GB 的 GPU，不是已经建立的基准环境（Reference Environment）。
+
+使用公开接口 `torch.profiler.profile`、`torch.profiler.ProfilerActivity.CPU`、`torch.profiler.ProfilerActivity.CUDA`、`torch.profiler.record_function`、`torch.profiler.schedule`、`step`、`key_averages` 和 `export_chrome_trace`。编译器集成、CUDA Graph 捕获、私有实验设置与更新的 profiler 内部接口都不属于本合同。
+
+## 沿主机路径跟随关联
+
+推理链为**框架运算 -> 主机/运行时启动 -> CUDA 活动**。CUPTI 运行时与核函数记录具有相关关系，外部关联（external correlation）再把这些记录连接到前端活动。Kineto 根据身份连接它们，PyTorch 把已关联的运行时/设备事件附到 CPU FunctionEvents。依据是固定的 [PyTorch 关联逻辑](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/autograd/profiler.py#L664-L743)与 [Kineto 关联映射](https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/libkineto/src/CuptiActivityProfiler.cpp#L467-L478)。
+
+先在进程/线程/窗口中选择一次具体发生，沿已记录的运行时关系找到具有设备/流身份的 CUDA 活动。核函数可以在发起它的 CPU 范围结束后执行。时间包含或相同显示名称都不能建立这一关系。缺失的连接保持未解析，不分给最近的范围。不是每个事件，尤其同步或记账事件，都必须具有相同外部 ID 字段。
+
+## 工作表：给定连接优先于相似名称
+
+这是**符号关系工作表，不是导出追踪、简化追踪或已观察启动列表**。F、H、C、K 标签是原创题设标识符，不承诺对应 JSON 键或真实关联编号。假设对这三次框架运算，给出的映射完整；未提供时长或跨流顺序。
+
+| 框架运算实例 | 主机启动 | 给定关联符号 | 设备工作 | 设备 / 流 |
+| --- | --- | --- | --- | --- |
+| `F-A` | `H-A1` | `C-X` | `K-A1` | `0 / 3` |
+| `F-A` | `H-A2` | `C-Y` | `K-A2` | `0 / 3` |
+| `F-B` | 无，题设仅处理元数据 | 无 | 无 | 不适用 |
+| `F-C` | `H-C1` | `C-Z` | `K-C1` | `0 / 7` |
+
+可推导 **F-A 有两个核函数，F-B 为零，F-C 有一个**。设定 K-A2 与 K-C1 都显示为“elementwise”，它们仍属于不同的框架运算实例。若 K-A1 在 F-A 的 CPU 范围结束后运行，给定启动链仍将它归于 F-A。都在设备 0，不代表流 3 与流 7 彼此有序。
+
+若额外出现 K-U，却没有给定关联，它的归属就是**未解析**，而不是 F-B。真实采集中，活动缺失也可能表示采集失败；不同于本题完整给定的工作表，仅一行为空不能证明该运算没有启动核函数。表格没有提供重叠、利用率、时长、正确性或瓶颈结果。
+
+## 可用性不等于采集成功
+
+问题是 Python 到 CUDA 的归属时，明确请求 CPU 与 CUDA 活动。检查 CUDA 可用性与 `torch.profiler.supported_activities()`，但把它们当成预检，不是已捕获核函数的证明。固定版本的 [CUPTI 回退说明](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py#L72-L83)指出，即使导出 JSON 没有 CUDA 核函数事件，旧路径回退仍可能让 profiler 表格出现 CUDA 时间。
+
+未来追踪冒烟检查必须在选定活动窗口中保留实际框架/用户范围、CUDA 运行时启动活动与 CUDA 核函数活动，并至少有一条可用关联链。只有声明的工作负载在窗口内传输数据时，才要求传输活动。含 CUDA 时间的表格、supported activities 成员、空 JSON 文件或追踪文件存在，都不能满足此检查。本页没有执行该冒烟检查。
+
+## 采集前先预测调度
+
+公开 schedule 参数设为 `wait=1`、`warmup=1`、`active=3`、`repeat=2`、`skip_first=0`、`skip_first_wait=0`。声明十个逻辑迭代，索引 0 到 9，每次迭代**之后**恰好调用一次 `prof.step()`。初始动作作用于迭代 0。每个五步周期依次等待、预热，再记录三个迭代。
+
+| 迭代索引 | 预测动作 | 工作负载所属保存窗口 | 该迭代之后的边界 |
+| --- | --- | --- | --- |
+| `0` | `NONE` | 无 | 前进到预热 |
+| `1` | `WARMUP` | 无 | 开始活动记录 |
+| `2` | `RECORD` | `W1` | 继续 |
+| `3` | `RECORD` | `W1` | 继续 |
+| `4` | `RECORD_AND_SAVE` | `W1` | 回调 1，然后等待 |
+| `5` | `NONE` | 无 | 前进到预热 |
+| `6` | `WARMUP` | 无 | 开始活动记录 |
+| `7` | `RECORD` | `W2` | 继续 |
+| `8` | `RECORD` | `W2` | 继续 |
+| `9` | `RECORD_AND_SAVE` | `W2` | 回调 2，然后停止记录 |
+
+预期活动索引为 **2-4 与 7-9**，即**六个活动迭代、两次回调**。按声明的迭代末尾 step 规则，回调发生在前进到 profiler 步号 **5 与 10** 时，不是在迭代 4 与 9 执行之前。等待/预热中的工作负载不属于保存的活动范围；不能把工具记账混作工作负载成员。
+
+`prof.step()` 宣告下一个逻辑迭代，**不是通用 CUDA 完成屏障**。Profiler 预热准备采集，进入 profiler 前的工作负载预热准备选定形状、dtype、分配器与库。Schedule 默认 `repeat=0` 表示不断重复周期直到性能分析结束。零预热合法，但会警告结果可能偏斜；本题并未采用零预热。
+
+## 保存每个窗口，而不只保存最后一个
+
+为每次 `on_trace_ready` 回调分配不同目标，并在回调内调用 `export_chrome_trace` 保留该窗口。记录窗口身份、包含的逻辑迭代、产物身份与导出错误。本题 W1 对应索引 2-4，W2 对应 7-9；它们是计划位置，不是已有产物。
+
+在调度上下文结束后只导出一次，得到的是**最后一个周期**，不是两个周期的归档。两次回调复用同一目标可能覆盖第一份。默认 `acc_events=False` 不保留全部周期的 FunctionEvents；`acc_events=True` 改变摘要事件的跨周期累积，但不能替代逐窗口保存时间线。[固定导出合同](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py#L285-L301)比“导出所有执行过的工作”窄得多。
+
+## 插桩会改变实验
+
+形状、栈与内存采集应按需开启。`record_shapes=True` 可以持有张量引用，改变依赖引用计数的优化，引入额外复制，并扰动分配生命周期。记录形状的运行不能证明 P05 所讨论的无插桩存储生命周期。`with_stack` 也会增加成本并可能暴露文件路径。本版本 `with_modules` 层级支持 TorchScript，不支持 eager 模型；源码栈采集是另一项功能。
+
+把正确性运行、用于关系分析的定向 profiler 运行，以及采用相同已验收工作负载的无 profiler 计时运行分开。计时要明确主机或设备范围、同步、预热/重复次数，以及是否包含分配/传输。若估算插桩开销，应在匹配条件下比较分布，并单独报告该估计。不要扣除假设的通用 profiler 成本，不要把重叠时长加成墙钟时间，也不要声称形状采集能揭示累加器精度。
+
+## 保留环境清单与安全产物
+
+下面没有填入任何实测清单值。未来<strong>环境清单（Environment Manifest）</strong>必须覆盖这些字段；每个未知或不适用坐标都要记录原因。
+
+| 字段组 | 提出声明前必须记录的内容 |
+| --- | --- |
+| 硬件 | GPU 型号、受控设备标识、计算能力、显存、GPU 数量、选定设备，以及相关拓扑/分区状态 |
+| 主机 | 原生 Linux 发行版/版本、内核、架构、glibc、CPU、解释器来源与构建/编译器身份，使用容器时的镜像身份 |
+| 软件 | CPython 版本、确切 torch wheel/哈希与源码提交、完整依赖固定项、驱动、构建 CUDA、系统 Toolkit/编译器或明确缺失，以及实际加载的 runtime/cuDNN/CUPTI 版本与库身份 |
+| 执行 | 工作负载修订、输入来源/种子、大小/形状/步幅/dtype、正确性标准与结果、设备/流政策、精度/确定性标志、分配器后端与配置 |
+| 采集 | Profiler/构建身份、请求/支持活动、工作负载预热、调度与迭代边界、形状/栈/内存标志、回调/窗口映射、采集错误/丢记录警告及完整性审查 |
+| 测量 | 独立无 profiler 计时方法、包含/排除工作、完成边界、重复次数、原始样本/分布、时钟/功耗/温度状态与竞争工作负载 |
+| 保管 | 权限/主机政策、私有原始产物位置与哈希、脱敏副本身份/哈希、删改记录、审核批准与保留/删除政策 |
+
+共享 eager 合同要求记录进程启动前选定的 `PYTORCH_ALLOC_CONF=backend:native`，并通过 `torch.cuda.memory.get_allocator_backend()` 核对实际后端。已安装包元数据不证明已加载库身份；实际运算触发延迟加载后，再检查相关身份。仅完成本 eager 性能分析任务并不要求系统 Toolkit 或编译器。
+
+采用合成、非敏感工作负载数据与中性阶段标签。追踪、栈、日志、元数据和文件名可能泄露主机名、用户名、源码路径、模型名、形状或应用输入。原始材料保持私有；凭据、私有主机路径或机密追踪不得进入公开 issue、仓库文件、截图或部署。共享前审核脱敏副本，并保留足以支持声明的窗口/关联结构。清单需要技术可复现性，不需要公开秘密；标识字段若脱敏，必须如实注明。
+
+## 定位缺失层，不盲目提权
+
+| 症状 | 下一步的有限问题 |
+| --- | --- |
+| CUDA 不可用 | 目标 Linux 主机是否安装选定 CUDA 构建，并有可工作的兼容驱动/设备？ |
+| 表格有 CUDA 时间，JSON 无核函数 | 是回退计时、已加载 CUPTI 缺失/不兼容，还是采集不完整？ |
+| 有核函数却缺预期范围 | CPU 活动、标签、逻辑迭代边界与活动窗口是否正确？ |
+| 两次回调却只有一个保留产物 | 导出是否覆盖目标、失败，或只在上下文后发生？ |
+| 仅记录形状时存储保留更久 | 插桩持有的引用能否解释生命周期变化？ |
+
+[CUPTI 兼容性与订阅者合同](https://docs.nvidia.com/cupti/12.8.1/main/main.html)分别规定驱动兼容性与单一回调订阅者。Torch.profiler 应与其他基于 CUPTI 的工具（包括 Nsight）分开运行，而不是假设同时插桩受支持。先保留诊断，检查已加载库身份、驱动/工具兼容性与主机/容器政策。
+
+活动追踪与硬件计数器（hardware counter）性能分析有不同权限要求。核函数缺失不意味着应把所有程序改为 root 运行、禁用主机安全措施或修改共享机器的驱动政策。若确实需要授权管理员修改必要政策，应记录精确边界与批准；否则采集继续受阻。不能把所需 CUDA 追踪静默换成仅 CPU 或仅表格的成功。
+
+## 引导实践：准备可审查的采集计划
+
+1. 明确一个问题：哪些 CUDA 活动属于某次选定框架运算？精度与速度问题另行处理。
+2. 重建符号关系工作表，解析给定连接，统计每次运算的工作量，额外未关联项保持未解析。
+3. 推导十个调度动作，为两个活动窗口分配不同导出位置，规定唯一的迭代末尾 step 边界。
+4. 采集前写好冒烟验收条件与完整环境清单。CUDA 表格计时、supported activities 与实际 JSON 核函数是三项不同检查。
+5. 规定原始产物保管、脱敏与无 profiler 计时计划。实际追踪、时长、分配器与后端结果字段全部保持未记录。
+
+**验收：** 另一位读者不运行 CUDA，也能审查映射、六个活动迭代、两次回调、两份窗口保留义务、缺失层诊断，以及隐私/权限边界。
+
+## 证据边界
+
+本学习单元（Learning Unit）及其静态练习（Exercise）的四个证据数组均为空，没有 profiler 运行、实际追踪/输出、性能结果或分配器行为观察。**依赖 GPU 的行为保持待硬件验证（Pending Hardware Verification）。** 源码检查与调度算术不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）；合格运行需要声明的基准环境、完整环境清单及保留的验收证据。
+
+## 检索检查
+
+1. 为什么一次框架运算可能对应多个核函数、零个核函数，或在不完整采集中留下未解析活动？
+2. 哪条关联链替代了名称匹配与 CPU 范围包含关系？
+3. 为什么 supported activities 与 CUDA 表格时间不能证明 JSON 含设备核函数？
+4. 给定调度下，哪些索引处于活动期，两次回调何时发生，怎样保留两个窗口？
+5. 为什么形状记录、计时、权限与脱敏产物保管必须分别审查？
+
+## 继续练习
+
+先完成[三道 P07 练习](/frameworks/python-to-cuda-profiling/exercises/)，再读[独立解答](/frameworks/python-to-cuda-profiling/solutions/)，随后审查 [PB-R5-007](/practice/#pb-r5-007)。相关 [P05](/frameworks/streams-and-storage-lifetime/)可复习生命周期义务，[P06](/frameworks/mixed-precision-contracts/)可复习数值验收；它们不是额外先修项。
+
+## 来源与许可
+
+复核与访问日期为 **2026-09-12**。[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)记录环境身份，[SRC-CUDA-083](/sources-and-versions/#src-cuda-083)记录 profiler 合同。可查固定的 [profiler 源码](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py)与[官方调度/关联测试](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/profiler/test_profiler.py)。测试定义不是测试执行；没有用 Context7 的更新片段扩展所选版本的公开接口范围。
+
+所有工作表标识符、表格、正文与练习均为原创 CC BY 4.0 内容，没有复制官方代码、测试正文、追踪、截图、图示或大段文档。PyTorch 保留其 [BSD-3-Clause 许可](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE)与 [NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE)；Kineto 有自己的 [BSD-3-Clause 许可](https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/LICENSE)。NVIDIA CUPTI 文档与二进制保留[独立条款](https://docs.nvidia.com/cupti/12.8.1/copyright-and-licenses/index.html)，链接它们不会改变许可。

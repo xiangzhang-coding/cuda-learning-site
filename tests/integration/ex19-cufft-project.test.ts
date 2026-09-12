@@ -108,8 +108,8 @@ it('includes the four issue-39 Publication Pairs in the public inventory', async
   const { scope } = JSON.parse(await readFile(path.join(root, 'src/current-publication-manifest.json'), 'utf8'));
   expect(scope.learningUnits).toContain('L12');
   expect(scope.runnableExamples).toContain('EX19');
-  expect(scope.publicationPairs).toBe(287);
-  expect(scope.sourceRoutes).toBe(574);
+  expect(scope.publicationPairs).toBe(299);
+  expect(scope.sourceRoutes).toBe(598);
   for (const [pair, slug] of [
     ['l12', 'libraries/cufft-plans-layouts-startup.mdx'],
     ['l12-exercises', 'libraries/cufft-plans-layouts-startup/exercises.md'],

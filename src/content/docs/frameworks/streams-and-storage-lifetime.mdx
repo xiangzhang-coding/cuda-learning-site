@@ -1,0 +1,177 @@
+---
+title: 'P05：工作排序与存储保护要分别证明'
+description: 在固定的 PyTorch native 缓存分配器合同下，追踪分配来源流、生产消费依赖，以及输入和结果两个方向的存储生命周期。
+pairId: p05
+counterpart: /en/frameworks/streams-and-storage-lifetime/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, worksheet, correctness, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P05
+prerequisites: [P04, M08]
+relatedUnits: [P04]
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch CUDA semantics'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Native allocator selection and write-only cross-stream hazards'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch Stream and Event interfaces'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Call-time wait_stream boundary'
+    accessDate: '2026-09-12'
+  - title: 'Pinned Tensor record_stream contract'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_tensor_docs.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Deallocation-time lifetime boundary and manual origin-stream return'
+    accessDate: '2026-09-12'
+  - title: 'Pinned native CUDA caching allocator'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDACachingAllocator.cpp'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Ordinary eager allocations; stream registration and events at free'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p05 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/streams-and-storage-lifetime/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,worksheet,correctness,measurement,versions,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P05 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P04,M08' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: P04 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '4' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'torch-2.11.0+cu128,CPython-3.12.14,CUDA-12.8,native' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/streams-and-storage-lifetime/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+侧流（side stream）能提供并发机会，但把操作搬进去，也会把一部分责任交给调用者。现在要分别回答两个问题：操作使用输入时，数据是否已经就绪？操作还在使用这些字节时，它们能否被分给别的张量？其中一个答案正确，不代表另一个也正确。
+
+用约 30 分钟，你将审查分配来源，修复输入和结果的双向交接，解释只写操作的危险，并区分调用时依赖与释放时生命周期保护。本学习单元（Learning Unit）采用静态练习（Exercise），无需 GPU。**GPU 分配器与流观察仍为待硬件验证（Pending Hardware Verification）。**
+
+## 前置知识
+
+有序前置严格为 `[P04, M08]`：[P04：排队工作计时](/frameworks/queued-work-timing/)区分提交与完成；[M08：事件依赖与计时](/memory/event-dependencies-timing/)提供事件（event）依赖推理。P04 也是后续测量方案的相关单元。没有其他前置要求。
+
+## 缓存为什么让生命周期问题显现出来
+
+Python 对象生命周期与 GPU 工作按不同节奏前进。缓存分配器（caching allocator）不必为每个短命张量重新向驱动申请分配，而是保留已释放块供后续张量使用。与流关联的复用利用了顺序：在分配来源流上，后续访问可以安全地排在旧访问之后，即使旧 GPU 工作尚未实际完成，CPU 已经再次交出了这个块。
+
+因此，“Python 已经释放”不等于“GPU 已经用完”。一旦另一条流使用同一分配，仅靠来源流的顺序就无法描述全部使用者。框架需要额外的生命周期信息，或者应用必须把这些使用接回来源流的顺序链。这是依赖问题，不是要求关闭缓存，或在每个表达式之后同步整个设备。
+
+选定目标为 **torch 2.11.0+cu128**，提交 `70d99e998b4955e0049d13a98d77ae1b14db1f45`，搭配 **CPython 3.12.14、原生 Linux x86_64、native 缓存分配器**。模型只适用于普通即时执行（eager execution）的 CUDA 张量存储，不涉及外部内存、自定义分配器或 CUDA Graph 池。
+
+## 两项义务，两种不同边界
+
+分别记录**分配来源流（allocation origin）**、生产者、消费者、最后使用及存储释放。最后写入者不会自动成为来源流。视图（view）共享底层存储；删除一个名称不一定是最终释放。生命周期义务针对底层分配及所有剩余别名（alias）。
+
+| 机制 | 建立什么 | 不建立什么 |
+| --- | --- | --- |
+| `consumer.wait_stream(producer)` | 消费流未来的工作等待生产流在调用边界前已提交的工作 | CPU 等待、对生产流后续提交的覆盖、自动存储生命周期登记 |
+| `tensor.record_stream(consumer)` | 登记非来源流的使用，使 native 分配器在存储释放时延迟复用 | 生产数据就绪、复制、主机等待、所有权转移、对显式原地覆写的保护 |
+| 释放前返回真实来源流的依赖 | 来源流未来的复用工作排在此依赖覆盖的非来源流使用之后 | 对返回边界之后才提交的消费操作的覆盖 |
+| 持有存储直到经检查的消费完成点 | 这些使用仍在执行时，分配不会被回收 | 竞争生产者、读者或写者之间的自动排序 |
+
+`wait_stream` 在调用时于参数指定的流上记录事件。因此，在所需生产之前等待、等待方向相反，或冲突消费已经提交之后才等待，都不能建立需要的顺序。它影响等待流的未来工作，不要求 CPU 停下来。
+
+`record_stream` 使用另一种边界。在本 native 实现中，登记会把侧流加入分配的使用集合。存储解除分配时，分配器在已登记流上插入事件，随后检查这些事件的完成情况再决定复用。它覆盖的是这些流在**存储解除分配时**已排队的工作，而不只是调用登记时已排队的工作。它不允许释放存储后继续启动使用。事件跟踪有开销，也可能使复用时机不确定。
+
+## 先预测，再解双向交接工作表
+
+先遮住保护列，识别真实来源流，并分别画出就绪边与复用边。A、B 是同一 GPU 上的两条流；x、y、z 是三项独立的普通 native 分配。提交之后、GPU 完成之前，全部引用都可能消失。这是原创静态工作表，不是跟踪记录或地址复用实验。
+
+| 存储 | 来源与使用 | 必需的就绪条件 | 最终释放前的生命周期保护 |
+| --- | --- | --- | --- |
+| x | 在 A 分配和生产；在 B 读取 | B 在读 x 前等待相关 A 生产 | 为 x 登记 B，持有到 B 完成，或把 B 对 x 的最后使用返回来源 A |
+| y | 在 B 分配和生产；在 A 读取 | A 在读 y 前等待相关 B 生产 | 为 y 登记 A，持有到 A 完成，或把 A 对 y 的最后使用返回来源 B |
+| z | 在 A 用 `torch.empty` 分配；B 不读旧值，直接覆写 | B 在写 z 前等待分配来源 A 的边界 | 为 z 登记 B，持有到 B 完成，或把 B 对 z 的最后使用返回来源 A |
+
+对 x，先把 A 的生产排在 B 的读取之前。仅处理这条边，仍可能在 B 读取时复用 x 的存储。对 y，角色反过来：y 来源是 B，因此保护 x 对 y 后续的 A 使用没有任何保证。返回结果需要独立的就绪与生命周期证明。
+
+对 z，没有初始化值需要保留，但物理块可能来自旧张量，A 上仍有旧工作排队。未排序的 B 写入可能与这些旧访问冲突。**只写不能免除分配来源依赖。** z 被 B 写入之后，来源仍是 A。
+
+再审查 x、y 的五种方案；其中明确存在的等待都假定放在正确边界：
+
+| 情形 | 待审查方案 | 判断 |
+| --- | --- | --- |
+| S0 | 两个就绪等待都有；只登记 x 的 B 使用；y 在 A 读取入队后释放 | 不完整：y 的非来源 A 使用缺少生命周期保护 |
+| S1 | 两个非来源使用都登记；没有就绪等待 | 不完整：生命周期登记不建立数据就绪 |
+| S2 | 两个就绪等待都有；只持有两个名称到消费提交 | 不完整：提交不是完成 |
+| S3 | 两个就绪等待、最终释放前的两个非来源登记都存在；没有冲突修改 | 对给定使用图完整，但不是运行证据 |
+| S4 | 两个就绪等待都有；释放前把全部非来源最后使用汇合回各自真实来源 | 对给定使用图有效的手动替代方案 |
+
+最后考虑以下顺序：x 活着时登记 R，随后提交 B 使用 U1、U2，再发生最终存储释放 F；F 之后企图使用 U3。登记流的释放边界覆盖 U1、U2，但不授权 U3。相比之下，位于 U1、U2 之间的 `wait_stream` 边界只覆盖 U1，不覆盖 U2。这些是顺序标签，不是时间戳或可执行指令。
+
+## 失败是依赖图缺陷，不是必现的损坏输出
+
+不要要求不安全方案一定产生某个错误张量、崩溃或复用地址。调度与分配器状态可能让缺陷在多次运行中不显现。同样，地址不同也不能证明生命周期图正确。不要把故意执行竞争作为默认学习活动；应在纸上诊断缺边。
+
+保持存储存活可以防止回收，不能防止应用主动修改。即使 S3 已登记，如果 A 显式覆写 x 与 B 读取并发，仍然不安全。`record_stream` 不冻结值，也不串行化这些访问。需要给冲突访问添加顺序，或使用独立存储；只保住分配所有权不够。
+
+手动返回必须在全部相关非来源使用已经提交之后、最终释放之前，到达真实分配来源。x 的 B 使用返回 A；y 的 A 使用返回 B。每次 `wait_stream` 都先在参数流上记录新事件，再把等待入队。在这个普通即时执行模型中，仅流方向相反不会形成循环设备等待：每条依赖都从已提交工作指向后续工作。位置不当实际可能遗漏必需的覆盖或造成不必要的串行化。每条返回都应位于相关最后提交之后、释放之前。
+
+将来进行安全验证时，在经检查的完成点后用独立参考比较预期结果，既覆盖输入，也覆盖返回结果，并审查别名与生命周期。数值比较成功是补充证据，不是对一般排序合同的证明。异步失败的诊断应保留，不能在同步失败后当作已经成功完成而继续。
+
+## 所有权证明之后才测量
+
+分开正确性、工作负载预热（warmup）、无插桩计时与性能剖析（profiling）。采用 P04 的完成墙钟区间或正确包围工作的事件区间，并汇合每个纳入分支。事件必须启用计时，end 必须完成，经过时间单位是毫秒。只测入队不能解释为消费完成。
+
+比较登记与手动返回政策时，必须保持工作负载及输入/结果语义一致。记录每项释放和依赖的位置。较晚返回可能提供更多重叠机会，但保留内存更久；登记则增加分配器事件工作。本页没有哪种政策更快的测量。记录形状的剖析可能持有张量，改变依赖引用计数的分配行为，因此不能用来认证未受扰动的复用或计时。
+
+将来的<strong>环境清单（Environment Manifest）</strong>必须保留以下全部字段：
+
+| 字段组 | 必须记录的字段 |
+| --- | --- |
+| 运行与工作负载 | 日期、源码/工作负载修订、命令或活动身份、输入/种子、形状/步长/布局/数据类型、独立参考、容差及有限值政策、日志与失败阶段 |
+| 硬件 | GPU 型号/稳定身份、计算能力（compute capability）、可见/使用 GPU 数量及设备映射、总量/可用显存、CPU 型号、时钟/功率/温度条件、竞争工作 |
+| 主机与 Python | 原生 Linux 发行版/版本、架构、内核/glibc、OS 镜像/包来源，以及适用的容器/GPU 暴露方式；精确 CPython 可执行文件/构建来源、编译器/选项、安装器版本 |
+| 框架与 CUDA | Torch 版本/提交、精确 wheel/索引/哈希、完整依赖版本/产物哈希；已安装驱动、构建 CUDA 系列、随包 Runtime/cuDNN/CUPTI 及使用组件、操作后加载库的路径/身份；系统 Toolkit、`nvcc`、主机编译器，或明确不存在/未使用 |
+| 所有权与政策 | 实际分配器后端及配置、launch-blocking 等相关环境变量、精度开关、每项分配来源、别名/持有者、生产/消费流、就绪等待、登记/返回汇合、最后使用与释放 |
+| 测量 | 计时方法/单位、起止覆盖、是否纳入传输/分配/初始化、预热/重复/批次政策、原始样本/分布与噪声政策、剖析器版本/配置或禁用、独立正确性与跟踪产物 |
+
+未观察的值保持未观察，不能从拟议目标抄入。峰值/保留/已分配内存观察需要实际后端与采样方法；指针相等不是可移植的复用要求。没有真实证据前，不填耗时、地址、误差或实测结果。
+
+## 版本与硬件范围
+
+[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)中的环境选择 torch **2.11.0+cu128**、CPython **3.12.14**、Linux x86_64 标签 `cp312-cp312-manylinux_2_28_x86_64`、构建 CUDA **12.8**、元包 **12.8.1**、随包 Runtime/CUPTI **12.8.90**、cuDNN **9.19.0.56**。这条即时路径需要选定包的原生库及工作正常的驱动，不要求安装系统 Toolkit 或 `nvcc`。
+
+在进程启动前设置 `PYTORCH_ALLOC_CONF=backend:native`，并确认 `torch.cuda.memory.get_allocator_backend` 报告 `native`。此版本默认就是 `native`，但实际核对胜过推断。CUDA 12.8 不会自动选择 `cudaMallocAsync`。后者是另一种进程范围后端，要求 CUDA 11.4 或更新版本，不在本工作表的内部复用/统计声明范围内。`PYTORCH_CUDA_ALLOC_CONF` 是别名，不要给两个别名设置冲突配置。
+
+拟议外部目标为 Ubuntu 24.04 x86_64，单 GPU 计算能力至少 8.0、显存至少 8 GB，小输入适配实际可用显存。选择仍受维护且兼容的驱动，保守采用 **570.124.06 或更新版本**，并服从 GPU/OS 可能提出的更高要求。这里不声明实际 GPU/驱动配置或基准环境（Reference Environment）。原生 Linux 是唯一受支持环境（Supported Environment）；阅读工作表无需硬件，对应 `hardwareGate: none`。
+
+## 证据边界
+
+**待硬件验证（Pending Hardware Verification）：** 本页没有实际观察到分配器跟踪、张量结果、指针复用、重叠或性能结果。四个证据数组均为空。静态图推理与所有者源码审查都不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）状态。浏览器不执行 CUDA。
+
+## 提取式自测
+
+1. `consumer.wait_stream(producer)` 在调用时覆盖什么，为什么调用不阻塞 CPU？
+2. `record_stream` 在存储解除分配时保护什么，为什么它不能使消费者输入就绪？
+3. B 只写一个来源为 A 的 `torch.empty` 分配，为什么仍可能需要 A 到 B 的依赖？
+4. x 从 A 交给 B，而另行分配的 y 从 B 返回 A，最容易漏掉哪项生命周期义务？
+5. 只持有名称到入队、观察到不同地址、给仍存活张量做登记，分别为什么不能证明一般流安全？
+
+## 继续练习
+
+先完成[三道 P05 练习](/frameworks/streams-and-storage-lifetime/exercises/)，再阅读[独立参考解答](/frameworks/streams-and-storage-lifetime/solutions/)。用 [PB-R5-005](/practice/#pb-r5-005)重复双向所有权审查。选择测量边界时回到 [P04](/frameworks/queued-work-timing/)。
+
+## 来源与许可
+
+精确提交的 [CUDA 语义](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst)解释只写复用与后端选择；[Stream 与 Event 接口](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py)建立调用时等待边界；[Tensor 合同](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_tensor_docs.py)与 [native 分配器实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDACachingAllocator.cpp)建立释放边界及手动替代方案。
+
+[SRC-CUDA-081](/sources-and-versions/#src-cuda-081)记录语义审查；[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)记录环境产物与许可。当前 Context7 检索已与不可变所有者源码核对。正文、存储账本及 S0-S4 工作表是原创 CC BY 4.0 内容，不是复制的所有者示例或测试。链接的 PyTorch 源码保留 BSD-3-Clause 条款及适用通知；随包依赖保留各自许可。**事实核对与来源访问日期：2026-09-12。**

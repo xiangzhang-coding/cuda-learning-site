@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 200 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 204 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
 factCheckDate: '2026-09-12'
@@ -28,6 +28,10 @@ structure:
   - entry-term-198
   - entry-term-199
   - entry-term-200
+  - entry-term-201
+  - entry-term-202
+  - entry-term-203
+  - entry-term-204
   - maintenance
 evidence:
   compilation: []
@@ -50,7 +54,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,entry-term-201,entry-term-202,entry-term-203,entry-term-204,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1871,8 +1875,44 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [F04](/foundations/host-device-lifecycle/)、[P01](/python/cuda-python-bridge/)、[P02](/python/devices-contexts-launches/)与 [EX21](/examples/cuda-python-launch/)。
 - **版本说明：** CPython 3.14.7 ctypes 数组类型的 `from_address` 方法与 core 1.2.0 Buffer 所有权记录于 2026-09-12 复核的 [SRC-CUDA-077](/sources-and-versions/#src-cuda-077)。只有主机可访问句柄可建 CPU 视图；结果读取前 `sync()`，Buffer 关闭前停止使用视图。沿用既有页锁定内存与流词条，不重复新增。
 
+<span id="term-201" class="resource-target" aria-hidden="true"></span>
+
+### Storage lifetime tracking · 存储生命周期跟踪
+
+- **定义：** 存储生命周期跟踪（Storage lifetime tracking）记录底层分配尚未结束的使用，避免最后持有者释放后发生冲突复用。对于 PyTorch native 分配器下普通 eager CUDA 张量，record_stream 登记非原点流；即使带偏移，视图仍指向同一存储。
+- **避免使用：** 生产者同步；所有权转移；张量复制；防止显式并发修改；最后写入者变成分配原点。
+- **相关资源：** [P04](/frameworks/queued-work-timing/)和 [P05](/frameworks/streams-and-storage-lifetime/)。
+- **版本说明：** PyTorch 2.11.0+cu128、native 分配器，2026-09-12 复核于 [SRC-CUDA-081](/sources-and-versions/#src-cuda-081)。分配器在释放时处理登记流上已排队的工作。数据依赖仍须 wait；释放前手动汇合回真正原点是替代方案。不承诺精确复用地址或 cudaMallocAsync 行为。
+
+<span id="term-202" class="resource-target" aria-hidden="true"></span>
+
+### Autocast · 自动混合精度转换
+
+- **定义：** 自动混合精度转换（Autocast）是一种操作分派政策，在上下文内为合格操作选择计算 dtype。它不把所有参数或张量转成半精度。操作资格、输入精度、内部算术和输出舍入是不同问题。
+- **避免使用：** 全局 model.half 转换；所有归约都用 FP32；输出 dtype 证明累加器 dtype；离开上下文会扩宽已有张量。
+- **相关资源：** [L08](/libraries/tensor-core-precision-contracts/)和 [P06](/frameworks/mixed-precision-contracts/)。
+- **版本说明：** PyTorch 2.11.0+cu128 的公开 torch.amp.autocast，2026-09-12 复核于 [SRC-CUDA-082](/sources-and-versions/#src-cuda-082)。in-place 和 out= 变体不因此取得 autocast 分派，显式 dtype 保持有效。状态是线程局部的，反向放在前向 autocast 上下文之外。
+
+<span id="term-203" class="resource-target" aria-hidden="true"></span>
+
+### Gradient scaling · 梯度缩放
+
+- **定义：** 梯度缩放（Gradient scaling）在反向前放大损失，使较小的中间梯度更容易表示，再在优化器使用前去掉 scale。动态缩放还检查非有限梯度，可以跳过更新并降低 scale；它与 autocast 分派相互独立。
+- **避免使用：** 修复前向溢出；恢复量化丢失的输入值；保证收敛；scale 不能低于 1；在同一累积有效批次中更改 scale。
+- **相关资源：** [Q02](/correctness/floating-point-order-reproducibility/)和 [P06](/frameworks/mixed-precision-contracts/)。
+- **版本说明：** PyTorch 2.11.0+cu128 的 torch.amp.GradScaler("cuda")，2026-09-12 复核于 [SRC-CUDA-082](/sources-and-versions/#src-cuda-082)。累积后对每个优化器 unscale 一次，检查/裁剪、step，再 update。溢出压力可使 scale 低于 1；get_scale 可能同步。不记录训练结果。
+
+<span id="term-204" class="resource-target" aria-hidden="true"></span>
+
+### Profiler correlation · 分析器关联
+
+- **定义：** 分析器关联（Profiler correlation）是连接前端 CPU 活动、运行时启动及设备工作的记录关系。Kineto 使用 CUPTI 关联和外部前端映射；内核不必与其父操作同名，也不必落在 CPU 区间内。
+- **避免使用：** 名称匹配；时间包含；一个操作必有一个内核；表格总计等于墙钟时间；CUDA 时间列证明已跟踪内核。
+- **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)和 [P07](/frameworks/python-to-cuda-profiling/)。
+- **版本说明：** PyTorch 2.11.0+cu128、Kineto 提交 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7、CUPTI 包 12.8.90，2026-09-12 复核于 [SRC-CUDA-083](/sources-and-versions/#src-cuda-083)。要求真实 CPU/运行时/内核活动并保留每个调度窗口；词条定义不提供 trace。
+
 ## 维护规则
 
-2026-09-12 增量只新增 TERM-197 至 TERM-200，当前共 **200** 个词条。既有词条及逐项日期不变。这四条原创定义补充 Python 接口、共享上下文、标量 ABI 和借用视图区别，不重复 PTX、cubin、流或页锁定主机内存。双语页面和目录记录使用相同的新复核日期，不改变证据状态（Evidence Status）。
+2026-09-12 的 issue #43 增量新增 TERM-201 至 TERM-204，当前共 **204** 个词条。Issue #42 的 TERM-197 至 TERM-200 及此前逐项日期不变。存储生命周期跟踪、自动混合精度转换、梯度缩放和分析器关联各有独立合同，不重复已有流或精度词条。双语页面与目录记录使用相同复核日期，不改变证据状态（Evidence Status）。
 
 TERM-001 至 TERM-194 保留各自逐项复核日期。新增 TERM-195/196 与完整 196 项双语发布对（Publication Pair）的元数据、直接链接和静态定义于 **2026-09-09** 同步复核。每个词条包含规范英文、首选中文、定义、避免别名、相关资源和版本说明。定义与推导均为原创，只引用并转述公开上游资料，不复制其文字、表格、图示、代码或结果。新词条区分描述符借用的表示与活动预处理状态，不重复已有 CSR、预处理或外部工作区词条。四个证据数组均保持为空；EX20 仍独立处于待硬件验证（Pending Hardware Verification）。对应的[英文页](/en/glossary/)同时完整发布。

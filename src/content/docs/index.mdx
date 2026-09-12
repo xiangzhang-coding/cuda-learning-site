@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-截至 **2026-09-12**，当前发布在 R4 基础上加入 CUDA Python 桥接路线，覆盖 O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P03，共 78 个学习单元（Learning Unit）、287 个双语发布对（Publication Pair）、574 条源路由和 411 条资源目录记录。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
+截至 **2026-09-12**，当前发布在 R4 基础上加入 CUDA Python 桥接与 eager PyTorch CUDA 语义，覆盖 O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07，共 82 个学习单元（Learning Unit）、299 个双语发布对（Publication Pair）、598 条源路由和 423 条资源目录记录。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
 
 **最近完成的聚合静态复核仍是 2026-09-10 的 R4。** 模式版本 5 的 `src/r4-release-manifest.json` 继续生成冻结的 `/release.json`：75 个学习单元、277 个双语发布对、554 条源路由和 401 条目录记录。`/publication.json` 记录当前扩展后的清单，最近完成阶段仍为 R4，下一阶段 R5 的聚合复核待完成。R1-R3 历史发布不变；R3 保留 62 个单元、232 个发布对、464 条路由与 347 条目录记录。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 和[聚合来源复核结论](/sources-and-versions/#r4-aggregate-review)保留各自的历史日期；当前页面发布不预先证明 CI、Preview、生产部署或远程冒烟检查已通过，技术来源也保留逐项日期。
 
@@ -96,13 +96,15 @@ EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component
 
 A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS、cuDNN、cuFFT 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
 
-当前资源目录包含 12 个实验、85 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、200 个术语表（Glossary）词条和 95 条来源记录，共 411 条资源目录记录。源文件形成 287 个双语发布对，即 574 条源路由，包含 77 组练习与 77 组独立参考解答。R4 历史目录仍为 82 道题、196 个词条、92 条来源与 401 条记录；当前新增 `PB-R5-001/002/003`，不改动 R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。两个历史子集仍在[练习题库](/practice/)中列明。
+当前资源目录包含 12 个实验、89 个练习题库（Practice Bank）条目、19 项可视化讲解（Visual Explainer）、204 个术语表（Glossary）词条和 99 条来源记录，共 423 条资源目录记录。源文件形成 299 个双语发布对，即 598 条源路由，包含 81 组练习与 81 组独立参考解答。R4 历史目录仍为 82 道题、196 个词条、92 条来源与 401 条记录；在 Python 桥接的 `PB-R5-001/002/003` 之后，本次新增 `PB-R5-004/005/006/007`，不改动 R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。两个历史子集仍在[练习题库](/practice/)中列明。
 
-只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。P01-P03 的四个证据数组均为空；EX21 的编译证据和实际观察记录为空，主机测试不证明 CUDA 编译或运行。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
+只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。P01-P07 的四个证据数组均为空；EX21 的编译证据和实际观察记录为空，主机测试不证明 CUDA 编译或运行。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。六份分析器计划都只有预期内容；来源复核不是 GPU 证据。
 
 [L12](/libraries/cufft-plans-layouts-startup/)完整有序先修为 `[Q05,M07]`。[L12 练习](/libraries/cufft-plans-layouts-startup/exercises/)依赖 `[L12]`，[独立解答](/libraries/cufft-plans-layouts-startup/solutions/)依赖 `[L12-EXERCISES]`。L12 的四个证据数组仍为空；归档的 12.9.2 cuFFT 指南是教学基线，当前 13.3 参考访问于 2026-09-08，因为精确的 13.3.1 API 与发布说明归档不可用。
 
 [L13](/libraries/cusparse-descriptors-spmv-spmm/)完整有序先修为 `[A12,A13,L01]`。[L13 练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)依赖 `[L13]`，[独立解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)依赖 `[L13-EXERCISES]`。L01-L13 均已发布。L13 的四个证据数组仍为空；EX20 没有保留的编译证据，运行仍待硬件验证。其三项 C++17 非执行构建门槛固定 Toolkit/cuSPARSE 组合为 11.8.0/11.7.5.86、12.9.2/12.5.10.65 与 13.3.1/12.8.2.51。[SRC-CUDA-075/076 复核](/sources-and-versions/#src-cuda-075)于 2026-09-09 记录了可访问的精确 cuSPARSE 归档，包括 13.3.1；这与 EX19 较早的归档访问失败记录分开。来源审查与构建门槛不是 GPU 证据。
+
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) 新增 [P04：排队工作与计时](/frameworks/queued-work-timing/)，先修 `[M07,Q05]`；[P05：流与存储生命周期](/frameworks/streams-and-storage-lifetime/)，先修 `[P04,M08]`；[P06：混合精度合同](/frameworks/mixed-precision-contracts/)，先修 `[Q02,P04,L08]`；[P07：从 Python 到 CUDA 的性能分析](/frameworks/python-to-cuda-profiling/)，先修 `[P04,Q07,Q08]`。相关边依次为 `[P05,P06,P07]`、`[P04]`、`[P04,P07]`、`[P05,P06]`。各单元练习只依赖本单元，独立解答只依赖对应练习集。这十二对页面不增加可运行示例或实验。独立的[环境与来源](/sources-and-versions/#src-cuda-080)固定 PyTorch 2.11.0+cu128、CPython 3.12.14、CUDA 元包 12.8.1、runtime/CUPTI 12.8.90、cuDNN 9.19.0.56 及 native 分配器。Eager 工作不需要系统 Toolkit，源码和包检查不授予 GPU 证据。P08、EX22、LAB13 与 Triton 目的地仍未发布。
 
 ## 边界先说清
 
@@ -111,6 +113,11 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
 ## 现在可以去哪里
 
 <div className="route-grid">
+  <a className="route-card" href="/frameworks/queued-work-timing/">
+    <span>P04-P07 · PYTORCH CUDA</span>
+    <strong>排队工作、存储、精度与分析</strong>
+    <small>从 M07 和 Q05 出发，按精确先修关系学习四个不授予证据状态的单元。</small>
+  </a>
   <a className="route-card" href="/start/using-the-learning-site/">
     <span>01 · START HERE</span>
     <strong>如何使用学习站</strong>
@@ -729,17 +736,17 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 85 道原创题练习证据、环境、架构、内核、内存、算法、库、Python 桥接、工具链与正确性判断。</small>
+    <small>用 89 道原创题练习证据、环境、架构、内核、内存、算法、库、Python 桥接、PyTorch、工具链与正确性判断。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
     <strong>术语表（Glossary）</strong>
-    <small>核对本站使用的 200 个中英文规范术语。</small>
+    <small>核对本站使用的 204 个中英文规范术语。</small>
   </a>
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 95 条接口与上游来源记录，以及各自复核日期。</small>
+    <small>查看当前发布依据的 99 条接口与上游来源记录，以及各自复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

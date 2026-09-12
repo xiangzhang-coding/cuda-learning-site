@@ -32,8 +32,9 @@ describe('GitHub Actions quality contract', () => {
       '820762786026740c76f36085b0efc47a31fe5020',
       '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a',
       '3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
+      'ece7cb06caefa5fff74198d8649806c4678c61a1',
     ]);
-    expect(workflow.match(/persist-credentials: false/g)).toHaveLength(5);
+    expect(workflow.match(/persist-credentials: false/g)).toHaveLength(6);
     expect(workflow.match(/fetch-depth: 0/g)).toHaveLength(1);
   });
 
@@ -42,6 +43,7 @@ describe('GitHub Actions quality contract', () => {
 
     for (const job of [
       'static-and-integration',
+      'pytorch-environment',
       'e2e-chromium',
       'e2e-cross-browser',
       'accessibility-automated',
