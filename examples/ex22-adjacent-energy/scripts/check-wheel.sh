@@ -17,3 +17,4 @@ python -m pip check
 # fresh process; neither editable installs nor JIT recompilation can hide gaps.
 python -I -c 'import torch, cuda_learning_ops; from pathlib import Path; assert "site-packages" in Path(cuda_learning_ops.__file__).parts; print("installed-wheel import passed")'
 python -I verify.py --device cpu
+python -I verify_install.py

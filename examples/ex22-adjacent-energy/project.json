@@ -11,7 +11,7 @@
     "hostLanguage": "c++/python",
     "standard": "c++17",
     "inputs": ["csrc/contract.h", "csrc/operator.cpp", "csrc/kernel.cu", "cuda_learning_ops/__init__.py", "cuda_learning_ops/_registration.py", "setup.py", "verify.py"],
-    "hostTestInputs": ["verify.py"],
+    "hostTestInputs": ["verify.py", "verify_install.py"],
     "contractFiles": ["pyproject.toml", "MANIFEST.in", "project.json", "scripts/check-wheel.sh"],
     "additionalContractInputs": ["environment-manifest.json"],
     "commands": {"build": "python -m pip wheel --no-build-isolation --no-deps . --wheel-dir dist", "hostTest": "python -I verify.py --device cpu", "run": "python -I verify.py --device cuda"},

@@ -20,6 +20,8 @@ jobs:
     env:
       CUDA_VISIBLE_DEVICES: ''
       PYTORCH_ALLOC_CONF: backend:native
+      # Override the image's CUDA loader path. setup-python adds only its own lib.
+      LD_LIBRARY_PATH: ''
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -47,4 +49,5 @@ jobs:
           "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip install --require-hashes --only-binary=:all: -r ../../scripts/pytorch-environment/requirements.lock
           "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip install --no-deps dist/*.whl
           "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip check
+          "$RUNNER_TEMP/ex22-consumer/bin/python" -I verify_install.py
           "$RUNNER_TEMP/ex22-consumer/bin/python" -I -c 'import torch, cuda_learning_ops; from cuda_learning_ops import adjacent_energy; torch.testing.assert_close(adjacent_energy(torch.tensor([1., -2., 2., 2.5])), torch.tensor([9., 16., .25])); print("clean consumer passed; no GPU executed")'

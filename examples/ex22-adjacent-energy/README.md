@@ -21,9 +21,12 @@ binary compatibility is claimed; rebuild after changing any build coordinate.
 From the repository root, with an empty selected-interpreter venv activated:
 
 ```sh
-python -I scripts/pytorch-environment/check.py --install
+PYTORCH_ALLOC_CONF=backend:native CUDA_VISIBLE_DEVICES='' LD_LIBRARY_PATH="$(python -I -c 'import sys; print(sys.base_prefix + "/lib")')" python -I scripts/pytorch-environment/check.py --install
 ```
 
+These command-scoped settings hide devices only during preparation and restrict
+library lookup to the selected interpreter's lib directory. Leave LD_PRELOAD
+and the legacy PYTORCH_CUDA_ALLOC_CONF unset; the checker rejects them.
 This reuses the exact hashed application lock and performs its CPU environment
 checks before the extension is installed. Provision the compiler and Toolkit
 separately. Then run from `examples/ex22-adjacent-energy/`:
@@ -38,6 +41,10 @@ checks dependencies and canonical installed imports, then tests CPU execution,
 opcheck, numerical first/second derivatives, meta and fullgraph dynamic
 compilation. It needs no GPU. It does not offer a CPU-only replacement build.
 `python -I` prevents a source-tree package from satisfying the import test.
+`verify_install.py` also checks fresh imports, temporarily hides the installed
+extension in this disposable venv, requires import failure, restores it in a
+finally block, and requires success again. If the process is forcibly killed,
+restore the `.ex22-hidden` backup or recreate the disposable environment.
 
 The CUDA command requires an actual supported GPU: CC >= 8.0, at least 8 GB,
 one visible device and a compatible driver (conservative baseline 570.124.06).
