@@ -44,6 +44,7 @@ export default defineConfig({
       disable404Route: true,
       customCss: ['./src/styles/site.css'],
       components: {
+        Search: './src/components/Search.astro',
         PageTitle: './src/components/SearchablePageTitle.astro',
         Banner: './src/components/ThemeFallbackBanner.astro',
         ThemeProvider: './src/components/ThemeProvider.astro',

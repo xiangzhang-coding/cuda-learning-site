@@ -89,6 +89,8 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 精确 npm 清单负责版本、引擎、依赖和许可信息；当前上游文档负责配置语义。Context7 用于发现和交叉核对接口，不覆盖目标版本清单。
 
+**SRC-WEB-002 补记，访问日期 2026-09-13：** 通过 Context7 `/withastro/starlight` 交叉核对官方 [Search 覆写接口](https://starlight.astro.build/reference/overrides/#search)。选定的 owner tag `@astrojs/starlight@0.41.7` 解析为 `656ffd54e5b27483f542c9eb8b12fd32f44372ae`；其 [`packages/starlight/components/Search.astro`](https://github.com/withastro/starlight/blob/656ffd54e5b27483f542c9eb8b12fd32f44372ae/packages/starlight/components/Search.astro) 被改编为 `src/components/Search.astro`，让点击、键盘意图与可选空闲预加载共用一次初始化。加载与失败提示均本地化；UI 模块加载超过十秒会提示重新加载页面，不自动重试。保留上游布局、CSS（含内嵌结果图标）、翻译、弹窗无障碍语义与开发模式提示。这一个复制、改编的软件文件保留精确的 [MIT 许可](https://github.com/withastro/starlight/blob/656ffd54e5b27483f542c9eb8b12fd32f44372ae/LICENSE)及 2023 Astro contributors 版权，完整声明保存在源码并随 `/legal/starlight-0.41.7-MIT.txt` 分发，不属于 Apache-2.0 或教学 CC BY 4.0 内容。已安装源码及许可分别匹配 owner Git blob `d8c80d826995d6c8ce598aa618ddf7ea575ecadc` / `385b09dbf084027aa08be278f255975d5fd27406`，没有中间层许可或 NOTICE。这一有限例外仅就该文件取代先前“无改编”的概括，不增改来源记录、双语发布对、依赖、历史来源日期或 CUDA 证据。扣留空闲回调能证明上游按需初始化缺口，不能证明缺少首次 trace 的 CI 失败之精确原因。
+
 资源索引实现所用的 Astro build-time data 与 processed client script、Starlight MDX/静态 Pagefind、Pagefind 多语言和索引边界在 **2026-08-25** 通过上列 Context7 库与 owner documentation 交叉核对。Pagefind filter metadata 作用于页面而非页面内单张卡片，因此本次没有伪造 card-level Pagefind facet；全站搜索仍由静态 Pagefind 负责，页内筛选使用无持久化的原生控件。
 
 ### 已核对的技术来源与 CUDA 版本事实

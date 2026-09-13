@@ -4,7 +4,7 @@
 
 ## Apache-2.0
 
-Website source, configuration, styles, test tooling, and scripts are licensed under the [Apache License 2.0](LICENSE).
+Original website source, configuration, styles, test tooling, and scripts are licensed under the [Apache License 2.0](LICENSE). The exact `src/components/Search.astro` adaptation is MIT, as recorded below; it is not relicensed by the root license.
 
 This scope includes:
 
@@ -123,7 +123,15 @@ The [backend 9.24.0 SDK EULA and cuDNN supplement](https://docs.nvidia.com/deepl
 
 ## Adaptations
 
-No adapted content or assets are included in the current publication. It contains no copied, traced, or adapted NVIDIA sample, figure, table, diagram, prose, source listing, external font, third-party image, owner asset, or private material. EX01-EX20 are original code rather than reconstructions of NVIDIA samples.
+### Starlight Search override
+
+Reviewed and accessed **2026-09-13**. The sole adapted software file is `src/components/Search.astro`, from [`packages/starlight/components/Search.astro`](https://github.com/withastro/starlight/blob/656ffd54e5b27483f542c9eb8b12fd32f44372ae/packages/starlight/components/Search.astro) in `withastro/starlight`, tag `@astrojs/starlight@0.41.7`, commit `656ffd54e5b27483f542c9eb8b12fd32f44372ae`. The installed file matches owner Git blob `d8c80d826995d6c8ce598aa618ddf7ea575ecadc`. The complete owner tree contains no intervening license or NOTICE; the governing root [LICENSE](https://github.com/withastro/starlight/blob/656ffd54e5b27483f542c9eb8b12fd32f44372ae/LICENSE), blob `385b09dbf084027aa08be278f255975d5fd27406`, matches the installed license.
+
+The file retains **MIT**, `Copyright (c) 2023 [Astro contributors](https://github.com/withastro/starlight/graphs/contributors)`, and the complete permission/condition/disclaimer text in Astro frontmatter, not rendered HTML. Distribution retains that notice in source and the existing `legal/starlight-0.41.7-MIT.txt` output. Changes are the public Icon import, instance-scoped single-flight initialization on open intent and optional idle preload, late DOM readiness, focus after loading only while open, and localized loading/failure messages with a ten-second UI-module deadline. Failure requires a page reload; no automatic retry or global scheduler patch is added. The upstream styles, translations, icons, modal semantics and development warning are retained.
+
+The config registration, narrow license-check exception, virtual-module type declaration, and browser/contract tests are original Apache-2.0 software. New bilingual source notes are original CC BY 4.0 prose. This website-interface adaptation adds no source record, Publication Pair, dependency, CUDA evidence, or curriculum asset.
+
+No adapted content or assets are included in the instructional material. It contains no copied, traced, or adapted NVIDIA sample, figure, table, diagram, prose, source listing, external font, third-party image, or private material. EX01-EX20 are original code rather than reconstructions of NVIDIA samples. The MIT website-interface exception above does not change these teaching-content rights.
 
 The issue #23 A08-A09, EX15, VIS12, PB-R2-020/021, TERM-147 through TERM-151, and `SRC-CUDA-044/045` additions are original. EX15 is an original Apache-2.0 C++17 project with empty compilation evidence, Pending Hardware Verification runtime, and no recorded observations. VIS12's controls, hierarchy model, and static fallback are an original teaching composition. These additions publish no observed runtime or measured performance result.
 
