@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test';
 
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
-import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
+import { collectBrowserFailures, expectRankedSearchResult, settlePublicationPage } from '../helpers/browser-contract';
 import { discoverPublishedRoutes, publishedRouteBatches } from '../helpers/publication-routes';
 
 const routeBatches = await publishedRouteBatches();
@@ -36,7 +36,7 @@ test.describe('published route batches', () => {
         await test.step(route, async () => {
           const response = await page.goto(route, { waitUntil: 'load' });
           expect(response?.ok(), route).toBe(true);
-          await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
+          await settlePublicationPage(page);
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
           expect(errors, route).toEqual([]);
         });

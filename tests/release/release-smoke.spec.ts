@@ -29,7 +29,7 @@ import r4ReleaseManifest from '../../src/r4-release-manifest.json' with { type: 
 import { hashCanonicalBuildContract, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
-import { collectBrowserFailures, expectRankedSearchResult, type SearchScenario } from '../helpers/browser-contract';
+import { collectBrowserFailures, expectRankedSearchResult, settlePublicationPage, type SearchScenario } from '../helpers/browser-contract';
 import { discoverPublishedRoutes, publishedRouteBatches } from '../helpers/publication-routes';
 
 const routeBatches = await publishedRouteBatches();
@@ -1057,7 +1057,7 @@ test.describe('published route batches', () => {
           const response = await page.goto(route, { waitUntil: 'load' });
           expect(response?.ok(), route).toBe(true);
           expect(scanArtifactBuffer(await response!.body(), `${route}index.html`), route).toEqual([]);
-          await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
+          await settlePublicationPage(page);
           await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${canonicalOrigin}${route}`);
           expect(failures, route).toEqual([]);
         });

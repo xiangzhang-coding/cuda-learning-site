@@ -50,6 +50,20 @@ the installed pinned CLI supplies the actual collection behavior. The budget
 change itself is not a passing rerun, a fix for unobserved retry causes or
 CUDA evidence; required CI must complete before issue closure.
 
+The three-shard run 34747410781 completed within budget. Its sole flaky
+failure was Firefox route batch en/25, with a retained first-failure trace:
+`favicon.svg` returned response metadata with status 200 but
+`NS_BINDING_ABORTED` while the sweep replaced the document. This is distinct
+from the earlier unretained PyTorch navigation retries. A controlled delayed
+favicon reproduced the harness ending readiness at search-input creation;
+the original boundary failed and the fixed boundary passed five repetitions.
+The actual route batch then passed ten repetitions without retries. Shared
+`settlePublicationPage` retains the static-search assertion and waits for the
+page's outstanding requests to settle before the next navigation, for both
+ordinary route sweeps and release smoke. The strict failure collector, all
+route coverage and fail-on-flaky policy remain intact; no aborted-request
+whitelist, production code change or additional timeout is introduced.
+
 - Aggregate R4 static review date: 2026-09-10
 - Earlier API, infrastructure, source-item, rights, and archive-access records retain their individual dates; fresh aggregate retrievals are recorded separately below
 - Historical R4 scope: 277 bilingual Publication Pairs, 554 source routes, 75 Learning Units including L01-L13, 20 Runnable Examples, 12 Labs, 19 Visual Explainers, 74 Exercise-set and 74 solution-set pairs, 82 Practice Bank entries, 196 Glossary terms, 92 source records, and 401 catalog records; R1-R4 remain immutable history

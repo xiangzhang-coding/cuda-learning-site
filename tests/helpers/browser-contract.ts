@@ -57,3 +57,11 @@ export async function expectRankedSearchResult(page: Page, scenario: SearchScena
 
   await page.keyboard.press('Escape');
 }
+
+export async function settlePublicationPage(page: Page) {
+  await expect(page.locator('site-search input'), 'publication initializes static search').toHaveCount(1);
+  // Firefox can still be fetching the favicon after load and search UI creation.
+  // Drain that page's requests before the sweep replaces its document; keep the
+  // failure collector strict rather than hiding NS_BINDING_ABORTED globally.
+  await page.waitForLoadState('networkidle');
+}
