@@ -447,6 +447,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R4-015', 'PB-R4-016',
       'PB-R5-001', 'PB-R5-002', 'PB-R5-003',
       'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007',
+      'PB-R5-008', 'PB-R5-009', 'PB-R5-010',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -528,6 +529,9 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-005': 'frameworks/streams-and-storage-lifetime',
       'PB-R5-006': 'frameworks/mixed-precision-contracts',
       'PB-R5-007': 'frameworks/python-to-cuda-profiling',
+      'PB-R5-008': 'frameworks/first-custom-operator',
+      'PB-R5-009': 'frameworks/operator-registration',
+      'PB-R5-010': 'frameworks/operator-packaging',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -796,9 +800,12 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-005': ['memory/event-dependencies-timing', 'frameworks/queued-work-timing', 'frameworks/streams-and-storage-lifetime'],
       'PB-R5-006': ['correctness/floating-point-order-reproducibility', 'libraries/tensor-core-precision-contracts', 'frameworks/mixed-precision-contracts'],
       'PB-R5-007': ['correctness/timeline-first-nsight-systems', 'correctness/kernel-first-nsight-compute', 'frameworks/python-to-cuda-profiling'],
+      'PB-R5-008': ['frameworks/first-custom-operator', 'examples/adjacent-energy'],
+      'PB-R5-009': ['frameworks/operator-registration', 'examples/adjacent-energy'],
+      'PB-R5-010': ['frameworks/operator-packaging', 'examples/adjacent-energy', 'labs/build-custom-operator'],
     };
 
-    expect(entrySections).toHaveLength(89);
+    expect(entrySections).toHaveLength(92);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];

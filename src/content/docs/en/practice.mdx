@@ -1,9 +1,9 @@
 ---
 title: Practice Bank
-description: 89 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 92 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -98,6 +98,9 @@ structure:
   - entry-pb-r5-005
   - entry-pb-r5-006
   - entry-pb-r5-007
+  - entry-pb-r5-008
+  - entry-pb-r5-009
+  - entry-pb-r5-010
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -183,6 +186,9 @@ prerequisites:
   - P05
   - P06
   - P07
+  - P08
+  - P09
+  - P10
 relatedUnits:
   - O02
   - O03
@@ -270,6 +276,9 @@ relatedUnits:
   - P05
   - P06
   - P07
+  - P08
+  - P09
+  - P10
   - EX21
   - LAB06
   - LAB08
@@ -292,19 +301,19 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,entry-pb-r5-004,entry-pb-r5-005,entry-pb-r5-006,entry-pb-r5-007,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,entry-pb-r5-004,entry-pb-r5-005,entry-pb-r5-006,entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03,P04,P05,P06,P07' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03,P04,P05,P06,P07,P08,P09,P10' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,P04,P05,P06,P07,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,P04,P05,P06,P07,P08,P09,P10,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -323,13 +332,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 89 complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. This page publishes 92 complete original entries; a solution reviews your work rather than replacing it.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 89 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable discussion label, not a URL-stability promise. Filtering changes the visible cards only; all 92 complete prompts, prerequisite links and solutions remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
@@ -4084,7 +4093,75 @@ Retry latency needs a separately declared end-to-end host interval that covers t
 
 **Source date:** 2026-09-12.
 
+<span id="pb-r5-008" class="resource-target"></span>
+
+## PB-R5-008: Audit sliced input contracts
+
+**ID:** PB-R5-008 · original Publication Pair.
+- **Direct prerequisite:** [P08](/en/frameworks/first-custom-operator/), exactly `[P08]`.
+- **Hardware gate:** none for this static audit.
+- **Last reviewed:** 2026-09-13.
+- **Related Learning Units and resources:** [P08](/en/frameworks/first-custom-operator/), [EX22](/en/examples/adjacent-energy/).
+
+**Difficulty:** intermediate. **Version:** PyTorch 2.11.0+cu128.
+
+**Prompt:** Decide which views may reach EX22's native pointer loop. A contiguous float64 base contains `[0,1,2,3,4,5]`; candidates are `base[2:5]`, `base[::2]`, `base[3:3]`, and `base[4:5]`.
+
+**Constraints:** Do not silently materialize inputs or change the public contract. Distinguish rank, stride, storage offset and length. **Expected evidence:** one accept/reject decision per candidate, output shape and values for accepted cases, and one counterexample to a validator that checks only rank/dtype. **Acceptance criteria:** retain supported offset views and singleton input while rejecting noncontiguous and empty input.
+
+<details><summary>Hint 1: An offset is not a stride</summary><p>The pointer to the first view element already starts at its offset. Ask whether subsequent logical elements are adjacent in memory.</p></details>
+<details><summary>Hint 2: Empty input differs from empty output</summary><p>A singleton has zero adjacent edges and is supported. A zero-length input lies outside the declared input domain.</p></details>
+<details><summary>Separate reviewed solution: Open after your attempt</summary><p>Accept base[2:5]: values [2,3,4] yield [1,1], shape (2,). Reject base[::2] because stride two violates contiguity, although rank/dtype are valid. Reject base[3:3] because length zero is invalid. Accept base[4:5], returning fresh shape (0,) output. No extra storage offset is added to the data pointer. A valid alternative is an explicitly separate API that materializes strided inputs; silently doing so would change this operator's contract. Common errors are rejecting every offset view, accepting zero input because zero output is supported, and calling derived values measured GPU results.</p></details>
+
+**Source basis:** Original view audit; [EX22](/en/examples/adjacent-energy/), [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084). **Source date:** 2026-09-13.
+
+<span id="pb-r5-009" class="resource-target"></span>
+
+## PB-R5-009: Distinguish three operator acceptance reports
+
+**ID:** PB-R5-009 · original Publication Pair.
+- **Direct prerequisite:** [P09](/en/frameworks/operator-registration/), exactly `[P09]`.
+- **Hardware gate:** none for this static audit.
+- **Last reviewed:** 2026-09-13.
+- **Related Learning Units and resources:** [P09](/en/frameworks/operator-registration/), [EX22](/en/examples/adjacent-energy/).
+
+**Difficulty:** advanced. **Version:** PyTorch 2.11.0+cu128.
+
+**Prompt:** Audit three hypothetical reports: A has full forward comparisons only; B has opcheck on ordinary inputs only; C has gradcheck on a constant length-four input only. Each claims complete trainable compiled-operator acceptance.
+
+**Constraints:** Treat supplied checks as hypothetical successful observations for the reasoning, not actual repository evidence. Do not infer absent tests. **Expected evidence:** a coverage table distinguishing values, registration, numerical derivatives, singleton, dynamic shape, packaging and hardware identity. **Acceptance criteria:** reject all three complete-acceptance claims and propose complementary tests, including nonconstant inputs and nonuniform upstream derivatives.
+
+<details><summary>Hint 1: Name the claim before the test</summary><p>A numerical value comparison and a registration check answer different questions. Which report actually probes a derivative formula?</p></details>
+<details><summary>Hint 2: A degenerate derivative can hide a bug</summary><p>The adjacent-energy derivative is zero at constant input. A universally zero backward can survive that one first-derivative sample.</p></details>
+<details><summary>Separate reviewed solution: Open after your attempt</summary><p>A supplies forward corpus coverage, not derivatives, metadata or import behavior. B checks registration/schema/fake/AOT integration on supplied inputs but is not the mathematical derivative oracle. C probes a derivative numerically at one degenerate point: add unequal adjacent values and multiple upstream weights, gradgradcheck, singleton cases, offset views, explicit meta and dynamic fullgraph forward/backward. All need the remaining complementary checks and installed-wheel import identity. CPU results do not fill CUDA environment fields. A valid alternative adds a tiny independently formed Jacobian; it supplements these boundaries. Common errors are adding counts of passing tests instead of examining coverage, assuming fullgraph implies fusion, or promoting hypothetical reports into runtime evidence.</p></details>
+
+**Source basis:** Original coverage audit; [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084). **Source date:** 2026-09-13.
+
+<span id="pb-r5-010" class="resource-target"></span>
+
+## PB-R5-010: Reject cross-version extension wheel reuse
+
+**ID:** PB-R5-010 · original Publication Pair.
+- **Direct prerequisite:** [P10](/en/frameworks/operator-packaging/), exactly `[P10]`.
+- **Hardware gate:** none for this static audit.
+- **Last reviewed:** 2026-09-13.
+- **Related Learning Units and resources:** [P10](/en/frameworks/operator-packaging/), [EX22](/en/examples/adjacent-energy/), [LAB13](/en/labs/build-custom-operator/).
+
+**Difficulty:** advanced. **Version:** PyTorch 2.11.0+cu128.
+
+**Prompt:** Review a deployment proposal that copies the EX22 cp312 wheel to a cp313 environment with a different torch minor release, preserving only the CUDA family and GPU model.
+
+**Constraints:** No stable ABI was selected. The proposal supplies no rebuild, clean import or numerical reports. **Expected evidence:** list retained and changed coordinates, explain why filename rewriting cannot establish compatibility, and define a new acceptance matrix. **Acceptance criteria:** reject reuse under the selected contract and require a separately reviewed rebuild/profile with artifact and dependency identity.
+
+<details><summary>Hint 1: CUDA is one coordinate</summary><p>A matching CUDA family says nothing by itself about Python module initialization ABI or the selected LibTorch interface.</p></details>
+<details><summary>Hint 2: Metadata cannot repair binary calls</summary><p>Renaming a wheel changes how it may be selected; it does not recompile its symbols, linking or Python initialization code.</p></details>
+<details><summary>Separate reviewed solution: Open after your attempt</summary><p>GPU model and CUDA family are retained; Python ABI and PyTorch version are changed. This project uses an ordinary cp312 native extension, not abi3 or stable LibTorch ABI. Reject the proposed reuse even if a filename edit makes installation possible. A new row must review exact APIs, compiler/Toolkit compatibility, dependency artifacts and rights, then rebuild both native paths and run clean positive/negative imports, values, derivatives, fake/meta and compiled execution. Alternatively retain the original selected environment and wheel bytes. Common errors include interpreting a successful install as import success, an import as numerical acceptance, or same GPU model as complete environment identity. [LAB13](/en/labs/build-custom-operator/) supplies the current row's checks, not automatic authorization of the proposed row.</p></details>
+
+**Source basis:** Original migration audit; [SRC-CUDA-085](/en/sources-and-versions/#src-cuda-085). **Source date:** 2026-09-13.
+
 ## Review record
+
+The 2026-09-13 issue #44 increment adds PB-R5-008/009/010 with exact prerequisites P08/P09/P10. Current total: 92 original entries. EX22 and LAB13 add two Pending Hardware Verification subjects (34 total), with empty compilation and recorded observations. Earlier dated increments below are history; R5 aggregate review remains pending.
 
 The **2026-09-12** issue #43 increment adds exactly PB-R5-004/005/006/007, with direct prerequisites `[P04]`, `[P05]`, `[P06]`, and `[P07]`, bringing the current total to **89**. Issue #42's PB-R5-001/002/003 remain intact. Each new entry has two closed hints and a separate original worked solution. Historical dates and the R3/R4 classifications remain unchanged; R5 aggregate review is pending. No new Example or Lab is added: 20 examples plus 12 Labs remain **32** pending subjects, without new compilation or recorded runtime evidence.
 

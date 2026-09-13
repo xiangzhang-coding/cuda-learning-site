@@ -1,0 +1,152 @@
+---
+title: 'EX22: Adjacent-Difference Energy Operator'
+description: Canonical original CPU/CUDA operator with schema, fake/meta, gradients, checks and an ahead-of-time installed wheel.
+pairId: ex22
+counterpart: /examples/adjacent-energy/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, project, cpu, schema, cuda, imports, fake, autograd, build, reference, checks, execution, evidence, sources]
+resourceKind: runnable-example
+unitId: EX22
+prerequisites: [P08, P09]
+relatedUnits: [P10, LAB13]
+exampleIds: [EX22]
+canonicalExample: EX22
+canonicalRanges:
+  - cpu
+  - schema
+  - cuda
+  - imports
+  - fake
+  - autograd
+  - build
+  - reference
+  - checks
+hardwareGate: 'Native Linux; build requires CPython 3.12.14, torch 2.11.0+cu128, Toolkit 12.8.1, NVCC 12.8.93 and GCC 13.3.0; CUDA run requires one CC 8.0+ GPU with at least 8 GB.'
+toolkitLanes: []
+extensionProfile: ex22-torch211-cu128-cp312
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - 'The wheel should import outside its source tree and CPU checks should pass without a GPU.'
+    - 'CPU and CUDA should agree with the full reference, gradients, metadata and compiled execution contracts.'
+  recordedObservations: []
+sources:
+  - { title: 'Library integration', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'Fake/meta autograd opcheck', accessDate: '2026-09-13' }
+  - { title: 'Extension build', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py', version: 'PyTorch 2.11.0', platform: 'CUDAExtension AOT wheel', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex22 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/examples/adjacent-energy/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,project,cpu,schema,cuda,imports,fake,autograd,build,reference,checks,execution,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P08,P09' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P10,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'cpu,schema,cuda,imports,fake,autograd,build,reference,checks' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Linux; build requires CPython 3.12.14, torch 2.11.0+cu128, Toolkit 12.8.1, NVCC 12.8.93 and GCC 13.3.0; CUDA run requires one CC 8.0+ GPU with at least 8 GB.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:extension-profile', content: ex22-torch211-cu128-cp312 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '2 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/adjacent-energy/" lang="zh-CN">阅读中文对应页</a>
+
+## Contract
+
+Prerequisites: [P08](/en/frameworks/first-custom-operator/) and [P09](/en/frameworks/operator-registration/). Compute `y[i]=(x[i+1]-x[i])^2` for contiguous rank-one strided CPU/CUDA float32 or float64 tensors with 1 through 1,000,000 elements. Return fresh contiguous n-1 output on the same device and dtype without mutation or alias. A contiguous offset view works; a stride-two view, empty input, half/integer dtype or batched shape is rejected. A singleton returns empty output. Ordinary nonfinite arithmetic is not masked. This is original instructional code, not an adapted tutorial operator or a performance benchmark.
+
+## Canonical project
+
+[Inspect immutable source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/4129723b1c284266c30696a47b5eea0828dd3921/examples/ex22-adjacent-energy) or [download the archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/4129723b1c284266c30696a47b5eea0828dd3921.zip). Use `examples/ex22-adjacent-energy/` as the project root and retain the surrounding repository for the existing application environment lock. Both Publication Pair pages import the same nine canonical ranges. Software is Apache-2.0; instructional text is CC BY 4.0.
+
+## CPU implementation
+
+<CanonicalCode exampleId="EX22" range="cpu" />
+
+The shared `contract.h` validates before pointer access. Each output owns an adjacent pair. The pointer already accounts for a contiguous input view's storage offset.
+
+## Schema and CPU dispatch
+
+<CanonicalCode exampleId="EX22" range="schema" />
+
+One schema promises fresh output and no mutation. Backend dispatch chooses a native implementation; Python does not copy CUDA inputs to CPU.
+
+## CUDA implementation
+
+<CanonicalCode exampleId="EX22" range="cuda" />
+
+Select the input device and its current stream. For n=258, 257 outputs require two blocks with 255 inactive threads. Skip launch for n=1. The launch check reports submission errors; correctness checking still requires successful completion. No private stream, device-wide synchronization or allocator ownership transfer occurs inside the operator.
+
+## Canonical imports
+
+<CanonicalCode exampleId="EX22" range="imports" />
+
+The installed package loads torch, then the native `_C` module, then Python registrations. Import this package before using its `torch.ops` name. There is no import-time JIT fallback.
+
+## Fake and meta
+
+<CanonicalCode exampleId="EX22" range="fake" />
+
+Only metadata is read. A new n-1 tensor preserves dtype/device and the fresh contiguous output contract; symbolic constraints do not turn lengths into concrete Python integers.
+
+## Autograd
+
+<CanonicalCode exampleId="EX22" range="autograd" />
+
+With q=2*diff(x)*g, left padding supplies each edge's positive right-end contribution, and right padding supplies the negative left-end contribution. This handles singleton input and permits higher derivatives through ordinary tensor operations.
+
+## Ahead-of-time build
+
+<CanonicalCode exampleId="EX22" range="build" />
+
+Setup checks the selected profile before this declaration: native Linux x86-64, CPython 3.12.14, torch 2.11.0+cu128, separate Toolkit 12.8.1/NVCC 12.8.93, GCC 13.3.0, C++17 and explicit 8.0+PTX. Setuptools 81.0.0 comes from the existing hash lock. Packaged runtime 12.8.90 is independent from the local compiler. No ABI portability across other Python/PyTorch rows is promised; [P10](/en/frameworks/operator-packaging/) explains the build/import boundary.
+
+## Independent reference
+
+<CanonicalCode exampleId="EX22" range="reference" />
+
+For input [1,-2,2,2.5], the hand-derived output is [9,16,0.25]. Nonuniform upstream g=[1,2,3] gives dx=[6,-22,13,3]. These are predictions. Binary-fraction generated inputs permit exact forward comparison; float64 finite differences use eps=1e-6, atol=1e-5, rtol=1e-3.
+
+## Correctness and integration checks
+
+<CanonicalCode exampleId="EX22" range="checks" />
+
+The complete verifier adds explicit meta calls and a separately selected CPU or CUDA mode. CUDA mode refuses missing hardware and checks CC >= 8.0 and at least 8 GB. It runs on a non-default stream and joins completion. Opcheck checks registration; gradcheck checks the mathematical derivative; fullgraph dynamic compilation tests integration, not fusion or speedup. Input/output payload is below 16 MB at the maximum double-precision length; compiler/context/test storage is extra.
+
+## Build, install and execute
+
+Prepare a fresh CPython 3.12.14 venv using the exact command-scoped bootstrap settings in [LAB13 preparation](/en/labs/build-custom-operator/#prepare-and-predict). That command hides GPUs only for preparation, selects the native allocator and restricts loader paths to the interpreter library. Provision GCC and Toolkit separately. From the EX22 root:
+
+```sh
+bash scripts/check-wheel.sh
+python -I verify.py --device cuda
+```
+
+The first command builds both paths, installs the wheel, checks dependencies, validates isolated installed imports and executes CPU integration checks without a GPU. The second requires one suitable CUDA device and a compatible driver, conservative baseline 570.124.06. Never call a missing CUDA device a passing skip. Keep complete stage exit codes and diagnostics; failed builds/imports are failures even if source execution works. [LAB13](/en/labs/build-custom-operator/) supplies the full packaging and Environment Manifest acceptance procedure.
+
+## Independent evidence
+
+Compilation evidence: **none**. Runtime: **Pending Hardware Verification**. Recorded observations: **none**. Expected observations are that the installed wheel should pass CPU checks without a GPU, and that CPU/CUDA should satisfy the full value, gradient, metadata and compiled-execution checks. Source, host tests and browser checks do not grant hardware evidence. Fill an external copy of `environment-manifest.json` with actual source, software, wheel, loaded-library, driver, GPU, stream and result observations; do not populate it from target values. No timing or profiler measurement is requested.
+
+## Primary sources
+
+Reviewed 2026-09-13: [library integration](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py) and [extension builder](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py). [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084) and [SRC-CUDA-085](/en/sources-and-versions/#src-cuda-085) distinguish exact source/test/license review from execution. No owner implementation, test or output is copied.

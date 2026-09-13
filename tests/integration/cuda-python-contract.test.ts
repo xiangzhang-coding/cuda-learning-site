@@ -29,14 +29,15 @@ describe('issue #42 CUDA Python publication contract', () => {
     const [current, r4] = await Promise.all(['current-publication', 'r4-release'].map(async (name) =>
       JSON.parse(await readFile(path.join(root, `src/${name}-manifest.json`), 'utf8'))));
     expect(current).toMatchObject({
-      reviewDate: '2026-09-12',
+      reviewDate: '2026-09-13',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
-      scope: { publicationPairs: 299, sourceRoutes: 598, exerciseSetPublicationPairs: 81,
-        solutionSetPublicationPairs: 81, practiceBankEntries: 89, sourceRecords: 99 },
+      scope: { publicationPairs: 310, sourceRoutes: 620, exerciseSetPublicationPairs: 84,
+        solutionSetPublicationPairs: 84, practiceBankEntries: 92, sourceRecords: 101 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']);
-    expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21']);
-    for (const field of ['labs', 'visualExplainers', 'nsightReportAnalysisPracticeEntries', 'libraryAlgorithmChoicePracticeEntries']) {
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']);
+    expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22']);
+    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13']);
+    for (const field of ['visualExplainers', 'nsightReportAnalysisPracticeEntries', 'libraryAlgorithmChoicePracticeEntries']) {
       expect(current.scope[field], field).toEqual(r4.scope[field]);
     }
     expect(current.compatibility).toMatchObject(r4.compatibility);
@@ -52,14 +53,14 @@ describe('issue #42 CUDA Python publication contract', () => {
     });
     expect(current.evidence).toEqual({
       ...r4.evidence,
-      noCompileCheckedClaim: [...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21',
-        ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB'))],
-      pendingHardwareVerification: [...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21',
-        ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB'))],
-      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07'],
+      noCompileCheckedClaim: [...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22',
+        ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13'],
+      pendingHardwareVerification: [...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22',
+        ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB')), 'LAB13'],
+      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'],
     });
     expect(current.knownLimitations.join(' ')).toMatch(/EX21.*Pending Hardware Verification/);
-    expect(current.knownLimitations.join(' ')).toMatch(/P01-P07.*no Evidence Status/);
+    expect(current.knownLimitations.join(' ')).toMatch(/P01-P10.*no Evidence Status/);
     expect(current.scope.glossaryTerms).toBe(204);
   });
 
@@ -171,7 +172,7 @@ describe('issue #42 CUDA Python publication contract', () => {
   });
 
   it('static: gives each Python Practice Bank entry and source record a published prerequisite destination', async () => {
-    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-12T12:00:00Z') })).not.toThrow();
+    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-13T12:00:00Z') })).not.toThrow();
     const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R5-00[1-3]$/.test(planningId));
     expect(practice.map(({ planningId }) => planningId)).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
     for (const [index, record] of practice.entries()) {

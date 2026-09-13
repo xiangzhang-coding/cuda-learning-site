@@ -47,6 +47,7 @@ for (const locale of ['', 'en/']) {
     expect(await page.locator('nav a[href*="/frameworks/"]').evaluateAll((links) =>
       links.map((link) => link.getAttribute('href')).sort())).toEqual([
       'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',
+      'first-custom-operator', 'operator-registration', 'operator-packaging',
     ].map((slug) => `/${locale}frameworks/${slug}/`).sort());
     for (const { slug, id } of units.slice(1)) {
       await page.locator(`main a[href="/${locale}${slug}/"]`).first().click();

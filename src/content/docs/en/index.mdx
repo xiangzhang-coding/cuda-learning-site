@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,9 @@ head:
 
 ## The route published today
 
-As of **2026-09-12**, the current publication extends R4 with the CUDA Python bridge and eager PyTorch CUDA semantics. It covers O01-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, and P01-P07: 82 Learning Units, 299 Publication Pairs, 598 source routes, and 423 catalog records. Using Python does not remove the Stable Curriculum's prerequisites.
+As of **2026-09-13**, the current publication extends R4 through P01-P10: 85 Learning Units, 310 Publication Pairs, 620 source routes and 429 catalog records. The first original PyTorch custom operator joins the CUDA Python bridge and eager PyTorch CUDA semantics. Using Python does not remove the Stable Curriculum's prerequisites.
+
+[P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
 **R4 remains the latest completed aggregate static review, dated 2026-09-10.** Schema 5 `src/r4-release-manifest.json` still supplies the frozen `/release.json`: 75 Learning Units, 277 Publication Pairs, 554 source routes, and 401 catalog records. `/publication.json` records the expanded current inventory, with R4 latest completed and the next R5 aggregate review pending. R1-R3 history is unchanged; R3 retains 62 units, 232 pairs, 464 routes, and 347 catalog records. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) and the [aggregate source disposition](/en/sources-and-versions/#r4-aggregate-review) retain their historical dates. Publishing the current pages does not pre-certify CI, Preview, production, or smoke acceptance, and technical sources retain their item-level dates.
 
@@ -84,27 +86,27 @@ Q06-Q13 also publish complete Exercises and separate reviewed solutions, includi
 
 L01-L09 publish [L01 Exercises](/en/libraries/library-primitive-dsl-custom-kernel/exercises/) and [solutions](/en/libraries/library-primitive-dsl-custom-kernel/solutions/), [L02 Exercises](/en/libraries/thrust-algorithm-vocabulary/exercises/) and [solutions](/en/libraries/thrust-algorithm-vocabulary/solutions/), [L03 Exercises](/en/libraries/cub-device-primitives/exercises/) and [solutions](/en/libraries/cub-device-primitives/solutions/), [L04 Exercises](/en/libraries/cub-warp-block-primitives/exercises/) and [solutions](/en/libraries/cub-warp-block-primitives/solutions/), [L05 Exercises](/en/libraries/libcu-plus-plus-synchronization/exercises/) and [solutions](/en/libraries/libcu-plus-plus-synchronization/solutions/), [L06 Exercises](/en/libraries/cublas-gemm/exercises/) and [solutions](/en/libraries/cublas-gemm/solutions/), plus [L07 Exercises](/en/libraries/cublaslt-matmul/exercises/) and [solutions](/en/libraries/cublaslt-matmul/solutions/). This increment adds [L08 Exercises](/en/libraries/tensor-core-precision-contracts/exercises/) and [separate solutions](/en/libraries/tensor-core-precision-contracts/solutions/), plus [L09 Exercises](/en/libraries/cutlass-cpp-gemm-structure/exercises/) and [separate solutions](/en/libraries/cutlass-cpp-gemm-structure/solutions/).
 
-The site has 21 Runnable Examples, EX01-EX21. [EX21: CUDA Python Explicit Launch](/en/examples/cuda-python-launch/) strictly requires P02; [EX20: cuSPARSE SpMV](/en/examples/cusparse-spmv/) strictly requires L13; [EX19: cuFFT Batched Transform](/en/examples/cufft-batched-transform/) strictly requires L12; [EX18: cuBLAS GEMM](/en/examples/cublas-gemm/) strictly requires L06; [EX17 CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/) strictly requires L03; EX15 requires A08, EX14 requires A05, and EX16 requires Q03/Q04. EX19 declares C++17 only on the same three pinned Toolkit Lanes, with bundled cuFFT 10.9.0.58 / 11.4.1.4 / 12.3.0.29. Its FP32 C2C contract excludes callbacks, low precision, multi-GPU execution, and timing.
+The site has 22 Runnable Examples, EX01-EX22. [EX21](/en/examples/cuda-python-launch/) retains P02, [EX20](/en/examples/cusparse-spmv/) retains L13, [EX19](/en/examples/cufft-batched-transform/) retains L12, [EX18](/en/examples/cublas-gemm/) retains L06, and [EX17](/en/examples/cub-device-reduction-scan/) retains L03 as direct prerequisites. EX15 requires A08, EX14 requires A05 and EX16 requires Q03/Q04. EX19's C++17 bundled cuFFT rows and FP32 C2C exclusions remain unchanged. EX22 adds the independent operator project described above.
 
 Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes 11.8.0, 12.9.2, and 13.3.1. It has empty compilation evidence, Pending Hardware Verification runtime, and empty recorded observations. A host utility establishes no GPU correctness. The site has not run EX15 and publishes no output, timing, speedup, or other performance number.
 
 EX17's five bundled CUB 1.15.1/2.8.2/3.3.4 and selected CCCL 3.4.2 component rows are only a declared non-evidentiary build gate; the site does not claim CI ran. EX17 has empty compilation evidence and recorded observations, no observed runtime evidence, and Pending Hardware Verification runtime.
 
-The current 12 Labs are LAB01-LAB12. [LAB10 Optimize the Canonical Transpose](/en/labs/optimize-canonical-transpose/) strictly requires Q11. [LAB11 Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/) strictly requires Q12 and L03 and compares immutable EX11 with EX17. [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/) strictly requires Q13 and L06 and compares EX15 with EX18. All three have no recorded observations. LAB12 has complete bilingual instructions, but runtime remains Pending Hardware Verification. L13/EX20 add no Lab.
+The current 13 Labs are LAB01-LAB13. [LAB10](/en/labs/optimize-canonical-transpose/) requires Q11; [LAB11](/en/labs/compare-custom-reduction-with-cub/) requires Q12/L03 and compares EX11 with EX17; [LAB12](/en/labs/compare-gemm-with-cublas/) requires Q13/L06 and compares EX15 with EX18. LAB13 builds and validates EX22. All four have empty recorded observations and Pending Hardware Verification runtime.
 
 The site has 19 formal Visual Explainers: standalone VIS01-VIS14 and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/) plus embedded VIS19-VIS22. VIS18 strictly requires A11 and provides a deterministic shape, stage, and IO ledger with a purpose-built static SVG. It is not GPU-traffic or performance evidence.
 
 A10-A14, Q06-Q13, L01-L13, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The current catalog contains 12 Labs, 89 Practice Bank entries, 19 Visual Explainers, 204 Glossary terms, and 99 source records, for 423 catalog records. Source files form 299 Publication Pairs, or 598 source routes, including 81 Exercise sets and 81 separate reviewed-solution sets. R4's historical catalog retains 82 entries, 196 terms, 92 sources, and 401 records. The current increment adds `PB-R5-004/005/006/007` after the Python bridge's `PB-R5-001/002/003`, without changing the ten-entry R3 Nsight report-analysis subset or the eight R4 library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. Both historical subsets remain identified in the [Practice Bank](/en/practice/).
+The current catalog contains 13 Labs, 92 Practice Bank entries, 19 Visual Explainers, 204 Glossary terms and 101 source records: 429 records total. Source files form 310 Publication Pairs / 620 routes, with 84 Exercise sets and 84 separate solution sets. This increment adds PB-R5-008/009/010. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/).
 
-Only EX02, EX10, and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 20 examples and all 12 Labs remain Pending Hardware Verification, 32 subjects in total. P01-P07 have all four evidence arrays empty; EX21 has empty compilation evidence and recorded observations, and host tests prove no CUDA compilation or execution. There are zero Runtime-Verified or Community-Observed subjects, Reference Environments, and performance observations. All six profiler plans are expected-only. Source review is not GPU evidence.
+Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 21 examples and all 13 Labs remain Pending Hardware Verification, 34 subjects total. P01-P10 keep four empty evidence arrays. EX21/EX22 and LAB13 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; source and host checks do not grant GPU evidence.
 
 [L12](/en/libraries/cufft-plans-layouts-startup/) has exactly `[Q05,M07]` as ordered prerequisites. [L12 Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) require `[L12]`; [separate solutions](/en/libraries/cufft-plans-layouts-startup/solutions/) require `[L12-EXERCISES]`. L12's four evidence arrays remain empty. The archived 12.9.2 cuFFT guide is the teaching baseline; the live 13.3 reference was accessed 2026-09-08 because exact 13.3.1 API and release-note archives were unavailable.
 
 [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) has exactly `[A12,A13,L01]` as ordered prerequisites. [L13 Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) require `[L13]`; [separate solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/) require `[L13-EXERCISES]`. All L01-L13 are published. L13's four evidence arrays remain empty; EX20 has no retained compilation evidence and remains Pending Hardware Verification. Its three C++17 non-executing build gates pin Toolkit/cuSPARSE pairs 11.8.0/11.7.5.86, 12.9.2/12.5.10.65, and 13.3.1/12.8.2.51. The [SRC-CUDA-075/076 review](/en/sources-and-versions/#src-cuda-075) dated 2026-09-09 records available exact cuSPARSE archives, including 13.3.1, separately from EX19's older archive-failure record. Source review and build gates are not GPU evidence.
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) adds [P04: Queued Work and Timing](/en/frameworks/queued-work-timing/) with `[M07,Q05]`, [P05: Streams and Storage Lifetime](/en/frameworks/streams-and-storage-lifetime/) with `[P04,M08]`, [P06: Mixed-Precision Contracts](/en/frameworks/mixed-precision-contracts/) with `[Q02,P04,L08]`, and [P07: Python-to-CUDA Profiling](/en/frameworks/python-to-cuda-profiling/) with `[P04,Q07,Q08]`. Related edges are `[P05,P06,P07]`, `[P04]`, `[P04,P07]`, and `[P05,P06]` respectively. Each publishes Exercises requiring its unit and separate solutions requiring that Exercise set. These twelve pairs add no Runnable Example or Lab. The independent [environment and sources](/en/sources-and-versions/#src-cuda-080) pin PyTorch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56 and the native allocator. Eager work requires no system Toolkit; source and package checks grant no GPU evidence. P08, EX22, LAB13 and Triton destinations remain unpublished.
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) supplies [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`. Their twelve pairs include Exercises and separate solutions. The [independent eager environment](/en/sources-and-versions/#src-cuda-080) retains torch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1/runtime 12.8.90, cuDNN 9.19.0.56 and the native allocator, with no system Toolkit requirement. P08-P10 now add the separately gated extension project; Triton destinations remain unpublished.
 
 ## Boundaries first
 
@@ -736,7 +738,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, environment, architecture, kernel, memory, algorithm, library, Python bridge, PyTorch, toolchain, and correctness reasoning through 89 original problems.</small>
+    <small>Practice evidence, environment, architecture, kernels, libraries and PyTorch through 92 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -746,7 +748,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 99 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 101 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

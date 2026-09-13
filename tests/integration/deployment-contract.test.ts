@@ -165,16 +165,16 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication).toMatchObject({
       publicationId: 'current',
       schemaVersion: 1,
-      reviewDate: '2026-09-12',
+      reviewDate: '2026-09-13',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: {
-        publicationPairs: 299,
-        sourceRoutes: 598,
-        exerciseSetPublicationPairs: 81,
-        solutionSetPublicationPairs: 81,
-        practiceBankEntries: 89,
+        publicationPairs: 310,
+        sourceRoutes: 620,
+        exerciseSetPublicationPairs: 84,
+        solutionSetPublicationPairs: 84,
+        practiceBankEntries: 92,
         glossaryTerms: 204,
-        sourceRecords: 99,
+        sourceRecords: 101,
       },
       compatibility: {
         componentBoundaries: {
@@ -229,7 +229,7 @@ describe('Cloudflare assets-only deployment contract', () => {
         ]),
         capturedProfilerReports: [],
         r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
-        r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07'],
+        r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'],
       },
     });
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('Q11');
@@ -249,18 +249,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L12');
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('L13');
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L13');
-    expect(publication.scope.learningUnits).toHaveLength(82);
+    expect(publication.scope.learningUnits).toHaveLength(85);
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']));
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13']));
-    expect(publication.scope.runnableExamples).toHaveLength(21);
+    expect(publication.scope.runnableExamples).toHaveLength(22);
     expect(publication.scope.runnableExamples).toEqual(expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21']));
-    expect(publication.scope.labs).toHaveLength(12);
+    expect(publication.scope.labs).toHaveLength(13);
     expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']));
     expect(publication.scope.visualExplainers).toHaveLength(19);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
     expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
-      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(423);
-    expect(publication.evidence.pendingHardwareVerification).toHaveLength(32);
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(429);
+    expect(publication.evidence.pendingHardwareVerification).toHaveLength(34);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
@@ -273,7 +273,7 @@ describe('Cloudflare assets-only deployment contract', () => {
       'EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.',
       'L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.',
       'EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.',
-      'P01-P07 have all four evidence arrays empty and grant no Evidence Status. P04-P07 add eager PyTorch timing, storage lifetime, mixed precision, and profiler correlation, with no new Runnable Example or Lab. The R5 aggregate review remains pending; P08, EX22, LAB13, and Triton destinations are not published.',
+      'P01-P10 have all four evidence arrays empty and grant no Evidence Status. P08-P10, EX22 and LAB13 publish the first original adjacent-energy custom operator and its independent extension build profile. The R5 aggregate review and Triton destinations remain pending.',
     ]));
     expect(publication.knownLimitations).not.toContain(
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
@@ -324,9 +324,9 @@ describe('Cloudflare assets-only deployment contract', () => {
       '92 source records', '401 catalog records', '277 Publication Pairs', '554 source routes']) {
       expect(historicalInventory, `historical ${value}`).toContain(value);
     }
-    for (const value of ['2026-09-12', '82 Learning Units', '21 Runnable Examples', '89 Practice Bank entries',
-      '204 Glossary terms', '99 source records', '423 catalog records', '299 Publication Pairs', '598 source routes',
-      '81 Exercise-set and 81 solution-set Publication Pairs']) {
+    for (const value of ['2026-09-13', '85 Learning Units', '22 Runnable Examples', '92 Practice Bank entries',
+      '204 Glossary terms', '101 source records', '429 catalog records', '310 Publication Pairs', '620 source routes',
+      '84 Exercise-set and 84 solution-set Publication Pairs']) {
       expect(currentInventory, `current ${value}`).toContain(value);
     }
     expect(deployment).not.toMatch(/share the same inventory|both currently containing|currently has the same inventory/i);
@@ -334,8 +334,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/closed \[issue #41\]/i);
     expect(deployment).not.toMatch(/records those dynamic results later|Issue #41 must record R4 acceptance|not a claim that R4 has passed a remote gate/i);
     expect(deployment).toContain('No new deployment or infrastructure inspection is claimed');
-    expect(deployment).toContain('32 Pending Hardware Verification subjects');
-    expect(deployment).toContain('historical R4 tally remains 31');
+    expect(deployment).toContain('34 Pending Hardware Verification subjects');
+    expect(deployment).toContain('Historical R4 remains 31');
     for (const pin of ['CPython 3.14.7', 'cuda-core 1.2.0', 'cuda-bindings 13.4.1', 'Toolkit 13.3.1',
       'cuda-pathfinder 1.8.1', 'NumPy 2.5.3', 'NVRTC 13.3.33', 'nvJitLink 13.3.33',
       'cuda-compat-13-3_610.43.02-1ubuntu1_amd64.deb', 'libcuda.so.610.43.02']) expect(deployment).toContain(pin);
@@ -343,9 +343,9 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/no kernel module[^\n]*no GPU[^\n]*no `cuInit`/i);
     expect(deployment).toMatch(/not a stub/i);
     expect(deployment).toContain('scripts/run-ex21-python-check.mjs');
-    expect(deployment).toContain('EX21 remains Pending Hardware Verification');
-    expect(deployment).toContain('all 598 routes');
-    expect(deployment).toContain('P01-P03 and EX21');
+    expect(deployment).toContain('EX21/EX22 and LAB13 retain empty compilation/recorded observations');
+    expect(deployment).toContain('all 620 routes');
+    expect(deployment).toContain('P08-P10, EX22 and LAB13');
     expect(deployment).toMatch(/EX21[^\n]*archive[^\n]*requirements\.lock[^\n]*environment-manifest\.json/i);
     expect(deployment).toContain('62 Learning Units');
     expect(deployment).toContain('75 Learning Units');
@@ -378,7 +378,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toContain('releaseReview.next: R5');
     expect(deployment).toContain('releaseReview.status: pending');
     expect(deployment).not.toMatch(/R4 aggregate review remains pending/i);
-    expect(deployment).toContain('framework or Triton track completion');
+    expect(deployment).toContain('does not certify framework/Triton completion');
     expect(deployment).toContain('232 Publication Pairs, and 464 source routes');
     expect(deployment).toContain('347 catalog records');
     expect(deployment).toMatch(/issue #32/i);
@@ -428,9 +428,9 @@ describe('Cloudflare assets-only deployment contract', () => {
         RELEASE_BASE_URL: 'https://r1-cuda-learning-site.hmzhangxiang.workers.dev',
         RELEASE_KIND: 'preview',
       }),
-    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 204 tests') });
+    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 206 tests') });
     await expect(
       listTests({ RELEASE_BASE_URL: 'http://127.0.0.1:4321', RELEASE_KIND: 'local' }),
-    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 204 tests') });
+    ).resolves.toMatchObject({ stdout: expect.stringContaining('Total: 206 tests') });
   }, 20_000);
 });

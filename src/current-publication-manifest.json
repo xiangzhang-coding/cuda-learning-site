@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-12",
+  "reviewDate": "2026-09-13",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 299,
-    "sourceRoutes": 598,
-    "exerciseSetPublicationPairs": 81,
-    "solutionSetPublicationPairs": 81,
+    "publicationPairs": 310,
+    "sourceRoutes": 620,
+    "exerciseSetPublicationPairs": 84,
+    "solutionSetPublicationPairs": 84,
     "learningUnits": [
       "O01",
       "O02",
@@ -97,10 +97,13 @@
       "P04",
       "P05",
       "P06",
-      "P07"
+      "P07",
+      "P08",
+      "P09",
+      "P10"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22"],
+    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13"],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -122,7 +125,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 89,
+    "practiceBankEntries": 92,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -146,7 +149,7 @@
       "PB-R4-016"
     ],
     "glossaryTerms": 204,
-    "sourceRecords": 99
+    "sourceRecords": 101
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -219,6 +222,22 @@
       }
     ],
     "componentBoundaries": {
+      "pytorchExtension": {
+        "id": "ex22-torch211-cu128-cp312",
+        "reviewedOn": "2026-09-13",
+        "torch": "2.11.0+cu128",
+        "python": "3.12.14",
+        "packagedCuda": "12.8",
+        "packagedRuntime": "12.8.90",
+        "toolkit": "12.8.1",
+        "nvcc": "12.8.93",
+        "hostCompiler": "GCC 13.3.0",
+        "dialect": "c++17",
+        "archList": "8.0+PTX",
+        "project": "examples/ex22-adjacent-energy/project.json",
+        "compileCheckedToolkitLanes": [],
+        "runtimeVerified": false
+      },
       "pytorch": {
         "selection": "independently-pinned",
         "reviewedOn": "2026-09-12",
@@ -435,6 +454,7 @@
       "EX19",
       "EX20",
       "EX21",
+      "EX22",
       "LAB01",
       "LAB03",
       "LAB04",
@@ -445,7 +465,8 @@
       "LAB09",
       "LAB10",
       "LAB11",
-      "LAB12"
+      "LAB12",
+      "LAB13"
     ],
     "pendingHardwareVerification": [
       "EX01",
@@ -468,6 +489,7 @@
       "EX19",
       "EX20",
       "EX21",
+      "EX22",
       "LAB01",
       "LAB02",
       "LAB03",
@@ -479,7 +501,8 @@
       "LAB09",
       "LAB10",
       "LAB11",
-      "LAB12"
+      "LAB12",
+      "LAB13"
     ],
     "runtimeNotApplicable": ["EX10"],
     "communityObserved": [],
@@ -488,7 +511,7 @@
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
     "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"],
-    "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03", "P04", "P05", "P06", "P07"],
+    "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -528,7 +551,8 @@
     "EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.",
     "L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.",
     "EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.",
-    "P01-P07 have all four evidence arrays empty and grant no Evidence Status. P04-P07 add eager PyTorch timing, storage lifetime, mixed precision, and profiler correlation, with no new Runnable Example or Lab. The R5 aggregate review remains pending; P08, EX22, LAB13, and Triton destinations are not published.",
+    "P01-P10 have all four evidence arrays empty and grant no Evidence Status. P08-P10, EX22 and LAB13 publish the first original adjacent-energy custom operator and its independent extension build profile. The R5 aggregate review and Triton destinations remain pending.",
+    "EX22 and LAB13 have empty compilation and recorded observations and remain Pending Hardware Verification. The independent CPython 3.12.14 / torch 2.11.0+cu128 / Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0 profile inherits no ordinary Toolkit Lane evidence. CPU integration and wheel/import gates are not CUDA runtime or performance evidence.",
     "P04-P07 independently select PyTorch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1, packaged runtime/CUPTI 12.8.90, and cuDNN 9.19.0.56 with the native allocator. Their eager activities require no system Toolkit or nvcc and inherit no existing CUDA Python, Toolkit Lane, or library evidence. Artifact metadata and source/license inspection are not a Linux installation, GPU run, timing result, AMP result, or captured CUPTI trace.",
     "EX21 has empty compilation and recorded observations and remains Pending Hardware Verification. Host tests, Python syntax checks, package installation, canonical imports, and browser rendering grant no CUDA compilation, linking, launch, correctness, or performance evidence.",
     "EX21 selects ordinary CPython 3.14.7, cuda-core 1.2.0, cuda-bindings 13.4.1, cuda-pathfinder 1.8.1, and NumPy 2.5.3 independently from system Toolkit 13.3.1. Only the declared native Linux x86-64 profile is selected; no CUDA 11.8 or 12.9 combination is implied, and optional Toolkit extras are excluded. Actual loaded native libraries, driver, supported target, and GPU coordinates still require an Environment Manifest."

@@ -31,6 +31,7 @@ export const publicationMetadata = z
     estimatedMinutes: z.number().int().positive().optional(),
     difficulty: z.enum(['introductory', 'intermediate', 'advanced']).optional(),
     toolkitLanes: z.array(z.string().regex(/^cuda-\d+\.\d+$/)).optional(),
+    extensionProfile: z.literal('ex22-torch211-cu128-cp312').optional(),
     minimumComputeCapability: z.string().regex(/^\d+\.\d+$/).optional(),
     maximumProblemMemoryBytes: z.number().int().nonnegative().optional(),
     gpuCount: z.number().int().positive().optional(),
@@ -51,6 +52,10 @@ export const publicationMetadata = z
 
     if (metadata.resourceKind !== 'lab') return;
 
+    if (metadata.extensionProfile && metadata.toolkitLanes?.length) {
+      context.addIssue({ code: 'custom', path: ['toolkitLanes'], message: 'An independent extension profile must not inherit ordinary Toolkit Lanes.' });
+    }
+
     for (const field of [
       'unitId',
       'hardwareGate',
@@ -65,6 +70,7 @@ export const publicationMetadata = z
       'sources',
     ] as const) {
       const value = metadata[field];
+      if (field === 'toolkitLanes' && metadata.extensionProfile && Array.isArray(value)) continue;
       if (value === undefined || (Array.isArray(value) && value.length === 0)) {
         context.addIssue({ code: 'custom', path: [field], message: `Lab metadata requires ${field}.` });
       }

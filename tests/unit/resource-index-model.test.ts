@@ -14,7 +14,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-09-12T12:00:00Z');
+const asOf = new Date('2026-09-13T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -32,12 +32,17 @@ describe('resource index catalog', () => {
       ['P05', 'frameworks/streams-and-storage-lifetime', ['P04', 'M08']],
       ['P06', 'frameworks/mixed-precision-contracts', ['Q02', 'P04', 'L08']],
       ['P07', 'frameworks/python-to-cuda-profiling', ['P04', 'Q07', 'Q08']],
+      ['P08', 'frameworks/first-custom-operator', ['O04', 'F04', 'Q01', 'P04']],
+      ['P09', 'frameworks/operator-registration', ['P08', 'Q01']],
+      ['P10', 'frameworks/operator-packaging', ['P08', 'M18']],
+      ['EX22', 'examples/adjacent-energy', ['P08', 'P09']],
+      ['LAB13', 'labs/build-custom-operator', ['P08', 'P09']],
       ['EX21', 'examples/cuda-python-launch', ['P02']],
     ] as const) {
       expect(PUBLISHED_DESTINATIONS[id], id).toMatchObject({
         href: { 'zh-CN': `/${slug}/`, en: `/en/${slug}/` }, prerequisites,
       });
-      if (id === 'EX21') continue;
+      if (id.startsWith('EX') || id.startsWith('LAB')) continue;
       for (const suffix of ['exercises', 'solutions']) {
         expect(PUBLISHED_DESTINATIONS[`${id}-${suffix.toUpperCase()}`]).toMatchObject({
           href: { 'zh-CN': `/${slug}/${suffix}/`, en: `/en/${slug}/${suffix}/` },
@@ -45,8 +50,8 @@ describe('resource index catalog', () => {
         });
       }
     }
-    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id))).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']);
-    for (const id of ['P08', 'T01', 'EX22', 'LAB13']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']);
+    for (const id of ['P11', 'T01', 'EX23', 'LAB14']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
     const destinations = Object.fromEntries(Object.entries(PUBLISHED_DESTINATIONS)
       .map(([id, { indexGroup: _indexGroup, ...destination }]) => [id, destination]));
     expect(() => validateResourceCatalog([], { requiredGroups: [], destinations })).not.toThrow();
@@ -91,14 +96,14 @@ describe('resource index catalog', () => {
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(219 + currentPublication.scope.glossaryTerms);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(225 + currentPublication.scope.glossaryTerms);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 12, practice: 89, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 99 });
-    for (const absentId of ['LAB13']) {
+    ).toEqual({ labs: 13, practice: 92, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 101 });
+    for (const absentId of ['LAB14']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }

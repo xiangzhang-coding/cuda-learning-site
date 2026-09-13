@@ -15,7 +15,7 @@ import {
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-09-12T12:00:00Z');
+const asOf = new Date('2026-09-13T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -121,7 +121,7 @@ describe('published resource indexes', () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(89);
+    expect(practiceIds).toHaveLength(92);
 
     const localeContracts = [
       {
@@ -133,7 +133,7 @@ describe('published resource indexes', () => {
         expectedEvidence: /\*\*预期证据：\*\*[^\n]+/,
         acceptanceCriteria: /\*\*验收条件：\*\*/,
         hint: /<details><summary>提示 [^<]+<\/summary>/g,
-        solution: /\*\*(?:解答|参考解答(?:（Reviewed solution）)?)：\*\*[^\n]+/,
+        solution: /\*\*(?:解答|参考解答(?:（Reviewed solution）)?)：\*\*[^\n]+|<details><summary>独立参考解答[^<]+<\/summary><p>[^<]{100}/,
         sourceBasis: /\*\*来源依据(?:（Source basis）)?：\*\*[^\n]+/,
         prompt: /\*\*题目：\*\*\s*([^\n]+)/,
       },
@@ -146,7 +146,7 @@ describe('published resource indexes', () => {
         expectedEvidence: /\*\*Expected evidence:\*\*[^\n]+/,
         acceptanceCriteria: /\*\*Acceptance criteria:\*\*/,
         hint: /<details><summary>Hint [^<]+<\/summary>/g,
-        solution: /\*\*(?:Solution|Reviewed solution):\*\*[^\n]+/,
+        solution: /\*\*(?:Solution|Reviewed solution):\*\*[^\n]+|<details><summary>Separate reviewed solution[^<]+<\/summary><p>[^<]{100}/,
         sourceBasis: /\*\*Source basis:\*\*[^\n]+/,
         prompt: /\*\*Prompt:\*\*\s*([^\n]+)/,
       },
@@ -176,7 +176,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(89);
+      expect(prompts.size).toBe(92);
     }
   });
 
@@ -184,8 +184,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 12, practice: 89, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 99 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(219 + currentPublication.scope.glossaryTerms);
+    expect(counts).toEqual({ labs: 13, practice: 92, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 101 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(225 + currentPublication.scope.glossaryTerms);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -193,7 +193,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['LAB13', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['LAB14', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);

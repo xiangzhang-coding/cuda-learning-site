@@ -2,6 +2,68 @@
 
 # Maintenance Source Record
 
+## Issue #44 custom operator increment — 2026-09-13
+
+P08/P09/P10 have ordered prerequisites `[O04,F04,Q01,P04]`, `[P08,Q01]`,
+`[P08,M18]`; EX22 and LAB13 require `[P08,P09]`. Eleven new Publication
+Pairs bring the rolling inventory to 310 pairs / 620 routes, 85 Learning Units,
+22 Runnable Examples, 13 Labs, 84 Exercise sets and 84 solution sets,
+92 Practice Bank entries, 204 terms, 101 source records and 429 catalog records.
+R1-R4 are unchanged; R5 aggregate review remains pending.
+
+Context7 `/pytorch/pytorch/v2.11.0` was queried twice for dispatcher/fake/autograd
+integration and separately for AOT build/import/version contracts. Results
+included legacy and main material; exact selected-owner files override those
+snippets. The paired SRC-CUDA-084/085 records contain eleven individually
+hashed PyTorch source/doc/test files at commit
+`70d99e998b4955e0049d13a98d77ae1b14db1f45`, root LICENSE/NOTICE hashes and the
+complete-tree check showing no intervening license for these paths. NVIDIA's
+12.8.1 redistribution manifest confirms NVCC 12.8.93 and runtime 12.8.90;
+the archived Linux guide distinguishes its qualification row from the exact
+GCC 13.3.0 project target. Existing CPython, torch, packaged dependencies and
+setuptools 81.0.0 remain under the existing hashed application lock and rights
+record. No owner operator, code, test, prose, figure, binary or output is copied.
+
+EX22 is original adjacent-difference energy, with independent literal/tensor
+references, native CPU/CUDA dispatch, fake/meta, first/second derivatives,
+opcheck, dynamic fullgraph integration and isolated installed-wheel checks.
+The extension profile is CPython 3.12.14 / torch 2.11.0+cu128 / separate
+Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0 / C++17 / 8.0+PTX. It inherits
+no ordinary Toolkit Lane evidence. Compilation and recorded observations
+remain empty; EX22/LAB13 runtime remains Pending Hardware Verification.
+Thirty-four subjects are pending; none are Runtime-Verified or Community-Observed.
+Build, CPU, browser and publication gates are not GPU runtime evidence.
+Dynamic acceptance and issue closure must cite actual checks separately.
+
+The issue #44 Web Quality run 34745288151 completed static/integration,
+Chromium, accessibility and cross-browser shard 2/2, but shard 1/2 reached
+the unchanged 35-minute job limit while still completing tests. Its log
+retains six Firefox first-attempt failures that passed on retry; cancellation
+prevented the final diagnostic summary and artifact retention, so their cause
+is not inferred. The suite is repartitioned into three independent runners,
+still one worker each, with the same timeout, projects, assertions, retries
+and fail-on-flaky policy. The new collection test executes the installed
+Playwright 1.62.1 CLI and proves the three shards contain every selected test
+exactly once. Context7 `/microsoft/playwright` cross-checked `--list`, JSON
+reporting and test-level sharding; main-branch results are discovery, while
+the installed pinned CLI supplies the actual collection behavior. The budget
+change itself is not a passing rerun, a fix for unobserved retry causes or
+CUDA evidence; required CI must complete before issue closure.
+
+The three-shard run 34747410781 completed within budget. Its sole flaky
+failure was Firefox route batch en/25, with a retained first-failure trace:
+`favicon.svg` returned response metadata with status 200 but
+`NS_BINDING_ABORTED` while the sweep replaced the document. This is distinct
+from the earlier unretained PyTorch navigation retries. A controlled delayed
+favicon reproduced the harness ending readiness at search-input creation;
+the original boundary failed and the fixed boundary passed five repetitions.
+The actual route batch then passed ten repetitions without retries. Shared
+`settlePublicationPage` retains the static-search assertion and waits for the
+page's outstanding requests to settle before the next navigation, for both
+ordinary route sweeps and release smoke. The strict failure collector, all
+route coverage and fail-on-flaky policy remain intact; no aborted-request
+whitelist, production code change or additional timeout is introduced.
+
 - Aggregate R4 static review date: 2026-09-10
 - Earlier API, infrastructure, source-item, rights, and archive-access records retain their individual dates; fresh aggregate retrievals are recorded separately below
 - Historical R4 scope: 277 bilingual Publication Pairs, 554 source routes, 75 Learning Units including L01-L13, 20 Runnable Examples, 12 Labs, 19 Visual Explainers, 74 Exercise-set and 74 solution-set pairs, 82 Practice Bank entries, 196 Glossary terms, 92 source records, and 401 catalog records; R1-R4 remain immutable history

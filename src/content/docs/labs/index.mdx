@@ -3,7 +3,7 @@ title: 实验索引
 description: 按先修、硬件、版本和证据状态（Evidence Status）直接查找当前完整发布的实验。
 pairId: labs-index
 counterpart: /en/labs/
-factCheckDate: '2026-09-05'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,9 +26,9 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/labs/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、具有可执行步骤和验收条件的实验（Lab）。截至 2026-09-06，共有十二个连续编号的已发布实验：LAB01-LAB12；最新条目是 [LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)。其前置学习单元 [Q13](/correctness/gemm-optimization-case-study/)与 [L06](/libraries/cublas-gemm/)均已发布。页面完整不等于运行已验证（Runtime-Verified）；未完成条目仍不会显示。
+本索引只列出完整双语发布对（Publication Pair）、有可执行步骤和验收条件的实验（Lab）。截至 2026-09-13，共十三个连续编号实验 LAB01-LAB13，新增 [LAB13：构建并验证 CUDA 算子](/labs/build-custom-operator/)，直接依赖 [P08](/frameworks/first-custom-operator/)、[P09](/frameworks/operator-registration/)。页面完整不等于运行已验证（Runtime-Verified）。
 
-**发布清单与导航更新：2026-09-06。** 本次不重新核查 CUDA API 事实；各实验的技术来源与证据记录保留各自日期。
+**发布清单与导航更新：2026-09-13。** 既有实验的技术来源与证据记录保留各自日期。
 
 ## 已发布实验
 
@@ -41,6 +41,8 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 LAB12 的直接先修恰好是 [Q13](/correctness/gemm-optimization-case-study/)与 [L06](/libraries/cublas-gemm/)，按此顺序完成后，在站外比较 [EX15](/examples/tiled-gemm/)与 [EX18](/examples/cublas-gemm/)。[L07](/libraries/cublaslt-matmul/)和 [VIS12](/visuals/gemm-tiling-hierarchy/)是相关资源，不增加先修要求，也不把这份传统 cuBLAS 对比变成 Lt 选择实验。规划 ID 是跨课程讨论和维护时使用的稳定标签，不是 URL 稳定性承诺。请使用卡片中的当前链接，并在进入实验前完成卡片列出的全部先修学习单元（Learning Unit）。
 
 ## 证据边界
+
+LAB13 接在既有序列之后，使用 [EX22](/examples/adjacent-energy/) 的独立 torch 2.11.0+cu128 / Toolkit 12.8.1 扩展配置，不继承普通工具包通道证据。编译、已记录观察为空，运行待硬件验证。它分别检查构建、CPU/CUDA 数值与梯度、fake/meta、编译集成以及已安装 wheel 的正负向导入。
 
 卡片中的编译和运行状态直接复制自链接实验的受控证据字段，不会把网站构建、筛选或浏览器测试升级为 CUDA 证据。既有 LAB01-LAB10 状态不变。LAB11 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，runtime 为待硬件验证（Pending Hardware Verification），只发布 expected observations；没有 Reference Environment 或 `performanceObservations`。其 expected-only fixture 不是采集所得 `.ncu-rep`，也没有 CUB output、temporary-storage value、kernel mapping、timing、metric、traffic、speedup、maintenance score 或 winner。EX17 的 compilation evidence 同样为空且 runtime 待硬件验证；声明的 component matrix 是 non-evidentiary build gate，并不表示 CI 已运行。
 

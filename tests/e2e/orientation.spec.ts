@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test';
 
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
-import { collectBrowserFailures, expectRankedSearchResult } from '../helpers/browser-contract';
+import { collectBrowserFailures, expectRankedSearchResult, settlePublicationPage } from '../helpers/browser-contract';
 import { discoverPublishedRoutes, publishedRouteBatches } from '../helpers/publication-routes';
 
 const routeBatches = await publishedRouteBatches();
@@ -13,13 +13,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(598);
-    expect(new Set(routes).size).toBe(598);
+    expect(routes).toHaveLength(620);
+    expect(new Set(routes).size).toBe(620);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(50);
+    expect(routeBatches).toHaveLength(52);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(299);
+      expect(localized).toHaveLength(310);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }
@@ -36,7 +36,7 @@ test.describe('published route batches', () => {
         await test.step(route, async () => {
           const response = await page.goto(route, { waitUntil: 'load' });
           expect(response?.ok(), route).toBe(true);
-          await expect(page.locator('site-search input'), `${route} initializes static search`).toHaveCount(1);
+          await settlePublicationPage(page);
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
           expect(errors, route).toEqual([]);
         });

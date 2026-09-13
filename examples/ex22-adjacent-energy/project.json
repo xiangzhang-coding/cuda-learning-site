@@ -1,0 +1,72 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX22",
+  "title": "Adjacent-difference energy",
+  "purpose": "An original dispatcher operator with CPU/CUDA implementations, metadata and gradient registration, and an ahead-of-time wheel.",
+  "root": "examples/ex22-adjacent-energy",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "hostLanguage": "c++/python",
+    "standard": "c++17",
+    "inputs": ["csrc/contract.h", "csrc/operator.cpp", "csrc/kernel.cu", "cuda_learning_ops/__init__.py", "cuda_learning_ops/_registration.py", "setup.py", "verify.py"],
+    "hostTestInputs": ["verify.py", "verify_install.py"],
+    "contractFiles": ["pyproject.toml", "MANIFEST.in", "project.json", "scripts/check-wheel.sh"],
+    "additionalContractInputs": ["environment-manifest.json"],
+    "commands": {"build": "python -m pip wheel --no-build-isolation --no-deps . --wheel-dir dist", "hostTest": "python -I verify.py --device cpu", "run": "python -I verify.py --device cuda"},
+    "gpuExecutionInBuild": false
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "lanes": [],
+    "extensionProfile": {
+      "id": "ex22-torch211-cu128-cp312",
+      "python": "3.12.14",
+      "torch": "2.11.0+cu128",
+      "torchSourceCommit": "70d99e998b4955e0049d13a98d77ae1b14db1f45",
+      "packagedCuda": "12.8",
+      "packagedRuntime": "12.8.90",
+      "toolkit": "12.8.1",
+      "nvcc": "12.8.93",
+      "compiler": "GCC 13.3.0",
+      "dialect": "c++17",
+      "setuptools": "81.0.0",
+      "archList": "8.0+PTX",
+      "host": "Ubuntu 24.04 x86-64",
+      "driverBaseline": "570.124.06",
+      "environmentLock": "scripts/pytorch-environment/requirements.lock (repository root)",
+      "environmentLockSha256": "1536b687b0592836a7bb5c9d154ddce6a870a3cd7e7382333bb61ac96a66edd1",
+      "container": "nvidia/cuda:12.8.1-devel-ubuntu24.04@sha256:4b9ed5fa8361736996499f64ecebf25d4ec37ff56e4d11323ccde10aa36e0c43"
+    },
+    "minimumComputeCapability": "8.0",
+    "minimumDeviceMemoryBytes": 8000000000,
+    "maximumProblemMemoryBytes": 8000000000,
+    "gpuCount": 1
+  },
+  "correctness": {
+    "formula": "y[i] = (x[i+1] - x[i])^2",
+    "inputs": "Contiguous rank-one strided CPU/CUDA float32 or float64; 1 <= n <= 1000000; offset views allowed; no broadcasting or input mutation",
+    "output": "Fresh contiguous length n-1 tensor on the same device and dtype",
+    "cpuReference": "verify.py reference plus independently derived [9,16,0.25] literal",
+    "gradients": "q=2*(x[1:]-x[:-1])*g; dx=pad_left(q)-pad_right(q), including n=1",
+    "checks": ["CPU and CUDA reference", "nonuniform upstream gradient", "gradcheck", "gradgradcheck", "opcheck", "meta", "torch.compile fullgraph dynamic", "non-default CUDA stream", "fresh-process installed wheel import"]
+  },
+  "ranges": {
+    "cpu": {"file": "csrc/operator.cpp", "startMarker": "// [ex22-cpu-start]", "endMarker": "// [ex22-cpu-end]", "language": "cpp"},
+    "schema": {"file": "csrc/operator.cpp", "startMarker": "// [ex22-schema-start]", "endMarker": "// [ex22-schema-end]", "language": "cpp"},
+    "cuda": {"file": "csrc/kernel.cu", "startMarker": "// [ex22-cuda-start]", "endMarker": "// [ex22-cuda-end]", "language": "cpp"},
+    "imports": {"file": "cuda_learning_ops/__init__.py", "startMarker": "# [ex22-imports-start]", "endMarker": "# [ex22-imports-end]", "language": "python"},
+    "fake": {"file": "cuda_learning_ops/_registration.py", "startMarker": "# [ex22-fake-start]", "endMarker": "# [ex22-fake-end]", "language": "python"},
+    "autograd": {"file": "cuda_learning_ops/_registration.py", "startMarker": "# [ex22-autograd-start]", "endMarker": "# [ex22-autograd-end]", "language": "python"},
+    "build": {"file": "setup.py", "startMarker": "# [ex22-build-start]", "endMarker": "# [ex22-build-end]", "language": "python"},
+    "reference": {"file": "verify.py", "startMarker": "# [ex22-reference-start]", "endMarker": "# [ex22-reference-end]", "language": "python"},
+    "checks": {"file": "verify.py", "startMarker": "# [ex22-checks-start]", "endMarker": "# [ex22-checks-end]", "language": "python"}
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": ["The wheel should import outside its source tree and CPU checks should pass without a GPU.", "CPU and CUDA should agree with the full reference, gradients, metadata and compiled execution contracts."],
+    "recordedObservations": []
+  }
+}
