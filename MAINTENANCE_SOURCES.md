@@ -35,6 +35,21 @@ Thirty-four subjects are pending; none are Runtime-Verified or Community-Observe
 Build, CPU, browser and publication gates are not GPU runtime evidence.
 Dynamic acceptance and issue closure must cite actual checks separately.
 
+The issue #44 Web Quality run 34745288151 completed static/integration,
+Chromium, accessibility and cross-browser shard 2/2, but shard 1/2 reached
+the unchanged 35-minute job limit while still completing tests. Its log
+retains six Firefox first-attempt failures that passed on retry; cancellation
+prevented the final diagnostic summary and artifact retention, so their cause
+is not inferred. The suite is repartitioned into three independent runners,
+still one worker each, with the same timeout, projects, assertions, retries
+and fail-on-flaky policy. The new collection test executes the installed
+Playwright 1.62.1 CLI and proves the three shards contain every selected test
+exactly once. Context7 `/microsoft/playwright` cross-checked `--list`, JSON
+reporting and test-level sharding; main-branch results are discovery, while
+the installed pinned CLI supplies the actual collection behavior. The budget
+change itself is not a passing rerun, a fix for unobserved retry causes or
+CUDA evidence; required CI must complete before issue closure.
+
 - Aggregate R4 static review date: 2026-09-10
 - Earlier API, infrastructure, source-item, rights, and archive-access records retain their individual dates; fresh aggregate retrievals are recorded separately below
 - Historical R4 scope: 277 bilingual Publication Pairs, 554 source routes, 75 Learning Units including L01-L13, 20 Runnable Examples, 12 Labs, 19 Visual Explainers, 74 Exercise-set and 74 solution-set pairs, 82 Practice Bank entries, 196 Glossary terms, 92 source records, and 401 catalog records; R1-R4 remain immutable history
