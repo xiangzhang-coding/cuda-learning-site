@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-import { readFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
 
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanDirectory, scanFiles, walkFiles } from '../../scripts/lib/quality-policy.mjs';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
+const execFileAsync = promisify(execFile);
 const ignoredDirectories = new Set([
   '.git',
   '.astro',
@@ -186,7 +190,7 @@ describe('source, license, and privacy policy', () => {
       /\.(md|mdx)$/.test(file),
     );
 
-    expect(contentFiles).toHaveLength(574);
+    expect(contentFiles).toHaveLength(598);
     expect(contentFiles.length % 2).toBe(0);
     for (const file of contentFiles) {
       const content = await readFile(file, 'utf8');
@@ -195,11 +199,66 @@ describe('source, license, and privacy policy', () => {
     }
 
     await expect(readFile(path.join(projectRoot, 'CONTENT_LICENSES.md'), 'utf8')).resolves.toContain(
-      'No adapted content or assets',
+      'No adapted content or assets are included in the instructional material.',
     );
     await expect(readFile(path.join(projectRoot, 'THIRD_PARTY_NOTICES.md'), 'utf8')).resolves.toMatch(
       /`@astrojs\/starlight` \| 0\.41\.7/,
     );
+  });
+
+  it('retains the exact Starlight MIT notice for the sole adapted Search file', async () => {
+    const [component, upstreamLicense, ledger, notices] = await Promise.all([
+      readFile(path.join(projectRoot, 'src/components/Search.astro'), 'utf8'),
+      readFile(path.join(projectRoot, 'node_modules/@astrojs/starlight/LICENSE'), 'utf8'),
+      readFile(path.join(projectRoot, 'CONTENT_LICENSES.md'), 'utf8'),
+      readFile(path.join(projectRoot, 'THIRD_PARTY_NOTICES.md'), 'utf8'),
+    ]);
+    expect(component).toContain('SPDX-License-Identifier: MIT');
+    expect(component).not.toContain('SPDX-License-Identifier: Apache-2.0');
+    expect(component.split('\n---')[0]).toContain(upstreamLicense.trim());
+    for (const content of [component, ledger, notices]) {
+      expect(content).toContain('656ffd54e5b27483f542c9eb8b12fd32f44372ae/packages/starlight/components/Search.astro');
+    }
+    for (const locale of ['', 'en/']) {
+      const html = await readFile(path.join(projectRoot, 'dist', locale, 'index.html'), 'utf8');
+      expect(html).not.toContain('Permission is hereby granted');
+      expect(html).not.toContain('withheldSearchIdle');
+    }
+    await expect(readFile(path.join(projectRoot, 'dist/legal/starlight-0.41.7-MIT.txt'), 'utf8')).resolves.toBe(upstreamLicense);
+  });
+
+  it('checks the exact Search notice through the CLI without installed dependencies', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'search-license-policy-'));
+    try {
+      const scriptPath = 'scripts/check-file-licenses.mjs';
+      const componentPath = 'src/components/Search.astro';
+      for (const file of [scriptPath, componentPath]) {
+        await mkdir(path.dirname(path.join(root, file)), { recursive: true });
+        await copyFile(path.join(projectRoot, file), path.join(root, file));
+      }
+      await execFileAsync('git', ['init', '--quiet'], { cwd: root });
+      await execFileAsync('git', ['add', '--', scriptPath, componentPath], { cwd: root });
+      await expect(access(path.join(root, 'node_modules'))).rejects.toMatchObject({ code: 'ENOENT' });
+
+      const result = await execFileAsync(process.execPath, [scriptPath], { cwd: root });
+      expect(result.stdout).toContain('File-level license policy passed for 2 tracked files.');
+      expect(result.stderr).toBe('');
+
+      const component = await readFile(path.join(root, componentPath), 'utf8');
+      for (const invalid of [
+        component.replace(/THE SOFTWARE IS PROVIDED[\s\S]*?SOFTWARE\.\n/, ''),
+        component.replace('Copyright (c) 2023', 'Copyright (c) 2024'),
+      ]) {
+        expect(invalid).not.toBe(component);
+        await writeFile(path.join(root, componentPath), invalid);
+        await expect(execFileAsync(process.execPath, [scriptPath], { cwd: root })).rejects.toMatchObject({
+          code: 1,
+          stderr: expect.stringContaining('src/components/Search.astro: adapted Search requires its exact upstream source and complete MIT notice'),
+        });
+      }
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 
   it('covers the exact issue #19 content, software, tests, and original project sources', async () => {
@@ -311,7 +370,7 @@ describe('source, license, and privacy policy', () => {
     }
 
     await expect(readFile(path.join(projectRoot, 'CONTENT_LICENSES.md'), 'utf8')).resolves.toContain(
-      'No adapted content or assets',
+      'No adapted content or assets are included in the instructional material.',
     );
     expect((await scanFiles(projectRoot, scopedFiles)).violations.map(({ rule }) => rule)).toEqual([]);
   });

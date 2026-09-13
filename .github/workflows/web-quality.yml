@@ -20,6 +20,74 @@ env:
   NODE_VERSION: 24.19.0
 
 jobs:
+  pytorch-environment:
+    name: pytorch-environment
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      PYTORCH_ALLOC_CONF: backend:native
+      CUDA_VISIBLE_DEVICES: ''
+    steps:
+      - name: Check out public source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up exact Node.js for source and summary scanning
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enforce public source and attribution boundaries before installation
+        run: |
+          npm run quality:source
+          npm run quality:licenses
+
+      - name: Set up exact CPython for the Linux wheel ABI
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12.14'
+          architecture: x64
+          check-latest: false
+          allow-prereleases: false
+
+      - name: Create an isolated application environment outside public source
+        run: python -I -m venv "$RUNNER_TEMP/pytorch-environment-venv"
+
+      - name: Verify full wheel hashes and run the Linux CPU host gate
+        id: host
+        env:
+          PYTORCH_SUMMARY: ${{ runner.temp }}/pytorch-environment-summary.json
+        run: >-
+          "$RUNNER_TEMP/pytorch-environment-venv/bin/python" -I
+          scripts/pytorch-environment/check.py --install > "$PYTORCH_SUMMARY"
+
+      - name: Scan the bounded summary before printing to the retained job log
+        if: ${{ !cancelled() && steps.host.outcome != 'skipped' }}
+        env:
+          PYTORCH_SUMMARY: ${{ runner.temp }}/pytorch-environment-summary.json
+        run: |
+          node --input-type=module <<'JS'
+          import { readFile } from 'node:fs/promises';
+          import { scanArtifactBuffer } from './scripts/lib/quality-policy.mjs';
+          try {
+            const raw = await readFile(process.env.PYTORCH_SUMMARY);
+            if (raw.length > 16384 || scanArtifactBuffer(raw, 'pytorch-environment-summary.json').length) {
+              throw new Error('summary rejected');
+            }
+            const summary = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(raw));
+            if (!['pass', 'fail'].includes(summary.result) || summary.scope !== 'linux-cpu-environment' ||
+                summary.gpuExecuted !== false || summary.traceCollected !== false) {
+              throw new Error('summary rejected');
+            }
+            console.log(JSON.stringify(summary));
+            if (summary.result !== 'pass') process.exitCode = 1;
+          } catch {
+            console.error('PyTorch host summary rejected; raw diagnostics are not retained.');
+            process.exitCode = 1;
+          }
+          JS
+
   static-and-integration:
     name: static-and-integration
     runs-on: ubuntu-24.04
@@ -304,6 +372,7 @@ jobs:
     name: web-quality
     if: ${{ always() }}
     needs:
+      - pytorch-environment
       - static-and-integration
       - e2e-chromium
       - e2e-cross-browser
@@ -314,13 +383,14 @@ jobs:
     steps:
       - name: Require every web quality boundary
         env:
+          PYTORCH_ENVIRONMENT_RESULT: ${{ needs.pytorch-environment.result }}
           STATIC_RESULT: ${{ needs.static-and-integration.result }}
           CHROMIUM_RESULT: ${{ needs.e2e-chromium.result }}
           CROSS_BROWSER_RESULT: ${{ needs.e2e-cross-browser.result }}
           ACCESSIBILITY_RESULT: ${{ needs.accessibility-automated.result }}
           ARTIFACT_RESULT: ${{ needs.artifact-policy.result }}
         run: |
-          for result in "$STATIC_RESULT" "$CHROMIUM_RESULT" "$CROSS_BROWSER_RESULT" "$ACCESSIBILITY_RESULT" "$ARTIFACT_RESULT"; do
+          for result in "$PYTORCH_ENVIRONMENT_RESULT" "$STATIC_RESULT" "$CHROMIUM_RESULT" "$CROSS_BROWSER_RESULT" "$ACCESSIBILITY_RESULT" "$ARTIFACT_RESULT"; do
             if [ "$result" != "success" ]; then exit 1; fi
           done
           echo "Web quality does not grant CUDA evidence status."

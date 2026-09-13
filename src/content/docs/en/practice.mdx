@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: 85 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 89 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-09-12'
@@ -94,6 +94,10 @@ structure:
   - entry-pb-r5-001
   - entry-pb-r5-002
   - entry-pb-r5-003
+  - entry-pb-r5-004
+  - entry-pb-r5-005
+  - entry-pb-r5-006
+  - entry-pb-r5-007
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -175,6 +179,10 @@ prerequisites:
   - P01
   - P02
   - P03
+  - P04
+  - P05
+  - P06
+  - P07
 relatedUnits:
   - O02
   - O03
@@ -258,6 +266,10 @@ relatedUnits:
   - P01
   - P02
   - P03
+  - P04
+  - P05
+  - P06
+  - P07
   - EX21
   - LAB06
   - LAB08
@@ -284,15 +296,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,entry-pb-r5-004,entry-pb-r5-005,entry-pb-r5-006,entry-pb-r5-007,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03,P04,P05,P06,P07' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,P04,P05,P06,P07,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -311,13 +323,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 85 complete entries below and uses no empty preview entries.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. The reviewed solution checks boundaries rather than replacing the work. This page publishes only the 89 complete entries below and uses no empty preview entries.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 85 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
+A planning ID is a stable label for cross-curriculum discussion, not a URL-stability promise. Filtering changes only the cards visible in the current browser. The 89 complete prompts, prerequisite links, and reviewed solutions below remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
@@ -3900,9 +3912,181 @@ Require a fresh result directory and associate source hash, options, explicit vi
 
 **Source date:** 2026-09-12.
 
+<span id="pb-r5-004" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-004: Audit timing boundaries for a two-branch request
+
+- **ID and Publication Pair:** PB-R5-004 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [P04](/en/frameworks/queued-work-timing/), exactly `[P04]`.
+- **Hardware gate:** No GPU for this paper audit. Measurement needs native Linux and one CC 8.0+ GPU with at least 8 GB.
+- **Version gate:** PyTorch 2.11.0+cu128, CPython 3.12.14, native allocator; packaged runtime/CUPTI 12.8.90, no system Toolkit requirement.
+- **Related Learning Units and resources:** [M07](/en/memory/stream-ordering/), [Q05](/en/correctness/timing-asynchronous-gpu-work/), and [P04](/en/frameworks/queued-work-timing/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** A request produces a tensor on stream A, then forks into a matrix product on B and a checksum on C. Both results belong to the response. A dashboard records start/end events on A, with end immediately after the two host submissions. It launches the next request, synchronizes the device, and calls the elapsed event interval response latency. A second chart times only those host submissions with perf_counter and labels the difference GPU acceleration. No durations or traces are supplied.
+
+**Goal:** Define three honest measurements without changing the request's work or silently including its successor.
+
+**Constraints:** Keep both branches, transfer policy, shape, dtype and allocator identical across comparisons. Treat this as a proposed schedule, not an observed run. Preserve data ordering and storage ownership independently from timing. Do not repair an early event by renaming its number.
+
+**Expected evidence:** An event dependency graph, a scope table for enqueue/response/device intervals, a successor exclusion rule, and an external Environment Manifest plus repetition plan for any future measurements.
+
+**Acceptance criteria:** An event-enabled start precedes A's production and both branches; A joins completion events recorded after B/C work before recording end. End completion precedes elapsed_time in milliseconds. A selected-device wall interval drains prior work before starting and waits for declared work before stopping. The next request is submitted only afterward for an isolated-response claim. An unsynchronized host interval remains an enqueue-side observation, not pure kernel time or a speedup denominator.
+
+<details><summary>Hint 1: Waiting later does not move an earlier timestamp</summary>List everything ordered before the end event itself. Device synchronization cannot insert the missing branch-to-end edges retroactively.</details>
+
+<details><summary>Hint 2: Latency and throughput need different experiments</summary>Starting the next request before the completion boundary can turn an isolated-response measurement into a mixed workload. A steady-state throughput study is valid only with that different scope declared.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** Record a timing-enabled start on A, produce the input, then record a readiness event. B and C wait for readiness before their work. Record a completion event after each branch, make A wait for both, and only then record the timing-enabled end. Retain all branch storage through its uses. Waiting for end makes its timestamp readable; the interval includes the graph's gaps and joins, not a sum of isolated kernel times.
+
+For isolated response wall time, finish prior work on the selected device, start the host clock, submit the declared request and its transfers, wait for completion, then stop. Device-wide synchronization includes all streams on that device, so remove unrelated producers or explicitly include them. Submit the successor after stopping. Label the unsynchronized host chart as host submission time, including incidental blocking; there is no guaranteed ordering between that number and the event number.
+
+Warm up the actual shapes/dtypes/libraries and allocator outside measurement. Record warmup and repetition counts, every retained interval and a distribution, workload/source revision, driver, loaded libraries, launch-blocking state and synchronization scope. Keep checksum readback, item extraction, printing and profiler collection outside timing unless intentionally included. Require finite nonnegative observations and correctness, not a minimum speedup.
+
+**Valid alternatives and common errors:** A completion event on a dedicated join stream is valid with the same complete graph. Retained handles plus explicit completion can protect lifetime. A steady-state multi-request benchmark is another valid question, not a substitute for response latency. Merely synchronizing after the old end, summing branch durations, or dividing incomparable host/device intervals fails the audit. No GPU evidence has been produced here.
+
+</details>
+
+**Source basis:** Original two-branch service audit; [P04](/en/frameworks/queued-work-timing/), [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080), and [SRC-CUDA-081](/en/sources-and-versions/#src-cuda-081). No upstream exercise or measured output is reproduced.
+
+**Source date:** 2026-09-12.
+
+<span id="pb-r5-005" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-005: Repair reuse contracts for a three-stream ring slot
+
+- **ID and Publication Pair:** PB-R5-005 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness debugging; advanced.
+- **Direct prerequisite:** [P05](/en/frameworks/streams-and-storage-lifetime/), exactly `[P05]`.
+- **Hardware gate:** No GPU for the proof; safe allocation-pressure runs need native Linux, CC 8.0+, and at least 8 GB.
+- **Version gate:** PyTorch 2.11.0+cu128 native caching allocator, ordinary eager tensors, no external allocation or CUDA Graph pool.
+- **Related Learning Units and resources:** [M08](/en/memory/event-dependencies-timing/), [P04](/en/frameworks/queued-work-timing/), and [P05](/en/frameworks/streams-and-storage-lifetime/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** A ring-slot arena is allocated on A; an offset view is filled on B and read by C. C calls wait_stream(B) before B queues the fill. B has no wait on A because the fill is write-only. The manager records the view on C and offers two reuse modes: drop all references immediately after enqueue, or retain the arena and overwrite the slot on A for the next request. It claims both modes are safe because the view was recorded and B is now its allocation origin.
+
+**Goal:** Repair data dependencies, allocator lifetime and explicit slot mutation as separate obligations.
+
+**Constraints:** Keep the allocation origin A and the offset view. No deliberate race execution, exact-pointer reuse assertion, global allocator substitution, or promised corruption. Future submissions after storage release are forbidden.
+
+**Expected evidence:** An origin/producer/consumer/last-use/release ledger; corrected wait placement; separate proofs for freeing storage and reusing a still-live slot; safe pressure-test acceptance and its Environment Manifest.
+
+**Acceptance criteria:** B waits for relevant A work before filling even uninitialized logical storage; C's wait follows the fill submission and precedes its read. Register every non-origin use B/C before release or join both back to A before final release. Recording C cannot order B's fill or prevent A's explicit overwrite. An offset view keeps the same backing allocation origin.
+
+<details><summary>Hint 1: The view's offset does not allocate another block</summary>Identify the backing storage, not the last writer or the view's first address. Recycled memory can still have origin-stream work queued.</details>
+
+<details><summary>Hint 2: Freeing and overwriting are different hazards</summary>Allocator bookkeeping delays reuse of released storage. The application can still race by writing a live allocation, so the ring-slot lease needs its own completion edge.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** A remains the allocation origin. Insert B.wait_stream(A) after the relevant A submissions and before B's fill. Insert C.wait_stream(B) after B queues that fill, not before. A wait captures the argument stream's work already submitted at its call boundary; it does not subscribe to future work.
+
+For immediate reference release, record the backing allocation's B and C uses before release and finish queuing all uses while owners remain valid. The native allocator records side-stream use and inserts completion events at deallocation; registration does not create data ordering. A shifted view registers the storage pointer, not a separately owned offset allocation. A manual alternative joins B/C back to true origin A after their final submissions but before final release, so later origin-stream reuse is ordered safely without a CPU wait.
+
+For the retained ring slot, A must wait for C's read to finish before overwriting; recording alone cannot help because no allocator reuse is involved. With the repaired B-to-C dependency, C's final completion also covers B's earlier fill. Keep a slot lease until that boundary; if another reader is added later, extend the proof. Retaining a Python variable until enqueue is not retaining it until completion.
+
+**Valid alternatives and common errors:** Holding storage until a checked consumer synchronization is safe but blocks the CPU. Independent slots with explicit leases can preserve concurrency. Reject treating B as origin, using a wait in the wrong direction, claiming record_stream copies data, or requiring an unsafe schedule to fail every time. Future native-allocator pressure runs must validate every output and record dependencies, allocation sizes, repetitions and the exact environment; source reasoning alone grants no runtime result.
+
+</details>
+
+**Source basis:** Original ring-slot and two-mode reuse proposal; [P05](/en/frameworks/streams-and-storage-lifetime/), [TERM-201](/en/glossary/#term-201), and [SRC-CUDA-081](/en/sources-and-versions/#src-cuda-081).
+
+**Source date:** 2026-09-12.
+
+<span id="pb-r5-006" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-006: Reject a misleading precision acceptance report
+
+- **ID and Publication Pair:** PB-R5-006 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Correctness debugging; advanced.
+- **Direct prerequisite:** [P06](/en/frameworks/mixed-precision-contracts/), exactly `[P06]`.
+- **Hardware gate:** Paper arithmetic needs no GPU. Numerical acceptance needs native Linux, CC 8.0+, at least 8 GB; native BF16 is checked separately.
+- **Version gate:** PyTorch 2.11.0+cu128 torch.amp; CPython 3.12.14; norm error, per-element tolerance and parameter rounding remain separate contracts.
+- **Related Learning Units and resources:** [Q02](/en/correctness/floating-point-order-reproducibility/), [L08](/en/libraries/tensor-core-precision-contracts/), and [P06](/en/frameworks/mixed-precision-contracts/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** A precision rollout has a supplied reference vector r=[1,0.000001,-0.000001] and candidate c=[1,0,0]. It approves candidates when Euclidean norm-relative error is at most 0.000002, then claims all elementwise contracts and a downstream decision r[1]>0 are preserved. The actual elementwise contract is atol=0.0000002 and rtol=0.001. A separate training control starts with FP32 p=1, finite unscaled gradient 1 and SGD learning rate 2^-30, with no momentum or decay. The report treats a finite gradient as proof of a changed parameter and proposes raising GradScaler to repair both discrepancies. These are paper data, not a GPU run.
+
+**Goal:** Separate global accuracy, local error, task decisions and representable optimizer updates before approving a precision change.
+
+**Constraints:** Keep the supplied tolerances and strict-positive decision fixed. Treat the training update as exact arithmetic followed by IEEE FP32 nearest rounding. The candidate's internal algorithm and input quantization are unspecified; do not infer them from these vectors. No benchmark or GPU execution is required.
+
+**Expected evidence:** Maximum absolute and norm-relative errors, each element's tolerance verdict, the decision change, the ideal and stored parameter values, and separate reference/gradient/update evidence needed for a future rollout.
+
+**Acceptance criteria:** The norm test passes at about 1.414214e-6, while both small components fail the 2.01e-7 local error bound. The strict-positive decision changes. The ideal parameter is 1-2^-30, but FP32 rounds it back to 1; finiteness does not prove a representable update. Raising backward scale repairs neither forward scores nor parameter-rounding loss after correct unscale. Reject this rollout under the stated contracts.
+
+<details><summary>Hint 1: A large reference component can dominate a norm</summary>Compare the two small errors with their own absolute-plus-relative bounds, not with the magnitude of the first component.</details>
+
+<details><summary>Hint 2: A finite update can disappear at storage</summary>Correct gradient unscale removes the larger backward factor. Compare the resulting SGD step with FP32 spacing immediately below 1.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** Maximum absolute error is 1e-6. The Euclidean error norm is sqrt(2)*1e-6 and the reference norm is sqrt(1+2e-12), so the norm-relative error is about 1.414214e-6 and passes the dashboard threshold. Element 0 is exact. For each small component, the permitted error is 2e-7+0.001*1e-6=2.01e-7, below its 1e-6 error. Both fail, and the positive decision on element 1 changes from true to false. Global norm agreement does not authorize replacing a local or task-level criterion.
+
+The ideal SGD result is 1-2^-30. FP32 spacing immediately below 1 is 2^-24; half that gap is 2^-25. The stipulated decrement is smaller, so storing the result rounds back to 1. This is not evidence that GradScaler skipped the optimizer; it is a distinct representability problem. Correct unscale restores gradient 1 regardless of the temporary backward factor. A validation control meant to demonstrate a parameter change must choose and justify a representable update and compare actual parameters from fresh identical states.
+
+The report cannot locate the source of the supplied forward error. Future evidence needs an FP64 reference constructed from original inputs before narrowing and a second reference from widened quantized inputs. Record finiteness, per-element errors, maximum absolute error, norm-relative error with a zero-reference convention, the task decision and exact tolerances. Separate storage/dispatch/internal arithmetic/output fields; output dtype identifies neither accumulator width nor Tensor Core use. Native BF16 needs including_emulation=False and operation-specific validation. Record IEEE FP32 baseline and reduction/precision settings without mixing old and new TF32 control families.
+
+**Valid alternatives and common errors:** Reject the rollout, retain a validated higher-precision sensitive region, or propose a separately justified task tolerance; do not silently loosen this contract. Full FP32 is a useful control, not an automatic accuracy guarantee. GradScaler addresses backward range, cannot recover forward quantization and can legitimately fall below 1 under overflow pressure. Test a separately injected nonfinite gradient before unscale for update skipping, not by inferring skip from an unchanged rounded parameter. Exact environment, gradients, parameter deltas and raw outputs are required for runtime claims; keep readback/get_scale outside timing. The arithmetic above is a stipulated model, not execution evidence.
+
+</details>
+
+**Source basis:** Original rollout thresholds and parameter-rounding audit; [P06](/en/frameworks/mixed-precision-contracts/), [TERM-202](/en/glossary/#term-202), [TERM-203](/en/glossary/#term-203), and [SRC-CUDA-082](/en/sources-and-versions/#src-cuda-082).
+
+**Source date:** 2026-09-12.
+
+<span id="pb-r5-007" class="resource-target" aria-hidden="true"></span>
+
+## PB-R5-007: Reject profiler correlations spliced across runs
+
+- **ID and Publication Pair:** PB-R5-007 in the `practice-bank` Publication Pair.
+- **Type and difficulty:** Evidence review; advanced.
+- **Direct prerequisite:** [P07](/en/frameworks/python-to-cuda-profiling/), exactly `[P07]`.
+- **Hardware gate:** No GPU for this audit. Capture needs native Linux, CC 8.0+, at least 8 GB, and working CUPTI activity tracing.
+- **Version gate:** PyTorch 2.11.0+cu128, pinned Kineto, CUPTI package 12.8.90; public eager profiling, no concurrent Nsight collection.
+- **Related Learning Units and resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), and [P07](/en/frameworks/python-to-cuda-profiling/).
+- **Last reviewed:** 2026-09-12.
+
+**Prompt:** A retry service has two independent process runs R-A and R-B, each with two completed profiler windows. Both runs happen to contain a local external-correlation value 17 and the same user label. Four callbacks upload to one replaceable trace filename; only the last file survives. A dashboard keeps summary tables, resets each run's displayed clock to zero, joins rows globally on 17, and assigns an R-B kernel to R-A's request. It sums device times across runs as retry latency. R-A's table has CUDA time but its discarded timeline was never checked for kernels. All statements describe a hypothetical evidence packet, not real traces.
+
+**Goal:** Design run-scoped correlation and trace custody so retries cannot manufacture a request-to-kernel relationship.
+
+**Constraints:** Processes have no supplied shared clock or cross-run request mapping. Correlation values and labels are not globally unique. Data is already on-device, so transfers are not required. Do not reconstruct missing events from tables, fabricate a trace, freeze JSON internals, or collect private stacks without authorization.
+
+**Expected evidence:** A four-slot run/window artifact inventory, a scoped join key and provenance policy, verdicts for attribution/latency/capture completeness, and the minimum new capture and unprofiled measurement required to revisit the rejected claims.
+
+**Acceptance criteria:** Require distinct R-A/W1, R-A/W2, R-B/W1 and R-B/W2 artifacts with hashes; four callback invocations and one retained file are not four traces. Local value 17 does not authorize a cross-run association, and reset display clocks provide no elapsed retry time. Keep R-A's kernel tracing unresolved, not certified from its table. A fresh complete capture must show CPU/runtime/kernel relations within its own run and window.
+
+<details><summary>Hint 1: Add identity before joining data</summary>Two unrelated processes can reuse the same integer. Which run, window, process and artifact produced the number, and which original correlation record supports the edge?</details>
+
+<details><summary>Hint 2: A callback is not durable custody</summary>A later successful overwrite can erase earlier evidence. Summary totals cannot recover the original events or establish a common clock across retries.</details>
+
+<details>
+<summary>Separate reviewed solution: Open after your attempt</summary>
+
+**Reviewed solution:** Create four separate artifact slots R-A/W1, R-A/W2, R-B/W1 and R-B/W2. Each stores source/build identity, process/run identity, active iteration range, schedule/options, capture success, byte hash and immutable retained location. Export inside on_trace_ready to a distinct destination and confirm retention before counting the window. The surviving last file proves nothing about the other three. acc_events and retained tables cannot reconstruct their timelines; rerun the missing capture if the relationship still matters.
+
+Scope frontend/runtime/device joins to the originating capture and process, retaining window identity and original correlation records plus device/stream coordinates. The bare value 17 is not a cross-run request key; even the same user label identifies a phase, not a globally unique operation occurrence. An application request/retry identifier can label occurrences, but each run must still supply its own CPU-to-launch-to-kernel chain. One CPU operation can launch several kernels, some after its host interval ends. Do not substitute name matching, nearest timestamps or universal external-ID assertions for those links.
+
+Retry latency needs a separately declared end-to-end host interval that covers the request and retry completion, not two reset display clocks or a sum of device durations. key_averages may aggregate overlapping events and is not a timeline. For R-A, a CUDA time column cannot settle whether CUPTI tracing worked; classify the claim as unresolved because the needed file was not inspected and retained. New capture must check activities, actual kernel/runtime events, loaded CUPTI after work, package/driver identity and host/container policy. Keep other CUPTI tools separate, avoid privilege escalation, and separate shape-recording runs from unprofiled timing because instrumentation can retain tensors and perturb lifetime.
+
+**Valid alternatives and common errors:** A single continuous capture can answer a different, explicitly scoped same-process question. A manifest-backed collection of per-window files preserves retries without inventing a unified clock. Sanitized derivatives may be shared only with an authorized raw-to-derivative custody record; do not upload private source paths. Reject hashes without retained bytes, identical labels as identity, table timing as proof of kernel tracing, and callback counts as file counts. This audit creates no trace, retry latency or GPU evidence.
+
+</details>
+
+**Source basis:** Original cross-process retry and overwritten-artifact audit; [P07](/en/frameworks/python-to-cuda-profiling/), [TERM-204](/en/glossary/#term-204), and [SRC-CUDA-083](/en/sources-and-versions/#src-cuda-083).
+
+**Source date:** 2026-09-12.
+
 ## Review record
 
-The **2026-09-12** increment adds exactly PB-R5-001/002/003, with direct prerequisites `[P01]`, `[P02]`, and `[P03]`, bringing the current total to **85**. Their two closed hints and separate worked solutions are original static reasoning. Historical entry dates and the R3/R4 classifications below remain unchanged; R5 aggregate review is pending. EX21 adds one Pending Hardware Verification subject, giving 20 examples plus 12 Labs, **32** pending subjects, with no new compilation or recorded runtime evidence.
+The **2026-09-12** issue #43 increment adds exactly PB-R5-004/005/006/007, with direct prerequisites `[P04]`, `[P05]`, `[P06]`, and `[P07]`, bringing the current total to **89**. Issue #42's PB-R5-001/002/003 remain intact. Each new entry has two closed hints and a separate original worked solution. Historical dates and the R3/R4 classifications remain unchanged; R5 aggregate review is pending. No new Example or Lab is added: 20 examples plus 12 Labs remain **32** pending subjects, without new compilation or recorded runtime evidence.
 
 The **2026-09-10** R4 aggregate static review records all **82** existing entries and the eight qualifying choices above alongside the immutable R3 ten-entry report-analysis subset. R4 is the latest completed static review; R5 is next with its aggregate review pending. No entry, prerequisite, hint, solution, source, or item-level date is changed by this classification. The September 4-9 records remain attached to their original entries, including PB-R4-015/016's September 9 review and direct `[L13]` prerequisites. R1-R3 history remains unchanged.
 

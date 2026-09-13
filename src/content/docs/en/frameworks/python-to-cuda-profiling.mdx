@@ -1,0 +1,207 @@
+---
+title: 'P07: Follow a Framework Operation to CUDA Activity'
+description: Plan two profiler windows, distinguish CUPTI tracing from fallback table timing, and correlate framework, runtime, and device work without name matching or fabricated traces.
+pairId: p07
+counterpart: /frameworks/python-to-cuda-profiling/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, profile, correlation, worksheet, availability, schedule, export, overhead, manifest, diagnostics, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P07
+prerequisites: [P04, Q07, Q08]
+relatedUnits: [P05, P06]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch profiler API and scheduling'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CPython 3.12.14; native Linux x86_64; no collected trace'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch profiler event association'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/autograd/profiler.py'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Linked CPU/runtime/device event source contract'
+    accessDate: '2026-09-12'
+  - title: 'Pinned Kineto external correlation'
+    url: 'https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/libkineto/src/CuptiActivityProfiler.cpp'
+    version: 'Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7'
+    platform: 'PyTorch release submodule source; no binary reproduction'
+    accessDate: '2026-09-12'
+  - title: 'CUPTI compatibility, activity, and subscriber contracts'
+    url: 'https://docs.nvidia.com/cupti/12.8.1/main/main.html'
+    version: 'CUPTI 12.8.1 documentation; selected package 12.8.90'
+    platform: 'Native Linux CUDA profiling requirements; not local availability'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p07 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/python-to-cuda-profiling/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,profile,correlation,worksheet,availability,schedule,export,overhead,manifest,diagnostics,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P07 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P04,Q07,Q08' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P05,P06' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '4' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'PyTorch-2.11.0+cu128,CUPTI-12.8.90,Kineto-7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/python-to-cuda-profiling/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+A framework table says an operation consumed CUDA time, but the exported timeline has no kernels. Another timeline shows a kernel after its Python call returned. Neither observation should be repaired by inventing missing work or matching the nearest names. Learn which records establish a launch relationship and which questions need a separate measurement.
+
+Allow 40 minutes for source-guided reasoning and the static worksheets. No package installation, GPU, trace viewer, or implementation is required. **Actual CUDA traces, correlation, allocator observations, and timings remain Pending Hardware Verification.** The tables here are original supplied relations and schedule predictions, not actual trace or profiler output.
+
+## Prerequisites
+
+The exact ordered prerequisites are `[P04, Q07, Q08]`: [P04](/en/frameworks/queued-work-timing/) supplies completion-aware timing; [Q07](/en/correctness/timeline-first-nsight-systems/) supplies application-timeline reasoning; [Q08](/en/correctness/kernel-first-nsight-compute/) supplies selected-kernel and collection boundaries. Related [P05](/en/frameworks/streams-and-storage-lifetime/) and [P06](/en/frameworks/mixed-precision-contracts/) explain lifetime and precision questions, but add no prerequisite here.
+
+## Why an operator table is not a device timeline
+
+Framework-level profiling answers which operations were invoked. CUDA activity tracing answers when submitted device work ran and on which device and stream. Asynchronous submission separates those two timelines. The modern profiler combines framework events with Kineto and the CUDA Profiling Tools Interface (CUPTI) rather than pretending Python functions execute as GPU kernels.
+
+A `record_function` range gives a phase a readable name. It does not rename device kernels, synchronize the GPU, or make each operation launch exactly one kernel. A metadata-only operation can launch none; a library operation can launch several. `key_averages()` groups events and loses the original occurrence-by-occurrence timeline. Summing overlapping kernel durations or inclusive parent/child times does not produce application wall-clock latency.
+
+## One pinned profiling contract
+
+Select **PyTorch 2.11.0+cu128**, commit **`70d99e998b4955e0049d13a98d77ae1b14db1f45`**, **CPython 3.12.14**, native **Linux x86_64**. The release pins Kineto source at **`7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7`**. [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) identifies the selected environment; [SRC-CUDA-083](/en/sources-and-versions/#src-cuda-083) records profiler sources. A stable release does not freeze private interfaces or every JSON field.
+
+Build CUDA 12.8, packaged CUDA Runtime 12.8.90, CUPTI 12.8.90, and cuDNN 9.19.0.56 are separate versions. CUPTI's archived documentation is 12.8.1, with display version v2025.1.1; neither is the Python wheel's package version. Installing a system Toolkit does not prove the process loaded the intended CUPTI. A future target is one GPU with compute capability at least 8.0 and at least 8 GB under native Linux, not an instantiated Reference Environment.
+
+Use the public `torch.profiler.profile`, `torch.profiler.ProfilerActivity.CPU`, `torch.profiler.ProfilerActivity.CUDA`, `torch.profiler.record_function`, `torch.profiler.schedule`, `step`, `key_averages`, and `export_chrome_trace` surface. Compiler integration, CUDA Graph capture, private experimental settings, and newer profiler internals are outside this contract.
+
+## Follow correlations through the host
+
+The reasoning chain is **framework operation -> host/runtime launch -> CUDA activity**. CUPTI runtime and kernel records have correlation relationships; external correlation relates those records back to frontend activity. Kineto joins those identities, and PyTorch associates linked runtime/device events with CPU FunctionEvents. See the pinned [PyTorch association](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/autograd/profiler.py#L664-L743) and [Kineto correlation mapping](https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/libkineto/src/CuptiActivityProfiler.cpp#L467-L478).
+
+Choose an occurrence in its process/thread/window, follow its recorded runtime relationship, then find linked CUDA activity with device/stream identity. A kernel may execute after the launching CPU range ends. Neither temporal containment nor a matching display name establishes this relationship. Keep missing links unresolved; do not assign them to the nearest range. Not every event, especially synchronization or bookkeeping, must have the same external-ID fields.
+
+## Worksheet: Supplied links beat similar names
+
+This is a **symbolic relationship worksheet, not an exported trace, simplified trace, or observed launch list**. F, H, C, and K labels are invented worksheet identifiers, not a promise about JSON keys or actual correlation numbers. Assume the supplied mapping is complete for these three framework occurrences; no durations or ordering between streams are given.
+
+| Framework occurrence | Host launch | Supplied correlation token | Device work | Device / stream |
+| --- | --- | --- | --- | --- |
+| `F-A` | `H-A1` | `C-X` | `K-A1` | `0 / 3` |
+| `F-A` | `H-A2` | `C-Y` | `K-A2` | `0 / 3` |
+| `F-B` | None, stipulated metadata-only | None | None | Not applicable |
+| `F-C` | `H-C1` | `C-Z` | `K-C1` | `0 / 7` |
+
+Derive **two kernels for F-A, zero for F-B, and one for F-C**. Stipulate that K-A2 and K-C1 share the display label “elementwise”; they still belong to different framework occurrences. If K-A1 runs after F-A's CPU range ends, the supplied launch chain still attributes it to F-A. Device 0 does not make stream 3 and stream 7 ordered with one another.
+
+If an additional K-U has no supplied correlation, its owner is **unresolved**, not F-B. In a real capture, missing activity can also mean a collection failure; unlike this complete stipulated worksheet, an empty row alone cannot prove an operation launched zero kernels. The table gives no overlap, utilization, duration, correctness, or bottleneck result.
+
+## Availability is not successful collection
+
+Request CPU and CUDA activities explicitly when the question is Python-to-CUDA attribution. Inspect CUDA availability and `torch.profiler.supported_activities()`, but treat them as preflight checks, not proof of a captured kernel. The pinned [CUPTI fallback note](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py#L72-L83) states that CUDA timing may appear in profiler tables through a legacy fallback even when CUDA kernel events are absent from exported JSON.
+
+A future trace smoke test must retain actual framework/user ranges, CUDA runtime launch activity, and CUDA kernel activity in the selected active window, with at least one usable correlation chain. Require transfer activity only if the declared workload transfers data inside that window. A table with CUDA time, supported-activity membership, an empty JSON file, or a trace file's existence alone cannot satisfy this test. This page has performed no such smoke test.
+
+## Predict the schedule before collecting
+
+Set the public schedule parameters to `wait=1`, `warmup=1`, `active=3`, `repeat=2`, `skip_first=0`, `skip_first_wait=0`. Declare ten logical iterations indexed 0 through 9 and exactly one `prof.step()` **after** each iteration. The initial action applies to iteration 0. Each five-step cycle waits, warms up, then records three iterations.
+
+| Iteration index | Predicted action | Workload belongs to saved window | Boundary after this iteration |
+| --- | --- | --- | --- |
+| `0` | `NONE` | No | Advance to warmup |
+| `1` | `WARMUP` | No | Begin active recording |
+| `2` | `RECORD` | `W1` | Continue |
+| `3` | `RECORD` | `W1` | Continue |
+| `4` | `RECORD_AND_SAVE` | `W1` | Callback 1, then wait |
+| `5` | `NONE` | No | Advance to warmup |
+| `6` | `WARMUP` | No | Begin active recording |
+| `7` | `RECORD` | `W2` | Continue |
+| `8` | `RECORD` | `W2` | Continue |
+| `9` | `RECORD_AND_SAVE` | `W2` | Callback 2, then stop recording |
+
+The expected active indexes are **2-4 and 7-9**, giving **six active iterations and two callbacks**. With the declared end-of-iteration stepping, callbacks occur at transitions to profiler step numbers **5 and 10**, not before iterations 4 and 9 execute. Wait/warmup workload is outside the saved active ranges; tool bookkeeping must not be confused with workload membership.
+
+`prof.step()` announces the next logical iteration; it is **not a generic CUDA completion barrier**. Profiler warmup prepares collection, whereas workload warmup before entering the profiler prepares the selected shapes, dtype, allocator, and libraries. The schedule defaults `repeat=0` to continuing cycles until profiling ends. Zero warmup is accepted with a warning about skew; it is not the schedule used here.
+
+## Save every window, not just the last
+
+Assign a distinct destination to each `on_trace_ready` callback and call `export_chrome_trace` within that callback to retain that window. Record window identity, included logical iterations, artifact identity, and any export error. In this worksheet W1 corresponds to indexes 2-4, W2 to 7-9; these are planned slots, not existing artifacts.
+
+A single export after the scheduled context contains the **last cycle**, not an archive of both cycles. Reusing one destination in both callbacks can overwrite the first. The default `acc_events=False` does not retain all cycles' FunctionEvents; `acc_events=True` changes event accumulation for summaries but is not a substitute for saving every timeline. The [pinned export contract](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py#L285-L301) is narrower than “export everything that ran.”
+
+## Instrumentation changes the experiment
+
+Keep shape, stack, and memory collection opt-in. `record_shapes=True` can hold tensor references, alter reference-count-sensitive optimizations, trigger extra copies, and perturb allocation lifetimes. A shape-recording run cannot establish the uninstrumented storage lifetime discussed in P05. `with_stack` also adds cost and can expose file paths. `with_modules` hierarchy at this pin is supported for TorchScript, not eager models; source-stack capture is a different feature.
+
+Use one correctness run, a targeted profiler run for relationships, and a separate unprofiled timing run with the same accepted workload. In the timing run, state host versus device scope, synchronization, warmup/repetitions, and whether allocation/transfers are included. Compare distributions under matched conditions if estimating instrumentation overhead, and report that estimate separately. Do not subtract an assumed universal profiler cost, sum overlapped durations into wall time, or claim that shape capture reveals accumulator precision.
+
+## Retain an Environment Manifest and safe artifacts
+
+No manifest below is filled with observed values. A future **Environment Manifest** must include all of these fields; record a reason for every unknown or not-applicable coordinate.
+
+| Field group | Required record before making a claim |
+| --- | --- |
+| Hardware | GPU model, controlled device identifier, compute capability, memory, GPU count, selected device, topology/partition state where relevant |
+| Host | Native Linux distribution/release, kernel, architecture, glibc, CPU, interpreter provenance and build/compiler identity, container/image identity if used |
+| Software | CPython version, exact torch wheel/hash and source commit, complete dependency pins, driver, build CUDA, installed system Toolkit/compiler or explicit absence, actually loaded runtime/cuDNN/CUPTI versions and library identities |
+| Execution | Workload revision, input origin/seed, sizes/shapes/strides/dtypes, correctness criteria and results, device/stream policy, precision/determinism flags, allocator backend and configuration |
+| Collection | Profiler/build identity, requested/supported activities, workload warmup, schedule and iteration boundary, shape/stack/memory flags, callback/window mapping, collection errors/dropped-record warnings and completeness review |
+| Measurement | Separate unprofiled timing method, included/excluded work, completion boundary, repetitions, raw samples/distribution, clocks/power/thermal state and competing workloads |
+| Custody | Permission/host policy, private raw artifact location and hash, sanitized derivative identity/hash, redactions, reviewer approval and retention/deletion policy |
+
+For the shared eager contract, record `PYTORCH_ALLOC_CONF=backend:native` selected before process startup and verify the actual backend via `torch.cuda.memory.get_allocator_backend()`. Installed package metadata is not proof of loaded library identity; inspect the relevant identities after actual operations have triggered lazy loading. No system Toolkit or compiler is required merely to do this eager profiling task.
+
+Use synthetic non-sensitive workload data and neutral phase labels. Traces, stacks, logs, metadata, and filenames can disclose hostnames, usernames, source paths, model names, shapes, or application inputs. Keep raw material private; never put credentials, private host paths, or confidential traces in public issues, repository files, screenshots, or deployments. Review a sanitized derivative before sharing and keep enough window/correlation structure to justify its claim. A manifest needs technical reproducibility, not public disclosure of secrets; mark redacted identifying fields honestly.
+
+## Diagnose the missing layer without escalating blindly
+
+| Symptom | Next bounded question |
+| --- | --- |
+| CUDA unavailable | Is the selected CUDA build installed on the intended Linux host, with a working compatible driver/device? |
+| CUDA time in table, no JSON kernels | Is this fallback timing, a missing/incompatible loaded CUPTI, or an incomplete capture? |
+| Kernels exist but intended ranges are missing | Were CPU activity, labels, logical iteration boundaries, and active windows correct? |
+| Two callbacks but only one retained artifact | Did export overwrite a destination, fail, or happen only after the context? |
+| Only shape-recording runs retain storage longer | Could instrumentation-held references explain the changed lifetime? |
+
+The [CUPTI compatibility and subscriber contract](https://docs.nvidia.com/cupti/12.8.1/main/main.html) distinguishes driver compatibility and a single callback subscriber. Run torch.profiler separately from other CUPTI-based tools, including Nsight, instead of assuming simultaneous instrumentation is supported. Preserve diagnostics and check loaded library identity, driver/tool compatibility, and host/container policy first.
+
+Activity tracing and hardware-counter profiling have different permission requirements. Missing kernels are not an instruction to run everything as root, disable host security, or change a shared machine's driver policy. If an authorized administrator must change a necessary policy, record the exact boundary and approval; otherwise keep collection blocked. Do not silently replace the required CUDA trace with a CPU-only or table-only success.
+
+## Guided practice: Prepare a reviewable capture plan
+
+1. State one question: which CUDA activities belong to a chosen framework occurrence? Keep precision and speed questions separate.
+2. Reconstruct the symbolic relationship worksheet. Resolve supplied links, count work per occurrence, and leave the extra unlinked item unresolved.
+3. Derive the ten schedule actions and assign distinct export slots to the two active windows. Specify one end-of-iteration step boundary.
+4. Write the smoke-test criteria and full Environment Manifest before collection. Keep CUDA table timing, supported activities, and actual JSON kernels as separate checks.
+5. Specify raw-artifact custody, sanitization, and an unprofiled timing plan. Leave all actual trace, duration, allocator, and backend-result fields unrecorded.
+
+**Acceptance:** Another reader can audit the mapping, six active iterations, two callbacks, two retained-window obligations, missing-layer diagnostics, and privacy/permission boundaries without executing CUDA.
+
+## Evidence boundary
+
+This Learning Unit and its static Exercises have four empty evidence arrays. There is no profiler run, actual trace/output, performance result, or observation of allocator behavior. **GPU-dependent behavior remains Pending Hardware Verification.** Source inspection and schedule arithmetic do not grant Compile-Checked or Runtime-Verified status; a qualifying run needs a declared Reference Environment, the complete Environment Manifest, and retained acceptance evidence.
+
+## Retrieval check
+
+1. Why can one framework occurrence have several kernels, none, or unresolved activity in an incomplete capture?
+2. Which correlation chain replaces name matching and CPU-range containment?
+3. Why do supported activities and CUDA table time fail to prove that JSON contains device kernels?
+4. For the declared schedule, which indexes are active, when do the two callbacks occur, and how are both windows retained?
+5. Why must shape-recording, timing, permissions, and sanitized artifact custody be reviewed separately?
+
+## Continue with practice
+
+Complete the [three P07 Exercises](/en/frameworks/python-to-cuda-profiling/exercises/) before the [separate solutions](/en/frameworks/python-to-cuda-profiling/solutions/), then audit [PB-R5-007](/en/practice/#pb-r5-007). Revisit related [P05](/en/frameworks/streams-and-storage-lifetime/) for lifetime obligations and [P06](/en/frameworks/mixed-precision-contracts/) for numerical acceptance, not as extra prerequisites.
+
+## Sources and licensing
+
+Reviewed and accessed **2026-09-12**. [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) records environment identities and [SRC-CUDA-083](/en/sources-and-versions/#src-cuda-083) records the profiler contract. Consult the pinned [profiler source](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py) and [owner schedule/correlation tests](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/profiler/test_profiler.py). Test definitions are not test execution. Context7's newer snippets were not used to expand the selected release's public surface.
+
+All worksheet identifiers, tables, prose, and Exercises are original CC BY 4.0. No owner code, test body, trace, screenshot, figure, or substantial documentation passage is copied. PyTorch retains its [BSD-3-Clause license](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE) and [NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE); Kineto has its own [BSD-3-Clause license](https://github.com/pytorch/kineto/blob/7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7/LICENSE). NVIDIA CUPTI documentation and binaries retain their [separate terms](https://docs.nvidia.com/cupti/12.8.1/copyright-and-licenses/index.html); those are not relicensed by linking them.

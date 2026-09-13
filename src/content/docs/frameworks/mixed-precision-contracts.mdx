@@ -1,0 +1,180 @@
+---
+title: 'P06：把混合精度决策与数值证据分开'
+description: 审查 autocast 适用条件、两份独立数值参考、精度控制与有效批次的梯度缩放，不从 dtype 推断 GPU 行为。
+pairId: p06
+counterpart: /en/frameworks/mixed-precision-contracts/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, profile, precision-axes, worksheet, autocast, scaling, capabilities, verification, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P06
+prerequisites: [Q02, P04, L08]
+relatedUnits: [P04, P07]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch AMP contract'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/amp.md'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CPython 3.12.14; native Linux x86_64; static contract only'
+    accessDate: '2026-09-12'
+  - title: 'Pinned GradScaler implementation'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/grad_scaler.py'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CUDA scaling and optimizer-boundary source contract; not execution'
+    accessDate: '2026-09-12'
+  - title: 'Pinned CUDA precision controls'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CUDA matmul and cuDNN precision policy; not selected kernel evidence'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p06 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/mixed-precision-contracts/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,profile,precision-axes,worksheet,autocast,scaling,capabilities,verification,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P06 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'Q02,P04,L08' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P04,P07' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'PyTorch-2.11.0+cu128' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/mixed-precision-contracts/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+半精度结果可能相对已存储输入很准确，却偏离原始问题。反过来，float32 结果中也可能包含以较低精度求得的乘积。先定位信息在哪里丢失，再考虑修改容差或缩放因子。阅读与纸面工作表约需 40 分钟，不需要安装软件或使用 GPU。
+
+**依赖 GPU 的分派、梯度、参数更新与性能均保持待硬件验证（Pending Hardware Verification）。** 以下算术是原创教学模型，不是 PyTorch 输出。本页不提供可执行实现或实际追踪记录。
+
+## 前置知识
+
+有序直接先修项恰好为 `[Q02, P04, L08]`：[Q02](/correctness/floating-point-order-reproducibility/)提供舍入与运算顺序知识，[P04](/frameworks/queued-work-timing/)提供异步计时边界，[L08](/libraries/tensor-core-precision-contracts/)区分存储与累加器合同。P04 与 [P07](/frameworks/python-to-cuda-profiling/)是相关单元；P07 不是额外先修项。
+
+## 为什么混合精度不只是一次转换
+
+较窄存储可以减少流量，但更小的指数范围与更少的有效位改变了哪些数值能够保留。因此，让所有运算都使用窄类型，与逐运算选择精度，是两种不同政策。自动混合精度（Automatic Mixed Precision，AMP）把运算分派机制 autocast 与可独立使用的梯度缩放（gradient scaling）结合起来。两者都不是普遍成立的准确性保证。
+
+已有资料中可以见到旧的 CUDA 专用 AMP 接口。本单元采用选定版本的公开命名空间 `torch.amp.autocast` 与 `torch.amp.GradScaler`。旧 `torch.cuda.amp` 接口族已弃用；它仍然存在，不代表可以混用构造参数约定。
+
+## 把声明绑定到一个环境
+
+选定 **PyTorch 2.11.0+cu128**，源码提交 **`70d99e998b4955e0049d13a98d77ae1b14db1f45`**，**CPython 3.12.14**，原生 **Linux x86_64**。[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)记录环境与产物合同；[SRC-CUDA-082](/sources-and-versions/#src-cuda-082)记录 AMP 事实。这是选定的稳定构建，不声称它是最新版本。
+
+构建 CUDA 家族 12.8、包提供的 CUDA Runtime 12.8.90、CUPTI 12.8.90 与 cuDNN 9.19.0.56 是不同坐标。系统 Toolkit 标签不能决定 Python 进程实际加载的库。本页普通 eager 运算无需自定义 CUDA 编译或系统 `nvcc`。原生 Linux 是唯一受支持环境（Supported Environment）；未来单 GPU 目标要求计算能力（compute capability）至少 8.0、至少 8 GB，并采用小问题。兼容目标还不是已有观察的基准环境（Reference Environment）。
+
+## 六项决策，而非一个 dtype
+
+| 决策 | 要记录的问题 | 不能据此证明什么 |
+| --- | --- | --- |
+| 输入存储 | 原始数值与窄化后的数值 | 再扩大类型无法恢复转换已丢弃的信息 |
+| 乘法 | 运算实际使用的操作数精度 | FP32 张量存储本身不能排除 TF32 乘法 |
+| 累加 | 累加器类型（Accumulator Type）与中间归约政策 | 输出 dtype 本身无法识别这两项 |
+| 输出存储 | 最终转换与舍入 | 窄输出可能来自更宽的累加 |
+| 梯度缩放 | 反向传播中的因子及其移除时机 | 缩放无法修复前向量化或溢出的结果 |
+| 验收 | 独立参考、有限性检查、容差、参数变化 | dtype 检查通过不等于准确或更快 |
+
+未知的内部精度字段应保持未知。后端、算法、形状、架构与精度标志都可能影响路径；数值接近或核函数名称都不能测出累加器位宽。
+
+## 工作表：两份参考定位不同误差
+
+每行定义一个两项点积，在纸面上使用精确有理数运算。<strong>完整原值参考（full-original reference）</strong>使用窄化前的原始操作数；<strong>存储输入参考（stored-input reference）</strong>独立扩大 FP16 舍入后的操作数，再计算点积。未来实现应在 autocast 外求这两份参考；对于这些二进制精确数值，宜用独立的主机 FP64 算术，而不是再调用一次待评估后端。
+
+题设模型先按最近值、偶数优先规则把输入舍入为 FP16，精确求积与求和，最后再把输出舍入为 FP16。这**不是对真实 GPU 累加器的预测**。
+
+| 行 | 原始 a | 原始 b | FP16 存储 a | FP16 存储 b | 完整原值参考 | 存储输入参考 | 模型输出 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| S | `[1+2^-12,1]` | `[1,-1/2]` | `[1,1]` | `[1,-1/2]` | `2049/4096` | `1/2` | `1/2` |
+| R | `[1+2^-10,1]` | `[1+2^-10,-1]` | `[1+2^-10,1]` | `[1+2^-10,-1]` | `2049/1048576` | `2049/1048576` | `1/512` |
+
+S 的首个原值比 1 大四分之一个 FP16 间距，因此舍入为 1。原始结果是 **0.500244140625**，存储输入参考与模型输出均为 **0.5**。相对原值的绝对误差是 **`2^-12 = 0.000244140625`**，相对存储输入则为零。更宽的累加不能恢复缺失的输入小数部分。
+
+R 的两个输入本来就能用 FP16 表示。乘积是 `1+2^-9+2^-20`，减去 1 得到 **0.00195407867431640625**。它恰好处于两个 FP16 输出值的中点；偶数优先得到 **0.001953125**。相对任一参考的误差都是 **`2^-20 = 0.00000095367431640625`**。另一条假设路径若先把乘积舍入为 FP16，再减去 1，也得到相同终值。所以这个结果无法区分精确累加与那条提前舍入的路径。
+
+把两行看作向量，相对完整原值的最大绝对误差为 **`2^-12`**，相对存储输入则为 **`2^-20`**。相对完整原值向量的欧氏范数相对误差为 **`1/2049`**。两份报告都要保留：只检查存储输入会掩盖 S 的输入损失。
+
+## Autocast 适用条件是逐运算合同
+
+采用 `torch.amp.autocast`，用 `device_type` 选择 CUDA，并明确 `dtype`，例如 `torch.float16` 或 `torch.bfloat16`。公开别名 `torch.autocast` 也有效。构造器的字面默认值是 `dtype=None`、`enabled=True`、`cache_enabled=None`；省略 dtype/cache 会继承当前状态，CUDA 初始状态为 FP16/启用缓存。嵌套状态也要考虑。[固定 autocast 源码](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/autocast_mode.py#L180-L275)还规定状态是<strong>线程局部（thread-local）</strong>的：调用者线程启用它，不会让任意工作线程自动启用。
+
+| CUDA autocast 内的情形 | 本版本合同 |
+| --- | --- |
+| 适用的非原地 `mm`、`matmul`、`linear` | 低精度分派政策，不是全模型转换 |
+| 适用的 `mse_loss` | FP32 分派政策 |
+| 适用的 `sum`、`softmax`，无显式 dtype | 可选 dtype 的 FP32 政策，不代表所有归约 |
+| 原地 `addmm_` | 绕过 autocast，仍须满足原生 dtype 与合法性规则 |
+| `addmm` 指定 `out=` | 绕过 autocast，提供输出并不隐含类型转换 |
+| `sum` 指定 `dtype=torch.float64` | 尊重显式 dtype |
+| FP64 或非浮点输入；未列出的 `mean`、`std` | 没有统一 autocast 转换，遵循运算自身规则 |
+
+未列出的运算仍可能收到上游已窄化的输入。离开或禁用 autocast，不会扩大已有的 half 张量。数值敏感的 FP32 子区域既需要明确扩大操作数，也需要正确的分派政策。基础训练保留 FP32 参数，只在前向/损失区域使用 autocast，反向在区域外执行；反向遵循对应前向所选的 dtype。叶子梯度是 FP32，不代表全部中间梯度都是 FP32。
+
+## 缩放属于一个有效批次
+
+`torch.amp.GradScaler` 的设备构造参数叫 `device`，不是 autocast 的 `device_type`。默认值为 `device="cuda"`、`init_scale=65536.0`、`growth_factor=2.0`、`backoff_factor=0.5`、`growth_interval=2000`、`enabled=True`。Autocast 与缩放可以分开使用。
+
+缩放损失是在较小反向数值消失于 FP16 之前将其放大。到优化器边界，`unscale_` 先移除因子，再检查或裁剪。需要时，`step` 执行反缩放/检查；已记录的梯度非有限时，它跳过普通优化器的更新。随后 `update` 缩小因子，或在连续足够多次未跳过更新后增大因子。显式反缩放后，不可再引入未经检查的非有限梯度，并假设 `step` 会重新检查。
+
+微批次累积时，[有效批次合同](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/amp_examples.rst#L123-L137)要求全部贡献累积完成前，梯度保持已缩放状态且因子不变。每个优化器每步只反缩放一次，然后检查/裁剪、step、update；边界是有效批次（effective batch），不是每个微批次。损失归一化是另一项选择：若目标是等大微批次的平均值，累积前须给予正确权重。
+
+**缩放因子没有 1 这个下限。** 若刻意设定初始因子 **0.5**，之后检测到非有限梯度，默认回退因子预测下一尺度为 **0.25**，并跳过该优化器的参数更新。这是溢出/回退（overflow/backoff）响应，不是检测到下溢。把 BF16 范围的数值强行放入 FP16 会造成范围压力；缩放不能修复前向溢出或保证收敛。反复回退也不保证训练有效。`get_scale()` 与梯度检查应放在计时外，因为状态读取可能同步。如果 CUDA 缺失使 scaler 自动禁用，需要 CUDA 的检查属于受阻，而不是通过。
+
+## BF16 与 TF32 各有门槛
+
+固定版本的 [BF16 能力检查](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py#L183-L212)默认 `including_emulation=True`；在计算能力低于 8.0 时，基于分配的模拟支持检查仍可能成功。原生能力应通过 `torch.cuda.is_bf16_supported` 配合 `including_emulation=False` 检查，再验证实际运算/后端。BF16 可用不等于原生张量核心（Tensor Core）加速或更快。更宽的指数范围通常降低缩放需求，但不会消除舍入误差。
+
+TF32 是独立的 FP32 算术政策，不是 FP16 autocast。更严格的 FP32 比较应通过新 `fp32_precision` 接口族明确选择 `"ieee"`，记录全局、后端与运算覆盖项，包括 `torch.backends.cuda.matmul.fp32_precision` 和 `torch.backends.cudnn.conv.fp32_precision`。TF32 分支允许 `"tf32"`。同一验证配置中，**不要把这套接口与旧 `allow_tf32` 设置混用**。矩阵乘法与 cuDNN 卷积各有政策；FP32 存储 dtype 不能证明 IEEE 乘法。
+
+还应记录 `torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction`、`torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction` 和 `torch.backends.cuda.matmul.allow_fp16_accumulation`。更严格的矩阵乘法分支禁止相关的低精度归约与全 FP16 累加，但这些开关不是所有运算的通用精度控制。若提出详细后端声明，还须记录相关 split-K 归约状态。输出 dtype、记录形状的 profiler 或一个相同数值，都不能证明所选内部算术。
+
+## 看到结果前先写验收规则
+
+要求输出与参考值均有限；分别对两份参考报告最大绝对误差和 `norm(y-r)/norm(r)`。明确零参考规则：两项范数都为零时相对误差为 0；参考范数为零而误差非零时为无穷大。拒绝 NaN，不把它们视为相等。逐元素规则可用 `abs(y-r) <= atol + rtol*abs(r)`；容差应来自数值尺度、条件性、归约长度与应用需要，而不是失败后不断放宽。
+
+仅对本纸面数据，`atol=2^-21`、`rtol=2^-11` 使两行相对两份参考都通过。保持绝对容差不变而令 `rtol=0`，两行相对原值都失败；相对存储输入则只有 S 仍通过。这展示了不同的验收问题，不是适用于任意训练的容差。
+
+未来训练检查应为每个精度分支恢复全新且相同的参数与优化器状态，要求有限损失与反缩放后有限梯度，并实际比较更新前后参数。刻意设置非零有限梯度且更新量可表示的对照，选定参数必须变化；另一个在反缩放前受控注入非有限梯度的分支，必须跳过该优化器的更新并缩小尺度。只有有限损失、零梯度下参数不变，或 `step` 的返回值，都不足以作为证据。把这些检查与计时、性能分析分开。
+
+## 引导实践：组成一份精度审查
+
+1. 分别从原值与存储值重算 S、R，标出每个舍入点，说明哪份参考能发现它。
+2. 分类适用条件表中的各行，不假设运行时输出。在书面合同中加入工作线程边界与禁用 autocast 的子区域。
+3. 画出包含两个微批次的有效批次，标记不变的尺度、最终反缩放/检查、允许的裁剪、step 与 update 边界。
+4. 准备环境清单（Environment Manifest）：精确 Python/构建/产物及依赖身份，OS/内核/glibc 与解释器/编译器来源，GPU/计算能力/显存/数量，已安装驱动，已加载 CUDA/cuDNN/CUPTI 路径与版本，分配器后端，精度/确定性标志，形状/步幅/种子，梯度归一化，优化器/scaler 设置，以及测量边界。缺失坐标写为未知。
+5. 合格外部运行前，实测 dtype、误差指标、梯度检查、参数变化与计时都保持未记录。原始诊断资料留在私有位置；共享前审核脱敏副本。
+
+**验收：** 读者不用运行 CUDA，也能区分输入损失、后续算术/输出误差与无效的梯度尺度生命周期。纸面审查的任何一步都不提升运行证据。
+
+## 证据边界
+
+四个证据数组均为空。工作表、源码阅读与 API 政策不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）状态。**实际 GPU 行为保持待硬件验证（Pending Hardware Verification）**，直到在声明的基准环境中完成正确性与观察验收，并附环境清单。本页不声称加速比、Tensor Core 路径、实际累加器或训练收敛。
+
+## 检索检查
+
+1. 为什么 S 通过存储输入比较，却丢失了原始问题的信息？
+2. 为什么不同内部舍入路径能产生 R 的相同终值？
+3. 哪些原地、输出缓冲、显式 dtype 与线程边界情形否定了统一 autocast 声明？
+4. 为什么两个微批次必须共用一个尺度，为什么溢出回退能让它低于 1？
+5. 原生 BF16 能力、TF32 政策、有限梯度、参数更新与实际算术证据之间有哪些区别？
+
+## 继续练习
+
+先完成[三道 P06 练习](/frameworks/mixed-precision-contracts/exercises/)，再看[独立解答](/frameworks/mixed-precision-contracts/solutions/)。[PB-R5-006](/practice/#pb-r5-006)再次审查精度验收。[P07](/frameworks/python-to-cuda-profiling/)解释 profiler 可以关联什么，以及为什么它不是累加器检查器。
+
+## 来源与许可
+
+事实核对与来源访问日期为 **2026-09-12**。环境身份见 [SRC-CUDA-080](/sources-and-versions/#src-cuda-080)，AMP 见 [SRC-CUDA-082](/sources-and-versions/#src-cuda-082)。主要依据是固定提交的 [AMP 合同](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/amp.md)、[GradScaler 源码](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/grad_scaler.py)与 [CUDA 精度说明](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst)。当前 Context7 检索经过这些精确官方来源核对，不直接采用更新版本片段。
+
+正文、数值、表格与练习（Exercise）均为原创 CC BY 4.0 教学内容，没有复制官方实现、测试正文、数值输出或图示。PyTorch 源码保留其 [BSD-3-Clause 许可](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE)及 [NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE)；二进制依赖保留各自条款。

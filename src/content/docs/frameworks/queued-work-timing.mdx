@@ -1,0 +1,167 @@
+---
+title: 'P04：计时要覆盖完成，而不只是提交'
+description: 区分主机提交、完成后的墙钟时间与 CUDA 事件区间，审查多流测量的起止边界，不编造 GPU 观察。
+pairId: p04
+counterpart: /en/frameworks/queued-work-timing/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, worksheet, correctness, measurement, versions, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P04
+prerequisites: [M07, Q05]
+relatedUnits: [P05, P06, P07]
+hardwareGate: none
+estimatedMinutes: 25
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch CUDA semantics'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Native Linux CUDA; asynchronous execution and streams'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch Stream and Event interfaces'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Event timing, completion, and call-time stream dependencies'
+    accessDate: '2026-09-12'
+  - title: 'Pinned PyTorch device synchronization'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py'
+    version: 'PyTorch 2.11.0; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'Selected-device synchronization scope'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p04 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/queued-work-timing/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,worksheet,correctness,measurement,versions,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P04 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'M07,Q05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P05,P06,P07' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'torch-2.11.0+cu128,CPython-3.12.14,CUDA-12.8,native' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/queued-work-timing/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+一个 Python 张量操作很快返回，下一个请求却卡住了。在判断前者快、后者慢之前，先问谁提交了工作，谁承担了等待完成的成本。移动等待的位置，可能只改变成本记在哪一项上，并没有改变计算本身。
+
+用约 25 分钟，你将区分三个计时问题，证明区间的开始与结束边界，并识别“数字看起来合理，测量却不成立”的报告。本学习单元（Learning Unit）及书面练习（Exercise）不需要安装软件或 GPU。**GPU 计时观察仍为待硬件验证（Pending Hardware Verification）。**
+
+## 前置知识
+
+有序前置严格为 `[M07, Q05]`：[M07：流内顺序](/memory/stream-ordering/)解释队列顺序；[Q05：异步 GPU 工作计时](/correctness/timing-asynchronous-gpu-work/)解释完成点与测量范围。把这些模型带入 PyTorch，而不是根据 Python 语法重新猜测 CUDA 行为。
+
+[P05：流与存储生命周期](/frameworks/streams-and-storage-lifetime/)是相关单元，不是前置。[P06](/frameworks/mixed-precision-contracts/)展开混合精度验证，[P07](/frameworks/python-to-cuda-profiling/)展开性能剖析；完成本工作表不需要先学它们。
+
+## 看似同步的表达式为什么会排队
+
+CUDA 把主机提交与设备执行分开，使 CPU 可以在 GPU 处理前一批工作时准备后续工作。PyTorch 的张量操作建立在这个模型之上：即时执行（eager execution）的 Python 表达式可以选择原生操作并提交 CUDA 工作，而不等待结果完成。即时分派不等于 Python 继续前设备已经完成。
+
+主机时钟仍然有用，但回答的是主机侧问题。CUDA 事件（event）则为流（stream）区间提供设备进度标记。两种时钟都无法从表达式名称推断你想测量哪些工作。本单元选择 **torch 2.11.0+cu128**，提交 `70d99e998b4955e0049d13a98d77ae1b14db1f45`，搭配 **CPython 3.12.14、原生 Linux x86_64、native 分配器**。后文会区分软件选择与实际观察到的环境。
+
+## 三种区间，三种合同
+
+| 区间 | 必要边界 | 可以怎样解释 |
+| --- | --- | --- |
+| 未同步的主机区间 | 用两次 `time.perf_counter` 读数包住 Python 操作，没有显式完成边界 | 主机经过时间，包括提交及实际发生的附带阻塞；不是 GPU 完成延迟或纯核函数时间 |
+| 完成后的墙钟区间（wall time） | 主机起点前完成所选设备的旧工作；主机终点前完成该设备上声明要测的工作 | 声明区域的完成端到端时间，包括区域内主机工作与最后等待 |
+| CUDA 事件区间 | 在一条显式流上记录启用计时的起止事件，用依赖把所测工作包在中间；读时间前结束事件已完成 | 两个标记之间的设备经过时间，不自动等于各核函数执行时间之和 |
+
+`torch.cuda.synchronize(device)` 等待的是**所选设备**上的所有流，不是所有 GPU。干净的起点能排除该设备的历史积压，却不能防止其他进程或无关流在试次中造成资源竞争。报告需要识别并控制这种干扰。
+
+事件的 `enable_timing` 默认为 `False`。两个端点都必须启用计时，并且确实被记录。`start.elapsed_time(end)` 的单位是**毫秒**。用 `end.synchronize()` 等待结束事件，只能为该事件所覆盖的工作建立主机完成点，不能把无关流纳入区间。未显式指定流时，事件记录在当前流上，当前流不一定是默认流。
+
+若工作只在 S 上执行，流内顺序使 start 在工作前、end 在工作后。若工作分成两个分支，协调流 C 记录 start；每个分支在所测工作前都要依赖这个 start；C 在记录 end 前还要汇合两个分支的完成点。这里的<strong>汇合（join）</strong>指结束依赖位于每个纳入分支的最后工作之后，而不是根据主机提交先后猜测设备顺序。无论用事件还是 `wait_stream` 表达，等待都必须落在正确的提交边界。
+
+## 先预测，再审查静态工作表
+
+先遮住最后一列，把每行归为提交观察、有效完成区间，或对整个工作负载的无效声明，并写出仍未知的内容。T0-T5 是原创工作表标签，不是测量试次。下表事件均已启用计时并被记录，end 最终也都完成；需要审查的是覆盖范围。
+
+| 情形 | 给定边界 | 判断 |
+| --- | --- | --- |
+| T0 | 主机时钟只包住入队；没有显式完成等待 | 只能作为主机观察，不能声称完成延迟 |
+| T1 | 主机起点前完成所选设备积压；提交声明工作；主机终点前完成所选设备工作 | 对声明区域有效的完成墙钟边界 |
+| T2 | S 上依次为 start、全部声明工作、end；主机等待 end | 有效的同流事件边界 |
+| T3 | C 正确建立两个分支的开始依赖，但记录 end 前没有汇合 B；随后同步设备 | 对整个工作负载无效：B 不必先于 end 完成 |
+| T4 | C 在 end 前汇合两个分支，但 B 没有 start 依赖 | 对整个工作负载无效：B 可能先于 start 开始 |
+| T5 | start 在各分支工作前到达两个分支；两个最终完成点在 end 前返回 C；主机等待 end | 有效的多流事件边界 |
+
+T3 的解答要区分两个完成点：事件在 C 中的位置，以及随后设备范围的等待。后者证明 B 最终完成，却**不会移动已经记录的结束时间戳**。T4 即使拥有完整的结束汇合，也找不回 B 在起点前执行的部分。事后的 synchronize 既不能修复缺失的开始依赖，也不能修复缺失的结束汇合。
+
+T5 有两条向外的开始依赖和两条返回的完成依赖，所有纳入工作都被排序在两个标记之间。这证明覆盖，不证明重叠、加速或具体耗时。设备调度、资源竞争，以及主机提交造成的空隙仍会影响区间。本表没有可供计算的经过时间。
+
+## 先证明正确，再解释耗时
+
+计时报告既要结果正确，也要区间成立。为将来的小型即时张量工作负载，先声明形状、步长、数据类型、设备、输入生成方式与独立参考实现（independent reference）。经检查的完成点之后，检查全部相关输出，采用有依据的绝对/相对容差，并明确拒绝非有限值。除非问题特意包含验证成本，否则比较应在计时区域外。
+
+| 缺陷 | 为什么合理的时间数值也救不了它 |
+| --- | --- |
+| 缺少生产者依赖 | 消费者可能使用尚未完成的数据；事后等待无法撤销已经发生的竞争 |
+| 端点未记录或未启用计时 | 端点不能用于经过时间测量；就绪查询成功仍不够 |
+| end 在侧流汇合前 | 已记录的时间戳漏掉了声明工作中没有确定边界的一部分 |
+| 只有一个方案在区间内读取主机标量或打印 CUDA 数据 | 隐含同步改变了测量合同 |
+| 同步时暴露错误 | 完成检查暴露了失败；应保留阶段与诊断，不能报告基准测试成功 |
+
+未同步主机值不保证小于事件值。分派、初始化、分配或附带阻塞都可能主导它。很小但有效的事件区间也可能低于有用的测量分辨率。不要要求任意最小正耗时、CPU/GPU 时间比或通用加速比；有真实测量时，应要求边界有效且观察值有限、非负。
+
+## 分开预热、计时与性能剖析
+
+在测量区域外，针对实际形状、数据类型、操作路径、分配器和库进行预热（warmup）。声明研究的是稳态还是单独的冷启动问题。准备输入，并一致地恢复可变状态。除非属于声明工作，否则把 `.item()`、用于检查的输出传输、CUDA 数据打印及其他主机读取移出区间。
+
+工作负载预热、计时运行、正确性运行和性能剖析（profiling）运行应有独立标识。剖析会扰动执行和张量生命周期，其观察不能代替无插桩计时分布。`CUDA_LAUNCH_BLOCKING=1` 会改变执行行为，属于调试配置，不是默认基准配置。记录它及其他相关设置是未设置还是具体取值。
+
+将来的报告需要完整**环境清单（Environment Manifest）**，不能只有 torch 版本：
+
+| 字段组 | 必须记录的字段 |
+| --- | --- |
+| 运行身份 | 日期、工作负载/源码修订、命令或活动身份、种子/输入构造、正确性参考及容差政策、原始记录和失败诊断 |
+| 硬件 | GPU 型号与稳定身份、计算能力（compute capability）、可见及实际使用 GPU 数量、设备映射、总量/可用显存、CPU 型号、竞争工作、时钟/功率策略及温度条件 |
+| 主机 | 原生 Linux 发行版/版本、架构、内核、glibc、OS 镜像/包来源；若使用容器，记录容器身份与 GPU 暴露方式 |
+| 解释器与构建 | 精确 CPython 版本、可执行文件/构建来源、解释器编译器及选项、安装器版本；torch 版本/提交、wheel 文件名/索引/哈希、依赖版本及产物哈希 |
+| CUDA 组件 | 已安装驱动版本、torch 构建 CUDA 系列、随包 Runtime/cuDNN/CUPTI 及其他使用组件、相关操作后实际加载库的路径/身份；系统 Toolkit 与 `nvcc`/主机编译器版本，或明确不存在/未使用 |
+| 执行政策 | 分配器后端及配置、流/设备分工与依赖图、类型/形状/步长/布局、精度开关、launch-blocking 等相关环境变量、是否包含分配/传输/初始化 |
+| 测量 | 主机时钟或事件方法及单位、起止完成范围、预热和重复次数、成组计时的组大小、原始样本及分布摘要、剖析器版本/配置或禁用、噪声/异常值政策 |
+
+没有观察的字段不能用拟议目标补齐，应标为未观察。这样的记录是设计工作表，不是完整运行报告。成组重复后再除以操作次数，得到的是该批次策略下的摊销时间，不是孤立请求延迟。
+
+## 版本与硬件范围
+
+[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)记录环境选择：torch **2.11.0+cu128**、上述精确提交、CPython **3.12.14**、Linux x86_64 wheel 标签 `cp312-cp312-manylinux_2_28_x86_64` 及选定依赖产物。区分构建 CUDA **12.8**、元包 **12.8.1**、随包 CUDA Runtime 与 CUPTI **12.8.90**、cuDNN **9.19.0.56**。包版本不等于已加载库的观察。
+
+拟议外部目标是 Ubuntu 24.04 x86_64，单 GPU 满足现代单 GPU 能力层级（Modern Single-GPU Capability Tier）：计算能力至少 8.0、显存至少 8 GB，采用低于可用显存的小输入。选择仍受维护且兼容的驱动，以 **570.124.06 或更新版本**作为 CUDA 12.8 Update 1 的保守基线；GPU 或 OS 可能要求更高版本。这不是已经建立的基准环境（Reference Environment），也不是硬件支持已测试的声明。
+
+在进程启动前选择 `PYTORCH_ALLOC_CONF=backend:native`，并用 `torch.cuda.memory.get_allocator_backend` 确认实际后端。这些即时张量活动不需要系统 Toolkit 或 `nvcc`；名为 `cuda-toolkit` 的 Python 包不能证明二者已经安装。这个独立框架目标不继承 P01 的 Python/CUDA 配置，也不自动属于课程的 C++ 工具包通道（Toolkit Lane）。书面工作表不需要 GPU，因此页面硬件门槛是 `none`。
+
+## 证据边界
+
+**待硬件验证（Pending Hardware Verification）：** 本页没有计时、GPU 输出、重叠或剖析观察。四个证据数组均为空。工作表证明的是给定顺序下的结论，不是某台机器的执行结果。源码审查与浏览器检查都不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）状态。浏览器只展示静态教学内容，不执行 CUDA。
+
+## 提取式自测
+
+1. 未同步的 `time.perf_counter` 区间能说明什么，为什么不一定比 GPU 区间短？
+2. 哪些等待能在主机墙钟区间外排除所选设备的旧工作，并在区间内包含完成？它们覆盖每个 GPU 吗？
+3. CUDA 事件计时的默认设置、单位、记录要求和主机完成要求分别是什么？
+4. 为什么每个分支既需要开始依赖，也需要结束汇合？为什么事后 synchronize 两者都修复不了？
+5. 为什么正确性、工作负载预热、计时和剖析要有独立记录及完整环境清单？
+
+## 继续练习
+
+先完成[三道 P04 练习](/frameworks/queued-work-timing/exercises/)，再打开[独立参考解答](/frameworks/queued-work-timing/solutions/)。用 [PB-R5-004](/practice/#pb-r5-004)复习测量审查。继续学习 [P05](/frameworks/streams-and-storage-lifetime/)，区分数据就绪与存储复用；[P06](/frameworks/mixed-precision-contracts/)、[P07](/frameworks/python-to-cuda-profiling/)会把本计时合同用于数值验证与性能剖析。
+
+## 来源与许可
+
+阅读精确提交的 [CUDA 语义](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst)、[Stream 与 Event 接口](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/streams.py)及[设备同步定义](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py)。[SRC-CUDA-081](/sources-and-versions/#src-cuda-081)记录计时与流语义；[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)记录环境产物与许可边界。
+
+当前 Context7 检索已与不可变的所有者源码核对，不以 `main` 片段作为版本依据。正文与 T0-T5 工作表是原创 CC BY 4.0 内容，未复制所有者实现、测试体、图或大段文档。链接的 PyTorch 源码保留 BSD-3-Clause 条款及适用通知；这不是随包 CUDA 库的统一许可。**事实核对与来源访问日期：2026-09-12。**

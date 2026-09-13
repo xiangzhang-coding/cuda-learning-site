@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-As of **2026-09-12**, the current publication extends R4 with the CUDA Python bridge. It covers O01-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, and P01-P03: 78 Learning Units, 287 Publication Pairs, 574 source routes, and 411 catalog records. Using Python does not remove the Stable Curriculum's prerequisites.
+As of **2026-09-12**, the current publication extends R4 with the CUDA Python bridge and eager PyTorch CUDA semantics. It covers O01-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, and P01-P07: 82 Learning Units, 299 Publication Pairs, 598 source routes, and 423 catalog records. Using Python does not remove the Stable Curriculum's prerequisites.
 
 **R4 remains the latest completed aggregate static review, dated 2026-09-10.** Schema 5 `src/r4-release-manifest.json` still supplies the frozen `/release.json`: 75 Learning Units, 277 Publication Pairs, 554 source routes, and 401 catalog records. `/publication.json` records the expanded current inventory, with R4 latest completed and the next R5 aggregate review pending. R1-R3 history is unchanged; R3 retains 62 units, 232 pairs, 464 routes, and 347 catalog records. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) and the [aggregate source disposition](/en/sources-and-versions/#r4-aggregate-review) retain their historical dates. Publishing the current pages does not pre-certify CI, Preview, production, or smoke acceptance, and technical sources retain their item-level dates.
 
@@ -96,13 +96,15 @@ The site has 19 formal Visual Explainers: standalone VIS01-VIS14 and [VIS18 Atte
 
 A10-A14, Q06-Q13, L01-L13, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The current catalog contains 12 Labs, 85 Practice Bank entries, 19 Visual Explainers, 200 Glossary terms, and 95 source records, for 411 catalog records. Source files form 287 Publication Pairs, or 574 source routes, including 77 Exercise sets and 77 separate reviewed-solution sets. R4's historical catalog retains 82 entries, 196 terms, 92 sources, and 401 records. The current increment adds `PB-R5-001/002/003` without changing the ten-entry R3 Nsight report-analysis subset or the eight R4 library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. Both historical subsets remain identified in the [Practice Bank](/en/practice/).
+The current catalog contains 12 Labs, 89 Practice Bank entries, 19 Visual Explainers, 204 Glossary terms, and 99 source records, for 423 catalog records. Source files form 299 Publication Pairs, or 598 source routes, including 81 Exercise sets and 81 separate reviewed-solution sets. R4's historical catalog retains 82 entries, 196 terms, 92 sources, and 401 records. The current increment adds `PB-R5-004/005/006/007` after the Python bridge's `PB-R5-001/002/003`, without changing the ten-entry R3 Nsight report-analysis subset or the eight R4 library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. Both historical subsets remain identified in the [Practice Bank](/en/practice/).
 
-Only EX02, EX10, and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 20 examples and all 12 Labs remain Pending Hardware Verification, 32 subjects in total. P01-P03 have all four evidence arrays empty; EX21 has empty compilation evidence and recorded observations, and host tests prove no CUDA compilation or execution. There are zero Runtime-Verified or Community-Observed subjects, Reference Environments, and performance observations. All six profiler plans are expected-only. Source review is not GPU evidence.
+Only EX02, EX10, and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 20 examples and all 12 Labs remain Pending Hardware Verification, 32 subjects in total. P01-P07 have all four evidence arrays empty; EX21 has empty compilation evidence and recorded observations, and host tests prove no CUDA compilation or execution. There are zero Runtime-Verified or Community-Observed subjects, Reference Environments, and performance observations. All six profiler plans are expected-only. Source review is not GPU evidence.
 
 [L12](/en/libraries/cufft-plans-layouts-startup/) has exactly `[Q05,M07]` as ordered prerequisites. [L12 Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) require `[L12]`; [separate solutions](/en/libraries/cufft-plans-layouts-startup/solutions/) require `[L12-EXERCISES]`. L12's four evidence arrays remain empty. The archived 12.9.2 cuFFT guide is the teaching baseline; the live 13.3 reference was accessed 2026-09-08 because exact 13.3.1 API and release-note archives were unavailable.
 
 [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) has exactly `[A12,A13,L01]` as ordered prerequisites. [L13 Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) require `[L13]`; [separate solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/) require `[L13-EXERCISES]`. All L01-L13 are published. L13's four evidence arrays remain empty; EX20 has no retained compilation evidence and remains Pending Hardware Verification. Its three C++17 non-executing build gates pin Toolkit/cuSPARSE pairs 11.8.0/11.7.5.86, 12.9.2/12.5.10.65, and 13.3.1/12.8.2.51. The [SRC-CUDA-075/076 review](/en/sources-and-versions/#src-cuda-075) dated 2026-09-09 records available exact cuSPARSE archives, including 13.3.1, separately from EX19's older archive-failure record. Source review and build gates are not GPU evidence.
+
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) adds [P04: Queued Work and Timing](/en/frameworks/queued-work-timing/) with `[M07,Q05]`, [P05: Streams and Storage Lifetime](/en/frameworks/streams-and-storage-lifetime/) with `[P04,M08]`, [P06: Mixed-Precision Contracts](/en/frameworks/mixed-precision-contracts/) with `[Q02,P04,L08]`, and [P07: Python-to-CUDA Profiling](/en/frameworks/python-to-cuda-profiling/) with `[P04,Q07,Q08]`. Related edges are `[P05,P06,P07]`, `[P04]`, `[P04,P07]`, and `[P05,P06]` respectively. Each publishes Exercises requiring its unit and separate solutions requiring that Exercise set. These twelve pairs add no Runnable Example or Lab. The independent [environment and sources](/en/sources-and-versions/#src-cuda-080) pin PyTorch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56 and the native allocator. Eager work requires no system Toolkit; source and package checks grant no GPU evidence. P08, EX22, LAB13 and Triton destinations remain unpublished.
 
 ## Boundaries first
 
@@ -111,6 +113,11 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
 ## Where you can go now
 
 <div className="route-grid">
+  <a className="route-card" href="/en/frameworks/queued-work-timing/">
+    <span>P04-P07 · PYTORCH CUDA</span>
+    <strong>Queued work, storage, precision, and profiling</strong>
+    <small>Begin with M07 and Q05; follow the exact prerequisites through four evidence-neutral units.</small>
+  </a>
   <a className="route-card" href="/en/start/using-the-learning-site/">
     <span>01 · START HERE</span>
     <strong>Using the Learning Site</strong>
@@ -729,17 +736,17 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, environment, architecture, kernel, memory, algorithm, library, Python bridge, toolchain, and correctness reasoning through 85 original problems.</small>
+    <small>Practice evidence, environment, architecture, kernel, memory, algorithm, library, Python bridge, PyTorch, toolchain, and correctness reasoning through 89 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
     <strong>Glossary</strong>
-    <small>Check the 200-term canonical bilingual vocabulary.</small>
+    <small>Check the 204-term canonical bilingual vocabulary.</small>
   </a>
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 95 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 99 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

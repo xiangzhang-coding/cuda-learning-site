@@ -31,10 +31,10 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current).toMatchObject({
       reviewDate: '2026-09-12',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
-      scope: { publicationPairs: 287, sourceRoutes: 574, exerciseSetPublicationPairs: 77,
-        solutionSetPublicationPairs: 77, practiceBankEntries: 85, sourceRecords: 95 },
+      scope: { publicationPairs: 299, sourceRoutes: 598, exerciseSetPublicationPairs: 81,
+        solutionSetPublicationPairs: 81, practiceBankEntries: 89, sourceRecords: 99 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21']);
     for (const field of ['labs', 'visualExplainers', 'nsightReportAnalysisPracticeEntries', 'libraryAlgorithmChoicePracticeEntries']) {
       expect(current.scope[field], field).toEqual(r4.scope[field]);
@@ -56,11 +56,11 @@ describe('issue #42 CUDA Python publication contract', () => {
         ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB'))],
       pendingHardwareVerification: [...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21',
         ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB'))],
-      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03'],
+      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07'],
     });
     expect(current.knownLimitations.join(' ')).toMatch(/EX21.*Pending Hardware Verification/);
-    expect(current.knownLimitations.join(' ')).toMatch(/P01-P03.*no Evidence Status/);
-    expect(current.scope.glossaryTerms).toBe(200);
+    expect(current.knownLimitations.join(' ')).toMatch(/P01-P07.*no Evidence Status/);
+    expect(current.scope.glossaryTerms).toBe(204);
   });
 
   it.each(units)('static: publishes $id and its original exercises and solutions as complete evidence-neutral pairs', async ({ id, slug, prerequisites }) => {
@@ -172,7 +172,7 @@ describe('issue #42 CUDA Python publication contract', () => {
 
   it('static: gives each Python Practice Bank entry and source record a published prerequisite destination', async () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-12T12:00:00Z') })).not.toThrow();
-    const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => planningId.startsWith('PB-R5-'));
+    const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R5-00[1-3]$/.test(planningId));
     expect(practice.map(({ planningId }) => planningId)).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
     for (const [index, record] of practice.entries()) {
       expect(record.prerequisites).toEqual([units[index].id]);

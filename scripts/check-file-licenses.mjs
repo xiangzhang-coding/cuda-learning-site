@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -62,6 +63,17 @@ for (const relativePath of trackedFiles) {
   }
 
   if (formatExemptions.has(relativePath)) continue;
+  if (relativePath === 'src/components/Search.astro') {
+    const license = content.match(/^MIT License\n[\s\S]*?^SOFTWARE\.\n(?=\*\/)/m)?.[0] ?? '';
+    // Git blob identity covers the complete owner LICENSE bytes, including the final newline.
+    const licenseBlob = createHash('sha1')
+      .update(`blob ${Buffer.byteLength(license)}\0`).update(license).digest('hex');
+    if (!content.includes('SPDX-License-Identifier: MIT') || licenseBlob !== '385b09dbf084027aa08be278f255975d5fd27406' ||
+        !content.includes('https://github.com/withastro/starlight/blob/656ffd54e5b27483f542c9eb8b12fd32f44372ae/packages/starlight/components/Search.astro')) {
+      errors.push(`${relativePath}: adapted Search requires its exact upstream source and complete MIT notice`);
+    }
+    continue;
+  }
   const jsonSpdx = relativePath.endsWith('.json') &&
     /"SPDX-License-Identifier"\s*:\s*"Apache-2\.0"/.test(content);
   if (!content.includes(softwareSpdx) && !jsonSpdx) {

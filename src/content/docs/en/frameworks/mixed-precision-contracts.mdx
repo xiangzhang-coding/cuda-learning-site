@@ -1,0 +1,180 @@
+---
+title: 'P06: Separate Mixed-Precision Decisions from Numerical Evidence'
+description: Audit autocast eligibility, two independent numerical references, precision controls, and effective-batch gradient scaling without inferring GPU behavior from a dtype.
+pairId: p06
+counterpart: /frameworks/mixed-precision-contracts/
+factCheckDate: '2026-09-12'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, profile, precision-axes, worksheet, autocast, scaling, capabilities, verification, guided-practice, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P06
+prerequisites: [Q02, P04, L08]
+relatedUnits: [P04, P07]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - title: 'Pinned PyTorch AMP contract'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/amp.md'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CPython 3.12.14; native Linux x86_64; static contract only'
+    accessDate: '2026-09-12'
+  - title: 'Pinned GradScaler implementation'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/grad_scaler.py'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CUDA scaling and optimizer-boundary source contract; not execution'
+    accessDate: '2026-09-12'
+  - title: 'Pinned CUDA precision controls'
+    url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst'
+    version: 'PyTorch 2.11.0+cu128; 70d99e998b4955e0049d13a98d77ae1b14db1f45'
+    platform: 'CUDA matmul and cuDNN precision policy; not selected kernel evidence'
+    accessDate: '2026-09-12'
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p06 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/mixed-precision-contracts/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-12' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,profile,precision-axes,worksheet,autocast,scaling,capabilities,verification,guided-practice,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P06 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'Q02,P04,L08' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P04,P07' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: 'PyTorch-2.11.0+cu128' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/mixed-precision-contracts/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+A half-precision result can be accurate relative to its stored inputs and inaccurate relative to the original problem. Conversely, a float32 result can contain products evaluated at reduced precision. Learn to locate the loss of information before changing a tolerance or a scaling factor. Allow 40 minutes for the reading and paper worksheet; no installation or GPU is required.
+
+**GPU-dependent dispatch, gradients, parameter updates, and performance remain Pending Hardware Verification.** The arithmetic below is an original teaching model, not PyTorch output. This page provides no executable implementation or trace.
+
+## Prerequisites
+
+The exact ordered prerequisites are `[Q02, P04, L08]`: [Q02](/en/correctness/floating-point-order-reproducibility/) supplies rounding and operation order; [P04](/en/frameworks/queued-work-timing/) supplies asynchronous timing boundaries; [L08](/en/libraries/tensor-core-precision-contracts/) separates storage and accumulator contracts. P04 and [P07](/en/frameworks/python-to-cuda-profiling/) are related; P07 is not an extra prerequisite.
+
+## Why mixed precision needs more than a cast
+
+Using narrower storage can reduce traffic, but smaller exponent ranges and fewer significand bits change which values survive. Keeping every operation narrow is therefore a different policy from selecting precision operation by operation. Automatic mixed precision (AMP) combines an operation-dispatch mechanism, autocast, with an independently usable gradient-scaling mechanism. Neither is a general accuracy theorem.
+
+Older CUDA-specific AMP interfaces appear in existing material. This unit uses the selected release's public `torch.amp.autocast` and `torch.amp.GradScaler` namespaces. The old `torch.cuda.amp` family is deprecated; its existence is not a reason to mix constructor conventions.
+
+## Bind the claim to one environment
+
+The selection is **PyTorch 2.11.0+cu128**, source commit **`70d99e998b4955e0049d13a98d77ae1b14db1f45`**, **CPython 3.12.14**, native **Linux x86_64**. [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) records the environment/artifact contract; [SRC-CUDA-082](/en/sources-and-versions/#src-cuda-082) records AMP facts. This is a selected stable build, not a claim that it is the newest release.
+
+Build CUDA family 12.8, packaged CUDA Runtime 12.8.90, CUPTI 12.8.90, and cuDNN 9.19.0.56 are distinct coordinates. A system Toolkit label does not select the libraries loaded by a Python process. Ordinary eager operations here require no custom CUDA compilation or system `nvcc`. Native Linux is the only Supported Environment; a future one-GPU target uses compute capability at least 8.0, at least 8 GB, and small problems. A compatible target is not an observed Reference Environment.
+
+## Six decisions, not one dtype
+
+| Decision | Question to record | What it cannot establish |
+| --- | --- | --- |
+| Input storage | Original values and values after narrowing | Information discarded by the cast cannot be recovered by widening |
+| Multiplication | Precision of operands actually used by the operation | FP32 tensor storage alone does not exclude TF32 multiplication |
+| Accumulation | Accumulator Type and intermediate reduction policy | Output dtype alone does not identify either |
+| Output storage | Final conversion and rounding | A narrow output can follow wider accumulation |
+| Gradient scaling | Scale during backward and when it is removed | Scaling cannot repair a quantized or overflowing forward result |
+| Acceptance | Independent references, finite checks, tolerances, parameter changes | Passing a dtype check does not establish accuracy or speed |
+
+Keep an unknown internal precision field unknown. Backend, algorithm, shape, architecture, and precision flags can affect the path; a close result or a kernel name does not measure an accumulator's bit width.
+
+## Worked worksheet: Two references locate different errors
+
+Define each row as a two-term dot product. Use exact rational arithmetic on paper. The **full-original reference** uses the original operands before narrowing; the **stored-input reference** independently widens the FP16-rounded operands and evaluates their dot product. Both references are evaluated outside autocast in any future implementation, preferably with independent host FP64 arithmetic for these binary-exact values, not a second call through the candidate backend.
+
+The stipulated model rounds inputs to FP16 with round-to-nearest, ties-to-even, multiplies and sums them exactly, then rounds the final output to FP16. This is **not a prediction of the actual GPU accumulator**.
+
+| Row | Original a | Original b | Stored FP16 a | Stored FP16 b | Full-original reference | Stored-input reference | Model output |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| S | `[1+2^-12,1]` | `[1,-1/2]` | `[1,1]` | `[1,-1/2]` | `2049/4096` | `1/2` | `1/2` |
+| R | `[1+2^-10,1]` | `[1+2^-10,-1]` | `[1+2^-10,1]` | `[1+2^-10,-1]` | `2049/1048576` | `2049/1048576` | `1/512` |
+
+For S, the original first value is one quarter of an FP16 spacing above 1, so it rounds to 1. Its original result is **0.500244140625**, while its stored-input reference and model output are **0.5**. Absolute error is **`2^-12 = 0.000244140625`** against the original, but zero against stored inputs. Wider accumulation cannot restore that missing input fraction.
+
+For R, both inputs already fit FP16. Their product is `1+2^-9+2^-20`; subtracting 1 gives **0.00195407867431640625**. This lies halfway between two FP16 output values; ties-to-even yields **0.001953125**. Error is **`2^-20 = 0.00000095367431640625`** against either reference. A different hypothetical path that rounds the product to FP16 before subtracting 1 gives the same final value. Thus this result cannot distinguish exact accumulation from that early-rounding path.
+
+For the two-row vector, maximum absolute error is **`2^-12`** against full-original values and **`2^-20`** against stored-input values. The Euclidean norm relative error against the full-original vector is **`1/2049`**. Preserve both reports: a stored-input-only check would hide row S's input loss.
+
+## Autocast eligibility is an operation contract
+
+Use `torch.amp.autocast` with `device_type` selecting CUDA and an explicit `dtype` such as `torch.float16` or `torch.bfloat16`. The public `torch.autocast` alias is also valid. The constructor's literal defaults are `dtype=None`, `enabled=True`, `cache_enabled=None`; the omitted dtype/cache inherit current state, initially FP16/enabled for CUDA. Nested state matters. [Pinned autocast source](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/autocast_mode.py#L180-L275) also makes the state **thread-local**: enabling it in a caller thread does not enable an arbitrary worker thread.
+
+| Case inside CUDA autocast | Contract at this pin |
+| --- | --- |
+| Eligible out-of-place `mm`, `matmul`, `linear` | Lower-precision dispatch policy; not a global model conversion |
+| Eligible `mse_loss` | FP32 dispatch policy |
+| Eligible `sum`, `softmax`, with no explicit dtype | Optional-dtype FP32 policy; not a rule for every reduction |
+| In-place `addmm_` | Bypasses autocast; native dtype/legality rules still apply |
+| `addmm` with `out=` | Bypasses autocast; providing an output is not an implicit cast |
+| `sum` with `dtype=torch.float64` | Explicit dtype is respected |
+| FP64 or non-floating inputs; unlisted `mean`, `std` | No blanket autocast conversion; follow the operation's native rules |
+
+An unlisted operation can still receive already-narrowed inputs from an earlier operation. Leaving or disabling autocast does not widen an existing half tensor. A sensitive FP32 subregion requires explicitly widened operands as well as the intended dispatch policy. For basic training, retain FP32 parameters, use autocast around forward/loss, and run backward outside it; backward follows the corresponding forward dtype choices. An FP32 leaf gradient does not reveal every intermediate gradient dtype.
+
+## Scaling belongs to an effective batch
+
+`torch.amp.GradScaler` uses constructor argument `device`, not autocast's `device_type`. Its defaults are `device="cuda"`, `init_scale=65536.0`, `growth_factor=2.0`, `backoff_factor=0.5`, `growth_interval=2000`, `enabled=True`. Autocast and scaling can be used separately.
+
+Scaling the loss increases small backward values before they disappear in FP16. At the optimizer boundary, `unscale_` removes that factor before inspection or clipping. `step` unscales/checks when needed and skips an ordinary optimizer's update when the recorded gradients are nonfinite; `update` then applies backoff or, after enough consecutive unskipped steps, growth. Do not introduce unchecked nonfinite gradients after explicit unscale and assume `step` checks them again.
+
+For microbatch accumulation, the [effective-batch contract](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/amp_examples.rst#L123-L137) requires gradients to remain scaled at one unchanged scale until all contributions have accumulated. Unscale once per optimizer per step, then inspect/clip, step, and update at that boundary, not after each microbatch. Loss normalization is a separate choice: an average over equal-sized microbatches needs their appropriate weighting before accumulation.
+
+There is **no scale floor of 1**. A deliberately stipulated initial scale **0.5** followed by detected nonfinite gradients and default backoff predicts **0.25**, with that optimizer's parameter update skipped. This is an overflow/backoff response, not detection of underflow. Forcing BF16-range values into FP16 can create range pressure; scaling cannot repair forward overflow or guarantee convergence. Repeated backoff need not produce useful training. Keep `get_scale()` and gradient inspection outside timing because state reads can synchronize. If CUDA is missing and the scaler disables itself, the CUDA-required check is blocked, not passed.
+
+## BF16 and TF32 require separate gates
+
+The pinned [BF16 capability check](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/cuda/__init__.py#L183-L212) defaults to `including_emulation=True`; below compute capability 8.0, an allocation-based emulation check can still succeed. For native capability use `torch.cuda.is_bf16_supported` with `including_emulation=False`, then validate the actual operation/backend. BF16 availability is not proof of native Tensor Core acceleration or speed. Its wider exponent range often reduces the need for scaling, but does not remove rounding error.
+
+TF32 is a separate FP32 arithmetic policy, not FP16 autocast. For a stricter FP32 comparison, explicitly use the new `fp32_precision` family to select `"ieee"`, recording global, backend, and operation overrides, including `torch.backends.cuda.matmul.fp32_precision` and `torch.backends.cudnn.conv.fp32_precision`. A TF32 branch permits `"tf32"`. **Do not mix this family with old `allow_tf32` settings** in one validation configuration. Matmul and cuDNN convolution have separate policies; a storage dtype of FP32 does not certify IEEE multiplication.
+
+Also record `torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction`, `torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction`, and `torch.backends.cuda.matmul.allow_fp16_accumulation`. A stricter matmul branch disallows relevant reduced-precision reductions and full FP16 accumulation, but these controls are not universal precision controls for every operation. Record relevant split-K reduction state when making detailed backend claims. No output dtype, shape-recording profiler, or single matching value proves the selected internal arithmetic.
+
+## Write acceptance before seeing a result
+
+Require finite outputs and references; report maximum absolute error and `norm(y-r)/norm(r)` separately against both references. Define zero-reference handling: relative error is 0 if both norms are zero, otherwise infinity when the reference norm is zero. Reject NaNs rather than treating them as equal. An elementwise rule is `abs(y-r) <= atol + rtol*abs(r)`; choose tolerances from scale, conditioning, reduction length, and the application's needs, not by enlarging them after failure.
+
+For this paper fixture only, `atol=2^-21` and `rtol=2^-11` accept both modeled rows against both references. Setting `rtol=0` at the same absolute tolerance rejects both rows against the original reference; S alone still passes the stored-input comparison. This illustrates two different questions, not a reusable tolerance for arbitrary training.
+
+A future training check needs fresh identical parameter and optimizer state for each precision branch, finite loss and unscaled gradients, and actual before/after parameter comparisons. A deliberately nonzero finite gradient with a representable update must change the selected parameter; a separately controlled nonfinite-gradient case injected before unscale must skip that optimizer's update and back off the scale. A finite loss alone, an unchanged parameter with zero gradient, or the return value of `step` is not sufficient evidence. Separate these checks from timing and profiling.
+
+## Guided practice: Assemble a precision audit
+
+1. Recompute S and R from original values, then from stored values. Label every rounding point and explain which reference sees it.
+2. Classify each eligibility-table row without assuming a runtime output. Add a worker-thread boundary and a disabled-autocast subregion to the written contract.
+3. Draw one effective batch containing two microbatches. Mark the unchanged scale, final unscale/check, permitted clipping, step, and update boundaries.
+4. Prepare an Environment Manifest with exact Python/build/artifact and dependency identities, OS/kernel/glibc and interpreter/compiler provenance, GPU/compute capability/memory/count, installed driver, loaded CUDA/cuDNN/CUPTI paths and versions, allocator backend, precision/determinism flags, shapes/strides/seed, gradient normalization, optimizer/scaler settings, and measurement boundaries. Record missing coordinates as unknown.
+5. Leave observed dtypes, error metrics, gradient checks, parameter changes, and timings unrecorded until a qualifying external run exists. Keep raw diagnostic material private and review a sanitized derivative before sharing.
+
+**Acceptance:** A reader can distinguish input loss, later arithmetic/output error, and invalid gradient-scale lifetime without running CUDA. No step in this paper audit upgrades runtime evidence.
+
+## Evidence boundary
+
+All four evidence arrays are empty. The worksheets, source inspection, and API policies establish no Compile-Checked or Runtime-Verified status. **Actual GPU-dependent behavior remains Pending Hardware Verification** until correctness and observation criteria are met in a declared Reference Environment with an Environment Manifest. No speedup, Tensor Core path, actual accumulator, or training convergence is asserted.
+
+## Retrieval check
+
+1. Why does row S pass a stored-input comparison while losing information from the original problem?
+2. Why can row R's same final value arise from different internal rounding paths?
+3. Which in-place, output-buffer, explicit-dtype, and thread-boundary cases prevent a blanket autocast claim?
+4. Why must two microbatches share one scale, and why can overflow backoff take that scale below 1?
+5. What separates native BF16 capability, TF32 policy, finite gradients, a parameter update, and actual arithmetic evidence?
+
+## Continue with practice
+
+Complete the [three P06 Exercises](/en/frameworks/mixed-precision-contracts/exercises/) before the [separate solutions](/en/frameworks/mixed-precision-contracts/solutions/). [PB-R5-006](/en/practice/#pb-r5-006) revisits precision acceptance. [P07](/en/frameworks/python-to-cuda-profiling/) explains what a profiler can correlate, and why that is not an accumulator inspector.
+
+## Sources and licensing
+
+Facts and source access were checked **2026-09-12**. Use [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) for environment identities and [SRC-CUDA-082](/en/sources-and-versions/#src-cuda-082) for AMP. Primary sources are the pinned [AMP contract](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/amp.md), [GradScaler source](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/amp/grad_scaler.py), and [CUDA precision notes](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/notes/cuda.rst). Current Context7 discovery was checked against these exact owner sources, not accepted from newer snippets.
+
+The prose, numbers, tables, and Exercises are original CC BY 4.0 material. No owner implementation, test body, numerical output, or figure is reproduced. PyTorch source retains its [BSD-3-Clause license](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE) and [NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE); bundled binary dependencies retain their separate terms.

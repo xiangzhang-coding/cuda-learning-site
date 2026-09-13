@@ -503,6 +503,66 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     title: { 'zh-CN': 'P03 参考解答', en: 'P03 Reviewed Solutions' },
     prerequisites: ['P03-EXERCISES'],
   },
+  P04: {
+    href: { 'zh-CN': '/frameworks/queued-work-timing/', en: '/en/frameworks/queued-work-timing/' },
+    title: { 'zh-CN': 'P04：排队工作与计时', en: 'P04: Queued Work and Timing' },
+    prerequisites: ['M07', 'Q05'],
+  },
+  'P04-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/queued-work-timing/exercises/', en: '/en/frameworks/queued-work-timing/exercises/' },
+    title: { 'zh-CN': 'P04 练习', en: 'P04 Exercises' },
+    prerequisites: ['P04'],
+  },
+  'P04-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/queued-work-timing/solutions/', en: '/en/frameworks/queued-work-timing/solutions/' },
+    title: { 'zh-CN': 'P04 参考解答', en: 'P04 Reviewed Solutions' },
+    prerequisites: ['P04-EXERCISES'],
+  },
+  P05: {
+    href: { 'zh-CN': '/frameworks/streams-and-storage-lifetime/', en: '/en/frameworks/streams-and-storage-lifetime/' },
+    title: { 'zh-CN': 'P05：流与存储生命周期', en: 'P05: Streams and Storage Lifetime' },
+    prerequisites: ['P04', 'M08'],
+  },
+  'P05-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/streams-and-storage-lifetime/exercises/', en: '/en/frameworks/streams-and-storage-lifetime/exercises/' },
+    title: { 'zh-CN': 'P05 练习', en: 'P05 Exercises' },
+    prerequisites: ['P05'],
+  },
+  'P05-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/streams-and-storage-lifetime/solutions/', en: '/en/frameworks/streams-and-storage-lifetime/solutions/' },
+    title: { 'zh-CN': 'P05 参考解答', en: 'P05 Reviewed Solutions' },
+    prerequisites: ['P05-EXERCISES'],
+  },
+  P06: {
+    href: { 'zh-CN': '/frameworks/mixed-precision-contracts/', en: '/en/frameworks/mixed-precision-contracts/' },
+    title: { 'zh-CN': 'P06：混合精度合同', en: 'P06: Mixed-Precision Contracts' },
+    prerequisites: ['Q02', 'P04', 'L08'],
+  },
+  'P06-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/mixed-precision-contracts/exercises/', en: '/en/frameworks/mixed-precision-contracts/exercises/' },
+    title: { 'zh-CN': 'P06 练习', en: 'P06 Exercises' },
+    prerequisites: ['P06'],
+  },
+  'P06-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/mixed-precision-contracts/solutions/', en: '/en/frameworks/mixed-precision-contracts/solutions/' },
+    title: { 'zh-CN': 'P06 参考解答', en: 'P06 Reviewed Solutions' },
+    prerequisites: ['P06-EXERCISES'],
+  },
+  P07: {
+    href: { 'zh-CN': '/frameworks/python-to-cuda-profiling/', en: '/en/frameworks/python-to-cuda-profiling/' },
+    title: { 'zh-CN': 'P07：从 Python 到 CUDA 的性能分析', en: 'P07: Python-to-CUDA Profiling' },
+    prerequisites: ['P04', 'Q07', 'Q08'],
+  },
+  'P07-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/python-to-cuda-profiling/exercises/', en: '/en/frameworks/python-to-cuda-profiling/exercises/' },
+    title: { 'zh-CN': 'P07 练习', en: 'P07 Exercises' },
+    prerequisites: ['P07'],
+  },
+  'P07-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/python-to-cuda-profiling/solutions/', en: '/en/frameworks/python-to-cuda-profiling/solutions/' },
+    title: { 'zh-CN': 'P07 参考解答', en: 'P07 Reviewed Solutions' },
+    prerequisites: ['P07-EXERCISES'],
+  },
   EX01: {
     href: { 'zh-CN': '/examples/environment-report/', en: '/en/examples/environment-report/' },
     title: { 'zh-CN': 'EX01：环境报告可运行示例', en: 'EX01: Environment Report Runnable Example' },

@@ -23,11 +23,15 @@ function replaceRecord(planningId: string, replacement: (record: ResourceIndexRe
 }
 
 describe('resource index catalog', () => {
-  it('publishes only the Python bridge with exact direct prerequisites and separate practice destinations', () => {
+  it('publishes the Python bridge and eager PyTorch with exact direct prerequisites and separate practice destinations', () => {
     for (const [id, slug, prerequisites] of [
       ['P01', 'python/cuda-python-bridge', ['F04', 'M07']],
       ['P02', 'python/devices-contexts-launches', ['P01', 'F07']],
       ['P03', 'python/runtime-compilation-linking', ['P02', 'M15', 'M16']],
+      ['P04', 'frameworks/queued-work-timing', ['M07', 'Q05']],
+      ['P05', 'frameworks/streams-and-storage-lifetime', ['P04', 'M08']],
+      ['P06', 'frameworks/mixed-precision-contracts', ['Q02', 'P04', 'L08']],
+      ['P07', 'frameworks/python-to-cuda-profiling', ['P04', 'Q07', 'Q08']],
       ['EX21', 'examples/cuda-python-launch', ['P02']],
     ] as const) {
       expect(PUBLISHED_DESTINATIONS[id], id).toMatchObject({
@@ -41,8 +45,8 @@ describe('resource index catalog', () => {
         });
       }
     }
-    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id))).toEqual(['P01', 'P02', 'P03']);
-    for (const id of ['P04', 'T01', 'EX22', 'LAB13']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id))).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']);
+    for (const id of ['P08', 'T01', 'EX22', 'LAB13']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
     const destinations = Object.fromEntries(Object.entries(PUBLISHED_DESTINATIONS)
       .map(([id, { indexGroup: _indexGroup, ...destination }]) => [id, destination]));
     expect(() => validateResourceCatalog([], { requiredGroups: [], destinations })).not.toThrow();
@@ -87,13 +91,13 @@ describe('resource index catalog', () => {
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(211 + currentPublication.scope.glossaryTerms);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(219 + currentPublication.scope.glossaryTerms);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 12, practice: 85, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 95 });
+    ).toEqual({ labs: 12, practice: 89, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 99 });
     for (const absentId of ['LAB13']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
@@ -796,7 +800,7 @@ describe('resource index catalog', () => {
       { asOf },
     );
 
-    expect(projected).toHaveLength(225);
+    expect(projected).toHaveLength(229);
     expect(projected.slice(-25).map(({ planningId }) => planningId)).toEqual(
       Array.from({ length: 25 }, (_, index) => `TERM-${900 + index}`),
     );

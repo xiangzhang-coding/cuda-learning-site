@@ -117,11 +117,11 @@ describe('published resource indexes', () => {
     }
   });
 
-  it('keeps all eighty-five bilingual Practice Bank entries complete and nonduplicative', async () => {
+  it('keeps all eighty-nine bilingual Practice Bank entries complete and nonduplicative', async () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(85);
+    expect(practiceIds).toHaveLength(89);
 
     const localeContracts = [
       {
@@ -176,7 +176,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(85);
+      expect(prompts.size).toBe(89);
     }
   });
 
@@ -184,8 +184,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 12, practice: 85, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 95 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(211 + currentPublication.scope.glossaryTerms);
+    expect(counts).toEqual({ labs: 12, practice: 89, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 99 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(219 + currentPublication.scope.glossaryTerms);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));

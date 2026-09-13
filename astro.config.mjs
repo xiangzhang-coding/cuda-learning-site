@@ -44,6 +44,7 @@ export default defineConfig({
       disable404Route: true,
       customCss: ['./src/styles/site.css'],
       components: {
+        Search: './src/components/Search.astro',
         PageTitle: './src/components/SearchablePageTitle.astro',
         Banner: './src/components/ThemeFallbackBanner.astro',
         ThemeProvider: './src/components/ThemeProvider.astro',
@@ -174,6 +175,16 @@ export default defineConfig({
             { slug: 'python/cuda-python-bridge' },
             { slug: 'python/devices-contexts-launches' },
             { slug: 'python/runtime-compilation-linking' },
+          ],
+        },
+        {
+          label: 'PyTorch CUDA 语义',
+          translations: { en: 'PyTorch CUDA Semantics' },
+          items: [
+            { slug: 'frameworks/queued-work-timing' },
+            { slug: 'frameworks/streams-and-storage-lifetime' },
+            { slug: 'frameworks/mixed-precision-contracts' },
+            { slug: 'frameworks/python-to-cuda-profiling' },
           ],
         },
         {

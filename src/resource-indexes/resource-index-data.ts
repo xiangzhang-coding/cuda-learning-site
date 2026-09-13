@@ -1698,6 +1698,50 @@ const practice: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-12',
     keywords: localized('NVRTC nvJitLink PTX cubin libcuda 状态元组 异常 首个失败 日志 bytearray 新产物 延迟加载', 'NVRTC nvJitLink PTX cubin libcuda status tuple exception first failure log bytearray fresh artifacts lazy loading'),
   },
+  {
+    planningId: 'PB-R5-004', group: 'practice',
+    title: localized('审查双分支请求的计时边界', 'Audit timing boundaries for a two-branch request'),
+    href: localized('/practice/#pb-r5-004', '/en/practice/#pb-r5-004'),
+    resourceType: 'evidence-review', difficulty: 'advanced',
+    prerequisites: ['P04'], relatedUnits: ['M07', 'Q05', 'P04'],
+    hardwareGate: localized('纸面审查无需 GPU；实测需原生 Linux、CC 8.0+ 且至少 8 GB 的单 GPU。', 'No GPU for the paper audit; measurement requires native Linux and one CC 8.0+ GPU with at least 8 GB.'),
+    versionGate: localized('PyTorch 2.11.0+cu128、CPython 3.12.14、native 分配器；事件必须包住双分支汇合，无系统 Toolkit 继承。', 'PyTorch 2.11.0+cu128, CPython 3.12.14, native allocator; events must enclose both branches and their join, with no system Toolkit inheritance.'),
+    reviewedOn: '2026-09-12',
+    keywords: same('PyTorch eager timing enqueue perf_counter CUDA event fan-out join warmup completion'),
+  },
+  {
+    planningId: 'PB-R5-005', group: 'practice',
+    title: localized('修复三流环形槽的复用合同', 'Repair reuse contracts for a three-stream ring slot'),
+    href: localized('/practice/#pb-r5-005', '/en/practice/#pb-r5-005'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced',
+    prerequisites: ['P05'], relatedUnits: ['M08', 'P04', 'P05'],
+    hardwareGate: localized('纸面依赖证明无需 GPU；安全压力测试需原生 Linux、CC 8.0+、至少 8 GB。', 'No GPU for dependency proofs; safe pressure testing requires native Linux, CC 8.0+, and at least 8 GB.'),
+    versionGate: localized('PyTorch 2.11.0+cu128 native 缓存分配器；存储分配原点不等于最后写入流，record_stream 不保护显式覆盖。', 'PyTorch 2.11.0+cu128 native caching allocator; allocation origin is not the last writer, and record_stream does not protect explicit overwrites.'),
+    reviewedOn: '2026-09-12',
+    keywords: same('PyTorch record_stream wait_stream storage lifetime allocation origin view ring slot mutation'),
+  },
+  {
+    planningId: 'PB-R5-006', group: 'practice',
+    title: localized('拒绝误导性的精度验收报告', 'Reject a misleading precision acceptance report'),
+    href: localized('/practice/#pb-r5-006', '/en/practice/#pb-r5-006'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced',
+    prerequisites: ['P06'], relatedUnits: ['Q02', 'L08', 'P06'],
+    hardwareGate: localized('纸面审计无需 GPU；CUDA 数值验收需原生 Linux、CC 8.0+、至少 8 GB，原生 BF16 单独检查。', 'No GPU for the paper audit; CUDA numerical acceptance requires native Linux, CC 8.0+, at least 8 GB, and a separate native BF16 check.'),
+    versionGate: localized('PyTorch 2.11.0+cu128 torch.amp；范数误差、逐项容差、任务决策与可表示参数更新独立验收。', 'PyTorch 2.11.0+cu128 torch.amp; norm error, elementwise tolerance, task decisions, and representable parameter updates need independent acceptance.'),
+    reviewedOn: '2026-09-12',
+    keywords: same('autocast GradScaler norm relative error tolerance threshold quantization FP64 parameter update rounding'),
+  },
+  {
+    planningId: 'PB-R5-007', group: 'practice',
+    title: localized('拒绝跨运行拼接的分析器关联', 'Reject profiler correlations spliced across runs'),
+    href: localized('/practice/#pb-r5-007', '/en/practice/#pb-r5-007'),
+    resourceType: 'evidence-review', difficulty: 'advanced',
+    prerequisites: ['P07'], relatedUnits: ['Q07', 'Q08', 'P07'],
+    hardwareGate: localized('纸面审查无需 GPU；采集需原生 Linux、CC 8.0+、至少 8 GB 及实际可用的 CUPTI 活动跟踪。', 'No GPU for the paper audit; capture requires native Linux, CC 8.0+, at least 8 GB, and working CUPTI activity tracing.'),
+    versionGate: localized('PyTorch 2.11.0+cu128、Kineto 固定提交、CUPTI 12.8.90；eager 公共接口，每个活动窗口分别导出。', 'PyTorch 2.11.0+cu128, pinned Kineto, CUPTI 12.8.90; public eager interfaces with one export per active window.'),
+    reviewedOn: '2026-09-12',
+    keywords: same('torch.profiler Kineto CUPTI external correlation schedule step export_chrome_trace callback fallback'),
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -2202,6 +2246,10 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-198', 'Primary Context · 主上下文', 'kernel-vocabulary', ['F07', 'P02', 'EX21'], 'core 1.2.0 默认 set_current() 持有并选择共享主上下文，返回 None；不获得独占销毁/重置权限。', 'Core 1.2.0 default set_current() retains/selects a shared primary context and returns None; it grants no exclusive destroy/reset ownership.', '2026-09-12'),
   glossaryRecord('TERM-199', 'Kernel Argument Marshalling · 核函数参数封送', 'kernel-vocabulary', ['P02', 'P03', 'EX21'], 'core 1.2.0 中普通 Python int 按指针位宽、float 按 double 封送；显式 ctypes 类型匹配核函数参数，转换前检查范围。', 'Core 1.2.0 packs raw Python int at pointer width and float as double; explicit ctypes types match kernel parameters, with range checks before conversion.', '2026-09-12'),
   glossaryRecord('TERM-200', 'Borrowed View · 借用视图', 'kernel-vocabulary', ['F04', 'P01', 'P02', 'EX21'], 'CPython 3.14.7 ctypes 数组类型的 from_address 方法不持有 core 1.2.0 Buffer；主机可访问存储必须活到视图与排队传输使用结束。', 'The from_address method of CPython 3.14.7 ctypes array types does not retain a core 1.2.0 Buffer; host-accessible storage must outlive view accesses and queued transfers.', '2026-09-12'),
+  glossaryRecord('TERM-201', 'Storage lifetime tracking · 存储生命周期跟踪', 'kernel-vocabulary', ['P04', 'P05'], 'PyTorch 2.11.0+cu128 native 分配器记录非原点流的存储使用；不建立生产者依赖或阻止显式覆盖。', 'PyTorch 2.11.0+cu128 native allocator tracks storage use on non-origin streams; this neither orders producers nor prevents explicit overwrites.', '2026-09-12'),
+  glossaryRecord('TERM-202', 'Autocast · 自动混合精度转换', 'kernel-vocabulary', ['L08', 'P06'], 'PyTorch 2.11.0+cu128 按操作选择精度；并非全局 half 转换，in-place、out= 与显式 dtype 各有边界。', 'PyTorch 2.11.0+cu128 selects precision by operation, not a global half conversion; in-place, out=, and explicit dtype have distinct boundaries.', '2026-09-12'),
+  glossaryRecord('TERM-203', 'Gradient scaling · 梯度缩放', 'kernel-vocabulary', ['Q02', 'P06'], 'torch.amp.GradScaler 缩放反向梯度并在更新前去缩放；scale 可以小于 1，不能修复前向溢出。', 'torch.amp.GradScaler scales backward gradients and unscales before updates; scale may fall below 1 and cannot repair forward overflow.', '2026-09-12'),
+  glossaryRecord('TERM-204', 'Profiler correlation · 分析器关联', 'evidence-vocabulary', ['Q07', 'Q08', 'P07'], 'PyTorch 2.11.0+cu128 与固定 Kineto/CUPTI 的 CPU、运行时启动及设备活动关系；不是名称相同或时间包含。', 'PyTorch 2.11.0+cu128 with pinned Kineto/CUPTI relates CPU, runtime launch, and device activity; this is not name matching or temporal containment.', '2026-09-12'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -3176,6 +3224,10 @@ const sources: readonly ResourceIndexRecord[] = [
     localized('普通 CPython 3.14.7；core 1.2.0、bindings 13.4.1、pathfinder 1.8.1、NumPy 2.5.3；Ubuntu 24.04 x86-64、Toolkit 13.3.1、NVRTC/nvJitLink 13.3.33、驱动目标 610.43.02；哈希/许可审查不等于安装或执行。', 'Ordinary CPython 3.14.7; core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3; Ubuntu 24.04 x86-64, Toolkit 13.3.1, NVRTC/nvJitLink 13.3.33, driver target 610.43.02; hash/license review is not installation or execution.'),
     '2026-09-12', '2026-09-12',
   ),
+  sourceRecord('SRC-CUDA-080', localized('PyTorch 环境产物、依赖与精确许可', 'PyTorch environment artifacts, dependencies, and exact licenses'), 'cuda-version-record', ['P04', 'P05', 'P06', 'P07'], localized('PyTorch 2.11.0+cu128；CPython 3.12.14；29 个发行包、34 条活动依赖边；CUDA 元包 12.8.1、runtime/CUPTI 12.8.90、cuDNN 9.19.0.56；仅元数据与源码审查。', 'PyTorch 2.11.0+cu128; CPython 3.12.14; 29 distributions and 34 active dependency edges; CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56; metadata and source review only.'), '2026-09-12', '2026-09-12'),
+  sourceRecord('SRC-CUDA-081', localized('PyTorch 计时、流与 native 分配器合同', 'PyTorch timing, streams, and native allocator contracts'), 'cuda-version-record', ['P04', 'P05'], localized('固定提交 70d99e998b4955e0049d13a98d77ae1b14db1f45；事件、wait_stream、record_stream、存储原点及 owner 测试；测试未运行。', 'Pinned commit 70d99e998b4955e0049d13a98d77ae1b14db1f45; events, wait_stream, record_stream, allocation origin, and owner tests; tests not run.'), '2026-09-12', '2026-09-12'),
+  sourceRecord('SRC-CUDA-082', localized('PyTorch AMP、数值与优化器合同', 'PyTorch AMP, numerical, and optimizer contracts'), 'cuda-version-record', ['L08', 'P06'], localized('同一 PyTorch 2.11.0 提交；autocast 注册表、GradScaler、梯度累积、GEMM 精度及测试；输出 dtype 不证明累加精度。', 'The same PyTorch 2.11.0 commit; autocast registry, GradScaler, gradient accumulation, GEMM precision, and tests; output dtype does not prove accumulation precision.'), '2026-09-12', '2026-09-12'),
+  sourceRecord('SRC-CUDA-083', localized('PyTorch Profiler、Kineto 与 CUPTI 关联', 'PyTorch Profiler, Kineto, and CUPTI correlation'), 'cuda-version-record', ['Q07', 'Q08', 'P07'], localized('PyTorch 2.11.0；Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7；CUPTI 包 12.8.90 与文档 12.8.1；无采集 trace。', 'PyTorch 2.11.0; Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7; CUPTI package 12.8.90 and documentation 12.8.1; no captured trace.'), '2026-09-12', '2026-09-12'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

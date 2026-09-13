@@ -1,6 +1,6 @@
 ---
 title: Glossary
-description: 200 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: 204 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
 factCheckDate: '2026-09-12'
@@ -28,6 +28,10 @@ structure:
   - entry-term-198
   - entry-term-199
   - entry-term-200
+  - entry-term-201
+  - entry-term-202
+  - entry-term-203
+  - entry-term-204
   - maintenance
 evidence:
   compilation: []
@@ -50,7 +54,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,entry-term-201,entry-term-202,entry-term-203,entry-term-204,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1871,8 +1875,44 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [F04](/en/foundations/host-device-lifecycle/), [P01](/en/python/cuda-python-bridge/), [P02](/en/python/devices-contexts-launches/), and [EX21](/en/examples/cuda-python-launch/).
 - **Version note:** CPython 3.14.7 ctypes array types' `from_address` method and core 1.2.0 Buffer ownership are reviewed in [SRC-CUDA-077](/en/sources-and-versions/#src-cuda-077), 2026-09-12. Only host-accessible handles become CPU views; `sync()` precedes result reads, and view use ends before Buffer close. Existing page-locked-memory and stream terms are reused, not duplicated.
 
+<span id="term-201" class="resource-target" aria-hidden="true"></span>
+
+### Storage lifetime tracking · 存储生命周期跟踪
+
+- **Definition:** Tracking outstanding uses of a backing allocation so releasing its last owner does not allow conflicting reuse. For ordinary eager CUDA tensors under PyTorch's native allocator, record_stream registers non-origin streams; views refer to the same storage, even with an offset.
+- **Avoid:** Producer synchronization; ownership transfer; a tensor copy; protection against explicit concurrent mutation; last writer becomes allocation origin.
+- **Related resources:** [P04](/en/frameworks/queued-work-timing/) and [P05](/en/frameworks/streams-and-storage-lifetime/).
+- **Version note:** PyTorch 2.11.0+cu128, native allocator, reviewed 2026-09-12 in [SRC-CUDA-081](/en/sources-and-versions/#src-cuda-081). At deallocation the allocator accounts for queued work on registered streams. Data dependencies still need waits; a manual join to the true origin before release is an alternative. No exact reuse address or cudaMallocAsync behavior is promised.
+
+<span id="term-202" class="resource-target" aria-hidden="true"></span>
+
+### Autocast · 自动混合精度转换
+
+- **Definition:** An operation-dispatch policy that selects eligible computation dtypes within a context. It does not convert every parameter or tensor to half precision. Eligibility, input precision, internal arithmetic and output rounding are different questions.
+- **Avoid:** Global model.half conversion; every reduction is FP32; output dtype proves accumulator dtype; leaving the context widens existing tensors.
+- **Related resources:** [L08](/en/libraries/tensor-core-precision-contracts/) and [P06](/en/frameworks/mixed-precision-contracts/).
+- **Version note:** PyTorch 2.11.0+cu128 public torch.amp.autocast, reviewed 2026-09-12 in [SRC-CUDA-082](/en/sources-and-versions/#src-cuda-082). In-place and out= variants do not acquire autocast dispatch; explicit dtype is respected. State is thread-local, and backward runs outside the forward autocast context.
+
+<span id="term-203" class="resource-target" aria-hidden="true"></span>
+
+### Gradient scaling · 梯度缩放
+
+- **Definition:** Multiplying a loss before backward so small intermediate gradients are more representable, then removing the scale before optimizer use. Dynamic scaling also checks nonfinite gradients and can skip an update and reduce scale. It is independent from autocast dispatch.
+- **Avoid:** Forward-overflow repair; recovering quantized-away input values; guaranteed convergence; scale cannot fall below 1; change scale during one accumulated effective batch.
+- **Related resources:** [Q02](/en/correctness/floating-point-order-reproducibility/) and [P06](/en/frameworks/mixed-precision-contracts/).
+- **Version note:** PyTorch 2.11.0+cu128 torch.amp.GradScaler("cuda"), reviewed 2026-09-12 in [SRC-CUDA-082](/en/sources-and-versions/#src-cuda-082). Unscale once per optimizer after accumulation, inspect/clip, step, then update. Overflow pressure can drive scale below 1; get_scale can synchronize. No training result is recorded.
+
+<span id="term-204" class="resource-target" aria-hidden="true"></span>
+
+### Profiler correlation · 分析器关联
+
+- **Definition:** Recorded relationships connecting frontend CPU activity to runtime launches and device work. Kineto uses CUPTI correlation and external frontend associations; a kernel need not have its parent's name or fit inside its CPU interval.
+- **Avoid:** Name matching; temporal containment; one operator means one kernel; table totals equal wall time; a CUDA time column proves kernel tracing.
+- **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), and [P07](/en/frameworks/python-to-cuda-profiling/).
+- **Version note:** PyTorch 2.11.0+cu128, Kineto commit 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7, CUPTI package 12.8.90, reviewed 2026-09-12 in [SRC-CUDA-083](/en/sources-and-versions/#src-cuda-083). Require real CPU/runtime/kernel activity and preserve each scheduled window; no trace is supplied by a definition.
+
 ## Maintenance rule
 
-The 2026-09-12 increment adds only TERM-197 through TERM-200, bringing the current total to **200**. Prior terms and their item-level dates remain unchanged. These four original definitions add Python-interface, shared-context, scalar-ABI, and borrowed-view distinctions without duplicating PTX, cubin, stream, or page-locked host memory. Both locales and catalog records share the new review date; no Evidence Status changes.
+The 2026-09-12 issue #43 increment adds TERM-201 through TERM-204, bringing the current total to **204**. Issue #42's TERM-197 through TERM-200 and all earlier item-level dates remain unchanged. Storage lifetime tracking, autocast, gradient scaling and profiler correlation add distinct contracts rather than duplicate existing stream or precision terms. Both locales and catalog records share the review date; no Evidence Status changes.
 
 TERM-001 through TERM-194 retain their item-level review dates. New TERM-195/196 and the complete 196-term Publication Pair's metadata, direct links, and static definitions were reviewed together on **2026-09-09**. Every entry includes canonical English, preferred Chinese, a definition, aliases to avoid, related resources, and a version note. Definitions and derivations are original, citing and paraphrasing public owner material without copying its prose, tables, figures, code, or results. The new terms distinguish a descriptor's borrowed representation from active preprocessing state without duplicating existing CSR, preprocessing, or external-workspace terms. All four evidence arrays remain empty; EX20 retains independent Pending Hardware Verification runtime. The [Chinese counterpart](/glossary/) is complete at the same time.

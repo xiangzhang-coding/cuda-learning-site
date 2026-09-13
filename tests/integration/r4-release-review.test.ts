@@ -92,16 +92,17 @@ describe('R4 release review', () => {
         .toBe('2026-09-12');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /287 (?:Publication Pairs|个双语发布对)/, /574 (?:source routes|条源路由)/,
-        /78 (?:Learning Units|个学习单元)/, /21 (?:Runnable Examples|个可运行示例)/,
-        /77 (?:Exercise sets|组练习)/, /77 (?:separate reviewed-solution sets|组独立参考解答)/,
-        /85 (?:Practice Bank entries|个练习题库条目)/, /200 (?:Glossary terms|个术语表词条)/,
-        /95 (?:source records|条来源记录)/, /411 (?:catalog records|条资源目录记录)/, /32 (?:subjects|个主体)/,
+        /299 (?:Publication Pairs|个双语发布对)/, /598 (?:source routes|条源路由)/,
+        /82 (?:Learning Units|个学习单元)/, /21 (?:Runnable Examples|个可运行示例)/,
+        /81 (?:Exercise sets|组练习)/, /81 (?:separate reviewed-solution sets|组独立参考解答)/,
+        /89 (?:Practice Bank entries|个练习题库条目)/, /204 (?:Glossary terms|个术语表词条)/,
+        /99 (?:source records|条来源记录)/, /423 (?:catalog records|条资源目录记录)/, /32 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
       expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
       expect(prose).not.toMatch(/R4 and (?:the )?current catalog|R4 与当前[^。\n]*均|currently has the same inventory|当前具有相同清单/);
-      for (const slug of ['python/cuda-python-bridge', 'python/devices-contexts-launches', 'python/runtime-compilation-linking', 'examples/cuda-python-launch']) {
+      for (const slug of ['python/cuda-python-bridge', 'python/devices-contexts-launches', 'python/runtime-compilation-linking', 'examples/cuda-python-launch',
+        'frameworks/queued-work-timing', 'frameworks/streams-and-storage-lifetime', 'frameworks/mixed-precision-contracts', 'frameworks/python-to-cuda-profiling']) {
         expect(raw, `${prefix}${file}`).toContain(`/${prefix}${slug}/`);
       }
       for (const edge of ['[F04,M07]', '[P01,F07]', '[P02,M15,M16]', '[P02]']) expect(raw).toContain(edge);
@@ -109,7 +110,8 @@ describe('R4 release review', () => {
       if (file === 'index.mdx') {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
-        for (const [slug, count] of [['practice', '85'], ['glossary', '200'], ['sources-and-versions', '95']]) {
+        expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
+        for (const [slug, count] of [['practice', '89'], ['glossary', '204'], ['sources-and-versions', '99']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -472,7 +474,7 @@ describe('R4 release review', () => {
         expect(document).not.toMatch(/R4 aggregate review remains pending|R4 聚合复核仍待完成/i);
       }
       const practice = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8');
-      expect(practice).toMatch(/85 (?:complete entries|个完整条目|道完整题目)/i);
+      expect(practice).toMatch(/89 (?:complete entries|个完整条目|道完整题目)/i);
       expect(practice).not.toMatch(/68 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
       for (const id of ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016']) {
@@ -613,11 +615,15 @@ describe('R4 release review', () => {
       expectExactMembers(subjectsWith('evidence-compilation', 'none'), current.evidence.noCompileCheckedClaim);
       expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), current.evidence.pendingHardwareVerification);
       expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
-      expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03']);
-      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T\d{2}|^PB-R[6-9]-|^LAB13$/.test(id))).toBe(false);
+      expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']);
+      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T\d{2}|^PB-R[6-9]-|^(?:P08|EX22|LAB13)$/.test(id))).toBe(false);
     }
-    expect(routes.some((route) => /\/(?:frameworks?|triton)(?:\/|$)/i.test(route))).toBe(false);
+    expect(routes.some((route) => /\/(?:framework|triton)(?:\/|$)/i.test(route))).toBe(false);
+    expect(routes.filter((route) => /\/frameworks(?:\/|$)/.test(route)).sort()).toEqual(
+      ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling']
+        .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}frameworks/${slug}/${suffix}`))).sort(),
+    );
     expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
     expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB13');
   }, 30_000);
