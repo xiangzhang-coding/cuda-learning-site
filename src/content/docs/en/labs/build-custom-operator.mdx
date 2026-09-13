@@ -1,0 +1,167 @@
+---
+title: 'LAB13: Build and Validate a CUDA Operator'
+description: Build EX22, verify CPU and CUDA values and gradients, and validate the same wheel in a clean environment with a complete Environment Manifest.
+pairId: lab13
+counterpart: /labs/build-custom-operator/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, build, validate, package, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB13
+prerequisites: [P08, P09]
+relatedUnits: [P10, EX22]
+exampleIds: [EX22]
+canonicalExample: EX22
+canonicalRanges:
+  - build
+  - checks
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.12.14; torch 2.11.0+cu128; Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0; one CC 8.0+ CUDA GPU with at least 8 GB and a compatible driver.'
+estimatedMinutes: 120
+difficulty: advanced
+toolkitLanes: []
+extensionProfile: ex22-torch211-cu128-cp312
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions:
+  - 'Install hash-locked Python dependencies and the original wheel into learner-owned virtual environments'
+  - 'Run GCC, NVCC and Python; access one CUDA device; inspect loaded libraries, versions and hashes'
+  - 'Create learner-owned build and evidence files; no profiler counter access is required'
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations:
+    - 'Both native paths should build into one wheel and import in a clean matching environment.'
+    - 'CPU and CUDA should pass forward, weighted-gradient, numerical-gradient, fake/meta and compiled execution checks.'
+    - 'The missing-extension negative import should fail without a JIT or source-tree fallback.'
+  recordedObservations: []
+sources:
+  - { title: 'Library integration', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'Fake/meta autograd opcheck', accessDate: '2026-09-13' }
+  - { title: 'Extension build', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py', version: 'PyTorch 2.11.0', platform: 'CUDAExtension AOT wheel', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab13 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/labs/build-custom-operator/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,build,validate,package,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB13 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P08,P09' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P10,EX22' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'build,checks' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.12.14; torch 2.11.0+cu128; Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0; one CC 8.0+ CUDA GPU with at least 8 GB and a compatible driver.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:extension-profile', content: ex22-torch211-cu128-cp312 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/labs/build-custom-operator/" lang="zh-CN">阅读中文对应页</a>
+
+## Lab contract
+
+Build one original adjacent-energy operator, register and differentiate it, test both native paths and install the same ahead-of-time wheel into a clean matching environment. Allow about 120 minutes plus environment provisioning. The website runs no CUDA. A GPU-free build/CPU check is useful progress, but completing this Lab requires the CUDA checks and complete records below. Current status is **Pending Hardware Verification**, not a prefilled success report.
+
+## Prerequisites and canonical source
+
+Exact prerequisites `[P08, P09]`: [P08](/en/frameworks/first-custom-operator/) and [P09](/en/frameworks/operator-registration/). [P10](/en/frameworks/operator-packaging/) is related deeper packaging study; all commands needed here are supplied. [EX22](/en/examples/adjacent-energy/) is the sole canonical project. [Inspect source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/da760f1727e596521f66ea46f9c73bdecf57b9a2/examples/ex22-adjacent-energy) or [download the full archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/da760f1727e596521f66ea46f9c73bdecf57b9a2.zip). Retain this source identity and use a fresh learner-owned copy.
+
+## Required environment
+
+| Coordinate | Requirement |
+| --- | --- |
+| Supported Environment | Native Ubuntu 24.04 x86-64; record actual kernel and glibc |
+| Interpreter | CPython `3.12.14`, `cp312`, learner-owned isolated venv |
+| Application | `torch 2.11.0+cu128`, commit `70d99e998b4955e0049d13a98d77ae1b14db1f45`; existing 29-distribution hash lock |
+| Packaged CUDA | Build family `12.8`, metapackage `12.8.1`, runtime/CUPTI `12.8.90`, cuDNN `9.19.0.56` |
+| Extension toolchain | Separate Toolkit `12.8.1`, NVCC `12.8.93`, GCC/G++ `13.3.0`, `c++17`, setuptools `81.0.0` |
+| Build target | `CUDA_HOME=/usr/local/cuda-12.8`, `TORCH_CUDA_ARCH_LIST=8.0+PTX` |
+| GPU | One visible CC >= 8.0 device, at least 8 GB total memory; record actual free memory |
+| Driver | Compatible with the wheel and selected device; conservative baseline `570.124.06` |
+| Permissions | Compile and execute, read identities/hashes and loaded-library mappings, write owned files; no profiler counters |
+
+This extension profile is independent from the ordinary Toolkit Lanes and EX21. The packaged runtime is not the extension compiler. Input/output payload is below 16 MB for `n<=1,000,000` in float64, but training/compiler/context storage is extra. Ensure enough free memory rather than equating payload with total allocation. A prepared configuration is not automatically a maintainer-controlled Reference Environment.
+
+## Prepare and predict
+
+Provision the declared Python, GCC and Toolkit. Create and activate a fresh virtual environment with that interpreter. From the downloaded repository root run:
+
+```sh
+python -I scripts/pytorch-environment/check.py --install
+```
+
+This installs and checks the existing exact application closure before EX22 adds its own distribution. Preserve that phase's exit code. Make a learner-owned external copy of EX22's blank `environment-manifest.json`; target requirements must not fill observation fields.
+
+Predict the literal input [1,-2,2,2.5], the weighted gradient for g=[1,2,3], the singleton output/gradient and n=258 launch shape. Answers should be [9,16,0.25], [6,-22,13,3], empty/one zero, and 257 outputs in two 256-thread blocks. These are algebraic predictions, not run output. Explain them before executing.
+
+## Build and install the canonical wheel
+
+<CanonicalCode exampleId="EX22" range="build" />
+
+Move your terminal to `examples/ex22-adjacent-energy/`, keeping the selected venv active. Run:
+
+```sh
+bash scripts/check-wheel.sh
+```
+
+The script rejects a preexisting dist, exports the selected compiler/target, builds both CPU/CUDA paths with no build isolation or dependency re-resolution, installs the single wheel, runs pip check and isolated imports, then CPU integration tests. Preserve compiler commands, diagnostics and actual exits. A build without CUDA source or a successful source-tree import does not pass. Wrong local NVCC must stop before compilation, not become a compatibility warning you ignore.
+
+## Validate values, metadata and gradients
+
+<CanonicalCode exampleId="EX22" range="checks" />
+
+After the host gate succeeds, select one suitable visible GPU and run:
+
+```sh
+python -I verify.py --device cuda
+```
+
+The verifier rejects unavailable/insufficient hardware, exercises the non-default current stream and joins completion. It checks all forward outputs and preserved inputs, nonuniform upstream gradients, float64 gradcheck and gradgradcheck, opcheck, explicit meta calls, and fullgraph dynamic forward/backward. Sizes 1, 2, 256, 257, 258 and 1003 cover empty output and block boundaries. Offset-contiguous inputs are accepted; empty, over-budget, strided, rank-two, integer and half inputs are rejected. Binary fractions justify exact forward tolerance; numerical derivative tolerances are eps=1e-6, atol=1e-5, rtol=1e-3. A mismatch, nonfinite result, launch or completion error fails the phase; preserve its first diagnostic.
+
+## Prove packaging and import behavior
+
+Hash the built wheel and installed extension with SHA-256. Create a **second** matching CPython venv, install the same application's hash-locked requirements from the repository root, and install that exact wheel with `python -m pip install --no-deps /absolute/path/to/wheel.whl`. Use your real wheel path; it is not an executable placeholder to paste unchanged. Run `python -m pip check`, then the same verification script through the second interpreter with `-I --device cpu`. The script's own path does not become a package import path in isolated mode.
+
+Record the resolved `cuda_learning_ops` and `_C` paths; they must belong to the second environment's site-packages. Start a new process for each test. In that disposable environment, temporarily remove only the installed `_C` file and require a fresh isolated public import to fail even with the source checkout still present. Restore by reinstalling the original wheel, then require import to succeed. There must be no editable install, source fallback or import-time compilation. This negative test distinguishes artifact completeness from a cached/native module already loaded in one process.
+
+## Complete the Environment Manifest
+
+| Record | Actual observations to retain |
+| --- | --- |
+| Identity | Source commit, OS/kernel/glibc, Python version/ABI, torch version/git version and build CUDA |
+| Dependencies | Installed distributions, packaged CUDA components, compiler/NVCC/CUDA_HOME, flags and target |
+| Artifact | Wheel/extension SHA-256, both environment import paths, build and install commands/exits |
+| Loaded libraries | Resolved files and hashes for libtorch, CUDA runtime and driver after the relevant operations; do not infer loaded paths from package names |
+| Device | Driver, visible count, device name, CC, total/free memory, allocator and current-stream/completion boundary |
+| Results | CPU/CUDA forward and gradient checks, opcheck, meta/fake, compiled execution, positive and negative import verdicts |
+| Measurement | No timing or profiler requested; retain no invented performance observations |
+
+Retain complete private diagnostic logs locally; review/redact sensitive paths before submitting public evidence. The verifier's bounded summary is not the full manifest, a source/date alone is not an environment, and a CPU pass leaves GPU fields unobserved. Do not overwrite earlier failed attempts with later results.
+
+## Expected observations and evidence boundary
+
+Both native paths **should** build into one importable wheel. CPU and CUDA **should** satisfy the value, derivative, metadata and compiled-execution contracts. Removing the installed extension **should** fail import. These expectations are not observations. Compilation evidence is empty; runtime is **Pending Hardware Verification**; recorded observations are empty. A CI build does not automatically become Compile-Checked, and an arbitrary successful GPU run does not automatically become Runtime-Verified without Reference Environment review.
+
+## Acceptance checkpoint
+
+Submit the source diff for your Exercise work, complete manifest, wheel identity, all stage exits and separate CPU/CUDA reports. Require every positive check above and the expected negative-import failure. Explain why opcheck is not gradcheck, why `_C` loads first and why an ordinary Toolkit Lane cannot replace the extension matrix. If no qualifying GPU is available, record the exact hardware blocker and completed host phases; the Lab remains incomplete as a runtime activity and Pending Hardware Verification publicly.
+
+## Cleanup
+
+After retaining evidence, remove only your own disposable environments, builds and copied artifacts. Do not reset PyTorch's shared CUDA context or delete system Toolkit/driver files. Preserve the original source archive and failed-attempt records for reproducibility.
+
+## Primary sources
+
+Reviewed 2026-09-13: exact [library integration](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py) and [extension builder](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py), with rights and owner-test details in [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084) and [SRC-CUDA-085](/en/sources-and-versions/#src-cuda-085). Original software is Apache-2.0; this Lab is CC BY 4.0. No owner code or output is copied.

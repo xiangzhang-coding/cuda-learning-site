@@ -1,0 +1,116 @@
+---
+title: 'P10：构建并导入算子 wheel'
+description: 分清 PyTorch CUDA 运行时与扩展编译器，用隔离的已安装导入验证提前构建的 wheel。
+pairId: p10
+counterpart: /en/frameworks/operator-packaging/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, matrix, build, import, diagnostics, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P10
+prerequisites: [P08, M18]
+relatedUnits: [P09, EX22, LAB13]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Extension builder', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py', version: 'PyTorch 2.11.0', platform: 'CUDAExtension and BuildExtension', accessDate: '2026-09-13' }
+  - { title: 'AOT owner tests', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cpp_extensions_aot.py', version: 'PyTorch 2.11.0', platform: 'Ahead-of-time extension import', accessDate: '2026-09-13' }
+  - { title: 'Toolkit component manifest', url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.8.1.json', version: 'CUDA Toolkit 12.8.1', platform: 'NVCC 12.8.93 and Runtime 12.8.90', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p10 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/operator-packaging/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,matrix,build,import,diagnostics,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P10 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P08,M18' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P09,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/operator-packaging/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+算子在开发者源码目录中能导入，换成干净机器却失败。你将辨认关键构建坐标，生成提前构建（Ahead-of-Time Build）的 wheel，并设计无法借本地源码蒙混过关的导入检查。推理部分预计 35 分钟；实际编译在[实验（Lab）LAB13](/labs/build-custom-operator/)完成。
+
+## 前置知识
+
+精确有序前置为 `[P08, M18]`：[P08](/frameworks/first-custom-operator/)提供本地算子，[M18](/toolchain/separate-compilation-device-linking/)提供编译与链接概念。[P09](/frameworks/operator-registration/)是相关框架集成内容，不是打包推理的隐藏前置。完整[可运行示例（Runnable Example）EX22](/examples/adjacent-energy/)包含两条路径。
+
+## 为什么把编译放在导入之前？
+
+即时扩展加载方便实验，但把导入与本地编译器、可写缓存、源码可用性绑定。提前构建把 C++/CUDA 编译移到构建阶段，分发可安装产物。这不同于运行时编译外围张量程序的 `torch.compile`。wheel 不会自动让 C++ 扩展跨 Python ABI、PyTorch 版本或 GPU 可移植。
+
+## 只选择一行版本矩阵
+
+| 坐标 | 选定值与责任 |
+| --- | --- |
+| 主机 / Python | 原生 Ubuntu 24.04 x86-64；CPython `3.12.14`，`cp312` |
+| PyTorch | `2.11.0+cu128`，提交 `70d99e998b4955e0049d13a98d77ae1b14db1f45` |
+| 随包 CUDA | 构建族 `12.8`；元包 `12.8.1`；运行时 `12.8.90` |
+| 独立扩展 Toolkit | `12.8.1`，NVCC `12.8.93`，`CUDA_HOME=/usr/local/cuda-12.8` |
+| 主机编译器 / 方言 | GCC/G++ `13.3.0`；`c++17` |
+| 构建后端 | `setuptools==81.0.0`；由应用哈希锁安装 |
+| 架构 | `TORCH_CUDA_ARCH_LIST=8.0+PTX`；SM80 SASS 与 compute80 PTX |
+| 运行门槛 | CC >= 8.0、至少 8 GB、一个可见 GPU；兼容驱动，保守基线 `570.124.06` |
+
+既有应用的哈希锁仍负责其 29 个发行包，其中包括 setuptools；扩展不另行解析 torch。随包运行时不能替代 nvcc 和 SDK 头文件。PyTorch 构建器会拒绝 CUDA 主版本不符，却可能只警告次版本不符；EX22 有意拒绝精确编译器坐标以外的所有组合。本站 11.8、12.9、13.3 工具包通道（Toolkit Lane）不会自动变成扩展目标。
+
+显式架构列表让无 GPU 主机也能编译，不依赖该主机可见设备推断目标。后续设备在驱动支持时可能 JIT compute80 PTX；这不是通用向前兼容或实测性能主张。没有请求受限 Python ABI 或稳定 LibTorch ABI。修改矩阵坐标后应重建并重新验证，不应给 wheel 改名就声称兼容。
+
+## 安装之前构建两条本地路径
+
+阅读 EX22 的规范 `setup.py` 与 `pyproject.toml`。`CUDAExtension` 从 CPU 注册源码及 CUDA 源码定义 `_C`。`BuildExtension` 提供 PyTorch 的头文件、库与 ABI 参数；本项目设置 `use_ninja=False`，使用普通 setuptools 编译路径。`MANIFEST.in` 包括共用合同头文件和源码。小型 CPython 模块初始化器加载分派器注册，不暴露张量绑定。
+
+先在仓库根目录使用已检查的安装器创建精确应用环境。另行准备 Toolkit/GCC。在 EX22 项目根目录执行：
+
+```sh
+bash scripts/check-wheel.sh
+```
+
+脚本固定编译器、架构变量，运行 `python -m pip wheel --no-build-isolation --no-deps . --wheel-dir dist`。关闭构建隔离是有意选择：让已验证安装的 torch 与 setuptools 参与构建，不创建第二套未固定环境。`--no-deps` 阻止依赖解析，不容许缺失依赖；后续 `pip check` 会检查缺失。使用新的项目副本以保留以前的结果。即使只能执行 CPU 主机检查，也构建 CPU、CUDA 两条实现。
+
+## 检查已安装产物，而不是源码目录
+
+脚本用 `--no-deps` 安装唯一生成的 wheel，运行 `pip check`，再启动隔离 Python 进程。`python -I` 从导入路径排除当前源码目录和 `PYTHONPATH`。规范导入必须解析到 `site-packages`，且 Python 注册之前已有 `_C`。EX22 验证脚本随后从已安装包检查 CPU 数值、梯度、meta/fake 和编译执行。
+
+还应把 wheel 安装到新的匹配应用虚拟环境，执行隔离导入，保留 wheel 哈希与解析到的扩展路径。不使用 editable 安装，也不能让原位构建满足此检查。每个进程内普通重复导入都应成功；删除 `_C` 应使导入失败，而不是隐式触发 JIT 构建。可复现导入行为指选择同一声明的产物和依赖合同，不是未经测试的编译输出逐字节相同主张。
+
+## 按阶段定位故障
+
+| 失败 | 首先检查 |
+| --- | --- |
+| 构建前 CUDA 版本不符 | 对比本地 NVCC、CUDA_HOME 与 `torch.version.cuda`；不能用驱动能力替代 |
+| 编译或链接错误 | 保留精确命令、头文件路径、ABI 参数、诊断与退出码 |
+| 导入缺少 `_C` | 检查已安装 wheel 内容和 CPython ABI；源码存在与否无关 |
+| fake 注册时算子不存在 | 恢复先 `_C` 后注册的次序，不要定义第二份模式 |
+| CPU 检查通过但 CUDA 不可用 | 分别记录主机通过与 CUDA 阻塞 |
+
+在环境清单（Environment Manifest）中保留 wheel/扩展 SHA-256、源码提交、Python ABI、编译器/NVCC、安装版本、实际加载库和各阶段结果。CPU/wheel 检查不授予 GPU 结果。EX22/LAB13 编译证据为空，运行仍为**待硬件验证（Pending Hardware Verification）**，直到另行审查的证据满足要求。
+
+## 提取式自测
+
+1. 为什么 eager torch 可以在没有扩展 Toolkit 时运行？
+2. 为什么 EX22 拒绝上游构建器只警告的不匹配？
+3. `8.0+PTX` 在扩展中放入了什么？
+4. 为什么 editable 安装会掩盖损坏的 wheel？
+5. 扩展提前构建与 `torch.compile` 有何不同？
+
+## 练习
+
+先完成[实现与调试练习（Exercise）](/frameworks/operator-packaging/exercises/)，再参考[独立解答](/frameworks/operator-packaging/solutions/)。进入 LAB13 打包检查点前，审查练习题库（Practice Bank）中的 [PB-R5-010](/practice/#pb-r5-010)。
+
+## 一手来源
+
+2026-09-13 核对：精确[扩展构建器](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py)、[AOT 测试](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cpp_extensions_aot.py)和[Toolkit 12.8.1 清单](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.8.1.json)。[SRC-CUDA-085](/sources-and-versions/#src-cuda-085)记录打包、版本和权利边界，[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)保留精确外部依赖。学习站（Learning Site）不分发上游示例或二进制。

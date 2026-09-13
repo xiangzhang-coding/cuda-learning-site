@@ -2,6 +2,11 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "examples": {
+    "EX22": {
+      "sourceCommit": "da760f1727e596521f66ea46f9c73bdecf57b9a2",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/da760f1727e596521f66ea46f9c73bdecf57b9a2/examples/ex22-adjacent-energy",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/da760f1727e596521f66ea46f9c73bdecf57b9a2.zip"
+    },
     "EX21": {
       "sourceCommit": "55486357d87671e64277dfb4c09a5eef8ed1a3cd",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/55486357d87671e64277dfb4c09a5eef8ed1a3cd/examples/ex21-cuda-python-launch",

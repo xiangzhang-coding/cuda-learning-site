@@ -2,6 +2,20 @@
 
 # Content and File Licenses
 
+## Custom operator reference-only review
+
+Reviewed 2026-09-13 for #44. Original EX22 C++/CUDA/Python, build/verification
+scripts and tests use Apache-2.0; P08-P10, LAB13, EX22 pages, Exercises,
+solutions and PB-R5-008/009/010 use CC BY 4.0. No upstream tutorial operator
+or source/test/output is copied or adapted. The exact eleven-file PyTorch
+ledger, computed SHA-256 values, root BSD-3-Clause LICENSE and NOTICE, and
+absence of intervening license files are recorded in both public
+`SRC-CUDA-084` and `SRC-CUDA-085` sections of Sources and Version Record.
+Private implementation paths are references, never imports. Existing external
+CPython/torch/setuptools dependency notices remain applicable; NVIDIA Toolkit
+12.8.1 documentation, headers and libraries retain their own EULA and notices.
+No dependency binary or SDK file is added to public source or website assets.
+
 ## Apache-2.0
 
 Original website source, configuration, styles, test tooling, and scripts are licensed under the [Apache License 2.0](LICENSE). The exact `src/components/Search.astro` adaptation is MIT, as recorded below; it is not relicensed by the root license.

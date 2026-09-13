@@ -401,6 +401,15 @@ const labs: readonly ResourceIndexRecord[] = [
     reviewedOn: '2026-09-06',
     keywords: localized('EX15 EX18 cuBLAS GEMM FP32 pedantic 独立参考 初始 C 事件计时 原始样本 维护成本', 'EX15 EX18 cuBLAS GEMM FP32 pedantic independent oracle initial C event timing raw samples maintenance cost'),
   },
+  {
+    planningId: 'LAB13', group: 'labs',
+    title: PUBLISHED_DESTINATIONS.LAB13.title, href: PUBLISHED_DESTINATIONS.LAB13.href,
+    resourceType: 'guided-lab', difficulty: 'advanced', prerequisites: ['P08', 'P09'],
+    relatedUnits: ['P10', 'EX22'],
+    hardwareGate: localized('原生 Linux；一个 CC 8.0+ GPU，至少 8 GB；构建与 CPU 检查不需要 GPU。', 'Native Linux; one CC 8.0+ GPU with at least 8 GB; build and CPU checks need no GPU.'),
+    versionGate: localized('CPython 3.12.14、torch 2.11.0+cu128、独立 Toolkit 12.8.1/NVCC 12.8.93、GCC 13.3.0；不继承普通 Toolkit Lanes。', 'CPython 3.12.14, torch 2.11.0+cu128, independent Toolkit 12.8.1/NVCC 12.8.93, GCC 13.3.0; no ordinary Toolkit Lane inheritance.'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-13',
+  },
 ];
 
 const practice: readonly ResourceIndexRecord[] = [
@@ -1741,6 +1750,33 @@ const practice: readonly ResourceIndexRecord[] = [
     versionGate: localized('PyTorch 2.11.0+cu128、Kineto 固定提交、CUPTI 12.8.90；eager 公共接口，每个活动窗口分别导出。', 'PyTorch 2.11.0+cu128, pinned Kineto, CUPTI 12.8.90; public eager interfaces with one export per active window.'),
     reviewedOn: '2026-09-12',
     keywords: same('torch.profiler Kineto CUPTI external correlation schedule step export_chrome_trace callback fallback'),
+  },
+  {
+    planningId: 'PB-R5-008', group: 'practice',
+    title: localized('审查切片是否仍满足输入合同', 'Audit sliced input contracts'),
+    href: localized('/practice/#pb-r5-008', '/en/practice/#pb-r5-008'),
+    resourceType: 'correctness-debugging', difficulty: 'intermediate',
+    prerequisites: ['P08'], relatedUnits: ['P08', 'EX22'], hardwareGate: noHardware,
+    versionGate: localized('PyTorch 2.11.0+cu128；连续偏移、步长、空输入和新输出合同。', 'PyTorch 2.11.0+cu128; contiguous offsets, strides, empty input and fresh output.'),
+    reviewedOn: '2026-09-13',
+  },
+  {
+    planningId: 'PB-R5-009', group: 'practice',
+    title: localized('区分三份算子验收报告', 'Distinguish three operator acceptance reports'),
+    href: localized('/practice/#pb-r5-009', '/en/practice/#pb-r5-009'),
+    resourceType: 'evidence-review', difficulty: 'advanced',
+    prerequisites: ['P09'], relatedUnits: ['P09', 'EX22'], hardwareGate: noHardware,
+    versionGate: localized('PyTorch 2.11.0+cu128；opcheck、gradcheck 和 fullgraph 不是同一证据。', 'PyTorch 2.11.0+cu128; opcheck, gradcheck and fullgraph supply distinct checks.'),
+    reviewedOn: '2026-09-13',
+  },
+  {
+    planningId: 'PB-R5-010', group: 'practice',
+    title: localized('拒绝跨版本重用扩展 wheel', 'Reject cross-version extension wheel reuse'),
+    href: localized('/practice/#pb-r5-010', '/en/practice/#pb-r5-010'),
+    resourceType: 'evidence-review', difficulty: 'advanced',
+    prerequisites: ['P10'], relatedUnits: ['P10', 'EX22', 'LAB13'], hardwareGate: noHardware,
+    versionGate: localized('PyTorch 2.11.0+cu128；CPython 3.12.14、Toolkit 12.8.1 与原生 ABI 矩阵。', 'PyTorch 2.11.0+cu128; CPython 3.12.14, Toolkit 12.8.1 and native ABI matrix.'),
+    reviewedOn: '2026-09-13',
   },
 ];
 
@@ -3228,6 +3264,8 @@ const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-081', localized('PyTorch 计时、流与 native 分配器合同', 'PyTorch timing, streams, and native allocator contracts'), 'cuda-version-record', ['P04', 'P05'], localized('固定提交 70d99e998b4955e0049d13a98d77ae1b14db1f45；事件、wait_stream、record_stream、存储原点及 owner 测试；测试未运行。', 'Pinned commit 70d99e998b4955e0049d13a98d77ae1b14db1f45; events, wait_stream, record_stream, allocation origin, and owner tests; tests not run.'), '2026-09-12', '2026-09-12'),
   sourceRecord('SRC-CUDA-082', localized('PyTorch AMP、数值与优化器合同', 'PyTorch AMP, numerical, and optimizer contracts'), 'cuda-version-record', ['L08', 'P06'], localized('同一 PyTorch 2.11.0 提交；autocast 注册表、GradScaler、梯度累积、GEMM 精度及测试；输出 dtype 不证明累加精度。', 'The same PyTorch 2.11.0 commit; autocast registry, GradScaler, gradient accumulation, GEMM precision, and tests; output dtype does not prove accumulation precision.'), '2026-09-12', '2026-09-12'),
   sourceRecord('SRC-CUDA-083', localized('PyTorch Profiler、Kineto 与 CUPTI 关联', 'PyTorch Profiler, Kineto, and CUPTI correlation'), 'cuda-version-record', ['Q07', 'Q08', 'P07'], localized('PyTorch 2.11.0；Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7；CUPTI 包 12.8.90 与文档 12.8.1；无采集 trace。', 'PyTorch 2.11.0; Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7; CUPTI package 12.8.90 and documentation 12.8.1; no captured trace.'), '2026-09-12', '2026-09-12'),
+  sourceRecord('SRC-CUDA-084', localized('自定义算子注册、元数据与梯度', 'Custom operator registration, metadata and gradients'), 'cuda-version-record', ['P08', 'P09', 'EX22', 'LAB13'], localized('PyTorch 2.11.0 固定源码、头文件、fake/autograd 与上游测试；仅参考，不复制。', 'Pinned PyTorch 2.11.0 source, headers, fake/autograd and owner tests; reference only, no copying.'), '2026-09-13', '2026-09-13'),
+  sourceRecord('SRC-CUDA-085', localized('扩展工具链、AOT wheel 与导入合同', 'Extension toolchain, AOT wheel and import contracts'), 'cuda-version-record', ['P08', 'P10', 'EX22', 'LAB13'], localized('CPython 3.12.14、torch 2.11.0+cu128、Toolkit 12.8.1、NVCC 12.8.93、GCC 13.3.0；精确源码与组件清单。', 'CPython 3.12.14, torch 2.11.0+cu128, Toolkit 12.8.1, NVCC 12.8.93, GCC 13.3.0; exact source and component manifests.'), '2026-09-13', '2026-09-13'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

@@ -3,7 +3,7 @@ title: 来源与版本记录
 description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P07、LAB01-LAB12、EX01-EX21、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -31,6 +31,8 @@ structure:
   - entry-src-cuda-081
   - entry-src-cuda-082
   - entry-src-cuda-083
+  - entry-src-cuda-084
+  - entry-src-cuda-085
   - content-sources
   - review-record
 evidence:
@@ -46,7 +48,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -54,7 +56,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -711,6 +713,47 @@ EX21 原创的 `cleanup_step` 是项目代码，不是新 core API。每个显�
 [CUPTI 使用文档](https://docs.nvidia.com/cupti/12.8.1/main/main.html)与[版权/许可](https://docs.nvidia.com/cupti/12.8.1/copyright-and-licenses/index.html)按 NVIDIA/第三方条款说明兼容性、初始化、外部关联和回调订阅者限制，不受 Kineto BSD 许可覆盖。请求 CPU/CUDA 活动后，还须要求实际运行时启动与内核事件；CUDA 时间表格可能只是回退。每个活动窗口在回调内保存。step 是逻辑迭代转换，不是 CUDA 屏障；key_averages 不是时间线。形状采集可能持有张量，不能认证未受扰动的分配或计时。其他 CUPTI 工具分开运行，缺失活动通过诊断处理，不升级权限，也不固定每个事件的 external ID 或内核名称。
 
 Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 main 片段，它们不是所选构建的权威。排除较新的 CUPTI monitor API、实验性内部接口、torch.compile 和 CUDA Graph capture。不复制上游源码、测试、正文或 trace，没有采集内核轨迹，也不授予 GPU 证据状态（Evidence Status）。
+
+<span id="src-cuda-084" class="resource-target"></span>
+
+## SRC-CUDA-084：自定义算子注册、元数据与梯度
+
+**相关 ID：** P08、P09、EX22、LAB13。**访问/复核：** 2026-09-13。PyTorch 2.11.0 固定到 `70d99e998b4955e0049d13a98d77ae1b14db1f45`。已查询 Context7 `/pytorch/pytorch/v2.11.0` 的分派器注册、fake/meta、自动求导、opcheck 和 fullgraph 编译。返回的旧注册方式和 main 片段仅用于发现。以下精确上游文件约束实现；上游测试已阅读，不当作本地执行证据。
+
+| 仅作参考的精确文件 | SHA-256 |
+| --- | --- |
+| [torch/library.h](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.h) | `82e725fa663c35d7c3b76615bf9eb714adc5236173e96fe31b804391a627d6e2` |
+| [torch/library.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py) | `bd76a792649fc14a86f32f73d5464d42f07ecb71da41fd882d8a2736d72cd004` |
+| [library 文档](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/library.md) | `667549ed8d525cfd8561e5f828c9a70d106c05c666379e40566443cf020e884f` |
+| [自定义算子测试](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_custom_ops.py) | `e90d9710725099c64e5dc2741a17d545d3c7c512f606c3c55dd2b0e71e7a520a` |
+| [autograd 实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_library/autograd.py) | `088f2c48025ebbbbac01f02352d5feb1470e963759d9aafe98d7fd961cbed8f1` |
+| [fake 实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/_library/fake_impl.py) | `e0ffa886552704864680ff0472f542862d34962ef481d4c779022496b354db55` |
+| [CUDAGuard](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAGuard.h) | `a97608286b8c749e61410660bbaa2506121ba1224167e83f00b885c29fafe31f` |
+| [CUDAStream](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAStream.h) | `2d5dda3f4f0e439a74343b06bb48e312caeff8f4e6c0ffffe84925c46ff9ecde` |
+
+头文件定义一个模式和独立后端注册。library API/源码区分 fake/meta 元数据、setup_context/backward、集成检查与数值梯度。设备头文件建立作用域设备选择和按设备区分的当前流。私有实现文件是参考，不是项目导入。
+
+完整上游树中，这些路径没有中间 LICENSE/NOTICE。它们保留根 [LICENSE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE)，BSD-3-Clause，SHA-256 `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43`，以及 [NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE)，SHA-256 `c2cc7bf0caec7652c2b460a8a470bea1677f241e4ab8e431df34cf17f5a9fec0`。引用保留权利人与贡献者版权、分发条件、免责声明；独立 vendor 树不因此重新许可。
+
+[P08](/frameworks/first-custom-operator/)、[P09](/frameworks/operator-registration/)使用原创解释与原创相邻差分能量算子，没有复制教程算子、上游源码、测试、输出。EX22 软件为 Apache-2.0，双语发布对（Publication Pair）及原创练习为 CC BY 4.0。文件审查不授予编译、导数或 GPU 结果。
+
+<span id="src-cuda-085" class="resource-target"></span>
+
+## SRC-CUDA-085：扩展工具链、AOT wheel 与导入合同
+
+**相关 ID：** P08、P10、EX22、LAB13。**访问/复核：** 2026-09-13。第二次 Context7 `/pytorch/pytorch/v2.11.0` 查询覆盖 CUDAExtension、BuildExtension、CUDA_HOME、架构选择和 AOT 打包。返回的 main GPU 片段不是选定版本权威。[P10](/frameworks/operator-packaging/)、[LAB13](/labs/build-custom-operator/)使用原创 [EX22](/examples/adjacent-energy/)及既有 [SRC-CUDA-080](#src-cuda-080) 应用锁。
+
+| 精确参考 | 身份与用途 |
+| --- | --- |
+| [cpp_extension.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py) | `1517eb2ac276065210d7c861becc5bf3a5404796da16d35af9b9466667fef904`；构建 API、C++17、架构/ABI 参数、CUDA 主版本错误/次版本警告 |
+| [扩展文档](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/cpp_extension.rst) | `3c05ced9667735a4b3a591e8f57e9907f80d4bdbb1c028c2802a825003bc1081`；API 入口 |
+| [AOT 测试](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cpp_extensions_aot.py) | `4e411e9b00e644a5e94fdf5aff650dfb286f594568920f0376350c369bd17aca`；扩展导入与 ABI 后缀产物 |
+| [12.8.1 组件清单](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.8.1.json) | Toolkit `12.8.1`、NVCC `12.8.93`、runtime `12.8.90` |
+| [12.8.1 Linux 指南](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-installation-guide-linux/index.html) | 主机/编译器政策；Ubuntu 资格行不同于项目 GCC `13.3.0` 目标 |
+
+三个 PyTorch 文件使用上述精确根 BSD-3-Clause/NOTICE 许可继承。NVIDIA Toolkit 二进制、头文件、文档保留 NVIDIA 版权及 [12.8.1 EULA](https://docs.nvidia.com/cuda/archive/12.8.1/eula/index.html)。项目/包装层许可不重新许可它们。CPython 和随包 torch 依赖保留 SRC-CUDA-080 的精确二进制通知记录。setuptools 81.0.0 已在哈希锁中；不替换后端、不增加外部 Python 发行包。
+
+选定行：原生 Ubuntu 24.04 x86-64、CPython `3.12.14`、torch `2.11.0+cu128`、随包 runtime/CUPTI `12.8.90`、独立 Toolkit `12.8.1`、NVCC `12.8.93`、GCC `13.3.0`、`c++17`、`8.0+PTX`。官方 amd64 devel 容器身份为 `sha256:4b9ed5fa8361736996499f64ecebf25d4ec37ff56e4d11323ccde10aa36e0c43`，解析身份不是构建结果。构建拒绝不匹配，使用已安装哈希锁 torch/setuptools，不隔离重解析。不声称 abi3 或稳定 LibTorch ABI。新隔离导入检查 wheel；CUDA 模式没有通过式硬件跳过。EX22/LAB13 编译、已记录观察为空，运行仍为待硬件验证（Pending Hardware Verification）。
 
 ## 内容与素材来源
 

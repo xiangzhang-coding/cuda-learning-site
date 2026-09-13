@@ -1,0 +1,116 @@
+---
+title: 'P10: Build and Import an Operator Wheel'
+description: Separate the PyTorch CUDA runtime from the extension compiler and verify an ahead-of-time wheel through isolated installed imports.
+pairId: p10
+counterpart: /frameworks/operator-packaging/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, matrix, build, import, diagnostics, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P10
+prerequisites: [P08, M18]
+relatedUnits: [P09, EX22, LAB13]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Extension builder', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py', version: 'PyTorch 2.11.0', platform: 'CUDAExtension and BuildExtension', accessDate: '2026-09-13' }
+  - { title: 'AOT owner tests', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cpp_extensions_aot.py', version: 'PyTorch 2.11.0', platform: 'Ahead-of-time extension import', accessDate: '2026-09-13' }
+  - { title: 'Toolkit component manifest', url: 'https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.8.1.json', version: 'CUDA Toolkit 12.8.1', platform: 'NVCC 12.8.93 and Runtime 12.8.90', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p10 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/operator-packaging/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,matrix,build,import,diagnostics,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P10 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P08,M18' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P09,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/operator-packaging/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning outcome
+
+An operator imports in its developer's checkout but fails on a clean machine. You will identify which build coordinates matter, produce one ahead-of-time wheel and design an import test that cannot succeed by finding local source. Budget 35 minutes for the reasoning; actual compilation is a separate [LAB13](/en/labs/build-custom-operator/) activity.
+
+## Prerequisites
+
+The exact ordered prerequisites are `[P08, M18]`: [P08](/en/frameworks/first-custom-operator/) supplies the native operator and [M18](/en/toolchain/separate-compilation-device-linking/) supplies compilation/linking concepts. [P09](/en/frameworks/operator-registration/) is related framework integration, not a hidden prerequisite for packaging reasoning. The complete [EX22](/en/examples/adjacent-energy/) includes both paths.
+
+## Why move compilation before import?
+
+Just-in-time extension loading is convenient during experiments, but it couples import to a local compiler, writable cache and source availability. Ahead-of-time extension builds move C++/CUDA compilation into a build step and distribute an installable artifact. This differs from `torch.compile`, which compiles a surrounding tensor program at runtime. A wheel does not automatically make a C++ extension portable across Python ABIs, PyTorch releases or GPUs.
+
+## One selected matrix row
+
+| Coordinate | Selected value and responsibility |
+| --- | --- |
+| Host / Python | Native Ubuntu 24.04 x86-64; CPython `3.12.14`, `cp312` |
+| PyTorch | `2.11.0+cu128`, commit `70d99e998b4955e0049d13a98d77ae1b14db1f45` |
+| Packaged CUDA | Build family `12.8`; metapackage `12.8.1`; runtime `12.8.90` |
+| Separate extension Toolkit | `12.8.1`, NVCC `12.8.93`, `CUDA_HOME=/usr/local/cuda-12.8` |
+| Host compiler / dialect | GCC/G++ `13.3.0`; `c++17` |
+| Build backend | `setuptools==81.0.0`; installed through the application hash lock |
+| Architecture | `TORCH_CUDA_ARCH_LIST=8.0+PTX`; SM80 SASS and compute80 PTX |
+| Runtime gate | CC >= 8.0, at least 8 GB, one visible GPU; compatible driver, conservative baseline `570.124.06` |
+
+The existing application's hash lock stays authoritative for its 29 distributions. It includes setuptools; the extension adds no alternate torch resolution. The packaged runtime does not replace nvcc or SDK headers. PyTorch's builder rejects a CUDA major mismatch but may only warn on a minor mismatch; EX22 deliberately rejects every row except the exact selected compiler coordinate. The site's 11.8, 12.9 and 13.3 Toolkit Lanes do not become extension targets.
+
+The explicit architecture list permits GPU-free compilation without deriving targets from a build host's visible devices. Later devices may JIT compute80 PTX if their driver supports it; this is not a universal forward-compatibility or measured-performance claim. No limited Python ABI or stable LibTorch ABI is requested. Change a matrix coordinate and rebuild/revalidate rather than rename a wheel.
+
+## Build both native paths before installation
+
+Read EX22's canonical `setup.py` and `pyproject.toml`. `CUDAExtension` declares `_C` from the CPU registration source and CUDA source. `BuildExtension` supplies PyTorch include/library/ABI flags; this project uses the ordinary setuptools compiler path with `use_ninja=False`. `MANIFEST.in` includes the shared contract header and sources. A small CPython module initializer loads dispatcher registrations without exposing tensor bindings.
+
+First create the exact application environment from the repository root with its checked installer. Provision Toolkit/GCC separately. In the EX22 project root, use:
+
+```sh
+bash scripts/check-wheel.sh
+```
+
+The script fixes the compiler and architecture variables and runs `python -m pip wheel --no-build-isolation --no-deps . --wheel-dir dist`. Disabling isolation is deliberate: the prevalidated installed torch and setuptools supply the build, rather than a second unpinned environment. `--no-deps` prevents dependency resolution; it does not excuse missing dependencies, which the subsequent `pip check` detects. A fresh project copy is required to preserve earlier results. Both CPU and CUDA implementations are built even when only the CPU host gate can execute.
+
+## Test the installed artifact, not a checkout
+
+The script installs the one produced wheel with `--no-deps`, runs `pip check`, and starts isolated Python processes. `python -I` excludes the current source path and `PYTHONPATH` from imports. The canonical import must resolve inside `site-packages`, with `_C` present before Python registration. EX22's verification script then runs CPU values, gradients, meta/fake and compiled execution from that installed package.
+
+Also transfer the wheel into a fresh matching application venv, run the isolated import, and retain its wheel hash and resolved extension path. Do not install it editable or let an in-place build satisfy this test. Ordinary repeated imports should work in each process; deleting `_C` must make import fail rather than trigger a hidden JIT build. Reproducible import behavior means the same declared artifact/dependency contract is selected; it is not an untested claim of byte-identical compiler output.
+
+## Diagnose by stage
+
+| Failure | Investigate first |
+| --- | --- |
+| Wrong CUDA version before build | Compare local NVCC, CUDA_HOME and `torch.version.cuda`; do not substitute driver capability |
+| Compiler/linker error | Preserve exact command, include paths, ABI flags, diagnostics and exit code |
+| Missing `_C` at import | Inspect installed wheel contents and CPython ABI; source presence is irrelevant |
+| Operator missing during fake registration | Restore `_C`-before-registration order; do not define a second schema |
+| CPU checks pass, CUDA unavailable | Record the host pass and CUDA blocker separately |
+
+Keep wheel/extension SHA-256, source commit, Python ABI, compiler/NVCC, installed versions, actual loaded libraries and all stage results in an Environment Manifest. CPU/wheel gates grant no GPU result. EX22/LAB13 keep compilation evidence empty and runtime **Pending Hardware Verification** until separately reviewed evidence qualifies.
+
+## Retrieval check
+
+1. Why can eager torch run without the extension Toolkit?
+2. Why does EX22 reject a mismatch that the upstream builder only warns about?
+3. What does `8.0+PTX` place in the extension?
+4. Why can an editable install hide a broken wheel?
+5. How do ahead-of-time extension builds differ from `torch.compile`?
+
+## Practice
+
+Complete the [implementation and debugging Exercises](/en/frameworks/operator-packaging/exercises/) and consult the [separate solutions](/en/frameworks/operator-packaging/solutions/) afterward. Audit [PB-R5-010](/en/practice/#pb-r5-010) before the packaging checkpoint in LAB13.
+
+## Primary sources
+
+Reviewed 2026-09-13: exact [extension builder](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py), [AOT tests](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_cpp_extensions_aot.py), and [Toolkit 12.8.1 manifest](https://developer.download.nvidia.com/compute/cuda/redist/redistrib_12.8.1.json). [SRC-CUDA-085](/en/sources-and-versions/#src-cuda-085) records packaging/version rights; [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) retains exact external dependencies. No upstream example or binary is redistributed by this Learning Site.

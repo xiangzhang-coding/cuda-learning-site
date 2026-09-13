@@ -1,0 +1,108 @@
+---
+title: 'P09：注册元数据与梯度'
+description: 用彼此独立的集成检查和数学检查，把本地算子接入分派器、fake/meta、自动求导与 torch.compile。
+pairId: p09
+counterpart: /en/frameworks/operator-registration/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, registration, metadata, gradients, verification, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P09
+prerequisites: [P08, Q01]
+relatedUnits: [P10, EX22, LAB13]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Library API and implementation', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'register_fake register_autograd opcheck', accessDate: '2026-09-13' }
+  - { title: 'Custom operator owner tests', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_custom_ops.py', version: 'PyTorch 2.11.0', platform: 'Registration and mathematical checks are distinct', accessDate: '2026-09-13' }
+  - { title: 'Library documentation', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/library.md', version: 'PyTorch 2.11.0', platform: 'Framework composition', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p09 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/operator-registration/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,registration,metadata,gradients,verification,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P09 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P08,Q01' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P10,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/operator-registration/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+本地前向结果正确，训练却失败，编译器也无法推断结果形状。你将分开定位这些失败，推导向量—雅可比积（Vector-Jacobian Product），并为每项主张选择对应测试。[EX22](/examples/adjacent-energy/)提供全部规范代码；本学习单元（Learning Unit）预计需要 40 分钟。
+
+## 前置知识
+
+精确前置 `[P08, Q01]` 为 [P08](/frameworks/first-custom-operator/)和 [Q01](/correctness/cpu-references-tolerances-invariants/)。先掌握相邻能量的输入合同和独立参考。[P10](/frameworks/operator-packaging/)是相关打包内容，[LAB13](/labs/build-custom-operator/)将这些合同串成实践。
+
+## 从 eager 执行到框架组合
+
+eager 调用能够读取真实数据；图编译器（Graph Compiler）需要在数据存在之前推理形状和设备，自动微分需要传播任意上游导数。这解释了为什么裸绑定和前向核函数不够。选定接口属于 PyTorch `2.11.0+cu128`，不承诺所有后续版本或稳定 C++ ABI 都适用。
+
+## 模式、后端与导入次序
+
+`TORCH_LIBRARY(cuda_learning, m)` 只定义一次模式（Schema）`adjacent_energy(Tensor x) -> Tensor`。没有修改或别名标注是一项承诺：实现分配新结果、从不修改 x。不同的 `TORCH_LIBRARY_IMPL` 块把 CPU、CUDA 实现关联到同一名称。不要再用 Python `custom_op` 重复定义它。
+
+公开导入为 `from cuda_learning_ops import adjacent_energy`。包先导入 torch，再导入 `_C`，最后执行 Python 注册。加载 `_C` 时先建立模式和后端注册，`register_fake` 与 `register_autograd` 随后才能查找。没有先导入包就调用 `torch.ops.cuda_learning.adjacent_energy.default`，不会自动加载本项目。重新加载注册文件不是幂等机制；普通 Python 导入缓存负责重复公开导入。
+
+## fake 与 meta 必须描述真实输出
+
+`torch.library.register_fake` 提供同时服务 FakeTensor 与 meta 张量的无存储实现。它检查维数、dtype、布局、连续性、设备族和大小，随后返回 `x.new_empty((x.shape[0]-1,))`。不读取张量值，不调用 `.item()` 或数据指针，也不启动 CUDA 核函数。`torch._check` 表达形状约束，不把符号长度转成 Python 整数。
+
+返回 `empty_like(x)` 是错的：即使 dtype 和设备正确，长度也是 n 而非 n-1。返回 x 的切片长度正确，却违反新输出的别名合同。返回新连续张量还保证偏移输入的输出步长正确。显式 meta 调用检查无存储路径，opcheck 覆盖 FakeTensor 一致性，动态编译检验带约束的符号大小；三者用途不同。
+
+## 推导反向传播，包括端点
+
+令 `d[i]=x[i+1]-x[i]`，`g[i]` 为 y 的上游导数，设 `q[i]=2*d[i]*g[i]`。内部输入属于两条边，因此收到符号相反的两项贡献。
+
+| 输入坐标 | 梯度 |
+| --- | --- |
+| 首项，n > 1 | `-q[0]` |
+| 内部 | `q[j-1]-q[j]` |
+| 末项，n > 1 | `q[n-2]` |
+| 单元素 | 一个零，因为不存在相邻边 |
+
+给定 `x=[1,-2,2,2.5]` 与 `g=[1,2,3]`，得到 `q=[-6,16,3]`、`dx=[6,-22,13,3]`。梯度和为零：整体平移输入不改变差分。单靠这个不变量仍不能证明每个分量正确。
+
+EX22 的 `setup_context(ctx, inputs, output)` 用 `save_for_backward` 保存 x。反向函数使用普通可微 PyTorch 操作：q 左侧补零，再减去右侧补零的 q。q 为空时，两者都是长度一的零张量。一个输入对应一个梯度返回；这种写法还允许 `gradgradcheck` 检查二阶导数。不导入私有自动求导实现，也不必手写 CUDA 反向核函数。
+
+## 各检查证明什么？
+
+| 检查 | 目标与边界 |
+| --- | --- |
+| 全量 CPU/CUDA 参考比较 | 所选数据集的前向数值；不证明梯度注册 |
+| `torch.library.opcheck` | 模式、自动求导注册、fake 与 AOT 分派集成；不证明数值导数 |
+| `torch.autograd.gradcheck` | 使用明确 eps 和容差的 float64 有限差分导数比较 |
+| `torch.autograd.gradgradcheck` | 所给案例的二阶导数行为 |
+| `torch.compile(..., fullgraph=True, dynamic=True)` | 跨长度的编译前向和反向；不能静默断图，但不承诺核函数融合 |
+
+使用非均匀 g 暴露求和损失可能掩盖的端点和符号错误。包括 n=1、普通长度和块尾情况。非法输入在本地与 fake 路径的检查应一致。自定义调用仍是编译器融合无法看穿的边界。源码审查、主机集成检查、浏览器渲染都不是 CUDA 观察：EX22/LAB13 仍为**待硬件验证（Pending Hardware Verification）**，编译证据为空。
+
+## 提取式自测
+
+1. 为什么 fake 注册前必须加载 `_C`？
+2. 用输入切片作为 fake 输出满足或违反了哪些合同？
+3. 为什么内部输入收到两项梯度贡献？
+4. 为什么 opcheck 通过不代表导数公式已证明？
+5. fullgraph 编译承诺什么，又不承诺什么？
+
+## 练习
+
+完成[实现与调试练习（Exercise）](/frameworks/operator-registration/exercises/)，再查看[独立解答](/frameworks/operator-registration/solutions/)。练习题库（Practice Bank）中的 [PB-R5-009](/practice/#pb-r5-009)要求评判相互竞争的验收报告，而不是重复推导。通过[实验（Lab）LAB13](/labs/build-custom-operator/)运行已安装项目。
+
+## 一手来源
+
+2026-09-13 核对：[library API](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py)、[上游测试](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_custom_ops.py)和[文档](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/library.md)。[SRC-CUDA-084](/sources-and-versions/#src-cuda-084)记录精确文件身份及仅作参考的权利边界。上游测试已阅读，不声称已在本地执行。

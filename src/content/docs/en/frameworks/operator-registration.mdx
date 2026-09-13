@@ -1,0 +1,108 @@
+---
+title: 'P09: Register Metadata and Gradients'
+description: Connect a native operator to the dispatcher, fake/meta execution, autograd and torch.compile with independent integration and mathematical checks.
+pairId: p09
+counterpart: /frameworks/operator-registration/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, registration, metadata, gradients, verification, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P09
+prerequisites: [P08, Q01]
+relatedUnits: [P10, EX22, LAB13]
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Library API and implementation', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'register_fake register_autograd opcheck', accessDate: '2026-09-13' }
+  - { title: 'Custom operator owner tests', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_custom_ops.py', version: 'PyTorch 2.11.0', platform: 'Registration and mathematical checks are distinct', accessDate: '2026-09-13' }
+  - { title: 'Library documentation', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/library.md', version: 'PyTorch 2.11.0', platform: 'Framework composition', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p09 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/operator-registration/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,registration,metadata,gradients,verification,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P09 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P08,Q01' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P10,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/operator-registration/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning outcome
+
+A native forward result is correct, but training fails and compilation cannot infer the result shape. You will separate those failures, derive the vector-Jacobian product and map each claim to its own test. [EX22](/en/examples/adjacent-energy/) provides all canonical code; plan 40 minutes for this unit.
+
+## Prerequisites
+
+Exact prerequisites `[P08, Q01]` are [P08](/en/frameworks/first-custom-operator/) and [Q01](/en/correctness/cpu-references-tolerances-invariants/). Know the adjacent-energy input contract and independent references first. [P10](/en/frameworks/operator-packaging/) is related packaging work, while [LAB13](/en/labs/build-custom-operator/) joins these contracts in practice.
+
+## From eager execution to framework composition
+
+An eager call can read real data. A graph compiler must reason about shapes and devices before those data exist; automatic differentiation must propagate an arbitrary upstream derivative. These needs explain why a raw binding and a forward kernel are insufficient. The selected interface is PyTorch `2.11.0+cu128`, not a promise about every newer release or the stable C++ ABI.
+
+## Schema, backend and import order
+
+`TORCH_LIBRARY(cuda_learning, m)` defines `adjacent_energy(Tensor x) -> Tensor` once. The absence of mutation/alias annotations is a promise: the implementation allocates a fresh result and never modifies x. Separate `TORCH_LIBRARY_IMPL` blocks associate CPU and CUDA implementations with the same name. Do not additionally redefine that name with Python `custom_op`.
+
+The public import is `from cuda_learning_ops import adjacent_energy`. Its package first imports torch, then `_C`, then Python registrations. `_C` loading creates the schema and backend registrations before `register_fake` and `register_autograd` look them up. Calling `torch.ops.cuda_learning.adjacent_energy.default` without first importing the package does not load this project. Reloading registration files is not an idempotence mechanism; ordinary Python import caching handles repeated public imports.
+
+## Fake and meta must describe the real output
+
+`torch.library.register_fake` supplies one storage-free implementation used for both FakeTensors and meta tensors. It checks rank, dtype, layout, contiguity, device family and extent, then returns `x.new_empty((x.shape[0]-1,))`. It reads no tensor values, calls no `.item()` or data pointer and does not launch the CUDA kernel. `torch._check` expresses shape constraints without turning symbolic lengths into Python integers.
+
+Returning `empty_like(x)` is wrong even though dtype and device agree: the length is n rather than n-1. Returning a slice of x has the right length but violates the fresh-output alias contract. Returning a new contiguous tensor also preserves the output stride for offset inputs. An explicit meta call checks a storage-free path; opcheck covers FakeTensor agreement, and dynamic compilation exercises guarded symbolic sizes. These tests serve different purposes.
+
+## Derive the backward, including endpoints
+
+Let `d[i]=x[i+1]-x[i]`, and let `g[i]` be the upstream derivative of y. Set `q[i]=2*d[i]*g[i]`. An interior input belongs to two edges; its contributions have opposite signs.
+
+| Input coordinate | Gradient |
+| --- | --- |
+| First, when n > 1 | `-q[0]` |
+| Interior | `q[j-1]-q[j]` |
+| Last, when n > 1 | `q[n-2]` |
+| Singleton | One zero, because there are no edges |
+
+For `x=[1,-2,2,2.5]` and `g=[1,2,3]`, `q=[-6,16,3]` and `dx=[6,-22,13,3]`. The sum is zero: shifting all inputs together leaves differences unchanged. This invariant alone does not prove every component correct.
+
+EX22's `setup_context(ctx, inputs, output)` saves x with `save_for_backward`. Its backward uses ordinary differentiable PyTorch operations: left-pad q with zero and subtract right-padded q. For empty q both are a length-one zero tensor. There is one gradient return for one input. This also permits the second derivative tested by `gradgradcheck`. No private autograd implementation is imported, and no handwritten CUDA backward kernel is required.
+
+## Which check proves which claim?
+
+| Check | Target and limit |
+| --- | --- |
+| Full CPU/CUDA reference comparison | Forward values for the selected corpus; not gradient registration |
+| `torch.library.opcheck` | Schema, autograd registration, fake and AOT-dispatch integration; not a numerical derivative proof |
+| `torch.autograd.gradcheck` | Float64 finite-difference derivative comparison with explicit eps/tolerances |
+| `torch.autograd.gradgradcheck` | Second derivative behavior for supplied cases |
+| `torch.compile(..., fullgraph=True, dynamic=True)` | Compiled forward and backward across lengths; no silent graph break, but no promised kernel fusion |
+
+Use nonuniform g to expose endpoint and sign errors hidden by a sum reduction. Include n=1, ordinary lengths and block tails. Invalid-input checks must remain aligned between native and fake paths. The custom call remains opaque to compiler fusion. Source review, host integration checks and a browser rendering are not CUDA observations: EX22/LAB13 remain **Pending Hardware Verification**, compilation evidence empty.
+
+## Retrieval check
+
+1. Why must `_C` load before fake registration?
+2. Which two contracts does a sliced fake output violate or satisfy?
+3. Why does an interior input receive two gradient contributions?
+4. Why can opcheck pass without proving the derivative formula?
+5. What does fullgraph compilation promise, and what does it not promise?
+
+## Practice
+
+Work through the [implementation and debugging Exercises](/en/frameworks/operator-registration/exercises/), then their [separate solutions](/en/frameworks/operator-registration/solutions/). [PB-R5-009](/en/practice/#pb-r5-009) asks you to evaluate competing acceptance reports rather than repeat the derivation. Run the installed project through [LAB13](/en/labs/build-custom-operator/).
+
+## Primary sources
+
+Reviewed 2026-09-13: [library API](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py), [owner tests](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_custom_ops.py), and [documentation](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/library.md). [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084) records exact file identities and reference-only rights. Owner tests were inspected, not claimed as executed locally.

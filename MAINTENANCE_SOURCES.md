@@ -2,6 +2,39 @@
 
 # Maintenance Source Record
 
+## Issue #44 custom operator increment — 2026-09-13
+
+P08/P09/P10 have ordered prerequisites `[O04,F04,Q01,P04]`, `[P08,Q01]`,
+`[P08,M18]`; EX22 and LAB13 require `[P08,P09]`. Eleven new Publication
+Pairs bring the rolling inventory to 310 pairs / 620 routes, 85 Learning Units,
+22 Runnable Examples, 13 Labs, 84 Exercise sets and 84 solution sets,
+92 Practice Bank entries, 204 terms, 101 source records and 429 catalog records.
+R1-R4 are unchanged; R5 aggregate review remains pending.
+
+Context7 `/pytorch/pytorch/v2.11.0` was queried twice for dispatcher/fake/autograd
+integration and separately for AOT build/import/version contracts. Results
+included legacy and main material; exact selected-owner files override those
+snippets. The paired SRC-CUDA-084/085 records contain eleven individually
+hashed PyTorch source/doc/test files at commit
+`70d99e998b4955e0049d13a98d77ae1b14db1f45`, root LICENSE/NOTICE hashes and the
+complete-tree check showing no intervening license for these paths. NVIDIA's
+12.8.1 redistribution manifest confirms NVCC 12.8.93 and runtime 12.8.90;
+the archived Linux guide distinguishes its qualification row from the exact
+GCC 13.3.0 project target. Existing CPython, torch, packaged dependencies and
+setuptools 81.0.0 remain under the existing hashed application lock and rights
+record. No owner operator, code, test, prose, figure, binary or output is copied.
+
+EX22 is original adjacent-difference energy, with independent literal/tensor
+references, native CPU/CUDA dispatch, fake/meta, first/second derivatives,
+opcheck, dynamic fullgraph integration and isolated installed-wheel checks.
+The extension profile is CPython 3.12.14 / torch 2.11.0+cu128 / separate
+Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0 / C++17 / 8.0+PTX. It inherits
+no ordinary Toolkit Lane evidence. Compilation and recorded observations
+remain empty; EX22/LAB13 runtime remains Pending Hardware Verification.
+Thirty-four subjects are pending; none are Runtime-Verified or Community-Observed.
+Build, CPU, browser and publication gates are not GPU runtime evidence.
+Dynamic acceptance and issue closure must cite actual checks separately.
+
 - Aggregate R4 static review date: 2026-09-10
 - Earlier API, infrastructure, source-item, rights, and archive-access records retain their individual dates; fresh aggregate retrievals are recorded separately below
 - Historical R4 scope: 277 bilingual Publication Pairs, 554 source routes, 75 Learning Units including L01-L13, 20 Runnable Examples, 12 Labs, 19 Visual Explainers, 74 Exercise-set and 74 solution-set pairs, 82 Practice Bank entries, 196 Glossary terms, 92 source records, and 401 catalog records; R1-R4 remain immutable history

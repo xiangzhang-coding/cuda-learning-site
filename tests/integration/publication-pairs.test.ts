@@ -46,7 +46,25 @@ type PublicationPair = {
   en: string;
 };
 
-const publicationPairs: readonly PublicationPair[] = [
+const publicationPairFixtures: readonly PublicationPair[] = [
+  ...[
+    { id: 'P08', slug: 'frameworks/first-custom-operator', prerequisites: 'O04,F04,Q01,P04' },
+    { id: 'P09', slug: 'frameworks/operator-registration', prerequisites: 'P08,Q01' },
+    { id: 'P10', slug: 'frameworks/operator-packaging', prerequisites: 'P08,M18' },
+  ].flatMap(({ id, slug, prerequisites }) => [
+    { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
+      factCheckDate: '2026-09-13', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
+    { pairId: `${id.toLowerCase()}-exercises`, unitId: `${id}-EXERCISES`, resourceKind: 'exercise-set', prerequisites: id,
+      factCheckDate: '2026-09-13', hardwareGate: 'none', zh: `/${slug}/exercises/`, en: `/en/${slug}/exercises/` },
+    { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`,
+      factCheckDate: '2026-09-13', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
+  ]),
+  { pairId: 'ex22', unitId: 'EX22', resourceKind: 'runnable-example', prerequisites: 'P08,P09',
+    factCheckDate: '2026-09-13', canonicalExample: 'EX22', evidenceRuntime: 'Pending Hardware Verification',
+    zh: '/examples/adjacent-energy/', en: '/en/examples/adjacent-energy/' },
+  { pairId: 'lab13', unitId: 'LAB13', resourceKind: 'lab', prerequisites: 'P08,P09',
+    factCheckDate: '2026-09-13', canonicalExample: 'EX22', evidenceRuntime: 'Pending Hardware Verification',
+    zh: '/labs/build-custom-operator/', en: '/en/labs/build-custom-operator/' },
   ...[
     { id: 'P04', slug: 'frameworks/queued-work-timing', prerequisites: 'M07,Q05', relatedUnits: 'P05,P06,P07' },
     { id: 'P05', slug: 'frameworks/streams-and-storage-lifetime', prerequisites: 'P04,M08', relatedUnits: 'P04' },
@@ -4104,6 +4122,18 @@ const publicationPairs: readonly PublicationPair[] = [
   },
 ];
 
+// Explicit rolling additions keep long catalog fixtures readable without deriving
+// expected metadata from the implementation being tested.
+const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
+  if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-13',
+    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,review'),
+    prerequisites: `${pair.prerequisites},P08,P09,P10`,
+    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,EX21') };
+  if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-13',
+    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,content-sources') };
+  return pair;
+});
+
 function metadata(document: Document, name: string) {
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content');
 }
@@ -4218,20 +4248,27 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(299);
-    expect(sourceRoutes.size).toBe(598);
+    expect(publicationPairs).toHaveLength(310);
+    expect(sourceRoutes.size).toBe(620);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['P08', 'T01', 'EX22', 'LAB13']) {
+    for (const absentUnitId of ['P11', 'T01', 'EX23', 'LAB14']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
 
   it('publishes the closed, acyclic prerequisite graph with exact curriculum-map edges', async () => {
     const expectedPrerequisites = new Map<string, readonly string[]>([
+      ['P08', ['O04', 'F04', 'Q01', 'P04']],
+      ['P09', ['P08', 'Q01']],
+      ['P10', ['P08', 'M18']],
+      ['P08-EXERCISES', ['P08']], ['P08-SOLUTIONS', ['P08-EXERCISES']],
+      ['P09-EXERCISES', ['P09']], ['P09-SOLUTIONS', ['P09-EXERCISES']],
+      ['P10-EXERCISES', ['P10']], ['P10-SOLUTIONS', ['P10-EXERCISES']],
+      ['EX22', ['P08', 'P09']], ['LAB13', ['P08', 'P09']],
       ['O01', []],
       ['O02', ['O01']],
       ['O03', ['O01']],

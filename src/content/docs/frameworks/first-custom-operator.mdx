@@ -1,0 +1,97 @@
+---
+title: 'P08：第一个 C++/CUDA 自定义算子'
+description: 先定义相邻差分能量的合同，实现 CPU 与 CUDA 路径并检查边界，再进入注册和打包。
+pairId: p08
+counterpart: /en/frameworks/first-custom-operator/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, implementation, verification, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P08
+prerequisites: [O04, F04, Q01, P04]
+relatedUnits: [P09, P10, EX22, LAB13]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Dispatcher registration', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.h', version: 'PyTorch 2.11.0', platform: 'C++ CPU/CUDA dispatch', accessDate: '2026-09-13' }
+  - { title: 'Device guard', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAGuard.h', version: 'PyTorch 2.11.0', platform: 'CUDA device scope', accessDate: '2026-09-13' }
+  - { title: 'Current stream', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAStream.h', version: 'PyTorch 2.11.0', platform: 'CUDA stream selection', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p08 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/first-custom-operator/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,implementation,verification,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P08 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'O04,F04,Q01,P04' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P09,P10,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/first-custom-operator/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+信号处理流水线需要每两个相邻样本之差的平方。你将定义这个操作，跟踪 CPU 与 CUDA 两条实现，并说明调用者能依赖什么。原创的 [EX22](/examples/adjacent-energy/) 是可运行示例（Runnable Example）；本学习单元（Learning Unit）的推理不需要 GPU。预计先用 35 分钟学习，再完成实现练习。
+
+## 前置知识
+
+精确有序前置为 `[O04, F04, Q01, P04]`：[O04](/start/cpp17-for-cuda/)、[F04](/foundations/host-device-lifecycle/)、[Q01](/correctness/cpu-references-tolerances-invariants/) 和 [P04](/frameworks/queued-work-timing/)。把 C++ 所有权、主机与设备生命周期、独立正确性检查及异步完成放在一起使用。[P09](/frameworks/operator-registration/)补充框架集成，[P10](/frameworks/operator-packaging/)补充可复现构建；两者都不是本页合同推理的隐藏前置。
+
+## 为什么绑定不等于完整算子
+
+Python 绑定能调用本地代码，框架还需要名称、模式（Schema）、设备分派（Dispatch）、元数据行为和导数。PyTorch 的分派器（Dispatcher）把这些合同显式化。早期只暴露 C++ 函数便足以完成 eager 调用，编译器和自动求导集成则会暴露缺失的语义。先用可组合张量表达式作为参考，再独立论证自定义实现的必要性。本教学算子不声称生产性能优势。
+
+## 有意收窄的合同
+
+对 `0 <= i < n-1` 定义 `y[i]=(x[i+1]-x[i])^2`。每个输出对应一条相邻边，因此输入和输出长度不同。单元素输入产生空结果，空输入被拒绝。
+
+| 属性 | 合同 |
+| --- | --- |
+| 输入 | 一维、strided 布局、连续、`float32` 或 `float64`，CPU 或 CUDA |
+| 大小 | `1 <= n <= 1000000`；允许带存储偏移的连续视图 |
+| 输出 | 新分配的连续 `(n-1,)`，dtype 与设备相同；不修改输入、不产生别名 |
+| 排除 | 不支持批处理、广播、稀疏张量、半精度、自动转换规则或跨步遍历 |
+| 算术 | 普通减法与乘法；非有限输入或溢出可以产生非有限输出 |
+
+给定 `x=[1,-2,2,2.5]`，差分为 `[-3,4,0.5]`，推导结果为 `[9,16,0.25]`。这些是手算参考，不是 CUDA 运行记录。即使元素总数相同，二维输入也必须失败：数量不等于形状。
+
+## 跟踪规范实现
+
+阅读 EX22 的 `contract.h`、`operator.cpp` 和 `kernel.cu`。共用本地检查在访问裸指针前验证布局、维数、连续性、dtype 和大小。`const_data_ptr` 已包含连续视图的存储偏移。CPU 循环创建新输出并写入全部元素。CUDA 路径用 `c10::cuda::CUDAGuard` 选择输入设备，在该设备分配，并在 `c10::cuda::getCurrentCUDAStream(x.get_device())` 上启动。
+
+每个线程负责一个输出、读取两个输入。`n=258` 时有 `257` 个输出，需要两个各含 `256` 线程的块，`255` 个线程不工作。边界检查必须先于两次读取，包括 `x[i+1]`。`n=1` 时启动前返回空张量，不需要零块启动。float64 输入与输出的最大载荷为 `8*(2*n-1)` 字节，不到 16 MB；上下文、编译器和测试分配另计。
+
+`C10_CUDA_KERNEL_LAUNCH_CHECK()` 检查启动提交错误，不会同步已经成功提交的设备工作，也不证明数值正确。算子不创建私有流，不执行设备级同步。调用者仍承担 P04 中生产者依赖和生命周期责任；测试在接受结果前汇合非默认流。
+
+## 性能之前先验证合同
+
+EX22 对照张量表达式和独立字面量检查全部结果，保留输入以检查意外修改，覆盖单元素和块尾大小，并拒绝错误维数、dtype、布局。生成的二进制分数允许逐项精确比较，这不是任意浮点计算都应精确相等的主张。一般有限差分检查使用 float64 和明确容差。
+
+选择 `torch 2.11.0+cu128`、CPython `3.12.14`、独立 Toolkit `12.8.1` / NVCC `12.8.93`、GCC `13.3.0` 与 C++17。随包运行时为 `12.8.90`，不提供这个编译器。CUDA 执行要求原生 Linux、CC >= 8.0、至少 8 GB 和兼容驱动。EX22 与 [LAB13](/labs/build-custom-operator/)的编译证据为空，运行仍为**待硬件验证（Pending Hardware Verification）**；本单元不授予证据状态（Evidence Status）。
+
+## 提取式自测
+
+1. 为什么输出有 `n-1` 而不是 `n` 个元素？
+2. 受支持的偏移视图与被拒绝的跨步视图有什么区别？
+3. 为什么边界检查必须保护 `x[i+1]`？
+4. 启动检查证明了什么，还有什么需要等待完成？
+5. 为什么 CPU 正确不能证明 CUDA 当前流使用正确？
+
+## 练习
+
+先完成[实现和调试练习（Exercise）](/frameworks/first-custom-operator/exercises/)，再打开[独立解答](/frameworks/first-custom-operator/solutions/)。随后审查练习题库（Practice Bank）中的独立边界案例 [PB-R5-008](/practice/#pb-r5-008)。完整构建与验证活动在[实验（Lab）LAB13](/labs/build-custom-operator/)。
+
+## 一手来源
+
+2026-09-13 核对：精确[分派器头文件](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.h)、[设备 guard](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAGuard.h)和[当前流声明](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAStream.h)。[SRC-CUDA-084](/sources-and-versions/#src-cuda-084)记录源码和权利边界，[SRC-CUDA-080](/sources-and-versions/#src-cuda-080)保留应用环境。教学文字与算子代码均为原创。

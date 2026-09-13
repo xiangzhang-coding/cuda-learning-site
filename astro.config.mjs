@@ -185,6 +185,9 @@ export default defineConfig({
             { slug: 'frameworks/streams-and-storage-lifetime' },
             { slug: 'frameworks/mixed-precision-contracts' },
             { slug: 'frameworks/python-to-cuda-profiling' },
+            { slug: 'frameworks/first-custom-operator' },
+            { slug: 'frameworks/operator-registration' },
+            { slug: 'frameworks/operator-packaging' },
           ],
         },
         {
@@ -212,6 +215,7 @@ export default defineConfig({
             { slug: 'examples/cufft-batched-transform' },
             { slug: 'examples/cusparse-spmv' },
             { slug: 'examples/cuda-python-launch' },
+            { slug: 'examples/adjacent-energy' },
           ],
         },
         {
@@ -231,6 +235,7 @@ export default defineConfig({
             { slug: 'labs/optimize-canonical-transpose' },
             { slug: 'labs/compare-custom-reduction-with-cub' },
             { slug: 'labs/compare-gemm-with-cublas' },
+            { slug: 'labs/build-custom-operator' },
           ],
         },
         {

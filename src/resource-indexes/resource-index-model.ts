@@ -73,6 +73,55 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  P08: {
+    href: { 'zh-CN': '/frameworks/first-custom-operator/', en: '/en/frameworks/first-custom-operator/' },
+    title: { 'zh-CN': 'P08：第一个 C++/CUDA 自定义算子', en: 'P08: A First C++/CUDA Operator' },
+    prerequisites: ['O04', 'F04', 'Q01', 'P04'],
+  },
+  'P08-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/first-custom-operator/exercises/', en: '/en/frameworks/first-custom-operator/exercises/' },
+    title: { 'zh-CN': 'P08 练习', en: 'P08 Exercises' }, prerequisites: ['P08'],
+  },
+  'P08-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/first-custom-operator/solutions/', en: '/en/frameworks/first-custom-operator/solutions/' },
+    title: { 'zh-CN': 'P08 独立参考解答', en: 'P08 Reviewed Solutions' }, prerequisites: ['P08-EXERCISES'],
+  },
+  P09: {
+    href: { 'zh-CN': '/frameworks/operator-registration/', en: '/en/frameworks/operator-registration/' },
+    title: { 'zh-CN': 'P09：注册元数据与梯度', en: 'P09: Register Metadata and Gradients' },
+    prerequisites: ['P08', 'Q01'],
+  },
+  'P09-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/operator-registration/exercises/', en: '/en/frameworks/operator-registration/exercises/' },
+    title: { 'zh-CN': 'P09 练习', en: 'P09 Exercises' }, prerequisites: ['P09'],
+  },
+  'P09-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/operator-registration/solutions/', en: '/en/frameworks/operator-registration/solutions/' },
+    title: { 'zh-CN': 'P09 独立参考解答', en: 'P09 Reviewed Solutions' }, prerequisites: ['P09-EXERCISES'],
+  },
+  P10: {
+    href: { 'zh-CN': '/frameworks/operator-packaging/', en: '/en/frameworks/operator-packaging/' },
+    title: { 'zh-CN': 'P10：构建并导入算子 wheel', en: 'P10: Build and Import an Operator Wheel' },
+    prerequisites: ['P08', 'M18'],
+  },
+  'P10-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/operator-packaging/exercises/', en: '/en/frameworks/operator-packaging/exercises/' },
+    title: { 'zh-CN': 'P10 练习', en: 'P10 Exercises' }, prerequisites: ['P10'],
+  },
+  'P10-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/operator-packaging/solutions/', en: '/en/frameworks/operator-packaging/solutions/' },
+    title: { 'zh-CN': 'P10 独立参考解答', en: 'P10 Reviewed Solutions' }, prerequisites: ['P10-EXERCISES'],
+  },
+  EX22: {
+    href: { 'zh-CN': '/examples/adjacent-energy/', en: '/en/examples/adjacent-energy/' },
+    title: { 'zh-CN': 'EX22：相邻差分能量算子', en: 'EX22: Adjacent-Difference Energy Operator' },
+    prerequisites: ['P08', 'P09'],
+  },
+  LAB13: {
+    href: { 'zh-CN': '/labs/build-custom-operator/', en: '/en/labs/build-custom-operator/' },
+    title: { 'zh-CN': 'LAB13：构建并验证 CUDA 算子', en: 'LAB13: Build and Validate a CUDA Operator' },
+    prerequisites: ['P08', 'P09'], indexGroup: 'labs',
+  },
   O01: {
     href: { 'zh-CN': '/start/using-the-learning-site/', en: '/en/start/using-the-learning-site/' },
     title: { 'zh-CN': 'O01：如何使用学习站', en: 'O01: Using the Learning Site' },

@@ -1,0 +1,97 @@
+---
+title: 'P08: A First C++/CUDA Operator'
+description: Define an adjacent-difference energy contract, implement CPU and CUDA paths, and validate boundaries before registration and packaging.
+pairId: p08
+counterpart: /frameworks/first-custom-operator/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, implementation, verification, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P08
+prerequisites: [O04, F04, Q01, P04]
+relatedUnits: [P09, P10, EX22, LAB13]
+hardwareGate: none
+estimatedMinutes: 35
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Dispatcher registration', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.h', version: 'PyTorch 2.11.0', platform: 'C++ CPU/CUDA dispatch', accessDate: '2026-09-13' }
+  - { title: 'Device guard', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAGuard.h', version: 'PyTorch 2.11.0', platform: 'CUDA device scope', accessDate: '2026-09-13' }
+  - { title: 'Current stream', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAStream.h', version: 'PyTorch 2.11.0', platform: 'CUDA stream selection', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p08 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/first-custom-operator/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,implementation,verification,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P08 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'O04,F04,Q01,P04' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P09,P10,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/first-custom-operator/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning outcome
+
+A signal pipeline needs the squared change between adjacent samples. You will specify that operation, trace its CPU and CUDA implementations, and decide what callers may rely on. The original [EX22](/en/examples/adjacent-energy/) is the executable project; this unit's reasoning needs no GPU. Allow about 35 minutes before the implementation Exercises.
+
+## Prerequisites
+
+The exact ordered edges are `[O04, F04, Q01, P04]`: [O04](/en/start/cpp17-for-cuda/), [F04](/en/foundations/host-device-lifecycle/), [Q01](/en/correctness/cpu-references-tolerances-invariants/), and [P04](/en/frameworks/queued-work-timing/). Use C++ ownership, host/device lifetimes, independent correctness checks and asynchronous completion together. [P09](/en/frameworks/operator-registration/) adds framework integration; [P10](/en/frameworks/operator-packaging/) adds reproducible builds. Neither is a hidden prerequisite for this contract worksheet.
+
+## Why a binding is not the whole operator
+
+A Python binding can call native code, but a framework also needs a name, a schema, device dispatch, metadata behavior and derivatives. PyTorch's dispatcher makes those contracts explicit. Historically, exposing a C++ function was enough to call it eagerly; compiler and autograd integration expose the missing semantics. Start with a composable tensor expression as the reference, and justify a custom implementation separately. This educational operator makes no production performance claim.
+
+## A deliberately bounded contract
+
+Define `y[i]=(x[i+1]-x[i])^2` for `0 <= i < n-1`. Each output measures one edge, so input length and output length differ. A singleton has an empty result; an empty input is rejected.
+
+| Property | Contract |
+| --- | --- |
+| Input | Rank one, strided layout, contiguous, `float32` or `float64`, CPU or CUDA |
+| Extent | `1 <= n <= 1000000`; contiguous storage-offset views are allowed |
+| Output | Fresh contiguous `(n-1,)`, same dtype and device; no input mutation or alias |
+| Exclusions | No batching, broadcasting, sparse tensors, half precision, autocast rule or strided traversal |
+| Arithmetic | Ordinary subtraction and multiplication; nonfinite inputs/overflow may produce nonfinite outputs |
+
+For `x=[1,-2,2,2.5]`, differences are `[-3,4,0.5]` and the derived answer is `[9,16,0.25]`. These numbers are a hand-worked oracle, not recorded CUDA output. A rank-two input with the same total count must still fail: count is not shape.
+
+## Follow the canonical implementation
+
+Read EX22's `contract.h`, `operator.cpp` and `kernel.cu`. The shared native guard checks layout, rank, contiguity, dtype and extent before raw-pointer access. `const_data_ptr` respects a contiguous view's storage offset. The CPU loop creates fresh output and writes every element. The CUDA path selects the input device with `c10::cuda::CUDAGuard`, allocates there, and launches on `c10::cuda::getCurrentCUDAStream(x.get_device())`.
+
+One thread owns one output and reads two input samples. For `n=258`, there are `257` outputs, two blocks of `256` threads and `255` inactive threads. The guard precedes both reads, including `x[i+1]`. For `n=1`, return the empty tensor before launching; a zero-block launch is not required. The maximum payload for input plus output in float64 is `8*(2*n-1)` bytes, under 16 MB; context, compiler and test allocations are additional.
+
+`C10_CUDA_KERNEL_LAUNCH_CHECK()` checks launch submission errors. It does not synchronize successful device work or prove numerical correctness. The operator creates no private stream and calls no device-wide synchronization. The caller retains the usual producer/lifetime responsibilities taught by P04; the test joins its non-default stream before accepting results.
+
+## Verify the contract before performance
+
+EX22 compares the full result to the tensor expression and independent literals, preserves the input for mutation checks, exercises singleton and block-tail sizes, and rejects invalid rank, dtype and layout. Its generated binary fractions permit exact forward comparison without a universal floating-point-equality claim. General random finite-difference tests use float64 and stated tolerances.
+
+Select `torch 2.11.0+cu128`, CPython `3.12.14`, separate Toolkit `12.8.1` / NVCC `12.8.93`, GCC `13.3.0` and C++17. The packaged runtime is `12.8.90`; it does not supply this compiler. CUDA execution requires native Linux, CC >= 8.0, at least 8 GB and a compatible driver. EX22 and [LAB13](/en/labs/build-custom-operator/) remain **Pending Hardware Verification** with compilation evidence empty; the unit grants no Evidence Status.
+
+## Retrieval check
+
+1. Why does the output have `n-1` rather than `n` elements?
+2. What distinguishes a supported offset view from a rejected strided view?
+3. Why must the bounds check protect `x[i+1]`?
+4. What does the launch check establish, and what still needs completion?
+5. Why does CPU correctness not prove current-stream CUDA correctness?
+
+## Practice
+
+Complete the [implementation and debugging Exercises](/en/frameworks/first-custom-operator/exercises/) before opening their [separate solutions](/en/frameworks/first-custom-operator/solutions/). Then audit the independent [PB-R5-008](/en/practice/#pb-r5-008) boundary case. The complete build and verification activity is [LAB13](/en/labs/build-custom-operator/).
+
+## Primary sources
+
+Reviewed 2026-09-13: exact [dispatcher header](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.h), [device guard](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAGuard.h), and [current-stream declaration](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/c10/cuda/CUDAStream.h). [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084) records source and rights boundaries; [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) retains the application environment. All teaching material and operator code are original.

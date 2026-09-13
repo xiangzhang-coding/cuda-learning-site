@@ -43,6 +43,7 @@ const allowedGithubFiles = new Set([
   '.github/ISSUE_TEMPLATE/problem-report.yml',
   '.github/PULL_REQUEST_TEMPLATE.md',
   '.github/workflows/web-quality.yml',
+  '.github/workflows/pytorch-operator.yml',
   '.github/workflows/cuda-compile.yml',
   '.github/workflows/release-smoke.yml',
 ]);
