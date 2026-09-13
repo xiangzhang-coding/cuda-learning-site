@@ -2,7 +2,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { THEME_IDS } from '../../src/theme-contract';
-import { collectBrowserFailures } from '../helpers/browser-contract';
+import { collectBrowserFailures, settlePublicationPage } from '../helpers/browser-contract';
 
 const units = [
   { id: 'P04', slug: 'frameworks/queued-work-timing', prerequisites: 'M07,Q05', practice: 'pb-r5-004', source: '081' },
@@ -93,6 +93,14 @@ for (const locale of ['', 'en/']) {
 
     test(`${label}${unit.id} mobile worksheet, counterpart round trips, keyboard hints and separate printable solutions`, async ({ page, baseURL }, info) => {
       const failures = collectBrowserFailures(page, baseURL!);
+      if (locale === 'en/' && unit.id === 'P06' && info.project.name === 'firefox') {
+        // Exercise the real round-trip path with an icon still loading after
+        // metadata is visible. This is network stress, not a readiness delay.
+        await page.route('**/favicon.svg', async (request) => {
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          await request.continue();
+        });
+      }
       await page.setViewportSize({ width: 360, height: 800 });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       const route = `/${locale}${unit.slug}/`;
@@ -102,13 +110,16 @@ for (const locale of ['', 'en/']) {
         const id = unit.id + (suffix ? `-${suffix.replace('/', '').toUpperCase()}` : '');
         const prerequisites = suffix === 'exercises/' ? unit.id : suffix === 'solutions/' ? `${unit.id}-EXERCISES` : unit.prerequisites;
         await expectPublication(page, id, prerequisites);
+        await settlePublicationPage(page);
         const counterpart = `/${locale ? '' : 'en/'}${unit.slug}/${suffix}`;
         await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', counterpart);
         await page.locator('[data-locale-counterpart]').click();
         await expect(page).toHaveURL(`${baseURL}${counterpart}`);
         await expectPublication(page, id, prerequisites);
+        await settlePublicationPage(page);
         await page.locator('[data-locale-counterpart]').click();
         await expect(page).toHaveURL(`${baseURL}${route}${suffix}`);
+        await settlePublicationPage(page);
         if (!suffix) {
           const table = page.locator('main table').first();
           await expect(table).toBeVisible();
@@ -146,6 +157,7 @@ for (const locale of ['', 'en/']) {
       }
       await page.locator(`main a[href="${route}"]`).first().click();
       await expectPublication(page, unit.id, unit.prerequisites);
+      await settlePublicationPage(page);
       expect(failures).toEqual([]);
     });
 

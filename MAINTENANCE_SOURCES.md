@@ -64,6 +64,19 @@ ordinary route sweeps and release smoke. The strict failure collector, all
 route coverage and fail-on-flaky policy remain intact; no aborted-request
 whitelist, production code change or additional timeout is introduced.
 
+Post-merge run 34755510467 completed its Firefox shard in 17.8 minutes,
+but failed the unchanged fail-on-flaky policy: the P06 English mobile
+round-trip test recorded one target-origin request failure before passing
+on retry. That first attempt has no retained trace identifying the resource,
+so it is not described as a proven historical favicon failure. Delaying the
+real favicon in that exact mobile test reproduces the same failure class:
+metadata assertions allow the next locale navigation before requests finish.
+The mobile path now uses the existing page-settlement boundary after each
+publication/locale transition and before its final error assertion. The
+delayed-icon regression passed ten repetitions and all 32 cross-browser
+mobile publication cases passed without retries. No production code, CUDA
+evidence, timeout, request-failure filtering or flaky-test policy changes.
+
 - Aggregate R4 static review date: 2026-09-10
 - Earlier API, infrastructure, source-item, rights, and archive-access records retain their individual dates; fresh aggregate retrievals are recorded separately below
 - Historical R4 scope: 277 bilingual Publication Pairs, 554 source routes, 75 Learning Units including L01-L13, 20 Runnable Examples, 12 Labs, 19 Visual Explainers, 74 Exercise-set and 74 solution-set pairs, 82 Practice Bank entries, 196 Glossary terms, 92 source records, and 401 catalog records; R1-R4 remain immutable history
