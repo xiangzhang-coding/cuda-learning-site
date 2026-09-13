@@ -2,6 +2,49 @@
 
 # Maintenance Source Record
 
+## Issue #45 optimization and dispatch increment — 2026-09-13
+
+P11 requires `[P07,P09,Q06]`, P12 requires `[A11,L11,P06,P07]`, and LAB14
+requires `[P11]`. Seven new Publication Pairs bring the current inventory to
+317 pairs / 634 routes, 87 Learning Units, 22 Runnable Examples, 14 Labs,
+86 Exercise sets and 86 solution sets, 94 Practice Bank entries, 204 terms,
+102 source records and 433 catalog records. R1-R4 remain historical snapshots;
+R5 aggregate review remains pending. LAB14 adds one pending subject: 35 total.
+
+Context7 `/pytorch/pytorch/v2.11.0` queries covered (1) SDPA controls,
+eligibility, dtype, beta and determinism, (2) profiler schedule, warm-up,
+export and completion, and (3) custom-operator fake/autograd/opcheck/packaging.
+Returned main snippets were discovery only. Exact owner files at
+`70d99e998b4955e0049d13a98d77ae1b14db1f45` and their whole-file SHA-256 values
+are recorded in both SRC-CUDA-086 sections. The full untruncated owner tree
+contains no intervening LICENSE/NOTICE/COPYING along those seven paths;
+root BSD-3-Clause LICENSE and NOTICE hashes were rechecked. Transformer tests
+were inspected for math references/gradcheck, priority restoration and
+determinism; profiler tests for schedules and Chrome trace export. Owner
+tests were not executed. Their speed expectations and XPU-specific priority
+checks are not general CUDA claims. The functional GQA summary is not treated
+as a complete support matrix; the executable fixture excludes GQA.
+
+The original external harness imports the installed EX22 wheel, invokes its
+canonical verifier and separates seven unprofiled CUDA-event samples from
+scheduled CPU/CUDA diagnostics. The 128-thread candidate is learner work,
+with explicit boundary/gradient/import checks and no guaranteed gain.
+SDPA mode uses rounded inputs and an independent CPU float64 decomposition;
+negative eligibility differs from execution/numerical failure. Exact backend
+events and device kernels are required before a dispatch report can pass;
+full correlation still needs local review. Parser fixtures are explicitly
+constructed, not captured traces. The Linux CI CPU oracle and installed-wheel
+gates grant no CUDA runtime or performance evidence. VIS18 is reused unchanged.
+
+The first #45 remote Web Quality run exposed an aggregate browser-test budget:
+the single mobile-reflow test visited ten locale/index pages under one 30-second
+timeout. WebKit and Mobile Safari exhausted that budget in all three attempts,
+at different loading/readiness assertions; no horizontal-overflow assertion
+failed. The same test passed locally in about eight seconds per browser.
+Each locale/index route now has its own default test budget and error collector,
+preserving all ten pages and every readiness, count, width and error assertion.
+This is test partitioning, not a layout workaround or increased retry policy.
+
 ## Issue #44 custom operator increment — 2026-09-13
 
 P08/P09/P10 have ordered prerequisites `[O04,F04,Q01,P04]`, `[P08,Q01]`,

@@ -31,12 +31,12 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current).toMatchObject({
       reviewDate: '2026-09-13',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
-      scope: { publicationPairs: 310, sourceRoutes: 620, exerciseSetPublicationPairs: 84,
-        solutionSetPublicationPairs: 84, practiceBankEntries: 92, sourceRecords: 101 },
+      scope: { publicationPairs: 317, sourceRoutes: 634, exerciseSetPublicationPairs: 86,
+        solutionSetPublicationPairs: 86, practiceBankEntries: 94, sourceRecords: 102 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22']);
-    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13']);
+    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14']);
     for (const field of ['visualExplainers', 'nsightReportAnalysisPracticeEntries', 'libraryAlgorithmChoicePracticeEntries']) {
       expect(current.scope[field], field).toEqual(r4.scope[field]);
     }
@@ -54,13 +54,13 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current.evidence).toEqual({
       ...r4.evidence,
       noCompileCheckedClaim: [...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22',
-        ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13'],
+        ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14'],
       pendingHardwareVerification: [...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22',
-        ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB')), 'LAB13'],
-      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'],
+        ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14'],
+      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12'],
     });
     expect(current.knownLimitations.join(' ')).toMatch(/EX21.*Pending Hardware Verification/);
-    expect(current.knownLimitations.join(' ')).toMatch(/P01-P10.*no Evidence Status/);
+    expect(current.knownLimitations.join(' ')).toMatch(/P01-P12.*no Evidence Status/);
     expect(current.scope.glossaryTerms).toBe(204);
   });
 

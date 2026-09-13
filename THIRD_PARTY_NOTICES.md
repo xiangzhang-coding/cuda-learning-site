@@ -4,6 +4,14 @@
 
 This project installs third-party packages to build and test the Learning Site. The packages remain under their own terms; the project licenses do not relicense them.
 
+The 2026-09-13 #45 increment adds reference-only PyTorch SDPA/profiler source
+review under the exact root BSD-3-Clause LICENSE and NOTICE. Its per-file
+hashes and ancestry are in SRC-CUDA-086 and
+[CONTENT_LICENSES.md](CONTENT_LICENSES.md#optimization-and-sdpa-reference-only-review).
+No upstream implementation, test, trace, binary or timing is redistributed.
+The existing external PyTorch 2.11.0+cu128 and NVIDIA component notices below
+continue to govern LAB14's independently provisioned environment.
+
 The **2026-09-10 R4 aggregate static review** preserves the exact package selections below and all dated external-library ledgers. It adds no dependency upgrade, bundled owner material, adaptation, or new project `NOTICE` obligation. [CONTENT_LICENSES.md](CONTENT_LICENSES.md#r4-aggregate-rights-disposition) and [MAINTENANCE_SOURCES.md](MAINTENANCE_SOURCES.md#r4-aggregate-source-disposition) record the aggregate disposition and retrieval limits; they do not certify CI, deployment, smoke, or GPU results.
 
 CCCL 3.4.2, including Thrust, CUB, and libcu++, is an external header-library reference/dependency, not vendored site material. Its [pinned aggregate license](https://github.com/NVIDIA/cccl/blob/d36012203ef73ac7f966e848dd88482273e91e02/LICENSE) preserves Apache, LLVM-exception, BSD, and file-specific legacy terms. The exact Thrust/CUB records and [L05 file ledger](CONTENT_LICENSES.md#l05-file-level-review) govern individual notices; the aggregate license is not a blanket grant for every file. The CUTLASS 19-file and cuDNN frontend 20-file ledgers below likewise remain bounded, reference-only reviews rather than whole-repository audits.

@@ -403,12 +403,12 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
-  expect(counts.labs).toBe(13);
-  expect(counts.practice).toBe(92);
+  expect(counts.labs).toBe(14);
+  expect(counts.practice).toBe(94);
   expect(counts.visuals).toBe(19);
   expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
-  expect(counts.sources).toBe(101);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(225 + currentPublication.scope.glossaryTerms);
+  expect(counts.sources).toBe(102);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(229 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
     ...releaseLabIds,
@@ -550,7 +550,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
       await index.locator('[data-resource-query]').fill('');
     }
     if (group === 'labs') {
-      for (const futureId of ['LAB14']) {
+      for (const futureId of ['LAB15']) {
         await expect(index.locator(`[data-resource-id="${futureId}"]`)).toHaveCount(0);
         await expect(index.locator('h3 a', { hasText: new RegExp(`^${futureId}\\b`) })).toHaveCount(0);
       }
@@ -730,12 +730,13 @@ test('theme changes preserve ephemeral filters while reloads reset them', async 
   await expect(page.locator('[data-resource-card]:visible')).toHaveCount(expectedCount('practice'));
 });
 
-test('mobile reflow keeps every index within the viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
-
-  for (const group of INDEX_GROUPS) {
-    for (const locale of INDEX_LOCALES) {
+// Each complete index gets its own default timeout. Combining ten increasingly
+// large pages exhausted 30 seconds on CI WebKit before the final assertions.
+for (const group of INDEX_GROUPS) {
+  for (const locale of INDEX_LOCALES) {
+    test(`mobile reflow keeps ${locale}/${group} within the viewport`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      const failures = collectBrowserFailures(page, 'http://127.0.0.1:4321');
       const route = INDEX_ROUTES[group][locale];
       await page.goto(route);
       await page.waitForLoadState('networkidle');
@@ -743,11 +744,10 @@ test('mobile reflow keeps every index within the viewport', async ({ page }) => 
       await expect(page.locator('site-search input')).toHaveCount(1);
       await expect(page.locator('[data-resource-card]')).toHaveCount(expectedCount(group));
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
-    }
+      expect(failures).toEqual([]);
+    });
   }
-
-  expect(failures).toEqual([]);
-});
+}
 
 test('print restores the complete index after a screen filter', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Chromium owns print-media emulation.');

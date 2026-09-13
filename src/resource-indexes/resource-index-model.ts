@@ -73,6 +73,37 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  P11: {
+    href: { 'zh-CN': '/frameworks/profile-led-optimization/', en: '/en/frameworks/profile-led-optimization/' },
+    title: { 'zh-CN': 'P11：用性能分析指导算子优化', en: 'P11: Profile-Led Operator Optimization' },
+    prerequisites: ['P07', 'P09', 'Q06'],
+  },
+  'P11-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/profile-led-optimization/exercises/', en: '/en/frameworks/profile-led-optimization/exercises/' },
+    title: { 'zh-CN': 'P11 练习', en: 'P11 Exercises' }, prerequisites: ['P11'],
+  },
+  'P11-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/profile-led-optimization/solutions/', en: '/en/frameworks/profile-led-optimization/solutions/' },
+    title: { 'zh-CN': 'P11 独立参考解答', en: 'P11 Reviewed Solutions' }, prerequisites: ['P11-EXERCISES'],
+  },
+  P12: {
+    href: { 'zh-CN': '/frameworks/sdpa-dispatch-verification/', en: '/en/frameworks/sdpa-dispatch-verification/' },
+    title: { 'zh-CN': 'P12：验证 SDPA 后端派发', en: 'P12: Verify SDPA Backend Dispatch' },
+    prerequisites: ['A11', 'L11', 'P06', 'P07'],
+  },
+  'P12-EXERCISES': {
+    href: { 'zh-CN': '/frameworks/sdpa-dispatch-verification/exercises/', en: '/en/frameworks/sdpa-dispatch-verification/exercises/' },
+    title: { 'zh-CN': 'P12 练习', en: 'P12 Exercises' }, prerequisites: ['P12'],
+  },
+  'P12-SOLUTIONS': {
+    href: { 'zh-CN': '/frameworks/sdpa-dispatch-verification/solutions/', en: '/en/frameworks/sdpa-dispatch-verification/solutions/' },
+    title: { 'zh-CN': 'P12 独立参考解答', en: 'P12 Reviewed Solutions' }, prerequisites: ['P12-EXERCISES'],
+  },
+  LAB14: {
+    href: { 'zh-CN': '/labs/profile-custom-operator/', en: '/en/labs/profile-custom-operator/' },
+    title: { 'zh-CN': 'LAB14：分析并优化自定义算子', en: 'LAB14: Profile and Optimize the Custom Operator' },
+    prerequisites: ['P11'], indexGroup: 'labs',
+  },
   P08: {
     href: { 'zh-CN': '/frameworks/first-custom-operator/', en: '/en/frameworks/first-custom-operator/' },
     title: { 'zh-CN': 'P08：第一个 C++/CUDA 自定义算子', en: 'P08: A First C++/CUDA Operator' },

@@ -2,6 +2,26 @@
 
 # Content and File Licenses
 
+## Optimization and SDPA reference-only review
+
+Reviewed 2026-09-13 for #45. P11/P12, LAB14, their Exercises/solutions and
+PB-R5-011/012 are original CC BY 4.0 instructional content. The external
+`scripts/framework-verification/` harness and tests are original Apache-2.0.
+VIS18 is linked unchanged. No owner code, tests, tables, traces or timing
+results are copied or adapted, and no external package is added.
+
+Both public SRC-CUDA-086 sections retain the exact seven-file ledger at
+PyTorch `70d99e998b4955e0049d13a98d77ae1b14db1f45`: `torch/nn/functional.py`,
+`torch/nn/attention/__init__.py`, `torch/backends/cuda/__init__.py`,
+`aten/src/ATen/native/transformers/cuda/sdp_utils.cpp`,
+`torch/profiler/profiler.py`, `test/test_transformers.py`, and
+`test/profiler/test_profiler.py`. Each whole-file hash and root license ancestry
+was checked, including the untruncated tree's absence of intervening rights files.
+These paths retain BSD-3-Clause and the owner root NOTICE, not project licenses.
+NVIDIA packaged CUDA/cuDNN/CUPTI and vendor implementations retain the separate
+rights in the external environment ledger. No new adaptation or redistribution
+creates an additional NOTICE obligation.
+
 ## Custom operator reference-only review
 
 Reviewed 2026-09-13 for #44. Original EX22 C++/CUDA/Python, build/verification

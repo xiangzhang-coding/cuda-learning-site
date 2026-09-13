@@ -56,7 +56,7 @@ Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42)在当前发布中加入 [P01：CUDA Python 桥接](/python/cuda-python-bridge/)、[P02：设备、上下文与启动](/python/devices-contexts-launches/)和 [P03：运行时编译与链接](/python/runtime-compilation-linking/)，有序直接先修分别为 `[F04,M07]`、`[P01,F07]`和 `[P02,M15,M16]`。每个单元有练习和独立解答；共用的 [EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)仅依赖 `[P02]`，独立记录 Python、包与原生 Toolkit 配置，仍待硬件验证（Pending Hardware Verification）。本次增加十个发布对、二十条路由，不改写 R4 历史或发布框架、Triton 占位入口。
 
-截至 **2026-09-13**，当前发布有 85 个学习单元、22 个可运行示例（EX01-EX22）、13 个实验（LAB01-LAB13）、19 项可视化讲解、92 个[练习题库（Practice Bank）](/practice/)条目、204 个[术语表](/glossary/)词条、101 条[来源记录](/sources-and-versions/)，共 429 条资源目录记录、310 个双语发布对、620 条源路由，含 84 组练习与 84 组独立参考解答。
+截至 **2026-09-13**，当前发布有 87 个学习单元、22 个可运行示例（EX01-EX22）、14 个实验（LAB01-LAB14）、19 项可视化讲解、94 个[练习题库（Practice Bank）](/practice/)条目、204 个[术语表](/glossary/)词条、102 条[来源记录](/sources-and-versions/)，共 433 条资源目录记录、317 个双语发布对、634 条源路由，含 86 组练习与 86 组独立参考解答。
 
 Issue #44 增加 [P08](/frameworks/first-custom-operator/)，先修 `[O04,F04,Q01,P04]`；[P09](/frameworks/operator-registration/)，先修 `[P08,Q01]`；[P10](/frameworks/operator-packaging/)，先修 `[P08,M18]`。[EX22](/examples/adjacent-energy/)和 [LAB13](/labs/build-custom-operator/)依赖 `[P08,P09]`，原创相邻能量算子有 CPU/CUDA 路径和独立固定的扩展 Toolkit。两者编译/已记录观察为空，运行待硬件验证（Pending Hardware Verification）。
 
@@ -64,7 +64,7 @@ Issue #44 增加 [P08](/frameworks/first-custom-operator/)，先修 `[O04,F04,Q0
 
 **R4 聚合静态复核：2026-09-10。** 技术来源保留各自访问与复核日期，当时的检索有单独的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)，不覆盖当前 Python 桥接增量。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。R4 不表示框架或 Triton 路线已完成，也不为它们发布占位入口。
 
-当前 92 道练习题库题目包括 PB-R5-001 至 PB-R5-010。R4 八道库与算法选择题、R3 十道 Nsight 报告分析题不变。只有 EX02、EX10、LAB02 编译已检查（Compile-Checked），EX10 无需运行验证（Runtime-Not-Applicable）。其余 21 个示例和全部 13 个实验共 34 个主体待硬件验证（Pending Hardware Verification）。P01-P10 四个证据数组为空。EX21 和 EX22 编译/已记录观察为空，主机检查不授予 GPU 证据。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察均为零。六份分析器计划只有预期内容。
+当前 94 道练习题库题目包括 PB-R5-001 至 PB-R5-012。R4 八道库与算法选择题、R3 十道 Nsight 报告分析题不变。只有 EX02、EX10、LAB02 编译已检查（Compile-Checked），EX10 无需运行验证（Runtime-Not-Applicable）。其余 21 个示例和全部 14 个实验共 35 个主体待硬件验证（Pending Hardware Verification）。P01-P12 四个证据数组为空。EX21 和 EX22 编译/已记录观察为空，主机检查不授予 GPU 证据。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察均为零。六份分析器计划只有预期内容。
 
 Q06-Q13、A10-A14 与 L01-L13 的四个证据数组均为空，不授予证据状态（Evidence Status）。L03-L05 只链接和复述精确的上游源码及测试合同；API 存在与上游测试不是本站编译或运行证据。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）；没有计时、加速比或赢家记录，L07 的发布也不提供 Lt 选择的运行证据。选定的 CCCL v3.4.2 坐标独立于 Toolkit 标签，只用于 12.9.2/13.3.1 评估，并排除 11.8。19 项可视化讲解仍是无 CUDA 证据的浏览器模型。
 

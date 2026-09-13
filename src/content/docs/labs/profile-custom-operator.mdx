@@ -1,0 +1,156 @@
+---
+title: 'LAB14：分析并优化自定义算子'
+description: 比较原始与候选 EX22 wheel，保留语义门禁，诚实记录框架与内核证据。
+pairId: lab14
+counterpart: /en/labs/profile-custom-operator/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, baseline, candidate, compare, dispatch, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB14
+prerequisites: [P11]
+relatedUnits: [P12, EX22, LAB13]
+exampleIds: [EX22]
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.12.14; torch 2.11.0+cu128; Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0; one CC 8.0+ GPU with at least 8 GB; CUPTI activity tracing permission.'
+estimatedMinutes: 120
+difficulty: advanced
+toolkitLanes: []
+extensionProfile: ex22-torch211-cu128-cp312
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions: ['Build and install wheels in learner-owned virtual environments', 'Access one CUDA device and CUPTI activity tracing', 'Read versions and library mappings; write owned reports; no hardware performance counters required']
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Both wheels should preserve the full EX22 contract.', 'CUDA profiling should retain correlated framework and kernel events; timing is collected separately.', 'Candidate improvement is an open hypothesis, not an expected guaranteed speedup.']
+  recordedObservations: []
+sources:
+  - { title: 'Pinned profiler', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py', version: 'PyTorch 2.11.0', platform: 'CUPTI activities and schedule', accessDate: '2026-09-13' }
+  - { title: 'Pinned operator integration', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'opcheck fake/meta autograd', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab14 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/labs/profile-custom-operator/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,baseline,candidate,compare,dispatch,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB14 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: P11 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P12,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.12.14; torch 2.11.0+cu128; Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0; one CC 8.0+ GPU with at least 8 GB; CUPTI activity tracing permission.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:extension-profile', content: ex22-torch211-cu128-cp312 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/profile-custom-operator/" lang="en">Read the English counterpart</a>
+
+## 实验合同
+
+分析已安装的原始 [EX22](/examples/adjacent-energy/) wheel，在学习者副本中实现 P11 有边界的候选，不削弱语义地比较两者。预计 120 分钟，另加准备时间。网站不运行 CUDA。完成运行活动需要两个 wheel 的检查、轨迹、测量和环境清单（Environment Manifest）；仅 CPU 门禁是部分进展。当前状态为**待硬件验证（Pending Hardware Verification）**。
+
+## 前置知识与源码
+
+精确前置条件为 `[P11]`：[P11](/frameworks/profile-led-optimization/) 提供假设和需保留的合同。EX22 仍是规范项目；[LAB13](/labs/build-custom-operator/) 提供已说明的环境/构建/导入步骤。下面单独调用的派发扩展还要求 [P12](/frameworks/sdpa-dispatch-verification/)，它不是 LAB14 算子活动的隐藏前置条件。
+
+使用包含 `scripts/framework-verification/check.py` 的学习站（Learning Site）干净检出。为工具和原始源码记录 `git rev-parse HEAD`；EX22 发布页保留不可变规范归档。学习者修改与 wheel 产物分别保存。不能用未跟踪工作树，却把干净提交作为完整源码标识报告。
+
+## 环境与权限门槛
+
+| 坐标 | 精确要求 |
+| --- | --- |
+| 主机 / Python | 原生 Ubuntu 24.04 x86-64；CPython 3.12.14 cp312；记录 kernel/glibc |
+| 框架与分析器 | torch 2.11.0+cu128，源码 70d99e998b4955e0049d13a98d77ae1b14db1f45；该构建附带的 torch.profiler |
+| 应用包 | scripts/pytorch-environment/requirements.lock 中现有 29 个分发包的哈希锁 |
+| 打包 CUDA | 家族 12.8；元包 12.8.1；runtime/CUPTI 12.8.90；cuDNN 9.19.0.56；记录所有已安装和实际加载组件 |
+| 扩展编译器 | Toolkit 12.8.1、NVCC 12.8.93、GCC/G++ 13.3.0、C++17、setuptools 81.0.0；CUDA_HOME=/usr/local/cuda-12.8；8.0+PTX |
+| GPU / 驱动 | 一个可见 CC >= 8.0 GPU，至少 8 GB；兼容驱动，保守基线 570.124.06；记录空闲显存 |
+| 权限 | 自有虚拟环境中的构建/安装；CUDA 访问；CUPTI 活动轨迹；读取标识与映射；写自有报告 |
+
+本实验不要求独立 Nsight 版本或性能计数器权限：分析器是精确 PyTorch 构建加打包 CUPTI。可选深入 Nsight 工作须按 [P07](/frameworks/python-to-cuda-profiling/) 单独声明版本和权限。工具检查 CUPTI 可用性；没有设备内核的 JSON 轨迹会失败，不能用仅 CPU 计时绕过。记录轨迹权限拒绝诊断，停止该阶段。不要以 root 运行应用来规避策略。
+
+## 准备与预测
+
+按 LAB13 准备哈希锁环境、构建两条原生路径并验证隔离已安装导入。清除 LD_PRELOAD 和旧 PYTORCH_CUDA_ALLOC_CONF，使用已检查的加载器环境与 `PYTORCH_ALLOC_CONF=backend:native`。通过 CUDA_VISIBLE_DEVICES 选择一块 GPU。在外部保存精确命令/退出码和编译器输出。从仓库根目录把 shell 变量设置为实际干净源码标识：
+
+```sh
+SOURCE_COMMIT=$(git rev-parse HEAD)
+```
+
+运行前预测 n=258 有 257 个输出、两个 256 线程块。说明各尺寸预计由启动开销还是设备工作主导，以及什么观察能推翻预测。这些是假设，不是观察输出。
+
+## 采集原始基线
+
+在原始 wheel 的虚拟环境中，从仓库根目录运行：
+
+```sh
+PYTORCH_ALLOC_CONF=backend:native python -I scripts/framework-verification/check.py --mode operator --device cuda --source-commit "$SOURCE_COMMIT" --output baseline-round-1
+```
+
+输出目录必须不存在。工具调用 EX22 规范验证器，再把 float32/float64 的 n=258,1003,1000000 全部前向输出与即时表达式比较。即时组合和已安装算子读取相同、预分配的有限二进制分数输入。梯度/fake/meta/编译/流覆盖来自计时前的规范验证器，不来自前向基准。
+
+每项操作预热 20 次。七组无分析器样本各在当前流 CUDA 事件（CUDA Event）之间执行 100 次；结束事件完成后读取时间。输入创建、验证、传输排除，输出分配包含。独立 CPU+CUDA 分析记录形状，以 wait=1、warmup=1、active=2、repeat=1 执行四次 `prof.step()`，每个诊断边界同步。分析器开销不进入无分析器中位数。
+
+## 构建并验证候选
+
+在新的学习者副本中，只应用 P11 从 256 到 128 的启动修改。为规范验证器的数值与梯度边界集合增加 n=128,129,130。提交学习者差异以获取不同源码标识，并在外部保留该差异。使用 LAB13 的 wheel 脚本，在独立干净匹配虚拟环境中构建/安装；重跑隔离 CPU/CUDA 检查，以及第二虚拟环境的正向/负向导入。保留两个 wheel 哈希和实际加载扩展哈希。本页不把任何修改内核发布为已测胜者。
+
+从候选检出使用其真实 SOURCE_COMMIT 和新的 `candidate-round-1` 输出目录执行同一命令。用旧已安装 wheel 重跑原命令，不是在测试候选。EX22 的合法 dtype、CPU 路径、自动微分（Autograd）注册、fake/meta 和打包合同均须保留。
+
+## 比较与决策
+
+至少三轮交替基线/候选进程顺序，每次尝试使用新目录。匹配尺寸、dtype、前向/分配范围、时钟/功耗策略、竞争负载和软件。保留每项七个样本及中位数/离散程度，只对匹配且正确的用例报告比值。比较原始 **operator** 行与候选 **operator** 行；eager 行用于解释组合开销，不是原始原生基线。
+
+在本地检查完整轨迹：连接框架区间与原始/候选内核启动，观察间隙，区分请求字节与已测内存流量。本活动不采集 DRAM 计数器。若收益淹没在波动中、小尺寸回退超出预先策略，或任一正确性检查失败，保留原始实现。候选正确但没有加速，是有效实验结论。
+
+## 单独设门槛的 P12 派发扩展
+
+完成 P12 后，在同一精确应用环境中启动独立进程：
+
+```sh
+PYTORCH_ALLOC_CONF=backend:native python -I scripts/framework-verification/check.py --mode sdpa --device cuda --source-commit "$SOURCE_COMMIT" --output dispatch-round-1
+```
+
+它不需要修改 EX22。对 P12 无掩码/dropout/GQA 前向夹具，使用由已舍入输入构造的 CPU float64 参考，在 AUTO 与四个强制策略间验证。FP16/BF16/FP32/FP64 使用 P12 固定容差；原生 BF16 和融合谓词为试验设门槛。不满足条件的行保留，执行/数值失败使尝试失败。要求后端事件识别与设备内核，并随后在本地检查关联。报告分别记录请求策略和观察事件，绝不只从开关推断 AUTO。不声明注意力反向结果。
+
+若仅做无 GPU 的工具/参考检查，在所选 Linux 环境使用 `--mode sdpa --device cpu` 和新输出目录。它检查 MATH float32/float64，不产生 CUDA 计时或 GPU 清单。它不完成本实验，也不验证 CUDA 派发。
+
+## 完成环境清单与产物包
+
+| 产物 | 必需内容 |
+| --- | --- |
+| report.json | 实际环境、逐项正确性/状态、策略、轨迹哈希、无分析器原始样本及中位数；保留失败 |
+| 命名轨迹 JSON | CPU 区间与设备内核，在本地检查完整关联；分析器配置 |
+| 构建/导入记录 | 工具和两个源码提交、候选差异、Python ABI、编译器/NVCC/标志、wheel 哈希、实际导入与扩展哈希、全部阶段退出码 |
+| 设备记录 | 驱动、GPU 标识/CC/数量、总/空闲显存、时钟/功耗策略、其他负载、当前流和完成边界 |
+| 软件记录 | 已安装包版本、实际加载 CUDA/cuDNN/CUPTI/libtorch 文件及哈希、分配器/加载器设置、确定性与 SDPA 控制 |
+| 决策记录 | 假设、匹配范围、包含失败的所有轮次、数值策略、保留/拒绝理由，适用时提供基准环境（Reference Environment）标识 |
+
+工具自动记录许多字段，包括实际 `/proc/self/maps` 库标识；根据观察补充构建、wheel、时钟、负载及基准环境（Reference Environment）字段。CLI 源码参数是待审计的声明，不证明工作树干净或 wheel 来源。保存本地详细诊断与退出码。公开提交前审查/脱敏路径和敏感轨迹数据，不盲目上传原始产物。
+
+## 预期观察与记录观察
+
+预期：两个 wheel 应保留 EX22 完整合同；CUPTI 分析应产生关联框架/内核事件；计时应独立采集。候选是否改善性能仍是开放假设。记录观察：**无**。编译证据为空，运行保持**待硬件验证（Pending Hardware Verification）**。CPU 测试、构造报告夹具和浏览器检查不授予 CUDA 证据、后端选择或性能结果。
+
+## 验收检查点
+
+要求全部语义/集成/导入检查、原始与候选产物标识、匹配轨迹/计时和完整清单。解释保留或拒绝候选的原因。没有 GPU 或拒绝分析权限仍是明确阻塞，只能记录已完成主机阶段。P12 可选扩展另要求逐策略矩阵和有限数值验收；不支持的策略不能计作成功执行。未来运行已验证（Runtime-Verified）声明必须经过声明基准环境中的维护者审查。
+
+## 清理
+
+保留失败尝试、源码/wheel 标识和已审查证据。保存后只删除自有一次性构建、虚拟环境和临时副本。不要重置共享 CUDA 状态或删除系统分析器/驱动文件。
+
+## 一手来源
+
+审查日期 2026-09-13：[SRC-CUDA-086](/sources-and-versions/#src-cuda-086) 记录精确分析器/派发源码及测试，[SRC-CUDA-084](/sources-and-versions/#src-cuda-084) 记录算子集成，[SRC-CUDA-085](/sources-and-versions/#src-cuda-085) 记录构建/导入，[SRC-CUDA-080](/sources-and-versions/#src-cuda-080) 记录打包组件。工具是原创 Apache-2.0 软件，本实验采用 CC BY 4.0。不复制上游代码或输出。

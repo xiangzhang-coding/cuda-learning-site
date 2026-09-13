@@ -1,0 +1,112 @@
+---
+title: 'P12：验证 SDPA 后端派发'
+description: 在固定 PyTorch 构建中区分注意力语义、后端开关、可用条件与实际执行。
+pairId: p12
+counterpart: /en/frameworks/sdpa-dispatch-verification/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, semantics, version, dispatch, validation, visual, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P12
+prerequisites: [A11, L11, P06, P07]
+relatedUnits: [P11, VIS18, LAB14]
+hardwareGate: none
+estimatedMinutes: 45
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'SDPA semantics', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/functional.py', version: 'PyTorch 2.11.0', platform: 'SDPA beta API and numerical policy', accessDate: '2026-09-13' }
+  - { title: 'Backend control', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/attention/__init__.py', version: 'PyTorch 2.11.0', platform: 'sdpa_kernel set_priority', accessDate: '2026-09-13' }
+  - { title: 'CUDA dispatch and eligibility', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/transformers/cuda/sdp_utils.cpp', version: 'PyTorch 2.11.0', platform: 'Exact CUDA source gates', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p12 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/sdpa-dispatch-verification/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,semantics,version,dispatch,validation,visual,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P12 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'A11,L11,P06,P07' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P11,VIS18,LAB14' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/sdpa-dispatch-verification/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+“Flash 已开启”不是执行记录。用 45 分钟固定注意力请求，区分策略、可用条件与实际派发，并设计后端拒绝后仍然成立的数值检查。[LAB14](/labs/profile-custom-operator/) 的外部工具提供单独调用的 P12 验证扩展；网站不执行 CUDA。
+
+## 前置知识
+
+精确、有序的前置条件为 `[A11, L11, P06, P07]`：[A11](/algorithms/attention-as-an-io-problem/) 推导公式与 IO 模型，[L11](/libraries/attention-backend-dispatch/) 区分后端合同，[P06](/frameworks/mixed-precision-contracts/) 提供精度策略，[P07](/frameworks/python-to-cuda-profiling/) 连接调用区间与设备轨迹。[P11](/frameworks/profile-led-optimization/) 和 [VIS18](/visuals/attention-memory-traffic/) 是相关资源。
+
+## 从 IO 算法到框架调用
+
+注意力公式早于 IO 感知分块。A11 的历史来源解释了为什么避免实体化分数/概率矩阵可以减少流量。框架的缩放点积注意力（Scaled Dot-Product Attention，SDPA）接口允许多种实现满足同一公式。算法家族、Python API、满足条件的实现和实际内核仍是不同概念。论文不能证明今天的 dtype 或设备门槛。
+
+## 选择后端前先固定语义
+
+本次审查的实验是稠密前向推理：Q/K/V 分别连续存放，形状 `[1,2,128,64]`，步幅 `[16384,8192,64,1]`，头数相同，`scale=0.125`，无掩码，`dropout_p=0.0`、`is_causal=False`、`enable_gqa=False`。计算 `softmax_row(QK^T * 0.125)V`。输入采用有界确定性分数；参考计算将**已舍入的输入**提升到 CPU float64。FP16、BF16、FP32、FP64 是独立试验，不是对同一字节重新解释。
+
+在本实验以外，布尔掩码 True 表示该元素参与注意力；浮点掩码加到分数上。即使处于评估模式，丢弃（Dropout）仍遵循 `dropout_p`，调用者必须传零才能关闭。非方形序列的因果语义需要核对精确文档的对齐方式；不能为获得融合路径而删掉掩码或改变 scale。分组查询注意力（Grouped Query Attention，GQA）是实验性功能，本实验排除它。固定版本 functional 文档字符串中的 GQA 概述比部分源码/上游测试更窄，不能将它提升为通用支持矩阵。
+
+## 精确构建与明确限制的 beta 接口
+
+使用原生 Ubuntu 24.04 x86-64、CPython 3.12.14、`torch 2.11.0+cu128`，源码为 `70d99e998b4955e0049d13a98d77ae1b14db1f45`，遵循应用哈希锁，打包 CUDA 家族 12.8、runtime/CUPTI 12.8.90、cuDNN 9.19.0.56。EX22 扩展编译器仍为 Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0。L11 独立审查的 cuDNN 9.24.0/frontend 1.27.0 合同**不是**这个 wheel 的组件矩阵。
+
+该 SHA 的 `scaled_dot_product_attention`、`SDPBackend` 和 `sdpa_kernel` 都标记为 beta。稳定课程（Stable Curriculum）的前置依赖是持久的公式、数值策略与证据推理；可执行 API 练习是这一精确构建下有版本门槛的案例，升级前必须重查。上下文签名是 `sdpa_kernel(backends, set_priority=False)`，不能猜用其他版本的参数拼写。列表允许多个选择；只有 `set_priority=True` 才把顺序作为优先级请求。实现会在退出时恢复先前的开关，以及按需恢复优先级，异常退出也如此。优先使用上下文而不是无范围的全局开关；旧 `torch.backends.cuda.sdp_kernel` 不是本课的控制接口。
+
+## 派发的四个阶段
+
+| 阶段 | 保存内容 | 边界 |
+| --- | --- | --- |
+| 允许策略 | AUTO，或单独允许 MATH/FLASH_ATTENTION/EFFICIENT_ATTENTION/CUDNN_ATTENTION 的上下文 | 开启不表示满足条件 |
+| 可用条件 | 实际 `SDPAParams`，以及 `can_use_flash_attention`、`can_use_efficient_attention` 或 `can_use_cudnn_attention` 与 debug 诊断 | 谓词不是执行，也不是测得的偏好 |
+| 执行 | 精确内部 ATen 后端事件、关联设备内核轨迹、完成检查 | 宽泛的 `scaled_dot_product_attention` 区间不能单独识别后端 |
+| 验收 | 有限输出、形状、固定参考/容差和完整环境清单（Environment Manifest） | 正确性不证明速度或跨设备可重复性 |
+
+所选 CUDA 源码检查编译功能、运行期开关、张量设备/形状/步幅/dtype、头维度与设备支持。该版本 Flash 的 NVIDIA 硬件区间为 SM80 到 SM121，且另有条件；不是所有未来计算能力的承诺。本练习要求单个计算能力（Compute Capability）至少 8.0、显存至少 8 GB 的 GPU，然后仍要应用实际逐调用谓词。BF16 还须有原生 BF16 支持。数学实现支持 float64；half/BF16 数学路径的中间结果默认保持 float。不能假设每个融合后端都支持 float32 或 float64。
+
+默认优先级并非总是 Flash 优先。精确源码可能根据实际加载 cuDNN、GPU 主/次架构号以及 `TORCH_CUDNN_SDPA_DEPRIORITIZED` 优先考虑 cuDNN；它选择当前顺序中第一个可用后端，不是逐调用基准测试的胜者。不能把源码中关于速度的注释当作实测结果。首次调用前记录开关和环境，不能将一块设备的顺序推断到另一块。
+
+## 对支持的选择进行数值验证
+
+对每个试验 dtype，用外部工具执行 AUTO，以及每个强制单后端上下文。工具只跳过可用性谓词为假的情形（或缺少原生 BF16），保留 `ineligible` 阶段；非预期执行错误和数值错误会使运行失败。强制选择不受支持的后端，不意味着可以悄悄加入 MATH。手动演示强制调用失败时，使用新进程并保留诊断。不满足条件的行不是成功比较。
+
+为本有界输入夹具预先声明 `(atol,rtol)`：FP16 `(2e-3,2e-3)`、BF16 `(2e-2,2e-2)`、FP32 `(1e-5,1e-4)`、FP64 `(1e-12,1e-10)`。逐元素检查 `abs(error) <= atol + rtol*abs(reference)`，拒绝非有限值，保存最大绝对误差和全部失败。这些是夹具验收阈值，不是后端通用误差界。CPU MATH float32/float64 测试检查工具与参考计算，不证明 CUDA 派发。
+
+固定版本 CUDA 轨迹识别器区分 `aten::_scaled_dot_product_attention_math`、`aten::_scaled_dot_product_flash_attention`、`aten::_scaled_dot_product_efficient_attention` 和 `aten::_scaled_dot_product_cudnn_attention`。它还要求设备内核事件；缺失或歧义识别按失败处理。发布后端声明前，在本地检查关联关系与完整轨迹。名称是精确构建的诊断依据，不是稳定的公开查询 API。
+
+cuDNN 可能选择非确定性算法；`torch.backends.cudnn.deterministic` 和 `torch.use_deterministic_algorithms` 是单独记录的控制，不是数值容差。确定性（Determinism）可能改变可用条件或引发异常。同环境可重复不保证跨架构、版本或实现的逐位一致。若实验确定性策略，应启动新进程，在工作前设置并记录策略，重新执行整个矩阵，保留拒绝结果。本前向实验不提供注意力反向声明。
+
+## 复用现有 IO 可视化
+
+打开 [VIS18](/visuals/attention-memory-traffic/)。`N=8,d=4,Br=Bc=4` 时，其 FP32 逻辑账本仍为 **512 elements = 2048 B** 与 **192 elements = 768 B**，差值 **1280 B**。它解释实体化，不表示本课更大张量的 CUDA 流量。不能因 FP16 将数值减半、把轨道标成“Flash”和“cuDNN”，或由动画推断已选后端。直接复用键盘控制、静态回退与双语讲解，不复制实现。
+
+## 证据边界
+
+本页没有后端选择、轨迹、计时或加速比结果，单元四个证据数组均为空。外部尝试在合格基准环境（Reference Environment）审查前保持**待硬件验证（Pending Hardware Verification）**；写着 passed 的报告不能自行授予证据状态（Evidence Status）。后端拒绝时保留失败与原参考。未来提交需要实际驱动/GPU/组件版本、加载库、输入与策略、轨迹标识、已检查的结果及精确计时范围。
+
+## 回忆检查
+
+1. 开启、满足条件、已经执行各自说明什么？
+2. 为什么仅进入评估模式不能关闭 SDPA dropout？
+3. `set_priority=True` 为后端列表增加了什么语义？
+4. 为什么提升已舍入输入，而不是改用另一组全精度输入作比较？
+5. 为什么确定性、数值准确性与后端身份是独立声明？
+
+## 练习
+
+完成[派发练习](/frameworks/sdpa-dispatch-verification/exercises/)，再查看[独立解答](/frameworks/sdpa-dispatch-verification/solutions/)。审计 [PB-R5-012](/practice/#pb-r5-012)。[LAB14](/labs/profile-custom-operator/) 提供单独设门槛的外部派发命令与产物要求。
+
+## 一手来源
+
+[SRC-CUDA-086](/sources-and-versions/#src-cuda-086) 记录 Context7 发现过程和精确上游 functional 文档字符串、控制实现、CUDA 派发源码、transformer 测试与 profiler 测试，审查日期 2026-09-13。[SRC-CUDA-080](/sources-and-versions/#src-cuda-080) 提供所选 wheel 的组件锁。只阅读、转述上游代码/测试，不复制，也不声称已执行。A11 已有历史来源只解释算法。

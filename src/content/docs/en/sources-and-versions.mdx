@@ -1,6 +1,6 @@
 ---
 title: Sources and Version Record
-description: Exact publishing and technical sources for the curriculum through P10, EX22 and LAB13, with independent version, rights and evidence records.
+description: Exact publishing and technical sources for the curriculum through P12, EX22 and LAB14, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
 factCheckDate: '2026-09-13'
@@ -33,6 +33,7 @@ structure:
   - entry-src-cuda-083
   - entry-src-cuda-084
   - entry-src-cuda-085
+  - entry-src-cuda-086
   - content-sources
   - review-record
 evidence:
@@ -56,18 +57,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P10, EX01-EX22 and LAB01-LAB13. Nineteen Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
+This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, EX01-EX22 and LAB01-LAB14. Nineteen Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
 
 ## Scope of this record
 
-The **2026-09-13 current publication** has 85 Learning Units, 22 Runnable Examples, 13 Labs, 19 Visual Explainers, 84 Exercise-set and 84 separate solution-set Publication Pairs: **310 Publication Pairs / 620 source routes**. Its **429 catalog records** contain 13 Labs, 92 Practice Bank entries, 19 Visual Explainers, 204 Glossary terms and 101 source records. Issue #44 adds SRC-CUDA-084/085; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-13 current publication** has 87 Learning Units, 22 Runnable Examples, 14 Labs, 19 Visual Explainers, 86 Exercise-set and 86 separate solution-set Publication Pairs: **317 Publication Pairs / 634 source routes**. Its **433 catalog records** contain 14 Labs, 94 Practice Bank entries, 19 Visual Explainers, 204 Glossary terms and 102 source records. Issue #45 adds SRC-CUDA-086; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -755,9 +756,31 @@ The three PyTorch files share the exact root BSD-3-Clause/NOTICE ancestry above.
 
 Selected row: native Ubuntu 24.04 x86-64, CPython `3.12.14`, torch `2.11.0+cu128`, packaged runtime/CUPTI `12.8.90`, separate Toolkit `12.8.1`, NVCC `12.8.93`, GCC `13.3.0`, `c++17`, `8.0+PTX`. Official amd64 devel container identity is `sha256:4b9ed5fa8361736996499f64ecebf25d4ec37ff56e4d11323ccde10aa36e0c43`; resolving it is not a build result. Build rejects mismatches and uses installed hash-locked torch/setuptools without isolated re-resolution. It claims no abi3 or stable LibTorch ABI. Fresh isolated imports test the wheel; CUDA mode has no passing hardware skip. EX22/LAB13 retain empty compilation/recorded observations and Pending Hardware Verification runtime.
 
+<span id="src-cuda-086" class="resource-target"></span>
+
+## SRC-CUDA-086: Profile-led optimization and exact SDPA dispatch
+
+**Related IDs:** P11, P12, LAB14, EX22, VIS18. **Access/review:** 2026-09-13. Context7 `/pytorch/pytorch/v2.11.0` was queried separately for SDPA controls/eligibility/dtypes/determinism, profiler scheduling/export and custom-operator integration. Some results pointed at main; selected-release source below governs. Current documentation discovery grants no runtime result.
+
+All references below belong to PyTorch 2.11.0 at `70d99e998b4955e0049d13a98d77ae1b14db1f45`. SHA-256 values were computed from the exact full files:
+
+| File | SHA-256 and reviewed purpose |
+| --- | --- |
+| [torch/nn/functional.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/functional.py) | `06f330c5ce12f7a7b5be938fb4fd1b78dadcc4a345c49aac58dbb923b3a3a405`; SDPA beta, mask/dropout/scale, math precision, experimental GQA |
+| [torch/nn/attention/__init__.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/attention/__init__.py) | `56e10b6f965cc050db782dd4dc472097c9b02ec5b5fe3ab2c8b04055c0b0bbe0`; SDPBackend, sdpa_kernel beta, set_priority and finally restoration |
+| [torch/backends/cuda/__init__.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/backends/cuda/__init__.py) | `c70bd54e7d4b995ddd822cb70d7d8e140b95a2d8e61635bf2c580b8045d83c11`; SDPAParams and eligibility diagnostics |
+| [CUDA sdp_utils.cpp](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/transformers/cuda/sdp_utils.cpp) | `b3147692c23222489ec3864d2272b0d83110310a7a064e1a9e73e5bcb9f25ba2`; exact device/dtype/shape gates, cuDNN preference and selection |
+| [torch/profiler/profiler.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py) | `ee59c2a780b5a01039bc35f179f738e2eee01b6797b50ac14ac3891f0aa6bff6`; CUPTI fallback, schedule and trace export |
+| [test/test_transformers.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/test_transformers.py) | `817eca720aca4e078f0ace8a5ac8a4181772230fd01a35d78efb63d0094c83cb`; SDPA references, math gradcheck, dtype, priority restoration and determinism tests |
+| [test/profiler/test_profiler.py](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/profiler/test_profiler.py) | `66472f0354bb15be0c0863bc36a9ad612d1da2bbe1c9121e96603e1999a24d8b`; scheduled counts and basic Chrome trace tests |
+
+The untruncated owner tree was checked for intervening LICENSE/NOTICE/COPYING files along these paths: none intervenes. Each retains root [LICENSE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE), BSD-3-Clause, SHA-256 `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43`, and [NOTICE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE), SHA-256 `c2cc7bf0caec7652c2b460a8a470bea1677f241e4ab8e431df34cf17f5a9fec0`. Owner/contributor copyrights, conditions and disclaimer remain with those files. This ancestry does not relicense vendor implementations or packaged CUDA/cuDNN/CUPTI binaries, whose exact rights remain in SRC-CUDA-080 and the external dependency ledger.
+
+Owner tests were inspected, not executed. Their speed expectations are not project observations, their XPU priority test is not a CUDA rule, and the functional GQA summary is not treated as a complete source-level support matrix. P12 excludes GQA, masks and backward in its executable fixture. Beta controls and internal diagnostic names are exact-build case-study dependencies, not version-independent prerequisites. P11's contract-preserving candidate, LAB14 and the report parser are original work; no upstream code, table, test, trace or timing is copied. VIS18 is linked unchanged. No selected backend, generated-code result or performance evidence is created by this source review.
+
 ## Content and asset sources
 
-- Home, 85 Learning Units, 22 Runnable Examples, 13 Labs, 92 Practice Bank entries, 204 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
+- Home, 87 Learning Units, 22 Runnable Examples, 14 Labs, 94 Practice Bank entries, 204 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
@@ -791,4 +814,4 @@ On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-si
 
 Immutable `src/r3-release-manifest.json` retains 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including ten Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 61 Exercise sets, 61 solution sets, 232 Publication Pairs, and 464 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains its dynamic acceptance. R4 additionally qualifies eight existing library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. The R3 subset remains PB-R3-002 through PB-R3-005 and PB-R3-007 through PB-R3-012; both classifications are within the existing 82 entries.
 
-Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 21 other examples and 13 Labs remain Pending Hardware Verification, 34 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13 and P01-P10 retain empty evidence arrays. Six profiler plans remain expected-only; nineteen browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.
+Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 21 other examples and 14 Labs remain Pending Hardware Verification, 35 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13 and P01-P12 retain empty evidence arrays. Six profiler plans remain expected-only; nineteen browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.

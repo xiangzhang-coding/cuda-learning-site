@@ -448,6 +448,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-001', 'PB-R5-002', 'PB-R5-003',
       'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007',
       'PB-R5-008', 'PB-R5-009', 'PB-R5-010',
+      'PB-R5-011', 'PB-R5-012',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -532,6 +533,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-008': 'frameworks/first-custom-operator',
       'PB-R5-009': 'frameworks/operator-registration',
       'PB-R5-010': 'frameworks/operator-packaging',
+      'PB-R5-011': 'frameworks/profile-led-optimization',
+      'PB-R5-012': 'frameworks/sdpa-dispatch-verification',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -803,9 +806,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-008': ['frameworks/first-custom-operator', 'examples/adjacent-energy'],
       'PB-R5-009': ['frameworks/operator-registration', 'examples/adjacent-energy'],
       'PB-R5-010': ['frameworks/operator-packaging', 'examples/adjacent-energy', 'labs/build-custom-operator'],
+      'PB-R5-011': ['frameworks/profile-led-optimization', 'examples/adjacent-energy', 'labs/profile-custom-operator'],
+      'PB-R5-012': ['frameworks/sdpa-dispatch-verification', 'visuals/attention-memory-traffic'],
     };
 
-    expect(entrySections).toHaveLength(92);
+    expect(entrySections).toHaveLength(94);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];

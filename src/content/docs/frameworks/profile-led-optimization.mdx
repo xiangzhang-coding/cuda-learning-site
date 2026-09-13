@@ -1,0 +1,109 @@
+---
+title: 'P11：用性能分析指导算子优化'
+description: 为 EX22 建立可证伪的优化假设，保留全部集成合同，将无分析器计时与诊断轨迹分开比较。
+pairId: p11
+counterpart: /en/frameworks/profile-led-optimization/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, baseline, hypothesis, implementation, verification, measurement, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P11
+prerequisites: [P07, P09, Q06]
+relatedUnits: [P10, P12, EX22, LAB14]
+hardwareGate: none
+estimatedMinutes: 45
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Pinned profiler implementation', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py', version: 'PyTorch 2.11.0', platform: 'CPU ranges and CUPTI CUDA activities', accessDate: '2026-09-13' }
+  - { title: 'Pinned custom operator contracts', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'Fake, autograd and opcheck', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p11 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/frameworks/profile-led-optimization/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,baseline,hypothesis,implementation,verification,measurement,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P11 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P07,P09,Q06' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P10,P12,EX22,LAB14' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/frameworks/profile-led-optimization/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+算子已经正确，应用却仍然很慢。本单元带你判断修改内核是否针对已测瓶颈，制作一个有边界的启动几何候选，并在正确性和公平比较支持它时才保留修改。学习单元（Learning Unit）预计 45 分钟，[LAB14](/labs/profile-custom-operator/) 预计 120 分钟。
+
+## 前置知识
+
+精确、有序的前置条件是 `[P07, P09, Q06]`：[P07](/frameworks/python-to-cuda-profiling/) 连接 Python 区间与 GPU 工作，[P09](/frameworks/operator-registration/) 提供注册和梯度知识，[Q06](/correctness/apod-optimization-loop/) 提供 APOD 测量与优化循环。[P10](/frameworks/operator-packaging/) 是相关的打包深入学习。[EX22](/examples/adjacent-energy/) 仍是唯一的规范可运行示例（Runnable Example）项目。
+
+## 为什么优化不能只看一个内核
+
+即时执行（Eager Execution）的张量组合便于核对公式，但分开的操作可能引入临时存储和派发开销。融合的原生算子能够减少这些边界，同时也对外围编译器不透明：`torch.compile` 不会自动优化它的原生函数体。启动次数减少只是成本假设，不是已测加速比。前向融合也不能说明由多个可微操作组成的反向路径是否更快。
+
+## 固定可观察合同
+
+EX22 计算 `y[i]=(x[i+1]-x[i])^2`。保留连续一维 CPU/CUDA float32 或 float64 输入、`1 <= n <= 1000000`、有存储偏移的连续视图、不修改输入，以及设备和 dtype 相同、长度为 `n-1` 的新连续输出。单元素输入返回空输出，不启动零线程块网格。非连续、整数、half、空、一维以外和超预算输入仍须拒绝。
+
+对上游梯度 g，`q=2*(x[1:]-x[:-1])*g`，随后 `dx=pad_left(q)-pad_right(q)`。候选保留 schema、CPU 实现、符号 fake/meta 检查、注册的自动微分（Autograd）、二阶导数和已安装 wheel 的导入行为。设备保护、当前 CUDA 流（CUDA Stream）和启动错误检查都是正确性的一部分。隐式全设备同步或改用默认流都不是可接受的优化。
+
+## 建立两种基线
+
+先执行 [LAB13](/labs/build-custom-operator/) 的规范 CPU/CUDA 验证器与 wheel/导入门禁，再用 LAB14 外部工具比较即时差分平方表达式与已安装的原始 EX22 wheel。这个比较用于理解融合；优化验收比较的是**原始 EX22 wheel 与候选 EX22 wheel**，两者使用同一工具和输入。
+
+工作负载包含 float32、float64 的 `n=258,1003,1000000`，使用有限二进制分数并要求精确前向结果。计时范围是预先准备输入上的前向执行加输出分配；输入生成、传输、编译、正确性检查和性能分析均在计时外。训练及应用端到端时间需要另设实验并明确标注。
+
+## 把轨迹转成可证伪假设
+
+| 待寻找的观察，并非已提供结果 | 候选问题 | 反证 |
+| --- | --- | --- |
+| 小输入以主机启动间隙为主 | 在应用边界批量提交是否有帮助？ | 批处理改变所需语义，或没有降低墙钟时间 |
+| 大输入中原始 EX22 的设备耗时占比明显 | 128 线程是否比 256 线程更适合该负载？ | 无分析器的中位数差异落在跨轮波动内，或出现回退 |
+| 训练以反向耗时为主 | 前向调优能否影响总成本？ | 前向占比将收益上限压得过低 |
+| JSON 只有 CPU 区间，没有 CUDA 内核 | CUPTI 轨迹能力是否可用？ | 缺少可解释的设备轨迹 |
+
+若总时间占比 f 的部分加速 s 倍，理想整体上限为 `1 / ((1-f)+f/s)`。构造算例 `f=0.1,s=2` 得到约 `1.053`，不是应用实测收益。修改代码前，先决定哪项实验能区分竞争解释。
+
+## 制作一个有边界的候选
+
+在新的学习者 EX22 副本中，把 CUDA 启动从 `(count + 255) / 256, 256` 改为 `(count + 127) / 128, 128`。向上取整和线程块大小必须一起修改。保留内核边界判断与所有包装检查。记录差异和新源码标识，在独立干净的 wheel/环境中重新构建，并保存原 wheel 作为基线。这是候选，不表示 128 线程一定更快。
+
+n=258 对应 257 个输出：原始版本启动两个线程块，候选启动三个。128 线程时若仍使用 255 的取整偏移，会启动过多线程块；若只改线程块大小、仍除以 256，则可能漏算输出。两处算术必须一致。依赖对齐的向量化属于后续另一项实验：带偏移的连续输入意味着不能假定所有合法指针都有向量对齐。
+
+## 重跑语义与集成门禁
+
+要求通过 CPU/CUDA 参考值、输入保持、非均匀加权梯度、float64 gradcheck 和 gradgradcheck、opcheck、显式 meta/fake、fullgraph 动态前向/反向，以及非默认流用例。`opcheck` 检查注册用法，不证明导数公式。除规范尺寸外，还要覆盖新 128 线程几何两侧：n=128,129,130 分别产生 127,128,129 个输出。逐元素检查，不能只看校验和。
+
+同时重建 CPU 和 CUDA 实现，在第二个匹配的虚拟环境中非 editable 安装 wheel，并通过隔离的正向导入和缺失扩展的负向导入。旧的已安装二进制可能让源码差异看起来正确：每次运行都保存 wheel 与实际加载扩展的哈希。不能把修改后的内核作为原始不可变示例标识发布。
+
+## 将诊断与计时分开
+
+LAB14 使用 20 次预热、七组每组 100 次的无分析器采样，以及当前流上的 CUDA 事件（CUDA Event），完成后才读取时间。独立的 `torch.profiler` 采用 wait=1、warmup=1、active=2、repeat=1，每步末尾调用 `prof.step()`。分析器预热不等于应用预热。形状记录和轨迹采集会增加开销，轨迹时长不能代替无分析器采样。
+
+保存原始样本、中位数和离散程度、GPU 负载/时钟/功耗策略、源码/wheel 标识与环境清单（Environment Manifest）。至少三轮交替执行基线与候选进程；比较同一范围，披露小尺寸回退。收益不可区分或任一正确性门禁失败时保留原始版本。本页不提供轨迹、计时、后端或加速比结果；没有合格运行证据时，EX22 和 LAB14 保持**待硬件验证（Pending Hardware Verification）**。
+
+## 回忆检查
+
+1. 为什么更少的前向启动可能无法改善训练时间？
+2. 只支持对齐指针的向量化路径会威胁 EX22 的哪些合同？
+3. 为什么线程块变化时向上取整也必须变化？
+4. 哪些测试区分注册正确性与数值梯度？
+5. 为什么分析器表格或仅 CPU 的 wheel 检查不能证明 GPU 加速？
+
+## 练习
+
+完成[性能分析与实现练习](/frameworks/profile-led-optimization/exercises/)，再查看[独立解答](/frameworks/profile-led-optimization/solutions/)。审计 [PB-R5-011](/practice/#pb-r5-011)，执行 [LAB14](/labs/profile-custom-operator/)，再进入 [P12](/frameworks/sdpa-dispatch-verification/) 学习派发验证。
+
+## 一手来源
+
+2026-09-13 通过 Context7 和精确上游[分析器实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py)、[库注册](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py)核对。[SRC-CUDA-086](/sources-and-versions/#src-cuda-086) 记录分析器/派发源码与测试审查；[SRC-CUDA-084](/sources-and-versions/#src-cuda-084) 和 [SRC-CUDA-085](/sources-and-versions/#src-cuda-085) 保留算子与打包的精确权利记录。只链接并转述来源，课程和情景均为原创。

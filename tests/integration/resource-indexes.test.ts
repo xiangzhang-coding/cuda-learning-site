@@ -121,7 +121,7 @@ describe('published resource indexes', () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(92);
+    expect(practiceIds).toHaveLength(94);
 
     const localeContracts = [
       {
@@ -176,7 +176,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(92);
+      expect(prompts.size).toBe(94);
     }
   });
 
@@ -184,8 +184,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 13, practice: 92, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 101 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(225 + currentPublication.scope.glossaryTerms);
+    expect(counts).toEqual({ labs: 14, practice: 94, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 102 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(229 + currentPublication.scope.glossaryTerms);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -193,7 +193,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['LAB14', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['LAB15', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);

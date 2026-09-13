@@ -48,6 +48,7 @@ for (const locale of ['', 'en/']) {
       links.map((link) => link.getAttribute('href')).sort())).toEqual([
       'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',
       'first-custom-operator', 'operator-registration', 'operator-packaging',
+      'profile-led-optimization', 'sdpa-dispatch-verification',
     ].map((slug) => `/${locale}frameworks/${slug}/`).sort());
     for (const { slug, id } of units.slice(1)) {
       await page.locator(`main a[href="/${locale}${slug}/"]`).first().click();

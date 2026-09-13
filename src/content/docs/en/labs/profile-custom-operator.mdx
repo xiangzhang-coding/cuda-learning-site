@@ -1,0 +1,156 @@
+---
+title: 'LAB14: Profile and Optimize the Custom Operator'
+description: Compare an original and candidate EX22 wheel, preserve semantic gates, and retain honest framework and kernel evidence.
+pairId: lab14
+counterpart: /labs/profile-custom-operator/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, baseline, candidate, compare, dispatch, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB14
+prerequisites: [P11]
+relatedUnits: [P12, EX22, LAB13]
+exampleIds: [EX22]
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.12.14; torch 2.11.0+cu128; Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0; one CC 8.0+ GPU with at least 8 GB; CUPTI activity tracing permission.'
+estimatedMinutes: 120
+difficulty: advanced
+toolkitLanes: []
+extensionProfile: ex22-torch211-cu128-cp312
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions: ['Build and install wheels in learner-owned virtual environments', 'Access one CUDA device and CUPTI activity tracing', 'Read versions and library mappings; write owned reports; no hardware performance counters required']
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Both wheels should preserve the full EX22 contract.', 'CUDA profiling should retain correlated framework and kernel events; timing is collected separately.', 'Candidate improvement is an open hypothesis, not an expected guaranteed speedup.']
+  recordedObservations: []
+sources:
+  - { title: 'Pinned profiler', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py', version: 'PyTorch 2.11.0', platform: 'CUPTI activities and schedule', accessDate: '2026-09-13' }
+  - { title: 'Pinned operator integration', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'opcheck fake/meta autograd', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab14 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/labs/profile-custom-operator/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,baseline,candidate,compare,dispatch,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB14 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: P11 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P12,EX22,LAB13' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX22 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.12.14; torch 2.11.0+cu128; Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0; one CC 8.0+ GPU with at least 8 GB; CUPTI activity tracing permission.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:extension-profile', content: ex22-torch211-cu128-cp312 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/profile-custom-operator/" lang="zh-CN">阅读中文对应页</a>
+
+## Lab contract
+
+Profile the installed original [EX22](/en/examples/adjacent-energy/) wheel, implement P11's bounded candidate in a learner copy, and compare both without weakening semantics. Allow 120 minutes plus setup. The website never runs CUDA. Successful runtime completion needs both wheels' checks, traces, measurements and manifest; a CPU-only gate is partial progress. Current runtime status is **Pending Hardware Verification**.
+
+## Prerequisites and source
+
+The exact prerequisite is `[P11]`: [P11](/en/frameworks/profile-led-optimization/) supplies the hypothesis and preserved contracts. EX22 remains canonical; [LAB13](/en/labs/build-custom-operator/) supplies the already-described environment/build/import procedure. The separately invoked dispatch extension below additionally requires [P12](/en/frameworks/sdpa-dispatch-verification/); it is not a hidden prerequisite for LAB14's operator activity.
+
+Use a clean checkout of this Learning Site containing `scripts/framework-verification/check.py`. Record `git rev-parse HEAD` for the harness and original source; EX22's published page retains its immutable canonical archive. Keep learner modifications and wheel outputs separate. Do not substitute an untracked working tree while reporting its clean commit as the full source identity.
+
+## Required environment and permission gates
+
+| Coordinate | Exact requirement |
+| --- | --- |
+| Host / Python | Native Ubuntu 24.04 x86-64; CPython 3.12.14 cp312; record kernel/glibc |
+| Framework and profiler | torch 2.11.0+cu128 at 70d99e998b4955e0049d13a98d77ae1b14db1f45; torch.profiler shipped in that build |
+| Application packages | Existing 29-distribution hash lock in scripts/pytorch-environment/requirements.lock |
+| Packaged CUDA | Family 12.8; metapackage 12.8.1; runtime/CUPTI 12.8.90; cuDNN 9.19.0.56; record all installed and actually loaded components |
+| Extension compiler | Toolkit 12.8.1, NVCC 12.8.93, GCC/G++ 13.3.0, C++17, setuptools 81.0.0; CUDA_HOME=/usr/local/cuda-12.8; 8.0+PTX |
+| GPU / driver | One visible CC >= 8.0 GPU, at least 8 GB; compatible driver, conservative baseline 570.124.06; record free memory |
+| Permissions | Build/install in owned venvs; CUDA access; CUPTI activity tracing; read identities and mappings; write owned reports |
+
+No standalone Nsight version or performance-counter access is required for this Lab: its profiler is the exact PyTorch build plus packaged CUPTI. Optional deeper Nsight work must declare its own version and permissions under [P07](/en/frameworks/python-to-cuda-profiling/). CUPTI availability is checked, and a JSON trace with no device kernels fails; do not bypass it with CPU-only timing. Record a denied-tracing diagnostic and stop that phase. Do not run the application as root to evade policy.
+
+## Prepare and predict
+
+Follow LAB13 to prepare the hash-locked environment, build both native paths, and verify isolated installed imports. Unset LD_PRELOAD and legacy PYTORCH_CUDA_ALLOC_CONF; use the checked loader environment and `PYTORCH_ALLOC_CONF=backend:native`. Select one GPU with CUDA_VISIBLE_DEVICES. Preserve exact commands/exits and compiler output externally. From the repository root, set a shell variable to the actual clean source identity:
+
+```sh
+SOURCE_COMMIT=$(git rev-parse HEAD)
+```
+
+Before running, predict that n=258 has 257 outputs and two 256-thread blocks. State whether you expect launch overhead or device work to dominate at each size, and what would refute that prediction. These are hypotheses, not observed outputs.
+
+## Capture the original baseline
+
+From the repository root in the original wheel's venv:
+
+```sh
+PYTORCH_ALLOC_CONF=backend:native python -I scripts/framework-verification/check.py --mode operator --device cuda --source-commit "$SOURCE_COMMIT" --output baseline-round-1
+```
+
+The new output directory must not already exist. The harness invokes EX22's canonical verifier, then checks every forward result for n=258,1003,1000000 in float32/float64 against the eager expression. It compares both eager composition and the installed operator; both read the same preallocated finite binary-fraction inputs. Gradients/fake/meta/compile/stream coverage comes from the canonical verifier before timing, not from the forward benchmark.
+
+Each operation warms up 20 calls. Seven unprofiled samples each run 100 calls between current-stream CUDA events; the end event completes before elapsed time is read. Input creation, validation and transfers are excluded, output allocation is included. A separate CPU+CUDA profile records shapes with wait=1, warmup=1, active=2, repeat=1 over four `prof.step()` calls, synchronizing at each diagnostic boundary. Keep profiler overhead out of the unprofiled medians.
+
+## Build and verify the candidate
+
+In a fresh learner copy, apply only P11's 256-to-128 launch change. Extend the canonical verifier with n=128,129,130 in its numerical and gradient boundary set. Commit the learner diff to obtain a distinct source identity, and retain that diff externally. Build/install in a separate clean matching venv using LAB13's wheel script; rerun isolated CPU/CUDA checks and second-venv positive/negative import verification. Preserve both wheel hashes and actual loaded-extension hashes. No changed kernel is published here as a measured winner.
+
+Run the same command from the candidate checkout with its real SOURCE_COMMIT and a new `candidate-round-1` output directory. Repeating the original run with the old installed wheel does not test the candidate. The EX22 source has not changed its accepted dtype, CPU path, autograd registration, fake/meta or packaging contracts.
+
+## Compare and decide
+
+Alternate baseline/candidate process order over at least three rounds, using new directories for every attempt. Match size, dtype, forward/allocation scope, clocks/power policy, competing load and software. Retain all seven samples per case and median/spread; report the ratio only for matched, correct cases. Compare original **operator** rows to candidate **operator** rows. Eager rows explain composition overhead but are not the original native baseline.
+
+Inspect full traces locally: connect framework ranges and original/candidate kernel launches, note gaps, and distinguish requested bytes from measured memory traffic. This activity does not collect DRAM counters. If improvement is lost in variability, smaller shapes regress outside your predeclared policy, or any correctness check fails, keep the original. A correct candidate with no speedup is a valid experimental conclusion.
+
+## Separately gated P12 dispatch extension
+
+After P12, in the same exact application environment, invoke a separate process:
+
+```sh
+PYTORCH_ALLOC_CONF=backend:native python -I scripts/framework-verification/check.py --mode sdpa --device cuda --source-commit "$SOURCE_COMMIT" --output dispatch-round-1
+```
+
+This does not require modifying EX22. It validates P12's no-mask/dropout/GQA forward fixture against a CPU float64 oracle from rounded inputs, across AUTO and four forced policies. FP16/BF16/FP32/FP64 use P12's fixed tolerances; native BF16 and fused predicates gate trials. Ineligible rows are retained, while execution/numerical failures fail the attempt. Backend event recognition plus device kernels is required, followed by local correlation inspection. It reports requested policy separately from observed events and never derives AUTO from flags alone. No attention backward is claimed.
+
+For a GPU-free tool/oracle check only, use `--mode sdpa --device cpu` in the selected Linux environment with a fresh output directory. It checks MATH float32/float64 and emits no CUDA timings or GPU manifest. It does not complete this Lab or verify CUDA dispatch.
+
+## Complete the Environment Manifest and artifact bundle
+
+| Artifact | Required contents |
+| --- | --- |
+| report.json | Actual environment, per-case correctness/status, policies, trace hashes, raw unprofiled samples and medians; failures preserved |
+| Named trace JSON files | CPU ranges and device kernels, full correlation inspected locally; profiler configuration |
+| Build/import records | Harness and both source commits, candidate diff, Python ABI, compiler/NVCC/flags, wheel hashes, resolved import and extension hashes, all stage exits |
+| Device record | Driver, GPU identity/CC/count, total/free memory, clocks/power policy, other workload, current stream and completion boundaries |
+| Software record | Installed package versions, actually loaded CUDA/cuDNN/CUPTI/libtorch files and hashes, allocator/loader settings, determinism and SDPA controls |
+| Decision record | Hypothesis, matched scopes, all rounds including failures, numerical policy, retain/reject rationale, Reference Environment identity if applicable |
+
+The tool records many fields automatically, including actual `/proc/self/maps` library identities; supplement build, wheel, clocks, load and Reference Environment fields manually from observations. A CLI source argument is a declaration to audit, not proof of a clean tree or wheel provenance. Keep detailed local diagnostics and exit codes. Review/redact paths and sensitive trace data before any public submission; do not upload raw artifacts blindly.
+
+## Expected observations and recorded observations
+
+Expected: both wheels should preserve EX22's full contract; CUPTI profiling should yield correlated framework/kernel events; timing should be collected separately. Whether the candidate improves performance is an open hypothesis. Recorded observations: **none**. Compilation evidence is empty; runtime is **Pending Hardware Verification**. CPU tests, constructed report fixtures and browser checks grant no CUDA evidence, backend choice or performance result.
+
+## Acceptance checkpoint
+
+Require all semantic/integration/import checks, both original/candidate artifact identities, matched traces/timings and a complete manifest. Explain why the candidate is retained or rejected. GPU absence or denied profiling remains an explicit blocker with partial host progress. P12's optional extension additionally requires its per-policy matrix and finite numerical acceptance; unsupported policies are not counted as passing executions. A future Runtime-Verified claim requires maintainer review in a declared Reference Environment.
+
+## Cleanup
+
+Retain failed attempts, source/wheel identities and reviewed evidence. Remove only owned disposable builds, venvs and temporary copies after preservation. Do not reset shared CUDA state or delete system profiler/driver files.
+
+## Primary sources
+
+Reviewed 2026-09-13: [SRC-CUDA-086](/en/sources-and-versions/#src-cuda-086) for exact profiler/dispatch source/tests, [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084) for operator integration, [SRC-CUDA-085](/en/sources-and-versions/#src-cuda-085) for build/import and [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) for packaged components. The harness is original Apache-2.0 software; this Lab is CC BY 4.0. No upstream code or output is copied.

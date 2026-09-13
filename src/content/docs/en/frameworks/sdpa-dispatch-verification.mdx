@@ -1,0 +1,112 @@
+---
+title: 'P12: Verify SDPA Backend Dispatch'
+description: Separate attention semantics, enabled backends, eligibility and observed execution in one pinned PyTorch build.
+pairId: p12
+counterpart: /frameworks/sdpa-dispatch-verification/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, semantics, version, dispatch, validation, visual, evidence, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P12
+prerequisites: [A11, L11, P06, P07]
+relatedUnits: [P11, VIS18, LAB14]
+hardwareGate: none
+estimatedMinutes: 45
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'SDPA semantics', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/functional.py', version: 'PyTorch 2.11.0', platform: 'SDPA beta API and numerical policy', accessDate: '2026-09-13' }
+  - { title: 'Backend control', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/attention/__init__.py', version: 'PyTorch 2.11.0', platform: 'sdpa_kernel set_priority', accessDate: '2026-09-13' }
+  - { title: 'CUDA dispatch and eligibility', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/transformers/cuda/sdp_utils.cpp', version: 'PyTorch 2.11.0', platform: 'Exact CUDA source gates', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p12 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/sdpa-dispatch-verification/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,semantics,version,dispatch,validation,visual,evidence,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P12 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'A11,L11,P06,P07' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P11,VIS18,LAB14' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/sdpa-dispatch-verification/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning outcome
+
+“Flash is enabled” is not an execution record. In 45 minutes you will freeze an attention request, distinguish policy from eligibility and actual dispatch, and design a numerical check that survives backend rejection. The external harness in [LAB14](/en/labs/profile-custom-operator/) supplies a separately invoked P12 verification extension; the website executes no CUDA.
+
+## Prerequisites
+
+Exact ordered prerequisites `[A11, L11, P06, P07]`: [A11](/en/algorithms/attention-as-an-io-problem/) develops the equation and IO model, [L11](/en/libraries/attention-backend-dispatch/) separates backend contracts, [P06](/en/frameworks/mixed-precision-contracts/) supplies precision policy, and [P07](/en/frameworks/python-to-cuda-profiling/) connects call ranges and device traces. [P11](/en/frameworks/profile-led-optimization/) and [VIS18](/en/visuals/attention-memory-traffic/) are related resources.
+
+## From an IO algorithm to a framework call
+
+Attention's equation preceded IO-aware tiling. A11's historical sources explain why avoiding a materialized score/probability matrix can reduce traffic. A framework's scaled dot-product attention (SDPA) interface lets several implementations satisfy that equation. The algorithm family, Python API, eligible implementation and observed kernel remain different things. A paper cannot establish today's dtype or device gate.
+
+## Freeze semantics before selection
+
+The reviewed experiment is dense forward inference with separate contiguous Q/K/V of shape `[1,2,128,64]`, strides `[16384,8192,64,1]`, equal heads, `scale=0.125`, no mask, `dropout_p=0.0`, `is_causal=False`, `enable_gqa=False`. It computes `softmax_row(QK^T * 0.125)V`. Inputs use bounded deterministic fractions, and the oracle promotes the **already rounded inputs** to CPU float64. FP16, BF16, FP32 and FP64 are separate trials, not reinterpretations of the same bytes.
+
+Outside this experiment, Boolean mask True means an element participates; a floating mask adds to scores. Dropout follows `dropout_p` even during evaluation unless the caller passes zero. Causal behavior for non-square lengths needs its exact documented alignment; never remove a mask or change scale to get a fused path. GQA is experimental and excluded here. The pinned functional docstring's GQA summary is narrower than some owner source/tests; do not promote it into a universal support table.
+
+## One exact build, explicitly bounded beta surfaces
+
+Use native Ubuntu 24.04 x86-64, CPython 3.12.14, `torch 2.11.0+cu128` at `70d99e998b4955e0049d13a98d77ae1b14db1f45`, the application's hash lock, packaged CUDA family 12.8, runtime/CUPTI 12.8.90 and cuDNN 9.19.0.56. The EX22 extension compiler remains Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0. L11's independently reviewed cuDNN 9.24.0/frontend 1.27.0 contract is **not** this wheel's component matrix.
+
+`scaled_dot_product_attention`, `SDPBackend` and `sdpa_kernel` are marked beta at this SHA. Stable Curriculum prerequisites are the durable equation, numerical policy and evidence reasoning; the executable API exercise is this exact-build, version-gated case study. Recheck it before a version change. The context signature is `sdpa_kernel(backends, set_priority=False)`, not a guessed spelling from another release. A list enables choices; its order is a priority request only with `set_priority=True`. The implementation restores previous enabled flags and, when requested, priority on exit, including exceptional exit. Prefer this context to unscoped global toggles; legacy `torch.backends.cuda.sdp_kernel` is not the teaching control surface.
+
+## Four stages of dispatch
+
+| Stage | What to retain | Limit |
+| --- | --- | --- |
+| Enabled policy | AUTO, or a singleton MATH/FLASH_ATTENTION/EFFICIENT_ATTENTION/CUDNN_ATTENTION context | Enabled does not mean eligible |
+| Eligibility | Actual `SDPAParams` plus `can_use_flash_attention`, `can_use_efficient_attention` or `can_use_cudnn_attention`, with debug diagnostics | A predicate is not execution or measured preference |
+| Execution | Exact internal ATen backend event and associated device-kernel trace, checked completion | A broad `scaled_dot_product_attention` range alone does not identify a backend |
+| Acceptance | Finite output, shape, fixed oracle/tolerances and full Environment Manifest | Correctness does not prove speed or cross-device repeatability |
+
+The selected CUDA source checks compiled features, runtime flags, tensor device/shape/strides/dtype, head dimensions and device support. Flash's NVIDIA hardware interval is SM80 through SM121 at this source revision, with further constraints; it is not an all-future-CC promise. This exercise requires one CC >= 8.0 GPU with at least 8 GB, then still applies the actual per-call predicates. BF16 additionally requires native BF16 support. The math implementation supports float64; half/BF16 math intermediates are float by default. Do not assume every fused backend supports float32 or float64.
+
+Default priority is not universally Flash-first. The exact source can prefer cuDNN based on loaded cuDNN, GPU major/minor and `TORCH_CUDNN_SDPA_DEPRIORITIZED`; it selects the first viable backend in the current order, not the winner of a per-call benchmark. Do not copy a source comment about speed as a measured result. Record flags and environment before the first call, and do not infer one device's order on another.
+
+## Validate across supported choices
+
+Run the external harness once for AUTO and separately under each forced singleton context for every trial dtype. The tool skips only a negative eligibility predicate (or absent native BF16), preserving that stage as `ineligible`; unexpected execution and numerical errors fail the run. A forced unsupported choice does not authorize silently adding MATH. If manually demonstrating the forced call's failure, do it in a fresh process and retain its diagnostics. Ineligible rows are not successful comparisons.
+
+For this bounded input fixture, predeclare `(atol,rtol)` as FP16 `(2e-3,2e-3)`, BF16 `(2e-2,2e-2)`, FP32 `(1e-5,1e-4)`, FP64 `(1e-12,1e-10)`. Check every output against `abs(error) <= atol + rtol*abs(reference)`, reject nonfinite values, retain maximum absolute error and all failures. These are fixture acceptance thresholds, not universal backend error bounds. CPU MATH float32/float64 tests check the harness/oracle without establishing CUDA dispatch.
+
+The pinned CUDA trace recognizer distinguishes `aten::_scaled_dot_product_attention_math`, `aten::_scaled_dot_product_flash_attention`, `aten::_scaled_dot_product_efficient_attention` and `aten::_scaled_dot_product_cudnn_attention`. It also requires device kernel events; missing or ambiguous recognition fails closed. Inspect correlation and the full trace locally before publishing a backend claim. Names are exact-build diagnostics, not a stable public introspection API.
+
+cuDNN may choose nondeterministic algorithms; `torch.backends.cudnn.deterministic` and `torch.use_deterministic_algorithms` are separate recorded controls, not numerical tolerances. Determinism can change eligibility or raise. Repeatability within an environment does not promise bitwise identity across architectures, releases or backend implementations. For a deterministic-policy experiment, start a new process, set and record policy before work, rerun the complete matrix, and preserve rejections. This forward experiment supplies no attention-backward claim.
+
+## Reuse the existing IO visual
+
+Open [VIS18](/en/visuals/attention-memory-traffic/). For `N=8,d=4,Br=Bc=4`, its FP32 logical ledger remains **512 elements = 2048 B** versus **192 elements = 768 B**, a **1280 B** difference. It illustrates materialization, not these larger tensors' CUDA traffic. Do not halve its totals for FP16, label its tracks “Flash” and “cuDNN,” or infer the selected backend from its animation. Its keyboard controls, static fallback and bilingual explanation are reused unchanged rather than duplicated.
+
+## Evidence boundary
+
+No backend selection, trace, timing or speedup is reported here. All four unit evidence arrays are empty. External attempts remain **Pending Hardware Verification** until qualifying Reference Environment review; a report that says passed is not self-certifying evidence. Preserve failures and the original oracle when a backend is rejected. A future submission needs actual driver/GPU/component versions, loaded libraries, inputs and policies, trace identity, checked results and the exact measurement scope.
+
+## Retrieval check
+
+1. What does enabled mean that eligible and executed do not?
+2. Why does evaluation mode alone not disable SDPA dropout?
+3. What does `set_priority=True` add to a backend list?
+4. Why promote rounded inputs rather than compare against different full-precision inputs?
+5. Why are determinism, numerical accuracy and backend identity separate claims?
+
+## Practice
+
+Complete the [dispatch Exercises](/en/frameworks/sdpa-dispatch-verification/exercises/) and consult the [separate solutions](/en/frameworks/sdpa-dispatch-verification/solutions/). Audit [PB-R5-012](/en/practice/#pb-r5-012). [LAB14](/en/labs/profile-custom-operator/) gives the separately gated external dispatch command and artifacts.
+
+## Primary sources
+
+[SRC-CUDA-086](/en/sources-and-versions/#src-cuda-086) records Context7 discovery and exact owner functional docstring, control implementation, CUDA dispatch source, transformer tests and profiler tests, reviewed 2026-09-13. [SRC-CUDA-080](/en/sources-and-versions/#src-cuda-080) supplies the selected wheel's component lock. Owner code/tests are read and paraphrased, not copied or claimed executed. A11's existing historical sources explain algorithms only.
