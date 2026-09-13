@@ -25,7 +25,7 @@ describe('EX22 canonical original operator', () => {
   });
 
   it('parses all Python sources and shell without importing torch or executing CUDA', () => {
-    const files = project.build.inputs.filter((file: string) => file.endsWith('.py'));
+    const files = [...new Set<string>([...project.build.inputs, ...project.build.hostTestInputs])].filter((file) => file.endsWith('.py'));
     execFileSync('python3', ['-I', '-c', 'import ast,sys; [ast.parse(s) for s in sys.argv[1:]]', ...files.map(read)]);
     execFileSync('bash', ['-n', path.join(example, 'scripts/check-wheel.sh')]);
   });

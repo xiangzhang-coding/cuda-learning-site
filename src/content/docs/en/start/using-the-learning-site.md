@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'

@@ -3,7 +3,7 @@ title: 关于本站
 description: CUDA 学习站的目的、范围、作者和反馈渠道。
 pairId: about
 counterpart: /en/about/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -60,7 +60,7 @@ Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](
 
 Issue #44 增加 [P08](/frameworks/first-custom-operator/)，先修 `[O04,F04,Q01,P04]`；[P09](/frameworks/operator-registration/)，先修 `[P08,Q01]`；[P10](/frameworks/operator-packaging/)，先修 `[P08,M18]`。[EX22](/examples/adjacent-energy/)和 [LAB13](/labs/build-custom-operator/)依赖 `[P08,P09]`，原创相邻能量算子有 CPU/CUDA 路径和独立固定的扩展 Toolkit。两者编译/已记录观察为空，运行待硬件验证（Pending Hardware Verification）。
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) 新增 [P04](/frameworks/queued-work-timing/)，有序先修 `[M07,Q05]`；[P05](/frameworks/streams-and-storage-lifetime/)，先修 `[P04,M08]`；[P06](/frameworks/mixed-precision-contracts/)，先修 `[Q02,P04,L08]`；[P07](/frameworks/python-to-cuda-profiling/)，先修 `[P04,Q07,Q08]`。相关边依次为 `[P05,P06,P07]`、`[P04]`、`[P04,P07]`、`[P05,P06]`。各单元练习只依赖本单元，独立解答只依赖对应练习集，恰好十二对，不新增可运行示例或实验。四个证据数组均为空。[独立 eager 配置](/sources-and-versions/#src-cuda-080)选择 PyTorch 2.11.0+cu128、CPython 3.12.14、CUDA 元包 12.8.1、runtime/CUPTI 12.8.90、cuDNN 9.19.0.56 及 native 分配器，不要求系统 Toolkit，也不继承 GPU 证据。P08、EX22、LAB13 与 Triton 目的地仍不存在。
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43)保留 [P04](/frameworks/queued-work-timing/) `[M07,Q05]`、[P05](/frameworks/streams-and-storage-lifetime/) `[P04,M08]`、[P06](/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`、[P07](/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`，含完整练习/解答和空证据数组。[独立 eager 配置](/sources-and-versions/#src-cuda-080)不需要系统 Toolkit。Issue #44 增加独立扩展工具链，Triton 目的地仍不存在。
 
 **R4 聚合静态复核：2026-09-10。** 技术来源保留各自访问与复核日期，当时的检索有单独的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)，不覆盖当前 Python 桥接增量。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 只在 CI、Preview、生产部署和远程冒烟检查结果实际产生后记录动态验收。R4 不表示框架或 Triton 路线已完成，也不为它们发布占位入口。
 

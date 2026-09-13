@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -60,7 +60,7 @@ As of **2026-09-13**, the current publication has 85 Learning Units, 22 Runnable
 
 Issue #44 adds [P08](/en/frameworks/first-custom-operator/) with `[O04,F04,Q01,P04]`, [P09](/en/frameworks/operator-registration/) with `[P08,Q01]`, and [P10](/en/frameworks/operator-packaging/) with `[P08,M18]`. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) require `[P08,P09]`; the original adjacent-energy operator has CPU/CUDA paths and an independently pinned extension Toolkit. Both retain empty compilation/recorded observations and Pending Hardware Verification runtime.
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) adds [P04](/en/frameworks/queued-work-timing/) with ordered prerequisites `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) with `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) with `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) with `[P04,Q07,Q08]`. Their related edges are `[P05,P06,P07]`, `[P04]`, `[P04,P07]`, and `[P05,P06]`. Each has Exercises requiring that unit and separate solutions requiring its Exercise set, exactly twelve pairs without another Runnable Example or Lab. Their four evidence arrays stay empty. The [independent eager profile](/en/sources-and-versions/#src-cuda-080) selects PyTorch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56 and the native allocator, without a system Toolkit requirement or inherited GPU evidence. P08, EX22, LAB13 and Triton destinations remain absent.
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) retains [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`, with complete Exercises/solutions and empty evidence arrays. Their [independent eager profile](/en/sources-and-versions/#src-cuda-080) needs no system Toolkit. Issue #44 adds the independent extension toolchain; Triton destinations remain absent.
 
 **R4 aggregate static review: 2026-09-10.** Technical sources retain their individual access and review dates; that review's retrievals have a separate [aggregate disposition](/en/sources-and-versions/#r4-aggregate-review), not a review of the current Python bridge increment. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records CI, Preview, production, and smoke acceptance only after those results exist. R4 does not imply completion of framework or Triton tracks or publish placeholder destinations for them.
 

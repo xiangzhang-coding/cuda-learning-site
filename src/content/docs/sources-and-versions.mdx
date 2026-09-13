@@ -1,6 +1,6 @@
 ---
 title: 来源与版本记录
-description: 当前公开路线、O04-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P07、LAB01-LAB12、EX01-EX21、可视化与练习资源使用的发布接口、技术事实、内容来源和复核日期。
+description: 覆盖 P10、EX22、LAB13 的课程精确发布与技术来源，独立记录版本、权利和证据。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
 factCheckDate: '2026-09-13'
@@ -63,11 +63,11 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录说明 CUDA 学习站使用的精确发布、主题与可视化接口，以及 O02-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13、P01-P07、LAB01-LAB12、二十一个 Runnable Examples 和十九项正式 Visual Explainers（独立 VIS01-VIS14/VIS18 与内嵌 VIS19-VIS22）的技术事实来自哪里。工具版本、浏览器表现、硬件能力、项目支持政策和实际观察始终分开记录。
+这份记录列出精确发布、主题、可视化接口，以及扩展至 P01-P10、EX01-EX22、LAB01-LAB13 的课程技术来源。十九项可视化讲解保持无 CUDA 证据。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
 
 ## 记录范围
 
-**2026-09-12 的当前发布范围**覆盖 Home、包含 P01-P07 的 82 个学习单元（Learning Unit）、21 个可运行示例（Runnable Example）、12 个实验（Lab）、19 项可视化讲解（Visual Explainer），以及 81 组练习和 81 组独立解答的双语发布对（Publication Pair）。共 **299 个发布对 / 598 条源路由**，**423 条目录记录**：12 个实验、89 个练习题库（Practice Bank）条目、19 项可视化讲解、204 个术语表（Glossary）词条和 99 条来源记录。Issue #43 增加 `SRC-CUDA-080/081/082/083`，既有逐项日期不变。R4 仍是最近完成的聚合静态复核，保留 277 对、554 路由和 401 条目录记录；R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)仍是带日期的历史，不是新 Python/PyTorch 内容的复核。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+**2026-09-13 当前发布**有 85 个学习单元（Learning Unit）、22 个可运行示例（Runnable Example）、13 个实验（Lab）、19 项可视化讲解（Visual Explainer）、84 组练习与 84 组独立解答的双语发布对（Publication Pair），共 **310 个发布对 / 620 条源路由**。**429 条目录记录**包括 13 个实验、92 个练习题库（Practice Bank）条目、19 项可视化讲解、204 个术语表（Glossary）词条和 101 条来源。Issue #44 增加 SRC-CUDA-084/085，既有逐项日期不变。R4 仍是最近完成的聚合复核（277 对、554 路由、401 条记录），R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)保持历史记录。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -757,7 +757,7 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 ## 内容与素材来源
 
-- Home、82 个 Learning Units、21 个 Runnable Examples、12 个 Labs、89 个 Practice Bank 条目、204 个术语定义、独立 VIS01-VIS14/VIS18、内嵌 VIS19-VIS22 与全部教学构图均由项目原创。文字与教学构图采用 **CC BY 4.0**；example source、components、models、styles、tests 与 tooling 采用 **Apache-2.0**。
+- Home、85 个学习单元、22 个可运行示例、13 个实验、92 个练习题库条目、204 个术语定义与全部教学构图为项目原创。文字/构图采用 **CC BY 4.0**，原创软件和工具采用 **Apache-2.0**；单独记录的 Search 改编保留 MIT。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
@@ -791,4 +791,4 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 不可变 `src/r3-release-manifest.json` 保留 62 个学习单元、16 个可运行示例、10 个实验、19 项可视化讲解、66 个练习题库条目（其中十道 Nsight 报告分析题）、176 个术语表词条、76 条来源记录、347 条目录记录、61 组练习、61 组解答、232 个双语发布对和 464 条源路由。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保留其动态验收。R4 另将八道既有题目列为符合库与算法选择分类的条目：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。R3 子集仍为 PB-R3-002 至 PB-R3-005 和 PB-R3-007 至 PB-R3-012；两个分类均属于既有的 82 个条目。
 
-既有保留的编译记录不变：只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable）。加上 EX21，当前其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。L01-L13 与 P01-P07 保留四个空证据数组。六份仅有预期内容的分析器计划保留未填写的环境清单（Environment Manifest）和空的实际观察记录；十九项浏览器可视化讲解不授予 CUDA 证据状态（Evidence Status）。来源复核没有新增 GPU 输出、工作区查询、性能分析、分派、类型、流量、计时、Tensor Core 或加速比记录。自动化结果不构成 WCAG 一致性声明；CI 与动态验收仍独立于本次复核。
+只有 EX02、EX10、LAB02 保留编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable），其余 21 个示例和 13 个实验共 34 个主体待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量仍为零。L01-L13、P01-P10 保留空证据数组。六份分析器计划只有预期内容，十九项浏览器讲解不授予 CUDA 证据。来源审查不产生 GPU、计时、性能观察。自动检查不建立 WCAG 一致性，CI 和动态验收单独记录。

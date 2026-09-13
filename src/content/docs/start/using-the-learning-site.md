@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -117,7 +117,7 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 13. 正确性与质量路线保留 Q01-Q08，并加入 [Q09：用 Occupancy、Stalls 与 Throughput 解释延迟隐藏](/correctness/occupancy-stalls-throughput/)`<-[Q08,F08]`、[Q10：从 Arithmetic Intensity 构建可审计 Roofline](/correctness/roofline-arithmetic-intensity/)`<-[Q05,A14]`、[Q11：用受控证据优化 Canonical Transpose](/correctness/transpose-optimization-case-study/)`<-[A05,Q06,Q08,Q10]`、[Q12：用受控证据优化 Canonical Reduction](/correctness/reduction-optimization-case-study/)`<-[A02,Q02,Q06,Q08]`与 [Q13：用受控证据优化 Canonical GEMM](/correctness/gemm-optimization-case-study/)`<-[A08,Q06,Q08,Q10]`。Q13 从 immutable [EX15](/examples/tiled-gemm/)开始，并复用 evidence-neutral [VIS12](/visuals/gemm-tiling-hierarchy/)。
 14. 可复用库路线包含 [L01：在生产库、可复用原语、DSL 与自定义内核之间做选择](/libraries/library-primitive-dsl-custom-kernel/)`<-[A02,A03,A08,Q06]`、[L02：把 Thrust 作为算法词汇](/libraries/thrust-algorithm-vocabulary/)`<-[A01,A03,A09]`、[L03：用 CUB Device Primitives 完成归约与扫描](/libraries/cub-device-primitives/)`<-[A02,A03,M07,L01]`、[L04：用 CUB Warp 与 Block Primitives 组合内核](/libraries/cub-warp-block-primitives/)`<-[F02,M03,M05,A02,A03,L03]`、[L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)`<-[M05,M13,M19]`、[L06：cuBLAS GEMM](/libraries/cublas-gemm/)`<-[A08,Q01]`和 [L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)`<-[L06,Q05]`。
 15. 库路线继续到 [L08：Tensor Core 精度与架构合同](/libraries/tensor-core-precision-contracts/)`<-[Q02,L06,F06]`和 [L09：CUTLASS C++ GEMM 结构](/libraries/cutlass-cpp-gemm-structure/)`<-[A08,L06,M17]`；以上分别是两者完整的有序直接先修项，L08 不是 L09 的额外先修项。
-16. 当前有 21 个可运行示例，集合是 EX01-EX21，最新项目为 [EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)`<-[P02]`；[EX20：cuSPARSE SpMV](/examples/cusparse-spmv/)仍依赖 `[L13]`，[EX19：cuFFT 批量变换](/examples/cufft-batched-transform/)仍依赖 `[L12]`，[EX18：cuBLAS GEMM](/examples/cublas-gemm/)仍依赖 `[L06]`。实验集合是 LAB01-LAB12，最新活动为 [LAB12：对比教学 GEMM 与 cuBLAS](/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`。可视化路线保留 [VIS18：Attention Memory Traffic](/visuals/attention-memory-traffic/)`<-[A11]`；Python 桥接不增加实验。
+16. 22 个可运行示例为 EX01-EX22；[EX21](/examples/cuda-python-launch/)保留 `[P02]`，[EX20](/examples/cusparse-spmv/)保留 `[L13]`，[EX19](/examples/cufft-batched-transform/)保留 `[L12]`，[EX18](/examples/cublas-gemm/)保留 `[L06]`。13 个实验为 LAB01-LAB13，[LAB12](/labs/compare-gemm-with-cublas/)保留 `[Q13,L06]`。[EX22](/examples/adjacent-energy/)、[LAB13](/labs/build-custom-operator/)均依赖 `[P08,P09]`。[VIS18](/visuals/attention-memory-traffic/)仍依赖 `[A11]`。
 17. 库路线继续到 [L10：cuDNN 图与计划](/libraries/cudnn-graphs-and-plans/)`<-[A07,L01,Q05]`和 [L11：注意力后端分派](/libraries/attention-backend-dispatch/)`<-[A11,L10,L08]`。这是完整有序直接先修；相关边分别为 L11 与 VIS18，不添加旧单元先修。
 18. [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)完整有序先修为 `[Q05,M07]`，相关资源为 EX19。[L12 练习](/libraries/cufft-plans-layouts-startup/exercises/)依赖 `[L12]`，[独立参考解答](/libraries/cufft-plans-layouts-startup/solutions/)依赖 `[L12-EXERCISES]`。
 19. [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)完整有序先修为 `[A12,A13,L01]`，相关资源为 EX20。[L13 练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)依赖 `[L13]`，[独立参考解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)依赖 `[L13-EXERCISES]`。
@@ -141,7 +141,7 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 P04-P07 的证据数组为空，[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、随包 CUDA 12.8.1/runtime 12.8.90 与 native 分配器。Eager 工作不需要系统 Toolkit。[P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含练习和独立解答。扩展项目另行要求 Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0。Triton 目的地仍未发布。
 
-只有 EX02、EX10 与 LAB02 具有编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；其余 20 个示例和全部 12 个实验共 32 个主体仍待硬件验证（Pending Hardware Verification）。P01-P03 的四个证据数组均为空；EX21 的编译证据和实际观察记录为空，仍待硬件验证。Python 主机测试不授予 CUDA 编译或运行证据。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）和性能观察的数量均为零。来源复核不是 GPU 证据。
+只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 21 个示例和 13 个实验共 34 个主体待硬件验证（Pending Hardware Verification）。P01-P10 证据数组为空。EX21/EX22 与 LAB13 编译/已记录观察为空，仍待硬件验证。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察均为零；来源和主机检查不是 GPU 证据。
 
 Q06-Q13、A10-A14 与 L01-L13 的四个证据数组均为空，不授予证据状态（Evidence Status）。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。LAB12 已发布可执行的比较步骤，但没有记录输出、计时、加速比或赢家；L07 的发布也不表示 EX18/LAB12 实现了 Lt 选择。EX17 的五项组件矩阵是非证据性的构建检查，不表示 CI 已运行。当前六份分析器测试材料都是预期计划，不是采集报告；当前发布不声明基准环境（Reference Environment）或 `performanceObservations`。
 

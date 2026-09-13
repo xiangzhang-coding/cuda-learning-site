@@ -4125,6 +4125,7 @@ const publicationPairFixtures: readonly PublicationPair[] = [
 // Explicit rolling additions keep long catalog fixtures readable without deriving
 // expected metadata from the implementation being tested.
 const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
+  if (['home', 'o01', 'about', 'labs-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-13' };
   if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-13',
     structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,review'),
     prerequisites: `${pair.prerequisites},P08,P09,P10`,

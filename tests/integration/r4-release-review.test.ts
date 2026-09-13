@@ -87,16 +87,16 @@ describe('R4 release review', () => {
     for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md']) {
       const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
       const { frontmatter } = parseFrontmatter(raw);
-      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-12');
+      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-13');
       expect(frontmatter.head.find((entry: { attrs: { name: string } }) => entry.attrs.name === 'cuda:fact-check-date')?.attrs.content)
-        .toBe('2026-09-12');
+        .toBe('2026-09-13');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /299 (?:Publication Pairs|个双语发布对)/, /598 (?:source routes|条源路由)/,
-        /82 (?:Learning Units|个学习单元)/, /21 (?:Runnable Examples|个可运行示例)/,
-        /81 (?:Exercise sets|组练习)/, /81 (?:separate reviewed-solution sets|组独立参考解答)/,
-        /89 (?:Practice Bank entries|个练习题库条目)/, /204 (?:Glossary terms|个术语表词条)/,
-        /99 (?:source records|条来源记录)/, /423 (?:catalog records|条资源目录记录)/, /32 (?:subjects|个主体)/,
+        /310 (?:Publication Pairs|个双语发布对)/, /620 (?:source routes|routes|条源路由|条路由)/,
+        /85 (?:Learning Units|个学习单元)/, /22 (?:Runnable Examples|个可运行示例)/,
+        /84 (?:Exercise sets|组练习)/, /84 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
+        /92 (?:Practice Bank entries|个练习题库条目)/, /204 (?:Glossary terms|个术语表词条)/,
+        /101 (?:source records|条来源(?:记录)?)/, /429 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /34 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
       expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '89'], ['glossary', '204'], ['sources-and-versions', '99']]) {
+        for (const [slug, count] of [['practice', '92'], ['glossary', '204'], ['sources-and-versions', '101']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -163,7 +163,7 @@ describe('R4 release review', () => {
     expect(current).toMatchObject({
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-12',
+      reviewDate: '2026-09-13',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
@@ -474,7 +474,7 @@ describe('R4 release review', () => {
         expect(document).not.toMatch(/R4 aggregate review remains pending|R4 聚合复核仍待完成/i);
       }
       const practice = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8');
-      expect(practice).toMatch(/89 (?:complete entries|个完整条目|道完整题目)/i);
+      expect(practice).toMatch(/92 (?:complete original entries|个完整原创条目)/i);
       expect(practice).not.toMatch(/68 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
       for (const id of ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016']) {
@@ -518,7 +518,7 @@ describe('R4 release review', () => {
         .map(([, doc]) => metadata(doc, 'unit-id')!);
       expectExactMembers(idsOfKind('learning-unit'), current.scope.learningUnits);
       expectExactMembers(idsOfKind('runnable-example'), current.scope.runnableExamples);
-      expectExactMembers(idsOfKind('lab'), labs);
+      expectExactMembers(idsOfKind('lab'), [...labs, 'LAB13']);
       expect(idsOfKind('exercise-set')).toHaveLength(current.scope.exerciseSetPublicationPairs);
       expect(idsOfKind('solution-set')).toHaveLength(current.scope.solutionSetPublicationPairs);
       const units = new Map(localPages.filter(([, doc]) => metadata(doc, 'unit-id'))
@@ -558,7 +558,7 @@ describe('R4 release review', () => {
 
       const catalogIds: string[] = [];
       for (const [slug, group, count] of [
-        ['labs', 'labs', 12], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 19],
+        ['labs', 'labs', 13], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 19],
         ['glossary', 'glossary', current.scope.glossaryTerms], ['sources-and-versions', 'sources', current.scope.sourceRecords],
       ] as const) {
         const route = `${locale === 'en' ? '/en' : ''}/${slug}/`;
@@ -585,7 +585,7 @@ describe('R4 release review', () => {
       }
       expect(catalogIds).toHaveLength(RESOURCE_INDEX_RECORDS.length);
       expect(new Set(catalogIds).size).toBe(RESOURCE_INDEX_RECORDS.length);
-      for (const id of [...current.scope.runnableExamples, ...labs]) {
+      for (const id of [...current.scope.runnableExamples, ...current.scope.labs]) {
         const document = units.get(id)!.document;
         expect(metadata(document, 'evidence-compilation'), id).toBe(['EX02', 'EX10', 'LAB02'].includes(id) ? 'Compile-Checked' : 'none');
         expect(metadata(document, 'evidence-runtime'), id).toBe(id === 'EX10' ? 'Runtime-Not-Applicable' : 'Pending Hardware Verification');
@@ -615,16 +615,16 @@ describe('R4 release review', () => {
       expectExactMembers(subjectsWith('evidence-compilation', 'none'), current.evidence.noCompileCheckedClaim);
       expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), current.evidence.pendingHardwareVerification);
       expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
-      expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']);
-      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T\d{2}|^PB-R[6-9]-|^(?:P08|EX22|LAB13)$/.test(id))).toBe(false);
+      expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']);
+      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T\d{2}|^PB-R[6-9]-|^(?:P11|EX23|LAB14)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/(?:framework|triton)(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/frameworks(?:\/|$)/.test(route)).sort()).toEqual(
-      ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling']
+      ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling', 'first-custom-operator', 'operator-registration', 'operator-packaging']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}frameworks/${slug}/${suffix}`))).sort(),
     );
     expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
-    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB13');
+    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB14');
   }, 30_000);
 });

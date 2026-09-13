@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-13'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -106,7 +106,7 @@ Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; t
 
 [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) has exactly `[A12,A13,L01]` as ordered prerequisites. [L13 Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) require `[L13]`; [separate solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/) require `[L13-EXERCISES]`. All L01-L13 are published. L13's four evidence arrays remain empty; EX20 has no retained compilation evidence and remains Pending Hardware Verification. Its three C++17 non-executing build gates pin Toolkit/cuSPARSE pairs 11.8.0/11.7.5.86, 12.9.2/12.5.10.65, and 13.3.1/12.8.2.51. The [SRC-CUDA-075/076 review](/en/sources-and-versions/#src-cuda-075) dated 2026-09-09 records available exact cuSPARSE archives, including 13.3.1, separately from EX19's older archive-failure record. Source review and build gates are not GPU evidence.
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) adds [P04: Queued Work and Timing](/en/frameworks/queued-work-timing/) with `[M07,Q05]`, [P05: Streams and Storage Lifetime](/en/frameworks/streams-and-storage-lifetime/) with `[P04,M08]`, [P06: Mixed-Precision Contracts](/en/frameworks/mixed-precision-contracts/) with `[Q02,P04,L08]`, and [P07: Python-to-CUDA Profiling](/en/frameworks/python-to-cuda-profiling/) with `[P04,Q07,Q08]`. Related edges are `[P05,P06,P07]`, `[P04]`, `[P04,P07]`, and `[P05,P06]` respectively. Each publishes Exercises requiring its unit and separate solutions requiring that Exercise set. These twelve pairs add no Runnable Example or Lab. The independent [environment and sources](/en/sources-and-versions/#src-cuda-080) pin PyTorch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56 and the native allocator. Eager work requires no system Toolkit; source and package checks grant no GPU evidence. P08, EX22, LAB13 and Triton destinations remain unpublished.
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) supplies [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`. Their twelve pairs include Exercises and separate solutions. The [independent eager environment](/en/sources-and-versions/#src-cuda-080) retains torch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1/runtime 12.8.90, cuDNN 9.19.0.56 and the native allocator, with no system Toolkit requirement. P08-P10 now add the separately gated extension project; Triton destinations remain unpublished.
 
 ## Boundaries first
 
@@ -738,7 +738,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, environment, architecture, kernel, memory, algorithm, library, Python bridge, PyTorch, toolchain, and correctness reasoning through 89 original problems.</small>
+    <small>Practice evidence, environment, architecture, kernels, libraries and PyTorch through 92 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 99 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 101 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

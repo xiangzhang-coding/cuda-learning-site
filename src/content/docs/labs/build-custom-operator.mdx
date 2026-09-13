@@ -76,7 +76,7 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 ## 前置与规范源码
 
-精确前置 `[P08, P09]`：[P08](/frameworks/first-custom-operator/)和 [P09](/frameworks/operator-registration/)。[P10](/frameworks/operator-packaging/)是相关深入打包内容，此处提供全部必要命令。[EX22](/examples/adjacent-energy/)是唯一规范项目。[查看源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/da760f1727e596521f66ea46f9c73bdecf57b9a2/examples/ex22-adjacent-energy)或[下载完整归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/da760f1727e596521f66ea46f9c73bdecf57b9a2.zip)。保留源码身份，使用自己的新副本。
+精确前置 `[P08, P09]`：[P08](/frameworks/first-custom-operator/)和 [P09](/frameworks/operator-registration/)。[P10](/frameworks/operator-packaging/)是相关深入打包内容，此处提供全部必要命令。[EX22](/examples/adjacent-energy/)是唯一规范项目。[查看源码](https://github.com/xiangzhang-coding/cuda-learning-site/tree/4129723b1c284266c30696a47b5eea0828dd3921/examples/ex22-adjacent-energy)或[下载完整归档](https://github.com/xiangzhang-coding/cuda-learning-site/archive/4129723b1c284266c30696a47b5eea0828dd3921.zip)。保留源码身份，使用自己的新副本。
 
 ## 必需环境
 
@@ -99,10 +99,10 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 准备声明的 Python、GCC、Toolkit。使用该解释器创建并激活新虚拟环境，在下载仓库根目录执行：
 
 ```sh
-python -I scripts/pytorch-environment/check.py --install
+PYTORCH_ALLOC_CONF=backend:native CUDA_VISIBLE_DEVICES='' LD_LIBRARY_PATH="$(python -I -c 'import sys; print(sys.base_prefix + "/lib")')" python -I scripts/pytorch-environment/check.py --install
 ```
 
-它在 EX22 增加自己的发行包之前安装并检查既有精确应用闭包。保留该阶段退出码。在外部复制 EX22 的空白 `environment-manifest.json`，作为自己的环境清单（Environment Manifest）；不得把目标要求填进观察字段。
+这些仅作用于该命令的变量只在准备阶段隐藏 GPU，并把加载路径限制到选定解释器库。LD_PRELOAD 和旧 PYTORCH_CUDA_ALLOC_CONF 保持未设置，检查器会拒绝它们。命令在 EX22 增加自己的发行包之前安装/检查精确应用闭包。保留退出码，在外部复制空白 `environment-manifest.json` 作为环境清单（Environment Manifest），不得用目标值填写观察。
 
 预测字面量输入 [1,-2,2,2.5] 的结果、g=[1,2,3] 时加权梯度、单元素输出/梯度，以及 n=258 的启动形状。答案应为 [9,16,0.25]、[6,-22,13,3]、空/一个零，以及两个 256 线程块中的 257 个输出。这些是代数预测，不是运行输出；执行前解释它们。
 
@@ -134,7 +134,7 @@ python -I verify.py --device cuda
 
 计算构建 wheel 和已安装扩展的 SHA-256。创建**第二个**匹配 CPython 虚拟环境，从仓库根安装同一应用哈希锁依赖，再用 `python -m pip install --no-deps /absolute/path/to/wheel.whl` 安装这个确切 wheel。替换成你的真实路径，不能原样粘贴占位路径。运行 `python -m pip check`，再通过第二个解释器用 `-I --device cpu` 执行同一验证脚本。隔离模式下，脚本自己的路径不会成为包导入路径。
 
-记录解析到的 `cuda_learning_ops`、`_C` 路径，它们必须属于第二个环境的 site-packages。每次检查使用新进程。在一次性环境中临时移除仅已安装的 `_C` 文件；即使源码目录仍存在，新隔离公开导入也必须失败。重装原 wheel 恢复后要求导入成功。不得存在 editable 安装、源码回退、导入时编译。负向检查用于区分产物完整性与单进程已经缓存或加载的本地模块。
+用第二个环境的解释器运行 `python -I verify_install.py`。它检查 `cuda_learning_ops`、`_C` 属于该 venv 的 site-packages，启动新正向导入，临时隐藏仅已安装的 `_C`，要求导入失败，在 finally 恢复后再要求成功。除有界摘要外，还在外部记录解析路径。仅在一次性环境使用；强制终止后应恢复 `.ex22-hidden` 备份或重建 venv。editable、源码、JIT 回退不能通过负向检查。新子进程不复用父进程已缓存模块。
 
 ## 完成环境清单
 

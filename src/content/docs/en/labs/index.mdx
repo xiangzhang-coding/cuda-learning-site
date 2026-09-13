@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-09-05'
+factCheckDate: '2026-09-13'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-05' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,9 +26,9 @@ import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
 
-This index lists only Labs that form complete Publication Pairs and provide runnable steps and acceptance criteria. As of 2026-09-06, it contains twelve contiguously numbered published Labs, LAB01-LAB12; the newest row is [LAB12: Compare an Educational GEMM with cuBLAS](/en/labs/compare-gemm-with-cublas/). Its prerequisite Learning Units [Q13](/en/correctness/gemm-optimization-case-study/) and [L06](/en/libraries/cublas-gemm/) are both published. A complete page does not mean Runtime-Verified execution; incomplete work still does not appear.
+This index lists complete Lab Publication Pairs with executable steps and acceptance criteria. As of 2026-09-13, it contains thirteen Labs, LAB01-LAB13. New [LAB13: Build and Validate a CUDA Operator](/en/labs/build-custom-operator/) directly requires [P08](/en/frameworks/first-custom-operator/) and [P09](/en/frameworks/operator-registration/). A complete page does not mean Runtime-Verified execution.
 
-**Publication inventory and navigation updated: 2026-09-06.** This update does not re-review CUDA API facts; each Lab's technical sources and evidence records retain their individual dates.
+**Publication inventory and navigation updated: 2026-09-13.** Existing Labs' technical sources and evidence records retain their own dates.
 
 ## Published Labs
 
@@ -41,6 +41,8 @@ The current sequence lists LAB01-LAB09 followed by [LAB10: Optimize the Canonica
 LAB12 has exactly two direct prerequisites, [Q13](/en/correctness/gemm-optimization-case-study/) and [L06](/en/libraries/cublas-gemm/), in that order. Complete them before comparing [EX15](/en/examples/tiled-gemm/) with [EX18](/en/examples/cublas-gemm/) outside the site. [L07](/en/libraries/cublaslt-matmul/) and [VIS12](/en/visuals/gemm-tiling-hierarchy/) are related resources, not additional prerequisites or a conversion of this traditional cuBLAS comparison into an Lt selection Lab. A planning ID is a stable label for curriculum discussion and maintenance, not a promise that a URL will never change. Use the current card link and complete every listed prerequisite Learning Unit before entering a Lab.
 
 ## Evidence boundary
+
+LAB13 follows the existing sequence and uses [EX22](/en/examples/adjacent-energy/)'s independent torch 2.11.0+cu128 / Toolkit 12.8.1 extension profile, with no ordinary Toolkit Lane evidence inheritance. Compilation and recorded observations are empty; runtime is Pending Hardware Verification. It separately checks build, CPU/CUDA values and gradients, fake/meta, compiled integration and positive/negative installed-wheel imports.
 
 Compilation and runtime labels are copied directly from each linked Lab's controlled evidence fields. Existing LAB01-LAB10 statuses do not change. LAB11 has empty compilation evidence and recorded observations, no observed runtime evidence, Pending Hardware Verification runtime, and expected observations only; there is no Reference Environment or `performanceObservations` entry. Its expected-only fixture is not a collected `.ncu-rep` and contains no CUB output, temporary-storage value, kernel mapping, timing, metric, traffic, speedup, maintenance score, or winner. EX17 likewise has empty compilation evidence and Pending Hardware Verification runtime. Its declared component matrix is a non-evidentiary build gate and does not state that CI ran.
 

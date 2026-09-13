@@ -76,7 +76,7 @@ Prerequisites: [P08](/en/frameworks/first-custom-operator/) and [P09](/en/framew
 
 ## Canonical project
 
-[Inspect immutable source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/da760f1727e596521f66ea46f9c73bdecf57b9a2/examples/ex22-adjacent-energy) or [download the archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/da760f1727e596521f66ea46f9c73bdecf57b9a2.zip). Use `examples/ex22-adjacent-energy/` as the project root and retain the surrounding repository for the existing application environment lock. Both Publication Pair pages import the same nine canonical ranges. Software is Apache-2.0; instructional text is CC BY 4.0.
+[Inspect immutable source](https://github.com/xiangzhang-coding/cuda-learning-site/tree/4129723b1c284266c30696a47b5eea0828dd3921/examples/ex22-adjacent-energy) or [download the archive](https://github.com/xiangzhang-coding/cuda-learning-site/archive/4129723b1c284266c30696a47b5eea0828dd3921.zip). Use `examples/ex22-adjacent-energy/` as the project root and retain the surrounding repository for the existing application environment lock. Both Publication Pair pages import the same nine canonical ranges. Software is Apache-2.0; instructional text is CC BY 4.0.
 
 ## CPU implementation
 
@@ -134,7 +134,7 @@ The complete verifier adds explicit meta calls and a separately selected CPU or 
 
 ## Build, install and execute
 
-Prepare the selected application environment from the repository root using `python -I scripts/pytorch-environment/check.py --install` in a fresh CPython 3.12.14 venv. Provision GCC and Toolkit separately. From the EX22 root:
+Prepare a fresh CPython 3.12.14 venv using the exact command-scoped bootstrap settings in [LAB13 preparation](/en/labs/build-custom-operator/#prepare-and-predict). That command hides GPUs only for preparation, selects the native allocator and restricts loader paths to the interpreter library. Provision GCC and Toolkit separately. From the EX22 root:
 
 ```sh
 bash scripts/check-wheel.sh
