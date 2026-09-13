@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 92 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 94 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-09-13'
@@ -101,6 +101,8 @@ structure:
   - entry-pb-r5-008
   - entry-pb-r5-009
   - entry-pb-r5-010
+  - entry-pb-r5-011
+  - entry-pb-r5-012
   - review
 resourceKind: practice-bank
 unitId: PB-R0
@@ -189,6 +191,8 @@ prerequisites:
   - P08
   - P09
   - P10
+  - P11
+  - P12
 relatedUnits:
   - O02
   - O03
@@ -279,6 +283,8 @@ relatedUnits:
   - P08
   - P09
   - P10
+  - P11
+  - P12
   - EX21
   - LAB06
   - LAB08
@@ -305,15 +311,15 @@ head:
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
-    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,entry-pb-r5-004,entry-pb-r5-005,entry-pb-r5-006,entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,review' }
+    attrs: { name: 'cuda:structure', content: 'use,lookup-index,entry-pb-r0-001,entry-pb-r0-002,entry-pb-r0-003,entry-pb-r0-004,entry-pb-r0-005,entry-pb-r1-001,entry-pb-r1-002,entry-pb-r1-003,entry-pb-r1-004,entry-pb-r1-005,entry-pb-r1-006,entry-pb-r1-007,entry-pb-r1-008,entry-pb-r1-009,entry-pb-r1-010,entry-pb-r1-011,entry-pb-r1-012,entry-pb-r1-013,entry-pb-r1-014,entry-pb-r1-015,entry-pb-r1-016,entry-pb-r1-017,entry-pb-r1-018,entry-pb-r1-019,entry-pb-r1-020,entry-pb-r1-021,entry-pb-r1-022,entry-pb-r1-023,entry-pb-r1-024,entry-pb-r2-001,entry-pb-r2-002,entry-pb-r2-003,entry-pb-r2-004,entry-pb-r2-005,entry-pb-r2-006,entry-pb-r2-007,entry-pb-r2-008,entry-pb-r2-009,entry-pb-r2-010,entry-pb-r2-011,entry-pb-r2-012,entry-pb-r2-013,entry-pb-r2-014,entry-pb-r2-015,entry-pb-r2-016,entry-pb-r2-017,entry-pb-r2-018,entry-pb-r2-019,entry-pb-r2-020,entry-pb-r2-021,entry-pb-r3-001,entry-pb-r3-002,entry-pb-r3-003,entry-pb-r3-004,entry-pb-r3-005,entry-pb-r3-006,entry-pb-r3-007,entry-pb-r3-008,entry-pb-r3-009,entry-pb-r3-010,entry-pb-r3-011,entry-pb-r3-012,entry-pb-r3-013,entry-pb-r3-014,entry-pb-r3-015,entry-pb-r3-016,entry-pb-r4-001,entry-pb-r4-002,entry-pb-r4-003,entry-pb-r4-004,entry-pb-r4-005,entry-pb-r4-006,entry-pb-r4-007,entry-pb-r4-008,entry-pb-r4-009,entry-pb-r4-010,entry-pb-r4-011,entry-pb-r4-012,entry-pb-r4-013,entry-pb-r4-014,entry-pb-r4-015,entry-pb-r4-016,entry-pb-r5-001,entry-pb-r5-002,entry-pb-r5-003,entry-pb-r5-004,entry-pb-r5-005,entry-pb-r5-006,entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,review' }
   - tag: meta
     attrs: { name: 'cuda:resource-kind', content: practice-bank }
   - tag: meta
     attrs: { name: 'cuda:unit-id', content: PB-R0 }
   - tag: meta
-    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03,P04,P05,P06,P07,P08,P09,P10' }
+    attrs: { name: 'cuda:prerequisites', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,P01,P02,P03,P04,P05,P06,P07,P08,P09,P10,P11,P12' }
   - tag: meta
-    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,P04,P05,P06,P07,P08,P09,P10,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
+    attrs: { name: 'cuda:related-units', content: 'O02,O03,F01,F02,F03,F04,F05,F06,F07,F08,O04,O05,O06,O07,O08,M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,A01,A02,A03,A04,A05,A06,A07,A08,A09,A10,A11,A12,A13,A14,Q01,Q02,Q03,Q04,Q05,Q06,Q07,Q08,Q09,Q10,Q11,Q12,Q13,L01,L02,L03,L04,L05,L06,L07,L08,L09,L10,L11,L12,L13,EX15,EX17,EX18,EX19,EX20,P01,P02,P03,P04,P05,P06,P07,P08,P09,P10,P11,P12,EX21,LAB06,LAB08,LAB09,LAB10,LAB11,LAB12,VIS10,VIS12,VIS13,VIS14,VIS18' }
   - tag: meta
     attrs: { name: 'cuda:hardware-gate', content: none }
   - tag: meta
@@ -332,13 +338,13 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 如何使用
 
-先按先修链接复习，再不看解答完成自己的产物，提示按层展开。本页发布 92 个完整原创条目；解答用于复核，不替代作答。
+先按先修链接复习，再不看解答完成自己的产物，提示按层展开。本页发布 94 个完整原创条目；解答用于复核，不替代作答。
 
 ## 已发布条目索引
 
 <ResourceIndex group="practice" locale="zh-CN" />
 
-规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 89 道完整题目、先修链接和参考解答始终保留在静态页面中。
+规划 ID 是跨课程讨论用的稳定标签，不是 URL 稳定性承诺。筛选只改变当前浏览器中可见的卡片；下方 94 道完整题目、先修链接和参考解答始终保留在静态页面中。
 
 R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集：`PB-R3-002`、`PB-R3-003`、`PB-R3-004`、`PB-R3-005`、`PB-R3-007`、`PB-R3-008`、`PB-R3-009`、`PB-R3-010`、`PB-R3-011` 和 `PB-R3-012`。它们要求学习者设计或审查 timeline、metric/replay、report custody、Environment Manifest 与有界结论；静态分析不等于运行 profiler，也不授予 CUDA Evidence Status。
 
@@ -4159,7 +4165,53 @@ NVRTC create 返回 `(status, program)`，compile/destroy 返回 `(status,)`，�
 
 **来源依据：** 原创迁移审查；[SRC-CUDA-085](/sources-and-versions/#src-cuda-085)。**来源日期：** 2026-09-13。
 
+<span id="pb-r5-011" class="resource-target"></span>
+
+## PB-R5-011：评估前向优化的端到端上限
+
+**ID：** PB-R5-011 · 原创双语发布对。
+- **直接先修条件：** [P11](/frameworks/profile-led-optimization/)，精确为 `[P11]`。
+- **硬件门槛：** 静态审计无需硬件。
+- **最近复核：** 2026-09-13。
+- **相关学习单元与资源：** [P11](/frameworks/profile-led-optimization/)、[EX22](/examples/adjacent-energy/)、[LAB14](/labs/profile-custom-operator/)。
+
+**难度：** 高级。**版本：** PyTorch 2.11.0+cu128。
+
+**题目：** 在构造的训练成本模型中，EX22 前向占总时间 10%。提案声称前向快两倍就让训练时间减半，却没有测量反向或端到端工作。
+
+**约束：** 比例是假设，不是 GPU 证据。保持全部算子合同与其他成本不变。**预期证据：** 推导端到端上限并提出匹配测量。**验收条件：** 得到 `1/(0.9+0.1/2)=1/0.95`，约 1.053，拒绝训练快两倍的声明。
+
+<details><summary>提示 1：拆分原始时间</summary><p>把总时间归一化为一，只有 0.1 除以提议的加速因子。</p></details>
+<details><summary>提示 2：定义范围</summary><p>包含分配的前向事件计时与完整训练步墙钟时间回答不同问题。</p></details>
+<details><summary>独立参考解答：尝试后再打开</summary><p>假设新总时间为 0.9+0.05=0.95，理想因子约 1.053。实际收益仍需匹配预热、源码/wheel 标识、正确性、全部样本和完整训练测量。若轨迹支持，先研究反向也是有效选择。常见错误是将局部比值应用于整体、把模型当成实测、调优时删除梯度/fake/导入检查。没有可重复且符合预先策略的收益时保留原始实现。</p></details>
+
+**来源依据：** 原创成本审计；[SRC-CUDA-086](/sources-and-versions/#src-cuda-086)。**来源日期：** 2026-09-13。
+
+<span id="pb-r5-012" class="resource-target"></span>
+
+## PB-R5-012：区分优先级与已观察后端
+
+**ID：** PB-R5-012 · 原创双语发布对。
+- **直接先修条件：** [P12](/frameworks/sdpa-dispatch-verification/)，精确为 `[P12]`。
+- **硬件门槛：** 静态审计无需硬件。
+- **最近复核：** 2026-09-13。
+- **相关学习单元与资源：** [P12](/frameworks/sdpa-dispatch-verification/)、[VIS18](/visuals/attention-memory-traffic/)。
+
+**难度：** 高级。**版本：** PyTorch 2.11.0+cu128。
+
+**题目：** 假想报告开启 `[CUDNN_ATTENTION, FLASH_ATTENTION, MATH]` 却没有 set_priority，仅观察到宽泛 CPU SDPA 区间，就把 cuDNN 标为实际执行且最快的后端。
+
+**约束：** 没有设备事件或计时，不能编造。**预期证据：** 区分开启策略、优先级、可用性、执行和性能。**验收条件：** 拒绝选择与最快两项声明，要求精确构建的关联后端/设备事件、正确性及附环境清单的独立计时。
+
+<details><summary>提示 1：检查上下文签名</summary><p>所选版本只有 set_priority=True 才把列表顺序作为优先级请求。</p></details>
+<details><summary>提示 2：优先级也只是请求</summary><p>仍须通过可用性过滤，派发器不是基准测试。</p></details>
+<details><summary>独立参考解答：尝试后再打开</summary><p>报告只说明开启集合和主机区间，没有有序请求、可用结果、实际后端事件或已测胜者。采集已完成且关联的设备工作，要求恰好一个已识别后端事件，保留已舍入输入的参考与固定容差，再单独计时。强制单后端实验并记录不满足条件而不是静默回退，也是有效方案。常见错误是把 VIS18 轨道标成后端、没有 set_priority 却相信列表顺序，以及把正确输出当作速度结果。</p></details>
+
+**来源依据：** 原创派发审计；[SRC-CUDA-086](/sources-and-versions/#src-cuda-086)。**来源日期：** 2026-09-13。
+
 ## 复核记录
+
+Issue #45 于 2026-09-13 增加 PB-R5-011/012，精确前置条件为 P11/P12。当前共 94 个原创条目；LAB14 增加一个待硬件验证主体，总数 35。以下增量记录为历史，R5 聚合复核仍待完成。
 
 2026-09-13 的 issue #44 增量增加 PB-R5-008/009/010，精确前置分别为 P08/P09/P10。当前共 92 个原创条目。EX22 与 LAB13 增加两个待硬件验证对象（合计 34 个），编译和已记录观察为空。以下较早增量为历史记录，R5 聚合复核仍待完成。
 

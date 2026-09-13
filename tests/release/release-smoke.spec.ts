@@ -136,7 +136,7 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -145,7 +145,7 @@ const r4RunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX
 const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r4Labs = [...r3Labs, 'LAB11', 'LAB12'] as const;
-const currentLabs = [...r4Labs, 'LAB13'] as const;
+const currentLabs = [...r4Labs, 'LAB13', 'LAB14'] as const;
 const currentVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -180,7 +180,7 @@ const currentProfilerReportPlans = [
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -188,11 +188,11 @@ const currentPendingHardwareVerification = [
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 13 },
-  { suffix: 'practice/', count: 92 },
+  { suffix: 'labs/', count: 14 },
+  { suffix: 'practice/', count: 94 },
   { suffix: 'visuals/', count: 19 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 101 },
+  { suffix: 'sources-and-versions/', count: 102 },
 ] as const;
 const exampleRouteSlugs = [
   'adjacent-energy',
@@ -489,19 +489,19 @@ test('serves the exact R4 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 310,
-    sourceRoutes: 620,
-    exerciseSetPublicationPairs: 84,
-    solutionSetPublicationPairs: 84,
+    publicationPairs: 317,
+    sourceRoutes: 634,
+    exerciseSetPublicationPairs: 86,
+    solutionSetPublicationPairs: 86,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 92,
+    practiceBankEntries: 94,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 101,
+    sourceRecords: 102,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -518,7 +518,7 @@ test('serves the exact R4 release and current publication with production canoni
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
     r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
-    r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'],
+    r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
@@ -633,8 +633,8 @@ test('serves the exact R4 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '310 Publication Pairs' : '310 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '620 source routes' : '620 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '317 Publication Pairs' : '317 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '634 source routes' : '634 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -668,7 +668,7 @@ test('serves the exact R4 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(225 + currentPublicationManifest.scope.glossaryTerms);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(229 + currentPublicationManifest.scope.glossaryTerms);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -1033,13 +1033,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(620);
-    expect(new Set(routes).size).toBe(620);
+    expect(routes).toHaveLength(634);
+    expect(new Set(routes).size).toBe(634);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(52);
+    expect(routeBatches).toHaveLength(54);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(310);
+      expect(localized).toHaveLength(317);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

@@ -51,3 +51,8 @@ jobs:
           "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip check
           "$RUNNER_TEMP/ex22-consumer/bin/python" -I verify_install.py
           "$RUNNER_TEMP/ex22-consumer/bin/python" -I -c 'import torch, cuda_learning_ops; from cuda_learning_ops import adjacent_energy; torch.testing.assert_close(adjacent_energy(torch.tensor([1., -2., 2., 2.5])), torch.tensor([9., 16., .25])); print("clean consumer passed; no GPU executed")'
+      - name: Validate framework report fixtures and CPU SDPA oracle
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/ex22-venv/bin/python" -I scripts/framework-verification/test_check.py
+          "$RUNNER_TEMP/ex22-venv/bin/python" -I scripts/framework-verification/check.py --mode sdpa --device cpu --source-commit "$GITHUB_SHA" --output "$RUNNER_TEMP/p12-cpu"

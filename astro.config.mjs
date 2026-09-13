@@ -188,6 +188,8 @@ export default defineConfig({
             { slug: 'frameworks/first-custom-operator' },
             { slug: 'frameworks/operator-registration' },
             { slug: 'frameworks/operator-packaging' },
+            { slug: 'frameworks/profile-led-optimization' },
+            { slug: 'frameworks/sdpa-dispatch-verification' },
           ],
         },
         {
@@ -236,6 +238,7 @@ export default defineConfig({
             { slug: 'labs/compare-custom-reduction-with-cub' },
             { slug: 'labs/compare-gemm-with-cublas' },
             { slug: 'labs/build-custom-operator' },
+            { slug: 'labs/profile-custom-operator' },
           ],
         },
         {

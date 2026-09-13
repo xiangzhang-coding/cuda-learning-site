@@ -58,7 +58,7 @@ for (const locale of ['', 'en/']) {
       await expect(group).toHaveCount(1);
       expect(await group.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
         .toEqual([...units.map(({ slug }) => `/${locale}${slug}/`),
-          ...['first-custom-operator', 'operator-registration', 'operator-packaging'].map((slug) => `/${locale}frameworks/${slug}/`)]);
+          ...['first-custom-operator', 'operator-registration', 'operator-packaging', 'profile-led-optimization', 'sdpa-dispatch-verification'].map((slug) => `/${locale}frameworks/${slug}/`)]);
       if (!(await group.evaluate((element) => element.hasAttribute('open')))) await group.locator('summary').click();
       await group.locator(`a[href="/${locale}${unit.slug}/"]`).click();
       await expect(page).toHaveURL(`${baseURL}/${locale}${unit.slug}/`);

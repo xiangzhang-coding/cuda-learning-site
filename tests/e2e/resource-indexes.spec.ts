@@ -403,12 +403,12 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   const counts = Object.fromEntries(
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
-  expect(counts.labs).toBe(13);
-  expect(counts.practice).toBe(92);
+  expect(counts.labs).toBe(14);
+  expect(counts.practice).toBe(94);
   expect(counts.visuals).toBe(19);
   expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
-  expect(counts.sources).toBe(101);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(225 + currentPublication.scope.glossaryTerms);
+  expect(counts.sources).toBe(102);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(229 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
     ...releaseLabIds,
@@ -550,7 +550,7 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
       await index.locator('[data-resource-query]').fill('');
     }
     if (group === 'labs') {
-      for (const futureId of ['LAB14']) {
+      for (const futureId of ['LAB15']) {
         await expect(index.locator(`[data-resource-id="${futureId}"]`)).toHaveCount(0);
         await expect(index.locator('h3 a', { hasText: new RegExp(`^${futureId}\\b`) })).toHaveCount(0);
       }

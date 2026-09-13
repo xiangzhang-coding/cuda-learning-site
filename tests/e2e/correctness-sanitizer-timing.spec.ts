@@ -156,6 +156,7 @@ const exampleSlugs = [
   'cuda-python-launch',
 ] as const;
 const labSlugs = [
+  'profile-custom-operator',
   'build-custom-operator',
   'record-cuda-environment',
   'vector-addition',
@@ -176,8 +177,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(620);
-  expect(publishedRoutes.length / 2).toBe(310);
+  expect(publishedRoutes).toHaveLength(634);
+  expect(publishedRoutes.length / 2).toBe(317);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

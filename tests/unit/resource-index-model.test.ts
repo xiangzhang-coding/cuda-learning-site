@@ -35,6 +35,9 @@ describe('resource index catalog', () => {
       ['P08', 'frameworks/first-custom-operator', ['O04', 'F04', 'Q01', 'P04']],
       ['P09', 'frameworks/operator-registration', ['P08', 'Q01']],
       ['P10', 'frameworks/operator-packaging', ['P08', 'M18']],
+      ['P11', 'frameworks/profile-led-optimization', ['P07', 'P09', 'Q06']],
+      ['P12', 'frameworks/sdpa-dispatch-verification', ['A11', 'L11', 'P06', 'P07']],
+      ['LAB14', 'labs/profile-custom-operator', ['P11']],
       ['EX22', 'examples/adjacent-energy', ['P08', 'P09']],
       ['LAB13', 'labs/build-custom-operator', ['P08', 'P09']],
       ['EX21', 'examples/cuda-python-launch', ['P02']],
@@ -50,8 +53,8 @@ describe('resource index catalog', () => {
         });
       }
     }
-    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']);
-    for (const id of ['P11', 'T01', 'EX23', 'LAB14']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
+    for (const id of ['T01', 'EX23', 'LAB15']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
     const destinations = Object.fromEntries(Object.entries(PUBLISHED_DESTINATIONS)
       .map(([id, { indexGroup: _indexGroup, ...destination }]) => [id, destination]));
     expect(() => validateResourceCatalog([], { requiredGroups: [], destinations })).not.toThrow();
@@ -96,14 +99,14 @@ describe('resource index catalog', () => {
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(225 + currentPublication.scope.glossaryTerms);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(229 + currentPublication.scope.glossaryTerms);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 13, practice: 92, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 101 });
-    for (const absentId of ['LAB14']) {
+    ).toEqual({ labs: 14, practice: 94, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 102 });
+    for (const absentId of ['LAB15']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }

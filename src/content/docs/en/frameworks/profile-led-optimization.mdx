@@ -1,0 +1,109 @@
+---
+title: 'P11: Profile-Led Operator Optimization'
+description: Optimize EX22 with an explicit hypothesis, preserve every integration contract, and compare unprofiled measurements separately from diagnostic traces.
+pairId: p11
+counterpart: /frameworks/profile-led-optimization/
+factCheckDate: '2026-09-13'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, baseline, hypothesis, implementation, verification, measurement, retrieval, practice, sources]
+resourceKind: learning-unit
+unitId: P11
+prerequisites: [P07, P09, Q06]
+relatedUnits: [P10, P12, EX22, LAB14]
+hardwareGate: none
+estimatedMinutes: 45
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Pinned profiler implementation', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py', version: 'PyTorch 2.11.0', platform: 'CPU ranges and CUPTI CUDA activities', accessDate: '2026-09-13' }
+  - { title: 'Pinned custom operator contracts', url: 'https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py', version: 'PyTorch 2.11.0', platform: 'Fake, autograd and opcheck', accessDate: '2026-09-13' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: p11 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/frameworks/profile-led-optimization/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-13' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,baseline,hypothesis,implementation,verification,measurement,retrieval,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: P11 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'P07,P09,Q06' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'P10,P12,EX22,LAB14' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/frameworks/profile-led-optimization/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning outcome
+
+You have a correct operator and a slow application. You will decide whether changing the kernel addresses the measured bottleneck, make one bounded launch-geometry candidate, and retain it only if correctness and a fair comparison support the change. Budget 45 minutes for this unit and 120 minutes for [LAB14](/en/labs/profile-custom-operator/).
+
+## Prerequisites
+
+The exact ordered prerequisites are `[P07, P09, Q06]`: [P07](/en/frameworks/python-to-cuda-profiling/) connects Python ranges to GPU work, [P09](/en/frameworks/operator-registration/) supplies registration and gradients, and [Q06](/en/correctness/apod-optimization-loop/) supplies the APOD measurement/optimization loop. [P10](/en/frameworks/operator-packaging/) is related packaging depth. [EX22](/en/examples/adjacent-energy/) remains the single canonical operator project.
+
+## Why optimization moved beyond one kernel
+
+Eager tensor composition makes a mathematical expression easy to inspect, but separate operations can create temporary storage and dispatch overhead. A fused native operator can reduce those boundaries. It also becomes opaque to a surrounding compiler: `torch.compile` does not automatically optimize its native body. Fewer launches are a hypothesis about cost, not a measured speedup. Forward fusion also says nothing about a backward assembled from several differentiable operations.
+
+## Freeze the observable contract
+
+EX22 computes `y[i]=(x[i+1]-x[i])^2`. Keep contiguous rank-one CPU/CUDA float32 or float64 input, `1 <= n <= 1000000`, offset-contiguous views, no mutation, and a fresh contiguous `n-1` output on the input device/dtype. Singleton input returns an empty output without launching a zero-block grid. Strided, integer, half, empty, rank-two and over-budget inputs remain rejected.
+
+For upstream gradient g, `q=2*(x[1:]-x[:-1])*g`, then `dx=pad_left(q)-pad_right(q)`. Keep the schema, CPU implementation, symbolic fake/meta checks, registered autograd, second derivatives and installed-wheel import unchanged in your candidate. Device guard, current CUDA stream and launch-error check are part of correctness. Neither an implicit device-wide synchronization nor a default-stream substitution is an acceptable optimization.
+
+## Establish two baselines
+
+First run the canonical CPU and CUDA verifier and wheel/import gate from [LAB13](/en/labs/build-custom-operator/). Then use LAB14's external harness to compare the eager difference-square expression with the installed original EX22 wheel. This comparison illustrates fusion; the optimization acceptance compares the **original EX22 wheel against the candidate EX22 wheel**, using the same harness and inputs.
+
+The workload covers `n=258,1003,1000000` in float32 and float64, finite binary fractions with exact forward acceptance. The measured scope is forward plus output allocation on preallocated inputs; input creation, transfers, compilation, correctness checks and profiling are outside it. Training and end-to-end application time require separately labeled experiments.
+
+## Turn a trace into a falsifiable hypothesis
+
+| Observation to seek, not a supplied result | Candidate question | Refutation |
+| --- | --- | --- |
+| Host launch gaps dominate small inputs | Would batching calls at the application boundary help? | Batching changes requested semantics or does not reduce wall time |
+| Original EX22 device duration matters at large n | Does 128 rather than 256 threads improve this workload? | Unprofiled medians overlap in run-to-run variability or regress |
+| Backward dominates training | Is forward tuning material to total cost? | The forward fraction bounds the possible benefit too tightly |
+| CPU ranges but no CUDA kernels in JSON | Is CUPTI tracing available? | There is no device trace to interpret |
+
+If a fraction f of total time is improved by a factor s, the ideal overall bound is `1 / ((1-f)+f/s)`. As constructed arithmetic, `f=0.1,s=2` gives about `1.053`, not a measured application gain. Decide which experiment can distinguish competing explanations before changing code.
+
+## Make one bounded candidate
+
+In a fresh learner copy of EX22, change the CUDA launch from `(count + 255) / 256, 256` to `(count + 127) / 128, 128`. Both the ceiling division and block size must change together. Preserve the kernel bounds check and every wrapper check. Record the diff and a new source identity, rebuild into a separate clean wheel/environment, and retain the original wheel as the baseline. This is a candidate, not an assertion that 128 threads is faster.
+
+For n=258 there are 257 outputs: the original launches two blocks and the candidate three. A ceiling numerator left at 255 with a 128-thread block would launch too many blocks; replacing only the block size while keeping division by 256 could leave outputs uncovered. Keep arithmetic consistent. Alignment-sensitive vectorization is a later, different experiment: offset-contiguous inputs prevent assuming every accepted pointer has vector alignment.
+
+## Re-run semantic and integration gates
+
+Require CPU/CUDA reference values, preserved inputs, nonuniform weighted gradients, float64 gradcheck and gradgradcheck, opcheck, explicit meta/fake behavior, fullgraph dynamic forward/backward and the non-default-stream case. `opcheck` validates registration use; it does not establish the derivative formula. Test both boundaries of the new 128-thread geometry in addition to canonical sizes: n=128,129,130 yield 127,128,129 outputs. Inspect every output, not just a checksum.
+
+Rebuild both CPU and CUDA implementations, install the wheel non-editably in a second matching venv, and require isolated positive and missing-extension negative imports. An old installed binary can make a source diff appear correct: retain wheel and loaded-extension hashes for each run. Do not publish a modified kernel under the original immutable example identity.
+
+## Separate diagnosis from timing
+
+LAB14 uses 20 warm-up calls, seven unprofiled samples of 100 calls, and CUDA events on the current stream with completion before reading elapsed time. A separate `torch.profiler` schedule uses wait=1, warmup=1, active=2, repeat=1 and `prof.step()` after each step. Profiler warm-up is not application warm-up. Shape recording and tracing add overhead, so trace durations are not the reported unprofiled timing samples.
+
+Keep raw samples, their median and spread, GPU load/clocks/power policy, source/wheel identity and Environment Manifest. Alternate baseline/candidate process order over at least three rounds; compare equal scopes and disclose regressions at smaller shapes. Retain the original when improvement is not distinguishable or any correctness gate fails. No trace, timing, backend or speedup is supplied here; EX22 and LAB14 remain **Pending Hardware Verification** without qualifying runtime evidence.
+
+## Retrieval check
+
+1. Why can fewer forward launches fail to improve training time?
+2. Which EX22 contracts would an alignment-only vectorization path risk?
+3. Why must ceiling division change with block size?
+4. Which tests distinguish registration correctness from numerical gradients?
+5. Why cannot a profiler table or CPU-only wheel check certify a GPU speedup?
+
+## Practice
+
+Complete the [profiler and implementation Exercises](/en/frameworks/profile-led-optimization/exercises/), then the [separate solutions](/en/frameworks/profile-led-optimization/solutions/). Audit [PB-R5-011](/en/practice/#pb-r5-011) and execute [LAB14](/en/labs/profile-custom-operator/). Continue to [P12](/en/frameworks/sdpa-dispatch-verification/) for dispatch verification.
+
+## Primary sources
+
+Reviewed 2026-09-13 through Context7 and the exact owner [profiler implementation](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/profiler/profiler.py) and [library registration](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/library.py). [SRC-CUDA-086](/en/sources-and-versions/#src-cuda-086) records the profiler/dispatch source and test review; [SRC-CUDA-084](/en/sources-and-versions/#src-cuda-084) and [SRC-CUDA-085](/en/sources-and-versions/#src-cuda-085) retain exact operator and packaging rights. Sources are linked and paraphrased; this lesson and its scenarios are original.

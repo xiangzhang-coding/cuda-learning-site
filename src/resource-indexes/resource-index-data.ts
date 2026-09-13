@@ -410,6 +410,14 @@ const labs: readonly ResourceIndexRecord[] = [
     versionGate: localized('CPython 3.12.14、torch 2.11.0+cu128、独立 Toolkit 12.8.1/NVCC 12.8.93、GCC 13.3.0；不继承普通 Toolkit Lanes。', 'CPython 3.12.14, torch 2.11.0+cu128, independent Toolkit 12.8.1/NVCC 12.8.93, GCC 13.3.0; no ordinary Toolkit Lane inheritance.'),
     evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-13',
   },
+  {
+    planningId: 'LAB14', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB14.title,
+    href: PUBLISHED_DESTINATIONS.LAB14.href, resourceType: 'guided-lab', difficulty: 'advanced',
+    prerequisites: ['P11'], relatedUnits: ['P12', 'EX22', 'LAB13'],
+    hardwareGate: localized('原生 Linux；一个 CC 8.0+ GPU，至少 8 GB；CUPTI 活动轨迹权限。', 'Native Linux; one CC 8.0+ GPU with at least 8 GB; CUPTI activity tracing permission.'),
+    versionGate: localized('torch 2.11.0+cu128 / torch.profiler；CUPTI 12.8.90；EX22 独立扩展工具链。', 'torch 2.11.0+cu128 / torch.profiler; CUPTI 12.8.90; EX22 independent extension toolchain.'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-13',
+  },
 ];
 
 const practice: readonly ResourceIndexRecord[] = [
@@ -1777,6 +1785,20 @@ const practice: readonly ResourceIndexRecord[] = [
     prerequisites: ['P10'], relatedUnits: ['P10', 'EX22', 'LAB13'], hardwareGate: noHardware,
     versionGate: localized('PyTorch 2.11.0+cu128；CPython 3.12.14、Toolkit 12.8.1 与原生 ABI 矩阵。', 'PyTorch 2.11.0+cu128; CPython 3.12.14, Toolkit 12.8.1 and native ABI matrix.'),
     reviewedOn: '2026-09-13',
+  },
+  {
+    planningId: 'PB-R5-011', group: 'practice',
+    title: localized('评估前向优化的端到端上限', 'Bound the end-to-end value of forward tuning'),
+    href: localized('/practice/#pb-r5-011', '/en/practice/#pb-r5-011'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['P11'], relatedUnits: ['P11', 'EX22', 'LAB14'],
+    hardwareGate: noHardware, versionGate: localized('PyTorch 2.11.0+cu128；前向与训练范围。', 'PyTorch 2.11.0+cu128; forward versus training scope.'), reviewedOn: '2026-09-13',
+  },
+  {
+    planningId: 'PB-R5-012', group: 'practice',
+    title: localized('区分优先级与已观察后端', 'Separate priority from observed backend'),
+    href: localized('/practice/#pb-r5-012', '/en/practice/#pb-r5-012'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['P12'], relatedUnits: ['P12', 'VIS18'],
+    hardwareGate: noHardware, versionGate: localized('PyTorch 2.11.0+cu128；sdpa_kernel beta；set_priority。', 'PyTorch 2.11.0+cu128; sdpa_kernel beta; set_priority.'), reviewedOn: '2026-09-13',
   },
 ];
 
@@ -3266,6 +3288,7 @@ const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-083', localized('PyTorch Profiler、Kineto 与 CUPTI 关联', 'PyTorch Profiler, Kineto, and CUPTI correlation'), 'cuda-version-record', ['Q07', 'Q08', 'P07'], localized('PyTorch 2.11.0；Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7；CUPTI 包 12.8.90 与文档 12.8.1；无采集 trace。', 'PyTorch 2.11.0; Kineto 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7; CUPTI package 12.8.90 and documentation 12.8.1; no captured trace.'), '2026-09-12', '2026-09-12'),
   sourceRecord('SRC-CUDA-084', localized('自定义算子注册、元数据与梯度', 'Custom operator registration, metadata and gradients'), 'cuda-version-record', ['P08', 'P09', 'EX22', 'LAB13'], localized('PyTorch 2.11.0 固定源码、头文件、fake/autograd 与上游测试；仅参考，不复制。', 'Pinned PyTorch 2.11.0 source, headers, fake/autograd and owner tests; reference only, no copying.'), '2026-09-13', '2026-09-13'),
   sourceRecord('SRC-CUDA-085', localized('扩展工具链、AOT wheel 与导入合同', 'Extension toolchain, AOT wheel and import contracts'), 'cuda-version-record', ['P08', 'P10', 'EX22', 'LAB13'], localized('CPython 3.12.14、torch 2.11.0+cu128、Toolkit 12.8.1、NVCC 12.8.93、GCC 13.3.0；精确源码与组件清单。', 'CPython 3.12.14, torch 2.11.0+cu128, Toolkit 12.8.1, NVCC 12.8.93, GCC 13.3.0; exact source and component manifests.'), '2026-09-13', '2026-09-13'),
+  sourceRecord('SRC-CUDA-086', localized('分析驱动优化与精确 SDPA 派发', 'Profile-led optimization and exact SDPA dispatch'), 'cuda-version-record', ['P11', 'P12', 'LAB14', 'EX22', 'VIS18'], localized('PyTorch 2.11.0+cu128；profiler、SDPA beta、set_priority、源码门槛及上游测试；无运行观察。', 'PyTorch 2.11.0+cu128; profiler, SDPA beta, set_priority, source gates and owner tests; no runtime observations.'), '2026-09-13', '2026-09-13'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

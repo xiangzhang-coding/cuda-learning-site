@@ -51,6 +51,8 @@ const publicationPairFixtures: readonly PublicationPair[] = [
     { id: 'P08', slug: 'frameworks/first-custom-operator', prerequisites: 'O04,F04,Q01,P04' },
     { id: 'P09', slug: 'frameworks/operator-registration', prerequisites: 'P08,Q01' },
     { id: 'P10', slug: 'frameworks/operator-packaging', prerequisites: 'P08,M18' },
+    { id: 'P11', slug: 'frameworks/profile-led-optimization', prerequisites: 'P07,P09,Q06' },
+    { id: 'P12', slug: 'frameworks/sdpa-dispatch-verification', prerequisites: 'A11,L11,P06,P07' },
   ].flatMap(({ id, slug, prerequisites }) => [
     { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
       factCheckDate: '2026-09-13', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
@@ -59,6 +61,9 @@ const publicationPairFixtures: readonly PublicationPair[] = [
     { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`,
       factCheckDate: '2026-09-13', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
   ]),
+  { pairId: 'lab14', unitId: 'LAB14', resourceKind: 'lab', prerequisites: 'P11',
+    factCheckDate: '2026-09-13', evidenceRuntime: 'Pending Hardware Verification',
+    zh: '/labs/profile-custom-operator/', en: '/en/labs/profile-custom-operator/' },
   { pairId: 'ex22', unitId: 'EX22', resourceKind: 'runnable-example', prerequisites: 'P08,P09',
     factCheckDate: '2026-09-13', canonicalExample: 'EX22', evidenceRuntime: 'Pending Hardware Verification',
     zh: '/examples/adjacent-energy/', en: '/en/examples/adjacent-energy/' },
@@ -4127,11 +4132,11 @@ const publicationPairFixtures: readonly PublicationPair[] = [
 const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
   if (['home', 'o01', 'about', 'labs-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-13' };
   if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-13',
-    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,review'),
-    prerequisites: `${pair.prerequisites},P08,P09,P10`,
-    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,EX21') };
+    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,review'),
+    prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12`,
+    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,EX21') };
   if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-13',
-    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,content-sources') };
+    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,content-sources') };
   return pair;
 });
 
@@ -4249,14 +4254,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(310);
-    expect(sourceRoutes.size).toBe(620);
+    expect(publicationPairs).toHaveLength(317);
+    expect(sourceRoutes.size).toBe(634);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['P11', 'T01', 'EX23', 'LAB14']) {
+    for (const absentUnitId of ['T01', 'EX23', 'LAB15']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
