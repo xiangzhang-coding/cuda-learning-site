@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+name: PyTorch Operator
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pytorch-operator-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  wheel-and-cpu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container:
+      image: nvidia/cuda:12.8.1-devel-ubuntu24.04@sha256:4b9ed5fa8361736996499f64ecebf25d4ec37ff56e4d11323ccde10aa36e0c43
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      PYTORCH_ALLOC_CONF: backend:native
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12.14'
+          architecture: x64
+      - name: Prepare exact external application environment
+        shell: bash
+        run: |
+          python -I -m venv "$RUNNER_TEMP/ex22-venv"
+          "$RUNNER_TEMP/ex22-venv/bin/python" -I scripts/pytorch-environment/check.py --install
+      - name: Build CPU and CUDA into a wheel, then verify installed CPU integration
+        shell: bash
+        working-directory: examples/ex22-adjacent-energy
+        run: |
+          source "$RUNNER_TEMP/ex22-venv/bin/activate"
+          bash scripts/check-wheel.sh
+      - name: Import the same wheel in a second clean environment
+        shell: bash
+        working-directory: examples/ex22-adjacent-energy
+        run: |
+          python -I -m venv "$RUNNER_TEMP/ex22-consumer"
+          "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip install --require-hashes --only-binary=:all: -r ../../scripts/pytorch-environment/requirements.lock
+          "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip install --no-deps dist/*.whl
+          "$RUNNER_TEMP/ex22-consumer/bin/python" -m pip check
+          "$RUNNER_TEMP/ex22-consumer/bin/python" -I -c 'import torch, cuda_learning_ops; from cuda_learning_ops import adjacent_energy; torch.testing.assert_close(adjacent_energy(torch.tensor([1., -2., 2., 2.5])), torch.tensor([9., 16., .25])); print("clean consumer passed; no GPU executed")'
