@@ -36,6 +36,15 @@ full correlation still needs local review. Parser fixtures are explicitly
 constructed, not captured traces. The Linux CI CPU oracle and installed-wheel
 gates grant no CUDA runtime or performance evidence. VIS18 is reused unchanged.
 
+The first #45 remote Web Quality run exposed an aggregate browser-test budget:
+the single mobile-reflow test visited ten locale/index pages under one 30-second
+timeout. WebKit and Mobile Safari exhausted that budget in all three attempts,
+at different loading/readiness assertions; no horizontal-overflow assertion
+failed. The same test passed locally in about eight seconds per browser.
+Each locale/index route now has its own default test budget and error collector,
+preserving all ten pages and every readiness, count, width and error assertion.
+This is test partitioning, not a layout workaround or increased retry policy.
+
 ## Issue #44 custom operator increment — 2026-09-13
 
 P08/P09/P10 have ordered prerequisites `[O04,F04,Q01,P04]`, `[P08,Q01]`,
