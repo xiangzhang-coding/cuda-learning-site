@@ -57,7 +57,8 @@ for (const locale of ['', 'en/']) {
       const group = page.locator('nav details').filter({ has: page.locator('summary', { hasText: locale ? 'PyTorch CUDA Semantics' : 'PyTorch CUDA 语义' }) });
       await expect(group).toHaveCount(1);
       expect(await group.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
-        .toEqual(units.map(({ slug }) => `/${locale}${slug}/`));
+        .toEqual([...units.map(({ slug }) => `/${locale}${slug}/`),
+          ...['first-custom-operator', 'operator-registration', 'operator-packaging'].map((slug) => `/${locale}frameworks/${slug}/`)]);
       if (!(await group.evaluate((element) => element.hasAttribute('open')))) await group.locator('summary').click();
       await group.locator(`a[href="/${locale}${unit.slug}/"]`).click();
       await expect(page).toHaveURL(`${baseURL}/${locale}${unit.slug}/`);

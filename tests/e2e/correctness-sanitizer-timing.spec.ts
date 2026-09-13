@@ -132,6 +132,7 @@ const issue19MemorySlugs = [
 ] as const;
 const issue19MemorySlugSet = new Set<string>(issue19MemorySlugs);
 const exampleSlugs = [
+  'adjacent-energy',
   'environment-report',
   'vector-addition',
   'multidimensional-indexing',
@@ -155,6 +156,7 @@ const exampleSlugs = [
   'cuda-python-launch',
 ] as const;
 const labSlugs = [
+  'build-custom-operator',
   'record-cuda-environment',
   'vector-addition',
   'break-and-repair-indexing',
