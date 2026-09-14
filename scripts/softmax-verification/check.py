@@ -19,6 +19,11 @@ from contract import ATOL, RTOL, ROW_SUM_ATOL, reference_row, verify_rows
 
 ROOT = HERE.parents[1]
 SHAPES = ((1, 1), (3, 31), (7, 32), (5, 33), (17, 257), (257, 1003), (512, 2048))
+WARMUP_CALLS = 20
+BENCH_WARMUP_MS = 25
+BENCH_REP_MS = 100
+BENCH_RETURN_MODE = 'all'
+ROUNDS = 3
 
 
 def digest(file):
@@ -26,6 +31,8 @@ def digest(file):
 
 
 def environment(compiler_only=False):
+    if os.environ.get('CUDA_LAUNCH_BLOCKING', '0') != '0':
+        raise RuntimeError('Remove CUDA_LAUNCH_BLOCKING before evidence collection')
     # Reuse the exact reviewed full/compiler lock and gates, without importing GPU libraries.
     spec = importlib.util.spec_from_file_location('lab15_environment', ROOT / 'examples/ex23-triton-vector-add/ex23.py')
     module = importlib.util.module_from_spec(spec)
@@ -120,8 +127,9 @@ def gpu_cases(report, output, warps, benchmark, env_module):
     # One provider-neutral scope: input already on device, preallocated output, no gradients.
     report['measurement'] = {'scope': 'preallocated-output forward; current-stream device events; no transfer/allocation/validation',
         'tuning': 'disabled; numWarps is a declared candidate, not a selected winner', 'numWarps': warps,
-        'jit': 'fresh harness cache; warmup compile call separately recorded', 'warmupCalls': 20,
-        'doBenchWarmupMs': 25, 'doBenchRepMs': 100, 'returnMode': 'all', 'rounds': 3,
+        'jit': 'fresh harness cache; warmup compile call separately recorded', 'warmupCalls': WARMUP_CALLS,
+        'doBenchWarmupMs': BENCH_WARMUP_MS, 'doBenchRepMs': BENCH_REP_MS,
+        'returnMode': BENCH_RETURN_MODE, 'rounds': ROUNDS, 'cudaLaunchBlocking': False,
         'cachePolicy': 'Triton do_bench clears its benchmark cache before each measured call; not a DRAM counter',
         'profiler': 'none', 'graphs': False}
     prepared = []
@@ -160,10 +168,10 @@ def gpu_cases(report, output, warps, benchmark, env_module):
             ptx.write_text(compiled.asm['ptx'])
             case['ptxSha256'] = digest(ptx)
             report['cases'].append(case)
-            prepared.append((x, y, native, case))
+            prepared.append((x, y, native, guard, cpu, expected, case))
         # Every correctness case passes before any timing is collected.
         if benchmark:
-            for x, y, native, case in prepared:
+            for x, y, native, guard, cpu, expected, case in prepared:
                 rows, width = case['shape']
                 tile = case['tile']
                 providers = {
@@ -171,24 +179,33 @@ def gpu_cases(report, output, warps, benchmark, env_module):
                     'torch': lambda: torch.softmax(x, dim=1, out=native),
                 }
                 for fn in providers.values():
-                    for _ in range(20):
+                    for _ in range(WARMUP_CALLS):
                         fn()
                 torch.cuda.synchronize()
-                for round_index in range(3):
+                for round_index in range(ROUNDS):
                     order = ['triton', 'torch'] if round_index % 2 == 0 else ['torch', 'triton']
-                    record = {'order': order, 'providers': {}}
+                    record = {'order': order, 'providers': {}, 'status': 'incomplete'}
+                    case['rounds'].append(record)
                     for name in order:
                         report['phase'] = f'benchmark-{rows}x{width}-{round_index}-{name}'
-                        samples = do_bench(providers[name], warmup=25, rep=100, return_mode='all')
+                        samples = do_bench(providers[name], warmup=BENCH_WARMUP_MS,
+                                           rep=BENCH_REP_MS, return_mode=BENCH_RETURN_MODE)
                         if not samples or any(not math.isfinite(s) or s <= 0 for s in samples):
                             raise ValueError('nonpositive or nonfinite event samples')
                         record['providers'][name] = {'rawMilliseconds': samples,
                             'medianMilliseconds': statistics.median(samples),
                             'minMilliseconds': min(samples), 'maxMilliseconds': max(samples)}
-                    case['rounds'].append(record)
-                expected = oracle(torch, x.cpu())
-                verify_rows(y.cpu().tolist(), expected)
-                verify_rows(native.cpu().tolist(), expected)
+                    record['status'] = 'complete'
+                report['phase'] = f'post-benchmark-correctness-{rows}x{width}'
+                torch.cuda.synchronize()
+                if not torch.equal(x.cpu(), cpu):
+                    raise ValueError('benchmark changed input')
+                if not torch.isnan(guard[rows * width:]).all().item():
+                    raise ValueError('benchmark changed tail write guard')
+                case['postBenchmarkCorrectness'] = {
+                    'triton': verify_rows(y.cpu().tolist(), expected),
+                    'torch': verify_rows(native.cpu().tolist(), expected),
+                    'inputUnchanged': True, 'tailGuardUnchanged': True}
     # Loaded library identities are kept locally for audit; never auto-published.
     mappings = {line.split()[-1] for line in Path('/proc/self/maps').read_text().splitlines()
                 if '.so' in line and line.split()[-1].startswith('/')}

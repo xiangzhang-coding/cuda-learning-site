@@ -92,7 +92,7 @@ export CUDA_VISIBLE_DEVICES=0
 "$PYTHON" -I scripts/softmax-verification/check.py --mode cpu --output "$RUN_ROOT/cpu"
 ```
 
-Save every command and exit status. Remove inherited Triton/ptxas overrides before these gates; the checker rejects them. Do not use interpreter/debug/profiler modes to obtain benchmark evidence. CPU mode checks the independent oracle against FP64 `torch.softmax` without querying CUDA; it is partial progress, not completion of this Lab.
+Save every command and exit status. Remove inherited Triton/ptxas overrides and `CUDA_LAUNCH_BLOCKING` before these gates; the checker rejects debugging launch synchronization before CUDA initialization. Do not use interpreter/debug/profiler modes to obtain benchmark evidence. CPU mode checks the independent oracle against FP64 `torch.softmax` without querying CUDA; it is partial progress, not completion of this Lab.
 
 ## Implement and predict
 
@@ -129,6 +129,8 @@ Benchmark mode reruns all correctness gates in its own process before timing. It
 Three rounds run Triton/native, native/Triton, Triton/native. Preserve every raw millisecond sample, median, min/max, shape, dtype, tile and warp count. Both use preallocated outputs and the same input; transfers, allocations, validation, JIT and profiler collection are excluded. Native softmax is already an optimized baseline, not the five-stage materialized ledger. Tiny cases can reflect launch/submission overhead. Repeat the whole experiment under comparable load before making a decision; do not pool unlike shapes or report only the best round.
 
 Optional candidate: repeat compile, verify and benchmark with `--warps 8` into new directories. Record search cost separately and compare all shapes; no configuration is automatically declared a winner. If variability hides a difference, report it as inconclusive. No DRAM counters are collected, so ledger bytes and logical throughput are never measured memory traffic.
+
+After timing, recheck both outputs against the preserved original CPU oracle, input immutability and tail integrity. The report retains these checks and marks a round incomplete until both providers finish; a second-provider failure preserves the first provider's completed samples. An incomplete or failed run cannot support a speedup claim.
 
 ## Environment Manifest and artifact bundle
 

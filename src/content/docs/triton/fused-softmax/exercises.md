@@ -39,7 +39,7 @@ head:
 
 ## 先修条件与说明
 
-精确前置 **[T03]**：[融合 Softmax](/triton/fused-softmax/)。先纸面作答，再使用 [LAB15](/labs/verify-fused-softmax/) 的学习者副本。实现的执行继承实验的精确 Linux/GPU 门槛。这里所有证据数组为空。审查日期 2026-09-14；[SRC-CUDA-088](/sources-and-versions/#src-cuda-088)。
+精确前置 **[T03]**：[融合 Softmax](/triton/fused-softmax/)。先纸面作答，再使用 [LAB15](/labs/verify-fused-softmax/) 的学习者副本。实现的执行继承实验（Lab）的精确 Linux/GPU 门槛。这里所有证据数组为空。审查日期 2026-09-14；[SRC-CUDA-088](/sources-and-versions/#src-cuda-088)。
 
 ## 练习一：实现稳定的填充行
 
@@ -54,7 +54,7 @@ head:
 
 ## 练习二：修正性能结论
 
-**目标：** 审核 `R=5,C=33` 的假设报告：“字节比就是加速比；首次启动就是稳态；`warmup=25` 表示 25 次迭代；四线程束最优。”报告没有测量或环境清单。
+**目标：** 审核 `R=5,C=33` 的假设报告：“字节比就是加速比；首次启动就是稳态；`warmup=25` 表示 25 次迭代；四线程束最优。”报告没有测量或环境清单（Environment Manifest）。
 
 **约束：** 不编造替代计时。对照原生 `torch.softmax`，匹配 dtype、形状和预分配输出范围。单独保留编译与调优成本。
 

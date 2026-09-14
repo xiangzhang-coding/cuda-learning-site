@@ -38,7 +38,6 @@ head:
   - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
 ---
 
-import { Code } from 'astro:components';
 import kernel from '../../../../scripts/softmax-verification/kernel.py?raw';
 
 <a class="locale-pair" data-locale-counterpart href="/en/triton/fused-softmax/" lang="en">Read the English counterpart</a>
@@ -69,7 +68,10 @@ Softmax 将逻辑值（logits）转换为归一化分布。库张量操作序列
 
 ## 阅读两种语言共用的实验内核
 
-<Code code={kernel} lang="python" />
+<figure class="canonical-code">
+  <figcaption><code>LAB15 · scripts/softmax-verification/kernel.py</code></figcaption>
+  <pre tabindex="0"><code class="language-python">{kernel}</code></pre>
+</figure>
 
 双语页面直接呈现 `scripts/softmax-verification/kernel.py`。`tl.program_id(0)` 负责一行；`tl.arange` 构造列；`tl.max(..., axis=0)` 和 `tl.sum(..., axis=0)` 归约本程序的块值。启动为 `normalize_rows[(rows,)](x, y, WIDTH=width, TILE=tile, num_warps=4)`。线程束（warp）数量是独立于逻辑形状的启动选项。不同程序之间不交换行数据；编译器选择的通道布局和寄存器用量仍需检查产物。
 

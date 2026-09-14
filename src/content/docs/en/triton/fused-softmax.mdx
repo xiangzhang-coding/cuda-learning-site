@@ -38,7 +38,6 @@ head:
   - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
 ---
 
-import { Code } from 'astro:components';
 import kernel from '../../../../../scripts/softmax-verification/kernel.py?raw';
 
 <a class="locale-pair" data-locale-counterpart href="/triton/fused-softmax/" lang="zh-CN">阅读中文对应页</a>
@@ -69,7 +68,10 @@ A memory mask is not a semantic attention mask. An all-masked row of negative in
 
 ## Read the shared Lab kernel
 
-<Code code={kernel} lang="python" />
+<figure class="canonical-code">
+  <figcaption><code>LAB15 · scripts/softmax-verification/kernel.py</code></figcaption>
+  <pre tabindex="0"><code class="language-python">{kernel}</code></pre>
+</figure>
 
 Both locales render `scripts/softmax-verification/kernel.py` directly. `tl.program_id(0)` owns one row; `tl.arange` builds columns; `tl.max(..., axis=0)` and `tl.sum(..., axis=0)` reduce that program's block value. The launch is `normalize_rows[(rows,)](x, y, WIDTH=width, TILE=tile, num_warps=4)`. The warp count is a launch option, separate from logical shape. No program communicates with another row. Compiler-selected lane layout and register use still require artifact inspection.
 
