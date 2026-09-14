@@ -1,0 +1,62 @@
+---
+title: 'VIS17：SIMT 与 Triton 执行归属映射'
+description: 用确定性算术比较固定 CUDA 线程网格与 Triton 程序实例、块值和内存掩码。
+pairId: vis17
+counterpart: /en/visuals/simt-triton-mapping/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, prerequisites, explorer, interpretation, sources]
+resourceKind: visual-explainer
+unitId: VIS17
+prerequisites: [T01]
+relatedUnits: [T02, EX23]
+hardwareGate: none
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton program and memory semantics', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Browser logical model only', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis17 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/visuals/simt-triton-mapping/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,prerequisites,explorer,interpretation,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS17 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: T01 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T02,EX23' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import TritonMappingExplorer from '../../../components/TritonMappingExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/simt-triton-mapping/" lang="en">Read the English counterpart</a>
+
+## 用途
+
+改变问题长度与逻辑块形状，再跟踪每个索引的归属。CUDA 对照固定采用每块 32 个线程；Triton 的块范围独立设置。这是原创的确定性可视化讲解（Visual Explainer），不是测得的 GPU 布局。
+
+## 前置知识
+
+精确前置为 **[T01]**：[程序实例与块值](/triton/programs-and-block-values/)。接着通过 [T02](/triton/masked-vector-addition/) 与 [EX23](/examples/triton-vector-add/) 学习带掩码内存操作。
+
+## 探索映射
+
+<TritonMappingExplorer locale="zh-CN" />
+
+## 解读结果
+
+`N=37, B=16` 时，程序实例（program instance）2 负责逻辑索引 32–47，但只有 32–36 可以读取或写入。索引 36 映射到 CUDA 块 1、线程/通道（lane）4，以及 Triton 逻辑位置 4。Triton 位置标签不标识编译后的物理通道。设置 `N=1003, B=256` 可匹配 EX23 的逻辑形状；固定的每块 32 线程 CUDA 对照仍用于说明概念，不是 EX02 的精确启动配置。
+
+键盘控制与即时更新不需要动画。禁用 JavaScript 或打印时，静态三实例表与初始表仍可使用；窄屏将静态卡片纵向排列，宽表可用键盘横向滚动。掩码有效性有文字标签，不依赖颜色。不持久保存设置，也不授予证据状态（Evidence Status）。
+
+## 来源与许可
+
+参见 [SRC-CUDA-087](/sources-and-versions/#src-cuda-087)，核查日期 **2026-09-14**。原创组件和模型代码采用 Apache-2.0；原创解释正文采用 CC BY 4.0。没有复制上游图片或可视化。

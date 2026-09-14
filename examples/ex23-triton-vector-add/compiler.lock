@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: Apache-2.0
+# The driver-free compiler subset of requirements.lock, exact cp314 ordinary x86_64 wheel.
+triton==3.7.1 --hash=sha256:2020153b08280415ec0da6607834e79166442147e78e144df06b508c75b186d2

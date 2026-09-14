@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: Apache-2.0
+export const tritonMappingCopy = {
+  en: {
+    title: 'One index, two ownership models', size: 'Problem length N', tile: 'Values per program B',
+    program: 'Selected program', previous: 'Previous program', next: 'Next program', reset: 'Reset mapping',
+    controls: 'Mapping controls', grid: 'Triton program grid', cuda: 'CUDA grid (32 threads/block)',
+    masked: 'Masked positions across grid', position: 'Block-value position', index: 'Global index',
+    owner: 'CUDA block / thread / lane', mask: 'Memory mask', yes: 'true — load and store',
+    no: 'false — no memory access', absent: 'Not launched in this CUDA grid',
+    notice: 'Logical values are not GPU lanes. The compiler chooses the Triton lane/register layout; this model cannot display that physical placement.',
+    static: 'Static side-by-side mapping', range: 'Global indices', valid: 'Valid indices',
+    local: 'Local block-value positions', programLabel: 'program', maskLabel: 'Memory mask',
+    cudaRange: 'CUDA block / launched thread-and-lane range',
+    instructions: 'Use Tab to reach controls, arrow keys to change selections, and Enter or Space for buttons. Changes are immediate with no animation. Nothing is saved.',
+    boundary: 'Browser arithmetic only: no CUDA, Triton interpreter, GPU query, timing, or Evidence Status.',
+  },
+  'zh-CN': {
+    title: '同一索引，两种执行归属', size: '问题长度 N', tile: '每个程序实例的值数 B',
+    program: '选中的程序实例', previous: '上一个程序实例', next: '下一个程序实例', reset: '重置映射',
+    controls: '映射控制', grid: 'Triton 程序实例网格', cuda: 'CUDA 网格（每线程块 32 个线程）',
+    masked: '整个网格的掩码位置数', position: '块值位置', index: '全局索引',
+    owner: 'CUDA 线程块 / 线程 / 通道', mask: '内存掩码', yes: 'true — 读取并写入',
+    no: 'false — 不访问内存', absent: '此 CUDA 网格没有启动该线程',
+    notice: '逻辑值不是 GPU 通道（lane）。编译器决定 Triton 的通道与寄存器布局，本模型不表示这种物理分配。',
+    static: '静态并排映射', range: '全局索引', valid: '有效索引',
+    local: '块内逻辑位置', programLabel: '程序实例', maskLabel: '内存掩码',
+    cudaRange: 'CUDA 线程块 / 已启动线程及通道范围',
+    instructions: '用 Tab 进入控件，方向键改变选择，Enter 或空格激活按钮。变化立即生效，没有动画，也不保存状态。',
+    boundary: '仅浏览器算术：不执行 CUDA 或 Triton 解释器，不查询 GPU，不计时，也不授予证据状态（Evidence Status）。',
+  },
+} as const;

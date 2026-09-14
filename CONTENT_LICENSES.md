@@ -1,5 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Triton mental-model increment — 2026-09-14
+
+Current scope is 89 Learning Units, 23 Runnable Examples, 14 Labs, 20 Visual Explainers, 96 Practice Bank entries, 207 Glossary terms, 103 source records, 440 catalog records, 88 Exercise-set and 88 solution-set pairs, 325 Publication Pairs and 650 source routes. Earlier dated scope statements below are historical. T01/T02, four Exercise/solution pairs, EX23 and VIS17 add eight complete Publication Pairs. New prose and Exercises are original CC BY 4.0; the canonical project, visual model, component and tests are original Apache-2.0.
+
+Triton v3.7.1's exact root MIT license is retained in EX23/TRITON-LICENSE and verified by SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`. SRC-CUDA-087 records the selected source and owner-test disposition. Reference-only owner code, tutorial fixtures and benchmarks are not copied or reconstructed; the preserved notice is an upstream license text, not project-authored instructional content. Installed Triton/PyTorch/NVIDIA packages retain their licenses and notices, and are not redistributed by the website. No runtime or performance evidence is granted by rights review.
+
 # Content and File Licenses
 
 ## Optimization and SDPA reference-only review

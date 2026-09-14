@@ -193,11 +193,20 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Triton 编程模型',
+          translations: { en: 'Triton Programming Model' },
+          items: [
+            { slug: 'triton/programs-and-block-values' },
+            { slug: 'triton/masked-vector-addition' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [
             { slug: 'examples/environment-report' },
             { slug: 'examples/vector-addition' },
+            { slug: 'examples/triton-vector-add' },
             { slug: 'examples/multidimensional-indexing' },
             { slug: 'examples/error-handling-lifecycle' },
             { slug: 'examples/coalesced-strided-access' },

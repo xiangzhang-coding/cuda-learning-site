@@ -87,16 +87,16 @@ describe('R4 release review', () => {
     for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md']) {
       const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
       const { frontmatter } = parseFrontmatter(raw);
-      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-13');
+      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-14');
       expect(frontmatter.head.find((entry: { attrs: { name: string } }) => entry.attrs.name === 'cuda:fact-check-date')?.attrs.content)
-        .toBe('2026-09-13');
+        .toBe('2026-09-14');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /317 (?:Publication Pairs|个双语发布对)/, /634 (?:source routes|routes|条源路由|条路由)/,
-        /87 (?:Learning Units|个学习单元)/, /22 (?:Runnable Examples|个可运行示例)/,
-        /86 (?:Exercise sets|组练习)/, /86 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
-        /94 (?:Practice Bank entries|个练习题库条目)/, /204 (?:Glossary terms|个术语表词条)/,
-        /102 (?:source records|条来源(?:记录)?)/, /433 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /35 (?:subjects|个主体)/,
+        /325 (?:Publication Pairs|个双语发布对)/, /650 (?:source routes|routes|条源路由|条路由)/,
+        /89 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
+        /88 (?:Exercise sets|组练习)/, /88 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
+        /96 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
+        /103 (?:source records|条来源(?:记录)?)/, /440 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /36 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
       expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '94'], ['glossary', '204'], ['sources-and-versions', '102']]) {
+        for (const [slug, count] of [['practice', '96'], ['glossary', '207'], ['sources-and-versions', '103']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -163,7 +163,7 @@ describe('R4 release review', () => {
     expect(current).toMatchObject({
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-13',
+      reviewDate: '2026-09-14',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
@@ -558,7 +558,7 @@ describe('R4 release review', () => {
 
       const catalogIds: string[] = [];
       for (const [slug, group, count] of [
-        ['labs', 'labs', 14], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 19],
+        ['labs', 'labs', 14], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 20],
         ['glossary', 'glossary', current.scope.glossaryTerms], ['sources-and-versions', 'sources', current.scope.sourceRecords],
       ] as const) {
         const route = `${locale === 'en' ? '/en' : ''}/${slug}/`;
@@ -569,7 +569,7 @@ describe('R4 release review', () => {
         expect(new Set(ids).size).toBe(count);
         expectExactMembers(ids, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).map((record) => record.planningId));
         catalogIds.push(...ids);
-        if (group === 'visuals') expectExactMembers(ids, visualExplainers);
+        if (group === 'visuals') expectExactMembers(ids, [...visualExplainers, 'VIS17']);
         if (group === 'practice' || group === 'glossary' || group === 'sources') {
           const prefix = { practice: 'pb-', glossary: 'term-', sources: 'src-' }[group];
           expectExactMembers([...document.querySelectorAll(`span[id^="${prefix}"]`)].map((node) => node.id.toUpperCase()), ids);
@@ -600,7 +600,7 @@ describe('R4 release review', () => {
           }
         }
       }
-      for (const id of visualExplainers) {
+      for (const id of [...visualExplainers, 'VIS17']) {
         const { href } = PUBLISHED_DESTINATIONS[id];
         const target = new URL(href[locale], 'https://cuda-learning-site.hmzhangxiang.workers.dev');
         expect(pages.has(target.pathname), id).toBe(true);
@@ -616,15 +616,19 @@ describe('R4 release review', () => {
       expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), current.evidence.pendingHardwareVerification);
       expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
       expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
-      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T\d{2}|^PB-R[6-9]-|^(?:EX23|LAB15)$/.test(id))).toBe(false);
+      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014']);
+      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T0[3-9]|^PB-R[6-9]-|^(?:EX24|LAB15)$/.test(id))).toBe(false);
     }
-    expect(routes.some((route) => /\/(?:framework|triton)(?:\/|$)/i.test(route))).toBe(false);
+    expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
+    expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(
+      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition']
+        .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}triton/${slug}/${suffix}`))).sort());
     expect(routes.filter((route) => /\/frameworks(?:\/|$)/.test(route)).sort()).toEqual(
       ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling', 'first-custom-operator', 'operator-registration', 'operator-packaging', 'profile-led-optimization', 'sdpa-dispatch-verification']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}frameworks/${slug}/${suffix}`))).sort(),
     );
-    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P|T)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
     expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB15');
   }, 30_000);
 });

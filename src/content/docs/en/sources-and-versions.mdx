@@ -1,9 +1,9 @@
 ---
 title: Sources and Version Record
-description: Exact publishing and technical sources for the curriculum through P12, EX22 and LAB14, with independent version, rights and evidence records.
+description: Exact publishing and technical sources through T02, EX23 and VIS17, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-13'
+factCheckDate: '2026-09-14'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -34,6 +34,7 @@ structure:
   - entry-src-cuda-084
   - entry-src-cuda-085
   - entry-src-cuda-086
+  - entry-src-cuda-087
   - content-sources
   - review-record
 evidence:
@@ -49,7 +50,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-13'
+      content: '2026-09-14'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -57,18 +58,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, EX01-EX22 and LAB01-LAB14. Nineteen Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
+This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, T01-T02, EX01-EX23 and LAB01-LAB14. Twenty Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
 
 ## Scope of this record
 
-The **2026-09-13 current publication** has 87 Learning Units, 22 Runnable Examples, 14 Labs, 19 Visual Explainers, 86 Exercise-set and 86 separate solution-set Publication Pairs: **317 Publication Pairs / 634 source routes**. Its **433 catalog records** contain 14 Labs, 94 Practice Bank entries, 19 Visual Explainers, 204 Glossary terms and 102 source records. Issue #45 adds SRC-CUDA-086; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-14 current publication** has 89 Learning Units, 23 Runnable Examples, 14 Labs, 20 Visual Explainers, 88 Exercise-set and 88 separate solution-set Publication Pairs: **325 Publication Pairs / 650 source routes**. Its **440 catalog records** contain 14 Labs, 96 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 103 source records. Issue #46 adds SRC-CUDA-087; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -778,9 +779,32 @@ The untruncated owner tree was checked for intervening LICENSE/NOTICE/COPYING fi
 
 Owner tests were inspected, not executed. Their speed expectations are not project observations, their XPU priority test is not a CUDA rule, and the functional GQA summary is not treated as a complete source-level support matrix. P12 excludes GQA, masks and backward in its executable fixture. Beta controls and internal diagnostic names are exact-build case-study dependencies, not version-independent prerequisites. P11's contract-preserving candidate, LAB14 and the report parser are original work; no upstream code, table, test, trace or timing is copied. VIS18 is linked unchanged. No selected backend, generated-code result or performance evidence is created by this source review.
 
+<span id="src-cuda-087" class="resource-target"></span>
+
+## SRC-CUDA-087: Triton programs, masks and generated toolchain
+
+**Related IDs:** T01, T02, EX23, VIS17. **Access/review:** 2026-09-14. Select Triton **3.7.1**, tag commit `f797708c0626e5f9840ca5b0a98790e2c7cb09ad`, rather than the now-available 3.8.0. Context7 `/triton-lang/triton` queries covered installation/CC, vector-add launch and masking; results pointed to current main documentation and were used for discovery. Exact selected source below governs. Context7's PyTorch lookup also identified the 2.13 documentation collection; the exact host source and wheel metadata were checked directly.
+
+| Owner source | Verified scope |
+| --- | --- |
+| [README](https://github.com/triton-lang/triton/blob/v3.7.1/README.md), [setup.py](https://github.com/triton-lang/triton/blob/v3.7.1/setup.py) | Linux; NVIDIA CC 8.0+; CPython 3.10–3.14; version 3.7.1; source-build dependency download/copy rules. The 2019 tiled-language history is linked by the owner README. |
+| [language/core.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py), [semantic.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/semantic.py) | Program IDs, zero-based power-of-two arange extent, broadcasting, pointer-tensor load/store masks, load fill, and eager argument evaluation for where. Descriptor/block-pointer boundaries are distinct. |
+| [runtime/jit.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/jit.py), [compiler/compiler.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/compiler/compiler.py) | Grid launch, compile-time values, explicit ASTSource/GPUTarget compilation, artifact access and lazy driver handles. This compiler API is scoped to the exact example release. |
+| [NVIDIA compiler](https://github.com/triton-lang/triton/blob/v3.7.1/third_party/nvidia/backend/compiler.py), [driver](https://github.com/triton-lang/triton/blob/v3.7.1/third_party/nvidia/backend/driver.py), [toolchain pins](https://github.com/triton-lang/triton/blob/v3.7.1/cmake/nvidia-toolchain-version.json) | TTIR → TTGIR → LLVM IR → PTX → cubin; bundled ptxas 12.8.93 below architecture 100, ptxas-blackwell 13.1.80 at/above 100; host launcher and libcuda dependency; no system NVCC call in EX23. |
+| [Owner language tests](https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/language/test_core.py) | Inspected `test_masked_load`, scalar masked-load tests, arange and where tests. Masked-load tests compare the input prefix plus explicit fill values. Tests were read, not run, and no fixture or result is copied. |
+| [Triton wheel metadata](https://pypi.org/pypi/triton/3.7.1/json), [torch metadata](https://pypi.org/pypi/torch/2.13.0/json), [torch CUDA host API](https://github.com/pytorch/pytorch/blob/v2.13.0/torch/cuda/__init__.py) | Ordinary CPython 3.14 x86_64 Triton wheel SHA-256 `2020153b08280415ec0da6607834e79166442147e78e144df06b508c75b186d2`; torch 2.13.0 Linux requires triton==3.7.1. Device selection/properties and device synchronization remain host operations. |
+| [CUDA 13.0 release notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html) | EX23 selects a conservative Linux driver floor 580.65.06 for the CUDA 13 host package family; actual architecture/code loading must still work. The ptxas version is a separate coordinate. |
+| [Exact Triton LICENSE](https://github.com/triton-lang/triton/blob/v3.7.1/LICENSE) | MIT notice, copyright 2018–2020 Philippe Tillet and 2020–2022 OpenAI; complete bytes retained in EX23/TRITON-LICENSE, SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`. |
+
+The independent full lock selects CPython 3.14.7, torch 2.13.0, Triton 3.7.1 and transitive NVIDIA packages. `compiler.lock` is the exact driver-free Triton subset for artifact checks; it cannot run the example. Setup offers `--compiler-only` for this subset and checks it independently. The default setup installs the full runtime lock. Neither profile inherits a C++ Toolkit Lane or EX21/EX22 evidence.
+
+The [owner vector-add tutorial](https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/01-vector-add.py) was consulted for language/launch contracts; no tutorial listing, random fixture, performance graph or benchmark is copied. EX23's input formula, oracle, guards, command gates and artifact reports are original Apache-2.0; teaching prose and Exercises are original CC BY 4.0. Triton source files referenced above are governed by the selected root MIT notice; bundled NVIDIA tools, PyTorch and installed dependencies retain their own terms. No wheel, assembler, SDK header or upstream source is redistributed with the site. The retained MIT notice does not relicense NVIDIA binaries.
+
+Source/metadata inspection, CPU arithmetic and browser models create no Triton runtime or performance evidence. EX23 remains Pending Hardware Verification with empty published compilation and recorded observations.
+
 ## Content and asset sources
 
-- Home, 87 Learning Units, 22 Runnable Examples, 14 Labs, 94 Practice Bank entries, 204 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
+- Home, 89 Learning Units, 23 Runnable Examples, 14 Labs, 96 Practice Bank entries, 207 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
@@ -814,4 +838,4 @@ On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-si
 
 Immutable `src/r3-release-manifest.json` retains 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including ten Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 61 Exercise sets, 61 solution sets, 232 Publication Pairs, and 464 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains its dynamic acceptance. R4 additionally qualifies eight existing library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. The R3 subset remains PB-R3-002 through PB-R3-005 and PB-R3-007 through PB-R3-012; both classifications are within the existing 82 entries.
 
-Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 21 other examples and 14 Labs remain Pending Hardware Verification, 35 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13 and P01-P12 retain empty evidence arrays. Six profiler plans remain expected-only; nineteen browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.
+Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 22 other examples and 14 Labs remain Pending Hardware Verification, 36 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13, P01-P12 and T01-T02 retain empty evidence arrays. Six profiler plans remain expected-only; twenty browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.

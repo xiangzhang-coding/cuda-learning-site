@@ -2,6 +2,16 @@
 
 # Maintenance Source Record
 
+## Triton model and vector-add increment — 2026-09-14
+
+Issue #46 adds T01 `[F02,F03,M02]`, T02 `[T01,A01]`, EX23 `[T02]`, VIS17 `[T01]`, four Exercise/solution pairs, PB-R5-013/014 and TERM-205/206/207. Current scope: 325 pairs / 650 routes, 89 Learning Units, 23 Runnable Examples, 14 Labs, 20 Visual Explainers, 88 Exercise sets and 88 solution sets, 96 Practice Bank entries, 207 terms, 103 source records and 440 catalog records. R4 history stays frozen; R5 aggregate review is pending.
+
+Context7 `/triton-lang/triton` discovery queries covered vector addition, program_id/arange, launch/masking, installation and generated-toolchain boundaries, followed by exact v3.7.1 owner README, setup.py, language/core.py, language/semantic.py, runtime/jit.py, compiler/compiler.py, NVIDIA compiler/driver, toolchain pins, language tests and LICENSE. The tag resolves to `f797708c0626e5f9840ca5b0a98790e2c7cb09ad`. Main-branch discovery is not treated as an exact release. PyTorch 2.13.0 metadata requires Triton 3.7.1 on Linux; its selected host CUDA source was inspected. CUDA 13.0 archived notes supply the conservative 580.65.06 driver floor. The independent hashed runtime lock was resolved for CPython 3.14.7 / Linux x86_64; Context7 `/astral-sh/uv` confirmed platform-specific lock flags. Exact source/rights details are in SRC-CUDA-087.
+
+Local build-only validation used Linux/amd64 emulation, ordinary CPython 3.14.7, glibc 2.36, Triton 3.7.1 and ptxas 12.8.93. `python:3.14.7-slim-bookworm` resolved to image digest `sha256:9ab8d9c8514b44f90cf0029dd42fdd7e9e211e639c8b995304cc04568dee900f`. Compiler-subset setup, CPU contract and explicit sm_80 compilation exited 0 and produced nonempty TTIR/TTGIR/LLVM IR/PTX/cubin. No driver initialization or GPU execution occurred. This local container check is not the native-Linux GPU Reference Environment, does not publish Compile-Checked evidence, and does not validate runtime performance. EX23 retains empty published compilation and recorded observations and Pending Hardware Verification.
+
+The implementation's Standards and Spec reviews independently identified the static card's local/global-index ambiguity; the cards now derive from the shared logical model, distinguish local positions from global indices, retain all launched CUDA tail threads, and localize explanatory labels. The immutable canonical project is separately committed so both locales and downloads identify the same build inputs.
+
 ## Post-merge PyTorch navigation search check — 2026-09-14
 
 The #45 PR checks passed, but main Web Quality run `34783041801` reported

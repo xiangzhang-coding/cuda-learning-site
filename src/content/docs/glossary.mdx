@@ -1,9 +1,9 @@
 ---
 title: 术语表
-description: CUDA 学习站已发布的 204 个规范中英文术语和证据边界。
+description: CUDA 学习站已发布的 207 个规范中英文术语和证据边界。
 pairId: glossary
 counterpart: /en/glossary/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-14'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -32,6 +32,9 @@ structure:
   - entry-term-202
   - entry-term-203
   - entry-term-204
+  - entry-term-205
+  - entry-term-206
+  - entry-term-207
   - maintenance
 evidence:
   compilation: []
@@ -46,7 +49,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-14'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -54,7 +57,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,entry-term-201,entry-term-202,entry-term-203,entry-term-204,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,entry-term-201,entry-term-202,entry-term-203,entry-term-204,entry-term-205,entry-term-206,entry-term-207,maintenance'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -1911,7 +1914,36 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 - **相关资源：** [Q07](/correctness/timeline-first-nsight-systems/)、[Q08](/correctness/kernel-first-nsight-compute/)和 [P07](/frameworks/python-to-cuda-profiling/)。
 - **版本说明：** PyTorch 2.11.0+cu128、Kineto 提交 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7、CUPTI 包 12.8.90，2026-09-12 复核于 [SRC-CUDA-083](/sources-and-versions/#src-cuda-083)。要求真实 CPU/运行时/内核活动并保留每个调度窗口；词条定义不提供 trace。
 
+<span id="term-205" class="resource-target" aria-hidden="true"></span>
+
+### program instance · 程序实例
+
+- **定义：** 程序实例（program instance）是启动网格中 Triton JIT 函数的一个实例，由 `program_id` 沿某个轴标识。
+- **避免使用：** CUDA 线程；线程束通道；按定义就是矩阵行。
+- **相关资源：** [T01](/triton/programs-and-block-values/)、[T02](/triton/masked-vector-addition/)。
+- **版本说明：** Triton 3.7.1，2026-09-14 于 [SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 核查。逻辑归属不能建立物理调度结论。
+
+<span id="term-206" class="resource-target" aria-hidden="true"></span>
+
+### block-shaped value · 块形值
+
+- **定义：** 块形值（block-shaped value）是 Triton 程序内带编译期形状的逻辑张量值，编译器可以将元素分布在线程和寄存器中。
+- **避免使用：** 每个物理通道一个值；自动分配共享内存；Python 列表。
+- **相关资源：** [T01](/triton/programs-and-block-values/)。
+- **版本说明：** Triton 3.7.1，2026-09-14 于 [SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 核查。形状与启动线程束数是独立选择。
+
+<span id="term-207" class="resource-target" aria-hidden="true"></span>
+
+### memory mask · 内存掩码
+
+- **定义：** 内存掩码（memory mask）是逐元素谓词，控制指针张量的每个读取或写入是否访问内存。带掩码读取的 `other` 提供非活动位置的值。
+- **避免使用：** 缩小形状；在无掩码读取外包 `where`；写入掩码能修复读取。
+- **相关资源：** [T02](/triton/masked-vector-addition/)。
+- **版本说明：** Triton 3.7.1，2026-09-14 于 [SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 核查。此定义涉及指针张量，不是描述符边界语义。
+
 ## 维护规则
+
+Issue #46 于 2026-09-14 增加 TERM-205 至 TERM-207，当前总数为 **207**。较早条目保留各自核查日期。定义与浏览器映射不产生 GPU 证据。
 
 2026-09-12 的 issue #43 增量新增 TERM-201 至 TERM-204，当前共 **204** 个词条。Issue #42 的 TERM-197 至 TERM-200 及此前逐项日期不变。存储生命周期跟踪、自动混合精度转换、梯度缩放和分析器关联各有独立合同，不重复已有流或精度词条。双语页面与目录记录使用相同复核日期，不改变证据状态（Evidence Status）。
 

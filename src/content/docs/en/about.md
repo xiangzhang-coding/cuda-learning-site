@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-09-13'
+factCheckDate: '2026-09-14'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-13'
+      content: '2026-09-14'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -56,7 +56,7 @@ Issue #31 adds `A12<-[M01,M02]` and `A13<-[A12,A08]` to the strict graph. [Issue
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) adds [P01: The CUDA Python Bridge](/en/python/cuda-python-bridge/), [P02: Devices, Contexts, and Launches](/en/python/devices-contexts-launches/), and [P03: Runtime Compilation and Linking](/en/python/runtime-compilation-linking/) to the current publication, with ordered direct prerequisites `[F04,M07]`, `[P01,F07]`, and `[P02,M15,M16]` respectively. Each unit has Exercises and separate solutions. Their shared [EX21: CUDA Python Explicit Launch](/en/examples/cuda-python-launch/) requires only `[P02]`, records its Python, package, and native Toolkit profile independently, and remains Pending Hardware Verification. These ten pairs and twenty routes neither rewrite R4 history nor publish framework or Triton placeholders.
 
-As of **2026-09-13**, the current publication has 87 Learning Units, 22 Runnable Examples (EX01-EX22), 14 Labs (LAB01-LAB14), 19 Visual Explainers, 94 [Practice Bank](/en/practice/) entries, 204 [Glossary](/en/glossary/) terms and 102 [source records](/en/sources-and-versions/): 433 catalog records, 317 Publication Pairs and 634 source routes, including 86 Exercise sets and 86 separate reviewed-solution sets.
+As of **2026-09-14**, the current publication has 89 Learning Units, 23 Runnable Examples (EX01-EX23), 14 Labs (LAB01-LAB14), 20 Visual Explainers, 96 [Practice Bank](/en/practice/) entries, 207 [Glossary](/en/glossary/) terms and 103 [source records](/en/sources-and-versions/): 440 catalog records, 325 Publication Pairs and 650 source routes, including 88 Exercise sets and 88 separate reviewed-solution sets. [T01](/en/triton/programs-and-block-values/) and [T02](/en/triton/masked-vector-addition/) add the Triton mental model and vector addition with [EX23](/en/examples/triton-vector-add/) and [VIS17](/en/visuals/simt-triton-mapping/).
 
 Issue #44 adds [P08](/en/frameworks/first-custom-operator/) with `[O04,F04,Q01,P04]`, [P09](/en/frameworks/operator-registration/) with `[P08,Q01]`, and [P10](/en/frameworks/operator-packaging/) with `[P08,M18]`. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) require `[P08,P09]`; the original adjacent-energy operator has CPU/CUDA paths and an independently pinned extension Toolkit. Both retain empty compilation/recorded observations and Pending Hardware Verification runtime.
 
@@ -64,7 +64,7 @@ Issue #44 adds [P08](/en/frameworks/first-custom-operator/) with `[O04,F04,Q01,P
 
 **R4 aggregate static review: 2026-09-10.** Technical sources retain their individual access and review dates; that review's retrievals have a separate [aggregate disposition](/en/sources-and-versions/#r4-aggregate-review), not a review of the current Python bridge increment. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records CI, Preview, production, and smoke acceptance only after those results exist. R4 does not imply completion of framework or Triton tracks or publish placeholder destinations for them.
 
-The current 94-entry Practice Bank includes PB-R5-001 through PB-R5-012. R4's eight library-and-algorithm-choice entries and R3's ten Nsight report-analysis entries remain unchanged. Only EX02, EX10 and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. The other 21 examples and all 14 Labs remain Pending Hardware Verification, 35 subjects total. P01-P12 keep four empty evidence arrays. EX21 and EX22 have empty compilation/recorded observations; host checks grant no GPU evidence. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only.
+The current 96-entry Practice Bank includes PB-R5-001 through PB-R5-014. R4's eight library-and-algorithm-choice entries and R3's ten Nsight report-analysis entries remain unchanged. Only EX02, EX10 and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. The other 22 examples and all 14 Labs remain Pending Hardware Verification, 36 subjects total. P01-P12 and T01-T02 keep four empty evidence arrays. EX21-EX23 have empty compilation/recorded observations; host checks grant no GPU evidence. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only.
 
 Q06-Q13, A10-A14, and L01-L13 have all four evidence arrays empty and grant no Evidence Status. L03-L05 only link and paraphrase exact owner source and test contracts; API presence and owner tests are not site compilation or runtime evidence. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime; no timing, speedup, or winner is recorded, and publishing L07 supplies no Lt selection runtime evidence. The selected CCCL v3.4.2 coordinate is independent from Toolkit labels, applies only to 12.9.2/13.3.1 evaluation, and excludes 11.8. All 19 Visual Explainers remain evidence-neutral browser models.
 

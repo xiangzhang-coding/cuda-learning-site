@@ -1,0 +1,152 @@
+---
+title: 'EX23：Triton 带掩码向量加法'
+description: 独立 Linux Triton 项目，包含显式无 GPU 编译目标、完整 CPU 参考、输出保护区和独立运行门槛。
+pairId: ex23
+counterpart: /en/examples/triton-vector-add/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, project, environment, setup, build, run, correctness, observations, evidence, sources]
+resourceKind: runnable-example
+unitId: EX23
+prerequisites: [T02]
+relatedUnits: [T01, EX02, VIS17]
+exampleIds: [EX23]
+canonicalExample: EX23
+canonicalRanges:
+  - imports
+  - kernel
+  - reference
+  - launch
+hardwareGate: 'Native Linux x86_64; NVIDIA CC 8.0+; at least 8 GB; one selected GPU; driver 580.65.06 or newer'
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+toolkitLanes: []
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['1003 values use four programs and 21 masked positions.', 'Every finite output equals its CPU reference; guards remain NaN.', 'Five nonempty compiler artifacts for sm_80 without GPU execution.']
+  recordedObservations: []
+sources:
+  - { title: 'Exact compiler and lazy handles', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/compiler/compiler.py', version: '3.7.1', platform: 'Explicit NVIDIA compiler target', accessDate: '2026-09-14' }
+  - { title: 'Exact NVIDIA toolchain pins', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/cmake/nvidia-toolchain-version.json', version: '3.7.1', platform: 'Native Linux', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex23 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/examples/triton-vector-add/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,project,environment,setup,build,run,correctness,observations,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: T02 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T01,EX02,VIS17' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'imports,kernel,reference,launch' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Linux x86_64; NVIDIA CC 8.0+; at least 8 GB; one selected GPU; driver 580.65.06 or newer' } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/triton-vector-add/" lang="en">Read the English counterpart</a>
+
+## 契约
+
+构建并运行原创 FP32 向量加法，明确保护尾部边界。规范项目分别提供只用标准库的 CPU 测试、显式目标的无 GPU 编译，以及 GPU 执行。运行状态为**待硬件验证（Pending Hardware Verification）**，编译证据和已记录观察为空。没有性能结论。
+
+## 前置知识
+
+精确直接依赖是 **[T02]**：[带掩码向量加法](/triton/masked-vector-addition/)。用 [T01](/triton/programs-and-block-values/) 与 [VIS17](/visuals/simt-triton-mapping/) 解释归属模型；[EX02](/examples/vector-addition/) 是有独立证据的 CUDA 对照。
+
+## 规范项目与导入
+
+阅读[源码目录](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5f830b8ec77dedb42e851ff03201e4cf968d10e9/examples/ex23-triton-vector-add)或[下载对应修订](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5f830b8ec77dedb42e851ff03201e4cf968d10e9.zip)，以 `examples/ex23-triton-vector-add/` 为独立工作目录。保持项目清单、锁文件、安装脚本和源码完整。
+
+<CanonicalCode exampleId="EX23" range="imports" />
+
+<CanonicalCode exampleId="EX23" range="kernel" />
+
+只有 build/run 才导入 JIT 内核。host-test 不需要 Triton 或 PyTorch。双语页面展示同一源码区间，不维护两份副本。
+
+## 一个独立环境
+
+| 坐标 | 选定契约 |
+| --- | --- |
+| 受支持环境（Supported Environment） | 原生 Linux x86_64；目标为 Ubuntu 24.04 |
+| Python | CPython 3.14.7 普通 GIL 构建；匹配的开发头文件与 venv/pip |
+| Python 包 | Triton 3.7.1、PyTorch 2.13.0 以及 `requirements.lock` 中的全部传递依赖 |
+| 主机 GPU 库 | PyTorch 的 CUDA 13.0.3 包族；实际组件版本独立锁定 |
+| 生成代码工具 | CC 10.0 以下使用 Triton 随包 ptxas 12.8.93；CC 10.0+ 使用 ptxas-blackwell 13.1.80 |
+| 主机启动器 | 可用 C 编译器、Python 头文件，以及可发现的 NVIDIA `libcuda.so.1` |
+| GPU 运行 | 选定一个 NVIDIA GPU，CC 8.0+、至少 8 GB、驱动至少 580.65.06；更新架构可能要求更新驱动 |
+
+Triton 3.7.1 的上游支持 Linux 与 NVIDIA CC 8.0+。其 wheel 覆盖 CPython 3.10–3.14；本项目只选定一个精确普通 ABI。PyTorch 2.13.0 的 Linux 元数据要求精确的 Triton 3.7.1。不要把此环境合并进 EX21 或 EX22。不调用系统 NVCC；Triton 的 MLIR/LLVM/PTX/ptxas 流程与 PyTorch 的运行库不同。驱动仍需支持实际 GPU 与加载代码。
+
+## 安装并测试 CPU 契约
+
+在匹配 Linux 的全新独立项目中，先准备指定 Python 解释器与主机开发工具，再运行：
+
+```sh
+bash scripts/setup.sh
+.venv/bin/python ex23.py host-test
+.venv/bin/python ex23.py check-environment
+```
+
+安装拒绝替换 `.venv`，要求带哈希的二进制发行包，运行 `pip check` 并核对已安装版本。先移除 Triton 覆盖环境变量；解释器模式、替代汇编器、目标覆盖和其他 `TRITON_` 开关不在本环境契约中。在不受支持机器上执行 `python3 ex23.py host-test` 只是独立 CPU 练习，不代表受支持 GPU 环境或编译器检查。
+
+## 不执行 GPU 的构建
+
+仅做编译的主机可以在另一份全新副本中使用 `bash scripts/setup.sh --compiler-only`，通过 `compiler.lock` 安装完全相同的 Triton wheel。构建检查此子集，运行始终要求完整锁；仅编译安装不等于可运行的 GPU 环境。
+
+```sh
+.venv/bin/python ex23.py build
+```
+
+此版本限定构建使用 `ASTSource`、`GPUTarget('cuda', 80, 32)`、`TILE=256` 和四个线程束。全新临时缓存避免复用无关产物。不访问活动驱动的目标选择，也不初始化编译句柄。预期在 `build/compile/` 生成非空 TTIR、TTGIR、LLVM IR、含 `sm_80` 的 PTX 与 cubin，`report.json` 记录哈希及汇编器身份。这是固定的产物检查目标，不保证此 cubin 能在每个 CC 8.0+ GPU 上运行。
+
+保留失败信息与实际退出状态。Python 语法检查不等于此构建。即使本地编译报告成功，也需要审查后才能发布编译证据标签。
+
+## 通过硬件门槛后运行
+
+```sh
+.venv/bin/python ex23.py run --size 1003
+```
+
+run 检查环境，选择 CUDA 设备 0，拒绝 AMD/HIP，检查计算能力、内存和驱动，再测试尺寸 1、255、256、257、1003 及请求尺寸。零、负数、非整数与超预算尺寸被拒绝。Triton JIT 使用实际设备目标执行。报告记录可见 GPU 数量、选定 GPU、计算能力、内存、驱动、包版本和汇编器哈希。另存退出状态与完整原始日志。
+
+<CanonicalCode exampleId="EX23" range="reference" />
+
+## 检查每个输出与保护区
+
+<CanonicalCode exampleId="EX23" range="launch" />
+
+带符号的四分之一、二分之一输入及其和都能在 FP32 中精确表示。每个有效输出必须有限且精确相等；长度改变、非有限值和不匹配都失败。CPU 测试还核对独立字面值。所有输出从 NaN 开始，便于发现漏写。`N` 之后的全部 256 个保护值都必须保持 NaN。这能检测尾部写入，但不能证明读取安全或不存在所有 GPU 缺陷。
+
+主机在同步和 CPU 检查完成前保留所有张量所有者。启动返回或校验和均不构成验收。在请求证据审查前，填写 `environment-manifest.json`，包含源码提交、适用时的基准环境（Reference Environment）身份、实际系统与内核、主机编译器、驱动、包、工具哈希、命令、退出状态和日志。模板不包含观察。
+
+## 预期观察
+
+1. `N=1003` 应使用四个各含 256 个逻辑值的程序实例；最后一个有 235 个有效位置和 21 个屏蔽位置。
+2. 所有有限输出应等于 CPU 参考，全部保护值应保持 NaN。字面示例为索引 0 处 −6.5、索引 1002 处 −2。
+3. 显式 sm_80 构建应在不执行 GPU 的情况下生成五个非空编译产物。
+
+这些是预测与验收标准，不是示例运行记录。安装或硬件不可用时，不得虚构成功报告。
+
+## 证据边界
+
+编译：**没有编译已检查（Compile-Checked）声明**。运行：**待硬件验证**。没有记录运行或性能观察。本地生成的运行报告未经审查，不能自行标记为运行已验证（Runtime-Verified）。CPU 测试、浏览器算术、解释器运行、上游测试和 EX02 证据都不能建立 EX23 运行或性能结论。这里不测量时间或带宽。
+
+## 来源与许可
+
+[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 记录精确源码文件、上游测试、wheel 元数据、驱动边界和生成工具链行为，核查于 **2026-09-14**。EX23 代码原创，采用 Apache-2.0；教学正文采用 CC BY 4.0。上游向量加法教程只用于核查 API 行为，没有复制其代码、输入或基准测试。`TRITON-LICENSE` 保留完整上游 MIT 通知。PyTorch 和 NVIDIA 二进制依赖保留各自条款，并在外部安装。

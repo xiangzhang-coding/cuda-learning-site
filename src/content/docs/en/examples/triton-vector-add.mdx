@@ -1,0 +1,152 @@
+---
+title: 'EX23: Triton Masked Vector Addition'
+description: An independent Linux Triton project with an explicit GPU-free compiler target, complete CPU oracle, guarded output and separate runtime gate.
+pairId: ex23
+counterpart: /examples/triton-vector-add/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, project, environment, setup, build, run, correctness, observations, evidence, sources]
+resourceKind: runnable-example
+unitId: EX23
+prerequisites: [T02]
+relatedUnits: [T01, EX02, VIS17]
+exampleIds: [EX23]
+canonicalExample: EX23
+canonicalRanges:
+  - imports
+  - kernel
+  - reference
+  - launch
+hardwareGate: 'Native Linux x86_64; NVIDIA CC 8.0+; at least 8 GB; one selected GPU; driver 580.65.06 or newer'
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+toolkitLanes: []
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['1003 values use four programs and 21 masked positions.', 'Every finite output equals its CPU reference; guards remain NaN.', 'Five nonempty compiler artifacts for sm_80 without GPU execution.']
+  recordedObservations: []
+sources:
+  - { title: 'Exact compiler and lazy handles', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/compiler/compiler.py', version: '3.7.1', platform: 'Explicit NVIDIA compiler target', accessDate: '2026-09-14' }
+  - { title: 'Exact NVIDIA toolchain pins', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/cmake/nvidia-toolchain-version.json', version: '3.7.1', platform: 'Native Linux', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex23 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/examples/triton-vector-add/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,project,environment,setup,build,run,correctness,observations,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: T02 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T01,EX02,VIS17' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'imports,kernel,reference,launch' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Linux x86_64; NVIDIA CC 8.0+; at least 8 GB; one selected GPU; driver 580.65.06 or newer' } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/triton-vector-add/" lang="zh-CN">阅读中文对应页</a>
+
+## Contract
+
+Build and run an original FP32 vector addition with explicit tail masks. The canonical project separates a stdlib-only CPU test, an explicit-target GPU-free compile, and GPU execution. Runtime is **Pending Hardware Verification**; compilation evidence and recorded observations are empty. There is no performance claim.
+
+## Prerequisites
+
+Exact direct prerequisite: **[T02]**, [masked vector addition](/en/triton/masked-vector-addition/). Use [T01](/en/triton/programs-and-block-values/) and [VIS17](/en/visuals/simt-triton-mapping/) to explain the ownership model; [EX02](/en/examples/vector-addition/) is the separately evidenced CUDA comparison.
+
+## Canonical project and imports
+
+Read the [source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5f830b8ec77dedb42e851ff03201e4cf968d10e9/examples/ex23-triton-vector-add) or [download the revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5f830b8ec77dedb42e851ff03201e4cf968d10e9.zip), then use `examples/ex23-triton-vector-add/` as the standalone working directory. Keep the project manifest, lock, setup script and sources together.
+
+<CanonicalCode exampleId="EX23" range="imports" />
+
+<CanonicalCode exampleId="EX23" range="kernel" />
+
+The JIT kernel is imported only for build/run. Host-test needs neither Triton nor PyTorch. Both locales display the same source ranges rather than maintaining copies.
+
+## One independent environment
+
+| Coordinate | Selected contract |
+| --- | --- |
+| Supported Environment | Native Linux x86_64; Ubuntu 24.04 target |
+| Python | CPython 3.14.7, ordinary GIL build; matching development headers and venv/pip |
+| Python packages | Triton 3.7.1, PyTorch 2.13.0 and all transitive packages in `requirements.lock` |
+| Host GPU libraries | PyTorch's CUDA 13.0.3 package family; actual component versions are independently locked |
+| Generated-code tools | Triton-bundled ptxas 12.8.93 below CC 10.0; ptxas-blackwell 13.1.80 at CC 10.0+ |
+| Host launcher | A working C compiler, Python headers, and discoverable NVIDIA `libcuda.so.1` |
+| GPU run | One selected NVIDIA GPU, CC 8.0+, at least 8 GB, driver at least 580.65.06; newer architectures may require newer drivers |
+
+Triton 3.7.1's owner supports Linux and NVIDIA CC 8.0+. Its wheels cover CPython 3.10–3.14; this project selects one exact ordinary ABI. PyTorch 2.13.0's Linux metadata requires exactly Triton 3.7.1. Do not merge this profile into EX21 or EX22. No system NVCC is called; Triton's MLIR/LLVM/PTX/ptxas pipeline is distinct from PyTorch's runtime libraries. The driver still has to support the actual GPU and loaded code.
+
+## Set up and test the CPU contract
+
+From a fresh standalone project on matching Linux, prepare the declared Python interpreter and host development tools, then run:
+
+```sh
+bash scripts/setup.sh
+.venv/bin/python ex23.py host-test
+.venv/bin/python ex23.py check-environment
+```
+
+Setup refuses to replace `.venv`, requires binary distributions with hashes, runs `pip check`, and checks installed versions. Remove any Triton override environment variables first; interpreter, alternate assembler, target overrides and other `TRITON_` knobs are outside this profile. On an unsupported machine, `python3 ex23.py host-test` is an isolated CPU exercise only, not a supported GPU setup or a compiler check.
+
+## Build without GPU execution
+
+For a compiler-only host, a separate fresh copy may use `bash scripts/setup.sh --compiler-only`, installing the exact same Triton wheel through `compiler.lock`. Build checks this subset. Runtime always requires the full lock; do not treat compiler-only installation as a runnable GPU environment.
+
+```sh
+.venv/bin/python ex23.py build
+```
+
+The version-scoped build uses `ASTSource`, `GPUTarget('cuda', 80, 32)`, `TILE=256`, and four warps. Its fresh temporary cache prevents reuse of unrelated artifacts. It does not access active-driver target selection or initialize compiled handles. Expect nonempty TTIR, TTGIR, LLVM IR, PTX with `sm_80`, and cubin under `build/compile/`, with hashes and assembler identity in `report.json`. This is a fixed artifact-inspection target, not a promise that this cubin runs on every CC 8.0+ GPU.
+
+Preserve failures and the actual exit status. A Python syntax check is not this build. Even a successful local compiler report requires review before a compilation evidence label is published.
+
+## Run after the hardware gate
+
+```sh
+.venv/bin/python ex23.py run --size 1003
+```
+
+Run checks the profile, selects CUDA device 0, rejects AMD/HIP, checks capability/memory and driver, then tests sizes 1, 255, 256, 257 and 1003 plus the requested size. Zero, negative, noninteger and over-budget sizes are rejected. Triton's JIT uses the actual device target for execution. The report records visible GPU count, selected GPU, capability, memory, driver, package versions and assembler hash. Save exit status and full original logs alongside it.
+
+<CanonicalCode exampleId="EX23" range="reference" />
+
+## Check every output and the guard
+
+<CanonicalCode exampleId="EX23" range="launch" />
+
+The signed quarter/half inputs and sums are exactly representable in FP32. Require finite exact equality for every valid output; changed lengths, nonfinite values and mismatches fail. The CPU test also checks independent literal values. Every output starts as NaN, making missed stores visible. All 256 guard values after `N` must remain NaN. This detects tail writes but does not prove load safety or absence of every GPU defect.
+
+The host retains all tensor owners until synchronization and CPU inspection. Neither launch return nor a checksum is acceptance. Complete `environment-manifest.json` with source commit, Reference Environment identity if applicable, actual OS/kernel, host compiler, driver, packages, tool hashes, commands, exit status and logs before requesting evidence review. The template contains no observations.
+
+## Expected observations
+
+1. `N=1003` should use four programs of 256 logical values; the last has 235 valid and 21 masked positions.
+2. All finite outputs should equal their CPU reference and all guard values should remain NaN. Literal examples are −6.5 at index 0 and −2 at index 1002.
+3. The explicit sm_80 build should produce five nonempty compiler artifacts without GPU execution.
+
+These are predictions and acceptance criteria, not a sample transcript. Do not fabricate a success report when installation or hardware is unavailable.
+
+## Evidence boundary
+
+Compilation: **no Compile-Checked claim**. Runtime: **Pending Hardware Verification**. No recorded runtime or performance observations. A generated local run report is unreviewed; it cannot label itself Runtime-Verified. CPU tests, browser arithmetic, interpreter runs, upstream tests and EX02 evidence do not establish EX23 runtime or performance. No timing or bandwidth is measured here.
+
+## Sources and licensing
+
+[SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) records exact source files, owner tests, wheel metadata, driver boundary and generated-toolchain behavior, reviewed **2026-09-14**. EX23 code is original Apache-2.0; teaching prose is CC BY 4.0. The upstream vector-add tutorial was consulted for API behavior without copying its listing, fixture or benchmark. `TRITON-LICENSE` retains the complete owner MIT notice. PyTorch and NVIDIA binary dependencies retain their own terms and are installed externally.

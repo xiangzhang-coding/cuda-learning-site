@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+# Independent of EX21 and EX22. CPython 3.14.7, native Linux x86_64.
+triton==3.7.1
+torch==2.13.0

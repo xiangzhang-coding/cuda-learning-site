@@ -22,6 +22,7 @@ import ex19Project from '../../examples/ex19-cufft-batched-transform/project.jso
 import ex20Project from '../../examples/ex20-cusparse-spmv/project.json' with { type: 'json' };
 import ex21Project from '../../examples/ex21-cuda-python-launch/project.json' with { type: 'json' };
 import ex22Project from '../../examples/ex22-adjacent-energy/project.json' with { type: 'json' };
+import ex23Project from '../../examples/ex23-triton-vector-add/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import currentPublicationManifest from '../../src/current-publication-manifest.json' with { type: 'json' };
 import r3ReleaseManifest from '../../src/r3-release-manifest.json' with { type: 'json' };
@@ -123,6 +124,7 @@ const projectExamples = [
   { suffix: 'examples/cusparse-spmv/', project: ex20PublishedProject },
   { suffix: 'examples/cuda-python-launch/', project: ex21PublishedProject },
   { suffix: 'examples/adjacent-energy/', project: { ...ex22Project, ...publicationPins.EX22 } },
+  { suffix: 'examples/triton-vector-add/', project: { ...ex23Project, ...publicationPins.EX23 } },
 ] as const;
 const learningUnits = [
   'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
@@ -136,20 +138,21 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
 const r4RunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX20'] as const;
-const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22'] as const;
+const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r4Labs = [...r3Labs, 'LAB11', 'LAB12'] as const;
 const currentLabs = [...r4Labs, 'LAB13', 'LAB14'] as const;
-const currentVisualExplainers = [
+const historicalVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
+const currentVisualExplainers = [...historicalVisualExplainers, 'VIS17'].sort();
 const r3EvidenceNeutralLearningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
   'A10', 'A11', 'A12', 'A13', 'A14',
@@ -179,22 +182,23 @@ const currentProfilerReportPlans = [
 ] as const;
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
-  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22',
+  'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 14 },
-  { suffix: 'practice/', count: 94 },
-  { suffix: 'visuals/', count: 19 },
+  { suffix: 'practice/', count: 96 },
+  { suffix: 'visuals/', count: 20 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 102 },
+  { suffix: 'sources-and-versions/', count: 103 },
 ] as const;
 const exampleRouteSlugs = [
+  'triton-vector-add',
   'adjacent-energy',
   'coalesced-strided-access',
   'cub-device-reduction-scan',
@@ -262,7 +266,7 @@ test('serves the exact R4 release and current publication with production canoni
   expect(release.scope).toEqual({
     publicationPairs: 277, sourceRoutes: 554, exerciseSetPublicationPairs: 74, solutionSetPublicationPairs: 74,
     learningUnits: r4LearningUnits, runnableExamples: r4RunnableExampleIds, labs: r4Labs,
-    visualExplainers: currentVisualExplainers, practiceBankEntries: 82,
+    visualExplainers: historicalVisualExplainers, practiceBankEntries: 82,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds, glossaryTerms: 196, sourceRecords: 92,
   });
@@ -331,7 +335,7 @@ test('serves the exact R4 release and current publication with production canoni
     learningUnits,
     runnableExamples: runnableExampleIds,
     labs: r3Labs,
-    visualExplainers: currentVisualExplainers,
+    visualExplainers: historicalVisualExplainers,
     practiceBankEntries: 66,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     glossaryTerms: 176,
@@ -355,7 +359,7 @@ test('serves the exact R4 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-13',
+    reviewDate: '2026-09-14',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -489,19 +493,19 @@ test('serves the exact R4 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 317,
-    sourceRoutes: 634,
-    exerciseSetPublicationPairs: 86,
-    solutionSetPublicationPairs: 86,
+    publicationPairs: 325,
+    sourceRoutes: 650,
+    exerciseSetPublicationPairs: 88,
+    solutionSetPublicationPairs: 88,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 94,
+    practiceBankEntries: 96,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 102,
+    sourceRecords: 103,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -518,7 +522,7 @@ test('serves the exact R4 release and current publication with production canoni
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
     r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
-    r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12'],
+    r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
@@ -633,8 +637,8 @@ test('serves the exact R4 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '317 Publication Pairs' : '317 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '634 source routes' : '634 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '325 Publication Pairs' : '325 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '650 source routes' : '650 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -668,7 +672,7 @@ test('serves the exact R4 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(229 + currentPublicationManifest.scope.glossaryTerms);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(233 + currentPublicationManifest.scope.glossaryTerms);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -679,7 +683,7 @@ test('serves the exact R4 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(13);
+    await expect(labCards).toHaveCount(14);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -694,6 +698,7 @@ test('serves the exact R4 release and current publication with production canoni
       'LAB11',
       'LAB12',
       'LAB13',
+      'LAB14',
     ]);
   }
 
@@ -979,11 +984,13 @@ test('keeps the Python bridge graph, separate practice, and EX21 canonical journ
         await expect(page.locator(`meta[name="cuda:${field}"]`)).toHaveAttribute('content', 'none');
       }
       await expectCanonicalRanges(page, ex21PublishedProject, ranges);
-      await expect(page.locator('nav a[href*="/triton/"]')).toHaveCount(0);
+      expect(await page.locator('nav a[href*="/triton/"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')).sort()))
+        .toEqual(['masked-vector-addition', 'programs-and-block-values'].map((slug) => `${prefix}triton/${slug}/`));
       expect(await page.locator('nav a[href*="/frameworks/"]').evaluateAll((links) =>
         links.map((link) => link.getAttribute('href')).sort())).toEqual([
         'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',
         'first-custom-operator', 'operator-registration', 'operator-packaging',
+        'profile-led-optimization', 'sdpa-dispatch-verification',
       ].map((slug) => `${prefix}frameworks/${slug}/`).sort());
       await page.locator(`main a[href="${prefix}${suffix}exercises/"]`).first().click();
       await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', `${id}-EXERCISES`);
@@ -1033,13 +1040,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(634);
-    expect(new Set(routes).size).toBe(634);
+    expect(routes).toHaveLength(650);
+    expect(new Set(routes).size).toBe(650);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(54);
+    expect(routeBatches).toHaveLength(56);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(317);
+      expect(localized).toHaveLength(325);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }
@@ -1965,7 +1972,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
     expect(project.evidence.recordedObservations).toEqual([]);
     if (project.id === 'EX18' || project.id === 'EX19' || project.id === 'EX20') {
       expect(project.evidence.runtime).toBe('Pending Hardware Verification');
-      expect(project.build.standard).toBe('c++17');
+      expect('standard' in project.build && project.build.standard).toBe('c++17');
       const manifest = project.id === 'EX18' ? ex18Project : project.id === 'EX19' ? ex19Project : ex20Project;
       expect(manifest.compatibility.lanes.map(({ id, dialects }) => ({ id, dialects }))).toEqual([
         { id: 'cuda-11.8', dialects: ['c++17'] },
@@ -2053,6 +2060,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       ...project.build.hostTestInputs,
       ...project.build.contractFiles,
       ...(project.id === 'EX21' ? [...ex21Project.build.additionalContractInputs, 'README.md', 'evidence/README.md'] : []),
+      ...(project.id === 'EX23' ? ['environment-manifest.json', 'README.md', 'TRITON-LICENSE', 'project.json'] : []),
     ])) {
       const local = await readFile(path.join(projectRoot, project.root, relativePath));
       expect(findEntry(relativePath).content.equals(local), `${project.id} archive matches ${relativePath}`).toBe(true);

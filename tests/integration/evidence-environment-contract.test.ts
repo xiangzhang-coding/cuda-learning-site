@@ -449,6 +449,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007',
       'PB-R5-008', 'PB-R5-009', 'PB-R5-010',
       'PB-R5-011', 'PB-R5-012',
+      'PB-R5-013', 'PB-R5-014',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -535,6 +536,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-010': 'frameworks/operator-packaging',
       'PB-R5-011': 'frameworks/profile-led-optimization',
       'PB-R5-012': 'frameworks/sdpa-dispatch-verification',
+      'PB-R5-013': 'triton/programs-and-block-values',
+      'PB-R5-014': 'triton/masked-vector-addition',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -808,9 +811,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-010': ['frameworks/operator-packaging', 'examples/adjacent-energy', 'labs/build-custom-operator'],
       'PB-R5-011': ['frameworks/profile-led-optimization', 'examples/adjacent-energy', 'labs/profile-custom-operator'],
       'PB-R5-012': ['frameworks/sdpa-dispatch-verification', 'visuals/attention-memory-traffic'],
+      'PB-R5-013': ['triton/programs-and-block-values', 'visuals/simt-triton-mapping'],
+      'PB-R5-014': ['triton/masked-vector-addition', 'examples/triton-vector-add'],
     };
 
-    expect(entrySections).toHaveLength(94);
+    expect(entrySections).toHaveLength(96);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];
@@ -843,7 +848,9 @@ describe('Exercises and Practice Bank contract', () => {
           : prerequisitePath?.startsWith('python/')
             ? /\/(?:en\/)?python\//
           : prerequisitePath?.startsWith('frameworks/')
-            ? /\/(?:en\/)?frameworks\//
+             ? /\/(?:en\/)?frameworks\//
+          : prerequisitePath?.startsWith('triton/')
+            ? /\/(?:en\/)?triton\//
         : /\/(?:en\/)?(?:start|foundations)\//;
       expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link))).toBe(true);
       if (prerequisitePath) {

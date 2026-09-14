@@ -74,6 +74,12 @@ for (const relativePath of trackedFiles) {
     }
     continue;
   }
+  if (relativePath === 'examples/ex23-triton-vector-add/TRITON-LICENSE') {
+    const notice = await readFile(path.join(projectRoot, relativePath));
+    const upstream = createHash('sha256').update(notice).digest('hex');
+    if (upstream !== '92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946') errors.push(`${relativePath}: exact Triton v3.7.1 MIT notice required`);
+    continue;
+  }
   const jsonSpdx = relativePath.endsWith('.json') &&
     /"SPDX-License-Identifier"\s*:\s*"Apache-2\.0"/.test(content);
   if (!content.includes(softwareSpdx) && !jsonSpdx) {

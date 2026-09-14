@@ -1800,9 +1800,30 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['P12'], relatedUnits: ['P12', 'VIS18'],
     hardwareGate: noHardware, versionGate: localized('PyTorch 2.11.0+cu128；sdpa_kernel beta；set_priority。', 'PyTorch 2.11.0+cu128; sdpa_kernel beta; set_priority.'), reviewedOn: '2026-09-13',
   },
+  {
+    planningId: 'PB-R5-013', group: 'practice',
+    title: localized('审查从块值推断通道的说法', 'Audit a block-value-to-lane claim'),
+    href: localized('/practice/#pb-r5-013', '/en/practice/#pb-r5-013'),
+    resourceType: 'mental-model', difficulty: 'intermediate', prerequisites: ['T01'], relatedUnits: ['T01', 'VIS17'],
+    hardwareGate: noHardware, versionGate: same('Triton 3.7.1'), reviewedOn: '2026-09-14',
+  },
+  {
+    planningId: 'PB-R5-014', group: 'practice',
+    title: localized('审查只检查前缀的正确性报告', 'Audit a prefix-only correctness report'),
+    href: localized('/practice/#pb-r5-014', '/en/practice/#pb-r5-014'),
+    resourceType: 'correctness-debugging', difficulty: 'intermediate', prerequisites: ['T02'], relatedUnits: ['T02', 'EX23'],
+    hardwareGate: noHardware, versionGate: same('Triton 3.7.1'), reviewedOn: '2026-09-14',
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
+  {
+    planningId: 'VIS17', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS17.title,
+    href: PUBLISHED_DESTINATIONS.VIS17.href, resourceType: 'indexing-model',
+    prerequisites: ['T01'], relatedUnits: ['T02', 'EX23'], hardwareGate: noCudaHardware,
+    versionGate: localized('Triton 3.7.1；仅逻辑归属，不表示编译后的通道布局。', 'Triton 3.7.1; logical ownership only, not a compiled lane layout.'),
+    reviewedOn: '2026-09-14',
+  },
   {
     planningId: 'VIS01',
     group: 'visuals',
@@ -2308,6 +2329,9 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-202', 'Autocast · 自动混合精度转换', 'kernel-vocabulary', ['L08', 'P06'], 'PyTorch 2.11.0+cu128 按操作选择精度；并非全局 half 转换，in-place、out= 与显式 dtype 各有边界。', 'PyTorch 2.11.0+cu128 selects precision by operation, not a global half conversion; in-place, out=, and explicit dtype have distinct boundaries.', '2026-09-12'),
   glossaryRecord('TERM-203', 'Gradient scaling · 梯度缩放', 'kernel-vocabulary', ['Q02', 'P06'], 'torch.amp.GradScaler 缩放反向梯度并在更新前去缩放；scale 可以小于 1，不能修复前向溢出。', 'torch.amp.GradScaler scales backward gradients and unscales before updates; scale may fall below 1 and cannot repair forward overflow.', '2026-09-12'),
   glossaryRecord('TERM-204', 'Profiler correlation · 分析器关联', 'evidence-vocabulary', ['Q07', 'Q08', 'P07'], 'PyTorch 2.11.0+cu128 与固定 Kineto/CUPTI 的 CPU、运行时启动及设备活动关系；不是名称相同或时间包含。', 'PyTorch 2.11.0+cu128 with pinned Kineto/CUPTI relates CPU, runtime launch, and device activity; this is not name matching or temporal containment.', '2026-09-12'),
+  glossaryRecord('TERM-205', 'program instance · 程序实例', 'kernel-vocabulary', ['T01', 'T02'], 'Triton 3.7.1；网格中的函数实例，不是线程。', 'Triton 3.7.1; a function instance in the grid, not a thread.', '2026-09-14'),
+  glossaryRecord('TERM-206', 'block-shaped value · 块形值', 'kernel-vocabulary', ['T01'], 'Triton 3.7.1；逻辑张量形状，不决定物理通道。', 'Triton 3.7.1; logical tensor shape does not determine physical lanes.', '2026-09-14'),
+  glossaryRecord('TERM-207', 'memory mask · 内存掩码', 'kernel-vocabulary', ['T02'], 'Triton 3.7.1；逐元素控制内存操作，不缩小形状。', 'Triton 3.7.1; elementwise control of memory operations without shrinking shape.', '2026-09-14'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [
@@ -3289,6 +3313,7 @@ const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-084', localized('自定义算子注册、元数据与梯度', 'Custom operator registration, metadata and gradients'), 'cuda-version-record', ['P08', 'P09', 'EX22', 'LAB13'], localized('PyTorch 2.11.0 固定源码、头文件、fake/autograd 与上游测试；仅参考，不复制。', 'Pinned PyTorch 2.11.0 source, headers, fake/autograd and owner tests; reference only, no copying.'), '2026-09-13', '2026-09-13'),
   sourceRecord('SRC-CUDA-085', localized('扩展工具链、AOT wheel 与导入合同', 'Extension toolchain, AOT wheel and import contracts'), 'cuda-version-record', ['P08', 'P10', 'EX22', 'LAB13'], localized('CPython 3.12.14、torch 2.11.0+cu128、Toolkit 12.8.1、NVCC 12.8.93、GCC 13.3.0；精确源码与组件清单。', 'CPython 3.12.14, torch 2.11.0+cu128, Toolkit 12.8.1, NVCC 12.8.93, GCC 13.3.0; exact source and component manifests.'), '2026-09-13', '2026-09-13'),
   sourceRecord('SRC-CUDA-086', localized('分析驱动优化与精确 SDPA 派发', 'Profile-led optimization and exact SDPA dispatch'), 'cuda-version-record', ['P11', 'P12', 'LAB14', 'EX22', 'VIS18'], localized('PyTorch 2.11.0+cu128；profiler、SDPA beta、set_priority、源码门槛及上游测试；无运行观察。', 'PyTorch 2.11.0+cu128; profiler, SDPA beta, set_priority, source gates and owner tests; no runtime observations.'), '2026-09-13', '2026-09-13'),
+  sourceRecord('SRC-CUDA-087', localized('Triton 精确版本、块值、掩码与生成工具链', 'Triton exact release, block values, masking and generated toolchain'), 'cuda-version-record', ['T01', 'T02', 'EX23', 'VIS17'], localized('Triton 3.7.1；CPython 3.14.7；独立 torch 2.13.0；Linux、CC 8.0+；仅来源审查。', 'Triton 3.7.1; CPython 3.14.7; independent torch 2.13.0; Linux, CC 8.0+; source review only.'), '2026-09-14', '2026-09-14'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

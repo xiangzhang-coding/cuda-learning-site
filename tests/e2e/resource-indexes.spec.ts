@@ -404,13 +404,14 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(14);
-  expect(counts.practice).toBe(94);
-  expect(counts.visuals).toBe(19);
+  expect(counts.practice).toBe(96);
+  expect(counts.visuals).toBe(20);
   expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
-  expect(counts.sources).toBe(102);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(229 + currentPublication.scope.glossaryTerms);
+  expect(counts.sources).toBe(103);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(233 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
+    'VIS17', 'PB-R5-013', 'PB-R5-014', 'TERM-205', 'TERM-206', 'TERM-207', 'SRC-CUDA-087',
     ...releaseLabIds,
     ...issue25LabIds,
     ...issue26LabIds,

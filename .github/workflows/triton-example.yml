@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Triton Example
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: triton-example-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  setup-and-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      PIP_NO_CACHE_DIR: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14.7'
+          architecture: x64
+      - name: Install the independently locked runtime dependencies without a GPU
+        working-directory: examples/ex23-triton-vector-add
+        run: bash scripts/setup.sh
+      - name: Validate CPU reference, imports and explicit driver-free compilation
+        working-directory: examples/ex23-triton-vector-add
+        run: |
+          .venv/bin/python ex23.py host-test
+          .venv/bin/python -c 'import torch, triton; assert torch.version.hip is None; assert not torch.cuda.is_initialized(); print("Host imports only; no GPU execution")'
+          .venv/bin/python ex23.py build
+      - name: Enforce independent evidence boundaries
+        working-directory: examples/ex23-triton-vector-add
+        run: |
+          .venv/bin/python -c 'import json; p=json.load(open("project.json")); assert p["evidence"]["runtime"] == "Pending Hardware Verification"; assert p["evidence"]["compilation"] == []; r=json.load(open("build/compile/report.json")); assert r["gpuExecuted"] is False and r["driverInitialized"] is False; assert len(r["artifacts"]) == 5'
