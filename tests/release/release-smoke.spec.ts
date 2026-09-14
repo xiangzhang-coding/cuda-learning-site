@@ -138,7 +138,7 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -147,7 +147,7 @@ const r4RunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX
 const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r4Labs = [...r3Labs, 'LAB11', 'LAB12'] as const;
-const currentLabs = [...r4Labs, 'LAB13', 'LAB14'] as const;
+const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15'] as const;
 const historicalVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -183,7 +183,7 @@ const currentProfilerReportPlans = [
 const currentNoCompileCheckedClaim = [
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
-  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14',
+  'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14', 'LAB15',
 ] as const;
 const currentPendingHardwareVerification = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
@@ -191,11 +191,11 @@ const currentPendingHardwareVerification = [
   ...currentLabs,
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 14 },
-  { suffix: 'practice/', count: 96 },
+  { suffix: 'labs/', count: 15 },
+  { suffix: 'practice/', count: 98 },
   { suffix: 'visuals/', count: 20 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 103 },
+  { suffix: 'sources-and-versions/', count: 104 },
 ] as const;
 const exampleRouteSlugs = [
   'triton-vector-add',
@@ -493,19 +493,19 @@ test('serves the exact R4 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 325,
-    sourceRoutes: 650,
-    exerciseSetPublicationPairs: 88,
-    solutionSetPublicationPairs: 88,
+    publicationPairs: 329,
+    sourceRoutes: 658,
+    exerciseSetPublicationPairs: 89,
+    solutionSetPublicationPairs: 89,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 96,
+    practiceBankEntries: 98,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 103,
+    sourceRecords: 104,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -522,7 +522,7 @@ test('serves the exact R4 release and current publication with production canoni
     performanceObservations: [],
     r3EvidenceNeutralLearningUnits,
     r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
-    r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02'],
+    r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
@@ -637,8 +637,8 @@ test('serves the exact R4 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '325 Publication Pairs' : '325 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '650 source routes' : '650 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '329 Publication Pairs' : '329 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '658 source routes' : '658 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -672,7 +672,7 @@ test('serves the exact R4 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(233 + currentPublicationManifest.scope.glossaryTerms);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(237 + currentPublicationManifest.scope.glossaryTerms);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -683,7 +683,7 @@ test('serves the exact R4 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(14);
+    await expect(labCards).toHaveCount(15);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -699,6 +699,7 @@ test('serves the exact R4 release and current publication with production canoni
       'LAB12',
       'LAB13',
       'LAB14',
+      'LAB15',
     ]);
   }
 
@@ -985,7 +986,7 @@ test('keeps the Python bridge graph, separate practice, and EX21 canonical journ
       }
       await expectCanonicalRanges(page, ex21PublishedProject, ranges);
       expect(await page.locator('nav a[href*="/triton/"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')).sort()))
-        .toEqual(['masked-vector-addition', 'programs-and-block-values'].map((slug) => `${prefix}triton/${slug}/`));
+        .toEqual(['fused-softmax', 'masked-vector-addition', 'programs-and-block-values'].map((slug) => `${prefix}triton/${slug}/`));
       expect(await page.locator('nav a[href*="/frameworks/"]').evaluateAll((links) =>
         links.map((link) => link.getAttribute('href')).sort())).toEqual([
         'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',
@@ -1040,13 +1041,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(650);
-    expect(new Set(routes).size).toBe(650);
+    expect(routes).toHaveLength(658);
+    expect(new Set(routes).size).toBe(658);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
     expect(routeBatches).toHaveLength(56);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(325);
+      expect(localized).toHaveLength(329);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

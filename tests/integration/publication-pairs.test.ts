@@ -50,6 +50,7 @@ const publicationPairFixtures: readonly PublicationPair[] = [
   ...[
     { id: 'T01', slug: 'triton/programs-and-block-values', prerequisites: 'F02,F03,M02' },
     { id: 'T02', slug: 'triton/masked-vector-addition', prerequisites: 'T01,A01' },
+    { id: 'T03', slug: 'triton/fused-softmax', prerequisites: 'T02,A10,Q05' },
   ].flatMap(({ id, slug, prerequisites }) => [
     { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
       factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
@@ -58,6 +59,9 @@ const publicationPairFixtures: readonly PublicationPair[] = [
     { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`,
       factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
   ]),
+  { pairId: 'lab15', unitId: 'LAB15', resourceKind: 'lab', prerequisites: 'T02,A10,Q05',
+    factCheckDate: '2026-09-14', evidenceRuntime: 'Pending Hardware Verification',
+    zh: '/labs/verify-fused-softmax/', en: '/en/labs/verify-fused-softmax/' },
   { pairId: 'ex23', unitId: 'EX23', resourceKind: 'runnable-example', prerequisites: 'T02',
     factCheckDate: '2026-09-14', canonicalExample: 'EX23', evidenceRuntime: 'Pending Hardware Verification',
     zh: '/examples/triton-vector-add/', en: '/en/examples/triton-vector-add/' },
@@ -4147,13 +4151,13 @@ const publicationPairFixtures: readonly PublicationPair[] = [
 // expected metadata from the implementation being tested.
 const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
   if (['home', 'o01', 'about'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-14' };
-  if (pair.pairId === 'labs-index') return { ...pair, factCheckDate: '2026-09-13' };
+  if (pair.pairId === 'labs-index') return { ...pair, factCheckDate: '2026-09-14' };
   if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-14',
-    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,entry-pb-r5-013,entry-pb-r5-014,review'),
-    prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12,T01,T02`,
-    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,T01,T02,EX21') };
+    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,entry-pb-r5-013,entry-pb-r5-014,entry-pb-r5-015,entry-pb-r5-016,review'),
+    prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12,T01,T02,T03`,
+    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,T01,T02,T03,EX21') };
   if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-14',
-    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,content-sources') };
+    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,content-sources') };
   if (pair.pairId === 'glossary') return { ...pair, factCheckDate: '2026-09-14',
     structure: pair.structure!.replace('entry-term-204,maintenance', 'entry-term-204,entry-term-205,entry-term-206,entry-term-207,maintenance') };
   return pair;
@@ -4273,14 +4277,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(325);
-    expect(sourceRoutes.size).toBe(650);
+    expect(publicationPairs).toHaveLength(329);
+    expect(sourceRoutes.size).toBe(658);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['T03', 'EX24', 'LAB15']) {
+    for (const absentUnitId of ['T04', 'EX24', 'LAB16']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

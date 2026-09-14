@@ -418,6 +418,14 @@ const labs: readonly ResourceIndexRecord[] = [
     versionGate: localized('torch 2.11.0+cu128 / torch.profiler；CUPTI 12.8.90；EX22 独立扩展工具链。', 'torch 2.11.0+cu128 / torch.profiler; CUPTI 12.8.90; EX22 independent extension toolchain.'),
     evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-13',
   },
+  {
+    planningId: 'LAB15', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB15.title,
+    href: PUBLISHED_DESTINATIONS.LAB15.href, resourceType: 'guided-lab', difficulty: 'intermediate',
+    prerequisites: ['T02', 'A10', 'Q05'], relatedUnits: ['T03'],
+    hardwareGate: localized('原生 Linux；一个 CC 8.0+ NVIDIA GPU，总内存 8 GB+、空闲 2 GB+。', 'Native Linux; one CC 8.0+ NVIDIA GPU, 8 GB+ total and 2 GB+ free.'),
+    versionGate: same('CPython 3.14.7; Triton 3.7.1; torch 2.13.0; EX23 full hash lock'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-14',
+  },
 ];
 
 const practice: readonly ResourceIndexRecord[] = [
@@ -1813,6 +1821,20 @@ const practice: readonly ResourceIndexRecord[] = [
     href: localized('/practice/#pb-r5-014', '/en/practice/#pb-r5-014'),
     resourceType: 'correctness-debugging', difficulty: 'intermediate', prerequisites: ['T02'], relatedUnits: ['T02', 'EX23'],
     hardwareGate: noHardware, versionGate: same('Triton 3.7.1'), reviewedOn: '2026-09-14',
+  },
+  {
+    planningId: 'PB-R5-015', group: 'practice',
+    title: localized('识别 Softmax 零填充陷阱', 'Identify the softmax zero-padding trap'),
+    href: localized('/practice/#pb-r5-015', '/en/practice/#pb-r5-015'),
+    resourceType: 'correctness-debugging', difficulty: 'intermediate', prerequisites: ['T03'], relatedUnits: ['T03', 'LAB15'],
+    hardwareGate: noHardware, versionGate: same('Triton 3.7.1'), reviewedOn: '2026-09-14',
+  },
+  {
+    planningId: 'PB-R5-016', group: 'practice',
+    title: localized('拒绝不匹配的 Softmax 计时', 'Reject mismatched softmax timings'),
+    href: localized('/practice/#pb-r5-016', '/en/practice/#pb-r5-016'),
+    resourceType: 'evidence-review', difficulty: 'intermediate', prerequisites: ['T03'], relatedUnits: ['T03', 'LAB15'],
+    hardwareGate: noHardware, versionGate: same('Triton 3.7.1; torch 2.13.0'), reviewedOn: '2026-09-14',
   },
 ];
 
@@ -3314,6 +3336,7 @@ const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-085', localized('扩展工具链、AOT wheel 与导入合同', 'Extension toolchain, AOT wheel and import contracts'), 'cuda-version-record', ['P08', 'P10', 'EX22', 'LAB13'], localized('CPython 3.12.14、torch 2.11.0+cu128、Toolkit 12.8.1、NVCC 12.8.93、GCC 13.3.0；精确源码与组件清单。', 'CPython 3.12.14, torch 2.11.0+cu128, Toolkit 12.8.1, NVCC 12.8.93, GCC 13.3.0; exact source and component manifests.'), '2026-09-13', '2026-09-13'),
   sourceRecord('SRC-CUDA-086', localized('分析驱动优化与精确 SDPA 派发', 'Profile-led optimization and exact SDPA dispatch'), 'cuda-version-record', ['P11', 'P12', 'LAB14', 'EX22', 'VIS18'], localized('PyTorch 2.11.0+cu128；profiler、SDPA beta、set_priority、源码门槛及上游测试；无运行观察。', 'PyTorch 2.11.0+cu128; profiler, SDPA beta, set_priority, source gates and owner tests; no runtime observations.'), '2026-09-13', '2026-09-13'),
   sourceRecord('SRC-CUDA-087', localized('Triton 精确版本、块值、掩码与生成工具链', 'Triton exact release, block values, masking and generated toolchain'), 'cuda-version-record', ['T01', 'T02', 'EX23', 'VIS17'], localized('Triton 3.7.1；CPython 3.14.7；独立 torch 2.13.0；Linux、CC 8.0+；仅来源审查。', 'Triton 3.7.1; CPython 3.14.7; independent torch 2.13.0; Linux, CC 8.0+; source review only.'), '2026-09-14', '2026-09-14'),
+  sourceRecord('SRC-CUDA-088', localized('融合 Softmax 的归约、JIT 与测量接口', 'Fused softmax reduction, JIT and measurement interfaces'), 'cuda-version-record', ['T03', 'LAB15'], localized('Triton 3.7.1；负无穷填充、FP32 归约、编译与设备预热、do_bench 原始样本；torch 2.13.0 out 接口。', 'Triton 3.7.1; negative-infinity fill, FP32 reductions, compile versus device warm-up, do_bench raw samples; torch 2.13.0 out interface.'), '2026-09-14', '2026-09-14'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

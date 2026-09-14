@@ -39,3 +39,13 @@ jobs:
         working-directory: examples/ex23-triton-vector-add
         run: |
           .venv/bin/python -c 'import json; p=json.load(open("project.json")); assert p["evidence"]["runtime"] == "Pending Hardware Verification"; assert p["evidence"]["compilation"] == []; r=json.load(open("build/compile/report.json")); assert r["gpuExecuted"] is False and r["driverInitialized"] is False; assert len(r["artifacts"]) == 5'
+      - name: Check LAB15 numerical policy and pinned Linux CPU oracle
+        run: |
+          PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+          "$PYTHON" -m unittest discover -s scripts/softmax-verification -p 'test_*.py'
+          "$PYTHON" -I scripts/softmax-verification/check.py --mode cpu --output "$RUNNER_TEMP/lab15-cpu"
+      - name: Compile both LAB15 candidates without a driver or GPU execution
+        run: |
+          PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+          "$PYTHON" -I scripts/softmax-verification/check.py --mode compile --warps 4 --output "$RUNNER_TEMP/lab15-compile-4"
+          "$PYTHON" -I scripts/softmax-verification/check.py --mode compile --warps 8 --output "$RUNNER_TEMP/lab15-compile-8"

@@ -1,5 +1,27 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Fused softmax — 2026-09-14
+
+Issue #47 publishes T03 and LAB15 with ordered prerequisites `[T02,A10,Q05]`,
+T03 Exercises/solutions, PB-R5-015/016 and SRC-CUDA-088. Current inventory:
+329 pairs / 658 routes, 90 Learning Units, 23 Runnable Examples, 15 Labs,
+20 Visual Explainers, 89 Exercise sets and 89 solution sets, 98 Practice Bank
+entries, 207 terms, 104 source records and 444 catalog records. Older increments
+below retain their historical counts. LAB15 adds one pending subject (37 total).
+
+Context7 `/triton-lang/triton` queries covered row-softmax reductions/masking/JIT,
+`do_bench` budgets/statistics, and debugging/compiler warmup. Main-branch and sparse
+results were discovery only. Selected v3.7.1 `language/standard.py`, `language/core.py`,
+`runtime/jit.py`, `testing.py`, debugging guide, and `test_core.py` govern the public
+record. Inspected owner tests: `test_reduce1d`, `test_reduce`, `test_masked_load`.
+PyTorch v2.13.0 `native_functions.yaml` confirms `softmax.int_out`.
+No owner tests were executed or copied. In `testing.py`, actual default behavior
+is mean despite the introductory docstring; the harness requests all samples.
+The tutorial's persistent scheduling and benchmark conclusions are not adopted.
+Original scalar-oracle, masking and logical byte derivations are distinct from
+runtime observations. Exact MIT notice/hash and all external package rights remain
+as recorded in SRC-CUDA-087. No new GPU or performance evidence is claimed.
+
 # Maintenance Source Record
 
 ## Triton model and vector-add increment — 2026-09-14

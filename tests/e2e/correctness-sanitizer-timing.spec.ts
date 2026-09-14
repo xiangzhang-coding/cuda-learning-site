@@ -178,8 +178,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(650);
-  expect(publishedRoutes.length / 2).toBe(325);
+  expect(publishedRoutes).toHaveLength(658);
+  expect(publishedRoutes.length / 2).toBe(329);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

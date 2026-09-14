@@ -1,0 +1,159 @@
+---
+title: 'LAB15: Verify and Measure Fused Softmax'
+description: Implement a bounded Triton row reduction, check every probability and preserve phase-separated evidence.
+pairId: lab15
+counterpart: /labs/verify-fused-softmax/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, implement, compile, correctness, measurement, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB15
+prerequisites: [T02, A10, Q05]
+relatedUnits: [T03]
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.'
+estimatedMinutes: 90
+difficulty: intermediate
+toolkitLanes: []
+tritonProfile: cpython-3-14-7-triton-3-7-1
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions: ['Install hash-locked wheels in an owned virtual environment', 'Access one NVIDIA CUDA device and read driver identity', 'Write owned compiler artifacts and reports; no profiler counters required']
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Finite FP32 results should meet the declared independent oracle and row-sum tolerances.', 'Width 33 should use 64 logical positions with 31 masked columns.', 'Performance depends on shape and environment; no winner is predicted.']
+  recordedObservations: []
+sources:
+  - { title: 'Triton reductions and softmax', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/standard.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton benchmark implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py', version: '3.7.1', platform: 'Device events and benchmark cache', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab15 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/labs/verify-fused-softmax/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,implement,compile,correctness,measurement,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB15 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,A10,Q05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: T03 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:triton-profile', content: cpython-3-14-7-triton-3-7-1 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/verify-fused-softmax/" lang="zh-CN">阅读中文对应页</a>
+
+## Lab contract
+
+Implement the row normalization developed in [T03](/en/triton/fused-softmax/), validate it against an independent reference and native framework operation, and record a fair forward-only comparison. Allow 90 minutes plus installation. This activity runs on external Linux, never inside the website. It remains **Pending Hardware Verification**.
+
+## Prerequisites and workload
+
+Exact edges: **[T02, A10, Q05]** — [pointer masks](/en/triton/masked-vector-addition/), [stable softmax](/en/algorithms/numerically-stable-softmax/), [timing asynchronous work](/en/correctness/timing-asynchronous-gpu-work/). T03 is the companion explanation, not an additional hidden edge.
+
+Contract: contiguous rank-2 finite FP32 input/output, FP32 intermediates, forward only, no gradients or semantic attention masks. The host validator rejects wrong rank/dtype/layout, nonfinite values and axes outside 1–4096 rows / 1–2048 columns. Fixed cases are `(1,1), (3,31), (7,32), (5,33), (17,257), (257,1003), (512,2048)`. The four repeating row patterns are equal 1000s, −1000 plus quarter increments, a final 80 among −80s, and mixed half increments. These stored inputs are binary-exact. Do not generalize this gate to BF16, FP16, arbitrary strides or all-masked rows.
+
+## Exact environment and permissions
+
+| Coordinate | Requirement |
+| --- | --- |
+| Host | Native Ubuntu 24.04 x86-64; record kernel and glibc |
+| Python | Ordinary GIL CPython 3.14.7, cp314; no free-threaded ABI |
+| Packages | Triton 3.7.1, torch 2.13.0, full EX23 requirements.lock including every transitive version/hash |
+| Packaged CUDA | torch CUDA 13.0.3 package family; exact components in the lock; no system nvcc required |
+| Generated toolchain | Bundled ptxas 12.8.93; Blackwell branch ptxas 13.1.80; runtime target must be supported by the selected release |
+| Device | Exactly one visible NVIDIA GPU, CC >= 8.0, total memory >= 8 GB, free memory >= 2 GB |
+| Driver | 580.65.06 or newer; retain observed version |
+| Permissions | Owned venv/cache/output, device access, driver identity; no profiler or counter permission needed |
+
+The environment is independently pinned, with no ordinary Toolkit Lane inheritance. Each largest fixture tensor is 4 MiB; retaining input and two output buffers plus write guards for all cases is under 32 MiB. CPU oracle objects, CUDA context, compiler, libraries, allocator and `do_bench` cache storage are additional. The 2 GB free gate provides headroom, not an observed peak-memory report. An out-of-memory failure must still stop the run.
+
+## Prepare the source and environment
+
+Use a clean checkout containing `scripts/softmax-verification/`. Record `git rev-parse HEAD`, `git status --short`, and any learner diff. Follow [EX23 setup](/en/examples/triton-vector-add/) to install its hash-locked **full** runtime environment with CPython 3.14.7; its `.venv` can be reused without modifying EX23 source. `compiler.lock` alone cannot run CPU framework or GPU checks. All commands below run from the repository root. Choose an unused external directory:
+
+```sh
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+RUN_ROOT=$(mktemp -d)
+export CUDA_VISIBLE_DEVICES=0
+"$PYTHON" -I examples/ex23-triton-vector-add/ex23.py check-environment
+"$PYTHON" -m unittest discover -s scripts/softmax-verification -p 'test_*.py'
+"$PYTHON" -I scripts/softmax-verification/check.py --mode cpu --output "$RUN_ROOT/cpu"
+```
+
+Save every command and exit status. Remove inherited Triton/ptxas overrides before these gates; the checker rejects them. Do not use interpreter/debug/profiler modes to obtain benchmark evidence. CPU mode checks the independent oracle against FP64 `torch.softmax` without querying CUDA; it is partial progress, not completion of this Lab.
+
+## Implement and predict
+
+In a learner copy, implement `normalize_rows` in `kernel.py` using one program per row. Build power-of-two column offsets, load valid values with negative-infinity fill, subtract the row maximum, exponentiate, sum and divide, then mask stores. Keep its signature and the runner's acceptance rules unchanged. Work from [T03 Exercises](/en/triton/fused-softmax/exercises/) before comparing with the reviewed implementation rendered in T03.
+
+Predict width 33 → tile 64 → 31 masked positions, and `[1000,1000]` → `[0.5,0.5]`. Derive the materialized `4*(8*R*C+4*R)` and fused `8*R*C` logical byte ledgers. Write a hypothesis per shape and a rule for rejecting an inconclusive performance claim. No predicted value is a recorded observation.
+
+## Compile separately
+
+```sh
+"$PYTHON" -I scripts/softmax-verification/check.py --mode compile --output "$RUN_ROOT/compile-4" --warps 4
+```
+
+This phase checks the compiler subset of the same lock and compiles every fixture width for explicit sm_80, saving TTIR, TTGIR, LLVM IR, PTX and cubin plus hashes. It does not initialize the driver or launch a GPU. A successful command is a local build gate; published compilation evidence remains empty until qualified review. GPU mode later compiles for the actual target, which can differ from sm_80.
+
+## Verify every output before timing
+
+```sh
+"$PYTHON" -I scripts/softmax-verification/check.py --mode verify --output "$RUN_ROOT/verify-4" --warps 4
+```
+
+The runner checks environment/device/free memory, prepares exact CPU inputs, requests JIT compilation separately, launches each row grid, synchronizes, then copies results for checking. The scalar double oracle uses stored values and compensated summation. Both Triton and native `torch.softmax` must satisfy `abs(error) <= 2e-6 + 2e-5*abs(reference)`, finite probabilities in `[0,1]`, and row sums within `2e-5` of one. Every output is checked. NaN-filled output catches missing stores; an extra 2048-float NaN tail must remain untouched, and input must be unchanged. A guard is not a proof of safe loads.
+
+Failures preserve phase and error in `report.json`, return nonzero and stop the attempt. Inspect masks and reduction order rather than accepting NaN equality or relaxing tolerances. Compiler artifacts and the Linux CPU gate cannot establish this GPU correctness result.
+
+## Measure a fixed candidate fairly
+
+```sh
+"$PYTHON" -I scripts/softmax-verification/check.py --mode benchmark --output "$RUN_ROOT/benchmark-4" --warps 4
+```
+
+Benchmark mode reruns all correctness gates in its own process before timing. It records the host wall time of each `kernel.warmup` compile request separately, with a new harness-owned cache. No autotuning runs; four warps is a candidate. Twenty device warm-up calls per provider precede synchronization and `do_bench(fn, warmup=25, rep=100, return_mode='all')`. Here warmup/rep are millisecond budgets, not iteration counts. The helper estimates repetitions, clears its benchmark cache before measured calls, records current-stream device events and synchronizes before reading them.
+
+Three rounds run Triton/native, native/Triton, Triton/native. Preserve every raw millisecond sample, median, min/max, shape, dtype, tile and warp count. Both use preallocated outputs and the same input; transfers, allocations, validation, JIT and profiler collection are excluded. Native softmax is already an optimized baseline, not the five-stage materialized ledger. Tiny cases can reflect launch/submission overhead. Repeat the whole experiment under comparable load before making a decision; do not pool unlike shapes or report only the best round.
+
+Optional candidate: repeat compile, verify and benchmark with `--warps 8` into new directories. Record search cost separately and compare all shapes; no configuration is automatically declared a winner. If variability hides a difference, report it as inconclusive. No DRAM counters are collected, so ledger bytes and logical throughput are never measured memory traffic.
+
+## Environment Manifest and artifact bundle
+
+| Artifact | Required information |
+| --- | --- |
+| report.json | Mode/result/first failed phase, source hashes, locked environment/hash, numerical policy and per-case checks |
+| Compiler artifacts | Explicit sm_80 artifacts and hashes; actual runtime PTX/hash; declared warp/tile, bundled ptxas identity |
+| GPU record | Name/UUID/CC/visible count, total/free memory, driver, torch CUDA family; actual loaded shared-library paths/hashes |
+| Measurement | Fresh-cache compile wall times, no-tuning declaration, warm-up, event scope, cache policy, provider order, all raw samples and statistics |
+| Manual supplement | OS release, source commit and dirty diff, setup/toolchain, exact commands/exits, clocks/power policy, competing load, decision and Reference Environment identity or absence |
+
+The runner records machine observations but cannot infer the manual supplement. Keep all attempts, including failures. Raw reports can contain host paths; review and redact them before public submission. Do not upload the cache or binaries blindly. A passing local report is not automatically Runtime-Verified; that status requires maintainer review in a declared Reference Environment.
+
+## Expected versus recorded observations
+
+Expected: finite probabilities should meet the fixed tolerances; width 33 should have 31 masked positions; performance may vary by shape and environment. **Recorded observations: none.** Compilation evidence is empty and runtime remains **Pending Hardware Verification**. There are no published timings, selected configurations, measured traffic conclusions or speedups.
+
+## Acceptance checkpoint
+
+Submit implementation/diff, mask and byte derivations, passing full numerical/guard checks, phase-separated raw measurements, complete manifest and a justified retain/reject/inconclusive decision. A correct kernel with no speedup is a valid outcome. If GPU access is missing, record the blocker and host progress without marking runtime complete. Review the [separate solutions](/en/triton/fused-softmax/solutions/) and [Practice Bank](/en/practice/#pb-r5-016).
+
+## Cleanup
+
+Preserve reviewed reports, failures and source identities first. Then remove only your disposable venv, copies and RUN_ROOT cache/output when no longer needed. Do not modify shared GPU state or system driver files.
+
+## Sources and licensing
+
+Facts checked **2026-09-14**: [SRC-CUDA-088](/en/sources-and-versions/#src-cuda-088) for exact APIs/tests and [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) for the full environment and exact rights record. Lab code is original Apache-2.0, prose is CC BY 4.0; the upstream MIT notice is retained separately. No upstream results are project observations.

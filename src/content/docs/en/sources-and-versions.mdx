@@ -1,6 +1,6 @@
 ---
 title: Sources and Version Record
-description: Exact publishing and technical sources through T02, EX23 and VIS17, with independent version, rights and evidence records.
+description: Exact publishing and technical sources through T03 and LAB15, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
 factCheckDate: '2026-09-14'
@@ -35,6 +35,7 @@ structure:
   - entry-src-cuda-085
   - entry-src-cuda-086
   - entry-src-cuda-087
+  - entry-src-cuda-088
   - content-sources
   - review-record
 evidence:
@@ -58,18 +59,18 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, T01-T02, EX01-EX23 and LAB01-LAB14. Twenty Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
+This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, T01-T03, EX01-EX23 and LAB01-LAB15. Twenty Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
 
 ## Scope of this record
 
-The **2026-09-14 current publication** has 89 Learning Units, 23 Runnable Examples, 14 Labs, 20 Visual Explainers, 88 Exercise-set and 88 separate solution-set Publication Pairs: **325 Publication Pairs / 650 source routes**. Its **440 catalog records** contain 14 Labs, 96 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 103 source records. Issue #46 adds SRC-CUDA-087; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-14 current publication** has 90 Learning Units, 23 Runnable Examples, 15 Labs, 20 Visual Explainers, 89 Exercise-set and 89 separate solution-set Publication Pairs: **329 Publication Pairs / 658 source routes**. Its **444 catalog records** contain 15 Labs, 98 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 104 source records. Issue #47 adds SRC-CUDA-088; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -802,9 +803,28 @@ The [owner vector-add tutorial](https://github.com/triton-lang/triton/blob/v3.7.
 
 Source/metadata inspection, CPU arithmetic and browser models create no Triton runtime or performance evidence. EX23 remains Pending Hardware Verification with empty published compilation and recorded observations.
 
+<span id="src-cuda-088" class="resource-target"></span>
+
+## SRC-CUDA-088: Fused softmax reductions and measurement
+
+**Related IDs:** T03, LAB15. **Access/fact check:** 2026-09-14. Retain Triton 3.7.1 at `f797708c0626e5f9840ca5b0a98790e2c7cb09ad`, CPython 3.14.7 and torch 2.13.0 with EX23's full hash lock. Context7 `/triton-lang/triton` was queried separately for row-softmax reductions/masks/JIT, `do_bench` budgets/statistics, and debugging/compile warmup. It returned main-branch documentation, with sparse reduction details. The following selected-release sources govern instead of assuming current snippets are version-specific.
+
+| Exact owner source | Checked interface and limitation |
+| --- | --- |
+| [standard.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/standard.py), [core.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py) | Axis-zero max/sum, max subtraction, pointer-tensor load `mask`/`other`, masked store, compile-time arange and static_assert. FP32 inputs keep the selected intermediates FP32. |
+| [jit.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/jit.py) | `kernel[grid]` calls `run(..., warmup=False)`; `.warmup(..., grid=...)` calls `run(..., warmup=True)`. Compilation is distinct from device execution and warm-up. |
+| [testing.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py) | `do_bench` defaults to mean in actual code, despite conflicting introductory docstring wording. Explicit `return_mode='all'` returns event samples; warmup/rep are ms budgets; it estimates iteration counts, clears benchmark cache and synchronizes. LAB15 does not use graph replay or privileged clock helpers. |
+| [debugging guide](https://github.com/triton-lang/triton/blob/v3.7.1/docs/programming-guide/chapter-3/debugging.rst) | static_assert at compile time, device_assert gated by TRITON_DEBUG, sequential TRITON_INTERPRET simulation and its BF16/indirect-memory limitations. Diagnostic overrides are rejected by the normal evidence harness. |
+| [owner tests](https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/language/test_core.py) | `test_reduce1d`, `test_reduce`, `test_masked_load`, scalar masks; read, not executed or copied. |
+| [softmax tutorial](https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/02-fused-softmax.py) | Approximate exp, negative-infinity padding and fused-row motivation. Its persistent launch policy, example outputs, graph and speed claims are not reproduced or adopted. Element counts are converted to bytes explicitly in our own analytical ledger; no DRAM observation is inferred. |
+| [torch native signatures](https://github.com/pytorch/pytorch/blob/v2.13.0/aten/src/ATen/native/native_functions.yaml) | `softmax.int_out` supports keyword `out`; `_softmax.out` dispatches CPU/CUDA separately. LAB15's native comparison uses preallocated FP32 output and no autograd. |
+
+The exact [Triton root MIT notice](https://github.com/triton-lang/triton/blob/v3.7.1/LICENSE) is retained in EX23/TRITON-LICENSE with SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`. Referenced Triton files follow that notice; PyTorch and packaged NVIDIA components retain the independently recorded terms in SRC-CUDA-087. LAB15 kernel, fixture, oracle, reporting and exercises are original work; no owner source listing, test fixture, image, binary or result is distributed. Source inspection grants no compilation, GPU correctness, traffic, timing, configuration selection or speedup evidence.
+
 ## Content and asset sources
 
-- Home, 89 Learning Units, 23 Runnable Examples, 14 Labs, 96 Practice Bank entries, 207 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
+
+- Home, 90 Learning Units, 23 Runnable Examples, 15 Labs, 98 Practice Bank entries, 207 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
@@ -838,4 +858,4 @@ On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-si
 
 Immutable `src/r3-release-manifest.json` retains 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including ten Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 61 Exercise sets, 61 solution sets, 232 Publication Pairs, and 464 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains its dynamic acceptance. R4 additionally qualifies eight existing library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. The R3 subset remains PB-R3-002 through PB-R3-005 and PB-R3-007 through PB-R3-012; both classifications are within the existing 82 entries.
 
-Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 22 other examples and 14 Labs remain Pending Hardware Verification, 36 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13, P01-P12 and T01-T02 retain empty evidence arrays. Six profiler plans remain expected-only; twenty browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.
+Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 22 other examples and 15 Labs remain Pending Hardware Verification, 37 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13, P01-P12 and T01-T03 retain empty evidence arrays. Six profiler plans remain expected-only; twenty browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.

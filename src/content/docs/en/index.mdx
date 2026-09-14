@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-As of **2026-09-14**, the current publication extends R4 through P01-P12 and T01-T02: 89 Learning Units, 325 Publication Pairs, 650 source routes and 440 catalog records. [T01](/en/triton/programs-and-block-values/) introduces Triton program instances and block values; [T02](/en/triton/masked-vector-addition/) develops masked vector addition. Using Python does not remove the Stable Curriculum's prerequisites.
+As of **2026-09-14**, the current publication extends R4 through P01-P12 and T01-T03: 90 Learning Units, 329 Publication Pairs, 658 source routes and 444 catalog records. [T01](/en/triton/programs-and-block-values/) introduces Triton program instances and block values; [T02](/en/triton/masked-vector-addition/) develops masked vector addition; [T03](/en/triton/fused-softmax/) and [LAB15](/en/labs/verify-fused-softmax/) develop stable fused softmax. Using Python does not remove the Stable Curriculum's prerequisites.
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
@@ -92,21 +92,21 @@ Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes
 
 EX17's five bundled CUB 1.15.1/2.8.2/3.3.4 and selected CCCL 3.4.2 component rows are only a declared non-evidentiary build gate; the site does not claim CI ran. EX17 has empty compilation evidence and recorded observations, no observed runtime evidence, and Pending Hardware Verification runtime.
 
-The current 14 Labs are LAB01-LAB14. [LAB10](/en/labs/optimize-canonical-transpose/) requires Q11; [LAB11](/en/labs/compare-custom-reduction-with-cub/) requires Q12/L03 and compares EX11 with EX17; [LAB12](/en/labs/compare-gemm-with-cublas/) requires Q13/L06 and compares EX15 with EX18. LAB13 builds and validates EX22; [LAB14](/en/labs/profile-custom-operator/) requires P11 and profiles the operator. All five have empty recorded observations and Pending Hardware Verification runtime.
+The current 15 Labs are LAB01-LAB15. [LAB10](/en/labs/optimize-canonical-transpose/) requires Q11; [LAB11](/en/labs/compare-custom-reduction-with-cub/) requires Q12/L03 and compares EX11 with EX17; [LAB12](/en/labs/compare-gemm-with-cublas/) requires Q13/L06 and compares EX15 with EX18. LAB13 builds and validates EX22; [LAB14](/en/labs/profile-custom-operator/) requires P11 and profiles the operator; [LAB15](/en/labs/verify-fused-softmax/) requires T02/A10/Q05 and verifies and measures fused softmax. All six have empty recorded observations and Pending Hardware Verification runtime.
 
 The site has 20 formal Visual Explainers: standalone VIS01-VIS14, [VIS17 SIMT/Triton Mapping](/en/visuals/simt-triton-mapping/) and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/), plus embedded VIS19-VIS22. VIS17 requires T01 and compares logical ownership without guessing Triton physical lanes. VIS18 requires A11. These browser models provide no GPU or performance evidence.
 
 A10-A14, Q06-Q13, L01-L13, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The current catalog contains 14 Labs, 96 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 103 source records: 440 records total. Source files form 325 Publication Pairs / 650 routes, with 88 Exercise sets and 88 separate solution sets. This increment adds PB-R5-013/014. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/).
+The current catalog contains 15 Labs, 98 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 104 source records: 444 records total. Source files form 329 Publication Pairs / 658 routes, with 89 Exercise sets and 89 separate solution sets. This increment adds PB-R5-015/016. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/).
 
-Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 22 examples and all 14 Labs remain Pending Hardware Verification, 36 subjects total. P01-P12 and T01-T02 keep four empty evidence arrays. EX21-EX23 and LAB13/LAB14 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; source and host checks do not grant GPU evidence.
+Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 22 examples and all 15 Labs remain Pending Hardware Verification, 37 subjects total. P01-P12 and T01-T03 keep four empty evidence arrays. EX21-EX23 and LAB13/LAB14/LAB15 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; source and host checks do not grant GPU evidence.
 
 [L12](/en/libraries/cufft-plans-layouts-startup/) has exactly `[Q05,M07]` as ordered prerequisites. [L12 Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) require `[L12]`; [separate solutions](/en/libraries/cufft-plans-layouts-startup/solutions/) require `[L12-EXERCISES]`. L12's four evidence arrays remain empty. The archived 12.9.2 cuFFT guide is the teaching baseline; the live 13.3 reference was accessed 2026-09-08 because exact 13.3.1 API and release-note archives were unavailable.
 
 [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) has exactly `[A12,A13,L01]` as ordered prerequisites. [L13 Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) require `[L13]`; [separate solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/) require `[L13-EXERCISES]`. All L01-L13 are published. L13's four evidence arrays remain empty; EX20 has no retained compilation evidence and remains Pending Hardware Verification. Its three C++17 non-executing build gates pin Toolkit/cuSPARSE pairs 11.8.0/11.7.5.86, 12.9.2/12.5.10.65, and 13.3.1/12.8.2.51. The [SRC-CUDA-075/076 review](/en/sources-and-versions/#src-cuda-075) dated 2026-09-09 records available exact cuSPARSE archives, including 13.3.1, separately from EX19's older archive-failure record. Source review and build gates are not GPU evidence.
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) supplies [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`. Their twelve pairs include Exercises and separate solutions. The [independent eager environment](/en/sources-and-versions/#src-cuda-080) retains torch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1/runtime 12.8.90, cuDNN 9.19.0.56 and the native allocator, with no system Toolkit requirement. P08-P10 add the separately gated extension project. T01/T02 now publish with `[F02,F03,M02]` and `[T01,A01]`; later Triton units remain unpublished.
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) supplies [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`. Their twelve pairs include Exercises and separate solutions. The [independent eager environment](/en/sources-and-versions/#src-cuda-080) retains torch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1/runtime 12.8.90, cuDNN 9.19.0.56 and the native allocator, with no system Toolkit requirement. P08-P10 add the separately gated extension project. T01/T02 require `[F02,F03,M02]` and `[T01,A01]`; T03/LAB15 both require `[T02,A10,Q05]`. Further Triton units remain unpublished.
 
 ## Boundaries first
 
@@ -738,7 +738,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, environment, architecture, kernels, libraries, PyTorch and Triton through 96 original problems.</small>
+    <small>Practice evidence, environment, architecture, kernels, libraries, PyTorch and Triton through 98 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 103 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 104 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

@@ -1,0 +1,159 @@
+---
+title: 'LAB15：验证并测量融合 Softmax'
+description: 实现有边界的 Triton 行归约，检查每个概率，并保存分阶段证据。
+pairId: lab15
+counterpart: /en/labs/verify-fused-softmax/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, implement, compile, correctness, measurement, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB15
+prerequisites: [T02, A10, Q05]
+relatedUnits: [T03]
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.'
+estimatedMinutes: 90
+difficulty: intermediate
+toolkitLanes: []
+tritonProfile: cpython-3-14-7-triton-3-7-1
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions: ['Install hash-locked wheels in an owned virtual environment', 'Access one NVIDIA CUDA device and read driver identity', 'Write owned compiler artifacts and reports; no profiler counters required']
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Finite FP32 results should meet the declared independent oracle and row-sum tolerances.', 'Width 33 should use 64 logical positions with 31 masked columns.', 'Performance depends on shape and environment; no winner is predicted.']
+  recordedObservations: []
+sources:
+  - { title: 'Triton reductions and softmax', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/standard.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton benchmark implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py', version: '3.7.1', platform: 'Device events and benchmark cache', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab15 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/labs/verify-fused-softmax/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,implement,compile,correctness,measurement,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB15 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,A10,Q05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: T03 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:triton-profile', content: cpython-3-14-7-triton-3-7-1 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/verify-fused-softmax/" lang="en">Read the English counterpart</a>
+
+## 实验合同
+
+实现 [T03](/triton/fused-softmax/) 中的行归一化，对照独立参考与原生框架操作验证，并记录公平的仅前向比较。实验（Lab）预计 90 分钟，另加安装时间。在外部 Linux 上执行，网站不运行 CUDA。当前为**待硬件验证（Pending Hardware Verification）**。
+
+## 先修条件与工作负载
+
+精确前置：**[T02, A10, Q05]**——[指针掩码](/triton/masked-vector-addition/)、[稳定 Softmax](/algorithms/numerically-stable-softmax/)、[异步工作计时](/correctness/timing-asynchronous-gpu-work/)。T03 是配套讲解，不增加隐藏前置。
+
+合同：连续二维有限 FP32 输入/输出，FP32 中间量，仅前向，无梯度和语义注意力掩码。主机验证器拒绝错误维数/dtype/布局、非有限值和超出 1–4096 行、1–2048 列的输入。固定用例为 `(1,1), (3,31), (7,32), (5,33), (17,257), (257,1003), (512,2048)`。四种重复行模式依次为全 1000、−1000 加四分之一增量、−80 中最后一项为 80、混合二分之一增量。这些存储输入可二进制精确表示。不要将此门禁推广至 BF16、FP16、任意跨步或全被屏蔽的行。
+
+## 精确环境与权限
+
+| 坐标 | 要求 |
+| --- | --- |
+| 主机 | 原生 Ubuntu 24.04 x86-64；记录内核和 glibc |
+| Python | 普通 GIL CPython 3.14.7，cp314；不使用自由线程 ABI |
+| 软件包 | Triton 3.7.1、torch 2.13.0、EX23 完整 requirements.lock 的全部传递版本和哈希 |
+| 打包 CUDA | torch CUDA 13.0.3 包家族；精确组件见锁文件；不需要系统 nvcc |
+| 生成工具链 | 捆绑 ptxas 12.8.93；Blackwell 分支 ptxas 13.1.80；所选发布须支持实际目标 |
+| 设备 | 恰好一个可见 NVIDIA GPU，计算能力（compute capability）>= 8.0，总内存 >= 8 GB，空闲 >= 2 GB |
+| 驱动 | 580.65.06 或更新；保留观察到的版本 |
+| 权限 | 自有 venv/缓存/输出、设备访问、读取驱动身份；不需要分析器或计数器权限 |
+
+环境独立锁定，不继承普通工具包通道（Toolkit Lane）。最大夹具的单个张量为 4 MiB；保留全部用例的输入、两份输出和写保护区合计不足 32 MiB。CPU 参考对象、CUDA 上下文、编译器、库、分配器和 `do_bench` 缓存还需要额外空间。2 GB 空闲门槛提供余量，不是已测峰值内存报告。内存不足仍须停止运行。
+
+## 准备源码与环境
+
+使用包含 `scripts/softmax-verification/` 的干净检出。记录 `git rev-parse HEAD`、`git status --short` 与学习者修改。按 [EX23 安装步骤](/examples/triton-vector-add/) 使用 CPython 3.14.7 安装带哈希锁定的**完整**运行环境；可复用其 `.venv`，无需修改 EX23 源码。仅 `compiler.lock` 不能运行 CPU 框架或 GPU 检查。以下命令均在仓库根目录执行，选择未使用的外部目录：
+
+```sh
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+RUN_ROOT=$(mktemp -d)
+export CUDA_VISIBLE_DEVICES=0
+"$PYTHON" -I examples/ex23-triton-vector-add/ex23.py check-environment
+"$PYTHON" -m unittest discover -s scripts/softmax-verification -p 'test_*.py'
+"$PYTHON" -I scripts/softmax-verification/check.py --mode cpu --output "$RUN_ROOT/cpu"
+```
+
+保存每条命令及退出状态。门禁前移除继承的 Triton/ptxas 覆盖配置；检查器会拒绝它们。不要用解释器、调试或分析器模式取得基准证据。CPU 模式对照 FP64 `torch.softmax` 检查独立参考，不查询 CUDA；这只是部分进展，不代表实验完成。
+
+## 实现并预测
+
+在学习者副本中实现 `kernel.py` 的 `normalize_rows`，每行一个程序实例（program instance）。构造二次幂列偏移，以负无穷填充无效加载，减行最大值、求指数、求和、相除，再屏蔽无效存储。保持签名与运行器验收规则不变。先做 [T03 练习](/triton/fused-softmax/exercises/)，再与 T03 呈现的已审查实现对照。
+
+预测列数 33 → tile 64 → 31 个无效位置，以及 `[1000,1000]` → `[0.5,0.5]`。推导物化 `4*(8*R*C+4*R)` 和融合 `8*R*C` 的逻辑字节账本。逐形状写出假设，并预先规定何时拒绝不确定的性能结论。预测值不是已记录观察。
+
+## 单独编译
+
+```sh
+"$PYTHON" -I scripts/softmax-verification/check.py --mode compile --output "$RUN_ROOT/compile-4" --warps 4
+```
+
+此阶段检查同一锁文件的编译器子集，对所有夹具列数显式编译 sm_80，保存 TTIR、TTGIR、LLVM IR、PTX、cubin 和哈希。不初始化驱动或启动 GPU。命令成功只是本地构建门禁；合格审查前，公开编译证据仍为空。GPU 模式之后按实际目标编译，该目标可能不是 sm_80。
+
+## 计时前检查每个输出
+
+```sh
+"$PYTHON" -I scripts/softmax-verification/check.py --mode verify --output "$RUN_ROOT/verify-4" --warps 4
+```
+
+运行器检查环境/设备/空闲内存，准备精确 CPU 输入，单独请求即时编译（JIT），启动行网格、同步，再复制结果检查。标量双精度参考使用已存储值与补偿求和。Triton 与原生 `torch.softmax` 均须满足 `abs(error) <= 2e-6 + 2e-5*abs(reference)`、概率有限且位于 `[0,1]`，行和距一不超过 `2e-5`。检查每个输出。NaN 初始化捕获漏写；额外 2048 个 float 的 NaN 尾部必须不变，输入也必须不变。保护区不能证明加载安全。
+
+失败会在 `report.json` 保留阶段与错误，非零退出并停止本次尝试。检查掩码和归约顺序，不要接受 NaN 相等或放宽容差。编译产物和 Linux CPU 门禁不能建立 GPU 正确性结果。
+
+## 公平测量固定候选
+
+```sh
+"$PYTHON" -I scripts/softmax-verification/check.py --mode benchmark --output "$RUN_ROOT/benchmark-4" --warps 4
+```
+
+基准模式在自己的进程中重新执行全部正确性门禁，再开始计时。每个 `kernel.warmup` 编译请求的主机墙钟时间单独记录，使用工具新建的自有缓存。不运行自动调优；四线程束只是候选。每个实现先做 20 次设备预热，再同步并调用 `do_bench(fn, warmup=25, rep=100, return_mode='all')`。这里 warmup/rep 是毫秒预算，不是迭代次数。辅助函数估计重复次数，在被测调用前清理基准缓存，记录当前流设备事件，同步后才读取时间。
+
+三轮顺序为 Triton/原生、原生/Triton、Triton/原生。保留每个原始毫秒样本、中位数、最小/最大值、形状、dtype、tile 和线程束数量。双方使用预分配输出和相同输入；传输、分配、验证、JIT 和分析器采集不在计时范围。原生 Softmax 已是优化基线，不是五阶段物化账本。微小用例可能反映启动/提交开销。决定前应在相近负载下重复整个实验；不要混合不同形状或只报告最好的一轮。
+
+可选候选：以 `--warps 8` 在新目录重做编译、验证和基准。单独记录搜索成本，并比较全部形状；不自动声明获胜配置。若波动掩盖差异，应报告结论不确定。不采集 DRAM 计数器，因此账本字节和逻辑吞吐量绝不能写成实测内存流量。
+
+## 环境清单与产物包
+
+| 产物 | 必需信息 |
+| --- | --- |
+| report.json | 模式/结果/首个失败阶段、源码哈希、锁定环境/哈希、数值策略与逐用例检查 |
+| 编译产物 | 显式 sm_80 产物/哈希、实际运行 PTX/哈希、声明的 warp/tile、捆绑 ptxas 身份 |
+| GPU 记录 | 名称/UUID/计算能力/可见数量、总/空闲内存、驱动、torch CUDA 家族、实际加载共享库路径/哈希 |
+| 测量 | 新缓存编译墙钟、未调优声明、预热、事件范围、缓存策略、实现顺序、全部原始样本与统计 |
+| 手工补充 | OS 发布、源码提交与未提交差异、安装/工具链、精确命令/退出码、时钟/功耗策略、竞争负载、决策、基准环境身份或缺失 |
+
+运行器记录机器观察，不能推断手工补充项。保留全部尝试，包括失败。原始报告可能含主机路径，公开提交前须审阅脱敏；不要直接上传缓存或二进制。本地通过报告不会自动成为运行已验证（Runtime-Verified）；该状态要求维护者在声明的基准环境（Reference Environment）中审查。
+
+## 预期与已记录观察
+
+预期：有限概率满足固定容差；列数 33 有 31 个无效位置；性能随形状和环境变化。**已记录观察：无。** 编译证据为空，运行保持**待硬件验证（Pending Hardware Verification）**。没有公开计时、所选配置、实测流量结论或加速比。
+
+## 验收检查点
+
+提交实现/差异、掩码与字节推导、完整数值/保护区通过记录、分阶段原始测量、完整环境清单（Environment Manifest），以及有理由的保留/拒绝/不确定决策。正确但不加速的内核也是有效结果。缺少 GPU 时记录阻塞与主机进展，不标记运行完成。复核[独立解答](/triton/fused-softmax/solutions/)与[练习题库](/practice/#pb-r5-016)。
+
+## 清理
+
+先保存审阅后的报告、失败和源码身份。确认不再需要后，仅删除自有临时 venv、副本以及 RUN_ROOT 缓存/输出。不要修改共享 GPU 状态或系统驱动文件。
+
+## 来源与许可
+
+事实核查 **2026-09-14**：[SRC-CUDA-088](/sources-and-versions/#src-cuda-088) 提供精确 API/测试，[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 提供完整环境与精确权利记录。实验代码为原创 Apache-2.0，正文为 CC BY 4.0；上游 MIT 声明单独保留。上游结果不是项目观察。
